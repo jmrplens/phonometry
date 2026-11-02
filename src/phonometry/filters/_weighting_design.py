@@ -105,9 +105,14 @@ output:
   bit), and ``sin``, ``tan``, ``atan`` and the magnitude of a complex root,
   correctly rounded, in :mod:`~phonometry.filters._pinned_trig`. No routine
   of the C library is left in the fit; :func:`_scalar_arctan` says what the
-  last of them cost. What is left of ``numpy`` on the path is arithmetic
-  IEEE 754 pins, and ``sqrt``, which the standard correctly rounds and which
-  does not move.
+  last of them cost. No library step is left after it either: the
+  second-order sections SciPy's ``zpk2sos`` formed through the BLAS, pairing
+  roots by numpy's complex magnitude, are :func:`second_order_sections`, and
+  the BS.468-4 prototype's poles, which ``numpy.roots`` took from LAPACK, are
+  the correctly rounded roots of
+  :mod:`~phonometry.filters._pinned_roots`. What is left of ``numpy`` on the
+  path is arithmetic IEEE 754 pins, and ``sqrt``, which the standard
+  correctly rounds and which does not move.
 
   The root of it sat *before* the loop rather than inside it.
   :func:`numpy.geomspace` is ``10 ** linspace(...)``, so the grid every
@@ -146,10 +151,10 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from scipy import signal
 
 from .._internal.validation import (
     complex_number,
+    exactly_nonzero,
     is_positive,
     real_array,
     real_number,
@@ -1260,6 +1265,221 @@ def bilinear_zpk(
     return digital_zeros, _mapped_roots(poles, fs2), gain * real
 
 
+#: SciPy's tolerance for a root to count as real and for two roots to count as
+#: a conjugate pair: ``100 * spacing(1)`` of a double, relative to the root's
+#: magnitude.
+_PAIRING_TOLERANCE = 100.0 * float(np.finfo(np.float64).eps)
+
+
+def _magnitude(root: complex) -> float:
+    """``|root|``, correctly rounded, where numpy's complex absolute is its own loop."""
+    return pinned_hypot(root.real, root.imag)
+
+
+def _is_real(root: complex) -> bool:
+    """Whether *root* has no imaginary part, as ``numpy.isreal`` asks, read off its bits."""
+    return not bool(exactly_nonzero(np.array([root.imag]))[0])
+
+
+def _runs_of_one_real_part(upper: list[complex]) -> list[tuple[int, int]]:
+    """``(start, stop)`` of each run of roots whose real parts agree within the tolerance.
+
+    SciPy's ``_cplxreal`` finds them from the differences of the sorted real
+    parts, each against the tolerance times the magnitude of the root before
+    it, and sorts each run by the size of its imaginary parts.
+    """
+    runs: list[tuple[int, int]] = []
+    start: int | None = None
+    for index in range(len(upper) - 1):
+        gap = upper[index + 1].real - upper[index].real
+        same = gap <= _PAIRING_TOLERANCE * _magnitude(upper[index])
+        if same and start is None:
+            start = index
+        elif not same and start is not None:
+            runs.append((start, index + 1))
+            start = None
+    if start is not None:
+        runs.append((start, len(upper)))
+    return runs
+
+
+def _sorted_runs(roots: list[complex], runs: list[tuple[int, int]]) -> list[complex]:
+    """*roots* with each run sorted, stably, by the size of the imaginary part."""
+    ordered = list(roots)
+    for start, stop in runs:
+        ordered[start:stop] = sorted(
+            ordered[start:stop], key=lambda z: math.fabs(z.imag)
+        )
+    return ordered
+
+
+def _conjugate_pairs(roots: list[complex]) -> tuple[list[complex], list[complex]]:
+    """SciPy's ``_cplxreal``: one root of each conjugate pair, and the real roots.
+
+    The roots are sorted by real part and then by the size of the imaginary
+    part; a root whose imaginary part is within the tolerance of its
+    magnitude is real, the rest are split by sign, matched in order and
+    averaged, as SciPy averages them, with the quotient by two spelled as
+    numpy divides by ``2 + 0j``.
+
+    :return: ``(pairs, reals)``, each pair by its member above the axis.
+    :raises ValueError: if a complex root has no conjugate.
+    """
+    ordered = sorted(roots, key=lambda z: (z.real, math.fabs(z.imag)))
+    flags = [math.fabs(z.imag) <= _PAIRING_TOLERANCE * _magnitude(z) for z in ordered]
+    reals = [complex(z.real) for z, real in zip(ordered, flags, strict=True) if real]
+    rest = [z for z, real in zip(ordered, flags, strict=True) if not real]
+    upper = [z for z in rest if z.imag > 0.0]
+    lower = [z for z in rest if z.imag < 0.0]
+    if len(upper) != len(lower):
+        msg = "Array contains complex value with no matching conjugate."
+        raise ValueError(msg)
+    runs = _runs_of_one_real_part(upper)
+    upper, lower = _sorted_runs(upper, runs), _sorted_runs(lower, runs)
+    pairs = []
+    for above, below in zip(upper, lower, strict=True):
+        apart = complex(above.real - below.real, above.imag - -below.imag)
+        if _magnitude(apart) > _PAIRING_TOLERANCE * _magnitude(below):
+            msg = "Array contains complex value with no matching conjugate."
+            raise ValueError(msg)
+        total = (above.real + below.real, above.imag + -below.imag)
+        pairs.append(complex(*complex_quotient(total, (2.0, 0.0))))
+    return pairs, reals
+
+
+def _section_polynomial(roots: list[complex]) -> list[float]:
+    r"""``poly(roots)`` for one section: up to two roots, real or a conjugate pair.
+
+    SciPy forms it with numpy's ``convolve``, which multiplies complex roots
+    through the BLAS: :math:`(r_1 r_2 - i_1 i_2)` is a sum of products a
+    BLAS may fuse, and the OpenBLAS of 64-bit ARM does. Here each product
+    and each sum is one separately rounded operation, in the order of the
+    dot product numpy hands the BLAS, every sum starting from ``+0.0`` as
+    that dot product does, so a zero comes out positive. The imaginary part
+    of a conjugate pair's product cancels and is dropped, as SciPy drops it.
+
+    :param roots: No more than two roots: two real ones, or a conjugate pair.
+    :return: The monic coefficients, the highest power first.
+    """
+    if not roots:
+        return [1.0]
+    first = roots[0]
+    if len(roots) == 1:
+        return [1.0, -first.real + 0.0]
+    second = roots[1]
+    middle = (-first.real - second.real) + 0.0
+    last = ((first.real * second.real + 0.0) - (first.imag * second.imag + 0.0)) + 0.0
+    return [1.0, middle, last]
+
+
+def _section(zeros: list[complex], poles: list[complex]) -> list[float]:
+    """SciPy's ``_single_zpksos``: one section's six coefficients, each half right-aligned."""
+    above = _section_polynomial(zeros)
+    below = _section_polynomial(poles)
+    return [0.0] * (3 - len(above)) + above + [0.0] * (3 - len(below)) + below
+
+
+def _worst(roots: list[complex]) -> int:
+    """The index of the root nearest the unit circle, the first of any tie."""
+    distance = [math.fabs(1.0 - _magnitude(root)) for root in roots]
+    return distance.index(min(distance))
+
+
+def _nearest(roots: list[complex], to: complex, which: str) -> int:
+    """SciPy's ``_nearest_real_complex_idx``: the nearest root of the kind *which* asks.
+
+    Ties keep the order the roots are in, which is the order a stable sort
+    gives and the one numpy's sort gives on the short arrays a section draws
+    from.
+    """
+    distance = [_magnitude(root - to) for root in roots]
+    order = sorted(range(len(roots)), key=distance.__getitem__)
+    if which == "any":
+        return order[0]
+    wanted = which == "real"
+    return next(i for i in order if _is_real(roots[i]) == wanted)
+
+
+def _paired_zeros(zeros: list[complex], pole: complex) -> list[complex]:
+    """The zeros the section of *pole* takes, removed from *zeros*: SciPy's general case."""
+    if not zeros:
+        return []
+    first = zeros.pop(_nearest(zeros, pole, "any"))
+    if not _is_real(first):
+        return [first, first.conjugate()]
+    if not zeros:
+        return [first]
+    return [first, zeros.pop(_nearest(zeros, pole, "real"))]
+
+
+def _next_section(zeros: list[complex], poles: list[complex]) -> list[float]:
+    """The section of the pole nearest the unit circle, the roots it takes removed.
+
+    SciPy's ``zpk2sos`` with its default pairing, ``'nearest'``, for a
+    digital filter, branch for branch.
+    """
+    pole = poles.pop(_worst(poles))
+    real_poles = sum(_is_real(p) for p in poles)
+    if _is_real(pole) and real_poles == 0:
+        zero = zeros.pop(_nearest(zeros, pole, "real"))
+        return _section([zero, 0j], [pole, 0j])
+    real_zeros = sum(_is_real(z) for z in zeros)
+    if (
+        len(poles) + 1 == len(zeros)
+        and not _is_real(pole)
+        and real_poles == real_zeros == 1
+    ):
+        zero = zeros.pop(_nearest(zeros, pole, "complex"))
+        return _section([zero, zero.conjugate()], [pole, pole.conjugate()])
+    if _is_real(pole):
+        real_indices = [i for i, p in enumerate(poles) if _is_real(p)]
+        partner = poles.pop(real_indices[_worst([poles[i] for i in real_indices])])
+    else:
+        partner = pole.conjugate()
+    return _section(_paired_zeros(zeros, pole), [pole, partner])
+
+
+def second_order_sections(
+    zeros: np.ndarray, poles: np.ndarray, gain: float
+) -> np.ndarray:
+    """:func:`scipy.signal.zpk2sos`, step for step, in separately rounded arithmetic.
+
+    SciPy pairs each pole with its zeros by complex magnitudes, numpy's own
+    loop and one numpy picks by processor, and forms each section's
+    polynomial with ``numpy.convolve``, whose complex products go through the
+    BLAS; the OpenBLAS of 64-bit ARM fuses them into multiply-adds and the
+    x86-64 kernels round each product apart, so fourteen of the checked
+    designs came out of SciPy with other last bits on 64-bit ARM. Here every
+    magnitude is the correctly rounded one (:func:`_magnitude`), every
+    product and sum is one separately rounded operation
+    (:func:`_section_polynomial`), and the pairing is SciPy's default,
+    ``'nearest'``, for a digital filter, branch for branch: the poles nearest
+    the unit circle go in the last sections, each with the zeros nearest it.
+
+    :param zeros: Digital zeros, a real or complex one-dimensional array.
+    :param poles: Digital poles, likewise.
+    :param gain: The filter's gain, folded into the first section.
+    :return: The cascade, one section ``[b0, b1, b2, a0, a1, a2]`` per row.
+    :raises ValueError: if a complex root has no conjugate.
+    """
+    z = [complex(v) for v in np.asarray(zeros).tolist()]
+    p = [complex(v) for v in np.asarray(poles).tolist()]
+    if not z and not p:
+        return np.array([[gain, 0.0, 0.0, 1.0, 0.0, 0.0]])
+    z += [0j] * max(len(p) - len(z), 0)
+    p += [0j] * max(len(z) - len(p), 0)
+    count = (len(p) + 1) // 2
+    if len(p) % 2:
+        p.append(0j)
+        z.append(0j)
+    z_pairs, z_reals = _conjugate_pairs(z)
+    p_pairs, p_reals = _conjugate_pairs(p)
+    z, p = z_pairs + z_reals, p_pairs + p_reals
+    sections = [_next_section(z, p) for _ in range(count)][::-1]
+    sections[0][:3] = [gain * value for value in sections[0][:3]]
+    return np.array(sections, dtype=np.float64)
+
+
 def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> float:
     r"""``|H|`` of a biquad cascade at one frequency, in real arithmetic.
 
@@ -1472,7 +1692,7 @@ def design_sos(
     )
     anchor = _anchor_hz(fs, band, reference_frequency_hz)
     digital = bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
-    sos = signal.zpk2sos(*digital)
+    sos = second_order_sections(*digital)
     printed = _analog_db(
         np.asarray(zeros), np.asarray(poles), np.array([anchor]), reference_frequency_hz
     )

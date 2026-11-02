@@ -126,6 +126,7 @@ from ._weighting_design import (
     complex_product,
     complex_quotient,
     design_sos,
+    second_order_sections,
 )
 
 if TYPE_CHECKING:
@@ -609,7 +610,7 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
             n_origin_zeros=_zeros_at_origin(curve),
         )
     else:
-        sos = signal.zpk2sos(*bilinear_zpk(zeros, poles, gain, fs))
+        sos = second_order_sections(*bilinear_zpk(zeros, poles, gain, fs))
     shared = np.array(sos, dtype=np.float64)
     shared.flags.writeable = False
     return shared

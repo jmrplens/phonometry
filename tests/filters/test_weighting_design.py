@@ -25,6 +25,7 @@ import os
 import subprocess
 import sys
 import textwrap
+import types
 import warnings
 from fractions import Fraction
 from typing import TYPE_CHECKING, Any
@@ -34,11 +35,13 @@ import pytest
 from libm_identity import TUNABLES, WITHOUT_FMA, runs_the_pinned_routines
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
+from scipy._lib._array_api import array_namespace
 from trig_oracle import correctly_rounded_arctangent
 
 from phonometry import filters
 from phonometry.filters import _weighting_design
 from phonometry.filters import weighting as weighting_module
+from phonometry.filters._pinned_trig import pinned_hypot
 from phonometry.filters._weighting_design import (
     _CORNER_DECADES,
     _cascade_magnitude,
@@ -48,6 +51,7 @@ from phonometry.filters._weighting_design import (
     design_sos,
     fit_prototype,
     fitted_prototype_hz,
+    second_order_sections,
 )
 from phonometry.filters._weighting_design import (
     _analog_db as _shipped_analog_db,
@@ -125,6 +129,13 @@ _WORST_DEVIATION_DB = {
     "AU": 0.011,
     "468": 0.100,
 }
+
+
+#: The rates of the checked set between the low rates below and
+#: :data:`_RATES`: the telephone and wideband rates and half of 44.1 kHz. The
+#: same per-curve bounds hold there, measured at 0.0119 dB for D at 16 kHz and
+#: 0.0181 dB for 468 at 22.05 kHz, the two nearest their bounds.
+_MID_RATES = (8000, 16000, 22050)
 
 
 #: Sample rates at or below twice the 1 kHz reference frequency, where the
@@ -327,10 +338,15 @@ def _worst_tone_deviation_db(curve: str, fs: int) -> tuple[float, float]:
     return worst, where
 
 
-@pytest.mark.parametrize("fs", _RATES)
+@pytest.mark.parametrize("fs", [*_MID_RATES, *_RATES])
 @pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
 def test_realised_filter_tracks_its_printed_prototype(curve: str, fs: int) -> None:
-    """Every shipped design, against the curve the standard defines."""
+    """Every shipped design, against the curve the standard defines.
+
+    With :data:`_LOW_RATES` below, these are the 133 designs of the checked
+    set, so a change to the arithmetic underneath the design that moves any
+    of them is held to the design's own tolerance.
+    """
     worst = float(np.max(np.abs(_deviation_db(curve, fs))))
     assert worst <= _WORST_DEVIATION_DB[curve], f"{curve} at fs={fs}: {worst:.5f} dB"
 
@@ -1493,6 +1509,265 @@ def test_the_bilinear_transform_is_scipy_s_bit_for_bit(curve: str) -> None:
         )
 
 
+#: The head of the SHA-256 of each curve designed at 48 kHz. Every step of the
+#: design is now the package's own arithmetic, the polynomial roots of the
+#: 468 prototype and the second-order sections included, so each curve has
+#: one digest on every platform, as the A weighting has had since its
+#: transcendentals were pinned. The 468 weighting moved here from the
+#: 08f94c9ff182cff1 its LAPACK roots gave on x86-64.
+_DIGESTS_48K = {
+    "A": "991833ff389afe91",
+    "B": "9d614c312cdae506",
+    "C": "84655ec4f8ebcec4",
+    "D": "e68aa3b7e031906a",
+    "G": "57b5f6d57070632c",
+    "AU": "82878978b16b6110",
+    "468": "eee92dba5dcc41f7",
+}
+
+
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_every_curve_is_the_documented_design_on_every_platform(curve: str) -> None:
+    """Each curve at 48 kHz, as it ships, designed to one digest everywhere.
+
+    Before the roots and the sections were spelled here the 468 weighting
+    and some designs of B, C, D, G and AU came out of 64-bit ARM with other
+    last bits, so only the A weighting was held across the matrix.
+    """
+    weighting_module._itu_r_468_prototype.cache_clear()
+    _cached_weighting_sos.cache_clear()
+    sos = filters.WeightingFilter(48000, curve).sos
+    assert hashlib.sha256(sos.tobytes()).hexdigest()[:16] == _DIGESTS_48K[curve]
+
+
+#: Library routines that once formed part of the cascade: the roots LAPACK
+#: finds, the polynomial products numpy hands the BLAS, and the sections
+#: SciPy forms through both.
+_LIBRARY_STEPS = (
+    (np, "roots"),
+    (np, "convolve"),
+    (np, "polymul"),
+    (np.linalg, "eigvals"),
+    (np.linalg, "eig"),
+    (sg, "zpk2sos"),
+    (sg, "zpk2tf"),
+)
+
+
+@pytest.mark.parametrize("curve", ["A", "D", "468", "AU"])
+def test_a_design_calls_no_library_root_finder_or_section_former(
+    curve: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With those routines made to raise, the design and the plain design still run.
+
+    The run-time half of the source check below for the two steps that were
+    a library's: the 468 prototype's poles, which ``numpy.roots`` found
+    through LAPACK, and the second-order sections, which SciPy's ``zpk2sos``
+    formed through ``numpy.convolve`` and the BLAS. D and AU have complex
+    poles, so their sections take the polynomial of a conjugate pair; AU at
+    1 kHz takes every spare placement.
+    """
+
+    def refuse(*_: object, **__: object) -> object:
+        message = "a library step reached the design"
+        raise AssertionError(message)
+
+    for owner, name in _LIBRARY_STEPS:
+        monkeypatch.setattr(owner, name, refuse)
+    weighting_module._itu_r_468_prototype.cache_clear()
+    try:
+        fs = 1000 if curve == "AU" else 48000
+        designed = _cached_weighting_sos.__wrapped__(curve, fs, high_accuracy=True)
+        plain = _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=False)
+    finally:
+        weighting_module._itu_r_468_prototype.cache_clear()
+    assert np.isfinite(designed).all()
+    assert np.isfinite(plain).all()
+
+
+def _unfused_section(a: complex, b: complex) -> list[complex]:
+    """``numpy.convolve([1, -a], [1, -b])``, each operation rounded once."""
+    return [
+        complex(1.0, 0.0),
+        complex((-a.real - b.real) + 0.0, (-a.imag - b.imag) + 0.0),
+        complex(
+            (a.real * b.real + 0.0) - (a.imag * b.imag + 0.0) + 0.0,
+            (a.real * b.imag + 0.0) + (a.imag * b.real + 0.0) + 0.0,
+        ),
+    ]
+
+
+def _numpy_convolves_step_by_step() -> bool:
+    """Whether numpy's complex ``convolve`` rounds every product and sum apart.
+
+    SciPy forms a section's polynomial with ``numpy.convolve``, whose complex
+    dot products go to the BLAS; the OpenBLAS of 64-bit ARM fuses them, and
+    then SciPy's sections are not the separately rounded ones the design
+    spells, so the comparison below has nothing to compare with.
+    """
+    for a, b in _FUSION_PROBES:
+        result = np.convolve(np.array([1.0, -a]), np.array([1.0, -b])).tolist()
+        if [complex(v) for v in result] != _unfused_section(a, b):
+            return False
+    return True
+
+
+def _correctly_rounded_abs(values: object) -> object:
+    """``numpy.abs`` with a complex magnitude correctly rounded, as the design takes it."""
+    array = np.asarray(values)
+    if not np.iscomplexobj(array):
+        return np.fabs(array)
+    flat = [pinned_hypot(z.real, z.imag) for z in array.reshape(-1).tolist()]
+    magnitudes = np.array(flat, dtype=np.float64).reshape(array.shape)
+    return magnitudes if array.ndim else np.float64(magnitudes)
+
+
+class _CorrectlyRoundedNumpy(types.ModuleType):
+    """numpy as SciPy's filter design sees it, its complex absolute correctly rounded."""
+
+    abs = staticmethod(_correctly_rounded_abs)
+    absolute = staticmethod(_correctly_rounded_abs)
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(np, name)
+
+
+def _random_digital_zpk(seed: int) -> tuple[np.ndarray, np.ndarray, float]:
+    """Roots of every kind ``zpk2sos`` branches on: odd counts, real and paired."""
+    rng = np.random.default_rng(seed)
+
+    def roots(count: int, radius: float) -> list[complex]:
+        found: list[complex] = []
+        while len(found) < count:
+            r, angle = radius * rng.uniform(0.1, 1.0), rng.uniform(0.0, np.pi)
+            if count - len(found) >= 2 and rng.uniform() < 0.6:
+                found += [complex(r * np.cos(angle), r * np.sin(angle))]
+                found += [found[-1].conjugate()]
+            else:
+                found.append(complex(rng.uniform(-radius, radius)))
+        return found
+
+    zeros = roots(int(rng.integers(0, 8)), 1.5)
+    poles = roots(int(rng.integers(max(len(zeros) - 1, 1), 9)), 0.98)
+    return np.array(zeros, dtype=complex), np.array(poles, dtype=complex), 0.7
+
+
+@pytest.mark.skipif(
+    not _numpy_convolves_step_by_step(),
+    reason="this numpy's complex convolve fuses its products, so SciPy's sections "
+    "are not the separately rounded ones the design spells",
+)
+def test_the_sections_are_scipy_s_where_scipy_rounds_exactly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Where SciPy's arithmetic is exact, the design's sections are SciPy's, bit for bit.
+
+    The design spells ``zpk2sos`` step by step: each product and sum rounded
+    once, and each complex magnitude its pairing reads correctly rounded.
+    SciPy rounds the products the same way where numpy's ``convolve`` does
+    (the skip above), but its magnitudes are numpy's own loop, which is not
+    correctly rounded, so SciPy is handed the correctly rounded magnitude
+    here; then the two agree on every curve's plain and fitted design at
+    48 kHz, on the AU weighting at 100 Hz, where numpy's magnitude pairs two
+    zeros one unit in the last place apart the other way round and SciPy's
+    own sections differ from these, and on random roots that take every
+    branch of the pairing.
+    """
+    monkeypatch.setattr(sg._filter_design, "np", _CorrectlyRoundedNumpy("np"))
+    monkeypatch.setattr(sg._filter_design, "abs", _correctly_rounded_abs, raising=False)
+    cases = [_random_digital_zpk(seed) for seed in range(60)]
+    for curve in _PROTOTYPE_CURVES:
+        zeros, poles, gain = _analog_weighting_zpk(curve)
+        cases.append(bilinear_zpk(zeros, poles, gain, 48000.0))
+        for fs in (48000, 100) if curve == "AU" else (48000,):
+            fitted = fit_prototype(
+                zeros, poles, float(fs), _fit_band(curve, fs), _FIT_SECTIONS[curve],
+                _REFERENCE_HZ.get(curve, 1000.0), n_origin_zeros=_zeros_at_origin(curve),
+            )  # fmt: skip
+            cases.append(bilinear_zpk(*fitted, 1.0, float(fs)))
+    for case in cases:
+        ours = second_order_sections(*case)
+        theirs = sg.zpk2sos(*case)
+        assert ours.shape == theirs.shape
+        np.testing.assert_array_equal(ours.view(np.uint64), theirs.view(np.uint64))
+
+
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_the_sections_realise_scipy_s_response(curve: str) -> None:
+    """On any platform the sections are the same filter as SciPy's, to its rounding.
+
+    Wherever the BLAS fuses or numpy's magnitudes pair two nearly equal
+    roots the other way, SciPy's sections differ from these in their last
+    bits, and only there: the response the two realise over the fit band is
+    the same to a trillionth of a decibel.
+    """
+    zeros, poles, _ = _analog_weighting_zpk(curve)
+    fitted = fit_prototype(
+        zeros, poles, 48000.0, _fit_band(curve, 48000), _FIT_SECTIONS[curve],
+        _REFERENCE_HZ.get(curve, 1000.0), n_origin_zeros=_zeros_at_origin(curve),
+    )  # fmt: skip
+    digital = bilinear_zpk(*fitted, 1.0, 48000.0)
+    grid = np.geomspace(*_fit_band(curve, 48000), 2001)
+    _, ours = sg.sosfreqz(second_order_sections(*digital), worN=grid, fs=48000)
+    _, theirs = sg.sosfreqz(sg.zpk2sos(*digital), worN=grid, fs=48000)
+    apart = np.max(np.abs(20.0 * np.log10(np.abs(ours) / np.abs(theirs))))
+    assert apart < 1e-9, f"{curve}: {apart:.3e} dB"
+
+
+def _fused_convolve(a: object, v: object, mode: str = "full") -> np.ndarray:
+    """``numpy.convolve`` as a BLAS that fuses its complex dot products returns it."""
+    left, right = np.asarray(a), np.asarray(v)
+    if not (np.iscomplexobj(left) or np.iscomplexobj(right)) or mode != "full":
+        return _UNFUSED_CONVOLVE(a, v, mode)
+    out = [complex(0.0)] * (left.size + right.size - 1)
+    for i, x in enumerate(left.tolist()):
+        for j, y in enumerate(right.tolist()):
+            x, y = complex(x), complex(y)
+            out[i + j] += _fused_product(x, y)
+    return np.array(out, dtype=complex)
+
+
+_UNFUSED_CONVOLVE = np.convolve
+
+
+def test_a_blas_that_fuses_its_complex_dot_designs_the_same_filters(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The design owes nothing to whether the BLAS fuses a complex dot product.
+
+    SciPy forms each section's polynomial with ``numpy.convolve``, whose
+    complex products go to the BLAS's dot product, and the OpenBLAS of 64-bit
+    ARM fuses them. With ``numpy.convolve`` fused here, on any platform,
+    SciPy's sections move for the D and G weightings at 48 kHz (the test
+    asserts it, so that it shows something) and the design's do not, since
+    it no longer reaches either.
+    """
+    zeros, poles, _ = _analog_weighting_zpk("D")
+    fitted = fit_prototype(
+        zeros, poles, 48000.0, _fit_band("D", 48000), _FIT_SECTIONS["D"], 1000.0,
+        n_origin_zeros=_zeros_at_origin("D"),
+    )  # fmt: skip
+    digital = bilinear_zpk(*fitted, 1.0, 48000.0)
+    before = {
+        curve: _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=True)
+        for curve in ("D", "G")
+    }
+    unfused_scipy = sg.zpk2sos(*digital)
+    # SciPy reaches numpy through its array namespace, which holds its own
+    # reference to ``convolve``.
+    namespace = array_namespace(np.array([1.0]))
+    monkeypatch.setattr(np, "convolve", _fused_convolve)
+    monkeypatch.setattr(namespace, "convolve", _fused_convolve)
+    assert not np.array_equal(
+        sg.zpk2sos(*digital).view(np.uint64), unfused_scipy.view(np.uint64)
+    )
+    for curve, unfused in before.items():
+        fused = _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=True)
+        np.testing.assert_array_equal(
+            fused.view(np.uint64), unfused.view(np.uint64), err_msg=curve
+        )
+
+
 @pytest.mark.skipif(
     not runs_the_pinned_routines(),
     reason="needs this process on glibc's FMA variant, on an x86-64 processor "
@@ -1556,24 +1831,30 @@ _MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite", "prod"})
 
 #: numpy names that are a transcendental, a power, or a magnitude that may be
 #: complex, each of which numpy computes with a dispatched kernel or the C
-#: library. A real magnitude is ``np.fabs``, which IEEE 754 fixes and which
-#: refuses a complex value.
+#: library, and the polynomial, dot-product and linear-algebra routines that
+#: hand their sums of products to the BLAS or to LAPACK. A real magnitude is
+#: ``np.fabs``, which IEEE 754 fixes and which refuses a complex value.
 _NUMPY_FORBIDDEN = frozenset(
     {
         "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "power",
         "float_power", "sin", "cos", "tan", "arcsin", "arccos", "arctan",
         "arctan2", "sinh", "cosh", "tanh", "arcsinh", "arccosh", "arctanh",
         "hypot", "cbrt", "geomspace", "logspace", "angle", "abs", "absolute",
-        "emath", "prod", "cumprod", "polyval",
+        "emath", "prod", "cumprod", "polyval", "roots", "poly", "polymul",
+        "polyadd", "polysub", "polydiv", "convolve", "correlate", "dot",
+        "vdot", "inner", "matmul", "einsum", "tensordot", "linalg",
     }
 )  # fmt: skip
 
 #: SciPy's filter routines that evaluate or transform with complex products
-#: and quotients, which numpy computes in a loop a compiler may fuse.
+#: and quotients, which numpy computes in a loop a compiler may fuse, and the
+#: conversions that form polynomials with ``numpy.convolve`` (the BLAS) or
+#: find roots with ``numpy.roots`` (LAPACK).
 _SIGNAL_COMPLEX = frozenset(
     {
         "bilinear", "bilinear_zpk", "freqs", "freqs_zpk", "freqz", "freqz_zpk",
-        "freqz_sos", "sosfreqz", "group_delay",
+        "freqz_sos", "sosfreqz", "group_delay", "zpk2sos", "zpk2tf", "tf2zpk",
+        "tf2sos", "sos2zpk", "sos2tf", "zpk2ss", "ss2zpk",
     }
 )  # fmt: skip
 
@@ -1584,11 +1865,13 @@ _SIGNAL_OWNERS = frozenset({"signal", "scipy.signal"})
 _NUMPY_OWNERS = frozenset({"np", "numpy"})
 
 #: Modules every name of which is a platform's answer: complex math, SciPy's
-#: special functions and numpy's complex-domain math.
+#: special functions, numpy's complex-domain math and the linear algebra of
+#: numpy and SciPy, which is LAPACK's.
 _FORBIDDEN_MODULES = frozenset(
     {
         "cmath", "scipy.special", "special", "np.emath", "numpy.emath",
-        "np.lib.scimath", "numpy.lib.scimath",
+        "np.lib.scimath", "numpy.lib.scimath", "np.linalg", "numpy.linalg",
+        "scipy.linalg", "linalg",
     }
 )  # fmt: skip
 
@@ -1623,8 +1906,8 @@ def _import_from_finding(node: ast.ImportFrom) -> str | None:
     hidden = (
         module in {"math", "cmath"}
         or module in _FORBIDDEN_MODULES
-        or module.startswith("scipy.special")
-        or (module == "scipy" and "special" in names)
+        or module.startswith(("scipy.special", "scipy.linalg"))
+        or (module == "scipy" and bool(names & {"special", "linalg"}))
         or (module in _NUMPY_OWNERS and bool(names & _NUMPY_FORBIDDEN))
         or (module == "operator" and bool(names & _OPERATOR_FORBIDDEN))
         or (module == "scipy.signal" and bool(names & _SIGNAL_COMPLEX))
@@ -1641,7 +1924,7 @@ def _import_finding(node: ast.Import) -> list[str]:
         if (
             renamed
             or alias.name in _FORBIDDEN_MODULES
-            or alias.name.startswith("scipy.special")
+            or alias.name.startswith(("scipy.special", "scipy.linalg"))
         ):
             found.append(f"import {alias.name} as {bound}")
     return found
@@ -1669,6 +1952,8 @@ class _PlatformOperations(ast.NodeVisitor):
     def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
         if isinstance(node.op, ast.Pow):
             self.found.add(f"{node.lineno}: the ** operator")
+        if isinstance(node.op, ast.MatMult):
+            self.found.add(f"{node.lineno}: the @ operator")
         if isinstance(node.op, _COMPLEX_PRODUCTS) and any(
             _is_complex_literal(side) for side in (node.left, node.right)
         ):
@@ -1771,7 +2056,13 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     on macOS and on Windows and numpy built with GCC does not. That is how
     the A weighting at 48 kHz once hashed to ``5f5e34e5d3a8aa6e`` on both of
     them; the spelling is :func:`~phonometry.filters._weighting_design.complex_product`
-    and its neighbours.
+    and its neighbours. So is a step that hands a sum of products to the
+    BLAS or to LAPACK: ``numpy.roots``, ``numpy.convolve`` and the polynomial
+    products, ``@`` and ``numpy.linalg``, and SciPy's ``zpk2sos`` and the
+    conversions beside it, which on 64-bit ARM gave the 468 prototype's poles
+    and the sections of fourteen other designs other last bits; the spelling
+    is :func:`~phonometry.filters._pinned_roots.correctly_rounded_roots` and
+    :func:`~phonometry.filters._weighting_design.second_order_sections`.
     In ``weighting.py`` the scan covers the imports and everything the cached
     design reaches by name, the prototypes and their helpers included.
     """
@@ -1781,7 +2072,8 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     reached = _reached_from(weighting_tree, "_cached_weighting_sos")
     assert {
         "_analog_weighting_zpk", "_itu_r_468_prototype", "_abcd_product",
-        "_u_poles", "_fit_band", "_ITU_R_468_LADDER",
+        "_u_poles", "_fit_band", "_ITU_R_468_LADDER", "_ladder_element",
+        "_prototype", "_zeros_at_origin",
     } <= set(reached)  # fmt: skip
     imports = [
         node
@@ -1841,6 +2133,31 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
     assert _platform_operations(
         ast.parse("from scipy.signal import freqz, zpk2sos\nw = math.prod([2.0])")
     ) == ["1: from scipy.signal import freqz, zpk2sos"]
+    library = textwrap.dedent(
+        """
+        import scipy.linalg
+        from scipy import linalg
+        from numpy import roots
+        def g(a, b, z, p):
+            r = np.roots(a) + np.polymul(a, b) + np.convolve(a, b)
+            e = np.linalg.eigvals(a) + a @ b + numpy.dot(a, b)
+            return signal.zpk2sos(z, p, 1.0), signal.zpk2tf(z, p, 1.0), r, e
+        """
+    )
+    assert _platform_operations(ast.parse(library)) == [
+        "2: import scipy.linalg as scipy.linalg",
+        "3: from scipy import linalg",
+        "4: from numpy import roots",
+        "6: np.convolve",
+        "6: np.polymul",
+        "6: np.roots",
+        "7: np.linalg",
+        "7: np.linalg.eigvals",
+        "7: numpy.dot",
+        "7: the @ operator",
+        "8: signal.zpk2sos",
+        "8: signal.zpk2tf",
+    ]
     module = ast.parse(
         textwrap.dedent(
             """

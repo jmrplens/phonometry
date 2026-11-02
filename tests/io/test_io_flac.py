@@ -274,3 +274,20 @@ def test_a_bext_embed_stopped_partway_leaves_no_copy_beside_the_file(
     monkeypatch.undo()
     assert sorted(entry.name for entry in tmp_path.iterdir()) == ["carried.flac"]
     assert np.asarray(read(path)).ravel().tolist() == samples.tolist()
+
+
+def test_a_bext_too_long_for_a_flac_block_is_refused_before_the_audio_is_written(
+    tmp_path: Path,
+) -> None:
+    """A payload past the 16 MiB a FLAC metadata block holds is refused, and
+    nothing is written at the path.
+
+    Its size was tested only once python-soundfile had written the audio, so
+    the refusal left a FLAC file without its ``bext`` where the caller named.
+    """
+    meta = replace(fresh_metadata(), coding_history="A=PCM\r\n" * (1 << 22))
+    path = tmp_path / "too_long.flac"
+    with pytest.raises(ValueError, match="exceeds the 24-bit FLAC metadata block"):
+        write(path, np.full(16, 0.125), FS, bext=meta)
+    assert not path.exists()
+    assert list(tmp_path.iterdir()) == []

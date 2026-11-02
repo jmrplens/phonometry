@@ -2301,6 +2301,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it, so a `pathlib.Path` built the whole fiche and then failed with
   ReportLab's own error. Every `.report()` takes `str | os.PathLike[str]`
   now, writes the PDF where the path names, and returns that path as a text.
+- **`io.write` refuses a `bext` too long for a FLAC file before it writes
+  anything.** A payload past the 16 MiB a FLAC metadata block holds was
+  measured only once python-soundfile had written the audio at the path, so
+  the refusal left a FLAC file without its `bext` behind; the path is
+  untouched now.
 - **A record refuses a container that holds itself by the name of the field
   wherever the container sits.** A field the class's own `__post_init__`
   fills (`init=False`), an `InitVar` handed to it, a field a pickled or

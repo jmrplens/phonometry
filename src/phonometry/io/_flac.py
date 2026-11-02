@@ -100,21 +100,17 @@ def read_flac_bext(path: str | os.PathLike[str]) -> BroadcastMetadata | None:
                 return None
 
 
-def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
-    """Insert the ``bext`` chunk into a finished FLAC file's metadata.
+def flac_bext_block(path: str | os.PathLike[str], bext_payload: bytes) -> bytes:
+    """The APPLICATION block that carries *bext_payload* in a FLAC file.
 
-    Rewrites the metadata chain (STREAMINFO and friends copied as they
-    are, the old last-block flag cleared) and appends one APPLICATION
-    block in the ``flac --keep-foreign-metadata`` convention: application
-    ID ``riff``, then the verbatim RIFF chunk (``bext`` fourcc, 32-bit
-    little-endian size, payload, alignment pad byte if the payload is
-    odd). The audio frames are streamed across untouched, and the rewrite
-    lands in a sibling temporary file moved over the original only once
-    complete, so a failure cannot leave a half-written measurement file
-    in place, nor the temporary file beside it.
+    The ``flac --keep-foreign-metadata`` convention: application ID
+    ``riff``, then the verbatim RIFF chunk (``bext`` fourcc, 32-bit
+    little-endian size, payload, alignment pad byte if the payload is odd).
+    Built before anything is written, so a writer refuses a payload too long
+    for a FLAC block before it writes the audio at *path*.
 
-    :raises ValueError: If the file is not FLAC, or the chunk exceeds the
-        24-bit block length a FLAC metadata block can hold.
+    :raises ValueError: If the chunk exceeds the 24-bit block length a FLAC
+        metadata block can hold.
     """
     chunk = (
         _RIFF_APP_ID
@@ -129,6 +125,24 @@ def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
             "24-bit FLAC metadata block length"
         )
         raise ValueError(msg)
+    return chunk
+
+
+def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
+    """Insert the ``bext`` chunk into a finished FLAC file's metadata.
+
+    Rewrites the metadata chain (STREAMINFO and friends copied as they
+    are, the old last-block flag cleared) and appends the APPLICATION block
+    of :func:`flac_bext_block`. The audio frames are streamed across
+    untouched, and the rewrite lands in a sibling temporary file moved over
+    the original only once complete, so a failure cannot leave a
+    half-written measurement file in place, nor the temporary file beside
+    it.
+
+    :raises ValueError: If the file is not FLAC, or the chunk exceeds the
+        24-bit block length a FLAC metadata block can hold.
+    """
+    chunk = flac_bext_block(path, bext_payload)
     source = Path(path)
     staging = source.with_name(source.name + ".phonometry-tmp")
     try:

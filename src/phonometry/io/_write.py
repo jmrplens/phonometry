@@ -971,7 +971,7 @@ def _write_flac(
     is refused rather than silently dropped to 24 bits.
     """
     from ._backends import _import_soundfile
-    from ._flac import embed_flac_bext
+    from ._flac import embed_flac_bext, flac_bext_block
 
     sf = _import_soundfile("FLAC")
     implied = _PASSTHROUGH_SUBTYPES.get(data.dtype)
@@ -990,6 +990,9 @@ def _write_flac(
     else:
         resolved, out = _flac_quantised_codes(path, data, subtype, dither, rng)
     bext_payload = _resolve_bext(x, bext, data, fs, resolved, algorithm="FLAC")
+    if bext_payload is not None:
+        # Refused before python-soundfile writes the audio at path.
+        flac_bext_block(path, bext_payload)
     frames_first = np.ascontiguousarray(out.T)
     sf.write(
         os.fspath(path),

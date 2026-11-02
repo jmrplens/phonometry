@@ -1576,12 +1576,16 @@ The deterministic design path answers each door in kind, in
   nearest the exact root's, decided by a certificate: a disk around each
   approximation that provably holds one root and no other, and an extent in
   each coordinate that lies strictly between the midpoints around one
-  double. The second-order sections were SciPy's `zpk2sos`, which forms each
-  section's polynomial with `numpy.convolve`, whose complex products go to
-  the BLAS, and pairs poles with zeros by numpy's own complex magnitude,
-  which is not correctly rounded. It is now spelled step for step and
-  branch for branch, each product and sum rounded once and each magnitude
-  correctly rounded.
+  double, or a coordinate shown in exact arithmetic to sit on one of those
+  midpoints, which rounds to even. The second-order sections were SciPy's
+  `zpk2sos`, which forms each section's polynomial with `numpy.convolve`,
+  whose complex products go to the BLAS, and pairs poles with zeros by
+  numpy's own complex magnitude, which is not correctly rounded. It is now
+  spelled step for step and branch for branch, each product and sum
+  rounded once and each magnitude correctly rounded; of two zeros at
+  exactly the same distance from a pole it takes the first, as a stable
+  sort does, where SciPy's choice goes through numpy's default sort, whose
+  order of ties follows the processor.
 
 ## The evidence
 
@@ -1619,21 +1623,22 @@ run in CI:
   at 250, 400 and 500&nbsp;Hz and at 22.05&nbsp;kHz by nearly half the value
   of one small coefficient, and the response differs by at most
   0.0072&nbsp;dB, at 125&nbsp;Hz (0.0033&nbsp;dB at 44.1&nbsp;kHz,
-  0.000012&nbsp;dB at 48&nbsp;kHz). It moved the AU weighting at 100 and
-  200&nbsp;Hz by one or two units in the last place of six or eight
-  coefficients, where numpy's complex magnitude, one unit off the correctly
-  rounded one, had paired two zeros one unit in the last place apart the
-  other way round. The other 112 checked designs keep their bytes,
-  the A weighting at every rate among them, and every design that moved
-  stays inside the response bounds the tests hold.
+  0.000012&nbsp;dB at 48&nbsp;kHz). It moved the AU weighting by up to two
+  units in the last place of eight coefficients at 100&nbsp;Hz and by one
+  unit of six at 200&nbsp;Hz, where numpy's complex magnitude, one unit
+  off the correctly rounded one, had paired two zeros one unit in the last
+  place apart the other way round. The other 112 checked designs keep
+  their bytes, the A weighting at every rate among them, and every design
+  that moved stays inside the response bounds the tests hold.
 - **The poles, against the exact value.** The six poles are the roots an
   arbitrary-precision library finds, rounded part by part, and the test
   suite holds them to those doubles. Against the same library at 3000 bits,
-  the root finder returned the correctly rounded value of every part of
-  every root of 10&nbsp;600 random polynomials: 10&nbsp;200 copies of the
-  468 network with each component moved by up to 30&nbsp;%, 200 with integer
-  coefficients up to degree ten and 200 whose roots spread over eighteen
-  decades. numpy's own answer differs from them by 4 to 21 units in the last
+  the root finder as it ships returned the correctly rounded value of every
+  part of every root of 10&nbsp;600 random polynomials, each in under half
+  a second: 10&nbsp;200 copies of the 468 network with each component moved
+  by up to 30&nbsp;%, 200 with integer coefficients of degree two to ten,
+  four of them with a root at zero, and 200 whose roots spread over
+  eighteen decades. numpy's own answer differs from them by 4 to 21 units in the last
   place of the root's magnitude, which is at most 3&nbsp;% of the error
   LAPACK's backward-stable eigensolver allows itself on that companion
   matrix, so the poles are what numpy finds, to numpy's own error, and the

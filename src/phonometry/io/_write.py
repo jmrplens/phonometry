@@ -827,8 +827,10 @@ def write(
         no sidecar holds or whose sidecar would pass the 1 MiB a reader
         takes, or one with a pipe, a device, a socket or a directory at the
         sidecar's name, refused before the audio is written.
-    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes, or
-        ``bext``, ``dither`` or ``subtype`` is not a text.
+    :raises TypeError: if ``x`` is a text, holds one (a ``bytearray`` at
+        any depth included) or holds a complex value, ``fs`` is a flag, a
+        text or an array where a count goes, or ``bext``, ``dither`` or
+        ``subtype`` is not a text.
     """
     if dither is not None:
         require_choice(dither, "dither", ("tpdf",))

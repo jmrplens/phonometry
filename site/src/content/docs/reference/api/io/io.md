@@ -1900,7 +1900,7 @@ out of calibrated results).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown suffix or subtype, a missing or conflicting `fs` or one that is not a whole number (given or the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own), a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
-| TypeError | if `fs` is a flag, a text or an array where a count goes, or `bext`, `dither` or `subtype` is not a text. |
+| TypeError | if `x` is a text, holds one (a `bytearray` at any depth included) or holds a complex value, `fs` is a flag, a text or an array where a count goes, or `bext`, `dither` or `subtype` is not a text. |
 
 ## write_catalogue
 

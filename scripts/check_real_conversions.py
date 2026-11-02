@@ -53,14 +53,19 @@ a caller's value that no check has read on every path to it:
   call after an earlier ``return``, in the body of a ``try`` a handler of
   which goes on, or of a parameter rebound before it to another value
   counts for nothing; or a name rebound to what a check returns. A check
+  handed a conditional expression reads what both of its branches hold, and
+  the name its test finds ``None`` (``d if x is None else x``) where the
+  branch that runs while it is not holds it; handed ``getattr(x, name, d)``,
+  nothing of ``d``, which is read only when the attribute is missing. A check
   handed what NumPy made of a caller's value no check has refused a text in
   (``np.asarray(x)``, ``np.atleast_1d(x)`` and the other NumPy calls that
-  keep its values, given no floating dtype, or a name bound to one) reads a
-  ``bytearray`` as the codes of its characters, and the census lists that
-  reading as a conversion no check precedes. What each check refuses is listed, a complex value, a text or
-  both: a conversion to floats needs both refused, one to complex numbers a
-  text. A check of an item (``x[0]``) reads that item, not the sequence it
-  was taken from.
+  keep its values, given no floating dtype, or a name bound to one on any
+  path that reaches the check, an item a loop takes from one included) reads
+  a ``bytearray`` as the codes of its characters, and the census lists that
+  reading as a conversion no check precedes. What each check refuses is
+  listed, a complex value, a text or both: a conversion to floats needs both
+  refused, one to complex numbers a text. A check of an item (``x[0]``)
+  reads that item, not the sequence it was taken from.
 - **On every path**: the function is read the way it runs. A check inside
   an ``if`` holds after it only when the other branch checks too or leaves
   the function; a check in one branch does not reach the other; a check in
@@ -509,6 +514,17 @@ def join(first: State, second: State) -> State:
 Env = dict[str, State]
 
 
+def _numpy_key(name: str) -> str:
+    """The key under which an env marks *name* as bound to what NumPy made of
+    a caller's value no check has refused a text in.
+
+    The mark lives in the env, so each branch reads it as its own path left
+    it, a join keeps it when any path does, and binding the name again drops
+    it with the name's items; no source spells ``[<numpy>]``.
+    """
+    return f"{name}[<numpy>]"
+
+
 def _join_envs(envs: Sequence[Env], default: Callable[[str], State]) -> Env:
     if not envs:
         return {}
@@ -540,6 +556,23 @@ def _targets(target: ast.expr) -> list[str]:
     if isinstance(target, ast.Starred):
         return _targets(target.value)
     return []
+
+
+def _none_test(test: ast.expr) -> tuple[str | None, bool]:
+    """The name *test* compares with ``None`` by ``is`` or ``is not``, and
+    whether the test holds when the name is ``None``; ``(None, False)`` for
+    any other test.
+    """
+    if (
+        isinstance(test, ast.Compare)
+        and isinstance(test.left, ast.Name)
+        and len(test.ops) == 1
+        and isinstance(test.ops[0], ast.Is | ast.IsNot)
+        and isinstance(test.comparators[0], ast.Constant)
+        and test.comparators[0].value is None
+    ):
+        return test.left.id, isinstance(test.ops[0], ast.Is)
+    return None, False
 
 
 def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
@@ -632,10 +665,6 @@ class _Flow:
     )
     #: Each ``lambda`` met, with what the names hold where it is written.
     lambdas: list[tuple[ast.Lambda, Env]] = field(default_factory=list)
-    #: The names bound to what NumPy made of a caller's value no check has
-    #: refused a text in, in which a ``bytearray`` is the codes of its
-    #: characters.
-    numpy_read: set[str] = field(default_factory=set)
 
     # What a value holds.
 
@@ -693,14 +722,33 @@ class _Flow:
         return self._joined(_kept(call, self.names), env)
 
     def names_read(self, node: ast.expr) -> list[str]:
-        """The names *node* holds the value of as it is, as a check reads them."""
+        """The names *node* holds the value of as it is on every path, as a
+        check reads them: of a conditional expression, those both of its
+        branches hold (see :meth:`_branches_read`).
+        """
         if isinstance(node, ast.Name):
             return [node.id]
         if isinstance(node, ast.Attribute):
             return self._attribute_names(node)
         if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name):
             return [ast.unparse(node)]
+        if isinstance(node, ast.IfExp):
+            return self._branches_read(node)
         return [name for part in self._parts(node) for name in self.names_read(part)]
+
+    def _branches_read(self, node: ast.IfExp) -> list[str]:
+        """The names both branches of *node* hold, and the name its test finds
+        ``None`` (``d if x is None else x``) when the branch that runs while
+        it is not holds it: the other runs on no caller's number.
+        """
+        body = self.names_read(node.body)
+        orelse = self.names_read(node.orelse)
+        found = [name for name in body if name in orelse]
+        name, when_none = _none_test(node.test)
+        valued = orelse if when_none else body
+        if name is not None and name in valued and name not in found:
+            found.append(name)
+        return found
 
     def _attribute_names(self, node: ast.Attribute) -> list[str]:
         if self.fields and isinstance(node.value, ast.Name) and node.value.id == "self":
@@ -708,24 +756,32 @@ class _Flow:
         return self.names_read(node.value) if node.attr in _KEEPING_ATTRIBUTES else []
 
     def _parts(self, node: ast.expr) -> list[ast.expr]:
-        """The parts of *node* that hold its value as they are."""
+        """The parts of *node* that hold its value as they are on every path:
+        none of ``getattr``, whose default is read only when the attribute is
+        missing.
+        """
         if isinstance(node, ast.Starred | ast.NamedExpr):
             return [node.value]
         if isinstance(node, ast.Tuple | ast.List):
             return list(node.elts)
-        if isinstance(node, ast.IfExp):
-            return [node.body, node.orelse]
-        if isinstance(node, ast.Call):
+        if isinstance(node, ast.Call) and _last_name(node.func) != "getattr":
             return _kept(node, self.names)
         return []
 
     # Bindings and checks.
 
     def bind(
-        self, target: ast.expr, value: ast.expr | None, state: State, env: Env
+        self,
+        target: ast.expr,
+        value: ast.expr | None,
+        state: State,
+        env: Env,
+        *,
+        read: bool | None = None,
     ) -> None:
         """Bind *target* to *value*, which holds *state*, member by member
-        where both are tuples of the same length.
+        where both are tuples of the same length; mark each name bound to
+        NumPy's reading of a caller's value (*read*, else read off *value*).
         """
         if (
             isinstance(target, ast.Tuple | ast.List)
@@ -740,8 +796,12 @@ class _Flow:
             if isinstance(target.value, ast.Name) and target.value.id == "self":
                 env[f"self.{target.attr}"] = state
             return
+        if read is None:
+            read = value is not None and self._numpy_reading(value, env)
         for name in _targets(target):
             self._set(env, name, state)
+            if read:
+                env[_numpy_key(name)] = frozenset()
 
     @staticmethod
     def _set(env: Env, name: str, state: State) -> None:
@@ -781,14 +841,24 @@ class _Flow:
             self._comprehension_env(node, env, record=True)
         elif isinstance(node, ast.NamedExpr):
             self.expression(node.value, env, sure=sure)
-            state = self.state(node.value, env)
-            held = state if sure else join(state, self.lookup(env, node.target.id))
-            self._set(env, node.target.id, held)
+            self._walrus(node, env, sure=sure)
         else:
             for child in ast.iter_child_nodes(node):
                 self.expression(child, env, sure=sure)
             if isinstance(node, ast.Call):
                 self._at_call(node, env, sure=sure)
+
+    def _walrus(self, node: ast.NamedExpr, env: Env, *, sure: bool) -> None:
+        """Bind the target of a ``:=``, which, where it may not run, may
+        still hold what it held before.
+        """
+        name = node.target.id
+        state = self.state(node.value, env)
+        read = self._numpy_reading(node.value, env)
+        if not sure:
+            state = join(state, self.lookup(env, name))
+            read = read or self._numpy_reading(node.target, env)
+        self.bind(node.target, None, state, env, read=read)
 
     def _scope(self, node: ast.AST, env: Env) -> bool:
         """Keep what the names hold at a ``lambda`` or at a use of a nested
@@ -815,12 +885,23 @@ class _Flow:
             self.check(call, env)
 
     def _numpy_reading(self, node: ast.expr, env: Env) -> bool:
-        """Whether *node* is what NumPy made of a caller's value no check has
-        refused a text in (``np.asarray(x)``, ``np.atleast_1d(x)`` and the
-        other NumPy calls that keep its values), or a name bound to it.
+        """Whether *node* may be what NumPy made of a caller's value no check
+        has refused a text in (``np.asarray(x)``, ``np.atleast_1d(x)`` and the
+        other NumPy calls that keep its values), or a name bound to it on a
+        path that reaches here, on either side of a conditional expression,
+        an ``and`` or an ``or``.
         """
         if isinstance(node, ast.Name):
-            return node.id in self.numpy_read
+            return _numpy_key(node.id) in env
+        if isinstance(node, ast.NamedExpr):
+            return self._numpy_reading(node.value, env)
+        if isinstance(node, ast.IfExp | ast.BoolOp):
+            parts = (
+                node.values
+                if isinstance(node, ast.BoolOp)
+                else [node.body, node.orelse]
+            )
+            return any(self._numpy_reading(part, env) for part in parts)
         if not isinstance(node, ast.Call) or not _numpy_function(node, self.names):
             return False
         state = self._joined(_kept(node, self.names), env)
@@ -862,7 +943,13 @@ class _Flow:
         for number, generator in enumerate(node.generators):
             if record:
                 self.expression(generator.iter, inner, sure=number == 0)
-            self.bind(generator.target, None, self.state(generator.iter, inner), inner)
+            self.bind(
+                generator.target,
+                None,
+                self.state(generator.iter, inner),
+                inner,
+                read=self._numpy_reading(generator.iter, inner),
+            )
             for condition in generator.ifs if record else ():
                 self.expression(condition, inner, sure=False)
         if record:
@@ -913,12 +1000,7 @@ class _Flow:
         read = self._numpy_reading(node.value, env)
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
         for target in targets:
-            self.bind(target, node.value, state, env)
-            for name in _targets(target):
-                if read and isinstance(target, ast.Name):
-                    self.numpy_read.add(name)
-                else:
-                    self.numpy_read.discard(name)
+            self.bind(target, node.value, state, env, read=read)
         return env, False
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
@@ -949,7 +1031,9 @@ class _Flow:
         for _ in range(2):
             inner = dict(entry)
             if not isinstance(node, ast.While):
-                self.bind(node.target, None, self.state(node.iter, inner), inner)
+                read = self._numpy_reading(node.iter, inner)
+                state = self.state(node.iter, inner)
+                self.bind(node.target, None, state, inner, read=read)
             end, _ = self.block(node.body, inner)
             entry = _join_envs([head, end], self.default)
         breaks = self.breaks.pop()

@@ -513,6 +513,87 @@ _PLANTED_UNCHECKED = {
             levels = real_array(levels, "levels")
             return first, g()
     """,
+    "checked_through_one_branch_of_a_conditional": """
+        def f(levels, flag):
+            real_array(levels if flag else [1.0], "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_through_a_conditional_in_a_list": """
+        def f(levels, flag):
+            real_array([levels if flag else 1.0, 2.0], "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_through_the_default_of_getattr": """
+        def f(levels, record):
+            real_array(getattr(record, "levels", levels), "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_one_branch_of_a_conditional": """
+        def _read(levels, flag):
+            real_array(levels if flag else [1.0], "levels")
+
+        def f(levels, flag):
+            _read(levels, flag)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_rebinds_to_one_branch_of_a_conditional": """
+        def _read(levels, flag):
+            levels = levels if flag else [1.0]
+            real_array(levels, "levels")
+
+        def f(levels, flag):
+            _read(levels, flag)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_unless_another_name_is_none": """
+        def f(levels, other):
+            real_array([1.0] if other is None else levels, "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_unless_it_is_none_the_other_way_round": """
+        def f(levels=None):
+            real_array(levels if levels is None else [1.0], "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "numpy_s_reading_bound_in_one_branch": """
+        def f(levels, flag):
+            if flag:
+                arr = np.atleast_1d(levels)
+            else:
+                arr = 0.0
+            return real_array(arr, "levels")
+    """,
+    "numpy_s_reading_bound_in_a_try_a_handler_rebinds": """
+        def f(levels):
+            try:
+                arr = np.asarray(levels)
+            except ValueError:
+                arr = 0.0
+            return real_array(arr, "levels")
+    """,
+    "numpy_s_reading_kept_when_a_loop_does_not_run": """
+        def f(levels, rows):
+            arr = np.asarray(levels)
+            for row in rows:
+                arr = row
+            return real_array(arr, "levels")
+    """,
+    "numpy_s_reading_bound_in_a_tuple": """
+        def f(levels):
+            arr, count = np.asarray(levels), 0
+            return real_array(arr, "levels"), count
+    """,
+    "numpy_s_reading_in_one_branch_of_a_conditional": """
+        def f(levels, flag):
+            arr = np.asarray(levels) if flag else 0.0
+            return real_array(arr, "levels")
+    """,
+    "numpy_s_reading_bound_by_a_walrus": """
+        def f(levels):
+            if (arr := np.asarray(levels)).size:
+                return real_array(arr, "levels")
+            return None
+    """,
 }
 
 #: The shapes that answer one: a check on every path, or no caller's value.
@@ -635,6 +716,55 @@ _PLANTED_ANSWERED = {
                 return np.asarray(levels, dtype=np.float64)
 
             return g(), real_array(levels, "levels")
+    """,
+    "the_same_value_in_both_branches_of_a_conditional": """
+        def f(levels, flag):
+            real_array(levels.T if flag else levels, "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_both_branches_of_a_conditional": """
+        def _read(levels, flag):
+            real_array(levels.T if flag else levels, "levels")
+
+        def f(levels, flag):
+            _read(levels, flag)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_unless_it_is_none": """
+        def f(levels=None):
+            real_array([1.0] if levels is None else levels, "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_while_it_is_not_none": """
+        def f(levels=None):
+            real_array(levels if levels is not None else [1.0], "levels")
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_rebinds_a_missing_value_to_its_default": """
+        def _read(levels=None):
+            levels = [1.0] if levels is None else levels
+            real_array(levels, "levels")
+
+        def f(levels=None):
+            _read(levels)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "numpy_s_reading_rebound_in_every_branch": """
+        def f(levels, flag):
+            arr = np.asarray(levels)
+            if flag:
+                arr = real_array(levels, "levels")
+            else:
+                arr = real_array(levels.T, "levels")
+            return refuse_text(arr, "no")
+    """,
+    "numpy_s_reading_in_a_branch_that_returns": """
+        def f(levels, other, flag):
+            arr = real_array(levels, "levels")
+            if flag:
+                arr = np.asarray(other)
+                return arr.size
+            return refuse_text(arr, "no")
     """,
 }
 

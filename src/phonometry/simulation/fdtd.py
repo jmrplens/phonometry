@@ -191,11 +191,13 @@ def _finite(name: str, value: float) -> float:
 
 
 #: What is surely one real number a float holds, handed back after one
-#: ``isinstance``: a Python or NumPy float, or a NumPy integer of any width
-#: (the widest, ``np.uint64``, is far inside a float's range). A NumPy
-#: complex number is no ``np.floating`` and a NumPy flag no ``np.integer``,
-#: so neither passes. A Python integer has no width, so it is not here.
-_SURELY_REAL = float | np.floating | np.integer
+#: ``isinstance``: a Python float or a NumPy float of no more than its width
+#: (``np.float64`` is a ``float``), or a NumPy integer of any width (the
+#: widest, ``np.uint64``, is far inside a float's range). A NumPy complex
+#: number is neither and a NumPy flag no ``np.integer``, so neither passes.
+#: A Python integer has no width and a long double may be wider than a
+#: float (80 bits on x86-64 Linux), so neither is here.
+_SURELY_REAL = float | np.float32 | np.float16 | np.integer
 
 
 def _one_real(value: object, refusal: Callable[[], str]) -> float:
@@ -203,7 +205,9 @@ def _one_real(value: object, refusal: Callable[[], str]) -> float:
 
     A Python integer, a flag among them, is read as the float it rounds to
     with one :func:`float`, which refuses one too large for a float; the
-    engines add it into float fields, where it rounds the same way. The
+    engines add it into float fields, where it rounds the same way. So is a
+    long double, through :func:`require_real`, which refuses one beyond a
+    float's range that :func:`float` would read as an infinity. The
     refusal is worded only when it is raised: showing the value costs more
     than checking it when the value is an array (a zero-dimensional one
     included), and a waveform's sample is checked at every step.
@@ -228,9 +232,10 @@ def _one_real(value: object, refusal: Callable[[], str]) -> float:
 def _real_time(t: float) -> float:
     """The time a source's waveform is asked for, refused when it is not one real number.
 
-    A Python or NumPy float or a NumPy integer, what an engine's step hands
-    over, passes as it is after one ``isinstance``, and a Python integer is
-    read as its float. Anything else goes through :func:`require_real`:
+    A Python float, a NumPy float no wider or a NumPy integer, what an
+    engine's step hands over, passes as it is after one ``isinstance``, and
+    a Python integer or a long double is read as its float. Anything else
+    goes through :func:`require_real`:
     NumPy reads a complex time as its real part with no more than a
     ``ComplexWarning``, and a text, an array or ``None`` fails where it
     first meets a number, in a message that names nothing.
@@ -253,12 +258,14 @@ def _real_sample(value: float, source: object) -> float:
     real part of a complex one (with no more than a ``ComplexWarning``) or
     fail with a casting error that names nothing; they multiply a text by
     the amplitude, broadcast an array into the field, and fail on ``None``
-    in a message that names nothing. A Python or NumPy float or a NumPy
-    integer, what a waveform returns, passes as it is after one
+    in a message that names nothing. A Python float, a NumPy float no wider
+    or a NumPy integer, what a waveform returns, passes as it is after one
     ``isinstance``, so the step pays nothing more; a Python integer is read
     as its float, so one no float holds is refused here rather than met by
-    an ``OverflowError`` in the field update; anything else goes through
-    :func:`require_real` and steps as the float it reads as.
+    an ``OverflowError`` in the field update; anything else, a long double
+    among them, goes through :func:`require_real` and steps as the float it
+    reads as, so one beyond a float's range is refused here rather than
+    added into a field as an infinity.
 
     :param source: The source whose waveform returned *value*, which the
         refusal names by its class.
@@ -370,6 +377,7 @@ class GaussianPulse(RichDisplay):
 
         :raises TypeError: if ``t`` is anything but one real number: a
             complex number, a text, an array or ``None``.
+        :raises ValueError: if ``t`` is a number too large for a float.
         """
         t = _real_time(t)
         t0 = 4.0 * self.half_width_s if self.t0 is None else self.t0
@@ -432,6 +440,7 @@ class CWSource(RichDisplay):
 
         :raises TypeError: if ``t`` is anything but one real number: a
             complex number, a text, an array or ``None``.
+        :raises ValueError: if ``t`` is a number too large for a float.
         """
         t = _real_time(t)
         ramp_time = self.ramp_cycles / self.frequency
@@ -512,6 +521,7 @@ class SignalSource(OwnsArrays):
 
         :raises TypeError: if ``t`` is anything but one real number: a
             complex number, a text, an array or ``None``.
+        :raises ValueError: if ``t`` is a number too large for a float.
         """
         pos = _real_time(t) * self.fs
         last = self.samples.size - 1
@@ -1948,8 +1958,14 @@ class FDTD2D:
     def step(self) -> None:
         """Advance the leapfrog scheme by one time step.
 
+        Every plane wave is sampled before any field moves, so a refused
+        sample leaves the engine as it was, and a plane wave a waveform adds
+        while the step runs enters on the next step.
+
         :raises TypeError: if the waveform of a :class:`PlaneWaveSource`
             returns anything but one real number.
+        :raises ValueError: if that waveform returns a number too large for
+            a float.
         """
         with self._backend.context():
             self._step()
@@ -1958,11 +1974,14 @@ class FDTD2D:
         """One leapfrog step on the backend's arrays.
 
         Every plane wave is sampled before any field moves, so a sample the
-        step refuses leaves the engine as it was.
+        step refuses leaves the engine as it was. The step samples and
+        injects the plane waves the engine held when it began, so one a
+        waveform adds while the step runs enters on the next step.
         """
         t_next = (self.n + 1) * self.dt
-        plane_samples = [
-            self._plane_samples(plane, t_next) for plane in self._plane_sources
+        planes = [
+            (plane, *self._plane_samples(plane, t_next))
+            for plane in tuple(self._plane_sources)
         ]
         dt_dx = self.dt / self.dx
         # Velocity half-step from the pressure gradient (rigid walls are the
@@ -1988,9 +2007,7 @@ class FDTD2D:
         self.p -= self._kappa * dt_dx * div
         for src in self._sources:
             self.p[src.iy, src.ix] += src.value(t_next)
-        for plane, (value_p, value_v) in zip(
-            self._plane_sources, plane_samples, strict=True
-        ):
+        for plane, value_p, value_v in planes:
             self._inject_plane(plane, value_p, value_v)
         self.p *= self._decay_p
         self.n += 1
@@ -2081,8 +2098,9 @@ class FDTD2D:
             goes, or the waveform of a :class:`PlaneWaveSource` returns
             anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
-            or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
-            number of 1 or more.
+            ``snapshot_every`` or ``snapshot_decimation`` is not a whole
+            number of 1 or more, or that waveform returns a number too large
+            for a float.
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
 
@@ -3041,7 +3059,8 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         steps, for the waveform of a :class:`PlaneWaveSource` that returns
         anything but one real number.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
-        a hosts file that cannot be read or is malformed.
+        a hosts file that cannot be read or is malformed; and, as the run
+        steps, for that waveform returning a number too large for a float.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import, unless ``fallback=True``.

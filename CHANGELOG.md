@@ -2513,12 +2513,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the source's waveform for anything but one real number, a text included,
   and a `Decimal` time or sample, which failed, is read as the float it holds.
   A whole number no float holds, such as `10**400`, passed as a time or a
-  sample and failed in the arithmetic with Python's `OverflowError`; it raises
-  `ValueError` naming `t` or the waveform now. A refused sample leaves the
-  engine as it was: each step samples every plane wave, force and explosion
-  before it moves a field, where the refusal came after the step had advanced
-  the fields and left the step count behind them, so a caller that caught it
-  and stepped again stepped the same instant twice.
+  sample and failed in the arithmetic with Python's `OverflowError`, and a
+  long double or a `Decimal` beyond a float's range was added into a field as
+  an infinity; each raises `ValueError` naming `t` or the waveform now, and a
+  long double within range is read as the float it rounds to. The shared
+  reader of one number behind the library's guards refuses such a long double
+  or `Decimal` with `ValueError` too, where it handed back the infinity
+  `float()` reads it as, which a pair such as the `bulk_density_range_kg_m3`
+  of `materials.absorbers.FiberResistivityFit` kept. A refused sample leaves
+  the engine as it was: each step samples every plane wave, force and
+  explosion before it moves a field, where the refusal came after the step had
+  advanced the fields and left the step count behind them, so a caller that
+  caught it and stepped again stepped the same instant twice. A plane wave a
+  waveform adds while a step runs enters on the next step, where one added by
+  a point source's waveform stopped the step with a `ValueError` of `zip`'s
+  once the pressure had moved.
   A `bytearray` given as `shape=` to `FDTD2D`, `ElasticFDTD2D` or
   `ElasticFDTD2D.from_regions` was read as the codes of its characters (two
   bytes of 16 built a grid of 16 by 16 cells) where a `bytes` was refused; it

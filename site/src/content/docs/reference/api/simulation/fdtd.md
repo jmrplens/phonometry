@@ -195,6 +195,7 @@ Source waveform at time `t` (seconds).
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `t` is anything but one real number: a complex number, a text, an array or `None`. |
+| ValueError | if `t` is a number too large for a float. |
 
 ## FDTD2D
 
@@ -468,7 +469,7 @@ returned and only the final state is kept (read it with
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
-| ValueError | if `n_steps` is not a whole number of 0 or more, or `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more. |
+| ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, or that waveform returns a number too large for a float. |
 
 ### FDTD2D.step()
 
@@ -478,11 +479,16 @@ FDTD2D.step() -> None
 
 Advance the leapfrog scheme by one time step.
 
+Every plane wave is sampled before any field moves, so a refused
+sample leaves the engine as it was, and a plane wave a waveform adds
+while the step runs enters on the next step.
+
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | TypeError | if the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
+| ValueError | if that waveform returns a number too large for a float. |
 
 ### FDTD2D.time
 
@@ -538,7 +544,7 @@ spreading rather than the 3D spherical $1/r$.
 | Exception | When |
 | :--- | :--- |
 | TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
-| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed. |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed; and, as the run steps, for that waveform returning a number too large for a float. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation, unless `fallback=True`. |
@@ -787,6 +793,7 @@ Source waveform at time `t` (seconds).
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `t` is anything but one real number: a complex number, a text, an array or `None`. |
+| ValueError | if `t` is a number too large for a float. |
 
 ## PlaneWaveSource
 
@@ -868,3 +875,4 @@ Source waveform at time `t` (seconds), zero outside the span.
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `t` is anything but one real number: a complex number, a text, an array or `None`. |
+| ValueError | if `t` is a number too large for a float. |

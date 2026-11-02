@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import inspect
 import re
+from dataclasses import dataclass
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -674,23 +676,54 @@ def test_a_waveform_that_returns_no_real_number_is_refused_by_name(
             _STEPPERS[stepper](_WRONG_SAMPLES[spelling])
 
 
-#: A whole number of the right type that no float holds.
-_TOO_LARGE = 10**400
+#: Whether a long double holds numbers a float does not: it does on x86-64
+#: Linux (80 bits), and is a float on Windows and on macOS on Apple silicon.
+_WIDE_LONG_DOUBLE = bool(np.finfo(np.longdouble).max > np.finfo(np.float64).max)
+
+_ONLY_WITH_A_WIDE_LONG_DOUBLE = pytest.mark.skipif(
+    not _WIDE_LONG_DOUBLE, reason="a long double is a float on this platform"
+)
+
+#: Finite numbers of the right type that no float holds, by how a caller
+#: writes them, each built when it is used: a long double is one only where
+#: it is wider than a float. ``float()`` refuses the integer with an
+#: ``OverflowError``, and reads the others as an infinity.
+_TOO_LARGE: dict[str, Callable[[], object]] = {
+    "python integer": lambda: 10**400,
+    "Decimal": lambda: Decimal("1e400"),
+    "negative Decimal": lambda: Decimal("-1e400"),
+    "long double": lambda: np.longdouble("1e400"),
+}
+
+_TOO_LARGE_SPELLINGS = [
+    pytest.param(
+        spelling,
+        marks=_ONLY_WITH_A_WIDE_LONG_DOUBLE if "long double" in spelling else (),
+    )
+    for spelling in sorted(_TOO_LARGE)
+]
 
 
+@pytest.mark.parametrize("spelling", _TOO_LARGE_SPELLINGS)
 @pytest.mark.parametrize("stepper", sorted(_STEPPERS))
-def test_a_waveform_sample_no_float_holds_is_refused_by_name(stepper: str) -> None:
-    """A Python integer beyond a float's range stops the step, naming the waveform.
+def test_a_waveform_sample_no_float_holds_is_refused_by_name(
+    stepper: str, spelling: str
+) -> None:
+    """A number beyond a float's range stops the step, naming the waveform.
 
-    It passed the check as surely one real number, being an ``int``, and
-    failed in the field update with Python's ``OverflowError``, which names
-    nothing the caller wrote. It is a value of the right type, refused with
-    ``ValueError`` as :func:`require_real` refuses it.
+    A Python integer passed the check as surely one real number, being an
+    ``int``, and failed in the field update with Python's ``OverflowError``,
+    which names nothing the caller wrote. A long double passed it as a NumPy
+    float, and a ``Decimal`` was read by ``float()`` as an infinity, so both
+    stepped an infinite sample into the field. Each is a value of the right
+    type, refused with ``ValueError`` as :func:`require_real` refuses it.
     """
+    sample = _TOO_LARGE[spelling]()
     with pytest.raises(ValueError, match=r"waveform of .* must return a real"):
-        _STEPPERS[stepper](_TOO_LARGE)
+        _STEPPERS[stepper](sample)
 
 
+@pytest.mark.parametrize("spelling", _TOO_LARGE_SPELLINGS)
 @pytest.mark.parametrize(
     "source",
     [
@@ -701,11 +734,29 @@ def test_a_waveform_sample_no_float_holds_is_refused_by_name(stepper: str) -> No
     ids=type,
 )
 def test_a_time_no_float_holds_is_refused_by_name(
-    source: GaussianPulse | CWSource | SignalSource,
+    source: GaussianPulse | CWSource | SignalSource, spelling: str
 ) -> None:
-    """``value(t)`` refuses a Python integer beyond a float's range by the name ``t``."""
+    """``value(t)`` refuses a number beyond a float's range by the name ``t``."""
+    t = _TOO_LARGE[spelling]()
     with pytest.raises(ValueError, match=r"t must be one real number"):
-        source.value(_TOO_LARGE)
+        source.value(t)  # type: ignore[arg-type]
+
+
+@_ONLY_WITH_A_WIDE_LONG_DOUBLE
+def test_a_long_double_is_read_as_the_float_it_rounds_to() -> None:
+    """A long double sample or time is the float it rounds to, as a Python integer is.
+
+    It passed as it was, being a NumPy float, so a sample the engine scaled
+    before adding it into a float field was scaled with the long double's
+    extra digits, and one beyond a float's range became an infinity there.
+    """
+    from phonometry.simulation import fdtd
+
+    value = np.longdouble(1) / np.longdouble(3)
+    source = _blast()
+    for read in (fdtd._real_sample(value, source), fdtd._real_time(value)):  # type: ignore[arg-type]
+        assert type(read) is float
+        assert read == float(value)
 
 
 #: What a waveform returns, and what an engine hands ``value(t)``, when it is
@@ -851,4 +902,127 @@ def test_a_refused_sample_leaves_the_engine_as_it_was(kind: str) -> None:
         name
         for name in stepped
         if not np.array_equal(stepped[name], never_refused[name])
+    ] == []
+
+
+class _SecondSampleWrong:
+    """A plane wave's waveform whose pressure sample is right and whose velocity sample is not.
+
+    A step asks the waveform for the pressure line's sample, then for the
+    velocity face's, so every second call returns a complex number.
+    """
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def __call__(self, t: float) -> object:
+        self.calls += 1
+        return 0.25 if self.calls % 2 else 1.0 + 1.0j
+
+
+def test_a_refused_velocity_sample_leaves_the_engine_as_it_was() -> None:
+    """The velocity face's sample is checked on its own, before any field moves.
+
+    Every other case hands both samples the same wrong value, so the
+    pressure line's check refuses it first, and a step that checked only
+    that sample would pass them all.
+    """
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    sim.add_source(PlaneWaveSource(direction="right", waveform=_SecondSampleWrong()))
+    before = _fields(sim)
+    with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
+        sim.step()
+    assert sim.n == 0
+    after = _fields(sim)
+    assert [
+        name for name in before if not np.array_equal(after[name], before[name])
+    ] == []
+
+
+def _tone(t: float) -> float:
+    """A 2 kHz tone, the waveform of the plane wave a step adds."""
+    return float(np.sin(2.0 * np.pi * 2000.0 * t))
+
+
+#: The plane wave a waveform adds to its engine while a step runs.
+_ADDED = PlaneWaveSource(direction="down", waveform=_tone)
+
+
+@dataclass(frozen=True, kw_only=True)
+class _PulseThatAddsAPlaneWave(GaussianPulse):
+    """A pulse whose waveform adds a plane wave to its engine the first time it is asked."""
+
+    engine: FDTD2D
+
+    def value(self, t: float) -> float:
+        if _ADDED not in self.engine._plane_sources:
+            self.engine.add_source(_ADDED)
+        return super().value(t)
+
+
+class _ToneThatAddsAPlaneWave:
+    """A plane wave's waveform that adds another plane wave the first time it is asked."""
+
+    def __init__(self, engine: FDTD2D) -> None:
+        self.engine = engine
+
+    def __call__(self, t: float) -> float:
+        if _ADDED not in self.engine._plane_sources:
+            self.engine.add_source(_ADDED)
+        return _tone(t)
+
+
+def _engine_whose_waveform_adds(adder: str) -> FDTD2D:
+    """A small engine one of whose waveforms adds :data:`_ADDED` while it steps."""
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    if adder == "point source":
+        sim.add_source(
+            _PulseThatAddsAPlaneWave(ix=8, iy=8, half_width_s=1e-4, engine=sim)
+        )
+    else:
+        sim.add_source(
+            PlaneWaveSource(direction="right", waveform=_ToneThatAddsAPlaneWave(sim))
+        )
+    return sim
+
+
+def _engine_with_the_same_sources(adder: str) -> FDTD2D:
+    """The same engine with waveforms that add nothing."""
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    if adder == "point source":
+        sim.add_source(GaussianPulse(ix=8, iy=8, half_width_s=1e-4))
+    else:
+        sim.add_source(PlaneWaveSource(direction="right", waveform=_tone))
+    return sim
+
+
+@pytest.mark.parametrize("adder", ["point source", "plane wave"])
+def test_a_plane_wave_added_while_a_step_runs_enters_on_the_next_step(
+    adder: str,
+) -> None:
+    """A step injects the plane waves it began with, so one added during it waits a step.
+
+    The step sampled every plane wave before it moved a field and then
+    paired the samples with the plane waves the engine held by then, so a
+    plane wave added by a point source's waveform, after the sampling and
+    before the injection, stopped the step with ``zip``'s ``ValueError``
+    once the pressure had moved and before the count did; one added by a
+    plane wave's own waveform was sampled and injected in the step that
+    added it. Either enters on the next step now, as one added between the
+    two steps does.
+    """
+    sim = _engine_whose_waveform_adds(adder)
+    twin = _engine_with_the_same_sources(adder)
+    sim.step()
+    twin.step()
+    twin.add_source(_ADDED)
+    for _ in range(3):
+        sim.step()
+        twin.step()
+    stepped, added_between = _fields(sim), _fields(twin)
+    assert sim.n == twin.n == 4
+    assert [
+        name
+        for name in stepped
+        if not np.array_equal(stepped[name], added_between[name])
     ] == []

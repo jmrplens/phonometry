@@ -143,7 +143,7 @@ $1/\sqrt{r}$ amplitude spreading.
 | Exception | When |
 | :--- | :--- |
 | TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for a waveform that returns anything but one real number. |
-| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed. |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed; and, as the run steps, for a waveform that returns a number too large for a float. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation, unless `fallback=True`. |
@@ -452,7 +452,7 @@ with `numpy_field`). The two counts are taken by name, as
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
-| ValueError | if `n_steps` is not a whole number of 0 or more, or `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more. |
+| ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, or such a waveform returns a number too large for a float. |
 
 ### ElasticFDTD2D.step()
 
@@ -467,6 +467,7 @@ Advance the leapfrog scheme by one time step (Virieux Eq. 5).
 | Exception | When |
 | :--- | :--- |
 | TypeError | if the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
+| ValueError | if such a waveform returns a number too large for a float. |
 
 ### ElasticFDTD2D.time
 

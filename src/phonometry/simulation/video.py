@@ -1123,7 +1123,9 @@ def write_fdtd_animation(
         a directory, or its container rules out the options,
         ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
-        ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
+        ``AnimationFrame(color_limit=...)``), or the hosts file is malformed;
+        or, as a run written here steps, a waveform returns a number too
+        large for a float.
     :raises FileNotFoundError: If the directory of ``path`` does not exist
         or cannot be reached (it sits inside a directory this process
         cannot search); before any step, and before ssh starts.
@@ -1341,7 +1343,9 @@ def write_elastic_fdtd_animation(
         a directory, or its container rules out the options,
         ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
-        ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
+        ``AnimationFrame(color_limit=...)``), or the hosts file is malformed;
+        or, as a run written here steps, a waveform returns a number too
+        large for a float.
     :raises FileNotFoundError: If the directory of ``path`` does not exist
         or cannot be reached (it sits inside a directory this process
         cannot search); before any step, and before ssh starts.

@@ -1235,6 +1235,8 @@ class ElasticFDTD2D:
 
         :raises TypeError: if the waveform of an :class:`ExplosionSource` or
             a :class:`ForceSource` returns anything but one real number.
+        :raises ValueError: if such a waveform returns a number too large
+            for a float.
         """
         with self._backend.context():
             self._step()
@@ -1541,8 +1543,9 @@ class ElasticFDTD2D:
             goes, or the waveform of an :class:`ExplosionSource` or a
             :class:`ForceSource` returns anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
-            or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
-            number of 1 or more.
+            ``snapshot_every`` or ``snapshot_decimation`` is not a whole
+            number of 1 or more, or such a waveform returns a number too
+            large for a float.
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
 
@@ -2379,7 +2382,8 @@ def elastic_fdtd_simulation(
         outside the range of an int64; and, as the run steps, for a waveform
         that returns anything but one real number.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
-        a hosts file that cannot be read or is malformed.
+        a hosts file that cannot be read or is malformed; and, as the run
+        steps, for a waveform that returns a number too large for a float.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import, unless ``fallback=True``.

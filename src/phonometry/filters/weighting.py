@@ -88,6 +88,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
+from fractions import Fraction
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
@@ -113,6 +114,12 @@ from ..io._resolve import (
     resolve_samples,
 )
 from ..io._signal import Signal
+from ._pinned_roots import (
+    Polynomial,
+    correctly_rounded_roots,
+    exact_polynomial_product,
+    exact_polynomial_sum,
+)
 from ._pinned_trig import pinned_hypot
 from ._weighting_design import (
     bilinear_zpk,
@@ -220,15 +227,19 @@ _ITU_R_468_LADDER: tuple[tuple[str, float], ...] = (
 )
 
 
-def _abcd_product(
-    left: list[list[np.ndarray]], right: list[list[np.ndarray]]
-) -> list[list[np.ndarray]]:
+#: A two-port's ABCD matrix ``[[A, B], [C, D]]``, each entry a polynomial in
+#: ``s`` held as its exact coefficients, the highest power first.
+_TwoPort = list[list[Polynomial]]
+
+
+def _abcd_product(left: _TwoPort, right: _TwoPort) -> _TwoPort:
     """Product of two 2x2 ABCD matrices whose entries are polynomials in ``s``.
 
-    Each entry is a coefficient array in ``numpy.polynomial`` convention
-    (highest power first), so the chain rule of two-port theory becomes an
-    ordinary matrix product over the polynomial ring and the ladder's
-    transfer function comes out exactly, with no per-frequency evaluation.
+    The chain rule of two-port theory is an ordinary matrix product over the
+    polynomial ring, so the ladder's transfer function comes out as
+    polynomials, with no per-frequency evaluation; and over exact rational
+    coefficients it comes out with no rounding either, where ``numpy``'s
+    ``polymul`` hands each product to the BLAS.
 
     :param left: The upstream two-port, as ``[[A, B], [C, D]]``.
     :param right: The downstream two-port, in the same form.
@@ -236,14 +247,31 @@ def _abcd_product(
     """
     return [
         [
-            np.polyadd(
-                np.polymul(left[row][0], right[0][col]),
-                np.polymul(left[row][1], right[1][col]),
+            exact_polynomial_sum(
+                exact_polynomial_product(left[row][0], right[0][col]),
+                exact_polynomial_product(left[row][1], right[1][col]),
             )
             for col in (0, 1)
         ]
         for row in (0, 1)
     ]
+
+
+def _ladder_element(kind: str, value: float) -> _TwoPort:
+    """The ABCD matrix of one element of the Fig. 1a ladder, exactly.
+
+    The component values are read as the doubles the table holds, each an
+    exact rational number.
+    """
+    one, zero, s = (Fraction(1),), (Fraction(0),), (Fraction(1), Fraction(0))
+    exact = Fraction(value)
+    if kind == "shunt_c":
+        return [[one, zero], [(exact, Fraction(0)), one]]
+    if kind == "series_l":
+        return [[one, (exact, Fraction(0))], [zero, one]]
+    # "series_c": s * [[1, 1 / (s C)], [0, 1]], the scaling the prototype's
+    # docstring describes.
+    return [[s, (1 / exact,)], [zero, s]]
 
 
 def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
@@ -275,44 +303,42 @@ def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
 
     one zero at the origin because that series capacitor blocks dc, and six
     poles because ``C2``, ``C3`` and ``C4`` form a capacitive loop whose
-    third state is dependent (seven reactive elements, order six). Evaluated
-    in double precision the six coefficients agree with exact rational
-    arithmetic over the same component values to 3.4e-16 relative, and the
-    resulting curve reproduces all 21 rows of Table 1 to 0.0503 dB maximum
-    and 0.0264 dB rms, which is the 0.05 dB rounding quantum of the printed
-    table (the 100 Hz row overshoots it by 0.0002 dB, a rounding tie the
-    four-significant-figure component values cannot resolve).
+    third state is dependent (seven reactive elements, order six). The
+    coefficients are exact: the chain runs in rational arithmetic over the
+    component values, so the denominator is the network's own polynomial,
+    and the poles are its roots with each part correctly rounded
+    (:func:`~phonometry.filters._pinned_roots.correctly_rounded_roots`), the
+    same doubles on every platform. ``numpy.roots`` takes them as
+    eigenvalues through LAPACK, which is a library's arithmetic and gave
+    other last bits on 64-bit ARM; its answers lie within its own error of
+    these. The resulting curve reproduces all 21 rows of Table 1 to
+    0.0503 dB maximum and 0.0264 dB rms, which is the 0.05 dB rounding
+    quantum of the printed table (the 100 Hz row overshoots it by
+    0.0002 dB, a rounding tie the four-significant-figure component values
+    cannot resolve).
 
     :return: The six poles in rad/s, sorted for reproducibility, and the
         gain ``K`` that puts the response at 0 dB at the 1 kHz reference
         frequency Table 1 prints as its zero row.
     """
-    one = np.array([1.0])
-    zero = np.array([0.0])
-    s = np.array([1.0, 0.0])
-
-    abcd = [[one, np.array([_ITU_R_468_SOURCE_OHM])], [zero, one]]
+    abcd: _TwoPort = [
+        [(Fraction(1),), (Fraction(_ITU_R_468_SOURCE_OHM),)],
+        [(Fraction(0),), (Fraction(1),)],
+    ]
     for kind, value in _ITU_R_468_LADDER:
-        if kind == "shunt_c":
-            element = [[one, zero], [np.array([value, 0.0]), one]]
-        elif kind == "series_l":
-            element = [[one, np.array([value, 0.0])], [zero, one]]
-        else:  # "series_c": s * [[1, 1 / (s C)], [0, 1]], the scaling above
-            element = [[s, np.array([1.0 / value])], [zero, s]]
-        abcd = _abcd_product(abcd, element)
+        abcd = _abcd_product(abcd, _ladder_element(kind, value))
 
     # Loading the two-port: V_out / V_in = 1 / (A + B / R_load), times the s
     # the series capacitor's matrix was scaled by.
-    denominator = np.polyadd(abcd[0][0], abcd[0][1] / _ITU_R_468_LOAD_OHM)
-    poles = np.roots(denominator / denominator[0])
+    load = Fraction(_ITU_R_468_LOAD_OHM)
+    denominator = exact_polynomial_sum(abcd[0][0], tuple(c / load for c in abcd[0][1]))
+    poles = correctly_rounded_roots(denominator)
     w_ref = 2.0 * np.pi * 1000.0
     # prod(j w_ref - poles), spelled in real arithmetic by complex_product
     # because numpy's own complex product is fused on some builds.
-    at_reference = complex_product(_shifted_to(w_ref, poles))
+    at_reference = complex_product(_shifted_to(w_ref, np.array(poles)))
     gain = pinned_hypot(*at_reference) / w_ref
-    return tuple(sorted((complex(v) for v in poles), key=lambda v: (v.real, v.imag))), (
-        gain
-    )
+    return poles, gain
 
 
 #: The curves that have an analog prototype, i.e. everything but the ``Z``

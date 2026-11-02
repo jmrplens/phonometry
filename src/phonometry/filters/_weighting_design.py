@@ -154,7 +154,7 @@ from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
 
 def _log_of(value: float) -> float:
     """The pinned natural logarithm of one positive float."""
-    return float(pinned_log(np.array([value]))[0])
+    return float(pinned_log(real_array([value], "value"))[0])
 
 
 #: Decibels per natural log unit of a squared magnitude: ``10 / ln 10``.
@@ -572,7 +572,7 @@ def _scalar_geomspace(start: float, stop: float, count: int) -> np.ndarray:
     :param count: How many points, at least two.
     :return: The geometric grid, as :func:`numpy.geomspace` would give it.
     """
-    ends = pinned_log10(np.array([start, stop]))
+    ends = pinned_log10(real_array([start, stop], "start and stop"))
     exponents = np.linspace(ends[0], ends[1], count)
     out = pinned_pow(10.0, exponents)
     out[0] = start

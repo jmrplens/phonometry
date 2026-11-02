@@ -1561,3 +1561,36 @@ class, its column's heading and its unit
 **Enforced by:** `site/scripts/check-page-size.mjs`, `CI: Check every page fits in what a search engine reads`
 
 **Exceptions.** None. The redirect stubs and the error page are small and are counted like any other file; a page that cannot be split or slimmed below the cap is a design question to settle before it is published, not an entry here.
+
+## Inline code spans
+
+<a id="f65"></a>
+### F65. Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own
+
+**Why.** A code span opens on a run of backticks and closes on the next run of exactly as many; a backslash before the opening run escapes its first backtick, and inside the span a backslash escapes nothing (CommonMark 0.31.2, 2.4 and 6.1). Nine scripts that read the prose of a page found spans with a pattern of their own, a backtick, anything but a backtick, a backtick, and each misread a span of two backticks that holds one, an escaped backtick, or a span that ends in a backslash: the prose up to the next backtick was hidden from the check, or code was checked as prose. The curated API table and the translation tables were read that way until this rule.
+
+**Do**
+
+```python
+import pathlib
+import sys
+
+import phonometry
+
+checkout = pathlib.Path(phonometry.__file__).resolve().parents[2]
+sys.path.insert(0, str(checkout / "scripts"))  # a script in scripts/ has it already
+from markdown_spans import inline_spans
+
+cell = "``a`b`` and `c`"
+spans = [cell[start:end] for start, end in inline_spans(cell)]  # ['``a`b``', '`c`']
+```
+
+**Don't**
+
+```py
+names = re.findall(r"`([^`]+)`", cell)  # ['a', ' and ']: the prose read as code
+```
+
+**Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py`
+
+**Exceptions.** The site's scripts read spans through `site/scripts/shared/markdown-spans.mjs`, the same reading in JavaScript. A backtick right after a colon opens a role of reStructuredText (`:math:` and its kin), which Markdown does not have, and is not read as a span. A script that reads the docstrings of the library reads reStructuredText, whose inline literal is two backticks, and one that reads a JavaScript template literal reads no span at all: each is listed in `EXEMPT` of the check, keyed by the file, with the reason, and an entry that covers nothing fails. The site's code is read line by line, without a parser, so a pattern built across lines is not seen there.

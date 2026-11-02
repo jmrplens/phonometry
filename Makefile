@@ -740,6 +740,16 @@ hazards:
 fence-readers:
 	$(PYTHON) scripts/check_fence_readers.py
 
+# Where an inline code span opens and closes is decided in
+# scripts/markdown_spans.py, as CommonMark decides it, and in
+# site/scripts/shared/markdown-spans.mjs for the site's scripts. This fails on
+# a script or a piece of the site's code that reads a span with a pattern of
+# its own (a backtick, anything but a backtick, a backtick), which misreads a
+# span of two backticks, an escaped backtick and a span that holds a
+# backslash. Stdlib only.
+span-readers:
+	$(PYTHON) scripts/check_span_readers.py
+
 # Catch a C0 control character in a text file. A form feed in a raw docstring
 # is what \frac looks like once the backslash and the f have been eaten, and
 # the published formula then loses its fraction with nothing reporting it.
@@ -923,7 +933,7 @@ check: lint security test
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
-	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
+	fence-names fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \
 	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \

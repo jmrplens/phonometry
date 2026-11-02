@@ -121,6 +121,7 @@ from typing import TYPE_CHECKING, TypeAliasType, TypeVar, get_origin
 
 from api_taxonomy import public_names
 from ast_scan import COMPOUND_STATEMENTS, block_statements
+from markdown_spans import inline_spans
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -129,12 +130,28 @@ if TYPE_CHECKING:
 #: What a package held under a name before anything was imported there.
 _NOTHING = object()
 
-#: A backticked name inside a table cell, e.g. ```leq``` or ```.plot()```.
-_BACKTICKED = re.compile(r"`([^`]+)`")
 
 #: The version literal in the ``__version__`` row's usage cell, e.g.
 #: ``phonometry.__version__  # '3.3.0'``.
 _VERSION_LITERAL = re.compile(r"phonometry\.__version__\s*#\s*['\"]([^'\"]*)['\"]")
+
+
+def _backticked(cell: str) -> list[str]:
+    """The text of each code span of a table cell, e.g. ``leq`` or ``.plot()``.
+
+    The spans are read as the site reads them (:mod:`markdown_spans`): the run
+    of backticks that opens one closes it, and one space inside each end is
+    taken off when both are there, as CommonMark takes it off.
+    """
+    found: list[str] = []
+    for start, end in inline_spans(cell):
+        span = cell[start:end]
+        run = len(span) - len(span.lstrip("`"))
+        text = span[run : len(span) - run]
+        if text.startswith(" ") and text.endswith(" ") and text.strip():
+            text = text[1:-1]
+        found.append(text)
+    return found
 
 
 def table_names(markdown: str) -> set[str]:
@@ -153,7 +170,7 @@ def table_names(markdown: str) -> set[str]:
             continue
         # Split on unescaped pipes only (``\|`` is a literal pipe in a cell).
         first_cell = re.split(r"(?<!\\)\|", stripped)[1]
-        names.update(_BACKTICKED.findall(first_cell))
+        names.update(_backticked(first_cell))
     return names
 
 
@@ -233,12 +250,10 @@ def _row_kinds(markdown: str) -> list[tuple[str, frozenset[str]]]:
         cells = re.split(r"(?<!\\)\|", stripped)
         if len(cells) < 3:
             continue
-        declared = frozenset(
-            word.strip().lower() for word in _BACKTICKED.findall(cells[2])
-        )
+        declared = frozenset(word.strip().lower() for word in _backticked(cells[2]))
         if not declared:
             continue
-        rows.extend((name, declared) for name in _BACKTICKED.findall(cells[1]))
+        rows.extend((name, declared) for name in _backticked(cells[1]))
     return rows
 
 
@@ -269,12 +284,12 @@ def stale_rows(markdown: str, public: Collection[str]) -> list[str]:
         cells = re.split(r"(?<!\\)\|", stripped)
         if len(cells) < 3:
             continue
-        kinds = {word.strip().lower() for word in _BACKTICKED.findall(cells[2])}
+        kinds = {word.strip().lower() for word in _backticked(cells[2])}
         if "convention" in kinds:
             continue
         problems.extend(
             f"{name}: has a row, and nothing publishes it"
-            for name in _BACKTICKED.findall(cells[1])
+            for name in _backticked(cells[1])
             if _PLAIN_NAME.fullmatch(name) and name not in public
         )
     return problems
@@ -362,10 +377,10 @@ def example_problems(markdown: str, roots: Mapping[str, object]) -> list[str]:
         cells = re.split(r"(?<!\\)\|", stripped)
         if len(cells) < 6:
             continue  # Not a row of the four-column name table.
-        row = " / ".join(_BACKTICKED.findall(cells[1]))
+        row = " / ".join(_backticked(cells[1]))
         problems.extend(
             f"{row}: `{fragment}` calls {problem}"
-            for fragment in _BACKTICKED.findall(cells[-2])
+            for fragment in _backticked(cells[-2])
             for problem in _fragment_problems(fragment, roots)
         )
     return problems

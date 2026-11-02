@@ -126,7 +126,7 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
-from ast_scan import binding_of, own_names
+from ast_scan import binding_of, live_bindings, own_names, scope_nodes
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -676,10 +676,14 @@ class Module:
             for target, value in _assignments(node):
                 self.module_names.setdefault(target, []).append(value)
         self.imports = _imported_names(self.tree, path)
+        #: The relative imports the module makes at its top, by the name each
+        #: binds, in the order of the source: an import inside a function
+        #: binds the name for that function alone.
+        self.top_imports = _imports_by_name(scope_nodes(self.tree))
         # A function written inside an ``if``, a ``try`` or a ``with`` at the
         # top of the module is the module's own as well, and one written in
-        # each branch is either at run time.
-        self.top_functions = _by_name(_own_definitions(self.tree))
+        # each branch is either at run time; one a later one replaces is not.
+        self.top_functions = _live_by_name(self.tree, _own_definitions(self.tree))
         self.classes = {
             node.name: node
             for node in ast.walk(self.tree)
@@ -815,24 +819,65 @@ class Module:
             if name in names.declared_global:
                 break
             if names.binds(name):
-                return self._bound_as(current, name)
+                return self._bound_as(current, name, node if current is scope else None)
             current = self.enclosing(current)
         return self.top_functions.get(name, ())
 
-    def _bound_as(self, function: Function, name: str) -> tuple[Function, ...] | None:
+    def _bound_as(
+        self, function: Function, name: str, node: ast.AST | None = None
+    ) -> tuple[Function, ...] | None:
         """The functions *name* stands for in *function*, which binds it itself.
 
         The functions of that name it defines (inside an ``if``, a ``try`` or
-        a ``with`` too); none for an import, which the package follows; and
-        ``None`` for any other binding: the name is then the function's, and
-        no function of the module or of an import is the one it calls.
+        a ``with`` too): those that may have run before *node* and that no
+        later one replaced on the way, when *node* is written in *function*
+        (:func:`ast_scan.live_bindings`), or every one; none for an import,
+        which the package follows; and ``None`` for any other binding: the
+        name is then the function's, and no function of the module or of an
+        import is the one it calls.
         """
         how = own_names(function).how(name)
         if how == "definition":
-            return _by_name(_own_definitions(function)).get(name, ())
+            defined = _by_name(_own_definitions(function)).get(name, ())
+            if node is None:
+                return defined
+            return tuple(live_bindings(function, list(defined), node))
         if how == "import":
             return ()
         return None
+
+    def imports_at(
+        self, name: str, scope: Function | None, node: ast.AST
+    ) -> list[tuple[pathlib.Path, str]]:
+        """Where *name*, read at *node* in *scope*, is imported from.
+
+        From the nearest of *scope* and the functions around it that binds
+        the name, its imports of it: in *scope* itself, those that may have
+        run before *node* (:func:`ast_scan.live_bindings`). From the top of
+        the module when none binds it, those the name holds once the module
+        has run. None for a name a scope binds otherwise.
+        """
+        current = scope
+        while current is not None:
+            names = own_names(current)
+            if names.rebinds(name):
+                return []
+            if name in names.declared_global:
+                break
+            if names.binds(name):
+                statements = _imports_by_name(scope_nodes(current)).get(name, [])
+                if current is scope:
+                    statements = live_bindings(current, statements, node)
+                return _import_targets(statements, name, self.path)
+            current = self.enclosing(current)
+        return self.top_import_targets(name)
+
+    def top_import_targets(self, name: str) -> list[tuple[pathlib.Path, str]]:
+        """Where the imports at the top of the module the name may hold once
+        it has run read it from.
+        """
+        statements = live_bindings(self.tree, self.top_imports.get(name, []))
+        return _import_targets(statements, name, self.path)
 
     def named_functions(
         self, name: str, scope: Function | None
@@ -1397,11 +1442,13 @@ class Module:
             # the module's import of it.
             and self.lookup(func.id, context.function, node) is not None
         ):
-            found = self.package.functions(self, func.id)
-            if found is not None:
-                owner, functions = found
+            found = self.package.functions(
+                self.imports_at(func.id, context.function, node)
+            )
+            if found:
                 return join(
                     owner.returns(function, self.bind(function, node, context))
+                    for owner, functions in found
                     for function in functions
                 )
         return OPAQUE
@@ -1536,18 +1583,25 @@ def _imported_names(
     for node in ast.walk(tree):
         if not isinstance(node, ast.ImportFrom) or not node.level:
             continue
-        base = path.parent
-        for _ in range(node.level - 1):
-            base = base.parent
-        target = base.joinpath(*(node.module or "").split(".")) if node.module else base
-        source = (
-            target.with_suffix(".py")
-            if target.with_suffix(".py").is_file()
-            else target / "__init__.py"
-        )
+        source = _import_source(node, path)
         for alias in node.names:
             found[alias.asname or alias.name] = (source, alias.name)
     return found
+
+
+def _import_source(node: ast.ImportFrom, path: pathlib.Path) -> pathlib.Path:
+    """The file a relative import written in *path* reads: the module file or
+    the package's ``__init__``.
+    """
+    base = path.parent
+    for _ in range(node.level - 1):
+        base = base.parent
+    target = base.joinpath(*(node.module or "").split(".")) if node.module else base
+    return (
+        target.with_suffix(".py")
+        if target.with_suffix(".py").is_file()
+        else target / "__init__.py"
+    )
 
 
 #: Nodes that open a scope of their own, whose names are not the function's.
@@ -1710,9 +1764,55 @@ def _is_static(function: Function) -> bool:
 
 def _methods(owner: ast.ClassDef, name: str) -> tuple[Function, ...]:
     """The methods *owner* defines by *name*: one in each branch of an ``if``
-    in its body too, which is either at run time.
+    in its body too, which is either at run time, and not one a later one
+    replaces.
     """
-    return _by_name(_own_definitions(owner)).get(name, ())
+    return _live_by_name(owner, _own_definitions(owner)).get(name, ())
+
+
+def _live_by_name(
+    scope: ast.AST, functions: Iterable[Function]
+) -> dict[str, tuple[Function, ...]]:
+    """:func:`_by_name`, each name with the definitions it may hold once
+    *scope* has run (:func:`ast_scan.live_bindings`).
+    """
+    return {
+        name: tuple(live_bindings(scope, list(defined)))
+        for name, defined in _by_name(functions).items()
+    }
+
+
+def _imports_by_name(
+    nodes: Iterable[ast.AST],
+) -> dict[str, list[ast.ImportFrom]]:
+    """The relative imports among *nodes*, by each name they bind, in the order
+    of the source: how the package imports its own modules.
+    """
+    found: dict[str, list[ast.ImportFrom]] = {}
+    imports = [
+        node for node in nodes if isinstance(node, ast.ImportFrom) and node.level
+    ]
+    for node in sorted(imports, key=lambda node: (node.lineno, node.col_offset)):
+        for alias in node.names:
+            found.setdefault(alias.asname or alias.name, []).append(node)
+    return found
+
+
+def _import_targets(
+    statements: Iterable[ast.ImportFrom], name: str, path: pathlib.Path
+) -> list[tuple[pathlib.Path, str]]:
+    """Where each relative import of *statements* written in the file *path*
+    reads *name* from: the module file, or the package's ``__init__``.
+    """
+    found: list[tuple[pathlib.Path, str]] = []
+    for node in statements:
+        source = _import_source(node, path)
+        found.extend(
+            (source, alias.name)
+            for alias in node.names
+            if (alias.asname or alias.name) == name
+        )
+    return found
 
 
 def _by_name(functions: Iterable[Function]) -> dict[str, tuple[Function, ...]]:
@@ -1800,20 +1900,24 @@ class Package:
         return self.modules[path]
 
     def functions(
-        self, importer: Module, name: str, hops: int = 3
-    ) -> tuple[Module, tuple[Function, ...]] | None:
-        """The functions a name imported into ``importer`` can be, through
-        re-exports: every definition of it in the module that defines it.
+        self, targets: Iterable[tuple[pathlib.Path, str]], hops: int = 3
+    ) -> list[tuple[Module, tuple[Function, ...]]]:
+        """The functions each import of *targets* can be, through re-exports:
+        every definition of it the module that defines it holds once it has
+        run, each with that module.
         """
-        if name not in importer.imports or hops == 0:
-            return None
-        source, original = importer.imports[name]
-        owner = self.module(source)
-        if owner is None:
-            return None
-        if original in owner.top_functions:
-            return owner, owner.top_functions[original]
-        return self.functions(owner, original, hops - 1)
+        found: list[tuple[Module, tuple[Function, ...]]] = []
+        for source, original in targets:
+            owner = self.module(source)
+            if owner is None:
+                continue
+            if original in owner.top_functions:
+                found.append((owner, owner.top_functions[original]))
+            elif hops > 1:
+                found.extend(
+                    self.functions(owner.top_import_targets(original), hops - 1)
+                )
+        return found
 
 
 def scan(

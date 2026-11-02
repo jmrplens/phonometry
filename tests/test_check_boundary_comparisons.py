@@ -524,6 +524,89 @@ def test_every_definition_of_a_helper_written_in_two_branches_is_followed(
     assert _texts(in_a_class, tmp_path) == ["margin > _LIMIT_DB"]
 
 
+def test_a_definition_a_later_one_replaces_is_never_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reaches the definitions a name may hold where it runs.
+
+    Every definition of a name in a module, a class or a function was
+    followed, so a first ``_margin`` that hands back the bare difference,
+    replaced by a second that settles it, made the comparison of its result
+    refused, and a first ``_exceeds`` that compares what it is handed was
+    judged by calls that only ever reach the second.
+    """
+    at_the_top = """
+    from phonometry._internal.boundary import settled
+    _LIMIT_DB = 10.0
+    def _margin(signal, background):
+        return signal - background
+    def _margin(signal, background):
+        return settled(signal - background)
+    def public(signal, background):
+        return _margin(signal, background) > _LIMIT_DB
+    """
+    assert _texts(at_the_top, tmp_path) == []
+    in_a_class = """
+    _LIMIT_DB = 10.0
+    class _Judge:
+        def _exceeds(self, margin):
+            return margin > _LIMIT_DB
+        def _exceeds(self, margin):
+            return False
+        def judge(self, signal, background):
+            return self._exceeds(signal - background)
+    def public(signal, background):
+        return _Judge().judge(signal, background)
+    """
+    assert _texts(in_a_class, tmp_path) == []
+    in_a_function = """
+    _LIMIT_DB = 10.0
+    def public(signal, background):
+        def _exceeds(margin):
+            return margin > _LIMIT_DB
+        def _exceeds(margin):
+            return False
+        return _exceeds(signal - background)
+    """
+    assert _texts(in_a_function, tmp_path) == []
+
+
+def test_a_name_a_function_imports_is_read_through_its_own_import(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import a function makes binds the name for that function alone.
+
+    The imports of a file were read from every node of it into one table, so
+    the last function to import a name under an alias gave every other
+    function that alias, and a function that imports a helper that hands
+    back a difference was read through a sibling's helper that counts.
+    """
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n"
+        "    return max(levels) - min(levels)\n"
+        "def count(levels):\n"
+        "    return len(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "verdict.py").write_text(
+        "_SPREAD_DB = 3.0\n"
+        "def spread_judged(levels):\n"
+        "    from .helpers import spread as measure\n"
+        "    return measure(levels) <= _SPREAD_DB\n"
+        "def count_judged(levels):\n"
+        "    from .helpers import count as measure\n"
+        "    return measure(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "spread_judged", "measure(levels) <= _SPREAD_DB")
+    ]
+
+
 def test_a_converting_helper_is_read_per_call(tmp_path: pathlib.Path) -> None:
     # Read once for all its callers, _as_float would make the reading look
     # computed because another caller passes it a difference.

@@ -629,7 +629,7 @@ microphone aimed as A.2.5 asks has no direct sound to trigger on, and an
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both reference forms are given, if a response is not one-dimensional or is silent, if the two hall responses are of different lengths, or if they are too short to reach the 80 ms boundary. |
-| TypeError | if `reference_level` holds a text or a value that is not a real number. |
+| TypeError | if `reference_level` holds a text or a value that is not a real number, or `fraction` is not a single number. |
 
 ## LATE_LATERAL_START_S
 
@@ -1099,6 +1099,7 @@ $L_{pE,10}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the response is not one-dimensional or is silent, if `limits` is malformed, or if a band has no energy. |
+| TypeError | if `fraction` is not a single number. |
 
 ## sound_strength
 
@@ -1156,7 +1157,7 @@ a calibrated source where every other measure in Table A.1 does not.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both reference forms are given, if a response is not one-dimensional or is silent, or if `reference_level` does not broadcast onto the band axis. |
-| TypeError | if `reference_level` holds a text or a value that is not a real number. |
+| TypeError | if `reference_level` holds a text or a value that is not a real number, or `fraction` is not a single number. |
 
 ## sound_strength_from_power
 

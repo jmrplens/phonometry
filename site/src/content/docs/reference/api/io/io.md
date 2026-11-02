@@ -1123,7 +1123,7 @@ original) so tools that only read PCM can open it.
 | Name | Description |
 | :--- | :--- |
 | `src` | The file to read (any format the readers accept). |
-| `dst` | The file to write; the suffix picks the container (WAV family or, with the `[audio]` extra, FLAC). Lossy suffixes are refused by policy. |
+| `dst` | The file to write; the suffix picks the container (WAV family or, with the `[audio]` extra, FLAC). Lossy suffixes are refused by policy. Nothing or a regular file at the name is replaced only once the new file beside it is whole, as [`write`](/phonometry/reference/api/io/io/#write) does; a link, a pipe, a device or a directory there is opened as Python opens it. |
 | `subtype` | Target sample format; `None` preserves the source's depth (the module docstring's mapping). An explicitly narrower choice quantises with the clipping count reported. |
 | `block_size` | Frames per streamed block; the memory ceiling. |
 
@@ -1891,7 +1891,7 @@ out of calibrated results).
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. |
+| `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. With nothing at the name, or a regular file, the audio is written to a new hidden file beside it, which takes the name only once it is whole, so a write stopped half way (an error, an interrupt) leaves what was there; the new file keeps the permission bits of the old one, and a hard link to the old file keeps the old bytes. A link, a pipe, a device or a directory at the name is opened there as Python opens it: a link is followed, a pipe waits for a reader, a directory raises `IsADirectoryError`. |
 | `x` | A [`Signal`](/phonometry/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
 | `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
 | `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. |

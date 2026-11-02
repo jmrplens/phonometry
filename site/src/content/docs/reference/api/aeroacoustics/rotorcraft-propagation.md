@@ -321,6 +321,12 @@ Positive above the plane; the guidance substitutes these equivalent
 heights, floored at 0.1 m for source and receiver, into the
 flat-ground equations (§A.4.4).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `distance_m` or `height_m` is not one real number. |
+
 ### MeanGroundPlaneResult.height()
 
 ```python

@@ -35,10 +35,10 @@
     "test:scripts": "node --test 'scripts/**/*.test.mjs'"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.3.4",
+    "@astrojs/markdown-remark": "^7.3.5",
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/starlight": "^0.42.7",
-    "astro": "^7.4.2",
+    "astro": "^7.4.4",
     "katex": "catalog:",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
@@ -51,7 +51,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
     "html-validate": "^11.17.0",
-    "lighthouse": "^13.5.0",
+    "lighthouse": "^13.6.0",
     "pa11y-ci": "^5.0.0",
     "puppeteer": "25.16.0",
     "typescript": "^6.0.3"

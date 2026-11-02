@@ -592,7 +592,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 ReactiveSilencerResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

@@ -174,7 +174,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | Exception | When |
 | :--- | :--- |
 | ValueError | On a non-positive/ordered geometry, a `method` other than the two listed, or if a ground is requested with `method="kurze_anderson"`. |
-| TypeError | if `barrier_distance`, `barrier_height_m`, `receiver_distance` or `thickness_m` is not a single number, `frequencies` holds a text or a value that is not a real number, or `method` is not a text, or `ground_model` is not a text. |
+| TypeError | if `barrier_distance`, `barrier_height_m`, `receiver_distance` or `thickness_m` is not a single number, `frequencies` holds a text or a value that is not a real number, or `method` is not a text, or `ground_model` is not a text. `receiver_height_m` or `source_height_m` are refused the same way when any is not one real number. |
 
 ## BarrierInsertionLoss
 
@@ -249,7 +249,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 BarrierInsertionLoss.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

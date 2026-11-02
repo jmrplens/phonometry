@@ -1623,6 +1623,7 @@ edge.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an edge is negative, not finite, or if *tmax* is not after *tmin*. |
+| TypeError | if `tmin` or `tmax` is not one real number. |
 
 ### Signal.dtype
 

@@ -185,7 +185,7 @@ unchanged; this is a thin, plottable wrapper around the existing function
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is negative or non-finite (NaN/inf); the check lives on [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) so it also guards direct construction. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. `distance` is refused the same way when it is not one real number. |
 
 ## AtmosphericAbsorptionWarning
 

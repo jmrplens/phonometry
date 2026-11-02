@@ -153,7 +153,7 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area` or `volume` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `area` or `volume` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. `delta_l_fs` is refused the same way when it is not one real number. |
 
 ## FacadeElement
 
@@ -272,7 +272,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 FacadePredictionResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -465,7 +465,7 @@ the standard's separate segment-of-openings Formula (4).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area` is not a single number, or `lp_in` or `octave_bands` holds a text or a value that is not a real number. |
+| TypeError | if `area` is not a single number, or `lp_in` or `octave_bands` holds a text or a value that is not a real number. `c_d` or `r_prime_cap` are refused the same way when any is not one real number. |
 
 ## RadiatedPowerResult
 

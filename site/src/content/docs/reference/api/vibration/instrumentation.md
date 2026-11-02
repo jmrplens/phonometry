@@ -821,7 +821,7 @@ against a band the standard does not give.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `method` is neither average, if the measured time is not positive and finite, or if the integration time is not one of the three printed time constants. |
-| TypeError | if `measured_time_s` is not a single number, or `method` is not a text. |
+| TypeError | if `measured_time_s` is not a single number, or `method` is not a text. `integration_time` is refused the same way when it is not one real number. |
 
 ## verify_weighting
 

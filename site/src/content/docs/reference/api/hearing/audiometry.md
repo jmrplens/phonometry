@@ -353,7 +353,7 @@ presentations, a new call with `shortened=False`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither form or both are given, the responses do not match the presentations, a step differs from 6.2.3.2, a presentation follows the end of the series, or more ascents are given than a series holds. |
-| TypeError | if `ascent_levels` or `presentation_levels` holds a text or a value that is not a real number. |
+| TypeError | if `ascent_levels` or `presentation_levels` holds a text or a value that is not a real number. `familiarization_level` is refused the same way when it is not one real number. |
 
 ## AscendingThresholdResult
 

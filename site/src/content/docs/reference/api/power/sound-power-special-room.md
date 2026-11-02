@@ -784,7 +784,7 @@ where `sigma_omc_db` was given. Requires matplotlib
 
 ```python
 SpecialRoomSoundPowerResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

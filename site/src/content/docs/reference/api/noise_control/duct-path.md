@@ -276,7 +276,7 @@ An [`NCResult`](/phonometry/reference/api/rooms/noise-criteria/#ncresult) when
 
 ```python
 DuctPathResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

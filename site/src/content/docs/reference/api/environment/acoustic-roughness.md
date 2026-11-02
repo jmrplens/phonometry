@@ -222,6 +222,12 @@ a limit curve when one is given.
 
 **Returns:** The axes drawn on.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if a wavelength of `limit_db` is not one real number. |
+
 ## average_roughness_spectra
 
 ```python

@@ -273,7 +273,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, fewer than two microphones, or an unknown method. |
-| TypeError | if `heat_conduction_method` is not a text. |
+| TypeError | if `heat_conduction_method` is not a text. `relative_humidity_percent`, `static_pressure_pa` or `temperature_c` are refused the same way when any is not one real number. |
 
 ## coupler_parameter_uncertainty
 
@@ -333,7 +333,7 @@ are the length and the radius of the capillary tubes.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for other than three microphones, a microphone index that is not 1, 2 or 3, an uncertainty on the volume or surface of a plane-wave coupler (they follow from its length and diameter), one on capillary tubes the coupler does not have, or one on the static pressure, the temperature or the humidity of a coupler filled with a given gas. |
-| TypeError | if `heat_conduction_method` is not a text. |
+| TypeError | if `heat_conduction_method` is not a text. `relative_humidity_percent`, `static_pressure_pa` or `temperature_c` are refused the same way when any is not one real number. |
 
 ## coupler_transfer_impedance
 

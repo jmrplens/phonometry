@@ -824,7 +824,7 @@ $R_\mathrm{s,max} - 3$ dB when `limit_at_max`.
 
 ```python
 LaboratoryJointInsulationResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

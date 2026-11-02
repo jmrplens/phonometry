@@ -88,7 +88,7 @@ is what 5.14.3 and IEC 61260-3:2016 10.3.6 grade.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive bandwidth designator, duration, averaging time or frequency, or an end frequency not above the start. |
-| TypeError | if `averaging_time_s`, `end_frequency_hz`, `fraction`, `start_frequency_hz` or `sweep_duration_s` is not a single number. |
+| TypeError | if `averaging_time_s`, `end_frequency_hz`, `fraction`, `start_frequency_hz` or `sweep_duration_s` is not a single number. `input_level` or `reference_attenuation` are refused the same way when any is not one real number. |
 
 ## swept_level_uncertainty
 
@@ -302,3 +302,4 @@ verdict here is for the bank as configured.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for no sweep rate, a rate outside 2 s to 5 s per decade, or a bank with no bands. |
+| TypeError | if a rate of `seconds_per_decade` is not one real number. |

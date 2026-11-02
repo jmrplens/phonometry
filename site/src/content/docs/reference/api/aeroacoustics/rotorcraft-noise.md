@@ -306,7 +306,7 @@ reference implementation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `condition` is not a text. |
+| TypeError | if `condition` is not a text. `offset_db` is refused the same way when it is not one real number. |
 
 ## hover_ring_hemisphere
 

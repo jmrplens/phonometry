@@ -232,7 +232,7 @@ Plot the narrowband spectrum with the critical band and masking level.
 
 ```python
 WindTurbineTonalityResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

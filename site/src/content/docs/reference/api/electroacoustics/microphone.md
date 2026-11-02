@@ -245,7 +245,7 @@ against sound pressure level).
 
 ```python
 MicrophoneCharacteristics.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

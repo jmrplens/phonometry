@@ -630,6 +630,12 @@ Draw the deviations along every traverse at one frequency.
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency_hz` is not one real number. |
+
 ### InverseSquareLawResult.tolerance_db
 
 *property*

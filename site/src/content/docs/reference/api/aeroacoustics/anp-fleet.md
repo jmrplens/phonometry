@@ -303,7 +303,7 @@ Feeds the aircraft's profile and NPD curves into
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written, `"departure"` and not `"DEPARTURE"` or `"takeoff"`). |
-| TypeError | if `operation`, `metric` or `absorption` is not a text. |
+| TypeError | if `operation`, `metric` or `absorption` is not a text. `relative_humidity_percent` is refused the same way when it is not one real number. |
 
 ### ANPDatabase.flight_profile()
 
@@ -392,7 +392,7 @@ Feeds the aircraft's profile and NPD curves into
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written, `"departure"` and not `"DEPARTURE"` or `"takeoff"`). |
-| TypeError | if `operation`, `metric` or `absorption` is not a text. |
+| TypeError | if `operation`, `metric` or `absorption` is not a text. `relative_humidity_percent` is refused the same way when it is not one real number. |
 
 ### ANPDatabase.npd_curves()
 

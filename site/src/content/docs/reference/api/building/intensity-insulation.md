@@ -289,7 +289,7 @@ to be available (16 or 5 bands) and matplotlib
 
 ```python
 IntensityElementNormalizedResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -401,7 +401,7 @@ automatic rating to be available (16 or 5 bands) and matplotlib
 
 ```python
 IntensityReductionResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

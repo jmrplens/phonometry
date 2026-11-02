@@ -567,7 +567,7 @@ NOTE 1); how a report uses the increase is left to it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for another angle, or a frequency Table B.1 does not list. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. `incidence_angle_deg` is refused the same way when it is not one real number. |
 
 ## INCIDENCE_CORRECTION_FREQUENCIES_HZ
 

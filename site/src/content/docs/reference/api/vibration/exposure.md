@@ -396,7 +396,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 DailyVibrationExposure.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -500,7 +500,7 @@ Assess a daily exposure against Directive 2002/44/EC (Article 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown `kind`/`metric` combination or a non-finite or negative `value`. |
-| TypeError | if `kind` or `metric` is not a text. |
+| TypeError | if `kind` or `metric` is not a text. `value` is refused the same way when it is not one real number. |
 
 ## ExposureAssessment
 

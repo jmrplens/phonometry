@@ -236,6 +236,12 @@ A row that is not banded by frequency contains every frequency.
 
 **Returns:** `True` inside the band, its included ends counted.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency_hz` is not one real number. |
+
 ## PeakReference
 
 ```python

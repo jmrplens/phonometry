@@ -567,6 +567,7 @@ G.2): build it with [`phonometry.metrology.rectangular`](/phonometry/reference/a
 | Exception | When |
 | :--- | :--- |
 | ValueError | See [`PassByUncertainty`](/phonometry/reference/api/environment/rolling-stock-noise/#passbyuncertainty). |
+| TypeError | if `pressure_level` or `coverage_factor` is not one real number. |
 
 ## PassByMeasurement
 

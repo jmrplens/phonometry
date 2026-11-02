@@ -229,6 +229,7 @@ forwards from the same anchor, so touchdown is where the two sweeps meet.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the procedure carries no Land step to anchor it, or a step cannot be flown as specified. |
+| TypeError | if `weight_lb` is not one real number. |
 
 **Warns**
 

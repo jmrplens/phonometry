@@ -374,7 +374,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 STIResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

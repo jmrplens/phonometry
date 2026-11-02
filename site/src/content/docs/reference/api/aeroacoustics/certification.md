@@ -199,7 +199,7 @@ Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band.
 
 ```python
 EPNLResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

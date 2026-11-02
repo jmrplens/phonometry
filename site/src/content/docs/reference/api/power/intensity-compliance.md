@@ -284,7 +284,7 @@ class of the standard, the one it comes closest to meeting).
 
 ```python
 IntensityInstrumentComplianceResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

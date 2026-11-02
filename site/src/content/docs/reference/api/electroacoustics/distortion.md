@@ -74,7 +74,7 @@ conventions), THD+N and SINAD into a plottable result.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `fs` is not a single number, or `x` holds a text or a value that is not a real number. |
+| TypeError | if `fs` is not a single number, or `x` holds a text or a value that is not a real number. `fundamental` is refused the same way when it is not one real number. |
 
 ## harmonic_distortion
 
@@ -257,7 +257,7 @@ datasheets; the two agree to first order for small distortion.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal/parameters are invalid, `kind` is unknown, or no harmonic of the fundamental lies below Nyquist. |
-| TypeError | if `fs` is not a single number, or `kind` is not a text, or `x` holds a text or a value that is not a real number. |
+| TypeError | if `fs` is not a single number, or `kind` is not a text, or `x` holds a text or a value that is not a real number. `fundamental` is refused the same way when it is not one real number. |
 
 ## thd_plus_noise
 

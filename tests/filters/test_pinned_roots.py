@@ -16,6 +16,9 @@ import ast
 import inspect
 import math
 import random
+import subprocess
+import sys
+import textwrap
 from fractions import Fraction
 
 import numpy as np
@@ -234,6 +237,78 @@ def test_roots_at_the_origin_and_on_the_axes_come_back_exact() -> None:
     assert _bits(correctly_rounded_roots([1, -3, 2])) == _bits([1 + 0j, 2 + 0j])
 
 
+#: The root finder run in a child, so that a polynomial it never finishes
+#: fails in bounded time on every platform: ``SIGALRM`` does not exist on
+#: Windows, the suite's own limit waits fifteen minutes, and a thread cannot
+#: be stopped while its fractions grow.
+_CHILD = textwrap.dedent(
+    """
+    import sys
+    from fractions import Fraction
+    from phonometry.filters._pinned_roots import correctly_rounded_roots
+    coefficients = [Fraction(c) for c in sys.argv[1:]]
+    try:
+        roots = correctly_rounded_roots(coefficients)
+    except ArithmeticError as error:
+        print(type(error).__name__, error)
+    else:
+        print(" ".join(f"{z.real.hex()},{z.imag.hex()}" for z in roots))
+    """
+)
+
+
+def _printed(roots: list[complex]) -> str:
+    """*roots* as the child prints them."""
+    return " ".join(f"{z.real.hex()},{z.imag.hex()}" for z in roots)
+
+
+def _roots_in_a_child(coefficients: list[Fraction]) -> str:
+    """What the root finder prints for *coefficients*, in a child given a minute."""
+    try:
+        # Fixed argv, no shell, no user input
+        finished = subprocess.run(
+            [sys.executable, "-c", _CHILD, *(str(c) for c in coefficients)],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"the root finder did not return within 60 s: {coefficients}")
+    return finished.stdout.strip()
+
+
+def test_a_root_at_zero_is_read_off_the_coefficients() -> None:
+    """``x^3 - 2x``, ``x (x - 1/3)`` and ``3x``: the root at zero is exact.
+
+    A polynomial whose constant term is zero has a root at zero, and the
+    iteration, whose grid follows each point's own magnitude, approached it
+    ever more closely without its disk ever deciding: the root finder never
+    returned on the first two. The root is now read off the coefficients,
+    divided out and returned as ``+0.0``; the others are rounded here from
+    their closed forms.
+    """
+    root2 = [_nearest_double(Fraction(0), Fraction(2), sign) for sign in (-1, 1)]
+    expected = [complex(root2[0]), complex(0.0), complex(root2[1])]
+    cubic = [Fraction(1), Fraction(0), Fraction(-2), Fraction(0)]
+    assert _roots_in_a_child(cubic) == _printed(expected)
+    third = [complex(0.0), complex(_double(Fraction(1, 3)))]
+    assert _roots_in_a_child([Fraction(1), Fraction(-1, 3), Fraction(0)]) == (
+        _printed(third)
+    )
+    assert _bits(correctly_rounded_roots([3, 0])) == _bits([complex(0.0)])
+
+
+def test_zero_as_a_multiple_root_is_refused_at_once() -> None:
+    """``x^2 (x - 1)`` ends in two zeros, so zero is a double root, refused as such.
+
+    It was refused before only after every grid had failed, with the
+    message of a root the iteration could not resolve.
+    """
+    printed = _roots_in_a_child([Fraction(1), Fraction(-1), Fraction(0), Fraction(0)])
+    assert printed.startswith("ArithmeticError zero is a root 2 times over"), printed
+
+
 def _conjugate_pair(re: Fraction, im: Fraction) -> tuple[Fraction, ...]:
     """``(x - re)^2 + im^2``, whose roots are ``re +/- i im``."""
     return (Fraction(1), -2 * re, re * re + im * im)
@@ -297,6 +372,122 @@ def test_two_approximations_that_land_on_one_point_are_parted() -> None:
     assert _bits(roots) == _bits(sorted(expected, key=lambda z: (z.real, z.imag)))
 
 
+@pytest.mark.parametrize(
+    ("half_units", "expected"),
+    [(1, "0x1.0000000000000p+0"), (3, "0x1.0000000000002p+0")],
+)
+def test_a_complex_root_whose_real_part_is_a_tie_rounds_to_even(
+    half_units: int, expected: str
+) -> None:
+    """``(x - a)^2 + 2``, ``a = 1 + k 2^-53`` half way between two doubles.
+
+    No disk about the real part ever lies on one side of the midpoint, and
+    the iteration cannot land on the root, whose imaginary part is
+    irrational; the root finder refused these two simple roots as if they
+    were a multiple one. The real part is now decided exactly on the line
+    through the midpoint, and rounds to even.
+    """
+    a = 1 + Fraction(half_units, 2**53)
+    roots = correctly_rounded_roots((Fraction(1), -2 * a, a * a + 2))
+    im = _nearest_double(Fraction(0), Fraction(2), 1)
+    re = float.fromhex(expected)
+    assert _bits(roots) == _bits([complex(re, -im), complex(re, im)])
+
+
+def test_a_complex_root_whose_imaginary_part_is_a_tie_rounds_to_even() -> None:
+    """``(x^2 + 2 + b^2)^2 - 8 x^2``, whose roots are ``+/-sqrt(2) +/- i b``.
+
+    ``b = 1 + 2^-53`` lies half way between 1 and the next double, and the
+    real parts are irrational, so no disk about an imaginary part decides
+    and the root finder refused the quartic; each imaginary part is now
+    decided exactly on the line through the midpoint and rounds to 1.
+    """
+    b = 1 + Fraction(1, 2**53)
+    square = exact_polynomial_product(
+        (Fraction(1), Fraction(0), 2 + b * b), (Fraction(1), Fraction(0), 2 + b * b)
+    )
+    quartic = exact_polynomial_sum(square, (Fraction(-8), Fraction(0), Fraction(0)))
+    root2 = [_nearest_double(Fraction(0), Fraction(2), sign) for sign in (-1, 1)]
+    expected = [complex(re, s) for re in root2 for s in (-1.0, 1.0)]
+    assert _bits(correctly_rounded_roots(quartic)) == _bits(expected)
+
+
+def test_every_part_that_rounds_to_zero_is_positive_zero() -> None:
+    """``x^2 + 2``, ``(x^2 + 2)(x - 1)``, ``x + 2^-1100`` and ``x^2 + 2^-2200``.
+
+    The real parts of the first two are exactly zero, and the extent about
+    them reached both sides and rounded its lower end to ``-0.0``; the root
+    of the third, ``-2^-1100``, rounds to ``-0.0`` as a division does; and
+    the conjugate of the fourth's pair, ``+/-i 2^-1100``, took a negated
+    zero. Every part that rounds to zero is now ``+0.0``.
+    """
+    root2 = _nearest_double(Fraction(0), Fraction(2), 1)
+    pair = [complex(0.0, -root2), complex(0.0, root2)]
+    quadratic = (Fraction(1), Fraction(0), Fraction(2))
+    cases = [
+        (quadratic, pair),
+        (exact_polynomial_product(quadratic, (Fraction(1), Fraction(-1))), [
+            *pair, complex(1.0)
+        ]),
+        ((Fraction(1), Fraction(1, 2**1100)), [complex(0.0)]),
+        ((Fraction(1), Fraction(0), Fraction(1, 2**2200)), [complex(0.0)] * 2),
+    ]  # fmt: skip
+    for polynomial, expected in cases:
+        assert _bits(correctly_rounded_roots(polynomial)) == _bits(expected)
+
+
+def test_no_two_starting_points_are_conjugate_and_none_is_real() -> None:
+    """For every degree from 2 to 200, as the starting points' docstring says.
+
+    The iteration keeps two conjugate points conjugate and a real point real
+    on a polynomial with real coefficients, so neither may start that way.
+    The offset off the symmetric values was 1/7, which gave conjugate starts
+    at every multiple of 21 and a real one at the odd multiples.
+    """
+    failing = []
+    for degree in range(2, 201):
+        monic = (Fraction(1),) + (Fraction(0),) * (degree - 1) + (Fraction(1),)
+        points = _pinned_roots._starts(monic)
+        mirrored = {(re, -im) for re, im in points}
+        if any(not im for _, im in points) or mirrored & set(points):
+            failing.append(degree)
+    assert failing == []
+
+
+#: The largest double, ``2**1024 - 2**971``.
+_LARGEST = 2**1024 - 2**971
+
+
+@pytest.mark.parametrize(
+    "root", [2**1100, -(2**1100), 2**1024 - 2**970], ids=["above", "below", "tie"]
+)
+def test_a_root_round_to_nearest_takes_to_infinity_is_refused(root: int) -> None:
+    """``2^1100``, its negative and ``2^1024 - 2^970``, the tie above the largest double.
+
+    They raised ``OverflowError`` from the division, with a message about an
+    integer quotient; the refusal now names the threshold.
+    """
+    with pytest.raises(OverflowError, match=r"2\*\*1024 - 2\*\*970"):
+        correctly_rounded_roots([1, -root])
+
+
+def test_a_root_that_rounds_to_the_largest_double_comes_back_as_it() -> None:
+    """``x^2 - (r^2 + 1)``, ``r`` 2^950 below the largest double, and ``x - r``.
+
+    The irrational roots round to the largest double and its negative. The
+    rounding boundary above the largest double was taken as the midpoint
+    with its neighbour, which is infinite and has no exact value, so the
+    root finder raised ``OverflowError``; it is ``2^1024 - 2^970``.
+    """
+    r = Fraction(_LARGEST - 2**950)
+    largest = _double(Fraction(_LARGEST))
+    roots = correctly_rounded_roots((Fraction(1), Fraction(0), -(r * r + 1)))
+    assert _bits(roots) == _bits([complex(-largest), complex(largest)])
+    assert _bits(correctly_rounded_roots((Fraction(1), -r))) == _bits(
+        [complex(largest)]
+    )
+
+
 def test_a_multiple_root_is_refused() -> None:
     """``(x - 1)^2`` has no two disjoint disks to separate, at any grid."""
     with pytest.raises(ArithmeticError, match="multiple root"):
@@ -343,8 +534,9 @@ _EXACT_IMPORTS = frozenset(
 )
 
 #: The names of :mod:`math` whose answers IEEE 754 or integer arithmetic fix:
-#: the integer square root, the neighbour of a double and infinity.
-_EXACT_MATH = frozenset({"inf", "isqrt", "nextafter"})
+#: the integer square root, the neighbour of a double, whether a double is
+#: finite, and infinity.
+_EXACT_MATH = frozenset({"inf", "isfinite", "isqrt", "nextafter"})
 
 
 def test_the_root_finder_reaches_no_numerical_library() -> None:
@@ -353,7 +545,8 @@ def test_the_root_finder_reaches_no_numerical_library() -> None:
     The roots are the same doubles everywhere because nothing between the
     exact coefficients and the one rounding at the end is a library's
     arithmetic: Python's integers and fractions are exact, ``math.isqrt``
-    is an integer function and ``math.nextafter`` the neighbouring double.
+    is an integer function, ``math.nextafter`` the neighbouring double and
+    ``math.isfinite`` a test of the exponent's bits.
     A ``numpy`` call or a ``math`` transcendental slipped in would answer
     with the platform's bits again.
     """

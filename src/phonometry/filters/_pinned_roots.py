@@ -18,8 +18,9 @@ and :func:`correctly_rounded_roots` returns each root with its real and its
 imaginary part the double nearest the exact root's. That answer has one
 definition and no platform in it, and it is found with nothing but Python
 integers and fractions, whose arithmetic is exact, one correctly rounded
-integer division per part and the two doubles beside its result, which
-:func:`math.nextafter` returns exactly as IEEE 754 defines them.
+integer division per part, the two doubles beside its result, which
+:func:`math.nextafter` returns exactly as IEEE 754 defines them, and the
+addition of ``+0.0`` that makes a zero positive.
 
 The method is a simultaneous iteration followed by a certificate. Aberth's
 iteration (Aberth, Math. Comp. 27, 1973; Ehrlich, Comm. ACM 10, 1967) moves
@@ -41,14 +42,27 @@ conjugate too, so the root is real. Every other disk has to lie wholly above
 or below the axis. When both ends of each disk's extent in each coordinate
 lie strictly between the midpoints around one double, decided in exact
 rational arithmetic, that double is the coordinate's correctly rounded
-value, and the pass returns; otherwise the next pass refines the grid.
+value. An extent that reaches a midpoint asks whether the coordinate is that
+midpoint exactly: on the line through it the polynomial is
+:math:`A(t) + \mathrm{i}\,B(t)` for real :math:`t`, and the disk's one root,
+which is simple, lies on the line where the greatest common divisor of
+:math:`A` and :math:`B` changes sign across the line's chord through the
+disk, which exact arithmetic decides too; such a coordinate rounds to even.
+When neither decides, the next pass refines the grid.
 Two approximations of two close real roots can settle on the vertical line
 through the roots' midpoint, where every correction is purely imaginary and
 the grid holds the real part exactly, so a pass that does not decide moves
 each point off it by a small step of its own before the next. The step is
 deterministic and the certificate, not the path, decides the answer, so it
-changes no result. A multiple root is never separated, and the finest grid
-refuses it.
+changes no result.
+
+A root at zero is read off the coefficients, which end in a zero, and is
+divided out before the iteration, which would approach it ever more closely
+without its relative grid ever deciding. Every part that rounds to zero is
+``+0.0``, whichever side of zero the exact part lies; a part at or beyond
+:math:`2^{1024} - 2^{970}`, which round to nearest takes to infinity, raises
+:class:`OverflowError`. A multiple root is never separated: at zero it is
+refused at once, and elsewhere the finest grid refuses it.
 """
 
 from __future__ import annotations
@@ -89,8 +103,18 @@ _ABERTH_STEPS = 400
 #: all before the finest grid refuses it.
 _PASS_STEPS = 16
 
-#: Guard bits of the upper bound on a disk's radius beyond the radius itself.
+#: Guard bits of the bounds on a square root beyond the root itself.
 _RADIUS_GUARD = 64
+
+#: The rounding boundary past the largest double, half way between it and
+#: :math:`2^{1024}`: round to nearest takes every value from here on to
+#: infinity, and a tie here too, since the largest double's last bit is odd.
+_OVERFLOW = Fraction(2**1024 - 2**970)
+
+#: The offset that shifts the starting points off the symmetric values: the
+#: reciprocal of a prime, so that no two starts are conjugate and none is
+#: real for every degree below three times it (:func:`_starts`).
+_START_OFFSET = Fraction(1, 1009)
 
 
 def _power_of_two(exponent: int) -> Fraction:
@@ -185,16 +209,21 @@ def _starts(coefficients: Polynomial) -> list[_Complex]:
     The radius is a power of two near the geometric mean of the roots'
     magnitudes, :math:`|a_n / a_0|^{1/n}`, read off bit lengths. The points
     are :math:`((1 - t^2), 2t) / (1 + t^2)` on the unit circle for rational
-    :math:`t` spread over both signs and shifted off the symmetric values, so
-    that no two are conjugate and none is real, which a polynomial with real
-    coefficients would otherwise keep conjugate or real for good.
+    :math:`t_k = \tfrac{3}{2}(2k + 1 - n)/n + 1/q`, spread over both signs and
+    shifted off the symmetric values by :data:`_START_OFFSET`, :math:`1/q`
+    with :math:`q = 1009` a prime, so that no two are conjugate and none is
+    real, which a polynomial with real coefficients would otherwise keep
+    conjugate or real for good. Two points are conjugate where
+    :math:`t_j = -t_k` and a point is real where :math:`t_k = 0`; either asks
+    :math:`3q\,m = -2n` for an integer :math:`m`, so for every degree
+    :math:`n` below :math:`3q = 3027` neither happens.
     """
     degree = len(coefficients) - 1
     constant = abs(coefficients[-1]) or Fraction(1)
     radius = _power_of_two(_exponent(constant / abs(coefficients[0])) // degree)
     points = []
     for k in range(degree):
-        t = Fraction(2 * k + 1 - degree, degree) * Fraction(3, 2) + Fraction(1, 7)
+        t = Fraction(2 * k + 1 - degree, degree) * Fraction(3, 2) + _START_OFFSET
         denominator = 1 + t * t
         points.append(
             (radius * (1 - t * t) / denominator, radius * 2 * t / denominator)
@@ -244,6 +273,17 @@ def _aberth(coefficients: Polynomial) -> list[_Complex]:
     return points
 
 
+def _square_root_below(square: Fraction) -> Fraction:
+    """A lower bound on the square root of *square*, :data:`_RADIUS_GUARD` bits within it.
+
+    ``sqrt(a / b)`` is ``sqrt(a b) / b``, and the integer square root of
+    ``a b 4^g`` over ``b 2^g`` is below it by less than ``2^-g`` of it.
+    """
+    shift = 1 << _RADIUS_GUARD
+    scaled = square.numerator * square.denominator * shift * shift
+    return Fraction(math.isqrt(scaled), square.denominator * shift)
+
+
 def _radius_above(coefficients: Polynomial, x: _Complex) -> Fraction:
     r"""An upper bound on :math:`n\,|p(x)/p'(x)|`, the radius of a disk that holds a root.
 
@@ -258,9 +298,8 @@ def _radius_above(coefficients: Polynomial, x: _Complex) -> Fraction:
     square = degree * degree * _magnitude2(value) / below
     if not square:
         return square
-    shift = 1 << _RADIUS_GUARD
-    scaled = square.numerator * square.denominator * shift * shift
-    return Fraction(math.isqrt(scaled) + 1, square.denominator * shift)
+    unit = Fraction(1, square.denominator << _RADIUS_GUARD)
+    return _square_root_below(square) + unit
 
 
 def _disjoint(centres: list[_Complex], radii: list[Fraction]) -> bool:
@@ -275,23 +314,188 @@ def _disjoint(centres: list[_Complex], radii: list[Fraction]) -> bool:
     return True
 
 
+def _double(value: Fraction) -> float:
+    r"""The double nearest *value*, a zero always ``+0.0``.
+
+    Integer true division in Python is correctly rounded, ties to even, and
+    adding ``+0.0`` turns a ``-0.0`` positive and leaves every other double
+    as it is.
+
+    :raises OverflowError: if *value* lies at or beyond
+        :math:`\pm(2^{1024} - 2^{970})`, which round to nearest takes to
+        infinity.
+    """
+    if abs(value) >= _OVERFLOW:
+        msg = (
+            "a root has a part at or beyond 2**1024 - 2**970, which round to "
+            "nearest takes to infinity."
+        )
+        raise OverflowError(msg)
+    return value.numerator / value.denominator + 0.0
+
+
+def _boundary(nearest: float, towards: float) -> Fraction:
+    """The rounding boundary between the double *nearest* and its neighbour towards *towards*.
+
+    It is the midpoint of the two, exactly; past the largest double the
+    neighbour is infinite, and the boundary is :data:`_OVERFLOW`.
+    """
+    neighbour = math.nextafter(nearest, towards)
+    if not math.isfinite(neighbour):
+        return _OVERFLOW if towards > 0 else -_OVERFLOW
+    return (Fraction(nearest) + Fraction(neighbour)) / 2
+
+
 def _rounded(low: Fraction, high: Fraction) -> float | None:
     """The double every point of ``[low, high]`` rounds to, or ``None``.
 
-    Integer true division in Python is correctly rounded, so *low* rounds to
-    ``nearest``. Every point of the interval rounds to it when the whole
-    interval lies strictly between the midpoints ``nearest`` shares with its
-    two neighbours, which is decided in exact rational arithmetic; an
-    interval that reaches either midpoint asks for a finer grid. A single
-    point, an exact root, rounds as the division rounds it.
+    *low* rounds to ``nearest``, and every point of the interval rounds to it
+    when the whole interval lies strictly between the boundaries ``nearest``
+    shares with its two neighbours, which is decided in exact rational
+    arithmetic; an interval that reaches either boundary, the threshold of
+    overflow among them, does not decide. A single point, an exact root,
+    rounds as the division rounds it.
+
+    :raises OverflowError: if the whole interval lies at or beyond the
+        threshold of overflow.
     """
-    nearest = low.numerator / low.denominator
+    if low <= -_OVERFLOW < high or low < _OVERFLOW <= high:
+        return None
+    nearest = _double(low)
     if low == high:
         return nearest
-    exact = Fraction(nearest)
-    below = (exact + Fraction(math.nextafter(nearest, -math.inf))) / 2
-    above = (exact + Fraction(math.nextafter(nearest, math.inf))) / 2
+    below, above = _boundary(nearest, -math.inf), _boundary(nearest, math.inf)
     return nearest if below < low and high < above else None
+
+
+def _boundary_within(low: Fraction, high: Fraction) -> Fraction | None:
+    """A rounding boundary that ``[low, high]`` reaches, or ``None``.
+
+    The threshold of overflow if the interval reaches it, else a midpoint
+    beside the double *low* rounds to. Called where :func:`_rounded` did not
+    decide, so the interval lies within the thresholds when it reaches
+    neither.
+    """
+    for threshold in (-_OVERFLOW, _OVERFLOW):
+        if low <= threshold <= high:
+            return threshold
+    nearest = _double(low)
+    for towards in (math.inf, -math.inf):
+        boundary = _boundary(nearest, towards)
+        if low <= boundary <= high:
+            return boundary
+    return None
+
+
+def _trimmed(polynomial: list[Fraction]) -> list[Fraction]:
+    """*polynomial* without its leading zero coefficients."""
+    start = 0
+    while start < len(polynomial) and not polynomial[start]:
+        start += 1
+    return polynomial[start:]
+
+
+def _remainder(dividend: list[Fraction], divisor: list[Fraction]) -> list[Fraction]:
+    """The remainder of dividing *dividend* by *divisor*, exactly; *divisor* trimmed."""
+    remainder = list(dividend)
+    while len(remainder) >= len(divisor):
+        ratio = remainder[0] / divisor[0]
+        for k, coefficient in enumerate(divisor):
+            remainder[k] -= ratio * coefficient
+        remainder.pop(0)
+        remainder = _trimmed(remainder)
+    return remainder
+
+
+def _common_divisor(a: list[Fraction], b: list[Fraction]) -> list[Fraction]:
+    """A greatest common divisor of two real polynomials, by Euclid's algorithm, exactly."""
+    a, b = _trimmed(a), _trimmed(b)
+    while b:
+        a, b = b, _remainder(a, b)
+    return a
+
+
+def _real_value(polynomial: list[Fraction], t: Fraction) -> Fraction:
+    """A real polynomial at *t*, by Horner's rule, exactly."""
+    value = Fraction(0)
+    for coefficient in polynomial:
+        value = value * t + coefficient
+    return value
+
+
+def _on_the_line(
+    coefficients: Polynomial, axis: int, value: Fraction
+) -> tuple[list[Fraction], list[Fraction]]:
+    r"""*p* on the line where coordinate *axis* is *value*, as :math:`A(t) + \mathrm{i}\,B(t)`.
+
+    :math:`t` is the other coordinate: the point is :math:`v + \mathrm{i}t`
+    on the line of real part :math:`v` (*axis* 0) and :math:`t + \mathrm{i}v`
+    on the line of imaginary part :math:`v` (*axis* 1). The polynomial is
+    shifted to the line's origin by repeated synthetic division, which gives
+    the coefficients of :math:`p(c + w)` in :math:`w` exactly, and on the
+    line of real part :math:`v` the power :math:`w^k` is
+    :math:`\mathrm{i}^k t^k`.
+    """
+    origin: _Complex = (value, Fraction(0)) if axis == 0 else (Fraction(0), value)
+    shifted: list[_Complex] = [(c, Fraction(0)) for c in coefficients]
+    degree = len(shifted) - 1
+    for last in range(degree, 0, -1):
+        for j in range(1, last + 1):
+            step = _product(origin, shifted[j - 1])
+            shifted[j] = (shifted[j][0] + step[0], shifted[j][1] + step[1])
+    if axis == 0:
+        for position in range(len(shifted)):
+            for _ in range((degree - position) % 4):
+                shifted[position] = (-shifted[position][1], shifted[position][0])
+    return [c[0] for c in shifted], [c[1] for c in shifted]
+
+
+def _on_line(
+    coefficients: Polynomial,
+    centre: _Complex,
+    radius: Fraction,
+    axis: int,
+    value: Fraction,
+) -> bool:
+    r"""Whether the one root in the disk has coordinate *axis* exactly *value*.
+
+    The disk about *centre* holds one root of *p*, a simple one. On the line
+    where coordinate *axis* is *value*, :math:`p = A(t) + \mathrm{i}\,B(t)`,
+    so the roots of *p* on the line are the real roots of
+    :math:`g = \gcd(A, B)`, each as simple in :math:`g` as in *p*. The line
+    meets the disk in a chord of half-length
+    :math:`h = \sqrt{r^2 - (v - c)^2}` about the centre's other coordinate;
+    :math:`g` has at most one root on an interval inside the chord, a simple
+    one, so it has one exactly where its values at the interval's ends differ
+    in sign or vanish. The half-length is bounded below by an integer square
+    root, so the interval lies inside the chord; a root on the line beyond it
+    is found by a later pass, whose disk is smaller.
+    """
+    offset = value - centre[axis]
+    half = _square_root_below(radius * radius - offset * offset)
+    along = centre[1 - axis]
+    divisor = _common_divisor(*_on_the_line(coefficients, axis, value))
+    ends = _real_value(divisor, along - half) * _real_value(divisor, along + half)
+    return ends <= 0
+
+
+def _decided(
+    coefficients: Polynomial, centre: _Complex, radius: Fraction, axis: int
+) -> float | None:
+    """The correctly rounded coordinate *axis* of the one root in the disk, or ``None``.
+
+    The extent's ends round alike (:func:`_rounded`), or the extent reaches a
+    rounding boundary the coordinate is exactly (:func:`_on_line`), which
+    rounds to even; otherwise the disk does not decide yet.
+    """
+    low, high = centre[axis] - radius, centre[axis] + radius
+    part = _rounded(low, high)
+    if part is not None:
+        return part
+    boundary = _boundary_within(low, high)
+    if boundary is None or not _on_line(coefficients, centre, radius, axis, boundary):
+        return None
+    return _double(boundary)
 
 
 def _alone_on_the_axis(
@@ -322,28 +526,30 @@ def _certified_root(
     A real root comes back alone; the disk above the axis reports its root
     and that root's conjugate, so the disk below reports nothing. ``None``
     is a disk that does not yet decide: one that straddles the axis without
-    being alone on it, or whose extent reaches a rounding boundary.
+    being alone on it, or whose extent reaches a rounding boundary the
+    coordinate is not exactly. The conjugate's imaginary part is
+    ``0.0 - im``, so that a part that rounds to zero is ``+0.0`` on both.
     """
     x, radius = points[index], radii[index]
     widened = _alone_on_the_axis(index, points, radii)
     if widened is not None:
         # The point's real part is the widened disk's centre, so a disk about
         # it no wider holds the same root; on the axis the iteration can land
-        # on the root itself, which a root on a rounding boundary needs.
+        # on the root itself, which then decides at once.
         on_axis = _radius_above(coefficients, (x[0], Fraction(0)))
         if 0 <= on_axis < widened:
             widened = on_axis
-        part = _rounded(x[0] - widened, x[0] + widened)
+        part = _decided(coefficients, (x[0], Fraction(0)), widened, 0)
         return None if part is None else [complex(part, 0.0)]
     if -x[1] > radius:
         return []
     if x[1] <= radius:
         return None
-    re = _rounded(x[0] - radius, x[0] + radius)
-    im = _rounded(x[1] - radius, x[1] + radius)
+    re = _decided(coefficients, x, radius, 0)
+    im = _decided(coefficients, x, radius, 1)
     if re is None or im is None:
         return None
-    return [complex(re, im), complex(re, -im)]
+    return [complex(re, im), complex(re, 0.0 - im)]
 
 
 def _certified(
@@ -416,23 +622,11 @@ def _exact_coefficients(coefficients: Sequence[Fraction | int]) -> Polynomial:
     return exact
 
 
-def correctly_rounded_roots(
-    coefficients: Sequence[Fraction | int],
-) -> tuple[complex, ...]:
-    """Every root of a real polynomial, each part the double nearest the exact root's.
+def _iterated_roots(exact: Polynomial) -> list[complex]:
+    """Every root of *exact*, none at zero, by the iteration and its certificate.
 
-    :param coefficients: The polynomial's exact coefficients, the highest
-        power first, the first not zero. Its roots must be simple.
-    :return: The roots, sorted by real part and then by imaginary part; a
-        complex pair is a pair of exact conjugates and a real root has an
-        imaginary part of ``0.0``.
-    :raises TypeError: if a coefficient is not a :class:`~fractions.Fraction`
-        or an ``int``.
-    :raises ValueError: if the polynomial is a constant.
-    :raises ArithmeticError: if the roots are not resolved by the finest grid,
-        as a multiple root never is.
+    :raises ArithmeticError: if the roots are not resolved at the finest grid.
     """
-    exact = _exact_coefficients(coefficients)
     points = _aberth(exact)
     bits = _FIRST_BITS
     while bits < _LAST_BITS:
@@ -440,7 +634,47 @@ def correctly_rounded_roots(
         _settle(exact, points, bits)
         roots = _certified(exact, points)
         if roots is not None:
-            return tuple(sorted(roots, key=lambda z: (z.real, z.imag)))
+            return roots
         _nudge(points, bits)
-    msg = "the roots were not resolved; a multiple root never is."
+    msg = (
+        f"the roots were not resolved at {_LAST_BITS} bits; a multiple root "
+        "never is, nor a cluster of roots the iteration has not parted by then."
+    )
     raise ArithmeticError(msg)
+
+
+def correctly_rounded_roots(
+    coefficients: Sequence[Fraction | int],
+) -> tuple[complex, ...]:
+    """Every root of a real polynomial, each part the double nearest the exact root's.
+
+    A root at zero is found exactly from the coefficients, whose last one is
+    then zero, and divided out before the iteration.
+
+    :param coefficients: The polynomial's exact coefficients, the highest
+        power first, the first not zero. Its roots must be simple.
+    :return: The roots, sorted by real part and then by imaginary part; a
+        complex pair is a pair of conjugates, a real root has an imaginary
+        part of ``0.0``, and every part that rounds to zero is ``+0.0``,
+        whichever side of zero the exact part lies.
+    :raises TypeError: if a coefficient is not a :class:`~fractions.Fraction`
+        or an ``int``.
+    :raises ValueError: if the polynomial is a constant.
+    :raises OverflowError: if a part of a root lies at or beyond
+        ``2**1024 - 2**970``, which round to nearest takes to infinity.
+    :raises ArithmeticError: if zero is a multiple root, which the
+        coefficients show, or if the roots are not resolved at 4096 bits, as a
+        multiple root never is, nor a cluster of roots the iteration has not
+        parted by then.
+    """
+    exact = _exact_coefficients(coefficients)
+    kept = len(exact)
+    while not exact[kept - 1]:
+        kept -= 1
+    at_zero = len(exact) - kept
+    if at_zero > 1:
+        msg = f"zero is a root {at_zero} times over; a multiple root is refused."
+        raise ArithmeticError(msg)
+    roots = _iterated_roots(exact[:kept]) if kept > 1 else []
+    roots += [complex(0.0, 0.0)] * at_zero
+    return tuple(sorted(roots, key=lambda z: (z.real, z.imag)))

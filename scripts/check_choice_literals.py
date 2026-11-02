@@ -1657,18 +1657,42 @@ def _local_imports(
     package = getattr(module, "__package__", None) or module_name.rpartition(".")[0]
     found: dict[str, object] = {}
     for node in scope_nodes(tree) if own else ast.walk(tree):
-        if not isinstance(node, ast.ImportFrom):
-            continue
-        source = "." * node.level + (node.module or "")
-        try:
-            imported = importlib.import_module(
-                importlib.util.resolve_name(source, package)
-            )
-        except (ImportError, ValueError):
-            continue
-        for alias in node.names:
-            found[alias.asname or alias.name] = getattr(imported, alias.name, None)
+        if isinstance(node, ast.Import):
+            found.update(_plain_imports(node))
+        elif isinstance(node, ast.ImportFrom):
+            found.update(_from_imports(node, package))
     return found
+
+
+def _plain_imports(node: ast.Import) -> dict[str, object]:
+    """What an ``import`` binds, by name: ``import a.b as c`` binds ``c`` to
+    the module ``a.b``, ``import a.b`` binds ``a`` to the package ``a``.
+    """
+    found: dict[str, object] = {}
+    for alias in node.names:
+        try:
+            imported = importlib.import_module(alias.name)
+        except ImportError:
+            continue
+        if alias.asname:
+            found[alias.asname] = imported
+        else:
+            top = alias.name.partition(".")[0]
+            found[top] = sys.modules.get(top)
+    return found
+
+
+def _from_imports(node: ast.ImportFrom, package: str) -> dict[str, object]:
+    """What a ``from ... import`` binds, by name, read from *package* when relative."""
+    source = "." * node.level + (node.module or "")
+    try:
+        imported = importlib.import_module(importlib.util.resolve_name(source, package))
+    except (ImportError, ValueError):
+        return {}
+    return {
+        alias.asname or alias.name: getattr(imported, alias.name, None)
+        for alias in node.names
+    }
 
 
 def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:

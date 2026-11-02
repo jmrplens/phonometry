@@ -2357,6 +2357,38 @@ def test_a_name_a_scope_inside_the_function_binds_hides_no_check() -> None:
         assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
 
 
+def _checked_through_a_module_imported_as(mode: _Pace) -> _Pace:
+    import phonometry._internal.validation as checks
+
+    checks.require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_through_a_module_imported_whole(mode: _Pace) -> _Pace:
+    import phonometry._internal.validation
+
+    phonometry._internal.validation.require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_check_reached_through_a_plain_import_is_a_check() -> None:
+    """``import a.b as c`` inside the function binds ``c`` to the module, and
+    ``import a.b`` binds ``a``: a call of the check through either is the
+    check.
+
+    The function's own imports were read from its ``from ... import``
+    statements alone, so ``checks.require_choice(...)`` reached no function
+    and the checked choice was refused as never checked; before the check
+    was known by the function its name reaches, it passed by its name.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for checked in (
+        _checked_through_a_module_imported_as,
+        _checked_through_a_module_imported_whole,
+    ):
+        assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
+
+
 def _handed_to_a_namesake_method(mode: str, registry: object) -> str:
     registry.require_choice(mode, "mode", _PACES)  # type: ignore[attr-defined]
     return mode

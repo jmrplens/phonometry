@@ -234,6 +234,40 @@ def test_roots_at_the_origin_and_on_the_axes_come_back_exact() -> None:
     assert _bits(correctly_rounded_roots([1, -3, 2])) == _bits([1 + 0j, 2 + 0j])
 
 
+def _conjugate_pair(re: Fraction, im: Fraction) -> tuple[Fraction, ...]:
+    """``(x - re)^2 + im^2``, whose roots are ``re +/- i im``."""
+    return (Fraction(1), -2 * re, re * re + im * im)
+
+
+@pytest.mark.parametrize("apart", [40, 52, 60, 100])
+def test_close_roots_are_told_apart(apart: int) -> None:
+    """Roots ``2**-apart`` apart come back each on its own, rounded on its own.
+
+    Two approximations of two close real roots can settle on the vertical
+    line through their midpoint, where every correction is imaginary and the
+    grid holds the real part exactly; the root finder used to refuse such a
+    pair from ``2**-40`` apart down, and a pair of conjugate pairs from
+    ``2**-100``. ``1 + 2**-40`` and ``1 + 2**-52`` are doubles of their own;
+    ``1 + 2**-60`` and ``1 + 2**-100`` round to 1, so the two roots come
+    back as the same double.
+    """
+    near = 1 + Fraction(1, 2**apart)
+    rounded = near.numerator / near.denominator
+    reals = correctly_rounded_roots(
+        exact_polynomial_product((Fraction(1), Fraction(-1)), (Fraction(1), -near))
+    )
+    assert _bits(reals) == _bits([complex(1.0), complex(rounded)])
+    pairs = correctly_rounded_roots(
+        exact_polynomial_product(
+            _conjugate_pair(Fraction(1), Fraction(1)),
+            _conjugate_pair(near, Fraction(1)),
+        )
+    )
+    expected = [complex(1.0, -1.0), complex(rounded, -1.0)]
+    expected += [complex(1.0, 1.0), complex(rounded, 1.0)]
+    assert _bits(pairs) == _bits(sorted(expected, key=lambda z: (z.real, z.imag)))
+
+
 def test_a_multiple_root_is_refused() -> None:
     """``(x - 1)^2`` has no two disjoint disks to separate, at any grid."""
     with pytest.raises(ArithmeticError, match="multiple root"):

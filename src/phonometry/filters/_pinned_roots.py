@@ -41,8 +41,14 @@ conjugate too, so the root is real. Every other disk has to lie wholly above
 or below the axis. When both ends of each disk's extent in each coordinate
 lie strictly between the midpoints around one double, decided in exact
 rational arithmetic, that double is the coordinate's correctly rounded
-value, and the pass returns; otherwise the next pass refines the grid. A
-multiple root is never separated, and the finest grid refuses it.
+value, and the pass returns; otherwise the next pass refines the grid.
+Two approximations of two close real roots can settle on the vertical line
+through the roots' midpoint, where every correction is purely imaginary and
+the grid holds the real part exactly, so a pass that does not decide moves
+each point off it by a small step of its own before the next. The step is
+deterministic and the certificate, not the path, decides the answer, so it
+changes no result. A multiple root is never separated, and the finest grid
+refuses it.
 """
 
 from __future__ import annotations
@@ -76,10 +82,12 @@ _LAST_BITS = 4096
 #: not, and the certificate refuses what it leaves unresolved.
 _ABERTH_STEPS = 400
 
-#: Sweeps of the iteration per pass. Each pass doubles the grid's bits and
-#: each sweep near a simple root at least doubles the correct ones, so two
-#: sweeps keep the approximations at the grid's resolution.
-_PASS_SWEEPS = 2
+#: Sweeps of the iteration per pass at most. Each pass doubles the grid's
+#: bits and each sweep near a simple root at least doubles the correct ones,
+#: so two sweeps settle a pass where the roots are apart; a cluster of close
+#: roots takes more, and a multiple root, which never settles, takes them
+#: all before the finest grid refuses it.
+_PASS_STEPS = 16
 
 #: Guard bits of the upper bound on a disk's radius beyond the radius itself.
 _RADIUS_GUARD = 64
@@ -350,6 +358,29 @@ def _certified(
     return roots
 
 
+def _settle(coefficients: Polynomial, points: list[_Complex], bits: int) -> None:
+    """Sweep on the grid of *bits* until every correction is small, :data:`_PASS_STEPS` times at most."""
+    for _ in range(_PASS_STEPS):
+        if _aberth_sweep(coefficients, points, bits):
+            return
+
+
+def _nudge(points: list[_Complex], bits: int) -> None:
+    """Move each point off any line of symmetry it has settled on, by a step of its own.
+
+    Two approximations of two close real roots can settle on the vertical
+    line through the roots' midpoint: there the iteration's corrections are
+    purely imaginary and the grid holds the real part exactly, so they never
+    reach the axis. A step of a relative ``2**(-bits/2)``, a different
+    multiple of ``1 + 2i`` for each point, takes them off it.
+    """
+    step = _power_of_two(-(bits // 2))
+    for index, x in enumerate(points):
+        scale = max(abs(x[0]), abs(x[1])) or Fraction(1)
+        shift = step * scale * (index + 1)
+        points[index] = _on_grid((x[0] + shift, x[1] + 2 * shift), bits)
+
+
 def _exact_coefficients(coefficients: Sequence[Fraction | int]) -> Polynomial:
     """*coefficients* as fractions, refused unless a polynomial of degree one or more."""
     if any(
@@ -385,10 +416,10 @@ def correctly_rounded_roots(
     bits = _FIRST_BITS
     while bits < _LAST_BITS:
         bits *= 2
-        for _ in range(_PASS_SWEEPS):
-            _aberth_sweep(exact, points, bits)
+        _settle(exact, points, bits)
         roots = _certified(exact, points)
         if roots is not None:
             return tuple(sorted(roots, key=lambda z: (z.real, z.imag)))
+        _nudge(points, bits)
     msg = "the roots were not resolved; a multiple root never is."
     raise ArithmeticError(msg)

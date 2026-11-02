@@ -48,10 +48,14 @@ from __future__ import annotations
 
 import math
 from fractions import Fraction
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from .._internal.validation import real_array
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 __all__ = ["pinned_atan", "pinned_hypot", "pinned_sin", "pinned_tan"]
 
@@ -361,10 +365,12 @@ def _hypot_scalar(x: float, y: float) -> float:
         return math.inf
 
 
-def _elementwise(function: object, values: np.ndarray | float) -> np.ndarray:
+def _elementwise(
+    function: Callable[[float], float], values: np.ndarray | float
+) -> np.ndarray:
     array = real_array(values, "values")
     flat = array.reshape(-1).tolist()
-    out = np.fromiter((function(v) for v in flat), np.float64, len(flat))  # type: ignore[operator]
+    out = np.fromiter((function(v) for v in flat), np.float64, len(flat))
     return out.reshape(array.shape)
 
 

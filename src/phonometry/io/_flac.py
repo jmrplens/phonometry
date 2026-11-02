@@ -30,6 +30,7 @@ audio is byte-identical.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import struct
@@ -110,7 +111,7 @@ def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
     odd). The audio frames are streamed across untouched, and the rewrite
     lands in a sibling temporary file moved over the original only once
     complete, so a failure cannot leave a half-written measurement file
-    in place.
+    in place, nor the temporary file beside it.
 
     :raises ValueError: If the file is not FLAC, or the chunk exceeds the
         24-bit block length a FLAC metadata block can hold.
@@ -130,16 +131,34 @@ def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
         raise ValueError(msg)
     source = Path(path)
     staging = source.with_name(source.name + ".phonometry-tmp")
+    try:
+        _copy_with_block(source, staging, chunk, named=escaped(os.fspath(path)))
+        staging.replace(source)
+    except BaseException:
+        # A refusal, a full disk, an interrupt or a refused rename: the file
+        # at path is the one soundfile wrote, and its copy goes.
+        with contextlib.suppress(OSError):
+            staging.unlink(missing_ok=True)
+        raise
+
+
+def _copy_with_block(source: Path, staging: Path, chunk: bytes, *, named: str) -> None:
+    """Copy the FLAC *source* to *staging* with the APPLICATION block *chunk* last.
+
+    :param named: The caller's path, escaped, for a refusal to name.
+    :raises ValueError: If *source* is not FLAC or its metadata chain ends
+        before its last block.
+    """
     with open_audio(source) as src, staging.open("wb") as dst:
         magic = src.read(4)
         if magic != _FLAC_MAGIC:
-            msg = f"{escaped(os.fspath(path))}: not a FLAC file"
+            msg = f"{named}: not a FLAC file"
             raise ValueError(msg)
         dst.write(magic)
         while True:
             header = src.read(4)
             if len(header) < _METADATA_BLOCK_HEADER_BYTES:
-                msg = f"{escaped(os.fspath(path))}: truncated FLAC metadata chain"
+                msg = f"{named}: truncated FLAC metadata chain"
                 raise ValueError(msg)
             body = src.read(int.from_bytes(header[1:4], "big"))
             last = bool(header[0] & 0x80)
@@ -152,4 +171,3 @@ def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
         dst.write(chunk)
         # The audio frames, streamed: copied, never decoded or held whole.
         shutil.copyfileobj(src, dst)
-    staging.replace(source)

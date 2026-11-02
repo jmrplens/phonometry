@@ -2418,6 +2418,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   video guide say `winget install --exact --id Gyan.FFmpeg`, where
   `winget install ffmpeg` matches more than one package.
 
+- **A FLAC whose bext was stopped on its way in leaves no copy behind.**
+  `io.write` and `io.convert` put a bext into a FLAC by rewriting the file
+  python-soundfile wrote into a copy beside it, `<name>.phonometry-tmp`,
+  which then takes its place. An interrupt, a full disk or a rename the file
+  system refuses before that left the copy there; it is removed now, and the
+  file at `path` is the one python-soundfile wrote, without the bext.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

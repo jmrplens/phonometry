@@ -515,6 +515,7 @@ error, and only the *sum* going negative puts a band outside the method
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite, or `negative` cannot be broadcast against `levels`. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## partial_power_concentration
 
@@ -571,7 +572,7 @@ budget, and the procedure cannot help.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the positions and areas disagree in length, an area is not positive and finite, an intensity is not finite, the total sound power is not positive (clause 9.2 puts the band outside the method), no subset satisfies the two conditions of B.1.3, the subset is a single segment (equation (A.8) has no spread over one position, so equation (B.4) is undefined), the algebraic mean normal intensity over the remainder is not positive (A.2.3, which happens when the subset takes all the outward flow), or the remainder leaves no error budget for the subset. In the last four cases the selective modification cannot be carried out, and clause 8.3.2 then asks for the appropriate alternative actions in accordance with clause B.2 and Table B.3. Which row of that table applies is not settled here: its two lower rows are conditioned on criterion 2 and on $F_3 - F_2$, neither of which this function is given. |
-| TypeError | if `grade` is not a text. |
+| TypeError | if `grade` is not a text, or `areas` or `normal_intensity` holds a text or a value that is not a real number. |
 
 ## PartialPowerConcentration
 
@@ -727,4 +728,4 @@ achieved grade rather than the requested one, which is the grade clause
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `grade` is none of the three grades of Table 1, or `fraction` is neither 1 nor 3; if `normal_intensity` is neither 1D nor 2D, or `areas` is not 1D; if the position set is empty, the positions and areas disagree in length, or an area is not positive and finite; if an input is not finite; if the optional arrays do not span the same positions or bands; if a frequency is not a band of Tables B.2 and 2; or if `temporal_intensity` is neither 1D nor 2D, carries fewer than two samples, or holds a band whose mean is not positive and so leaves `F1` nothing to normalize by. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `grade` is not a text. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `grade` is not a text, or `areas`, `frequencies`, `normal_intensity`, `pressure_levels`, `pressure_residual_index` or `temporal_intensity` holds a text or a value that is not a real number. |

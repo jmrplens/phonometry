@@ -80,6 +80,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_band_fraction,
     require_equal_counts,
     require_equal_shapes,
@@ -188,7 +189,7 @@ _OCTAVE_STEP_THRESHOLD = _OCTAVE_SPACING_MIN_RATIO
 
 def _as_1d(values: ArrayLike, name: str) -> np.ndarray:
     """Coerce to a finite 1-D float array."""
-    data = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    data = np.atleast_1d(real_array(values, name))
     if data.ndim != 1:
         msg = f"'{name}' must be one-dimensional (one value per band)."
         raise ValueError(msg)
@@ -236,6 +237,8 @@ def velocity_level_difference(
     :return: ``Dv,ij`` per band, in dB.
     :raises ValueError: If the inputs are empty, non-finite, or differ in
         length.
+    :raises TypeError: if ``receive_level`` or ``source_level`` holds a text or a value
+        that is not a real number.
     """
     lv_i = _as_1d(source_level, "source_level")
     lv_j = _as_1d(receive_level, "receive_level")
@@ -263,6 +266,8 @@ def direction_averaged_level_difference(
     :return: ``D̄v,ij`` per band, in dB.
     :raises ValueError: If the inputs are empty, non-finite, or differ in
         length.
+    :raises TypeError: if ``dv_ij`` or ``dv_ji`` holds a text or a value that is not a
+        real number.
     """
     a = _as_1d(dv_ij, "dv_ij")
     b = _as_1d(dv_ji, "dv_ji")
@@ -290,6 +295,8 @@ def total_loss_factor(
     :return: Total loss factor ``η`` (dimensionless) per band.
     :raises ValueError: If the inputs are not positive/finite or their band
         counts are incompatible.
+    :raises TypeError: if ``frequencies`` or ``structural_reverberation_time`` holds a
+        text or a value that is not a real number.
     """
     f = _positive_array(frequencies, "frequencies")
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
@@ -322,7 +329,9 @@ def equivalent_absorption_length(
     :return: Equivalent absorption length ``aj``, in m, per band.
     :raises ValueError: If any input is not positive/finite or the band counts
         are incompatible.
-    :raises TypeError: if ``area`` or ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``area`` or ``speed_of_sound`` is not a single number, or
+        ``frequencies`` or ``structural_reverberation_time`` holds a text or a value
+        that is not a real number.
     """
     s = _positive(area, "area")
     c0 = _positive(speed_of_sound, "speed_of_sound")
@@ -337,6 +346,7 @@ def equivalent_absorption_length(
 def _broadcast(values: np.ndarray, n_bands: int, name: str) -> np.ndarray:
     """Broadcast a scalar-per-band array to ``n_bands``, or validate the count."""
     require_scalar(n_bands, "n_bands")
+    values = real_array(values, name)
     if values.size == 1:
         return np.full(n_bands, values[0], dtype=np.float64)
     if values.size != n_bands:
@@ -643,8 +653,11 @@ def vibration_reduction_index(
     :raises ValueError: On incompatible band counts, non-positive geometry, or
         if only one of the two structural reverberation times is supplied.
     :raises TypeError: if ``area_i``, ``area_j`` or ``junction_length`` is not a single
-        number.
+        number, or ``frequencies``, ``modal_overlap`` or ``velocity_level_difference``
+        holds a text or a value that is not a real number, or ``speed_of_sound`` is not
+        a single number.
     """
+    require_scalar(speed_of_sound, "speed_of_sound")
     dv = _as_1d(velocity_level_difference, "velocity_level_difference")
     lij = _positive(junction_length, "junction_length")
     s_i = _positive(area_i, "area_i")
@@ -743,7 +756,10 @@ def vibration_reduction_index_from_flanking(
     :return: ``Kij`` per band, in dB.
     :raises ValueError: On incompatible band counts or non-positive geometry.
     :raises TypeError: if ``area_i``, ``area_j``, ``junction_length`` or
-        ``reference_area`` is not a single number.
+        ``reference_area`` is not a single number, or ``absorption_length_i``,
+        ``absorption_length_j``, ``normalized_flanking_level_difference``,
+        ``reduction_index_i`` or ``reduction_index_j`` holds a text or a value that is
+        not a real number.
     """
     dn_f = _as_1d(
         normalized_flanking_level_difference, "normalized_flanking_level_difference"
@@ -972,7 +988,9 @@ def normalized_flanking_level_difference(
         rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
     :raises TypeError: if ``reference_area`` is not a single number, or ``fraction`` is
-        not an integer (a word, a flag or a float).
+        not an integer (a word, a flag or a float), or ``absorption_area``,
+        ``receive_level`` or ``source_level`` holds a text or a value that is not a real
+        number.
     """
     l1 = _as_1d(source_level, "source_level")
     l2 = _as_1d(receive_level, "receive_level")
@@ -1017,7 +1035,8 @@ def normalized_flanking_impact_level(
         formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
     :raises TypeError: if ``reference_area`` is not a single number, or ``fraction`` is
-        not an integer (a word, a flag or a float).
+        not an integer (a word, a flag or a float), or ``absorption_area`` or
+        ``receive_level`` holds a text or a value that is not a real number.
     """
     l2 = _as_1d(receive_level, "receive_level")
     area = _positive_array(absorption_area, "absorption_area")
@@ -1132,6 +1151,8 @@ class StrongCouplingCheck(OwnsArrays):
         :raises ValueError: For differences that are not a finite 1-D array,
             an element quantity that is not positive and finite, or band
             frequencies that are not one positive value per band.
+        :raises TypeError: if ``frequencies`` or ``velocity_level_difference`` holds a
+            text or a value that is not a real number.
         """
         difference = _as_1d(self.velocity_level_difference, "velocity_level_difference")
         object.__setattr__(self, "velocity_level_difference", read_only(difference))
@@ -1248,7 +1269,8 @@ def check_strong_coupling(
     :raises ValueError: If any scalar input is not positive/finite, or the
         band frequencies are not one positive value per band.
     :raises TypeError: if ``critical_frequency_i``, ``critical_frequency_j``, ``mass_i``
-        or ``mass_j`` is not a single number.
+        or ``mass_j`` is not a single number, or ``frequencies`` or
+        ``velocity_level_difference`` holds a text or a value that is not a real number.
     """
     return StrongCouplingCheck(
         _as_1d(velocity_level_difference, "velocity_level_difference"),
@@ -1258,7 +1280,7 @@ def check_strong_coupling(
         critical_frequency_j=_positive(critical_frequency_j, "critical_frequency_j"),
         frequencies=None
         if frequencies is None
-        else np.asarray(frequencies, dtype=np.float64),
+        else real_array(frequencies, "frequencies"),
     )
 
 
@@ -1308,6 +1330,8 @@ def modal_overlap_factor(
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
     :return: Modal overlap factor ``M`` per band (dimensionless).
     :raises ValueError: If any input is not positive/finite.
+    :raises TypeError: if ``structural_reverberation_time`` holds a text or a value that
+        is not a real number.
     """
     n = modal_density(area, critical_frequency, speed_of_sound=speed_of_sound)
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
@@ -1335,6 +1359,8 @@ def band_mode_count(
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
     :return: In-band mode count ``N`` per band (dimensionless).
     :raises ValueError: If any input is not positive/finite.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = _positive_array(frequencies, "frequencies")
     n = modal_density(area, critical_frequency, speed_of_sound=speed_of_sound)

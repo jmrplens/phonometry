@@ -252,7 +252,7 @@ A.2.3 print.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `delta_l` is not 16 finite one-third-octave values, a mapping lacks one of them, or `reference_floor` is not one of the four floors. |
-| TypeError | if `reference_floor` is not a text. |
+| TypeError | if `reference_floor` is not a text, or `delta_l` holds a text or a value that is not a real number. |
 
 ## IMPACT_REFERENCE_FLOORS
 
@@ -537,7 +537,7 @@ the heavyweight floor, as A.2.2 prints.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `delta_l` is not 16 finite one-third-octave values, a mapping lacks one of them, or `reference_floor` is not one of the four floors. |
-| TypeError | if `reference_floor` is not a text. |
+| TypeError | if `reference_floor` is not a text, or `delta_l` holds a text or a value that is not a real number. |
 
 ## weighted_impact_rating
 
@@ -583,7 +583,7 @@ airborne problem, so no separate search is duplicated.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the number of values does not match the band set, if a mapping lacks a band of it, or if any value is non-finite. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `values_by_band` holds a text or a value that is not a real number. |
 
 ## weighted_impact_rating_extended
 
@@ -625,6 +625,7 @@ as printed in A.2.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input is not one-dimensional and finite, the band counts differ, or the core bands are missing. |
+| TypeError | if `frequencies` or `values_by_band` holds a text or a value that is not a real number. |
 
 ## weighted_rating
 
@@ -661,7 +662,7 @@ No. 2. Input values are first reduced to one decimal place
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the number of values does not match the band set, if a mapping lacks a band of it, or if any value is non-finite. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `values_by_band` holds a text or a value that is not a real number. |
 
 ## weighted_rating_extended
 
@@ -704,6 +705,7 @@ Annex B requires for the uncertainty of single-number values.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input is not one-dimensional and finite, the band counts differ, or the core bands are missing. |
+| TypeError | if `frequencies` or `values_by_band` holds a text or a value that is not a real number. |
 
 ## weighted_reduction_improvement
 
@@ -755,7 +757,7 @@ returns beside this rating.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `delta_r` is not one-dimensional and finite, the band counts differ, a band is not in Table E.1, the core bands are missing, or `basic_element` is not a standard element. |
-| TypeError | if `basic_element` is not a text. |
+| TypeError | if `basic_element` is not a text, or `delta_r` or `frequencies` holds a text or a value that is not a real number. |
 
 ## WeightedRatingResult
 

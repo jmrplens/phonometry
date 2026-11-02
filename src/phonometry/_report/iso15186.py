@@ -41,6 +41,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._i18n import t
 from ._insulation_fiche import (
     Column,
@@ -112,7 +113,7 @@ def _qualification_columns(
     ):
         if values is None:
             continue
-        arr = np.asarray(values, dtype=np.float64)
+        arr = real_array(values, name)
         if arr.shape != (n_bands,):
             msg = (
                 f"'{name}' must carry one value per reported band "

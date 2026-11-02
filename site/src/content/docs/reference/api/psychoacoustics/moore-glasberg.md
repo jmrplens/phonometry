@@ -115,7 +115,7 @@ closely spaced components of clause 5.3.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `field` or `presentation` is not a text. |
+| TypeError | if `field` or `presentation` is not a text, or `components` holds a text or a value that is not a real number. |
 
 A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
 1.000 sone / 40 phon by definition of the sone.
@@ -153,7 +153,7 @@ sinusoidal components and the exact method is applied.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `field` or `presentation` is not a text. |
+| TypeError | if `field` or `presentation` is not a text, or `band_levels` holds a text or a value that is not a real number. |
 
 ## MooreGlasbergLoudness
 

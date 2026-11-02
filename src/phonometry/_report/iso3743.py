@@ -39,6 +39,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._i18n import format_number, t
 from ._sound_power_fiche import (
     FicheCopy,
@@ -114,7 +115,7 @@ def _hard_walled_marks(result: HardWalledSoundPowerResult) -> list[str]:
 
 def _nearest_half(values: np.ndarray) -> np.ndarray:
     """The levels to the nearest one-half decibel (ISO 3743-2:2018, 12.5 d)."""
-    return np.asarray(np.round(2.0 * np.asarray(values, dtype=np.float64)) / 2.0)
+    return np.asarray(np.round(2.0 * real_array(values, "values")) / 2.0)
 
 
 def _coverage_sentence(k: float, language: Language) -> str:

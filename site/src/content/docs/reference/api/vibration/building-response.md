@@ -313,6 +313,7 @@ frequencies correlate with measurement *worse* than this line does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height is not positive and finite. |
+| TypeError | if `height_m` holds a text or a value that is not a real number. |
 
 ## HEIGHT_PERIOD_COEFFICIENT_S_PER_M
 

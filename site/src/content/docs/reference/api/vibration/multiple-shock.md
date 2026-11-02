@@ -165,6 +165,12 @@ Daily dose from several exposure conditions (clause 5.3, Formula 5).
 
 **Returns:** The combined daily dose $D_\mathrm{zd} = \left[ \sum_j D_{\mathrm{z},j}^6 \, (t_{\mathrm{d},j}/t_{\mathrm{m},j}) \right]^{1/6}$, m/s2.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `doses`, `exposure_times` or `measurement_times` holds a text or a value that is not a real number. |
+
 ## dose_from_peaks
 
 ```python
@@ -181,6 +187,12 @@ Formula 3).
 | `peaks` | The positive response peaks $A_{\mathrm{z},i}$, m/s2. |
 
 **Returns:** The acceleration dose $D_\mathrm{z} = 1.07 \left( \sum A_{\mathrm{z},i}^6 \right)^{1/6}$, m/s2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `peaks` holds a text or a value that is not a real number. |
 
 ## injury_probability
 
@@ -219,7 +231,7 @@ Probability of lumbar injury $P(R)$ (Annex C, Formula C.5).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `sex` is not a text. |
+| TypeError | if `sex` is not a text, or `risk` holds a text or a value that is not a real number. |
 
 ## injury_risk
 
@@ -482,6 +494,12 @@ the vertical spinal response; the transmissibility is unity at 0 Hz.
 
 **Returns:** The complex frequency response, aligned with `frequencies`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+
 ## spinal_response
 
 ```python
@@ -560,4 +578,4 @@ Formula C.4).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `sex` is not a text. |
+| TypeError | if `sex` is not a text, or `age` holds a text or a value that is not a real number. |

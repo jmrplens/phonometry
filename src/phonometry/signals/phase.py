@@ -50,6 +50,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    complex_array,
     require_count,
     require_ranks,
     require_same_length,
@@ -86,7 +87,7 @@ def _validate_response(
     *,
     name: str = "response",
 ) -> NDArray[np.complex128]:
-    arr = np.asarray(response)
+    arr = complex_array(response, name)
     if arr.ndim != 1:
         msg = f"'{name}' must be one-dimensional."
         raise ValueError(msg)
@@ -96,11 +97,10 @@ def _validate_response(
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)
-    out = arr.astype(np.complex128, copy=False)
-    if not np.any(np.abs(out) > 0.0):
+    if not np.any(np.abs(arr) > 0.0):
         msg = f"'{name}' must not be identically zero."
         raise ValueError(msg)
-    return out
+    return arr
 
 
 def _validate_oversample(oversample: int | np.integer[Any]) -> int:
@@ -166,7 +166,7 @@ def min_phase(
         magnitude, reconstructed phase).
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``oversample`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``response`` holds a text or a value that is not a number.
 
     .. note::
         Magnitude zeros cannot be represented by a minimum-phase system;
@@ -207,7 +207,8 @@ def group_delay(
     :param fs: Sample rate the response grid corresponds to, in Hz.
     :return: Group delay per bin, in seconds.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``response`` holds a text or
+        a value that is not a number.
     """
     resp = _validate_response(response)
     require_scalar(fs, "fs")
@@ -244,6 +245,7 @@ def excess_phase(
         reconstruction (default 8).
     :return: Excess phase per bin, in radians (continuous, 0 at DC).
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``response`` holds a text or a value that is not a number.
     """
     resp = _validate_response(response)
     reconstructed = min_phase(resp, oversample=oversample)
@@ -395,7 +397,8 @@ def phase_decomposition(
     :param oversample: Cepstral anti-aliasing factor (default 8).
     :return: A :class:`PhaseDecompositionResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``response`` holds a text or
+        a value that is not a number.
     """
     resp = _validate_response(response)
     require_scalar(fs, "fs")

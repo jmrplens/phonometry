@@ -149,6 +149,12 @@ in that band (clause A.2.3) and a `ValueError` is raised.
 
 **Returns:** [`FieldIndicators`](/phonometry/reference/api/power/intensity/#fieldindicators).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies`, `normal_intensity` or `pressure_levels` holds a text or a value that is not a real number. |
+
 ## FieldIndicators
 
 ```python
@@ -244,6 +250,7 @@ Requires per-band data (call [`field_indicators`](/phonometry/reference/api/powe
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the result carries no per-band data. |
+| TypeError | if `dynamic_capability` holds a text or a value that is not a real number. |
 
 ## FieldStationarityCheck
 
@@ -516,6 +523,7 @@ $F_1 > 0.6$ ([`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/reference/api/power/inte
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than two samples are supplied, the input is not 1D or 2D, or the mean intensity of a band is not positive. A.2.1 states no positivity condition on the M samples, but F1 normalizes by that mean, so a non-positive one leaves the indicator meaningless and the Table B.3 criterion vacuous; this library rejects it rather than return a negative F1. |
+| TypeError | if `short_time_intensity` holds a text or a value that is not a real number. |
 
 ## TEMPORAL_VARIABILITY_LIMIT
 

@@ -102,7 +102,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
-    _as_float64,
+    real_array,
     require_choice,
     require_count,
     require_equal_counts,
@@ -427,7 +427,7 @@ def static_pressure_from_altitude(altitude: float) -> float:
     :raises ValueError: if ``altitude`` is not a finite number or
         ``1 - a Ha`` is not positive.
     """
-    height = _as_float64(altitude, "altitude")
+    height = real_array(altitude, "altitude")
     if height.ndim != 0:
         msg = "'altitude' must be a single value, the altitude of the test site."
         raise TypeError(msg)
@@ -503,10 +503,12 @@ def excess_sound_pressure_level(
     :raises ValueError: if any input is empty or not finite, any ``distance``
         is not positive, or the three shapes do not broadcast against each
         other.
+    :raises TypeError: if ``distance``, ``level`` or ``reference_sound_power_levels``
+        holds a text or a value that is not a real number.
     """
-    lp = _as_float64(level, "level")
-    lw = _as_float64(reference_sound_power_levels, "reference_sound_power_levels")
-    r = _as_float64(distance, "distance")
+    lp = real_array(level, "level")
+    lw = real_array(reference_sound_power_levels, "reference_sound_power_levels")
+    r = real_array(distance, "distance")
     for arr, name in (
         (lp, "level"),
         (lw, "reference_sound_power_levels"),
@@ -577,7 +579,7 @@ def _finite_grid(value: ArrayLike, name: str, ndim: tuple[int, ...]) -> np.ndarr
     """A finite float array of one of the admissible ranks, or a refusal
     naming the argument.
     """
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if arr.ndim not in ndim or arr.size == 0:
         shapes = " or ".join(f"{d}D" for d in ndim)
         msg = f"'{name}' must be a non-empty {shapes} array of levels in decibels."
@@ -590,7 +592,7 @@ def _finite_grid(value: ArrayLike, name: str, ndim: tuple[int, ...]) -> np.ndarr
 
 def _checked_frequencies(frequencies: ArrayLike, n_bands: int) -> np.ndarray:
     """The octave mid-band frequencies, one per band and all in Table D.1."""
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if freqs.shape != (n_bands,):
         msg = f"'frequencies' must carry one value per band ({n_bands})."
         raise ValueError(msg)
@@ -713,7 +715,7 @@ def _grade_indicators(
         return None, None
     excess: np.ndarray | None = None
     if conditions.excess_levels is not None:
-        excess = _as_float64(conditions.excess_levels, "excess_levels")
+        excess = real_array(conditions.excess_levels, "excess_levels")
     directivity = conditions.directivity_range
     _check_grade_indicators(excess, directivity, n_positions)
     return excess, None if directivity is None else float(directivity)
@@ -960,13 +962,15 @@ def _determine(
         frequencies=freqs,
         sound_power_level=level if is_power else nan_band,
         sound_energy_level=nan_band if is_power else level,
-        mean_source_level=np.asarray(mean_source, dtype=np.float64),
+        mean_source_level=real_array(mean_source, "mean_source"),
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
         reference_levels=np.asarray(per_location, dtype=np.float64),
         reference_power_level=np.asarray(ref_power, dtype=np.float64),
-        background_correction=np.asarray(background_correction, dtype=np.float64),
+        background_correction=real_array(
+            background_correction, "background_correction"
+        ),
         reference_background_correction=np.asarray(k1_ref, dtype=np.float64),
-        background_margin_db=np.asarray(margin_source, dtype=np.float64),
+        background_margin_db=real_array(margin_source, "margin_source"),
         reference_background_margin_db=np.asarray(margin_ref, dtype=np.float64),
         c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
         excess_levels=excess,
@@ -1069,6 +1073,8 @@ def sound_power_in_situ(
         per position, ``conditions.directivity_range`` or ``sigma_omc_db`` is
         supplied and is
         negative, or ``coverage_factor`` is not positive.
+    :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
+        that is not a real number.
     """
     arr = _finite_grid(levels, "levels", (2,))
     n_positions, n_bands = arr.shape
@@ -1178,7 +1184,8 @@ def sound_energy_in_situ(
         integer with the 2D form, ``integration_time`` is not positive, or
         any of the refusals of :func:`sound_power_in_situ` applies.
     :raises TypeError: if ``integration_time`` is not a single number, or ``n_events``
-        is a flag, a text or an array where a count goes.
+        is a flag, a text or an array where a count goes, or ``background_levels`` or
+        ``event_levels`` holds a text or a value that is not a real number.
     """
     arr = _finite_grid(event_levels, "event_levels", (2, 3))
     one_at_a_time, n_positions, n_events, n_bands = _event_shape(arr, n_events)

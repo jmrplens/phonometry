@@ -94,7 +94,7 @@ $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness, mass or frequency. |
-| TypeError | if `bending_stiffness` or `mass_per_length` is not a single number. |
+| TypeError | if `bending_stiffness` or `mass_per_length` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## infinite_beam_impedance
 
@@ -201,7 +201,7 @@ at the driving point.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
-| TypeError | if `bending_stiffness` or `mass_per_length` is not a single number. |
+| TypeError | if `bending_stiffness` or `mass_per_length` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## infinite_beam_point_mobility
 
@@ -232,7 +232,7 @@ Infinite-beam point mobility bundled as a [`MobilityResult`](/phonometry/referen
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `location` is not a text. |
+| TypeError | if `location` is not a text, or `frequency` holds a text or a value that is not a real number. |
 
 ## infinite_plate_impedance
 
@@ -337,7 +337,7 @@ with the ISO 7626 mobility machinery.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `location` is not a text. |
+| TypeError | if `location` is not a text, or `frequency` holds a text or a value that is not a real number. |
 
 ## injected_power
 
@@ -362,6 +362,12 @@ near-field energy.
 | `mobility` | Complex point mobility `Y` (broadcast with *force_n*), in m/(N.s). |
 
 **Returns:** The injected power `W`, in W.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `force_n` or `mobility` holds a text or a value that is not a number. |
 
 ## longitudinal_rod_impedance
 
@@ -484,4 +490,4 @@ $c_\mathrm{B} = (B' \omega^2 / m'')^{1/4}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness, mass or frequency. |
-| TypeError | if `bending_stiffness` or `mass_per_area` is not a single number. |
+| TypeError | if `bending_stiffness` or `mass_per_area` is not a single number, or `frequency` holds a text or a value that is not a real number. |

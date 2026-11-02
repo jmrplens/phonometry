@@ -63,6 +63,7 @@ import numpy as np
 
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -297,7 +298,7 @@ def _single_event_mean(
     :raises ValueError: for non-finite levels, an empty event axis or a
         non-positive ``n_events``.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, name)
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' must contain only finite values."
         raise ValueError(msg)
@@ -346,7 +347,7 @@ def _background_exposure(
         )
         raise ValueError(msg)
     t = require_positive(integration_time, "integration_time")
-    bg = np.asarray(background_levels, dtype=np.float64)
+    bg = real_array(background_levels, "background_levels")
     if not np.all(np.isfinite(bg)):
         msg = "'background_levels' must contain only finite values."
         raise ValueError(msg)
@@ -390,7 +391,7 @@ def _reference_power_levels(
     from .reference_sound_source import ReferenceSourceCalibration
 
     if not isinstance(reference_sound_power_levels, ReferenceSourceCalibration):
-        return np.asarray(reference_sound_power_levels, dtype=np.float64)
+        return real_array(cast("ArrayLike", reference_sound_power_levels), name)
     if frequencies is None:
         msg = (
             f"'frequencies' are required to read '{name}' from a "
@@ -398,7 +399,7 @@ def _reference_power_levels(
         )
         raise ValueError(msg)
     return reference_sound_power_levels.sound_power_level_at(
-        np.asarray(frequencies, dtype=np.float64),
+        real_array(cast("ArrayLike", frequencies), "frequencies"),
         fraction=fraction,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,

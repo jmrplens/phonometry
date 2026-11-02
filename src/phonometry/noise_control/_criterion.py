@@ -15,11 +15,11 @@ Private module: nothing here is part of the public API.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 import numpy as np
 
-from .._internal.validation import require_choice, require_scalar
+from .._internal.validation import real_array, require_choice, require_scalar
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
@@ -81,14 +81,18 @@ def as_band_spectrum(
         for a constant ``default``.
     :param n: Number of analysis bands.
     :param name: Parameter name, for the error messages.
-    :param default: The value ``None`` expands to.
+    :param default: The value ``None`` expands to, checked by the caller that
+        takes it from its own parameter.
     :return: The validated ``(n,)`` array.
     :raises ValueError: If the shape does not match or a value is not finite.
+    :raises TypeError: If the values hold a complex number, a text or a
+        ``bytearray``, or ``default`` is not a single number.
     """
     if value is None:
+        require_scalar(default, "default")
         return np.full(n, default, dtype=np.float64)
-    values = getattr(value, "values", value)
-    arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    values = cast("ArrayLike", getattr(value, "values", value))
+    arr = np.atleast_1d(real_array(values, name))
     if arr.size == 1:
         arr = np.full(n, float(arr[0]), dtype=np.float64)
     if arr.shape != (n,):

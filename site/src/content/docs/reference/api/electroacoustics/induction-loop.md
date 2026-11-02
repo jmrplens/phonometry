@@ -403,6 +403,12 @@ prints 566 mA/m, which is $400\sqrt{2}$).
 
 **Returns:** The RMS field strength, in A/m.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `level` holds a text or a value that is not a real number. |
+
 ## field_strength_level
 
 ```python
@@ -422,6 +428,12 @@ $$
 | `field_strength_a_per_m` | RMS magnetic field strength, in A/m. |
 
 **Returns:** The level, in dB re 400 mA/m.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field_strength_a_per_m` holds a text or a value that is not a real number. |
 
 ## field_strength_meter
 
@@ -739,6 +751,12 @@ $0{,}503\ \mu\mathrm{T}$. E.6 prints 1,256; the last digit rounds to
 
 **Returns:** The flux density, in tesla.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field_strength_a_per_m` holds a text or a value that is not a real number. |
+
 ## OVERLOAD_TEST_FREQUENCIES
 
 *Constant* (`mapping`).
@@ -841,6 +859,12 @@ $6 \times 10^{-17}$, which would read as about -324 dB instead.
 | `angle_deg` | Angle between the telecoil's axis and the field, in degrees. |
 
 **Returns:** The response relative to the one on axis, in dB; minus infinity at 90 and 270 degrees.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `angle_deg` holds a text or a value that is not a real number. |
 
 ## verify_amplifier_overload
 
@@ -972,7 +996,7 @@ off is also assessed against the recommendations of 7.2
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `specified_level` is not a single number, or `frequencies` or `system_noise_levels` holds a text or a value that is not a real number. |
+| TypeError | if `specified_level` is not a single number, or `field_strength_levels`, `frequencies`, `response_db` or `system_noise_levels` holds a text or a value that is not a real number. |
 
 ## verify_small_volume_system
 
@@ -1032,4 +1056,4 @@ The informative Annex A.4 allows up to +12 dB at 1,45 m for a counter;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a fixed layout's levels of the wrong shape, or a useful volume without a point at a height of 9.2 or 9.3. |
-| TypeError | if `layout` is not a text, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `layout` is not a text, or `field_strength_levels`, `frequencies`, `heights_m`, `response_db` or `standing_area_levels` holds a text or a value that is not a real number. |

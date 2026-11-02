@@ -150,6 +150,7 @@ traverse of levels and distances.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any input is empty or not finite, any `distance` is not positive, or the three shapes do not broadcast against each other. |
+| TypeError | if `distance`, `level` or `reference_sound_power_levels` holds a text or a value that is not a real number. |
 
 ## GradeConditions
 
@@ -408,7 +409,7 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `event_levels` is not a finite 2D or 3D array, `n_events` is given with the 3D form or missing or not a positive integer with the 2D form, `integration_time` is not positive, or any of the refusals of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) applies. |
-| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
+| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes, or `background_levels` or `event_levels` holds a text or a value that is not a real number. |
 
 ## sound_power_in_situ
 
@@ -471,6 +472,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `levels` is not a finite `(n, bands)` array, `reference_levels`, `reference_sound_power_levels` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature_c` or `static_pressure_kpa` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc_db` is supplied and is negative, or `coverage_factor` is not positive. |
+| TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## static_pressure_from_altitude
 

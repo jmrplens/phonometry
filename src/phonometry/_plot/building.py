@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_array
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -1317,7 +1318,7 @@ def _plot_path_shares(
     twin = ax.twinx()
     twin.plot(
         positions,
-        np.asarray(total, dtype=np.float64),
+        real_array(total, "total"),
         color=_C_REFERENCE,
         lw=2.0,
         marker="o",
@@ -2511,7 +2512,7 @@ def _plot_low_frequency(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    r_i = np.asarray(values, dtype=np.float64)
+    r_i = real_array(values, "values")
     # Categorical positions, not a log frequency axis: the standard fixes the
     # band set at three to six bands, and bars over so short a span read
     # better evenly spaced. Without centres the bands are labelled by order.
@@ -4157,7 +4158,7 @@ def _named_band_axis(
         )
     return _band_axis(
         ax,
-        np.asarray(frequencies, dtype=np.float64),
+        real_array(frequencies, "frequencies"),
         xlabel=_t(_FREQ_LABEL, language),
         language=language,
     )

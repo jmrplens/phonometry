@@ -218,7 +218,7 @@ sampling advisory. The uncertainty is the job-based budget (Eq C.9, Table C.4).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `instrument` Table C.5 does not list. |
-| TypeError | if `effective_duration_hours` or `u3` is not a single number, or `instrument` is not a text. |
+| TypeError | if `effective_duration_hours` or `u3` is not a single number, or `instrument` is not a text, or `samples` holds a text or a value that is not a real number. |
 
 ## INSTRUMENT_U2
 
@@ -270,7 +270,7 @@ $c_2 = c_3 = 1$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a `sample_duration_hours` that is not positive, an `n_workers` that is not a whole number from 1, or an `instrument` Table C.5 does not list. |
-| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number, `n_workers` is a flag, a text or an array where a count goes, or `instrument` is not a text. |
+| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number, `n_workers` is a flag, a text or an array where a count goes, or `instrument` is not a text, or `samples` holds a text or a value that is not a real number. |
 
 ## min_cumulative_duration_hours
 

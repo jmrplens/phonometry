@@ -41,7 +41,7 @@ import re
 import types
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pytest
@@ -1359,12 +1359,53 @@ def test_the_compared_rule_reads_a_lookup_that_returns_and_then_raises() -> None
 # Every public scalar parameter, called
 # ---------------------------------------------------------------------------
 
-#: The annotations of a parameter that takes one number.
+#: The annotations of a parameter that takes one number, part by part.
 _ONE_NUMBER = frozenset({"float", "int"})
+#: The parts of an annotation that still promise one number of that kind.
+_NUMBER_PARTS = {"np.integer[Any]": "int", "np.floating[Any]": "float"}
+#: The annotations of a parameter that takes numbers, one or many, which the
+#: probe fills with an array so that it reaches the one-number parameters
+#: beside it.
+_ARRAYS = frozenset(
+    {
+        "ArrayLike",
+        "Signal | ArrayLike",
+        "SignalInput",
+        "Sequence[float]",
+        "BandValues",
+        "RealValues",
+        "NDArray[np.float64]",
+    }
+)
 #: Values tried, in turn, until a call with every required parameter set to one
 #: of them goes through; a function no value of these satisfies is not probed.
 _FLOAT_TRIES = (1.0, 0.5, 2.0, 10.0, 100.0, 1000.0, 0.1, 3.0, 20.0, 50.0, 0.0)
 _INT_TRIES = (1, 2, 3, 10, 4, 100, 0)
+#: The arrays tried for a parameter that takes many numbers: one value, the
+#: octave bands, the one-third-octave bands of building acoustics, and a
+#: second of a signal, each beside every value of :data:`_FLOAT_TRIES`.
+_OCTAVES = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+_THIRDS = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0]
+    + [1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0]
+)
+_SIGNAL = np.sin(2.0 * np.pi * 1000.0 * np.arange(48_000) / 48_000.0)
+
+
+#: The kinds of a required parameter the probe fills but does not probe.
+_FILLED = frozenset({"array", "text", "empty"})
+
+
+def _array_tries(value: float) -> tuple[np.ndarray, ...]:
+    """The arrays tried beside *value* for a parameter that takes many numbers."""
+    return (
+        np.array([value]),
+        np.full(_OCTAVES.size, value),
+        _OCTAVES,
+        np.full(_THIRDS.size, value),
+        _THIRDS,
+        _SIGNAL,
+    )
 
 
 def _one_number(annotation: object) -> str | None:
@@ -1376,10 +1417,30 @@ def _one_number(annotation: object) -> str | None:
         if isinstance(annotation, str)
         else getattr(annotation, "__name__", "")
     )
-    kept = [part.strip() for part in str(text).split("|") if part.strip() != "None"]
+    kept = [
+        _NUMBER_PARTS.get(part.strip(), part.strip())
+        for part in str(text).split("|")
+        if part.strip() != "None"
+    ]
     if kept and all(part in _ONE_NUMBER for part in kept):
         return kept[0]
     return None
+
+
+def _kind(annotation: object) -> str | None:
+    """``"float"``, ``"int"``, ``"array"``, ``"text"`` or ``"empty"``: what the
+    probe can give a parameter (a text for one annotated ``str``, a label or a
+    name; no member for a sequence of records).
+    """
+    one = _one_number(annotation)
+    if one is not None:
+        return one
+    text = annotation if isinstance(annotation, str) else ""
+    if text == "str":
+        return "text"
+    if text.startswith("Sequence[") and text not in _ARRAYS:
+        return "empty"
+    return "array" if text in _ARRAYS else None
 
 
 def _quietly(function: Callable[..., object], arguments: dict[str, object]) -> object:
@@ -1401,17 +1462,21 @@ def _public_functions() -> Iterator[tuple[str, Callable[..., object]]]:
                 yield f"{info.name}.{name}", function
 
 
+def _attempts(required: dict[str, str]) -> Iterator[dict[str, object]]:
+    """Arguments for the required parameters, one set after another."""
+    arrays = any(kind == "array" for kind in required.values())
+    for attempt, value in enumerate(_FLOAT_TRIES):
+        count = _INT_TRIES[attempt % len(_INT_TRIES)]
+        for array in _array_tries(value) if arrays else (None,):
+            fill = {"int": count, "array": array, "text": "probe", "empty": ()}
+            yield {name: fill.get(kind, value) for name, kind in required.items()}
+
+
 def _baseline(
     function: Callable[..., object], required: dict[str, str]
 ) -> dict[str, object] | None:
     """Arguments for the required parameters that the function takes, if any."""
-    for attempt in range(len(_FLOAT_TRIES)):
-        arguments: dict[str, object] = {
-            name: _INT_TRIES[attempt % len(_INT_TRIES)]
-            if kind == "int"
-            else _FLOAT_TRIES[attempt]
-            for name, kind in required.items()
-        }
+    for arguments in _attempts(required):
         try:
             _quietly(function, arguments)
         # Any refusal means: try the next value
@@ -1424,71 +1489,111 @@ def _baseline(
 def _scalar_parameters(
     function: Callable[..., object],
 ) -> tuple[dict[str, str], dict[str, float]] | None:
-    """The required one-number parameters and the optional ones with a number.
+    """The required parameters the probe can fill and the optional ones with a number.
 
-    ``None`` when a required parameter takes something else, which the probe
-    cannot build.
+    A required parameter takes one number, or numbers the probe fills with an
+    array; ``None`` when one takes something else, which the probe cannot
+    build, or when no parameter takes one number.
     """
     required: dict[str, str] = {}
     optional: dict[str, float] = {}
     for parameter in inspect.signature(function).parameters.values():
         if parameter.kind in (parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD):
             continue
-        kind = _one_number(parameter.annotation)
         if parameter.default is inspect.Parameter.empty:
+            kind = _kind(parameter.annotation)
             if kind is None:
                 return None
             required[parameter.name] = kind
         elif (
-            kind is not None
+            _one_number(parameter.annotation) is not None
             and isinstance(parameter.default, (int, float))
             and not isinstance(parameter.default, bool)
         ):
             optional[parameter.name] = parameter.default
+    if not optional and all(kind in _FILLED for kind in required.values()):
+        return None
     return required, optional
 
 
 def _wrong_types(value: float) -> tuple[object, ...]:
-    """What a one-number parameter must refuse as the wrong type."""
-    return (np.array([value]), np.array([value, value]), str(value), "fifty")
+    """What a one-number parameter must refuse as the wrong type.
+
+    A complex number among them, in both its kinds: :func:`float` refuses a
+    Python ``complex`` without naming the parameter and keeps the real part
+    of a NumPy one, with no more than a ``ComplexWarning``.
+    """
+    return (
+        np.array([value]),
+        np.array([value, value]),
+        str(value),
+        "fifty",
+        complex(value, 1.0),
+        np.complex128(value + 1j),
+    )
+
+
+def _outcome(
+    function: Callable[..., object], arguments: dict[str, object], name: str
+) -> str | None:
+    """What a call does with a wrong value in *name*: ``None`` for a
+    ``TypeError`` that names it, the offence otherwise.
+    """
+    try:
+        _quietly(function, arguments)
+    except TypeError as refusal:
+        if name in str(refusal):
+            return None
+        return f"an anonymous TypeError ({refusal})"
+    # Reported, not hidden
+    except Exception as refusal:
+        return f"{type(refusal).__name__} ({refusal})"
+    return "accepted"
+
+
+def _probed_numbers(
+    function: Callable[..., object],
+) -> tuple[dict[str, object], dict[str, object]] | None:
+    """A call the function takes, and the one-number parameters to probe in it."""
+    parameters = _scalar_parameters(function)
+    if parameters is None:
+        return None
+    required, optional = parameters
+    baseline = _baseline(function, required) if required or optional else None
+    if baseline is None:
+        return None
+    numbers = {
+        name: value
+        for name, value in {**baseline, **optional}.items()
+        if required.get(name) not in _FILLED
+    }
+    return baseline, numbers
 
 
 def _array_refusals() -> tuple[list[str], int]:
-    """Each public one-number parameter an array or a text reaches unrefused.
+    """Each public one-number parameter an array, a text or a complex number reaches unrefused.
 
-    For every public function whose required parameters all take one number,
-    a call that goes through is found first; then each one-number parameter,
-    required or defaulted, is given a one-element and a two-element array, the
-    text of its own number and a text that reads as none, in turn, and must
-    be refused with a ``TypeError`` that names it.
+    For every public function whose required parameters the probe can fill (one
+    number, numbers, a text label or a sequence of records), a call that goes
+    through is found first; then each one-number parameter, required or
+    defaulted, is given a one-element and a two-element array, the text of its
+    own number, a text that reads as none and its number as a Python and as a
+    NumPy complex number, in turn, and must be refused with a ``TypeError``
+    that names it.
     """
     offences: list[str] = []
     probed = 0
     for qualified, function in _public_functions():
-        parameters = _scalar_parameters(function)
-        if parameters is None:
+        found = _probed_numbers(function)
+        if found is None:
             continue
-        required, optional = parameters
-        if not (required or optional):
-            continue
-        baseline = _baseline(function, required)
-        if baseline is None:
-            continue
-        for name, value in {**baseline, **optional}.items():
+        baseline, numbers = found
+        for name, value in numbers.items():
             probed += 1
-            for wrapped in _wrong_types(value):
-                try:
-                    _quietly(function, {**baseline, name: wrapped})
-                except TypeError as refusal:
-                    if name in str(refusal):
-                        continue
-                    outcome = f"an anonymous TypeError ({refusal})"
-                # Reported, not hidden
-                except Exception as refusal:
-                    outcome = f"{type(refusal).__name__} ({refusal})"
-                else:
-                    outcome = "accepted"
-                offences.append(f"{qualified}({name}) given {wrapped!r}: {outcome}")
+            for wrapped in _wrong_types(cast("float", value)):
+                outcome = _outcome(function, {**baseline, name: wrapped}, name)
+                if outcome is not None:
+                    offences.append(f"{qualified}({name}) given {wrapped!r}: {outcome}")
     return offences, probed
 
 
@@ -1505,4 +1610,100 @@ def test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name() -> N
     """
     offences, probed = _array_refusals()
     assert probed > 500, f"only {probed} parameters were probed"
+    assert offences == [], "\n".join(offences)
+
+
+def _array_parameters(function: Callable[..., object]) -> dict[str, str] | None:
+    """The required parameters the probe can fill, when one of them takes numbers."""
+    required: dict[str, str] = {}
+    for parameter in inspect.signature(function).parameters.values():
+        if parameter.kind in (parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD):
+            continue
+        if parameter.default is inspect.Parameter.empty:
+            kind = _kind(parameter.annotation)
+            if kind is None:
+                return None
+            required[parameter.name] = kind
+    return required if "array" in required.values() else None
+
+
+def _array_offence(
+    function: Callable[..., object],
+    arguments: dict[str, object],
+    name: str,
+    *,
+    may_accept: bool,
+) -> str | None:
+    """What a call does with a value no number in the parameter *name*:
+    ``None`` for a ``TypeError`` that names it, or for an acceptance the
+    value may have, the offence otherwise.
+    """
+    try:
+        _quietly(function, arguments)
+    except TypeError as refusal:
+        if name in str(refusal):
+            return None
+        return f"a TypeError that names another parameter ({refusal})"
+    # Reported, not hidden
+    except Exception as refusal:
+        return f"{type(refusal).__name__} ({refusal})"
+    return None if may_accept else "accepted"
+
+
+def _public_array_offences() -> tuple[list[str], int]:
+    """Each public parameter that takes numbers, given a complex array or a
+    list of ``bytearray``, refused by another name than its own or not refused.
+
+    A complex array may be taken, as a mobility, an impedance or a transfer
+    function is complex; refused, it is refused by the parameter's own name.
+    A ``bytearray`` is never numbers and is always refused that way.
+    """
+    offences: list[str] = []
+    probed = 0
+    for qualified, function in _public_functions():
+        required = _array_parameters(function)
+        baseline = _baseline(function, required) if required else None
+        if required is None or baseline is None:
+            continue
+        for name in (name for name, kind in required.items() if kind == "array"):
+            probed += 1
+            offences.extend(_parameter_offences(qualified, function, baseline, name))
+    return offences, probed
+
+
+def _parameter_offences(
+    qualified: str,
+    function: Callable[..., object],
+    baseline: dict[str, object],
+    name: str,
+) -> list[str]:
+    """The offences of one parameter given a complex array and bytearrays."""
+    numbers = np.asarray(baseline[name], dtype=np.float64)
+    found = []
+    for label, wrong, may_accept in (
+        ("a complex array", numbers + 0.5j, True),
+        ("bytearrays", [bytearray(b"12")] * max(numbers.size, 1), False),
+    ):
+        offence = _array_offence(
+            function, {**baseline, name: wrong}, name, may_accept=may_accept
+        )
+        if offence is not None:
+            found.append(f"{qualified}({name}) given {label}: {offence}")
+    return found
+
+
+def test_every_public_array_parameter_refuses_what_is_no_number_by_its_own_name() -> (
+    None
+):
+    """A parameter that takes numbers refuses a complex value or a text by its own name.
+
+    A private helper the public function hands its numbers to read them under
+    the helper's own name, or under the name of the first of a list of
+    parameters read in a loop: ``check_output_mass`` refused a complex
+    ``output_acceleration_level`` as ``output_force_level``,
+    ``random_incidence_absorption`` its ``t1`` as ``T`` and
+    ``loudspeaker_characteristics`` its ``spl`` as ``values``.
+    """
+    offences, probed = _public_array_offences()
+    assert probed > 900, f"only {probed} parameters were probed"
     assert offences == [], "\n".join(offences)

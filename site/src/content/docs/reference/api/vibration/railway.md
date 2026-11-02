@@ -434,7 +434,7 @@ $10 \lg \langle 10^{L/10} \rangle$, the level of
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty or non-finite input. |
-| TypeError | if `axis` is a flag, a text or an array where a count goes. |
+| TypeError | if `axis` is a flag, a text or an array where a count goes, or `levels` holds a text or a value that is not a real number. |
 
 ## passage_average_velocity
 

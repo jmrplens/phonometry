@@ -114,7 +114,7 @@ not a multiple of `N`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the parameters are invalid. |
-| TypeError | if `n_averages` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_averages` is a flag, a text or an array where a count goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## SynchronousAverageResult
 

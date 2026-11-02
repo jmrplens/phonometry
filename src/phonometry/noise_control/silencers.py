@@ -119,11 +119,14 @@ from numpy.typing import ArrayLike, NDArray
 from .._internal.frozen import OwnsArrays, read_only_copy, reduce_with_plain_rows
 from .._internal.validation import (
     check_engine,
+    complex_array,
+    real_array,
     require_non_negative,
     require_positive,
     require_present,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .duct_modes import _warn_above_plane_wave_limit
 from .duct_modes import plane_wave_limit as _plane_wave_limit
@@ -185,7 +188,7 @@ _FOUR_POLE_NDIM = 3
 
 def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
     """Validate a strictly positive, finite 1-D frequency grid (Hz)."""
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -201,7 +204,7 @@ def _per_frequency(impedance: ArrayLike, name: str, n_freq: int) -> _Complex:
     A scalar is held constant over the grid; anything else must already be
     the ``(n_freq,)`` per-frequency array.
     """
-    z = np.asarray(impedance, dtype=np.complex128)
+    z = complex_array(impedance, name)
     if z.ndim == 0:
         return np.full(n_freq, z, dtype=np.complex128)
     if z.shape != (n_freq,):
@@ -230,7 +233,8 @@ def duct_matrix(
     :param density: Air density ``rho``, kg/m3.
     :return: A ``(n_freq, 2, 2)`` complex transfer-matrix array.
     :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
-        a single number.
+        a single number, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = _frequencies(frequencies)
     length = require_non_negative(length, "length")
@@ -255,8 +259,10 @@ def shunt_matrix(branch_impedance: ArrayLike) -> _Complex:
     :param branch_impedance: Acoustic impedance ``Z_b`` of the branch,
         Pa s/m3 (1-D complex array over frequency).
     :return: A ``(n_freq, 2, 2)`` complex transfer-matrix array.
+    :raises TypeError: if ``branch_impedance`` holds a text or a value that is not a
+        number.
     """
-    zb = np.atleast_1d(np.asarray(branch_impedance, dtype=np.complex128))
+    zb = np.atleast_1d(complex_array(branch_impedance, "branch_impedance"))
     if zb.ndim != 1 or zb.size == 0:
         msg = "'branch_impedance' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -311,7 +317,7 @@ def cascade(*matrices: ArrayLike) -> _Complex:
         raise ValueError(msg)
     arrays: list[_Complex] = []
     for i, matrix in enumerate(matrices):
-        arr = np.asarray(matrix, dtype=np.complex128)
+        arr = complex_array(matrix, "matrices")
         if arr.ndim != _FOUR_POLE_NDIM or arr.shape[1:] != (2, 2):
             msg = (
                 f"'matrices'[{i}] must be a (n_freq, 2, 2) four-pole array; "
@@ -403,6 +409,8 @@ def insertion_loss(
     :return: The insertion loss per frequency, dB.
     :raises ValueError: If an impedance is neither a scalar nor one value per
         analysis frequency.
+    :raises TypeError: if ``radiation_impedance`` or ``source_impedance`` holds a text
+        or a value that is not a number.
     """
     n = transfer_matrix.shape[0]
     zs = _per_frequency(source_impedance, "source_impedance", n)
@@ -446,7 +454,8 @@ def helmholtz_impedance(
     :param density: Air density ``rho``, kg/m3.
     :return: The complex branch impedance per frequency, Pa s/m3.
     :raises TypeError: if ``cavity_volume``, ``density``, ``neck_area``,
-        ``neck_length``, ``resistance`` or ``speed_of_sound`` is not a single number.
+        ``neck_length``, ``resistance`` or ``speed_of_sound`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = _frequencies(frequencies)
     s_neck = require_positive(neck_area, "neck_area")
@@ -482,7 +491,8 @@ def quarter_wave_impedance(
     :param density: Air density ``rho``, kg/m3.
     :return: The complex branch impedance per frequency, Pa s/m3.
     :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
-        a single number.
+        a single number, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = _frequencies(frequencies)
     le = require_positive(length, "length")
@@ -868,7 +878,8 @@ def expansion_chamber(
         equals the closed form
         :math:`10 \log_{10}[1 + (1/4)(m - 1/m)^2 \sin^2(kL)]`).
     :raises TypeError: if ``chamber_area``, ``density``, ``pipe_area`` or
-        ``speed_of_sound`` is not a single number.
+        ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -922,7 +933,8 @@ def helmholtz_resonator(
     :return: A :class:`ReactiveSilencerResult`; ``resonances`` holds
         :math:`f_0 = (c / 2 \pi) \sqrt{S_{\mathrm{neck}} / (l_\mathrm{e} V)}`.
     :raises TypeError: if ``density``, ``duct_area`` or ``speed_of_sound`` is not a
-        single number.
+        single number, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -983,8 +995,10 @@ def quarter_wave_resonator(
     :return: A :class:`ReactiveSilencerResult`; ``resonances`` holds the odd
         multiples of :math:`f = c / (4 l_\mathrm{e})` within the frequency range.
     :raises TypeError: if ``density``, ``duct_area``, ``length`` or ``speed_of_sound``
-        is not a single number.
+        is not a single number, or ``frequencies`` holds a text or a value that is not a
+        real number, or ``branch_area`` is not a single number.
     """
+    require_scalar(branch_area, "branch_area")
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
     rho = require_positive(density, "density")
@@ -1064,7 +1078,8 @@ def extended_tube_chamber(
     :return: A :class:`ReactiveSilencerResult`.
     :raises TypeError: if ``chamber_area``, ``density``, ``inlet_extension``,
         ``length``, ``outlet_extension``, ``pipe_area`` or ``speed_of_sound`` is not a
-        single number.
+        single number, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -1209,7 +1224,8 @@ class SilencerChain:
         element of the chain.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :raises TypeError: if ``density`` or ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``density`` or ``speed_of_sound`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
 
     def __init__(
@@ -1293,6 +1309,8 @@ class SilencerChain:
         :return: The chain, so the calls can be written one after another.
         :raises ValueError: If ``branch_impedance`` is neither a scalar nor one
             value per analysis frequency.
+        :raises TypeError: if ``branch_impedance`` holds a text or a value that is not a
+            number.
         """
         zb = _per_frequency(
             branch_impedance, "branch_impedance", self._frequencies.size

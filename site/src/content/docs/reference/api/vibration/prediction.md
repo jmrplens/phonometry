@@ -388,7 +388,7 @@ MACHINE_COUNT_CORRECTION = {3: (0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383,
 machine_count_correction(
     n_machines: ArrayLike,
     *,
-    n_reference_machines: int,
+    n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 
@@ -413,7 +413,7 @@ five-hundredth and interpolated linearly between the readings.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a count outside the figure or a reference the figure has no curve for. |
-| TypeError | if `n_machines` holds a text or a value that is not a real number. |
+| TypeError | if `n_machines` holds a text or a value that is not a real number, or `n_reference_machines` is not a single number. |
 
 ## MACHINE_FREQUENCY_BANDS_HZ
 
@@ -430,7 +430,7 @@ machine_hall_velocity_mm_s(
     reference_velocity_mm_s: float,
     n_machines: ArrayLike,
     *,
-    n_reference_machines: int,
+    n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 
@@ -457,7 +457,7 @@ sixty, the nearest group; beyond that the added groups are further off.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative velocity, or a count or reference outside Figure 3. |
-| TypeError | if `reference_velocity_mm_s` is not a single number, or `n_machines` holds a text or a value that is not a real number. |
+| TypeError | if `reference_velocity_mm_s` is not a single number, or `n_machines` holds a text or a value that is not a real number, or `n_reference_machines` is not a single number. |
 
 ## material_damping_factor
 

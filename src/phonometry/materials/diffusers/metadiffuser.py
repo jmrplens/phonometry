@@ -34,6 +34,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_positive,
     require_positive_array,
@@ -382,10 +383,11 @@ def metadiffuser_diffusion_spectrum(
         :class:`~phonometry.materials.diffusers.scattering_diffusion.DiffusionSpectrum`
         carrying the raw ``d(f)`` and the normalised ``d_n(f)``.
     :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number, or
-        ``resonator_geometry`` is not a text.
+        ``resonator_geometry`` is not a text, or ``frequencies`` holds a text or a value
+        that is not a real number.
     """
     require_choice(resonator_geometry, "resonator_geometry", ("square", "slit"))
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D sequence."
         raise ValueError(msg)

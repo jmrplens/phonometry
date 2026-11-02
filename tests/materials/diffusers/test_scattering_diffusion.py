@@ -616,10 +616,13 @@ def test_absorption_rejects_nonpositive_geometry() -> None:
 
 
 def test_absorption_rejects_nonpositive_time_and_speed() -> None:
-    with pytest.raises(ValueError, match="'T' values must be positive"):
+    """Each refusal names the parameter given, not the kernel's ``T`` or ``c``."""
+    with pytest.raises(ValueError, match="'t1' values must be positive"):
         random_incidence_absorption(V, S, c1=C, t1=0.0, c2=C, t2=6.0)
-    with pytest.raises(ValueError, match="'c' values must be positive"):
+    with pytest.raises(ValueError, match="'c1' values must be positive"):
         random_incidence_absorption(V, S, c1=-1.0, t1=8.0, c2=C, t2=6.0)
+    with pytest.raises(ValueError, match="'t2' values must be positive"):
+        random_incidence_absorption(V, S, c1=C, t1=8.0, c2=C, t2=0.0)
 
 
 def test_scattering_rejects_alpha_s_equal_one() -> None:

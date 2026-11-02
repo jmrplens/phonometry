@@ -496,6 +496,7 @@ and never filled from its neighbours.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite and positive, for one that matches none of the bands, naming the nearest, and for a band this row does not print, naming the row, the band and what the page had in that cell. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### DuctWallSpectrum.why_missing()
 

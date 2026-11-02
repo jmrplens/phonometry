@@ -193,6 +193,7 @@ of clause 6 a) and c), which the standard states without a number.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a determination whose geometry or number of positions is not the contour's, a non-positive time, or a negative range. |
+| TypeError | if `leq_range_db` or `measurement_time_s` holds a text or a value that is not a real number. |
 
 ## partial_plant_contributions
 
@@ -363,7 +364,7 @@ standard sets no number for "markedly".
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band outside the method, only one of the two weather values, or a humidity outside 0 % to 100 %. |
-| TypeError | if `relative_humidity_percent` or `temperature_c` is not a single number. |
+| TypeError | if `relative_humidity_percent` or `temperature_c` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## PLANT_BACKGROUND_CORRECTION
 
@@ -412,6 +413,7 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite difference or one below 6 dB, which the table calls an invalid measurement. |
+| TypeError | if `level_difference` holds a text or a value that is not a real number. |
 
 ## plant_characteristic_height_m
 
@@ -446,7 +448,7 @@ of `source_heights_m`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative or non-finite height, a count from 1 to 9, or no sources at all. |
-| TypeError | if `n_low_sources` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_low_sources` is a flag, a text or an array where a count goes, or `source_heights_m` holds a text or a value that is not a real number. |
 
 ## plant_mean_distance_limits_m
 
@@ -521,7 +523,7 @@ the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for polygons that do not form a contour round the plant area, a layout of fewer than three positions, an omitted position that is not a whole number from 0, or omitted positions without a layout to refer to. |
-| TypeError | if `n_positions` or an item of `omitted_positions` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_positions` or an item of `omitted_positions` is a flag, a text or an array where a count goes, or `contour_m` or `plant_outline_m` holds a text or a value that is not a real number. |
 
 ## plant_method_uncertainty
 
@@ -654,7 +656,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that do not match the bands, a background less than 6 dB below a level, a non-positive geometry, a microphone angle outside (0°, 90°], or half a weather. |
-| TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
+| TypeError | if `background_levels`, `directional_microphone_angle_deg`, `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## plant_steady_reading
 

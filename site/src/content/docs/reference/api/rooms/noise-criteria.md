@@ -215,6 +215,7 @@ reads `">NC-70"` / `"<NC-15"`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for malformed inputs or unknown band frequencies. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## NoiseCriterionWarning
 
@@ -399,6 +400,7 @@ tabulated RC-25 to RC-50 family is flagged by
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the 500/1000/2000 Hz mid-frequency bands are absent. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 **Warns**
 

@@ -45,6 +45,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_finite_fields,
     require_ranks,
     require_same_length,
@@ -339,7 +340,7 @@ def _masking_amdb(level: np.ndarray | float) -> np.ndarray:
     :math:`0.5 L - 59.8` (:math:`67 \le L < 100`) and
     :math:`-10` (:math:`L \ge 100`).
     """
-    lvl = np.asarray(level, dtype=np.float64)
+    lvl = real_array(level, "level")
     return np.asarray(
         np.select(
             [
@@ -366,7 +367,7 @@ def _octave_bank(fs: float) -> OctaveFilterBank:
 
 
 def _validate_band_vector(values: ArrayLike, name: str) -> np.ndarray:
-    arr = np.asarray(values, dtype=np.float64)
+    arr = real_array(values, name)
     if arr.shape != (_NUM_BANDS,):
         msg = (
             f"'{name}' must contain exactly {_NUM_BANDS} octave-band values "
@@ -388,7 +389,7 @@ def _truncated_mtf(mtf: ArrayLike, *, stacklevel: int = 4) -> np.ndarray:
     fits the public functions that route through :func:`_sti_from_mtf`, and
     :func:`sti_adjusted_for_levels`, which calls here directly, passes 3.
     """
-    m = np.array(mtf, dtype=np.float64)
+    m = real_array(mtf, "mtf", copy=True)
     # The number is a count of array axes, not a quantity.
     if m.ndim != 2 or m.shape[0] != _NUM_BANDS:  # noqa: PLR2004
         msg = (
@@ -415,7 +416,7 @@ def _snr_vector(
     """The per-band signal-to-noise ratios, broadcast from a scalar if given."""
     if snr is None:
         return None
-    snr_arr = np.asarray(snr, dtype=np.float64)
+    snr_arr = real_array(snr, "snr")
     if snr_arr.ndim == 0:
         return np.full(_NUM_BANDS, float(snr_arr))
     if snr_arr.shape != (_NUM_BANDS,):
@@ -679,6 +680,9 @@ def sti_adjusted_for_levels(
         ``band_levels`` and ``ambient_levels``.
     :raises ValueError: if a level vector is not 7 finite values, or ``mtf`` is not
         a (7, n) matrix of finite non-negative values.
+    :raises TypeError: if ``measured_ambient``, ``measured_levels``, ``mtf``,
+        ``operational_ambient`` or ``operational_levels`` holds a text or a value that
+        is not a real number.
     """
     measured = _level_correction(
         _validate_band_vector(measured_levels, "measured_levels"),
@@ -793,7 +797,8 @@ def sti_from_impulse_response(
     :param ambient: Optional ambient noise octave-band levels in dB SPL
         (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 14).
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``ambient``, ``levels`` or
+        ``snr`` holds a text or a value that is not a real number.
     """
     require_scalar(fs, "fs")
     fs = resolve_fs(ir, fs, name="ir")
@@ -991,7 +996,8 @@ def stipa(
     :param ambient: Optional ambient noise octave-band levels in dB SPL
         (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 2).
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``ambient`` or ``levels``
+        holds a text or a value that is not a real number.
     """
     require_scalar(fs, "fs")
     # The reference is a second recording of the same test signal, so it has

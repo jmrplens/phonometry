@@ -35,6 +35,7 @@ from .._internal.frozen import OwnsArrays, read_only
 # sex field of AgeThresholdResult in this module's namespace.
 from .._internal.types import Sex  # noqa: TC001
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_ranks,
     require_same_length,
@@ -301,7 +302,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
         return values.copy()
-    fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    fr = np.atleast_1d(real_array(frequencies, "frequencies"))
     idx = []
     for f in fr:
         matches = np.isclose(AUDIOMETRIC_FREQUENCIES_HZ, f, rtol=1e-3)
@@ -347,8 +348,9 @@ def age_threshold(
     :return: An :class:`AgeThresholdResult` with the distribution and ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a fractile outside
         (0, 1), or an unknown frequency.
-    :raises TypeError: if ``age`` or ``fractile`` is not a single number, or
-        ``sex`` is not a text.
+    :raises TypeError: if ``age`` or ``fractile`` is not a single number, or ``sex`` is
+        not a text, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     require_scalar(age, "age")
     if age < _REFERENCE_AGE:
@@ -401,7 +403,8 @@ def reference_threshold(
         hertz; ``None`` uses all eleven (125 Hz - 8000 Hz).
     :return: The reference threshold, in dB, aligned with the frequencies.
     :raises ValueError: for an unknown field or frequency.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     chosen = require_choice(field, "field", FIELDS)
     return _select(_REFERENCE[chosen], frequencies)
@@ -574,7 +577,7 @@ def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndar
     """``values`` at a requested subset of the ISO 389-1 frequencies."""
     if frequencies is None:
         return values.copy()
-    fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    fr = np.atleast_1d(real_array(frequencies, "frequencies"))
     idx = []
     for f in fr:
         matches = np.isclose(RETSPL_FREQUENCIES_HZ, f, rtol=1e-3)
@@ -607,7 +610,8 @@ def earphone_reference_level(
         hertz; ``None`` uses all twenty-three.
     :return: The reference level, in dB, aligned with the frequencies.
     :raises ValueError: For an unknown earphone or frequency.
-    :raises TypeError: if ``earphone`` is not a text.
+    :raises TypeError: if ``earphone`` is not a text, or ``frequencies`` holds a text or
+        a value that is not a real number.
     """
     require_choice(earphone, "earphone", EARPHONES)
     return _select_retspl(_RETSPL[earphone], frequencies)
@@ -633,10 +637,11 @@ def hearing_level_to_coupler_spl(
     :return: The equivalent sound pressure level in the coupler, in dB.
     :raises ValueError: If the audiogram does not match the frequencies, or
         for an unknown earphone or frequency.
-    :raises TypeError: if ``earphone`` is not a text.
+    :raises TypeError: if ``earphone`` is not a text, or ``hearing_level`` holds a text
+        or a value that is not a real number.
     """
     reference = earphone_reference_level(earphone, frequencies)
-    levels = np.atleast_1d(np.asarray(hearing_level, dtype=np.float64))
+    levels = np.atleast_1d(real_array(hearing_level, "hearing_level"))
     if levels.shape != reference.shape:
         msg = (
             f"hearing_level carries {levels.size} value(s) but the request "

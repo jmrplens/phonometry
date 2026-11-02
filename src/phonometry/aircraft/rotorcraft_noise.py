@@ -62,9 +62,9 @@ from .._internal.frozen import OwnsArrays, read_only
 # flow_resistivity field of RotorcraftGround in this module's namespace.
 from .._internal.types import GroundClass  # noqa: TC001
 from .._internal.validation import (
-    _as_float64,
     arrays_of,
     is_scalar,
+    real_array,
     refuse_text_beside_choice,
     require_choice,
     require_equal_shapes,
@@ -291,8 +291,8 @@ def hemisphere_source_level(
     """
     out = _source_levels(
         hemisphere,
-        np.asarray([azimuth_deg], dtype=np.float64),
-        np.asarray([polar_deg], dtype=np.float64),
+        real_array([azimuth_deg], "azimuth_deg"),
+        real_array([polar_deg], "polar_deg"),
     )
     return np.asarray(out[0], dtype=np.float64)
 
@@ -507,12 +507,12 @@ def hover_ring_hemisphere(
     :return: A :class:`RotorcraftHemisphere` on the requested grid.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``mapping`` is not a text, ``azimuth_step``, ``distance_m`` or
-        ``polar_step`` is not a single number, or ``frequencies`` holds a text or a
-        value that is not a real number.
+        ``polar_step`` is not a single number, or ``bearings``, ``frequencies`` or
+        ``levels`` holds a text or a value that is not a real number.
     """
     freqs = require_positive_array(frequencies, "frequencies")
-    brg = np.atleast_1d(np.asarray(bearings, dtype=np.float64))
-    lv = np.asarray(levels, dtype=np.float64)
+    brg = np.atleast_1d(real_array(bearings, "bearings"))
+    lv = real_array(levels, "levels")
     # The number is a count of array axes, not a quantity.
     if brg.ndim != 1 or brg.size < 2:  # noqa: PLR2004
         msg = "'bearings' must be 1-D with at least two ring directions."
@@ -673,10 +673,14 @@ def flight_condition_weights(
         reproduces the reference implementation bin for bin.
     :return: The ``(index, weight)`` pairs, weights summing to 1.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``scaling_factor`` is not a single number.
+    :raises TypeError: if ``scaling_factor`` is not a single number, or ``airspeeds`` or
+        ``path_angles_deg`` holds a text or a value that is not a real number, or
+        ``airspeed`` or ``path_angle_deg`` is not a single number.
     """
-    v = np.atleast_1d(np.asarray(airspeeds, dtype=np.float64))
-    g = np.atleast_1d(np.asarray(path_angles_deg, dtype=np.float64))
+    require_scalar(airspeed, "airspeed")
+    require_scalar(path_angle_deg, "path_angle_deg")
+    v = np.atleast_1d(real_array(airspeeds, "airspeeds"))
+    g = np.atleast_1d(real_array(path_angles_deg, "path_angles_deg"))
     require_equal_shapes(
         "flight_condition_weights",
         {"airspeeds": v.shape, "path_angles_deg": g.shape},
@@ -803,6 +807,8 @@ def interpolated_source_level(
         :func:`flight_condition_weights`).
     :return: Band levels at the reference distance, in dB, shape ``(F,)``.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``airspeeds`` holds a text or a value that is not a real
+        number.
     """
     freqs = _common_frequencies(hemispheres, airspeeds)
     weights = flight_condition_weights(
@@ -830,7 +836,7 @@ def _common_frequencies(
     if len(hemispheres) == 0:
         msg = "'hemispheres' must not be empty."
         raise ValueError(msg)
-    n = np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)).size
+    n = np.atleast_1d(real_array(airspeeds, "airspeeds")).size
     if len(hemispheres) != n:
         msg = "'hemispheres' and the flight conditions must have equal length."
         raise ValueError(msg)
@@ -965,7 +971,8 @@ def flight_path_kinematics(
     :param gravity: Acceleration of gravity ``g`` in m/s² (default 9.80665).
     :return: A :class:`FlightPathKinematics`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``gravity`` is not a single number.
+    :raises TypeError: if ``gravity`` is not a single number, or ``positions`` or
+        ``times`` holds a text or a value that is not a real number.
     """
     t, p = _validated_track(times, positions)
     g0 = require_positive(gravity, "gravity")
@@ -1003,7 +1010,7 @@ def flight_path_kinematics(
 
 def _a_weighting_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """IEC 61672-1 A-weighting at the exact frequencies, in dB (Doc 32 Eq. 25)."""
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
     num = f4**2 * f**4
     den = (f**2 + f1**2) * np.sqrt((f**2 + f2**2) * (f**2 + f3**2)) * (f**2 + f4**2)
@@ -1270,7 +1277,7 @@ def _per_point(
     """A per-track-point parameter: scalar broadcast, ``(N,)`` array, or ``None``."""
     if value is None:
         return None
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if arr.ndim == 0:
         arr = np.full(n, float(arr))
     if arr.shape != (n,):
@@ -1287,8 +1294,8 @@ def _validated_track(
     positions: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(times, positions)`` track arrays."""
-    t = np.asarray(times, dtype=np.float64)
-    p = np.asarray(positions, dtype=np.float64)
+    t = real_array(times, "times")
+    p = real_array(positions, "positions")
     # The number is a count of array axes, not a quantity.
     if t.ndim != 1 or t.size < 2:  # noqa: PLR2004
         msg = "'times' must be 1-D with at least two points."
@@ -1445,7 +1452,7 @@ class RotorcraftGround(OwnsArrays):
         for name in ("ground_elevation", "flow_resistivity"):
             value = getattr(self, name)
             if not isinstance(value, str) and not is_scalar(value):
-                object.__setattr__(self, name, read_only(_as_float64(value, name)))
+                object.__setattr__(self, name, read_only(real_array(value, name)))
         if self.terrain is not None:
             x, y, z = arrays_of(
                 self.terrain, "terrain", "an (x, y, z) elevation model of three axes", 3
@@ -1670,8 +1677,8 @@ def _event_setup(
     )
     return _EventSetup(
         hemispheres=tuple(hemispheres),
-        airspeeds=np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
-        path_angles_deg=np.atleast_1d(np.asarray(path_angles_deg, dtype=np.float64)),
+        airspeeds=np.atleast_1d(real_array(airspeeds, "airspeeds")),
+        path_angles_deg=np.atleast_1d(real_array(path_angles_deg, "path_angles_deg")),
         frequencies=freqs,
         times=t,
         positions=p,
@@ -1725,7 +1732,7 @@ def _setup_resistivity(
         )
         raise ValueError(msg)
     return require_positive_array(
-        np.asarray(flow_resistivity, dtype=np.float64).ravel(), "flow_resistivity"
+        real_array(flow_resistivity, "flow_resistivity").ravel(), "flow_resistivity"
     )
 
 
@@ -1736,7 +1743,7 @@ def _setup_ground_elevation(
     """The scalar (or per-receiver) ground elevation of an event run."""
     if is_scalar(ground_elevation):
         return require_finite(cast("float", ground_elevation), "ground_elevation")
-    arr = _as_float64(ground_elevation, "ground_elevation").ravel()
+    arr = real_array(ground_elevation, "ground_elevation").ravel()
     if not np.all(np.isfinite(arr)):
         msg = "'ground_elevation' must be finite."
         raise ValueError(msg)
@@ -1787,9 +1794,9 @@ def _validated_terrain(
     if len(terrain) != 3:  # noqa: PLR2004
         msg = "'terrain' must be an (x, y, z) elevation model."
         raise ValueError(msg)
-    tx = np.asarray(terrain[0], dtype=np.float64).ravel()
-    ty = np.asarray(terrain[1], dtype=np.float64).ravel()
-    tz = np.asarray(terrain[2], dtype=np.float64)
+    tx = real_array(terrain[0], "terrain").ravel()
+    ty = real_array(terrain[1], "terrain").ravel()
+    tz = real_array(terrain[2], "terrain")
     if (
         # The fewest values the step below can work with, not a quantity.
         tx.size < 2  # noqa: PLR2004
@@ -2117,8 +2124,10 @@ def rotorcraft_event_level(
         hemispheres, a :class:`FlightConditionInterpolation` (default:
         ``F_fc = 2`` over the Delaunay triangulation).
     :return: A :class:`RotorcraftEventResult`.
-    :raises TypeError: If the ground holds an array of flow resistivities or
-        ground elevations, which are for the contour grid.
+    :raises TypeError: If the ground holds an array of flow resistivities or ground
+        elevations, which are for the contour grid, or ``airspeeds``, ``level_offset``,
+        ``path_angles_deg``, ``positions``, ``receiver`` or ``times`` holds a text or a
+        value that is not a real number.
     :raises ValueError: If the inputs are invalid.
     """
     setup = _event_setup(
@@ -2133,7 +2142,7 @@ def rotorcraft_event_level(
         track_state=track_state,
         interpolation=interpolation,
     )
-    rx = np.asarray(receiver, dtype=np.float64).ravel()
+    rx = real_array(receiver, "receiver").ravel()
     # The length of a fixed-size argument, not a quantity.
     if rx.size != 2 or not np.all(np.isfinite(rx)):  # noqa: PLR2004
         msg = "'receiver' must be a finite (x, y) ground position."
@@ -2240,7 +2249,9 @@ def rotorcraft_noise_contour(
         hemispheres, a :class:`FlightConditionInterpolation`.
     :return: A :class:`RotorcraftNoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``metric`` is not a text.
+    :raises TypeError: if ``metric`` is not a text, or ``airspeeds``, ``level_offset``,
+        ``path_angles_deg``, ``positions``, ``times``, ``x`` or ``y`` holds a text or a
+        value that is not a real number.
     """
     setup = _event_setup(
         hemispheres,
@@ -2254,8 +2265,8 @@ def rotorcraft_noise_contour(
         track_state=track_state,
         interpolation=interpolation,
     )
-    gx = np.asarray(x, dtype=np.float64).ravel()
-    gy = np.asarray(y, dtype=np.float64).ravel()
+    gx = real_array(x, "x").ravel()
+    gy = real_array(y, "y").ravel()
     if (
         # The fewest values the step below can work with, not a quantity.
         gx.size < 2  # noqa: PLR2004

@@ -80,6 +80,7 @@ from scipy import special
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_axis_count,
     require_choice,
     require_count,
@@ -235,7 +236,7 @@ def _reverse_arrangement_p_value(n: int, statistic: int) -> float:
 
 def _log_comb(n: int, k: NDArray[np.int64]) -> NDArray[np.float64]:
     r"""``ln C(n, k)`` element-wise, ``-inf`` outside :math:`0 \le k \le n`."""
-    kk = np.asarray(k, dtype=np.float64)
+    kk = real_array(k, "k")
     valid = (kk >= 0.0) & (kk <= n)
     safe = np.where(valid, kk, 0.0)
     out = (
@@ -353,7 +354,7 @@ def _null_trend_mean(
     :param median: Classification median for ``"runs"``, else ignored.
     :return: The null mean, or ``None`` when it is not determined.
     """
-    seq = np.asarray(values, dtype=np.float64)
+    seq = real_array(values, "values")
     if method == "reverse_arrangements":
         return _reverse_arrangement_moments(seq.size)[0]
     if method != "runs" or median is None:
@@ -441,7 +442,7 @@ def _acceptance_region(
     if not 0.0 < alpha < 1.0:
         msg = f"{owner}: 'alpha' must be inside (0, 1), got {alpha!r}."
         raise ValueError(msg)
-    seq = np.asarray(values, dtype=np.float64)
+    seq = real_array(values, "values")
     if method == "reverse_arrangements":
         return _reverse_arrangement_bounds(seq.size, alpha)
     if median is None:
@@ -652,7 +653,7 @@ def _validate_trend_inputs(
     values: ArrayLike, method: object, alpha: float
 ) -> NDArray[np.float64]:
     require_scalar(alpha, "alpha")
-    seq = np.asarray(values, dtype=np.float64)
+    seq = real_array(values, "values")
     if seq.ndim != 1:
         msg = "'values' must be one-dimensional."
         raise ValueError(msg)
@@ -707,7 +708,8 @@ def trend_test(
         tabulated by B&P).
     :return: A :class:`TrendTestResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``alpha`` is not a single number, or ``method`` is not a text.
+    :raises TypeError: if ``alpha`` is not a single number, or ``method`` is not a text,
+        or ``values`` holds a text or a value that is not a real number.
     """
     seq = _validate_trend_inputs(values, method, alpha)
     if method == "reverse_arrangements":
@@ -1091,6 +1093,7 @@ def level_crossing_rate(
         (default: the :func:`power_spectral_density` default).
     :return: A :class:`LevelCrossingResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     xa = _validate_signal(x, "x", context="level-crossing statistics")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -1103,7 +1106,7 @@ def level_crossing_rate(
     if levels is None:
         level_arr = np.linspace(-3.0, 3.0, 13) * sigma
     else:
-        level_arr = np.asarray(levels, dtype=np.float64)
+        level_arr = real_array(levels, "levels")
         if level_arr.ndim != 1 or level_arr.size == 0:
             msg = "'levels' must be a non-empty 1-D array."
             raise ValueError(msg)
@@ -1385,8 +1388,9 @@ class PeakStatisticsResult(OwnsArrays):
 
         :param z: Standardized peak heights (units of the record RMS).
         :return: Exceedance probabilities, same shape.
+        :raises TypeError: if ``z`` holds a text or a value that is not a real number.
         """
-        za = np.atleast_1d(np.asarray(z, dtype=np.float64))
+        za = np.atleast_1d(real_array(z, "z"))
         return _rice_peak_exceedance(za, self.irregularity_factor)
 
     def peak_density(self, z: ArrayLike) -> NDArray[np.float64]:
@@ -1394,8 +1398,9 @@ class PeakStatisticsResult(OwnsArrays):
 
         :param z: Standardized peak heights (units of the record RMS).
         :return: Probability density values, same shape.
+        :raises TypeError: if ``z`` holds a text or a value that is not a real number.
         """
-        za = np.atleast_1d(np.asarray(z, dtype=np.float64))
+        za = np.atleast_1d(real_array(z, "z"))
         return _rice_peak_density(za, self.irregularity_factor)
 
     def plot(

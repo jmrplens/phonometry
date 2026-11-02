@@ -77,7 +77,7 @@ exactly as the paper reports `delta_n`.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `depth_m` or `period_m` is not a single number, or `resonator_geometry` is not a text. |
+| TypeError | if `depth_m` or `period_m` is not a single number, or `resonator_geometry` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## metadiffuser_polar_response
 

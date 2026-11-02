@@ -219,6 +219,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.types import CALIBRATION_FIELDS, CalibrationField
 from .._internal.validation import (
+    real_array,
     refuse_text,
     require_above_absolute_zero,
     require_choice,
@@ -425,12 +426,14 @@ def _output_level_difference_db(
     Without a monitor it is the plain difference of the two readings, which is
     also Formula (8) of IEC 61183.
     """
-    test = np.asarray(test_output_level, dtype=np.float64)
-    reference = np.asarray(reference_output_level, dtype=np.float64)
+    test = real_array(test_output_level, "test_output_level")
+    reference = real_array(reference_output_level, "reference_output_level")
     if test_monitor_level_db is not None:
-        test = test - np.asarray(test_monitor_level_db, dtype=np.float64)
+        test = test - real_array(test_monitor_level_db, "test_monitor_level_db")
     if reference_monitor_level_db is not None:
-        reference = reference - np.asarray(reference_monitor_level_db, dtype=np.float64)
+        reference = reference - real_array(
+            reference_monitor_level_db, "reference_monitor_level_db"
+        )
     return test - reference
 
 
@@ -443,8 +446,10 @@ def _interchange_level_difference_db(
     :math:`L_\mathrm{test} - L_\mathrm{ref} = -\tfrac12(L_\mathrm{C12} -
     L_\mathrm{C21})`.
     """
-    first = np.asarray(channel_difference, dtype=np.float64)
-    second = np.asarray(interchanged_channel_difference, dtype=np.float64)
+    first = real_array(channel_difference, "channel_difference")
+    second = real_array(
+        interchanged_channel_difference, "interchanged_channel_difference"
+    )
     return -0.5 * (first - second)
 
 
@@ -462,10 +467,10 @@ def _compared_level_db(
     pressure ratio and no correction.
     """
     return (
-        np.asarray(reference_level, dtype=np.float64)
-        + np.asarray(output_level_difference, dtype=np.float64)
-        - np.asarray(pressure_level_difference, dtype=np.float64)
-        + np.asarray(correction, dtype=np.float64)
+        real_array(reference_level, "reference_level")
+        + real_array(output_level_difference, "output_level_difference")
+        - real_array(pressure_level_difference, "pressure_level_difference")
+        + real_array(correction, "correction")
     )
 
 
@@ -473,7 +478,7 @@ def _wrapped_deg(phase_deg: ArrayLike) -> NDArray[np.float64]:
     """A phase or a difference of phases, in degrees, taken into the half-open
     interval from -180° (excluded) to 180° (included).
     """
-    phase = np.asarray(phase_deg, dtype=np.float64)
+    phase = real_array(phase_deg, "phase_deg")
     return _HALF_TURN_DEG - np.mod(_HALF_TURN_DEG - phase, _FULL_TURN_DEG)
 
 
@@ -1014,23 +1019,28 @@ def environmental_sensitivity_correction(
         not above absolute zero, a relative humidity outside 0 % to 100 %, a
         coefficient that is not finite, or a coefficient column that is not
         one value per frequency.
+    :raises TypeError: if ``frequencies``, ``humidity_coefficient_db_per_percent``,
+        ``static_pressure_coefficient_db_per_kpa`` or
+        ``temperature_coefficient_db_per_k`` holds a text or a value that is not a real
+        number.
     """
     return EnvironmentalSensitivityCorrection(
-        frequencies=np.asarray(frequencies, dtype=np.float64),
+        frequencies=real_array(frequencies, "frequencies"),
         static_pressure_kpa=static_pressure_kpa,
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
         reference_static_pressure_kpa=reference_static_pressure_kpa,
         reference_temperature_c=reference_temperature_c,
         reference_relative_humidity_percent=reference_relative_humidity_percent,
-        static_pressure_coefficient_db_per_kpa=np.asarray(
-            static_pressure_coefficient_db_per_kpa, dtype=np.float64
+        static_pressure_coefficient_db_per_kpa=real_array(
+            static_pressure_coefficient_db_per_kpa,
+            "static_pressure_coefficient_db_per_kpa",
         ),
-        temperature_coefficient_db_per_k=np.asarray(
-            temperature_coefficient_db_per_k, dtype=np.float64
+        temperature_coefficient_db_per_k=real_array(
+            temperature_coefficient_db_per_k, "temperature_coefficient_db_per_k"
         ),
-        humidity_coefficient_db_per_percent=np.asarray(
-            humidity_coefficient_db_per_percent, dtype=np.float64
+        humidity_coefficient_db_per_percent=real_array(
+            humidity_coefficient_db_per_percent, "humidity_coefficient_db_per_percent"
         ),
     )
 
@@ -1905,12 +1915,12 @@ def _calibration(
         named[str(name)] = value
     return ComparisonCalibration(
         frequencies=frequencies,
-        reference_sensitivity_level=np.asarray(
-            reference_sensitivity_level, dtype=np.float64
+        reference_sensitivity_level=real_array(
+            reference_sensitivity_level, "reference_sensitivity_level"
         ),
         output_level_differences=output_level_differences,
-        pressure_level_difference=np.asarray(
-            pressure_level_difference, dtype=np.float64
+        pressure_level_difference=real_array(
+            pressure_level_difference, "pressure_level_difference"
         ),
         corrections=named,  # type: ignore[arg-type]
         field=field,
@@ -1918,7 +1928,7 @@ def _calibration(
         expanded_uncertainty_db=(
             None
             if expanded_uncertainty_db is None
-            else np.asarray(expanded_uncertainty_db, dtype=np.float64)
+            else real_array(expanded_uncertainty_db, "expanded_uncertainty_db")
         ),
         reference_sensitivity_phase_deg=None if phases is None else phases.reference,
         output_phase_differences_deg=None if phases is None else phases.output,
@@ -2280,7 +2290,9 @@ def simultaneous_comparison(
         numbers of determinations disagree, any column that is not one
         finite value per frequency, or phase readings that do not follow the
         level readings.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` is not a text, or ``expanded_uncertainty_db``,
+        ``pressure_level_difference`` or ``reference_sensitivity_level`` holds a text or
+        a value that is not a real number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
@@ -2427,7 +2439,9 @@ def sequential_comparison(
         frequencies, readings whose numbers of determinations disagree, any
         column that is not one finite value per frequency, or monitor phases
         without the output phases.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` is not a text, or ``expanded_uncertainty_db``,
+        ``pressure_level_difference`` or ``reference_sensitivity_level`` holds a text or
+        a value that is not a real number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
@@ -2517,7 +2531,8 @@ class ComparisonUncertaintyBudget(OwnsArrays):
             component, a negative uncertainty, or an :attr:`uncertainty` that
             is not the root-sum-square of the components.
         :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` or
-            ``frequency_hz`` is not a single number.
+            ``frequency_hz`` is not a single number, or ``standard_uncertainties_db``
+            holds a text or a value that is not a real number.
         """
         require_positive(self.frequency_hz, "frequency_hz")
         require_positive(self.coverage_factor, "coverage_factor")
@@ -2526,8 +2541,8 @@ class ComparisonUncertaintyBudget(OwnsArrays):
         if len(self.components) != count:
             msg = "ComparisonUncertaintyBudget: 'components' must hold one per name."
             raise ValueError(msg)
-        column = np.array(
-            self.standard_uncertainties_db, dtype=np.float64, ndmin=1, copy=None
+        column = np.atleast_1d(
+            real_array(self.standard_uncertainties_db, "standard_uncertainties_db")
         )
         if column.shape != (count,):
             msg = (
@@ -2877,7 +2892,9 @@ class JigCouplerVerification(OwnsArrays):
             with an expanded uncertainty of 0 dB at some frequency (two
             uncertainties of 0 dB, or two that are all shared), or an unknown
             validation.
-        :raises TypeError: if ``validation`` is not a text.
+        :raises TypeError: if ``validation`` is not a text, or
+            ``unvalidated_frequencies_hz`` holds a text or a value that is not a real
+            number.
         """
         require_choice(self.validation, "validation", _VALIDATIONS)
         frequencies = _frequency_axis(self.frequencies)
@@ -2914,7 +2931,9 @@ class JigCouplerVerification(OwnsArrays):
                 "least one of them needs an uncertainty beyond the part they share."
             )
             raise ValueError(msg)
-        uncovered = np.asarray(self.unvalidated_frequencies_hz, dtype=np.float64)
+        uncovered = real_array(
+            self.unvalidated_frequencies_hz, "unvalidated_frequencies_hz"
+        )
         object.__setattr__(
             self, "unvalidated_frequencies_hz", read_only(uncovered.reshape(-1))
         )
@@ -3791,8 +3810,9 @@ def air_gap_series_impedance_pa_s_m3(
         a length or radius that is not positive, conditions Annex F refuses,
         or a gas at another pressure.
     :raises TypeError: if ``gap_length_m``, ``gap_radius_m`` or ``static_pressure_kpa``
-        is not a single number.
+        is not a single number, or ``relative_humidity_percent`` is not a single number.
     """
+    require_scalar(relative_humidity_percent, "relative_humidity_percent")
     frequencies = _frequency_axis(frequencies)
     length = require_positive(gap_length_m, "gap_length_m")
     radius = require_positive(gap_radius_m, "gap_radius_m")
@@ -4282,7 +4302,8 @@ class TimeSelectiveResponse(OwnsArrays):
         :return: The axes. Requires matplotlib
             (``pip install "phonometry[plot]"``).
         :raises ValueError: for an unknown quantity.
-        :raises TypeError: if ``quantity`` is not a text.
+        :raises TypeError: if ``quantity`` is not a text, or ``frequencies`` holds a
+            text or a value that is not a real number.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_time_selective_response
@@ -4349,13 +4370,14 @@ def time_selective_response(
         measurement, divided out of the response (Default: None).
     :return: The :class:`TimeSelectiveResponse`.
     :raises ValueError: for what :class:`TimeSelectiveResponse` refuses.
-    :raises TypeError: if ``window_shape`` is not a text.
+    :raises TypeError: if ``window_shape`` is not a text, or ``impulse_response`` holds
+        a text or a value that is not a real number.
     """
     require_choice(
         window_shape, "window_shape", ("tukey", "hann", "hamming", "rectangular")
     )
     return TimeSelectiveResponse(
-        impulse_response=np.asarray(impulse_response, dtype=np.float64),
+        impulse_response=real_array(impulse_response, "impulse_response"),
         fs=fs,
         window_start_s=window_start_s,
         window_end_s=window_end_s,

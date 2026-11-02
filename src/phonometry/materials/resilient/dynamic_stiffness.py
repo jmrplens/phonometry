@@ -91,6 +91,7 @@ from ..._internal.types import ReportEngine, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     is_positive,
+    real_array,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -183,12 +184,13 @@ def apparent_dynamic_stiffness(
     :return: The apparent dynamic stiffness per unit area ``s't``, in N/m3 (numerically
         MN/m3 when divided by 1e6); a ``float`` for a number; an array for a sequence or
         an array, a zero-dimensional one included.
-    :raises TypeError: if ``total_mass_per_area_kg_m2`` is not a single number.
+    :raises TypeError: if ``total_mass_per_area_kg_m2`` is not a single number, or
+        ``resonant_frequency_hz`` holds a text or a value that is not a real number.
     """
     total_mass_per_area_kg_m2 = require_positive(
         total_mass_per_area_kg_m2, "total_mass_per_area_kg_m2"
     )
-    fr = np.asarray(resonant_frequency_hz, dtype=np.float64)
+    fr = real_array(resonant_frequency_hz, "resonant_frequency_hz")
     if np.any(fr <= 0.0):
         msg = "'resonant_frequency_hz' must be positive."
         raise ValueError(msg)
@@ -243,7 +245,8 @@ def enclosed_gas_stiffness(
     :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3; a
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included.
-    :raises TypeError: if ``porosity`` or ``static_pressure_pa`` is not a single number.
+    :raises TypeError: if ``porosity`` or ``static_pressure_pa`` is not a single number,
+        or ``thickness_m`` holds a text or a value that is not a real number.
 
     .. note::
         With the standard's :math:`p_0 = 0.1` MPa and :math:`\epsilon = 0.9`
@@ -255,7 +258,7 @@ def enclosed_gas_stiffness(
     if not 0.0 < porosity <= 1.0:
         msg = "'porosity' must be in the range (0, 1]."
         raise ValueError(msg)
-    d = np.asarray(thickness_m, dtype=np.float64)
+    d = real_array(thickness_m, "thickness_m")
     if np.any(d <= 0.0):
         msg = "'thickness_m' must be positive."
         raise ValueError(msg)
@@ -387,10 +390,11 @@ def natural_frequency(
         ``m'``, in kg/m2.
     :return: The natural frequency ``f0``, in hertz; a ``float`` for a number; an array
         for a sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``mass_per_area_kg_m2`` is not a single number.
+    :raises TypeError: if ``mass_per_area_kg_m2`` is not a single number, or
+        ``dynamic_stiffness_n_m3`` holds a text or a value that is not a real number.
     """
     mass_per_area_kg_m2 = require_positive(mass_per_area_kg_m2, "mass_per_area_kg_m2")
-    s = np.asarray(dynamic_stiffness_n_m3, dtype=np.float64)
+    s = real_array(dynamic_stiffness_n_m3, "dynamic_stiffness_n_m3")
     if np.any(s <= 0.0):
         msg = "'dynamic_stiffness_n_m3' must be positive."
         raise ValueError(msg)

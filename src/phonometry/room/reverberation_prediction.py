@@ -82,6 +82,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_finite_fields,
     require_non_negative,
     require_positive,
@@ -181,7 +182,7 @@ def _accumulate_surfaces(
     alphas: list[NDArray[np.float64]] = []
     for area, alpha in surfaces:
         areas.append(require_non_negative(area, "surface area"))
-        alpha_arr = np.asarray(alpha, dtype=np.float64)
+        alpha_arr = real_array(alpha, "surfaces")
         if not np.all(np.isfinite(alpha_arr)):
             msg = "absorption coefficients must be finite."
             raise ValueError(msg)
@@ -211,7 +212,7 @@ def _accumulate_surfaces(
 
 def _air_term(air_attenuation_per_m: ArrayLike, volume: float) -> NDArray[np.float64]:
     """Air absorption area ``4 m V`` (m2), validated finite and non-negative."""
-    m = np.asarray(air_attenuation_per_m, dtype=np.float64)
+    m = real_array(air_attenuation_per_m, "air_attenuation_per_m")
     if not np.all(np.isfinite(m)) or np.any(m < 0.0):
         msg = "'air_attenuation_per_m' must be finite and non-negative."
         raise ValueError(msg)
@@ -351,8 +352,9 @@ def sabine_reverberation_time(
     :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
         air attenuation are all numbers, a zero-dimensional array when each is one
         value and one of them is a zero-dimensional array, otherwise a per-band array.
-    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or
-        an area of ``surfaces`` is not a real number.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or an
+        area of ``surfaces`` is not a real number, or ``air_attenuation_per_m`` holds a
+        text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
@@ -393,8 +395,9 @@ def eyring_reverberation_time(
     :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
         air attenuation are all numbers, a zero-dimensional array when each is one
         value and one of them is a zero-dimensional array, otherwise a per-band array.
-    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or
-        an area of ``surfaces`` is not a real number.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or an
+        area of ``surfaces`` is not a real number, or ``air_attenuation_per_m`` holds a
+        text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
@@ -438,8 +441,9 @@ def millington_sette_reverberation_time(
     :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
         air attenuation are all numbers, a zero-dimensional array when each is one
         value and one of them is a zero-dimensional array, otherwise a per-band array.
-    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or
-        an area of ``surfaces`` is not a real number.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or an
+        area of ``surfaces`` is not a real number, or ``air_attenuation_per_m`` holds a
+        text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
@@ -500,7 +504,7 @@ def _axial_eyring_times(
     air = _air_term(air_attenuation_per_m, volume)
     means: list[NDArray[np.float64]] = []
     for alpha in absorptions:
-        mean = np.asarray(alpha, dtype=np.float64)
+        mean = real_array(alpha, "absorptions")
         if not np.all(np.isfinite(mean)):
             msg = "absorption coefficients must be finite."
             raise ValueError(msg)
@@ -558,7 +562,8 @@ def fitzroy_reverberation_time(
         one value and one of them is a zero-dimensional array, otherwise a per-band
         array.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or an entry of
-        ``dimensions`` is not a real number.
+        ``dimensions`` is not a real number, or ``absorptions`` or
+        ``air_attenuation_per_m`` holds a text or a value that is not a real number.
     """
     weights, times = _axial_eyring_times(
         dimensions, absorptions, air_attenuation_per_m, speed_of_sound
@@ -596,7 +601,8 @@ def arau_puchades_reverberation_time(
         one value and one of them is a zero-dimensional array, otherwise a per-band
         array.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or an entry of
-        ``dimensions`` is not a real number.
+        ``dimensions`` is not a real number, or ``absorptions`` or
+        ``air_attenuation_per_m`` holds a text or a value that is not a real number.
     """
     weights, times = _axial_eyring_times(
         dimensions, absorptions, air_attenuation_per_m, speed_of_sound
@@ -803,7 +809,8 @@ def reverberation_time_models(
     :raises ValueError: for ``absorptions`` that are not the three wall pairs,
         and for what the five models refuse.
     :raises TypeError: if an entry of ``dimensions`` is not a real number, or
-        ``speed_of_sound`` is not a single number.
+        ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     volume, total_area, pair_areas = _axial_geometry(dimensions)
     if len(absorptions) != _N_ROOM_AXES:
@@ -864,7 +871,7 @@ def reverberation_time_models(
         # A single frequency is a band axis of one, as `frequencies=None`
         # already produces: the five curves are 1-D whatever is passed, so a
         # nought-dimensional axis beside them is a mixture no reader can walk.
-        freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+        freq = np.atleast_1d(real_array(frequencies, "frequencies"))
         if curve_bands not in (1, freq.size):
             msg = (
                 f"'frequencies' has {freq.size} bands but the per-band "
@@ -874,7 +881,8 @@ def reverberation_time_models(
         n_bands = freq.size
 
     def _fit(arr: np.ndarray) -> np.ndarray:
-        return np.broadcast_to(arr, (n_bands,)).astype(np.float64)
+        # The five curves are float arrays the function computed above.
+        return np.array(np.broadcast_to(arr, (n_bands,)))
 
     return ReverberationModelResult(
         frequencies=freq,

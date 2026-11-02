@@ -97,6 +97,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_finite_array,
@@ -317,7 +318,7 @@ def _mean_level(levels: ArrayLike) -> np.ndarray:
     band. A 1D input is treated as a single averaged spectrum (ISO 3741
     Eq. 16).
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     if arr.ndim == 1:
         return arr
     # The number is a count of array axes, not a quantity.
@@ -417,11 +418,11 @@ def _background_corrected_mean(
     the per-position procedure that is exact only when every position has the
     same source-to-background margin. Prefer per-position input.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     raw_mean = _mean_level(levels)
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
-        bg = np.asarray(background_levels, dtype=np.float64)
+        bg = real_array(background_levels, "background_levels")
         # Checked before the broadcast, not after it. A 1-D spectrum of the
         # wrong length used to die inside `np.broadcast_to`, whose message
         # reports two shapes from inside numpy and names neither the argument
@@ -543,7 +544,7 @@ def _position_sampling_warnings(levels: ArrayLike, stacklevel: int) -> None:
     apply to both the direct and the comparison methods. A 1D (already-averaged)
     spectrum carries no per-position information and is skipped.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     # The number is a count of array axes, not a quantity.
     if arr.ndim != 2:  # noqa: PLR2004
         return
@@ -614,8 +615,8 @@ def _band_inputs(
     n_bands: int, t60: ArrayLike, frequencies: ArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """The per-band ``T60`` and mid-band frequencies, one value per band."""
-    freqs = np.asarray(frequencies, dtype=np.float64)
-    t60_arr = np.broadcast_to(np.asarray(t60, dtype=np.float64), (n_bands,)).copy()
+    freqs = real_array(frequencies, "frequencies")
+    t60_arr = np.broadcast_to(real_array(t60, "t60"), (n_bands,)).copy()
     if freqs.shape != (n_bands,):
         msg = "'frequencies' length must match the number of bands."
         raise ValueError(msg)
@@ -701,7 +702,7 @@ def _comparison_inputs(
     if lp_rss.shape != (n_bands,) or lw_rss.shape != (n_bands,):
         msg = "'levels', 'reference_levels' and 'reference_sound_power_levels' must span the same bands."
         raise ValueError(msg)
-    freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
     if freqs is not None and freqs.shape != (n_bands,):
         msg = "'frequencies' length must match the number of bands."
         raise ValueError(msg)
@@ -780,7 +781,9 @@ def sound_power_reverberation(
     :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
     :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult`.
-    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
+        ``background_levels``, ``frequencies``, ``levels`` or ``t60`` holds a text or a
+        value that is not a real number.
     """
     _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
     mean_level = _mean_level(levels)
@@ -858,6 +861,9 @@ def sound_power_comparison(
     :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
     :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult` (``method='comparison'``).
+    :raises TypeError: if ``background_levels``, ``frequencies``, ``levels``,
+        ``reference_background_levels`` or ``reference_levels`` holds a text or a value
+        that is not a real number.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     lp_st = _mean_level(levels)
@@ -1048,7 +1054,7 @@ def _room_event_levels(
     :raises ValueError: for a rank other than 1 to 3, non-finite levels, or a
         per-event array given together with ``n_events``.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 3:  # noqa: PLR2004
         if n_events is not None:
@@ -1145,7 +1151,9 @@ def sound_energy_reverberation(
         non-physical room or climate, a background without its
         ``integration_time``, or mismatched band counts.
     :raises TypeError: if ``integration_time``, ``surface_area`` or ``volume`` is not a
-        single number, or ``n_events`` is a flag, a text or an array where a count goes.
+        single number, or ``n_events`` is a flag, a text or an array where a count goes,
+        or ``frequencies``, ``levels`` or ``t60`` holds a text or a value that is not a
+        real number.
     """
     _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
     event_levels, event_count = _room_event_levels(levels, n_events)
@@ -1247,7 +1255,9 @@ def sound_energy_comparison(
         non-physical climate, a background without its ``integration_time``
         or without ``frequencies``, or mismatched band counts.
     :raises TypeError: if ``integration_time`` is not a single number, or ``n_events``
-        is a flag, a text or an array where a count goes.
+        is a flag, a text or an array where a count goes, or ``frequencies``,
+        ``levels``, ``reference_background_levels`` or ``reference_levels`` holds a text
+        or a value that is not a real number.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     event_levels, event_count = _room_event_levels(levels, n_events)
@@ -1362,15 +1372,17 @@ def octave_band_levels(
     :raises ValueError: for a frequency outside Table F.1, a repeated
         frequency, an octave whose three thirds are not all present, or
         levels that do not carry one value per frequency.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if freqs.ndim != 1 or freqs.size == 0:
         msg = (
             "'frequencies' must be a non-empty 1-D array of nominal "
             "one-third-octave mid-band frequencies."
         )
         raise ValueError(msg)
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     if arr.ndim == 0 or arr.shape[-1] != freqs.size:
         msg = (
             "'levels' must carry one value per band of 'frequencies' on its last axis."

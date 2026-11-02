@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
+from ..._internal.validation import real_array
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -164,8 +165,8 @@ def _dim(
     """
     if not label:
         return
-    a = np.asarray(p1, dtype=np.float64)
-    b = np.asarray(p2, dtype=np.float64)
+    a = real_array(p1, "p1")
+    b = real_array(p2, "p2")
     direction = b - a
     length = float(np.hypot(*direction))
     if length < _EPS:

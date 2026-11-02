@@ -264,7 +264,7 @@ unit area as *tie_stiffness_per_area* (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
-| TypeError | if `gap_m`, `loss_factor`, `mass1` or `mass2` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `gap_m`, `loss_factor`, `mass1` or `mass2` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequency` holds a text or a value that is not a real number. |
 
 ## field_incidence_correction
 
@@ -331,7 +331,7 @@ builds its estimate on).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown incidence or a band set other than 1 or 3. |
-| TypeError | if `incidence` is not a text, or `field_correction` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `incidence` is not a text, or `field_correction` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequency` holds a text or a value that is not a real number. |
 
 ## mass_spring_mass_resonance
 
@@ -571,7 +571,7 @@ no smooth model predicts.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown method, a coincidence range that is not increasing, or a Heckl construction whose points would be out of order. |
-| TypeError | if `method` is not a text, or `area`, `critical_frequency_lower`, `critical_frequency_upper`, `limiting_angle_deg`, `loss_factor` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `method` is not a text, or `area`, `critical_frequency_lower`, `critical_frequency_upper`, `limiting_angle_deg`, `loss_factor` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequency` holds a text or a value that is not a real number. |
 
 ## PLATEAU_MATERIALS
 
@@ -671,7 +671,7 @@ and the material's own is then not read at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown material name, a row that does not print a number the construction reads, or an under-specified panel. |
-| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial), or a `thickness_mm`, `mass_per_area`, `plateau_height_db`, `frequency_ratio` or `field_correction` that is not one number. |
+| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial), or a `thickness_mm`, `mass_per_area`, `plateau_height_db`, `frequency_ratio` or `field_correction` that is not one number, or `frequency` holds a text or a value that is not a real number. |
 
 ## plot_double_wall_geometry
 
@@ -784,7 +784,7 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown coincidence model, or if neither *critical_frequency* nor *bending_stiffness* is given. |
-| TypeError | if `coincidence_model` is not a text, or `critical_frequency`, `field_correction`, `loss_factor` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `coincidence_model` is not a text, or `critical_frequency`, `field_correction`, `loss_factor` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequency` holds a text or a value that is not a real number. |
 
 ## SoundReductionResult
 

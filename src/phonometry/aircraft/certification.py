@@ -32,6 +32,7 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -135,7 +136,7 @@ _PNL_FACTOR = 10.0 / np.log10(2.0)
 
 
 def _validate_spectrum(spl: ArrayLike) -> NDArray[np.float64]:
-    sig = np.asarray(spl, dtype=np.float64)
+    sig = real_array(spl, "spl")
     if sig.shape != (24,):
         msg = "'spl' must contain the 24 one-third-octave-band levels."
         raise ValueError(msg)
@@ -164,6 +165,7 @@ def perceived_noisiness(spl: ArrayLike) -> NDArray[np.float64]:
     :param spl: The 24 one-third-octave-band sound pressure levels, in dB.
     :return: The per-band perceived noisiness, in noys.
     :raises ValueError: If the spectrum is not 24 finite levels.
+    :raises TypeError: if ``spl`` holds a text or a value that is not a real number.
     """
     sig = _validate_spectrum(spl)
     spl_a, spl_b, spl_c, spl_d, spl_e = (
@@ -404,7 +406,8 @@ def tone_correction(
         Step 1). The default 2 (80 Hz) is the aeroplane procedure; helicopters
         and tilt-rotors use 0 (50 Hz).
     :return: The tone-correction factor ``C``, in dB (0 if no tones qualify).
-    :raises TypeError: If ``start_band`` is not a number.
+    :raises TypeError: If ``start_band`` is not a number, or ``spl`` holds a text or a
+        value that is not a real number.
     :raises ValueError: If the spectrum is not 24 finite levels, or
         ``start_band`` is not an integer between 0 and 3.
     """
@@ -585,14 +588,15 @@ def epnl_from_pnlt(
         record indices ``.band_limits`` (inclusive), with the duration
         correction as ``.duration_correction``.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``reference_time`` is not a single number.
+    :raises TypeError: if ``reference_time`` is not a single number, or ``dt``, ``pnlt``
+        or ``tone_corrections`` holds a text or a value that is not a real number.
     """
     require_scalar(reference_time, "reference_time")
-    p = np.atleast_1d(np.asarray(pnlt, dtype=np.float64))
+    p = np.atleast_1d(real_array(pnlt, "pnlt"))
     if p.ndim != 1 or p.size < 1 or not np.all(np.isfinite(p)):
         msg = "'pnlt' must be a non-empty finite 1-D sequence."
         raise ValueError(msg)
-    dt_raw = np.asarray(dt, dtype=np.float64)
+    dt_raw = real_array(dt, "dt")
     dt_arr = (
         np.full(p.shape, float(dt_raw.reshape(-1)[0])) if dt_raw.size == 1 else dt_raw
     )
@@ -609,7 +613,7 @@ def epnl_from_pnlt(
     km = int(np.argmax(p))
     delta_b = 0.0
     if tone_corrections is not None:
-        c = np.atleast_1d(np.asarray(tone_corrections, dtype=np.float64))
+        c = np.atleast_1d(real_array(tone_corrections, "tone_corrections"))
         require_equal_shapes(
             "epnl_from_pnlt", {"pnlt": p.shape, "tone_corrections": c.shape}, "record"
         )
@@ -862,10 +866,11 @@ def effective_perceived_noise_level(
     :return: An :class:`EPNLResult`.
     :raises ValueError: If the input is not a ``(K, 24)`` finite array, or
         ``procedure`` is not ``"airplane"`` or ``"helicopter"``.
-    :raises TypeError: if ``procedure`` is not a text.
+    :raises TypeError: if ``procedure`` is not a text, or ``dt`` or ``spectra`` holds a
+        text or a value that is not a real number.
     """
     require_choice(procedure, "procedure", ("airplane", "helicopter"))
-    arr = np.asarray(spectra, dtype=np.float64)
+    arr = real_array(spectra, "spectra")
     # The number is a count of array axes, not a quantity.
     if arr.ndim != 2 or arr.shape[1] != NOY_BANDS_HZ.size or arr.shape[0] < 1:  # noqa: PLR2004
         msg = "'spectra' must have shape (K, 24)."
@@ -891,7 +896,7 @@ def effective_perceived_noise_level(
     )
 
     k = arr.shape[0]
-    dt_raw = np.asarray(dt, dtype=np.float64)
+    dt_raw = real_array(dt, "dt")
     if dt_raw.size == 1:
         times = np.arange(k, dtype=np.float64) * float(dt_raw.reshape(-1)[0])
     else:

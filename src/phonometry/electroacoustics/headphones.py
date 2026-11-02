@@ -178,6 +178,8 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting
 from .._internal.validation import (
+    complex_array,
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -530,7 +532,7 @@ def _frequencies(
     frequencies: ArrayLike, name: str = "frequencies"
 ) -> NDArray[np.float64]:
     """Positive, finite, strictly ascending frequencies, 1-D."""
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, name))
     if f.ndim != 1 or f.size == 0:
         msg = f"'{name}' must be a non-empty 1-D sequence."
         raise ValueError(msg)
@@ -545,7 +547,7 @@ def _frequencies(
 
 def _levels(values: ArrayLike, name: str) -> NDArray[np.float64]:
     """A finite float array of levels."""
-    levels = np.asarray(values, dtype=np.float64)
+    levels = real_array(values, name)
     if not np.all(np.isfinite(levels)):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)
@@ -695,10 +697,12 @@ def verify_rated_impedance(
     :return: A :class:`RatedImpedanceVerification`.
     :raises ValueError: If the inputs differ in length, are not positive and
         finite, or no measurement frequency falls in the rated range.
-    :raises TypeError: if ``rated_impedance_ohm`` is not a single number.
+    :raises TypeError: if ``rated_impedance_ohm`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``impedance_ohm`` holds a text or a value that is not a number.
     """
     f = _frequencies(frequencies)
-    z = np.abs(np.atleast_1d(np.asarray(impedance_ohm, dtype=np.complex128)))
+    z = np.abs(np.atleast_1d(complex_array(impedance_ohm, "impedance_ohm")))
     if z.shape != f.shape:
         msg = "'frequencies' and 'impedance_ohm' must have the same length."
         raise ValueError(msg)
@@ -948,7 +952,9 @@ def program_signal_level(
     :return: The level of the whole signal, in dB re 20 µPa.
     :raises ValueError: If the inputs differ in length or are not finite, or
         ``weighting`` is neither ``"A"`` nor ``"Z"``.
-    :raises TypeError: if ``weighting`` is not a text.
+    :raises TypeError: if ``weighting`` is not a text, or ``band_levels``,
+        ``free_field_response_db`` or ``frequencies`` holds a text or a value that is
+        not a real number.
     """
     weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     f = _frequencies(frequencies)
@@ -1093,7 +1099,9 @@ def program_characteristic_voltage(
     :return: A :class:`ProgramCharacteristicVoltage`.
     :raises ValueError: If the shapes disagree, a value is out of range or
         ``weighting`` is neither ``"A"`` nor ``"Z"``.
-    :raises TypeError: if ``weighting`` is not a text.
+    :raises TypeError: if ``weighting`` is not a text, or ``band_levels``,
+        ``free_field_response_db``, ``frequencies`` or ``source_emf_v`` holds a text or
+        a value that is not a real number.
     """
     weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     f = _frequencies(frequencies)
@@ -1102,7 +1110,7 @@ def program_characteristic_voltage(
         msg = "'band_levels' must be (bands,) or (fittings, bands) over 'frequencies'."
         raise ValueError(msg)
     emf = np.broadcast_to(
-        np.atleast_1d(np.asarray(source_emf_v, dtype=np.float64)), (levels.shape[0],)
+        np.atleast_1d(real_array(source_emf_v, "source_emf_v")), (levels.shape[0],)
     )
     if not (np.all(np.isfinite(emf)) and np.all(emf > 0.0)):
         msg = "'source_emf_v' must be positive and finite."
@@ -1198,12 +1206,13 @@ def check_limiting_test_signal(
     :param fs: Sample rate, in Hz; required for a bare array.
     :return: A :class:`LimitingTestSignalCheck`.
     :raises ValueError: If the record is not 1-D and finite, or too short.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
     from ..filters.core import octave_filter
     from ..io._resolve import resolve_fs
 
     rate = resolve_fs(x, fs, name="x")
-    x = np.asarray(x, dtype=np.float64)
+    x = real_array(x, "x")
     if x.ndim != 1 or x.size < _FEWEST_POINTS:
         msg = "'x' must be a 1-D record of at least two samples."
         raise ValueError(msg)
@@ -1315,6 +1324,8 @@ def protection_voltage(
     :return: A :class:`ProtectionVoltage`.
     :raises ValueError: If the inputs differ in length, are not finite, the
         e.m.f.s are not positive and ascending, or there are fewer than two.
+    :raises TypeError: if ``sound_pressure_level`` or ``source_emf_v`` holds a text or a
+        value that is not a real number.
     """
     emf = _frequencies(source_emf_v, "source_emf_v")
     if emf.size < _FEWEST_POINTS:
@@ -1438,6 +1449,8 @@ def coupler_frequency_response(
         (lower, upper), in Hz, to judge the coverage; ``None`` if not stated.
     :return: A :class:`CouplerFrequencyResponse`.
     :raises ValueError: If the inputs differ in length or are not finite.
+    :raises TypeError: if ``frequencies`` or ``sound_pressure_level`` holds a text or a
+        value that is not a real number.
     """
     f = _frequencies(frequencies)
     levels = _levels(sound_pressure_level, "sound_pressure_level")
@@ -1519,6 +1532,8 @@ def crosstalk_attenuation(
         20 µPa.
     :return: A :class:`CrosstalkAttenuation`.
     :raises ValueError: If the inputs differ in length or are not finite.
+    :raises TypeError: if ``driven_level``, ``frequencies`` or ``other_level`` holds a
+        text or a value that is not a real number.
     """
     f = _frequencies(frequencies)
     driven = _levels(driven_level, "driven_level")
@@ -1665,11 +1680,12 @@ def field_comparison_response(
     :return: A :class:`FieldComparisonResponse`.
     :raises ValueError: If the shapes disagree, a value is out of range or
         the reference band is missing.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` is not a text, or ``field_level``, ``frequencies``
+        or ``source_emf_v`` holds a text or a value that is not a real number.
     """
     require_choice(field, "field", ("free", "diffuse"))
     f = _frequencies(frequencies)
-    emf = np.atleast_2d(np.asarray(source_emf_v, dtype=np.float64))
+    emf = np.atleast_2d(real_array(source_emf_v, "source_emf_v"))
     if emf.ndim != _MATRIX_NDIM or emf.shape[1] != f.size:
         msg = "'source_emf_v' must be (persons, bands) over 'frequencies'."
         raise ValueError(msg)
@@ -1859,6 +1875,8 @@ def ear_canal_frequency_response(
     :return: An :class:`EarCanalFrequencyResponse`.
     :raises ValueError: If the shapes disagree, a level is not finite or the
         reference band is missing.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = _frequencies(frequencies)
     shaped = []
@@ -2016,7 +2034,9 @@ def verify_ear_canal_microphone(
     :raises ValueError: If a value is out of range or the level arrays
         disagree in length.
     :raises TypeError: if ``canal_section_area_mm2``, ``ear_canal_area_mm2``,
-        ``entrance_area_mm2`` or ``volume_mm3`` is not a single number.
+        ``entrance_area_mm2`` or ``volume_mm3`` is not a single number, or
+        ``open_levels``, ``pink_noise_band_levels`` or ``sealed_levels`` holds a text or
+        a value that is not a real number.
     """
     entrance = require_positive(entrance_area_mm2, "entrance_area_mm2")
     section = require_positive(canal_section_area_mm2, "canal_section_area_mm2")

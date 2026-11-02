@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import (
+    real_array,
+    require_equal_shapes,
+)
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -3886,7 +3889,7 @@ def plot_response_decay_check(
 
     def _db(ratio: float | np.ndarray) -> np.ndarray:
         with np.errstate(divide="ignore"):
-            return np.maximum(20.0 * np.log10(np.asarray(ratio, dtype=float)), floor)
+            return np.maximum(20.0 * np.log10(real_array(ratio, "ratio")), floor)
 
     level = _db(record / reference)
     if result.start_s > 0.0:

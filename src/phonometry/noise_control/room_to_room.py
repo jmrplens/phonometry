@@ -107,6 +107,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_non_negative,
     require_positive,
@@ -588,14 +589,14 @@ def room_to_room_transmission(
         family or the sound power model is unknown, or if
         ``receiver_distance_m`` is given and is not a positive finite number.
     :raises TypeError: if ``partition_area`` or ``receiver_distance_m`` is not a single
-        number.
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
     from ..room.steady_field import steady_state_spl
 
     source = SourceRoom() if source is None else source
     criterion = DesignCriterion() if criterion is None else criterion
 
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)

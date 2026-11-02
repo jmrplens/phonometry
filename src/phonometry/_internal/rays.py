@@ -244,7 +244,10 @@ from typing import TYPE_CHECKING, NamedTuple, Protocol
 
 import numpy as np
 
-from .validation import require_count
+from .validation import (
+    real_array,
+    require_count,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -1186,12 +1189,14 @@ def march_rays(
         returns is not bit-for-bit the one it returns without (see the module
         docstring).
     :return: A :class:`RayMarch`.
-    :raises TypeError: if ``n_steps`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``n_steps`` is a flag, a text or an array where a count goes,
+        or ``xi``, ``z0`` or ``zeta0`` holds a text or a value that is not a real
+        number.
     """
     ns = require_count(n_steps, "n_steps", at_least=None)
-    zeta = np.array(zeta0, dtype=np.float64)
-    z = np.array(np.broadcast_to(np.asarray(z0, dtype=np.float64), zeta.shape))
-    xi_state = np.array(np.broadcast_to(np.asarray(xi, dtype=np.float64), zeta.shape))
+    zeta = real_array(zeta0, "zeta0", copy=True)
+    z = np.array(np.broadcast_to(real_array(z0, "z0"), zeta.shape))
+    xi_state = np.array(np.broadcast_to(real_array(xi, "xi"), zeta.shape))
     sloping = _prepare_sloping(upper) if isinstance(upper, SlopingBoundary) else None
     level_upper = None if isinstance(upper, SlopingBoundary) else upper
     stopped = np.zeros(z.size, dtype=bool)

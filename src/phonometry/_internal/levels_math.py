@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, overload
 
 import numpy as np
 
+from .validation import real_array
+
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
@@ -33,8 +35,9 @@ def energy_mean(levels: ArrayLike, axis: int | None = None) -> np.ndarray | floa
     :param levels: Levels to average, in decibels.
     :param axis: Axis over which to average; ``None`` averages everything.
     :return: A ``float`` when *axis* is ``None``, otherwise an array.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     out = 10.0 * np.log10(np.mean(10.0 ** (arr / 10.0), axis=axis))
     if axis is None:
         return float(out)
@@ -57,8 +60,9 @@ def energy_sum(levels: ArrayLike, axis: int | None = None) -> np.ndarray | float
     :param levels: Levels to combine, in decibels.
     :param axis: Axis over which to sum; ``None`` sums everything.
     :return: A ``float`` when *axis* is ``None``, otherwise an array.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     out = 10.0 * np.log10(np.sum(10.0 ** (arr / 10.0), axis=axis))
     if axis is None:
         return float(out)
@@ -90,9 +94,11 @@ def weighted_energy_mean(
     :param weights: Non-negative weights (e.g. sub-areas or durations).
     :param axis: Axis over which to average; ``None`` averages everything.
     :return: A ``float`` when *axis* is ``None``, otherwise an array.
+    :raises TypeError: if ``levels`` or ``weights`` holds a text or a value that is not
+        a real number.
     """
-    arr = np.asarray(levels, dtype=np.float64)
-    w = np.asarray(weights, dtype=np.float64)
+    arr = real_array(levels, "levels")
+    w = real_array(weights, "weights")
     # Normalize by the weights summed over the SAME reduction, so weights
     # that vary along a non-reduced axis stay correct.
     denominator = np.sum(np.broadcast_to(w, arr.shape), axis=axis)

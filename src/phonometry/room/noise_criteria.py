@@ -42,6 +42,7 @@ from .._internal.boundary import round_half_even
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -179,7 +180,7 @@ def _require_table1_bands(owner: str, frequencies: np.ndarray) -> None:
     :param frequencies: The band axis to check, already rank-1.
     :raises ValueError: if the axis is not the ten tabulated octave bands.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if freqs.shape == NC_OCTAVE_BANDS_HZ.shape and np.all(
         np.isclose(freqs, NC_OCTAVE_BANDS_HZ, rtol=0.03)
     ):
@@ -248,7 +249,8 @@ class NCResult(OwnsArrays):
             is an unknown tag, or 'rating' and 'out_of_range' contradict each
             other.
         :raises TypeError: if ``out_of_range`` is not a text, or ``rating`` is not a
-            single number.
+            single number, or ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels")
@@ -422,8 +424,9 @@ class RCResult(OwnsArrays):
         :func:`room_criterion` marks each band it was not given with a
         ``NaN`` that the fiche renders as an em dash.
 
-        :raises TypeError: if 'rating' is not an integer (a bool is not one),
-            or ``classification`` is not a text.
+        :raises TypeError: if 'rating' is not an integer (a bool is not one), or
+            ``classification`` is not a text, or ``frequencies`` holds a text or a value
+            that is not a real number.
         :raises ValueError: if the three per-band arrays do not share one
             length, 'frequencies' is not the ten tabulated octave bands,
             'rating', 'lmf' or 'reference_curve' is not finite, or
@@ -598,7 +601,7 @@ def _criterion_curve_at(
     :return: The curve levels at ``frequencies``, in dB.
     """
     curve = nc_curve(index) if family == "NC" else rc_curve(index)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     return np.array(
         [curve[int(np.argmin(np.abs(np.log2(NC_OCTAVE_BANDS_HZ / f))))] for f in freqs]
     )
@@ -615,7 +618,7 @@ def _align_levels(
     :return: The levels on the ten :data:`NC_OCTAVE_BANDS_HZ`, absent bands NaN.
     :raises ValueError: for malformed inputs or unknown band frequencies.
     """
-    lv = np.atleast_1d(np.asarray(levels, dtype=np.float64))
+    lv = np.atleast_1d(real_array(levels, "levels"))
     if lv.ndim != 1:
         msg = "levels must be a 1-D vector of octave-band levels."
         raise ValueError(msg)
@@ -627,7 +630,7 @@ def _align_levels(
             )
             raise ValueError(msg)
         return lv
-    fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    fr = np.atleast_1d(real_array(frequencies, "frequencies"))
     require_equal_shapes(owner, {"levels": lv.shape, "frequencies": fr.shape}, "band")
     aligned = np.full(_N_BANDS, np.nan)
     for f, level in zip(fr, lv, strict=True):
@@ -671,6 +674,8 @@ def noise_criterion(
         ``levels``; a subset of the ANSI S12.2 octave bands may be supplied.
     :return: An :class:`NCResult` with the designation and its ``.plot()``.
     :raises ValueError: for malformed inputs or unknown band frequencies.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     aligned = _align_levels(levels, frequencies, "noise_criterion")
     valid = ~np.isnan(aligned)
@@ -768,6 +773,8 @@ def room_criterion(
         ``levels``.
     :return: An :class:`RCResult` with the rating, tag and its ``.plot()``.
     :raises ValueError: if the 500/1000/2000 Hz mid-frequency bands are absent.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     :warns NoiseCriterionWarning: if a band from 31.5 Hz to 4000 Hz is absent.
     """
     aligned = _align_levels(levels, frequencies, "room_criterion")

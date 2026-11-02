@@ -71,6 +71,7 @@ freedom.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `contributions` is empty, holds a value that is not finite, a pair that is not `(uncertainty, sensitivity)`, or a pair whose uncertainty is negative. |
+| TypeError | if `contributions` holds a text or a value that is not a real number. |
 
 ## coverage_factor
 
@@ -312,6 +313,7 @@ Combined standard uncertainty by the GUM law of propagation (clause 5).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for no inputs, a malformed correlation matrix, or a model that is not finite at the estimates or one evaluation step either side of them. |
+| TypeError | if `correlation` holds a text or a value that is not a real number. |
 
 ## UncertaintyResult
 

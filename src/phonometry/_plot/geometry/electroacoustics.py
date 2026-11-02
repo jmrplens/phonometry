@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.validation import (
+    real_array,
     require_count,
     require_equal_shapes,
     require_positive,
@@ -128,7 +129,8 @@ def plot_piston_geometry(
     :raises ValueError: for a non-positive radius, only one of the lobe
         pair, a lobe whose two arrays disagree, or a non-finite value in
         either of them.
-    :raises TypeError: if ``radius`` is not a single number.
+    :raises TypeError: if ``radius`` is not a single number, or ``angles_rad`` or
+        ``directivity`` holds a text or a value that is not a real number.
     """
     _check_language(language)
     require_positive(radius, "radius")
@@ -158,8 +160,8 @@ def plot_piston_geometry(
     ax.add_patch(piston)
     ax.plot([0.0, 3.2 * a], [0.0, 0.0], linestyle=":", linewidth=0.8, color=_C_MUTED)
     if angles_rad is not None and directivity is not None:
-        ang = np.asarray(angles_rad, dtype=np.float64)
-        d_lin = np.abs(np.asarray(directivity, dtype=np.float64))
+        ang = real_array(angles_rad, "angles_rad")
+        d_lin = np.abs(real_array(directivity, "directivity"))
         require_equal_shapes(
             "plot_piston_geometry",
             {"angles_rad": ang.shape, "directivity": d_lin.shape},

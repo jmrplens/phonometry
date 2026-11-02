@@ -90,6 +90,7 @@ from ..._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...vibration.structural.point_mobility import infinite_plate_mobility
 
@@ -318,8 +319,11 @@ def wall_tie_coupling_loss_factor(
     :raises ValueError: for a non-positive input or an unknown tie name.
     :raises TypeError: if ``mass1``, ``mass2``, ``tie`` or ``ties_per_area`` is not a
         single number, or ``frequency`` holds a text or a value that is not a real
+        number, or ``bending_stiffness1`` or ``bending_stiffness2`` is not a single
         number.
     """
+    require_scalar(bending_stiffness1, "bending_stiffness1")
+    require_scalar(bending_stiffness2, "bending_stiffness2")
     f = require_finite_array(frequency, "frequency")
     if np.any(f <= 0.0):
         msg = "'frequency' must be positive and finite."

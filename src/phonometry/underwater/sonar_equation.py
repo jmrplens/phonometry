@@ -55,6 +55,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_axis_rank,
     require_choice,
     require_count,
@@ -112,7 +113,7 @@ def _finite(value: float, name: str) -> float:
 
 
 def _finite_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
-    arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    arr = np.atleast_1d(real_array(values, name))
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be finite and non-empty."
         raise ValueError(msg)
@@ -245,7 +246,8 @@ def passive_sonar_equation(
     :return: A :class:`SonarEquationResult`.
     :raises ValueError: If an input is not finite.
     :raises TypeError: if ``detection_threshold``, ``directivity_index``,
-        ``noise_level`` or ``source_level`` is not a single number.
+        ``noise_level`` or ``source_level`` is not a single number, or
+        ``propagation_loss`` holds a text or a value that is not a real number.
     """
     sl = _finite(source_level, "source_level")
     nl = _finite(noise_level, "noise_level")
@@ -302,7 +304,8 @@ def active_sonar_equation(
     :raises ValueError: If an input is not finite.
     :raises TypeError: if ``detection_threshold``, ``directivity_index``,
         ``noise_level``, ``reverberation_level``, ``source_level`` or
-        ``target_strength`` is not a single number.
+        ``target_strength`` is not a single number, or ``propagation_loss`` holds a text
+        or a value that is not a real number.
     """
     sl = _finite(source_level, "source_level")
     ts = _finite(target_strength, "target_strength")
@@ -501,7 +504,8 @@ def detection_range_from_curve(
         situations.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``figure_of_merit`` is not a single number, or ``crossing`` is
-        not a text.
+        not a text, or ``propagation_loss`` or ``range_m`` holds a text or a value that
+        is not a real number.
     """
     fom = _finite(figure_of_merit, "figure_of_merit")
     r = _finite_array(range_m, "range_m")

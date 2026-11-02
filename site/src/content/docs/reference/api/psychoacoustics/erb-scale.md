@@ -95,6 +95,12 @@ One Cam is one auditory-filter width.
 
 **Returns:** The ERB_N number, Cam; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` holds a text or a value that is not a real number. |
+
 ## erb_bandwidth
 
 ```python
@@ -122,6 +128,12 @@ $24.7 \, (4.37 F + 1)$ for `F` in kHz).
 | `frequency` | Filter centre frequency `f`, Hz (scalar or array, non-negative). |
 
 **Returns:** The bandwidth `ERB_N`, Hz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` holds a text or a value that is not a real number. |
 
 ## ERB_C1_HZ
 
@@ -162,3 +174,9 @@ $f = (10^{i / 21.366} - 1) / 0.004368$.
 | `cam` | ERB_N number `i`, Cam (scalar or array, non-negative). |
 
 **Returns:** The frequency `f`, Hz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cam` holds a text or a value that is not a real number. |

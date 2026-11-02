@@ -89,6 +89,7 @@ from ..._internal.frozen import (
     reduce_with_plain_rows,
 )
 from ..._internal.validation import (
+    real_array,
     require_axis_count,
     require_axis_rank,
     require_choice,
@@ -1792,7 +1793,7 @@ def _speed(value: float, name: str = "speed_kmh") -> float:
 
 
 def _spectrum(values: ArrayLike, name: str, size: int = 24) -> NDArray[np.float64]:
-    array = np.asarray(values, dtype=np.float64)
+    array = real_array(values, name)
     if array.shape != (size,):
         msg = (
             f"'{name}' must hold {size} values, one per band; got "
@@ -1803,7 +1804,7 @@ def _spectrum(values: ArrayLike, name: str, size: int = 24) -> NDArray[np.float6
 
 
 def _energy_sum(*spectra: NDArray[np.float64]) -> NDArray[np.float64]:
-    total = sum(10.0 ** (np.asarray(s, dtype=np.float64) / 10.0) for s in spectra)
+    total = sum(10.0 ** (real_array(s, "spectra") / 10.0) for s in spectra)
     with np.errstate(divide="ignore"):
         return np.asarray(10.0 * np.log10(total), dtype=np.float64)
 
@@ -2204,10 +2205,12 @@ def roughness_to_frequency(
     :param interpolation: The :class:`RoughnessInterpolation` rule.
     :return: The spectrum on the target frequency grid, in dB.
     :raises ValueError: If an input is invalid.
-    :raises TypeError: if ``speed_kmh`` is not a single number.
+    :raises TypeError: if ``speed_kmh`` is not a single number, or ``frequencies``,
+        ``levels`` or ``wavelengths_mm`` holds a text or a value that is not a real
+        number.
     """
-    y = np.asarray(levels, dtype=np.float64)
-    lam = np.asarray(wavelengths_mm, dtype=np.float64) / 1000.0
+    y = real_array(levels, "levels")
+    lam = real_array(wavelengths_mm, "wavelengths_mm") / 1000.0
     require_axis_rank(y, "roughness_to_frequency", "levels", 1)
     require_equal_shapes(
         "roughness_to_frequency",
@@ -2217,7 +2220,7 @@ def roughness_to_frequency(
     if np.any(lam <= 0.0):
         msg = "'wavelengths_mm' must all be positive."
         raise ValueError(msg)
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must all be positive."
         raise ValueError(msg)
@@ -2247,6 +2250,8 @@ def total_effective_roughness(
     :param filter_: Contact filter ``A_3,i``, in dB.
     :return: ``L_R,TOT,i``, in dB.
     :raises ValueError: If the spectra are not 24 bands each.
+    :raises TypeError: if ``filter_``, ``rail`` or ``wheel`` holds a text or a value
+        that is not a real number.
     """
     return _energy_sum(_spectrum(rail, "rail"), _spectrum(wheel, "wheel")) + _spectrum(
         filter_, "filter_"
@@ -2296,7 +2301,8 @@ def rolling_sound_power(
     :param n_axles: Number of axles per vehicle ``N_a``.
     :return: The component sound power, in dB.
     :raises ValueError: If ``n_axles`` is not a positive number.
-    :raises TypeError: if ``n_axles`` is not a single number.
+    :raises TypeError: if ``n_axles`` is not a single number, or ``roughness`` or
+        ``transfer`` holds a text or a value that is not a real number.
     """
     n_a = _finite(n_axles, "n_axles")
     if n_a <= 0.0:
@@ -2377,11 +2383,12 @@ def horizontal_directivity(
     :param frequencies: Midband frequencies, used only for the array shape.
     :return: The correction, in dB, one value per band.
     :raises ValueError: If the angle is not finite.
-    :raises TypeError: if ``phi`` is not a single number.
+    :raises TypeError: if ``phi`` is not a single number, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
     angle = np.radians(_finite(phi, "phi"))
     value = 10.0 * np.log10(0.01 + 0.99 * np.sin(angle) ** 2)
-    return np.full(len(np.asarray(frequencies, dtype=np.float64)), value)
+    return np.full(len(real_array(frequencies, "frequencies")), value)
 
 
 def vertical_directivity(
@@ -2410,12 +2417,13 @@ def vertical_directivity(
     :param edition: Which text of (2.3.16) to evaluate.
     :return: The correction, in dB, one value per band.
     :raises ValueError: If the angle is not finite or the height is not 1 or 2.
-    :raises TypeError: if ``psi`` is not a single number, or ``height`` is a
-        flag, a text or an array where a source height index goes.
+    :raises TypeError: if ``psi`` is not a single number, or ``height`` is a flag, a
+        text or an array where a source height index goes, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
     height = require_count(height, "height")
     angle = np.radians(_finite(psi, "psi"))
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if height not in (1, 2):
         msg = "'height' must be 1 (source A) or 2 (source B)."
         raise ValueError(msg)
@@ -2444,6 +2452,7 @@ def octave_bands_from_third_octaves(levels: ArrayLike) -> NDArray[np.float64]:
     :param levels: The 24 1/3-octave levels from 50 Hz to 10 kHz, in dB.
     :return: The eight octave levels from 63 Hz to 8 kHz, in dB.
     :raises ValueError: If the spectrum is not 24 bands.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     spectrum = _spectrum(levels, "levels")
     energy = 10.0 ** (spectrum / 10.0)

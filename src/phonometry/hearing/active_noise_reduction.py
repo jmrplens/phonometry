@@ -73,13 +73,16 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_scalar
+from .._internal.validation import (
+    real_array,
+    require_scalar,
+)
 from ._real_ear_attenuation import ProtectorUncertaintyBudget, RealEarAttenuationResult
 from .hearing_protectors import (
     AssumedProtectionResult,
@@ -254,7 +257,7 @@ def _levels(values: ArrayLike, name: str) -> np.ndarray:
     :raises ValueError: for a shape other than two ears per subject, fewer
         than two subjects, or a value that is not finite.
     """
-    grid = np.array(values, dtype=np.float64)
+    grid = real_array(values, name, copy=True)
     if grid.ndim != _PER_EAR_RANK or grid.shape[1] != _EARS:
         msg = (
             f"'{name}' must be a (subjects, 2, bands) grid: 5.4.1 measures "
@@ -277,7 +280,7 @@ def _lower_ear_from_insertion_loss(
     insertion_loss: ArrayLike,
 ) -> tuple[np.ndarray | None, np.ndarray]:
     """The per-ear grid, if one was given, and the lower ear of each subject."""
-    grid = np.asarray(insertion_loss, dtype=np.float64)
+    grid = real_array(insertion_loss, "insertion_loss")
     if grid.ndim == _PER_EAR_RANK:
         per_ear = _levels(grid, "insertion_loss")
         return per_ear, per_ear.min(axis=1)
@@ -319,7 +322,7 @@ def _band_frequencies(frequencies: ArrayLike | None, count: int) -> np.ndarray:
     require_scalar(count, "count")
     if frequencies is None:
         return _default_bands(count, "active_insertion_loss")
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if freqs.ndim != 1 or freqs.size != count or not np.all(np.isfinite(freqs)):
         msg = (
             "active_insertion_loss: 'frequencies' must be one centre "
@@ -375,6 +378,8 @@ def active_insertion_loss(
         wrong shape, fewer than two subjects or a value that is not finite, if
         the two level grids differ in shape, or if ``frequencies`` does not
         match.
+    :raises TypeError: if ``active_levels``, ``frequencies``, ``insertion_loss`` or
+        ``passive_levels`` holds a text or a value that is not a real number.
     """
     levels_given = passive_levels is not None or active_levels is not None
     per_ear: np.ndarray | None
@@ -469,7 +474,7 @@ def _passive_octaves(
         grid = np.asarray(reat.attenuation, dtype=np.float64)
         freqs = np.asarray(reat.frequencies, dtype=np.float64)
     else:
-        grid = np.asarray(reat, dtype=np.float64)
+        grid = real_array(reat, "reat")
         if grid.ndim != _GRID_RANK:
             msg = (
                 "'reat' must be a (subjects, octave bands) grid of attenuations in dB."
@@ -590,6 +595,7 @@ def anr_total_attenuation(
     :raises ValueError: if the passive attenuation is not on the octave bands
         of ISO 4869-1, if the insertion loss does not reach the bands it needs,
         or if the two do not have the same number of subjects.
+    :raises TypeError: if ``reat`` holds a text or a value that is not a real number.
     """
     passive, octaves = _passive_octaves(reat)
     result = (
@@ -750,8 +756,10 @@ def assess_anr_linearity(
     :raises ValueError: if the external levels are not 5 dB steps, if they pass
         110 dB, if neither or both of the ear-level forms are given, or if the
         shapes do not match.
+    :raises TypeError: if ``ear_levels``, ``ear_third_octave_levels`` or
+        ``external_levels`` holds a text or a value that is not a real number.
     """
-    external = np.asarray(external_levels, dtype=np.float64)
+    external = real_array(external_levels, "external_levels")
     if (
         external.ndim != 1
         or external.size < _GRID_RANK
@@ -782,9 +790,11 @@ def assess_anr_linearity(
         )
         raise ValueError(msg)
     if ear_levels is not None:
-        levels = np.asarray(ear_levels, dtype=np.float64)
+        levels = real_array(ear_levels, "ear_levels")
     else:
-        thirds = np.asarray(ear_third_octave_levels, dtype=np.float64)
+        thirds = real_array(
+            cast("ArrayLike", ear_third_octave_levels), "ear_third_octave_levels"
+        )
         if thirds.ndim < _GRID_RANK or thirds.shape[-1] != _LINEARITY_THIRDS:
             msg = (
                 "'ear_third_octave_levels' must carry the 100 Hz, 125 Hz "

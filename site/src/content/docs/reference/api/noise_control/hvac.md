@@ -54,37 +54,38 @@ that table and interpolates it. Rectangular ducts use the equivalent
 diameter $D = \sqrt{4S/\pi}$.
 :::
 
-.. warning::
-   Long's worked duct-borne sheet (Table 14.9) was produced by a commercial
-   computer program, not by hand from the tables printed alongside it, and
-   several of its element rows do **not** follow from the book's own data.
-   The functions here implement the *printed* equations and tables, so they
-   reproduce some rows of that sheet and not others. Verified band by band:
+:::caution
+Long's worked duct-borne sheet (Table 14.9) was produced by a commercial
+computer program, not by hand from the tables printed alongside it, and
+several of its element rows do **not** follow from the book's own data.
+The functions here implement the *printed* equations and tables, so they
+reproduce some rows of that sheet and not others. Verified band by band:
 
-   * `split_loss` reproduces the 25 per cent split row (-6 dB) exactly, and
-     [`elbow_insertion_loss`](/phonometry/reference/api/noise_control/hvac/#elbow_insertion_loss) reproduces the unlined-elbow row exactly
-     when the elbow is read as round (Table 14.7) at $w = 24$ in;
-   * [`lined_rectangular_duct_attenuation`](/phonometry/reference/api/noise_control/hvac/#lined_rectangular_duct_attenuation) with `include_unlined=True`
-     reproduces the 18 x 12 in run from 500 Hz up (11/25/22/16/13 dB) and the
-     36 x 24 in run at 500 Hz and 8 kHz, but is 1-2 dB low at 63-250 Hz on
-     one run and 2 dB high on the other;
-   * the fan row (90/86/82/79/77/75/71/61 dB) is **not** reproducible from
-     Eq. 13.1 with the Table 13.5 forward-curved constants, which give
-     99/99/89/84/82/77/72/67 dB at the same duty; the printed spectrum is not
-     a level shift of the tabulated one, so it comes from other data;
-   * the flexible-duct row (14/14/16/15/17/22/16/13 dB) is **not** the
-     Table 14.4 entry for 12 in by 6 ft (3/5/10/15/17/16/9 dB);
-   * [`diffuser_sound_power`](/phonometry/reference/api/noise_control/hvac/#diffuser_sound_power) reproduces the supply diffuser row
-     (33/32/29/23/15/4/0/0 dB) to better than 1 dB in five of the six bands
-     that carry it (+0.4/+0.4/+0.2/+0.7/+0.9 dB from 63 Hz to 1 kHz) and to
-     1.9 dB in the sixth (2 kHz), reading the device as a 24 x 24 in
-     rectangular diffuser;
-   * the silencer and grille rows are manufacturer data, which is what a
-     real sheet uses and what [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) accepts.
+* `split_loss` reproduces the 25 per cent split row (-6 dB) exactly, and
+  [`elbow_insertion_loss`](/phonometry/reference/api/noise_control/hvac/#elbow_insertion_loss) reproduces the unlined-elbow row exactly
+  when the elbow is read as round (Table 14.7) at $w = 24$ in;
+* [`lined_rectangular_duct_attenuation`](/phonometry/reference/api/noise_control/hvac/#lined_rectangular_duct_attenuation) with `include_unlined=True`
+  reproduces the 18 x 12 in run from 500 Hz up (11/25/22/16/13 dB) and the
+  36 x 24 in run at 500 Hz and 8 kHz, but is 1-2 dB low at 63-250 Hz on
+  one run and 2 dB high on the other;
+* the fan row (90/86/82/79/77/75/71/61 dB) is **not** reproducible from
+  Eq. 13.1 with the Table 13.5 forward-curved constants, which give
+  99/99/89/84/82/77/72/67 dB at the same duty; the printed spectrum is not
+  a level shift of the tabulated one, so it comes from other data;
+* the flexible-duct row (14/14/16/15/17/22/16/13 dB) is **not** the
+  Table 14.4 entry for 12 in by 6 ft (3/5/10/15/17/16/9 dB);
+* [`diffuser_sound_power`](/phonometry/reference/api/noise_control/hvac/#diffuser_sound_power) reproduces the supply diffuser row
+  (33/32/29/23/15/4/0/0 dB) to better than 1 dB in five of the six bands
+  that carry it (+0.4/+0.4/+0.2/+0.7/+0.9 dB from 63 Hz to 1 kHz) and to
+  1.9 dB in the sixth (2 kHz), reading the device as a 24 x 24 in
+  rectangular diffuser;
+* the silencer and grille rows are manufacturer data, which is what a
+  real sheet uses and what [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) accepts.
 
-   The cascade arithmetic of that sheet is reproduced exactly (see the
-   duct-path tests, which feed it its own printed element rows), and the
-   sheet's own internal rounding is 1 dB.
+The cascade arithmetic of that sheet is reproduced exactly (see the
+duct-path tests, which feed it its own printed element rows), and the
+sheet's own internal rounding is 1 dB.
+:::
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -269,7 +270,7 @@ which is what `n_devices` applies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, `n_devices` is not a whole number from 1 or `shape` is unknown. |
-| TypeError | if `shape` is not a text, `face_area`, `pressure_drop_pa` or `volume_flow` is not a single number, or `n_devices` is a flag, a text or an array where a count goes. |
+| TypeError | if `shape` is not a text, `face_area`, `pressure_drop_pa` or `volume_flow` is not a single number, or `n_devices` is a flag, a text or an array where a count goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## elbow_insertion_loss
 
@@ -327,7 +328,7 @@ one rather than as the width in the plane of the bend.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `lined_side` or `model` is not a text, or `speed_of_sound` or `width_m` is not a single number, or `bend_type` is not a text. |
+| TypeError | if `lined_side` or `model` is not a text, or `speed_of_sound` or `width_m` is not a single number, or `bend_type` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## end_reflection_loss
 
@@ -378,7 +379,7 @@ The two agree within a couple of decibels over the bands both cover.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `method` is not a text, or `aspect_ratio`, `diameter_m`, `max_reduction` or `speed_of_sound` is not a single number, or `termination` is not a text. |
+| TypeError | if `method` is not a text, or `aspect_ratio`, `diameter_m`, `max_reduction` or `speed_of_sound` is not a single number, or `termination` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## end_reflection_loss_closed_form
 
@@ -423,7 +424,7 @@ whose flare smooths the impedance transition into the room.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `termination` is not a text, or `diameter_m` or `speed_of_sound` is not a single number. |
+| TypeError | if `termination` is not a text, or `diameter_m` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## equivalent_diameter
 
@@ -473,6 +474,12 @@ the housing.
 | `frequencies` | Octave-band centres, Hz; `None` (default) uses the eight octave bands from 63 Hz to 8 kHz. |
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## fan_efficiency_correction
 
@@ -612,7 +619,7 @@ duty point, worth 0,1 dB at the optimum itself.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `assembly`, `fan_type` or `model` is not a text, or `blade_frequency`, `fan_speed_rpm`, `fan_static_pressure_pa`, `fan_total_pressure_pa`, `n_blades`, `relative_flow`, `specific_sound_power_level` or `volume_flow` is not a single number. |
+| TypeError | if `assembly`, `fan_type` or `model` is not a text, or `blade_frequency`, `fan_speed_rpm`, `fan_static_pressure_pa`, `fan_total_pressure_pa`, `n_blades`, `relative_flow`, `specific_sound_power_level` or `volume_flow` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## flexible_duct_insertion_loss
 
@@ -650,7 +657,7 @@ value is returned.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m` or `length` is not a single number. |
+| TypeError | if `diameter_m` or `length` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## flow_noise_bend
 
@@ -726,7 +733,7 @@ $\lg St$ is not real below one.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `model` is not a text, or `area`, `branch_diameter_m`, `density`, `flow_velocity`, `height_m` or `rounding_ratio` is not a single number. |
+| TypeError | if `model` is not a text, or `area`, `branch_diameter_m`, `density`, `flow_velocity`, `height_m` or `rounding_ratio` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## flow_noise_straight_duct
 
@@ -765,7 +772,7 @@ Eq. (8.251) prints the two as one line and credits the same guideline.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area` or `flow_velocity` is not a single number. |
+| TypeError | if `area` or `flow_velocity` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## flow_noise_straight_duct_overall
 
@@ -949,7 +956,7 @@ ignores it.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `length` or `lining_thickness_m` is not a single number. |
+| TypeError | if `diameter_m`, `length` or `lining_thickness_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## lined_rectangular_duct_attenuation
 
@@ -994,7 +1001,7 @@ ducts). Flanking limits the total to 40 dB.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `height_m`, `length`, `lining_thickness_m` or `width_m` is not a single number. |
+| TypeError | if `height_m`, `length`, `lining_thickness_m` or `width_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## octave_band_limits
 
@@ -1036,7 +1043,7 @@ test, since `K_A = -A - 5`.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `a_weighted_limit_db` is not a single number. |
+| TypeError | if `a_weighted_limit_db` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## plenum_attenuation
 
@@ -1098,7 +1105,7 @@ with the wavelength; it underpredicts the low-frequency loss by 5-10 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, `mean_absorption` leaves `(0, 1)` or `angle_rad` leaves `[0, pi/2]`. |
-| TypeError | if `angle_rad`, `exit_area`, `line_of_sight` or `wall_area` is not a single number. |
+| TypeError | if `angle_rad`, `exit_area`, `line_of_sight` or `wall_area` is not a single number, or `mean_absorption` holds a text or a value that is not a real number. |
 
 ## plot_plenum_geometry
 
@@ -1241,7 +1248,7 @@ guideline's directivity comes from a chart against frequency, which is why
 | Exception | When |
 | :--- | :--- |
 | ValueError | unless exactly one absorption measure is given, or if an argument is not positive and finite. |
-| TypeError | if `distance` is not a single number. |
+| TypeError | if `distance` is not a single number, or `directivity` holds a text or a value that is not a real number. |
 
 ## section_change_loss
 
@@ -1308,7 +1315,7 @@ VDI 2081 treats the two as separate elements of the chain.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an area, a size, the speed of sound or the cap is not positive, the shape is unknown, a round duct's size contradicts its area, or a rectangular duct meeting a sudden increase is given no size. |
-| TypeError | if `shape` is not a text, or `cap`, `downstream_area`, `speed_of_sound`, `upstream_area` or `upstream_size` is not a single number. |
+| TypeError | if `shape` is not a text, or `cap`, `downstream_area`, `speed_of_sound`, `upstream_area` or `upstream_size` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## silencer_self_noise
 
@@ -1370,7 +1377,7 @@ correction because the face size enters through `N` and `H`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_passages` is not a whole number from 1. |
-| TypeError | if `model` is not a text, `airway_velocity`, `airway_width`, `approach_area`, `height_m` or `pressure_drop_pa` is not a single number, or `n_passages` is a flag, a text or an array where a count goes. |
+| TypeError | if `model` is not a text, `airway_velocity`, `airway_width`, `approach_area`, `height_m` or `pressure_drop_pa` is not a single number, or `n_passages` is a flag, a text or an array where a count goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## SPECTRAL_CORRECTION
 
@@ -1439,7 +1446,7 @@ records.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the areas are not positive or `branch` is not a whole number in range. |
-| TypeError | if `model` is not a text, `main_area` is not a single number, or `branch` is a flag, a text or an array where an index goes. |
+| TypeError | if `model` is not a text, `main_area` is not a single number, or `branch` is a flag, a text or an array where an index goes, or `branch_areas` holds a text or a value that is not a real number. |
 
 ## splitter_silencer_insertion_loss
 
@@ -1497,7 +1504,7 @@ noise is a separate quantity, [`silencer_self_noise`](/phonometry/reference/api/
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any dimension is not positive, or if `airway_widths` is not a non-empty 1-D array. |
-| TypeError | if `splitter_thickness_m` is not a single number. |
+| TypeError | if `splitter_thickness_m` is not a single number, or `airway_widths` or `frequencies` holds a text or a value that is not a real number. |
 
 ## unlined_circular_duct_attenuation
 
@@ -1540,7 +1547,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `model` is not a text, or `diameter_m` or `length` is not a single number. |
+| TypeError | if `model` is not a text, or `diameter_m` or `length` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## unlined_rectangular_duct_attenuation
 
@@ -1594,4 +1601,4 @@ and is refused.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `model` is not a text, or `height_m`, `length` or `width_m` is not a single number. |
+| TypeError | if `model` is not a text, or `height_m`, `length` or `width_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |

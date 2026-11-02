@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._i18n import format_number, t
 from ._sound_power_fiche import (
     FicheCopy,
@@ -205,7 +206,7 @@ def _band_array(values: np.ndarray | None, n: int) -> np.ndarray:
     """A per-band float array, or all-``NaN`` when the quantity is absent."""
     if values is None:
         return np.full(n, np.nan, dtype=np.float64)
-    return np.asarray(values, dtype=np.float64)
+    return real_array(values, "values")
 
 
 def _grade_cell(grade: np.ndarray | None, i: int) -> str:
@@ -300,7 +301,7 @@ def _indicator_range(
     """A field-indicator range, or an em dash when the indicator is absent."""
     if values is None:
         return _ABSENT
-    return range_str(np.asarray(values, dtype=np.float64), language, decimals)
+    return range_str(real_array(values, "values"), language, decimals)
 
 
 def render_intensity_power_report(
@@ -660,7 +661,7 @@ def _dynamic_capability(
     """``Ld = delta_pI0 - K`` with the fixed precision ``K``, or ``None``."""
     if residual_index is None:
         return None
-    return np.atleast_1d(np.asarray(residual_index, dtype=np.float64)) - _K_PRECISION
+    return np.atleast_1d(real_array(residual_index, "residual_index")) - _K_PRECISION
 
 
 def _precision_model_strip(
@@ -674,7 +675,7 @@ def _precision_model_strip(
     residual = (
         None
         if residual_index is None
-        else np.atleast_1d(np.asarray(residual_index, dtype=np.float64))
+        else np.atleast_1d(real_array(residual_index, "residual_index"))
     )
     return t(
         "L<sub>W</sub> = 10 lg(P/P<sub>0</sub>), P the sum of the "
@@ -877,6 +878,8 @@ def render_precision_intensity_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
+    :raises TypeError: if ``residual_index`` holds a text or a value that is not a real
+        number.
     """
     omitted = _precision_omitted(result, criteria)
     level_a = _precision_level_a(result, omitted)

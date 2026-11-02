@@ -46,7 +46,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_count
+from .._internal.validation import (
+    real_array,
+    require_count,
+)
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -319,7 +322,7 @@ def _band_value(
     """
     if frequency is None:
         return float("nan")
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     idx = int(np.argmin(np.abs(freq - target)))
     if abs(freq[idx] - target) > _BAND_MATCH_REL * target:
         return float("nan")
@@ -337,7 +340,7 @@ def _band_fraction(frequency: np.ndarray | None) -> int:
         return 1
     from ..filters.frequencies import _infer_band_fraction
 
-    return _infer_band_fraction(np.asarray(frequency, dtype=np.float64))
+    return _infer_band_fraction(real_array(frequency, "frequency"))
 
 
 def _reverberation_descriptor(
@@ -359,7 +362,7 @@ def _reverberation_descriptor(
     value came from.
     """
     freq = result.frequencies
-    arr = np.asarray(values, dtype=np.float64)
+    arr = real_array(values, "values")
     if freq is not None:
         wanted = (
             _TMID_THIRD_OCTAVE_BANDS

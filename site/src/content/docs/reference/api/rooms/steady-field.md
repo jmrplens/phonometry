@@ -160,6 +160,7 @@ ventilation opening begins.
 | Exception | When |
 | :--- | :--- |
 | ValueError | unless exactly one absorption measure is given, or if a value is not positive and finite. |
+| TypeError | if `absorption_area`, `directivity` or `room_constant` holds a text or a value that is not a real number. |
 
 ## room_constant
 
@@ -196,7 +197,7 @@ Room constant $R = S \bar{\alpha} / (1 - \bar{\alpha})$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `surface_area` is not a single number. |
+| TypeError | if `surface_area` is not a single number, or `mean_absorption` holds a text or a value that is not a real number. |
 
 ## sabine_absorption_area
 
@@ -252,7 +253,7 @@ is the same expression at 339 m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the volume, the time or the speed is not positive and finite. |
-| TypeError | if `speed_of_sound` or `volume` is not a single number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## schroeder_frequency
 
@@ -294,7 +295,7 @@ modes and `R` / `rc` lose their meaning.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `volume` is not a single number. |
+| TypeError | if `volume` is not a single number, or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## SOURCE_POWER_MODELS
 
@@ -342,7 +343,7 @@ distance (crossover of the two fields).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `characteristic_impedance`, `directivity`, `mean_absorption` or `sound_power_level` is not a single number. |
+| TypeError | if `characteristic_impedance`, `directivity`, `mean_absorption` or `sound_power_level` is not a single number, or `distances` holds a text or a value that is not a real number. |
 
 ## steady_state_spl
 
@@ -402,7 +403,7 @@ such as a room-to-room transmission uses.
 | Exception | When |
 | :--- | :--- |
 | ValueError | unless exactly one absorption measure is given; if `distance`, the measure or `directivity` is not positive and finite; or if `source_model` is not one of [`SOURCE_POWER_MODELS`](/phonometry/reference/api/rooms/steady-field/#source_power_models). |
-| TypeError | if `source_model` is not a text, or `characteristic_impedance` is not a single number. |
+| TypeError | if `source_model` is not a text, or `characteristic_impedance` is not a single number, or `absorption_area`, `directivity`, `distance`, `room_constant` or `sound_power_level` holds a text or a value that is not a real number. |
 
 ## SteadyFieldResult
 

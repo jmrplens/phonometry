@@ -36,6 +36,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import Sex  # noqa: TC001
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_finite_fields,
     require_ranks,
     require_same_length,
@@ -489,7 +490,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
         return values
-    fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    fr = np.atleast_1d(real_array(frequencies, "frequencies"))
     idx = []
     for f in fr:
         matches = np.isclose(_NIPTS_FREQUENCIES, f, rtol=1e-3)
@@ -563,7 +564,8 @@ def nipts(
     :raises ValueError: for a non-positive duration, a fractile outside (0, 1),
         or an unknown frequency.
     :raises TypeError: if ``exposure_duration_years``, ``fractile`` or ``l_ex`` is not a
-        single number.
+        single number, or ``frequencies`` holds a text or a value that is not a real
+        number.
 
     Outside the standard's validated domain (durations of 1 to 40 years,
     fractiles of 0.05 to 0.95, exposure levels up to 100 dB) the computation still
@@ -617,9 +619,11 @@ def age_and_noise_threshold(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarr
     :param htla: Age-associated hearing threshold level ``H``, in dB.
     :param nipts_value: Noise-induced permanent threshold shift ``N``, in dB.
     :return: The combined threshold ``H'``, in dB.
+    :raises TypeError: if ``htla`` or ``nipts_value`` holds a text or a value that is
+        not a real number.
     """
-    h = np.asarray(htla, dtype=np.float64)
-    n = np.asarray(nipts_value, dtype=np.float64)
+    h = real_array(htla, "htla")
+    n = real_array(nipts_value, "nipts_value")
     return h + n - h * n / _HTLAN_DENOM
 
 
@@ -652,8 +656,9 @@ def htlan(
         ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a non-positive
         duration, a fractile outside (0, 1), or an unknown frequency.
-    :raises TypeError: if ``age`` or ``fractile`` is not a single number, or
-        ``sex`` is not a text.
+    :raises TypeError: if ``age`` or ``fractile`` is not a single number, or ``sex`` is
+        not a text, or ``frequencies`` holds a text or a value that is not a real
+        number.
 
     The noise component inherits the validated-domain checks of :func:`nipts`,
     so exposure conditions outside the standard's stated ranges raise a

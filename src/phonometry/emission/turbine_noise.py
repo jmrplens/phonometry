@@ -123,6 +123,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_finite,
@@ -260,7 +261,7 @@ def _round_half_up(value: float) -> int:
 
 def _below_criterion(level_difference: ArrayLike) -> np.ndarray:
     """Which background level differences are less than 3 dB (4.2)."""
-    difference = np.asarray(level_difference, dtype=np.float64)
+    difference = real_array(level_difference, "level_difference")
     return np.asarray(
         difference < _BACKGROUND_CRITERION_DB - _BOUNDARY_SLACK_DB, dtype=bool
     )
@@ -618,11 +619,12 @@ def _outline(edges: np.ndarray, levels: np.ndarray, base: float) -> np.ndarray:
     the front end, across the top with every step, and down the rear end to
     key position 5.
     """
-    points = [(float(edges[0]), base)]
-    for i, level in enumerate(levels):
-        points.extend(((edges[i], level), (edges[i + 1], level)))
-    points.append((float(edges[-1]), base))
-    return np.array(points, dtype=np.float64)
+    # Every edge twice, each level on the run between two edges, and the base
+    # at both ends: the vertices (e0, base), (e0, l0), (e1, l0), (e1, l1), ...,
+    # (en, base) of the values the caller of this helper computed.
+    x = np.repeat(edges, 2)
+    y = np.concatenate(([base], np.repeat(levels, 2), [base]))
+    return np.column_stack((x, y))
 
 
 def _arc_lengths(polyline: np.ndarray) -> np.ndarray:
@@ -637,10 +639,8 @@ def _point_at(polyline: np.ndarray, lengths: np.ndarray, s: float) -> np.ndarray
     index = min(max(index, 0), len(polyline) - 2)
     span = lengths[index + 1] - lengths[index]
     fraction = 0.0 if span <= 0.0 else (s - lengths[index]) / span
-    start = np.asarray(polyline[index], dtype=np.float64)
-    return start + fraction * (
-        np.asarray(polyline[index + 1], dtype=np.float64) - start
-    )
+    start = real_array(polyline[index], "polyline")
+    return start + fraction * (real_array(polyline[index + 1], "polyline") - start)
 
 
 def _distance_along(

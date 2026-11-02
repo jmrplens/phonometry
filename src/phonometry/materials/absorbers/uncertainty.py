@@ -49,6 +49,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_equal_shapes,
     require_ranks,
@@ -158,7 +159,7 @@ def _condition(condition: object) -> Condition:
 
 
 def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
-    a = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    a = np.atleast_1d(real_array(values, name))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
         raise ValueError(msg)
@@ -168,7 +169,7 @@ def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
 def _round_report(u: np.ndarray, decimals: int) -> np.ndarray:
     """Round-half-up to *decimals* (numpy rounds half-to-even, unlike ISO 80000)."""
     scale = 10.0**decimals
-    return np.floor(np.asarray(u, dtype=np.float64) * scale + 0.5) / scale
+    return np.floor(real_array(u, "u") * scale + 0.5) / scale
 
 
 def absorption_coverage_factor(coverage: float = 0.95) -> float:
@@ -375,7 +376,8 @@ def sound_absorption_coefficient_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
         ``condition`` or an untabulated ``coverage``.
-    :raises TypeError: if ``condition`` is not a text.
+    :raises TypeError: if ``condition`` is not a text, or ``alpha`` or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     return _band_uncertainty(
         _finite_bands(alpha, "alpha"),
@@ -410,7 +412,8 @@ def equivalent_area_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
         ``condition`` or an untabulated ``coverage``.
-    :raises TypeError: if ``condition`` is not a text.
+    :raises TypeError: if ``condition`` is not a text, or ``area`` or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     a = _finite_bands(area, "area")
     f = _finite_bands(frequencies, "frequencies")
@@ -455,7 +458,8 @@ def practical_coefficient_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
         ``condition`` or an untabulated ``coverage``.
-    :raises TypeError: if ``condition`` is not a text.
+    :raises TypeError: if ``condition`` is not a text, or ``alpha_p`` or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     return _band_uncertainty(
         _finite_bands(alpha_p, "alpha_p"),
@@ -490,8 +494,8 @@ def _single_number(
         quantity=quantity,
         condition=condition,
         frequencies=empty,
-        values=np.asarray([value], dtype=np.float64),
-        standard_uncertainty=np.asarray([u], dtype=np.float64),
+        values=real_array([value], "value"),
+        standard_uncertainty=real_array([u], "u"),
         coverage_factor=k,
         expanded_uncertainty=np.asarray([k * u], dtype=np.float64),
     )

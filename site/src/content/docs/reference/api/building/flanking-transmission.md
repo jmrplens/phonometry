@@ -111,6 +111,7 @@ band is
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is not positive/finite. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## check_strong_coupling
 
@@ -151,7 +152,7 @@ does not hold (Part 1, 4.3.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any scalar input is not positive/finite, or the band frequencies are not one positive value per band. |
-| TypeError | if `critical_frequency_i`, `critical_frequency_j`, `mass_i` or `mass_j` is not a single number. |
+| TypeError | if `critical_frequency_i`, `critical_frequency_j`, `mass_i` or `mass_j` is not a single number, or `frequencies` or `velocity_level_difference` holds a text or a value that is not a real number. |
 
 ## critical_frequency
 
@@ -231,6 +232,7 @@ $\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are empty, non-finite, or differ in length. |
+| TypeError | if `dv_ij` or `dv_ji` holds a text or a value that is not a real number. |
 
 ## equivalent_absorption_length
 
@@ -268,7 +270,7 @@ with $f_{\mathrm{ref}} = 1000$ Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is not positive/finite or the band counts are incompatible. |
-| TypeError | if `area` or `speed_of_sound` is not a single number. |
+| TypeError | if `area` or `speed_of_sound` is not a single number, or `frequencies` or `structural_reverberation_time` holds a text or a value that is not a real number. |
 
 ## FlankingImpactLevelResult
 
@@ -486,6 +488,7 @@ bracketing and single-number exclusion.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is not positive/finite. |
+| TypeError | if `structural_reverberation_time` holds a text or a value that is not a real number. |
 
 ## normalized_flanking_impact_level
 
@@ -521,7 +524,7 @@ tapping machine on the source-room floor.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
-| TypeError | if `reference_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `reference_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `absorption_area` or `receive_level` holds a text or a value that is not a real number. |
 
 ## normalized_flanking_level_difference
 
@@ -558,7 +561,7 @@ area $A_0 = 10$ m².
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
-| TypeError | if `reference_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `reference_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `absorption_area`, `receive_level` or `source_level` holds a text or a value that is not a real number. |
 
 ## StrongCouplingCheck
 
@@ -681,6 +684,7 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are not positive/finite or their band counts are incompatible. |
+| TypeError | if `frequencies` or `structural_reverberation_time` holds a text or a value that is not a real number. |
 
 ## velocity_level_difference
 
@@ -707,6 +711,7 @@ Velocity level difference $D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are empty, non-finite, or differ in length. |
+| TypeError | if `receive_level` or `source_level` holds a text or a value that is not a real number. |
 
 ## vibration_reduction_index
 
@@ -757,7 +762,7 @@ is used.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts, non-positive geometry, or if only one of the two structural reverberation times is supplied. |
-| TypeError | if `area_i`, `area_j` or `junction_length` is not a single number. |
+| TypeError | if `area_i`, `area_j` or `junction_length` is not a single number, or `frequencies`, `modal_overlap` or `velocity_level_difference` holds a text or a value that is not a real number, or `speed_of_sound` is not a single number. |
 
 ## vibration_reduction_index_from_flanking
 
@@ -809,7 +814,7 @@ The standard warns this holds only for resonant-only transmission; measured
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive geometry. |
-| TypeError | if `area_i`, `area_j`, `junction_length` or `reference_area` is not a single number. |
+| TypeError | if `area_i`, `area_j`, `junction_length` or `reference_area` is not a single number, or `absorption_length_i`, `absorption_length_j`, `normalized_flanking_level_difference`, `reduction_index_i` or `reduction_index_j` holds a text or a value that is not a real number. |
 
 ## VibrationReductionResult
 

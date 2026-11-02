@@ -70,6 +70,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.types import answer_form, as_float_or_array, one_value
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_finite_fields,
     require_non_negative,
@@ -255,6 +256,8 @@ def evaluation_zone(
     :return: ``"A"``, ``"B"``, ``"C"`` or ``"D"``: a string for a number; an array of
         them for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a magnitude is negative or not finite.
+    :raises TypeError: if ``magnitude`` holds a text or a value that is not a real
+        number.
     """
     return _zone_letters(_zone_index(magnitude, boundaries), like=(magnitude,))
 
@@ -271,7 +274,7 @@ _ZONES: tuple[EvaluationZone, ...] = ("A", "B", "C", "D")
 
 def _zone_index(magnitude: ArrayLike, boundaries: ZoneBoundaries) -> NDArray[np.intp]:
     """Which of the four zones a magnitude falls in, as an index into the ladder."""
-    values = np.asarray(magnitude, dtype=np.float64)
+    values = real_array(magnitude, "magnitude")
     if np.any(values < 0.0) or not np.all(np.isfinite(values)):
         msg = "'magnitude' must be non-negative and finite."
         raise ValueError(msg)
@@ -375,7 +378,8 @@ def allowable_velocity(
     :raises ValueError: If a frequency is not positive, a velocity or corner
         is not positive and finite, or the corners are not in order.
     :raises TypeError: if ``constant_velocity_mm_s``, ``corner_high_hz``,
-        ``corner_low_hz`` or ``zone_factor`` is not a single number.
+        ``corner_low_hz`` or ``zone_factor`` is not a single number, or ``frequency``
+        holds a text or a value that is not a real number.
     """
     v_a = require_positive(constant_velocity_mm_s, "constant_velocity_mm_s")
     z = require_positive(zone_factor, "zone_factor")
@@ -391,7 +395,7 @@ def allowable_velocity(
         if not math.isfinite(value):
             msg = f"'{name}' must be finite."
             raise ValueError(msg)
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f <= 0.0) or not np.all(np.isfinite(f)):
         msg = "'frequency' must be positive and finite."
         raise ValueError(msg)
@@ -975,10 +979,11 @@ def gear_shaft_displacement_limit(
     :return: The allowable peak-to-peak displacement, in micrometres; a ``float`` for a
         number; an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a frequency or the rating is not positive.
-    :raises TypeError: if ``rating`` is not a single number.
+    :raises TypeError: if ``rating`` is not a single number, or ``frequency`` holds a
+        text or a value that is not a real number.
     """
     value = require_positive(rating, "rating")
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     if np.any(freq <= 0.0) or not np.all(np.isfinite(freq)):
         msg = "'frequency' must be positive and finite."
         raise ValueError(msg)

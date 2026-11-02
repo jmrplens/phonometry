@@ -52,6 +52,7 @@ single-strike SELs.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the sequence is empty or non-finite. |
+| TypeError | if `single_sels` holds a text or a value that is not a real number. |
 
 ## cumulative_sel_identical
 

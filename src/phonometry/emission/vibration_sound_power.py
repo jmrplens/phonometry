@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_equal_shapes,
     require_positive,
     require_ranks,
@@ -126,10 +127,11 @@ def velocity_level(
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
     :return: The velocity level ``L_v``, in dB re ``v0``.
     :raises ValueError: for a non-positive reference.
-    :raises TypeError: if ``reference`` is not a single number.
+    :raises TypeError: if ``reference`` is not a single number, or ``velocity`` holds a
+        text or a value that is not a real number.
     """
     reference = require_positive(reference, "reference")
-    v = np.asarray(velocity, dtype=np.float64)
+    v = real_array(velocity, "velocity")
     return np.asarray(20.0 * np.log10(np.abs(v) / reference), dtype=np.float64)
 
 
@@ -151,11 +153,12 @@ def velocity_level_from_acceleration(
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
     :return: The velocity level ``L_v``, in dB re ``v0``.
     :raises ValueError: for a non-positive frequency or reference.
-    :raises TypeError: if ``reference`` is not a single number.
+    :raises TypeError: if ``reference`` is not a single number, or ``frequency`` or
+        ``peak_acceleration`` holds a text or a value that is not a real number.
     """
     reference = require_positive(reference, "reference")
-    a = np.asarray(peak_acceleration, dtype=np.float64)
-    f = np.asarray(frequency, dtype=np.float64)
+    a = real_array(peak_acceleration, "peak_acceleration")
+    f = real_array(frequency, "frequency")
     if np.any(f <= 0.0):
         msg = "'frequency' must be positive."
         raise ValueError(msg)
@@ -174,13 +177,15 @@ def mean_velocity_level(levels: ArrayLike, areas: ArrayLike | None = None) -> fl
     :param areas: Partial areas ``S_i`` (Equation 11), or ``None`` for the
         uniform energetic average (Equation 10).
     :return: The mean velocity level, in dB.
+    :raises TypeError: if ``areas`` or ``levels`` holds a text or a value that is not a
+        real number.
     """
-    lv = np.asarray(levels, dtype=np.float64)
+    lv = real_array(levels, "levels")
     energy = 10.0 ** (0.1 * lv)
     if areas is None:
         mean_energy = float(np.mean(energy))
     else:
-        s = np.asarray(areas, dtype=np.float64)
+        s = real_array(areas, "areas")
         require_equal_shapes(
             "mean_velocity_level",
             {"levels": lv.shape, "areas": s.shape},
@@ -211,12 +216,14 @@ def radiation_factor(
     :param impedance: Characteristic impedance ``Z_c`` (Default: 411 N.s/m^3).
     :return: The radiation factor ``epsilon`` (dimensionless).
     :raises ValueError: for a non-positive area or impedance.
-    :raises TypeError: if ``area`` or ``impedance`` is not a single number.
+    :raises TypeError: if ``area`` or ``impedance`` is not a single number, or
+        ``mean_square_velocity`` or ``sound_power`` holds a text or a value that is not
+        a real number.
     """
     area = require_positive(area, "area")
     impedance = require_positive(impedance, "impedance")
-    p = np.asarray(sound_power, dtype=np.float64)
-    v2 = np.asarray(mean_square_velocity, dtype=np.float64)
+    p = real_array(sound_power, "sound_power")
+    v2 = real_array(mean_square_velocity, "mean_square_velocity")
     return np.asarray(p / (impedance * v2 * area), dtype=np.float64)
 
 
@@ -249,7 +256,8 @@ def radiated_sound_power_level(
     :return: The sound power level ``L_W``, in dB re 1 pW.
     :raises ValueError: for a non-positive area, reference area or impedance.
     :raises TypeError: if ``area``, ``normalized_impedance``, ``reference_area`` or
-        ``reference_impedance`` is not a single number.
+        ``reference_impedance`` is not a single number, or ``radiation_factor`` or
+        ``velocity_level`` holds a text or a value that is not a real number.
     """
     area = require_positive(area, "area")
     reference_area = require_positive(reference_area, "reference_area")
@@ -257,8 +265,8 @@ def radiated_sound_power_level(
         normalized_impedance, "normalized_impedance"
     )
     reference_impedance = require_positive(reference_impedance, "reference_impedance")
-    lv = np.asarray(velocity_level, dtype=np.float64)
-    eps = np.asarray(radiation_factor, dtype=np.float64)
+    lv = real_array(velocity_level, "velocity_level")
+    eps = real_array(radiation_factor, "radiation_factor")
     lw = (
         lv
         + 10.0 * np.log10(area / reference_area)
@@ -501,15 +509,17 @@ def sound_power_from_vibration(
         Part 1 upper limit); scalar or per band.
     :param frequencies: Band centre frequencies, in hertz, or ``None``.
     :return: The :class:`VibrationSoundPowerResult`.
+    :raises TypeError: if ``frequencies``, ``radiation_factor`` or ``velocity_level``
+        holds a text or a value that is not a real number.
     """
-    lv = np.atleast_1d(np.asarray(velocity_level, dtype=np.float64))
+    lv = np.atleast_1d(real_array(velocity_level, "velocity_level"))
     eps = np.broadcast_to(
-        np.asarray(radiation_factor, dtype=np.float64), lv.shape
+        real_array(radiation_factor, "radiation_factor"), lv.shape
     ).astype(np.float64)
     lw = radiated_sound_power_level(lv, area, radiation_factor=eps)
     freq = None
     if frequencies is not None:
-        freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+        freq = np.atleast_1d(real_array(frequencies, "frequencies"))
         require_equal_shapes(
             "sound_power_from_vibration",
             {"velocity_level": lv.shape, "frequencies": freq.shape},

@@ -50,6 +50,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.types import RealScalar
 from .._internal.validation import (
+    real_array,
     require_axis_count,
     require_choice,
     require_count,
@@ -479,7 +480,7 @@ def _validated_correlation(correlation: ArrayLike | None, n: int) -> np.ndarray 
     """
     if correlation is None:
         return None
-    r = np.asarray(correlation, dtype=np.float64)
+    r = real_array(correlation, "correlation")
     if r.shape != (n, n):
         msg = f"correlation must have shape ({n}, {n}); got {r.shape}."
         raise ValueError(msg)
@@ -561,6 +562,8 @@ def uncertainty_propagation(
     :raises ValueError: for no inputs, a malformed correlation matrix, or a
         model that is not finite at the estimates or one evaluation step
         either side of them.
+    :raises TypeError: if ``correlation`` holds a text or a value that is not a real
+        number.
     """
     if len(quantities) == 0:
         msg = "at least one input quantity is required."
@@ -654,6 +657,8 @@ def combined_standard_uncertainty(
     :raises ValueError: If ``contributions`` is empty, holds a value that is
         not finite, a pair that is not ``(uncertainty, sensitivity)``, or a
         pair whose uncertainty is negative.
+    :raises TypeError: if ``contributions`` holds a text or a value that is not a real
+        number.
     """
     items = list(contributions)
     if not items:
@@ -664,7 +669,7 @@ def combined_standard_uncertainty(
         if isinstance(item, Sequence | np.ndarray) and not isinstance(
             item, str | bytes
         ):
-            pair = np.asarray(item, dtype=np.float64)
+            pair = real_array(item, "contributions")
             if pair.shape != (2,):
                 msg = "Each pair must be (uncertainty, sensitivity)."
                 raise ValueError(msg)

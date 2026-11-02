@@ -121,6 +121,7 @@ not a condition judged here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an end-face grid that is not two rows of finite levels, directional readings given in part, or arrays that do not match. |
+| TypeError | if `end_face_levels`, `facing_away_levels`, `facing_levels`, `frequencies` or `front_to_rear_index` holds a text or a value that is not a real number. |
 
 ## check_random_incidence_field
 
@@ -230,6 +231,7 @@ use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearin
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not finite, grids of different bands, cup levels that do not match, frequencies that do not fit, or an uncertainty that is negative or not finite. |
+| TypeError | if `frequencies`, `isolation_cup_levels`, `occluded_levels` or `open_levels` holds a text or a value that is not a real number. |
 
 ## EARMUFF_INSERTION_LOSS_UNCERTAINTY
 
@@ -717,3 +719,4 @@ resilient mounting (5.1.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not finite or do not match the bands. |
+| TypeError | if `cup_levels`, `frequencies` or `open_levels` holds a text or a value that is not a real number. |

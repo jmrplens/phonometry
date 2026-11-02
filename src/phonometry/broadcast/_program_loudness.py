@@ -64,6 +64,7 @@ from .._internal.peaks import inter_sample_peak
 from .._internal.types import ReportEngine, as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_count,
     require_positive,
     require_ranks,
@@ -383,7 +384,8 @@ def k_weighting_response(
     :raises ValueError: If ``fs`` is below 16 kHz, ``n`` is not positive, or a
         supplied frequency is outside ``(0, fs/2]``.
     :raises TypeError: if ``fs`` is not a single number, or ``n`` is a flag, a text or
-        an array where a count goes.
+        an array where a count goes, or ``frequencies`` holds a text or a value that is
+        not a real number.
     """
     fs = require_positive(fs, "fs")
     (b1, a1), (b2, a2) = k_weighting_coefficients(fs)
@@ -397,7 +399,7 @@ def k_weighting_response(
             np.log10(10.0), np.log10(nyquist), require_count(n, "n", at_least=None)
         )
     else:
-        freqs = np.asarray(frequencies, dtype=np.float64).ravel()
+        freqs = real_array(frequencies, "frequencies").ravel()
         if freqs.size == 0:
             msg = "'frequencies' cannot be empty."
             raise ValueError(msg)
@@ -466,9 +468,11 @@ def channel_weight(
         120``, else 1.0; a ``float`` when ``azimuth`` and ``elevation`` are both
         numbers; an array of their broadcast shape when one is a sequence or an array, a
         zero-dimensional one included.
+    :raises TypeError: if ``azimuth`` or ``elevation`` holds a text or a value that is
+        not a real number.
     """
-    theta = np.abs(np.asarray(azimuth, dtype=np.float64))
-    phi = np.abs(np.asarray(elevation, dtype=np.float64))
+    theta = np.abs(real_array(azimuth, "azimuth"))
+    phi = np.abs(real_array(elevation, "elevation"))
     if not (np.all(np.isfinite(theta)) and np.all(np.isfinite(phi))):
         msg = "azimuth and elevation must be finite."
         raise ValueError(msg)
@@ -500,7 +504,7 @@ def _resolve_weights(n_channels: int, weights: ArrayLike | None) -> np.ndarray:
                 "use 0.0 to exclude an LFE channel)."
             )
             raise ValueError(msg) from None
-    w = np.asarray(weights, dtype=np.float64)
+    w = real_array(weights, "weights")
     if w.ndim != 1 or w.size != n_channels:
         msg = (
             f"weights must be a 1D sequence with one entry per channel "
@@ -613,8 +617,12 @@ def loudness_range(short_term_loudness: ArrayLike) -> float:
     :param short_term_loudness: Short-term loudness readings, LUFS.
     :return: The loudness range, in LU (0.0 when no reading survives the
         gate).
+    :raises TypeError: if ``short_term_loudness`` holds a text or a value that is not a
+        real number.
     """
-    stl = _lra_distribution(np.asarray(short_term_loudness, dtype=np.float64).ravel())
+    stl = _lra_distribution(
+        real_array(short_term_loudness, "short_term_loudness").ravel()
+    )
     if stl.size == 0:
         return 0.0
     low, high = LRA_PERCENTILES
@@ -708,6 +716,7 @@ def integrated_loudness(
         :data:`DEFAULT_CHANNEL_WEIGHTS` and :func:`channel_weight`).
     :return: The programme loudness, LUFS (``-inf`` when the signal is
         shorter than one gating block or entirely below the absolute gate).
+    :raises TypeError: if ``weights`` holds a text or a value that is not a real number.
     """
     fs = resolve_fs(x, fs)
     x_proc, w = _prepare_signal(x, weights)
@@ -1015,7 +1024,7 @@ def program_loudness(
         smallest factor reaching 192 kHz (4 at 48 kHz).
     :return: The frozen :class:`ProgramLoudnessResult`.
     :raises TypeError: if ``fs``, ``momentary_step`` or ``short_term_step`` is not a
-        single number.
+        single number, or ``weights`` holds a text or a value that is not a real number.
     """
     fs = resolve_fs(x, fs)
     x_proc, w = _prepare_signal(x, weights)

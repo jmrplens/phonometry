@@ -65,6 +65,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -677,7 +678,7 @@ def _positive_frequencies(
     frequency_hz: ArrayLike,
     name: str = "frequency_hz",
 ) -> NDArray[np.float64]:
-    f = np.array(frequency_hz, dtype=np.float64, copy=True, ndmin=1)
+    f = np.atleast_1d(real_array(frequency_hz, name, copy=True))
     if f.size == 0 or not np.all(np.isfinite(f)):
         msg = f"'{name}' must be finite and non-empty."
         raise ValueError(msg)
@@ -701,7 +702,8 @@ def auditory_weighting(
         ``"southall-2019"``.
     :return: An :class:`AuditoryWeightingResult`.
     :raises ValueError: If an input is invalid.
-    :raises TypeError: if ``group`` or ``guidance`` is not a text.
+    :raises TypeError: if ``group`` or ``guidance`` is not a text, or ``frequency_hz``
+        holds a text or a value that is not a real number.
     """
     require_choice(
         group,
@@ -1150,9 +1152,10 @@ def weighted_exposure(
         metric.
     :return: A :class:`WeightedExposureResult`.
     :raises ValueError: If an input is invalid.
-    :raises TypeError: if ``peak_spl`` is not a single number, ``n_events``
-        is a flag, a text or an array where a count goes, or ``group`` or
-        ``guidance`` is not a text.
+    :raises TypeError: if ``peak_spl`` is not a single number, ``n_events`` is a flag, a
+        text or an array where a count goes, or ``group`` or ``guidance`` is not a text,
+        or ``band_sel`` or ``frequencies_hz`` holds a text or a value that is not a real
+        number.
     """
     require_choice(
         group,
@@ -1174,7 +1177,7 @@ def weighted_exposure(
         ),
     )
     f = _positive_frequencies(frequencies_hz, "frequencies_hz")
-    sel = np.array(band_sel, dtype=np.float64, copy=True, ndmin=1)
+    sel = np.atleast_1d(real_array(band_sel, "band_sel", copy=True))
     require_equal_shapes(
         "weighted_exposure", {"frequencies_hz": f.shape, "band_sel": sel.shape}, "band"
     )

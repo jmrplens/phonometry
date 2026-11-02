@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
-from .._internal.validation import require_choice
+from .._internal.validation import real_array, require_choice, require_scalar
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -303,7 +303,7 @@ def _band_labels(
         return [_t("Broadband", language)] * count, False
     from ..filters.frequencies import _infer_band_fraction, _nominal_freq_for_band
 
-    centers = np.asarray(frequency, dtype=np.float64)
+    centers = real_array(frequency, "frequency")
     fraction = _infer_band_fraction(centers)
     labels = [
         _format_freq(_nominal_freq_for_band(float(f), float(fraction)), language)
@@ -421,7 +421,7 @@ def _band_indices(
     """Where the named nominal bands sit on a result's band axis."""
     if frequency is None:
         return None
-    centres = np.asarray(frequency, dtype=np.float64)
+    centres = real_array(frequency, "frequency")
     picked = [
         int(np.argmin(np.abs(centres - wanted)))
         for wanted in bands
@@ -1273,8 +1273,10 @@ def plot_excitation(
     :param kwargs: Forwarded to the time-domain ``plot`` call.
     :return: The time-domain axes (``ax`` given) or the tuple of two axes.
     :raises ValueError: for an unknown ``kind``, or an empty signal.
-    :raises TypeError: if ``kind`` is not a text.
+    :raises TypeError: if ``kind`` is not a text, or ``x`` holds a text or a value that
+        is not a real number, or ``fs`` is not a single number.
     """
+    require_scalar(fs, "fs")
     from .._i18n import check_language, localize_axes
 
     check_language(language)
@@ -1284,7 +1286,7 @@ def plot_excitation(
     # sine sweep" beside a spectrogram announcing an exponential frequency
     # rise, with no warning.
     require_choice(kind, "kind", _EXCITATION_KINDS)
-    x = np.asarray(x, dtype=np.float64)
+    x = real_array(x, "x")
     n = x.shape[-1]
     if n == 0:
         msg = "excitation signal is empty; nothing to plot."

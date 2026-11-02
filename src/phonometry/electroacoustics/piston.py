@@ -85,6 +85,7 @@ from scipy import special
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_finite_fields,
     require_positive,
     require_ranks,
@@ -137,8 +138,9 @@ def piston_resistance(x: ArrayLike) -> float | NDArray[np.float64]:
     :param x: Argument :math:`x = 2ka` (scalar or array), dimensionless.
     :return: ``R1(x)``; a ``float`` for a number; an array for a sequence or an array, a
         zero-dimensional one included.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(x, dtype=np.float64)
+    arr = real_array(x, "x")
     if np.any(arr < 0.0) or not np.all(np.isfinite(arr)):
         msg = "'x' must be non-negative and finite."
         raise ValueError(msg)
@@ -174,8 +176,9 @@ def piston_reactance(x: ArrayLike) -> float | NDArray[np.float64]:
     :param x: Argument :math:`x = 2ka` (scalar or array), dimensionless.
     :return: ``X1(x)``; a ``float`` for a number; an array for a sequence or an array, a
         zero-dimensional one included.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(x, dtype=np.float64)
+    arr = real_array(x, "x")
     if np.any(arr < 0.0) or not np.all(np.isfinite(arr)):
         msg = "'x' must be non-negative and finite."
         raise ValueError(msg)
@@ -222,9 +225,11 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> float | NDArray[np.fl
     :return: ``D``; a ``float`` when ``ka`` and ``theta`` are both numbers; an array of
         their broadcast shape when one is a sequence or an array, a zero-dimensional one
         included.
+    :raises TypeError: if ``ka`` or ``theta`` holds a text or a value that is not a real
+        number.
     """
-    ka_arr = np.asarray(ka, dtype=np.float64)
-    theta_arr = np.asarray(theta, dtype=np.float64)
+    ka_arr = real_array(ka, "ka")
+    theta_arr = real_array(theta, "theta")
     if np.any(ka_arr < 0.0) or not np.all(np.isfinite(ka_arr)):
         msg = "'ka' must be non-negative and finite."
         raise ValueError(msg)
@@ -355,8 +360,10 @@ def piston_directivity_pattern(
         (default) uses 361 points spanning the front hemisphere ``-90 deg`` to
         ``+90 deg``, 0.5 deg apart.
     :return: A :class:`PistonDirectivity`.
+    :raises TypeError: if ``angles_rad`` or ``ka`` holds a text or a value that is not a
+        real number.
     """
-    ka_arr = np.atleast_1d(np.asarray(ka, dtype=np.float64))
+    ka_arr = np.atleast_1d(real_array(ka, "ka"))
     if ka_arr.ndim != 1 or ka_arr.size == 0:
         msg = "'ka' must be a non-empty scalar or 1-D array."
         raise ValueError(msg)
@@ -367,7 +374,7 @@ def piston_directivity_pattern(
     if angles_rad is None:
         angle_arr = _DEFAULT_DIRECTIVITY_ANGLES
     else:
-        angle_arr = np.atleast_1d(np.asarray(angles_rad, dtype=np.float64))
+        angle_arr = np.atleast_1d(real_array(angles_rad, "angles_rad"))
         if angle_arr.ndim != 1 or angle_arr.size == 0:
             msg = "'angles_rad' must be a non-empty 1-D array."
             raise ValueError(msg)
@@ -585,12 +592,13 @@ def radiating_piston(
         to sample the directivity pattern.
     :return: A :class:`RadiatingPistonResult`.
     :raises TypeError: if ``density``, ``radius`` or ``speed_of_sound`` is not a single
-        number.
+        number, or ``angles_rad`` or ``frequencies`` holds a text or a value that is not
+        a real number.
     """
     a = require_positive(radius, "radius")
     c = require_positive(speed_of_sound, "speed_of_sound")
     rho = require_positive(density, "density")
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -611,7 +619,7 @@ def radiating_piston(
     directivity: np.ndarray | None = None
     angle_arr: np.ndarray | None = None
     if angles_rad is not None:
-        angle_arr = np.atleast_1d(np.asarray(angles_rad, dtype=np.float64))
+        angle_arr = np.atleast_1d(real_array(angles_rad, "angles_rad"))
         if angle_arr.ndim != 1 or angle_arr.size == 0:
             msg = "'angles_rad' must be a non-empty 1-D array."
             raise ValueError(msg)

@@ -112,6 +112,7 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_non_negative,
     require_positive,
     require_positive_array,
@@ -328,11 +329,12 @@ def background_noise_correction_at_workstation(
         the background held it anywhere.
     :raises ValueError: If the two arguments do not have the same shape, or the
         grade is neither of the two.
-    :raises TypeError: if ``grade`` is not a text.
+    :raises TypeError: if ``grade`` is not a text, or ``background_level`` or
+        ``measured_level`` holds a text or a value that is not a real number.
     """
     checked = _check_grade(grade)
-    measured = np.asarray(measured_level, dtype=np.float64)
-    background = np.asarray(background_level, dtype=np.float64)
+    measured = real_array(measured_level, "measured_level")
+    background = real_array(background_level, "background_level")
     if measured.shape != background.shape:
         msg = (
             f"'measured_level' {measured.shape} and 'background_level' "
@@ -468,9 +470,11 @@ def environmental_ratio_from_k2(
     :return: The ratio :math:`z`; a ``float`` when ``environmental_correction`` and
         ``directivity_index`` are both numbers; an array of their broadcast shape when
         one is a sequence or an array, a zero-dimensional one included.
+    :raises TypeError: if ``directivity_index`` or ``environmental_correction`` holds a
+        text or a value that is not a real number.
     """
-    k2 = np.asarray(environmental_correction, dtype=np.float64)
-    di = np.asarray(directivity_index, dtype=np.float64)
+    k2 = real_array(environmental_correction, "environmental_correction")
+    di = real_array(directivity_index, "directivity_index")
     if np.any(k2 < 0.0):
         msg = "'environmental_correction' is a correction and cannot be negative."
         raise ValueError(msg)
@@ -530,11 +534,12 @@ def environmental_ratio_from_absorption(
         one is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If either area is not strictly positive.
     :raises TypeError: if ``measurement_surface_m2`` is not a single number, or
-        ``absorption_area`` holds a text or a value that is not a real number.
+        ``absorption_area`` or ``directivity_index`` holds a text or a value that is not
+        a real number.
     """
     a = require_positive_array(absorption_area, "absorption_area")
     s_m = require_positive(measurement_surface_m2, "measurement_surface_m2")
-    di = np.asarray(directivity_index, dtype=np.float64)
+    di = real_array(directivity_index, "directivity_index")
     ratio = 1.0 - np.power(10.0, -0.1 * di) / (1.0 + a / (4.0 * s_m))
     return as_float_or_array(ratio, like=(absorption_area, directivity_index))
 
@@ -598,10 +603,12 @@ def emission_sound_pressure_level(
     :return: :math:`L_p` in decibels; a ``float`` when the reading and the two
         corrections are all numbers; an array of their broadcast shape when one is a
         sequence or an array, a zero-dimensional one included.
+    :raises TypeError: if ``background_correction``, ``local_correction`` or
+        ``measured_level`` holds a text or a value that is not a real number.
     """
-    measured = np.asarray(measured_level, dtype=np.float64)
-    k1 = np.asarray(background_correction, dtype=np.float64)
-    k3 = np.asarray(local_correction, dtype=np.float64)
+    measured = real_array(measured_level, "measured_level")
+    k1 = real_array(background_correction, "background_correction")
+    k3 = real_array(local_correction, "local_correction")
     level = np.asarray(measured - k1 - k3, dtype=np.float64)
     return as_float_or_array(
         level, like=(measured_level, background_correction, local_correction)
@@ -630,8 +637,9 @@ def operating_standard_deviation(levels: ArrayLike) -> float:
         at least two.
     :return: :math:`\sigma_\mathrm{omc}` in decibels.
     :raises ValueError: If fewer than two readings are given.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    levels = np.asarray(levels, dtype=np.float64).ravel()
+    levels = real_array(levels, "levels").ravel()
     if levels.size < _MIN_REPEATS:
         msg = (
             f"'levels' holds {levels.size} reading(s); the standard deviation "
@@ -716,10 +724,10 @@ def subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float:
     :return: The level of the whole interval, in decibels.
     :raises ValueError: If the two are of different lengths, or a duration is
         not strictly positive.
-    :raises TypeError: if ``durations_s`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``durations_s`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
-    levels = np.asarray(levels, dtype=np.float64).ravel()
+    levels = real_array(levels, "levels").ravel()
     durations = require_positive_array(durations_s, "durations_s").ravel()
     if levels.size != durations.size:
         msg = (
@@ -748,7 +756,9 @@ def grade_from_local_correction(local_correction: ArrayLike) -> Grade:
     :param local_correction: :math:`K_3` in decibels; a scalar or one value
         per band.
     :return: ``'engineering'`` or ``'survey'``.
+    :raises TypeError: if ``local_correction`` holds a text or a value that is not a
+        real number.
     """
-    k3 = np.asarray(local_correction, dtype=np.float64)
+    k3 = real_array(local_correction, "local_correction")
     worst = float(np.max(k3)) if k3.size else 0.0
     return "engineering" if worst <= GRADE_2_MAX_K3 else "survey"

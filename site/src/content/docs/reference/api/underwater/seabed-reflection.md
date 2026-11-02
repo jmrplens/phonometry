@@ -75,6 +75,7 @@ returned without warning.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `grazing_angle_deg` holds a text or a value that is not a real number. |
 
 ## BottomLossResult
 
@@ -172,7 +173,7 @@ Complex plane-wave pressure reflection coefficient at the seabed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `c1`, `c2`, `rho1` or `rho2` is not a single number. |
+| TypeError | if `c1`, `c2`, `rho1` or `rho2` is not a single number, or `grazing_angle_deg` holds a text or a value that is not a real number. |
 
 ## seabed_reflection
 
@@ -216,6 +217,7 @@ transmission), returned without warning.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `grazing_angle_deg` holds a text or a value that is not a real number. |
 
 ## SeabedReflection
 

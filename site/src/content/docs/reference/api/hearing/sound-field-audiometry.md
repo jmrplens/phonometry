@@ -121,7 +121,7 @@ them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, if a reading is given without its index or the other way round, if a single index is below 4 dB, or if a band from 500 Hz up has fewer than two finite readings. |
-| TypeError | if a position of `position_levels` is not a text. |
+| TypeError | if a position of `position_levels` is not a text, or `directional_levels`, `frequencies`, `front_to_random_index` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## check_free_sound_field
 
@@ -180,7 +180,7 @@ to 5.2 says only an anechoic room does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,15 m. |
-| TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text. |
+| TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text, or `back_levels`, `frequencies`, `front_levels` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## check_quasi_free_sound_field
 
@@ -234,7 +234,7 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,10 m. |
-| TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text. |
+| TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text, or `back_levels`, `frequencies`, `front_levels` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## DIFFUSE_FIELD_VARIATION_LIMITS
 
@@ -567,6 +567,7 @@ NOTE 1); how a report uses the increase is left to it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for another angle, or a frequency Table B.1 does not list. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## INCIDENCE_CORRECTION_FREQUENCIES_HZ
 

@@ -1039,6 +1039,7 @@ $Z_\mathrm{a}$: alternate this with
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an admittance or a sensitivity of zero, or a value that is not finite. |
+| TypeError | if `blocked_impedance_ohm`, `electrical_admittance_s` or `pressure_sensitivity_v_per_pa` holds a text or a value that is not a number. |
 
 ## PlaneWaveCoupler
 
@@ -1212,6 +1213,12 @@ $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\ome
 
 **Returns:** $Z_\mathrm{a}$ at each frequency, in Pa·s/m³.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+
 ### ReciprocityMicrophone.complex_equivalent_volume_m3()
 
 ```python
@@ -1234,6 +1241,12 @@ $$
 | `frequencies` | The frequencies, in Hz. |
 
 **Returns:** $V_\mathrm{e}$ at each frequency, in m³.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### ReciprocityMicrophone.compliance_m3_per_pa
 
@@ -1305,7 +1318,7 @@ that is not a right circular cylinder.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a ratio or an $X$ that is not positive and finite, or an unknown method. |
-| TypeError | if `method` is not a text, or `length_to_diameter_ratio` is not a single number. |
+| TypeError | if `method` is not a text, or `length_to_diameter_ratio` is not a single number, or `x` holds a text or a value that is not a real number. |
 
 ## WaveMotionCorrection
 

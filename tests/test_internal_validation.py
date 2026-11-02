@@ -35,11 +35,14 @@ if TYPE_CHECKING:
 from phonometry._internal.validation import (
     arrays_of,
     check_engine,
+    complex_array,
     floats_of,
     holds_text,
     indices_of,
     is_integer,
     pair_of_arrays,
+    real_array,
+    refuse_text,
     refuse_text_beside_choice,
     require_1d_signal,
     require_above_absolute_zero,
@@ -58,6 +61,7 @@ from phonometry._internal.validation import (
     require_real,
     require_same_length,
     require_same_shape,
+    require_scalar,
 )
 
 
@@ -746,3 +750,160 @@ def test_one_number_is_refused_when_it_is_complex_of_any_kind(value: object) -> 
         require_real(value, "'x' must be real")
     with pytest.raises(TypeError, match="'x' must be a number"):
         require_positive(value, "x")  # type: ignore[arg-type]
+
+
+#: A text that numpy does not see as one: a ``bytearray`` alone, inside a
+#: list, beside numbers in a nested list, inside a list beside an array, and
+#: in an array of objects.
+_BYTEARRAYS = [
+    bytearray(b"12"),
+    [bytearray(b"12")],
+    [[1.0, 2.0], bytearray(b"12")],
+    (np.array([1.0]), [bytearray(b"9")]),
+    np.array([bytearray(b"1"), 2.0], dtype=object),
+]
+
+
+@pytest.mark.parametrize(
+    "value", _BYTEARRAYS, ids=["alone", "listed", "beside-numbers", "nested", "objects"]
+)
+def test_a_bytearray_among_numbers_is_refused_as_text(value: object) -> None:
+    """numpy reads a ``bytearray`` as the codes of its characters.
+
+    ``np.asarray([bytearray(b"12")], dtype=np.float64)`` is ``[[49.0, 50.0]]``,
+    and beside numbers it is a row of them, so the shared readers took a
+    text for two levels. It is refused as the text it is, by the readers of
+    an array, by the text check every conversion that parses shares, and by
+    the reader of a record's fields.
+    """
+    with pytest.raises(TypeError, match="'x' must be numbers, not text"):
+        real_array(value, "x")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'x' must be numbers, not text"):
+        require_finite_array(value, "x")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="no text here"):
+        refuse_text(value, "no text here")
+    record = _Result(first=value)
+    with pytest.raises(TypeError, match="'first' must be numeric, not text"):
+        require_finite_fields(record, "first")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [[1 + 2j], [1.0, np.complex128(2j)], np.array([1.0, 2j]), np.complex64(1)],
+    ids=["python", "numpy-in-a-list", "array", "numpy-scalar"],
+)
+@pytest.mark.filterwarnings("error")
+def test_the_shared_reader_refuses_a_complex_value(value: object) -> None:
+    """The real part of a complex value is a number the caller never gave."""
+    with pytest.raises(TypeError, match="'levels' must be real, not complex"):
+        real_array(value, "levels")  # type: ignore[arg-type]
+
+
+def test_the_shared_reader_refuses_text_and_names_what_numpy_cannot_read() -> None:
+    """A text is refused whatever it reads as, and numpy's anonymous refusals
+    of an object or a ragged nesting are given the parameter's name.
+    """
+    with pytest.raises(TypeError, match="'levels' must be numbers, not text"):
+        real_array(["94.0"], "levels")
+    with pytest.raises(TypeError, match="'levels' must be numeric"):
+        real_array([object()], "levels")
+    with pytest.raises(ValueError, match="'levels' must be numeric"):
+        real_array([[1.0], [1.0, 2.0]], "levels")
+    looped: list[object] = [1.0]
+    looped.append(looped)
+    with pytest.raises(TypeError, match="nested more than 32 deep"):
+        real_array(looped, "levels")  # type: ignore[arg-type]
+
+
+def test_the_shared_reader_converts_numbers_as_numpy_does() -> None:
+    """Numbers, ``None`` read as ``nan`` and the shape numpy gives them; an
+    array already of floats comes back as itself unless a copy is asked for.
+    """
+    assert real_array([1, 2.5, np.float32(3.0)], "x").tolist() == [1.0, 2.5, 3.0]
+    assert np.isnan(real_array(None, "x"))
+    assert real_array([[1, 2], [3, 4]], "x").shape == (2, 2)
+    given = np.array([1.0, 2.0])
+    assert real_array(given, "x") is given
+    copied = real_array(given, "x", copy=True)
+    assert copied is not given
+    np.testing.assert_array_equal(copied, given)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        ["1+2j"],
+        "80",
+        b"80",
+        [bytearray(b"12")],
+        [np.array([1.0 + 1j]), [bytearray(b"1")]],
+        np.array(["0.5"]),
+    ],
+    ids=["text-in-list", "text", "bytes", "bytearray-in-list", "nested", "text-array"],
+)
+def test_the_complex_reader_refuses_text_by_name(value: object) -> None:
+    """``np.asarray(x, dtype=np.complex128)`` parses a text and reads a
+    ``bytearray`` as the codes of its characters; the reader refuses both.
+    """
+    with pytest.raises(TypeError, match="'reflection' must be numbers, not text"):
+        complex_array(value, "reflection")  # type: ignore[arg-type]
+
+
+def test_the_complex_reader_reads_numbers_of_every_kind() -> None:
+    """A real number is a complex one with no imaginary part; an array of
+    ``complex128`` comes back as itself unless a copy is asked for; numpy's
+    anonymous refusals are given the parameter's name.
+    """
+    assert complex_array([1, 2.5, 1 + 2j], "z").tolist() == [1 + 0j, 2.5 + 0j, 1 + 2j]
+    assert complex_array(np.float64(2.0), "z") == 2.0 + 0j
+    assert complex_array([np.complex64(1j)], "z").dtype == np.complex128
+    given = np.array([1.0 + 1j])
+    assert complex_array(given, "z") is given
+    copied = complex_array(given, "z", copy=True)
+    assert copied is not given
+    np.testing.assert_array_equal(copied, given)
+    with pytest.raises(TypeError, match="'z' must be numeric"):
+        complex_array([object()], "z")
+    with pytest.raises(ValueError, match="'z' must be numeric"):
+        complex_array([[1.0], [1.0, 2.0]], "z")
+
+
+@pytest.mark.parametrize("reader", [real_array, complex_array], ids=["real", "complex"])
+@pytest.mark.filterwarnings("ignore:the matrix subclass:PendingDeprecationWarning")
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda: np.matrix([[1.0, 2.0]]),
+        lambda: np.matrix([[1, 2]]),
+        lambda: np.ma.array([1.0, 2.0], mask=[False, True]),
+    ],
+    ids=["matrix", "integer-matrix", "masked"],
+)
+def test_a_subclass_of_an_array_is_read_as_the_plain_array_of_its_values(
+    reader: Callable[..., np.ndarray], build: Callable[[], np.ndarray]
+) -> None:
+    """``astype`` keeps a subclass, whose ``**`` is a matrix power and whose
+    reductions skip the masked values; both readers give the plain array
+    ``np.asarray`` gives, a copy of it when one is asked for.
+    """
+    given = build()
+    for copy in (False, True):
+        read = reader(given, "x", copy=copy)
+        assert type(read) is np.ndarray
+        np.testing.assert_array_equal(read, np.asarray(given))
+    assert not np.shares_memory(reader(given, "x", copy=True), given)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.complex128(2.0 + 1.0j), np.complex64(2.0), np.array(2.0j), 2.0 + 1.0j],
+    ids=["complex128", "complex64-real-valued", "zero-dimensional", "python"],
+)
+def test_the_rank_check_of_every_scalar_guard_refuses_a_complex_number(
+    value: object,
+) -> None:
+    """``require_scalar`` opens every scalar guard that reads its value through
+    :func:`float`, which keeps the real part of a NumPy complex number.
+    """
+    with pytest.raises(TypeError, match="'x' must be a number, not a complex one"):
+        require_scalar(value, "x")

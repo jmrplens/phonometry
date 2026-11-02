@@ -82,7 +82,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_positive, require_scalar
+from ..._internal.validation import complex_array, require_positive, require_scalar
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -385,7 +385,7 @@ def _positive_real_root(value: Complex) -> Complex:
     of the wave-number vectors (printed p. 247, below Eq. (11.21)): "The square
     root symbol represents the root which yields a positive real part."
     """
-    root = np.sqrt(np.asarray(value, dtype=np.complex128))
+    root = np.sqrt(complex_array(value, "value"))
     return np.asarray(np.where(root.real < 0.0, -root, root), dtype=np.complex128)
 
 
@@ -594,7 +594,7 @@ def _gamma(
     only consistent reading; that reading is implemented here.
     """
     omega = 2.0 * np.pi * np.asarray(waves.frequencies, dtype=np.float64)
-    k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
+    k_t = complex_array(transverse_wavenumber, "transverse_wavenumber")
     n_mod = waves.shear_modulus
     p_coef, q_coef, r_coef = waves.elastic_p, waves.elastic_q, waves.elastic_r
     mu1, mu2, mu3 = (
@@ -701,10 +701,11 @@ def poroelastic_transfer_matrix(
         frequency.
     :return: The transfer matrix with shape ``(len(frequency), 6, 6)``.
     :raises ValueError: for a non-positive thickness.
-    :raises TypeError: if ``thickness_m`` is not a single number.
+    :raises TypeError: if ``thickness_m`` is not a single number, or
+        ``transverse_wavenumber`` holds a text or a value that is not a number.
     """
     h = require_positive(thickness_m, "thickness_m")
-    k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
+    k_t = complex_array(transverse_wavenumber, "transverse_wavenumber")
     front = _gamma(waves, -h, k_t)
     back = _gamma(waves, 0.0, k_t)
     return np.asarray(front @ np.linalg.inv(back), dtype=np.complex128)
@@ -778,7 +779,7 @@ def _poroelastic_block(
 ) -> _Block:
     """A six-variable block, parameterised by its wave amplitudes."""
     h = require_positive(thickness, "thickness_m")
-    k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
+    k_t = complex_array(transverse_wavenumber, "transverse_wavenumber")
     return _Block(
         "poroelastic",
         _gamma(waves, -h, k_t),
@@ -848,7 +849,7 @@ def _poroelastic_blocks(
         :data:`_MAX_BLOCKS` of them.
     """
     h = require_positive(thickness, "thickness_m")
-    k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
+    k_t = complex_array(transverse_wavenumber, "transverse_wavenumber")
     pieces = _block_count(_layer_attenuation(waves, h, k_t), "PoroelasticLayer")
     return [_poroelastic_block(waves, h / pieces, k_t) for _ in range(pieces)]
 
@@ -967,7 +968,7 @@ def _stack_surface_impedance(
         matrix[:, row : row + height, offsets[-2] : offsets[-1]] = wall @ last.back
     else:
         # p(B) = Z_L v3(B), A&A Eq. (11.84).
-        z_l = np.asarray(termination, dtype=np.complex128)
+        z_l = complex_array(termination, "termination")
         closer = np.zeros((n_freq, 1, 2), dtype=np.complex128)
         closer[:, 0, 0] = -1.0
         closer[:, 0, 1] = z_l

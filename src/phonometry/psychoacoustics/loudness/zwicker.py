@@ -41,6 +41,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -847,10 +848,11 @@ def loudness_zwicker_from_spectrum(
     :return: :class:`ZwickerLoudness` with ``loudness`` (N in sone),
         ``loudness_level`` (LN in phon) and ``specific`` (N' in sone/Bark,
         240 values at 0.1-Bark steps); the time-varying fields are None.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` is not a text, or ``levels`` holds a text or a value
+        that is not a real number.
     """
     diffuse = _validate_field(field)
-    band_levels = np.asarray(levels, dtype=np.float64)
+    band_levels = real_array(levels, "levels")
     if band_levels.ndim != 1 or band_levels.size != _N_BANDS:
         msg = (
             f"'levels' must contain exactly {_N_BANDS} one-third-octave band "

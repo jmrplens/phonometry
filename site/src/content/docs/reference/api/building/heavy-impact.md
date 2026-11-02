@@ -528,19 +528,19 @@ $L_{F\mathrm{E}} = 10 \log_{10}[(1/T_\mathrm{ref}) \int F(t)^2 / F_0^2\,dt]$ dB 
 JIS A 1418-2:2019 Formula (1)). The integral is taken over the whole
 supplied record with the trapezoidal rule, so pass one isolated impact.
 
-.. important::
-
-   The specification tables are **per octave band**: JIS A 1418-2:2019
-   Annex C measures the force with a band filter between the force
-   transducer and the analyser, and ISO 16283-2 Table A.1 tabulates one
-   `LFE` for each of the five octaves. This function integrates whatever
-   record it is given, so feeding it an unfiltered pulse returns the
-   *broadband* level, which is several decibels above any single band value
-   and must not be compared with the table. Band-filter the force record
-   first (for example with
-   [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank)) and call this once
-   per band, then hand the five results to
-   [`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source).
+:::caution
+The specification tables are **per octave band**: JIS A 1418-2:2019
+Annex C measures the force with a band filter between the force
+transducer and the analyser, and ISO 16283-2 Table A.1 tabulates one
+`LFE` for each of the five octaves. This function integrates whatever
+record it is given, so feeding it an unfiltered pulse returns the
+*broadband* level, which is several decibels above any single band value
+and must not be compared with the table. Band-filter the force record
+first (for example with
+[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank)) and call this once
+per band, then hand the five results to
+[`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source).
+:::
 
 **Parameters**
 

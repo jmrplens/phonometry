@@ -82,6 +82,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -423,10 +424,11 @@ def weighting_tolerance_percent(
         transition frequencies, where the standard sets no lower limit at all.
     :raises ValueError: If the weighting is not one of the nine, or a
         frequency is not positive and finite.
-    :raises TypeError: if ``name`` is not a text.
+    :raises TypeError: if ``name`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     weighting = require_choice(name, "name", WEIGHTING_NAMES)
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     if f.size and not np.all(np.isfinite(f) & (f > 0.0)):
         msg = _FREQUENCIES_MSG
         raise ValueError(msg)
@@ -455,10 +457,11 @@ def phase_tolerance_deg(
     :param frequencies: Frequencies at which the band is wanted, in hertz.
     :return: The permitted deviation, in degrees, infinite in the two tails.
     :raises ValueError: As for :func:`weighting_tolerance_percent`.
-    :raises TypeError: if ``name`` is not a text.
+    :raises TypeError: if ``name`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     weighting = require_choice(name, "name", WEIGHTING_NAMES)
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     if f.size and not np.all(np.isfinite(f) & (f > 0.0)):
         msg = _FREQUENCIES_MSG
         raise ValueError(msg)
@@ -645,14 +648,15 @@ def verify_weighting(
         finite, if a measured factor is negative or not finite, or if the
         expanded uncertainty is negative or not finite.
     :raises TypeError: if ``expanded_uncertainty_percent`` is not a single number, or
-        ``name`` is not a text.
+        ``name`` is not a text, or ``frequencies`` or ``measured_factors`` holds a text
+        or a value that is not a real number.
     """
     weighting = require_choice(name, "name", WEIGHTING_NAMES)
     uncertainty = _checked_uncertainty(
         expanded_uncertainty_percent, "expanded_uncertainty_percent"
     )
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    measured = np.atleast_1d(np.asarray(measured_factors, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
+    measured = np.atleast_1d(real_array(measured_factors, "measured_factors"))
     require_equal_shapes(
         "verify_weighting",
         {"frequencies": f.shape, "measured_factors": measured.shape},

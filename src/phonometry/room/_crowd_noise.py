@@ -84,6 +84,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_finite_fields,
     require_positive,
     require_ranks,
@@ -116,7 +117,7 @@ PRIVACY_SNR_DB = -9.0
 
 def _require_distance(value: ArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a positive, finite distance (scalar or array)."""
-    r = np.asarray(value, dtype=np.float64)
+    r = real_array(value, name)
     if not np.all(np.isfinite(r)) or np.any(r <= 0.0):
         msg = f"'{name}' must be positive and finite."
         raise ValueError(msg)
@@ -168,8 +169,11 @@ def speech_direct_level(
         :data:`TALKER_DIRECTIVITY`).
     :return: The direct-field sound pressure level, dB; a ``float`` for a number; an
         array for a sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``directivity`` is not a single number.
+    :raises TypeError: if ``directivity`` is not a single number, or ``distance`` holds
+        a text or a value that is not a real number, or ``sound_power_level`` is not a
+        single number.
     """
+    require_scalar(sound_power_level, "sound_power_level")
     r = _require_distance(distance, "distance")
     q = require_positive(directivity, "directivity")
     lw = float(sound_power_level)
@@ -236,12 +240,15 @@ def crowd_noise_level(
     :return: The self-generated reverberant level, dB; a ``float`` when ``talkers`` and
         ``absorption_area`` are both numbers; an array of their broadcast shape when one
         is a sequence or an array, a zero-dimensional one included.
+    :raises TypeError: if ``absorption_area`` or ``talkers`` holds a text or a value
+        that is not a real number, or ``sound_power_level`` is not a single number.
     """
-    n = np.asarray(talkers, dtype=np.float64)
+    require_scalar(sound_power_level, "sound_power_level")
+    n = real_array(talkers, "talkers")
     if not np.all(np.isfinite(n)) or np.any(n < 1.0):
         msg = "'talkers' must be at least 1 and finite."
         raise ValueError(msg)
-    a = np.asarray(absorption_area, dtype=np.float64)
+    a = real_array(absorption_area, "absorption_area")
     if not np.all(np.isfinite(a)) or np.any(a <= 0.0):
         msg = "'absorption_area' must be positive and finite."
         raise ValueError(msg)
@@ -296,10 +303,12 @@ def speech_to_noise_ratio(
     :return: The speech-to-noise ratio, dB; a ``float`` when ``distance`` and
         ``absorption_per_table`` are both numbers; an array of their broadcast shape
         when one is a sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``directivity`` is not a single number.
+    :raises TypeError: if ``directivity`` is not a single number, or
+        ``absorption_per_table`` or ``distance`` holds a text or a value that is not a
+        real number.
     """
     r = _require_distance(distance, "distance")
-    a_tab = np.asarray(absorption_per_table, dtype=np.float64)
+    a_tab = real_array(absorption_per_table, "absorption_per_table")
     if not np.all(np.isfinite(a_tab)) or np.any(a_tab <= 0.0):
         msg = "'absorption_per_table' must be positive and finite."
         raise ValueError(msg)
@@ -348,7 +357,8 @@ def absorption_per_table(
     :param directivity: Talker directivity factor ``Q``.
     :return: The equivalent absorption area per table ``A_tab``, m2; a ``float`` for a
         number; an array for a sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``directivity`` or ``speech_to_noise`` is not a single number.
+    :raises TypeError: if ``directivity`` or ``speech_to_noise`` is not a single number,
+        or ``distance`` holds a text or a value that is not a real number.
     """
     r = _require_distance(distance, "distance")
     q = require_positive(directivity, "directivity")
@@ -540,9 +550,12 @@ def crowd_noise(
     :param directivity: Talker directivity factor ``Q`` (default
         :data:`TALKER_DIRECTIVITY`).
     :return: A :class:`CrowdNoiseResult`.
-    :raises TypeError: if ``directivity`` or ``distance`` is not a single number.
+    :raises TypeError: if ``directivity`` or ``distance`` is not a single number, or
+        ``absorption_areas`` or ``talkers`` holds a text or a value that is not a real
+        number, or ``sound_power_level`` is not a single number.
     """
-    areas = np.atleast_1d(np.asarray(absorption_areas, dtype=np.float64))
+    require_scalar(sound_power_level, "sound_power_level")
+    areas = np.atleast_1d(real_array(absorption_areas, "absorption_areas"))
     if areas.ndim != 1 or areas.size == 0:
         msg = "'absorption_areas' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -552,7 +565,7 @@ def crowd_noise(
     n = (
         np.arange(1.0, 21.0)
         if talkers is None
-        else np.atleast_1d(np.asarray(talkers, dtype=np.float64))
+        else np.atleast_1d(real_array(talkers, "talkers"))
     )
     if n.ndim != 1 or n.size == 0:
         msg = "'talkers' must be a non-empty 1-D array."

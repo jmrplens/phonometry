@@ -123,6 +123,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_non_negative,
@@ -206,7 +207,7 @@ def _octave_frequencies(
     :raises ValueError: if the count differs, a value is not a Table B.1
         octave centre, or the centres repeat or descend.
     """
-    freqs = np.array(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies", copy=True)
     if freqs.shape != (n_bands,):
         msg = f"'frequencies' must carry one value per band ({n_bands})."
         raise ValueError(msg)
@@ -234,7 +235,7 @@ def _finite(value: ArrayLike, name: str, ndims: tuple[int, ...]) -> np.ndarray:
     :raises ValueError: naming the argument, for any other rank or a
         non-finite entry.
     """
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if arr.ndim not in ndims or arr.size == 0:
         shapes = " or ".join(f"{d}D" for d in ndims)
         msg = f"'{name}' must be a non-empty {shapes} array of levels in decibels."
@@ -767,7 +768,7 @@ def _determine(
         frequencies=freqs,
         sound_power_level=level if is_power else nan_band,
         sound_energy_level=nan_band if is_power else level,
-        mean_source_level=np.asarray(mean_source, dtype=np.float64),
+        mean_source_level=real_array(mean_source, "mean_source"),
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
         mean_background_level=np.asarray(mean_bg, dtype=np.float64),
         reference_power_level=np.asarray(power, dtype=np.float64),
@@ -863,6 +864,7 @@ def sound_power_hard_walled(
         negative, ``coverage_factor`` is not positive, or a calibration does
         not cover the bands or used the manufacturer's ``C2``, whose value at
         the test only the manufacturer gives.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     arr = _finite(levels, "levels", (1, 2, 3))
     grid, traverse = _source_grid(arr)
@@ -1006,9 +1008,10 @@ def sound_energy_hard_walled(
         ``integration_time``, a non-positive ``integration_time``, or any
         refusal of :func:`sound_power_hard_walled`.
     :raises TypeError: if ``integration_time`` is not a single number, or ``n_events``
-        is a flag, a text or an array where a count goes.
+        is a flag, a text or an array where a count goes, or ``background_levels`` or
+        ``event_levels`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(event_levels, dtype=np.float64)
+    arr = real_array(event_levels, "event_levels")
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = "'event_levels' must be a non-empty array of finite levels in decibels."
         raise ValueError(msg)
@@ -1321,7 +1324,9 @@ def check_hard_walled_room(
     :raises ValueError: for levels that are not a finite 2D array of at least
         two orientations, frequencies outside 125 Hz to 8 kHz, a non-positive
         volume or box dimension, or an absorption coefficient outside [0, 1].
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or
+        ``absorption_coefficients``, ``frequencies``, ``orientation_levels`` or
+        ``reference_box_m`` holds a text or a value that is not a real number.
     """
     levels = _finite(orientation_levels, "orientation_levels", (2,))
     n_orientations, n_bands = levels.shape
@@ -1346,14 +1351,14 @@ def check_hard_walled_room(
             stacklevel=2,
         )
     volume = require_positive(volume, "volume")
-    box = np.asarray(reference_box_m, dtype=np.float64)
+    box = real_array(reference_box_m, "reference_box_m")
     if box.shape != (3,) or not np.all(np.isfinite(box)) or np.any(box <= 0.0):
         msg = "'reference_box_m' must be three positive, finite dimensions in metres."
         raise ValueError(msg)
     box_volume = float(np.prod(box))
     alpha_max = math.nan
     if absorption_coefficients is not None:
-        alpha = np.asarray(absorption_coefficients, dtype=np.float64)
+        alpha = real_array(absorption_coefficients, "absorption_coefficients")
         if (
             alpha.size == 0
             or not np.all(np.isfinite(alpha))
@@ -1520,6 +1525,8 @@ def hard_walled_source_locations(
     :return: The :class:`SourceLocationPlan`.
     :raises ValueError: for levels that are not a finite 2D array of at least
         two positions, or frequencies that are not octave centres.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     arr = _finite(levels, "levels", (2,))
     n_positions, n_bands = arr.shape

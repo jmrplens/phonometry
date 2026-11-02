@@ -68,6 +68,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_1d_signal,
     require_choice,
     require_equal_shapes,
@@ -314,9 +315,11 @@ def predicted_prominence(
     :param level_difference: Level difference(s), in dB (> 0).
     :return: The predicted prominence ``P`` (scalar inputs give a 0-d array).
     :raises ValueError: for a non-positive onset rate or level difference.
+    :raises TypeError: if ``level_difference`` or ``onset_rate`` holds a text or a value
+        that is not a real number.
     """
-    orate = np.asarray(onset_rate, dtype=np.float64)
-    ld = np.asarray(level_difference, dtype=np.float64)
+    orate = real_array(onset_rate, "onset_rate")
+    ld = real_array(level_difference, "level_difference")
     if not (np.all(np.isfinite(orate)) and np.all(np.isfinite(ld))):
         msg = "onset_rate and level_difference must be finite."
         raise ValueError(msg)
@@ -339,8 +342,10 @@ def impulse_adjustment(prominence: ArrayLike) -> np.ndarray:
 
     :param prominence: Predicted prominence ``P``.
     :return: The adjustment ``KI``, in dB, clamped at zero.
+    :raises TypeError: if ``prominence`` holds a text or a value that is not a real
+        number.
     """
-    p = np.asarray(prominence, dtype=np.float64)
+    p = real_array(prominence, "prominence")
     return np.maximum(_ADJUSTMENT_SLOPE * (p - _ADJUSTMENT_THRESHOLD), 0.0)
 
 
@@ -371,7 +376,9 @@ def impulse_prominence(
     :raises ValueError: for empty input, mismatched lengths, a non-positive
         onset rate or level difference, or an assessment period that is not
         positive and finite.
-    :raises TypeError: if ``assessment_period_minutes`` is not a single number.
+    :raises TypeError: if ``assessment_period_minutes`` is not a single number, or
+        ``level_differences`` or ``onset_rates`` holds a text or a value that is not a
+        real number.
     """
     require_scalar(assessment_period_minutes, "assessment_period_minutes")
     if not math.isfinite(assessment_period_minutes) or assessment_period_minutes <= 0.0:
@@ -380,8 +387,8 @@ def impulse_prominence(
             f"{assessment_period_minutes}."
         )
         raise ValueError(msg)
-    orate = np.asarray(onset_rates, dtype=np.float64).ravel()
-    ld = np.asarray(level_differences, dtype=np.float64).ravel()
+    orate = real_array(onset_rates, "onset_rates").ravel()
+    ld = real_array(level_differences, "level_differences").ravel()
     if orate.size == 0:
         msg = "at least one impulse is required."
         raise ValueError(msg)
@@ -431,11 +438,12 @@ def rating_level(
         ``durations``); commonly the sum of the durations.
     :return: The rating level ``LAr,T``, in dB.
     :raises ValueError: for mismatched lengths or a non-positive time.
-    :raises TypeError: if ``reference_time`` is not a single number.
+    :raises TypeError: if ``reference_time`` is not a single number, or ``adjustment``,
+        ``durations`` or ``laeq`` holds a text or a value that is not a real number.
     """
-    le = np.atleast_1d(np.asarray(laeq, dtype=np.float64))
-    ki = np.atleast_1d(np.asarray(adjustment, dtype=np.float64))
-    dt = np.atleast_1d(np.asarray(durations, dtype=np.float64))
+    le = np.atleast_1d(real_array(laeq, "laeq"))
+    ki = np.atleast_1d(real_array(adjustment, "adjustment"))
+    dt = np.atleast_1d(real_array(durations, "durations"))
     require_equal_shapes(
         "rating_level",
         {"laeq": le.shape, "adjustment": ki.shape, "durations": dt.shape},
@@ -892,11 +900,11 @@ def detect_onsets(
     :return: The detected onsets, ordered in time (empty when none is found).
     :raises ValueError: for a non-positive ``dt``, fewer than two samples, or
         an ``onset_rate_method`` other than the two listed.
-    :raises TypeError: if ``dt`` is not a single number, or
-        ``onset_rate_method`` is not a text.
+    :raises TypeError: if ``dt`` is not a single number, or ``onset_rate_method`` is not
+        a text, or ``levels`` holds a text or a value that is not a real number.
     """
     method = require_choice(onset_rate_method, "onset_rate_method", _ONSET_RATE_METHODS)
-    lev = np.asarray(levels, dtype=np.float64).ravel()
+    lev = real_array(levels, "levels").ravel()
     require_scalar(dt, "dt")
     if not math.isfinite(dt) or dt <= 0.0:
         msg = "dt must be positive."

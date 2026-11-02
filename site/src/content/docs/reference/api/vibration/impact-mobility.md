@@ -822,6 +822,7 @@ leaves the method open; [`single_mode_fit`](/phonometry/reference/api/vibration/
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or invalid inputs, or a window whose damping reaches a mode's apparent damping. |
+| TypeError | if `apparent_damping_ratio` or `damped_natural_frequency_hz` holds a text or a value that is not a real number, or `exponential_decay_rate_per_s` is not a single number. |
 
 ## ExponentialWindowCorrection
 
@@ -1576,7 +1577,7 @@ the record the exponential window multiplied:
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or non-finite data, a band that is not a pair of positive numbers or holds fewer than three frequencies, an unknown kind, or a band whose data hold no lightly damped mode. |
-| TypeError | if `exponential_decay_rate_per_s` is not a single number, `kind` is not a text, or `band_hz` is not a pair of numbers. |
+| TypeError | if `exponential_decay_rate_per_s` is not a single number, `kind` is not a text, or `band_hz` is not a pair of numbers, or `frequencies` holds a text or a value that is not a real number, or `frf` holds a text or a value that is not a number. |
 
 ## SingleModeFitResult
 
@@ -1749,7 +1750,7 @@ of the range of interest.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or non-finite data, or a range that holds none of the frequencies. |
-| TypeError | if `frequency_range_hz` is not a pair of numbers. |
+| TypeError | if `frequency_range_hz` is not a pair of numbers, or `frequencies` holds a text or a value that is not a real number, or `response` holds a text or a value that is not a number. |
 
 ## WINDOWED_RESPONSE_END_RATIO
 

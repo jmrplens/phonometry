@@ -138,6 +138,7 @@ from .._internal.types import BAND_SET_NAMES
 from .._internal.validation import (
     is_at_most,
     is_positive,
+    real_array,
     require_band_fraction,
     require_choice,
     require_equal_counts,
@@ -646,8 +647,9 @@ def normal_intensity_from_levels(
         is refused rather than returning more intensities than levels went in.
     :raises ValueError: If a level is not finite, or ``negative`` cannot be
         broadcast against ``levels``.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    values = np.asarray(levels, dtype=np.float64)
+    values = real_array(levels, "levels")
     if not np.all(np.isfinite(values)):
         msg = "'levels' must contain only finite intensity levels in decibels."
         raise ValueError(msg)
@@ -724,8 +726,8 @@ def _positive_partial_powers(
     normal_intensity: ArrayLike, areas: ArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """One band of signed normal intensities and its segment areas, validated."""
-    i_n = np.atleast_1d(np.asarray(normal_intensity, dtype=np.float64))
-    seg = np.atleast_1d(np.asarray(areas, dtype=np.float64))
+    i_n = np.atleast_1d(real_array(normal_intensity, "normal_intensity"))
+    seg = np.atleast_1d(real_array(areas, "areas"))
     if i_n.ndim != 1 or seg.ndim != 1:
         msg = (
             "partial_power_concentration works on one frequency band: pass 1D "
@@ -792,7 +794,8 @@ def partial_power_concentration(
         table applies is not settled here: its two lower rows are conditioned
         on criterion 2 and on :math:`F_3 - F_2`, neither of which this function
         is given.
-    :raises TypeError: if ``grade`` is not a text.
+    :raises TypeError: if ``grade`` is not a text, or ``areas`` or ``normal_intensity``
+        holds a text or a value that is not a real number.
     """
     grade = _check_grade(grade)
     i_n, seg = _positive_partial_powers(normal_intensity, areas)
@@ -992,7 +995,8 @@ class DiscretePointIntensityResult(OwnsArrays):
             the positions and the areas disagree, an area is not positive and
             finite, the grade is unknown or ``fraction`` is not 1 or 3.
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
-            float).
+            float), or ``normal_intensity`` or ``segment_areas_m2`` holds a text or a
+            value that is not a real number.
         """
         _check_grade(self.grade)
         object.__setattr__(self, "fraction", _check_fraction(self.fraction))
@@ -1025,7 +1029,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             },
             axis="position",
         )
-        areas = np.asarray(self.segment_areas_m2, dtype=np.float64)
+        areas = real_array(self.segment_areas_m2, "segment_areas_m2")
         if not np.all(np.isfinite(areas)) or np.any(areas <= 0.0):
             msg = (
                 "DiscretePointIntensityResult: 'segment_areas_m2' must be "
@@ -1033,7 +1037,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             )
             raise ValueError(msg)
         self.__dict__["_a_weighted"] = _a_weighted_determination(
-            np.asarray(self.normal_intensity, dtype=np.float64),
+            real_array(self.normal_intensity, "normal_intensity"),
             self.sound_power_level,
             self._applicable,
             self.a_weighting_omitted_bands,
@@ -1368,8 +1372,8 @@ def _position_grid(
     the two counts happen to agree. A pair that cannot be a survey at all is
     refused here, before any of it is measured against the standard.
     """
-    raw = np.asarray(normal_intensity, dtype=np.float64)
-    seg = np.atleast_1d(np.asarray(areas, dtype=np.float64))
+    raw = real_array(normal_intensity, "normal_intensity")
+    seg = np.atleast_1d(real_array(areas, "areas"))
     if raw.ndim not in (1, 2):
         msg = (
             "'normal_intensity' must be 1D (positions,) for a single band or "
@@ -1396,7 +1400,7 @@ def _checked_position_band_grid(
     """
     if values is None:
         return None
-    raw = np.asarray(values, dtype=np.float64)
+    raw = real_array(values, name)
     grid = raw.reshape(-1, 1) if raw.ndim == 1 else np.atleast_2d(raw)
     if grid.shape != (n_positions, n_bands):
         msg = (
@@ -1421,7 +1425,7 @@ def _checked_frequencies(
     """
     if frequencies is None:
         return None
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.shape != (n_bands,):
         msg = (
             f"'frequencies' must carry one value per band ({n_bands}); got "
@@ -1443,7 +1447,7 @@ def _checked_residual_index(
     """
     if pressure_residual_index is None:
         return None
-    supplied = np.asarray(pressure_residual_index, dtype=np.float64)
+    supplied = real_array(pressure_residual_index, "pressure_residual_index")
     try:
         residual = np.broadcast_to(supplied, (n_bands,)).astype(np.float64)
     except ValueError:
@@ -1591,7 +1595,7 @@ def _temporal_indicator(
     require_scalar(n_bands, "n_bands")
     if temporal_intensity is None:
         return None
-    samples = np.asarray(temporal_intensity, dtype=np.float64)
+    samples = real_array(temporal_intensity, "temporal_intensity")
     f1 = np.atleast_1d(
         np.asarray(temporal_variability_indicator(samples), dtype=np.float64)
     )
@@ -1984,7 +1988,9 @@ def sound_power_intensity_points(
         samples, or holds a band whose mean is not positive and so leaves
         ``F1`` nothing to normalize by.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``grade`` is not a text.
+        ``grade`` is not a text, or ``areas``, ``frequencies``, ``normal_intensity``,
+        ``pressure_levels``, ``pressure_residual_index`` or ``temporal_intensity`` holds
+        a text or a value that is not a real number.
     """
     grade = _check_grade(grade)
     fraction = _check_fraction(fraction)

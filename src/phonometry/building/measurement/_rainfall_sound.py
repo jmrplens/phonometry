@@ -69,7 +69,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
-    _as_float64,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -316,7 +316,7 @@ def _table_values(
     ``missing(frequency_hz, matches)`` words the error for a band the table
     does not hold exactly once.
     """
-    keys = np.asarray(tuple(table), dtype=np.float64)
+    keys = real_array(tuple(table), "table")
     values = np.asarray(tuple(table.values()), dtype=np.float64)
     out = np.empty(frequencies.shape, dtype=np.float64)
     for i, f in enumerate(frequencies):
@@ -921,7 +921,7 @@ def rainfall_sound(
         frequency, volume or area is not positive, or a band has no correction.
     """
     freqs = require_positive_array(frequencies, "frequencies")
-    levels = _as_float64(l_pr, "l_pr")
+    levels = real_array(l_pr, "l_pr")
     if levels.ndim == 1:
         levels = levels[np.newaxis, :]
     # The number is a count of array axes, not a quantity.

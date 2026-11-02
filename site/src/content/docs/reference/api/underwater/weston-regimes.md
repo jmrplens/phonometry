@@ -263,7 +263,7 @@ whole range grid so the transitions can be drawn.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `frequency_hz`, `speed_of_sound` or `water_depth` is not a single number, or `seabed` is not a text. |
+| TypeError | if `frequency_hz`, `speed_of_sound` or `water_depth` is not a single number, or `seabed` is not a text, or `range_m` holds a text or a value that is not a real number. |
 
 ## weston_regime_boundaries
 

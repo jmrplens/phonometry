@@ -118,7 +118,7 @@ network applied to the whole signal against a design-goal response, live in
 ```python
 class_limits(
     fraction: float,
-    filter_class: int,
+    filter_class: int | np.integer[Any],
     omega: ArrayLike,
     *,
     edition: Literal['2014', '1995'] = '2014',
@@ -142,7 +142,7 @@ Acceptance limits on relative attenuation at normalized frequencies.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction` is not a single number. |
+| TypeError | if `fraction` or `filter_class` is not a single number, or `omega` holds a text or a value that is not a real number. |
 
 :::note
 The exact band-edge point $\Omega = G^{1/2}$ is treated as

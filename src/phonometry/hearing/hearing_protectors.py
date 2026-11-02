@@ -63,7 +63,11 @@ import numpy as np
 
 from .._internal.boundary import round_half_away_from_zero
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_count, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_count,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -249,7 +253,7 @@ def _subject_attenuations(
     :raises ValueError: if it is not two-dimensional, if it holds fewer than
         two subjects, or if any value is not finite.
     """
-    grid = np.asarray(attenuation, dtype=np.float64)
+    grid = real_array(attenuation, "attenuation")
     if grid.ndim != _GRID_RANK:
         msg = (
             "'attenuation' must be a (subjects, bands) grid: ISO 4869-1 "
@@ -353,7 +357,8 @@ def assumed_protection_value(
         two subjects, if any value is not finite, if ``performance`` is not one
         Table 1 tabulates, or if ``frequencies`` does not match the grid.
     :raises TypeError: if ``performance`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``attenuation`` or ``frequencies`` holds a text or a value that is not
+        a real number.
 
     .. note::
 
@@ -400,7 +405,7 @@ def _octave_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.nd
             "are assumed."
         )
         raise ValueError(msg)
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if freqs.ndim != 1 or freqs.size != count:
         msg = (
             f"{owner}: 'frequencies' must be one mid-band frequency per band; "
@@ -496,14 +501,16 @@ def octave_band_protected_level(
     :raises ValueError: if the band counts disagree, if any value is not
         finite, or if the bands are neither the eight of Formula (2) nor those
         seven without 63 Hz and ``frequencies`` was not given.
+    :raises TypeError: if ``a_weighting``, ``apv``, ``frequencies`` or ``noise_levels``
+        holds a text or a value that is not a real number.
     """
-    levels = np.asarray(noise_levels, dtype=np.float64)
+    levels = real_array(noise_levels, "noise_levels")
     performance: int | None = None
     if isinstance(apv, AssumedProtectionResult):
         performance = apv.performance
         protection = np.asarray(apv.apv, dtype=np.float64)
     else:
-        protection = np.asarray(apv, dtype=np.float64)
+        protection = real_array(apv, "apv")
     for name, values in (("noise_levels", levels), ("apv", protection)):
         if values.ndim != 1 or values.size == 0 or not np.all(np.isfinite(values)):
             msg = (
@@ -567,7 +574,7 @@ def _a_weighting_axis(a_weighting: ArrayLike | None, freqs: np.ndarray) -> np.nd
             f"tabulated weighting; got {freqs.tolist()}."
         )
         raise ValueError(msg)
-    weighting = np.asarray(a_weighting, dtype=np.float64)
+    weighting = real_array(a_weighting, "a_weighting")
     if weighting.ndim != 1 or weighting.size != freqs.size:
         msg = (
             "'a_weighting' must be one value per band; got "
@@ -674,7 +681,7 @@ def hml_rating(
         two subjects, carries neither seven nor eight bands, or if
         ``performance`` is not one Table 1 tabulates.
     :raises TypeError: if ``performance`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``attenuation`` holds a text or a value that is not a real number.
     """
     grid = _subject_attenuations(attenuation)
     alpha = _alpha_for(performance)
@@ -862,7 +869,7 @@ def snr_rating(
         two subjects, carries neither seven nor eight bands, or if
         ``performance`` is not one Table 1 tabulates.
     :raises TypeError: if ``performance`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``attenuation`` holds a text or a value that is not a real number.
     """
     grid = _subject_attenuations(attenuation)
     alpha = _alpha_for(performance)

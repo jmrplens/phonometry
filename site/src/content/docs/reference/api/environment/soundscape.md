@@ -116,19 +116,19 @@ $x_i$. Both slips are in `docs/ERRATA.md`.
 method_a_scale_values(
     positions: float | np.floating[Any] | np.integer[Any],
     *,
-    part: int,
+    part: int | np.integer[Any],
 ) -> float
 
 method_a_scale_values(
     positions: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
-    part: int,
+    part: int | np.integer[Any],
 ) -> NDArray[np.float64]
 
 method_a_scale_values(
     positions: ArrayLike,
     *,
-    part: int,
+    part: int | np.integer[Any],
 ) -> float | NDArray[np.float64]
 ```
 
@@ -154,7 +154,7 @@ are 5 and the value is `6 - position`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a part other than 1 to 4 or a position that is not a whole number from 1 to 5. |
-| TypeError | if `positions` holds a complex value, a NumPy one or one held in an array of objects included. |
+| TypeError | if `positions` holds a text or a value that is not a real number, or `part` is not a single number. |
 
 ## METHOD_A_SCALES
 
@@ -238,6 +238,7 @@ requires ("determined at least with one decimal place").
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a fraction outside 0 to 1 or an infinite one. |
+| TypeError | if `marked_fraction` holds a text or a value that is not a real number. |
 
 ## METHOD_B_SCALES
 

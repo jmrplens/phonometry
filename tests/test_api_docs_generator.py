@@ -151,6 +151,25 @@ def test_rest_blocks_note_and_literal_block() -> None:
     assert "A formula:" in out
 
 
+@pytest.mark.parametrize(
+    ("directive", "aside"),
+    [
+        ("warning", "caution"),
+        ("important", "caution"),
+        ("tip", "tip"),
+        ("danger", "danger"),
+    ],
+)
+def test_every_admonition_becomes_an_aside(directive: str, aside: str) -> None:
+    """``.. warning::`` and ``.. important::`` reached the published page as
+    literal text, as only ``.. note::`` was converted.
+    """
+    text = f"Intro.\n\n.. {directive}::\n\n   The bands are octaves.\n\nAfter.\n"
+    out = gad.rest_blocks_to_markdown(text, [])
+    assert f":::{aside}\nThe bands are octaves.\n:::" in out
+    assert gad.leaked_roles("x.md", out) == []
+
+
 def test_math_directive_becomes_display_math() -> None:
     text = (
         "The level follows:\n"
@@ -400,8 +419,30 @@ def test_leaked_roles_finds_a_role_the_generator_does_not_convert() -> None:
     assert ":doc:" in leaks[1]
 
 
+def test_leaked_roles_finds_a_directive_folded_into_a_field() -> None:
+    """A ``.. note::`` the reflow of a field joined to its text is no block
+    of its own, and the page showed it as literal text in the field's row;
+    one that opens its own line is converted and never reaches the check.
+    """
+    parsed = gad.parse_docstring(
+        "Summary.\n\n:raises TypeError: if ``x`` is not a number."
+        " .. note:: The edge is pass-band.\n"
+    )
+    rendered = "\n".join(
+        ["| Exception | Condition |", f"| TypeError | {parsed.raises[0][1]} |"]
+    )
+    leaks = gad.leaked_roles("filters/compliance.md", rendered)
+    assert leaks == [
+        "filters/compliance.md:2: | TypeError | if ``x`` is not a number."
+        " .. note:: The edge is pass-band. |"
+    ]
+    assert gad.leaked_roles("x.md", "a path like ../docs.md:: or a.. b") == []
+
+
 def test_no_role_reaches_a_published_page() -> None:
-    """``:doc:`` and ``:sup:`` once shipped verbatim; nothing may again."""
+    """``:doc:`` and ``:sup:`` once shipped verbatim, and two ``.. note::``
+    blocks folded into a ``:raises:`` field; nothing may again.
+    """
     pages, xref, _ = gad.build_model()
     stats = gad.RoleStats()
     failures: list[str] = []

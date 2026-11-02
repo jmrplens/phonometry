@@ -79,6 +79,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
+    real_array,
     require_band_fraction,
     require_choice,
     require_count,
@@ -597,9 +598,11 @@ class BandFlatnessCheck(OwnsArrays):
         :raises ValueError: For arrays of different lengths, a spread that is
             negative or not finite, or a centre that is not a nominal octave
             centre frequency.
+        :raises TypeError: if ``octave_frequencies`` or ``spread_db`` holds a text or a
+            value that is not a real number.
         """
-        centres = read_only(np.asarray(self.octave_frequencies, dtype=np.float64))
-        spread = read_only(np.asarray(self.spread_db, dtype=np.float64))
+        centres = read_only(real_array(self.octave_frequencies, "octave_frequencies"))
+        spread = read_only(real_array(self.spread_db, "spread_db"))
         if centres.ndim != 1 or spread.shape != centres.shape:
             msg = "BandFlatnessCheck: one spread per octave centre."
             raise ValueError(msg)

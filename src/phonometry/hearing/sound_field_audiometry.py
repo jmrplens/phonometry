@@ -74,7 +74,11 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, given_repr, read_only
-from .._internal.validation import require_choice, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_choice,
+    require_scalar,
+)
 from .threshold import AUDIOMETRIC_FREQUENCIES_HZ as _AUDIOMETRIC_FREQUENCIES
 
 if TYPE_CHECKING:
@@ -305,7 +309,7 @@ def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
         finite.
     """
     require_scalar(count, "count")
-    array = np.array(values, dtype=np.float64)
+    array = real_array(values, name, copy=True)
     if array.ndim != 1 or array.size == 0 or not np.all(np.isfinite(array)):
         msg = f"'{name}' must be a non-empty one-dimensional array of finite values."
         raise ValueError(msg)
@@ -334,7 +338,7 @@ def _frequency_axis(
     """
     require_scalar(count, "count")
     if frequencies is None:
-        fallback = np.array(default, dtype=np.float64)
+        fallback = real_array(default, "default", copy=True)
         if fallback.size != count:
             msg = (
                 f"{owner} needs 'frequencies' for {count} bands; without them it "
@@ -343,7 +347,7 @@ def _frequency_axis(
             )
             raise ValueError(msg)
         return fallback
-    freqs = np.array(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies", copy=True)
     if (
         freqs.ndim != 1
         or freqs.size != count
@@ -691,7 +695,7 @@ def _directional_variation(
     if directional_levels is None or front_to_random_index is None:
         return variation, None
     index = _front_to_random_index(front_to_random_index, count, limits, standard)
-    readings = np.asarray(directional_levels, dtype=np.float64)
+    readings = real_array(directional_levels, "directional_levels")
     if readings.ndim != _GRID_RANK or readings.shape[1] != count:
         msg = (
             "'directional_levels' must be a (directions, bands) grid on "
@@ -721,7 +725,7 @@ def _front_to_random_index(
     :raises ValueError: for a single index below the table's last row, or an
         index that is not one number or one per band.
     """
-    index = np.array(front_to_random_index, dtype=np.float64)
+    index = real_array(front_to_random_index, "front_to_random_index", copy=True)
     if index.ndim == 0:
         lowest = limits[-1][0]
         if not math.isfinite(float(index)) or float(index) < lowest:
@@ -790,7 +794,9 @@ def check_diffuse_sound_field(
         not match, if a reading is given without its index or the other way
         round, if a single index is below 4 dB, or if a band from 500 Hz up has
         fewer than two finite readings.
-    :raises TypeError: if a position of ``position_levels`` is not a text.
+    :raises TypeError: if a position of ``position_levels`` is not a text, or
+        ``directional_levels``, ``frequencies``, ``front_to_random_index`` or
+        ``reference_levels`` holds a text or a value that is not a real number.
     """
     return _diffuse_field_check(
         position_levels,
@@ -1115,7 +1121,9 @@ def check_free_sound_field(
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, or if the distance is not larger than 0,15 m.
     :raises TypeError: if ``loudspeaker_distance_m`` is not a single number, or a
-        position of ``position_levels`` or ``lateral_levels`` is not a text.
+        position of ``position_levels`` or ``lateral_levels`` is not a text, or
+        ``back_levels``, ``frequencies``, ``front_levels`` or ``reference_levels`` holds
+        a text or a value that is not a real number.
     """
     return _free_field_check(
         lateral_levels,
@@ -1174,7 +1182,9 @@ def check_quasi_free_sound_field(
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, or if the distance is not larger than 0,10 m.
     :raises TypeError: if ``loudspeaker_distance_m`` is not a single number, or a
-        position of ``position_levels`` or ``lateral_levels`` is not a text.
+        position of ``position_levels`` or ``lateral_levels`` is not a text, or
+        ``back_levels``, ``frequencies``, ``front_levels`` or ``reference_levels`` holds
+        a text or a value that is not a real number.
     """
     return _free_field_check(
         lateral_levels,
@@ -1205,6 +1215,8 @@ def incidence_correction(
     :return: The increase per frequency, in dB.
     :raises ValueError: for another angle, or a frequency Table B.1 does not
         list.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     angle = float(incidence_angle_deg)
     column = next(
@@ -1221,7 +1233,7 @@ def incidence_correction(
             f"prints; got {angle:g}."
         )
         raise ValueError(msg)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     table = np.asarray(INCIDENCE_CORRECTION_FREQUENCIES_HZ, dtype=np.float64)
     out = np.empty(freqs.shape, dtype=np.float64)
     for position, f in np.ndenumerate(freqs):

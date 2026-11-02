@@ -60,6 +60,7 @@ from scipy.special import erf
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_positive,
     require_ranks,
@@ -558,6 +559,8 @@ class WestonPropagationResult(OwnsArrays):
         :raises ValueError: if a column has the wrong number of axes, or a
             length other than ``range_m``'s, or the composite loss is not the
             law of the regime in force or not :math:`-10 \log_{10} F`.
+        :raises TypeError: if ``propagation_loss`` holds a text or a value that is not a
+            real number.
         """
         require_ranks(
             self,
@@ -595,7 +598,7 @@ class WestonPropagationResult(OwnsArrays):
             )
         )
         in_force = _composite(self.regime, laws)
-        loss = np.asarray(self.propagation_loss, dtype=np.float64)
+        loss = real_array(self.propagation_loss, "propagation_loss")
         for name, expected in (
             ("the law of the regime in force", in_force),
             ("-10 lg F of 'propagation_factor'", _to_db(self.propagation_factor)),
@@ -647,10 +650,10 @@ def _composite(
     labels: NDArray[np.str_], laws: Mapping[WestonRegime, NDArray[np.float64]]
 ) -> NDArray[np.float64]:
     """At each range, the value of the law of the regime its label names."""
-    out = np.array(laws[WESTON_REGIMES[0]], dtype=np.float64, copy=True)
+    out = real_array(laws[WESTON_REGIMES[0]], "laws", copy=True)
     for name in WESTON_REGIMES[1:]:
         in_force = labels == name
-        out[in_force] = np.asarray(laws[name], dtype=np.float64)[in_force]
+        out[in_force] = real_array(laws[name], "laws")[in_force]
     return out
 
 
@@ -700,12 +703,13 @@ def weston_propagation_loss(
     :return: A :class:`WestonPropagationResult`.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``frequency_hz``, ``speed_of_sound`` or ``water_depth`` is not
-        a single number, or ``seabed`` is not a text.
+        a single number, or ``seabed`` is not a text, or ``range_m`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     h = require_positive(water_depth, "water_depth")
     c = require_positive(speed_of_sound, "speed_of_sound")
-    r = np.atleast_1d(np.asarray(range_m, dtype=np.float64))
+    r = np.atleast_1d(real_array(range_m, "range_m"))
     if r.size == 0 or not np.all(np.isfinite(r)):
         msg = "'range_m' must be finite and non-empty."
         raise ValueError(msg)

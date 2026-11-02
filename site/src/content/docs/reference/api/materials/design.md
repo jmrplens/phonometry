@@ -186,7 +186,7 @@ sequence.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty or non-1-D depth sequence, a depth that is not finite and non-negative, a non-positive well width, a number of periods that is not a whole number from 1, or a negative fin width. |
-| TypeError | if `fin_width` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes. |
+| TypeError | if `fin_width` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes, or `depths` holds a text or a value that is not a real number. |
 
 ## predict_diffuser_polar_response
 
@@ -249,7 +249,7 @@ exactly one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for invalid geometry, or if not exactly one of `depths` and `reflection` is supplied. |
-| TypeError | if `frequency`, `source_angle_deg`, `speed_of_sound` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes. |
+| TypeError | if `frequency`, `source_angle_deg`, `speed_of_sound` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes, or `angles_deg` or `depths` holds a text or a value that is not a real number, or `reflection` holds a text or a value that is not a number. |
 
 ## predicted_diffusion_spectrum
 
@@ -309,6 +309,7 @@ for this helper (build the spectrum yourself from
 | Exception | When |
 | :--- | :--- |
 | ValueError | for invalid geometry, an empty `frequencies` array, or if `reflection_of` is not `None`. |
+| TypeError | if `depths` or `frequencies` holds a text or a value that is not a real number. |
 
 ## qrd_well_depths
 

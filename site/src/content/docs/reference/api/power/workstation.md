@@ -135,7 +135,7 @@ a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerw
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two arguments do not have the same shape, or the grade is neither of the two. |
-| TypeError | if `grade` is not a text. |
+| TypeError | if `grade` is not a text, or `background_level` or `measured_level` holds a text or a value that is not a real number. |
 
 ## DEFAULT_COVERAGE_FACTOR
 
@@ -244,6 +244,12 @@ recognised, so the rule is the caller's to keep.
 | `local_correction` | $K_3$ in decibels (default 0). |
 
 **Returns:** $L_p$ in decibels; a `float` when the reading and the two corrections are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `background_correction`, `local_correction` or `measured_level` holds a text or a value that is not a real number. |
 
 ## EmissionPressureResult
 
@@ -368,7 +374,7 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either area is not strictly positive. |
-| TypeError | if `measurement_surface_m2` is not a single number, or `absorption_area` holds a text or a value that is not a real number. |
+| TypeError | if `measurement_surface_m2` is not a single number, or `absorption_area` or `directivity_index` holds a text or a value that is not a real number. |
 
 ## environmental_ratio_from_k2
 
@@ -424,6 +430,12 @@ limitation here.
 
 **Returns:** The ratio $z$; a `float` when `environmental_correction` and `directivity_index` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `directivity_index` or `environmental_correction` holds a text or a value that is not a real number. |
+
 ## GRADE_2_MAX_K3
 
 *Constant* (`float`).
@@ -458,6 +470,12 @@ weakest part.
 | `local_correction` | $K_3$ in decibels; a scalar or one value per band. |
 
 **Returns:** `'engineering'` or `'survey'`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `local_correction` holds a text or a value that is not a real number. |
 
 ## local_environmental_correction
 
@@ -565,6 +583,7 @@ ISO 11200:2014 Annex B disagree with each other about that, and
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than two readings are given. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## subinterval_level
 
@@ -597,7 +616,7 @@ weighted by how long each lasts, not by how many there are.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two are of different lengths, or a duration is not strictly positive. |
-| TypeError | if `durations_s` holds a text or a value that is not a real number. |
+| TypeError | if `durations_s` or `levels` holds a text or a value that is not a real number. |
 
 ## total_standard_deviation
 

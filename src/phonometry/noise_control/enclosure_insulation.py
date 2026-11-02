@@ -294,12 +294,17 @@ def _pair(
     level_without: ArrayLike,
     level_with: ArrayLike,
     frequencies: ArrayLike | None,
+    names: tuple[str, str],
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64] | None]:
-    """The two spectra and their band centres, checked against each other."""
-    without = require_finite_array(level_without, "level_without")
-    with_ = require_finite_array(level_with, "level_with")
+    """The two spectra and their band centres, checked against each other.
+
+    *names* are the caller's parameters for the two spectra, for the messages.
+    """
+    without_name, with_name = names
+    without = require_finite_array(level_without, without_name)
+    with_ = require_finite_array(level_with, with_name)
     if without.shape != with_.shape:
-        msg = "'level_without' and 'level_with' must match band for band."
+        msg = f"'{without_name}' and '{with_name}' must match band for band."
         raise ValueError(msg)
     freqs = None
     if frequencies is not None:
@@ -531,9 +536,12 @@ def _insulation(
     condition: str,
     source_kind: str,
     fraction: int | np.integer[Any],
+    names: tuple[str, str] = ("level_without", "level_with"),
 ) -> EnclosureInsulationResult:
-    """The body every one of Equations (1) to (5) shares."""
-    without, with_, freqs = _pair(level_without, level_with, frequencies)
+    """The body every one of Equations (1) to (5) shares; *names* are the
+    caller's parameters for the two spectra.
+    """
+    without, with_, freqs = _pair(level_without, level_with, frequencies, names)
     fraction = require_band_fraction(fraction, "fraction")
     where, kind = _method_pair(condition, source_kind)
     _check_band_range(
@@ -745,6 +753,7 @@ def enclosure_reciprocity_insulation(
         condition="laboratory",
         source_kind="reciprocity",
         fraction=fraction,
+        names=("external_levels", "internal_levels"),
     )
 
 

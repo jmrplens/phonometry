@@ -70,6 +70,12 @@ functions.
 
 **Returns:** An [`EqualLoudnessContours`](/phonometry/reference/api/psychoacoustics/contours/#equalloudnesscontours).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+
 ## EqualLoudnessContours
 
 ```python

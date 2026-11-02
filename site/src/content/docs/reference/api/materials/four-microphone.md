@@ -60,7 +60,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC, or any pressure is not positive. |
-| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
+| TypeError | if `static_pressure_kpa` or `temperature_c` holds a text or a value that is not a real number. |
 
 ## air_layer_transfer_matrix
 
@@ -96,7 +96,7 @@ $T_{11} = T_{22}$).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `characteristic_impedance` or `thickness_m` is not a single number. |
+| TypeError | if `characteristic_impedance` or `thickness_m` is not a single number, or `wavenumber` holds a text or a value that is not a number. |
 
 ## face_quantities
 
@@ -141,7 +141,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `characteristic_impedance` or `thickness_m` is not a single number. |
+| TypeError | if `characteristic_impedance` or `thickness_m` is not a single number, or `b`, `c`, `d` or `wavenumber` holds a text or a value that is not a number. |
 
 ## FaceQuantities
 
@@ -292,7 +292,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number, or `wavenumber` holds a text or a value that is not a number. |
 
 ## transfer_matrix_two_load
 
@@ -347,7 +347,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number, or `wavenumber` holds a text or a value that is not a number. |
 
 ## TransferMatrix
 
@@ -503,6 +503,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` or `characteristic_impedance` is neither supplied nor stored on the matrix. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### TransferMatrix.plot_geometry()
 
@@ -661,7 +662,7 @@ air-layer transfer matrix (see [`air_layer_transfer_matrix`](/phonometry/referen
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `l1` or `l2` is not a single number, or `h1`, `h2`, `h3`, `h4` or `wavenumber` holds a text or a value that is not a number. |
 
 ## WaveAmplitudes
 

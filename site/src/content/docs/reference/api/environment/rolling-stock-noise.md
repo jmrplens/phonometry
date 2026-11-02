@@ -1273,6 +1273,7 @@ position are valid when they are no more than 3 dB apart (9.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | See [`StationaryTestResult`](/phonometry/reference/api/environment/rolling-stock-noise/#stationarytestresult). |
+| TypeError | if `lengths_m` or `levels` holds a text or a value that is not a real number. |
 
 ## stationary_unit_level
 

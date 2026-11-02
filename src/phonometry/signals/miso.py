@@ -63,6 +63,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import own_window
 from .._internal.validation import (
     indices_of,
+    real_array,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -183,7 +184,7 @@ def _validate_inputs(
         rows = list(np.atleast_2d(resolve_samples(inputs, name="inputs")))
     # The number is a count of array axes, not a quantity.
     elif isinstance(inputs, np.ndarray) and inputs.ndim == 2:  # noqa: PLR2004
-        rows = [np.ascontiguousarray(row, dtype=np.float64) for row in inputs]
+        rows = [np.ascontiguousarray(row) for row in real_array(inputs, "inputs")]
     elif isinstance(inputs, Sequence):
         # A sequence may hold Signals of its own; each element keeps its own
         # calibration, applied by _validate_signal below.
@@ -191,7 +192,7 @@ def _validate_inputs(
     else:
         # Anything else numpy reads as an array: its rows are the records,
         # and one row is one record, which the count below refuses.
-        rows = list(np.atleast_2d(np.asarray(inputs, dtype=np.float64)))
+        rows = list(np.atleast_2d(real_array(inputs, "inputs")))
     if len(rows) < _MIN_INPUT_RECORDS:
         msg = "'inputs' must hold at least two input records."
         raise ValueError(msg)

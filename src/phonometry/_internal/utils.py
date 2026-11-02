@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 from scipy import signal
 
-from .validation import _as_float64
+from .validation import real_array
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
@@ -35,7 +35,7 @@ def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
     parameter, and a dict, a complex number or a plain object comes back as
     a ``TypeError``, which is not the exception these entry points document;
     both are re-raised as a ``ValueError`` that says which argument was
-    wrong, exactly as :func:`~phonometry._internal.validation._as_float64`
+    wrong, exactly as :func:`~phonometry._internal.validation.real_array`
     does for the result fields one layer up.
 
     ``None`` it does not refuse at all. ``None`` converts, to a ``NaN``
@@ -61,7 +61,7 @@ def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
     if x is None:
         msg = f"'{name}' must be a signal, not None."
         raise ValueError(msg)
-    samples = np.atleast_1d(_as_float64(x, name))
+    samples = np.atleast_1d(real_array(x, name))
     if not np.all(np.isfinite(samples)):
         msg = (
             f"'{name}' must contain only finite samples; a None inside the "

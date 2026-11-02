@@ -312,7 +312,7 @@ of the test arrangement $R_\mathrm{s,max}$ that
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in band count, a level is not finite, an area is not positive, or the length is not positive. |
-| TypeError | if `joint_length_m` is not a single number, or `absorption_area` holds a text or a value that is not a real number. |
+| TypeError | if `joint_length_m` is not a single number, or `absorption_area`, `l1` or `l2` holds a text or a value that is not a real number. |
 
 ## JointGapSeries
 

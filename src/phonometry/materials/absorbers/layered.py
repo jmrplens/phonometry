@@ -51,6 +51,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    complex_array,
     refuse_text_beside_choice,
     require_choice,
     require_count,
@@ -443,8 +444,8 @@ def _layer_terms(
         if isinstance(layer, AirLayer):
             d = require_non_negative(layer.thickness_m, "AirLayer.thickness_m")
             if d > 0.0:
-                zc = np.full(f.shape, rc, dtype=np.complex128)
-                k = np.asarray(k0, dtype=np.complex128)
+                zc = np.full(f.shape, complex_array(rc, "rc"))
+                k = complex_array(k0, "k0")
                 terms.append((_FLUID, *_fluid_layer_terms(zc, k, d, k0_sin2)))
         elif isinstance(layer, PorousLayer):
             term = _porous_layer_term(layer, f, k0_sin2)
@@ -987,9 +988,10 @@ def statistical_absorption(
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
     :return: Statistical absorption coefficient ``alpha_dif``.
-    :raises TypeError: if ``angle_limit_rad`` is not a single number.
+    :raises TypeError: if ``angle_limit_rad`` is not a single number, or
+        ``normalized_impedance`` holds a text or a value that is not a number.
     """
-    z = np.asarray(normalized_impedance, dtype=np.complex128)
+    z = complex_array(normalized_impedance, "normalized_impedance")
     if np.any(z.real <= 0.0):
         msg = "'normalized_impedance' must have a positive real part."
         raise ValueError(msg)

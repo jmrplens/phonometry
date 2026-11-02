@@ -106,6 +106,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import read_only
 from .._internal.validation import (
     is_class_designation,
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -282,7 +283,7 @@ def _sequence(values: Sequence[float] | None, name: str) -> tuple[float, ...] | 
     if values is None:
         return None
     try:
-        arr = np.asarray(values, dtype=np.float64)
+        arr = real_array(values, name)
     except TypeError:
         msg = f"'{name}' must be a sequence of numbers."
         raise TypeError(msg) from None
@@ -305,7 +306,7 @@ def _rows(
     if values is None:
         return None
     try:
-        arr = np.asarray(values, dtype=np.float64)
+        arr = real_array(values, name)
     except TypeError:
         msg = f"'{name}' must be rows of numbers."
         raise TypeError(msg) from None

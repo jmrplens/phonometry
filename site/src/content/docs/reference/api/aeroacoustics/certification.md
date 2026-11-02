@@ -63,7 +63,7 @@ the 10 dB-down window give $\mathrm{EPNL} = \mathrm{PNLTM} + D$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input is not a `(K, 24)` finite array, or `procedure` is not `"airplane"` or `"helicopter"`. |
-| TypeError | if `procedure` is not a text. |
+| TypeError | if `procedure` is not a text, or `dt` or `spectra` holds a text or a value that is not a real number. |
 
 ## epnl_from_pnlt
 
@@ -113,7 +113,7 @@ included in the reported EPNL.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `reference_time` is not a single number. |
+| TypeError | if `reference_time` is not a single number, or `dt`, `pnlt` or `tone_corrections` holds a text or a value that is not a real number. |
 
 ## EPNLIntegration
 
@@ -304,6 +304,7 @@ The analytic piecewise noy law, using the Table A2-3 constants:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is not 24 finite levels. |
+| TypeError | if `spl` holds a text or a value that is not a real number. |
 
 ## tone_correction
 
@@ -334,5 +335,5 @@ excess `F` above the smoothed background, with the 1.5 dB threshold, the
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `start_band` is not a number. |
+| TypeError | If `start_band` is not a number, or `spl` holds a text or a value that is not a real number. |
 | ValueError | If the spectrum is not 24 finite levels, or `start_band` is not an integer between 0 and 3. |

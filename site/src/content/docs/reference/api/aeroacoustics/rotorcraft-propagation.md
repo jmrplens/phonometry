@@ -172,7 +172,7 @@ $c = 346.1$ m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `edge_height_m` or `edge_span` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `edge_height_m` or `edge_span` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `path_difference` is not a single number. |
 
 ## ground_effect_adjustment
 
@@ -274,6 +274,7 @@ Eq. 37/38 with the segment integrals `A` and `B` of Eq. 39/40.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `distances_m` or `heights_m` holds a text or a value that is not a real number. |
 
 ## MeanGroundPlaneResult
 
@@ -335,6 +336,12 @@ The plane height $a\,d + b$ at `distance_m`, in metres.
 | `distance_m` | Distance $d$ along the section, in metres (scalar or array). |
 
 **Returns:** The height of the plane at each distance, in metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `distance_m` holds a text or a value that is not a real number. |
 
 ### MeanGroundPlaneResult.plot()
 
@@ -443,7 +450,7 @@ whose diffraction equations follow CNOSSOS-EU.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `flow_resistivity` is neither a class letter nor numbers (a `bytes`, `None`, a complex value, a text among numbers), or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `flow_resistivity` is neither a class letter nor numbers (a `bytes`, `None`, a complex value, a text among numbers), or `distances_m`, `frequencies` or `heights_m` holds a text or a value that is not a real number. |
 
 ## TerrainScreeningResult
 

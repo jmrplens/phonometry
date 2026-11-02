@@ -102,6 +102,7 @@ from the result itself and is the safe route.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a level vector is not 7 finite values, or `mtf` is not a (7, n) matrix of finite non-negative values. |
+| TypeError | if `measured_ambient`, `measured_levels`, `mtf`, `operational_ambient` or `operational_levels` holds a text or a value that is not a real number. |
 
 ## sti_from_impulse_response
 
@@ -181,7 +182,7 @@ STI itself stays within ~0.001.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `ambient`, `levels` or `snr` holds a text or a value that is not a real number. |
 
 ## stipa
 
@@ -249,7 +250,7 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `ambient` or `levels` holds a text or a value that is not a real number. |
 
 ## stipa_signal
 

@@ -50,6 +50,7 @@ if TYPE_CHECKING:
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_finite_fields,
     require_fraction,
@@ -122,10 +123,11 @@ def object_fraction(object_volumes: ArrayLike, volume: float) -> float:
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :return: The object fraction
         :math:`\psi = \sum V_{\text{obj}} / V`.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``object_volumes`` holds
+        a text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
-    vols = np.asarray(object_volumes, dtype=np.float64)
+    vols = real_array(object_volumes, "object_volumes")
     if np.any(vols < 0.0):
         msg = "object volumes must be non-negative."
         raise ValueError(msg)
@@ -145,8 +147,10 @@ def hard_object_absorption(object_volume: ArrayLike) -> np.ndarray:
     :param object_volume: Volume ``Vobj`` of the hard object(s), m3.
     :return: The equivalent absorption area
         :math:`A_{\text{obj}} = V_{\text{obj}}^{2/3}`, m2.
+    :raises TypeError: if ``object_volume`` holds a text or a value that is not a real
+        number.
     """
-    vol = np.asarray(object_volume, dtype=np.float64)
+    vol = real_array(object_volume, "object_volume")
     if np.any(vol < 0.0):
         msg = "object volumes must be non-negative."
         raise ValueError(msg)
@@ -183,11 +187,12 @@ def air_absorption_area(
     :return: The air absorption area :math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2; a
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included.
-    :raises TypeError: if ``object_fraction`` or ``volume`` is not a single number.
+    :raises TypeError: if ``object_fraction`` or ``volume`` is not a single number, or
+        ``m`` holds a text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
     object_fraction = require_fraction(object_fraction, "object_fraction")
-    m_arr = np.asarray(m, dtype=np.float64)
+    m_arr = real_array(m, "m")
     if np.any(m_arr < 0.0):
         msg = "the attenuation coefficient m must be non-negative."
         raise ValueError(msg)
@@ -216,8 +221,10 @@ def equivalent_absorption_area(
         coefficients, an object's entry and ``air_area`` are all numbers, a
         zero-dimensional array when each is one value and one of them is a
         zero-dimensional array, otherwise a per-band array.
+    :raises TypeError: if ``air_area``, ``objects`` or ``surfaces`` holds a text or a
+        value that is not a real number.
     """
-    total = np.asarray(air_area, dtype=np.float64)
+    total = real_array(air_area, "air_area")
     if np.any(total < 0.0):
         msg = "air_area must be non-negative."
         raise ValueError(msg)
@@ -225,12 +232,12 @@ def equivalent_absorption_area(
         if area < 0.0:
             msg = "surface areas must be non-negative."
             raise ValueError(msg)
-        alpha_arr = np.asarray(alpha, dtype=np.float64)
+        alpha_arr = real_array(alpha, "surfaces")
         if np.any(alpha_arr < 0.0):
             msg = "absorption coefficients must be non-negative."
             raise ValueError(msg)
         total = total + area * alpha_arr
-    obj = np.atleast_1d(np.asarray(objects, dtype=np.float64))
+    obj = np.atleast_1d(real_array(objects, "objects"))
     if obj.size:
         if np.any(obj < 0.0):
             msg = "object absorption areas must be non-negative."
@@ -305,12 +312,13 @@ def reverberation_time(
         zero-dimensional one included.
     :raises ValueError: if ``absorption_area`` is not positive and finite.
     :raises TypeError: if ``object_fraction``, ``speed_of_sound`` or ``volume`` is not a
-        single number.
+        single number, or ``absorption_area`` holds a text or a value that is not a real
+        number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     object_fraction = require_fraction(object_fraction, "object_fraction")
-    area = np.asarray(absorption_area, dtype=np.float64)
+    area = real_array(absorption_area, "absorption_area")
     # A NaN compares False against the bound below, so it has to be named
     # separately or a band of absorption that is not a number returns a
     # reverberation time that is not one either.
@@ -480,7 +488,8 @@ def enclosed_space_reverberation(
         125 Hz to 8 kHz.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The :class:`ReverberationResult`.
-    :raises TypeError: if ``air_condition`` is not a text.
+    :raises TypeError: if ``air_condition`` is not a text, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
     if air_condition is not None:
         require_choice(
@@ -497,7 +506,7 @@ def enclosed_space_reverberation(
         )
     # The result owns its arrays and copies them on construction, so neither
     # the caller's array nor _OCTAVE_BANDS needs a copy of its own here.
-    freq = np.asarray(frequencies, dtype=np.float64)
+    freq = real_array(frequencies, "frequencies")
     if air_condition is not None and not np.array_equal(freq, _OCTAVE_BANDS):
         msg = (
             "the built-in air_condition profiles cover the seven octave bands "

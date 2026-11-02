@@ -64,7 +64,7 @@ quantile of `fractile` and the spread is the upper one for `z >= 0`
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an age below 18, an unknown sex, a fractile outside (0, 1), or an unknown frequency. |
-| TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text. |
+| TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## AgeThresholdResult
 
@@ -157,7 +157,7 @@ standard prints two tables rather than one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown earphone or frequency. |
-| TypeError | if `earphone` is not a text. |
+| TypeError | if `earphone` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## EARPHONES
 
@@ -208,7 +208,7 @@ is a decibel more in the coupler.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the audiogram does not match the frequencies, or for an unknown earphone or frequency. |
-| TypeError | if `earphone` is not a text. |
+| TypeError | if `earphone` is not a text, or `hearing_level` holds a text or a value that is not a real number. |
 
 ## reference_threshold
 
@@ -239,7 +239,7 @@ frequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field or frequency. |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## RETSPL_FREQUENCIES_HZ
 

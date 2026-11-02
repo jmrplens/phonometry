@@ -34,6 +34,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .validation import real_array
+
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
@@ -48,8 +50,9 @@ def settled(value: ArrayLike) -> NDArray[np.float64]:
 
     :param value: The computed quantity, any shape.
     :return: The settled values as a float array (a 0-d array for a scalar).
+    :raises TypeError: if ``value`` holds a text or a value that is not a real number.
     """
-    return np.round(np.asarray(value, dtype=np.float64), SETTLED_DECIMALS)
+    return np.round(real_array(value, "value"), SETTLED_DECIMALS)
 
 
 def settled_ratio(part: ArrayLike, whole: ArrayLike) -> NDArray[np.float64]:
@@ -69,9 +72,11 @@ def settled_ratio(part: ArrayLike, whole: ArrayLike) -> NDArray[np.float64]:
     :return: The settled ratio; zero where the whole is zero, since a part of
         nothing is nothing, and NaN where either is NaN, so that a NaN answers
         every comparison False as it did before it was settled.
+    :raises TypeError: if ``part`` or ``whole`` holds a text or a value that is not a
+        real number.
     """
-    numerator = np.asarray(part, dtype=np.float64)
-    denominator = np.asarray(whole, dtype=np.float64)
+    numerator = real_array(part, "part")
+    denominator = real_array(whole, "whole")
     shape = np.broadcast_shapes(numerator.shape, denominator.shape)
     ratio = np.divide(
         numerator,
@@ -95,8 +100,9 @@ def settled_net_share(terms: ArrayLike, axis: int | None = None) -> NDArray[np.f
     :param terms: The signed terms.
     :param axis: The axis summed over; ``None`` sums them all.
     :return: The settled share, in [-1, 1]; zero where every term is zero.
+    :raises TypeError: if ``terms`` holds a text or a value that is not a real number.
     """
-    values = np.asarray(terms, dtype=np.float64)
+    values = real_array(terms, "terms")
     return settled_ratio(np.sum(values, axis=axis), np.sum(np.abs(values), axis=axis))
 
 
@@ -109,9 +115,10 @@ def round_half_up(value: ArrayLike, decimals: int = 0) -> NDArray[np.float64]:
     :param value: The value or values to round.
     :param decimals: The decimal places kept.
     :return: The rounded values as a float array.
+    :raises TypeError: if ``value`` holds a text or a value that is not a real number.
     """
     scale = 10.0**decimals
-    scaled = settled(np.asarray(value, dtype=np.float64) * scale)
+    scaled = settled(real_array(value, "value") * scale)
     return np.asarray(np.floor(scaled + 0.5) / scale, dtype=np.float64)
 
 
@@ -123,9 +130,10 @@ def round_half_away_from_zero(
     :param value: The value or values to round.
     :param decimals: The decimal places kept.
     :return: The rounded values as a float array.
+    :raises TypeError: if ``value`` holds a text or a value that is not a real number.
     """
     scale = 10.0**decimals
-    scaled = settled(np.asarray(value, dtype=np.float64) * scale)
+    scaled = settled(real_array(value, "value") * scale)
     return np.asarray(np.sign(scaled) * np.floor(np.abs(scaled) + 0.5) / scale)
 
 
@@ -139,7 +147,8 @@ def round_half_even(value: ArrayLike, decimals: int = 0) -> NDArray[np.float64]:
     :param value: The value or values to round.
     :param decimals: The decimal places kept.
     :return: The rounded values as a float array.
+    :raises TypeError: if ``value`` holds a text or a value that is not a real number.
     """
     scale = 10.0**decimals
-    scaled = settled(np.asarray(value, dtype=np.float64) * scale)
+    scaled = settled(real_array(value, "value") * scale)
     return np.asarray(np.rint(scaled) / scale, dtype=np.float64)

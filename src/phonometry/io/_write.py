@@ -78,7 +78,13 @@ import numpy as np
 from scipy.io import wavfile
 
 from .._internal.json_input import escaped
-from .._internal.validation import require_choice, require_count, require_scalar
+from .._internal.validation import (
+    real_array,
+    refuse_text,
+    require_choice,
+    require_count,
+    require_scalar,
+)
 from .._internal.warnings import PhonometryWarning
 from ._bext import (
     coding_history_line,
@@ -167,6 +173,9 @@ def _resolve_input(
         # The header holds a whole number of samples per second: a Signal
         # whose own rate is fractional is refused here, as a bare rate is.
         return x.data, require_count(x.fs, "fs", at_least=None)
+    # NumPy reads a bytearray as the codes of its characters, an integer
+    # array the writer would pass through as samples: a text is refused first.
+    refuse_text(x, "'x' must be numbers, not text.")
     data = np.asarray(x)
     if fs is None:
         msg = "fs is required when writing a bare array"
@@ -175,7 +184,7 @@ def _resolve_input(
         msg = "fs must be positive"
         raise ValueError(msg)
     if data.dtype not in _PASSTHROUGH_SUBTYPES:
-        data = np.asarray(data, dtype=np.float64)
+        data = real_array(data, "x")
     data = np.atleast_2d(data)
     # The number is a count of array axes, not a quantity.
     if data.ndim != 2:  # noqa: PLR2004
@@ -351,9 +360,10 @@ def _encode_frames(data: np.ndarray, subtype: str) -> bytes:
         return _pack_pcm24(interleaved)
     if subtype == "PCM_32":
         return interleaved.astype("<i4").tobytes()
+    samples = real_array(interleaved, "x")
     if subtype == "FLOAT":
-        return interleaved.astype("<f4").tobytes()
-    return interleaved.astype("<f8").tobytes()
+        return samples.astype("<f4").tobytes()
+    return samples.astype("<f8").tobytes()
 
 
 def frame_riff_chunk(chunk_id: bytes, payload: bytes) -> bytes:
@@ -459,7 +469,7 @@ def _resolve_bext(
         require_choice(bext, "bext", ("loudness",))
         base = provenance if provenance is not None else fresh_metadata()
         if data.dtype.kind == "f":
-            full_scale = np.asarray(data, dtype=np.float64)
+            full_scale = real_array(data, "data")
         else:
             full_scale = data / float(2 ** (8 * data.dtype.itemsize - 1))
         meta = with_measured_loudness(base, full_scale, fs)
@@ -701,7 +711,9 @@ def _write_through_scipy(
         )
     else:
         _scipy_write(
-            path, rate, data if resolved == "DOUBLE" else data.astype(np.float32)
+            path,
+            rate,
+            data if resolved == "DOUBLE" else real_array(data, "x").astype(np.float32),
         )
 
 
@@ -815,8 +827,10 @@ def write(
         no sidecar holds or whose sidecar would pass the 1 MiB a reader
         takes, or one with a pipe, a device, a socket or a directory at the
         sidecar's name, refused before the audio is written.
-    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes, or
-        ``bext``, ``dither`` or ``subtype`` is not a text.
+    :raises TypeError: if ``x`` is a text, holds one (a ``bytearray`` at
+        any depth included) or holds a complex value, ``fs`` is a flag, a
+        text or an array where a count goes, or ``bext``, ``dither`` or
+        ``subtype`` is not a text.
     """
     if dither is not None:
         require_choice(dither, "dither", ("tpdf",))

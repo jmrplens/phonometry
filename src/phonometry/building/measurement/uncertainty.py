@@ -55,6 +55,7 @@ import numpy as np
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -816,9 +817,11 @@ def single_number_uncertainty_uncorrelated(
     :param reference_differences: Per-band :math:`L_i - R_i`
         (reference-spectrum level minus measured band value), in dB.
     :raises ValueError: Mismatched shapes, empty input, or negative ``u_i``.
+    :raises TypeError: if ``band_uncertainties`` or ``reference_differences`` holds a
+        text or a value that is not a real number.
     """
-    u_arr = np.asarray(band_uncertainties, dtype=float)
-    d_arr = np.asarray(reference_differences, dtype=float)
+    u_arr = real_array(band_uncertainties, "band_uncertainties")
+    d_arr = real_array(reference_differences, "reference_differences")
     if u_arr.ndim != 1 or d_arr.ndim != 1:
         msg = "Inputs must be one-dimensional sequences."
         raise ValueError(msg)

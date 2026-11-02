@@ -62,6 +62,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_above_absolute_zero,
     require_equal_shapes,
     require_ranks,
@@ -209,8 +210,10 @@ def power_attenuation_from_alpha(
     :return: Power attenuation coefficient ``m``, in 1/m, with the shape of
         ``attenuation_db_per_m``.
     :raises ValueError: if any value is negative or not finite.
+    :raises TypeError: if ``attenuation_db_per_m`` holds a text or a value that is not a
+        real number.
     """
-    alpha = np.asarray(attenuation_db_per_m, dtype=np.float64)
+    alpha = real_array(attenuation_db_per_m, "attenuation_db_per_m")
     if not np.all(np.isfinite(alpha)):
         msg = "'attenuation_db_per_m' values must be finite."
         raise ValueError(msg)
@@ -279,8 +282,8 @@ def _absorption_area(
     what the public caller calls these two arguments, so a rejection names the
     parameter that was actually passed.
     """
-    t = np.asarray(t60, dtype=np.float64)
-    m_arr = np.asarray(m, dtype=np.float64)
+    t = real_array(t60, t_name)
+    m_arr = real_array(m, m_name)
     _validate_area_inputs(t, volume, m_arr, t_name=t_name, m_name=m_name)
     c = _resolve_speed(temperature_c, speed_of_sound)
     return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
@@ -317,7 +320,8 @@ def absorption_area(
     :return: Equivalent sound absorption area ``A``, in square metres, with the
         shape of ``t60``.
     :raises TypeError: if ``speed_of_sound``, ``temperature_c`` or ``volume`` is not a
-        single number.
+        single number, or ``m`` or ``t60`` holds a text or a value that is not a real
+        number.
     """
     area = _absorption_area(
         t60, volume, temperature_c=temperature_c, speed_of_sound=speed_of_sound, m=m
@@ -385,8 +389,11 @@ def absorption_coefficient(
     :return: Sound absorption coefficient ``alpha_s`` with the broadcast shape of
         ``t1`` and ``t2``.
     :raises TypeError: if ``sample_area``, ``speed_of_sound1``, ``speed_of_sound2``,
-        ``temperature1_c``, ``temperature2_c`` or ``volume`` is not a single number.
+        ``temperature1_c``, ``temperature2_c`` or ``volume`` is not a single number, or
+        ``m1``, ``m2``, ``t1`` or ``t2`` holds a text or a value that is not a real
+        number.
     """
+    require_scalar(temperature1_c, "temperature1_c")
     require_scalar(sample_area, "sample_area")
     require_scalar(volume, "volume")
     if sample_area <= 0.0:
@@ -666,11 +673,13 @@ def measure_sound_absorption(
         share one shape, ``relative_humidity_percent`` is not within ``[0, 100]`` %, or an
         input is non-physical (see :func:`absorption_coefficient`).
     :raises TypeError: if ``relative_humidity_percent``, ``speed_of_sound``,
-        ``temperature_c`` or ``volume`` is not a single number.
+        ``temperature_c`` or ``volume`` is not a single number, or ``frequencies``,
+        ``m``, ``t_empty`` or ``t_specimen`` holds a text or a value that is not a real
+        number.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
-    t1 = np.asarray(t_empty, dtype=np.float64)
-    t2 = np.asarray(t_specimen, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
+    t1 = real_array(t_empty, "t_empty")
+    t2 = real_array(t_specimen, "t_specimen")
     require_equal_shapes(
         "measure_sound_absorption",
         {
@@ -680,7 +689,7 @@ def measure_sound_absorption(
         },
         "band",
     )
-    m_arr = np.broadcast_to(np.asarray(m, dtype=np.float64), freqs.shape).astype(
+    m_arr = np.broadcast_to(real_array(m, "m"), freqs.shape).astype(
         np.float64, copy=True
     )
     if relative_humidity_percent is None:

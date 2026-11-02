@@ -70,6 +70,7 @@ from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting, as_float_or_array
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_finite,
     require_finite_array,
@@ -546,12 +547,14 @@ def power_law_wind_speed(
         included.
     :raises ValueError: If a height is not positive, a speed is negative or a
         value is not finite.
-    :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number.
+    :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number,
+        or ``reference_speed_m_s`` or ``shear_exponent`` holds a text or a value that is
+        not a real number.
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
-    speed = np.asarray(reference_speed_m_s, dtype=np.float64)
-    alpha = np.asarray(shear_exponent, dtype=np.float64)
+    speed = real_array(reference_speed_m_s, "reference_speed_m_s")
+    alpha = real_array(shear_exponent, "shear_exponent")
     if not (np.all(np.isfinite(speed)) and np.all(np.isfinite(alpha))):
         msg = "'reference_speed_m_s' and 'shear_exponent' must be finite."
         raise ValueError(msg)
@@ -617,15 +620,17 @@ def wind_shear_exponent(
         one included.
     :raises ValueError: If a speed or height is not positive, or the two
         heights are the same.
-    :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number.
+    :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number,
+        or ``reference_speed_m_s`` or ``speed_m_s`` holds a text or a value that is not
+        a real number.
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
     if math.isclose(z, z_ref):
         msg = "'height_m' and 'reference_height_m' must differ."
         raise ValueError(msg)
-    upper = np.asarray(speed_m_s, dtype=np.float64)
-    lower = np.asarray(reference_speed_m_s, dtype=np.float64)
+    upper = real_array(speed_m_s, "speed_m_s")
+    lower = real_array(reference_speed_m_s, "reference_speed_m_s")
     if not (np.all(np.isfinite(upper)) and np.all(np.isfinite(lower))):
         msg = "The wind speeds must be finite."
         raise ValueError(msg)
@@ -690,7 +695,8 @@ def logarithmic_wind_speed(
     :raises ValueError: If a height or the roughness length is not positive,
         a height does not exceed the roughness length, or a speed is negative.
     :raises TypeError: if ``height_m``, ``reference_height_m`` or ``roughness_length``
-        is not a single number.
+        is not a single number, or ``reference_speed_m_s`` holds a text or a value that
+        is not a real number.
     """
     z = require_positive(height_m, "height_m")
     z_ref = require_positive(reference_height_m, "reference_height_m")
@@ -698,7 +704,7 @@ def logarithmic_wind_speed(
     if z <= z0 or z_ref <= z0:
         msg = "Both heights must exceed the roughness length."
         raise ValueError(msg)
-    speed = np.asarray(reference_speed_m_s, dtype=np.float64)
+    speed = real_array(reference_speed_m_s, "reference_speed_m_s")
     if not np.all(np.isfinite(speed)) or np.any(speed < 0.0):
         msg = "'reference_speed_m_s' must be finite and not negative."
         raise ValueError(msg)
@@ -739,8 +745,12 @@ class WindShearProfile(RichDisplay):
     def speed_at[A: ArrayLike](self, height_m: A) -> float | NDArray[np.float64]: ...
 
     def speed_at(self, height_m: ArrayLike) -> float | NDArray[np.float64]:
-        """The power-law wind speed at ``height_m`` (Equation (K.1)), in m/s."""
-        heights = np.asarray(height_m, dtype=np.float64)
+        """The power-law wind speed at ``height_m`` (Equation (K.1)), in m/s.
+
+        :raises TypeError: if ``height_m`` holds a text or a value that is not a real
+            number.
+        """
+        heights = real_array(height_m, "height_m")
         if not np.all(np.isfinite(heights)) or np.any(heights <= 0.0):
             msg = "'height_m' must be finite and positive."
             raise ValueError(msg)
@@ -1107,13 +1117,14 @@ def bin_sound_levels(
         finite, a wind speed or an uncertainty is negative, or ``averaging``
         is unknown.
     :raises TypeError: if ``bin_width_m_s`` or ``sector_width_deg`` is not a single
-        number, or ``levels``, ``wind_directions_deg`` or ``wind_speeds_m_s`` holds a
-        text or a value that is not a real number, or ``averaging`` is not a text.
+        number, or ``levels``, ``type_b_uncertainty_db``, ``wind_directions_deg`` or
+        ``wind_speeds_m_s`` holds a text or a value that is not a real number, or
+        ``averaging`` is not a text.
     """
     mode = _Averaging(require_choice(averaging, "averaging", _AVERAGINGS))
     levels = require_finite_array(levels, "levels")
     type_b = np.broadcast_to(
-        np.asarray(type_b_uncertainty_db, dtype=np.float64), levels.shape
+        real_array(type_b_uncertainty_db, "type_b_uncertainty_db"), levels.shape
     ).astype(np.float64)
     if not np.all(np.isfinite(type_b)) or np.any(type_b < 0.0):
         msg = "'type_b_uncertainty_db' must be finite and not negative."
@@ -1223,6 +1234,9 @@ class TurbineSoundLevels(OwnsArrays):
             difference is not the total less the background, the turbine
             level is not the one the rule of its bin gives, or an undetermined
             bin carries an uncertainty.
+        :raises TypeError: if ``background_levels``, ``total_levels`` or
+            ``turbine_uncertainty_db`` holds a text or a value that is not a real
+            number.
         """
         require_ranks(
             self,
@@ -1241,8 +1255,8 @@ class TurbineSoundLevels(OwnsArrays):
             "turbine_uncertainty_db",
             axis="bin",
         )
-        total = np.asarray(self.total_levels, dtype=np.float64)
-        background = np.asarray(self.background_levels, dtype=np.float64)
+        total = real_array(self.total_levels, "total_levels")
+        background = real_array(self.background_levels, "background_levels")
         levels = _turbine_levels(total, background)
         for name, expected, rule in (
             (
@@ -1265,7 +1279,7 @@ class TurbineSoundLevels(OwnsArrays):
             ):
                 msg = f"TurbineSoundLevels: '{name}' must be {rule}."
                 raise ValueError(msg)
-        uncertainty = np.asarray(self.turbine_uncertainty_db, dtype=np.float64)
+        uncertainty = real_array(self.turbine_uncertainty_db, "turbine_uncertainty_db")
         if not np.all(np.isnan(uncertainty[np.isnan(levels)])):
             msg = (
                 "TurbineSoundLevels: 'turbine_uncertainty_db' must be NaN in a "
@@ -1384,9 +1398,9 @@ def turbine_sound_levels(
     :return: A :class:`TurbineSoundLevels`.
     :raises ValueError: If the inputs disagree in length or are not finite,
         or an uncertainty is infinite or negative.
-    :raises TypeError: if ``background_levels``, ``total_levels``,
-        ``wind_directions_deg`` or ``wind_speeds_m_s`` holds a text or a value that is
-        not a real number.
+    :raises TypeError: if ``background_levels``, ``background_uncertainty_db``,
+        ``total_levels``, ``total_uncertainty_db``, ``wind_directions_deg`` or
+        ``wind_speeds_m_s`` holds a text or a value that is not a real number.
     """
     total = require_finite_array(total_levels, "total_levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -1394,10 +1408,10 @@ def turbine_sound_levels(
         msg = "'total_levels' and 'background_levels' must pair bin by bin."
         raise ValueError(msg)
     u_t = np.broadcast_to(
-        np.asarray(total_uncertainty_db, dtype=np.float64), total.shape
+        real_array(total_uncertainty_db, "total_uncertainty_db"), total.shape
     )
     u_b = np.broadcast_to(
-        np.asarray(background_uncertainty_db, dtype=np.float64), total.shape
+        real_array(background_uncertainty_db, "background_uncertainty_db"), total.shape
     )
     for name, u in (("total_uncertainty_db", u_t), ("background_uncertainty_db", u_b)):
         # NaN is the uncertainty of a bin of one interval (Equation (2) needs
@@ -1528,11 +1542,13 @@ def predicted_receptor_level(
         negative.
     :raises TypeError: if ``modeling_uncertainty_db`` or
         ``prediction_model_uncertainty_db`` is not a single number, or
-        ``turbine_levels`` holds a text or a value that is not a real number.
+        ``sound_power_uncertainty_db`` or ``turbine_levels`` holds a text or a value
+        that is not a real number.
     """
     levels = require_finite_array(turbine_levels, "turbine_levels")
     u_w = np.broadcast_to(
-        np.asarray(sound_power_uncertainty_db, dtype=np.float64), levels.shape
+        real_array(sound_power_uncertainty_db, "sound_power_uncertainty_db"),
+        levels.shape,
     )
     if not np.all(np.isfinite(u_w)) or np.any(u_w < 0.0):
         msg = "'sound_power_uncertainty_db' must be finite and not negative."
@@ -1783,10 +1799,11 @@ def wind_turbine_low_frequency_level(
     :param weighting: ``"A"`` (default) to add the A-weighting of Table C.4
         (IEC 61672-1) to each band, or ``"Z"`` for unweighted levels.
     :return: A :class:`LowFrequencyLevel`.
-    :raises TypeError: If ``weighting`` is not a text, or
-        ``sound_power_levels``, ``frequencies``, ``facade_insulation``,
-        ``ground_correction`` or ``air_attenuation_db_per_km`` holds a text or a
-        value that is not a number.
+    :raises TypeError: If ``weighting`` is not a text, or ``sound_power_levels``,
+        ``frequencies``, ``facade_insulation``, ``ground_correction`` or
+        ``air_attenuation_db_per_km`` holds a text or a value that is not a number, or
+        ``distance`` or ``hub_height_m`` holds a text or a value that is not a real
+        number.
     :raises ValueError: If the shapes disagree, a distance or height is not
         positive, an air attenuation coefficient is negative, a default table
         has no value at a supplied band, or ``weighting`` is neither ``"A"``
@@ -1802,8 +1819,8 @@ def wind_turbine_low_frequency_level(
         )
         raise ValueError(msg)
     turbines = power.shape[0]
-    distances = np.broadcast_to(np.asarray(distance, dtype=np.float64), (turbines,))
-    heights = np.broadcast_to(np.asarray(hub_height_m, dtype=np.float64), (turbines,))
+    distances = np.broadcast_to(real_array(distance, "distance"), (turbines,))
+    heights = np.broadcast_to(real_array(hub_height_m, "hub_height_m"), (turbines,))
     for name, values in (("distance", distances), ("hub_height_m", heights)):
         if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
             msg = f"'{name}' must be finite and positive."
@@ -1998,8 +2015,10 @@ def amplitude_modulation_adjustment(
     :return: The adjustment :math:`K_\mathrm{am}`, in dB; a ``float`` for a number; an
         array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a depth is negative or not finite.
+    :raises TypeError: if ``modulation_depth_db`` holds a text or a value that is not a
+        real number.
     """
-    depth = np.asarray(modulation_depth_db, dtype=np.float64)
+    depth = real_array(modulation_depth_db, "modulation_depth_db")
     if not np.all(np.isfinite(depth)) or np.any(depth < 0.0):
         msg = "'modulation_depth_db' must be finite and not negative."
         raise ValueError(msg)

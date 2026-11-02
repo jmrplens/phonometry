@@ -71,6 +71,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_positive,
@@ -285,7 +286,7 @@ def _resolve_frequencies(
     """Validate an optional 1-D positive frequency grid (Hz)."""
     if frequencies is None:
         return None
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -307,7 +308,7 @@ def _resolve_panel_r(
             raise ValueError(msg)
         r = np.atleast_1d(np.asarray(values(freqs), dtype=np.float64))
     else:
-        r = np.atleast_1d(np.asarray(values, dtype=np.float64))
+        r = np.atleast_1d(real_array(values, name))
     if r.ndim != 1 or r.size == 0:
         msg = f"'{name}' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -352,7 +353,7 @@ def _resolve_interior(
     freqs = _resolve_frequencies(frequencies)
     v = _resolve_panel_r(values, freqs, name)
 
-    alpha = np.asarray(internal_absorption, dtype=np.float64)
+    alpha = real_array(internal_absorption, "internal_absorption")
     if alpha.ndim > 1 or alpha.size == 0:
         msg = "'internal_absorption' must be a scalar or a non-empty 1-D array."
         raise ValueError(msg)
@@ -434,9 +435,10 @@ def enclosure_insertion_loss(
         ``"norton"`` the bare :math:`C = 10 \log_{10}(S_\mathrm{E} / R_\mathrm{i})` of Norton & Karczub
         Equation (4.115).
     :return: An :class:`EnclosureInsertionLossResult`.
-    :raises TypeError: if ``panel_transmission_loss`` is none of the forms
-        above, ``model`` is not a text, or ``internal_area`` or
-        ``external_area`` is not one number.
+    :raises TypeError: if ``panel_transmission_loss`` is none of the forms above,
+        ``model`` is not a text, or ``internal_area`` or ``external_area`` is not one
+        number, or ``frequencies`` or ``internal_absorption`` holds a text or a value
+        that is not a real number.
     :raises ValueError: if an area is not positive, ``internal_absorption`` is
         not in ``(0, 1)`` or does not carry one value per band, a callable is
         given without ``frequencies``, or ``model`` is unknown.
@@ -524,7 +526,8 @@ def enclosure_required_transmission_loss(
         the **required** ``R`` and whose ``insertion_loss`` is the requested
         target, so it plots and reports like a forward calculation.
     :raises TypeError: if ``model`` is not a text, or ``external_area`` or
-        ``internal_area`` is not a single number.
+        ``internal_area`` is not a single number, or ``frequencies``, ``insertion_loss``
+        or ``internal_absorption`` holds a text or a value that is not a real number.
     """
     freqs, il_b, correction, r_i_b, s_e, s_i = _resolve_interior(
         insertion_loss,

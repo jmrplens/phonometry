@@ -82,6 +82,7 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import reduce_with_plain_rows
+from .validation import real_array
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
@@ -3056,8 +3057,10 @@ class BandedRow(CatalogueRow):
             for one that matches none of the bands, naming the nearest, and
             for a band this row does not print, naming the row, the band and
             what the page had in that cell.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
-        wanted = np.asarray(frequencies, dtype=np.float64)
+        wanted = real_array(frequencies, "frequencies")
         flat = wanted.reshape(-1)
         if not (np.all(np.isfinite(flat)) and np.all(flat > 0.0)):
             msg = (

@@ -109,6 +109,8 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.validation import (
+    complex_array,
+    real_array,
     require_choice,
     require_count,
     require_non_negative,
@@ -370,11 +372,11 @@ def temperature_transfer_function(
     :raises ValueError: for a ratio or an :math:`X` that is not positive and
         finite, or an unknown method.
     :raises TypeError: if ``method`` is not a text, or ``length_to_diameter_ratio`` is
-        not a single number.
+        not a single number, or ``x`` holds a text or a value that is not a real number.
     """
     method = require_choice(method, "method", _HEAT_CONDUCTION_METHODS)
     ratio = require_positive(length_to_diameter_ratio, "length_to_diameter_ratio")
-    values = np.asarray(x, dtype=np.float64)
+    values = real_array(x, "x")
     if values.size == 0 or not np.all(np.isfinite(values)) or np.any(values <= 0.0):
         msg = "'x' must be positive and finite."
         raise ValueError(msg)
@@ -816,8 +818,10 @@ class ReciprocityMicrophone(RichDisplay):
 
         :param frequencies: The frequencies, in Hz.
         :return: :math:`V_\mathrm{e}` at each frequency, in m³.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
-        ratio = np.asarray(frequencies, dtype=np.float64) / self.resonance_frequency_hz
+        ratio = real_array(frequencies, "frequencies") / self.resonance_frequency_hz
         volume = self.equivalent_volume_m3 / (
             1.0 - ratio**2 + 1.0j * self.loss_factor * ratio
         )
@@ -831,8 +835,10 @@ class ReciprocityMicrophone(RichDisplay):
 
         :param frequencies: The frequencies, in Hz, positive.
         :return: :math:`Z_\mathrm{a}` at each frequency, in Pa·s/m³.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
-        omega = 2.0 * math.pi * np.asarray(frequencies, dtype=np.float64)
+        omega = 2.0 * math.pi * real_array(frequencies, "frequencies")
         return _reference_stiffness() / (
             1.0j * omega * self.complex_equivalent_volume_m3(frequencies)
         )
@@ -864,10 +870,14 @@ def microphone_acoustic_impedance(
     :return: :math:`Z_\mathrm{a}`, complex, in Pa·s/m³.
     :raises ValueError: for an admittance or a sensitivity of zero, or a value
         that is not finite.
+    :raises TypeError: if ``blocked_impedance_ohm``, ``electrical_admittance_s`` or
+        ``pressure_sensitivity_v_per_pa`` holds a text or a value that is not a number.
     """
-    admittance = np.asarray(electrical_admittance_s, dtype=np.complex128)
-    blocked = np.asarray(blocked_impedance_ohm, dtype=np.complex128)
-    sensitivity = np.asarray(pressure_sensitivity_v_per_pa, dtype=np.complex128)
+    admittance = complex_array(electrical_admittance_s, "electrical_admittance_s")
+    blocked = complex_array(blocked_impedance_ohm, "blocked_impedance_ohm")
+    sensitivity = complex_array(
+        pressure_sensitivity_v_per_pa, "pressure_sensitivity_v_per_pa"
+    )
     for name, value in (
         ("electrical_admittance_s", admittance),
         ("blocked_impedance_ohm", blocked),
@@ -1625,7 +1635,7 @@ class WaveMotionCorrection(OwnsArrays):
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        column = np.asarray(self.correction, dtype=np.float64).reshape(-1)
+        column = real_array(self.correction, "correction").reshape(-1)
         if column.size != frequencies.size:
             msg = (
                 "WaveMotionCorrection: 'correction' must hold one value per frequency."

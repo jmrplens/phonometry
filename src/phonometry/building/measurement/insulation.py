@@ -87,7 +87,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
@@ -97,6 +97,7 @@ from ..._internal.types import ReportEngine, as_float_if_reduced
 from ..._internal.validation import (
     check_engine,
     is_positive,
+    real_array,
     require_choice,
     require_equal_counts,
     require_equal_shapes,
@@ -729,7 +730,7 @@ def _render_iso16283_facade(
 
 
 def energy_average_level(
-    levels: ArrayLike, *, axis: int = -1
+    levels: ArrayLike, *, axis: int | np.integer[Any] = -1
 ) -> float | NDArray[np.float64]:
     r"""Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).
 
@@ -746,15 +747,18 @@ def energy_average_level(
         result is zero-dimensional, otherwise an array.
     :raises ValueError: If ``levels`` is empty or contains non-finite
         values.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number,
+        or ``axis`` is not a single number.
     """
-    data = np.asarray(levels, dtype=np.float64)
+    require_scalar(axis, "axis")
+    data = real_array(levels, "levels")
     if data.size == 0:
         msg = "'levels' must not be empty."
         raise ValueError(msg)
     if not np.all(np.isfinite(data)):
         msg = "'levels' must contain only finite values."
         raise ValueError(msg)
-    return as_float_if_reduced(energy_mean(data, axis=axis))
+    return as_float_if_reduced(energy_mean(data, axis=cast("int", axis)))
 
 
 def _as_band_levels(levels: ArrayLike, name: str) -> np.ndarray:
@@ -764,7 +768,7 @@ def _as_band_levels(levels: ArrayLike, name: str) -> np.ndarray:
     band; a two-dimensional input is read as ``(positions, bands)`` and
     energy-averaged over the positions (Formula (9)).
     """
-    data = np.asarray(levels, dtype=np.float64)
+    data = real_array(levels, name)
     if data.ndim == 1:
         out = data
     # The number is a count of array axes, not a quantity.
@@ -823,7 +827,7 @@ def _checked_frequency_axis(
     require_scalar(band_count, "band_count")
     if frequencies is None:
         return None
-    axis = np.asarray(frequencies, dtype=np.float64)
+    axis = real_array(frequencies, "frequencies")
     if axis.ndim != 1 or axis.size != band_count:
         msg = (
             f"{owner}: 'frequencies' must carry one band centre per measured "
@@ -862,7 +866,7 @@ def _require_frequencies(
             "with the low-frequency arguments to say which bands those are."
         )
         raise ValueError(msg)
-    return np.asarray(frequencies, dtype=np.float64)
+    return real_array(frequencies, "frequencies")
 
 
 def _check_low_frequency_volume(
@@ -1033,14 +1037,16 @@ def airborne_insulation(
         source room. A room that does not round below 25 m³ is refused where
         the corner measurements are described, by
         :class:`~.low_frequency.LowFrequencyProcedure` itself.
-    :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number, or
+        ``frequencies``, ``l1``, ``l2`` or ``t2`` holds a text or a value that is not a
+        real number.
     :warns LowFrequencyWarning: when the receiving room rounds below 25 m³ and
         ``frequencies`` names any of the three bands but no ``receiver_low_frequency``
         answers Clause 8.1.
     """
     l1_bands = _as_band_levels(l1, "l1")
     l2_bands = _as_band_levels(l2, "l2")
-    t = np.asarray(t2, dtype=np.float64)
+    t = real_array(t2, "t2")
 
     # Compared by count, not by shape, so a `t2` that carries an extra axis
     # falls through to `_validate_reverberation`, which says that is what is
@@ -1181,13 +1187,15 @@ def impact_insulation(
         reverberation time is missing. A room that does not round below 25 m³
         is refused where the corner measurements are described, by
         :class:`~.low_frequency.LowFrequencyProcedure` itself.
-    :raises TypeError: if ``t0`` or ``volume`` is not a single number.
+    :raises TypeError: if ``t0`` or ``volume`` is not a single number, or
+        ``frequencies``, ``li`` or ``t2`` holds a text or a value that is not a real
+        number.
     :warns LowFrequencyWarning: when ``volume`` rounds below 25 m³ and
         ``frequencies`` names any of the three bands but no ``low_frequency`` answers
         Clause 8.1.
     """
     li_bands = _as_band_levels(li, "li")
-    t = np.asarray(t2, dtype=np.float64)
+    t = real_array(t2, "t2")
 
     # Compared by count, not by shape, so a `t2` that carries an extra axis
     # falls through to `_validate_reverberation`, which says that is what is
@@ -1382,7 +1390,8 @@ def facade_insulation(
         Supplying ``surface_level`` alone is not an error: ``r_prime`` simply
         stays ``None``.
     :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number, or
-        ``method`` is not a text.
+        ``method`` is not a text, or ``frequencies``, ``l1_2m``, ``l2``,
+        ``surface_level`` or ``t2`` holds a text or a value that is not a real number.
     :warns LowFrequencyWarning: when a loudspeaker-method ``volume`` rounds
         below 25 m³ and ``frequencies`` names any of the three bands but no
         ``low_frequency`` answers Clause 7.3.1.
@@ -1391,7 +1400,7 @@ def facade_insulation(
 
     l1_bands = _as_band_levels(l1_2m, "l1_2m")
     l2_bands = _as_band_levels(l2, "l2")
-    t = np.asarray(t2, dtype=np.float64)
+    t = real_array(t2, "t2")
 
     # Compared by count, not by shape, so a `t2` that carries an extra axis
     # falls through to `_validate_reverberation`, which says that is what is

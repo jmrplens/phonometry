@@ -7,14 +7,16 @@ and composite whole-day rating levels (6.5, Formulae 5-6).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
-from ..._internal.validation import require_scalar
+from ..._internal.validation import real_array, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from numpy.typing import ArrayLike
 
 __all__ = [
     "composite_rating_level",
@@ -28,7 +30,15 @@ __all__ = [
 _HOURS_SUM_TOL = 1e-9
 
 
-def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> float:
+#: A period table has one row per period and three columns: level, hours
+#: and adjustment.
+_PERIOD_TABLE_RANK = 2
+_PERIOD_FIELDS = 3
+
+
+def composite_rating_level(
+    periods: Iterable[tuple[float, float, float]] | ArrayLike,
+) -> float:
     r"""Composite whole-day rating level (ISO 1996-1:2016, 6.5).
 
     Generalizes Formulae (5) and (6): each period contributes its rating
@@ -39,18 +49,28 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
        10 \log_{10}\left[ \sum_i \frac{h_i}{24} \cdot
        10^{0.1 (L_i + K_i)} \right]
 
-    :param periods: Iterable of ``(level, hours, adjustment)`` tuples.
+    :param periods: Iterable of ``(level, hours, adjustment)`` tuples, or an
+        array of one such row per period.
         ``level`` is the period's (rating) equivalent continuous level,
         ``hours`` its duration and ``adjustment`` the time-of-day or
         source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB,
         night 10 dB). Hours must be positive and sum to 24.
     :return: Composite rating level in dB.
+    :raises ValueError: for no period, a period that is not three numbers, a
+        duration that is not positive and finite, or durations that do not
+        sum to 24 h.
+    :raises TypeError: if ``periods`` holds a text or a value that is not a
+        real number.
     """
-    periods = list(periods)
+    periods = list(cast("Iterable[tuple[float, float, float]]", periods))
     if not periods:
         msg = "At least one period is required."
         raise ValueError(msg)
-    hours = np.array([h for _, h, _ in periods], dtype=np.float64)
+    table = real_array(periods, "periods")
+    if table.ndim != _PERIOD_TABLE_RANK or table.shape[1] != _PERIOD_FIELDS:
+        msg = "Every period must be a (level, hours, adjustment) tuple."
+        raise ValueError(msg)
+    hours = table[:, 1]
     if not np.all(np.isfinite(hours)) or np.any(hours <= 0):
         msg = "Every period duration must be a positive, finite number."
         raise ValueError(msg)
@@ -58,7 +78,7 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
     if abs(total - 24.0) > _HOURS_SUM_TOL:
         msg = f"Period durations must sum to 24 h; got {total!r}."
         raise ValueError(msg)
-    acc = sum(h / 24.0 * 10 ** (0.1 * (level + k)) for level, h, k in periods)
+    acc = sum(h / 24.0 * 10 ** (0.1 * (level + k)) for level, h, k in table.tolist())
     return float(10 * np.log10(acc))
 
 

@@ -329,7 +329,7 @@ in the bright zone.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a distance is not positive. |
-| TypeError | if `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `direct_distance`, `edge_to_receiver` or `source_to_edge` is not a single number. |
 
 ## ground_effect
 
@@ -393,7 +393,7 @@ of the materials domain. Exactly one of the two must be given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both of `impedance`/`flow_resistivity_pa_s_m2` are given, a height is negative, or the distance is not positive. |
-| TypeError | if `distance`, `flow_resistivity_pa_s_m2`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `model` is not a text. |
+| TypeError | if `distance`, `flow_resistivity_pa_s_m2`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `model` is not a text, or `impedance` holds a text or a value that is not a number. |
 
 ## kurze_anderson_attenuation
 
@@ -522,7 +522,7 @@ $w = \sqrt{i k R_2 / 2} \, (\cos\theta + 1/Z)$ (Eq. (D.57)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height is negative, the distance is not positive, the impedance is zero, or its shape does not match the frequencies. |
-| TypeError | if `distance`, `receiver_height_m`, `source_height_m` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `distance`, `receiver_height_m`, `source_height_m` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `normalized_impedance` holds a text or a value that is not a number. |
 
 ## SphericalGroundResult
 

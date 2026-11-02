@@ -37,6 +37,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -138,7 +139,7 @@ def _validate_signal(
     ``calibrate=False`` is for the quantities referenced to digital full
     scale rather than to 20 uPa: see :mod:`phonometry.io._resolve`.
     """
-    sig = np.asarray(x, dtype=np.float64)
+    sig = real_array(x, "x")
     if sig.ndim != 1:
         msg = "'x' must be one-dimensional."
         raise ValueError(msg)
@@ -268,7 +269,8 @@ def thd(
     :return: Total harmonic distortion, as a ratio (0..).
     :raises ValueError: If the signal/parameters are invalid, ``kind`` is
         unknown, or no harmonic of the fundamental lies below Nyquist.
-    :raises TypeError: if ``fs`` is not a single number, or ``kind`` is not a text.
+    :raises TypeError: if ``fs`` is not a single number, or ``kind`` is not a text, or
+        ``x`` holds a text or a value that is not a real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -323,7 +325,8 @@ def harmonic_distortion(
     :raises ValueError: If ``order`` is not an integer, ``order`` < 2 or the
         inputs are invalid.
     :raises TypeError: if ``fs`` or ``fundamental`` is not a single number, or ``order``
-        is a flag, a text or an array where a count goes.
+        is a flag, a text or an array where a count goes, or ``x`` holds a text or a
+        value that is not a real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -477,7 +480,7 @@ def thd_plus_noise(
     :return: THD+N as a ratio (default) or in dB.
     :raises ValueError: If the inputs are invalid or ``notch_q`` out of range.
     :raises TypeError: if ``bandwidth``, ``fs``, ``fundamental`` or ``notch_q`` is not a
-        single number.
+        single number, or ``x`` holds a text or a value that is not a real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -585,8 +588,10 @@ def weighting_bs468(frequencies: ArrayLike) -> NDArray[np.float64]:
     :param frequencies: Frequencies, in Hz (scalar or array-like, >= 0).
     :return: Response in dB re the 1 kHz value, same shape as the input.
     :raises ValueError: for negative or non-finite frequencies.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequencies' must be finite and non-negative."
         raise ValueError(msg)
@@ -659,7 +664,8 @@ def weighted_thd(
     :return: Weighted THD, as a ratio.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``fs``, ``fundamental`` or ``notch_q`` is not a single number,
-        or ``weighting`` is not a text.
+        or ``weighting`` is not a text, or ``x`` holds a text or a value that is not a
+        real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -782,7 +788,8 @@ def harmonic_analysis(
         parameters (default ``'hann'``).
     :return: A :class:`HarmonicDistortionResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``x`` holds a text or a
+        value that is not a real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)

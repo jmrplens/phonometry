@@ -361,7 +361,7 @@ r.m.s.-only meter is not graded on phase at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | As for [`weighting_tolerance_percent`](/phonometry/reference/api/vibration/instrumentation/#weighting_tolerance_percent). |
-| TypeError | if `name` is not a text. |
+| TypeError | if `name` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## PhaseVerification
 
@@ -874,7 +874,7 @@ by [`MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/inst
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, if the two arrays do not have the same shape, if a frequency is not positive and finite, if a measured factor is negative or not finite, or if the expanded uncertainty is negative or not finite. |
-| TypeError | if `expanded_uncertainty_percent` is not a single number, or `name` is not a text. |
+| TypeError | if `expanded_uncertainty_percent` is not a single number, or `name` is not a text, or `frequencies` or `measured_factors` holds a text or a value that is not a real number. |
 
 ## WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT
 
@@ -909,7 +909,7 @@ The Table 5 band around a weighting, region by region.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, or a frequency is not positive and finite. |
-| TypeError | if `name` is not a text. |
+| TypeError | if `name` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## WeightingVerification
 

@@ -110,7 +110,7 @@ as the database conditions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `scaling_factor` is not a single number. |
+| TypeError | if `scaling_factor` is not a single number, or `airspeeds` or `path_angles_deg` holds a text or a value that is not a real number, or `airspeed` or `path_angle_deg` is not a single number. |
 
 ## flight_path_kinematics
 
@@ -151,7 +151,7 @@ radar tracks (e.g. spline resampling) before differentiating.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `gravity` is not a single number. |
+| TypeError | if `gravity` is not a single number, or `positions` or `times` holds a text or a value that is not a real number. |
 
 ## FlightConditionInterpolation
 
@@ -373,7 +373,7 @@ and the propagation adjustments honour as the reference distance.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `mapping` is not a text, `azimuth_step`, `distance_m` or `polar_step` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `mapping` is not a text, `azimuth_step`, `distance_m` or `polar_step` is not a single number, or `bearings`, `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## interpolated_source_level
 
@@ -418,6 +418,7 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `airspeeds` holds a text or a value that is not a real number. |
 
 ## rotorcraft_event_level
 
@@ -481,7 +482,7 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If the ground holds an array of flow resistivities or ground elevations, which are for the contour grid. |
+| TypeError | If the ground holds an array of flow resistivities or ground elevations, which are for the contour grid, or `airspeeds`, `level_offset`, `path_angles_deg`, `positions`, `receiver` or `times` holds a text or a value that is not a real number. |
 | ValueError | If the inputs are invalid. |
 
 ## rotorcraft_noise_contour
@@ -537,7 +538,7 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `metric` is not a text. |
+| TypeError | if `metric` is not a text, or `airspeeds`, `level_offset`, `path_angles_deg`, `positions`, `times`, `x` or `y` holds a text or a value that is not a real number. |
 
 ## RotorcraftAtmosphere
 

@@ -42,6 +42,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_array,
     require_above_absolute_zero,
     require_choice,
     require_finite,
@@ -495,8 +496,10 @@ class ARP866AAttenuation(OwnsArrays):
         :return: One value per band for a single length, or an array of shape
             ``(bands, lengths)``.
         :raises ValueError: if a length is negative or not finite.
+        :raises TypeError: if ``path_length_m`` holds a text or a value that is not a
+            real number.
         """
-        s = np.asarray(path_length_m, dtype=np.float64)
+        s = real_array(path_length_m, "path_length_m")
         if s.ndim > 1 or not np.all(np.isfinite(s)) or np.any(s < 0.0):
             msg = "'path_length_m' must be one non-negative length or a 1-D sequence of them."
             raise ValueError(msg)

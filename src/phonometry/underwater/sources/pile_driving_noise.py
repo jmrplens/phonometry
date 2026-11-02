@@ -32,6 +32,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
+    real_array,
     require_count,
     require_finite_fields,
     require_ranks,
@@ -111,8 +112,10 @@ def cumulative_sel(single_sels: ArrayLike) -> float:
     :param single_sels: Per-strike single-strike SELs, in dB re 1 µPa²·s.
     :return: Cumulative SEL, in dB re 1 µPa²·s.
     :raises ValueError: If the sequence is empty or non-finite.
+    :raises TypeError: if ``single_sels`` holds a text or a value that is not a real
+        number.
     """
-    sels = np.asarray(single_sels, dtype=np.float64)
+    sels = real_array(single_sels, "single_sels")
     if sels.ndim != 1 or sels.size < 1:
         msg = "'single_sels' must be a non-empty 1-D sequence."
         raise ValueError(msg)
@@ -238,7 +241,7 @@ def _peak_level(pressure: NDArray[np.float64]) -> float:
     :return: :math:`20 \log_{10}(\max\lvert p \rvert / 1\,\mu\mathrm{Pa})`,
         ``-inf`` for an all-zero trace.
     """
-    peak = float(np.max(np.abs(np.asarray(pressure, dtype=np.float64))))
+    peak = float(np.max(np.abs(real_array(pressure, "pressure"))))
     with np.errstate(divide="ignore"):
         return float(20.0 * np.log10(peak / UNDERWATER_REFERENCE_PRESSURE_PA))
 
@@ -257,7 +260,7 @@ def _band_energy_sum(band_sel: NDArray[np.float64]) -> float:
     :return: Their energy sum, in dB re 1 µPa²·s.
     """
     with np.errstate(divide="ignore"):
-        return energy_sum(np.asarray(band_sel, dtype=np.float64))
+        return energy_sum(real_array(band_sel, "band_sel"))
 
 
 @dataclass(frozen=True)
@@ -434,10 +437,12 @@ class StrikeSELSpectrum(OwnsArrays):
         :raises ValueError: if the band levels disagree with the centres, if a
             band is non-finite otherwise than ``-inf``, or if ``total_sel`` is
             not the energy sum of ``band_sel``.
+        :raises TypeError: if ``band_sel`` holds a text or a value that is not a real
+            number.
         """
         require_ranks(self, frequencies=1, band_sel=1)
         require_same_length(self, "frequencies", "band_sel")
-        band_sel = np.asarray(self.band_sel, dtype=np.float64)
+        band_sel = real_array(self.band_sel, "band_sel")
         undetermined = np.flatnonzero(~(np.isfinite(band_sel) | np.isneginf(band_sel)))
         if undetermined.size:
             i = int(undetermined[0])

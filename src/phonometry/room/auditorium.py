@@ -53,7 +53,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
 
 import numpy as np
 
@@ -62,6 +62,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_finite_array,
     require_scalar,
@@ -256,7 +257,7 @@ def _band_energy(
     band: NDArray[np.float64], index: int, name: str
 ) -> NDArray[np.float64]:
     """One band squared, from its own direct sound onwards (A.2.1)."""
-    p2 = band.astype(np.float64) ** 2
+    p2 = real_array(band, name, copy=True) ** 2
     if not np.any(p2 > 0.0):
         msg = f"Band {index} of '{name}' has no energy."
         raise ValueError(msg)
@@ -463,10 +464,11 @@ def free_field_reference_level(
         for a number; an array for a sequence or an array, a zero-dimensional one
         included.
     :raises ValueError: If ``distance`` is not a positive, finite length.
-    :raises TypeError: if ``distance`` is not a single number.
+    :raises TypeError: if ``distance`` is not a single number, or ``level`` holds a text
+        or a value that is not a real number.
     """
     require_scalar(distance, "distance")
-    values = np.asarray(level, dtype=np.float64)
+    values = real_array(level, "level")
     if not np.isfinite(distance) or distance <= 0.0:
         msg = f"'distance' must be a positive, finite length in m, got {distance!r}."
         raise ValueError(msg)
@@ -484,7 +486,7 @@ def free_field_reference_level(
 
 
 def directivity_energy_average(
-    levels: ArrayLike, *, axis: int = -1
+    levels: ArrayLike, *, axis: int | np.integer[Any] = -1
 ) -> float | NDArray[np.float64]:
     r"""Average a free-field measurement over bearings around the source.
 
@@ -524,8 +526,11 @@ def directivity_energy_average(
         an array with ``axis`` removed for several.
     :raises ValueError: If fewer than ``ceil(360 / 12,5) = 29`` bearings lie
         along ``axis``, or the levels are empty or non-finite.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number,
+        or ``axis`` is not a single number.
     """
-    values = np.asarray(levels, dtype=np.float64)
+    require_scalar(axis, "axis")
+    values = real_array(levels, "levels")
     if values.size == 0 or not np.all(np.isfinite(values)):
         msg = "'levels' must be a non-empty array of finite decibel values."
         raise ValueError(msg)
@@ -541,7 +546,7 @@ def directivity_energy_average(
         )
         raise ValueError(msg)
     mean = np.asarray(
-        10.0 * np.log10(np.mean(10.0 ** (values / 10.0), axis=axis)),
+        10.0 * np.log10(np.mean(10.0 ** (values / 10.0), axis=cast("int", axis))),
         dtype=np.float64,
     )
     return as_float_if_reduced(mean)
@@ -618,9 +623,11 @@ def reverberation_room_reference_level(
         the absorption area are both numbers; an array of their broadcast shape when one
         is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the absorption area is not a positive, finite area.
+    :raises TypeError: if ``absorption_area`` or ``reverberation_room_level`` holds a
+        text or a value that is not a real number.
     """
-    levels = np.asarray(reverberation_room_level, dtype=np.float64)
-    area = np.asarray(absorption_area, dtype=np.float64)
+    levels = real_array(reverberation_room_level, "reverberation_room_level")
+    area = real_array(absorption_area, "absorption_area")
     if not np.all(np.isfinite(area)) or np.any(area <= 0.0):
         msg = "'absorption_area' must be a positive, finite area in m^2."
         raise ValueError(msg)
@@ -682,9 +689,11 @@ def sound_strength_from_power(
     :return: The sound strength G, in dB; a ``float`` when the two levels are numbers;
         an array of their broadcast shape when one is a sequence or an array, a
         zero-dimensional one included.
+    :raises TypeError: if ``power_level`` or ``pressure_level`` holds a text or a value
+        that is not a real number.
     """
-    pressure = np.asarray(pressure_level, dtype=np.float64)
-    power = np.asarray(power_level, dtype=np.float64)
+    pressure = real_array(pressure_level, "pressure_level")
+    power = real_array(power_level, "power_level")
     strength = np.asarray(
         pressure - power + SOUND_STRENGTH_POWER_OFFSET_DB, dtype=np.float64
     )
@@ -786,6 +795,8 @@ def sound_strength(
     :raises ValueError: If neither or both reference forms are given, if a
         response is not one-dimensional or is silent, or if
         ``reference_level`` does not broadcast onto the band axis.
+    :raises TypeError: if ``reference_level`` holds a text or a value that is not a real
+        number.
     """
     if (reference_ir is None) == (reference_level is None):
         msg = (
@@ -806,7 +817,7 @@ def sound_strength(
             reference_ir, reference_fs, limits, fraction, "reference_ir"
         )
     else:
-        given = np.asarray(reference_level, dtype=np.float64)
+        given = real_array(cast("ArrayLike", reference_level), "reference_level")
         try:
             reference = np.broadcast_to(given, levels.shape).astype(np.float64)
         except ValueError as exc:
@@ -1118,6 +1129,8 @@ def late_lateral_sound_level(
         response is not one-dimensional or is silent, if the two hall
         responses are of different lengths, or if they are too short to
         reach the 80 ms boundary.
+    :raises TypeError: if ``reference_level`` holds a text or a value that is not a real
+        number.
     """
     if (reference_ir is None) == (reference_level is None):
         msg = (
@@ -1169,7 +1182,7 @@ def late_lateral_sound_level(
             )
             raise ValueError(msg)
     else:
-        given = np.asarray(reference_level, dtype=np.float64)
+        given = real_array(cast("ArrayLike", reference_level), "reference_level")
         try:
             reference = np.broadcast_to(given, levels.shape).astype(np.float64)
         except ValueError as exc:
@@ -1802,7 +1815,7 @@ def _band_positions(
     frequency: ArrayLike, wanted: tuple[float, ...], name: str
 ) -> list[int]:
     """Where the named nominal bands sit on a measured band axis."""
-    centres = np.asarray(frequency, dtype=np.float64)
+    centres = real_array(frequency, name)
     if centres.ndim != 1 or centres.size == 0:
         msg = f"'{name}' must be a non-empty one-dimensional band axis in Hz."
         raise ValueError(msg)
@@ -1860,14 +1873,15 @@ def single_number_average(
     :raises ValueError: If the symbol is not one Table A.1 prints, if the two
         arrays disagree in length, or if the band axis does not carry every
         band the quantity averages.
-    :raises TypeError: if ``symbol`` is not a text.
+    :raises TypeError: if ``symbol`` is not a text, or ``frequencies`` or ``values``
+        holds a text or a value that is not a real number.
     """
     require_choice(
         symbol, "symbol", ("G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J")
     )
     quantity = _table_a1_row(symbol)
-    readings = np.asarray(values, dtype=np.float64)
-    centres = np.asarray(frequencies, dtype=np.float64)
+    readings = real_array(values, "values")
+    centres = real_array(frequencies, "frequencies")
     if readings.shape != centres.shape:
         msg = (
             f"'values' has {readings.size} entries and 'frequencies' has "
@@ -1903,9 +1917,11 @@ def octave_pair_averages(
     :return: ``{"low": ..., "mid": ..., "high": ...}`` in the values' unit.
     :raises ValueError: If the two arrays disagree in length, or if the band
         axis does not carry all six octaves from 125 Hz to 4 kHz.
+    :raises TypeError: if ``frequencies`` or ``values`` holds a text or a value that is
+        not a real number.
     """
-    readings = np.asarray(values, dtype=np.float64)
-    centres = np.asarray(frequencies, dtype=np.float64)
+    readings = real_array(values, "values")
+    centres = real_array(frequencies, "frequencies")
     if readings.shape != centres.shape:
         msg = (
             f"'values' has {readings.size} entries and 'frequencies' has "
@@ -1943,7 +1959,8 @@ class PerceptibleDifference(OwnsArrays):
         :raises ValueError: If the symbol is not one Table A.1 prints, if the
             table prints no just-noticeable difference for it, or if the two
             values do not have the same shape.
-        :raises TypeError: if ``symbol`` is not a text.
+        :raises TypeError: if ``symbol`` is not a text, or ``first`` or ``second`` holds
+            a text or a value that is not a real number.
         """
         quantity = _table_a1_row(self.symbol)
         if quantity.just_noticeable_difference is None:
@@ -1953,8 +1970,8 @@ class PerceptibleDifference(OwnsArrays):
                 "of it cannot be compared against one."
             )
             raise ValueError(msg)
-        first = np.asarray(self.first, dtype=np.float64)
-        second = np.asarray(self.second, dtype=np.float64)
+        first = real_array(self.first, "first")
+        second = real_array(self.second, "second")
         if first.shape != second.shape:
             msg = "'first' and 'second' must have the same shape."
             raise ValueError(msg)
@@ -2020,15 +2037,16 @@ def assess_perceptible_difference(
     :raises ValueError: If the symbol is not one Table A.1 prints, if the
         table prints no just-noticeable difference for it, or if the two
         values do not have the same shape.
-    :raises TypeError: if ``symbol`` is not a text.
+    :raises TypeError: if ``symbol`` is not a text, or ``first`` or ``second`` holds a
+        text or a value that is not a real number.
     """
     require_choice(
         symbol, "symbol", ("G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J")
     )
     return PerceptibleDifference(
         symbol,
-        np.asarray(first, dtype=np.float64),
-        np.asarray(second, dtype=np.float64),
+        real_array(first, "first"),
+        real_array(second, "second"),
     )
 
 
@@ -2077,8 +2095,9 @@ def min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]:
         table and A.4 between them authorise; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a seat count is not a positive, finite number.
+    :raises TypeError: if ``seats`` holds a text or a value that is not a real number.
     """
-    count = np.asarray(seats, dtype=np.float64)
+    count = real_array(seats, "seats")
     if not np.all(np.isfinite(count)) or np.any(count <= 0.0):
         msg = "'seats' must be a positive, finite number of seats."
         raise ValueError(msg)

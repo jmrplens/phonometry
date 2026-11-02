@@ -89,7 +89,7 @@ $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - \mathrm{RL} - \mathr
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not finite. |
-| TypeError | if `detection_threshold`, `directivity_index`, `noise_level`, `reverberation_level`, `source_level` or `target_strength` is not a single number. |
+| TypeError | if `detection_threshold`, `directivity_index`, `noise_level`, `reverberation_level`, `source_level` or `target_strength` is not a single number, or `propagation_loss` holds a text or a value that is not a real number. |
 
 ## array_directivity_index
 
@@ -235,7 +235,7 @@ linearly between the two bracketing samples. Real waveguides oscillate, so
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `figure_of_merit` is not a single number, or `crossing` is not a text. |
+| TypeError | if `figure_of_merit` is not a single number, or `crossing` is not a text, or `propagation_loss` or `range_m` holds a text or a value that is not a real number. |
 
 ## detection_threshold
 
@@ -351,7 +351,7 @@ Passive sonar equation $\mathrm{SE} = \mathrm{SL} - \mathrm{PL} - (\mathrm{NL} -
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not finite. |
-| TypeError | if `detection_threshold`, `directivity_index`, `noise_level` or `source_level` is not a single number. |
+| TypeError | if `detection_threshold`, `directivity_index`, `noise_level` or `source_level` is not a single number, or `propagation_loss` holds a text or a value that is not a real number. |
 
 ## SonarEquationResult
 

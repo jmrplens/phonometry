@@ -106,7 +106,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 from scipy import stats
@@ -115,6 +115,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
+    real_array,
     refuse_complex,
     require_choice,
     require_real,
@@ -484,7 +485,7 @@ def _as_responses(
     """
     refuse_complex(values, f"'{name}' must hold real scale values.")
     try:
-        array = np.asarray(values, dtype=np.float64).ravel()
+        array = real_array(values, name).ravel()
     except TypeError as exc:
         msg = f"'{name}' must hold numeric scale values."
         raise TypeError(msg) from exc
@@ -610,23 +611,25 @@ def _method_a_scale(part: int) -> QuestionnaireScale:
 
 
 @overload
-def method_a_scale_values[S: RealScalar](positions: S, *, part: int) -> float: ...
+def method_a_scale_values[S: RealScalar](
+    positions: S, *, part: int | np.integer[Any]
+) -> float: ...
 
 
 @overload
 def method_a_scale_values[V: RealValues](
-    positions: V, *, part: int
+    positions: V, *, part: int | np.integer[Any]
 ) -> NDArray[np.float64]: ...
 
 
 @overload
 def method_a_scale_values[A: ArrayLike](
-    positions: A, *, part: int
+    positions: A, *, part: int | np.integer[Any]
 ) -> float | NDArray[np.float64]: ...
 
 
 def method_a_scale_values(
-    positions: ArrayLike, *, part: int
+    positions: ArrayLike, *, part: int | np.integer[Any]
 ) -> float | NDArray[np.float64]:
     """The scale value of a ticked box of Method A (ISO/TS 12913-3 Table A.1).
 
@@ -644,14 +647,15 @@ def method_a_scale_values(
         view of *positions*.
     :raises ValueError: for a part other than 1 to 4 or a position that is
         not a whole number from 1 to 5.
-    :raises TypeError: if ``positions`` holds a complex value, a NumPy one or
-        one held in an array of objects included.
+    :raises TypeError: if ``positions`` holds a text or a value that is not a real
+        number, or ``part`` is not a single number.
     """
-    scale = _method_a_scale(part)
+    require_scalar(part, "part")
+    scale = _method_a_scale(cast("int", part))
     # Before the conversion, which keeps the real part of a NumPy complex
     # position, so that the refusal of a complex one reaches it.
     refuse_complex(positions, "'positions' must hold real scale values.")
-    array = np.asarray(positions, dtype=np.float64)
+    array = real_array(positions, "positions")
     checked = _as_responses(array, "positions", integer=True).reshape(array.shape)
     # Parts 1 and 4 keep the position as the value; copy it so the caller's
     # positions and the returned values never share memory.
@@ -1088,7 +1092,7 @@ def _paired(
         # A copy, so the result never shares memory with the caller's array:
         # a later change to it would otherwise rewrite the result's x and y
         # and leave its coefficient and ranks describing other data.
-        array = np.array(values, dtype=np.float64).ravel()
+        array = np.array(real_array(values, name)).ravel()
         if not np.all(np.isfinite(array)):
             msg = f"'{name}' must be finite; drop the incomplete pairs first."
             raise ValueError(msg)
@@ -1299,8 +1303,10 @@ def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.floa
     :return: The scale values; a ``float`` for a number; an array for a sequence or an
         array, a zero-dimensional one included.
     :raises ValueError: for a fraction outside 0 to 1 or an infinite one.
+    :raises TypeError: if ``marked_fraction`` holds a text or a value that is not a real
+        number.
     """
-    fraction = np.asarray(marked_fraction, dtype=np.float64)
+    fraction = real_array(marked_fraction, "marked_fraction")
     given = fraction[~np.isnan(fraction)]
     if np.any(np.isinf(given)) or np.any((given < 0.0) | (given > 1.0)):
         msg = (

@@ -40,6 +40,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_array,
     require_above_absolute_zero,
     require_choice,
     require_equal_counts,
@@ -353,9 +354,9 @@ def _clean_table(
     distances_m: ArrayLike,
     levels: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    p = np.asarray(powers, dtype=np.float64).ravel()
-    d = np.asarray(distances_m, dtype=np.float64).ravel()
-    lv = np.asarray(levels, dtype=np.float64)
+    p = real_array(powers, "powers").ravel()
+    d = real_array(distances_m, "distances_m").ravel()
+    lv = real_array(levels, "levels")
     # The fewest values the step below can work with, not a quantity.
     if p.size < 2 or d.size < 2:  # noqa: PLR2004
         msg = "'powers' and 'distances_m' must each have at least two values."
@@ -463,10 +464,12 @@ def npd_level(
     :param distance_m: Query slant distance(s) ``d``, in metres.
     :return: The interpolated event level per query distance, in dB.
     :raises ValueError: If the table or inputs are invalid.
-    :raises TypeError: if ``power`` is not a single number.
+    :raises TypeError: if ``power`` is not a single number, or ``distance_m``,
+        ``distances_m``, ``levels`` or ``powers`` holds a text or a value that is not a
+        real number.
     """
     p, d, lv = _clean_table(powers, distances_m, levels)
-    dq = np.atleast_1d(np.asarray(distance_m, dtype=np.float64))
+    dq = np.atleast_1d(real_array(distance_m, "distance_m"))
     if dq.size == 0 or not np.all(np.isfinite(dq)) or np.any(dq <= 0.0):
         msg = "'distance_m' must be finite and strictly positive."
         raise ValueError(msg)
@@ -504,12 +507,14 @@ def npd_curve(
         sweep across the tabulated envelope.
     :return: An :class:`NPDLevelResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``distances_m``, ``levels``, ``powers`` or
+        ``query_distances_m`` holds a text or a value that is not a real number.
     """
     p, d, lv = _clean_table(powers, distances_m, levels)
     if query_distances_m is None:
         dq = np.logspace(np.log10(d[0]), np.log10(d[-1]), 200)
     else:
-        dq = np.atleast_1d(np.asarray(query_distances_m, dtype=np.float64))
+        dq = np.atleast_1d(real_array(query_distances_m, "query_distances_m"))
     level = npd_level(p, d, lv, power, dq)
     row = npd_level(p, d, lv, power, d)  # tabulated levels at the queried power
     return NPDLevelResult(
@@ -803,7 +808,7 @@ def _validate_path(
     path: ArrayLike,
 ) -> NDArray[np.float64]:
     """Coerce and validate a flight path to a finite ``(N, 5)`` array."""
-    pts = np.asarray(path, dtype=np.float64)
+    pts = real_array(path, "path")
     # The number is a count of array axes, not a quantity.
     if pts.ndim != 2 or pts.shape[1] != 5 or pts.shape[0] < 2:  # noqa: PLR2004
         msg = "'path' must have shape (N, 5) with N >= 2 (x,y,z,power,speed)."
@@ -841,7 +846,7 @@ def _validate_bank(
     """Coerce an optional per-segment bank-angle array (length ``N-1``)."""
     if bank is None:
         return None
-    bk = np.asarray(bank, dtype=np.float64).ravel()
+    bk = real_array(bank, "bank").ravel()
     if bk.shape != (n_points - 1,):
         msg = f"'bank' must have length {n_points - 1} (one per segment)."
         raise ValueError(msg)
@@ -1464,10 +1469,12 @@ def event_level(
     :return: A :class:`FlyoverResult`. If every segment is degenerate
         (zero length) the level is ``-inf``.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``metric`` or ``mounting`` is not a text.
+    :raises TypeError: if ``metric`` or ``mounting`` is not a text, or ``distances_m``,
+        ``exposure_levels``, ``max_levels``, ``observer``, ``path`` or ``powers`` holds
+        a text or a value that is not a real number.
     """
     pts = _validate_path(path)
-    obs = np.asarray(observer, dtype=np.float64).ravel()
+    obs = real_array(observer, "observer").ravel()
     if obs.shape != (3,) or not np.all(np.isfinite(obs)):
         msg = "'observer' must be a finite (x, y, z) point."
         raise ValueError(msg)
@@ -1588,10 +1595,12 @@ def noise_contour(
         :class:`FlightSegmentState` (see :func:`event_level`).
     :return: A :class:`NoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``metric`` or ``mounting`` is not a text.
+    :raises TypeError: if ``metric`` or ``mounting`` is not a text, or ``distances_m``,
+        ``exposure_levels``, ``max_levels``, ``path``, ``powers``, ``x`` or ``y`` holds
+        a text or a value that is not a real number.
     """
-    gx = np.asarray(x, dtype=np.float64).ravel()
-    gy = np.asarray(y, dtype=np.float64).ravel()
+    gx = real_array(x, "x").ravel()
+    gy = real_array(y, "y").ravel()
     # The fewest values the step below can work with, not a quantity.
     if gx.size < 2 or gy.size < 2:  # noqa: PLR2004
         msg = "'x' and 'y' must each have at least two grid points."

@@ -61,6 +61,7 @@ from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
     floats_of,
     pair_of_floats,
+    real_array,
     require_axis_count,
     require_choice,
     require_equal_counts,
@@ -698,7 +699,7 @@ def _finite(value: float, name: str) -> float:
 
 
 def _bands(values: tuple[float, ...]) -> NDArray[np.float64]:
-    return np.asarray(values, dtype=np.float64)
+    return real_array(values, "values")
 
 
 def _combine_rolling_and_propulsion(
@@ -711,7 +712,7 @@ def _combine_rolling_and_propulsion(
     because a copy of it that no test reaches is a copy that can drift.
     """
     if key in ("4a", "4b"):
-        return np.asarray(propulsion, dtype=np.float64)
+        return real_array(propulsion, "propulsion")
     return np.asarray(
         10.0 * np.log10(10.0 ** (rolling / 10.0) + 10.0 ** (propulsion / 10.0)),
         dtype=np.float64,
@@ -1313,13 +1314,14 @@ def line_source_segment_power(
     :param length: Length ``dL`` of the segment, in m.
     :return: The segment sound power, in dB re 1 pW.
     :raises ValueError: If ``length`` is not positive.
-    :raises TypeError: if ``length`` is not a single number.
+    :raises TypeError: if ``length`` is not a single number, or ``line_power`` holds a
+        text or a value that is not a real number.
     """
     dl = _finite(length, "length")
     if dl <= 0.0:
         msg = "'length' must be a positive number of metres."
         raise ValueError(msg)
     return np.asarray(
-        np.atleast_1d(np.asarray(line_power, dtype=np.float64)) + 10.0 * np.log10(dl),
+        np.atleast_1d(real_array(line_power, "line_power")) + 10.0 * np.log10(dl),
         dtype=np.float64,
     )

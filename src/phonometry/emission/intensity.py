@@ -80,6 +80,7 @@ from .._internal.levels_math import energy_mean
 from .._internal.types import answer_form, as_float_if_reduced, one_value
 from .._internal.utils import _typesignal
 from .._internal.validation import (
+    real_array,
     require_axis_count,
     require_band_fraction,
     require_equal_counts,
@@ -149,7 +150,7 @@ def _finite_difference_correction(k_dr: np.ndarray) -> np.ndarray:
     :math:`k \Delta r \to \pi` that would let near-null bins blow up the
     totals.
     """
-    kd = np.clip(np.asarray(k_dr, dtype=np.float64), 0.0, _BIAS_CORRECTION_MAX_KDR)
+    kd = np.clip(real_array(k_dr, "k_dr"), 0.0, _BIAS_CORRECTION_MAX_KDR)
     with np.errstate(divide="ignore", invalid="ignore"):
         return np.where(kd > 0.0, kd / np.sin(kd), 1.0)
 
@@ -573,6 +574,8 @@ class FieldIndicators(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the F2 curve ``plot`` call.
         :raises ValueError: If the result carries no per-band data.
+        :raises TypeError: if ``dynamic_capability`` holds a text or a value that is not
+            a real number.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_field_indicators
@@ -953,8 +956,10 @@ def temporal_variability_indicator(
         that mean, so a non-positive one leaves the indicator meaningless and
         the Table B.3 criterion vacuous; this library rejects it rather than
         return a negative F1.
+    :raises TypeError: if ``short_time_intensity`` holds a text or a value that is not a
+        real number.
     """
-    samples = np.atleast_1d(np.asarray(short_time_intensity, dtype=np.float64))
+    samples = np.atleast_1d(real_array(short_time_intensity, "short_time_intensity"))
     if samples.ndim not in (1, 2):
         msg = (
             "temporal_variability_indicator expects 1D (samples,) or 2D "
@@ -1115,9 +1120,11 @@ def field_indicators(
         one column per band of the surface input. Supplying it fills
         ``f1`` on the returned result.
     :return: :class:`FieldIndicators`.
+    :raises TypeError: if ``frequencies``, ``normal_intensity`` or ``pressure_levels``
+        holds a text or a value that is not a real number.
     """
-    lp = np.atleast_1d(np.asarray(pressure_levels, dtype=np.float64))
-    i_n = np.atleast_1d(np.asarray(normal_intensity, dtype=np.float64))
+    lp = np.atleast_1d(real_array(pressure_levels, "pressure_levels"))
+    i_n = np.atleast_1d(real_array(normal_intensity, "normal_intensity"))
     if lp.ndim not in (1, 2) or i_n.ndim not in (1, 2):
         msg = (
             "field_indicators expects 1D (positions,) or 2D (positions, bands) arrays."
@@ -1148,7 +1155,7 @@ def field_indicators(
     n_bands = lp.shape[1] if lp.ndim == 2 else 1  # noqa: PLR2004
     freqs: np.ndarray | None = None
     if frequencies is not None:
-        freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+        freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
         if freqs.size != n_bands:
             msg = (
                 f"'frequencies' must have one entry per band, got {freqs.size} "

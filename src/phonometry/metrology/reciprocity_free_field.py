@@ -80,6 +80,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.validation import (
+    real_array,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -753,9 +754,11 @@ class AcousticCenter(OwnsArrays):
         """Publish the columns read-only.
 
         :raises ValueError: for columns of different lengths.
+        :raises TypeError: if ``distances`` or ``inverse_readings`` holds a text or a
+            value that is not a real number.
         """
-        distances = np.asarray(self.distances, dtype=np.float64).reshape(-1)
-        inverse = np.asarray(self.inverse_readings, dtype=np.float64).reshape(-1)
+        distances = real_array(self.distances, "distances").reshape(-1)
+        inverse = real_array(self.inverse_readings, "inverse_readings").reshape(-1)
         if distances.size != inverse.size:
             msg = "AcousticCenter: one inverse pressure per distance."
             raise ValueError(msg)
@@ -824,10 +827,12 @@ def acoustic_center(
     :raises ValueError: for fewer than three distances, columns of different
         lengths, values that are not positive and finite, or distances that
         are all the same.
-    :raises TypeError: if ``attenuation_np_per_m`` is not a single number.
+    :raises TypeError: if ``attenuation_np_per_m`` is not a single number, or
+        ``distances`` or ``sound_pressures_pa`` holds a text or a value that is not a
+        real number.
     """
-    distances = np.asarray(distances, dtype=np.float64).reshape(-1)
-    pressures = np.abs(np.asarray(sound_pressures_pa, dtype=np.float64)).reshape(-1)
+    distances = real_array(distances, "distances").reshape(-1)
+    pressures = np.abs(real_array(sound_pressures_pa, "sound_pressures_pa")).reshape(-1)
     if distances.size < _FEWEST_DISTANCES or distances.size != pressures.size:
         msg = "One pressure per distance is needed, at three distances or more."
         raise ValueError(msg)
@@ -1186,6 +1191,8 @@ class FreeFieldInputUncertainties(OwnsArrays):
 
         :raises ValueError: for any, or acoustic-centre uncertainties of more
             than one dimension.
+        :raises TypeError: if ``u_acoustic_center_m`` holds a text or a value that is
+            not a real number.
         """
         for name in (
             "u_distance_m",
@@ -1197,7 +1204,7 @@ class FreeFieldInputUncertainties(OwnsArrays):
             object.__setattr__(
                 self, name, require_non_negative(getattr(self, name), name)
             )
-        centre = np.asarray(self.u_acoustic_center_m, dtype=np.float64)
+        centre = real_array(self.u_acoustic_center_m, "u_acoustic_center_m")
         if centre.ndim > 1 or not np.all(np.isfinite(centre)) or np.any(centre < 0.0):
             msg = (
                 "'u_acoustic_center_m' must be one finite, non-negative value or "

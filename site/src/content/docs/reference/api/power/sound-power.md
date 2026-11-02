@@ -119,7 +119,7 @@ bound (clause 8.2.3).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `background_levels` holds a text or a value that is not a real number, or `grade` is not a text. |
+| TypeError | if `background_levels` or `source_levels` holds a text or a value that is not a real number, or `grade` is not a text. |
 
 ## environmental_correction
 
@@ -215,7 +215,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `room_surface`, `surface_area` or `volume` is not a single number. |
+| TypeError | if `room_surface`, `surface_area` or `volume` is not a single number, or `mean_absorption_coefficient` or `reverberation_time` holds a text or a value that is not a real number, or `absorption_area` holds a text or a value that is not a real number. |
 
 ## mean_single_event_level
 
@@ -353,7 +353,7 @@ arrays it accepts directly.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `radius` is not a single number. |
+| TypeError | if `radius` is not a single number, or `positions` holds a text or a value that is not a real number. |
 
 ## reference_atmosphere_correction
 
@@ -555,7 +555,7 @@ The level holds for the meteorological conditions of the test; above
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a geometry that does not describe the surface, too few positions, a background without its `integration_time`, or a mismatched `frequencies` length. |
-| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text, or `surface` is not a text. |
+| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions`, `frequencies` or `levels_positions` holds a text or a value that is not a real number, or `grade` is not a text, or `surface` is not a text. |
 
 ## sound_power_pressure
 
@@ -616,7 +616,7 @@ sound power level is combined via ISO 3744 Annex E.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text, or `surface` is not a text. |
+| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `background_levels`, `dimensions`, `frequencies` or `levels_positions` holds a text or a value that is not a real number, or `grade` is not a text, or `surface` is not a text. |
 
 ## SoundEnergyResult
 

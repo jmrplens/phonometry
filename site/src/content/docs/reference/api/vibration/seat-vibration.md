@@ -147,7 +147,7 @@ here rather than quietly returned.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the values are not one-dimensional, if fewer than two are given, if any is not positive and finite, if the tolerance is not positive, or if any value lies outside the tolerance band around the mean. |
-| TypeError | if `relative_tolerance` is not a single number. |
+| TypeError | if `relative_tolerance` is not a single number, or `values` holds a text or a value that is not a real number. |
 
 ## resonance_transmissibility
 
@@ -248,6 +248,7 @@ this is stricter than the clause.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For anything [`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs) refuses, or if the two sets do not hold the same number of runs. |
+| TypeError | if `platform_runs` or `seat_runs` holds a text or a value that is not a real number. |
 
 ## SeatTransmissionResult
 

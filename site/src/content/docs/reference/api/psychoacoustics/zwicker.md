@@ -113,7 +113,7 @@ center frequencies 25 Hz to 12.5 kHz (base-ten bands, IEC 61260-1).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` is not a text, or `levels` holds a text or a value that is not a real number. |
 
 ## ZwickerLoudness
 

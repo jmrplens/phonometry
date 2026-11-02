@@ -95,7 +95,7 @@ prominence `P`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `dt`, fewer than two samples, or an `onset_rate_method` other than the two listed. |
-| TypeError | if `dt` is not a single number, or `onset_rate_method` is not a text. |
+| TypeError | if `dt` is not a single number, or `onset_rate_method` is not a text, or `levels` holds a text or a value that is not a real number. |
 
 ## impulse_adjustment
 
@@ -119,6 +119,12 @@ qualification (> 10 dB/s, clause 4.5) is enforced by
 | `prominence` | Predicted prominence `P`. |
 
 **Returns:** The adjustment `KI`, in dB, clamped at zero.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `prominence` holds a text or a value that is not a real number. |
 
 ## impulse_prominence
 
@@ -157,7 +163,7 @@ the adjustment is 0 dB when no event qualifies).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for empty input, mismatched lengths, a non-positive onset rate or level difference, or an assessment period that is not positive and finite. |
-| TypeError | if `assessment_period_minutes` is not a single number. |
+| TypeError | if `assessment_period_minutes` is not a single number, or `level_differences` or `onset_rates` holds a text or a value that is not a real number. |
 
 ## ImpulseOnset
 
@@ -529,6 +535,7 @@ dB/s and the level difference is the level rise over the onset in dB
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive onset rate or level difference. |
+| TypeError | if `level_difference` or `onset_rate` holds a text or a value that is not a real number. |
 
 ## rating_level
 
@@ -566,7 +573,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched lengths or a non-positive time. |
-| TypeError | if `reference_time` is not a single number. |
+| TypeError | if `reference_time` is not a single number, or `adjustment`, `durations` or `laeq` holds a text or a value that is not a real number. |
 
 ## sound_pressure_level_history
 

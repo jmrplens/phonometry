@@ -331,4 +331,4 @@ Table 2, is carried per band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels of the wrong shape or not finite, a band that is not a nominal centre, a diameter, velocity or temperature that is not a real number or is outside the scope of the standard, a velocity beyond 40 m/s asked for in a band above 10 kHz, a correction that is neither a scalar nor one value per band, or a non-positive static pressure. |
-| TypeError | if `shield` is not a text, `duct_diameter_m`, `flow_velocity`, `static_pressure_kpa` or `temperature_c` is not a single number, or `frequencies`, `microphone_correction` or `shield_correction` holds a text or a value that is not a real number. |
+| TypeError | if `shield` is not a text, `duct_diameter_m`, `flow_velocity`, `static_pressure_kpa` or `temperature_c` is not a single number, or `frequencies`, `levels`, `microphone_correction` or `shield_correction` holds a text or a value that is not a real number. |

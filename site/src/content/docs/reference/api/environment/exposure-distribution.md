@@ -112,6 +112,7 @@ range from 1 Hz to 10 kHz always meets the requirement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty or non-finite input, or shapes that do not broadcast. |
+| TypeError | if `band_levels` or `weighting_db` holds a text or a value that is not a real number. |
 
 ## long_term_sel
 
@@ -156,7 +157,7 @@ atmospheric-absorption class of probability 1.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the shapes differ, a probability is negative, the probabilities do not sum to one, every probability is zero, or a value is not finite. |
-| TypeError | if `rating_adjustment` is not a single number. |
+| TypeError | if `rating_adjustment` is not a single number, or `levels` or `probabilities` holds a text or a value that is not a real number. |
 
 ## replica_probabilities
 
@@ -192,6 +193,7 @@ excess-attenuation class.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty, multi-dimensional, non-finite or negative input. |
+| TypeError | if `absorption_probabilities` or `excess_attenuation_probabilities` holds a text or a value that is not a real number. |
 
 ## sel_distribution
 
@@ -238,7 +240,7 @@ width, in which case the run is combined (see the module documentation).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the shapes differ, a value is not finite, a probability is negative, the probabilities do not sum to one, every probability is zero, fewer than two distinct levels remain once equal levels are combined, `sigma_db` is not positive, or `n_subclasses` is not a whole number of at least one. |
-| TypeError | if `sigma_db` is not a single number, or `n_subclasses` is a flag, a text or an array where a count goes. |
+| TypeError | if `sigma_db` is not a single number, or `n_subclasses` is a flag, a text or an array where a count goes, or `levels` or `probabilities` holds a text or a value that is not a real number. |
 
 ## SELDistribution
 
@@ -316,6 +318,12 @@ neighbour, it is zero.
 
 **Returns:** $\rho(x)$; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
+
 ### SELDistribution.density()
 
 ```python
@@ -339,6 +347,12 @@ The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
 | `levels` | Level or levels `x`, in dB. |
 
 **Returns:** $\rho^{*}(x)$; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ### SELDistribution.exceedance()
 
@@ -371,6 +385,12 @@ falls.
 | `levels` | Level or levels `x`, in dB. |
 
 **Returns:** The probability; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ### SELDistribution.exceedance_level()
 
@@ -408,6 +428,7 @@ the lowest of the usual set; `exceedance_level(1)` the highest.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a percentage outside that range. |
+| TypeError | if `percent` holds a text or a value that is not a real number. |
 
 ### SELDistribution.plot()
 

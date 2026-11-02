@@ -35,15 +35,15 @@ exponents with a factor 2 for totally reflecting plenum sidewalls and states
 that totally absorbing ones give the same expression "without the factor 2",
 so the factor is the same $\epsilon$ that the compact form carries.
 
-.. warning::
-
-   Vigran prints the **unprimed** $m_\mathrm{R}$ in that denominator. That is a
-   misprint (see `docs/ERRATA.md`): the receiving-side integral
-   $\int_0^{L_\mathrm{R}} \exp(-\epsilon m'_\mathrm{R} x) \, dx = (1 - \exp(-\epsilon m'_\mathrm{R} L_\mathrm{R}))/(\epsilon m'_\mathrm{R})$ carries $m'_\mathrm{R}$,
-   exactly as the source-side one carries $m_\mathrm{S}$, and the printed
-   reading leaves $\tau_\mathrm{cl}$ unbounded as $m_\mathrm{R} \to 0$, where the
-   derived reading stays bounded by the leakage term. This module implements
-   the derived $m'_\mathrm{R}$.
+:::caution
+Vigran prints the **unprimed** $m_\mathrm{R}$ in that denominator. That is a
+misprint (see `docs/ERRATA.md`): the receiving-side integral
+$\int_0^{L_\mathrm{R}} \exp(-\epsilon m'_\mathrm{R} x) \, dx = (1 - \exp(-\epsilon m'_\mathrm{R} L_\mathrm{R}))/(\epsilon m'_\mathrm{R})$ carries $m'_\mathrm{R}$,
+exactly as the source-side one carries $m_\mathrm{S}$, and the printed
+reading leaves $\tau_\mathrm{cl}$ unbounded as $m_\mathrm{R} \to 0$, where the
+derived reading stays bounded by the leakage term. This module implements
+the derived $m'_\mathrm{R}$.
+:::
 
 For a plenum with little attenuation on both sides ($m_\mathrm{S} L_\mathrm{S} \ll 1$
 **and** $m'_\mathrm{R} L_\mathrm{R} \ll 1$, which needs a fairly insulating ceiling as

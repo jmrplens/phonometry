@@ -156,7 +156,7 @@ import itertools
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 import numpy as np
 
@@ -164,6 +164,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import (
     is_class_designation,
+    real_array,
     require_choice,
     require_count,
     require_real,
@@ -932,7 +933,7 @@ def _row(
         where none is allowed.
     """
     try:
-        array = np.asarray(values, dtype=np.float64)
+        array = real_array(cast("ArrayLike", values), name)
     except TypeError:
         msg = f"'{name}' must be a sequence of numbers."
         raise TypeError(msg) from None

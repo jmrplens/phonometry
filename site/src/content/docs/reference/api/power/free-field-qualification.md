@@ -223,7 +223,7 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown room, a non-positive frequency or frequencies that are not one value or a 1-D array. |
-| TypeError | if `room` is not a text. |
+| TypeError | if `room` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## FreeFieldCheck
 
@@ -507,7 +507,7 @@ span the frequency range, each with its own mathematical origin, and
 | Exception | When |
 | :--- | :--- |
 | ValueError | if both `origin_m` and `source_box_m` are given, a traverse's level columns do not match the frequencies, a traverse has no level at a frequency, or a point coincides with the origin. |
-| TypeError | if `room` is not a text. |
+| TypeError | if `room` is not a text, or `frequencies`, `origin_m` or `source_box_m` holds a text or a value that is not a real number. |
 
 ## inverse_square_law_tolerance
 
@@ -539,7 +539,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown room, a non-positive frequency or frequencies that are not one value or a 1-D array. |
-| TypeError | if `room` is not a text. |
+| TypeError | if `room` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## InverseSquareLawResult
 
@@ -705,6 +705,7 @@ A traverse laid out along a straight line from `start_m`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a direction that is zero or not finite. |
+| TypeError | if `background_levels`, `direction`, `distances`, `levels`, `monitor_levels` or `start_m` holds a text or a value that is not a real number. |
 
 ## qualification_frequencies
 
@@ -846,4 +847,4 @@ the room being qualified.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for the wrong number of positions, levels that are not finite, or bands that do not match. |
-| TypeError | if `room` is not a text. |
+| TypeError | if `room` is not a text, or `frequencies` or `levels` holds a text or a value that is not a real number. |

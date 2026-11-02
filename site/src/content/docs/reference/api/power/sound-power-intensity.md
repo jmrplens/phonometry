@@ -154,6 +154,12 @@ returned.
 
 **Returns:** [`PrecisionFieldIndicators`](/phonometry/reference/api/power/sound-power-intensity/#precisionfieldindicators).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `segment_intensity`, `segment_pressure_levels` or `time_window_intensity` holds a text or a value that is not a real number. |
+
 ## precision_qualification
 
 ```python
@@ -191,7 +197,7 @@ Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `frequencies`, `scan_intensity_level_1` or `scan_intensity_level_2` holds a text or a value that is not a real number. |
+| TypeError | if `field_nonuniformity_1`, `field_nonuniformity_2`, `frequencies`, `pressure_residual_index`, `repeatability_limit`, `scan_intensity_level_1` or `scan_intensity_level_2` holds a text or a value that is not a real number. |
 
 ## PrecisionCriteria
 
@@ -449,6 +455,7 @@ fields; the fiche prints them verbatim in its footer.
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or a supplied `indicators`, `criteria` or `residual_index` does not span the result's bands. |
 | ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| TypeError | if `residual_index` holds a text or a value that is not a real number. |
 
 ### PrecisionIntensityResult.sound_power
 
@@ -535,7 +542,7 @@ screening.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number, or `grade` is not a text. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `areas`, `frequencies`, `normal_intensity`, `normal_intensity_2`, `pressure_levels`, `pressure_residual_index` or `repeatability_limit` holds a text or a value that is not a real number, or `grade` is not a text. |
 
 ## sound_power_intensity_precision
 
@@ -581,7 +588,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `static_pressure_pa` or `temperature_c` is not a single number. |
+| TypeError | if `static_pressure_pa` or `temperature_c` is not a single number, or `areas`, `frequencies` or `partial_intensity` holds a text or a value that is not a real number. |
 
 ## SoundPowerIntensityResult
 

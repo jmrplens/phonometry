@@ -473,4 +473,4 @@ is written around and the one an external multilayer chain expects.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive thickness. |
-| TypeError | if `thickness_m` is not a single number. |
+| TypeError | if `thickness_m` is not a single number, or `transverse_wavenumber` holds a text or a value that is not a number. |

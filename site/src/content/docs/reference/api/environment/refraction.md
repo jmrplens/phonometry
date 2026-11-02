@@ -175,7 +175,7 @@ path; a ground reflection is instantaneous and leaves it continuous.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `max_range` or `source_height_m` is not a single number, or `n_steps` is a flag, a text or an array where a count goes. |
+| TypeError | if `max_range` or `source_height_m` is not a single number, or `n_steps` is a flag, a text or an array where a count goes, or `launch_angles_deg` holds a text or a value that is not a real number. |
 
 ## AtmosphericPEResult
 
@@ -312,6 +312,12 @@ EffectiveSoundSpeedProfile.speed_at(
 ```
 
 Piecewise-linear effective sound speed at one or more heights.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `height_m` holds a text or a value that is not a real number. |
 
 ## linear_sound_speed_profile
 

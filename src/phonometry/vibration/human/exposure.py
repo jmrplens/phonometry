@@ -70,6 +70,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_counts,
     require_equal_shapes,
@@ -389,7 +390,8 @@ def _evaluate_at(
     if not np.any(positive):
         return out
     s = np.asarray(
-        1j * 2.0 * math.pi * freq[positive].astype(np.float64), dtype=np.complex128
+        1j * 2.0 * math.pi * real_array(freq[positive], "freq", copy=True),
+        dtype=np.complex128,
     )
     out[positive] = np.asarray(stages(p, s), dtype=np.complex128)
     return out
@@ -495,7 +497,7 @@ def _response_result(
     name: WeightingName, frequencies: ArrayLike, *, band_limiting: bool
 ) -> WeightingResponse:
     """Evaluate one of the two responses of ``name`` and package it."""
-    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freq.ndim != 1 or freq.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -529,7 +531,8 @@ def frequency_weighting(
     :param frequencies: Frequencies at which to evaluate, in hertz (> 0).
     :return: A :class:`WeightingResponse` with ``.plot()``.
     :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
-    :raises TypeError: if ``name`` is not a text.
+    :raises TypeError: if ``name`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return _response_result(name, frequencies, band_limiting=False)
@@ -566,7 +569,8 @@ def band_limiting_response(
     :return: A :class:`WeightingResponse` with ``band_limiting`` true and
         ``.plot()``.
     :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
-    :raises TypeError: if ``name`` is not a text.
+    :raises TypeError: if ``name`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return _response_result(name, frequencies, band_limiting=True)
@@ -1041,15 +1045,17 @@ def vibration_total_value(
         (ISO 2631-1 7.2.3); ``None`` uses unity for every axis.
     :return: The vibration total value, in m/s2.
     :raises ValueError: if ``components`` is empty or ``k`` differs in length.
+    :raises TypeError: if ``components`` or ``k`` holds a text or a value that is not a
+        real number.
     """
-    comp = np.atleast_1d(np.asarray(components, dtype=np.float64))
+    comp = np.atleast_1d(real_array(components, "components"))
     if comp.ndim != 1 or comp.size == 0:
         msg = "'components' must be a non-empty 1-D array."
         raise ValueError(msg)
     if k is None:
         factors = np.ones_like(comp)
     else:
-        factors = np.atleast_1d(np.asarray(k, dtype=np.float64))
+        factors = np.atleast_1d(real_array(k, "k"))
         require_equal_shapes(
             "vibration_total_value",
             {"components": comp.shape, "k": factors.shape},
@@ -1128,8 +1134,10 @@ def combined_daily_exposure(partials: ArrayLike) -> float:
     :param partials: Partial exposures :math:`A_i(8)`, in m/s2.
     :return: The combined daily exposure ``A(8)``, in m/s2.
     :raises ValueError: if ``partials`` is empty.
+    :raises TypeError: if ``partials`` holds a text or a value that is not a real
+        number.
     """
-    parts = np.atleast_1d(np.asarray(partials, dtype=np.float64))
+    parts = np.atleast_1d(real_array(partials, "partials"))
     if parts.ndim != 1 or parts.size == 0:
         msg = "'partials' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -1149,9 +1157,11 @@ def hav_daily_exposure(
     :param durations_s: Duration :math:`T_i` per operation, in seconds.
     :return: The daily exposure ``A(8)``, in m/s2.
     :raises ValueError: if the inputs differ in length, are empty or negative.
+    :raises TypeError: if ``durations_s`` or ``total_values`` holds a text or a value
+        that is not a real number.
     """
-    ahv = np.atleast_1d(np.asarray(total_values, dtype=np.float64))
-    t = np.atleast_1d(np.asarray(durations_s, dtype=np.float64))
+    ahv = np.atleast_1d(real_array(total_values, "total_values"))
+    t = np.atleast_1d(real_array(durations_s, "durations_s"))
     if ahv.ndim != 1 or ahv.size == 0:
         msg = "'total_values' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -1179,9 +1189,11 @@ def energy_equivalent_acceleration(
     :return: The energy-equivalent magnitude :math:`a_\mathrm{w,e}`, in m/s2.
     :raises ValueError: if the inputs differ in length, are empty, or the total
         duration is zero.
+    :raises TypeError: if ``durations_s`` or ``magnitudes`` holds a text or a value that
+        is not a real number.
     """
-    a = np.atleast_1d(np.asarray(magnitudes, dtype=np.float64))
-    t = np.atleast_1d(np.asarray(durations_s, dtype=np.float64))
+    a = np.atleast_1d(real_array(magnitudes, "magnitudes"))
+    t = np.atleast_1d(real_array(durations_s, "durations_s"))
     if a.ndim != 1 or a.size == 0:
         msg = "'magnitudes' must be a non-empty 1-D array."
         raise ValueError(msg)

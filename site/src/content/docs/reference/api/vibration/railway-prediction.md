@@ -316,7 +316,7 @@ measured with a point excitation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance, a negative exponent or damping, a damping ratio without a wave speed, or an exponent that does not broadcast to the bands. |
-| TypeError | if `damping_ratio`, `distance_m` or `reference_distance_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `damping_ratio`, `distance_m` or `reference_distance_m` is not a single number, or `exponent` or `frequencies` holds a text or a value that is not a real number. |
 
 ## KB_ASSESSMENT_BANDS_HZ
 

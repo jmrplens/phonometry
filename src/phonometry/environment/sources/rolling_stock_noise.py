@@ -102,6 +102,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array, float_keyed
 from ..._internal.validation import (
+    real_array,
     require_1d_signal,
     require_choice,
     require_finite,
@@ -530,13 +531,13 @@ class PassByMeasurement(OwnsArrays):
     pass_by_time_s: float | None = None
 
     def __post_init__(self) -> None:
-        """Hold the history read-only."""
-        object.__setattr__(
-            self, "times", read_only(np.asarray(self.times, dtype=np.float64))
-        )
-        object.__setattr__(
-            self, "levels", read_only(np.asarray(self.levels, dtype=np.float64))
-        )
+        """Hold the history read-only.
+
+        :raises TypeError: if ``levels`` or ``times`` holds a text or a value that is
+            not a real number.
+        """
+        object.__setattr__(self, "times", read_only(real_array(self.times, "times")))
+        object.__setattr__(self, "levels", read_only(real_array(self.levels, "levels")))
 
     @property
     def measurement_time_s(self) -> float:
@@ -790,10 +791,10 @@ class StationaryTestResult(OwnsArrays):
         :raises ValueError: For fewer than three sets, a length per position
             missing, levels that are not finite or lengths that are not
             positive.
-        :raises TypeError: if ``lengths_m`` holds a text or a value that is not a real
-            number.
+        :raises TypeError: if ``lengths_m`` or ``levels`` holds a text or a value that
+            is not a real number.
         """
-        levels = np.atleast_2d(np.asarray(self.levels, dtype=np.float64))
+        levels = np.atleast_2d(real_array(self.levels, "levels"))
         lengths = require_positive_array(self.lengths_m, "lengths_m")
         # The number is a count of array axes, not a quantity.
         if levels.ndim != 2 or levels.shape[1] != lengths.size:  # noqa: PLR2004
@@ -865,10 +866,12 @@ def stationary_test(levels: ArrayLike, lengths_m: ArrayLike) -> StationaryTestRe
     :param lengths_m: The length each position stands for, in metres.
     :return: The test.
     :raises ValueError: See :class:`StationaryTestResult`.
+    :raises TypeError: if ``lengths_m`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     return StationaryTestResult(
-        levels=np.asarray(levels, dtype=np.float64),
-        lengths_m=np.asarray(lengths_m, dtype=np.float64),
+        levels=real_array(levels, "levels"),
+        lengths_m=real_array(lengths_m, "lengths_m"),
     )
 
 
@@ -1040,13 +1043,13 @@ class RiseSpeedResult(OwnsArrays):
     rise_speeds_db_per_s: tuple[float, ...]
 
     def __post_init__(self) -> None:
-        """Hold the history read-only and the slopes and speeds as tuples."""
-        object.__setattr__(
-            self, "times", read_only(np.asarray(self.times, dtype=np.float64))
-        )
-        object.__setattr__(
-            self, "levels", read_only(np.asarray(self.levels, dtype=np.float64))
-        )
+        """Hold the history read-only and the slopes and speeds as tuples.
+
+        :raises TypeError: if ``levels`` or ``times`` holds a text or a value that is
+            not a real number.
+        """
+        object.__setattr__(self, "times", read_only(real_array(self.times, "times")))
+        object.__setattr__(self, "levels", read_only(real_array(self.levels, "levels")))
         object.__setattr__(
             self,
             "slopes",

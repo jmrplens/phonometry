@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.validation import real_array
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -140,7 +141,8 @@ def plot_fdtd_domain(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the domain ``imshow`` of the obstacle layer.
     :return: The axes.
-    :raises TypeError: for ``extent`` or ``origin``, which the grid sets.
+    :raises TypeError: for ``extent`` or ``origin``, which the grid sets, or
+        ``probe_positions`` holds a text or a value that is not a real number.
     """
     _check_language(language)
     # Refused for every domain, with obstacles or without, so a call that
@@ -156,7 +158,7 @@ def plot_fdtd_domain(
 
     pts: NDArray[np.float64] | None = None
     if probe_positions is not None:
-        pts = np.asarray(probe_positions, dtype=np.float64)
+        pts = real_array(probe_positions, "probe_positions")
         # The number is a count of array axes, not a quantity.
         if pts.ndim != 2 or pts.shape[1] != 2:  # noqa: PLR2004
             msg = "'probe_positions' must have shape (N, 2)."

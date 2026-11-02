@@ -47,7 +47,11 @@ import numpy as np
 from scipy import signal
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_non_negative, require_positive
+from .._internal.validation import (
+    real_array,
+    require_non_negative,
+    require_positive,
+)
 from .compliance import _G, _band_relative_attenuation, _reference_attenuation_db
 from .core import _decimate_and_filter
 
@@ -145,10 +149,12 @@ class TimeInvarianceResult(OwnsArrays):
 
         :raises ValueError: if the level arrays are not one row per sweep rate
             and one column per band, or hold a non-finite value.
+        :raises TypeError: if ``expected_levels``, ``frequencies`` or ``output_levels``
+            holds a text or a value that is not a real number.
         """
-        freqs = np.asarray(self.frequencies, dtype=np.float64)
-        out = np.asarray(self.output_levels, dtype=np.float64)
-        expected = np.asarray(self.expected_levels, dtype=np.float64)
+        freqs = real_array(self.frequencies, "frequencies")
+        out = real_array(self.output_levels, "output_levels")
+        expected = real_array(self.expected_levels, "expected_levels")
         shape = (len(self.seconds_per_decade), freqs.size)
         for name, arr in (("output_levels", out), ("expected_levels", expected)):
             if arr.shape != shape:

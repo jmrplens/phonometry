@@ -48,7 +48,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.validation import require_count, require_positive, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_count,
+    require_positive,
+    require_scalar,
+)
 from ...io._resolve import SignalInput, resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
@@ -220,7 +225,8 @@ def psychoacoustic_annoyance_from_signal(
     :param calibration_factor: Digital-units-to-Pa factor applied to
         ``x``. An explicit value wins over the one a Signal carries.
     :return: A :class:`PsychoacousticAnnoyanceResult`.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` is not a text, or ``x`` holds a text or a value that
+        is not a real number.
     """
     from ..loudness.zwicker import loudness_zwicker
     from ._fluctuation_strength import fluctuation_strength as _fluctuation_strength
@@ -234,7 +240,7 @@ def psychoacoustic_annoyance_from_signal(
     factor = require_positive(
         resolve_calibration(x, calibration_factor), "calibration_factor"
     )
-    signal = np.asarray(x, dtype=np.float64) * float(factor)
+    signal = real_array(x, "x") * float(factor)
     loud = loudness_zwicker(
         signal, require_count(rate, "fs", at_least=None), field=field, stationary=False
     )

@@ -150,7 +150,7 @@ from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.levels_math import energy_mean
 from ..._internal.types import BAND_SET_NAMES
 from ..._internal.validation import (
-    _as_float64,
+    real_array,
     require_band_fraction,
     require_choice,
     require_count,
@@ -828,7 +828,7 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
 def _nominal_bands(frequencies: ArrayLike, fraction: int) -> np.ndarray:
     """Match each given centre to the nominal band of 4.2 it stands for."""
     table = np.asarray(_THIRD_OCTAVE_BANDS if fraction == _THIRD else _OCTAVE_BANDS)
-    freqs = np.atleast_1d(_as_float64(frequencies, "frequencies"))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0 or not np.all(np.isfinite(freqs)):
         msg = (
             "'frequencies' must be a non-empty one-dimensional list of finite centres."
@@ -878,7 +878,7 @@ def _weighted_sum(
 
 def _as_levels(value: ArrayLike, name: str) -> np.ndarray:
     """A finite float array of levels, or a ``ValueError`` naming the input."""
-    arr = _as_float64(value, name)
+    arr = real_array(value, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = f"'{name}' must hold finite levels in dB."
         raise ValueError(msg)
@@ -910,7 +910,7 @@ def _positive_number(value: ArrayLike, name: str) -> float:
     element = arr.item() if arr.ndim == 0 else None
     if arr.ndim != 0 or element is None or isinstance(element, _NOT_A_NUMBER_TYPES):
         raise TypeError(msg)
-    return require_positive(_as_float64(value, name).item(), name)
+    return require_positive(real_array(value, name).item(), name)
 
 
 def _numbers(value: ArrayLike, name: str) -> np.ndarray:
@@ -934,12 +934,12 @@ def _numbers(value: ArrayLike, name: str) -> np.ndarray:
     ):
         msg = f"'{name}' must be numbers, not text or flags."
         raise TypeError(msg)
-    return _as_float64(value, name)
+    return real_array(value, name)
 
 
 def _room(room_dimensions_m: ArrayLike) -> np.ndarray:
     """The length, width and height of a rectangular room, or a ``ValueError``."""
-    dims = _as_float64(room_dimensions_m, "room_dimensions_m")
+    dims = real_array(room_dimensions_m, "room_dimensions_m")
     if dims.shape != (3,) or not np.all(np.isfinite(dims)) or np.any(dims <= 0.0):
         msg = "'room_dimensions_m' must be the positive length, width and height of the room."
         raise ValueError(msg)
@@ -1089,6 +1089,8 @@ def service_equipment_background_correction(
     :param frequencies: Band centres in Hz, kept for the plot only.
     :return: :class:`ServiceEquipmentBackgroundResult`.
     :raises ValueError: If a level is not finite or the shapes differ.
+    :raises TypeError: if ``background_levels``, ``frequencies`` or ``levels`` holds a
+        text or a value that is not a real number.
     """
     measured = np.atleast_1d(_as_levels(levels, "levels"))
     background = np.atleast_1d(_as_levels(background_levels, "background_levels"))
@@ -1097,7 +1099,7 @@ def service_equipment_background_correction(
         raise ValueError(msg)
     freqs = None
     if frequencies is not None:
-        freqs = _as_float64(frequencies, "frequencies")
+        freqs = real_array(frequencies, "frequencies")
         if freqs.shape != measured.shape or not np.all(np.isfinite(freqs)):
             msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
@@ -1396,7 +1398,10 @@ def service_equipment_level(
         is not one positive number, or ``volume`` is given without a
         reverberation time.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``a_weighting_range`` or ``quantity`` is not a text.
+        ``a_weighting_range`` or ``quantity`` is not a text, or ``background_levels``,
+        ``frequencies``, ``levels``, ``reference_reverberation_time_s``,
+        ``reverberation_time`` or ``volume`` holds a text or a value that is not a real
+        number.
     """
     require_choice(quantity, "quantity", _QUANTITIES)
     fraction = require_band_fraction(fraction, "fraction")
@@ -1499,7 +1504,7 @@ def _standardize(
             msg = "'volume' normalizes through Formula (6), which also needs 'reverberation_time'."
             raise ValueError(msg)
         return None, None
-    t = np.atleast_1d(_as_float64(reverberation_time, "reverberation_time"))
+    t = np.atleast_1d(real_array(reverberation_time, "reverberation_time"))
     if t.shape != corrected.shape:
         msg = "'reverberation_time' must give one value per band."
         raise ValueError(msg)
@@ -1549,6 +1554,8 @@ class PositionSpreadCheck(OwnsArrays):
 
         :raises ValueError: if the levels are not 3, 6 or 9 finite readings
             in one row.
+        :raises TypeError: if ``levels`` holds a text or a value that is not a real
+            number.
         """
         levels = np.atleast_1d(_as_levels(self.levels, "levels"))
         if levels.ndim != 1 or levels.size not in (3, 6, 9):
@@ -1688,6 +1695,7 @@ def check_position_spread(levels: ArrayLike) -> PositionSpreadCheck:
         appended, in dB.
     :return: :class:`PositionSpreadCheck`.
     :raises ValueError: If there are not 3, 6 or 9 finite levels.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     levels = np.atleast_1d(_as_levels(levels, "levels"))
     if levels.ndim != 1 or levels.size not in (3, 6, 9):
@@ -1721,8 +1729,9 @@ def loudest_corner(
         from 0 in the order of ``c_weighted_levels``.
     :return: The index of the loudest corner left, counted from 0; the first of
         a tie.
-    :raises TypeError: If ``excluded`` is not a sequence, or holds a bool, a
-        text or anything else that is not a number.
+    :raises TypeError: If ``excluded`` is not a sequence, or holds a bool, a text or
+        anything else that is not a number, or ``c_weighted_levels`` holds a text or a
+        value that is not a real number.
     :raises ValueError: If a level is not finite, an index is not a whole
         number or is out of range, or every corner is excluded.
     """
@@ -1987,7 +1996,7 @@ def _points(value: ArrayLike, name: str) -> np.ndarray:
     array, so ``[]`` for the sources means none and ``[]`` for the room
     positions meets the refusal of a missing position by name.
     """
-    arr = _as_float64(value, name)
+    arr = real_array(value, name)
     if arr.ndim == 1 and arr.size == 0:
         arr = arr.reshape(0, _COORDINATES)
     elif arr.ndim == 1:
@@ -2049,8 +2058,10 @@ def check_service_equipment_positions(
         to the nearest obstacle, or one distance per obstacle near it, in m,
         measured on site; ``None`` (default) leaves the 0,2 m of 7.2 unjudged.
     :return: :class:`ServiceEquipmentPositionCheck`.
-    :raises TypeError: If ``small_room`` is not ``True`` or ``False``, or a
-        coordinate or distance is text or not a number.
+    :raises TypeError: If ``small_room`` is not ``True`` or ``False``, or a coordinate
+        or distance is text or not a number, or ``corner_obstacle_distance_m``,
+        ``corner_position_m``, ``room_dimensions_m``, ``room_positions_m`` or
+        ``source_positions_m`` holds a text or a value that is not a real number.
     :raises ValueError: If a dimension is not positive, a coordinate is not
         finite, no room position is given, a position lies outside the room,
         or an obstacle distance is not a finite distance of 0 m or more.
@@ -2146,7 +2157,8 @@ def additional_microphone_position(
     :return: The position ``(x, y, z)``, in m.
     :raises ValueError: If a dimension is not positive, the source lies
         outside the room, or the position would.
-    :raises TypeError: if ``mounting`` is not a text.
+    :raises TypeError: if ``mounting`` is not a text, or ``room_dimensions_m`` or
+        ``source_position_m`` holds a text or a value that is not a real number.
     """
     require_choice(mounting, "mounting", _MOUNTINGS)
     dims = _room(room_dimensions_m)
@@ -2311,6 +2323,8 @@ def verify_calibration_deviation(
     :return: :class:`CalibrationDeviationResult`.
     :raises ValueError: If a reading is not a finite level, or there is
         nothing to compare: one reading and no earlier calibration.
+    :raises TypeError: if ``calibration_levels`` or ``previous_levels`` holds a text or
+        a value that is not a real number.
     """
     levels = _readings(calibration_levels, "calibration_levels")
     previous = (
@@ -2448,8 +2462,9 @@ def check_background_duration(
     :param tolerance_s: The departure from 30 s, either way, accepted as
         "approximately", in s. Required: the draft prints none.
     :return: :class:`BackgroundDurationCheck`.
-    :raises TypeError: If a duration or the tolerance is a text or a flag,
-        or the tolerance is an array.
+    :raises TypeError: If a duration or the tolerance is a text or a flag, or the
+        tolerance is an array, or ``durations_s`` or ``tolerance_s`` holds a text or a
+        value that is not a real number.
     :raises ValueError: If a duration is not a positive, finite number, or
         the tolerance is not a finite number of 0 s or more.
     """
@@ -2616,6 +2631,9 @@ def check_varying_background(
     :return: :class:`VaryingBackgroundCheck`.
     :raises ValueError: If a level is not finite, the shapes differ, or the
         observation time is not one positive number.
+    :raises TypeError: if ``background_max_level``, ``equipment_levels``,
+        ``frequencies`` or ``observation_time_s`` holds a text or a value that is not a
+        real number.
     """
     background = _readings(background_max_level, "background_max_level")
     equipment = _readings(equipment_levels, "equipment_levels")
@@ -2625,7 +2643,7 @@ def check_varying_background(
     observation = _positive_number(observation_time_s, "observation_time_s")
     freqs = None
     if frequencies is not None:
-        freqs = np.atleast_1d(_as_float64(frequencies, "frequencies"))
+        freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
         if freqs.shape != background.shape or not np.all(np.isfinite(freqs)):
             msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
@@ -2758,6 +2776,8 @@ def check_measurement_disturbance(
         the same period, one per period, in dB.
     :return: :class:`MeasurementDisturbanceCheck`.
     :raises ValueError: If a level is not finite or the two counts differ.
+    :raises TypeError: if ``equivalent_levels`` or ``max_levels`` holds a text or a
+        value that is not a real number.
     """
     maxima = _readings(max_levels, "max_levels")
     equivalents = _readings(equivalent_levels, "equivalent_levels")

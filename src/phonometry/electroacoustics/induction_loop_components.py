@@ -155,8 +155,8 @@ from scipy import optimize
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
-    _as_float64,
     holds_complex,
+    real_array,
     refuse_text,
     require_choice,
     require_count,
@@ -507,16 +507,17 @@ def rectangular_loop_field(
     :raises ValueError: for a non-positive dimension, a non-finite coordinate
         or a point on the conductor, where a filament's field is infinite.
     :raises TypeError: if ``current_a``, ``length_m`` or ``width_m`` is not a single
-        number, or ``n_turns`` is a flag, a text or an array where a count goes.
+        number, or ``n_turns`` is a flag, a text or an array where a count goes, or
+        ``x_m``, ``y_m`` or ``z_m`` holds a text or a value that is not a real number.
     """
     current = require_finite(current_a, "current_a")
     length = require_positive(length_m, "length_m")
     width = require_positive(width_m, "width_m")
     n = require_count(n_turns, "n_turns")
     coordinates = (
-        _as_float64(x_m, "x_m"),
-        _as_float64(y_m, "y_m"),
-        _as_float64(z_m, "z_m"),
+        real_array(x_m, "x_m"),
+        real_array(y_m, "y_m"),
+        real_array(z_m, "z_m"),
     )
     try:
         xs, ys, zs = np.broadcast_arrays(*coordinates)
@@ -843,7 +844,7 @@ def rectangular_loop_inductance(
 
 def _frequencies_to_read(frequency_hz: ArrayLike) -> np.ndarray:
     """Frequencies of any shape to read a tabulated quantity at: positive, finite."""
-    f = _as_float64(frequency_hz, "frequency_hz")
+    f = real_array(frequency_hz, "frequency_hz")
     if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
         msg = "'frequency_hz' must be positive and finite."
         raise ValueError(msg)
@@ -884,6 +885,8 @@ class LoopImpedance(OwnsArrays):
 
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
         :return: :math:`|Z|` there, in ohms.
+        :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a
+            real number.
         """
         f = _frequencies_to_read(frequency_hz)
         return np.hypot(self.resistance_ohm, 2.0 * math.pi * f * self.inductance_h)
@@ -1221,6 +1224,8 @@ class AmplifierFrequencyResponse(OwnsArrays):
         :return: The response there, dB re 1 kHz.
         :raises ValueError: for a frequency that is not finite and positive,
             or lies outside the measured range.
+        :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a
+            real number.
         """
         f = _frequencies_to_read(frequency_hz)
         lo, hi = float(self.frequencies[0]), float(self.frequencies[-1])

@@ -126,7 +126,7 @@ area cancels and only the tie density `n` enters.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or an unknown tie name. |
-| TypeError | if `mass1`, `mass2`, `tie` or `ties_per_area` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | if `mass1`, `mass2`, `tie` or `ties_per_area` is not a single number, or `frequency` holds a text or a value that is not a real number, or `bending_stiffness1` or `bending_stiffness2` is not a single number. |
 
 ## WALL_TIE_STIFFNESS
 

@@ -69,6 +69,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_positive,
     require_ranks,
@@ -252,9 +253,10 @@ def radiation_efficiency(
     :raises ValueError: for a non-positive input or unknown boundary/baffle.
     :raises TypeError: if ``baffle`` or ``boundary`` is not a text, or
         ``critical_frequency``, ``length_x``, ``length_y`` or ``speed_of_sound`` is not
-        a single number.
+        a single number, or ``frequency`` holds a text or a value that is not a real
+        number.
     """
-    freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequency, "frequency"))
     if freq.ndim != 1 or freq.size == 0:
         msg = "'frequency' must be a non-empty 1-D array."
         raise ValueError(msg)

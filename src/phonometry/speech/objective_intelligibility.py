@@ -46,6 +46,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_count,
     require_equal_shapes,
     require_ranks,
@@ -282,8 +283,8 @@ def _validate_pair(
     degraded: Signal | ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate and return the clean/degraded 1-D float arrays."""
-    x = np.asarray(clean, dtype=np.float64)
-    y = np.asarray(degraded, dtype=np.float64)
+    x = real_array(clean, "clean")
+    y = real_array(degraded, "degraded")
     if x.ndim != 1 or y.ndim != 1:
         msg = "'clean' and 'degraded' must be 1-D signals."
         raise ValueError(msg)
@@ -304,9 +305,9 @@ def _segments(bands: NDArray[np.float64]) -> NDArray[np.float64]:
     frames ``m-_N_SEGMENT .. m``.
     """
     n_frames = bands.shape[1]
+    # The band matrix the function computed, float already: the windows keep it.
     return np.array(
-        [bands[:, m - _N_SEGMENT : m] for m in range(_N_SEGMENT, n_frames + 1)],
-        dtype=np.float64,
+        [bands[:, m - _N_SEGMENT : m] for m in range(_N_SEGMENT, n_frames + 1)]
     )
 
 
@@ -358,7 +359,8 @@ def stoi(
     :raises ValueError: if the signals are not equal-length finite 1-D arrays,
         ``fs`` is not positive, or fewer than 30 short-time frames survive the
         silent-frame removal (too little speech to score).
-    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes, or
+        ``clean`` or ``degraded`` holds a text or a value that is not a real number.
     """
     rate = resolve_pair_fs(clean, degraded, fs, names=("clean", "degraded"))
     x, y = _validate_pair(clean, degraded)

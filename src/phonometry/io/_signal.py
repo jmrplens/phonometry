@@ -34,6 +34,7 @@ from .._internal.display import RichDisplay
 from .._internal.validation import (
     indices_of,
     is_integer,
+    real_array,
     require_equal_counts,
     require_scalar,
 )
@@ -106,9 +107,9 @@ class Signal(RichDisplay):
     container, codec, bit depth and lossy flag of the origin. The labels are
     held as a tuple, whatever sequence of texts they were given as.
 
-    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single
-        number, or ``channel_labels`` is one text rather than a sequence of
-        them.
+    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number, or
+        ``channel_labels`` is one text rather than a sequence of them, or ``data`` holds
+        a text or a value that is not a real number.
     """
 
     data: NDArray[np.float64]
@@ -135,7 +136,7 @@ class Signal(RichDisplay):
     def __post_init__(self) -> None:
         require_scalar(self.calibration_factor, "calibration_factor")
         require_scalar(self.fs, "fs")
-        data = np.atleast_2d(np.asarray(self.data, dtype=np.float64))
+        data = np.atleast_2d(real_array(self.data, "data"))
         # The number is a count of array axes, not a quantity.
         if data.ndim != 2:  # noqa: PLR2004
             msg = f"data must be 1-D or (channels, samples); got {data.ndim}-D"

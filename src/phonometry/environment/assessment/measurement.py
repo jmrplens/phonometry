@@ -55,7 +55,11 @@ import numpy as np
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
-from ..._internal.validation import require_equal_counts, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_equal_counts,
+    require_scalar,
+)
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -328,8 +332,8 @@ def _survey_spectrum(
     owner: str, levels: ArrayLike, frequencies: ArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The levels and band centres the survey method can read, as float arrays."""
-    lev = np.asarray(levels, dtype=np.float64)
-    freq = np.asarray(frequencies, dtype=np.float64)
+    lev = real_array(levels, "levels")
+    freq = real_array(frequencies, "frequencies")
     if lev.ndim != 1 or freq.ndim != 1:
         msg = "'levels' and 'frequencies' must be one-dimensional."
         raise ValueError(msg)
@@ -375,6 +379,8 @@ class TonalSurveyAssessment(OwnsArrays):
 
         :raises ValueError: If the inputs are not one-dimensional, differ in
             length, hold fewer than three bands or a value that is not finite.
+        :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that
+            is not a real number.
         """
         lev, freq = _survey_spectrum(type(self).__name__, self.levels, self.frequencies)
         object.__setattr__(self, "levels", read_only(lev))
@@ -459,6 +465,8 @@ def assess_tonal_survey(
         a prominent tone are its ``prominent`` and ``tone_frequencies``.
     :raises ValueError: If the inputs are empty, non-finite, or differ in
         length.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     lev, freq = _survey_spectrum("assess_tonal_survey", levels, frequencies)
     return TonalSurveyAssessment(lev, freq)
@@ -742,10 +750,11 @@ def uncertainty_from_repeated_measurements(
     :param levels: The repeated measured levels ``Li``, in dB (at least two).
     :return: A :class:`RepeatedMeasurementResult`.
     :raises ValueError: If fewer than two finite levels are given.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     import warnings
 
-    lev = np.asarray(levels, dtype=np.float64)
+    lev = real_array(levels, "levels")
     if lev.ndim != 1 or lev.size < _MIN_REPEATED_LEVELS:
         msg = "'levels' must be a 1-D array of at least two values."
         raise ValueError(msg)

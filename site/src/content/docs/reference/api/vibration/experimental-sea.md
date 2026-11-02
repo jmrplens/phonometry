@@ -325,7 +325,7 @@ independent check on the measurement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad shape, a non-positive value, or a singular energy matrix in some band. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `energies`, `frequencies` or `input_powers` holds a text or a value that is not a real number. |
 
 ## PowerInjectionResult
 

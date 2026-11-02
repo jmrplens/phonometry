@@ -450,6 +450,7 @@ and never filled from its neighbours.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite and positive, for one that matches none of the bands, naming the nearest, and for a band this row does not print, naming the row, the band and what the page had in that cell. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### BandedRow.why_missing()
 
@@ -1588,7 +1589,7 @@ held as a tuple, whatever sequence of texts they were given as.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them. |
+| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them, or `data` holds a text or a value that is not a real number. |
 
 ### Signal.crop()
 
@@ -1899,7 +1900,7 @@ out of calibrated results).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown suffix or subtype, a missing or conflicting `fs` or one that is not a whole number (given or the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own), a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
-| TypeError | if `fs` is a flag, a text or an array where a count goes, or `bext`, `dither` or `subtype` is not a text. |
+| TypeError | if `x` is a text, holds one (a `bytearray` at any depth included) or holds a complex value, `fs` is a flag, a text or an array where a count goes, or `bext`, `dither` or `subtype` is not a text. |
 
 ## write_catalogue
 

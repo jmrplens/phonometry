@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ..._internal.validation import real_array
+
 if TYPE_CHECKING:
     from ..._internal.types import Real
 
@@ -49,8 +51,10 @@ def standing_wave_ratio_from_level(level_difference: ArrayLike) -> Real:
     :param level_difference: Level difference
         :math:`\Delta L = L_{\max} - L_{\min}`, in dB.
     :return: Standing-wave ratio ``s`` (>= 1).
+    :raises TypeError: if ``level_difference`` holds a text or a value that is not a
+        real number.
     """
-    dl = np.asarray(level_difference, dtype=np.float64)
+    dl = real_array(level_difference, "level_difference")
     if np.any(dl < 0.0):
         msg = "'level_difference' must be non-negative."
         raise ValueError(msg)
@@ -70,8 +74,9 @@ def standing_wave_reflection_magnitude(swr: ArrayLike) -> Real:
 
     :param swr: Standing-wave ratio ``s`` (>= 1).
     :return: Reflection magnitude ``|r|`` in ``[0, 1]``.
+    :raises TypeError: if ``swr`` holds a text or a value that is not a real number.
     """
-    s = np.asarray(swr, dtype=np.float64)
+    s = real_array(swr, "swr")
     _check_swr(s)
     return np.asarray((s - 1.0) / (s + 1.0), dtype=np.float64)
 
@@ -85,8 +90,9 @@ def standing_wave_absorption(swr: ArrayLike) -> Real:
 
     :param swr: Standing-wave ratio ``s`` (>= 1).
     :return: Absorption coefficient ``alpha`` in ``[0, 1]``.
+    :raises TypeError: if ``swr`` holds a text or a value that is not a real number.
     """
-    s = np.asarray(swr, dtype=np.float64)
+    s = real_array(swr, "swr")
     _check_swr(s)
     return np.asarray(4.0 * s / (s + 1.0) ** 2, dtype=np.float64)
 
@@ -120,11 +126,13 @@ def standing_wave_reflection(
         the first pressure minimum (toward the source), in metres.
     :param wavelength: Wavelength ``lambda0``, in metres (Eq. (27)).
     :return: Complex reflection factor ``r``.
+    :raises TypeError: if ``first_min_distance`` or ``wavelength`` holds a text or a
+        value that is not a real number.
     """
     magnitude = standing_wave_reflection_magnitude(swr)
     phase = _standing_wave_phase(
-        np.asarray(first_min_distance, dtype=np.float64),
-        np.asarray(wavelength, dtype=np.float64),
+        real_array(first_min_distance, "first_min_distance"),
+        real_array(wavelength, "wavelength"),
     )
     return np.asarray(magnitude * np.exp(1j * phase), dtype=np.complex128)
 

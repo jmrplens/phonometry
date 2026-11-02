@@ -40,6 +40,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_above_absolute_zero_array,
     require_equal_shapes,
     require_ranks,
@@ -166,7 +167,7 @@ def _positive_scalar(value: float, name: str) -> float:
 
 def _positive_array(value: ArrayLike, name: str) -> Real:
     """Return ``value`` as a positive float array or raise ``ValueError``."""
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' values must be finite."
         raise ValueError(msg)
@@ -178,7 +179,7 @@ def _positive_array(value: ArrayLike, name: str) -> Real:
 
 def _nonneg_array(value: ArrayLike, name: str) -> Real:
     """Return ``value`` as a non-negative float array or raise ``ValueError``."""
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' values must be finite."
         raise ValueError(msg)
@@ -215,6 +216,8 @@ def _sabine_absorption(
     area: float,
     situation_a: tuple[ArrayLike, ArrayLike, ArrayLike],
     situation_b: tuple[ArrayLike, ArrayLike, ArrayLike],
+    *,
+    labels: tuple[str, str],
 ) -> Real:
     r"""Sabine-form absorption difference between two measurement situations.
 
@@ -229,16 +232,20 @@ def _sabine_absorption(
     Each situation is the tuple ``(c, T, m)`` of speed of sound (m/s),
     reverberation time (s) and energy attenuation coefficient (1/m). ``V`` and
     ``S`` are the room volume and sample area; the difference is taken as
-    "situation b minus situation a" to match the printed equations.
+    "situation b minus situation a" to match the printed equations. *labels*
+    are the numbers the caller gives the two situations (``("1", "2")`` for
+    ``c1``, ``t1``, ``m1`` and ``c2``, ``t2``, ``m2``), so a refusal names the
+    parameter that was passed.
     """
+    a, b = labels
     vol = _positive_scalar(volume, "volume")
     surf = _positive_scalar(area, "area")
-    c_a = _positive_array(situation_a[0], "c")
-    t_a = _positive_array(situation_a[1], "T")
-    m_a = _nonneg_array(situation_a[2], "m")
-    c_b = _positive_array(situation_b[0], "c")
-    t_b = _positive_array(situation_b[1], "T")
-    m_b = _nonneg_array(situation_b[2], "m")
+    c_a = _positive_array(situation_a[0], f"c{a}")
+    t_a = _positive_array(situation_a[1], f"t{a}")
+    m_a = _nonneg_array(situation_a[2], f"m{a}")
+    c_b = _positive_array(situation_b[0], f"c{b}")
+    t_b = _positive_array(situation_b[1], f"t{b}")
+    m_b = _nonneg_array(situation_b[2], f"m{b}")
     ratio = vol / surf
     absorption = _SABINE_CONSTANT * ratio * (
         1.0 / (c_b * t_b) - 1.0 / (c_a * t_a)
@@ -281,9 +288,13 @@ def random_incidence_absorption(
     :param m2: Energy attenuation coefficient during ``t2``, in 1/m; defaults to 0.
     :return: Random-incidence absorption coefficient ``alpha_s`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c1``,
+        ``t1``, ``m1``, ``c2``, ``t2`` or ``m2`` holds a text or a value that is not a
+        real number.
     """
-    return _sabine_absorption(volume, area, (c1, t1, m1), (c2, t2, m2))
+    return _sabine_absorption(
+        volume, area, (c1, t1, m1), (c2, t2, m2), labels=("1", "2")
+    )
 
 
 def specular_absorption_coefficient(
@@ -319,9 +330,13 @@ def specular_absorption_coefficient(
     :param m4: Energy attenuation coefficient during ``t4``, in 1/m; defaults to 0.
     :return: Specular absorption coefficient ``alpha_spec`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c3``,
+        ``t3``, ``m3``, ``c4``, ``t4`` or ``m4`` holds a text or a value that is not a
+        real number.
     """
-    return _sabine_absorption(volume, area, (c3, t3, m3), (c4, t4, m4))
+    return _sabine_absorption(
+        volume, area, (c3, t3, m3), (c4, t4, m4), labels=("3", "4")
+    )
 
 
 def scattering_coefficient(
@@ -348,9 +363,11 @@ def scattering_coefficient(
         per Clause 8.3; values above 1 are never clipped.
     :return: Scattering coefficient ``s`` (per band).
     :raises ValueError: if any ``alpha_s`` equals 1 (undefined ratio).
+    :raises TypeError: if ``alpha_s`` or ``alpha_spec`` holds a text or a value that is
+        not a real number.
     """
-    spec = np.asarray(alpha_spec, dtype=np.float64)
-    diff = np.asarray(alpha_s, dtype=np.float64)
+    spec = real_array(alpha_spec, "alpha_spec")
+    diff = real_array(alpha_s, "alpha_s")
     denom = 1.0 - diff
     if np.any(np.isclose(denom, 0.0)):
         msg = "'alpha_s' must not equal 1 (division by zero)."
@@ -504,10 +521,12 @@ def scattering_coefficient_spectrum(
     :return: A :class:`ScatteringResult` with ``.plot()``.
     :raises ValueError: if the three inputs differ in shape, the band centres
         are empty or not 1-D, or any ``alpha_s`` equals 1.
+    :raises TypeError: if ``frequencies``, ``random_absorption`` or
+        ``specular_absorption`` holds a text or a value that is not a real number.
     """
-    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    spec = np.atleast_1d(np.asarray(specular_absorption, dtype=np.float64))
-    rand = np.atleast_1d(np.asarray(random_absorption, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequencies, "frequencies"))
+    spec = np.atleast_1d(real_array(specular_absorption, "specular_absorption"))
+    rand = np.atleast_1d(real_array(random_absorption, "random_absorption"))
     if freq.ndim != 1 or freq.size == 0:
         msg = (
             "'frequencies' must be a non-empty 1-D sequence of band centres; "
@@ -567,9 +586,13 @@ def base_plate_scattering(
     :param m3: Energy attenuation coefficient during ``t3``, in 1/m; defaults to 0.
     :return: Base-plate scattering coefficient ``s_base`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c1``,
+        ``t1``, ``m1``, ``c3``, ``t3`` or ``m3`` holds a text or a value that is not a
+        real number.
     """
-    return _sabine_absorption(volume, area, (c1, t1, m1), (c3, t3, m3))
+    return _sabine_absorption(
+        volume, area, (c1, t1, m1), (c3, t3, m3), labels=("1", "3")
+    )
 
 
 @dataclass(frozen=True)
@@ -597,10 +620,12 @@ class BasePlateScatteringCheck(OwnsArrays):
         :raises ValueError: For an array that is not one-dimensional, a
             scattering coefficient that is not finite, a length other than one
             value per band, or bands other than :data:`BASE_PLATE_BANDS_HZ`.
+        :raises TypeError: if ``frequencies`` or ``scattering`` holds a text or a value
+            that is not a real number.
         """
         owner = type(self).__name__
-        bands = np.asarray(self.frequencies, dtype=np.float64)
-        values = np.asarray(self.scattering, dtype=np.float64)
+        bands = real_array(self.frequencies, "frequencies")
+        values = real_array(self.scattering, "scattering")
         if bands.ndim != 1 or values.ndim != 1:
             msg = f"{owner}: 'frequencies' and 'scattering' must be one-dimensional."
             raise ValueError(msg)
@@ -702,6 +727,8 @@ def check_base_plate_scattering(
         over the limit are its :attr:`~BasePlateScatteringCheck.exceeded_frequencies`.
     :raises ValueError: for a mapping missing a band, a sequence of the wrong
         length, or a coefficient that is not finite (NaN or infinite).
+    :raises TypeError: if ``scattering`` holds a text or a value that is not a real
+        number.
     """
     if isinstance(scattering, Mapping):
         values: dict[int, float] = {}
@@ -718,7 +745,7 @@ def check_base_plate_scattering(
                 raise ValueError(msg)
         measured = np.array([values[band] for band in BASE_PLATE_BANDS_HZ])
     else:
-        measured = np.asarray(scattering, dtype=np.float64)
+        measured = real_array(scattering, "scattering")
         if measured.ndim != 1 or measured.size != len(BASE_PLATE_BANDS_HZ):
             msg = (
                 f"scattering must have {len(BASE_PLATE_BANDS_HZ)} values for "
@@ -759,6 +786,7 @@ def reverberation_time_uncertainty(times: ArrayLike) -> Real:
         seconds.
     :return: Standard uncertainty ``u`` of the mean reverberation time (0-d).
     :raises ValueError: if fewer than two measurements are supplied.
+    :raises TypeError: if ``times`` holds a text or a value that is not a real number.
     """
     arr = _positive_array(times, "times")
     if arr.ndim != 1:
@@ -803,7 +831,9 @@ def absorption_coefficient_uncertainty(
     :param u_b: Standard uncertainty of ``t_b`` (Eq. (A.1)), in seconds.
     :return: Combined standard uncertainty of the absorption coefficient (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or
+        ``speed_of_sound``, ``t_a``, ``t_b``, ``u_a`` or ``u_b`` holds a text or a value
+        that is not a real number.
     """
     vol = _positive_scalar(volume, "volume")
     surf = _positive_scalar(area, "area")
@@ -856,9 +886,11 @@ def scattering_coefficient_uncertainty(
     :return: A :class:`ScatteringUncertainty` with ``u_s`` and
         :math:`U = 2 u_s`.
     :raises ValueError: if any ``alpha_s`` equals 1 or any ``alpha_spec`` equals 1.
+    :raises TypeError: if ``alpha_s``, ``alpha_spec``, ``u_alpha_s`` or ``u_alpha_spec``
+        holds a text or a value that is not a real number.
     """
-    spec = np.asarray(alpha_spec, dtype=np.float64)
-    diff = np.asarray(alpha_s, dtype=np.float64)
+    spec = real_array(alpha_spec, "alpha_spec")
+    diff = real_array(alpha_s, "alpha_s")
     u_spec = _nonneg_array(u_alpha_spec, "u_alpha_spec")
     u_diff = _nonneg_array(u_alpha_s, "u_alpha_s")
     spec_term = spec - 1.0

@@ -116,4 +116,4 @@ integrator attack).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibrator_class` is not a text. |
+| TypeError | if `calibrator_class` is not a text, or `frequency`, `reference_pressure_pa` or `target_spl` is not a single number. |

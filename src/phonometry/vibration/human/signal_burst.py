@@ -89,7 +89,12 @@ import numpy as np
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, given_repr
-from ..._internal.validation import require_choice, require_positive, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_choice,
+    require_positive,
+    require_scalar,
+)
 from .exposure import (
     WeightingName,
     _params,
@@ -617,7 +622,7 @@ def _band_limiting_response(
     positive = frequencies > 0.0
     if not np.any(positive):
         return out
-    s = 1j * 2.0 * math.pi * frequencies[positive].astype(np.float64)
+    s = 1j * 2.0 * math.pi * real_array(frequencies[positive], "frequencies", copy=True)
     w1 = 2.0 * math.pi * params.f1
     w2 = 2.0 * math.pi * params.f2
     high_pass = 1.0 / (1.0 + w1 / (params.q1 * s) + (w1 / s) ** 2)

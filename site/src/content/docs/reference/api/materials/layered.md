@@ -376,4 +376,4 @@ Sect. D.5).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `angle_limit_rad` is not a single number. |
+| TypeError | if `angle_limit_rad` is not a single number, or `normalized_impedance` holds a text or a value that is not a number. |

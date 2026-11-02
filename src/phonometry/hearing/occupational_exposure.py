@@ -59,6 +59,7 @@ from .._internal.validation import (
     check_engine,
     floats_of,
     pair_of_floats,
+    real_array,
     require_choice,
     require_count,
     require_finite_array,
@@ -281,7 +282,7 @@ def _sampling_std(levels: ArrayLike) -> float:
 
     Used for the job/full-day sampling uncertainty ``u1`` (denominator ``N-1``).
     """
-    arr = np.asarray(levels, dtype=float)
+    arr = real_array(levels, "levels")
     if arr.size < _MIN_SAMPLES_FOR_SPREAD:
         return 0.0
     return float(np.std(arr, ddof=1))
@@ -294,7 +295,7 @@ def _task_sampling_uncertainty(levels: Sequence[float]) -> float:
     standard error of the mean (sample standard deviation / sqrt(I)), which is
     smaller than the Eq C.12 sample standard deviation used for the job method.
     """
-    arr = np.asarray(levels, dtype=float)
+    arr = real_array(levels, "levels")
     if arr.size < _MIN_SAMPLES_FOR_SPREAD:
         return 0.0
     return float(np.std(arr, ddof=1) / sqrt(arr.size))
@@ -389,7 +390,7 @@ class Task(RichDisplay):
 
 def _floats(values: ArrayLike) -> tuple[float, ...]:
     """A sequence of numbers as a tuple of floats, flattened."""
-    return tuple(float(value) for value in np.ravel(np.asarray(values, dtype=float)))
+    return tuple(float(value) for value in np.ravel(real_array(values, "values")))
 
 
 @dataclass(frozen=True)
@@ -881,7 +882,7 @@ def _sampled_exposure(
     """Shared engine for job-based and full-day strategies (Eq 11-13, Eq C.9)."""
     require_scalar(effective_duration_hours, "effective_duration_hours")
     require_scalar(u3, "u3")
-    arr = np.asarray(samples, dtype=float)
+    arr = real_array(samples, "samples")
     n = int(arr.size)
     if n < _MIN_SAMPLES_FOR_SPREAD:
         msg = "At least two samples are required."
@@ -964,8 +965,9 @@ def job_based_exposure(
         an ``n_workers`` that is not a whole number from 1, or an
         ``instrument`` Table C.5 does not list.
     :raises TypeError: if ``effective_duration_hours``, ``sample_duration_hours`` or
-        ``u3`` is not a single number, ``n_workers`` is a flag, a text or an
-        array where a count goes, or ``instrument`` is not a text.
+        ``u3`` is not a single number, ``n_workers`` is a flag, a text or an array where
+        a count goes, or ``instrument`` is not a text, or ``samples`` holds a text or a
+        value that is not a real number.
     """
     if n_workers is not None:
         n_workers = require_count(n_workers, "n_workers")
@@ -1021,10 +1023,11 @@ def full_day_exposure(
         Table C.4 advisory.
     :return: An :class:`ExposureResult`.
     :raises ValueError: for an ``instrument`` Table C.5 does not list.
-    :raises TypeError: if ``effective_duration_hours`` or ``u3`` is not a single
-        number, or ``instrument`` is not a text.
+    :raises TypeError: if ``effective_duration_hours`` or ``u3`` is not a single number,
+        or ``instrument`` is not a text, or ``samples`` holds a text or a value that is
+        not a real number.
     """
-    arr = np.asarray(samples, dtype=float)
+    arr = real_array(samples, "samples")
     spread = (
         arr.size == _MIN_FULL_DAY_SAMPLES
         and float(settled(arr.max() - arr.min())) >= _SPREAD_ADVISORY_THRESHOLD

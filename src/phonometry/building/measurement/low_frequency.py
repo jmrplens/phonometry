@@ -100,7 +100,11 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
-from ..._internal.validation import require_choice, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_choice,
+    require_scalar,
+)
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -265,7 +269,7 @@ def _named_low_frequency_bands(frequencies: ArrayLike) -> list[float]:
     :return: The named bands among 50 Hz, 63 Hz and 80 Hz, or an empty list
         for a vector naming none of them or naming one more than once.
     """
-    centres = np.asarray(frequencies, dtype=np.float64)
+    centres = real_array(frequencies, "frequencies")
     if centres.ndim != 1:
         return []
     counts = [
@@ -395,8 +399,10 @@ def corner_level(corner_levels: ArrayLike) -> np.ndarray:
     :return: :math:`L_\mathrm{Corner}`, one value per band, in dB.
     :raises ValueError: If the array is not two- or three-dimensional, is
         empty, or holds a non-finite value.
+    :raises TypeError: if ``corner_levels`` holds a text or a value that is not a real
+        number.
     """
-    data = np.asarray(corner_levels, dtype=np.float64)
+    data = real_array(corner_levels, "corner_levels")
     if data.ndim == _SINGLE_POSITION_RANK:
         data = data[np.newaxis, ...]
     elif data.ndim != _SINGLE_POSITION_RANK + 1:
@@ -448,9 +454,11 @@ def low_frequency_level(level: ArrayLike, corner: ArrayLike) -> np.ndarray:
     :return: :math:`L_\mathrm{LF}`, in dB, one value per band.
     :raises ValueError: If the two shapes differ, either is empty, or either
         holds a non-finite value.
+    :raises TypeError: if ``corner`` or ``level`` holds a text or a value that is not a
+        real number.
     """
-    default = np.asarray(level, dtype=np.float64)
-    highest = np.asarray(corner, dtype=np.float64)
+    default = real_array(level, "level")
+    highest = real_array(corner, "corner")
     if default.shape != highest.shape:
         msg = (
             "'level' and 'corner' must cover the same bands; got shapes "
@@ -524,10 +532,11 @@ class LowFrequencyProcedure(OwnsArrays):
             reads, if it does not carry exactly the three low-frequency bands,
             or if ``reverberation_63_octave`` is given and is not positive and
             finite.
-        :raises TypeError: if ``volume`` is not a single number.
+        :raises TypeError: if ``volume`` is not a single number, or ``corner_levels``
+            holds a text or a value that is not a real number.
         """
         _require_volume_triggers(self.volume, "volume")
-        corners = np.asarray(self.corner_levels, dtype=np.float64)
+        corners = real_array(self.corner_levels, "corner_levels")
         if corners.ndim not in (_SINGLE_POSITION_RANK, _SINGLE_POSITION_RANK + 1):
             msg = (
                 "'corner_levels' must be 2-D (corners x bands) for one source "
@@ -701,7 +710,7 @@ def _substituted_reverberation(
             "replaces three of them and leaves the rest as they are."
         )
         raise ValueError(msg)
-    times = np.asarray(reverberation_time, dtype=np.float64)
+    times = real_array(reverberation_time, "reverberation_time")
     if times.shape != levels.shape:
         msg = (
             f"The {room}-room reverberation times cover {times.shape} and "
@@ -754,11 +763,12 @@ def apply_low_frequency_procedure(
         disagree, if the 50 Hz, 63 Hz or 80 Hz band is absent from
         ``frequencies``, if a receiving room is missing either half of
         Clause 10.4, or if a source room brings either half of it.
-    :raises TypeError: if ``room`` is not a text.
+    :raises TypeError: if ``room`` is not a text, or ``frequencies``, ``levels`` or
+        ``reverberation_time`` holds a text or a value that is not a real number.
     """
     require_choice(room, "room", _ROOMS)
-    levels = np.asarray(levels, dtype=np.float64)
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    levels = real_array(levels, "levels")
+    freqs = real_array(frequencies, "frequencies")
     if levels.ndim != 1 or freqs.ndim != 1:
         msg = (
             "'levels' and 'frequencies' must each be one-dimensional (one "

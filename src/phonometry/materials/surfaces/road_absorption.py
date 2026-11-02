@@ -71,6 +71,8 @@ from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    complex_array,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_present,
@@ -396,10 +398,10 @@ def _transfer_functions(
     bin count (which is ambiguous for odd lengths).
     """
     hi_t = apply_calibration(
-        incident_ir, np.atleast_1d(np.asarray(incident_ir, dtype=np.float64))
+        incident_ir, np.atleast_1d(real_array(incident_ir, "incident_ir"))
     )
     hr_t = apply_calibration(
-        reflected_ir, np.atleast_1d(np.asarray(reflected_ir, dtype=np.float64))
+        reflected_ir, np.atleast_1d(real_array(reflected_ir, "reflected_ir"))
     )
     if hi_t.size == 0 or hr_t.size == 0:
         msg = "Impulse responses must be non-empty."
@@ -465,7 +467,8 @@ def in_situ_reflection_factor(
     :return: Complex reflection factor ``r(f)`` at the ``rfft`` frequency bins.
     :raises ValueError: On empty inputs, invalid geometry, or ``delay`` given
         without ``fs``.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``incident_ir`` or
+        ``reflected_ir`` holds a text or a value that is not a real number.
     """
     require_scalar(fs, "fs")
     kr = geometric_spreading_factor_angle(
@@ -502,8 +505,9 @@ def in_situ_absorption_from_reflection(reflection: ArrayLike) -> Real:
 
     :param reflection: Complex reflection factor ``r``.
     :return: Absorption coefficient ``alpha`` (real).
+    :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
-    r = np.asarray(reflection, dtype=np.complex128)
+    r = complex_array(reflection, "reflection")
     return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
 
 
@@ -538,6 +542,8 @@ def power_reflection_coefficient(
     :param incidence_angle_rad: Incidence angle ``theta``, in radians.
     :param n: FFT length; defaults to the longer input.
     :return: Sound-power reflection factor ``QW(f)`` (real).
+    :raises TypeError: if ``incident_ir`` or ``reflected_ir`` holds a text or a value
+        that is not a real number.
     """
     kr = geometric_spreading_factor_angle(
         incidence_angle_rad,
@@ -621,9 +627,11 @@ def absorption_reference_corrected(
     :param reference_reflection: Measured reference pressure reflection factor
         ``Qp,ref,meas`` (complex, same geometry and chain).
     :return: Reference-corrected road absorption coefficient ``alpha_road(f)``.
+    :raises TypeError: if ``reference_reflection`` or ``road_reflection`` holds a text
+        or a value that is not a number.
     """
-    q_road = np.asarray(road_reflection, dtype=np.complex128)
-    q_ref = np.asarray(reference_reflection, dtype=np.complex128)
+    q_road = complex_array(road_reflection, "road_reflection")
+    q_ref = complex_array(reference_reflection, "reference_reflection")
     return np.asarray(1.0 - np.abs(q_road / q_ref) ** 2, dtype=np.float64)
 
 
@@ -694,9 +702,13 @@ def one_third_octave_absorption(
         yields ``nan``.
     :raises ValueError: If ``frequencies`` and ``absorption`` differ in shape or
         are empty.
+    :raises TypeError: if ``absorption`` or ``frequencies`` holds a text or a value that
+        is not a real number, or ``f_max`` or ``f_min`` is not a single number.
     """
-    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    alpha = np.atleast_1d(np.asarray(absorption, dtype=np.float64))
+    require_scalar(f_max, "f_max")
+    require_scalar(f_min, "f_min")
+    freq = np.atleast_1d(real_array(frequencies, "frequencies"))
+    alpha = np.atleast_1d(real_array(absorption, "absorption"))
     require_equal_shapes(
         "one_third_octave_absorption",
         {"frequencies": freq.shape, "absorption": alpha.shape},
@@ -822,7 +834,8 @@ def in_situ_absorption_spectrum(
     :return: An :class:`InSituAbsorptionResult` with ``.plot()``.
     :raises ValueError: On empty inputs, invalid geometry, or a
         non-positive ``fs``.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``incident_ir`` or
+        ``reflected_ir`` holds a text or a value that is not a real number.
     """
     require_scalar(fs, "fs")
     fs = resolve_pair_fs(
@@ -831,10 +844,10 @@ def in_situ_absorption_spectrum(
     if fs <= 0.0:
         raise ValueError(_FS_POSITIVE)
     hi_t = apply_calibration(
-        incident_ir, np.atleast_1d(np.asarray(incident_ir, dtype=np.float64))
+        incident_ir, np.atleast_1d(real_array(incident_ir, "incident_ir"))
     )
     hr_t = apply_calibration(
-        reflected_ir, np.atleast_1d(np.asarray(reflected_ir, dtype=np.float64))
+        reflected_ir, np.atleast_1d(real_array(reflected_ir, "reflected_ir"))
     )
     # Fix the FFT length explicitly so ``rfftfreq`` matches the transform used
     # inside ``in_situ_absorption_coefficient`` for both even and odd inputs.
@@ -1051,8 +1064,10 @@ def check_spot_frequency_range(frequency: ArrayLike) -> None:
 
     :param frequency: Frequency or frequencies to check, in hertz.
     :raises ValueError: If any frequency is negative.
+    :raises TypeError: if ``frequency`` holds a text or a value that is not a real
+        number.
     """
-    freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequency, "frequency"))
     if np.any(freq < 0.0):
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
@@ -1095,9 +1110,11 @@ def spot_internal_loss_correction(
     :param clip_negative: Set negative corrected values to zero (default ``True``).
     :return: Corrected absorption coefficient ``alpha(f)``.
     :raises ValueError: If the two inputs differ in shape.
+    :raises TypeError: if ``measured_absorption`` or ``system_absorption`` holds a text
+        or a value that is not a real number.
     """
-    alpha_m = np.atleast_1d(np.asarray(measured_absorption, dtype=np.float64))
-    alpha_s = np.atleast_1d(np.asarray(system_absorption, dtype=np.float64))
+    alpha_m = np.atleast_1d(real_array(measured_absorption, "measured_absorption"))
+    alpha_s = np.atleast_1d(real_array(system_absorption, "system_absorption"))
     require_equal_shapes(
         "spot_internal_loss_correction",
         {

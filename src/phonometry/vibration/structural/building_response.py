@@ -56,7 +56,11 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
-from ..._internal.validation import require_choice, require_positive
+from ..._internal.validation import (
+    real_array,
+    require_choice,
+    require_positive,
+)
 from .building_damage import story_fundamental_frequency
 
 if TYPE_CHECKING:
@@ -291,8 +295,10 @@ def height_fundamental_frequency(height_m: ArrayLike) -> float | NDArray[np.floa
     :return: The predicted fundamental frequency, in hertz; a ``float`` for a number; an
         array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a height is not positive and finite.
+    :raises TypeError: if ``height_m`` holds a text or a value that is not a real
+        number.
     """
-    h = np.asarray(height_m, dtype=np.float64)
+    h = real_array(height_m, "height_m")
     if np.any(h <= 0.0) or not np.all(np.isfinite(h)):
         msg = "'height_m' must be positive and finite."
         raise ValueError(msg)

@@ -372,7 +372,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite, or if `residual_index` is not finite. |
-| TypeError | if `spacing_m` or `speed_of_sound` is not a single number. |
+| TypeError | if `spacing_m` or `speed_of_sound` is not a single number, or `frequency` or `residual_index` holds a text or a value that is not a real number. |
 
 ## residual_index_from_phase_mismatch
 
@@ -420,7 +420,7 @@ table requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `phase_mismatch_deg` is not positive and finite, or if `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite. |
-| TypeError | if `spacing_m` or `speed_of_sound` is not a single number. |
+| TypeError | if `spacing_m` or `speed_of_sound` is not a single number, or `frequency` or `phase_mismatch_deg` holds a text or a value that is not a real number. |
 
 ## residual_index_limits
 
@@ -456,7 +456,7 @@ for a spacing in metres).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `device` is unknown, `spacing_m` is not positive or a frequency is not a tabulated band. |
-| TypeError | if `spacing_m` is not a single number, or `device` is not a text. |
+| TypeError | if `spacing_m` is not a single number, or `device` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ResidualIndexLimits
 
@@ -534,4 +534,4 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a frequency is not a tabulated band, a band is repeated, or `device`/`spacing_m` are invalid. |
-| TypeError | if `device` is not a text. |
+| TypeError | if `device` is not a text, or `frequencies` or `residual_index` holds a text or a value that is not a real number, or `spacing_m` is not a single number. |

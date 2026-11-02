@@ -98,6 +98,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
     holds_complex,
+    real_array,
     refuse_text_beside_choice,
     require_choice,
     require_count,
@@ -770,7 +771,7 @@ def _runtime_frequency_response(
     :param frequencies: Frequencies in Hz, below the input Nyquist frequency.
     :return: Complex voltage response at each frequency (not normalized).
     """
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     if wf.weighting == "Z" or wf.sos.size == 0:
         return np.ones_like(f, dtype=np.complex128)
     _, h = signal.sosfreqz(wf.sos, worN=f, fs=wf.fs)

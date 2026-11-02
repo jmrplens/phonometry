@@ -51,7 +51,12 @@ from .._internal.frozen import (
     frozen_rows,
     reduce_with_plain_rows,
 )
-from .._internal.validation import require_choice, require_count, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_choice,
+    require_count,
+    require_scalar,
+)
 from .weighting import WeightingFilter, _runtime_frequency_response
 
 if TYPE_CHECKING:
@@ -417,7 +422,7 @@ def _analytic_weighting_db(curve: str, frequencies: np.ndarray) -> np.ndarray:
     built from the IEC 61012:1990 Table 2 poles (which reproduces every
     Table 1 nominal value within 0.05 dB).
     """
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     if curve == "Z":
         return np.zeros_like(f)
 
@@ -626,7 +631,7 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
     """
     if wf.weighting == "Z" or wf.sos.size == 0:
         return np.zeros_like(frequencies)
-    worn = np.concatenate([frequencies, [1000.0]])
+    worn = np.concatenate([real_array(frequencies, "frequencies"), [1000.0]])
     h = _runtime_frequency_response(wf, worn)
     gain_db = 20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
     return np.asarray(gain_db[:-1] - gain_db[-1], dtype=np.float64)  # relative to 1 kHz

@@ -59,6 +59,12 @@ Feeding such a database here combines it with the library's NIPTS.
 
 **Returns:** The combined threshold `H'`, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `htla` or `nipts_value` holds a text or a value that is not a real number. |
+
 ## htlan
 
 ```python
@@ -100,7 +106,7 @@ components.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an age below 18, an unknown sex, a non-positive duration, a fractile outside (0, 1), or an unknown frequency. |
-| TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text. |
+| TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 The noise component inherits the validated-domain checks of [`nipts`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#nipts),
 so exposure conditions outside the standard's stated ranges raise a
@@ -240,7 +246,7 @@ zero.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive duration, a fractile outside (0, 1), or an unknown frequency. |
-| TypeError | if `exposure_duration_years`, `fractile` or `l_ex` is not a single number. |
+| TypeError | if `exposure_duration_years`, `fractile` or `l_ex` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 Outside the standard's validated domain (durations of 1 to 40 years,
 fractiles of 0.05 to 0.95, exposure levels up to 100 dB) the computation still

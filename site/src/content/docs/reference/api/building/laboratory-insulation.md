@@ -108,6 +108,7 @@ directly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes differ or contain non-finite values. |
+| TypeError | if `background` or `signal_and_background` holds a text or a value that is not a real number. |
 
 ## laboratory_airborne_insulation
 
@@ -156,7 +157,7 @@ assumed already corrected for background noise (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts of `l1`, `l2` and `t2` differ, if `area`/`volume`/`t2` are not positive, or if inputs are non-finite. |
-| TypeError | if `area` or `volume` is not a single number. |
+| TypeError | if `area` or `volume` is not a single number, or `t2` holds a text or a value that is not a real number. |
 
 ## laboratory_impact_insulation
 
@@ -202,7 +203,7 @@ assumed already corrected for background noise (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts of `li` and `t2` differ, if `volume`/`t2` are not positive, or if inputs are non-finite. |
-| TypeError | if `volume` is not a single number. |
+| TypeError | if `volume` is not a single number, or `t2` holds a text or a value that is not a real number. |
 
 ## LaboratoryAirborneInsulationResult
 

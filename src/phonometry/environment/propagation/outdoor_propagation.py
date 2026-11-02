@@ -52,6 +52,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_finite_array,
     require_non_negative,
     require_positive,
@@ -654,7 +655,7 @@ def ground_attenuation(
         is not positive, a height is negative, or a frequency is not positive.
     :raises TypeError: if ``distance``, ``ground_middle``, ``ground_receiver``,
         ``ground_source``, ``receiver_height_m`` or ``source_height_m`` is not a single
-        number.
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
     require_scalar(ground_middle, "ground_middle")
     require_scalar(ground_receiver, "ground_receiver")
@@ -672,7 +673,7 @@ def ground_attenuation(
         raise ValueError(_DISTANCE_NOT_POSITIVE)
     require_non_negative(source_height_m, "source_height_m")
     require_non_negative(receiver_height_m, "receiver_height_m")
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive."
         raise ValueError(msg)
@@ -995,12 +996,13 @@ def barrier_attenuation(
     :param frequencies: Octave-band midband frequencies, in hertz.
     :return: ``Dz`` per band, in decibels (>= 0).
     :raises ValueError: If ``distance`` or any frequency is not positive.
-    :raises TypeError: if ``distance`` is not a single number.
+    :raises TypeError: if ``distance`` is not a single number, or ``frequencies`` holds
+        a text or a value that is not a real number.
     """
     require_scalar(distance, "distance")
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive."
         raise ValueError(msg)
@@ -1165,7 +1167,8 @@ def outdoor_propagation_attenuation(
     :return: :class:`OutdoorAttenuation` with the per-band term breakdown.
     :raises ValueError: If ``distance`` is not positive.
     :raises TypeError: if ``distance``, ``ground_middle``, ``ground_receiver`` or
-        ``ground_source`` is not a single number.
+        ``ground_source`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     require_scalar(ground_middle, "ground_middle")
     require_scalar(ground_receiver, "ground_receiver")
@@ -1176,7 +1179,7 @@ def outdoor_propagation_attenuation(
     )
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
 
     a_div = np.full_like(freqs, geometric_divergence(distance))
     a_atm = atmospheric_absorption(
@@ -1258,6 +1261,8 @@ def predicted_receiver_level(
     :param c0: Meteorological factor ``C0``, in decibels; ``None`` returns the
         downwind level ``LfT(DW)`` (:math:`C_\mathrm{met} = 0`).
     :return: Predicted octave-band level per frequency, in decibels.
+    :raises TypeError: if ``sound_power_level`` holds a text or a value that is not a
+        real number.
     """
     ground = GroundFactors() if ground is None else ground
     atmosphere = AtmosphericConditions() if atmosphere is None else atmosphere
@@ -1267,7 +1272,7 @@ def predicted_receiver_level(
         if atmosphere.relative_humidity_percent is None
         else atmosphere.relative_humidity_percent
     )
-    lw = np.atleast_1d(np.asarray(sound_power_level, dtype=np.float64))
+    lw = np.atleast_1d(real_array(sound_power_level, "sound_power_level"))
     attenuation = outdoor_propagation_attenuation(
         geometry.distance,
         geometry.source_height_m,

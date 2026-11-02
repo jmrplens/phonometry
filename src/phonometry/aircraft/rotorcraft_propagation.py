@@ -61,6 +61,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     is_scalar,
+    real_array,
     refuse_text_beside_choice,
     require_choice,
     require_equal_shapes,
@@ -69,6 +70,7 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -336,7 +338,7 @@ def _ground_effect(
     from scipy.special import wofz
 
     f = frequencies[None, :]
-    hs = np.maximum(np.atleast_1d(np.asarray(source_height, dtype=np.float64)), 0.1)[
+    hs = np.maximum(np.atleast_1d(real_array(source_height, "source_height")), 0.1)[
         :, None
     ]
     hr = max(receiver_height, 0.1)
@@ -348,7 +350,7 @@ def _ground_effect(
     cos_xi = (hs + hr) / r2  # incidence angle from the normal
     k = 2.0 * np.pi * f / _C
 
-    sig = np.atleast_1d(np.asarray(sigma, dtype=np.float64))[:, None]
+    sig = np.atleast_1d(real_array(sigma, "sigma"))[:, None]
     zs = _delany_bazley_impedance_grid(np.asarray(frequencies), sig)
     rp = (zs * cos_xi - 1.0) / (zs * cos_xi + 1.0)
     d_num = (1.0 + 1j) / 2.0 * np.sqrt(k * r2) * (1.0 / zs + cos_xi)
@@ -426,9 +428,11 @@ class MeanGroundPlaneResult(OwnsArrays):
         :param distance_m: Distance :math:`d` along the section, in metres
             (scalar or array).
         :return: The height of the plane at each distance, in metres.
+        :raises TypeError: if ``distance_m`` holds a text or a value that is not a real
+            number.
         """
         return np.asarray(
-            self.slope * np.asarray(distance_m, dtype=np.float64) + self.intercept,
+            self.slope * real_array(distance_m, "distance_m") + self.intercept,
             dtype=np.float64,
         )
 
@@ -473,6 +477,8 @@ def mean_ground_plane(
     :param heights_m: Terrain heights ``z(d)``, in metres, shape ``(M,)``.
     :return: A :class:`MeanGroundPlaneResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``distances_m`` or ``heights_m`` holds a text or a value that
+        is not a real number.
     """
     d, z = _validated_section(distances_m, heights_m)
     a, b = _mean_plane_coefficients(d, z)
@@ -484,8 +490,8 @@ def _validated_section(
     heights_m: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(d, z)`` arrays of a terrain section."""
-    d = np.atleast_1d(np.asarray(distances_m, dtype=np.float64))
-    z = np.atleast_1d(np.asarray(heights_m, dtype=np.float64))
+    d = np.atleast_1d(real_array(distances_m, "distances_m"))
+    z = np.atleast_1d(real_array(heights_m, "heights_m"))
     if d.ndim != 1 or d.shape != z.shape or d.size < _MIN_SECTION_VERTICES:
         msg = "'distances_m' and 'heights_m' must be 1-D of equal size >= 2."
         raise ValueError(msg)
@@ -592,8 +598,10 @@ def diffraction_attenuation(
     :return: The attenuation ``ΔLd`` per band, in dB (``≥ 0``).
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``edge_height_m`` or ``edge_span`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``path_difference`` is not a single number.
     """
+    require_scalar(path_difference, "path_difference")
     f = require_positive_array(frequencies, "frequencies")
     if not np.isfinite(path_difference):
         msg = "'path_difference' must be finite."
@@ -675,6 +683,8 @@ class TerrainScreeningResult(OwnsArrays):
             not lie before the receiver, the section does not run from one to
             the other, or the path difference and the diffracting edges are
             not those of the rubber band over the section.
+        :raises TypeError: if ``diffraction_points``, ``distances_m`` or ``heights_m``
+            holds a text or a value that is not a real number.
         """
         require_ranks(
             self,
@@ -700,7 +710,7 @@ class TerrainScreeningResult(OwnsArrays):
             )
             raise ValueError(msg)
         hull = _convex_path(src, rcv, d, z)
-        edges = np.asarray(self.diffraction_points, dtype=np.float64)
+        edges = real_array(self.diffraction_points, "diffraction_points")
         if hull is None:
             agrees = edges.shape[0] == 0 and math.isnan(self.path_difference)
         else:
@@ -801,9 +811,10 @@ def terrain_screening_adjustment(
         ``(M−1,)``) averaged per sub-path by Eq. 41.
     :return: A :class:`TerrainScreeningResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``flow_resistivity`` is neither a class letter nor
-        numbers (a ``bytes``, ``None``, a complex value, a text among numbers),
-        or ``frequencies`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``flow_resistivity`` is neither a class letter nor numbers (a
+        ``bytes``, ``None``, a complex value, a text among numbers), or ``distances_m``,
+        ``frequencies`` or ``heights_m`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(frequencies, "frequencies")
     d, z = _validated_section(distances_m, heights_m)

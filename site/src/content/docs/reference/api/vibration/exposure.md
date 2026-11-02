@@ -224,7 +224,7 @@ the standard cites it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `name` is unknown or `frequencies` is empty. |
-| TypeError | if `name` is not a text. |
+| TypeError | if `name` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## combined_daily_exposure
 
@@ -249,6 +249,7 @@ $A(8) = \sqrt{\sum_i A_i(8)^2}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `partials` is empty. |
+| TypeError | if `partials` holds a text or a value that is not a real number. |
 
 ## crest_factor
 
@@ -469,6 +470,7 @@ $a_\mathrm{w,e} = \sqrt{\sum a_{\mathrm{w}i}^2 T_i / \sum T_i}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in length, are empty, or the total duration is zero. |
+| TypeError | if `durations_s` or `magnitudes` holds a text or a value that is not a real number. |
 
 ## exposure_assessment
 
@@ -582,7 +584,7 @@ transition and upward step - of weighting `name` at `frequencies`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `name` is unknown or `frequencies` is empty. |
-| TypeError | if `name` is not a text. |
+| TypeError | if `name` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## hav_daily_exposure
 
@@ -608,6 +610,7 @@ $A(8) = \sqrt{(1/T_0) \sum_i a_{\mathrm{hv}i}^2 T_i}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in length, are empty or negative. |
+| TypeError | if `durations_s` or `total_values` holds a text or a value that is not a real number. |
 
 ## HAV_EAV_A8_M_S2
 
@@ -831,6 +834,7 @@ returned.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `components` is empty or `k` differs in length. |
+| TypeError | if `components` or `k` holds a text or a value that is not a real number. |
 
 ## WBV_EAV_A8_M_S2
 

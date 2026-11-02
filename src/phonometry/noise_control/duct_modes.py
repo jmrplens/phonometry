@@ -46,6 +46,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_count,
     require_non_negative,
     require_positive,
@@ -391,7 +392,7 @@ def _warn_above_plane_wave_limit(
         the caller of the public function rather than at this helper.
     :return: A boolean mask of the frequencies that are above the limit.
     """
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
     above = np.asarray(f > limit, dtype=np.bool_)
     if bool(np.any(above)):
         warnings.warn(

@@ -85,7 +85,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, given_repr, read_only
 from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
-    _as_float64,
+    real_array,
     require_choice,
     require_count,
     require_finite,
@@ -149,7 +149,7 @@ def _real_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
     :raises ValueError: for a text that reads as no number, an empty or a
         non-finite input.
     """
-    array = _as_float64(values, name)
+    array = real_array(values, name)
     if array.size == 0:
         msg = f"'{name}' must not be empty."
         raise ValueError(msg)
@@ -225,6 +225,8 @@ def frequency_weighted_sel(
     :return: :math:`L_{E,\mathrm{w}}` in dB, a float for a single spectrum.
     :raises ValueError: for an empty or non-finite input, or shapes that do
         not broadcast.
+    :raises TypeError: if ``band_levels`` or ``weighting_db`` holds a text or a value
+        that is not a real number.
     """
     levels = _real_array(band_levels, "band_levels")
     weighting = _real_array(weighting_db, "weighting_db")
@@ -270,6 +272,9 @@ def replica_probabilities(
         ``levels`` in.
     :raises ValueError: for an empty, multi-dimensional, non-finite or
         negative input.
+    :raises TypeError: if ``absorption_probabilities`` or
+        ``excess_attenuation_probabilities`` holds a text or a value that is not a real
+        number.
     """
     atm = _probability_array(absorption_probabilities, "absorption_probabilities")
     exc = _probability_array(
@@ -322,7 +327,8 @@ def long_term_sel(
     :raises ValueError: if the shapes differ, a probability is negative, the
         probabilities do not sum to one, every probability is zero, or a value
         is not finite.
-    :raises TypeError: if ``rating_adjustment`` is not a single number.
+    :raises TypeError: if ``rating_adjustment`` is not a single number, or ``levels`` or
+        ``probabilities`` holds a text or a value that is not a real number.
     """
     levels, probs = _levels_and_probabilities(levels, probabilities)
     k_db = require_finite(rating_adjustment, "rating_adjustment")
@@ -520,8 +526,10 @@ class SELDistribution(OwnsArrays):
         :param levels: Level or levels ``x``, in dB.
         :return: :math:`\rho(x)`; a ``float`` for a number; an array for a sequence or
             an array, a zero-dimensional one included.
+        :raises TypeError: if ``levels`` holds a text or a value that is not a real
+            number.
         """
-        x = np.asarray(levels, dtype=np.float64)
+        x = real_array(levels, "levels")
         inside = (x[..., None] > self.lower_bounds_db) & (
             x[..., None] < self.upper_bounds_db
         )
@@ -553,9 +561,11 @@ class SELDistribution(OwnsArrays):
         :param levels: Level or levels ``x``, in dB.
         :return: :math:`\rho^{*}(x)`; a ``float`` for a number; an array for a sequence
             or an array, a zero-dimensional one included.
+        :raises TypeError: if ``levels`` holds a text or a value that is not a real
+            number.
         """
         means, weights = self._spread()
-        x = np.asarray(levels, dtype=np.float64)
+        x = real_array(levels, "levels")
         z = (x[..., None] - means) / self.sigma_db
         value = np.sum(weights * np.exp(-0.5 * z * z), axis=-1) / (
             self.sigma_db * math.sqrt(2.0 * math.pi)
@@ -586,11 +596,13 @@ class SELDistribution(OwnsArrays):
         :param levels: Level or levels ``x``, in dB.
         :return: The probability; a ``float`` for a number; an array for a sequence or
             an array, a zero-dimensional one included.
+        :raises TypeError: if ``levels`` holds a text or a value that is not a real
+            number.
         """
         from scipy.special import ndtr
 
         means, weights = self._spread()
-        x = np.asarray(levels, dtype=np.float64)
+        x = real_array(levels, "levels")
         value = np.sum(weights * ndtr((means - x[..., None]) / self.sigma_db), axis=-1)
         return as_float_or_array(value, like=(levels,))
 
@@ -618,10 +630,12 @@ class SELDistribution(OwnsArrays):
         :return: The level, in dB; a ``float`` for a number; an array for a sequence or
             an array, a zero-dimensional one included.
         :raises ValueError: for a percentage outside that range.
+        :raises TypeError: if ``percent`` holds a text or a value that is not a real
+            number.
         """
         from scipy.optimize import brentq
 
-        n = np.asarray(percent, dtype=np.float64)
+        n = real_array(percent, "percent")
         total = float(np.sum(self.probabilities))
         target = n / 100.0
         if (
@@ -732,7 +746,8 @@ def sel_distribution(
         levels are combined, ``sigma_db`` is not positive, or ``n_subclasses``
         is not a whole number of at least one.
     :raises TypeError: if ``sigma_db`` is not a single number, or ``n_subclasses`` is a
-        flag, a text or an array where a count goes.
+        flag, a text or an array where a count goes, or ``levels`` or ``probabilities``
+        holds a text or a value that is not a real number.
     """
     levels, probs = _levels_and_probabilities(levels, probabilities)
     sigma = require_positive(sigma_db, "sigma_db")

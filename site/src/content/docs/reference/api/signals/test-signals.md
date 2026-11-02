@@ -117,7 +117,7 @@ signal is - or use odd lengths, and the operation is exact.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `delay` is not a single number, or `mode` is not a text. |
+| TypeError | if `delay` is not a single number, or `mode` is not a text, or `x` holds a text or a value that is not a real number. |
 
 ## noise_signal
 
@@ -203,7 +203,7 @@ default.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid, or if the rate ratio is not rational within `max_denominator`. |
-| TypeError | if `stopband_attenuation` or `transition_width` is not a single number, or `max_denominator` is a flag, a text or an array where a count goes. |
+| TypeError | if `stopband_attenuation` or `transition_width` is not a single number, or `max_denominator` is a flag, a text or an array where a count goes, or `x` holds a text or a value that is not a real number. |
 
 ## ResampledSignalResult
 

@@ -40,6 +40,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_above_absolute_zero,
     require_choice,
     require_ranks,
@@ -91,7 +92,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _positive_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
-    arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    arr = np.atleast_1d(real_array(values, name))
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be finite and non-empty."
         raise ValueError(msg)
@@ -121,8 +122,8 @@ def spreading_loss(
         ``"practical"``.
     :return: Spreading loss per range, in dB.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``transition_range`` is not a single number, or
-        ``law`` is not a text.
+    :raises TypeError: if ``transition_range`` is not a single number, or ``law`` is not
+        a text, or ``range_m`` holds a text or a value that is not a real number.
     """
     r = _positive_array(range_m, "range_m")
     key = require_choice(law, "law", _SPREADING_LAWS)
@@ -224,8 +225,10 @@ def seawater_absorption(
     :return: Absorption coefficient per frequency, in dB/km.
     :raises ValueError: If ``model`` is unknown or an input is invalid.
     :raises TypeError: if ``depth``, ``salinity`` or ``temperature_c`` is not a single
-        number, or ``model`` is not a text.
+        number, or ``model`` is not a text, or ``frequency_hz`` holds a text or a value
+        that is not a real number, or ``ph`` is not a single number.
     """
+    require_scalar(ph, "ph")
     f_khz = _positive_array(frequency_hz, "frequency_hz") / 1000.0
     require_scalar(temperature_c, "temperature_c")
     t = float(temperature_c)
@@ -366,8 +369,10 @@ def propagation_loss(
     :return: A :class:`PropagationLossResult`.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``frequency_hz`` is not a single number, or ``law`` or
-        ``model`` is not a text.
+        ``model`` is not a text, or ``range_m`` holds a text or a value that is not a
+        real number, or ``ph`` is not a single number.
     """
+    require_scalar(ph, "ph")
     f = _positive(frequency_hz, "frequency_hz")
     r = _positive_array(range_m, "range_m")
     spreading = spreading_loss(r, law=law, transition_range=transition_range)

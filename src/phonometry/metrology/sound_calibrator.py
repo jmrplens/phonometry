@@ -89,7 +89,11 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.validation import require_choice, require_positive
+from .._internal.validation import (
+    real_array,
+    require_choice,
+    require_positive,
+)
 from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
@@ -501,7 +505,7 @@ def _values(value: float | Sequence[float], name: str) -> tuple[float, ...]:
 
     :raises ValueError: for an empty, multi-dimensional or non-finite input.
     """
-    array = np.asarray(value, dtype=np.float64)
+    array = real_array(value, name)
     if array.ndim > 1 or array.size == 0:
         msg = f"'{name}' must be one number or a flat sequence of numbers."
         raise ValueError(msg)

@@ -142,7 +142,7 @@ that meet it in words, and the coefficients are optional here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not a finite 2D array of at least two orientations, frequencies outside 125 Hz to 8 kHz, a non-positive volume or box dimension, or an absorption coefficient outside [0, 1]. |
-| TypeError | if `volume` is not a single number. |
+| TypeError | if `volume` is not a single number, or `absorption_coefficients`, `frequencies`, `orientation_levels` or `reference_box_m` holds a text or a value that is not a real number. |
 
 ## hard_walled_source_locations
 
@@ -184,6 +184,7 @@ dimensions that still complies with 4.4.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not a finite 2D array of at least two positions, or frequencies that are not octave centres. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## HardWalledRoomCheck
 
@@ -647,7 +648,7 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `n_events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
-| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
+| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes, or `background_levels` or `event_levels` holds a text or a value that is not a real number. |
 
 ## sound_power_hard_walled
 
@@ -708,6 +709,7 @@ total.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a level array is not finite or of an admissible shape, the reference or background levels do not match the source's positions and bands, `frequencies` are not distinct ascending octave centres of Table B.1, the climate is out of range, `sigma_omc_db` is negative, `coverage_factor` is not positive, or a calibration does not cover the bands or used the manufacturer's `C2`, whose value at the test only the manufacturer gives. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## SourceLocationPlan
 

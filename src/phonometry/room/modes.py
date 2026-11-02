@@ -68,7 +68,12 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_if_reduced, as_float_or_array
-from .._internal.validation import require_positive, require_ranks, require_same_length
+from .._internal.validation import (
+    real_array,
+    require_positive,
+    require_ranks,
+    require_same_length,
+)
 from .steady_field import schroeder_frequency
 
 if TYPE_CHECKING:
@@ -111,7 +116,7 @@ _N_ROOM_AXES = 3
 
 def _require_dimensions(dimensions: ArrayLike) -> NDArray[np.float64]:
     """Validate the three room dimensions and return them as an array."""
-    dims = np.asarray(dimensions, dtype=np.float64).ravel()
+    dims = real_array(dimensions, "dimensions").ravel()
     if dims.size != _N_ROOM_AXES:
         msg = "'dimensions' must hold the three room dimensions (lx, ly, lz) in m."
         raise ValueError(msg)
@@ -152,11 +157,12 @@ def room_mode_frequency(
         343 m/s, dry air at 20 °C).
     :return: The modal frequency in Hz; a float for a single triple, otherwise
         one frequency per row.
-    :raises TypeError: if ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` is not a single number, or ``dimensions``
+        or ``orders`` holds a text or a value that is not a real number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
-    n = np.asarray(orders, dtype=np.float64)
+    n = real_array(orders, "orders")
     if n.ndim == 1:
         n = n.reshape(1, -1)
         single = True
@@ -215,11 +221,12 @@ def room_mode_count(
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The (non-integer) mode count; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` is not a single number, or ``dimensions``
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f < 0.0) or not np.all(np.isfinite(f)):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
@@ -273,11 +280,12 @@ def room_modal_density(
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The modal density, modes/Hz; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` is not a single number, or ``dimensions``
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f < 0.0) or not np.all(np.isfinite(f)):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
@@ -469,7 +477,7 @@ def room_modes(
         carried in the result (and marked by :meth:`RoomModesResult.plot`).
     :return: A :class:`RoomModesResult`.
     :raises TypeError: if ``max_frequency`` or ``speed_of_sound`` is not a single
-        number.
+        number, or ``dimensions`` holds a text or a value that is not a real number.
     """
     dims = _require_dimensions(dimensions)
     c0 = require_positive(speed_of_sound, "speed_of_sound")

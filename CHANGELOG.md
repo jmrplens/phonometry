@@ -2336,6 +2336,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   return mode` or `if mode is None: return`, as one that holds nothing to
   check only when the annotation lists such a value (rule A45).
 
+- **A complex value, a text or a `bytearray` given where numbers belong is
+  refused by the parameter's name, not read as its real part, parsed or read
+  as the codes of its characters.** In 1049 places the library converted a
+  caller's numbers with `np.asarray(x, dtype=np.float64)`, its complex twin
+  `np.asarray(x, dtype=np.complex128)` or one of their kin, which give back
+  the real part of a complex value with no more than a `ComplexWarning`, parse
+  a text and read a `bytearray` in a list as a row of the codes of its
+  characters: `environment.method_b_scale_values(np.complex128(0.5 + 0.3j))`
+  rated the mark at 0.5, `building.energy_average_level([bytearray(b"12")])`
+  came back as 49.5 dB, `vibration.injected_power([bytearray(b"12")],
+  [1e-3 + 1e-4j])` read the force as 49 and 50 N, and a column of readings left as
+  text passed for numbers. Each reads them now through `real_array` or, where
+  a complex value belongs (a reflection factor, an impedance, a mobility, a
+  transfer function), `complex_array` of `_internal/validation.py`, which
+  refuse them with a `TypeError` naming the parameter ("must be real, not
+  complex", "must be numbers, not text"), read a matrix or a masked array as
+  the plain array of its values, as `np.asarray` did, and the shared readers
+  and text checks find a `bytearray` at any depth of a sequence, as the
+  choices beside numbers already did. The rank check every scalar guard opens with refuses a
+  complex number of either kind as well, where `float()` kept the real part of
+  a NumPy one, and 35 public functions whose one-number parameters reached
+  `float()` or arithmetic without it open with it now (the `ph` of
+  `underwater.seawater_absorption`, the `sound_power_level` of
+  `room.crowd_noise_level`, `environment.fresnel_number` and the rest);
+  `building.flanking_element` names its own parameters where it named those
+  of `flanking_path`; `building.resonant_sound_reduction_index` annotates
+  `correction` as the one value or one per band it reads,
+  `environment.composite_rating_level` its `periods` as the rows of numbers
+  it reads, and the integers those checks admit as NumPy integers too are
+  annotated so (`axis`, `part`, `fraction`, `filter_class`,
+  `n_reference_machines`). Every one-number
+  parameter the public probe of `tests/test_scalar_guards.py` can call, 1625
+  of them, refuses `np.complex128(v + 1j)` by name.
+  `scripts/check_real_conversions.py` lists every conversion of the tree with
+  what it reads (`--census`) and fails on one that converts a caller's value,
+  a parameter, a field a record is built with or a name a nested function or
+  a `lambda` shares with the function around it, that no check has read on
+  every path to it, a function of the library counting as a check only when
+  it checks on every path that leaves it (rule A61); on the tree before this
+  change it reports all
+  1049, and the GPU-fingerprinted engines needed none of theirs changed. Each
+  refusal is documented in the `:raises TypeError:` field of the function, and
+  so in the API reference.
+
+- **The modulation depth of an amplitude-modulated block transforms the
+  fundamental's lines back once.** `environment.amplitude_modulation_block`
+  ran the inverse transform of the three lines about the fundamental twice
+  with the same lines when no harmonic was kept, once for the 1.5 dB swing
+  that decides whether harmonics are looked for and again for the depth; it
+  keeps the first series and transforms the set again only when a harmonic
+  widens it.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

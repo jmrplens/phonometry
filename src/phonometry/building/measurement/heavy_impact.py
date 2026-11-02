@@ -105,6 +105,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_band_fraction,
     require_choice,
     require_equal_shapes,
@@ -474,7 +475,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
         """
         require_choice(self.source, "source", tuple(_SPECS))
         n = len(_SPECS[self.source].frequencies)
-        measured = np.asarray(self.measured, dtype=np.float64)
+        measured = real_array(self.measured, "measured")
         if measured.shape != (n,) or not np.all(np.isfinite(measured)):
             msg = (
                 f"HeavyImpactSourceCheck: 'measured' must hold {n} finite "

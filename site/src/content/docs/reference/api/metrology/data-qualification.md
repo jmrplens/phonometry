@@ -120,6 +120,7 @@ miss crossings between samples.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## LevelCrossingResult
 
@@ -279,6 +280,12 @@ Peak probability density `w(z)` (B&P Eq. (5.217)).
 
 **Returns:** Probability density values, same shape.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `z` holds a text or a value that is not a real number. |
+
 ### PeakStatisticsResult.peak_exceedance()
 
 ```python
@@ -301,6 +308,12 @@ bandwidth limit.
 | `z` | Standardized peak heights (units of the record RMS). |
 
 **Returns:** Exceedance probabilities, same shape.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `z` holds a text or a value that is not a real number. |
 
 ### PeakStatisticsResult.plot()
 
@@ -501,7 +514,7 @@ non-monotonic clustering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `alpha` is not a single number, or `method` is not a text. |
+| TypeError | if `alpha` is not a single number, or `method` is not a text, or `values` holds a text or a value that is not a real number. |
 
 ## TrendTestResult
 

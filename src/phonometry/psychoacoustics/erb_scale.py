@@ -58,6 +58,7 @@ from typing import TYPE_CHECKING, overload
 import numpy as np
 
 from .._internal.types import as_float_or_array
+from .._internal.validation import real_array
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
@@ -106,8 +107,10 @@ def erb_bandwidth(frequency: ArrayLike) -> float | NDArray[np.float64]:
         non-negative).
     :return: The bandwidth ``ERB_N``, Hz; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
+    :raises TypeError: if ``frequency`` holds a text or a value that is not a real
+        number.
     """
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
@@ -137,8 +140,10 @@ def cam_from_frequency(frequency: ArrayLike) -> float | NDArray[np.float64]:
     :param frequency: Frequency ``f``, Hz (scalar or array, non-negative).
     :return: The ERB_N number, Cam; a ``float`` for a number; an array for a sequence or
         an array, a zero-dimensional one included.
+    :raises TypeError: if ``frequency`` holds a text or a value that is not a real
+        number.
     """
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
@@ -167,8 +172,9 @@ def frequency_from_cam(cam: ArrayLike) -> float | NDArray[np.float64]:
     :param cam: ERB_N number ``i``, Cam (scalar or array, non-negative).
     :return: The frequency ``f``, Hz; a ``float`` for a number; an array for a sequence
         or an array, a zero-dimensional one included.
+    :raises TypeError: if ``cam`` holds a text or a value that is not a real number.
     """
-    i = np.asarray(cam, dtype=np.float64)
+    i = real_array(cam, "cam")
     if not np.all(np.isfinite(i)) or np.any(i < 0.0):
         msg = "'cam' must be non-negative and finite."
         raise ValueError(msg)

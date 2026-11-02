@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from .._internal.validation import (
+    real_array,
     require_real,
     require_scalar,
 )
@@ -90,7 +91,7 @@ def _validate_pressure(
     pressure: SignalInput, *, min_samples: int = 1
 ) -> NDArray[np.float64]:
     require_scalar(min_samples, "min_samples")
-    sig = np.asarray(pressure, dtype=np.float64)
+    sig = real_array(pressure, "pressure_pa")
     if sig.ndim != 1:
         msg = "'pressure_pa' must be one-dimensional."
         raise ValueError(msg)
@@ -122,7 +123,8 @@ def sound_pressure_level(
     :param reference: Reference pressure :math:`p_0`, in Pa (default 1 µPa).
     :return: Sound pressure level, in dB re the reference.
     :raises ValueError: If the signal is invalid or has no energy.
-    :raises TypeError: if ``reference`` is not a single number.
+    :raises TypeError: if ``reference`` is not a single number, or ``pressure_pa`` holds
+        a text or a value that is not a real number.
     """
     sig = _validate_pressure(pressure_pa)
     p0 = _positive(reference, "reference")
@@ -156,7 +158,8 @@ def sound_exposure_level(
         1 µPa²·s).
     :return: Sound exposure level, in dB re the reference.
     :raises ValueError: If the inputs are invalid or the signal has no energy.
-    :raises TypeError: if ``fs`` or ``reference`` is not a single number.
+    :raises TypeError: if ``fs`` or ``reference`` is not a single number, or
+        ``pressure_pa`` holds a text or a value that is not a real number.
     """
     fs = resolve_fs(pressure_pa, fs, name="pressure_pa")
     sig = _validate_pressure(pressure_pa)
@@ -186,7 +189,8 @@ def peak_sound_pressure_level(
     :param reference: Reference pressure :math:`p_0`, in Pa (default 1 µPa).
     :return: Peak sound pressure level, in dB re the reference.
     :raises ValueError: If the signal is invalid or is all zero.
-    :raises TypeError: if ``reference`` is not a single number.
+    :raises TypeError: if ``reference`` is not a single number, or ``pressure_pa`` holds
+        a text or a value that is not a real number.
     """
     sig = _validate_pressure(pressure_pa)
     p0 = _positive(reference, "reference")

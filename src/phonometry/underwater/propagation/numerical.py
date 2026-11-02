@@ -61,6 +61,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -190,8 +191,8 @@ def _clean_profile(
     :raises ValueError: if the two do not describe one increasing profile
         from the surface down.
     """
-    z = np.asarray(depths, dtype=np.float64)
-    c = np.asarray(speeds_of_sound, dtype=np.float64)
+    z = real_array(depths, "depths")
+    c = real_array(speeds_of_sound, "speeds_of_sound")
     if z.ndim != 1 or z.size < _MIN_POLYLINE_NODES:
         msg = "'depths' must be a 1-D array of at least two points."
         raise ValueError(msg)
@@ -243,8 +244,8 @@ def _clean_bathymetry(
     if len(pair) != 2 or pair[0] is None or pair[1] is None:  # noqa: PLR2004
         msg = "'bathymetry' must be a (ranges_m, depths_m) pair of arrays."
         raise ValueError(msg)
-    br = np.asarray(pair[0], dtype=np.float64).ravel()
-    bd = np.asarray(pair[1], dtype=np.float64).ravel()
+    br = real_array(pair[0], "bathymetry").ravel()
+    bd = real_array(pair[1], "bathymetry").ravel()
     if br.size < _MIN_POLYLINE_NODES:
         msg = "the two halves of 'bathymetry' must carry at least two points."
         raise ValueError(msg)
@@ -569,7 +570,9 @@ def normal_modes(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``density``, ``frequency_hz``, ``receiver_depth`` or
         ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
-        or an array where a count goes, or ``bottom`` is not a text.
+        or an array where a count goes, or ``bottom`` is not a text, or ``depths``,
+        ``ranges_m`` or ``speeds_of_sound`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     rho = require_positive(density, "density")
@@ -599,7 +602,7 @@ def normal_modes(
     ranges = (
         np.linspace(100.0, 10_000.0, 400)
         if ranges_m is None
-        else np.asarray(ranges_m, dtype=np.float64).ravel()
+        else real_array(ranges_m, "ranges_m").ravel()
     )
     if np.any(ranges <= 0.0) or not np.all(np.isfinite(ranges)):
         msg = "'ranges_m' must be finite and positive."
@@ -934,7 +937,9 @@ def ray_trace(
     :return: A :class:`RayTraceResult`.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``max_range`` or ``source_depth`` is not a single number, or
-        ``n_steps`` is a flag, a text or an array where a count goes.
+        ``n_steps`` is a flag, a text or an array where a count goes, or ``depths``,
+        ``launch_angles_deg`` or ``speeds_of_sound`` holds a text or a value that is not
+        a real number.
     """
     z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "ray_trace")
     bathy = _clean_bathymetry(bathymetry, z_prof, "ray_trace")
@@ -949,7 +954,7 @@ def ray_trace(
     if require_count(n_steps, "n_steps", at_least=None) < _MIN_RAY_STEPS:
         msg = "'n_steps' must be at least 2."
         raise ValueError(msg)
-    angles = np.asarray(launch_angles_deg, dtype=np.float64).ravel()
+    angles = real_array(launch_angles_deg, "launch_angles_deg").ravel()
     if angles.size == 0 or not np.all(np.isfinite(angles)):
         msg = "'launch_angles_deg' must be finite and non-empty."
         raise ValueError(msg)
@@ -2756,7 +2761,7 @@ def _beam_influence(
     half_omega_width = (
         0.5
         * omega
-        * np.broadcast_to(np.asarray(beam_width, dtype=np.float64), (s.depth.shape[0],))
+        * np.broadcast_to(real_array(beam_width, "beam_width"), (s.depth.shape[0],))
     )
     grid = _Influence(
         receiver_depths=receiver_depths,
@@ -2852,8 +2857,8 @@ def _beam_range_grid(
     """
     require_scalar(dr, "dr")
     require_scalar(rmax, "rmax")
-    ranges = np.asarray(
-        np.arange(n_steps) * dr if ranges_m is None else ranges_m, dtype=np.float64
+    ranges = real_array(
+        np.arange(n_steps) * dr if ranges_m is None else ranges_m, "ranges_m"
     ).ravel()
     if ranges.size == 0 or not np.all(np.isfinite(ranges)) or np.any(ranges < 0.0):
         msg = "'ranges_m' must be finite, non-negative and non-empty."
@@ -2886,7 +2891,7 @@ def _beam_receiver_grid(
             raise ValueError(msg)
         dz = water_depth / (n_z + 1)
         return np.asarray(dz * np.arange(1, n_z + 1), dtype=np.float64)
-    receivers = np.asarray(receiver_depths_m, dtype=np.float64).ravel()
+    receivers = real_array(receiver_depths_m, "receiver_depths_m").ravel()
     if receivers.size == 0 or not np.all(np.isfinite(receivers)):
         msg = "'receiver_depths_m' must be finite and non-empty."
         raise ValueError(msg)
@@ -3357,8 +3362,10 @@ def gaussian_beams(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``frequency_hz``, ``max_range``, ``range_step`` or
         ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
-        or an array where a count goes, ``bottom`` is not a text, or ``absorption``
-        is neither a text nor a :class:`VolumeAbsorption`.
+        or an array where a count goes, ``bottom`` is not a text, or ``absorption`` is
+        neither a text nor a :class:`VolumeAbsorption`, or ``depths``,
+        ``receiver_depths_m`` or ``speeds_of_sound`` holds a text or a value that is not
+        a real number.
     :warns NumericalPropagationWarning: when the source sits on a kink of the profile
         (Sect. 3.7.4's spurious horizontal jet), and when one marching step
         carries the steepest beam of the fan across more than a quarter of
@@ -3732,7 +3739,8 @@ def parabolic_equation(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``frequency_hz``, ``max_range``, ``range_step`` or
         ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
-        or an array where a count goes.
+        or an array where a count goes, or ``depths`` or ``speeds_of_sound`` holds a
+        text or a value that is not a real number.
     """
     from scipy.fft import dst, idst
 

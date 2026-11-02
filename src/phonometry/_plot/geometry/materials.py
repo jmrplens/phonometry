@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_non_negative,
@@ -539,13 +540,13 @@ def plot_qrd_geometry(
     :raises ValueError: for an empty or non-1-D depth sequence, a depth that
         is not finite and non-negative, a non-positive well width, a number of
         periods that is not a whole number from 1, or a negative fin width.
-    :raises TypeError: if ``fin_width`` or ``well_width`` is not a single
-        number, or ``n_repetitions`` is a flag, a text or an array where a
-        count goes.
+    :raises TypeError: if ``fin_width`` or ``well_width`` is not a single number, or
+        ``n_repetitions`` is a flag, a text or an array where a count goes, or
+        ``depths`` holds a text or a value that is not a real number.
     """
     n_repetitions = require_count(n_repetitions, "n_repetitions")
     _check_language(language)
-    d = np.asarray(depths, dtype=np.float64)
+    d = real_array(depths, "depths")
     if d.ndim != 1 or d.size == 0:
         msg = "'depths' must be a non-empty 1-D sequence."
         raise ValueError(msg)

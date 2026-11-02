@@ -176,7 +176,7 @@ expressions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown boundary/baffle. |
-| TypeError | if `baffle` or `boundary` is not a text, or `critical_frequency`, `length_x`, `length_y` or `speed_of_sound` is not a single number. |
+| TypeError | if `baffle` or `boundary` is not a text, or `critical_frequency`, `length_x`, `length_y` or `speed_of_sound` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## RadiationEfficiencyResult
 

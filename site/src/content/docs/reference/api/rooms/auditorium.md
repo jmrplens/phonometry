@@ -83,7 +83,7 @@ and this function refuses to invent one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the symbol is not one Table A.1 prints, if the table prints no just-noticeable difference for it, or if the two values do not have the same shape. |
-| TypeError | if `symbol` is not a text. |
+| TypeError | if `symbol` is not a text, or `first` or `second` holds a text or a value that is not a real number. |
 
 ## AuditoriumQuantity
 
@@ -147,7 +147,7 @@ DIRECTIVITY_ARC_DEG = 30.0
 directivity_energy_average(
     levels: ArrayLike,
     *,
-    axis: int = -1,
+    axis: int | np.integer[Any] = -1,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -193,6 +193,7 @@ band per row when it is handed a two-dimensional survey.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than `ceil(360 / 12,5) = 29` bearings lie along `axis`, or the levels are empty or non-finite. |
+| TypeError | if `levels` holds a text or a value that is not a real number, or `axis` is not a single number. |
 
 ## DIRECTIVITY_STEP_DEG
 
@@ -352,7 +353,7 @@ its docstring says what the printed step does and does not determine.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is not a positive, finite length. |
-| TypeError | if `distance` is not a single number. |
+| TypeError | if `distance` is not a single number, or `level` holds a text or a value that is not a real number. |
 
 ## gliding_directivity_deviation
 
@@ -628,6 +629,7 @@ microphone aimed as A.2.5 asks has no direct sound to trigger on, and an
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both reference forms are given, if a response is not one-dimensional or is silent, if the two hall responses are of different lengths, or if they are too short to reach the 80 ms boundary. |
+| TypeError | if `reference_level` holds a text or a value that is not a real number. |
 
 ## LATE_LATERAL_START_S
 
@@ -804,6 +806,7 @@ as balconies and under-balcony areas will need more than this.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a seat count is not a positive, finite number. |
+| TypeError | if `seats` holds a text or a value that is not a real number. |
 
 ## MIN_REFERENCE_DISTANCE_M
 
@@ -852,6 +855,7 @@ pair means little for them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two arrays disagree in length, or if the band axis does not carry all six octaves from 125 Hz to 4 kHz. |
+| TypeError | if `frequencies` or `values` holds a text or a value that is not a real number. |
 
 ## OCTAVE_PAIRS_HZ
 
@@ -988,6 +992,7 @@ reproduces the method rather than quietly improving it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the absorption area is not a positive, finite area. |
+| TypeError | if `absorption_area` or `reverberation_room_level` holds a text or a value that is not a real number. |
 
 ## single_number_average
 
@@ -1031,7 +1036,7 @@ table.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the symbol is not one Table A.1 prints, if the two arrays disagree in length, or if the band axis does not carry every band the quantity averages. |
-| TypeError | if `symbol` is not a text. |
+| TypeError | if `symbol` is not a text, or `frequencies` or `values` holds a text or a value that is not a real number. |
 
 ## sound_pressure_exposure_level
 
@@ -1151,6 +1156,7 @@ a calibrated source where every other measure in Table A.1 does not.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both reference forms are given, if a response is not one-dimensional or is silent, or if `reference_level` does not broadcast onto the band axis. |
+| TypeError | if `reference_level` holds a text or a value that is not a real number. |
 
 ## sound_strength_from_power
 
@@ -1199,6 +1205,12 @@ ISO 3741, which the library implements in
 | `power_level` | Sound power level of the source, in dB, broadcast against `pressure_level`. |
 
 **Returns:** The sound strength G, in dB; a `float` when the two levels are numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `power_level` or `pressure_level` holds a text or a value that is not a real number. |
 
 ## SOUND_STRENGTH_POWER_OFFSET_DB
 

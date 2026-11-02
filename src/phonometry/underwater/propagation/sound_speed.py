@@ -16,6 +16,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_above_absolute_zero_array,
     require_ranks,
     require_same_length,
@@ -121,9 +122,10 @@ def sound_speed_profile(
     :param latitude: Latitude for the depth→pressure conversion, in degrees.
     :return: A :class:`SoundSpeedProfile`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``model`` is not a text.
+    :raises TypeError: if ``model`` is not a text, or ``depths``, ``salinities`` or
+        ``temperatures_c`` holds a text or a value that is not a real number.
     """
-    z = np.asarray(depths, dtype=np.float64)
+    z = real_array(depths, "depths")
     if z.ndim != 1 or z.size < _MIN_POLYLINE_NODES:
         msg = "'depths' must be a 1-D array of at least two depths."
         raise ValueError(msg)
@@ -133,8 +135,8 @@ def sound_speed_profile(
     if np.any(np.diff(z) <= 0.0):
         msg = "'depths' must be strictly increasing."
         raise ValueError(msg)
-    temp = np.broadcast_to(np.asarray(temperatures_c, dtype=np.float64), z.shape)
-    sal = np.broadcast_to(np.asarray(salinities, dtype=np.float64), z.shape)
+    temp = np.broadcast_to(real_array(temperatures_c, "temperatures_c"), z.shape)
+    sal = np.broadcast_to(real_array(salinities, "salinities"), z.shape)
     if not (np.all(np.isfinite(temp)) and np.all(np.isfinite(sal))):
         msg = "'temperatures_c' and 'salinities' must be finite."
         raise ValueError(msg)

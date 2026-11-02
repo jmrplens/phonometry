@@ -97,6 +97,8 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import (
+    complex_array,
+    real_array,
     require_choice,
     require_count,
     require_finite,
@@ -818,7 +820,8 @@ class ImpactMobilityResult(OwnsArrays):
             decay rate is negative, or the response quantity is unknown.
         :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
             or ``n_impacts`` is a flag, a text or an array where a count goes, or
-            ``response_quantity`` is not a text.
+            ``response_quantity`` is not a text, or ``coherence`` or ``frequencies``
+            holds a text or a value that is not a real number.
         """
         require_ranks(
             self,
@@ -836,14 +839,14 @@ class ImpactMobilityResult(OwnsArrays):
             axis="frequency",
         )
         owner = type(self).__name__
-        freqs = np.asarray(self.frequencies, dtype=np.float64)
+        freqs = real_array(self.frequencies, "frequencies")
         if freqs.size == 0 or not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
             msg = f"{owner}: 'frequencies' must be positive and finite."
             raise ValueError(msg)
         if not np.all(np.isfinite(np.asarray(self.mobility))):
             msg = f"{owner}: 'mobility' must be finite."
             raise ValueError(msg)
-        coherence = np.asarray(self.coherence, dtype=np.float64)
+        coherence = real_array(self.coherence, "coherence")
         if np.any(~(coherence >= 0.0)) or np.any(coherence > 1.0):
             msg = f"{owner}: 'coherence' must lie in [0, 1]."
             raise ValueError(msg)
@@ -1221,7 +1224,9 @@ class ExponentialWindowCorrection(OwnsArrays):
             :math:`a/\omega_r` reaches the apparent damping of a mode, which no
             real structure allows: the damping estimate or the decay rate is
             wrong.
-        :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
+        :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
+            or ``apparent_damping_ratio`` or ``damped_natural_frequency_hz`` holds a
+            text or a value that is not a real number.
         """
         require_ranks(self, damped_natural_frequency_hz=1, apparent_damping_ratio=1)
         require_same_length(
@@ -1231,8 +1236,10 @@ class ExponentialWindowCorrection(OwnsArrays):
             axis="mode",
         )
         owner = type(self).__name__
-        freqs = np.asarray(self.damped_natural_frequency_hz, dtype=np.float64)
-        zeta = np.asarray(self.apparent_damping_ratio, dtype=np.float64)
+        freqs = real_array(
+            self.damped_natural_frequency_hz, "damped_natural_frequency_hz"
+        )
+        zeta = real_array(self.apparent_damping_ratio, "apparent_damping_ratio")
         if freqs.size == 0 or not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
             msg = f"{owner}: 'damped_natural_frequency_hz' must be positive and finite."
             raise ValueError(msg)
@@ -1337,13 +1344,17 @@ def exponential_window_correction(
     :return: An :class:`ExponentialWindowCorrection`.
     :raises ValueError: for mismatched or invalid inputs, or a window whose
         damping reaches a mode's apparent damping.
+    :raises TypeError: if ``apparent_damping_ratio`` or ``damped_natural_frequency_hz``
+        holds a text or a value that is not a real number, or
+        ``exponential_decay_rate_per_s`` is not a single number.
     """
+    require_scalar(exponential_decay_rate_per_s, "exponential_decay_rate_per_s")
     return ExponentialWindowCorrection(
         damped_natural_frequency_hz=np.atleast_1d(
-            np.asarray(damped_natural_frequency_hz, dtype=np.float64)
+            real_array(damped_natural_frequency_hz, "damped_natural_frequency_hz")
         ),
         apparent_damping_ratio=np.atleast_1d(
-            np.asarray(apparent_damping_ratio, dtype=np.float64)
+            real_array(apparent_damping_ratio, "apparent_damping_ratio")
         ),
         exponential_decay_rate_per_s=float(exponential_decay_rate_per_s),
     )
@@ -1426,7 +1437,7 @@ class SingleModeFitResult(OwnsArrays):
         )
 
     def _synthesize(self, frequencies: ArrayLike, pole: complex) -> np.ndarray:
-        s = 2j * np.pi * np.asarray(frequencies, dtype=np.float64)
+        s = 2j * np.pi * real_array(frequencies, "frequencies")
         residue = complex(self.residue)
         value = (
             complex(self.direct_term)
@@ -1573,10 +1584,12 @@ def single_mode_fit(
         a pair of positive numbers or holds fewer than three frequencies, an
         unknown kind, or a band whose data hold no lightly damped mode.
     :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
-        ``kind`` is not a text, or ``band_hz`` is not a pair of numbers.
+        ``kind`` is not a text, or ``band_hz`` is not a pair of numbers, or
+        ``frequencies`` holds a text or a value that is not a real number, or ``frf``
+        holds a text or a value that is not a number.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
-    values = np.asarray(frf, dtype=np.complex128)
+    freqs = real_array(frequencies, "frequencies")
+    values = complex_array(frf, "frf")
     if freqs.ndim != 1 or values.shape != freqs.shape:
         msg = "'frequencies' and 'frf' must be one-dimensional and of one length."
         raise ValueError(msg)
@@ -2024,7 +2037,7 @@ class ResponseDecayCheck(OwnsArrays):
         require_positive(self.fs, "fs")
         require_positive(self.segment_s, "segment_s")
         require_non_negative(self.start_s, "start_s")
-        record = np.asarray(self.response, dtype=np.float64)
+        record = real_array(self.response, "response")
         if not np.all(np.isfinite(record)):
             msg = "ResponseDecayCheck: 'response' must be finite."
             raise ValueError(msg)
@@ -2292,7 +2305,7 @@ class CoherenceCheck(OwnsArrays):
             self, "frequencies", "coherence", "judged", axis="frequency"
         )
         owner = type(self).__name__
-        gamma2 = np.asarray(self.coherence, dtype=np.float64)
+        gamma2 = real_array(self.coherence, "coherence")
         if np.any(~(gamma2 >= 0.0)) or np.any(gamma2 > 1.0):
             msg = f"{owner}: 'coherence' must lie in [0, 1]."
             raise ValueError(msg)
@@ -2586,10 +2599,12 @@ def verify_channel_match(
     :return: A :class:`ChannelMatchVerification` over the range.
     :raises ValueError: for mismatched or non-finite data, or a range that
         holds none of the frequencies.
-    :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers.
+    :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers, or
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``response`` holds a text or a value that is not a number.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
-    values = np.asarray(response, dtype=np.complex128)
+    freqs = real_array(frequencies, "frequencies")
+    values = complex_array(response, "response")
     if freqs.ndim != 1 or values.shape != freqs.shape:
         msg = "'frequencies' and 'response' must be one-dimensional and of one length."
         raise ValueError(msg)

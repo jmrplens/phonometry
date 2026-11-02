@@ -108,6 +108,7 @@ neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are empty, non-finite, or differ in length. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## critical_bandwidth
 
@@ -593,3 +594,4 @@ different Li is small", so a spread above 3 dB triggers an
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than two finite levels are given. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |

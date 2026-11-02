@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
+from .._internal.validation import real_array
 from .common import (
     _C_MUTED,
     _C_REFERENCE,
@@ -703,10 +704,12 @@ def fdtd_frame(
     The snapshot plot's field, colour scale and colormap, on the scale
     *color_limit* fixes, laid out once (:func:`lay_out_frame`) for the
     widest title the run shows.
+
+    :raises TypeError: if ``field`` holds a text or a value that is not a real number.
     """
     return _video_snapshot(
         ax,
-        np.asarray(field, dtype=np.float64),
+        real_array(field, "field"),
         shape=shape,
         obstacle_mask=obstacle_mask,
         source_positions=acoustic_source_positions(sources, dx),
@@ -740,10 +743,13 @@ def elastic_frame(
     last_time_s: float,
     language: Language,
 ) -> AxesImage:
-    """The first frame of an elastic video, as :func:`fdtd_frame` draws an acoustic one."""
+    """The first frame of an elastic video, as :func:`fdtd_frame` draws an acoustic one.
+
+    :raises TypeError: if ``field`` holds a text or a value that is not a real number.
+    """
     return _video_snapshot(
         ax,
-        np.asarray(field, dtype=np.float64),
+        real_array(field, "field"),
         shape=shape,
         obstacle_mask=obstacle_mask,
         source_positions=elastic_source_positions(sources, dx),

@@ -114,6 +114,7 @@ from ..._internal.boundary import round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_finite,
     require_finite_array,
@@ -908,13 +909,14 @@ def statistical_pass_by(
         speed, or invalid weighting factors or levels.
     :raises TypeError: if ``road_speed_category`` or a key of
         ``corrected_vehicle_sound_levels``, ``reference_levels`` or
-        ``weighting_factors`` is not a text, or ``reference_levels`` or a value
-        of one of those mappings is not a single number.
+        ``weighting_factors`` is not a text, or ``reference_levels`` or a value of one
+        of those mappings is not a single number, or ``max_levels`` or ``speeds_kmh``
+        holds a text or a value that is not a real number.
     """
     road = _road_category(road_speed_category)
     labels = np.asarray(vehicle_categories, dtype=object).ravel()
-    speeds = np.asarray(speeds_kmh, dtype=np.float64)
-    levels = np.asarray(max_levels, dtype=np.float64)
+    speeds = real_array(speeds_kmh, "speeds_kmh")
+    levels = real_array(max_levels, "max_levels")
     if (
         speeds.ndim != 1
         or levels.ndim != 1

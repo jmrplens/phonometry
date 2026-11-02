@@ -34,6 +34,7 @@ from .._internal.frozen import OwnsArrays
 # Shared Welch-core defaults and helpers (single source of truth for the
 # segment policy across the spectral estimators).
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_counts,
@@ -78,8 +79,8 @@ def _validate_pair(
         length complaint names the function that was typed rather than this
         validator, which two entry points share.
     """
-    xa = np.asarray(x, dtype=np.float64)
-    ya = np.asarray(y, dtype=np.float64)
+    xa = real_array(x, "x")
+    ya = real_array(y, "y")
     if xa.ndim != 1 or ya.ndim != 1:
         msg = "'x' and 'y' must be one-dimensional."
         raise ValueError(msg)
@@ -276,7 +277,8 @@ def transfer_function(
     :return: A :class:`FrequencyResponseResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes,
-        or ``estimator`` is not a text.
+        or ``estimator`` is not a text, or ``x`` or ``y`` holds a text or a value that
+        is not a real number.
     """
     fs = resolve_pair_fs(x, y, fs)
     xa, ya = _validate_pair(x, y, "transfer_function")
@@ -379,7 +381,8 @@ def coherence(
     :return: The bins and the coherence at each, as a
         :class:`CoherenceResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes,
+        or ``x`` or ``y`` holds a text or a value that is not a real number.
     """
     fs = resolve_pair_fs(x, y, fs)
     xa, ya = _validate_pair(x, y, "coherence")

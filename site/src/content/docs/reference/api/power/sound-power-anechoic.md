@@ -98,7 +98,7 @@ from ISO 9613-1 (not computed here); without it $C_3 = 0$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `radius`, `static_pressure_kpa` or `temperature_c` is not a single number. |
+| TypeError | if `radius`, `static_pressure_kpa` or `temperature_c` is not a single number, or `air_absorption_db_per_m` holds a text or a value that is not a real number. |
 
 ## MeteorologicalCorrection
 
@@ -148,6 +148,12 @@ bounds (clause 9.4.2).
 | `frequencies` | `(NB,)` nominal mid-band frequencies (Hz), selecting the per-band lower criterion. |
 
 **Returns:** `K1i` per position and band, in decibels, matching the broadcast shape of the inputs.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `background_levels`, `frequencies` or `source_levels` holds a text or a value that is not a real number. |
 
 ## precision_positions
 
@@ -231,7 +237,7 @@ $k = 1.6$ (95 %, one-sided, when comparing to a limit).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `coverage_factor` or `sigma_omc_db` is not a single number. |
+| TypeError | if `coverage_factor` or `sigma_omc_db` is not a single number, or `sigma_r0` holds a text or a value that is not a real number. |
 
 ## PrecisionSoundPowerResult
 
@@ -414,4 +420,4 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a room qualification of the other room type. |
-| TypeError | if `radius` is not a single number, or `surface` is not a text. |
+| TypeError | if `radius` is not a single number, or `surface` is not a text, or `areas`, `background_levels`, `frequencies` or `levels_positions` holds a text or a value that is not a real number. |

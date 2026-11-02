@@ -75,6 +75,7 @@ from scipy import signal as sig
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -808,8 +809,9 @@ def takt_max_rms(maxima: ArrayLike) -> float:
     :return: :math:`KB_\mathrm{FTm}`, dimensionless. Zero for an empty input, which is the
         answer for a record with no whole clock interval in it.
     :raises ValueError: If a maximum is negative or not finite.
+    :raises TypeError: if ``maxima`` holds a text or a value that is not a real number.
     """
-    values = np.atleast_1d(np.asarray(maxima, dtype=np.float64))
+    values = np.atleast_1d(real_array(maxima, "maxima"))
     if values.size == 0:
         # A record with no whole clock interval in it: Formula (2) averages
         # over N of them and there are none, which is nothing rather than an

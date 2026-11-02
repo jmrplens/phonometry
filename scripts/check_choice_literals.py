@@ -846,6 +846,13 @@ def _bare(node: ast.expr) -> ast.expr:
     return node
 
 
+#: Private helpers that say what a value holds, by a word of their own,
+#: rather than hand the value back cleaned up: ``_misread_member(x)`` answers
+#: ``"bytearray"``, ``"nesting"`` or ``None`` for whatever *x* is, so a
+#: comparison of what it returns with a text compares no value of *x*.
+_CLASSIFYING_HELPERS = frozenset({"_misread_member"})
+
+
 def _derived_from(value: ast.expr, matches: Callable[[ast.expr], bool]) -> bool:
     """Whether an assigned *value* is the target, cleaned up, resolved or held.
 
@@ -861,6 +868,8 @@ def _derived_from(value: ast.expr, matches: Callable[[ast.expr], bool]) -> bool:
         return True
     if isinstance(value, ast.Call) and value.args and matches(value.args[0]):
         name = _call_name(value)
+        if name in _CLASSIFYING_HELPERS:
+            return False
         return name == "get" or name.startswith("_") or _holds_items(value)
     if isinstance(value, ast.Call) and _holds_items(value):
         return _derived_from(value.args[0], matches)

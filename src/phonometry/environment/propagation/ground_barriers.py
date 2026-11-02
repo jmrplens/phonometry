@@ -99,7 +99,7 @@ Fresnel number :math:`N = (2/\lambda)(A + B + e - d)` (Bies Eq. (5.157)).
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -107,8 +107,9 @@ from scipy.special import fresnel, wofz
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
-    _as_float64,
     check_engine,
+    complex_array,
+    real_array,
     require_choice,
     require_positive,
     require_positive_array,
@@ -203,10 +204,16 @@ def _normalized_ground_impedance(
     if isinstance(impedance, PorousMediumResult):
         # Materials e^{+j omega t} -> Salomons e^{-i omega t}: conjugate.
         impedance = np.conj(impedance.normalized_impedance)
-    return _resolve_impedance_array(impedance, frequency)
+    # Exactly one of the two is given, and flow_resistivity is not: the
+    # impedance is.
+    return _resolve_impedance_array(
+        cast("ArrayLike", impedance), frequency, "impedance"
+    )
 
 
-def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Complex:
+def _resolve_impedance_array(
+    impedance: ArrayLike, frequency: Real, name: str
+) -> Complex:
     r"""Broadcast a scalar/array normalized impedance to the frequency shape.
 
     The impedance is in the :math:`\mathrm{e}^{-i \omega t}` convention (a passive
@@ -214,21 +221,22 @@ def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Co
     impedance is rejected because :math:`1/Z`
     enters the numerical distance (an infinite ``Z`` would give ``inf/inf`` NaN
     rather than the intended hard-ground limit, which is a large finite ``Z``).
+    *name* is the caller's parameter, for the messages.
     """
-    z = np.atleast_1d(np.asarray(impedance, dtype=np.complex128))
+    z = np.atleast_1d(complex_array(impedance, name))
     if z.size == 1:
         z = np.full(frequency.shape, z[0], dtype=np.complex128)
     if z.shape != frequency.shape:
         msg = (
-            "'impedance' must be a scalar or match the frequency vector "
+            f"'{name}' must be a scalar or match the frequency vector "
             f"(got {z.shape}, expected {frequency.shape})."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(z)):
-        msg = "'impedance' must be finite."
+        msg = f"'{name}' must be finite."
         raise ValueError(msg)
     if not np.all(np.abs(z) > 0.0):
-        msg = "'impedance' must be non-zero."
+        msg = f"'{name}' must be non-zero."
         raise ValueError(msg)
     return z
 
@@ -314,7 +322,8 @@ def spherical_reflection_coefficient(
         the impedance is zero, or its shape does not match the frequencies.
     :raises TypeError: if ``distance``, ``receiver_height_m``, ``source_height_m`` or
         ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``normalized_impedance`` holds a text or a
+        value that is not a number.
     """
     require_scalar(distance, "distance")
     require_scalar(receiver_height_m, "receiver_height_m")
@@ -327,7 +336,7 @@ def spherical_reflection_coefficient(
         raise ValueError(msg)
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     f = require_positive_array(frequencies, "frequencies")
-    z = _resolve_impedance_array(normalized_impedance, f)
+    z = _resolve_impedance_array(normalized_impedance, f, "normalized_impedance")
     k = 2.0 * np.pi * f / speed_of_sound
     r2 = float(np.hypot(distance, source_height_m + receiver_height_m))
     cos_theta = (source_height_m + receiver_height_m) / r2
@@ -417,7 +426,7 @@ def ground_effect(
     :raises TypeError: if ``distance``, ``flow_resistivity_pa_s_m2``,
         ``receiver_height_m`` or ``source_height_m`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number, or ``model``
-        is not a text.
+        is not a text, or ``impedance`` holds a text or a value that is not a number.
     """
     require_choice(model, "model", ("delany_bazley", "miki"))
     require_scalar(distance, "distance")
@@ -482,8 +491,12 @@ def fresnel_number(
     :return: Fresnel number ``N`` per frequency.
     :raises ValueError: If a distance is not positive.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or ``frequencies``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``direct_distance``,
+        ``edge_to_receiver`` or ``source_to_edge`` is not a single number.
     """
+    require_scalar(direct_distance, "direct_distance")
+    require_scalar(edge_to_receiver, "edge_to_receiver")
+    require_scalar(source_to_edge, "source_to_edge")
     for name, value in (
         ("source_to_edge", source_to_edge),
         ("edge_to_receiver", edge_to_receiver),
@@ -523,7 +536,7 @@ def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
         otherwise not a number.
     :raises ValueError: for a non-finite or ragged ``fresnel_number``.
     """
-    n = _as_float64(fresnel_number, "fresnel_number")
+    n = real_array(fresnel_number, "fresnel_number")
     # A NaN would pass through the closed form and come back as a NaN
     # "attenuation", silently breaking the documented >= 0 dB contract.
     if not np.all(np.isfinite(n)):

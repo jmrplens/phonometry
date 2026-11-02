@@ -1245,7 +1245,9 @@ class ElasticFDTD2D:
         """One leapfrog step on the backend's arrays.
 
         Every force and explosion is sampled before any field moves, so a
-        sample the step refuses leaves the engine as it was.
+        sample the step refuses leaves the fields and the step count as they
+        were. A source a waveform adds while the step samples is registered
+        at once, and stays registered when the step raises.
         """
         t_half = (self.n + 0.5) * self.dt
         t_next = (self.n + 1) * self.dt

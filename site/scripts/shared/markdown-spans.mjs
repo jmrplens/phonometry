@@ -104,3 +104,57 @@ export function dropInlineSpansByLine(text, markers = '`') {
     .map((line) => dropInlineSpans(line, markers))
     .join('\n');
 }
+
+/**
+ * Whether a line opens a block of its own: a heading, a row of a table, an
+ * item of a list or a quotation, which a code span never crosses into.
+ */
+const BLOCK_START = /^ {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)/;
+
+/** Whether a line is a block on its own line only: a heading or a table row. */
+const ONE_LINE_BLOCK = /^ {0,3}(?:#{1,6}(?:\s|$)|\|)/;
+
+/**
+ * `text` with every span of {@link inlineSpans} taken out, each block read
+ * whole: a code span may run over the lines of its paragraph, as the page
+ * reads it, but never past a blank line or into another block. Each span
+ * leaves {@link SPAN_MARK} and the line breaks it held, so the text keeps its
+ * lines, each where it was.
+ *
+ * @param {string} text Prose, its fenced code already out (left as blank lines).
+ * @param {string} markers "`" for the code spans, "`$" for code and maths.
+ * @returns {string} The text, its spans out, with as many lines as it had.
+ */
+export function dropInlineSpansByBlock(text, markers = '`') {
+  const lines = text.split('\n');
+  const blocks = [];
+  let current = [];
+  const close = () => {
+    if (current.length) blocks.push(current);
+    current = [];
+  };
+  for (const line of lines) {
+    if (!line.trim()) {
+      close();
+      blocks.push([line]);
+      continue;
+    }
+    if (BLOCK_START.test(line)) close();
+    current.push(line);
+    if (ONE_LINE_BLOCK.test(line)) close();
+  }
+  close();
+  return blocks.map((block) => dropBlockSpans(block.join('\n'), markers)).join('\n');
+}
+
+/** One block with its spans out, each leaving its mark and its line breaks. */
+function dropBlockSpans(block, markers) {
+  let kept = '';
+  let done = 0;
+  for (const [start, end] of inlineSpans(block, markers)) {
+    const breaks = block.slice(start, end).split('\n').length - 1;
+    kept += block.slice(done, start) + SPAN_MARK + '\n'.repeat(breaks);
+    done = end;
+  }
+  return kept + block.slice(done);
+}

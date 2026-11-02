@@ -90,7 +90,8 @@ const figures = [];
 for (const page of esPages) {
 	// Fenced blocks and inline code are samples of markup, not markup; the
 	// page is read as shared/page-prose.mjs reads it, figures in every form.
-	if (authorsFigure(readFileSync(join(esDir, page), "utf8"))) {
+	const mdx = page.endsWith(".mdx");
+	if (authorsFigure(readFileSync(join(esDir, page), "utf8"), { mdx })) {
 		figures.push(page);
 	}
 }

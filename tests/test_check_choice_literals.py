@@ -2389,6 +2389,42 @@ def test_a_check_reached_through_a_plain_import_is_a_check() -> None:
         assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
 
 
+def _checked_before_a_namesake_is_imported(mode: _Pace, *, again: bool) -> _Pace:
+    from phonometry._internal.validation import require_choice
+
+    checked = require_choice(mode, "mode", _PACES)
+    if again:
+        from operator import truth as require_choice
+
+        require_choice(checked)
+    return checked
+
+
+def _checked_after_a_namesake_is_imported(mode: _Pace) -> _Pace:
+    from operator import truth as require_choice
+
+    require_choice(mode)
+    from phonometry._internal.validation import require_choice
+
+    return require_choice(mode, "mode", _PACES)
+
+
+def test_a_check_is_read_through_the_import_that_stands_for_it_at_the_call() -> None:
+    """Of two imports of one name in a function, a call reads the one it runs after.
+
+    The imports of the function were read into one table, in no order of
+    the source, so the namesake imported in the other branch, or before
+    the check, stood for the check's name at every call, and the checked
+    choice was refused as never checked.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for checked in (
+        _checked_before_a_namesake_is_imported,
+        _checked_after_a_namesake_is_imported,
+    ):
+        assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
+
+
 def _handed_to_a_namesake_method(mode: str, registry: object) -> str:
     registry.require_choice(mode, "mode", _PACES)  # type: ignore[attr-defined]
     return mode

@@ -115,7 +115,7 @@ import typing
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
-from ast_scan import binding_of, scope_nodes
+from ast_scan import binding_of, imported_names, live_bindings, scope_nodes
 
 import phonometry
 from phonometry._internal.catalogue import CatalogueRow
@@ -1328,8 +1328,9 @@ def _names_for_call(
     scope the call runs in out to the function: ``None`` when a scope binds
     it by a parameter, a value it stores or a function or a class it
     defines, which reaches what the function put there, never a function of
-    its module of the same name; the imports of the scope that imports it;
-    and the module's own names when no scope binds it, or one declares it
+    its module of the same name; the imports of the scope that imports it,
+    those that may stand for it at the call (:func:`_imports_at`); and the
+    module's own names when no scope binds it, or one declares it
     ``global``. What a function, a class or a comprehension inside the
     function binds or imports for itself hides nothing outside it. A module
     that is not loaded is read in *namespace*.
@@ -1344,7 +1345,7 @@ def _names_for_call(
     if how in {"definition", "binding"}:
         return None
     if how == "import" and scope is not None and module_name is not None:
-        return _local_imports(scope, module_name, own=True)
+        return _imports_at(scope, node, head.id, module_name)
     module = _module_names(module_name) if module_name else {}
     return module or namespace
 
@@ -1662,6 +1663,30 @@ def _local_imports(
         elif isinstance(node, ast.ImportFrom):
             found.update(_from_imports(node, package))
     return found
+
+
+def _imports_at(
+    scope: ast.AST, node: ast.AST, name: str, module_name: str
+) -> Mapping[str, object] | None:
+    """What the imports of *name* that *scope* makes, and that may stand for it
+    at *node* (:func:`ast_scan.live_bindings`), bind it to; ``None`` when two
+    of them bind it to different objects, which the call may reach either.
+    """
+    imports = sorted(
+        (
+            statement
+            for statement in scope_nodes(scope)
+            if isinstance(statement, ast.Import | ast.ImportFrom)
+            and name in imported_names(statement)
+        ),
+        key=lambda statement: (statement.lineno, statement.col_offset),
+    )
+    found = [
+        _local_imports(ast.Module(body=[statement], type_ignores=[]), module_name)
+        for statement in live_bindings(scope, imports, node)
+    ]
+    objects = {id(names.get(name)) for names in found}
+    return found[-1] if len(objects) == 1 else None
 
 
 def _plain_imports(node: ast.Import) -> dict[str, object]:

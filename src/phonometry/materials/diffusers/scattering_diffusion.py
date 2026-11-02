@@ -137,7 +137,7 @@ class DiffusionResult(OwnsArrays):
             msg = "DiffusionResult: 'angles_deg' must contain only finite values."
             raise ValueError(msg)
         lev = real_array(self.levels, "levels")
-        if np.any(np.isnan(lev)) or np.any(lev == np.inf):
+        if np.any(np.isnan(lev)) or np.any(np.isposinf(lev)):
             msg = (
                 "DiffusionResult: 'levels' must be finite, or -inf for a "
                 "receiver with no scattered energy."

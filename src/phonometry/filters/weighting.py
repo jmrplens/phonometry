@@ -79,9 +79,9 @@ each of them used to be a documented limitation of this module:
 * one minute of 44.1 kHz audio costs about 18 ms instead of 377 ms for A and
   775 ms for 468, and holds 21 MB of intermediates instead of 169 MB
   (measured back to back in one process, mean of five runs). The design
-  itself costs about 200 ms and is cached, so even a first call is quicker
-  than the path it replaces: about 215 ms against 377 for A, 220 against
-  775 for 468.
+  itself costs about 270 ms and is cached, so even a first call, the design
+  and the filtering together, is quicker than the 377 ms and 775 ms the path
+  it replaces spent on the filtering alone.
 """
 
 from __future__ import annotations
@@ -112,7 +112,13 @@ from ..io._resolve import (
     resolve_samples,
 )
 from ..io._signal import Signal
-from ._weighting_design import design_sos
+from ._pinned_trig import pinned_hypot
+from ._weighting_design import (
+    bilinear_zpk,
+    complex_product,
+    complex_quotient,
+    design_sos,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -239,6 +245,11 @@ def _abcd_product(
     ]
 
 
+def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
+    """``j w_ref - r`` for each root, as ``(real, imaginary)``, formed as numpy forms it."""
+    return [(0.0 - root.real, w_ref - root.imag) for root in roots.tolist()]
+
+
 @lru_cache(maxsize=1)
 def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
     r"""Poles and gain of the ITU-R BS.468-4 weighting network.
@@ -294,7 +305,10 @@ def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
     denominator = np.polyadd(abcd[0][0], abcd[0][1] / _ITU_R_468_LOAD_OHM)
     poles = np.roots(denominator / denominator[0])
     w_ref = 2.0 * np.pi * 1000.0
-    gain = float(np.abs(np.prod(1j * w_ref - poles)) / w_ref)
+    # prod(j w_ref - poles), spelled in real arithmetic by complex_product
+    # because numpy's own complex product is fused on some builds.
+    at_reference = complex_product(_shifted_to(w_ref, poles))
+    gain = pinned_hypot(*at_reference) / w_ref
     return tuple(sorted((complex(v) for v in poles), key=lambda v: (v.real, v.imag))), (
         gain
     )
@@ -446,9 +460,9 @@ def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     and librosa, two independent implementations.
     """
     zero_real = -6532.0 / 2.0
-    zero_imag = math.sqrt(4.0975e7 - zero_real**2)
+    zero_imag = math.sqrt(4.0975e7 - zero_real * zero_real)
     pole_real = -21514.0 / 2.0
-    pole_imag = math.sqrt(3.8836e8 - pole_real**2)
+    pole_imag = math.sqrt(3.8836e8 - pole_real * pole_real)
     zeros = np.array(
         [0.0, complex(zero_real, zero_imag), complex(zero_real, -zero_imag)]
     )
@@ -520,8 +534,11 @@ def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
         }
         zeros, poles, gain = builders[curve]()
     w_ref = 2 * np.pi * _REFERENCE_HZ.get(curve, 1000.0)
-    response = gain * np.prod(1j * w_ref - zeros) / np.prod(1j * w_ref - poles)
-    return zeros, poles, gain / float(np.abs(response))
+    # gain * prod(j w_ref - zeros) / prod(j w_ref - poles), numpy's steps in
+    # numpy's order, in the real arithmetic complex_product explains.
+    above = complex_product([(gain, 0.0), complex_product(_shifted_to(w_ref, zeros))])
+    response = complex_quotient(above, complex_product(_shifted_to(w_ref, poles)))
+    return zeros, poles, gain / pinned_hypot(*response)
 
 
 @lru_cache(maxsize=64)
@@ -538,7 +555,7 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
             _REFERENCE_HZ.get(curve, 1000.0),
         )
     else:
-        sos = signal.zpk2sos(*signal.bilinear_zpk(zeros, poles, gain, fs))
+        sos = signal.zpk2sos(*bilinear_zpk(zeros, poles, gain, fs))
     shared = np.array(sos, dtype=np.float64)
     shared.flags.writeable = False
     return shared
@@ -569,10 +586,10 @@ def _weighting_sos(
     library never actually applied, and the rates where they win are ones no
     standard in the corpus places a requirement at.
 
-    The fit costs about 200 ms, which is why it is cached: it is paid once per
-    (curve, rate, mode), and it is about a quarter of the 775 ms the resampled
+    The fit costs about 270 ms, which is why it is cached: it is paid once per
+    (curve, rate, mode), and it is about a third of the 775 ms the resampled
     path it replaces spent *filtering* one minute of 468-weighted audio, and
-    about half of the A curve's 377. Where the first start
+    about three quarters of the A curve's 377. Where the first start
     does not land close enough, the routine works through the other starts of
     :func:`~phonometry.filters._weighting_design._spare_placements` and the
     design takes about 3 s instead. That is common below about 2 kHz, and it

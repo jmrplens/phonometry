@@ -1183,7 +1183,7 @@ def weighted_exposure(
     )
     # -inf is admitted as the level of a band that carries no energy (see
     # StrikeSELSpectrum.band_sel); it is the neutral element of the energy sum.
-    if np.any(np.isnan(sel)) or np.any(sel == np.inf):
+    if np.any(np.isnan(sel)) or np.any(np.isposinf(sel)):
         msg = "'band_sel' must be finite, or -inf for a band with no energy."
         raise ValueError(msg)
     n = require_count(n_events, "n_events")

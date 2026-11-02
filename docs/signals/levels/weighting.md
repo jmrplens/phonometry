@@ -281,10 +281,10 @@ plt.show()
   second-order sections at the input rate, so `stateful` and `high_accuracy`
   are independent, stateful defaults to the fitted design like everything
   else, and stitched blocks reproduce a single call exactly.
-- The fit costs about 200 ms and is cached per curve and sample rate, so it
+- The fit costs about 270 ms and is cached per curve and sample rate, so it
   is paid once. Even including it, weighting one minute of 44.1 kHz audio is
-  faster than it used to be: about 215 ms against 377 ms for A, and 220 ms
-  against 775 ms for the 468 curve. Once the design is cached the filtering
+  faster than it used to be: under 300 ms against 377 ms for A, and against
+  775 ms for the 468 curve. Once the design is cached the filtering
   alone is about 18 ms, and it holds 21 MB of intermediates instead of 169 MB.
 
 ```python
@@ -426,8 +426,9 @@ Not with a plain bilinear design: at $f_\mathrm{s} = 48$ kHz the A-curve error r
   the infrasound G curve, the historical B and D, and AU for audible sound
   in the presence of ultrasound.
 - [Same bits on every machine](../../reference/determinism.md): why the
-  designed filter is byte-identical on any CPU, BLAS, thread count or
-  platform, with the measured evidence.
+  designed filter is byte-identical whatever the C library, the processor's
+  vector units or the thread count, which library steps it still depends on,
+  and the measured evidence.
 - API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
 - Theory: [Weighting Curves (IEC 61672-1)](../../reference/theory/signal-analysis.md#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
 

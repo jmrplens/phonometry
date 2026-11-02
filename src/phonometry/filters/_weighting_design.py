@@ -75,13 +75,18 @@ output:
   different filters: 5e-5 apart in the leading coefficient, 0.002 dB apart
   in response, and 0.0225 pt apart in a plotted curve. So the reductions are
   done here instead, by :func:`_ordered_sum` and :func:`_solve_dense`, in an
-  order this module fixes rather than one a library picks, and the two places
+  order this module fixes rather than one a library picks, and the places
   the path used to hand a *complex* expression to numpy (the printed curve
-  the fit aims at, and the one read-back that sets the shipped gain) are
-  written out in real arithmetic by :func:`_log_distance2` and
-  :func:`_cascade_magnitude`, because complex multiplication and complex
+  the fit aims at, the one read-back that sets the shipped gain, and the
+  bilinear transform with its gain) are written out in real arithmetic by
+  :func:`_log_distance2`, :func:`_cascade_magnitude` and
+  :func:`bilinear_zpk`, because complex multiplication and complex
   magnitude are dispatched on what the CPU can do in exactly the same way a
-  BLAS reduction is.
+  BLAS reduction is, and numpy's complex product is a C loop that a
+  compiler may fuse into multiply-adds: numpy built with clang does, on
+  macOS and on Windows, and numpy built with GCC does not, which kept the A
+  weighting at 48 kHz apart on those platforms after every transcendental
+  was pinned.
 
   Fixing the reductions was not enough, and what was left is worth stating
   because it is where an earlier version of this paragraph was wrong. It said
@@ -89,12 +94,20 @@ output:
   on a machine that has no AVX512, which is the one place they do. Under Intel
   SDE emulating Skylake-X, ``numpy``'s ``log``, ``exp``, ``tan``, ``power``,
   ``arctan`` and ``sin`` each return a different digest than the same host
-  returns natively, while :mod:`math`'s do not. Every one of them on the design
-  path is now taken from :mod:`math` one element at a time, through
-  :func:`_scalar_log`, :func:`_scalar_exp`, :func:`_scalar_tan`,
-  :func:`_scalar_pow` and :func:`_scalar_arctan`. What is left of ``numpy`` on
-  the path is arithmetic IEEE 754 pins, and ``sqrt``, which the standard
-  correctly rounds and which does not move.
+  returns natively, while :mod:`math`'s do not. So every one of them left
+  numpy, first for :mod:`math` one element at a time and then, because the C
+  library behind :mod:`math` is itself a platform choice (glibc, Apple's libm
+  and the Windows runtime each round a fraction of inputs differently, and
+  the fit amplifies the difference), for routines spelled in arithmetic IEEE
+  754 pins: ``log`` and ``log10`` in
+  :mod:`~phonometry.filters._pinned_log`, ``exp`` and ``pow`` in
+  :mod:`~phonometry.filters._pinned_exp` (both glibc's own routines, bit for
+  bit), and ``sin``, ``tan``, ``atan`` and the magnitude of a complex root,
+  correctly rounded, in :mod:`~phonometry.filters._pinned_trig`. No routine
+  of the C library is left in the fit; :func:`_scalar_arctan` says what the
+  last of them cost. What is left of ``numpy`` on the path is arithmetic
+  IEEE 754 pins, and ``sqrt``, which the standard correctly rounds and which
+  does not move.
 
   The root of it sat *before* the loop rather than inside it.
   :func:`numpy.geomspace` is ``10 ** linspace(...)``, so the grid every
@@ -139,10 +152,18 @@ from .._internal.validation import (
     is_positive,
     real_array,
 )
-from ._pinned_log import pinned_log
+from ._pinned_exp import pinned_exp, pinned_pow
+from ._pinned_log import pinned_log, pinned_log10
+from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
+
+
+def _log_of(value: float) -> float:
+    """The pinned natural logarithm of one positive float."""
+    return float(pinned_log(real_array([value], "value"))[0])
+
 
 #: Decibels per natural log unit of a squared magnitude: ``10 / ln 10``.
-_DB_PER_LOG = 10.0 / np.log(10.0)
+_DB_PER_LOG = 10.0 / _log_of(10.0)
 
 #: Grid points, logarithmically spaced in the *warped* frequency
 #: :math:`\Omega`. Spacing the grid in :math:`\Omega` rather than in :math:`f`
@@ -159,7 +180,7 @@ _GRID_POINTS = 257
 #: Both are fixed budgets rather than convergence tests, so the routine always
 #: does the same arithmetic, and they are set where the accuracy curve
 #: flattens: measured over this corpus, raising them to 40 by 12 -- 2.4 times
-#: the work, about 480 ms per design against the shipped budget's 200 --
+#: the work of the shipped budget --
 #: moves no (curve, rate)
 #: fit by more than 0.013 dB (the largest, D at 12 kHz, from 0.020 to 0.008)
 #: and moves the corpus's worst, BS.468-4 at 48 kHz, from 0.062 only to 0.060,
@@ -217,7 +238,7 @@ _CORNER_DECADES = 12.0
 #: the individual roots. One decade of margin, which at every rate this library
 #: is used at is slack: the physical limit above binds first, and this one is
 #: what keeps the guarantee from depending on that.
-_OVERFLOW_MARGIN = np.log(10.0)
+_OVERFLOW_MARGIN = _log_of(10.0)
 
 #: Floor under the residual magnitude in the Lawson update, so a point that
 #: happens to sit on the target does not zero its own weight for good.
@@ -321,13 +342,14 @@ def _corner_bounds(
         2 * layout.den_quadratic + layout.den_linear,
         1,
     )
-    largest_root = (np.log(np.finfo(np.float64).max) - _OVERFLOW_MARGIN) / cascade
-    decades = _CORNER_DECADES * math.log(10.0)
-    lowest = math.log(span[0]) - decades
-    highest = min(math.log(span[1]) + decades, largest_root - math.log(2.0))
-    quadratic = np.array(
-        [[lowest, 2.0 * lowest], [highest + math.log(2.0), 2.0 * highest]]
-    )
+    largest_root = (
+        _log_of(float(np.finfo(np.float64).max)) - _OVERFLOW_MARGIN
+    ) / cascade
+    decades = _CORNER_DECADES * _log_of(10.0)
+    lowest = _log_of(span[0]) - decades
+    log_two = _log_of(2.0)
+    highest = min(_log_of(span[1]) + decades, largest_root - log_two)
+    quadratic = np.array([[lowest, 2.0 * lowest], [highest + log_two, 2.0 * highest]])
     linear = np.array([[lowest], [highest]])
     pieces = (
         (layout.num_quadratic, quadratic),
@@ -377,7 +399,7 @@ def _anchor_hz(
 
 
 def _quadratic_group(
-    block: np.ndarray, omega: np.ndarray, omega2: np.ndarray, *, grad: bool
+    coefficients: np.ndarray, omega: np.ndarray, omega2: np.ndarray, *, grad: bool
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""``|s^2 + b1 s + b0|^2`` per factor at ``s = j omega``, and the gradient.
 
@@ -385,13 +407,14 @@ def _quadratic_group(
     magnitude is :math:`(b_0 - \Omega^2)^2 + (b_1 \Omega)^2`, and the
     derivatives of its ``log`` with respect to the *logs* of the coefficients
     are :math:`2 b_1^2 \Omega^2 / D` and :math:`2 b_0 (b_0 - \Omega^2) / D`.
-    The logarithm itself is taken by the caller, batched.
+    The coefficients arrive already exponentiated and the logarithm is taken by
+    the caller, both batched.
     """
-    coefficients = _scalar_exp(block)
     b1 = coefficients[:, 0][None, :]
     b0 = coefficients[:, 1][None, :]
     offset = b0 - omega2[:, None]
-    denominator = offset * offset + (b1 * omega[:, None]) ** 2
+    damping = b1 * omega[:, None]
+    denominator = offset * offset + damping * damping
     if not grad:
         return denominator, np.zeros((omega.size, 0))
     d_b1 = 2.0 * b1 * b1 * omega2[:, None] / denominator
@@ -400,14 +423,37 @@ def _quadratic_group(
 
 
 def _linear_group(
-    block: np.ndarray, omega2: np.ndarray, *, grad: bool
+    coefficients: np.ndarray, omega2: np.ndarray, *, grad: bool
 ) -> tuple[np.ndarray, np.ndarray]:
     """``|s + b1|^2`` per factor at ``s = j omega``, and the ``log`` gradient."""
-    b1 = _scalar_exp(block)[None, :]
+    b1 = coefficients[None, :]
     denominator = omega2[:, None] + b1 * b1
     if not grad:
         return denominator, np.zeros((omega2.size, 0))
     return denominator, 2.0 * b1 * b1 / denominator
+
+
+@functools.lru_cache(maxsize=4)
+def _exponentials(packed: bytes) -> np.ndarray:
+    """:func:`_scalar_exp` of the parameter vector *packed* holds, frozen."""
+    values = _scalar_exp(np.frombuffer(packed, dtype=np.float64))
+    values.setflags(write=False)
+    return values
+
+
+def _coefficients(theta: np.ndarray) -> np.ndarray:
+    """The factor coefficients ``exp(theta)``, computed once per distinct *theta*.
+
+    A Levenberg-Marquardt step evaluates the same parameters on the grid and
+    at the anchor, for the Jacobian and again for the residual, so most
+    evaluations ask for an exponential they have just had; four slots hold
+    the current point and the trial without recomputing either.
+
+    :param theta: The parameter vector.
+    :return: Its exponential, read-only, in the same shape.
+    """
+    flat = np.ascontiguousarray(real_array(theta, "theta"))
+    return _exponentials(flat.tobytes()).reshape(flat.shape)
 
 
 def _log_mag2(
@@ -429,9 +475,15 @@ def _log_mag2(
     elementwise, each group's column span is summed over the same columns in
     the same order, and the group totals join ``total`` in the order the
     group tuple fixes.
+
+    The exponentials are batched the same way, for the same reason: one
+    :func:`_scalar_exp` per distinct parameter vector, shared by the
+    evaluation on the grid and the one at the anchor and reused while the
+    vector does not change (:func:`_coefficients`). The function is
+    elementwise, so where it is evaluated moves no bit either.
     """
     omega2 = omega * omega
-    num_quad, num_lin, den_quad, den_lin = layout.blocks(theta)
+    num_quad, num_lin, den_quad, den_lin = layout.blocks(_coefficients(theta))
     pieces = [omega2[:, None]]
     spans: list[tuple[int, int, float]] = []
     columns = []
@@ -447,10 +499,12 @@ def _log_mag2(
             continue
         if quadratic:
             denominator, jacobian = _quadratic_group(
-                block=block, omega=omega, omega2=omega2, grad=grad
+                coefficients=block, omega=omega, omega2=omega2, grad=grad
             )
         else:
-            denominator, jacobian = _linear_group(block=block, omega2=omega2, grad=grad)
+            denominator, jacobian = _linear_group(
+                coefficients=block, omega2=omega2, grad=grad
+            )
         pieces.append(denominator)
         spans.append((start, start + denominator.shape[1], sign))
         start += denominator.shape[1]
@@ -478,20 +532,29 @@ def _residual_db(
 
 
 def _scalar_arctan(values: np.ndarray) -> np.ndarray:
-    """``arctan`` elementwise, for the reason :func:`_scalar_log` gives.
+    """``arctan`` elementwise, correctly rounded, from :mod:`~phonometry.filters._pinned_trig`.
 
-    This one maps the warped grid back to real frequencies for the target
-    curve, so it is on the path exactly once per design and reaches every
-    residual through the target.
+    It maps the warped grid back to real frequencies for the target curve, so
+    it runs once per design, on the 257 grid points, and reaches every
+    residual through the target. It was the last routine of the path taken
+    from the C library, and the one the C libraries split on where the
+    checked designs reach: glibc's ``atan`` is not correctly rounded on 19 of
+    the 15 866 arctangents the 133 checked designs evaluate, which reach 32
+    of those designs, and its two x86-64 builds, with fused multiply-adds and
+    without, round some inputs differently from each other. The correctly
+    rounded value has one definition and no platform in it, so that is the
+    arctangent here, in this package's own exact integer arithmetic. Six of
+    those 32 designs moved on Linux by their last bits, inside the response
+    the tests allow; in the other 26 the frequency that differs by one ulp
+    gives the same target level to the last bit, so the fit never sees it.
+    glibc's routine, which would have kept the six where they were, is the
+    IBM Accurate Mathematical Library, under LGPL-2.1-or-later, and is not
+    transcribed into this MIT package.
 
     :param values: Any real array.
     :return: Its arctangent, elementwise, in the same shape.
     """
-    flat = real_array(values, "values").reshape(-1)
-    out = np.empty(flat.size, dtype=np.float64)
-    for index in range(flat.size):
-        out[index] = math.atan(flat[index])
-    return out.reshape(np.shape(values))
+    return pinned_atan(values)
 
 
 def _scalar_geomspace(start: float, stop: float, count: int) -> np.ndarray:
@@ -503,46 +566,44 @@ def _scalar_geomspace(start: float, stop: float, count: int) -> np.ndarray:
     through every step that follows: this is where the AVX512 disagreement
     entered, ahead of anything in the loop itself.
 
-    The spelling is numpy's own, term for term, with the power taken one
-    element at a time and the endpoints pinned as ``geomspace`` pins them. It
-    returns the identical array on a machine without AVX512, verified over the
-    spans this module uses, so the shipped designs do not move.
+    The spelling is numpy's own, term for term, with the endpoints pinned as
+    ``geomspace`` pins them, and the logarithm and the power taken from the
+    pinned routines: glibc's own ``log10`` and ``pow``, spelled in arithmetic
+    IEEE 754 fixes, so the grid is the same array on every platform, and on a
+    glibc machine without AVX512 it is the array ``geomspace`` returns.
 
     :param start: First value of the grid.
     :param stop: Last value of the grid.
     :param count: How many points, at least two.
     :return: The geometric grid, as :func:`numpy.geomspace` would give it.
     """
-    exponents = np.linspace(math.log10(start), math.log10(stop), count)
-    out = np.empty(count, dtype=np.float64)
-    for index in range(count):
-        out[index] = math.pow(10.0, exponents[index])
+    ends = pinned_log10(real_array([start, stop], "start and stop"))
+    exponents = np.linspace(ends[0], ends[1], count)
+    out = pinned_pow(10.0, exponents)
     out[0] = start
     out[-1] = stop
     return out
 
 
 def _scalar_pow(values: np.ndarray, exponent: float) -> np.ndarray:
-    """``x ** exponent`` elementwise, for the reason :func:`_scalar_log` gives.
+    """``x ** exponent`` elementwise, in pinned arithmetic.
 
     ``numpy.power`` with a floating exponent is dispatched like the
-    transcendentals and moves with the kernel; ``x ** 2`` does not, because
-    numpy turns an integral exponent into multiplication. This is the one
-    remaining call with a floating exponent.
+    transcendentals and moves with the kernel, and a Python ``**`` on floats
+    is the C library's ``pow``. This is glibc's routine spelled in
+    :mod:`~phonometry.filters._pinned_exp`; the Lawson update raises to the
+    power :data:`_LAWSON_EXPONENT`, and the routine returns its base unchanged
+    when that power is one, as glibc does.
 
     :param values: Any real array.
     :param exponent: The power to raise each element to.
     :return: The elementwise power, in the same shape.
     """
-    flat = real_array(values, "values").reshape(-1)
-    out = np.empty(flat.size, dtype=np.float64)
-    for index in range(flat.size):
-        out[index] = math.pow(flat[index], exponent)
-    return out.reshape(np.shape(values))
+    return pinned_pow(values, exponent)
 
 
 def _scalar_log(values: np.ndarray) -> np.ndarray:
-    """``log`` in pinned arithmetic, so a vector unit cannot change it.
+    """``log`` in pinned arithmetic, so neither a vector unit nor a C library can change it.
 
     numpy's ``log``, ``exp`` and ``tan`` are dispatched on what the CPU offers,
     and their AVX512 kernels do not agree to the last bit with the ones a
@@ -550,28 +611,24 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     against this host: every one of those three returns a different digest over
     4096 samples, while :func:`math.log`, :func:`math.exp` and :func:`math.tan`
     applied element by element return the same digest on both. So the fit
-    first took every one of them from :mod:`math`, one element at a time, and
-    the last machine-dependent step on the path was gone.
+    first took every one of them from :mod:`math`, one element at a time.
 
-    For ``log`` the loop then went too, because ``log`` is by far the most
-    called transcendental inside the iteration (once per grid point per
-    factor per Levenberg-Marquardt step, three quarters of a million calls
-    per design), and the interpreter overhead of taking it elementwise had
-    multiplied the cost of a design by about four.
-    :func:`~phonometry.filters._pinned_log.pinned_log` spells the C library's
-    own routine in numpy operations IEEE 754 pins exactly, and returns
-    :func:`math.log`'s own bits on every input the fit produces: verified
-    over the 91 658 333 distinct values the whole corpus evaluates, zero
-    mismatches, so the shipped coefficients, the figure corpus and the
-    conformance report are untouched by the switch. The other
-    transcendentals stay on the :mod:`math` loop. Most of them run once per
-    design, but two run inside the iteration as well: ``exp`` of the fitted
-    parameters at every evaluation of the response, about ten thousand calls
-    a design, and ``**`` of the residual in every Lawson round, about two
-    thousand. Elementwise, that is a small fraction of the logarithm's cost.
-    The Lawson exponent, ``_LAWSON_EXPONENT``, is 1, for which glibc's
-    ``pow`` returns its argument unchanged (macOS and Windows were not
-    measured).
+    That fixed the CPU and left the C library: :mod:`math` is whatever routine
+    the platform ships, and the platforms round a fraction of inputs to the
+    other neighbour. So each transcendental then left :mod:`math` too, for a
+    routine spelled in numpy operations IEEE 754 pins exactly, and ``log``
+    went first because it is the one taken most (once per grid point per
+    factor per Levenberg-Marquardt step, three quarters of a million values
+    per design, where the elementwise loop had multiplied the cost of a
+    design by about four). :func:`~phonometry.filters._pinned_log.pinned_log`
+    spells glibc's own routine and returns :func:`math.log`'s bits on every
+    input the fit produces: verified over the 91 658 333 distinct values the
+    whole corpus evaluates, zero mismatches, so the shipped coefficients, the
+    figure corpus and the conformance report were untouched by the switch.
+    The exponential follows it into the iteration (once per factor per
+    evaluation, through :func:`_coefficients`) and the power into every Lawson
+    round; the rest run a few times per design. All of them are now pinned
+    the same way, the arctangent last; see :func:`_scalar_arctan`.
 
     :param values: Any real array of positive values.
     :return: Its natural logarithm, elementwise, in the same shape.
@@ -580,29 +637,28 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
 
 
 def _scalar_exp(values: np.ndarray) -> np.ndarray:
-    """``exp`` elementwise, for the reason :func:`_scalar_log` gives.
+    """``exp`` elementwise: glibc's routine, spelled in :mod:`~phonometry.filters._pinned_exp`.
+
+    The reason is the one :func:`_scalar_log` gives; the proof that it moves
+    no shipped coefficient is in that module.
 
     :param values: Any real array.
     :return: Its exponential, elementwise, in the same shape.
     """
-    flat = real_array(values, "values").reshape(-1)
-    out = np.empty(flat.size, dtype=np.float64)
-    for index in range(flat.size):
-        out[index] = math.exp(flat[index])
-    return out.reshape(np.shape(values))
+    return pinned_exp(values)
 
 
 def _scalar_tan(values: np.ndarray) -> np.ndarray:
-    """``tan`` elementwise, for the reason :func:`_scalar_log` gives.
+    """``tan`` elementwise, correctly rounded, from :mod:`~phonometry.filters._pinned_trig`.
+
+    The reason is the one :func:`_scalar_log` gives. glibc's own ``tan`` is
+    correctly rounded on every argument the corpus feeds it, so the correctly
+    rounded value is its value wherever a design reaches.
 
     :param values: Any real array.
     :return: Its tangent, elementwise, in the same shape.
     """
-    flat = real_array(values, "values").reshape(-1)
-    out = np.empty(flat.size, dtype=np.float64)
-    for index in range(flat.size):
-        out[index] = math.tan(flat[index])
-    return out.reshape(np.shape(values))
+    return pinned_tan(values)
 
 
 def _ordered_sum(terms: np.ndarray) -> np.ndarray:
@@ -687,12 +743,12 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     right = real_array(vector, "vector", copy=True)
     order = right.size
     for column in range(order - 1):
-        pivot = column + int(np.argmax(np.abs(rows[column:, column])))
+        pivot = column + int(np.argmax(np.fabs(rows[column:, column])))
         if pivot != column:
             rows[[column, pivot]] = rows[[pivot, column]]
             right[[column, pivot]] = right[[pivot, column]]
         head = rows[column, column]
-        if not is_positive(abs(head)):
+        if not is_positive(math.fabs(head)):
             continue
         factors = rows[column + 1 :, column] / head
         rows[column + 1 :, column + 1 :] -= (
@@ -702,7 +758,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     solution = np.zeros(order)
     for column in range(order - 1, -1, -1):
         head = rows[column, column]
-        if not is_positive(abs(head)):
+        if not is_positive(math.fabs(head)):
             continue
         behind = math.fsum(rows[column, column + 1 :] * solution[column + 1 :])
         solution[column] = (right[column] - behind) / head
@@ -821,23 +877,29 @@ def _lawson_fit(
     the two complex expressions replaced by :func:`_log_distance2` and
     :func:`_cascade_magnitude`.
 
-    What is left rests on IEEE 754 and on libm. Every arithmetic step on the
-    path is one addition, subtraction, multiplication, division or square root
-    of two doubles, each of which the standard rounds to a single answer, or a
-    :func:`math.fsum` that is correctly rounded whatever order it is handed.
+    What is left rests on IEEE 754, and for a while rested on libm too. Every
+    arithmetic step on the path is one addition, subtraction, multiplication,
+    division or square root of two doubles, each of which the standard rounds
+    to a single answer, or a :func:`math.fsum` that is correctly rounded
+    whatever order it is handed.
     What the standard does not pin is ``exp``, ``log``, ``tan`` and ``**``, and
     this docstring used to say that measurement showed them not moving between
     numpy's SIMD kernel sets. That measurement was taken on a machine with no
     AVX512, which is the one kernel set where they do move: under emulation all
-    four disagree with the same host's native answer. They are now taken from
-    :mod:`math` one element at a time, so what is left is a single libm per
+    four disagree with the same host's native answer. They were then taken
+    from :mod:`math` one element at a time, which left a single libm per
     process rather than a kernel chosen from the CPU.
 
-    A libm that rounds one of these differently would still move the design
-    through the amplification above. That is a property of the C library rather
-    than of this routine, it is the one claim here that is argued rather than
-    measured, and it is a far smaller surface than a dispatch table: glibc
-    picks one implementation per build, not one per machine it lands on.
+    A libm that rounds one of these differently still moved the design through
+    the amplification above, and measurement said so: the A weighting at 48 kHz
+    came out with one digest on glibc, another on macOS and a third on
+    Windows. That claim, once the one here that was argued rather than
+    measured, is now settled the other way round: each of these routines is
+    spelled in arithmetic IEEE 754 pins or correctly rounded (see
+    :func:`_scalar_log` and :func:`_scalar_arctan`), and with every libm
+    result perturbed by one unit in the last place, the arctangent's
+    included, the shipped designs do not move: no call is left to the C
+    library.
     """
     omega, omega_ref, target_db = grid
     weights = np.ones(omega.size)
@@ -846,10 +908,10 @@ def _lawson_fit(
     for _ in range(_LAWSON_ROUNDS):
         theta = _lm_round(theta, layout, grid, weights, bounds)
         residual = _residual_db(theta, layout, omega, omega_ref, target_db)
-        peak = float(np.max(np.abs(residual)))
+        peak = float(np.max(np.fabs(residual)))
         if peak < best_peak:
             best_peak, best = peak, theta
-        magnitude = np.maximum(np.abs(residual), _LAWSON_RESIDUAL_FLOOR)
+        magnitude = np.maximum(np.fabs(residual), _LAWSON_RESIDUAL_FLOOR)
         weights = weights * _scalar_pow(magnitude, _LAWSON_EXPONENT)
         weights = weights / np.max(weights)
     return best
@@ -874,14 +936,18 @@ def _stable_factors(
         # capture the loop variable, and its late binding is a hazard even
         # where, as here, it is consumed before the next iteration.
         wanted = value.conjugate()
-        distance = [abs(other - wanted) for other in values]
+        distance = [
+            pinned_hypot((other - wanted).real, (other - wanted).imag)
+            for other in values
+        ]
         partner = min(
             (k for k in range(len(values)) if not taken[k] and k != index),
             key=distance.__getitem__,
         )
         taken[index] = taken[partner] = True
-        quadratic.append((-2.0 * value.real, abs(value) ** 2))
-    real = sorted(abs(values[k].real) for k in range(len(values)) if not taken[k])
+        magnitude = pinned_hypot(value.real, value.imag)
+        quadratic.append((-2.0 * value.real, float(pinned_pow(magnitude, 2.0))))
+    real = sorted(math.fabs(values[k].real) for k in range(len(values)) if not taken[k])
     pairs, odd = divmod(len(real), 2)
     for index in range(pairs):
         first, second = real[2 * index], real[2 * index + 1]
@@ -918,7 +984,8 @@ def _padded_factors(
         )
         raise ValueError(msg)
     first, ratio = placement
-    corners = [first * ratio**k for k in range(spare // 2 + spare % 2)]
+    powers = pinned_pow(ratio, np.arange(spare // 2 + spare % 2, dtype=np.float64))
+    corners = [first * float(power) for power in powers]
     quadratic = [*quadratic, *[(2.0 * c, c * c) for c in corners[: spare // 2]]]
     linear = [*linear, *[(c,) for c in corners[spare // 2 :]]]
     return [*quadratic, *linear], len(quadratic), len(linear)
@@ -935,7 +1002,7 @@ def _start_parameters(
     :param placement: Where the spare factors start; see
         :func:`_spare_placements`.
     """
-    away_from_origin = np.abs(np.asarray(zeros)) > 0.0
+    away_from_origin = np.asarray(zeros).astype(bool)
     at_origin = int(np.count_nonzero(~away_from_origin))
     finite = np.asarray(zeros)[away_from_origin]
     num, num_quad, num_lin = _padded_factors(finite, degree, placement, at_origin)
@@ -996,7 +1063,7 @@ def _factor_roots(quadratic: np.ndarray, linear: np.ndarray) -> list[complex]:
     roots: list[complex] = []
     for b1, b0 in _scalar_exp(quadratic):
         discriminant = b1 * b1 - 4.0 * b0
-        radius = float(np.sqrt(abs(discriminant)))
+        radius = math.sqrt(math.fabs(discriminant))
         if discriminant >= 0.0:
             roots += [complex((-b1 + radius) / 2.0), complex((-b1 - radius) / 2.0)]
         else:
@@ -1066,6 +1133,129 @@ def _analog_db(
     return np.asarray(_DB_PER_LOG * (shape(omega) - shape(omega_ref)[0]))
 
 
+def complex_product(factors: list[tuple[float, float]]) -> tuple[float, float]:
+    r"""``numpy.prod`` of complex numbers, in real arithmetic, one rounding per operation.
+
+    numpy multiplies a complex array left to right, each step
+    :math:`(a_r b_r - a_i b_i) + \mathrm{j}(a_r b_i + a_i b_r)`, and the loop
+    it runs a product through is plain C a compiler may contract: numpy built
+    with clang fuses each of those into a multiply-add wherever the processor
+    has one, on every 64-bit ARM and on x86-64 from AVX2 on, and numpy built
+    with GCC does not. The product a design took through it moved by its last
+    bit between Linux and the macOS and Windows builds, and so did the A
+    weighting at 48 kHz. These are numpy's steps in the order numpy takes
+    them, each a separately rounded Python ``float`` operation, which no
+    compiler contracts, so the answer is the unfused one everywhere.
+
+    :param factors: The complex numbers as ``(real, imaginary)`` pairs.
+    :return: Their product as a pair, ``(1.0, 0.0)`` for none.
+    """
+    if not factors:
+        return 1.0, 0.0
+    real, imaginary = factors[0]
+    for factor_real, factor_imaginary in factors[1:]:
+        real, imaginary = (
+            real * factor_real - imaginary * factor_imaginary,
+            real * factor_imaginary + imaginary * factor_real,
+        )
+    return real, imaginary
+
+
+def complex_quotient(
+    numerator: tuple[float, float], denominator: tuple[float, float]
+) -> tuple[float, float]:
+    """numpy's complex division, Smith's algorithm, in real arithmetic.
+
+    The same steps numpy's loop takes, in the same order, each rounded once,
+    for the reason :func:`complex_product` gives: numpy's loop is C that clang
+    contracts into multiply-adds. The denominator is never zero here, since
+    every root the design maps lies in the closed left half plane and is
+    taken away from a positive ``2 fs``.
+
+    :param numerator: ``(real, imaginary)``.
+    :param denominator: ``(real, imaginary)``, not zero.
+    :return: The quotient as a pair.
+    """
+    real, imaginary = numerator
+    below_real, below_imaginary = denominator
+    if math.fabs(below_real) >= math.fabs(below_imaginary):
+        ratio = below_imaginary / below_real
+        scale = 1.0 / (below_real + below_imaginary * ratio)
+        return (real + imaginary * ratio) * scale, (imaginary - real * ratio) * scale
+    ratio = below_real / below_imaginary
+    scale = 1.0 / (below_imaginary + below_real * ratio)
+    return (real * ratio + imaginary) * scale, (imaginary * ratio - real) * scale
+
+
+def _mapped_roots(roots: np.ndarray, fs2: float) -> np.ndarray:
+    """``(2 fs + r) / (2 fs - r)`` for each root, as numpy computes it unfused.
+
+    A real array is divided as numpy divides reals, which IEEE 754 fixes; a
+    complex one goes through :func:`complex_quotient`, the sums formed as
+    numpy forms them with ``2 fs`` promoted to ``2 fs + 0j``.
+    """
+    if not np.iscomplexobj(roots):
+        return (fs2 + roots) / (fs2 - roots)
+    mapped = [
+        complex(
+            *complex_quotient(
+                (fs2 + root.real, 0.0 + root.imag), (fs2 - root.real, 0.0 - root.imag)
+            )
+        )
+        for root in roots.tolist()
+    ]
+    return np.array(mapped, dtype=np.complex128)
+
+
+def _shifted_product(roots: np.ndarray, fs2: float) -> tuple[float, float] | float:
+    """``prod(2 fs - r)``: a float for real roots, a ``(real, imaginary)`` pair for complex ones.
+
+    numpy's product of reals multiplies left to right from the first element,
+    each step one IEEE 754 multiplication; :func:`math.prod` takes the same
+    steps from ``1.0``, which leaves the first factor exact.
+    """
+    if not np.iscomplexobj(roots):
+        return math.prod((fs2 - roots).tolist(), start=1.0)
+    return complex_product(
+        [(fs2 - root.real, 0.0 - root.imag) for root in roots.tolist()]
+    )
+
+
+def bilinear_zpk(
+    zeros: np.ndarray, poles: np.ndarray, gain: float, fs: float
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """:func:`scipy.signal.bilinear_zpk`, bit for bit where numpy does not fuse, and everywhere.
+
+    SciPy forms the digital roots and the gain with numpy's complex division
+    and complex product, which a numpy built with clang fuses into
+    multiply-adds and one built with GCC does not; see
+    :func:`complex_product`. This is SciPy's transform step for step, with
+    every complex operation spelled in separately rounded real arithmetic,
+    and a real array taken through real arithmetic as SciPy takes it, so it
+    returns what SciPy returns on Linux, and the same on every platform.
+
+    :param zeros: Analog zeros, rad/s, a real or complex one-dimensional array.
+    :param poles: Analog poles, rad/s, likewise, at least as many.
+    :param gain: Analog gain.
+    :param fs: Sampling rate in Hz.
+    :return: ``(zeros, poles, gain)`` of the digital filter, as SciPy gives them.
+    """
+    fs2 = 2.0 * fs
+    digital_zeros = np.concatenate(
+        (_mapped_roots(zeros, fs2), -np.ones(len(poles) - len(zeros)))
+    )
+    above = _shifted_product(zeros, fs2)
+    below = _shifted_product(poles, fs2)
+    if isinstance(above, float) and isinstance(below, float):
+        return digital_zeros, _mapped_roots(poles, fs2), gain * (above / below)
+    if isinstance(above, float):
+        above = (above, 0.0)
+    if isinstance(below, float):
+        below = (below, 0.0)
+    real, _ = complex_quotient(above, below)
+    return digital_zeros, _mapped_roots(poles, fs2), gain * real
+
+
 def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> float:
     r"""``|H|`` of a biquad cascade at one frequency, in real arithmetic.
 
@@ -1102,10 +1292,9 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
     :return: The magnitude, a plain float.
     """
     angle = 2.0 * np.pi * frequency / fs
-    # math rather than numpy for the reason _scalar_log gives: these two are
-    # dispatched kernels, and this read-back sets the shipped gain.
-    sine = math.sin(angle)
-    half = math.sin(0.5 * angle)
+    # Pinned rather than numpy's or the C library's, for the reason
+    # _scalar_log gives: this read-back sets the shipped gain.
+    sine, half = (float(value) for value in pinned_sin(np.array([angle, 0.5 * angle])))
     versine = 2.0 * half * half
 
     def squared(triplet: np.ndarray) -> float:
@@ -1139,7 +1328,7 @@ def _fit_from(
     bounds = _corner_bounds(layout, span)
     fitted = _lawson_fit(np.clip(theta, *bounds), layout, grid, bounds)
     residual = _residual_db(fitted, layout, grid[0], grid[1], grid[2])
-    return float(np.max(np.abs(residual))), fitted, layout
+    return float(np.max(np.fabs(residual))), fitted, layout
 
 
 def fit_prototype(
@@ -1249,12 +1438,13 @@ def design_sos(
         zeros, poles, fs, band, n_sections, reference_frequency_hz
     )
     anchor = _anchor_hz(fs, band, reference_frequency_hz)
-    digital = signal.bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
+    digital = bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
     sos = signal.zpk2sos(*digital)
     printed = _analog_db(
         np.asarray(zeros), np.asarray(poles), np.array([anchor]), reference_frequency_hz
     )
-    sos[0, :3] /= _cascade_magnitude(sos, anchor, fs) / 10.0 ** (printed[0] / 20.0)
+    level = float(pinned_pow(10.0, printed[0] / 20.0))
+    sos[0, :3] /= _cascade_magnitude(sos, anchor, fs) / level
     return np.asarray(sos, dtype=np.float64)
 
 

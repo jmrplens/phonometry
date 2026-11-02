@@ -18,9 +18,10 @@ import sys
 
 import numpy as np
 import pytest
+from libm_identity import on_the_pinned_libm
 
 from phonometry.filters import _weighting_design
-from phonometry.filters._pinned_log import _fused_multiply_add, pinned_log
+from phonometry.filters._pinned_log import _fused_multiply_add, pinned_log, pinned_log10
 from phonometry.filters.weighting import _analog_weighting_zpk, _fit_band
 
 
@@ -43,29 +44,7 @@ def _probe() -> np.ndarray:
     return np.concatenate([bits.view(np.float64), window])
 
 
-def _libm_is_the_pinned_routine() -> bool:
-    probe = _probe()
-    return bool(
-        (pinned_log(probe).view(np.uint64) == _reference(probe).view(np.uint64)).all()
-    )
-
-
-#: True where the platform's ``math.log`` is the very routine ``pinned_log``
-#: spells -- glibc 2.28 onwards. On other C libraries (Apple's, musl's) the
-#: local ``log`` rounds a handful of inputs to the other neighbour, and the
-#: contract is the pinned routine's bits, not the local library's: the
-#: bit-for-bit tests below document the glibc lineage where it can be
-#: observed, and the one-ulp test holds everywhere.
-_SAME_LIBM = _libm_is_the_pinned_routine()
-
-_same_libm_only = pytest.mark.skipif(
-    not _SAME_LIBM,
-    reason="the platform libm is not the routine pinned_log spells; "
-    "its bits are the contract, the local library's are not",
-)
-
-
-@_same_libm_only
+@on_the_pinned_libm
 def test_full_range_bits_match() -> None:
     """Random bit patterns over every finite positive binade."""
     rng = np.random.default_rng(0)
@@ -73,7 +52,7 @@ def test_full_range_bits_match() -> None:
     _assert_same_bits(bits.view(np.float64))
 
 
-@_same_libm_only
+@on_the_pinned_libm
 def test_near_one_window_bits_match() -> None:
     """The separately-polynomialised window, where the fused sites live."""
     rng = np.random.default_rng(1)
@@ -81,7 +60,7 @@ def test_near_one_window_bits_match() -> None:
     _assert_same_bits(window)
 
 
-@_same_libm_only
+@on_the_pinned_libm
 def test_window_edges_and_anchors_match() -> None:
     """The branch boundaries themselves, one neighbour either side."""
     low = 1.0 - 2.0**-4
@@ -107,7 +86,7 @@ def test_window_edges_and_anchors_match() -> None:
     _assert_same_bits(edges)
 
 
-@_same_libm_only
+@on_the_pinned_libm
 def test_subnormal_bits_match() -> None:
     """The normalisation branch, which no design input reaches."""
     rng = np.random.default_rng(2)
@@ -157,7 +136,7 @@ def test_fused_multiply_add_matches_math_fma() -> None:
         np.testing.assert_array_equal(mine.view(np.uint64), reference.view(np.uint64))
 
 
-@_same_libm_only
+@on_the_pinned_libm
 def test_every_log_input_of_a_real_design_matches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -219,3 +198,78 @@ def test_within_one_ulp_of_the_local_libm_everywhere() -> None:
         sign_reference, -(ordered_reference & 0x7FFFFFFFFFFFFFFF), ordered_reference
     )
     assert int(np.abs(ordered_mine - ordered_reference).max()) <= 1
+
+
+def _log10_reference(values: np.ndarray) -> np.ndarray:
+    return np.fromiter(map(math.log10, values.tolist()), np.float64, values.size)
+
+
+@on_the_pinned_libm
+def test_log10_bits_match_over_every_binade() -> None:
+    """glibc's ``log10`` over the full positive range, the subnormals included.
+
+    The routine is the SunPro one on top of glibc's ``log``: on a machine whose
+    ``log`` is the routine :func:`pinned_log` spells, the two agree bit for bit.
+    """
+    rng = np.random.default_rng(6)
+    values = np.concatenate(
+        [
+            rng.integers(1, 0x7FF0000000000000, 200_000, dtype=np.uint64).view(
+                np.float64
+            ),
+            np.exp(rng.uniform(-10.0, 30.0, 100_000)),
+            rng.integers(1, 1 << 52, 20_000, dtype=np.uint64).view(np.float64),
+            np.array([1.0, 10.0, 100.0, 0.1, 2.0, 0.5]),
+        ]
+    )
+    mine = pinned_log10(values)
+    reference = _log10_reference(values)
+    assert not (mine.view(np.uint64) != reference.view(np.uint64)).any()
+
+
+@on_the_pinned_libm
+def test_every_log10_input_of_a_real_design_matches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The two ends of the frequency grid, as an actual design takes them."""
+    captured: list[np.ndarray] = []
+    original = pinned_log10
+
+    def spy(values: np.ndarray) -> np.ndarray:
+        captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
+        return original(values)
+
+    monkeypatch.setattr(_weighting_design, "pinned_log10", spy)
+    zeros, poles, _ = _analog_weighting_zpk("A")
+    band = _fit_band("A", 48000)
+    _weighting_design.design_sos(zeros, poles, 48000.0, band, 4, 1000.0)
+    assert captured, "the design evaluated no base-10 logarithm"
+    values = np.concatenate(captured)
+    mine = pinned_log10(values)
+    np.testing.assert_array_equal(
+        mine.view(np.uint64), _log10_reference(values).view(np.uint64)
+    )
+
+
+def test_log10_specials_follow_math_log10() -> None:
+    """Exact powers of ten, ``inf`` and ``nan``; zero and negatives raise."""
+    np.testing.assert_array_equal(
+        pinned_log10(np.array([1.0, 10.0, 1000.0])), [0.0, 1.0, 3.0]
+    )
+    assert pinned_log10(np.array([np.inf]))[0] == np.inf
+    assert math.isnan(pinned_log10(np.array([np.nan]))[0])
+    for bad in (0.0, -1.0, -np.inf):
+        with pytest.raises(ValueError, match="math domain error"):
+            pinned_log10(np.array([1.0, bad]))
+    assert pinned_log10(np.empty((0, 2))).shape == (0, 2)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.array([1.0 + 2.0j]), ["0.5"], [bytearray(b"1")]],
+    ids=["complex", "text", "bytes"],
+)
+def test_log10_refuses_what_holds_no_real_number_by_name(value: object) -> None:
+    """A complex value, a text or a bytearray is refused, as the logarithm refuses it."""
+    with pytest.raises(TypeError, match="'values'"):
+        pinned_log10(value)  # type: ignore[arg-type]

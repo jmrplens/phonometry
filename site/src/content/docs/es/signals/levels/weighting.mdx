@@ -430,10 +430,10 @@ plt.show()
   `high_accuracy` son independientes, stateful usa por defecto el diseño
   ajustado como todo lo demás, y los bloques concatenados reproducen
   exactamente una llamada única.
-- El ajuste cuesta unos 200 ms y se cachea por curva y frecuencia de
+- El ajuste cuesta unos 270 ms y se cachea por curva y frecuencia de
   muestreo, así que se paga una sola vez. Incluso contándolo, ponderar un
-  minuto de audio a 44,1 kHz es más rápido que antes: unos 215 ms frente a
-  377 ms para la A y 220 ms frente a 775 ms para la 468. Con el diseño ya
+  minuto de audio a 44,1 kHz es más rápido que antes: menos de 300 ms frente
+  a 377 ms para la A y frente a 775 ms para la 468. Con el diseño ya
   cacheado, el filtrado solo son unos 18 ms, y retiene 21 MB de intermedios
   en vez de 169 MB.
 
@@ -615,8 +615,9 @@ especiales](/phonometry/es/signals/levels/special-weightings/).
   la curva G de infrasonido, las históricas B y D, y la AU para sonido
   audible en presencia de ultrasonidos.
 - [Los mismos bits en cualquier máquina](/phonometry/es/reference/determinism/):
-  por qué el filtro diseñado es byte-idéntico en cualquier CPU, BLAS, número
-  de hilos o plataforma, con la evidencia medida.
+  por qué el filtro diseñado es byte-idéntico sean cuales sean la
+  biblioteca C, las unidades vectoriales del procesador o el número de
+  hilos, de qué pasos de biblioteca depende aún, y la evidencia medida.
 - Referencia de la API: [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/) y [`filters.compliance`](/phonometry/es/reference/api/filters/compliance/).
 - Teoría: [Curvas de ponderación (IEC 61672-1)](/phonometry/es/reference/theory/signal-analysis/#curvas-de-ponderacion-iec-61672-1): la definición en polos y ceros de las curvas A, C y Z, y la deformación bilineal que el diseño ajustado cancela.
 

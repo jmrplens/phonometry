@@ -1594,4 +1594,16 @@ fields goes through `np.asarray`, as it does for any `Signal`, and a
 calibrated input comes back with `calibration_factor=1.0`, so the field feeds
 the next function in pascals without the factor being applied again.
 
+## A block stream yields `Signal` blocks
+
+`io.read_blocks` is newer than 3.3.0, and in 4.0.0rc1 it yielded bare float64
+arrays. It now yields a `Signal` per block, carrying the rate, the
+calibration, the channel labels and the provenance `io.read` gives, and it
+takes the same `calibration_factor=` and reads the same sidecar. Two things
+change for a loop written against the release candidate. A block from a
+calibrated file reaches the filters and the level functions in pascals, so a
+`calibration_factor` applied by hand on top of it counts twice. And
+arithmetic on a block, or on what a filter returns for one, goes through
+`np.asarray`, as it does for any `Signal`.
+
 ---

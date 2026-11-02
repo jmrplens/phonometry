@@ -36,7 +36,7 @@ def footprint(x):
 
 **Enforced by:** `tests/test_package_architecture.py::test_no_source_compares_a_float_for_equality`
 
-**Exceptions.** An order comparison is not equality: a Taylor branch below a threshold (`if x < 1e-4: return 1 - x * x / 9`) is allowed and covers the exact zero too. The ways out, best first: make the zero stop being a case (an equivalent algebraic form, a subnormal term canceled by hand); close it at the door (`__post_init__`, or `<= 0.0` where the data cannot be negative); name the predicate once (`is_positive` in `phonometry._internal.validation`). The test sees `==` and `!=` with a float literal on one side only; `x == 0`, two float variables, `not x` on a float and `math.isclose(x, 0.0, abs_tol=0.0)` are the same equality in disguise, and review catches those.
+**Exceptions.** An order comparison is not equality: a Taylor branch below a threshold (`if x < 1e-4: return 1 - x * x / 9`) is allowed and covers the exact zero too. The ways out, best first: make the zero stop being a case (an equivalent algebraic form, a subnormal term canceled by hand); close it at the door (`__post_init__`, or `<= 0.0` where the data cannot be negative); name the predicate once (`is_positive` in `phonometry._internal.validation`, `np.isposinf` or `np.isinf` for an infinity). The test sees `==` and `!=` with a float constant on one side: a literal, signed or not, one numpy or `math` names (`np.inf`, `math.pi`), or `float("inf")`. `x == 0`, two float variables, `not x` on a float and `math.isclose(x, 0.0, abs_tol=0.0)` are the same equality in disguise, and review catches those.
 
 <a id="x2"></a>
 ### X2. Settle a computed value before comparing it with a printed limit

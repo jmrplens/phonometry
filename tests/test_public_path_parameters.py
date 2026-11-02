@@ -27,6 +27,7 @@ import pytest
 
 import phonometry
 from phonometry import aircraft, io
+from phonometry.io import _flac, _write
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -180,6 +181,54 @@ def test_a_refusal_names_a_path_of_another_library_by_its_path(
     with pytest.raises(FileNotFoundError, match="no .csv ANP tables") as empty:
         aircraft.load_anp_database(elsewhere)
     assert f"'{tmp_path}{os.sep}elsewhere'" in str(empty.value)
+
+
+@pytest.mark.parametrize(
+    ("refuse", "content", "reason"),
+    [
+        (_flac.read_flac_bext, b"RIFF\0\0\0\0WAVE", "not a FLAC file"),
+        (
+            lambda path: _flac.embed_flac_bext(path, bytes(1 << 24)),
+            b"fLaC",
+            "bext chunk of 16777216 bytes exceeds the 24-bit FLAC metadata block length",
+        ),
+        (lambda path: _flac.embed_flac_bext(path, b""), b"RIFF", "not a FLAC file"),
+        (
+            lambda path: _flac.embed_flac_bext(path, b""),
+            b"fLaC\0\0",
+            "truncated FLAC metadata chain",
+        ),
+        (
+            lambda path: _write.append_riff_chunk(path, b"bext", b""),
+            b"fLaC\0\0\0\0",
+            "not a RIFF/RF64/BW64 file",
+        ),
+    ],
+    ids=[
+        "FLAC bext reader",
+        "FLAC bext too long",
+        "FLAC bext writer",
+        "FLAC chain",
+        "RIFF chunk writer",
+    ],
+)
+def test_a_file_unlike_the_one_sniffed_or_written_is_named_by_its_path(
+    refuse: Callable[[os.PathLike[str]], object],
+    content: bytes,
+    reason: str,
+    tmp_path: Path,
+) -> None:
+    # The readers and writers behind io.read, io.info, io.write and io.convert
+    # refuse a file that is not the FLAC they sniffed or the FLAC or WAV they
+    # have just written, which a caller cannot hand them; the refusal printed
+    # a path of another library as the object's repr.
+    path = tmp_path / "taken\x1b.bin"
+    path.write_bytes(content)
+    elsewhere = _Elsewhere(path)
+    with pytest.raises(ValueError, match=reason) as caught:
+        refuse(elsewhere)
+    assert str(caught.value) == f"{tmp_path}{os.sep}taken\\x1b.bin: {reason}"
+    assert [entry.name for entry in tmp_path.iterdir()] == [path.name]
 
 
 @pytest.mark.parametrize(

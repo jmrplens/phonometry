@@ -16,13 +16,14 @@ from __future__ import annotations
 
 import inspect
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 import numpy as np
 import pytest
 
 from phonometry.simulation import (
     FDTD2D,
+    Compute,
     CWSource,
     ElasticBoundaries,
     ElasticFDTD2D,
@@ -40,6 +41,8 @@ from phonometry.simulation import (
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from phonometry.simulation.fdtd import Side
 
 #: A small grid, ``(ny, nx)``.
 _NY, _NX = 12, 16
@@ -143,6 +146,67 @@ def test_from_regions_takes_the_options_of_the_engine_by_name() -> None:
         assert sugar[name].default == engine[name].default, name
         assert sugar[name].annotation == engine[name].annotation, name
     assert all(p.kind is not inspect.Parameter.VAR_KEYWORD for p in sugar.values())
+
+
+class _EngineOptions(TypedDict):
+    """Every option ``from_regions`` hands the engine, as a caller writes it."""
+
+    cfl: float
+    absorbing_layer_cells: int
+    absorbing_sides: tuple[Side, ...]
+    absorbing_layer_reflection: float
+    damping: float
+    free_sides: Side
+    obstacle_mask: NDArray[np.bool_]
+    compute: Compute
+
+
+def test_from_regions_hands_every_option_to_the_engine() -> None:
+    """An engine built by ``from_regions`` steps as the one its options build directly.
+
+    Each option is given a value other than its default, so an option the
+    sugar dropped or replaced would build an engine that steps differently,
+    or holds another side or layer, from the one the constructor builds.
+    """
+    mask = np.zeros((_NY, _NX), dtype=bool)
+    mask[4:6, 10:12] = True
+    options: _EngineOptions = {
+        "cfl": 0.5,
+        "absorbing_layer_cells": 4,
+        "absorbing_sides": ("left", "bottom"),
+        "absorbing_layer_reflection": 1e-3,
+        "damping": 30.0,
+        "free_sides": "top",
+        "obstacle_mask": mask,
+        "compute": Compute(device="cpu", dtype="float32"),
+    }
+    defaults = inspect.signature(ElasticFDTD2D).parameters
+    painted = {"c_p", "c_s", "rho", "dx", "shape"}
+    assert sorted(options) == sorted(set(defaults) - painted)
+    assert [
+        name
+        for name, value in options.items()
+        if name != "obstacle_mask" and value == defaults[name].default
+    ] == []
+    sugar = ElasticFDTD2D.from_regions(
+        (_NY, _NX), 0.01, background=(4000.0, 2300.0, 2700.0), **options
+    )
+    direct = ElasticFDTD2D(
+        c_p=4000.0, c_s=2300.0, dx=0.01, rho=2700.0, shape=(_NY, _NX), **options
+    )
+    assert sugar.free_sides == ("top",)
+    assert sugar.absorbing_sides == ("left", "bottom")
+    assert sugar.absorbing_layer_cells == 4
+    assert sugar.dt == direct.dt
+    assert sugar.vx.dtype == np.float32
+    for sim in (sugar, direct):
+        sim.add_source(
+            ExplosionSource(ix=7, iy=6, waveform=lambda t: math.sin(4e4 * t))
+        )
+        for _ in range(12):
+            sim.step()
+    for name in ("vx", "vy", "txx", "tyy", "txy"):
+        assert np.array_equal(getattr(sugar, name), getattr(direct, name)), name
 
 
 def test_a_float32_map_is_held_as_given() -> None:

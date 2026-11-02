@@ -65,6 +65,7 @@ from ..._internal.validation import check_engine, require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable, Sequence
 
     from matplotlib.axes import Axes
@@ -281,7 +282,7 @@ class AirbornePredictionResult(RichDisplay):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -386,7 +387,7 @@ class ImpactPredictionResult(RichDisplay):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

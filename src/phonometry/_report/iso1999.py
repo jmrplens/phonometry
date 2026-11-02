@@ -59,6 +59,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -267,7 +269,7 @@ def _nipts_verdict(
 
 def render_nipts_report(
     result: NIPTSResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -448,7 +450,7 @@ def _htlan_verdict(
 
 def render_htlan_report(
     result: HTLANResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

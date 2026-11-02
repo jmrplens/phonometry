@@ -46,6 +46,8 @@ from ..._internal.validation import (
 from .reverberation_room_scattering import _positive_scalar
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike
@@ -176,7 +178,7 @@ class DiffusionResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -309,7 +311,7 @@ class DiffusionSpectrum(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

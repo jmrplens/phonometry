@@ -49,6 +49,8 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..vibration.structural.transfer_stiffness import (
         BandAveragedStiffness,
@@ -338,7 +340,7 @@ def _band_level_flow(
 
 def render_transfer_stiffness_report(
     result: TransferStiffnessResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

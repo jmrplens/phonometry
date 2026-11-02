@@ -121,6 +121,8 @@ from ..._internal.validation import (
 from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
@@ -787,7 +789,7 @@ class BarrierInsertionLoss(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

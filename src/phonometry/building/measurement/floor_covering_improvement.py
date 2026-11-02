@@ -71,6 +71,7 @@ from ...metrology.reference_values import REFERENCE_VALUES
 from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
@@ -438,7 +439,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

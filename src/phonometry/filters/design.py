@@ -5,11 +5,16 @@ fractional-octave banks, and the response plot the banks draw with it.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from scipy import signal
 
 from .._internal.validation import require_scalar
 from .frequencies import _format_nominal_freq
+
+if TYPE_CHECKING:
+    import os
 
 __all__: list[str] = []
 
@@ -86,7 +91,7 @@ def _design_sos_filter(
     attenuation: float,
     *,
     show: bool = False,
-    plot_file: str | None = None,
+    plot_file: str | os.PathLike[str] | None = None,
 ) -> list[np.ndarray]:
     """Generate SOS coefficients for the filter bank.
 
@@ -172,7 +177,7 @@ def _showfilter(
     factor: np.ndarray,
     *,
     show: bool = False,
-    plot_file: str | None = None,
+    plot_file: str | os.PathLike[str] | None = None,
     close: bool = True,
 ) -> None:
     """Visualize filter bank frequency response.

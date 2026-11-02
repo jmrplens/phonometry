@@ -63,6 +63,8 @@ from ..._internal.validation import (
 from .air_absorption import air_attenuation
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -421,7 +423,7 @@ class OutdoorAttenuation(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

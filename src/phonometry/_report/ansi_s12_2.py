@@ -66,6 +66,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable
 
     from reportlab.lib.styles import ParagraphStyle
@@ -484,7 +485,7 @@ class LeftCellBuilder[R: NCResult | RCResult](Protocol):
 
 def _render_room_noise[R: NCResult | RCResult](
     result: R,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     basis_template: str,
     left_builder: LeftCellBuilder[R],
@@ -566,7 +567,7 @@ def _render_room_noise[R: NCResult | RCResult](
 
 def render_nc_report(
     result: NCResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -605,7 +606,7 @@ def render_nc_report(
 
 def render_rc_report(
     result: RCResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

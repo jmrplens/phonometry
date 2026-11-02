@@ -60,6 +60,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -226,7 +228,7 @@ def _factor_strip(result: VibrationSoundPowerResult, language: Language = "en") 
 
 def render_vibration_power_report(
     result: VibrationSoundPowerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

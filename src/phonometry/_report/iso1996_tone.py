@@ -67,6 +67,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from reportlab.platypus import Table
 
@@ -299,7 +301,7 @@ def _verdict(
 
 def render_tone_audibility_report(
     result: ToneAudibilityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

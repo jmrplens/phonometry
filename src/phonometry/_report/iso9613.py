@@ -57,6 +57,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from numpy.typing import NDArray
     from reportlab.platypus import Table
 
@@ -335,7 +337,7 @@ def _resolve_levels(
 
 def render_outdoor_attenuation_report(
     result: OutdoorAttenuation,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -564,7 +566,7 @@ def _barrier_verdict(
 
 def render_barrier_insertion_loss_report(
     result: BarrierInsertionLoss,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

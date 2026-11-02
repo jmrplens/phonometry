@@ -69,6 +69,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -518,7 +520,7 @@ def _verdict(
 
 def render_iso3382_report(
     result: RoomAcousticsResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

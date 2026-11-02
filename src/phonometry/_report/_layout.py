@@ -1169,11 +1169,14 @@ def footer_flow(
     return flow
 
 
-def build_document(path: str, flow: list[Any], title: str) -> str:
+def build_document(path: str | os.PathLike[str], flow: list[Any], title: str) -> str:
     """Build the one-page A4 fiche ``flow`` into a reproducible PDF at ``path``.
 
-    Called only after the renderer has imported reportlab.
+    Called only after the renderer has imported reportlab, which takes the
+    path as a text: any path object is read as the text it stands for
+    (:func:`os.fspath`), and that text is what the fiche returns.
     """
+    target = os.fspath(path)
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
     from reportlab.platypus import SimpleDocTemplate
@@ -1190,9 +1193,9 @@ def build_document(path: str, flow: list[Any], title: str) -> str:
     # invariant=1 drops the embedded timestamp for a reproducible PDF; the
     # guard tolerates reportlab builds that do not accept the keyword.
     try:
-        doc = SimpleDocTemplate(path, invariant=1, **doc_kwargs)
+        doc = SimpleDocTemplate(target, invariant=1, **doc_kwargs)
     except TypeError:  # pragma: no cover - older reportlab
-        doc = SimpleDocTemplate(path, **doc_kwargs)
+        doc = SimpleDocTemplate(target, **doc_kwargs)
     # A fiche is one page, and nothing checked that it came to one. Too long
     # a table failed in two ways, neither of them useful: up to about forty
     # rows the sheet quietly ran on, leaving page 1 with the title over a
@@ -1212,10 +1215,10 @@ def build_document(path: str, flow: list[Any], title: str) -> str:
     try:
         doc.build(flow)
     except LayoutError as exc:
-        Path(path).unlink(missing_ok=True)
+        Path(target).unlink(missing_ok=True)
         raise ValueError(too_long) from exc
     if doc.page != 1:
-        Path(path).unlink(missing_ok=True)
+        Path(target).unlink(missing_ok=True)
         msg = f"{too_long} It came to {doc.page} pages."
         raise ValueError(msg)
-    return str(path)
+    return target

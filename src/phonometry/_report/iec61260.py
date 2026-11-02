@@ -52,6 +52,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..filters.compliance import FilterComplianceResult
     from .metadata import ReportMetadata
@@ -300,7 +302,7 @@ def _verdict(
 
 def render_iec61260_report(
     result: FilterComplianceResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

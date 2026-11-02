@@ -97,6 +97,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -500,7 +502,7 @@ class VibrationReductionResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -821,7 +823,7 @@ class FlankingLevelDifferenceResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -905,7 +907,7 @@ class FlankingImpactLevelResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

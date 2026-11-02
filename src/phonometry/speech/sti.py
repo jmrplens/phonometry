@@ -32,6 +32,8 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -230,7 +232,7 @@ class STIResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

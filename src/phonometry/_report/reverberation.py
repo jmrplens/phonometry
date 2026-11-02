@@ -60,6 +60,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
@@ -302,7 +303,7 @@ def _prediction_statement(
 
 def render_reverberation_models_report(
     result: ReverberationModelResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -466,7 +467,7 @@ def _enclosed_statement(
 
 def render_enclosed_space_report(
     result: ReverberationResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

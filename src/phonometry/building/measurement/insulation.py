@@ -120,6 +120,7 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
@@ -254,7 +255,7 @@ class AirborneInsulationResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         quantity: Literal["dnt", "r_prime"] = "dnt",
         metadata: ReportMetadata | None = None,
@@ -396,7 +397,7 @@ class ImpactInsulationResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         quantity: Literal["l_n_t", "l_n"] = "l_n_t",
         metadata: ReportMetadata | None = None,
@@ -533,7 +534,7 @@ class FacadeInsulationResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         quantity: Literal["d_2m_nt", "d_2m_n", "r_prime"] = "d_2m_nt",
         metadata: ReportMetadata | None = None,
@@ -603,7 +604,7 @@ _FIELD_QUANTITIES: dict[type, tuple[str, ...]] = {
 
 def _render_iso16283(
     result: AirborneInsulationResult | ImpactInsulationResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: str,
     metadata: ReportMetadata | None,
@@ -678,7 +679,7 @@ _FACADE_FIELD_QUANTITIES: tuple[Literal["d_2m_nt", "d_2m_n", "r_prime"], ...] = 
 
 def _render_iso16283_facade(
     result: FacadeInsulationResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: object,
     metadata: ReportMetadata | None,

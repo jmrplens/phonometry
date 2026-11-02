@@ -91,6 +91,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -444,7 +446,7 @@ class SurveyAirborneResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         quantity: Literal["dnt", "r_prime"] = "dnt",
         metadata: ReportMetadata | None = None,
@@ -556,7 +558,7 @@ class SurveyImpactResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -656,7 +658,7 @@ class SurveyFacadeResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

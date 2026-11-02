@@ -81,6 +81,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from numpy.typing import ArrayLike
     from reportlab.platypus import Table
 
@@ -306,7 +308,7 @@ def _indicator_range(
 
 def render_intensity_power_report(
     result: SoundPowerIntensityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -846,7 +848,7 @@ def _precision_criteria_strip(
 
 def render_precision_intensity_report(
     result: PrecisionIntensityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

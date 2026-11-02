@@ -84,6 +84,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
     from collections.abc import Callable, Mapping
 
     from matplotlib.axes import Axes
@@ -1431,7 +1432,7 @@ class DailyVibrationExposure(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

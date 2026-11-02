@@ -373,7 +373,7 @@ def _verdict(
 
 def render_iec60268_5_report(
     result: LoudspeakerCharacteristics,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     language: Language = "en",

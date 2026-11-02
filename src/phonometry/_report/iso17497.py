@@ -65,6 +65,8 @@ from ._layout import (
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -238,7 +240,7 @@ def _scattering_table(
 
 def render_scattering_report(
     result: ScatteringResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -398,7 +400,7 @@ def _diffusion_table(
 
 def render_diffusion_spectrum_report(
     result: DiffusionSpectrum,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -524,7 +526,7 @@ def _polar_table(result: DiffusionResult, language: Language = "en") -> Table:
 
 def render_diffusion_polar_report(
     result: DiffusionResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

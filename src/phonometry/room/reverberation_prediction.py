@@ -69,6 +69,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
@@ -726,7 +727,7 @@ class ReverberationModelResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

@@ -62,6 +62,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Paragraph, Table
 
     from .._i18n import Language
@@ -383,7 +385,7 @@ def _zone_row(result: MultipleShockResult, language: Language = "en") -> Paragra
 
 def render_iso2631_5_report(
     result: MultipleShockResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

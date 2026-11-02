@@ -59,6 +59,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.lib.colors import Color
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
@@ -367,7 +369,7 @@ def _left_table(
 
 def render_iso11654_report(
     result: AbsorptionRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

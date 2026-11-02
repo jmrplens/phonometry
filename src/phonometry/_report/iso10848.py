@@ -65,6 +65,8 @@ from ._layout import (
 from .iso717 import _metadata_pairs
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.lib.colors import Color
     from reportlab.lib.styles import StyleSheet1
     from reportlab.platypus import Table
@@ -183,7 +185,7 @@ def _require_rating(
 
 def render_flanking_level_difference_report(
     result: FlankingLevelDifferenceResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -230,7 +232,7 @@ def render_flanking_level_difference_report(
 
 def render_flanking_impact_level_report(
     result: FlankingImpactLevelResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -413,7 +415,7 @@ def _kij_result_box(
 
 def render_vibration_reduction_report(
     result: VibrationReductionResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

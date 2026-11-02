@@ -114,6 +114,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_sam
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -966,7 +967,7 @@ class ImpactMobilityResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

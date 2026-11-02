@@ -56,6 +56,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -190,7 +192,7 @@ def _conversion_strip(language: Language = "en") -> str:
 
 def render_structure_borne_power_report(
     result: StructureBornePowerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

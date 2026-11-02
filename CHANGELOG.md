@@ -2296,6 +2296,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **`.report()` writes to a `pathlib.Path` or any path object.** The fiche
+  of every result took `path` as a text and handed it to ReportLab as it got
+  it, so a `pathlib.Path` built the whole fiche and then failed with
+  ReportLab's own error. Every `.report()` takes `str | os.PathLike[str]`
+  now, writes the PDF where the path names, and returns that path as a text.
 - **A record refuses a container that holds itself by the name of the field
   wherever the container sits.** A field the class's own `__post_init__`
   fills (`init=False`), an `InitVar` handed to it, a field a pickled or

@@ -99,6 +99,8 @@ from .laboratory_insulation import LaboratoryInsulationWarning
 from .ratings import WeightedRatingResult, weighted_rating
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -273,7 +275,7 @@ class IntensityReductionResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -402,7 +404,7 @@ class IntensityElementNormalizedResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

@@ -81,6 +81,8 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -244,7 +246,7 @@ class ImpulseProminenceResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

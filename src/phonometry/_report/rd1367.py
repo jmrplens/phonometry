@@ -76,6 +76,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
@@ -374,7 +376,7 @@ def _verdict(result: ActivityAssessment, language: Language = "en") -> tuple[str
 
 def render_activity_report(
     result: ActivityAssessment,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

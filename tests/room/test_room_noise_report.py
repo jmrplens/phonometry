@@ -379,3 +379,29 @@ def test_rc_result_refuses_a_reference_curve_with_an_extra_axis() -> None:
     two_dimensional = np.asarray(result.reference_curve).reshape(-1, 1)
     with pytest.raises(ValueError, match="'reference_curve' must have one axis"):
         replace(result, reference_curve=two_dimensional)
+
+
+class _Elsewhere:
+    """A path of another library: an ``os.PathLike`` that is not a ``pathlib.Path``."""
+
+    def __init__(self, path: Path) -> None:
+        self._path = path
+
+    def __fspath__(self) -> str:
+        return str(self._path)
+
+
+def test_a_fiche_is_written_where_a_path_object_names(tmp_path: Path) -> None:
+    """``.report()`` takes a ``pathlib.Path`` or any ``os.PathLike``.
+
+    The renderers handed the path to ReportLab as they got it, which takes a
+    text only, so a ``Path`` built the whole fiche and then failed with
+    ReportLab's own error. The fiche is written where the path names, and
+    ``.report()`` returns that path as a text.
+    """
+    target = tmp_path / "nc.pdf"
+    assert _nc_result().report(target) == str(target)
+    assert target.read_bytes().startswith(b"%PDF")
+    other = tmp_path / "rc.pdf"
+    assert _rc_result().report(_Elsewhere(other)) == str(other)
+    assert other.read_bytes().startswith(b"%PDF")

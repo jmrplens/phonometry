@@ -55,6 +55,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -141,7 +143,7 @@ def performance_verdict(
 
 def render_noise_control_fiche(
     result: EnclosureInsertionLossResult | ReactiveSilencerResult | HVACSpectrumResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     title: str,
     basis: str,

@@ -61,6 +61,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..room.open_plan import OpenPlanResult
     from .metadata import ReportMetadata
@@ -210,7 +212,7 @@ def _verdict(
 
 def render_iso3382_3_report(
     result: OpenPlanResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

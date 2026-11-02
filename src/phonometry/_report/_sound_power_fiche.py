@@ -49,6 +49,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from numpy.typing import ArrayLike
@@ -463,7 +464,7 @@ def render_sound_power_fiche(
     # the structure-borne fiches (EN 15657, EN 12354-5) pass plot-only results
     # with a pre-computed verdict. No one protocol covers both contracts.
     result: Any,  # noqa: ANN401
-    path: str,
+    path: str | os.PathLike[str],
     *,
     copy: FicheCopy,
     value_table: Table,

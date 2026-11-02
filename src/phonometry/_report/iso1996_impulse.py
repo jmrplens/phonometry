@@ -65,6 +65,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -347,7 +349,7 @@ def _prominence_note(result: ImpulseProminenceResult, language: Language = "en")
 
 def render_impulse_prominence_report(
     result: ImpulseProminenceResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

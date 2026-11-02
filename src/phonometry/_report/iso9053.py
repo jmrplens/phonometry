@@ -49,6 +49,8 @@ from ._material_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..materials.absorbers._airflow_resistance import StaticAirflowResult
     from .metadata import ReportMetadata
@@ -191,7 +193,7 @@ def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> s
 
 def render_static_airflow_report(
     result: StaticAirflowResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

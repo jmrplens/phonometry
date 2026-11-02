@@ -58,6 +58,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -228,7 +230,7 @@ def _a_weighting_strip(language: Language = "en") -> str:
 
 def render_reverberation_power_report(
     result: ReverberationSoundPowerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

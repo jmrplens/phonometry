@@ -73,6 +73,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -569,7 +571,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

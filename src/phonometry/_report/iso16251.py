@@ -66,6 +66,8 @@ from ._layout import (
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Table
@@ -321,7 +323,7 @@ def _verdict_row(
 
 def render_iso16251_report(
     result: FloorCoveringImprovementResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -136,6 +136,7 @@ from .._internal.validation import (
 from .core import _multirate_lowpass
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Iterator, Mapping
 
     from matplotlib.axes import Axes
@@ -1580,7 +1581,7 @@ class FilterComplianceResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

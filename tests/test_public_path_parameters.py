@@ -90,6 +90,32 @@ def test_no_public_annotation_names_path_without_os_pathlike() -> None:
     assert _narrow_paths() == set()
 
 
+def _text_only_paths() -> set[str]:
+    """Each public parameter named ``path`` annotated ``str`` alone.
+
+    A record's field is left out: its ``__init__`` is written by
+    ``dataclasses``, and a record such as ``io.AudioFileInfo`` keeps the
+    path it read as the text it is.
+    """
+    return {
+        f"{label}(path)"
+        for module in _public_modules()
+        for label, function in _callables(module)
+        if str(inspect.get_annotations(function).get("path")) == "str"
+        and function.__code__.co_filename != "<string>"
+    }
+
+
+def test_no_public_path_is_annotated_as_a_text_alone() -> None:
+    """A public ``path`` names ``os.PathLike`` beside ``str``.
+
+    The ``.report()`` of every result took ``path: str`` and handed it to
+    ReportLab as it got it, so a ``pathlib.Path`` built the whole fiche and
+    then failed; each reads the path through ``os.fspath`` now and says so.
+    """
+    assert _text_only_paths() == set()
+
+
 class _Elsewhere:
     """A path of another library: an ``os.PathLike`` that is not a ``pathlib.Path``."""
 

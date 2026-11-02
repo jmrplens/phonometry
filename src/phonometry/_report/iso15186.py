@@ -51,6 +51,7 @@ from ._insulation_fiche import (
 from ._layout import fmt_num
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from numpy.typing import ArrayLike
@@ -166,7 +167,7 @@ def _areas_sentence(
 def render_iso15186_report(
     result: IntensityReductionResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -310,7 +311,7 @@ def _element_extras_sentence(
 def render_iso15186_element_report(
     result: IntensityElementNormalizedResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

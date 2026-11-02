@@ -44,6 +44,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable
 
     import numpy as np
@@ -98,7 +99,7 @@ def frf_metadata_pairs(
 
 def render_frf_fiche(
     result: MobilityResult | ImpactMobilityResult | TransferStiffnessResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     title: str,
     basis: str,

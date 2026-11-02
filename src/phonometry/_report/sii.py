@@ -53,6 +53,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from reportlab.platypus import Table
@@ -245,7 +246,7 @@ def _verdict(
 
 def render_sii_report(
     result: SIIResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

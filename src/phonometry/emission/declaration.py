@@ -46,6 +46,7 @@ from .._internal.display import RichDisplay
 from .._internal.validation import check_engine, require_choice, require_scalar
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from .._i18n import Language
@@ -295,7 +296,7 @@ class NoiseEmissionDeclaration(RichDisplay):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

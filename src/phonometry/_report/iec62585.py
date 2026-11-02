@@ -57,6 +57,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from numpy.typing import NDArray
 
     from .._i18n import Language
@@ -233,7 +235,7 @@ def _statement(
 
 def render_iec62585_report(
     result: CorrectionUncertaintyVerification,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

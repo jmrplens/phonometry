@@ -68,6 +68,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -420,7 +422,7 @@ def _verdict(result: ExposureResult, language: Language = "en") -> tuple[str, bo
 
 def render_iso9612_report(
     result: ExposureResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -59,6 +59,8 @@ from .._internal.validation import (
 from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -382,7 +384,7 @@ class PrecisionSoundPowerResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

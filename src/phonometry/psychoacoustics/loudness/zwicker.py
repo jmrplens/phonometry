@@ -28,6 +28,8 @@ import numpy as np
 from ...io._resolve import resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -255,7 +257,7 @@ class ZwickerLoudness(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

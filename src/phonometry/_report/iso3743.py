@@ -56,6 +56,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -399,7 +401,7 @@ def _hard_walled_a_weighting(
 
 def render_hard_walled_power_report(
     result: HardWalledSoundPowerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -646,7 +648,7 @@ def _special_a_weighting(
 
 def render_special_room_power_report(
     result: SpecialRoomSoundPowerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

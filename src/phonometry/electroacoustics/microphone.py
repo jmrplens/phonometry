@@ -87,6 +87,8 @@ from .loudspeaker import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
@@ -686,7 +688,7 @@ class MicrophoneCharacteristics(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

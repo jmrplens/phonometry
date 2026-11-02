@@ -50,6 +50,8 @@ from ._noise_control_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -325,7 +327,7 @@ def _basis_strip(
 
 def render_hvac_report(
     result: HVACSpectrumResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

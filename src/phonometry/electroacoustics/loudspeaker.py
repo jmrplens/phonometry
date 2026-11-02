@@ -70,6 +70,8 @@ from .._internal.validation import (
 from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
@@ -640,7 +642,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

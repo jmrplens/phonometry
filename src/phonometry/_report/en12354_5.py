@@ -58,6 +58,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -195,7 +197,7 @@ def _prediction_strip(language: Language = "en") -> str:
 
 def render_installed_structure_borne_report(
     result: InstalledSourceResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -132,6 +132,7 @@ from .duct_modes import _warn_above_plane_wave_limit
 from .duct_modes import plane_wave_limit as _plane_wave_limit
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -732,7 +733,7 @@ class ReactiveSilencerResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

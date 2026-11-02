@@ -74,6 +74,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -194,7 +196,7 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -319,7 +321,7 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -371,7 +373,7 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
 
 def _render_iso10140(
     result: LaboratoryAirborneInsulationResult | LaboratoryImpactInsulationResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: str,
     metadata: ReportMetadata | None,

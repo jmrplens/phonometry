@@ -60,6 +60,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     # TypeIs reached typing in Python 3.13; the type checker reads it from
@@ -297,7 +299,7 @@ def _a_weighting_strip(
 
 def render_sound_power_report(
     result: SoundPowerResult | PrecisionSoundPowerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

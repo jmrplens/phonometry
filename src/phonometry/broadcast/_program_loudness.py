@@ -50,6 +50,7 @@ from scipy import signal
 from ..io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
@@ -913,7 +914,7 @@ class ProgramLoudnessResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

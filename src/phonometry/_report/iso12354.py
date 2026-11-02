@@ -61,6 +61,8 @@ from ._layout import (
 from .iso717 import _metadata_pairs
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..building.prediction.detailed_model import (
@@ -147,7 +149,7 @@ def _render_prediction_fiche(
         | DetailedImpactResult
         | FacadePredictionResult
     ),
-    path: str,
+    path: str | os.PathLike[str],
     title_key: str,
     basis_key: str,
     rating_value: float,
@@ -264,7 +266,7 @@ def _render_prediction_fiche(
 
 def render_iso12354_airborne_report(
     result: AirbornePredictionResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -330,7 +332,7 @@ def render_iso12354_airborne_report(
 
 def render_iso12354_impact_report(
     result: ImpactPredictionResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -446,7 +448,7 @@ def _detailed_rating(
 
 def render_iso12354_detailed_airborne_report(
     result: DetailedAirborneResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -496,7 +498,7 @@ def render_iso12354_detailed_airborne_report(
 
 def render_iso12354_detailed_impact_report(
     result: DetailedImpactResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -564,7 +566,7 @@ def _facade_energy_shares(result: FacadePredictionResult) -> dict[str, float]:
 
 def render_iso12354_facade_report(
     result: FacadePredictionResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

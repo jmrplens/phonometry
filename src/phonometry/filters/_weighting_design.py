@@ -1388,9 +1388,11 @@ def _worst(roots: list[complex]) -> int:
 def _nearest(roots: list[complex], to: complex, which: str) -> int:
     """SciPy's ``_nearest_real_complex_idx``: the nearest root of the kind *which* asks.
 
-    Ties keep the order the roots are in, which is the order a stable sort
-    gives and the one numpy's sort gives on the short arrays a section draws
-    from.
+    A tie keeps the order the roots are in, as a stable sort does. SciPy
+    picks through numpy's default ``argsort``, which is not stable and whose
+    order of ties follows the processor from four roots up, so of two
+    distinct roots at exactly the same distance the design takes the first
+    in order and SciPy may take the other.
     """
     distance = [_magnitude(root - to) for root in roots]
     order = sorted(range(len(roots)), key=distance.__getitem__)
@@ -1416,7 +1418,8 @@ def _next_section(zeros: list[complex], poles: list[complex]) -> list[float]:
     """The section of the pole nearest the unit circle, the roots it takes removed.
 
     SciPy's ``zpk2sos`` with its default pairing, ``'nearest'``, for a
-    digital filter, branch for branch.
+    digital filter, branch for branch, but for the order of exact ties in
+    distance (:func:`_nearest`).
     """
     pole = poles.pop(_worst(poles))
     real_poles = sum(_is_real(p) for p in poles)
@@ -1455,6 +1458,10 @@ def second_order_sections(
     (:func:`_section_polynomial`), and the pairing is SciPy's default,
     ``'nearest'``, for a digital filter, branch for branch: the poles nearest
     the unit circle go in the last sections, each with the zeros nearest it.
+    Where two distinct zeros lie at exactly the same distance from a pole,
+    the design takes the first in order, as a stable sort does; SciPy sorts
+    with numpy's default ``argsort``, whose order of ties follows the
+    processor, and may take the other (:func:`_nearest`).
 
     :param zeros: Digital zeros, a real or complex one-dimensional array.
     :param poles: Digital poles, likewise.

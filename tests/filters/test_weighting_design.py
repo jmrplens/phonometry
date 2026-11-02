@@ -1832,8 +1832,10 @@ _MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite", "prod"})
 #: numpy names that are a transcendental, a power, or a magnitude that may be
 #: complex, each of which numpy computes with a dispatched kernel or the C
 #: library, and the polynomial, dot-product and linear-algebra routines that
-#: hand their sums of products to the BLAS or to LAPACK. A real magnitude is
-#: ``np.fabs``, which IEEE 754 fixes and which refuses a complex value.
+#: hand their sums of products to the BLAS or to LAPACK, and the sorts and
+#: partitions, whose default kind is not stable and orders ties as the
+#: processor's kernel does. A real magnitude is ``np.fabs``, which IEEE 754
+#: fixes and which refuses a complex value.
 _NUMPY_FORBIDDEN = frozenset(
     {
         "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "power",
@@ -1842,9 +1844,15 @@ _NUMPY_FORBIDDEN = frozenset(
         "hypot", "cbrt", "geomspace", "logspace", "angle", "abs", "absolute",
         "emath", "prod", "cumprod", "polyval", "roots", "poly", "polymul",
         "polyadd", "polysub", "polydiv", "convolve", "correlate", "dot",
-        "vdot", "inner", "matmul", "einsum", "tensordot", "linalg",
+        "vdot", "inner", "matmul", "einsum", "tensordot", "linalg", "sort",
+        "argsort", "lexsort", "partition", "argpartition", "sort_complex",
     }
 )  # fmt: skip
+
+#: The array methods that sort or partition, refused whatever they are called
+#: on: an array's ``argsort`` and ``partition`` are numpy's unstable kernels.
+#: ``sort`` is left to review, since a list has it too and Python's is stable.
+_ARRAY_SORTS = frozenset({"argsort", "argpartition", "partition"})
 
 #: SciPy's filter routines that evaluate or transform with complex products
 #: and quotients, which numpy computes in a loop a compiler may fuse, and the
@@ -1974,10 +1982,13 @@ class _PlatformOperations(ast.NodeVisitor):
 
     # ast.NodeVisitor dispatches on this name.
     def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
+        finding = None
         if isinstance(node.value, (ast.Name, ast.Attribute)):
             finding = _attribute_finding(ast.unparse(node.value), node.attr)
-            if finding is not None:
-                self.found.add(f"{node.lineno}: {finding}")
+        if finding is None and node.attr in _ARRAY_SORTS:
+            finding = f"the .{node.attr} method"
+        if finding is not None:
+            self.found.add(f"{node.lineno}: {finding}")
         self.generic_visit(node)
 
     # ast.NodeVisitor dispatches on this name.
@@ -2063,6 +2074,10 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     and the sections of fourteen other designs other last bits; the spelling
     is :func:`~phonometry.filters._pinned_roots.correctly_rounded_roots` and
     :func:`~phonometry.filters._weighting_design.second_order_sections`.
+    So is numpy's sort or partition, as a function or as an array's method:
+    its default kind is not stable, and the order it gives two equal keys
+    follows the processor's kernel; the design sorts with Python's stable
+    ``sorted``.
     In ``weighting.py`` the scan covers the imports and everything the cached
     design reaches by name, the prototypes and their helpers included.
     """
@@ -2157,6 +2172,28 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
         "7: the @ operator",
         "8: signal.zpk2sos",
         "8: signal.zpk2tf",
+    ]
+    sorts = textwrap.dedent(
+        """
+        from numpy import argsort
+        def s(a, b, items):
+            o = np.sort(a) + np.argsort(a) + numpy.lexsort((a, b))
+            q = np.partition(a, 1) + np.argpartition(a, 1) + np.sort_complex(b)
+            items.sort()
+            return o, q, a.argsort(), (a + b).argpartition(1), b.partition(1)
+        """
+    )
+    assert _platform_operations(ast.parse(sorts)) == [
+        "2: from numpy import argsort",
+        "4: np.argsort",
+        "4: np.sort",
+        "4: numpy.lexsort",
+        "5: np.argpartition",
+        "5: np.partition",
+        "5: np.sort_complex",
+        "7: the .argpartition method",
+        "7: the .argsort method",
+        "7: the .partition method",
     ]
     module = ast.parse(
         textwrap.dedent(

@@ -28,6 +28,8 @@ import pathlib
 import sys
 from typing import TYPE_CHECKING
 
+from ast_scan import COMPOUND_STATEMENTS, block_statements
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -74,22 +76,17 @@ def _package_of(path: pathlib.Path, module: str | None) -> str:
     return module.rsplit(".", 1)[0] if "." in module else ""
 
 
-#: Statements that hold module-level code without leaving module scope. A
-#: constant under ``if TYPE_CHECKING`` or in the fallback arm of a ``try`` is a
-#: module-level constant, and reading only ``tree.body`` never sees it.
-_NESTING = (ast.If, ast.Try, ast.With)
-
-
 def _module_level(body: list[ast.stmt]) -> Iterator[ast.stmt]:
-    """Every statement that runs at module scope, through if, try and with."""
+    """Every statement that runs at module scope, through every compound
+    statement's blocks (:func:`ast_scan.block_statements`).
+
+    A constant under ``if TYPE_CHECKING``, in the fallback arm of a ``try``
+    or in a ``case`` of a ``match`` is a module-level constant, and reading
+    only ``tree.body`` never sees it.
+    """
     for node in body:
-        if isinstance(node, _NESTING):
-            branches = [node.body, getattr(node, "orelse", [])]
-            if isinstance(node, ast.Try):
-                branches += [handler.body for handler in node.handlers]
-                branches.append(node.finalbody)
-            for branch in branches:
-                yield from _module_level(branch)
+        if isinstance(node, COMPOUND_STATEMENTS):
+            yield from _module_level(block_statements(node))
         else:
             yield node
 

@@ -93,6 +93,35 @@ def test_a_constant_under_if_or_try_is_still_at_module_scope() -> None:
     assert bound == {"_GUARDED", "_FIRST", "_SECOND", "_FALLBACK"}
 
 
+def test_a_constant_in_any_compound_statement_is_at_module_scope() -> None:
+    """A ``match``, a loop and a ``try`` with ``except*`` do not leave module
+    scope either.
+
+    Module scope was read through ``if``, ``try`` and ``with`` alone, so a
+    constant written in a ``case`` of a ``match`` at the top of a module was
+    never a constant the gate could find unread.
+    """
+    tree = ast.parse(
+        "match MODE:\n"
+        "    case 1:\n"
+        "        _MATCHED = 1\n"
+        "for _ in ():\n"
+        "    _LOOPED = 2\n"
+        "try:\n"
+        "    pass\n"
+        "except* ValueError:\n"
+        "    _STARRED = 3\n"
+    )
+    bound = {
+        name.id
+        for node in cdc._module_level(tree.body)
+        if isinstance(node, ast.Assign)
+        for target in node.targets
+        for name in cdc._assigned_names(target)
+    }
+    assert bound == {"_MATCHED", "_LOOPED", "_STARRED"}
+
+
 def test_a_package_init_is_its_own_package() -> None:
     """A relative import in an ``__init__.py`` climbs from the package it is."""
     init = cdc.ROOT / "src" / "phonometry" / "vibration" / "__init__.py"

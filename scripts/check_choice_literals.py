@@ -115,7 +115,14 @@ import typing
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
-from ast_scan import binding_of, imported_names, live_bindings, scope_nodes
+from ast_scan import (
+    COMPOUND_STATEMENTS,
+    binding_of,
+    block_statements,
+    imported_names,
+    live_bindings,
+    scope_nodes,
+)
 
 import phonometry
 from phonometry._internal.catalogue import CatalogueRow
@@ -1101,14 +1108,14 @@ def _imported_constants(
 
 
 def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
-    """The statements of a module body, those of its top-level ``if`` blocks
-    included: an alias or an import under ``if TYPE_CHECKING:`` is the
-    module's as surely as one written at the top.
+    """The statements of a module body, those of every compound statement's
+    blocks included (:func:`ast_scan.block_statements`): an alias or an
+    import under ``if TYPE_CHECKING:`` or in a ``try`` is the module's as
+    surely as one written at the top.
     """
     for node in body:
-        if isinstance(node, ast.If):
-            yield from _module_statements(node.body)
-            yield from _module_statements(node.orelse)
+        if isinstance(node, COMPOUND_STATEMENTS):
+            yield from _module_statements(block_statements(node))
         else:
             yield node
 

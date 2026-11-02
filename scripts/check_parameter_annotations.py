@@ -2114,7 +2114,7 @@ class Reader:
                 return None
             node = self.package.functions[method].implementation
             return method, node is not None and not _is_static(node)
-        target = self.package.call_target(function, func)
+        target = self.package.call_target(function, func, call)
         if target is None:
             return None
         if target in ends or target == "builtins.isinstance":
@@ -5397,7 +5397,7 @@ def _given_back(
             return True
         if not (isinstance(value, ast.Call) and value.args):
             return False
-        dotted = reader.package.call_target(function, value.func)
+        dotted = reader.package.call_target(function, value.func, value)
         if dotted is None:
             return False
         below = dotted.removeprefix(f"{reader.root}.")

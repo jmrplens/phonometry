@@ -120,6 +120,7 @@ from collections.abc import Collection, Mapping
 from typing import TYPE_CHECKING, TypeAliasType, TypeVar, get_origin
 
 from api_taxonomy import public_names
+from ast_scan import COMPOUND_STATEMENTS, block_statements
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -515,12 +516,9 @@ def imported_from(module: ModuleType) -> dict[str, str]:
     statements = list(tree.body)
     while statements:
         statement = statements.pop(0)
-        if isinstance(statement, (ast.If, ast.Try)):
+        if isinstance(statement, COMPOUND_STATEMENTS):
             if not _is_type_checking_block(statement):
-                nested = [*statement.body, *statement.orelse]
-                if isinstance(statement, ast.Try):
-                    nested += [s for h in statement.handlers for s in h.body]
-                statements[:0] = nested
+                statements[:0] = block_statements(statement)
         elif isinstance(statement, ast.ImportFrom):
             source = importlib.util.resolve_name(
                 "." * statement.level + (statement.module or ""), package
@@ -630,13 +628,9 @@ def defined_names(module: ModuleType) -> list[str]:
     statements = list(tree.body)
     while statements:
         statement = statements.pop(0)
-        if isinstance(statement, (ast.If, ast.Try)):
+        if isinstance(statement, COMPOUND_STATEMENTS):
             if not _is_type_checking_block(statement):
-                nested = [*statement.body, *statement.orelse]
-                if isinstance(statement, ast.Try):
-                    nested += [s for h in statement.handlers for s in h.body]
-                    nested += statement.finalbody
-                statements[:0] = nested
+                statements[:0] = block_statements(statement)
         elif isinstance(
             statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
         ):
@@ -807,17 +801,12 @@ def _package_binding(parent: ModuleType | None, leaf: str) -> str | None:
 
 
 def _module_level_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
-    """The statements that run at import time, inside ``if``/``try``/``with`` too."""
+    """The statements that run at import time, inside every compound
+    statement's blocks too (:func:`ast_scan.block_statements`).
+    """
     for node in body:
         yield node
-        for field in ("body", "orelse", "finalbody", "handlers"):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                break
-            for child in getattr(node, field, ()):
-                if isinstance(child, ast.ExceptHandler):
-                    yield from _module_level_statements(child.body)
-                elif isinstance(child, ast.stmt):
-                    yield from _module_level_statements([child])
+        yield from _module_level_statements(block_statements(node))
 
 
 def _binding_other_than_submodule(

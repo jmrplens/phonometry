@@ -156,11 +156,14 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from ast_scan import (
+    COMPOUND_STATEMENTS,
     ROOT,
     binding_of,
+    block_statements,
     exempted,
     imported_names,
     live_bindings,
+    live_class_members,
     own_names,
     python_files,
     relative,
@@ -797,10 +800,10 @@ class Tree:
                 self._read_body(
                     module, node.body, qualname, None, nested=True, parent=function
                 )
-            elif isinstance(node, ast.If | ast.Try | ast.With | ast.For | ast.While):
+            elif isinstance(node, COMPOUND_STATEMENTS):
                 self._read_body(
                     module,
-                    _nested_statements(node),
+                    block_statements(node),
                     scope,
                     owner,
                     nested=nested,
@@ -899,12 +902,17 @@ class Tree:
 
     def live_definitions(self, target: tuple[str, str]) -> list[FunctionInfo]:
         """The definitions of a function of a module, or of a class there,
-        that the name may hold once the module has run.
+        that the name may hold once the module has run: a method of a class
+        a later ``class`` of its name replaces is none
+        (:func:`ast_scan.live_class_members`).
         """
         if target not in self.live_cache:
             definitions = self.definitions[target]
             root = self.modules[definitions[0].module]
-            self.live_cache[target] = _live(root, definitions, None)
+            nodes = {definition.node: definition for definition in definitions}
+            self.live_cache[target] = [
+                nodes[node] for node in live_class_members(root, list(nodes))
+            ]
         return self.live_cache[target]
 
     def _bound_at_top(
@@ -1048,8 +1056,8 @@ def _excluded_from_init(value: ast.expr | None) -> bool:
 def _module_statements(body: Iterable[ast.stmt]) -> Iterable[ast.stmt]:
     """A module's statements, those under ``if TYPE_CHECKING:`` and the like too."""
     for node in body:
-        if isinstance(node, ast.If | ast.Try):
-            yield from _module_statements(_nested_statements(node))
+        if isinstance(node, COMPOUND_STATEMENTS):
+            yield from _module_statements(block_statements(node))
         else:
             yield node
 
@@ -1082,17 +1090,6 @@ def _alias(node: ast.stmt) -> tuple[str, str] | None:
     ):
         return node.targets[0].id, ast.unparse(node.value)
     return None
-
-
-def _nested_statements(node: ast.stmt) -> list[ast.stmt]:
-    out: list[ast.stmt] = []
-    for name in ("body", "orelse", "finalbody", "handlers"):
-        for child in getattr(node, name, []) or []:
-            if isinstance(child, ast.ExceptHandler):
-                out.extend(child.body)
-            else:
-                out.append(child)
-    return out
 
 
 #: Annotation words that say a field holds a container, whose ``copy`` is
@@ -1158,6 +1155,27 @@ class Summary:
     value: Value = _CLEAN
 
 
+#: How many times at most a function's body is read for its helpers to
+#: settle (:meth:`Reader.settled_helpers`): one more than the longest chain of
+#: helpers written before the sibling each calls.
+_HELPER_PASSES = 4
+
+
+def _helpers_written_in(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    """How many functions are written in *function*'s own body, through its
+    compound statements, not inside another function or a class.
+    """
+    count = 0
+    pending: list[ast.stmt] = list(function.body)
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            count += 1
+        else:
+            pending.extend(block_statements(node))
+    return count
+
+
 class Reader:
     """Follows the parameters of one function through its body."""
 
@@ -1169,6 +1187,7 @@ class Reader:
         findings: list[Finding] | None,
         closure: Mapping[str, Value] | None = None,
         enclosing: Mapping[ast.AST, tuple[Value, frozenset[str]]] | None = None,
+        helpers: Mapping[ast.AST, tuple[Value, frozenset[str]]] | None = None,
     ) -> None:
         self.tree = tree
         self.function = function
@@ -1193,7 +1212,11 @@ class Reader:
         #: What each function defined here returns, read where it is defined
         #: with what its closure holds there, and the labels that closure
         #: carries, which a call of it hands back as they are.
-        self.nested_returns: dict[ast.AST, tuple[Value, frozenset[str]]] = {}
+        #: *helpers* seeds it: what each returned on a pass before, so that a
+        #: helper written before a sibling it calls reads what that returns.
+        self.nested_returns: dict[ast.AST, tuple[Value, frozenset[str]]] = dict(
+            helpers or {}
+        )
         self.post_init = (
             function.owner is not None and function.node.name == "__post_init__"
         )
@@ -1279,9 +1302,42 @@ class Reader:
         return Many(record) if many else record
 
     def run(self) -> Value:
-        """Read the body, report the kept arrays, and return what is returned."""
+        """Read the body, report the kept arrays, and return what is returned.
+
+        A function with two helpers or more written in it is read first, with
+        no finding kept, until what each helper returns settles
+        (:meth:`settled_helpers`): a helper is read where it is written, so
+        one written before a sibling it calls would otherwise read that
+        sibling as returning nothing.
+        """
+        if _helpers_written_in(self.function.node) > 1:
+            self.nested_returns.update(self.settled_helpers())
         self.block(self.function.node.body, self.start())
         return self.returned
+
+    def settled_helpers(self) -> dict[ast.AST, tuple[Value, frozenset[str]]]:
+        """What each helper written in this function returns, once a pass of
+        the body over what the pass before found finds no more.
+
+        Each pass only adds to what a helper may return, so they settle; a
+        bound on their number keeps a cycle of helpers from reading forever.
+        """
+        held: dict[ast.AST, tuple[Value, frozenset[str]]] = {}
+        for _ in range(_HELPER_PASSES):
+            trial = Reader(
+                self.tree,
+                self.function,
+                self.summaries,
+                None,
+                self.closure,
+                self.enclosing,
+                held,
+            )
+            trial.block(self.function.node.body, trial.start())
+            if trial.nested_returns == held:
+                break
+            held = trial.nested_returns
+        return held
 
     # -- statements ------------------------------------------------------
     def block(

@@ -55,6 +55,7 @@ from api_taxonomy import (
     module_section,
     public_names,
 )
+from ast_scan import COMPOUND_STATEMENTS, block_statements
 from markdown_fences import code_lines
 
 if TYPE_CHECKING:
@@ -1023,8 +1024,8 @@ def _module_imports(module_name: str) -> Mapping[str, tuple[str, str]]:
     statements = list(tree.body)
     while statements:
         statement = statements.pop(0)
-        if isinstance(statement, ast.If):
-            statements[:0] = [*statement.body, *statement.orelse]
+        if isinstance(statement, COMPOUND_STATEMENTS):
+            statements[:0] = block_statements(statement)
         elif isinstance(statement, ast.ImportFrom):
             source = importlib.util.resolve_name(
                 "." * statement.level + (statement.module or ""), package
@@ -1272,8 +1273,8 @@ def _keywords_class(cls: type, stub: ast.FunctionDef) -> ast.ClassDef | None:
     pending: list[ast.stmt] = list(tree.body)
     while pending:
         statement = pending.pop(0)
-        if isinstance(statement, ast.If):
-            pending[:0] = [*statement.body, *statement.orelse]
+        if isinstance(statement, COMPOUND_STATEMENTS):
+            pending[:0] = block_statements(statement)
         elif isinstance(statement, ast.ClassDef) and statement.name == target.id:
             return statement
     return None

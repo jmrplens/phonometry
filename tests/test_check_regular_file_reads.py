@@ -886,6 +886,114 @@ def test_a_check_a_later_definition_replaces_counts_as_the_later_one(
     assert _found(tmp_path, source, helpers=_CHECK) == []
 
 
+def test_a_method_of_a_class_a_later_class_replaces_is_no_definition(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method is read in the class that holds it, and a class a later one
+    of its name replaces holds none the module keeps.
+
+    The methods of two ``Reader`` classes were read against each other, and
+    two blocks that share nothing keep both, so the check of the second
+    ``Reader`` counted only when the first, which no call reaches, checked
+    as well.
+    """
+    source = """
+        import numpy as np
+
+        from check import require_regular
+
+        class Reader:
+            def check(path):
+                return path
+
+        class Reader:
+            def check(path):
+                require_regular(path)
+
+        def reader(path):
+            Reader.check(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source, helpers=_CHECK) == []
+
+
+def test_a_package_re_exports_what_any_compound_statement_imports(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import written in a ``with``, a ``match`` or a loop at the top of a
+    package's ``__init__`` re-exports the name as one written at the top does.
+
+    The re-exports of a package were read through ``if`` and ``try`` alone,
+    so a check the package imports inside a ``with`` was no check for a
+    module that reaches it through the package, and the read was refused.
+    """
+    package = tmp_path / "phonometry" / "io"
+    package.mkdir(parents=True)
+    sources = {
+        "__init__.py": """
+            from contextlib import suppress
+
+            with suppress(ImportError):
+                from ._audio_file import require_regular_audio
+            """,
+        "_audio_file.py": """
+            from .._internal.json_input import not_regular_at
+
+            def require_regular_audio(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+            """,
+        "_backends.py": """
+            from phonometry.io import require_regular_audio as exported
+
+            def through_the_package(sf, path):
+                exported(path)
+                return sf.read(str(path))
+            """,
+    }
+    for name, source in sources.items():
+        (package / name).write_text(textwrap.dedent(source), encoding="utf-8")
+    findings, _stale = crf.check(sorted(package.iterdir()))
+    assert [finding.describe() for finding in findings] == []
+
+
+def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name in a scope, the call reaches the one that
+    stands for the name where it runs.
+
+    A scope's names were read into one table, one import of a name standing
+    for it everywhere, the first one written as the walk went, so a
+    ``require_regular`` imported from the check module counted as the check
+    though a second import, which checks nothing, replaced it before the
+    call.
+    """
+    replaced = """
+        import numpy as np
+
+        def reader(path):
+            from check import require_regular
+            from other import require_regular
+
+            require_regular(path)
+            return np.load(path)
+        """
+    either = """
+        import numpy as np
+
+        def reader(path, fast):
+            if fast:
+                from check import require_regular
+            else:
+                from other import require_regular
+            require_regular(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, replaced, helpers=_CHECK) == [("reader", _FOREIGN)]
+    assert _found(tmp_path, either, helpers=_CHECK) == [("reader", _FOREIGN)]
+
+
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:
     owner = tmp_path / "phonometry" / "_internal" / "json_input.py"
     owner.parent.mkdir(parents=True)

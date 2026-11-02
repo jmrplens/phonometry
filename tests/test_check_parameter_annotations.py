@@ -187,6 +187,40 @@ def test_a_bare_array_handed_to_a_helper_on_a_continuation_line_is_refused(
     ]
 
 
+def test_a_helper_is_the_one_its_name_is_imported_as_at_the_call(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name in a function, the call reaches the one
+    that stands for the name where it runs.
+
+    The call read the first import of the function, so ``_mean`` was the
+    converting helper of ``_helpers`` though the function imports the one
+    of ``_other`` after it, and the parameter was refused for a conversion
+    the call never reaches.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["sound_power"]
+
+        def sound_power(levels: np.ndarray) -> float:
+            from ._helpers import _mean
+            from ._other import _mean
+
+            return _mean(0.0, levels)
+        """,
+        _helpers="""
+        def _mean(offset: float, values: np.ndarray) -> float:
+            return offset + float(np.mean(np.asarray(values)))
+        """,
+        _other="""
+        def _mean(offset: float, values: np.ndarray) -> float:
+            return offset + float(values.mean())
+        """,
+    )
+    assert refused == {}
+
+
 def test_a_parameter_handed_by_keyword_or_through_a_local_name_is_followed(
     tmp_path: pathlib.Path,
 ) -> None:

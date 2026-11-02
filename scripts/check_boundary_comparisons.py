@@ -126,7 +126,7 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
-from ast_scan import binding_of, live_bindings, own_names, scope_nodes
+from ast_scan import binding_of, imported_names, live_bindings, own_names, scope_nodes
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -682,16 +682,16 @@ class Module:
         self.top_imports = _imports_by_name(scope_nodes(self.tree))
         # A function written inside an ``if``, a ``try`` or a ``with`` at the
         # top of the module is the module's own as well, and one written in
-        # each branch is either at run time; one a later one replaces is not.
-        self.top_functions = _live_by_name(self.tree, _own_definitions(self.tree))
-        self.classes = {
-            node.name: node
-            for node in ast.walk(self.tree)
-            if isinstance(node, ast.ClassDef)
-        }
+        # each branch is either at run time; one a later one replaces is not,
+        # whether the later one is a ``def`` or an import of the name.
+        self.top_functions, self.top_live_imports = _top_bindings(
+            self.tree, self.top_imports
+        )
         self.locals: dict[Function, dict[str, list[tuple[str, ast.AST, int]]]] = {}
         self.calls: dict[Function, list[tuple[ast.Call, Function | None]]] = {}
-        self.constructions: dict[str, list[tuple[ast.Call, Function | None]]] = {}
+        self.constructions: dict[
+            ast.ClassDef, list[tuple[ast.Call, Function | None]]
+        ] = {}
         self._index_calls()
         self._memo: dict[object, Value] = {}
         self._classes: dict[object, ast.ClassDef | None] = {}
@@ -781,12 +781,59 @@ class Module:
             for target in self.resolve_functions(node, scope):
                 self.calls.setdefault(target, []).append((node, scope))
             name = node.func.id if isinstance(node.func, ast.Name) else None
-            if name in self.classes:
-                self.constructions.setdefault(name, []).append((node, scope))
-            elif name == "cls":
-                owner = self.owner_class(scope)
-                if owner is not None:
-                    self.constructions.setdefault(owner.name, []).append((node, scope))
+            built = (
+                self.owner_class(scope)
+                if name == "cls"
+                else self.class_named(name, scope, node)
+                if name is not None
+                else None
+            )
+            if built is not None:
+                self.constructions.setdefault(built, []).append((node, scope))
+
+    def class_named(
+        self, name: str, scope: Function | None, node: ast.AST
+    ) -> ast.ClassDef | None:
+        """The class of this file *name*, read at *node* in *scope*, stands for.
+
+        Looked up as Python looks it up, from *scope* outwards to the module:
+        the nearest scope that binds the name says what it is, and it stands
+        for a class only when every way it binds it there is a ``class``
+        statement and one of them is the name's at *node*, or once that
+        scope has run when *node* is in a function inside it
+        (:func:`ast_scan.live_bindings`). ``None`` otherwise: a name bound
+        to a class in each branch of an ``if`` stands for no one class.
+        """
+        current = scope
+        while current is not None:
+            names = own_names(current)
+            if names.rebinds(name):
+                return None
+            if name in names.declared_global:
+                break
+            if names.binds(name):
+                return self._class_in(current, name, node if current is scope else None)
+            current = self.enclosing(current)
+        if scope is None:
+            return self._class_in(self.tree, name, node)
+        return self._class_in(self.tree, name, None)
+
+    def _class_in(
+        self, holder: ast.AST, name: str, node: ast.AST | None
+    ) -> ast.ClassDef | None:
+        """The ``class`` statement of *name* that *holder* binds it to at
+        *node*, or once it has run when *node* is None, when it binds the
+        name by ``class`` statements alone and one of them is the name's.
+        """
+        if own_names(holder).how(name) != "definition":
+            return None
+        classes = [
+            statement
+            for statement in scope_nodes(holder)
+            if isinstance(statement, ast.ClassDef) and statement.name == name
+        ]
+        live = live_bindings(holder, classes, node) if classes else []
+        return live[0] if len(live) == 1 else None
 
     def lookup(
         self, name: str, scope: Function | None, node: ast.AST | None = None
@@ -874,9 +921,9 @@ class Module:
 
     def top_import_targets(self, name: str) -> list[tuple[pathlib.Path, str]]:
         """Where the imports at the top of the module the name may hold once
-        it has run read it from.
+        it has run read it from (:func:`_top_bindings`).
         """
-        statements = live_bindings(self.tree, self.top_imports.get(name, []))
+        statements = self.top_live_imports.get(name, [])
         return _import_targets(statements, name, self.path)
 
     def named_functions(
@@ -1214,7 +1261,7 @@ class Module:
             owner = self.owner_class(context.function)
             if owner is not None:
                 return self._guarded(
-                    ("self", owner.name, node.attr),
+                    ("self", owner, node.attr),
                     functools.partial(self.member, owner, node.attr),
                 )
             return OPAQUE
@@ -1231,7 +1278,7 @@ class Module:
         built = self.instance_class(node.value, context)
         if built is not None:
             return self._guarded(
-                ("self", built.name, node.attr),
+                ("self", built, node.attr),
                 functools.partial(self.member, built, node.attr),
             )
         if base.decimal and not base.depth:
@@ -1252,7 +1299,7 @@ class Module:
         """
         if isinstance(node, ast.Call):
             return (
-                self.classes.get(node.func.id)
+                self.class_named(node.func.id, context.function, node)
                 if isinstance(node.func, ast.Name)
                 else None
             )
@@ -1332,7 +1379,7 @@ class Module:
         fields = _fields(owner)
         if attr not in fields:
             return OPAQUE
-        sites = self.constructions.get(owner.name, [])
+        sites = self.constructions.get(owner, [])
         default = _field_default(owner, attr)
         if not sites:
             return (
@@ -1429,12 +1476,10 @@ class Module:
                 if inner.decimal
                 else OPAQUE
             )
-        targets = self.resolve_functions(node, context.function)
-        if targets:
-            return join(
-                self.returns(target, self.bind(target, node, context))
-                for target in targets
-            )
+        values = [
+            self.returns(target, self.bind(target, node, context))
+            for target in self.resolve_functions(node, context.function)
+        ]
         if (
             isinstance(func, ast.Name)
             and self.package is not None
@@ -1442,16 +1487,15 @@ class Module:
             # the module's import of it.
             and self.lookup(func.id, context.function, node) is not None
         ):
-            found = self.package.functions(
-                self.imports_at(func.id, context.function, node)
-            )
-            if found:
-                return join(
-                    owner.returns(function, self.bind(function, node, context))
-                    for owner, functions in found
-                    for function in functions
+            # A ``def`` in one branch and an import in the other: either.
+            values.extend(
+                owner.returns(function, self.bind(function, node, context))
+                for owner, functions in self.package.functions(
+                    self.imports_at(func.id, context.function, node)
                 )
-        return OPAQUE
+                for function in functions
+            )
+        return join(values) if values else OPAQUE
 
     def selected(self, node: ast.Call, name: str, context: Context) -> list[Value]:
         """What a selecting call hands back: which of its arguments it selects from.
@@ -1782,6 +1826,35 @@ def _live_by_name(
     }
 
 
+def _top_bindings(
+    tree: ast.Module, relative: Mapping[str, list[ast.ImportFrom]]
+) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.ImportFrom]]]:
+    """The functions and the relative imports at the top of *tree* each name
+    holds once the module has run.
+
+    Its ``def`` statements and its imports of a name are read in one order
+    (:func:`ast_scan.live_bindings`): an import after a ``def`` replaces it,
+    a ``def`` after an import replaces that, and one in each branch of an
+    ``if`` is either. A name none of whose functions is live has no entry
+    among the functions, so a re-export is followed through its import.
+    """
+    defined = _by_name(_own_definitions(tree))
+    imported: dict[str, list[ast.stmt]] = {}
+    for node in scope_nodes(tree):
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            for name in imported_names(node):
+                imported.setdefault(name, []).append(node)
+    functions: dict[str, tuple[Function, ...]] = {}
+    imports: dict[str, list[ast.ImportFrom]] = {}
+    for name in defined.keys() | relative.keys():
+        live = live_bindings(tree, [*defined.get(name, ()), *imported.get(name, [])])
+        kept = tuple(node for node in defined.get(name, ()) if node in live)
+        if kept:
+            functions[name] = kept
+        imports[name] = [node for node in relative.get(name, []) if node in live]
+    return functions, imports
+
+
 def _imports_by_name(
     nodes: Iterable[ast.AST],
 ) -> dict[str, list[ast.ImportFrom]]:
@@ -1913,7 +1986,7 @@ class Package:
                 continue
             if original in owner.top_functions:
                 found.append((owner, owner.top_functions[original]))
-            elif hops > 1:
+            if hops > 1:
                 found.extend(
                     self.functions(owner.top_import_targets(original), hops - 1)
                 )

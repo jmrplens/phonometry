@@ -583,6 +583,15 @@ _PLANTED_UNCHECKED = {
             arr, count = np.asarray(levels), 0
             return real_array(arr, "levels"), count
     """,
+    "an_item_a_loop_takes_from_numpy_s_reading": """
+        def f(levels):
+            for row in np.atleast_2d(levels):
+                real_array(row, "levels")
+    """,
+    "an_item_a_comprehension_takes_from_numpy_s_reading": """
+        def f(levels):
+            return [real_array(row, "levels") for row in np.asarray(levels)]
+    """,
     "numpy_s_reading_in_one_branch_of_a_conditional": """
         def f(levels, flag):
             arr = np.asarray(levels) if flag else 0.0

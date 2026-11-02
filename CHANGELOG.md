@@ -171,8 +171,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the node raises `simulation.ComputeRemoteError`, which carries the node's
   traceback, or with `fallback=True` warns with `ComputeFallbackWarning` and
   runs on NumPy here. Warnings raised on the node are raised here with their
-  own class, or as a `RuntimeWarning` led by the class's path when that
-  class cannot be built here, and an interrupt stops the node's run.
+  own class, or, when that class cannot be built here, as the warning class
+  of Python's own it derives from (a library's `UserWarning` stays a
+  `UserWarning`), led by the class's path, and an interrupt stops the node's
+  run.
   `result.provenance.host` names the node and the new
   `result.provenance.package_sha256` the package that ran; progress goes to
   the `phonometry.simulation` logger, silent unless configured. `Compute`
@@ -2387,6 +2389,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that decides whether harmonics are looked for and again for the depth; it
   keeps the first series and transforms the set again only when a harmonic
   widens it.
+
+- **A path of another library reaches the file it names.** `io.write`,
+  `io.read`, `io.info`, `io.read_blocks` and `io.convert` handed SciPy and
+  python-soundfile `str(path)`, which for an `os.PathLike` that is neither a
+  `str` nor a `pathlib.Path` (an `os.DirEntry`, a path class of another
+  library) is the object's repr: a WAV of 16 or 32 bits, a float WAV, a FLAC
+  or a WAV with `bext="loudness"` was written to a file named
+  `<... object at 0x...>` in the working directory, a read raised
+  `FileNotFoundError` naming that repr, and `AudioFileInfo.path` held it. Each
+  now takes the path the object names, and so do their messages and those of
+  `aircraft.load_anp_database`; `convert`'s refusals of a lossy or unknown
+  target escape the name as every other reader's do. The annotations of
+  `io.write`, `io.read`, `io.info`, `io.read_blocks`, `io.convert`,
+  `io.write_sidecar`, `io.read_sidecar`, `io.sidecar_path` and
+  `aircraft.load_anp_database`, the public parameters whose annotation
+  named `pathlib.Path`, say `str | os.PathLike[str]`, as the video writers'
+  did.
+
+- **A video interrupted once it is finished leaves no hidden file behind,
+  and the ffmpeg install hint names one winget package.** An interrupt
+  (Ctrl-C, a notebook's stop button) that came after ffmpeg, or the node,
+  had finished the video and before it took the place of `path` left it
+  under its hidden partial name, from `io.write_video` and from the two
+  simulation writers on a node. It now goes as a failed write's file goes;
+  only the rename's own refusal (a player holding `path` open on Windows)
+  keeps it, at the name its message gives. `io.FFmpegNotFoundError` and the
+  video guide say `winget install --exact --id Gyan.FFmpeg`, where
+  `winget install ffmpeg` matches more than one package.
+
+- **A FLAC whose bext was stopped on its way in leaves no copy behind.**
+  `io.write` and `io.convert` put a bext into a FLAC by rewriting the file
+  python-soundfile wrote into a copy beside it, `<name>.phonometry-tmp`,
+  which then takes its place. An interrupt, a full disk or a rename the file
+  system refuses before that left the copy there; it is removed now, and the
+  file at `path` is the one python-soundfile wrote, without the bext.
 
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings

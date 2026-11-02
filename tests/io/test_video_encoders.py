@@ -125,8 +125,11 @@ def test_a_missing_ffmpeg_names_the_rcparam_and_the_install(
     import matplotlib as mpl
 
     monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "no-such-ffmpeg-here")
-    with pytest.raises(ve.FFmpegNotFoundError, match="animation.ffmpeg_path"):
+    with pytest.raises(ve.FFmpegNotFoundError, match="animation.ffmpeg_path") as caught:
         ve.find_ffmpeg()
+    # A bare "winget install ffmpeg" matches several packages and installs
+    # none of them; the id names the full build winget-pkgs publishes.
+    assert "winget install --exact --id Gyan.FFmpeg)" in str(caught.value)
 
 
 def test_pyodide_says_why(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -34,7 +34,7 @@ reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ffmpeg es un programa, no un paquete de Python, así que se instala aparte de
 phonometry: `conda install ffmpeg`, `apt install ffmpeg`,
-`brew install ffmpeg` o `winget install ffmpeg`. phonometry ejecuta el ffmpeg
+`brew install ffmpeg` o `winget install --exact --id Gyan.FFmpeg`. phonometry ejecuta el ffmpeg
 que ejecutaría matplotlib, el que nombra `rcParams["animation.ffmpeg_path"]`
 (`"ffmpeg"`, buscado en el `PATH`, salvo que lo cambies), y lanza
 `io.FFmpegNotFoundError` con esos comandos de instalación cuando no está. En

@@ -68,6 +68,7 @@ back.
 
 from __future__ import annotations
 
+import os
 import struct
 import warnings
 from dataclasses import replace
@@ -254,11 +255,15 @@ def _quantise(
 
 
 def _warn_clipped(
-    path: str | Path, subtype: str, clipped: int, total: int, peak_dbfs: float
+    path: str | os.PathLike[str],
+    subtype: str,
+    clipped: int,
+    total: int,
+    peak_dbfs: float,
 ) -> None:
     """Report saturation loudly: count, total, and how far over the top."""
     warnings.warn(
-        f"{escaped(str(path))}: {clipped} of {total} samples exceed the full-scale range "
+        f"{escaped(os.fspath(path))}: {clipped} of {total} samples exceed the full-scale range "
         f"of {subtype} (signal peak {peak_dbfs:+.2f} dBFS) and were "
         "saturated. Nothing was rescaled: scale the signal before writing "
         "if clipping is not intended.",
@@ -376,7 +381,9 @@ def frame_riff_chunk(chunk_id: bytes, payload: bytes) -> bytes:
     return chunk_id + struct.pack("<I", len(payload)) + payload + padding
 
 
-def append_riff_chunk(path: str | Path, chunk_id: bytes, payload: bytes) -> None:
+def append_riff_chunk(
+    path: str | os.PathLike[str], chunk_id: bytes, payload: bytes
+) -> None:
     """Append a chunk to a finished WAV/RF64 file and repair its size field.
 
     The path for files scipy wrote (its writer offers no metadata): the
@@ -392,7 +399,7 @@ def append_riff_chunk(path: str | Path, chunk_id: bytes, payload: bytes) -> None
     with Path(path).open("r+b") as fh:
         fourcc = fh.read(4)
         if fourcc not in (b"RIFF", b"RF64", b"BW64"):
-            msg = f"{escaped(str(path))}: not a RIFF/RF64/BW64 file"
+            msg = f"{escaped(os.fspath(path))}: not a RIFF/RF64/BW64 file"
             raise ValueError(msg)
         fh.seek(0, 2)
         if fh.tell() % 2:
@@ -402,7 +409,7 @@ def append_riff_chunk(path: str | Path, chunk_id: bytes, payload: bytes) -> None
         if fourcc == _RIFF_FOURCC:
             if riff_size > _RF64_SIZE_SENTINEL:
                 msg = (
-                    f"{escaped(str(path))}: appending {len(payload)} bytes overflows the "
+                    f"{escaped(os.fspath(path))}: appending {len(payload)} bytes overflows the "
                     "32-bit RIFF size; the file needed to be RF64"
                 )
                 raise ValueError(msg)
@@ -489,7 +496,7 @@ def _resolve_bext(
 
 def _reconcile_streamed_header(
     fh: BinaryIO,
-    path: str | Path,
+    path: str | os.PathLike[str],
     *,
     fs: int,
     channels: int,
@@ -518,7 +525,7 @@ def _reconcile_streamed_header(
     )
     if len(patched) != header_len:
         msg = (
-            f"{escaped(str(path))}: the {written} frames actually streamed move the "
+            f"{escaped(os.fspath(path))}: the {written} frames actually streamed move the "
             "header across the RF64 promotion boundary the estimated "
             "count chose; the estimate was too wrong to reconcile"
         )
@@ -528,7 +535,7 @@ def _reconcile_streamed_header(
 
 
 def write_wav_stream(
-    path: str | Path,
+    path: str | os.PathLike[str],
     blocks: Iterable[np.ndarray],
     fs: int,
     channels: int,
@@ -593,14 +600,14 @@ def write_wav_stream(
             frames = written
     if written != frames:
         msg = (
-            f"{escaped(str(path))}: the block stream carried {written} frames but the "
+            f"{escaped(os.fspath(path))}: the block stream carried {written} frames but the "
             f"header promised {frames}; the file is inconsistent"
         )
         raise ValueError(msg)
 
 
 def write_wav(
-    path: str | Path,
+    path: str | os.PathLike[str],
     data: np.ndarray,
     fs: int,
     subtype: str,
@@ -619,12 +626,12 @@ def write_wav(
     )
 
 
-def _check_target_suffix(path: str | Path, target: Path) -> None:
+def _check_target_suffix(path: str | os.PathLike[str], target: Path) -> None:
     """Refuse any destination outside the WAV family and FLAC."""
     suffix = target.suffix.lower()
     if suffix not in _WAV_SUFFIXES and suffix != ".flac":
         msg = (
-            f"{escaped(str(path))}: unsupported target {target.suffix!r}; the writer "
+            f"{escaped(os.fspath(path))}: unsupported target {target.suffix!r}; the writer "
             "produces the WAV family (.wav, .wave, .bwf) and, with the "
             "[audio] extra, FLAC. Lossy formats are deliberately not "
             "offered: a metrology library does not export approximations "
@@ -667,7 +674,7 @@ def _refuse_passthrough_dither(dither: str | None) -> None:
 
 
 def _write_pcm24(
-    path: str | Path,
+    path: str | os.PathLike[str],
     data: np.ndarray,
     rate: int,
     resolved: str,
@@ -691,7 +698,7 @@ def _write_pcm24(
 
 
 def _write_through_scipy(
-    path: str | Path,
+    path: str | os.PathLike[str],
     data: np.ndarray,
     rate: int,
     resolved: str,
@@ -719,7 +726,7 @@ def _write_through_scipy(
 
 @overload
 def write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
@@ -733,7 +740,7 @@ def write(
 
 @overload
 def write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
@@ -744,7 +751,7 @@ def write(
 
 
 def write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = None,
     *,
@@ -869,7 +876,7 @@ def write(
     _write_signal_sidecar(path, carried)
 
 
-def _write_signal_sidecar(path: str | Path, carried: bytes | None) -> None:
+def _write_signal_sidecar(path: str | os.PathLike[str], carried: bytes | None) -> None:
     """Put the sidecar made before the audio was written beside it, on request.
 
     The sidecar's bytes were made and checked before any bytes hit the disk,
@@ -880,7 +887,7 @@ def _write_signal_sidecar(path: str | Path, carried: bytes | None) -> None:
         put_sidecar(path, carried)
 
 
-def _scipy_write(path: str | Path, fs: int, data: np.ndarray) -> None:
+def _scipy_write(path: str | os.PathLike[str], fs: int, data: np.ndarray) -> None:
     """Write ``(channels, samples)`` data through scipy's writer.
 
     scipy fully serves four of the five subtypes (int16/int32 PCM, float
@@ -890,7 +897,7 @@ def _scipy_write(path: str | Path, fs: int, data: np.ndarray) -> None:
     """
     frames_first = np.ascontiguousarray(data.T)
     wavfile.write(
-        str(path), fs, frames_first[:, 0] if data.shape[0] == 1 else frames_first
+        os.fspath(path), fs, frames_first[:, 0] if data.shape[0] == 1 else frames_first
     )
 
 
@@ -904,7 +911,7 @@ def _flac_passthrough_codes(
 
 
 def _flac_quantised_codes(
-    path: str | Path,
+    path: str | os.PathLike[str],
     data: np.ndarray,
     subtype: str | None,
     dither: str | None,
@@ -938,7 +945,7 @@ def _flac_quantised_codes(
 
 
 def _write_flac(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     data: np.ndarray,
     fs: int,
@@ -971,7 +978,7 @@ def _write_flac(
     out: np.ndarray
     if implied == "PCM_32":
         msg = (
-            f"{escaped(str(path))}: FLAC stores integers up to 24 bits (libsndfile), so "
+            f"{escaped(os.fspath(path))}: FLAC stores integers up to 24 bits (libsndfile), so "
             "int32 codes cannot pass through bit-exact. Convert to float64 "
             "and choose subtype='PCM_24' to accept the 8-bit truncation "
             "explicitly."
@@ -985,7 +992,7 @@ def _write_flac(
     bext_payload = _resolve_bext(x, bext, data, fs, resolved, algorithm="FLAC")
     frames_first = np.ascontiguousarray(out.T)
     sf.write(
-        str(path),
+        os.fspath(path),
         frames_first[:, 0] if out.shape[0] == 1 else frames_first,
         fs,
         subtype=resolved,

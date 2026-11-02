@@ -104,12 +104,16 @@ python = "venvs/node/bin/python"    # relativo al directorio personal de allí
 | `ssh` | el destino que toma `ssh`: `usuario@dirección`, o un alias `Host` de tu `~/.ssh/config` | obligatoria |
 | `runner` | cómo ejecuta el nodo un trabajo: `"docker"` o `"python"` | obligatoria |
 | `image` | en un nodo Docker, la imagen que hay en el nodo | obligatoria allí |
-| `python` | en un nodo Python, su intérprete: una ruta absoluta, o una relativa al directorio personal en el nodo | obligatoria allí |
+| `python` | en un nodo Python, su intérprete: una ruta absoluta, una ruta relativa al directorio personal en el nodo, o el nombre de un programa, como `python3`, que se busca en el `PATH` que ve la orden que ssh ejecuta allí | obligatoria allí |
 | `label` | cómo nombran el nodo los mensajes y el log | su nombre |
 | `timeout_s` | lo máximo que puede durar una ejecución allí, en segundos | sin límite |
 
 Un nombre lleva letras, dígitos, `.`, `_` y `-`, y empieza por una letra o un
-dígito. Una clave que la tabla no recoge, una `image` en un nodo Python o un
+dígito. Un nombre con un punto va entre comillas en la cabecera de su tabla,
+porque TOML lee un punto suelto como una tabla dentro de otra:
+`[hosts."nas.local"]` nombra el nodo `nas.local`, el que pide
+`Compute(host="nas.local")`, mientras que `[hosts.nas.local]` sería una tabla
+`local` dentro de un nodo `nas`. Una clave que la tabla no recoge, una `image` en un nodo Python o un
 `python` en uno Docker, o una ruta de `python` que empieza por `~` lanzan
 `ValueError` nombrando el fichero: el cliente entrecomilla la ruta en la
 orden que envía, así que el shell del nodo nunca expandiría la `~`. Un
@@ -226,7 +230,9 @@ Cada ejecución tiene un contenedor propio, que se borra cuando termina la
 ejecución, sin red y con tu usuario del nodo, así que todo lo que escribe es
 tuyo. Sus paquetes viven en `~/.cache/phonometry/remote` en el nodo (bajo
 `XDG_CACHE_HOME` cuando esa variable contiene una ruta absoluta), que el
-contenedor monta. Una ejecución ocupa una GPU, la que elige `device_index`.
+contenedor monta, con los kernels que compila CuPy en `cupy-kernels` dentro de
+ese directorio, para que una ejecución posterior no los vuelva a compilar.
+Una ejecución ocupa una GPU, la que elige `device_index`.
 Docker nunca descarga la imagen: en un nodo que no la tiene la ejecución
 falla, y el error dice que la construyas.
 
@@ -312,8 +318,13 @@ Los avisos que lanza la ejecución en el nodo se lanzan aquí, en la línea de
 tu código que llamó a la función, con su propia clase: los de phonometry tal
 como se publican, y los de Python y NumPy como lo que son. Un aviso de una
 biblioteca que este proceso no ha importado, o de una clase que no se puede
-construir a partir de su mensaje, vuelve como un `RuntimeWarning` cuyo
-mensaje empieza por la ruta de la clase.
+construir a partir de su mensaje, vuelve como la clase de aviso propia de
+Python de la que deriva su clase, entre ellas `UserWarning`,
+`DeprecationWarning` y `RuntimeWarning`, con un mensaje que empieza por la
+ruta de la clase: un filtro sobre esa clase lo alcanza aquí como lo haría en
+el nodo. Una clase de aviso propia de Python que solo tiene un Python más
+reciente en el nodo vuelve como `RuntimeWarning`, con el mensaje encabezado
+también por la ruta de la clase.
 
 Una interrupción, Ctrl-C o el botón de parada de un cuaderno, detiene ssh en
 el acto y llega a tu código como `KeyboardInterrupt`, con `fallback=True` o

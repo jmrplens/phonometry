@@ -1103,8 +1103,8 @@ Warns that samples exceeded full scale and were saturated on write.
 
 ```python
 convert(
-    src: str | Path,
-    dst: str | Path,
+    src: str | os.PathLike[str],
+    dst: str | os.PathLike[str],
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = None,
     block_size: int | np.integer[Any] = 1048576,
@@ -1165,7 +1165,7 @@ ffmpeg is not where matplotlib looks for it, or cannot run here.
 ## info
 
 ```python
-info(path: str | Path) -> AudioFileInfo
+info(path: str | os.PathLike[str]) -> AudioFileInfo
 ```
 
 Describe an audio file without reading its samples.
@@ -1347,7 +1347,11 @@ PROVENANCE_KINDS = ('datasheet', 'declaration_of_performance', 'test_report', 'm
 ## read
 
 ```python
-read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
+read(
+    path: str | os.PathLike[str],
+    *,
+    calibration_factor: float | None = None,
+) -> Signal
 ```
 
 Read an audio file into a [`Signal`](/phonometry/reference/api/io/io/#signal).
@@ -1399,7 +1403,7 @@ derived from the file's channel mask.
 
 ```python
 read_blocks(
-    path: str | Path,
+    path: str | os.PathLike[str],
     block_size: int | np.integer[Any],
     *,
     overlap: int | np.integer[Any] = 0,
@@ -1509,7 +1513,9 @@ ever imported.
 ## read_sidecar
 
 ```python
-read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None
+read_sidecar(
+    audio_path: str | os.PathLike[str],
+) -> CalibrationSidecar | None
 ```
 
 Read an audio file's calibration sidecar, if one exists.
@@ -1538,7 +1544,7 @@ dropping it would silently drop the calibration).
 ## sidecar_path
 
 ```python
-sidecar_path(audio_path: str | Path) -> Path
+sidecar_path(audio_path: str | os.PathLike[str]) -> Path
 ```
 
 The sidecar filename of an audio file (see the module docstring).
@@ -1839,7 +1845,7 @@ checked when the path is known, still before anything starts.
 
 ```python
 write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
@@ -1851,7 +1857,7 @@ write(
 ) -> None
 
 write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
@@ -2005,7 +2011,7 @@ the reader's own words and naming the file.
 
 ```python
 write_sidecar(
-    audio_path: str | Path,
+    audio_path: str | os.PathLike[str],
     calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]],
     *,
     reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,

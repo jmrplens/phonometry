@@ -303,11 +303,12 @@ def test_the_colour_bar_s_label_stays_under_the_title(
 #: the frame, the field, the grid and the language, and the labels the x
 #: axis then draws. At the floor a tall grid's x axis is some 15 pixels
 #: wide, too narrow for "0.00" and "0.05" side by side, so it keeps its
-#: first tick alone; at 960 x 630 a 3:1 grid's five labels of four
+#: last tick alone, whose "0.05" at its place gives the axis' scale where a
+#: lone "0" gave none; at 960 x 630 a 3:1 grid's five labels of four
 #: decimals touch, and every second is kept; an axis with room for its
 #: labels keeps them all.
 _THINNED: dict[str, tuple[tuple[int, int], str, str, Language, list[str]]] = {
-    "the first alone": ((479, 245), "elastic p", "10:1", "en", ["0"]),
+    "the last alone": ((479, 245), "elastic p", "10:1", "en", ["0.05"]),
     "every second": (
         (960, 630),
         "elastic vx",

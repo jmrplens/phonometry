@@ -530,6 +530,29 @@ def test_a_stream_that_breaks_after_its_first_bytes_leaves_nothing(
     assert _partials(tmp_path) == []
 
 
+def test_an_interrupt_once_the_answer_is_in_leaves_no_partial_file(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The whole answer has been read and the file closed; an interrupt then,
+    # before the file takes path's place, left it under its hidden name.
+    from phonometry.io import _video as io_video
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "kept.webm"
+    target.write_bytes(b"the video that was there")
+
+    def interrupted_settle(partial: pathlib.Path, path: pathlib.Path) -> None:
+        assert partial.read_bytes().startswith(_WEBM)  # finished, not yet moved
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(io_video, "settle", interrupted_settle)
+    request = Compute(host=node)
+    with pytest.raises(KeyboardInterrupt):
+        write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
+    assert target.read_bytes() == b"the video that was there"
+    assert _partials(tmp_path) == []
+
+
 def test_a_finished_video_that_cannot_take_path_s_place_says_where_it_is(
     node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

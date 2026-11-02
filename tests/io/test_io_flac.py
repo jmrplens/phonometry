@@ -12,6 +12,9 @@ RFC 9639 and the flac --keep-foreign-metadata convention.
 from __future__ import annotations
 
 import builtins
+import errno
+import pathlib
+import shutil
 import struct
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -24,6 +27,7 @@ from phonometry.io import ClippingWarning, info, read, write
 from phonometry.io._bext import fresh_metadata
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 try:
@@ -207,3 +211,66 @@ def test_flac_target_without_the_extra_names_it(
     monkeypatch.setattr(builtins, "__import__", blocked)
     with pytest.raises(ImportError, match=r'pip install "phonometry\[audio\]"'):
         write(tmp_path / "x.flac", np.zeros(4), FS)
+
+
+def _stop_the_copy(error: BaseException) -> object:
+    """A copy of the audio frames that raises *error* once it has begun."""
+
+    def stopped(source: object, target: object) -> None:
+        raise error
+
+    return stopped
+
+
+def _refuse_the_rename(self: pathlib.Path, target: object) -> pathlib.Path:
+    """A rename the file system refuses, as Windows does for a file a player holds."""
+    msg = f"refused for the test: {self.name}"
+    raise PermissionError(errno.EACCES, msg)
+
+
+@needs_soundfile
+@pytest.mark.parametrize(
+    ("stop", "raised", "said"),
+    [
+        (
+            lambda patch: patch.setattr(
+                shutil, "copyfileobj", _stop_the_copy(KeyboardInterrupt())
+            ),
+            KeyboardInterrupt,
+            None,
+        ),
+        (
+            lambda patch: patch.setattr(
+                shutil,
+                "copyfileobj",
+                _stop_the_copy(OSError(errno.ENOSPC, "full for the test")),
+            ),
+            OSError,
+            "full for the test",
+        ),
+        (
+            lambda patch: patch.setattr(pathlib.Path, "replace", _refuse_the_rename),
+            PermissionError,
+            "refused for the test",
+        ),
+    ],
+    ids=["interrupted copy", "full disk", "refused rename"],
+)
+def test_a_bext_embed_stopped_partway_leaves_no_copy_beside_the_file(
+    stop: Callable[[pytest.MonkeyPatch], None],
+    raised: type[BaseException],
+    said: str | None,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The bext goes into a copy of the FLAC soundfile wrote, beside it, which
+    # then takes the file's place. Stopped before that, the copy stayed, a
+    # second FLAC under "carried.flac.phonometry-tmp" that nothing removed.
+    path = tmp_path / "carried.flac"
+    samples, bext = np.full(16, 0.125), fresh_metadata()
+    stop(monkeypatch)
+    with pytest.raises(raised, match=said):
+        write(path, samples, FS, bext=bext)
+    monkeypatch.undo()
+    assert sorted(entry.name for entry in tmp_path.iterdir()) == ["carried.flac"]
+    assert np.asarray(read(path)).ravel().tolist() == samples.tolist()

@@ -45,6 +45,7 @@ library cannot make), no dithering, no channel mixing.
 
 from __future__ import annotations
 
+import os
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from pathlib import Path
@@ -131,7 +132,9 @@ def _scale_to_float(raw: NDArray[np.generic]) -> NDArray[np.float64]:
     return raw.astype(np.float64, order="C") / scale
 
 
-def wav_info(path: str | Path, chunks: WavChunks | None = None) -> AudioFileInfo:
+def wav_info(
+    path: str | os.PathLike[str], chunks: WavChunks | None = None
+) -> AudioFileInfo:
     """Describe a WAV/BWF/RF64 file from its headers alone.
 
     A single pass of the chunk walker: the samples are never read, so the
@@ -150,7 +153,7 @@ def wav_info(path: str | Path, chunks: WavChunks | None = None) -> AudioFileInfo
     frames = parsed.frames
     lossless = fmt.resolved_tag in (WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT)
     return AudioFileInfo(
-        path=str(path),
+        path=os.fspath(path),
         container=parsed.container,
         format_name=fmt.format_name,
         fs=fmt.fs,
@@ -168,7 +171,7 @@ def wav_info(path: str | Path, chunks: WavChunks | None = None) -> AudioFileInfo
 
 
 def read_wav(
-    path: str | Path,
+    path: str | os.PathLike[str],
     chunks: WavChunks | None = None,
     *,
     calibration_factor: float | None = None,
@@ -217,7 +220,7 @@ def read_wav(
     fmt = parsed.fmt
     if fmt.resolved_tag not in (WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT):
         msg = (
-            f"{escaped(str(path))}: {fmt.format_name} is not linear PCM/float; "
+            f"{escaped(os.fspath(path))}: {fmt.format_name} is not linear PCM/float; "
             "read it through the [audio] backend"
         )
         raise ValueError(msg)
@@ -229,7 +232,7 @@ def read_wav(
     actual = Path(path).stat().st_size
     if actual < payload_end:
         msg = (
-            f"{escaped(str(path))}: data chunk claims {parsed.data_size} bytes "
+            f"{escaped(os.fspath(path))}: data chunk claims {parsed.data_size} bytes "
             f"({parsed.frames} frames) but the file ends "
             f"{payload_end - actual} bytes short; refusing to read a "
             "truncated recording as if it were complete"
@@ -254,7 +257,7 @@ def read_wav(
             # when it was not.
             warnings.simplefilter("ignore", wavfile.WavFileWarning)
             fs, raw = wavfile.read(
-                str(path), mmap=fmt.bits_per_sample != _THREE_BYTE_PCM_BITS
+                os.fspath(path), mmap=fmt.bits_per_sample != _THREE_BYTE_PCM_BITS
             )
         # scipy returns (frames,) or (frames, channels); the transpose to
         # the library's (channels, samples) is taken before the float
@@ -272,7 +275,7 @@ def read_wav(
     )
 
 
-def linear_wav_origin(path: str | Path, parsed: WavChunks) -> SignalOrigin:
+def linear_wav_origin(path: str | os.PathLike[str], parsed: WavChunks) -> SignalOrigin:
     """The origin record of a linear WAV, as the whole-file read stamps it.
 
     One construction for :func:`read_wav` and for the block reader, so a
@@ -285,7 +288,7 @@ def linear_wav_origin(path: str | Path, parsed: WavChunks) -> SignalOrigin:
     """
     fmt = parsed.fmt
     return SignalOrigin(
-        path=str(path),
+        path=os.fspath(path),
         container=parsed.container,
         format_name=fmt.format_name,
         bit_depth=fmt.valid_bits or fmt.bits_per_sample,

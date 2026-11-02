@@ -95,6 +95,8 @@ _INCOMING = ".incoming-"
 _REMOVING = ".removing-"
 
 _DIGEST = re.compile(r"[0-9a-f]{64}\Z")
+#: The lock file of a digest's package, which :func:`hold` opens.
+_DIGEST_LOCK = re.compile(r"([0-9a-f]{64})\.lock\Z")
 _PATH = re.compile(r"phonometry(?:/[A-Za-z0-9_.-]+)+\Z")
 _RELEASE = re.compile(r"\d+(?:\.\d+)*")
 
@@ -465,7 +467,7 @@ def _age(entry: Path, now: float) -> float:
 
 
 def touch_and_prune(cache: Path, digest: str, keep: int = KEEP) -> None:
-    """Mark *digest* as used, then prune what no run holds, and clear old uploads.
+    """Mark *digest* as used, then prune what no run holds, and clear old uploads and free lock files.
 
     Kept: the *keep* packages used last, *digest* itself, any used in the
     last :data:`_PRUNE_MARGIN_S` seconds, and any a run holds (:func:`hold`).
@@ -489,17 +491,46 @@ def touch_and_prune(cache: Path, digest: str, keep: int = KEEP) -> None:
             if old.name != digest and _age(old, now) > _PRUNE_MARGIN_S:
                 _prune(cache, old)
         _clear_leftovers(cache, now)
+        _clear_locks(cache)
 
 
 def _prune(cache: Path, package: Path) -> None:
     """Remove *package* unless a run holds it; called under the cache's lock.
 
-    Its lock file stays, an empty file, so that a run of the same digest
-    later locks the same file a prune would.
+    Its lock file is left to :func:`_clear_locks`, which removes it once no
+    run holds it.
     """
     with (cache / f"{package.name}.lock").open("ab") as handle:
         if _lock(handle, exclusive=True, wait=False):
             _discard(cache, package)
+
+
+def _clear_locks(cache: Path) -> None:
+    """Remove the lock file of every digest whose package is gone and no run holds; under the cache's lock.
+
+    One is left by each package pruned, and by each run whose package never
+    arrived whole; a development checkout makes a new digest at each change.
+    A lock file is opened only under the cache's lock (:func:`hold`), so one
+    this process locks alone, here, is held by no run and opened by none
+    until the lock is let go: removed then, the next run of its digest makes
+    a new file, which no prune has locked. On Windows, where only the tests
+    run this file, nothing is locked, so no lock file can be told free, and
+    none is removed.
+    """
+    if sys.platform == "win32":
+        return
+    for entry in cache.iterdir():
+        found = _DIGEST_LOCK.match(entry.name)
+        if found is None or is_stored(cache / found.group(1)):
+            continue
+        try:
+            handle = entry.open("ab")
+        except OSError:
+            # Not a file a run made (a directory of that name): left alone.
+            continue
+        with handle:
+            if _lock(handle, exclusive=True, wait=False):
+                entry.unlink(missing_ok=True)
 
 
 def _clear_leftovers(cache: Path, now: float) -> None:

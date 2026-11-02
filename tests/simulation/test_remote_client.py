@@ -20,7 +20,7 @@ import sys
 import threading
 import types
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -808,19 +808,37 @@ def test_the_node_s_warnings_are_raised_here_with_their_class_at_the_caller_s_li
     caught = [
         {
             "category": "phonometry.simulation.compute:ComputeFallbackWarning",
+            "base": "UserWarning",
             "message": "from the node",
         },
-        {"category": "builtins:RuntimeWarning", "message": "overflow"},
-        {"category": "some.module.nobody.imported:Odd", "message": "strange"},
+        {
+            "category": "builtins:RuntimeWarning",
+            "base": "RuntimeWarning",
+            "message": "overflow",
+        },
+        {
+            "category": "some.module.nobody.imported:Odd",
+            "base": "UserWarning",
+            "message": "strange",
+        },
+        {
+            "category": "some.module.nobody.imported:Old",
+            "base": "DeprecationWarning",
+            "message": "an old keyword",
+        },
     ]
     stdout = _result(caught=caught)
     with warnings.catch_warnings(record=True) as record:
         warnings.simplefilter("always")
         _receive(stdout)
+    # A class this process does not have comes back as the warning of
+    # Python's own it derives from, as the node names it: a filter on that
+    # class treats it here as it would there.
     assert [(w.category, str(w.message)) for w in record] == [
         (ComputeFallbackWarning, "from the node"),
         (RuntimeWarning, "overflow"),
-        (RuntimeWarning, "some.module.nobody.imported:Odd: strange"),
+        (UserWarning, "some.module.nobody.imported:Odd: strange"),
+        (DeprecationWarning, "some.module.nobody.imported:Old: an old keyword"),
     ]
     assert {w.filename for w in record} == {__file__}
 
@@ -840,14 +858,20 @@ def test_a_node_s_warning_class_is_looked_up_without_running_a_module_hook(
     lazy.__getattr__ = load  # type: ignore[method-assign]
     monkeypatch.setitem(sys.modules, lazy.__name__, lazy)
     stdout = _result(
-        caught=[{"category": f"{lazy.__name__}:submodule.Odd", "message": "strange"}]
+        caught=[
+            {
+                "category": f"{lazy.__name__}:submodule.Odd",
+                "base": "UserWarning",
+                "message": "strange",
+            }
+        ]
     )
     with warnings.catch_warnings(record=True) as record:
         warnings.simplefilter("always")
         _receive(stdout)
     assert asked == []
     assert [(w.category, str(w.message)) for w in record] == [
-        (RuntimeWarning, f"{lazy.__name__}:submodule.Odd: strange")
+        (UserWarning, f"{lazy.__name__}:submodule.Odd: strange")
     ]
 
 
@@ -871,7 +895,7 @@ class _ExplodingModule(importlib.abc.MetaPathFinder, importlib.abc.Loader):
         raise RuntimeError(msg)
 
 
-def test_a_node_s_warning_of_a_module_whose_import_raises_comes_back_as_a_runtime_warning(
+def test_a_node_s_warning_of_a_module_whose_import_raises_comes_back_as_its_builtin_base(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # The result is read already: whatever the import of a module the node
@@ -879,12 +903,14 @@ def test_a_node_s_warning_of_a_module_whose_import_raises_comes_back_as_a_runtim
     # ComputeRemoteError, which would skip the fallback.
     monkeypatch.setattr(sys, "meta_path", [_ExplodingModule(), *sys.meta_path])
     path = f"{_ExplodingModule.name}:Odd"
-    stdout = _result(caught=[{"category": path, "message": "strange"}])
+    stdout = _result(
+        caught=[{"category": path, "base": "FutureWarning", "message": "strange"}]
+    )
     with warnings.catch_warnings(record=True) as record:
         warnings.simplefilter("always")
         _receive(stdout)
     assert [(w.category, str(w.message)) for w in record] == [
-        (RuntimeWarning, f"{path}: strange")
+        (FutureWarning, f"{path}: strange")
     ]
     assert _ExplodingModule.name not in sys.modules
 
@@ -919,7 +945,7 @@ def _answers(stdout: bytes) -> Iterator[client.Session]:
 
 
 @pytest.mark.parametrize("strict", [_SinceWarning, _MuteWarning, _RewordingWarning])
-def test_a_node_s_warning_of_a_class_that_cannot_be_built_here_comes_back_as_a_runtime_warning(
+def test_a_node_s_warning_of_a_class_that_cannot_be_built_here_comes_back_as_its_builtin_base(
     strict: type[Warning], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     library = types.ModuleType("a_library_of_the_caller")
@@ -933,7 +959,13 @@ def test_a_node_s_warning_of_a_class_that_cannot_be_built_here_comes_back_as_a_r
         {"type": "hello", "protocol": bootstrap.PROTOCOL, "have": True}
     ) + _frame({"type": "ready"})
     result = _result(
-        caught=[{"category": f"{library.__name__}:Strict", "message": "deprecated"}]
+        caught=[
+            {
+                "category": f"{library.__name__}:Strict",
+                "base": "UserWarning",
+                "message": "deprecated",
+            }
+        ]
     )
     monkeypatch.setattr(
         client, "open_session", lambda entry, request: _answers(ready + result)
@@ -949,20 +981,66 @@ def test_a_node_s_warning_of_a_class_that_cannot_be_built_here_comes_back_as_a_r
     assert provenance.host == "lab"
     assert np.array_equal(target, np.arange(10.0).reshape(2, 5))
     assert [(w.category, str(w.message)) for w in record] == [
-        (RuntimeWarning, f"{library.__name__}:Strict: deprecated")
+        (UserWarning, f"{library.__name__}:Strict: deprecated")
     ]
 
 
 def test_a_node_s_warning_reaches_the_caller_escaped() -> None:
     stdout = _result(
         caught=[
-            {"category": "builtins:RuntimeWarning", "message": f"overflow {_ESCAPE}"}
+            {
+                "category": "builtins:RuntimeWarning",
+                "base": "RuntimeWarning",
+                "message": f"overflow {_ESCAPE}",
+            }
         ]
     )
     with warnings.catch_warnings(record=True) as record:
         warnings.simplefilter("always")
         _receive(stdout)
     assert _no_control([str(w.message) for w in record])
+
+
+@pytest.mark.parametrize(
+    ("base", "match"),
+    [
+        ("ValueError", "names 'ValueError' as a warning's base, which is no warning"),
+        ("open", "names 'open' as a warning's base"),
+        (None, "'base'"),
+        (7, "'base'"),
+    ],
+)
+def test_a_node_s_warning_whose_base_is_no_builtin_warning_breaks_the_protocol(
+    base: object, match: str
+) -> None:
+    # The node names the base from its class's own; a name Python here holds
+    # as something else, or no name at all, is a node that does not speak
+    # this package's protocol.
+    entry: dict[str, Any] = {
+        "category": "some.module.nobody.imported:Odd",
+        "message": "strange",
+    }
+    if base is not None:
+        entry["base"] = base
+    stdout = _result(caught=[entry])
+    with pytest.raises(ComputeRemoteError, match=match):
+        _receive(stdout)
+
+
+@pytest.mark.parametrize("base", ["WarningOfALaterPython", "PhonometryWarning"])
+def test_a_node_s_warning_whose_base_this_python_lacks_comes_back_as_a_runtime_warning(
+    base: str,
+) -> None:
+    # A newer Python on the node may have a warning class of its own this one
+    # lacks; the run it finished is not thrown away for the name.
+    path = "some.module.nobody.imported:Odd"
+    stdout = _result(caught=[{"category": path, "base": base, "message": "strange"}])
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        _receive(stdout)
+    assert [(w.category, str(w.message)) for w in record] == [
+        (RuntimeWarning, f"{path}: strange")
+    ]
 
 
 # A video's own checks on the stream: the bytes its container begins with.

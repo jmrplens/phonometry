@@ -879,6 +879,7 @@ def encode(
     # would be the protocol "x".
     partial = request.new_partial().absolute()
     pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
+    settling = False
     try:
         # Every frame is saved under these, whatever the caller's rcParams say.
         with mpl.rc_context(
@@ -889,14 +890,19 @@ def encode(
             }
         ):
             animation.save(str(partial), writer=_movie_writer(pipe))
-    except BaseException:
-        # The error that stopped the write is the one raised: an unfinished
-        # file the system does not let go (a scanner holding it on Windows)
-        # stays, hidden, rather than hide that error behind its own.
-        with contextlib.suppress(OSError):
-            partial.unlink(missing_ok=True)
+        settling = True
+        settle(partial, request.path)
+    except BaseException as exc:
+        # An interrupt can come once ffmpeg has finished, before the rename:
+        # the file goes then as it goes when the write fails. Only settle's
+        # own refusal keeps it, at the name its message gives, so the run it
+        # cost is not lost. The error that stopped the write is the one
+        # raised: a file the system does not let go (a scanner holding it on
+        # Windows) stays, hidden, rather than hide that error behind its own.
+        if not (settling and isinstance(exc, VideoEncoderError)):
+            with contextlib.suppress(OSError):
+                partial.unlink(missing_ok=True)
         raise
-    settle(partial, request.path)
     return pipe.encoder_name
 
 

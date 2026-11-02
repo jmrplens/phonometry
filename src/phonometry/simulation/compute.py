@@ -15,9 +15,11 @@ The environment variable is read when a computation resolves its placement,
 never at import. Its grammar is ``device[:index][@host][,option...]`` with the
 options ``float32``, ``float64`` and ``fallback``: ``cupy``, ``cupy:1``,
 ``torch:cuda:1,fallback``, ``torch:mps,float32``, ``cupy@nas``. A host is a
-name in the hosts file (see the guide on remote nodes); only
-:func:`~phonometry.simulation.fdtd_simulation` and
-:func:`~phonometry.simulation.elastic_fdtd_simulation` run on one.
+name in the hosts file (see the guide on remote nodes); only the two
+simulation functions, :func:`~phonometry.simulation.fdtd_simulation` and
+:func:`~phonometry.simulation.elastic_fdtd_simulation`, and the two video
+writers, :func:`~phonometry.simulation.write_fdtd_animation` and
+:func:`~phonometry.simulation.write_elastic_fdtd_animation`, run on one.
 """
 
 from __future__ import annotations
@@ -74,7 +76,8 @@ _DIGEST = re.compile(r"[0-9a-f]{64}")
 #: Where a placement came from, which a refusal names.
 _Source = Literal["argument", "use", "environment", "default"]
 #: The record of a whole simulation and the function that runs it, by
-#: engine: what runs on a node.
+#: engine: what an engine's refusal of a host points to. The video writers
+#: run on a node too, from the same record.
 _RUNS_THERE = MappingProxyType(
     {
         "FDTD2D": ("FDTDRun", "fdtd_simulation"),
@@ -168,9 +171,11 @@ class Compute(RichDisplay):
         when the device is not available, instead of raising.
     :param host: The node the run goes to, by its name in the hosts file, or
         ``None`` (default) to run on this machine. Only
-        :func:`~phonometry.simulation.fdtd_simulation` and
-        :func:`~phonometry.simulation.elastic_fdtd_simulation` run on a node;
-        an engine built here refuses a host.
+        :func:`~phonometry.simulation.fdtd_simulation`,
+        :func:`~phonometry.simulation.elastic_fdtd_simulation` and the two
+        video writers, :func:`~phonometry.simulation.write_fdtd_animation`
+        and :func:`~phonometry.simulation.write_elastic_fdtd_animation`, run
+        on a node; an engine built here refuses a host.
     :param timeout_s: The longest a remote run may take, from connecting to
         the result [s], or ``None`` for the hosts file's value (no limit when
         the file names none). Only with a ``host``.
@@ -452,7 +457,7 @@ def _local_request(compute: Compute | None, *, owner: str) -> Compute:
 
     An engine steps in the caller's process, and its fields are the caller's
     to read and write between steps; a node offers neither. Only the
-    simulation functions run on a node.
+    simulation functions and the video writers run on a node.
 
     :param owner: The engine's class name, which the refusal names.
     :raises ValueError: when the placement names a host, saying where the
@@ -474,16 +479,6 @@ def _local_request(compute: Compute | None, *, owner: str) -> Compute:
         f"{function}({record}(...), compute=...) to run the whole simulation there"
     )
     raise ValueError(msg)
-
-
-def _strip_host(text: str) -> str:
-    """A ``PHONOMETRY_COMPUTE`` value with its ``@host`` taken out.
-
-    A node runs what it is sent on itself; a host left in its own
-    environment would send a run there on to the node it names.
-    """
-    head, comma, options = text.partition(",")
-    return head.partition("@")[0].strip() + comma + options
 
 
 def _parse_environment(text: str) -> Compute:

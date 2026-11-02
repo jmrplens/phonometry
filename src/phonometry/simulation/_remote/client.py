@@ -28,6 +28,7 @@ logger, which says nothing unless the caller configures it.
 
 from __future__ import annotations
 
+import builtins
 import contextlib
 import dataclasses
 import importlib
@@ -104,6 +105,17 @@ _EXIT_WAIT_S = 10.0
 #: The most a stream's chunk holds on its way to the sink [bytes]: the chunk a
 #: node copies it in.
 _STREAM_CHUNK = bootstrap._CHUNK
+#: The warning classes of Python's own, by name. A node's warning of a class
+#: this process does not have is raised as the nearest of them its class
+#: derives from, which the node names: a library's ``UserWarning`` stays a
+#: ``UserWarning`` here, and a filter on it still reaches it.
+_BUILTIN_WARNINGS: Mapping[str, type[Warning]] = MappingProxyType(
+    {
+        name: value
+        for name, value in vars(builtins).items()
+        if isinstance(value, type) and issubclass(value, Warning)
+    }
+)
 #: What a node's text may not hold where it is kept as it is: the C0 and C1
 #: control characters, the newline and the tab apart, which a terminal could
 #: take as an escape sequence, and the marks that reorder what a reader sees
@@ -748,7 +760,8 @@ def _warning_class(path: str) -> type[Warning] | None:
         try:
             module = importlib.import_module(module_name)
         # Whatever the import of a module the node names raises, the class is
-        # not found here, and the warning comes back as a RuntimeWarning: this
+        # not found here, and the warning comes back as the warning of Python's
+        # own that the node says it derives from: this
         # runs once the result's header is read and before any of its arrays
         # is, and no error of the node's choosing may stop the run with
         # another error than a ComputeRemoteError.
@@ -776,27 +789,51 @@ def _built(category: type[Warning], message: str) -> Warning | None:
         warning = category(message)
         text = str(warning)
     # Whatever such a class raises, the node's words still reach the caller,
-    # as a RuntimeWarning.
+    # as the warning of Python's own that the class derives from.
     except Exception:
         return None
     return warning if text == message else None
+
+
+def _builtin_base(session: Session, entry: Mapping[str, object]) -> type[Warning]:
+    """The warning of Python's own that a node's warning derives from, as the node names it.
+
+    A name this Python does not have, as a later Python's own warning class
+    would be, is read as :class:`RuntimeWarning`, so the run the node
+    finished is not lost for it.
+
+    :raises ComputeRemoteError: for a base that is no text, or a name
+        :mod:`builtins` holds that is not one of ``_BUILTIN_WARNINGS``.
+    """
+    name = session.field(entry, "base", str)
+    base = _BUILTIN_WARNINGS.get(name)
+    if base is not None:
+        return base
+    if hasattr(builtins, name):
+        msg = f"the node names {_quoted(name)} as a warning's base, which is no warning of Python's own"
+        raise session.failure(msg)
+    return RuntimeWarning
 
 
 def _warnings_of(session: Session, header: Mapping[str, object]) -> list[Warning]:
     """The node's warnings, each built as it is raised here.
 
     In its own class when this process has it and the class takes the
-    message as its text; otherwise a RuntimeWarning led by the class path.
+    message as its text; otherwise in the nearest warning class of Python's
+    own that its class derives from (a ``UserWarning``, a
+    ``DeprecationWarning``, a ``RuntimeWarning``), led by the class path;
+    a ``RuntimeWarning`` when this Python lacks the class the node names.
     """
     caught: list[Warning] = []
     for item in session.field(header, "warnings", list)[: bootstrap._MAX_WARNINGS]:
         entry = cast("Mapping[str, object]", item)
         path = session.field(entry, "category", str)
+        base = _builtin_base(session, entry)
         message = _printable(session.field(entry, "message", str)[:_MESSAGE_CHARS])
         category = _warning_class(path)
         warning = None if category is None else _built(category, message)
         if warning is None:
-            warning = RuntimeWarning(f"{_cut(path)}: {message}")
+            warning = base(f"{_cut(path)}: {message}")
         caught.append(warning)
     return caught
 

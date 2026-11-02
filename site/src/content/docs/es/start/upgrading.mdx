@@ -2803,6 +2803,23 @@ with tempfile.TemporaryDirectory() as folder:
 # is a directory, and audio is read only from a regular file
 ```
 
+## Una ruta de otra biblioteca llega al fichero que nombra
+
+`io.write`, `io.read`, `io.info`, `io.read_blocks` e `io.convert` pasaban una
+ruta a SciPy y a python-soundfile como `str(path)`. Para un `str` o un
+`pathlib.Path` eso es la ruta; para cualquier otro `os.PathLike`, un
+`os.DirEntry` o una clase de ruta de otra biblioteca, es el repr del objeto.
+En la 4.0 cada una toma la ruta que nombra el objeto, los mensajes la
+escriben, y las anotaciones dicen `str | os.PathLike[str]`, como ya decían las
+de los escritores de vídeo. Un `str` o un `pathlib.Path` se comportan como
+antes.
+
+| Se pasa | 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| un `os.PathLike` que no es ni un `str` ni un `pathlib.Path`, a `io.write` (un WAV de 16 o 32 bits, un WAV en coma flotante, un FLAC, o `bext="loudness"`) | el fichero iba a un nombre hecho con el repr del objeto, `<... object at 0x...>`, en el directorio de trabajo | el fichero que nombra el objeto |
+| lo mismo a `io.read`, o como origen de `io.convert`, y un FLAC a `io.info` o `io.read_blocks` | `FileNotFoundError` con el repr, o el `LibsndfileError` de python-soundfile para un FLAC | se lee el fichero que nombra el objeto |
+| lo mismo a `io.info` | `AudioFileInfo.path` guardaba el repr | `AudioFileInfo.path` es la ruta |
+
 ## Los setenta y ocho nombres que ya no están
 
 Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo público:

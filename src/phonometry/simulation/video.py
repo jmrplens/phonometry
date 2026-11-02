@@ -870,22 +870,28 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
     # fails here rather than after the node's whole run; a file that was
     # never created leaves nothing to remove.
     partial.open()
+    settling = False
     try:
         ran = run_remote(
             function, call.placement, sent, expected, record, None, sink=partial
         )
         partial.close()
-    except BaseException:
-        # A stream that broke after its first bytes has written them. The
-        # error that stopped the run is the one raised: closing or removing
-        # the file after it may fail too (a full disk), and would hide it.
-        with contextlib.suppress(OSError, VideoEncoderError):
+        if ran is None:
             partial.discard()
+            return None
+        settling = True
+        settle(partial.path, request.path)
+    except BaseException as exc:
+        # A stream that broke after its first bytes has written them, and an
+        # interrupt can come between the close and the rename: the file goes
+        # either way. Only settle's own refusal keeps it, at the name its
+        # message gives, so the run it cost is not lost. The error that
+        # stopped the run is the one raised: closing or removing the file
+        # after it may fail too (a full disk), and would hide it.
+        if not (settling and isinstance(exc, VideoEncoderError)):
+            with contextlib.suppress(OSError, VideoEncoderError):
+                partial.discard()
         raise
-    if ran is None:
-        partial.discard()
-        return None
-    settle(partial.path, request.path)
     return result(call.run, record, ran)
 
 

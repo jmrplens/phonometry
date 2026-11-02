@@ -338,6 +338,63 @@ def test_a_package_a_run_holds_is_never_pruned(tmp_path: Path) -> None:
     assert _packages(tmp_path) == sorted([names[1], *names[3:]])
 
 
+def _locks(cache: Path) -> list[str]:
+    return sorted(
+        entry.name for entry in cache.iterdir() if entry.name.endswith(".lock")
+    )
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="a node is POSIX; on Windows the bootstrap locks nothing",
+)
+def test_a_lock_file_no_run_holds_goes_with_its_package(tmp_path: Path) -> None:
+    # One lock file per digest a run ever held: a development checkout makes
+    # a new digest at each change, and each pruned package left its file.
+    names = _aged(tmp_path, 8)
+    for name in names:
+        bootstrap.hold(tmp_path, name).close()
+    never_stored = "e" * 64  # a run whose package never arrived whole
+    bootstrap.hold(tmp_path, never_stored).close()
+    held = bootstrap.hold(tmp_path, names[1])  # an old package a run still holds
+    in_the_way = tmp_path / ("f" * 64 + ".lock")
+    in_the_way.mkdir()  # no file a run made
+    try:
+        bootstrap.touch_and_prune(tmp_path, names[-1])
+        locks = _locks(tmp_path)
+    finally:
+        held.close()
+    # The lock files of the packages kept stay; those of the packages pruned
+    # and of the one that never arrived go; the one a run holds stays with it.
+    assert locks == sorted(
+        [f"{name}.lock" for name in [names[1], *names[3:]]] + [in_the_way.name, ".lock"]
+    )
+    assert in_the_way.is_dir()
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="a node is POSIX; on Windows the bootstrap locks nothing",
+)
+def test_a_run_of_a_digest_whose_lock_file_went_holds_a_new_one(tmp_path: Path) -> None:
+    # Removed under the cache's lock while no run held it, the file a later
+    # run opens is a new one, which the next prune sees held.
+    names = _aged(tmp_path, 7)
+    bootstrap.hold(tmp_path, names[0]).close()
+    bootstrap.touch_and_prune(tmp_path, names[-1])
+    assert f"{names[0]}.lock" not in _locks(tmp_path)
+    (tmp_path / names[0] / "phonometry").mkdir(parents=True)
+    (tmp_path / names[0] / "phonometry" / "__init__.py").write_bytes(b"")
+    held = bootstrap.hold(tmp_path, names[0])
+    try:
+        os.utime(tmp_path / names[0], (0.0, 0.0))  # the oldest, as if unused
+        bootstrap.touch_and_prune(tmp_path, names[-1])
+        assert bootstrap.is_stored(tmp_path / names[0])
+        assert f"{names[0]}.lock" in _locks(tmp_path)
+    finally:
+        held.close()
+
+
 def test_touching_a_package_another_client_pruned_creates_nothing(
     tmp_path: Path,
 ) -> None:

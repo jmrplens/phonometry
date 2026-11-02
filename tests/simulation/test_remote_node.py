@@ -468,10 +468,22 @@ def test_a_frame_that_is_no_job_is_refused() -> None:
         node.serve(job, frames)
 
 
+class _LibraryDeprecation(DeprecationWarning):
+    """A deprecation of a library the client may not have."""
+
+
+class _LibraryNotice(UserWarning, RuntimeWarning):
+    """A warning of a library the client may not have, of two built-in classes."""
+
+
 def _warns_and_returns(**arguments: object) -> tuple[object, None]:
     warnings.warn("device 'cupy' is absent", ComputeFallbackWarning, stacklevel=1)
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
+    # Recorded whatever Python's default filters say of a deprecation.
+    warnings.simplefilter("always")
+    warnings.warn("an old keyword", _LibraryDeprecation, stacklevel=1)
+    warnings.warn("two bases", _LibraryNotice, stacklevel=1)
     here = fdtd_simulation(_ACOUSTIC)
     return SimpleNamespace(
         pressures=here.pressures, snapshots=None, provenance=here.provenance
@@ -491,12 +503,73 @@ def test_the_warnings_of_a_run_travel_once_each_with_their_class(
     code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
     ((header, _),) = frames
     assert code == 0
+    # Each with the nearest warning class of Python's own its class derives
+    # from, which a client that does not have the class raises it as.
     assert header["warnings"] == [
         {
             "category": "phonometry.simulation.compute:ComputeFallbackWarning",
+            "base": "UserWarning",
             "message": "device 'cupy' is absent",
         },
-        {"category": "builtins:RuntimeWarning", "message": "overflow in a sum"},
+        {
+            "category": "builtins:RuntimeWarning",
+            "base": "RuntimeWarning",
+            "message": "overflow in a sum",
+        },
+        {
+            "category": f"{__name__}:_LibraryDeprecation",
+            "base": "DeprecationWarning",
+            "message": "an old keyword",
+        },
+        {
+            "category": f"{__name__}:_LibraryNotice",
+            "base": "UserWarning",
+            "message": "two bases",
+        },
+    ]
+
+
+#: A warning class made by ``exec`` with no ``__name__`` in its globals: its
+#: ``__module__`` is ``"builtins"`` though it is no class of Python's own.
+_EXEC_MADE: dict[str, type[Warning]] = {}
+# S102: the code run is the literal on this line, nothing a caller gives.
+exec("class LibWarning(UserWarning): pass", _EXEC_MADE)  # noqa: S102
+
+
+def _warns_exec_made_and_returns(**arguments: object) -> tuple[object, None]:
+    warnings.warn("made by exec", _EXEC_MADE["LibWarning"], stacklevel=1)
+    here = fdtd_simulation(_ACOUSTIC)
+    return SimpleNamespace(
+        pressures=here.pressures, snapshots=None, provenance=here.provenance
+    ), None
+
+
+def test_a_warning_class_that_says_it_is_of_builtins_travels_with_a_real_builtin_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Its module says builtins, so the base was its own name, which no client
+    # has as a warning of Python's own: the client refused a finished run.
+    monkeypatch.setattr(
+        node,
+        "FUNCTIONS",
+        MappingProxyType(
+            {
+                "fdtd_simulation": (
+                    _warns_exec_made_and_returns,
+                    ("pressures", "snapshots"),
+                )
+            }
+        ),
+    )
+    code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    ((header, _),) = frames
+    assert code == 0
+    assert header["warnings"] == [
+        {
+            "category": "builtins:LibWarning",
+            "base": "UserWarning",
+            "message": "made by exec",
+        }
     ]
 
 
@@ -527,7 +600,11 @@ def test_a_long_warning_travels_cut_to_the_length_of_an_error_message(
     ((header, _),) = frames
     assert code == 0
     assert header["warnings"] == [
-        {"category": "builtins:UserWarning", "message": "x" * bootstrap._MAX_MESSAGE}
+        {
+            "category": "builtins:UserWarning",
+            "base": "UserWarning",
+            "message": "x" * bootstrap._MAX_MESSAGE,
+        }
     ]
 
 
@@ -957,21 +1034,55 @@ def _through_a_node(
     return kinds, header, buffers, code, b"".join(said)
 
 
+#: The record field each job sends first, and how the run here makes it.
+_FIRST_ARRAY: dict[str, tuple[str, Callable[[], np.ndarray]]] = {
+    "fdtd_simulation": ("pressures", lambda: fdtd_simulation(_ACOUSTIC).pressures),
+    "elastic_fdtd_simulation": (
+        "signals",
+        lambda: elastic_fdtd_simulation(_ELASTIC_FILMED).signals,
+    ),
+    "write_fdtd_animation": (
+        "pressures",
+        lambda: fdtd_simulation(_ACOUSTIC).pressures,
+    ),
+    "write_elastic_fdtd_animation": (
+        "signals",
+        lambda: elastic_fdtd_simulation(_ELASTIC_FILMED).signals,
+    ),
+}
+#: The bytes a video job's stream begins with, by its container.
+_HEADS = {"webm": b"\x1aE\xdf\xa3", "gif": b"GIF8"}
+
+
+@pytest.mark.parametrize("name", sorted(node.FUNCTIONS))
 def test_the_bootstrap_hands_the_shipped_package_to_the_node_and_the_job_runs(
-    tmp_path: Path,
+    name: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Every job a node runs, through the bootstrap in a process of its own,
+    # as a client's ssh starts it: the video jobs import the shipped
+    # package's drawing and encoding code there, which no job here reaches.
+    arguments = _EVERY_JOB[name]
+    if name.startswith("write_"):
+        pytest.importorskip("matplotlib")
+        (tmp_path / "ffmpeg").mkdir()
+        fake_ffmpeg.install(tmp_path / "ffmpeg", monkeypatch)  # on the node's PATH
+    cache = tmp_path / "cache"
     kinds, header, buffers, code, log = _through_a_node(
-        tmp_path,
-        _job("fdtd_simulation", {"run": _ACOUSTIC}, version=_SENT_VERSION),
+        cache, _job(name, arguments, version=_SENT_VERSION)
     )
     assert kinds == ["hello", "stored", "ready", "result"], log
     assert code == 0, log
     assert f"{bootstrap.PROGRESS} ".encode() in log
-    here = fdtd_simulation(_ACOUSTIC)
-    assert np.array_equal(_array(header["arrays"][0], buffers[0]), here.pressures)  # type: ignore[index]
+    described: list[dict[str, object]] = header["arrays"]  # type: ignore[assignment]
+    field, here = _FIRST_ARRAY[name]
+    assert described[0]["name"] == field
+    assert np.array_equal(_array(described[0], buffers[0]), here())
+    if name.startswith("write_"):
+        assert described[-1]["name"] == "video"
+        assert buffers[-1].startswith(_HEADS[str(arguments["container"])])
     assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]
     assert (
-        tmp_path
+        cache
         / installed_package().digest
         / "phonometry"
         / "simulation"

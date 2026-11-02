@@ -15,6 +15,7 @@ itself, :func:`require_regular_audio` looks first.
 from __future__ import annotations
 
 import contextlib
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -30,14 +31,14 @@ if TYPE_CHECKING:
     from typing import BinaryIO
 
 
-def _refusal(path: str | Path, kind: str) -> ValueError:
+def _refusal(path: str | os.PathLike[str], kind: str) -> ValueError:
     """The refusal of *path*, which holds *kind* rather than a regular file."""
     return ValueError(
-        f"{escaped(str(path))}: is {kind}, and audio is read only from a regular file"
+        f"{escaped(os.fspath(path))}: is {kind}, and audio is read only from a regular file"
     )
 
 
-def require_regular_audio(path: str | Path) -> None:
+def require_regular_audio(path: str | os.PathLike[str]) -> None:
     """Refuse *path* unless it names a regular file, or nothing.
 
     A link is followed, so a link to a recording is read and a link to a pipe
@@ -54,7 +55,7 @@ def require_regular_audio(path: str | Path) -> None:
 
 
 @contextlib.contextmanager
-def open_audio(path: str | Path) -> Iterator[BinaryIO]:
+def open_audio(path: str | os.PathLike[str]) -> Iterator[BinaryIO]:
     """The regular file *path*, open for reading in binary, closed on leaving.
 
     Opened through :func:`~phonometry._internal.json_input.open_regular`: what

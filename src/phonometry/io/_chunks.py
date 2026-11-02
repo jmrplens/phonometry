@@ -71,7 +71,6 @@ from .._internal.validation import require_scalar
 from ._audio_file import open_audio
 
 if TYPE_CHECKING:
-    from pathlib import Path
     from typing import BinaryIO
 
 #: RIFF format tags (``wFormatTag`` in ``fmt``, from Microsoft ``mmreg.h``).
@@ -572,11 +571,11 @@ def _parse_cue(payload: bytes) -> tuple[CuePoint, ...]:
     return tuple(points)
 
 
-def _parse_ds64(payload: bytes, path: str | Path) -> Ds64Chunk:
+def _parse_ds64(payload: bytes, path: str | os.PathLike[str]) -> Ds64Chunk:
     """Decode the three mandatory 64-bit sizes of a ``ds64`` chunk."""
     if len(payload) < _DS64_FIXED_BYTES:
         msg = (
-            f"{escaped(str(path))}: ds64 chunk is {len(payload)} bytes; the "
+            f"{escaped(os.fspath(path))}: ds64 chunk is {len(payload)} bytes; the "
             "riffSize, dataSize and sampleCount fields require 24"
         )
         raise ValueError(msg)
@@ -588,11 +587,11 @@ def _parse_ds64(payload: bytes, path: str | Path) -> Ds64Chunk:
     )
 
 
-def _parse_fact(payload: bytes, path: str | Path) -> int:
+def _parse_fact(payload: bytes, path: str | os.PathLike[str]) -> int:
     """Decode the ``fact`` chunk's single uint32 frame count."""
     if len(payload) < _UINT32_BYTES:
         msg = (
-            f"{escaped(str(path))}: fact chunk is {len(payload)} bytes; its "
+            f"{escaped(os.fspath(path))}: fact chunk is {len(payload)} bytes; its "
             "uint32 frame count requires 4"
         )
         raise ValueError(msg)
@@ -600,11 +599,11 @@ def _parse_fact(payload: bytes, path: str | Path) -> int:
     return int(fact_frames)
 
 
-def _read_wave_header(fh: BinaryIO, path: str | Path) -> WavContainer:
+def _read_wave_header(fh: BinaryIO, path: str | os.PathLike[str]) -> WavContainer:
     """Check the 12-byte RIFF prelude and name the container it declares."""
     header = fh.read(_RIFF_PRELUDE_BYTES)
     if len(header) < _RIFF_PRELUDE_BYTES or header[8:12] != _WAVE_FORM_TYPE:
-        msg = f"{escaped(str(path))}: not a WAVE file"
+        msg = f"{escaped(os.fspath(path))}: not a WAVE file"
         raise ValueError(msg)
     fourcc = header[:4]
     containers: dict[bytes, WavContainer] = {
@@ -613,13 +612,17 @@ def _read_wave_header(fh: BinaryIO, path: str | Path) -> WavContainer:
         b"BW64": "BW64",
     }
     if fourcc not in containers:
-        msg = f"{escaped(str(path))}: unknown container fourcc {fourcc!r} (expected RIFF, RF64 or BW64)"
+        msg = f"{escaped(os.fspath(path))}: unknown container fourcc {fourcc!r} (expected RIFF, RF64 or BW64)"
         raise ValueError(msg)
     return containers[fourcc]
 
 
 def _check_chunk_extent(
-    chunk_id: bytes, size: int, offset: int, file_size: int, path: str | Path
+    chunk_id: bytes,
+    size: int,
+    offset: int,
+    file_size: int,
+    path: str | os.PathLike[str],
 ) -> None:
     """Refuse a chunk whose declared payload runs past the end of the file.
 
@@ -635,14 +638,14 @@ def _check_chunk_extent(
     require_scalar(file_size, "file_size")
     if offset + size > file_size:
         msg = (
-            f"{escaped(str(path))}: chunk {chunk_id!r} claims {size} bytes but only "
+            f"{escaped(os.fspath(path))}: chunk {chunk_id!r} claims {size} bytes but only "
             f"{file_size - offset} remain in the file"
         )
         raise ValueError(msg)
 
 
 def _read_chunk_payload(
-    fh: BinaryIO, chunk_id: bytes, size: int, path: str | Path
+    fh: BinaryIO, chunk_id: bytes, size: int, path: str | os.PathLike[str]
 ) -> bytes:
     """Read one chunk's payload whole, honouring RIFF word alignment.
 
@@ -653,7 +656,7 @@ def _read_chunk_payload(
     payload = fh.read(size)
     if len(payload) < size:
         msg = (
-            f"{escaped(str(path))}: chunk {chunk_id!r} claims {size} bytes but the "
+            f"{escaped(os.fspath(path))}: chunk {chunk_id!r} claims {size} bytes but the "
             f"file ends after {len(payload)}"
         )
         raise ValueError(msg)
@@ -663,7 +666,10 @@ def _read_chunk_payload(
 
 
 def _true_data_size(
-    size: int, container: WavContainer, ds64: Ds64Chunk | None, path: str | Path
+    size: int,
+    container: WavContainer,
+    ds64: Ds64Chunk | None,
+    path: str | os.PathLike[str],
 ) -> int:
     """Resolve the ``data`` size, through ``ds64`` for the RF64 sentinel."""
     require_scalar(size, "size")
@@ -671,7 +677,7 @@ def _true_data_size(
         return size
     if ds64 is None:
         msg = (
-            f"{escaped(str(path))}: RF64 data chunk defers its size to a "
+            f"{escaped(os.fspath(path))}: RF64 data chunk defers its size to a "
             "ds64 chunk that never appeared"
         )
         raise ValueError(msg)
@@ -698,7 +704,9 @@ class _WalkedChunks:
     cue_points: tuple[CuePoint, ...] = ()
     has_ixml: bool = False
 
-    def absorb(self, chunk_id: bytes, payload: bytes, path: str | Path) -> None:
+    def absorb(
+        self, chunk_id: bytes, payload: bytes, path: str | os.PathLike[str]
+    ) -> None:
         """Decode one chunk of :data:`_DECODED_CHUNKS` into its slot."""
         if chunk_id == _FMT_CHUNK:
             self.fmt = _parse_fmt(payload)
@@ -712,7 +720,7 @@ class _WalkedChunks:
             self.cue_points = _parse_cue(payload)
 
 
-def parse_wav_chunks(path: str | Path) -> WavChunks:
+def parse_wav_chunks(path: str | os.PathLike[str]) -> WavChunks:
     """Walk a WAV/BWF/RF64/BW64 file's chunks without reading the samples.
 
     One sequential pass over the chunk headers: ``fmt`` (with the
@@ -776,10 +784,10 @@ def parse_wav_chunks(path: str | Path) -> WavChunks:
             fh.seek(size + size % 2, 1)
 
     if seen.fmt is None:
-        msg = f"{escaped(str(path))}: no fmt chunk found"
+        msg = f"{escaped(os.fspath(path))}: no fmt chunk found"
         raise ValueError(msg)
     if data_offset is None or data_size is None:
-        msg = f"{escaped(str(path))}: no data chunk found"
+        msg = f"{escaped(os.fspath(path))}: no data chunk found"
         raise ValueError(msg)
     return WavChunks(
         container=container,

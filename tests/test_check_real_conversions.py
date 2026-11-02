@@ -73,6 +73,9 @@ def scalar(value):
 def positional(levels):
     return np.asarray(levels, float)
 
+def arithmetic(levels):
+    return np.asarray(10.0 ** (levels / 10.0), dtype=np.float64)
+
 class Record:
     def __post_init__(self):
         object.__setattr__(self, "levels", np.asarray(self.levels, dtype=np.float64))
@@ -108,11 +111,8 @@ def through_a_local_check(levels):
     _real_numbers("levels", levels)
     return np.asarray(levels, dtype=np.float64)
 
-def computed(levels):
+def checked_arithmetic(levels):
     return np.asarray(real_array(levels, "levels") + 3.0, dtype=np.float64)
-
-def arithmetic(levels):
-    return np.asarray(10.0 ** (levels / 10.0), dtype=np.float64)
 
 def own(n):
     return np.asarray(np.arange(n), dtype=np.float64)
@@ -132,7 +132,7 @@ class Record:
 def test_each_shape_of_a_caller_s_value_is_found(tmp_path: Path) -> None:
     """A parameter read bare, copied, by an item, through a call that keeps its
     dtype or in a loop, cast with ``astype``, a NumPy scalar, a positional
-    dtype, and a field in ``__post_init__``.
+    dtype, through arithmetic, and a field in ``__post_init__``.
     """
     verdicts = _verdicts(tmp_path, _UNCHECKED)
     assert verdicts == {
@@ -144,21 +144,22 @@ def test_each_shape_of_a_caller_s_value_is_found(tmp_path: Path) -> None:
         "cast": "unchecked",
         "scalar": "unchecked",
         "positional": "unchecked",
+        "arithmetic": "unchecked",
         "Record.__post_init__": "unchecked",
     }
 
 
 def test_each_shape_that_answers_it_passes(tmp_path: Path) -> None:
     """The shared reader, a check first, a name rebound to a check, a check of the
-    module on any parameter, a value the function computed, a field a method reads.
+    module on any parameter, arithmetic on a checked value, a value the function
+    computed, a field a method reads.
     """
     verdicts = _verdicts(tmp_path, _ANSWERED)
     assert verdicts == {
         "refused_first": "checked",
         "rebound": "checked",
         "through_a_local_check": "checked",
-        "computed": "computed",
-        "arithmetic": "computed",
+        "checked_arithmetic": "checked",
         "own": "computed",
         "Record.total": "field",
     }
@@ -665,6 +666,32 @@ _PLANTED_UNCHECKED = {
                 return real_array(arr, "levels")
             return None
     """,
+    "arithmetic_on_the_value": """
+        def f(levels):
+            return np.asarray(levels * 2, dtype=np.float64)
+    """,
+    "a_sign_on_the_value": """
+        def f(levels):
+            return np.asarray(-levels, dtype=np.float64)
+    """,
+    "arithmetic_of_a_checked_value_with_one_no_check_read": """
+        def f(levels, gain):
+            return np.asarray(real_array(levels, "levels") * gain, dtype=np.float64)
+    """,
+    "an_augmented_assignment_of_the_value": """
+        def f(levels, gain):
+            scaled = real_array(levels, "levels")
+            scaled *= gain
+            return np.asarray(scaled, dtype=np.float64)
+    """,
+    "one_number_of_arithmetic_on_the_value": """
+        def f(level):
+            return float(level / 2.0)
+    """,
+    "a_check_handed_arithmetic_on_numpy_s_reading": """
+        def f(levels):
+            return real_array(np.asarray(levels) * 2, "levels")
+    """,
 }
 
 #: The shapes that answer one: a check on every path, or no caller's value.
@@ -864,6 +891,104 @@ _PLANTED_ANSWERED = {
             return refuse_text(arr, "no")
     """,
 }
+
+#: A private helper of the package, read through its calls: each caller
+#: hands it something, and the helper's conversion reads what it is handed.
+_HELPER = """
+def _convert(values):
+    return np.asarray(values, dtype=np.float64)
+"""
+
+#: What a public function hands the helper, and what the helper's conversion
+#: then reads: a parameter of a private function is no caller's value of its
+#: own, but what its calls hand it, joined over all of them.
+_HANDED = {
+    "the_caller_s_value": (
+        "def f(levels):\n    return _convert(levels)\n",
+        "unchecked",
+    ),
+    "arithmetic_on_the_caller_s_value": (
+        "def f(levels):\n    return _convert(levels * 2)\n",
+        "unchecked",
+    ),
+    "the_value_a_check_read": (
+        "def f(levels):\n    return _convert(real_array(levels, 'levels'))\n",
+        "checked",
+    ),
+    "a_value_the_library_computed": (
+        "def f(levels):\n    return _convert(np.zeros(3))\n",
+        "computed",
+    ),
+    "a_value_by_keyword": (
+        "def f(levels):\n    return _convert(values=np.zeros(3))\n",
+        "computed",
+    ),
+    "the_caller_s_value_through_another_helper": (
+        "def _relay(values):\n    return _convert(values)\n\n"
+        "def f(levels):\n    return _relay(levels)\n",
+        "unchecked",
+    ),
+    "a_computed_value_through_another_helper": (
+        "def _relay(values):\n    return _convert(values)\n\n"
+        "def f(levels):\n    return _relay(np.zeros(3))\n",
+        "computed",
+    ),
+    "a_computed_value_and_elsewhere_the_caller_s": (
+        "def f(levels):\n    return _convert(np.zeros(3))\n\n"
+        "def g(levels):\n    return _convert(levels)\n",
+        "unchecked",
+    ),
+    "the_helper_handed_on_rather_than_called": (
+        "def f(levels):\n    return list(map(_convert, [np.zeros(3)]))\n",
+        "unchecked",
+    ),
+    "an_unpacked_argument": (
+        "def f(levels):\n    return _convert(*levels)\n",
+        "unchecked",
+    ),
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_HANDED))
+def test_a_private_helper_reads_what_its_calls_hand_it(
+    tmp_path: Path, shape: str
+) -> None:
+    caller, verdict = _HANDED[shape]
+    source = _PLANTED_HEADER + _HELPER + "\n" + caller
+    assert _verdicts(tmp_path, source)["_convert"] == verdict
+
+
+def _read_apart(tmp_path: Path, published: str) -> str:
+    """The verdict on a conversion in a private module that a public one calls."""
+    package = tmp_path / "phonometry"
+    package.mkdir()
+    inner = package / "_inner.py"
+    inner.write_text(
+        _PLANTED_HEADER + "\ndef convert(values):\n"
+        "    return np.asarray(values, dtype=np.float64)\n",
+        encoding="utf-8",
+    )
+    outer = package / "outer.py"
+    outer.write_text(
+        "import numpy as np\n\nfrom ._inner import convert\n\n"
+        f"{published}\n\ndef f(levels):\n    return convert(np.zeros(3))\n",
+        encoding="utf-8",
+    )
+    found = guard.census([inner, outer], source=None)
+    return next(c.verdict for c in found if c.function == "convert")
+
+
+def test_a_function_of_a_private_module_is_read_through_its_calls(
+    tmp_path: Path,
+) -> None:
+    assert _read_apart(tmp_path, "") == "computed"
+
+
+def test_a_function_a_public_module_publishes_reads_a_caller_s_value(
+    tmp_path: Path,
+) -> None:
+    assert _read_apart(tmp_path, '__all__ = ["convert"]') == "unchecked"
+
 
 _PLANTED_HEADER = """
 import numbers

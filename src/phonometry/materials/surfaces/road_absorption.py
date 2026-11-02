@@ -73,7 +73,9 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     complex_array,
     real_array,
+    real_number,
     require_choice,
+    require_count,
     require_equal_shapes,
     require_present,
     require_scalar,
@@ -389,7 +391,7 @@ def adrienne_window(
 def _transfer_functions(
     incident_ir: SignalInput,
     reflected_ir: SignalInput,
-    n: int | None,
+    n: int | np.integer[Any] | None,
 ) -> tuple[Complex, Complex, int]:
     """Real FFTs of the (windowed) incident and reflected impulse responses.
 
@@ -406,7 +408,9 @@ def _transfer_functions(
     if hi_t.size == 0 or hr_t.size == 0:
         msg = "Impulse responses must be non-empty."
         raise ValueError(msg)
-    length = n if n is not None else max(hi_t.size, hr_t.size)
+    length = (
+        max(hi_t.size, hr_t.size) if n is None else require_count(n, "n", at_least=None)
+    )
     if length <= 0:
         msg = "'n' must be positive."
         raise ValueError(msg)
@@ -428,7 +432,7 @@ def in_situ_reflection_factor(
     incidence_angle_rad: float = 0.0,
     fs: float | None = None,
     delay: float | None = None,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
 ) -> Complex:
     r"""Complex pressure reflection factor ``r(f)`` (ISO 13472-1, Clause 4.1).
 
@@ -467,7 +471,8 @@ def in_situ_reflection_factor(
     :return: Complex reflection factor ``r(f)`` at the ``rfft`` frequency bins.
     :raises ValueError: On empty inputs, invalid geometry, or ``delay`` given
         without ``fs``.
-    :raises TypeError: if ``fs`` is not a single number, or ``incident_ir`` or
+    :raises TypeError: if ``fs`` is not a single number, ``delay`` is not one
+        real number, ``n`` is not a whole number, or ``incident_ir`` or
         ``reflected_ir`` holds a text or a value that is not a real number.
     """
     require_scalar(fs, "fs")
@@ -490,7 +495,7 @@ def in_situ_reflection_factor(
         # ``length`` is the exact time-domain length used for the FFTs, so
         # ``rfftfreq`` is correct for both even and odd inputs.
         freqs = np.fft.rfftfreq(length, d=1.0 / fs)
-        r = r * np.exp(2j * np.pi * freqs * delay)
+        r = r * np.exp(2j * np.pi * freqs * real_number(delay, "delay"))
     return np.asarray(r, dtype=np.complex128)
 
 
@@ -518,7 +523,7 @@ def power_reflection_coefficient(
     source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
     microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
 ) -> Real:
     r"""Sound-power reflection factor ``QW(f)`` (ISO 13472-1, 4.1 / Annex C).
 
@@ -543,7 +548,7 @@ def power_reflection_coefficient(
     :param n: FFT length; defaults to the longer input.
     :return: Sound-power reflection factor ``QW(f)`` (real).
     :raises TypeError: if ``incident_ir`` or ``reflected_ir`` holds a text or a value
-        that is not a real number.
+        that is not a real number, or ``n`` is not a whole number.
     """
     kr = geometric_spreading_factor_angle(
         incidence_angle_rad,
@@ -562,7 +567,7 @@ def in_situ_absorption_coefficient(
     source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
     microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
 ) -> Real:
     r"""Normal-incidence absorption coefficient ``alpha(f)`` (ISO 13472-1, 4.1).
 
@@ -798,7 +803,7 @@ def in_situ_absorption_spectrum(
     source_height_m: float = DEFAULT_SOURCE_HEIGHT_M,
     microphone_height_m: float = DEFAULT_MICROPHONE_HEIGHT_M,
     incidence_angle_rad: float = 0.0,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
     f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
     f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,

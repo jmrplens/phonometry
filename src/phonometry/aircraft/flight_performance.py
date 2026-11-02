@@ -415,11 +415,13 @@ class Aerodrome(RichDisplay):
             answers that with a complex number rather than an error, and a
             complex pressure ratio propagates silently into every thrust of the
             profile. Doc 29 claims the coefficients only up to 6,000 ft anyway.
+        :raises TypeError: if ``altitude_ft`` is not one real number.
         """
+        altitude = real_number(altitude_ft, "altitude_ft")
         base = (self.sea_level_pressure_inhg / _STANDARD_PRESSURE_INHG) ** (
             1.0 / _PRESSURE_EXPONENT
         )
-        bracket = base - _LAPSE_F_PER_FT * altitude_ft / _STANDARD_TEMPERATURE_R
+        bracket = base - _LAPSE_F_PER_FT * altitude / _STANDARD_TEMPERATURE_R
         if bracket <= 0.0:
             msg = (
                 "Eq. B-4 has no real pressure ratio at "

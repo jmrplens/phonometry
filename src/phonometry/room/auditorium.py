@@ -231,6 +231,8 @@ def _filter_quality_factor(fraction: int | np.integer[Any]) -> float:
     bandwidth is :math:`2^{1/2n} - 2^{-1/2n}` and Q is its reciprocal: 1,41
     for an octave and 4,32 for a one-third octave, whatever the centre.
     """
+    # The filter bank read it already; read here, it is read on every path.
+    require_scalar(fraction, "fraction")
     edge = float(2.0 ** (1.0 / (2.0 * fraction)))
     return 1.0 / (edge - 1.0 / edge)
 
@@ -412,6 +414,7 @@ def sound_pressure_exposure_level(
         :class:`float` for a broadband response.
     :raises ValueError: If the response is not one-dimensional or is silent,
         if ``limits`` is malformed, or if a band has no energy.
+    :raises TypeError: if ``fraction`` is not a single number.
     """
     fs = resolve_fs(ir, fs, name="ir")
     _, levels = _band_exposure_levels(ir, fs, limits, fraction, "ir")
@@ -796,7 +799,7 @@ def sound_strength(
         response is not one-dimensional or is silent, or if
         ``reference_level`` does not broadcast onto the band axis.
     :raises TypeError: if ``reference_level`` holds a text or a value that is not a real
-        number.
+        number, or ``fraction`` is not a single number.
     """
     if (reference_ir is None) == (reference_level is None):
         msg = (
@@ -1130,7 +1133,7 @@ def late_lateral_sound_level(
         responses are of different lengths, or if they are too short to
         reach the 80 ms boundary.
     :raises TypeError: if ``reference_level`` holds a text or a value that is not a real
-        number.
+        number, or ``fraction`` is not a single number.
     """
     if (reference_ir is None) == (reference_level is None):
         msg = (

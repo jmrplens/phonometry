@@ -72,6 +72,7 @@ from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
     require_count,
+    require_finite,
     require_positive,
     require_scalar,
 )
@@ -1405,9 +1406,14 @@ class AerodynamicValveNoise(OwnsArrays):
         not keep, so it is not held to the regime here.
 
         :raises ValueError: if :attr:`pressure_ratio` is not a finite number
-            strictly between 0 and 1, or the boundaries, the Mach number or
-            the acoustical efficiency is not the one the regime gives.
+            strictly between 0 and 1, :attr:`efficiency_correction` is not
+            finite, or the boundaries, the Mach number or the acoustical
+            efficiency is not the one the regime gives.
+        :raises TypeError: if :attr:`efficiency_correction` is not one real
+            number.
         """
+        # The correction scales the efficiency Table 3 gives, read below.
+        require_finite(self.efficiency_correction, "efficiency_correction")
         regime = flow_regime(self.pressure_ratio, self.boundaries)
         expected_bounds = pressure_ratio_boundaries(
             self.specific_heat_ratio, self.pressure_recovery

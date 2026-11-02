@@ -2308,7 +2308,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `TypeError` that names the parameter, and a number too large for a float
   with a `ValueError`; a contribution to `combined_standard_uncertainty` that
   is neither a number nor a pair is refused naming `contributions`. A parser
-  of a file's text (an ANP table, a JSON sidecar) still reads its text.
+  of a file's text (an ANP table, a JSON sidecar) still reads its text. A
+  number computed with before the result was converted is read the same way:
+  `aircraft.Aerodrome.pressure_ratio`, the two numbers of
+  `aircraft.MeanGroundPlaneResult.equivalent_height`, the `delay` and the FFT
+  length `n` of `materials.in_situ_reflection_factor` and the
+  `efficiency_correction` of a
+  `noise_control.AerodynamicValveNoise` a caller builds failed inside the
+  arithmetic on a text with an error that named nothing, and took a NumPy
+  complex number through it to its real part or into the phase.
 - **A wrapper of a text is refused where the text is.** A
   `collections.UserString` is a sequence of characters, and the tests that
   told a pair or a list of labels from a text by its type let it through:
@@ -2338,14 +2346,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it, so a `pathlib.Path` built the whole fiche and then failed with
   ReportLab's own error. Every `.report()` takes `str | os.PathLike[str]`
   now, writes the PDF where the path names, and returns that path as a text.
-- **`io.write` refuses a `bext` too long for a FLAC file before it writes
-  anything.** A payload past the 16 MiB a FLAC metadata block holds was
-  measured only once python-soundfile had written the audio at the path, so
-  the refusal left a FLAC file without its `bext` behind; the path is
-  untouched now.
-- **The refusals of a band range write it with "to".** The errors of
-  the speech transmission index (`speech.sti_from_impulse_response` and its
-  kin), `speech.speech_intelligibility_index`,
 - **A recording, a fiche or a response plot stopped half way leaves the file
   that was at its name.** `io.write`, the target of `io.convert`, every
   `.report()` and the response plot of a filter bank wrote straight at the
@@ -2358,6 +2358,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   take a new file. A link, a pipe, a device or a directory at the name is
   opened there as Python opens a name, as before: a recording streamed into a
   pipe on purpose still goes into the pipe.
+- **`io.write` refuses a `bext` too long for a FLAC file before it writes
+  anything.** A payload past the 16 MiB a FLAC metadata block holds was
+  measured only once python-soundfile had written the audio at the path, so
+  the refusal left a FLAC file without its `bext` behind; the path is
+  untouched now.
+- **The refusals of a band range write it with "to".** The errors of
+  the speech transmission index (`speech.sti_from_impulse_response` and its
+  kin), `speech.speech_intelligibility_index`,
   the noise criteria of `room`, the hearing threshold and the noise-induced
   hearing loss functions of `hearing`, and the tonality warning wrote a range
   as "(125 Hz - 8 kHz)", a spaced hyphen that reads as a minus beside

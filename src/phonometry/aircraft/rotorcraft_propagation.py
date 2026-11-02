@@ -443,9 +443,14 @@ class MeanGroundPlaneResult(OwnsArrays):
         Positive above the plane; the guidance substitutes these equivalent
         heights, floored at 0.1 m for source and receiver, into the
         flat-ground equations (§A.4.4).
+
+        :raises TypeError: if ``distance_m`` or ``height_m`` is not one real
+            number.
         """
+        distance = real_number(distance_m, "distance_m")
+        height = real_number(height_m, "height_m")
         return float(
-            (height_m - self.slope * distance_m - self.intercept)
+            (height - self.slope * distance - self.intercept)
             / math.hypot(1.0, self.slope)
         )
 

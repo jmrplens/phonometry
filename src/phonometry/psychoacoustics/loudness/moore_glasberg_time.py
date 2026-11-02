@@ -78,6 +78,7 @@ from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -778,8 +779,11 @@ def _as_two_channels(
 def _percentiles(trace: np.ndarray, fractions: Sequence[float]) -> dict[float, float]:
     """Long-term-loudness value exceeded for each stated fraction of the trace."""
     if trace.size == 0:
-        return {float(p): 0.0 for p in fractions}
-    return {float(p): float(np.percentile(trace, 100.0 - p)) for p in fractions}
+        return {real_number(p, "fractions"): 0.0 for p in fractions}
+    return {
+        real_number(p, "fractions"): float(np.percentile(trace, 100.0 - p))
+        for p in fractions
+    }
 
 
 def loudness_moore_glasberg_time(
@@ -819,6 +823,7 @@ def loudness_moore_glasberg_time(
     :return: A :class:`MooreGlasbergTimeVaryingLoudness`.
     :raises TypeError: if ``fs`` is not a single number, or ``presentation`` is not a
         text, or ``x`` holds a text or a value that is not a real number.
+        ``percentiles`` is refused the same way when it is not one real number.
 
     A steady 1 kHz tone at 40 dB SPL, binaural, free field, yields a peak
     long-term loudness of 1.000 sone (40 phon) by definition of the sone.

@@ -179,7 +179,9 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting
 from .._internal.validation import (
     complex_array,
+    complex_number,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_positive,
@@ -700,6 +702,7 @@ def verify_rated_impedance(
     :raises TypeError: if ``rated_impedance_ohm`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number, or
         ``impedance_ohm`` holds a text or a value that is not a number.
+        ``rated_frequency_range_hz`` is refused the same way when it is not one real number.
     """
     f = _frequencies(frequencies)
     z = np.abs(np.atleast_1d(complex_array(impedance_ohm, "impedance_ohm")))
@@ -710,7 +713,10 @@ def verify_rated_impedance(
         msg = "'impedance_ohm' must be positive and finite."
         raise ValueError(msg)
     rated = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
-    lower, upper = (float(value) for value in rated_frequency_range_hz)
+    lower, upper = (
+        real_number(value, "rated_frequency_range_hz")
+        for value in rated_frequency_range_hz
+    )
     if not (0.0 < lower < upper and math.isfinite(upper)):
         msg = (
             "'rated_frequency_range_hz' must be (lower, upper) with 0 < lower < upper."
@@ -874,6 +880,7 @@ def working_sound_pressure_level(
     :raises ValueError: If an input is out of range.
     :raises TypeError: if ``rated_impedance_ohm``, ``rated_source_impedance_ohm``,
         ``sound_pressure_level`` or ``source_emf_v`` is not a single number.
+        ``headphone_impedance_ohm`` is refused the same way when it is not one real number.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
     require_scalar(sound_pressure_level, "sound_pressure_level")
@@ -889,7 +896,7 @@ def working_sound_pressure_level(
         )
     else:
         rated, source = _impedances(rated_impedance_ohm, rated_source_impedance_ohm)
-        impedance = complex(headphone_impedance_ohm)
+        impedance = complex_number(headphone_impedance_ohm, "headphone_impedance_ohm")
         if not (cmath.isfinite(impedance) and abs(impedance) > 0.0):
             msg = "'headphone_impedance_ohm' must be finite and not zero."
             raise ValueError(msg)
@@ -1394,8 +1401,12 @@ class CouplerFrequencyResponse(OwnsArrays):
             8.3.3.1 NOTE).
         :return: The relative response at each frequency, in dB.
         :raises ValueError: If the reference frequency was not measured.
+        :raises TypeError: if ``reference_frequency_hz`` is not one real number.
         """
-        index = _band_index(self.frequencies, float(reference_frequency_hz))
+        index = _band_index(
+            self.frequencies,
+            real_number(reference_frequency_hz, "reference_frequency_hz"),
+        )
         return np.asarray(
             self.sound_pressure_level - self.sound_pressure_level[index],
             dtype=np.float64,
@@ -1451,6 +1462,7 @@ def coupler_frequency_response(
     :raises ValueError: If the inputs differ in length or are not finite.
     :raises TypeError: if ``frequencies`` or ``sound_pressure_level`` holds a text or a
         value that is not a real number.
+        ``rated_frequency_range_hz`` is refused the same way when it is not one real number.
     """
     f = _frequencies(frequencies)
     levels = _levels(sound_pressure_level, "sound_pressure_level")
@@ -1459,7 +1471,10 @@ def coupler_frequency_response(
         raise ValueError(msg)
     rated: tuple[float, float] | None = None
     if rated_frequency_range_hz is not None:
-        lower, upper = (float(value) for value in rated_frequency_range_hz)
+        lower, upper = (
+            real_number(value, "rated_frequency_range_hz")
+            for value in rated_frequency_range_hz
+        )
         if not (0.0 < lower < upper and math.isfinite(upper)):
             msg = "'rated_frequency_range_hz' must be (lower, upper) with 0 < lower < upper."
             raise ValueError(msg)
@@ -1682,6 +1697,7 @@ def field_comparison_response(
         the reference band is missing.
     :raises TypeError: if ``field`` is not a text, or ``field_level``, ``frequencies``
         or ``source_emf_v`` holds a text or a value that is not a real number.
+        ``reference_frequency_hz`` is refused the same way when it is not one real number.
     """
     require_choice(field, "field", ("free", "diffuse"))
     f = _frequencies(frequencies)
@@ -1698,7 +1714,9 @@ def field_comparison_response(
     except ValueError:
         msg = "'field_level' must be one value per band or one row per person."
         raise ValueError(msg) from None
-    reference = _band_index(f, float(reference_frequency_hz))
+    reference = _band_index(
+        f, real_number(reference_frequency_hz, "reference_frequency_hz")
+    )
     quotient = levels - _db20(emf)
     response = quotient - quotient[:, reference : reference + 1]
     return FieldComparisonResponse(
@@ -1877,6 +1895,7 @@ def ear_canal_frequency_response(
         reference band is missing.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
+        ``reference_frequency_hz`` is refused the same way when it is not one real number.
     """
     f = _frequencies(frequencies)
     shaped = []
@@ -1895,7 +1914,9 @@ def ear_canal_frequency_response(
     if earphone.shape != field.shape:
         msg = "'earphone_levels' and 'sound_field_levels' must have the same shape."
         raise ValueError(msg)
-    reference = _band_index(f, float(reference_frequency_hz))
+    reference = _band_index(
+        f, real_number(reference_frequency_hz, "reference_frequency_hz")
+    )
     return EarCanalFrequencyResponse(
         frequencies=f,
         earphone_levels=earphone,

@@ -83,6 +83,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -1471,6 +1472,7 @@ def verify_running_rms_decay(
         the three printed time constants.
     :raises TypeError: if ``measured_time_s`` is not a single number, or ``method`` is
         not a text.
+        ``integration_time`` is refused the same way when it is not one real number.
     """
     averaging: Method
     averaging = require_choice(method, "method", ("linear", "exponential"))
@@ -1479,7 +1481,7 @@ def verify_running_rms_decay(
     if not math.isfinite(measured) or measured <= 0.0:
         msg = "'measured_time_s' must be positive and finite."
         raise ValueError(msg)
-    tau = float(integration_time)
+    tau = real_number(integration_time, "integration_time")
     for printed_tau, _time, _tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
         if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
             tau = printed_tau

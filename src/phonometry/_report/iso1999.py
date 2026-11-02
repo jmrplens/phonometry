@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -95,12 +95,14 @@ _POPULATION_DISCLAIMER = (
 
 def _fmt_db(value: float, language: Language = "en") -> str:
     """A threshold shift or level rounded to one decimal place."""
-    return format_number(display_round(float(value)), language, decimals=1)
+    return format_number(
+        display_round(real_number(value, "value")), language, decimals=1
+    )
 
 
 def _fmt_freq(value: float, language: Language = "en") -> str:
     """An audiometric frequency in hertz, as an integer (500 ... 6000)."""
-    return format_number(round(float(value)), language, decimals=0)
+    return format_number(round(real_number(value, "value")), language, decimals=0)
 
 
 def _esc(value: str | None) -> str | None:
@@ -113,7 +115,10 @@ def _handicap_indices(frequencies: np.ndarray) -> list[int]:
     return [
         i
         for i, f in enumerate(frequencies)
-        if any(abs(float(f) - h) < _FREQ_MATCH_TOL_HZ for h in _HANDICAP_SET)
+        if any(
+            abs(real_number(f, "frequencies") - h) < _FREQ_MATCH_TOL_HZ
+            for h in _HANDICAP_SET
+        )
     ]
 
 
@@ -132,7 +137,7 @@ def _representative(
     if len(idx) == len(_HANDICAP_SET):
         return True, float(vals[idx].mean()), 0.0
     peak = int(np.argmax(vals))
-    return False, float(vals[peak]), float(frequencies[peak])
+    return False, float(vals[peak]), real_number(frequencies[peak], "frequencies")
 
 
 def _iso_q_percent(fractile: float) -> float:
@@ -144,7 +149,7 @@ def _iso_q_percent(fractile: float) -> float:
     The library's ``fractile`` is the complementary fraction with *smaller*
     values, so ``Q = 100 (1 - fractile)``.
     """
-    return round(100.0 * (1.0 - float(fractile)), 6)
+    return round(100.0 * (1.0 - real_number(fractile, "fractile")), 6)
 
 
 def _fractile_phrase(fractile: float, language: Language = "en") -> str:

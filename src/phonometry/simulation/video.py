@@ -75,7 +75,7 @@ from __future__ import annotations
 
 import contextlib
 import math
-from collections import UserString, deque
+from collections import deque
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass, replace
 from fractions import Fraction
@@ -89,7 +89,12 @@ import numpy as np
 from .._i18n import Language, check_language
 from .._internal.display import RichDisplay
 from .._internal.json_input import escaped
-from .._internal.validation import require_count, require_positive, require_scalar
+from .._internal.validation import (
+    is_text,
+    require_count,
+    require_positive,
+    require_scalar,
+)
 from .compute import Compute, _requested
 from .elastic_fdtd import (
     ElasticFDTDResult,
@@ -227,9 +232,7 @@ def _frame_sides(size: object) -> Collection[object]:
     """
     if isinstance(size, np.ndarray) and size.ndim == 1:
         return size
-    if isinstance(size, Sequence) and not isinstance(
-        size, str | bytes | bytearray | UserString
-    ):
+    if isinstance(size, Sequence) and not is_text(size):
         return size
     msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
     raise TypeError(msg)

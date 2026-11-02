@@ -58,6 +58,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_equal_counts,
@@ -469,7 +470,7 @@ def _refine_peak(
     peak one sample wide the refinement degrades gracefully to the sample
     grid.
     """
-    position = float(index)
+    position = real_number(index, "index")
     step = 1.0
     grid: NDArray[np.float64] = curve
     j = index
@@ -478,9 +479,9 @@ def _refine_peak(
     if interpolation == "parabolic" and 0 < j < grid.size - 1:
         sign = -1.0 if grid[j] < 0.0 else 1.0
         position += step * _parabolic_offset(
-            sign * float(grid[j - 1]),
-            sign * float(grid[j]),
-            sign * float(grid[j + 1]),
+            sign * real_number(grid[j - 1], "grid"),
+            sign * real_number(grid[j], "grid"),
+            sign * real_number(grid[j + 1], "grid"),
         )
     return position
 

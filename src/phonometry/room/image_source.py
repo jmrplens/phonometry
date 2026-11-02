@@ -78,6 +78,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
+    real_number,
     require_axis_count,
     require_axis_rank,
     require_count,
@@ -558,7 +559,7 @@ def _sample_ir(
 ) -> NDArray[np.float64]:
     """Accumulate the per-band impulses at the nearest sample to each delay."""
     if duration_s is None:
-        duration = float(times[-1]) + 1.0 / fs
+        duration = real_number(times[-1], "times") + 1.0 / fs
     else:
         duration = require_positive(duration_s, "duration_s")
     n_samples = int(np.ceil(duration * fs))

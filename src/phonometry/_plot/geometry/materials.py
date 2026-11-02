@@ -23,6 +23,7 @@ import numpy as np
 
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_non_negative,
@@ -739,7 +740,7 @@ def _tube_bore(
 
 def _nominal_bore(diameter_m: float | None, fallback: float) -> float:
     """The drawn bore: the real diameter, or a nominal stand-in."""
-    return float(diameter_m) if diameter_m is not None else fallback
+    return real_number(diameter_m, "diameter_m") if diameter_m is not None else fallback
 
 
 def plot_impedance_tube_geometry(
@@ -802,7 +803,7 @@ def plot_impedance_tube_geometry(
     thickness = (
         _NOMINAL_SAMPLE_THICKNESS
         if sample_thickness_m is None
-        else float(sample_thickness_m)
+        else real_number(sample_thickness_m, "sample_thickness_m")
     )
     lead_in = _SOURCE_MARGIN_DIAMETERS * bore
     x_left = -(x1 + lead_in)

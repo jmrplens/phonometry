@@ -19,6 +19,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Literal
 
+from ._internal.validation import real_number
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -73,8 +75,9 @@ def format_number(
         them. A value that rounds to zero at the requested precision never keeps
         a sign at all: a tiny negative number (or a signed ``-0.0``) formats as
         ``"0.0"``, not the contradictory ``"-0.0"``.
+    :raises TypeError: if ``value`` is not one real number.
     """
-    text = f"{float(value):.{decimals}f}"
+    text = f"{real_number(value, 'value'):.{decimals}f}"
     # A formatted value whose digits are all zeros is a signed zero; strip the
     # sign by inspecting the text itself (no float equality involved).
     if text.startswith("-") and not text.strip("-0."):

@@ -94,6 +94,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_positive,
@@ -981,6 +982,7 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
 
         :raises ValueError: if the arrays differ in length or rank, or a band
             is not an octave of Table 1.
+        :raises TypeError: if a band of ``frequencies`` is not one real number.
         """
         require_ranks(
             self,
@@ -994,7 +996,10 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
             "measured_power_level",
             "calibrated_power_level",
         )
-        if any(round(float(f)) not in _TABLE1_DB for f in self.frequencies):
+        if any(
+            round(real_number(f, "frequencies")) not in _TABLE1_DB
+            for f in self.frequencies
+        ):
             msg = (
                 "SpecialRoomSuitabilityCheck: 'frequencies' must be octave bands "
                 f"of Table 1 ({sorted(_TABLE1_DB)} Hz)."
@@ -1566,7 +1571,10 @@ def _margin_met(margin: np.ndarray) -> np.ndarray:
 def _table5_sigma(frequencies: np.ndarray) -> np.ndarray:
     """Table 5 per band; ``NaN`` at 63 Hz, which the table does not reach."""
     return np.array(
-        [_SIGMA_R0_DB.get(round(float(f)), math.nan) for f in frequencies],
+        [
+            _SIGMA_R0_DB.get(round(real_number(f, "frequencies")), math.nan)
+            for f in frequencies
+        ],
         dtype=np.float64,
     )
 

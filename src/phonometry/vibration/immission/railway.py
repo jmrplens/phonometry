@@ -57,6 +57,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_count,
     require_finite_array,
     require_positive,
@@ -274,7 +275,7 @@ def running_acceleration_level(
 def _slice(size: int, fs: float, interval_s: tuple[float, float]) -> slice:
     """The samples of a ``(start, end)`` stretch of a record, in seconds."""
     require_scalar(size, "size")
-    start_s, end_s = (float(bound) for bound in interval_s)
+    start_s, end_s = (real_number(bound, "interval_s") for bound in interval_s)
     if not (math.isfinite(start_s) and math.isfinite(end_s)) or end_s <= start_s:
         msg = (
             "an interval must be a finite (start, end) with end > start; "
@@ -313,6 +314,7 @@ def interval_rms(
     :raises ValueError: For a bad record, a non-positive rate, or an interval
         that is empty or runs outside the record.
     :raises TypeError: if ``fs`` is not a single number.
+        ``interval_s`` is refused the same way when it is not one real number.
     """
     x = _record(values, "values")
     fs = require_positive(fs, "fs")
@@ -974,6 +976,7 @@ def evaluate_train_passage(
         or a :math:`T_1` longer than :math:`T_2`, or an upper band that is not
         a nominal centre from 80 Hz to 315 Hz.
     :raises TypeError: if ``upper_band_hz`` is not a single number.
+        ``t1_s`` or ``t2_s`` are refused the same way when any is not one real number.
     """
     raw = _record(velocity_mm_s)
     fs = _sample_rate(fs, "railway")

@@ -60,6 +60,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_axis_count,
     require_equal_counts,
     require_ranks,
@@ -206,9 +207,9 @@ def _coerce(
         out: list[float] = []
         for c in centers:
             if c in values:
-                out.append(float(values[c]))
-            elif float(c) in values:
-                out.append(float(values[float(c)]))
+                out.append(real_number(values[c], "values"))
+            elif real_number(c, "centers") in values:
+                out.append(real_number(values[real_number(c, "centers")], "values"))
             else:
                 msg = f"{name} mapping is missing band {c} Hz; expected keys {centers}"
                 raise ValueError(msg)

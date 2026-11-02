@@ -98,7 +98,10 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import (
     complex_array,
+    complex_number,
+    is_text,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -1255,7 +1258,7 @@ class ExponentialWindowCorrection(OwnsArrays):
             worst = int(np.argmin(corrected))
             msg = (
                 f"{owner}: the window's damping a/omega_r = "
-                f"{float(self.window_damping_ratio[worst]):.4g} is not below the "
+                f"{real_number(self.window_damping_ratio[worst], 'window_damping_ratio'):.4g} is not below the "
                 f"apparent damping {float(zeta[worst]):.4g} of the mode at "
                 f"{float(freqs[worst]):g} Hz; the damping estimate or the decay "
                 "rate is wrong."
@@ -1400,12 +1403,13 @@ class SingleModeFitResult(OwnsArrays):
             not a motion-per-force FRF, the pole is not a decaying oscillation,
             or the decay rate is negative.
         :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
+            ``pole_rad_s`` is refused the same way when it is not one real number.
         """
         require_ranks(self, frequencies=1, frf=1)
         require_same_length(self, "frequencies", "frf", axis="frequency")
         owner = type(self).__name__
         require_choice(self.kind, "kind", ("accelerance", "mobility", "receptance"))
-        pole = complex(self.pole_rad_s)
+        pole = complex_number(self.pole_rad_s, "pole_rad_s")
         if not (pole.imag > 0.0 and pole.real < 0.0) or not math.isfinite(abs(pole)):
             msg = f"{owner}: 'pole_rad_s' must be a decaying oscillation, -sigma + j*omega_d."
             raise ValueError(msg)
@@ -1666,7 +1670,7 @@ def _pair(value: object, name: str) -> tuple[float, float]:
         f"'{name}' must be a pair of numbers (f_low, f_high), in hertz; got "
         f"{given_repr(value)}."
     )
-    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Iterable):
+    if is_text(value) or not isinstance(value, Iterable):
         raise TypeError(msg)
     try:
         low, high = (require_real(edge, msg) for edge in value)
@@ -1852,7 +1856,7 @@ def check_force_spectrum(
         frequencies=freqs[1:],
         energy_spectral_density=esd[1:],
         frequency_range_hz=(low, high),
-        max_drop_db=float(max_drop_db),
+        max_drop_db=real_number(max_drop_db, "max_drop_db"),
     )
 
 
@@ -2458,9 +2462,7 @@ def _exclusions(exclude_hz: object) -> list[tuple[float, float]]:
         "'exclude_hz' must be a sequence of (f_low, f_high) pairs, such as "
         f"[(40.0, 50.0)]; got {given_repr(exclude_hz)}."
     )
-    if isinstance(exclude_hz, (str, bytes, bytearray)) or not isinstance(
-        exclude_hz, Iterable
-    ):
+    if is_text(exclude_hz) or not isinstance(exclude_hz, Iterable):
         raise TypeError(msg)
     bands = list(exclude_hz)
     if any(isinstance(band, (int, float, np.number)) for band in bands):

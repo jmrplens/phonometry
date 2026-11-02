@@ -75,6 +75,7 @@ from .._internal.utils import _typesignal
 from .._internal.validation import (
     arrays_of,
     real_array,
+    real_number,
     refuse_text_beside_choice,
     require_choice,
     require_count,
@@ -1161,6 +1162,7 @@ def shaped_sweep_signal(
         ``fs`` is not a single number, or ``target`` is neither a text nor a
         pair of arrays of numbers (a ``bytes``, ``None``, a text among the
         numbers).
+        ``start_delay`` is refused the same way when it is not one real number.
     """
     require_scalar(amplitude, "amplitude")
     require_scalar(fade, "fade")
@@ -1190,7 +1192,11 @@ def shaped_sweep_signal(
     if not 0.0 <= fade < _MAX_FADE_FRACTION:
         msg = "fade must be in [0, 0.5)"
         raise ValueError(msg)
-    lead = 0.05 * duration_s if start_delay is None else float(start_delay)
+    lead = (
+        0.05 * duration_s
+        if start_delay is None
+        else real_number(start_delay, "start_delay")
+    )
     if lead <= 0.0:
         msg = "start_delay must be positive"
         raise ValueError(msg)

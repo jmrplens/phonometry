@@ -45,7 +45,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_count, require_scalar
+from .._internal.validation import real_number, require_count, require_scalar
 from ._i18n import format_number, t
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 from ._layout import (
@@ -356,11 +356,11 @@ def _kij_value_table(
 
     rows: list[list[Any]] = [header]
     for k, fk in enumerate(frequencies):
-        value = format_number(float(k_ij[k]), language, decimals=1)
+        value = format_number(real_number(k_ij[k], "k_ij"), language, decimals=1)
         is_bracketed = bracketed is not None and bool(bracketed[k])
         if is_bracketed:
             value = f"[{value}]"
-        row: list[Any] = [f"{round(float(fk))}", value]
+        row: list[Any] = [f"{round(real_number(fk, 'frequencies'))}", value]
         if verbose:
             row.append(t("yes", language) if bool(in_mean[k]) else t("no", language))
         rows.append(row)

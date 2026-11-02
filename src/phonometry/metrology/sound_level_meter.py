@@ -165,6 +165,7 @@ from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import (
     is_class_designation,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_real,
@@ -327,10 +328,11 @@ class MaxUncertaintyRow(RichDisplay):
 
         :param frequency_hz: The nominal frequency, in hertz.
         :return: ``True`` inside the band, its included ends counted.
+        :raises TypeError: if ``frequency_hz`` is not one real number.
         """
         if self.lower_hz is None or self.upper_hz is None:
             return True
-        f = float(frequency_hz)
+        f = real_number(frequency_hz, "frequency_hz")
         above = f >= self.lower_hz if self.includes_lower else f > self.lower_hz
         return above and f <= self.upper_hz
 

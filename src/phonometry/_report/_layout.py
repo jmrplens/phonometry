@@ -29,6 +29,7 @@ import numpy as np
 
 from .._internal.validation import (
     real_array,
+    real_number,
     require_count,
     require_scalar,
 )
@@ -173,10 +174,11 @@ def fmt_meta(value: float, language: Language = "en") -> str:
     silently alter them, so this round-trips the value (``repr``-shortest via
     ``%g``) instead of forcing the one-decimal display rounding of
     :func:`fmt_num`, and only localises the decimal separator.
+    :raises TypeError: if ``value`` is not one real number.
     """
     from ._i18n import decimal_comma
 
-    return decimal_comma(f"{float(value):g}", language)
+    return decimal_comma(f"{real_number(value, 'value'):g}", language)
 
 
 def display_round(value: float, decimals: int = 1) -> float:
@@ -190,9 +192,10 @@ def display_round(value: float, decimals: int = 1) -> float:
     result that rounds to zero returns an unsigned ``0.0`` (never ``-0.0``).
 
     :raises TypeError: if ``decimals`` is a flag, a text or an array where a count goes.
+        ``value`` is refused the same way when it is not one real number.
     """
     scale = 10.0 ** require_count(decimals, "decimals", at_least=None)
-    magnitude = math.floor(abs(float(value)) * scale + 0.5) / scale
+    magnitude = math.floor(abs(real_number(value, "value")) * scale + 0.5) / scale
     if magnitude <= 0.0:  # magnitude is non-negative; <= avoids float equality
         return 0.0
     return -magnitude if value < 0.0 else magnitude

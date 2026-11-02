@@ -197,6 +197,8 @@ def test_a_check_of_another_module_is_known_by_the_module(tmp_path: Path) -> Non
 _CALLS: dict[str, Callable[[object], object]] = {
     "real_array": lambda v: validation.real_array(v, "x"),
     "complex_array": lambda v: validation.complex_array(v, "x"),
+    "real_number": lambda v: validation.real_number(v, "x"),
+    "complex_number": lambda v: validation.complex_number(v, "x"),
     "refuse_complex": lambda v: validation.refuse_complex(v, "x"),
     "refuse_text": lambda v: validation.refuse_text(v, "x"),
     "refuse_text_beside_choice": lambda v: validation.refuse_text_beside_choice(
@@ -232,6 +234,8 @@ _CALLS: dict[str, Callable[[object], object]] = {
 #: value and the texts each kind is tried with.
 _ONE_NUMBER = frozenset(
     {
+        "real_number",
+        "complex_number",
         "require_real",
         "require_scalar",
         "require_positive",
@@ -289,6 +293,64 @@ def test_a_predicate_is_no_check(tmp_path: Path) -> None:
 #: Each shape a caller's value reaches a conversion in, one function each,
 #: that no check has read on every path to it: what the guard must report.
 _PLANTED_UNCHECKED = {
+    "python_s_float_of_a_parameter": """
+        def f(value):
+            return float(value)
+    """,
+    "python_s_complex_of_a_parameter": """
+        def f(value):
+            return complex(value)
+    """,
+    "an_item_replaced_after_its_check": """
+        def f(levels, other):
+            require_finite(levels[0], "levels")
+            levels[0] = other
+            return np.float64(levels[0])
+    """,
+    "an_item_replaced_after_the_whole_check": """
+        def f(levels, other):
+            levels = real_array(levels, "levels")
+            levels[0] = other
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return levels
+
+        def f(reference, levels):
+            out = _helper(reference, levels)
+            return np.asarray(out, dtype=np.float64)
+    """,
+    "numpy_s_reading_captured_by_a_match": """
+        def f(levels):
+            match np.asarray(levels):
+                case captured:
+                    return refuse_text(captured, "no")
+    """,
+    "numpy_s_reading_bound_by_a_with": """
+        def f(levels):
+            with np.asarray(levels) as held:
+                return refuse_text(held, "no")
+    """,
+    "a_closure_handed_out_before_its_function_rebinds_what_it_reads": """
+        def f(levels, other, sink):
+            levels = real_array(levels, "levels")
+
+            def read():
+                return np.asarray(levels, dtype=np.float64)
+
+            sink.append(read)
+            levels = other
+    """,
+    "a_method_of_a_class_written_in_the_function": """
+        def f(levels):
+            class Reader:
+                def read(self):
+                    return np.asarray(levels, dtype=np.float64)
+
+            return Reader()
+    """,
     "checked_in_one_branch": """
         def f(levels, flag):
             if flag:
@@ -607,6 +669,32 @@ _PLANTED_UNCHECKED = {
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_check_handed_the_value_or_a_number": """
+        def f(value):
+            require_finite(value or 0.0, "value")
+            return np.float64(value)
+    """,
+    "an_isinstance_test_of_real_numbers": """
+        def f(value):
+            if isinstance(value, float | int):
+                return np.float64(value)
+            if not isinstance(value, numbers.Real):
+                raise TypeError("value")
+            return np.float64(value)
+    """,
+    "a_check_that_hands_back_what_it_checked": """
+        def _helper(levels):
+            return real_array(levels, "levels")
+
+        def f(levels):
+            out = _helper(levels)
+            return np.asarray(out, dtype=np.float64)
+    """,
+    "python_s_float_after_the_shared_reader": """
+        def f(value):
+            value = real_number(value, "value")
+            return float(value)
+    """,
     "checked_in_both_branches": """
         def f(levels, flag):
             if flag:
@@ -778,11 +866,14 @@ _PLANTED_ANSWERED = {
 }
 
 _PLANTED_HEADER = """
+import numbers
+
 import numpy as np
 
 from phonometry._internal.validation import (
     complex_array,
     real_array,
+    real_number,
     refuse_complex,
     refuse_text,
     require_finite,

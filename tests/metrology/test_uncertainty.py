@@ -677,3 +677,22 @@ def test_combined_standard_uncertainty_refuses_what_it_cannot_combine(
 ) -> None:
     with pytest.raises(ValueError, match=match):
         u.combined_standard_uncertainty(contributions)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "contribution",
+    ["12", b"12", np.complex128(1 + 1j), 1 + 1j],
+    ids=["text", "bytes", "numpy-complex", "complex"],
+)
+def test_a_contribution_that_is_no_real_number_is_refused_by_name(
+    contribution: object,
+) -> None:
+    """A contribution that is not a pair is one real number, refused otherwise.
+
+    It was read through ``float()``, which parses a text (``"12"`` and
+    ``b"12"`` as 12.0) and keeps the real part of a NumPy complex number
+    with no more than a ``ComplexWarning``, so each came back a number the
+    caller never gave.
+    """
+    with pytest.raises(TypeError, match="'contributions'"):
+        u.combined_standard_uncertainty([contribution, 3.0])

@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -129,7 +130,7 @@ def _cell(value: float | None, language: Language, decimals: int) -> str:
 
 def _column(values: NDArray[np.float64] | None, index: int) -> float | None:
     """One entry of an optional per-frequency column."""
-    return None if values is None else float(values[index])
+    return None if values is None else real_number(values[index], "values")
 
 
 def _rows(

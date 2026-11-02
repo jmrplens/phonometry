@@ -43,6 +43,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._sound_power_fiche import (
     POWER_REFERENCE,
@@ -90,7 +91,7 @@ def _eta_cell(value: float, language: Language = "en") -> str:
     """The loss-factor cell (four decimals), or an em dash when not finite."""
     if not np.isfinite(value):
         return "—"
-    return format_number(float(value), language, decimals=4)
+    return format_number(real_number(value, "value"), language, decimals=4)
 
 
 def _value_table(

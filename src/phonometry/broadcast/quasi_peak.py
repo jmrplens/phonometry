@@ -111,6 +111,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_number,
     require_1d_signal,
     require_choice,
     require_finite_fields,
@@ -790,8 +791,9 @@ class QuasiPeakDynamicsResult(OwnsArrays):
         :raises ValueError: if there are not eleven readings, one is not
             positive and finite, or ``fs`` is not positive.
         :raises TypeError: if ``fs`` is not a single number.
+            ``readings_percent`` is refused the same way when it is not one real number.
         """
-        readings = tuple(float(r) for r in self.readings_percent)
+        readings = tuple(real_number(r, "r") for r in self.readings_percent)
         if len(readings) != len(_WINDOWS):
             msg = (
                 f"{type(self).__name__}: a verdict is attested over the "

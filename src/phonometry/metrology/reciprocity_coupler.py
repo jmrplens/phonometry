@@ -111,6 +111,7 @@ from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.validation import (
     complex_array,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_non_negative,
@@ -1967,6 +1968,7 @@ def check_coupler(
     :raises ValueError: for frequencies that are not positive and increasing,
         fewer than two microphones, or an unknown method.
     :raises TypeError: if ``heat_conduction_method`` is not a text.
+        ``relative_humidity_percent``, ``static_pressure_pa`` or ``temperature_c`` are refused the same way when any is not one real number.
     """
     frequencies = _frequency_axis(frequencies)
     method = require_choice(
@@ -1987,9 +1989,11 @@ def check_coupler(
     ratio = length / coupler.diameter_m
     conditions: dict[str, Any] = {
         "heat_conduction_method": method,
-        "temperature_c": float(temperature_c),
-        "static_pressure_pa": float(static_pressure_pa),
-        "relative_humidity_percent": float(relative_humidity_percent),
+        "temperature_c": real_number(temperature_c, "temperature_c"),
+        "static_pressure_pa": real_number(static_pressure_pa, "static_pressure_pa"),
+        "relative_humidity_percent": real_number(
+            relative_humidity_percent, "relative_humidity_percent"
+        ),
         "in_air": gas is None,
     }
     if isinstance(coupler, PlaneWaveCoupler):
@@ -2264,6 +2268,7 @@ def coupler_parameter_uncertainty(
         pressure, the temperature or the humidity of a coupler filled with a
         given gas.
     :raises TypeError: if ``heat_conduction_method`` is not a text.
+        ``relative_humidity_percent``, ``static_pressure_pa`` or ``temperature_c`` are refused the same way when any is not one real number.
     """
     frequencies = _frequency_axis(frequencies)
     if len(microphones) != len(_TRIAD_PAIRS):
@@ -2288,9 +2293,9 @@ def coupler_parameter_uncertainty(
         raise ValueError(msg)
     mics = tuple(microphones)
     conditions = (
-        float(temperature_c),
-        float(static_pressure_pa),
-        float(relative_humidity_percent),
+        real_number(temperature_c, "temperature_c"),
+        real_number(static_pressure_pa, "static_pressure_pa"),
+        real_number(relative_humidity_percent, "relative_humidity_percent"),
     )
     nominal = _pair_impedances(frequencies, coupler, mics, conditions, method, gas)
 

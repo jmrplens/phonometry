@@ -76,6 +76,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_scalar,
 )
@@ -1217,8 +1218,9 @@ def incidence_correction(
         list.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
+        ``incidence_angle_deg`` is refused the same way when it is not one real number.
     """
-    angle = float(incidence_angle_deg)
+    angle = real_number(incidence_angle_deg, "incidence_angle_deg")
     column = next(
         (
             values

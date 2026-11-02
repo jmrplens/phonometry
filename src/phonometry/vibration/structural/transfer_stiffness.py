@@ -100,6 +100,7 @@ from ..._internal.validation import (
     check_engine,
     complex_array,
     real_array,
+    real_number,
     require_choice,
     require_finite,
     require_finite_fields,
@@ -1639,7 +1640,7 @@ def _limit_crossing(
     first = int(candidates[0])
     before = np.flatnonzero(judged[:first])
     if before.size == 0:
-        return first, float(frequencies[first])
+        return first, real_number(frequencies[first], "frequencies")
     last = int(before[-1])
     fraction = margin[last] / (margin[last] - margin[first])
     if fraction >= 1.0:
@@ -1647,7 +1648,7 @@ def _limit_crossing(
         # line; returning the line itself, not a power that rounds a unit in
         # the last place either side of it, lets a caller keep the line at
         # the limit by comparing frequencies.
-        return first, float(frequencies[first])
+        return first, real_number(frequencies[first], "frequencies")
     ratio = frequencies[first] / frequencies[last]
     return first, float(frequencies[last] * ratio**fraction)
 

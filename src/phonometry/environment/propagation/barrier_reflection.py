@@ -112,6 +112,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     indices_of,
     real_array,
+    real_number,
     require_axis_rank,
     require_choice,
     require_finite_fields,
@@ -1083,7 +1084,7 @@ def _grid_rate(
     Two records at different rates cannot be subtracted sample against sample,
     so every Signal among them has to agree with ``fs`` and with each other.
     """
-    rate = None if fs is None else float(fs)
+    rate = None if fs is None else real_number(fs, "fs")
     source = ""
     for name, entries in (("in_front_irs", fronts), ("free_field_irs", frees)):
         for p, entry in enumerate(entries):
@@ -1536,6 +1537,7 @@ def reflection_index(
         or ``directivity_corrections``, ``free_field_irs``, ``in_front_irs``,
         ``low_band_window_length_s`` or ``window_length_s`` holds a text or a value that
         is not a real number.
+        ``fs`` is refused the same way when it is not one real number.
     :warns BarrierReflectionWarning: For an :math:`R_\mathrm{sub}` below 10 dB, a
         gain factor more than 20 % from 1, or a sample rate below 44 kHz.
     """

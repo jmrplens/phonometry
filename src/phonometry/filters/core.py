@@ -21,6 +21,7 @@ from .._internal.utils import (
 from .._internal.validation import (
     is_scalar,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_positive,
@@ -553,7 +554,7 @@ def _validate_bank_design(
         # a stateful resampling algorithm would be required...
         msg = "Resampling and stateful behaviour (block processing) are not supported."
         raise ValueError(msg)
-    return [float(f) for f in limits]
+    return [real_number(f, "limits") for f in limits]
 
 
 def _require_level_mode(mode: object) -> Mode:
@@ -665,6 +666,7 @@ class OctaveFilterBank:
             frequency limits or a design the bank cannot be built with.
         :raises TypeError: if ``fraction`` or ``fs`` is not a single number, or
             ``order`` is a flag, a text or an array where a count goes.
+            ``limits`` is refused the same way when it is not one real number.
         """
         order = require_count(order, "order")
         limits = _validate_bank_design(fs, fraction, limits, design, block_processing)

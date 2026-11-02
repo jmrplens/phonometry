@@ -84,6 +84,7 @@ from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_finite_fields,
     require_non_negative,
     require_positive,
@@ -820,8 +821,8 @@ def reverberation_time_models(
     # Two equal-area opposing walls per axis share the axis mean absorption.
     surfaces: list[Surface] = []
     for area, alpha in zip(pair_areas, absorptions, strict=True):
-        surfaces.append((float(area) / 2.0, alpha))
-        surfaces.append((float(area) / 2.0, alpha))
+        surfaces.append((real_number(area, "area") / 2.0, alpha))
+        surfaces.append((real_number(area, "area") / 2.0, alpha))
 
     sabine = np.atleast_1d(
         sabine_reverberation_time(

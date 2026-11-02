@@ -103,6 +103,7 @@ from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array, float_keyed
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_1d_signal,
     require_choice,
     require_finite,
@@ -1047,6 +1048,7 @@ class RiseSpeedResult(OwnsArrays):
 
         :raises TypeError: if ``levels`` or ``times`` holds a text or a value that is
             not a real number.
+            ``rise_speeds_db_per_s`` is refused the same way when it is not one real number.
         """
         object.__setattr__(self, "times", read_only(real_array(self.times, "times")))
         object.__setattr__(self, "levels", read_only(real_array(self.levels, "levels")))
@@ -1058,7 +1060,10 @@ class RiseSpeedResult(OwnsArrays):
         object.__setattr__(
             self,
             "rise_speeds_db_per_s",
-            tuple(float(s) for s in self.rise_speeds_db_per_s),
+            tuple(
+                real_number(s, "rise_speeds_db_per_s")
+                for s in self.rise_speeds_db_per_s
+            ),
         )
 
     @property
@@ -1595,12 +1600,15 @@ class RoughnessComparability(OwnsArrays):
         """Hold the arrays read-only and the four differences as a tuple.
 
         :raises ValueError: For other than four differences.
+        :raises TypeError: if a difference of ``level_differences`` is not one real number.
         """
         for name in ("frequencies", "noise_levels_1", "noise_levels_2"):
             object.__setattr__(
                 self, name, read_only(np.asarray(getattr(self, name), dtype=np.float64))
             )
-        differences = tuple(float(d) for d in self.level_differences)
+        differences = tuple(
+            real_number(d, "level_differences") for d in self.level_differences
+        )
         if len(differences) != _FORMULA_E4_TERMS:
             msg = (
                 "'level_differences' holds the four differences of Formula "
@@ -2437,11 +2445,15 @@ class PassByUncertainty(RichDisplay):
             is not finite.
         :raises TypeError: if ``coverage_factor`` or ``pressure_level`` is not a single
             number.
+            ``standard_uncertainties_db`` is refused the same way when it is not one real number.
         """
         require_finite(self.pressure_level, "pressure_level")
         names = tuple(str(name) for name in self.names)
-        corrections = tuple(float(c) for c in self.corrections)
-        uncertainties = tuple(float(u) for u in self.standard_uncertainties_db)
+        corrections = tuple(real_number(c, "corrections") for c in self.corrections)
+        uncertainties = tuple(
+            real_number(u, "standard_uncertainties_db")
+            for u in self.standard_uncertainties_db
+        )
         count = len(names)
         if count == 0 or not count == len(corrections) == len(uncertainties):
             msg = "every input quantity needs one name, one correction and one uncertainty."
@@ -2554,11 +2566,12 @@ def pass_by_uncertainty(
     :param coverage_factor: :math:`k`; 2 by G.5.
     :return: The budget.
     :raises ValueError: See :class:`PassByUncertainty`.
+    :raises TypeError: if ``pressure_level`` or ``coverage_factor`` is not one real number.
     """
     return PassByUncertainty(
-        pressure_level=float(pressure_level),
+        pressure_level=real_number(pressure_level, "pressure_level"),
         names=_input_names(inputs),
         corrections=tuple(float(q.value) for q in inputs),
         standard_uncertainties_db=tuple(float(q.uncertainty) for q in inputs),
-        coverage_factor=float(coverage_factor),
+        coverage_factor=real_number(coverage_factor, "coverage_factor"),
     )

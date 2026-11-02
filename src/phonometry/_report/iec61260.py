@@ -35,6 +35,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING, Any
 
+from .._internal.validation import real_number
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -75,7 +76,7 @@ def _band_margin(band: dict[str, Any], cls: int) -> float:
         f"bandwidth_margin_class{cls}_db",
         f"summation_margin_class{cls}_db",
     )
-    return min(float(band[k]) for k in keys if band.get(k) is not None)
+    return min(real_number(band[k], "band") for k in keys if band.get(k) is not None)
 
 
 #: The requirement rows of the fiche, per edition: the requirement, its label
@@ -226,7 +227,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
     """
     from ..filters.frequencies import _nominal_freq_for_band
 
-    nominal = _nominal_freq_for_band(exact_freq, float(fraction))
+    nominal = _nominal_freq_for_band(exact_freq, real_number(fraction, "fraction"))
     if nominal >= _HZ_PER_KHZ:
         return f"{nominal / _HZ_PER_KHZ:g} kHz"
     return f"{nominal:g} Hz"

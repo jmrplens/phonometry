@@ -100,6 +100,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite_array,
@@ -734,7 +735,11 @@ def _a_weighted_total(
             # centres from room_parameters); the A-weighted total is undefined.
             return float("nan")
         return energy_sum(sound_power_level + ck)
-    return float(sound_power_level[0]) if n_bands == 1 else float("nan")
+    return (
+        real_number(sound_power_level[0], "sound_power_level")
+        if n_bands == 1
+        else float("nan")
+    )
 
 
 def sound_power_reverberation(

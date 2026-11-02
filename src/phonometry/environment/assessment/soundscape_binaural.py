@@ -73,7 +73,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import reduce_with_plain_rows
-from ..._internal.validation import require_choice
+from ..._internal.validation import real_number, require_choice
 from ..._internal.warnings import PhonometryWarning
 from ...filters.weighting import weighting_filter
 from ...io._resolve import resolve_calibration, resolve_fs, resolve_samples
@@ -506,8 +506,8 @@ def _metric(
     return BinauralMetric(
         symbol=symbol,
         parameter=parameter,
-        left=float(left),
-        right=float(right),
+        left=real_number(left, "left"),
+        right=real_number(right, "right"),
         unit=_UNITS[symbol],
         method=_METHODS[symbol],
     )

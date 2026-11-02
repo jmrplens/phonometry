@@ -69,6 +69,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_1d_signal,
     require_choice,
     require_equal_shapes,
@@ -991,6 +992,7 @@ def impulsive_sound_adjustment(
         that is not one channel (a 1-D series), or an ``onset_rate_method``
         other than the two listed.
     :raises TypeError: if ``onset_rate_method`` is not a text.
+        ``laeq`` is refused the same way when it is not one real number.
     """
     require_choice(onset_rate_method, "onset_rate_method", _ONSET_RATE_METHODS)
     fs = resolve_fs(x, fs, name="x")
@@ -1022,7 +1024,7 @@ def impulsive_sound_adjustment(
         levels=levels,
         dt=realised_dt,
         onsets=onsets,
-        laeq=float(laeq),
+        laeq=real_number(laeq, "laeq"),
     )
 
 

@@ -114,6 +114,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
+    real_number,
     require_1d_signal,
     require_choice,
     require_positive,
@@ -510,8 +511,8 @@ def _hsa_solve(
     cols = np.empty((2 * n_pairs + 1, kl), dtype=np.complex128)
     cols[0] = _window_kernel(0.0, n_zb, n_ze, k)
     for m, f in enumerate(rates):
-        w_pos = _window_kernel(float(f), n_zb, n_ze, k)
-        w_neg = _window_kernel(-float(f), n_zb, n_ze, k)
+        w_pos = _window_kernel(real_number(f, "rates"), n_zb, n_ze, k)
+        w_neg = _window_kernel(-real_number(f, "rates"), n_zb, n_ze, k)
         cols[2 * m + 1] = w_pos + w_neg  # W+ (Formula 128)
         cols[2 * m + 2] = np.conj(w_pos - w_neg)  # W-* (Formulae 126/129)
 
@@ -769,7 +770,9 @@ def _harmonic_complex(
     best_order = 1
     for order in range(1, _MAX_ORDER_SEED + 1):
         f_base = f_opt / order
-        ratios = np.array([_round_half_away(float(f) / f_base) for f in rates])
+        ratios = np.array(
+            [_round_half_away(real_number(f, "f") / f_base) for f in rates]
+        )
         ratios[ratios > _MAX_ORDER] = 0  # Formula 153
         valid = ratios > 0
         rel_err = np.ones(rates.size)
@@ -894,7 +897,7 @@ def _time_dependent(
     a_lz: np.ndarray, block_times: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
     """Time-dependent specific fluctuation strength F'(l50, z) (9.1.11)."""
-    t_end = float(block_times[-1])
+    t_end = real_number(block_times[-1], "block_times")
     n50 = int(np.floor(t_end * _R_S50)) + 1
     grid = np.arange(n50) / _R_S50
     if block_times.size >= _MIN_INTERP_BLOCKS:

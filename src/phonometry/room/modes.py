@@ -70,6 +70,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     real_array,
+    real_number,
     require_positive,
     require_ranks,
     require_same_length,
@@ -128,7 +129,7 @@ def _require_dimensions(dimensions: ArrayLike) -> NDArray[np.float64]:
 
 def _room_geometry(dims: NDArray[np.float64]) -> tuple[float, float, float]:
     """Volume ``V``, total wall area ``S`` and total edge length ``L``."""
-    lx, ly, lz = (float(v) for v in dims)
+    lx, ly, lz = (real_number(v, "dims") for v in dims)
     volume = lx * ly * lz
     surface = 2.0 * (lx * ly + lx * lz + ly * lz)
     edges = 4.0 * (lx + ly + lz)

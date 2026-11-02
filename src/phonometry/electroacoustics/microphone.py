@@ -72,6 +72,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     pair_of_arrays,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -166,13 +167,13 @@ def _limit_edge(
     frequency is returned.
     """
     if not 0 <= neighbour < f.size:
-        return float(f[edge])
+        return real_number(f[edge], "f")
     threshold = tolerance if rel_db[neighbour] > tolerance else -tolerance
     return _threshold_crossing(
-        float(f[edge]),
-        float(rel_db[edge]),
-        float(f[neighbour]),
-        float(rel_db[neighbour]),
+        real_number(f[edge], "f"),
+        real_number(rel_db[edge], "rel_db"),
+        real_number(f[neighbour], "f"),
+        real_number(rel_db[neighbour], "rel_db"),
         threshold,
     )
 
@@ -261,15 +262,16 @@ def _overload_spl(
     """
     if thd_percent.size == 0:  # pragma: no cover - _as_curve enforces two points
         return None
-    if float(thd_percent[0]) >= limit_percent:
-        return float(spl[0])
+    if real_number(thd_percent[0], "thd_percent") >= limit_percent:
+        return real_number(spl[0], "spl")
     above = thd_percent >= limit_percent
     if not bool(np.any(above)):
         return None
     j = int(np.argmax(above))
     i = j - 1
-    frac = (limit_percent - float(thd_percent[i])) / (
-        float(thd_percent[j]) - float(thd_percent[i])
+    frac = (limit_percent - real_number(thd_percent[i], "thd_percent")) / (
+        real_number(thd_percent[j], "thd_percent")
+        - real_number(thd_percent[i], "thd_percent")
     )
     return float(spl[i] + frac * (spl[j] - spl[i]))
 

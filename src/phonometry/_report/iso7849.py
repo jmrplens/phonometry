@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._sound_power_fiche import (
     FicheCopy,
@@ -145,7 +146,7 @@ def _eps_cell(value: float, language: Language = "en") -> str:
     """The radiation-factor cell (three decimals), or an em dash when not finite."""
     if not np.isfinite(value):
         return "—"
-    return format_number(float(value), language, decimals=3)
+    return format_number(real_number(value, "value"), language, decimals=3)
 
 
 def _statement(

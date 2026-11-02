@@ -67,6 +67,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
+    real_number,
     require_1d_signal,
     require_choice,
     require_ranks,
@@ -566,7 +567,7 @@ def _time_dependent(
     a_lz: np.ndarray, block_times: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
     """Time-dependent specific roughness R'(l50, z) (Formulae 103-110)."""
-    t_end = float(block_times[-1])
+    t_end = real_number(block_times[-1], "block_times")
     n50 = int(np.floor(t_end * _R_S50)) + 1
     grid = np.arange(n50) / _R_S50
     if block_times.size >= _MIN_INTERP_BLOCKS:

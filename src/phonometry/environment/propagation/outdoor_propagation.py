@@ -53,6 +53,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_finite_array,
     require_non_negative,
     require_positive,
@@ -788,7 +789,7 @@ def _mean_ground_factor(
     if covered > 0.0:
         return float(np.sum(overlaps * factors) / covered)
     index = int(np.searchsorted(edges[1:-1], start, side="right"))
-    return float(factors[index])
+    return real_number(factors[index], "factors")
 
 
 def region_ground_factors(
@@ -915,6 +916,7 @@ def mean_path_height(
     :raises TypeError: if ``receiver_height_m`` or ``source_height_m`` is not a single
         number, or ``profile_distances`` or ``profile_heights_m`` holds a text or a
         value that is not a real number.
+        ``distance`` is refused the same way when it is not one real number.
 
     .. note::
 
@@ -953,7 +955,9 @@ def mean_path_height(
     ray = zs[0] + source_height_m + rise * (us - us[0]) / dp
     area = float(np.trapezoid(ray - zs, us))
     span = require_positive(
-        float(np.hypot(dp, rise)) if distance is None else float(distance),
+        float(np.hypot(dp, rise))
+        if distance is None
+        else real_number(distance, "distance"),
         "distance",
     )
     return area / span

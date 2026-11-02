@@ -68,6 +68,7 @@ from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -299,7 +300,7 @@ def _open_band_rating(
     """
     values = _round_half_up_tenths(r_s).copy()
     values[open_mask] = np.inf
-    opened = tuple(float(f) for f in freqs[open_mask])
+    opened = tuple(real_number(f, "freqs") for f in freqs[open_mask])
     core_values = values[core]
     if not np.any(np.isfinite(core_values)):
         return JointOpenBandRating(opened, None, None, None, None, None)
@@ -854,8 +855,9 @@ class GapWidthCheck(RichDisplay):
         """Hold the readings as a tuple of floats.
 
         :raises ValueError: If there is no reading.
+        :raises TypeError: if a reading of ``readings_mm`` is not one real number.
         """
-        readings = tuple(float(w) for w in self.readings_mm)
+        readings = tuple(real_number(w, "readings_mm") for w in self.readings_mm)
         if not readings:
             msg = "GapWidthCheck: 'readings_mm' must hold at least one reading."
             raise ValueError(msg)

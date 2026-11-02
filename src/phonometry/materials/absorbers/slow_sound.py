@@ -76,6 +76,7 @@ from scipy.optimize import root
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_positive,
@@ -955,7 +956,7 @@ def critical_coupling_design(
     z0 = rho0 * c0 / (d * a)
 
     def residual(x: np.ndarray) -> list[float]:
-        lc, h = float(x[0]), float(x[1])
+        lc, h = real_number(x[0], "x"), real_number(x[1], "x")
         if not (lc_lo <= lc <= lc_hi and h_lo <= h <= h_hi and h <= d):
             return [1e6, 1e6]
         cand = HelmholtzResonator(

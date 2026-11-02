@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import real_number, require_equal_shapes
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -184,7 +184,9 @@ def band_value_table(
             row.append(
                 cell
                 if isinstance(cell, str)
-                else format_number(float(cell), language, decimals=decimals)
+                else format_number(
+                    real_number(cell, "cell"), language, decimals=decimals
+                )
             )
         rows.append(row)
 

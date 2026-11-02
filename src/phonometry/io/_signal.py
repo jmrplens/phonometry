@@ -35,6 +35,7 @@ from .._internal.validation import (
     indices_of,
     is_integer,
     real_array,
+    real_number,
     require_equal_counts,
     require_scalar,
 )
@@ -303,9 +304,10 @@ class Signal(RichDisplay):
         :return: A :class:`Signal` over that span, at the same rate.
         :raises ValueError: If an edge is negative, not finite, or if
             *tmax* is not after *tmin*.
+        :raises TypeError: if ``tmin`` or ``tmax`` is not one real number.
         """
-        start = 0.0 if tmin is None else float(tmin)
-        stop = self.duration_s if tmax is None else float(tmax)
+        start = 0.0 if tmin is None else real_number(tmin, "tmin")
+        stop = self.duration_s if tmax is None else real_number(tmax, "tmax")
         if not np.isfinite(start) or not np.isfinite(stop):
             msg = "'tmin' and 'tmax' must be finite times in seconds"
             raise ValueError(msg)

@@ -60,6 +60,7 @@ from ..._internal.frozen import OwnsArrays, given_repr, read_only
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_present,
@@ -765,5 +766,5 @@ def _nearest(targets: list[float], available: dict[float, float]) -> list[float]
         idx = int(np.argmin(np.abs(keys - t)))
         if abs(keys[idx] - t) > t * 0.06:  # within ~6 % of the nominal ratio
             raise KeyError(t)
-        out.append(float(keys[idx]))
+        out.append(real_number(keys[idx], "keys"))
     return out

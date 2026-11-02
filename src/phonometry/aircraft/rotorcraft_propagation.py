@@ -62,6 +62,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     is_scalar,
     real_array,
+    real_number,
     refuse_text_beside_choice,
     require_choice,
     require_equal_shapes,
@@ -845,8 +846,8 @@ def _section_ends(
     :raises ValueError: if either is not a finite point, or the source does
         not lie at a smaller section distance than the receiver.
     """
-    src = (float(source[0]), float(source[1]))
-    rcv = (float(receiver[0]), float(receiver[1]))
+    src = (real_number(source[0], "source"), real_number(source[1], "source"))
+    rcv = (real_number(receiver[0], "receiver"), real_number(receiver[1], "receiver"))
     if not (
         np.isfinite(src[0])
         and np.isfinite(src[1])

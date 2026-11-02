@@ -44,6 +44,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING, Any
 
+from .._internal.validation import real_number
 from ._i18n import t
 from ._layout import (
     _ACCENT_HEX,
@@ -95,7 +96,9 @@ def _fmt(value: float, decimals: int, language: Language = "en") -> str:
     from ._i18n import format_number
 
     return format_number(
-        display_round(float(value), decimals), language, decimals=decimals
+        display_round(real_number(value, "value"), decimals),
+        language,
+        decimals=decimals,
     )
 
 
@@ -103,7 +106,12 @@ def _fmt_percent(probability: float, language: Language = "en") -> str:
     """The injury probability as a whole-number percentage (e.g. ``37 %``)."""
     from ._i18n import format_number
 
-    return format_number(100.0 * float(probability), language, decimals=0) + " %"
+    return (
+        format_number(
+            100.0 * real_number(probability, "probability"), language, decimals=0
+        )
+        + " %"
+    )
 
 
 def _band_index(result: MultipleShockResult) -> int:

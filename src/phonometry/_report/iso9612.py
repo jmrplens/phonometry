@@ -47,6 +47,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING, Any
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -98,12 +99,14 @@ _INSTRUMENT_LABELS: dict[str, str] = {
 
 def _fmt_db(value: float, language: Language = "en") -> str:
     """A level or uncertainty rounded to one decimal place (Clause 15 e)."""
-    return format_number(display_round(float(value)), language, decimals=1)
+    return format_number(
+        display_round(real_number(value, "value")), language, decimals=1
+    )
 
 
 def _fmt_hours(value: float, language: Language = "en") -> str:
     """A duration in hours with up to one decimal (trailing ``.0`` kept)."""
-    return format_number(float(value), language, decimals=1)
+    return format_number(real_number(value, "value"), language, decimals=1)
 
 
 def _basis(result: ExposureResult, language: Language = "en") -> str:

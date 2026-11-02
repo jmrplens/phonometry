@@ -122,6 +122,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_finite,
     require_positive,
@@ -724,7 +725,7 @@ def _prefix_radius(
         fails = np.flatnonzero(failing[:, j])
         stop = int(fails[0]) if fails.size else n_points
         passed = np.flatnonzero(valid[:stop, j])
-        radius[j] = float(rs[passed[-1]]) if passed.size else 0.0
+        radius[j] = real_number(rs[passed[-1]], "rs") if passed.size else 0.0
     return radius, np.any(failing, axis=0)
 
 
@@ -1050,6 +1051,7 @@ class InverseSquareLawResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the deviation curves.
         :return: The axes.
+        :raises TypeError: if ``frequency_hz`` is not one real number.
         """
         from .._i18n import check_language
         from .._plot.free_field import plot_inverse_square_law

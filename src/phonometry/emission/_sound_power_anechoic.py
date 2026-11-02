@@ -51,6 +51,7 @@ from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_ranks,
     require_same_length,
@@ -752,7 +753,7 @@ def _precision_surface_level(
 def _precision_a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> float:
     """A-weighted total LWA (Eq. C.1), NaN where it is not defined."""
     if freqs is None:
-        return float(lw[0]) if lw.shape[0] == 1 else float("nan")
+        return real_number(lw[0], "lw") if lw.shape[0] == 1 else float("nan")
     try:
         ck = _a_weighting_corrections(freqs)
     except ValueError:
@@ -775,7 +776,7 @@ def _precision_uncertainty_bands(
     if freqs is None:
         return np.full(n_bands, np.nan, dtype=np.float64)
     sigma_bands = np.array(
-        [_sigma_r0_3745(round(float(f)), room) for f in freqs],
+        [_sigma_r0_3745(round(real_number(f, "freqs")), room) for f in freqs],
         dtype=np.float64,
     )
     return np.asarray(

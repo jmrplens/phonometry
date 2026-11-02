@@ -46,10 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import (
-    real_array,
-    require_count,
-)
+from .._internal.validation import real_array, real_number, require_count
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -121,7 +118,7 @@ def _cell(
     trusted part of the decay curve) is shown as ``"—"``, the accredited
     empty-cell symbol, rather than a spurious number.
     """
-    v = float(value) * scale
+    v = real_number(value, "value") * scale
     if not math.isfinite(v):
         return "—"
     return format_number(v, language, decimals=decimals)
@@ -156,7 +153,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
     """
     from ..filters.frequencies import _nominal_freq_for_band
 
-    nominal = _nominal_freq_for_band(exact_freq, float(fraction))
+    nominal = _nominal_freq_for_band(exact_freq, real_number(fraction, "fraction"))
     return f"{nominal:g}"
 
 
@@ -328,7 +325,7 @@ def _band_value(
     idx = int(np.argmin(np.abs(freq - target)))
     if abs(freq[idx] - target) > _BAND_MATCH_REL * target:
         return float("nan")
-    return float(values[idx])
+    return real_number(values[idx], "values")
 
 
 def _band_fraction(frequency: np.ndarray | None) -> int:

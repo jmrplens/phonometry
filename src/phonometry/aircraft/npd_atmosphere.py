@@ -52,6 +52,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_number,
     require_choice,
     require_finite_array,
     require_positive_array,
@@ -126,7 +127,7 @@ def _nominal_a_weighting_db(bands: NDArray[np.float64]) -> NDArray[np.float64]:
     the weighting-class verifier uses, so the two cannot drift apart.
     """
     by_band = {row[0]: row[1] for row in _WEIGHTING_TABLE3}
-    return read_only(np.array([by_band[float(band)] for band in bands]))
+    return read_only(np.array([by_band[real_number(band, "bands")] for band in bands]))
 
 
 #: IEC 61672-1:2013 Table 3: the nominal A-weighting of the 24 bands from 50 Hz
@@ -266,9 +267,14 @@ class NPDAtmosphereIncrement(OwnsArrays):
         :param distance_m: One of the NPD distances, in metres.
         :return: Its index along the distance axis.
         :raises ValueError: if the distance is not one of the table's.
+        :raises TypeError: if ``distance_m`` is not one real number.
         """
         match = np.flatnonzero(
-            np.isclose(self.distances_m, float(distance_m), rtol=_DISTANCE_MATCH_RTOL)
+            np.isclose(
+                self.distances_m,
+                real_number(distance_m, "distance_m"),
+                rtol=_DISTANCE_MATCH_RTOL,
+            )
         )
         if match.size == 0:
             msg = (
@@ -386,6 +392,7 @@ def npd_atmosphere_increment(
         the chosen route refuses.
     :raises TypeError: if ``absorption`` is not a text, or ``distances_m`` holds a text
         or a value that is not a real number.
+        ``relative_humidity_percent``, ``static_pressure_kpa`` or ``temperature_c`` are refused the same way when any is not one real number.
     """
     levels = _spectrum_levels(spectrum)
     route = require_choice(absorption, "absorption", _ABSORPTION)
@@ -401,9 +408,9 @@ def npd_atmosphere_increment(
     if route == "arp5534":
         alpha = _arp5534_coefficient(
             frequencies,
-            float(temperature_c),
-            float(relative_humidity_percent),
-            float(static_pressure_kpa),
+            real_number(temperature_c, "temperature_c"),
+            real_number(relative_humidity_percent, "relative_humidity_percent"),
+            real_number(static_pressure_kpa, "static_pressure_kpa"),
         )
         specified_attenuation = _sae_band(np.multiply.outer(alpha, d))
     else:
@@ -429,9 +436,11 @@ def npd_atmosphere_increment(
         specified_levels_dba=specified_levels,
         increment_db=specified_levels - reference_levels,
         absorption=route,
-        temperature_c=float(temperature_c),
-        relative_humidity_percent=float(relative_humidity_percent),
-        static_pressure_kpa=float(static_pressure_kpa),
+        temperature_c=real_number(temperature_c, "temperature_c"),
+        relative_humidity_percent=real_number(
+            relative_humidity_percent, "relative_humidity_percent"
+        ),
+        static_pressure_kpa=real_number(static_pressure_kpa, "static_pressure_kpa"),
     )
 
 

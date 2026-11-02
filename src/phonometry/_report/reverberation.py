@@ -42,6 +42,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -93,7 +94,7 @@ _PRIMARY_MODEL = "Arau-Puchades"
 
 def _fmt_t(value: float, language: Language = "en") -> str:
     """Format a reverberation time to two decimals, or an em dash if not finite."""
-    v = float(value)
+    v = real_number(value, "value")
     if not math.isfinite(v):
         return "—"
     return format_number(v, language, decimals=2)
@@ -104,9 +105,9 @@ def _band_value(freqs: np.ndarray, values: np.ndarray, target: float) -> float:
     if freqs.size == 0:
         return float("nan")
     idx = int(np.argmin(np.abs(freqs - target)))
-    if abs(float(freqs[idx]) - target) > _BAND_MATCH_REL * target:
+    if abs(real_number(freqs[idx], "freqs") - target) > _BAND_MATCH_REL * target:
         return float("nan")
-    return float(values[idx])
+    return real_number(values[idx], "values")
 
 
 def _mid_or_first(freqs: np.ndarray, values: np.ndarray) -> tuple[float, bool]:
@@ -122,7 +123,7 @@ def _mid_or_first(freqs: np.ndarray, values: np.ndarray) -> tuple[float, bool]:
     if math.isfinite(low) and math.isfinite(high):
         return 0.5 * (low + high), True
     finite = values[np.isfinite(values)]
-    return (float(finite[0]) if finite.size else float("nan")), False
+    return (real_number(finite[0], "finite") if finite.size else float("nan")), False
 
 
 def _octave_table(

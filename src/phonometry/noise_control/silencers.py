@@ -121,6 +121,7 @@ from .._internal.validation import (
     check_engine,
     complex_array,
     real_array,
+    real_number,
     require_non_negative,
     require_positive,
     require_present,
@@ -297,7 +298,7 @@ def _shorting_frequency(
     index = int(np.argmin(magnitude))
     if index in (0, f.size - 1):
         return None
-    return float(f[index])
+    return real_number(f[index], "f")
 
 
 def cascade(*matrices: ArrayLike) -> _Complex:

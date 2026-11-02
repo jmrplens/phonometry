@@ -25,7 +25,7 @@ import math
 import warnings
 from collections import deque
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, FloatOperation, localcontext
 from fractions import Fraction
 from typing import TYPE_CHECKING
 
@@ -819,6 +819,86 @@ def test_an_infinity_the_caller_gives_is_read_as_that_infinity(value: object) ->
     read = require_real(value, "'x' must be a number")
     assert math.isinf(read)
     assert (read > 0) is bool(value > 0)  # type: ignore[operator]
+
+
+def test_a_decimal_past_its_context_s_exponent_is_refused_as_too_large() -> None:
+    """A ``Decimal`` too large for the decimal context's own arithmetic is
+    still one number too large for a float, refused with ``ValueError``.
+
+    Its magnitude was asked through ``abs()``, which runs in the decimal
+    context, so ``Decimal("1e1000000")`` raised ``decimal.Overflow`` out of
+    the guard instead of the refusal it words.
+    """
+    huge = Decimal("1e1000000")
+    with pytest.raises(ValueError, match="'x' must be a number"):
+        require_real(huge, "'x' must be a number")
+
+
+def test_a_finite_decimal_is_refused_when_its_context_traps_float_operations() -> None:
+    """A finite ``Decimal`` beyond a float's range is refused whatever the
+    caller's decimal context traps.
+
+    Comparing its magnitude with ``math.inf`` is an operation a context that
+    traps ``FloatOperation`` refuses with a ``TypeError``, which the guard
+    took for a value that cannot say whether it is finite, and so it handed
+    back ``inf`` for ``Decimal("1e400")``.
+    """
+    beyond = Decimal("1e400")
+    with localcontext() as context:
+        context.traps[FloatOperation] = True
+        with pytest.raises(ValueError, match="'x' must be a number"):
+            require_real(beyond, "'x' must be a number")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        [10**400],
+        10**400,
+        [Decimal("1e400")],
+        np.array([Decimal("-1e400"), Decimal(1)], dtype=object),
+    ],
+    ids=["int in a list", "int", "Decimal in a list", "array of objects"],
+)
+def test_real_array_refuses_a_number_too_large_for_a_float(value: object) -> None:
+    """A number past a float's largest is refused by name as too large.
+
+    numpy raised an anonymous ``OverflowError`` for a Python integer, and read
+    a ``Decimal`` past the range as an infinity with no more than a warning,
+    which the checks after it took for an infinity the caller gave.
+    """
+    with pytest.raises(ValueError, match="'x' holds a number too large for a float"):
+        real_array(value, "x")
+    as_complex = 10**400 if isinstance(value, np.ndarray) else value
+    with pytest.raises(ValueError, match="'x' holds a number too large for a float"):
+        complex_array(as_complex, "x")
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).max <= np.finfo(np.float64).max,
+    reason="a long double here holds no number past a float's largest",
+)
+def test_real_array_refuses_a_long_double_past_a_float() -> None:
+    big = np.array([1.0, 1e300], dtype=np.longdouble) * np.longdouble(1e300)
+    with pytest.raises(ValueError, match="'x' holds a number too large"):
+        real_array(big, "x")
+    assert np.array_equal(real_array(np.array([1.0], dtype=np.longdouble), "x"), [1.0])
+
+
+def test_real_array_keeps_an_infinity_the_caller_gives() -> None:
+    assert np.isinf(real_array([np.inf, 1.0], "x")[0])
+    assert np.isinf(real_array([Decimal("Infinity")], "x")[0])
+
+
+def test_real_array_names_an_element_whose_conversion_fails_as_a_value() -> None:
+    class Refuses:
+        def __float__(self) -> float:
+            msg = "no float"
+            raise ValueError(msg)
+
+    refused = [Refuses()]
+    with pytest.raises(ValueError, match="'x' must be numeric"):
+        real_array(refused, "x")
 
 
 #: A text that numpy does not see as one: a ``bytearray`` alone, inside a

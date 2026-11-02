@@ -41,7 +41,7 @@ import html
 import math
 from typing import TYPE_CHECKING
 
-from .._internal.validation import require_count
+from .._internal.validation import real_number, require_count
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -76,7 +76,7 @@ def _num(value: float, language: Language, *, decimals: int = 1) -> str:
     does not decrease with distance) is shown as ``"—"``, the accredited
     empty-cell symbol, rather than a spurious number.
     """
-    v = float(value)
+    v = real_number(value, "value")
     if not math.isfinite(v):
         return "—"
     return format_number(v, language, decimals=decimals)

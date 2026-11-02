@@ -43,6 +43,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -267,7 +268,7 @@ class NCResult(OwnsArrays):
                     "no NC rating (ANSI/ASA S12.2-2019, Table 1)."
                 )
                 raise ValueError(msg)
-        elif not math.isfinite(float(self.rating)):
+        elif not math.isfinite(real_number(self.rating, "rating")):
             msg = (
                 "NCResult: 'rating' must be finite when 'out_of_range' is "
                 "None; only a spectrum outside the NC-15 to NC-70 family "

@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal, cast, overload
 
 import numpy as np
 
-from .._internal.validation import require_scalar
+from .._internal.validation import real_number, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -987,7 +987,9 @@ def _band_axis(
     (e.g. a shared-x upper panel).
     """
     labels = [
-        item if isinstance(item, str) else _format_freq(float(item), language)
+        item
+        if isinstance(item, str)
+        else _format_freq(real_number(item, "labels_or_freqs"), language)
         for item in labels_or_freqs
     ]
     positions = np.arange(len(labels), dtype=np.float64)
@@ -1160,7 +1162,7 @@ def _annotate_impact_500(
     if frequencies.size == 0:
         return
     idx = int(np.argmin(np.abs(frequencies - 500.0)))
-    read_value = float(reference[idx])
+    read_value = real_number(reference[idx], "reference")
     read_str = format_number(read_value, language, decimals=0)
     read_label = (
         f"lectura 500 Hz = {read_str} dB"
@@ -1365,7 +1367,7 @@ def _time_axis(
 ) -> tuple[np.ndarray, str]:
     """Sample times in seconds when ``fs`` is known, else sample index."""
     if fs:
-        return np.arange(n) / float(fs), _t("Time [s]", language)
+        return np.arange(n) / real_number(fs, "fs"), _t("Time [s]", language)
     return np.arange(n, dtype=np.float64), _t("Sample", language)
 
 

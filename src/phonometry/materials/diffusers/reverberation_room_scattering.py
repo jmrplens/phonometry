@@ -41,6 +41,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_above_absolute_zero_array,
     require_equal_shapes,
     require_ranks,
@@ -736,9 +737,9 @@ def check_base_plate_scattering(
         values: dict[int, float] = {}
         for band in BASE_PLATE_BANDS_HZ:
             if band in scattering:
-                values[band] = float(scattering[band])
+                values[band] = real_number(scattering[band], "scattering")
             elif float(band) in scattering:
-                values[band] = float(scattering[float(band)])
+                values[band] = real_number(scattering[float(band)], "scattering")
             else:
                 msg = (
                     f"scattering mapping is missing band {band} Hz; "

@@ -24,7 +24,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.utils import _typesignal
-from ..._internal.validation import require_choice, require_scalar
+from ..._internal.validation import real_number, require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import apply_calibration, resolve_fs
 from ...signals.spectra import _welch_autospectrum
@@ -280,7 +280,7 @@ def _averaged_spectrum(
             f"resolution: need at least {nperseg} samples, got {x.shape[-1]}."
         )
         raise ValueError(msg)
-    freqs, psd = _welch_autospectrum(x, float(fs), nperseg, nperseg // 2)
+    freqs, psd = _welch_autospectrum(x, real_number(fs, "fs"), nperseg, nperseg // 2)
     df = float(freqs[1] - freqs[0])
     return freqs, psd * df, df
 

@@ -148,10 +148,7 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import signal
 
-from .._internal.validation import (
-    is_positive,
-    real_array,
-)
+from .._internal.validation import complex_number, is_positive, real_array, real_number
 from ._pinned_exp import pinned_exp, pinned_pow
 from ._pinned_log import pinned_log, pinned_log10
 from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
@@ -926,7 +923,7 @@ def _stable_factors(
     comparable with the printed ones; the remaining real roots are paired in
     order of magnitude, and an odd one out becomes a linear factor.
     """
-    values = [complex(v) for v in roots]
+    values = [complex_number(v, "roots") for v in roots]
     quadratic: list[tuple[float, float]] = []
     taken = [False] * len(values)
     for index, value in enumerate(values):
@@ -1298,7 +1295,7 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
     versine = 2.0 * half * half
 
     def squared(triplet: np.ndarray) -> float:
-        c0, c1, c2 = (float(value) for value in triplet)
+        c0, c1, c2 = (real_number(value, "triplet") for value in triplet)
         real = (c0 + c1 + c2) - (c0 + c2) * versine
         imaginary = (c0 - c2) * sine
         return real * real + imaginary * imaginary
@@ -1376,6 +1373,8 @@ def fit_prototype(
         :func:`scipy.signal.bilinear_zpk`.
     :raises ValueError: if *band* is empty or *n_sections* cannot hold the
         prototype's own degree.
+    :raises TypeError: if a coefficient ``poles`` gives the fit is not one real
+        number.
     """
     low, high = band
     # Spelled out rather than as ``not low < high``: the two differ only on

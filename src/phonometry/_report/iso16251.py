@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import real_number, require_equal_shapes
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -206,7 +206,9 @@ def _value_table(
         # markup), so the limit marker is a literal ">", not the XML entity.
         row: list[Any] = [f"{round(fk)}", f"> {value}" if limited[k] else value]
         if ln_r is not None:
-            row.append(format_number(float(ln_r[k]), language, decimals=1))
+            row.append(
+                format_number(real_number(ln_r[k], "ln_r"), language, decimals=1)
+            )
         rows.append(row)
     return band_table(rows, widths, len(freqs), band_centres=freqs)
 

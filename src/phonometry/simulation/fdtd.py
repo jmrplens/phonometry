@@ -76,6 +76,7 @@ from .._internal.frozen import (
 from .._internal.validation import (
     holds_complex,
     holds_text,
+    is_text,
     refuse_complex,
     refuse_text,
     require_choice,
@@ -805,7 +806,7 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     msg = f"shape must be a pair of positive integers (ny, nx); got {given_repr(shape)}"
     if isinstance(shape, np.ndarray) and shape.ndim == 1:
         shape = shape.tolist()
-    if not isinstance(shape, Sequence) or isinstance(shape, str | bytes | bytearray):
+    if not isinstance(shape, Sequence) or is_text(shape):
         raise TypeError(msg)
     # The length of a fixed-size argument, not a quantity.
     if len(shape) != 2:  # noqa: PLR2004

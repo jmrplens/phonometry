@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from ._i18n import t
 from ._insulation_fiche import (
     Column,
@@ -155,9 +155,9 @@ def _areas_sentence(
     else:
         return ""
     return " " + t(key, language).format(
-        s=fmt_num(float(area), language) if area is not None else "",
+        s=fmt_num(real_number(area, "area"), language) if area is not None else "",
         sm=(
-            fmt_num(float(measurement_area), language)
+            fmt_num(real_number(measurement_area, "measurement_area"), language)
             if measurement_area is not None
             else ""
         ),

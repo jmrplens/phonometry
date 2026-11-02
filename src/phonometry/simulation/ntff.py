@@ -72,6 +72,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     complex_array,
     real_array,
+    real_number,
     refuse_complex,
     refuse_text,
     require_equal_shapes,
@@ -353,7 +354,7 @@ def far_field_from_contour(
     rho = fluid.density
     omega = 2.0 * np.pi * contour.frequency
     k = omega / c
-    ox, oy = float(origin[0]), float(origin[1])
+    ox, oy = real_number(origin[0], "origin"), real_number(origin[1], "origin")
     if not (np.isfinite(ox) and np.isfinite(oy)):
         msg = "origin must be finite"
         raise ValueError(msg)

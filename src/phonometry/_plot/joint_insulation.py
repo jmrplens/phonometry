@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.validation import real_number
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -144,7 +145,7 @@ def _num(value: float, language: Language, decimals: int = 1) -> str:
 
 def _int(value: float, language: Language) -> str:
     """A whole number of decibels with a true minus sign."""
-    return _num(float(value), language, decimals=0)
+    return _num(real_number(value, "value"), language, decimals=0)
 
 
 def _signed(value: float, language: Language) -> str:

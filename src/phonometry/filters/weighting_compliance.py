@@ -53,6 +53,7 @@ from .._internal.frozen import (
 )
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_scalar,
@@ -666,8 +667,8 @@ def _weighting_band_verdicts(
             for cls, (lower, upper) in masks.items()
         }
         band: dict[str, Any] = {
-            "frequency": float(fm),
-            "deviation_db": float(deviation[i]),
+            "frequency": real_number(fm, "freqs_nom"),
+            "deviation_db": real_number(deviation[i], "deviation"),
         }
         band.update({f"margin_class{cls}_db": m for cls, m in margins.items()})
         bands.append(band)

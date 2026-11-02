@@ -110,6 +110,7 @@ from ..._internal.validation import (
     check_engine,
     complex_array,
     real_array,
+    real_number,
     require_choice,
     require_positive,
     require_positive_array,
@@ -962,6 +963,7 @@ def barrier_insertion_loss(
         ``receiver_distance`` or ``thickness_m`` is not a single number, ``frequencies``
         holds a text or a value that is not a real number, or ``method`` is not a text,
         or ``ground_model`` is not a text.
+        ``receiver_height_m`` or ``source_height_m`` are refused the same way when any is not one real number.
     """
     require_choice(ground_model, "ground_model", ("delany_bazley", "miki"))
     require_choice(method, "method", _BARRIER_METHODS)
@@ -1020,12 +1022,14 @@ def barrier_insertion_loss(
         fresnel_number=n,
         method=method,
         ground=has_ground,
-        source_height_m=float(source_height_m),
+        source_height_m=real_number(source_height_m, "source_height_m"),
         barrier_distance=float(barrier_distance),
         barrier_height_m=float(barrier_height_m),
         receiver_distance=float(receiver_distance),
-        receiver_height_m=float(receiver_height_m),
-        thickness_m=float(thickness_m) if thickness_m is not None else None,
+        receiver_height_m=real_number(receiver_height_m, "receiver_height_m"),
+        thickness_m=real_number(thickness_m, "thickness_m")
+        if thickness_m is not None
+        else None,
     )
 
 

@@ -58,6 +58,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_positive,
 )
@@ -393,6 +394,7 @@ def estimate_fundamental_frequency(
     :raises ValueError: For anything :func:`fundamental_period` refuses.
     :raises TypeError: if ``coefficient`` is not a single number, or ``model`` is not a
         text.
+        ``height_m`` is refused the same way when it is not one real number.
     """
     period = fundamental_period(
         model,
@@ -407,5 +409,5 @@ def estimate_fundamental_frequency(
         period_s=period,
         model=model,
         coefficient=used,
-        height_m=None if height_m is None else float(height_m),
+        height_m=None if height_m is None else real_number(height_m, "height_m"),
     )

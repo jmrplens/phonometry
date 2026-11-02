@@ -125,6 +125,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_non_negative,
@@ -283,7 +284,10 @@ def _margin_met(margin: np.ndarray) -> np.ndarray:
 def _table3_sigma(frequencies: np.ndarray) -> np.ndarray:
     """Table 3 per band; ``NaN`` at 63 Hz, which the table does not reach."""
     return np.array(
-        [_SIGMA_R0_DB.get(round(float(f)), math.nan) for f in frequencies],
+        [
+            _SIGMA_R0_DB.get(round(real_number(f, "frequencies")), math.nan)
+            for f in frequencies
+        ],
         dtype=np.float64,
     )
 
@@ -1150,6 +1154,7 @@ class HardWalledRoomCheck(OwnsArrays):
         :raises TypeError: if ``largest_box_dimension_m``,
             ``reference_box_volume_m3`` or ``volume`` is not a single number, or
             ``n_orientations`` is a flag, a text or an array where a count goes.
+            ``frequencies`` is refused the same way when it is not one real number.
         """
         # Held as the int require_count returns; two orientations are the
         # fewest values the step below can work with.
@@ -1160,7 +1165,10 @@ class HardWalledRoomCheck(OwnsArrays):
         )
         require_ranks(self, frequencies=1, level_range_db=1)
         require_same_length(self, "frequencies", "level_range_db")
-        if any(round(float(f)) not in _SIGMA_R0_DB for f in self.frequencies):
+        if any(
+            round(real_number(f, "frequencies")) not in _SIGMA_R0_DB
+            for f in self.frequencies
+        ):
             msg = (
                 "HardWalledRoomCheck: 'frequencies' must lie in 125 Hz to 8 kHz, "
                 f"the bands of Table 3 ({_STANDARD})."

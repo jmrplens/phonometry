@@ -98,9 +98,9 @@ import ast
 import pathlib
 import sys
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
-from ast_scan import ROOT, exempted, python_files, relative
+from ast_scan import ROOT, block_statements, exempted, python_files, relative
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -131,6 +131,8 @@ NEEDS: dict[Kind, frozenset[Refusal]] = {"real": _BOTH, "complex": _TEXT}
 CHECKS: dict[str, frozenset[Refusal]] = {
     "real_array": _BOTH,
     "complex_array": _TEXT,
+    "real_number": _BOTH,
+    "complex_number": _TEXT,
     "refuse_complex": _COMPLEX,
     "refuse_text": _TEXT,
     "refuse_text_beside_choice": _TEXT,
@@ -201,6 +203,10 @@ _COMPLEX_TYPES = frozenset(
 #: ``=``, ``|``).
 _REAL_TEXTS = _REAL_TYPES | {"f2", "f4", "f8", "f16", "d", "f", "e", "g"}
 _COMPLEX_TEXTS = _COMPLEX_TYPES | {"c8", "c16", "c32", "D", "F", "G"}
+#: Python's own conversions of one value: ``float("94")`` parses a text and
+#: ``float(np.complex128(1 + 1j))`` keeps the real part with no more than a
+#: ``ComplexWarning``; ``complex("1+2j")`` parses a text too.
+_BUILTIN_SCALARS: dict[str, Kind] = {"float": "real", "complex": "complex"}
 #: The NumPy scalar types whose call converts one value.
 _SCALARS: dict[str, Kind] = {
     **dict.fromkeys(_REAL_TYPES - {"float", "float_"}, "real"),
@@ -317,6 +323,24 @@ EXEMPT: dict[tuple[str, str], str] = {
         "the m and n of the standard's Tables 1 and 2, the module's own tables, "
         "looked up per band; the caller's frequencies, read through "
         "_finite_bands first, are only the keys"
+    ),
+    ("src/phonometry/_internal/catalogue.py", "PrintedNumber.__new__"): (
+        "a number printed in a catalogue, built from the text the table or the "
+        "user's file prints: reading that text is what it is for, and its "
+        "Decimal reads it first"
+    ),
+    ("src/phonometry/aircraft/anp_fleet.py", "_number"): (
+        "reads a cell of an ANP table, the text a file holds: parsing it is "
+        "what it is for, and a cell that holds no number is refused with "
+        "its table, line and column"
+    ),
+    ("src/phonometry/io/_sidecar.py", "_as_float"): (
+        "a number the JSON decoder read from a sidecar, an int or a float; an "
+        "integer past every float is refused with its key"
+    ),
+    ("src/phonometry/io/_sidecar.py", "_real"): (
+        "converts only once the value, read by NumPy, is one number of a real "
+        "dtype kind, which no text and no complex value is"
     ),
     ("src/phonometry/simulation/fdtd.py", "_real_objects"): (
         "an array of objects converted only after an isinstance test that every "
@@ -447,6 +471,13 @@ def converted(call: ast.Call, names: _Names = _PLAIN) -> tuple[ast.expr, Kind] |
         value = call.func.value
     elif name in _SCALARS and len(call.args) == 1:
         kind, value = _SCALARS[name], call.args[0]
+    elif (
+        isinstance(call.func, ast.Name)
+        and call.func.id in _BUILTIN_SCALARS
+        and len(call.args) == 1
+        and not call.keywords
+    ):
+        kind, value = _BUILTIN_SCALARS[call.func.id], call.args[0]
     else:
         return None
     return None if kind is None or value is None else (value, kind)
@@ -575,6 +606,106 @@ def _none_test(test: ast.expr) -> tuple[str | None, bool]:
     return None, False
 
 
+def _or_a_number(node: ast.expr) -> TypeGuard[ast.BoolOp]:
+    """Whether *node* is ``x or d`` with every operand after the first a
+    number or ``None``: what a check handed it reads is *x* whenever *x* is
+    a value at all, and otherwise the number, which the check accepts.
+    """
+    return (
+        isinstance(node, ast.BoolOp)
+        and isinstance(node.op, ast.Or)
+        and all(
+            isinstance(value, ast.Constant)
+            and (value.value is None or type(value.value) in {int, float})
+            for value in node.values[1:]
+        )
+    )
+
+
+#: The types an ``isinstance`` test may name whose instances are real
+#: numbers: neither a text nor a complex value passes the test.
+_REAL_CLASSES = frozenset(
+    {
+        "bool",
+        "int",
+        "float",
+        "Real",
+        "Rational",
+        "Integral",
+        "Fraction",
+        "Decimal",
+        "bool_",
+        "integer",
+        "signedinteger",
+        "unsignedinteger",
+        "floating",
+        *(f"{kind}{bits}" for kind in ("int", "uint") for bits in (8, 16, 32, 64)),
+        "float16",
+        "float32",
+        "float64",
+        "longdouble",
+    }
+)
+#: The types an ``isinstance`` test may name whose instances are numbers,
+#: complex ones among them: no text passes the test.
+_NUMBER_CLASSES = _REAL_CLASSES | frozenset(
+    {"complex", "Complex", "Number", "number", "inexact", "complexfloating"}
+    | {"complex64", "complex128", "clongdouble"}
+)
+
+
+def _class_refusals(node: ast.expr) -> frozenset[Refusal]:
+    """What an ``isinstance`` test of the types *node* names refuses in what
+    passes it: a text and a complex value for real numbers, a text for
+    numbers of any kind, nothing when one of the types is anything else.
+    """
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        return _class_refusals(node.left) & _class_refusals(node.right)
+    if isinstance(node, ast.Tuple):
+        refused = _BOTH
+        for member in node.elts:
+            refused &= _class_refusals(member)
+        return refused
+    name = _last_name(node)
+    if name in _REAL_CLASSES:
+        return _BOTH
+    if name in _NUMBER_CLASSES:
+        return _TEXT
+    return frozenset()
+
+
+#: The arguments of ``isinstance(value, types)``.
+_ISINSTANCE_ARGUMENTS = 2
+
+
+def _narrowed(test: ast.expr, *, holds: bool) -> dict[str, frozenset[Refusal]]:
+    """The names *test* finds to be numbers where it *holds* (or fails), with
+    what that refuses in each: ``isinstance(x, float)`` where it holds,
+    ``not isinstance(x, float)`` where it fails, each test of an ``and``
+    where it holds and each test of an ``or`` where it fails.
+    """
+    if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+        return _narrowed(test.operand, holds=not holds)
+    if isinstance(test, ast.BoolOp) and isinstance(test.op, ast.And) == holds:
+        # Each test of an ``and`` holds where it holds, and each test of an
+        # ``or`` fails where it fails.
+        found: dict[str, frozenset[Refusal]] = {}
+        for value in test.values:
+            found.update(_narrowed(value, holds=holds))
+        return found
+    if (
+        holds
+        and isinstance(test, ast.Call)
+        and isinstance(test.func, ast.Name)
+        and test.func.id == "isinstance"
+        and len(test.args) == _ISINSTANCE_ARGUMENTS
+        and isinstance(test.args[0], ast.Name)
+    ):
+        refused = _class_refusals(test.args[1])
+        return {test.args[0].id: refused} if refused else {}
+    return {}
+
+
 def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
     """The values a call that keeps them reads: its object as a method, its
     first argument as a function, every argument for ``zip`` and its kin;
@@ -652,6 +783,12 @@ class _Flow:
     checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
     names: _Names
     fields: bool
+    #: What a call of a check of the library hands back: the arguments it
+    #: returns, each with what the check refused in it (:func:`_checker`);
+    #: ``None`` for a call of anything else.
+    handed: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]] | None] = (
+        lambda _call: None
+    )
     found: dict[int, tuple[ast.Call, ast.expr, Kind, Verdict]] = field(
         default_factory=dict
     )
@@ -665,6 +802,8 @@ class _Flow:
     )
     #: Each ``lambda`` met, with what the names hold where it is written.
     lambdas: list[tuple[ast.Lambda, Env]] = field(default_factory=list)
+    #: Each ``class`` written in the function, with what the names hold there.
+    classes: list[tuple[ast.ClassDef, Env]] = field(default_factory=list)
 
     # What a value holds.
 
@@ -713,6 +852,16 @@ class _Flow:
         return state
 
     def _call(self, call: ast.Call, env: Env) -> State:
+        handed = self.handed(call)
+        if handed is not None:
+            # A check of the library hands back what it returns of its
+            # arguments, checked as far as it checked them: a parameter it
+            # never checked comes back the caller's value as it was.
+            state: State = None
+            for argument, refused in handed:
+                held = self.state(argument, env)
+                state = join(state, None if held is None else held | refused)
+            return state
         read = self.checks(call)
         if read:
             refusals: frozenset[Refusal] = frozenset()
@@ -734,6 +883,8 @@ class _Flow:
             return [ast.unparse(node)]
         if isinstance(node, ast.IfExp):
             return self._branches_read(node)
+        if _or_a_number(node):
+            return self.names_read(node.values[0])
         return [name for part in self._parts(node) for name in self.names_read(part)]
 
     def _branches_read(self, node: ast.IfExp) -> list[str]:
@@ -796,12 +947,29 @@ class _Flow:
             if isinstance(target.value, ast.Name) and target.value.id == "self":
                 env[f"self.{target.attr}"] = state
             return
+        if isinstance(target, ast.Subscript):
+            self._bind_item(target, state, env)
+            return
         if read is None:
             read = value is not None and self._numpy_reading(value, env)
         for name in _targets(target):
             self._set(env, name, state)
             if read:
                 env[_numpy_key(name)] = frozenset()
+
+    def _bind_item(self, target: ast.Subscript, state: State, env: Env) -> None:
+        """``x[i] = value``: the item holds *state* from here on, and *x*, a
+        caller's value, holds it among its items, so what a check made of *x*
+        as a whole holds only as far as *value* was checked too.
+        """
+        names = [name for name in self.names_read(target.value) if "[" not in name]
+        if not names:
+            return
+        env[ast.unparse(target)] = state
+        for name in names:
+            held = self.lookup(env, name)
+            if held is not None:
+                env[name] = join(held, state)
 
     @staticmethod
     def _set(env: Env, name: str, state: State) -> None:
@@ -831,8 +999,12 @@ class _Flow:
             return
         if isinstance(node, ast.IfExp):
             self.expression(node.test, env, sure=sure)
-            self.expression(node.body, env, sure=False)
-            self.expression(node.orelse, env, sure=False)
+            self.expression(
+                node.body, self.narrowed(node.test, env, holds=True), sure=False
+            )
+            self.expression(
+                node.orelse, self.narrowed(node.test, env, holds=False), sure=False
+            )
         elif isinstance(node, ast.BoolOp):
             self.expression(node.values[0], env, sure=sure)
             for value in node.values[1:]:
@@ -982,11 +1154,26 @@ class _Flow:
             self.nested[node.name] = node
             self.defined.setdefault(id(node), []).append(dict(env))
             return env, False
+        if isinstance(node, ast.ClassDef):
+            self.classes.append((node, dict(env)))
+            return env, False
         if isinstance(node, _SCOPES):
             return env, False
         for child in ast.iter_child_nodes(node):
             self.expression(child, env)
         return env, isinstance(node, ast.Return | ast.Raise | ast.Continue)
+
+    def narrowed(self, test: ast.expr, env: Env, *, holds: bool) -> Env:
+        """A copy of *env* where *test* holds (or fails): each caller's value
+        an ``isinstance`` test finds to be a number holds what it refuses
+        (:func:`_narrowed`).
+        """
+        inner = dict(env)
+        for name, refused in _narrowed(test, holds=holds).items():
+            held = self.lookup(inner, name)
+            if held is not None:
+                inner[name] = held | refused
+        return inner
 
     def _assign(
         self, node: ast.Assign | ast.AnnAssign | ast.AugAssign, env: Env
@@ -1005,8 +1192,12 @@ class _Flow:
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
         self.expression(node.test, env)
-        body, body_ends = self.block(node.body, dict(env))
-        other, other_ends = self.block(node.orelse, dict(env))
+        body, body_ends = self.block(
+            node.body, self.narrowed(node.test, env, holds=True)
+        )
+        other, other_ends = self.block(
+            node.orelse, self.narrowed(node.test, env, holds=False)
+        )
         reached = [
             e for e, ends in ((body, body_ends), (other, other_ends)) if not ends
         ]
@@ -1043,12 +1234,16 @@ class _Flow:
             return after, True
         return _join_envs(reached, self.default), False
 
-    def captured(self, function: ast.FunctionDef | ast.AsyncFunctionDef) -> Env:
+    def captured(
+        self, function: ast.FunctionDef | ast.AsyncFunctionDef, end: Env
+    ) -> Env:
         """What the names a nested *function* shares with this one hold for
-        it: where it is used, or, used nowhere here, where it is defined.
+        it: where it is used, or, used nowhere here, where it is defined,
+        joined with what they hold at the end of this one, *end*, after which
+        a closure handed out may still be called.
         """
         envs = self.used.get(id(function)) or self.defined.get(id(function), [])
-        return _join_envs(envs, self.default)
+        return _join_envs([*envs, end], self.default)
 
     def _break(self, node: ast.Break, env: Env) -> tuple[Env, bool]:
         del node
@@ -1061,7 +1256,8 @@ class _Flow:
             self.expression(item.context_expr, env)
             if item.optional_vars is not None:
                 state = self.state(item.context_expr, env)
-                self.bind(item.optional_vars, None, state, env)
+                read = self._numpy_reading(item.context_expr, env)
+                self.bind(item.optional_vars, None, state, env, read=read)
         return self.block(node.body, env)
 
     def _try(self, node: ast.Try | ast.TryStar, env: Env) -> tuple[Env, bool]:
@@ -1085,6 +1281,7 @@ class _Flow:
     def _match(self, node: ast.Match, env: Env) -> tuple[Env, bool]:
         self.expression(node.subject, env)
         subject = self.state(node.subject, env)
+        read = self._numpy_reading(node.subject, env)
         reached: list[Env] = []
         for case in node.cases:
             inner = dict(env)
@@ -1092,6 +1289,8 @@ class _Flow:
                 name = getattr(capture, "name", None)
                 if isinstance(name, str):
                     self._set(inner, name, subject)
+                    if read:
+                        inner[_numpy_key(name)] = frozenset()
             if case.guard is not None:
                 self.expression(case.guard, inner)
             end, ends = self.block(case.body, inner)
@@ -1365,12 +1564,20 @@ class _Call:
 
 @dataclass(frozen=True)
 class _Signature:
-    """What the search for the checks of the package needs of one function."""
+    """What the search for the checks of the package needs of one function.
+
+    With what its ``return`` statements hand back of its parameters: those
+    returned as the caller gave them (*returned*), and the calls of the
+    library whose result is returned (*returned_calls*), each with the
+    parameters its arguments are read from (:func:`_returns_of`).
+    """
 
     dotted: str
     positional: tuple[str, ...]
     parameters: frozenset[str]
     calls: tuple[_Call, ...]
+    returned: Provenance = field(default_factory=dict)
+    returned_calls: tuple[_Handing, ...] = ()
 
 
 def _signatures(path: pathlib.Path) -> list[_Signature]:
@@ -1401,14 +1608,204 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
         )
         arguments = node.args
         positional = tuple(a.arg for a in arguments.posonlyargs + arguments.args)
+        parameters = frozenset(_parameters(node))
+        returned, returned_calls = _Returns(module, node, parameters).read()
         found.append(
             _Signature(
                 f"{module.name}.{node.name}",
                 positional,
-                frozenset(_parameters(node)),
+                parameters,
                 calls,
+                returned,
+                returned_calls,
             )
         )
+    return found
+
+
+#: What a value may hand back of a function's parameters: each parameter it
+#: may be read from as the caller gave it, with what the checks on the way
+#: refused in it (a parameter returned through ``real_array`` is refused a
+#: complex value and a text).
+Provenance = dict[str, frozenset[Refusal]]
+
+
+def _either(one: Provenance, other: Provenance) -> Provenance:
+    """What either of two values may hand back: a parameter either may be read
+    from, with only what the checks of both refused in it.
+    """
+    found = dict(one)
+    for name, refused in other.items():
+        found[name] = found[name] & refused if name in found else refused
+    return found
+
+
+@dataclass(frozen=True)
+class _Handing:
+    """A call of a function of the library whose result a ``return`` hands
+    back: what it reaches, and what each argument is read from
+    (:data:`Provenance`), in order for the positional ones, by keyword for
+    the rest.
+    """
+
+    target: str
+    positional: tuple[Provenance, ...]
+    keywords: tuple[tuple[str | None, Provenance], ...]
+
+
+class _Returns:
+    """What a function's ``return`` statements hand back of its parameters.
+
+    Read without the order the function runs in: a name stands for every
+    value an assignment in the function binds it to, and a parameter for
+    itself as well. A value is handed back as the caller gave it bare, in a
+    tuple or a list, on either side of a conditional expression or of an
+    ``and`` or an ``or``, by an item, through a call that keeps its values,
+    and through a shared check (:data:`CHECKS`), which returns its first
+    argument with what it refuses refused; a call of a function of the
+    library hands back what that function returns
+    (:func:`returned_parameters`); anything else is a value the function
+    computed.
+    """
+
+    def __init__(
+        self,
+        module: _Module,
+        function: ast.FunctionDef | ast.AsyncFunctionDef,
+        parameters: frozenset[str],
+    ) -> None:
+        self.module = module
+        self.parameters = parameters
+        self.assigned: dict[str, list[ast.expr]] = {}
+        self.returns: list[ast.expr] = []
+        pending: list[ast.stmt] = list(function.body)
+        while pending:
+            node = pending.pop()
+            if isinstance(node, ast.Return) and node.value is not None:
+                self.returns.append(node.value)
+            elif isinstance(node, ast.Assign | ast.AnnAssign) and node.value:
+                for target in _assigned(node):
+                    for name in _targets(target):
+                        self.assigned.setdefault(name, []).append(node.value)
+            pending.extend(block_statements(node))
+
+    def read(self) -> tuple[Provenance, tuple[_Handing, ...]]:
+        """What the returns hand back as the caller gave it, and the calls whose
+        result they hand back.
+        """
+        found: Provenance = {}
+        calls: list[_Handing] = []
+        for value in self.returns:
+            provenance, through = self.sources(value, frozenset())
+            found = _either(found, provenance)
+            calls.extend(through)
+        return found, tuple(calls)
+
+    def sources(
+        self, node: ast.expr, seen: frozenset[str]
+    ) -> tuple[Provenance, list[_Handing]]:
+        """What *node* may hand back, and the calls whose result it may be."""
+        if isinstance(node, ast.Name):
+            return self._name(node.id, seen)
+        if isinstance(node, ast.Call):
+            return self._call(node, seen)
+        parts: list[ast.expr]
+        if isinstance(node, ast.Tuple | ast.List | ast.Set):
+            parts = list(node.elts)
+        elif isinstance(node, ast.IfExp):
+            parts = [node.body, node.orelse]
+        elif isinstance(node, ast.BoolOp):
+            parts = list(node.values)
+        elif isinstance(node, ast.Subscript | ast.Starred | ast.NamedExpr):
+            parts = [node.value]
+        else:
+            parts = []
+        return self._joined(parts, seen)
+
+    def _joined(
+        self, parts: Iterable[ast.expr], seen: frozenset[str]
+    ) -> tuple[Provenance, list[_Handing]]:
+        found: Provenance = {}
+        calls: list[_Handing] = []
+        for part in parts:
+            provenance, through = self.sources(part, seen)
+            found = _either(found, provenance)
+            calls.extend(through)
+        return found, calls
+
+    def _name(
+        self, name: str, seen: frozenset[str]
+    ) -> tuple[Provenance, list[_Handing]]:
+        if name in seen:
+            return {}, []
+        found, calls = self._joined(self.assigned.get(name, []), seen | {name})
+        if name in self.parameters:
+            found = _either(found, {name: frozenset()})
+        return found, calls
+
+    def _call(
+        self, call: ast.Call, seen: frozenset[str]
+    ) -> tuple[Provenance, list[_Handing]]:
+        func = call.func
+        if isinstance(func, ast.Name) and func.id in CHECKS and call.args:
+            found, calls = self.sources(call.args[0], seen)
+            refused = CHECKS[func.id]
+            return {name: held | refused for name, held in found.items()}, calls
+        kept = _kept(call, self.module.numpy)
+        if kept:
+            return self._joined(kept, seen)
+        if not isinstance(func, ast.Name):
+            return {}, []
+        target = self.module.imports.get(func.id, f"{self.module.name}.{func.id}")
+        handed = _Handing(
+            target,
+            tuple(self.sources(a, seen)[0] for a in call.args),
+            tuple((k.arg, self.sources(k.value, seen)[0]) for k in call.keywords),
+        )
+        return {}, [handed]
+
+
+def returned_parameters(signatures: Sequence[_Signature]) -> dict[str, Provenance]:
+    """What each function of *signatures* may hand back of its parameters,
+    through the functions of the library whose result it returns too,
+    followed until no new one turns up.
+    """
+    by_name = {signature.dotted: signature for signature in signatures}
+    found = {signature.dotted: dict(signature.returned) for signature in signatures}
+    grown = True
+    while grown:
+        grown = False
+        for signature in signatures:
+            more = found[signature.dotted]
+            for call in signature.returned_calls:
+                callee = by_name.get(call.target)
+                if callee is not None:
+                    more = _either(
+                        more, _handed_back(call, callee, found[callee.dotted])
+                    )
+            if more != found[signature.dotted]:
+                found[signature.dotted] = more
+                grown = True
+    return found
+
+
+def _handed_back(
+    call: _Handing, callee: _Signature, returned: Provenance
+) -> Provenance:
+    """What the arguments of *call* that *callee* hands back are read from,
+    with what *callee* refused in each on the way.
+    """
+    found: Provenance = {}
+    pairs = [
+        *zip(callee.positional, call.positional, strict=False),
+        *((name, provenance) for name, provenance in call.keywords if name),
+    ]
+    for name, provenance in pairs:
+        if name in returned:
+            refused = returned[name]
+            found = _either(
+                found, {source: held | refused for source, held in provenance.items()}
+            )
     return found
 
 
@@ -1490,6 +1887,38 @@ def _checker(
     return checked_by
 
 
+def _hander(
+    module: _Module,
+    checks: Mapping[str, Check],
+    returned: Mapping[str, Provenance],
+) -> Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]] | None]:
+    """What a call made in *module* of a check of the library hands back:
+    each argument the check returns (*returned*), with what it refused in it;
+    ``None`` for a call of a shared check or of anything else.
+    """
+
+    def handed(call: ast.Call) -> list[tuple[ast.expr, frozenset[Refusal]]] | None:
+        if not isinstance(call.func, ast.Name):
+            return None
+        name = call.func.id
+        target = module.imports.get(name, f"{module.name}.{name}")
+        check = checks.get(target)
+        if check is None or check.shared:
+            return None
+        back = returned.get(target, {})
+        pairs = [
+            *zip(check.parameters, call.args, strict=False),
+            *((k.arg, k.value) for k in call.keywords if k.arg is not None),
+        ]
+        return [
+            (argument, check.refused.get(parameter, frozenset()) | back[parameter])
+            for parameter, argument in pairs
+            if parameter in back
+        ]
+
+    return handed
+
+
 def package_checks(signatures: Sequence[_Signature]) -> dict[str, Check]:
     """Every check of the package, shared and local, by the module that defines it.
 
@@ -1542,10 +1971,22 @@ def _function_names(
 
 
 def conversions_in(
-    module: _Module, checks: Mapping[str, Check], file: str = ""
+    module: _Module,
+    checks: Mapping[str, Check],
+    file: str = "",
+    returned: Mapping[str, Provenance] | None = None,
 ) -> list[Conversion]:
-    """Every conversion in *module*, with what it reads."""
-    reading = _Reading(module, _checker(module, checks), file)
+    """Every conversion in *module*, with what it reads.
+
+    *returned* says what each check of the library hands back of its
+    parameters (:func:`returned_parameters`); without it, none.
+    """
+    reading = _Reading(
+        module,
+        _checker(module, checks),
+        file,
+        _hander(module, checks, returned or {}),
+    )
     for qualified, function in _functions(module.tree):
         reading.function(qualified, function)
     return sorted(reading.found, key=lambda c: (c.key[0], c.line, c.source))
@@ -1560,6 +2001,7 @@ class _Reading:
     module: _Module
     checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
     file: str
+    handed: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]] | None]
     found: list[Conversion] = field(default_factory=list)
     #: What a nested function's enclosing names hold, and whether it reads a
     #: record's fields, by the definition's id, kept until it is read.
@@ -1573,17 +2015,25 @@ class _Reading:
             self.checks,
             _function_names(self.module, function),
             fields=fields or function.name == "__post_init__",
+            handed=self.handed,
         )
         env = _scope_env(captured, function, function.body)
-        flow.block(function.body, env)
+        end, _ = flow.block(function.body, env)
         self._keep(qualified, flow)
         for inner in flow.nested.values():
-            self.enclosed[id(inner)] = (flow.captured(inner), flow.fields)
+            self.enclosed[id(inner)] = (flow.captured(inner, end), flow.fields)
+        for node, defined in flow.classes:
+            # A method of a class written here reads the names it shares with
+            # this function as they stand where the class is written, or at
+            # the end, whenever an instance's method is called.
+            shared = _join_envs([defined, end], flow.default)
+            for method in _methods(node):
+                self.enclosed[id(method)] = (shared, False)
 
     def _lambda(
         self, qualified: str, node: ast.Lambda, captured: Env, outer: _Flow
     ) -> None:
-        flow = _Flow(self.checks, outer.names, fields=outer.fields)
+        flow = _Flow(self.checks, outer.names, fields=outer.fields, handed=self.handed)
         env = _scope_env(captured, node, [node.body])
         flow.expression(node.body, env)
         self._keep(qualified, flow)
@@ -1603,6 +2053,23 @@ class _Reading:
             )
         for node, captured in flow.lambdas:
             self._lambda(f"{qualified}.<lambda>", node, captured, flow)
+
+
+def _methods(
+    node: ast.ClassDef,
+) -> Iterator[ast.FunctionDef | ast.AsyncFunctionDef]:
+    """The methods of a class, through its compound statements and the
+    classes written in it, whose methods share the same enclosing names.
+    """
+    pending: list[ast.stmt] = list(node.body)
+    while pending:
+        statement = pending.pop()
+        if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef):
+            yield statement
+        elif isinstance(statement, ast.ClassDef):
+            pending.extend(statement.body)
+        else:
+            pending.extend(block_statements(statement))
 
 
 def _scope_env(
@@ -1662,11 +2129,13 @@ def census(
     sources = set(read)
     if source is not None:
         sources |= {path.resolve() for path in source.rglob("*.py")}
-    checks = package_checks([s for path in sorted(sources) for s in _signatures(path)])
+    signatures = [s for path in sorted(sources) for s in _signatures(path)]
+    checks = package_checks(signatures)
+    returned = returned_parameters(signatures)
     return [
         c
         for path in read
-        for c in conversions_in(_module(path), checks, _spelled(path, source))
+        for c in conversions_in(_module(path), checks, _spelled(path, source), returned)
     ]
 
 

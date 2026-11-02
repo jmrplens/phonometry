@@ -38,6 +38,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_ranks,
@@ -188,7 +189,7 @@ def _fundamental_frequency(
 ) -> float:
     """Frequency of the largest non-DC spectral peak."""
     idx = int(np.argmax(amp[1:])) + 1
-    return float(freqs[idx])
+    return real_number(freqs[idx], "freqs")
 
 
 def _harmonic_amplitudes(
@@ -203,7 +204,7 @@ def _harmonic_amplitudes(
     f0 = (
         _fundamental_frequency(freqs, amp)
         if fundamental is None
-        else float(fundamental)
+        else real_number(fundamental, "fundamental")
     )
     if f0 <= 0.0:
         msg = "Could not determine a positive fundamental frequency."
@@ -271,6 +272,7 @@ def thd(
         unknown, or no harmonic of the fundamental lies below Nyquist.
     :raises TypeError: if ``fs`` is not a single number, or ``kind`` is not a text, or
         ``x`` holds a text or a value that is not a real number.
+        ``fundamental`` is refused the same way when it is not one real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -337,7 +339,8 @@ def harmonic_distortion(
     # integral float is the integer it prints as (the common accident is an
     # order computed by a division) and is accepted.
     if isinstance(order, (int, np.integer)) or (
-        isinstance(order, (float, np.floating)) and float(order).is_integer()
+        isinstance(order, (float, np.floating))
+        and real_number(order, "order").is_integer()
     ):
         order_v = require_count(order, "order", at_least=None)
     else:
@@ -790,6 +793,7 @@ def harmonic_analysis(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``fs`` is not a single number, or ``x`` holds a text or a
         value that is not a real number.
+        ``fundamental`` is refused the same way when it is not one real number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)

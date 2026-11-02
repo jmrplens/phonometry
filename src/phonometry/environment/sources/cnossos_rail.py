@@ -90,6 +90,7 @@ from ..._internal.frozen import (
 )
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_axis_count,
     require_axis_rank,
     require_choice,
@@ -1971,7 +1972,7 @@ def contact_filter(
     key = (
         filter_.value
         if isinstance(filter_, ContactFilter)
-        else (float(filter_[0]), float(filter_[1]))
+        else (real_number(filter_[0], "filter_"), real_number(filter_[1], "filter_"))
     )
     if key not in _TABLE_G2:
         raise ValueError(
@@ -2043,11 +2044,12 @@ def wheel_transfer(diameter_mm: WheelDiameter | float) -> NDArray[np.float64]:
     :param diameter_mm: A :class:`WheelDiameter` member or the diameter in mm.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the diameter is not tabulated.
+    :raises TypeError: if ``diameter_mm`` is not one real number.
     """
     key = (
         diameter_mm.value
         if isinstance(diameter_mm, WheelDiameter)
-        else float(diameter_mm)
+        else real_number(diameter_mm, "diameter_mm")
     )
     if key not in _TABLE_G3B:
         raise ValueError(

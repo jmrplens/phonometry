@@ -9,7 +9,9 @@ through these helpers; existing modules migrate as they are touched.
 from __future__ import annotations
 
 import math
+from collections import UserString
 from collections.abc import Iterable, Mapping, Sequence, Set
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Literal, TypeGuard, cast
 
 import numpy as np
@@ -80,6 +82,26 @@ def is_scalar(value: object) -> bool:
         return False
 
 
+#: The types of one text, a wrapper of one included: what a pair, a list of
+#: labels or a sequence of numbers is never read as, member by member.
+_TEXT_TYPES = (str, bytes, bytearray, UserString)
+
+
+def is_text(value: object) -> bool:
+    """Whether *value* is one text: a ``str``, ``bytes``, ``bytearray`` or a
+    :class:`~collections.UserString` wrapping one.
+
+    A text is a sequence of its characters, so a test of a sequence
+    (``isinstance(x, Sequence)``, ``len(x) == 2``) takes it for a pair or a
+    list of labels; every place that tells a text from a sequence asks this
+    one predicate, so a wrapper of a text is refused where the text is.
+
+    :param value: The value to test, of any type.
+    :return: Whether *value* is a text.
+    """
+    return isinstance(value, _TEXT_TYPES)
+
+
 def holds_text(value: object) -> bool:
     """True when *value* is text, or an array that holds text.
 
@@ -96,16 +118,14 @@ def holds_text(value: object) -> bool:
     :param value: The value to test, of any type.
     :return: Whether *value* is or holds text.
     """
-    if isinstance(value, (str, bytes)):
+    if is_text(value):
         return True
     if not isinstance(value, np.ndarray):
         return False
     kind = value.dtype.kind
     if kind in "SU":
         return True
-    return kind == "O" and any(
-        isinstance(item, str | bytes | bytearray) for item in value.flat
-    )
+    return kind == "O" and any(is_text(item) for item in value.flat)
 
 
 def refuse_text(value: object, msg: str) -> None:
@@ -128,7 +148,7 @@ def refuse_text(value: object, msg: str) -> None:
         found = True
     elif isinstance(value, np.ndarray):
         found = holds_text(value)
-    elif isinstance(value, (str, bytes)):
+    elif is_text(value):
         found = True
     else:
         try:
@@ -182,7 +202,7 @@ def refuse_complex(value: object, msg: str) -> None:
     """
     if isinstance(value, np.ndarray | complex | np.complexfloating):
         found = holds_complex(value)
-    elif isinstance(value, str | bytes):
+    elif is_text(value):
         found = False
     else:
         try:
@@ -352,12 +372,18 @@ def _finite_beyond_a_float(value: object) -> bool:
 
     A long double (80 bits on x86-64 Linux) or a ``Decimal`` holds finite
     numbers beyond a float's largest, and :func:`float` reads one as an
-    infinity rather than refusing it. It is finite when its magnitude is
-    below an infinity, which compares on both without a conversion; a value
-    that cannot say so is left as the infinity :func:`float` read.
+    infinity rather than refusing it. A ``Decimal`` says so itself
+    (:meth:`~decimal.Decimal.is_finite`), outside any decimal context: the
+    magnitude a context computes may overflow it, and comparing with a float
+    is an operation a context may trap. Any other value is finite when its
+    magnitude is below an infinity, which compares on a long double without
+    a conversion; a value that cannot say so is left as the infinity
+    :func:`float` read.
 
     :param value: A scalar :func:`float` read as an infinity.
     """
+    if isinstance(value, Decimal):
+        return value.is_finite()
     try:
         return bool(abs(cast("float", value)) < math.inf)
     except TypeError:
@@ -399,10 +425,14 @@ def require_scalar(value: object, name: str) -> None:
         raise TypeError(msg)
 
 
-def _one_number(value: object, name: str) -> float:
+def real_number(value: object, name: str) -> float:
     """*value* as a ``float``, refused by name when it is not one number.
 
-    What every shared scalar guard reads first. The rank is asked before the
+    The reading of one of a caller's numbers, the scalar twin of
+    :func:`real_array`, and what every shared scalar guard reads first.
+    ``float(value)`` is not this reading: it parses a text (``"25"`` as
+    25.0, ``b"25"`` too) and keeps the real part of a NumPy complex number
+    with no more than a ``ComplexWarning``. The rank is asked before the
     conversion (an array is refused on every numpy), a text is refused
     whatever it reads as (``"1000"`` as much as ``"fifty"``: a guard is not a
     parser), and what :func:`float` cannot take is refused with the
@@ -413,11 +443,41 @@ def _one_number(value: object, name: str) -> float:
     :param name: Parameter name used in the error message.
     :return: ``float(value)``.
     :raises TypeError: for an array, a text, or anything whose type
+        ``value`` is refused the same way when it is not one real number.
         :func:`float` refuses.
     :raises ValueError: for a number too large for a float.
     """
     require_scalar(value, name)
     return require_real(value, f"'{name}' must be a number, got {given_repr(value)}.")
+
+
+def complex_number(value: object, name: str) -> complex:
+    """*value* as a ``complex``, refused by name when it is not one number.
+
+    The scalar twin of :func:`complex_array`, where a complex number belongs
+    (an impedance, a reflection factor). ``complex(value)`` parses a text
+    (``"1+2j"``, and ``"80"`` as ``80+0j``); a text is refused here whatever
+    it reads as, an array of any shape too, and a real number is read as a
+    complex one with no imaginary part.
+
+    :param value: The caller's value, of any type.
+    :param name: Parameter name used in the error message.
+    :return: ``complex(value)``.
+    :raises TypeError: for an array, a text, or anything whose type
+        :func:`complex` refuses.
+    :raises ValueError: for a number too large for a complex.
+    """
+    if not is_scalar(value) or holds_text(value):
+        msg = f"'{name}' must be one number, got {given_repr(value)}."
+        raise TypeError(msg)
+    try:
+        return complex(cast("complex", value))
+    except TypeError:
+        msg = f"'{name}' must be a number, got {given_repr(value)}."
+        raise TypeError(msg) from None
+    except (ValueError, OverflowError):
+        msg = f"'{name}' must be a number a complex can hold, got {given_repr(value)}."
+        raise ValueError(msg) from None
 
 
 def require_positive(value: float, name: str) -> float:
@@ -430,7 +490,7 @@ def require_positive(value: float, name: str) -> float:
         else that is not a number.
     :raises ValueError: for a non-finite or non-positive value.
     """
-    number = _one_number(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number) or number <= 0.0:
         msg = f"'{name}' must be positive."
         raise ValueError(msg)
@@ -464,7 +524,7 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     :raises ValueError: for a non-finite temperature, or one at or below
         -273,15 degC.
     """
-    number = _one_number(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number) or number <= ABSOLUTE_ZERO_C:
         msg = f"'{name}' must be finite and above -273.15 degC."
         raise ValueError(msg)
@@ -505,7 +565,7 @@ def require_non_negative(value: float, name: str) -> float:
         else that is not a number.
     :raises ValueError: for a non-finite or negative value.
     """
-    number = _one_number(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number) or number < 0.0:
         msg = f"'{name}' must be non-negative."
         raise ValueError(msg)
@@ -527,7 +587,7 @@ def require_finite(value: float, name: str) -> float:
         else that is not a number.
     :raises ValueError: for a non-finite value.
     """
-    number = _one_number(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)
@@ -544,7 +604,7 @@ def require_fraction(value: float, name: str) -> float:
         else that is not a number.
     :raises ValueError: for a non-finite value, or one outside ``[0, 1)``.
     """
-    number = _one_number(value, name)
+    number = real_number(value, name)
     if not math.isfinite(number) or number < 0.0 or number >= 1.0:
         msg = f"'{name}' must be in the range [0, 1)."
         raise ValueError(msg)
@@ -755,21 +815,61 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
         # np.asarray reads a subclass (a matrix, a masked array) as the plain
         # array of its values; astype would keep the subclass, whose ``**`` is
         # a matrix power and whose reductions skip the masked values.
-        return np.asarray(x, dtype=np.float64, copy=True if copy else None)
+        if x.dtype.itemsize <= _FLOAT64_BYTES:
+            return np.asarray(x, dtype=np.float64, copy=True if copy else None)
+        # A long double holds finite numbers past a float's largest.
+        with np.errstate(over="ignore"):
+            read = np.asarray(x, dtype=np.float64, copy=True if copy else None)
+        _refuse_beyond_a_float(np.asarray(x), read, name)
+        return read
     if type(x) in _PLAIN_REALS:
-        return np.asarray(x, dtype=np.float64)
+        try:
+            return np.asarray(x, dtype=np.float64)
+        except OverflowError:
+            raise ValueError(_too_large(name)) from None
     array = _numbers_read(x, name)
     if holds_complex(array):
         msg = f"'{name}' must be real, not complex."
         raise TypeError(msg)
     try:
-        return array.astype(np.float64, copy=copy)
+        with np.errstate(over="ignore"):
+            read = array.astype(np.float64, copy=copy)
     except TypeError as exc:
         msg = f"'{name}' must be numeric."
         raise TypeError(msg) from exc
+    except OverflowError:
+        raise ValueError(_too_large(name)) from None
     except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
+    _refuse_beyond_a_float(array, read, name)
+    return read
+
+
+#: The size of a float, past which a real dtype holds numbers it cannot.
+_FLOAT64_BYTES = 8
+
+
+def _too_large(name: str) -> str:
+    return f"'{name}' holds a number too large for a float."
+
+
+def _refuse_beyond_a_float(source: np.ndarray, read: np.ndarray, name: str) -> None:
+    """Refuse a finite number of *source* that its reading as floats, *read*,
+    made an infinity: a long double or a ``Decimal`` past a float's largest,
+    which numpy converts to an infinity with no more than a warning.
+
+    Asked only where *read* holds an infinity, so an array of floats costs
+    one pass.
+
+    :raises ValueError: naming *name*, for such a number.
+    """
+    infinite = np.isinf(read)
+    if not infinite.any():
+        return
+    held = np.broadcast_to(source, read.shape)[infinite]
+    if any(_finite_beyond_a_float(item) for item in held.flat):
+        raise ValueError(_too_large(name))
 
 
 #: The dtype kinds of an array of numbers, complex ones included.
@@ -812,16 +912,24 @@ def complex_array(
         # is read as the plain array of its values, as real_array reads it.
         return np.asarray(x, dtype=np.complex128, copy=True if copy else None)
     if type(x) in _PLAIN_NUMBERS_OF_ANY_KIND:
-        return np.asarray(x, dtype=np.complex128)
+        try:
+            return np.asarray(x, dtype=np.complex128)
+        except OverflowError:
+            raise ValueError(_too_large(name)) from None
     array = _numbers_read(x, name)
     try:
-        return array.astype(np.complex128, copy=copy)
+        with np.errstate(over="ignore"):
+            read = array.astype(np.complex128, copy=copy)
     except TypeError as exc:
         msg = f"'{name}' must be numeric."
         raise TypeError(msg) from exc
+    except OverflowError:
+        raise ValueError(_too_large(name)) from None
     except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
+    _refuse_beyond_a_float(array, read, name)
+    return read
 
 
 def _numbers_read(x: object, name: str) -> np.ndarray:
@@ -1362,7 +1470,7 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
             )
             raise TypeError(msg)
         return tuple(int(item) for item in value)
-    if isinstance(value, str | bytes | bytearray) or not isinstance(value, Iterable):
+    if is_text(value) or not isinstance(value, Iterable):
         msg = (
             f"'{name}' must be a sequence of integer indices, got {given_repr(value)}."
         )

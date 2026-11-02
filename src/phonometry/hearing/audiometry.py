@@ -98,6 +98,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_scalar,
 )
@@ -1048,7 +1049,7 @@ def _replay_ascending(
             continue
         _check_step(levels, responses, i)
         if responses[i] and not responses[i - 1]:
-            ascents.append(float(levels[i]))
+            ascents.append(real_number(levels[i], "levels"))
             threshold, determined, exhausted = _ascending_rule(
                 ascents, shortened=shortened
             )
@@ -1070,7 +1071,10 @@ def _check_first_tone(levels: np.ndarray, familiarization_level: float | None) -
     """
     if familiarization_level is None or not levels.size:
         return
-    first = float(familiarization_level) - _FIRST_TONE_BELOW_DB
+    first = (
+        real_number(familiarization_level, "familiarization_level")
+        - _FIRST_TONE_BELOW_DB
+    )
     if not math.isclose(levels[0], first, abs_tol=_LEVEL_ATOL_DB):
         msg = (
             f"the first tone must be {first:g} dB, 10 dB below the lowest "
@@ -1113,7 +1117,8 @@ def _next_ascending_level(
     """
     if ended or not levels.size:
         return (
-            float(familiarization_level) - _FIRST_TONE_BELOW_DB
+            real_number(familiarization_level, "familiarization_level")
+            - _FIRST_TONE_BELOW_DB
             if not levels.size and familiarization_level is not None
             else math.nan
         )
@@ -1172,6 +1177,7 @@ def ascending_method_threshold(
         than a series holds.
     :raises TypeError: if ``ascent_levels`` or ``presentation_levels`` holds a text or a
         value that is not a real number.
+        ``familiarization_level`` is refused the same way when it is not one real number.
     """
     sequence = presentation_levels is not None or responses is not None
     if ascent_levels is not None and not sequence:

@@ -50,6 +50,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_finite_fields,
@@ -2850,6 +2851,7 @@ def approach_profile(
     :return: A :class:`FlightProfile` with ``operation="A"``.
     :raises ValueError: if the procedure carries no Land step to anchor it, or
         a step cannot be flown as specified.
+    :raises TypeError: if ``weight_lb`` is not one real number.
     :warns FlightProfileWarning: if consecutive Level-Idle steps are flown at
         different altitudes, or one's calibrated airspeed rises along it.
     """
@@ -2875,7 +2877,9 @@ def approach_profile(
         aircraft=aircraft,
         aerodrome=aerodrome,
         weight_lb=(
-            aircraft.approach_weight_lb if weight_lb is None else float(weight_lb)
+            aircraft.approach_weight_lb
+            if weight_lb is None
+            else real_number(weight_lb, "weight_lb")
         ),
         operation=_ARRIVAL,
     )

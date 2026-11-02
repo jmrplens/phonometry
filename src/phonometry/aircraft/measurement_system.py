@@ -20,7 +20,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.types import float_keyed
-from .._internal.validation import require_choice, require_scalar
+from .._internal.validation import real_number, require_choice, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -120,6 +120,7 @@ class AircraftSystemComplianceResult(OwnsArrays):
             range, or a linearity key is neither ``"reference"`` nor
             ``"other"``.
         :raises TypeError: If a ``linearity`` key is not a text.
+            ``resolution`` is refused the same way when it is not one real number.
         """
         if self.directional is not None:
             object.__setattr__(
@@ -149,7 +150,9 @@ class AircraftSystemComplianceResult(OwnsArrays):
                 MappingProxyType({k: float(v) for k, v in self.linearity.items()}),
             )
         if self.resolution is not None:
-            object.__setattr__(self, "resolution", float(self.resolution))
+            object.__setattr__(
+                self, "resolution", real_number(self.resolution, "resolution")
+            )
         # Every check is read once here, so a measurement no table covers is
         # refused where the result is built.
         self.__dict__["_checks"] = self._read_checks()
@@ -364,7 +367,7 @@ def _resolution_check(resolution: float) -> dict[str, Any]:
     :param resolution: Readout resolution, in dB.
     :return: The single check.
     """
-    res = float(resolution)
+    res = real_number(resolution, "resolution")
     return {
         "quantity": "resolution",
         "limit": _RESOLUTION_LIMIT,

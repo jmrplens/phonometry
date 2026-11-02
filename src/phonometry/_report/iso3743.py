@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from ._i18n import format_number, t
 from ._sound_power_fiche import (
     FicheCopy,
@@ -100,7 +100,7 @@ def _widths(columns: int) -> list[float]:
 def _marked(values: np.ndarray, marks: list[str], language: Language) -> list[str]:
     """One decimal per band, followed by the band's background marker."""
     return [
-        d1(float(value), language) + (f" {mark}" if mark else "")
+        d1(real_number(value, "value"), language) + (f" {mark}" if mark else "")
         for value, mark in zip(values, marks, strict=True)
     ]
 
@@ -125,7 +125,7 @@ def _coverage_sentence(k: float, language: Language) -> str:
     of Part 2 print it: 95 % two-sided for ``k`` = 2, 95 % one-sided for a
     comparison with a limit for ``k`` = 1,6, and the factor alone otherwise.
     """
-    value = format_number(float(k), language, decimals=1, trim=True)
+    value = format_number(real_number(k, "k"), language, decimals=1, trim=True)
     if math.isclose(k, _COVERAGE_TWO_SIDED):
         return t("k = 2 gives a coverage probability of 95 %.", language)
     if math.isclose(k, _COVERAGE_ONE_SIDED):

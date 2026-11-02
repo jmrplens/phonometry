@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import real_number, require_equal_shapes
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -83,7 +83,7 @@ def _cell(value: float, decimals: int, language: Language) -> str:
     rather than the literal ``nan`` that used to sit between two real
     coefficients.
     """
-    v = float(value)
+    v = real_number(value, "value")
     if not math.isfinite(v):
         return "—"
     return format_number(v, language, decimals=decimals)

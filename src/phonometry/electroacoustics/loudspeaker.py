@@ -57,8 +57,10 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    is_text,
     pair_of_arrays,
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -241,7 +243,7 @@ def _band_edge(
     neighbour), the measured edge frequency is returned.
     """
     if not 0 <= neighbour < frequencies.size:
-        return float(frequencies[edge])
+        return real_number(frequencies[edge], "frequencies")
     return _threshold_crossing(
         frequencies[edge],
         spl[edge],
@@ -267,7 +269,9 @@ def _effective_range(
     n = above.size
     peak = int(np.argmax(spl))
     if not above[peak]:  # pragma: no cover - the peak is always >= threshold
-        return float(frequencies[peak]), float(frequencies[peak])
+        return real_number(frequencies[peak], "frequencies"), real_number(
+            frequencies[peak], "frequencies"
+        )
     lo_idx = peak
     while lo_idx > 0 and above[lo_idx - 1]:
         lo_idx -= 1
@@ -384,7 +388,11 @@ class LoudspeakerRatings(RichDisplay):
         _require_frequency_pair(self, "frequency_range")
         if self.frequency_range is not None:
             low, high = self.frequency_range
-            object.__setattr__(self, "frequency_range", (float(low), float(high)))
+            object.__setattr__(
+                self,
+                "frequency_range",
+                (real_number(low, "low"), real_number(high, "high")),
+            )
 
 
 def _require_frequency_pair(owner: object, name: str) -> None:
@@ -424,7 +432,7 @@ def _require_frequency_pair(owner: object, name: str) -> None:
     except ValueError:
         # A ragged pair, one member an array: numpy has no shape to give.
         shape = None
-    if shape is None or len(shape) != 1 or isinstance(value, (str, bytes, bytearray)):
+    if shape is None or len(shape) != 1 or is_text(value):
         # Not a flat sequence of two numbers at all: a number, a text, or a
         # pair with an array inside it is the wrong type for a pair.
         described = "a ragged sequence" if shape is None else f"shape {shape}"
@@ -758,7 +766,7 @@ def _polar_from_piston(
         raise ValueError(msg)
     freqs = np.asarray(piston.frequencies, dtype=np.float64)
     target = (
-        float(polar_frequency)
+        real_number(polar_frequency, "polar_frequency")
         if polar_frequency is not None
         else float(freqs[freqs.size // 2])
     )
@@ -784,9 +792,12 @@ def _resolve_sensitivity_band(
 ) -> tuple[float, float]:
     """Resolve the characteristic-sensitivity band, defaulting to the peak octave."""
     if sensitivity_band is None:
-        f_peak = float(f[int(np.argmax(spl))])
+        f_peak = real_number(f[int(np.argmax(spl))], "f")
         return (f_peak / _OCTAVE_HALF, f_peak * _OCTAVE_HALF)
-    lo, hi = float(sensitivity_band[0]), float(sensitivity_band[1])
+    lo, hi = (
+        real_number(sensitivity_band[0], "sensitivity_band"),
+        real_number(sensitivity_band[1], "sensitivity_band"),
+    )
     if not 0.0 < lo < hi:
         msg = "'sensitivity_band' must be a positive (lo, hi) with lo < hi."
         raise ValueError(msg)

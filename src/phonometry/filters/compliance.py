@@ -127,6 +127,7 @@ from .._internal.frozen import (
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_ranks,
@@ -914,11 +915,15 @@ def _bank_summation(
     count = len(mids_hz)
     first, last = _summation_span(band, count, points_per_bandwidth, edition)
     omega = _test_frequencies(fraction, points_per_bandwidth, first, last)
-    freqs = omega * float(mids_hz[band])
+    freqs = omega * real_number(mids_hz[band], "mids_hz")
     rows = np.vstack(
         [
             _band_relative_attenuation(
-                sos[k], int(factors[k]), fs_hz, float(mids_hz[k]), freqs
+                sos[k],
+                int(factors[k]),
+                fs_hz,
+                real_number(mids_hz[k], "mids_hz"),
+                freqs,
             )
             for k in (band - 1, band, band + 1)
             if 0 <= k < count

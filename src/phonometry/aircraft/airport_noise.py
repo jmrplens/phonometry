@@ -41,6 +41,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     real_array,
+    real_number,
     require_above_absolute_zero,
     require_choice,
     require_equal_counts,
@@ -589,7 +590,9 @@ def _segment_angles(
     side = -float(np.sign(u[0] * (obs[1] - s1[1]) - u[1] * (obs[0] - s1[0])))
     if lateral <= 0.0:  # directly overhead: elevation/depression are ±90°
         beta = 90.0 if z_near >= 0.0 else -90.0
-        return beta, (90.0 if z_foot >= 0.0 else -90.0) + side * float(bank_deg)
+        return beta, (90.0 if z_foot >= 0.0 else -90.0) + side * real_number(
+            bank_deg, "bank_deg"
+        )
     eq_angle = (
         float(np.degrees(np.arccos(np.clip(lateral / dp, 0.0, 1.0))))
         if dp > 0.0
@@ -600,7 +603,7 @@ def _segment_angles(
         beta = eq_angle
     else:
         beta = float(np.degrees(np.arctan2(z_near, lateral)))
-    phi = eq_angle + side * float(bank_deg)
+    phi = eq_angle + side * real_number(bank_deg, "bank_deg")
     return beta, phi
 
 
@@ -988,7 +991,7 @@ def _event_level_core(
         s1, s2 = pts[i, :3], pts[i + 1, :3]
         p1, p2 = pts[i, 3], pts[i + 1, 3]
         v1, v2 = pts[i, 4], pts[i + 1, 4]
-        eps = float(bank_deg[i])
+        eps = real_number(bank_deg[i], "bank_deg")
         length, q, dp, ds, beta, phi, lateral = _segment_geometry(
             s1, s2, obs, bank_deg=eps
         )
@@ -1407,7 +1410,7 @@ def _grid_event_levels(
         if float(np.linalg.norm(pts[i + 1, :3] - pts[i, :3])) <= 0.0:
             continue  # degenerate (duplicate waypoints): skip
         any_segment = True
-        eps = float(bank[i]) if bank is not None else 0.0
+        eps = real_number(bank[i], "bank") if bank is not None else 0.0
         seg_level = _grid_segment_level(
             ctx=ctx,
             seg_pts=pts[i : i + 2],
@@ -1472,6 +1475,7 @@ def event_level(
     :raises TypeError: if ``metric`` or ``mounting`` is not a text, or ``distances_m``,
         ``exposure_levels``, ``max_levels``, ``observer``, ``path`` or ``powers`` holds
         a text or a value that is not a real number.
+        ``reference_speed_m_s`` is refused the same way when it is not one real number.
     """
     pts = _validate_path(path)
     obs = real_array(observer, "observer").ravel()
@@ -1496,7 +1500,7 @@ def event_level(
         d,
         le,
         lm,
-        float(reference_speed_m_s),
+        real_number(reference_speed_m_s, "reference_speed_m_s"),
         imp,
         mounting,
         key,
@@ -1598,6 +1602,7 @@ def noise_contour(
     :raises TypeError: if ``metric`` or ``mounting`` is not a text, or ``distances_m``,
         ``exposure_levels``, ``max_levels``, ``path``, ``powers``, ``x`` or ``y`` holds
         a text or a value that is not a real number.
+        ``reference_speed_m_s`` is refused the same way when it is not one real number.
     """
     gx = real_array(x, "x").ravel()
     gy = real_array(y, "y").ravel()
@@ -1613,7 +1618,7 @@ def noise_contour(
     bk = _validate_bank(segments.bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances_m, exposure_levels)
     _, _, lm = _clean_table(powers, distances_m, max_levels)
-    vref = float(reference_speed_m_s)
+    vref = real_number(reference_speed_m_s, "reference_speed_m_s")
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,
         static_pressure_kpa=atmosphere.static_pressure_kpa,

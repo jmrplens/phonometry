@@ -43,7 +43,12 @@ from typing import TYPE_CHECKING, Literal
 
 from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
-from .._internal.validation import check_engine, require_choice, require_scalar
+from .._internal.validation import (
+    check_engine,
+    real_number,
+    require_choice,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     import os
@@ -70,7 +75,7 @@ def _round_db(value: float) -> int:
     unrounded measurement is rounded here, settled first so that a level that
     is a half in decimal and a last bit under it in binary rounds up.
     """
-    return int(round_half_up(float(value)))
+    return int(round_half_up(real_number(value, "value")))
 
 
 @dataclass(frozen=True)

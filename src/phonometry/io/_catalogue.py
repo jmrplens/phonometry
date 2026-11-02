@@ -131,7 +131,7 @@ from .._internal.json_input import (
     text_location,
     write_beside,
 )
-from .._internal.validation import require_scalar
+from .._internal.validation import real_number, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._sidecar import _SIDECAR_TAIL
 
@@ -2043,7 +2043,7 @@ def _same_float(one: float, other: object) -> bool:
     """Whether two numbers are the same double, bit for bit."""
     if not isinstance(other, numbers.Real):
         return False
-    return float(one).hex() == float(other).hex()
+    return real_number(one, "one").hex() == float(other).hex()
 
 
 def _renamed(

@@ -27,10 +27,7 @@ if TYPE_CHECKING:
     from ..filters.weighting import TimeWeightedEnvelope
     from ..metrology.conformance import ConformanceVerification
 
-from .._internal.validation import (
-    real_array,
-    require_count,
-)
+from .._internal.validation import real_array, real_number, require_count
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -1215,7 +1212,7 @@ def _frame_extent(times: np.ndarray) -> tuple[float, float]:
     no hop; its window starts at the first sample, so it spans twice the
     time of its centre.
     """
-    first, last = float(times[0]), float(times[-1])
+    first, last = real_number(times[0], "times"), real_number(times[-1], "times")
     if times.size > 1:
         half_hop = (last - first) / (2.0 * (times.size - 1))
         return first - half_hop, last + half_hop

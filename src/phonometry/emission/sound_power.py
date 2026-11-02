@@ -89,6 +89,7 @@ from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_non_negative,
@@ -594,7 +595,9 @@ class SoundPowerResult(OwnsArrays):
                 "'frequencies' to sound_power_pressure(...) so LWA is defined."
             )
             raise ValueError(msg)
-        k = float(self.uncertainty if uncertainty is None else uncertainty)
+        k = real_number(
+            self.uncertainty if uncertainty is None else uncertainty, "uncertainty"
+        )
         return NoiseEmissionDeclaration(
             modes=(
                 OperatingModeDeclaration(
@@ -1132,7 +1135,7 @@ def _a_weighted_total(
         # A-weighting needs the band centre frequencies; with several bands and
         # none supplied the A-weighted total is undefined (NaN). A single band
         # carries no weighting, so LWA = LW.
-        return None, (float(lw[0]) if n_bands == 1 else float("nan"))
+        return None, (real_number(lw[0], "lw") if n_bands == 1 else float("nan"))
     # A scalar is one band's centre frequency, not a shape mistake: accept it
     # for a single band (as 1-D) and reject it, by name, for several.
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
@@ -1536,7 +1539,7 @@ def reference_atmosphere_correction(
         )
         raise ValueError(msg)
     if altitude is not None:
-        ps = _static_pressure_at_altitude(float(altitude))
+        ps = _static_pressure_at_altitude(real_number(altitude, "altitude"))
     elif static_pressure_kpa is not None:
         ps = require_positive(static_pressure_kpa, "static_pressure_kpa")
     else:

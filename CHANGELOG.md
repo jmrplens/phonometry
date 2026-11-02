@@ -2296,6 +2296,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **One number a function reads is read by name.** A function that turned
+  one of its caller's numbers into a float with `float()`, or into a complex
+  number with `complex()`, parsed a text and kept the real part of a NumPy
+  complex number with no more than a `ComplexWarning`:
+  `aircraft.npd_atmosphere_increment(temperature_c="25")` read 25 °C, `b"25"`
+  too, and `metrology.combined_standard_uncertainty(["12"])` came back as 12.
+  About three hundred and sixty such readings, in public functions and in the
+  helpers they hand their numbers to, read through the shared reader of one
+  number now, which refuses a text, an array and a complex value with a
+  `TypeError` that names the parameter, and a number too large for a float
+  with a `ValueError`; a contribution to `combined_standard_uncertainty` that
+  is neither a number nor a pair is refused naming `contributions`. A parser
+  of a file's text (an ANP table, a JSON sidecar) still reads its text.
+- **A wrapper of a text is refused where the text is.** A
+  `collections.UserString` is a sequence of characters, and the tests that
+  told a pair or a list of labels from a text by its type let it through:
+  `simulation.FDTD2D(shape=UserString("abc"))` was a `ValueError` about its
+  length where `"abc"` is a `TypeError`,
+  `metrology.combined_standard_uncertainty([UserString("12")])` a
+  `TypeError` about a nesting more than 32 deep, and the `excluded` corners
+  of `building.loudest_corner`, the `labels` of
+  `filters.FractionalOctaveBands`, the microphones of the free-field
+  corrections and the frequency pairs of the loudspeaker ratings and of the
+  impact mobility were measured or split the same way. Each refuses the
+  wrapper as it refuses the text it wraps, by the parameter's name.
+- **A number too large for a float is refused among an array's numbers too.**
+  The shared readers of a caller's numbers let a Python integer past a
+  float's largest, such as `10**400`, through to NumPy's anonymous
+  `OverflowError`, and read a long double or a `Decimal` past that range as
+  an infinity with no more than a `RuntimeWarning`, which the checks after
+  them took for an infinity the caller gave. Each is a `ValueError` naming the
+  parameter now, as one such number alone already was, and an infinity the
+  caller gives is still read as one. A `Decimal` too large for its own
+  decimal context, such as `Decimal("1e1000000")`, raised `decimal.Overflow`
+  out of the reader of one number, and a finite `Decimal("1e400")` came back
+  as an infinity where the caller's decimal context traps `FloatOperation`;
+  both are the same `ValueError` now.
 - **`.report()` writes to a `pathlib.Path` or any path object.** The fiche
   of every result took `path` as a text and handed it to ReportLab as it got
   it, so a `pathlib.Path` built the whole fiche and then failed with

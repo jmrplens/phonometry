@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.types import float_keyed
+from .._internal.validation import real_number
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -198,6 +199,7 @@ def plot_roughness_spectrum(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the spectrum line.
     :return: The axes.
+    :raises TypeError: if a wavelength of ``limit_db`` is not one real number.
     """
     from .._i18n import localize_axes
 
@@ -217,7 +219,7 @@ def plot_roughness_spectrum(
     )
     if limit_db is not None:
         _draw_roughness_limit(ax, float_keyed(limit_db), language)
-        wavelengths += [float(w) for w in limit_db]
+        wavelengths += [real_number(w, "limit_db") for w in limit_db]
     _roughness_axis(ax, wavelengths, language)
     ax.set_title(_t("EN 15610 acoustic rail roughness", language))
     ax.grid(visible=True, which="major", alpha=0.3)
@@ -324,13 +326,14 @@ def plot_track_decay_rate(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the rate line.
     :return: The axes.
+    :raises TypeError: if a frequency of ``limit_db_per_m`` is not one real number.
     """
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
     frequencies = [float(f) for f in rates.frequencies]
     if limit_db_per_m is not None:
-        frequencies += [float(f) for f in limit_db_per_m]
+        frequencies += [real_number(f, "limit_db_per_m") for f in limit_db_per_m]
     positions = _band_positions(frequencies)
     _draw_decay(
         ax,

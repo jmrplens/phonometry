@@ -38,7 +38,12 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.validation import require_choice, require_positive, require_scalar
+from ..._internal.validation import (
+    real_number,
+    require_choice,
+    require_positive,
+    require_scalar,
+)
 from .simplified_model import BuildingPredictionWarning
 
 if TYPE_CHECKING:
@@ -471,7 +476,9 @@ def lining_improvement(
         delta_ra=float(ratings[1]),
         delta_ratr=float(ratings[2]),
         anchors=anchors,
-        glued_area=None if glued_area is None else float(glued_area),
+        glued_area=None
+        if glued_area is None
+        else real_number(glued_area, "glued_area"),
     )
 
 

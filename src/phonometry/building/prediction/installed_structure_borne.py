@@ -95,6 +95,7 @@ from ..._internal.validation import (
     check_engine,
     complex_array,
     real_array,
+    real_number,
     require_band_fraction,
     require_choice,
     require_count,
@@ -524,7 +525,7 @@ def _table_d1_arguments(
             "pass 'frequency'."
         )
         raise ValueError(msg)
-    return {k: float(supplied[k]) for k in required}  # type: ignore[arg-type]
+    return {k: real_number(supplied[k], "supplied") for k in required}
 
 
 def typical_element_mobility(

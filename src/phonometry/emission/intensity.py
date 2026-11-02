@@ -81,6 +81,7 @@ from .._internal.types import answer_form, as_float_if_reduced, one_value
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     real_array,
+    real_number,
     require_axis_count,
     require_band_fraction,
     require_equal_counts,
@@ -821,7 +822,7 @@ def sound_intensity(
 
     if fraction is not None:
         band_limits = (
-            [float(limits[0]), float(limits[1])]
+            [real_number(limits[0], "limits"), real_number(limits[1], "limits")]
             if limits is not None
             else [12.0, 20000.0]
         )

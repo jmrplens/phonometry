@@ -82,6 +82,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_non_negative,
@@ -547,6 +548,7 @@ def assess_building_vibration(
         reason :func:`guideline_velocity` raises.
     :raises TypeError: if ``velocity_mm_s`` is not a single number, or
         ``building_class``, ``duration`` or ``location`` is not a text.
+        ``frequency_hz`` is refused the same way when it is not one real number.
     """
     require_choice(
         building_class, "building_class", ("commercial", "residential", "sensitive")
@@ -562,7 +564,9 @@ def assess_building_vibration(
         building_class=building_class,
         location=location,
         duration=duration,
-        frequency_hz=None if frequency_hz is None else float(frequency_hz),
+        frequency_hz=None
+        if frequency_hz is None
+        else real_number(frequency_hz, "frequency_hz"),
         massive_structure=bool(massive_structure),
     )
 

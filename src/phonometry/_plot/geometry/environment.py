@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_non_negative, require_positive
+from ..._internal.validation import real_number, require_non_negative, require_positive
 from ..common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -120,7 +120,7 @@ def plot_barrier_geometry(
         require_positive(thickness_m, "thickness_m")
     if ax is None:
         ax = _new_axes()
-    e = 0.0 if thickness_m is None else float(thickness_m)
+    e = 0.0 if thickness_m is None else real_number(thickness_m, "thickness_m")
     drawn_e = e if e > 0.0 else 0.012 * receiver_distance
     top = barrier_height_m
     src = (0.0, source_height_m)

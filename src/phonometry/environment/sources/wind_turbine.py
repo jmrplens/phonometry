@@ -36,6 +36,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_ranks,
@@ -479,7 +480,11 @@ def _candidate_peak(
         return int(np.argmax(lv))
     require_scalar(tone_frequency, "tone_frequency")
     tf = float(tone_frequency)
-    if not np.isfinite(tf) or tf < float(fr[0]) or tf > float(fr[-1]):
+    if (
+        not np.isfinite(tf)
+        or tf < real_number(fr[0], "fr")
+        or tf > real_number(fr[-1], "fr")
+    ):
         msg = (
             "'tone_frequency' must be finite and inside the spectrum's "
             f"frequency range [{fr[0]:.1f}, {fr[-1]:.1f}] Hz."
@@ -521,7 +526,7 @@ def _tone_lines(
         critical band are classified as "tone", and the energy average
         ``L_pn,avg`` of the lines classified as masking, in dB.
     """
-    lo, hi = _critical_band_edges(float(fr[peak]))
+    lo, hi = _critical_band_edges(real_number(fr[peak], "fr"))
     in_band = (fr >= lo) & (fr <= hi)
     band = lv[in_band]
 
@@ -630,7 +635,7 @@ def _tonality_chain(
     """Formulas 30 to 34 about the candidate line ``peak``, in the order of
     :data:`_TONALITY_METRICS`.
     """
-    cbw = _critical_bandwidth(float(fr[peak]))
+    cbw = _critical_bandwidth(real_number(fr[peak], "fr"))
     possible_tone, is_tone, l_pn_avg = _tone_lines(lv, fr, peak)
     tone_positions = np.nonzero(is_tone)[0]
     if not (possible_tone and tone_positions.size > 0):
@@ -639,7 +644,7 @@ def _tonality_chain(
         tone_positions = np.array([peak])
     # The frequency of the tone is the classified line with the highest level
     # (9.5.4); it anchors the reported frequency and Formula 34.
-    f_tone = float(fr[tone_positions[int(np.argmax(lv[tone_positions]))]])
+    f_tone = real_number(fr[tone_positions[int(np.argmax(lv[tone_positions]))]], "fr")
     # Energy-sum the tone lines per contiguous run (9.5.5), applying the Hanning
     # ÷1.5 correction to any run that spans two or more adjacent lines.
     runs = np.split(tone_positions, np.nonzero(np.diff(tone_positions) != 1)[0] + 1)

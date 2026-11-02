@@ -570,6 +570,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         :param language: ``"en"`` or ``"es"``.
         :param kwargs: Passed to the spectrum line.
         :return: The axes drawn on.
+        :raises TypeError: if a wavelength of ``limit_db`` is not one real number.
         """
         from ..._i18n import check_language
         from ..._plot.rolling_stock import plot_roughness_spectrum

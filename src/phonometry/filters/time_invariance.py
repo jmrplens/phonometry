@@ -49,6 +49,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     real_array,
+    real_number,
     require_non_negative,
     require_positive,
 )
@@ -341,6 +342,7 @@ def swept_band_level(
         averaging time or frequency, or an end frequency not above the start.
     :raises TypeError: if ``averaging_time_s``, ``end_frequency_hz``, ``fraction``,
         ``start_frequency_hz`` or ``sweep_duration_s`` is not a single number.
+        ``input_level`` or ``reference_attenuation`` are refused the same way when any is not one real number.
     """
     b = require_positive(fraction, "fraction")
     t_sweep = require_positive(sweep_duration_s, "sweep_duration_s")
@@ -355,8 +357,8 @@ def swept_band_level(
         raise ValueError(msg)
     band_ratio_lg = math.log10(_G) / b
     return (
-        float(input_level)
-        - float(reference_attenuation)
+        real_number(input_level, "input_level")
+        - real_number(reference_attenuation, "reference_attenuation")
         + 10.0
         * math.log10(t_sweep / t_avg * band_ratio_lg / math.log10(f_end / f_start))
     )
@@ -505,8 +507,9 @@ def verify_time_invariance(
     :return: A :class:`TimeInvarianceResult`.
     :raises ValueError: for no sweep rate, a rate outside 2 s to 5 s per
         decade, or a bank with no bands.
+    :raises TypeError: if a rate of ``seconds_per_decade`` is not one real number.
     """
-    rates_spd = tuple(float(r) for r in seconds_per_decade)
+    rates_spd = tuple(real_number(r, "seconds_per_decade") for r in seconds_per_decade)
     low, high = _SECONDS_PER_DECADE_RANGE
     if not rates_spd or any(not low <= r <= high for r in rates_spd):
         msg = (

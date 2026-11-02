@@ -545,7 +545,7 @@ def _finish(
         edge = flat[huge]
         beyond = np.where(edge > 0.0, np.inf, 0.0)
         if not finite_only:
-            beyond = np.where(np.isnan(edge) | (edge == np.inf), 1.0 + edge, beyond)
+            beyond = np.where(np.isnan(edge) | np.isposinf(edge), 1.0 + edge, beyond)
         out[huge] = beyond
     return out
 

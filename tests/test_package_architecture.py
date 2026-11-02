@@ -1092,6 +1092,88 @@ def _message_text(node: ast.Assign) -> str | None:
     return None
 
 
+#: The modules whose float constants are spelled by name.
+_FLOAT_CONSTANT_OWNERS = frozenset({"np", "numpy", "math"})
+
+#: Their float constants: a comparison with one is a comparison with a float
+#: literal written out by name, ``x == np.inf`` as much as ``x == 1e308``.
+_FLOAT_CONSTANT_NAMES = frozenset(
+    {
+        "inf",
+        "nan",
+        "pi",
+        "e",
+        "tau",
+        "euler_gamma",
+        "Inf",
+        "Infinity",
+        "NAN",
+        "NaN",
+        "NINF",
+        "PINF",
+        "infty",
+    }
+)
+
+
+def _is_float_constant(node: ast.expr) -> bool:
+    """Whether *node* is a float literal, signed, named or spelled ``float("inf")``."""
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
+        node = node.operand
+    if isinstance(node, ast.Constant):
+        return isinstance(node.value, float)
+    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+        return (
+            node.value.id in _FLOAT_CONSTANT_OWNERS
+            and node.attr in _FLOAT_CONSTANT_NAMES
+        )
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "float"
+        and len(node.args) == 1
+        and isinstance(node.args[0], ast.Constant)
+        and isinstance(node.args[0].value, str)
+    )
+
+
+def _float_equalities(tree: ast.AST) -> list[str]:
+    """Each ``==`` or ``!=`` of *tree* with a float constant on one side, as ``line source``."""
+    found: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Compare):
+            continue
+        left = node.left
+        for operator, right in zip(node.ops, node.comparators, strict=True):
+            if isinstance(operator, (ast.Eq, ast.NotEq)) and (
+                _is_float_constant(left) or _is_float_constant(right)
+            ):
+                found.append(f"{node.lineno} {ast.unparse(node)}")
+            left = right
+    return found
+
+
+def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> None:
+    """A literal, a signed one, one named by numpy or math, and ``float("inf")``."""
+    source = "\n".join(
+        [
+            "a = x == 0.0",
+            "b = x != -1.5",
+            "c = x == np.inf",
+            "d = -math.inf == x",
+            "e = x == float('nan')",
+            "f = y < x == numpy.pi",
+            "g = x == 0",
+            "h = x <= np.inf",
+            "i = np.isposinf(x)",
+            "j = x == other",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "1", "2", "3", "4", "5", "6",
+    ]  # fmt: skip
+
+
 def test_no_source_compares_a_float_for_equality() -> None:
     """Floating point does not answer `==`, and the tree had stopped asking.
 
@@ -1102,26 +1184,14 @@ def test_no_source_compares_a_float_for_equality() -> None:
     the repository could see the regression; SonarCloud reported it after the
     branch was already pushed, so the class is closed here instead.
     """
-    import ast
     import pathlib
 
     equalities: list[str] = []
     for path in sorted(pathlib.Path("src/phonometry").rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Compare):
-                continue
-            for operator, right in zip(node.ops, node.comparators, strict=True):
-                if not isinstance(operator, (ast.Eq, ast.NotEq)):
-                    continue
-                operands = (node.left, right)
-                if any(
-                    isinstance(side, ast.Constant) and isinstance(side.value, float)
-                    for side in operands
-                ):
-                    equalities.append(
-                        f"{path.relative_to('src')}:{node.lineno} {ast.unparse(node)}"
-                    )
+        equalities.extend(
+            f"{path.relative_to('src')}:{line}" for line in _float_equalities(tree)
+        )
 
     assert not equalities, "source comparing a float for equality:\n  " + "\n  ".join(
         equalities

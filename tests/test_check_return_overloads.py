@@ -712,6 +712,71 @@ def test_every_definition_of_a_function_written_in_two_branches_is_read(
     assert sorted(refused) == ["plot_pair", "plot_polar"]
 
 
+def test_a_definition_a_later_one_replaces_is_never_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reaches the definitions a name may hold where it runs.
+
+    A later ``def`` of a name was kept beside the earlier one as a second
+    definition, though it replaces it unconditionally, so a caller of the
+    plain helper was refused for the polar axes of code that never runs, at
+    the top of a module and in a class. Of two imports of one name in the
+    caller, the call read the first of the function, not the one written
+    last before it.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def new_polar() -> PolarAxes:
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def new_plain() -> Axes:
+            return plt.subplots()[1]
+        """,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def _new_axes():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _new_axes():
+            return plt.subplots()[1]
+
+        def plot_replaced(result: object) -> Axes:
+            return _new_axes()
+
+        class Result:
+            def _draw(self):
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+            def _draw(self):
+                return plt.subplots()[1]
+
+            def plot(self) -> Axes:
+                return self._draw()
+
+        if FAST:
+            def _maybe_polar():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_maybe(result: object) -> Axes:
+            return _maybe_polar()
+
+        def plot_imported(result: object, fast: bool) -> Axes:
+            if fast:
+                from .helpers import new_polar as make
+
+                return plt.gca()
+            from .helpers import new_plain as make
+
+            return make()
+        """,
+    )
+    assert sorted(refused) == ["plot_maybe"]
+
+
 def test_each_branch_keeps_its_own_overload_heads(tmp_path: pathlib.Path) -> None:
     """Overloads written in each branch of an ``if`` belong to that branch's function.
 

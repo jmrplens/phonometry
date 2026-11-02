@@ -89,6 +89,8 @@ from ast_scan import (
     ROOT,
     binding_of,
     exempted,
+    imported_names,
+    live_bindings,
     own_names,
     python_files,
     relative,
@@ -814,6 +816,8 @@ class Package:
         #: Each definition, its overload heads included, with the function it
         #: is one definition of.
         self.by_node: dict[ast.AST, Function] = {}
+        #: What :meth:`live_definitions` found, read once for each name.
+        self._live: dict[str, list[str]] = {}
         for path in files:
             module = _module_name(path, root)
             self.paths[module] = relative(path)
@@ -1211,9 +1215,31 @@ class Package:
         module, one in each branch of an ``if`` being either.
         """
         targets = self._targets(function, func, call)
-        if len(targets) == 1 and targets[0] in self.functions:
-            return list(self.every_definition(targets[0]))
+        if (
+            len(targets) == 1
+            and targets[0] in self.functions
+            and self.functions[targets[0]].parent is None
+        ):
+            return self.live_definitions(targets[0])
         return [target for target in targets if target in self.functions]
+
+    def live_definitions(self, dotted: str) -> list[str]:
+        """The key of each definition of a function of a module, or of a
+        method, the name may hold once the module or the class has run
+        (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
+        either, and a later one replaces an earlier one it always follows.
+        """
+        if dotted not in self._live:
+            keys = self.every_definition(dotted)
+            last = {
+                self.functions[key].definitions[-1]: key
+                for key in keys
+                if self.functions[key].definitions
+            }
+            tree = self.trees[self.functions[keys[0]].module]
+            live = live_bindings(tree, list(last), None)
+            self._live[dotted] = [last[node] for node in live] or list(keys)
+        return self._live[dotted]
 
     def _targets(
         self, function: Function, func: ast.expr, call: ast.AST | None = None
@@ -1246,7 +1272,8 @@ class Package:
             if head.id in names.declared_global:
                 break
             if names.binds(head.id):
-                return self._bound_in(scope, node, function.module, func, head)
+                at = call if scope is function else None
+                return self._bound_in(scope, node, func, head, at)
         resolved = self.resolve(function.module, func)
         return (resolved,) if resolved is not None else ()
 
@@ -1254,22 +1281,58 @@ class Package:
         self,
         scope: Function,
         node: ast.FunctionDef | ast.AsyncFunctionDef,
-        module: str,
         func: ast.expr,
         head: ast.Name,
+        call: ast.AST | None,
     ) -> tuple[str, ...]:
         """What a call reaches through a name the scope *node* binds itself.
 
-        Its import's target; the functions of the name it defines, for the
-        name called bare; nothing for any other binding.
+        The target of each of its imports of the name, or, when the call is
+        written in *node* itself (*call* given), of each that may have run
+        before it and that no later one replaced on the way
+        (:func:`ast_scan.live_bindings`); every function of the name it
+        defines, for the name called bare, whose calls are the scope's own
+        anyway (:meth:`callees`); nothing for any other binding.
         """
         how = own_names(node).how(head.id)
         if how == "import":
-            resolved = self.resolve(module, func, self.local_imports.get(node, {}))
-            return (resolved,) if resolved is not None else ()
+            return self._through_imports(scope.module, node, func, head, call)
         if how == "definition" and func is head:
             return tuple(scope.nested.get(head.id, ()))
         return ()
+
+    def _through_imports(
+        self,
+        module: str,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        func: ast.expr,
+        head: ast.Name,
+        call: ast.AST | None,
+    ) -> tuple[str, ...]:
+        """What a call reaches through the imports of the name *node* makes:
+        each one, or those that may stand for it at *call*.
+        """
+        imports = [
+            statement
+            for statement in scope_nodes(node)
+            if isinstance(statement, ast.Import | ast.ImportFrom)
+            and head.id in imported_names(statement)
+        ]
+        imports.sort(key=lambda statement: (statement.lineno, statement.col_offset))
+        if call is not None:
+            imports = live_bindings(node, imports, call)
+        package = self._package_of(module)
+        found = (
+            self.resolve(module, func, _imports([statement], package, into={}))
+            for statement in imports
+        )
+        return tuple(dict.fromkeys(target for target in found if target is not None))
+
+    def _package_of(self, module: str) -> str:
+        """The package a relative import written in *module* is read from."""
+        if self.paths[module].endswith("__init__.py"):
+            return module
+        return module.rpartition(".")[0]
 
     def _scopes_around(
         self, function: Function
@@ -1311,9 +1374,7 @@ class Package:
             and function.owner is not None
         ):
             target = f"{function.module}.{function.owner}.{func.attr}"
-            return (
-                list(self.every_definition(target)) if target in self.functions else []
-            )
+            return self.live_definitions(target) if target in self.functions else []
         return self.reached(function, func, call)
 
     def makes_polar(self, function: Function) -> bool:

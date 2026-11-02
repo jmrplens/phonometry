@@ -208,11 +208,14 @@ def _aberth_sweep(coefficients: Polynomial, points: list[_Complex], bits: int) -
     Each point moves by Newton's correction damped by the pull of all the
     others, which keeps two approximations from settling on one root, and is
     rounded onto its grid. A correction is small when it is under sixteen
-    units of that grid.
+    units of that grid. A point that has landed on another is first moved
+    off it (:func:`_apart`), and where the damping cancels Newton's step
+    exactly the step is taken undamped.
     """
     settled = True
     one: _Complex = (Fraction(1), Fraction(0))
-    for i, x in enumerate(points):
+    for i in range(len(points)):
+        x = _apart(points, i, bits)
         value, slope = _value_and_slope(coefficients, x)
         if not (slope[0] or slope[1]):
             settled = False
@@ -224,7 +227,8 @@ def _aberth_sweep(coefficients: Polynomial, points: list[_Complex], bits: int) -
                 term = _quotient(one, (x[0] - other[0], x[1] - other[1]))
                 repulsion = (repulsion[0] + term[0], repulsion[1] + term[1])
         damping = _product(newton, repulsion)
-        correction = _quotient(newton, (1 - damping[0], -damping[1]))
+        undamped = (1 - damping[0], -damping[1])
+        correction = _quotient(newton, undamped) if any(undamped) else newton
         points[i] = _on_grid((x[0] - correction[0], x[1] - correction[1]), bits)
         unit = _power_of_two(2 * (4 - bits)) * _magnitude2(points[i])
         settled = settled and _magnitude2(correction) <= unit
@@ -374,11 +378,28 @@ def _nudge(points: list[_Complex], bits: int) -> None:
     reach the axis. A step of a relative ``2**(-bits/2)``, a different
     multiple of ``1 + 2i`` for each point, takes them off it.
     """
-    step = _power_of_two(-(bits // 2))
     for index, x in enumerate(points):
-        scale = max(abs(x[0]), abs(x[1])) or Fraction(1)
-        shift = step * scale * (index + 1)
-        points[index] = _on_grid((x[0] + shift, x[1] + 2 * shift), bits)
+        points[index] = _shifted(x, index, -(bits // 2), bits)
+
+
+def _shifted(x: _Complex, index: int, exponent: int, bits: int) -> _Complex:
+    """*x* moved by a relative ``2**exponent`` times ``(index + 1)(1 + 2i)``, onto its grid."""
+    scale = max(abs(x[0]), abs(x[1])) or Fraction(1)
+    shift = _power_of_two(exponent) * scale * (index + 1)
+    return _on_grid((x[0] + shift, x[1] + 2 * shift), bits)
+
+
+def _apart(points: list[_Complex], index: int, bits: int) -> _Complex:
+    """The point of *index*, moved a few hundred units of its grid off any other it has landed on.
+
+    Two approximations of a cluster the grid cannot yet resolve can round to
+    the same point, where the pull between them has no direction; the step
+    differs from point to point, so they part.
+    """
+    x = points[index]
+    if any(other == x for j, other in enumerate(points) if j != index):
+        x = _shifted(x, index, 8 - bits, bits)
+    return x
 
 
 def _exact_coefficients(coefficients: Sequence[Fraction | int]) -> Polynomial:

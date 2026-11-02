@@ -268,6 +268,35 @@ def test_close_roots_are_told_apart(apart: int) -> None:
     assert _bits(pairs) == _bits(sorted(expected, key=lambda z: (z.real, z.imag)))
 
 
+def _double(value: Fraction) -> float:
+    """The double nearest *value*, by Python's correctly rounded integer division."""
+    return value.numerator / value.denominator
+
+
+def test_two_approximations_that_land_on_one_point_are_parted() -> None:
+    """Two conjugate pairs ``0.886 * 2**-92`` apart, and a real root beside them.
+
+    On the first grid the two approximations of the upper pair rounded to the
+    same point, where the pull between them divides by zero, and the root
+    finder raised ``ZeroDivisionError``; the point is now moved off the other
+    first. The pairs' parts round to the same doubles.
+    """
+    centre, height = Fraction(-48185, 542566), Fraction(138853, 148271)
+    shifted = centre + Fraction(886, 1000) / 2**92
+    real = Fraction(96787, 781363)
+    polynomial = exact_polynomial_product(
+        exact_polynomial_product(
+            _conjugate_pair(centre, height), _conjugate_pair(shifted, height)
+        ),
+        (Fraction(1), -real),
+    )
+    expected = [complex(_double(real))]
+    for re in (centre, shifted):
+        expected += [complex(_double(re), s * _double(height)) for s in (-1, 1)]
+    roots = correctly_rounded_roots(polynomial)
+    assert _bits(roots) == _bits(sorted(expected, key=lambda z: (z.real, z.imag)))
+
+
 def test_a_multiple_root_is_refused() -> None:
     """``(x - 1)^2`` has no two disjoint disks to separate, at any grid."""
     with pytest.raises(ArithmeticError, match="multiple root"):

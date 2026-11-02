@@ -1334,13 +1334,7 @@ class _Flow:
         read = self._numpy_reading(node.subject, env)
         reached: list[Env] = []
         for case in node.cases:
-            inner = dict(env)
-            for capture in ast.walk(case.pattern):
-                name = getattr(capture, "name", None)
-                if isinstance(name, str):
-                    self._set(inner, name, subject)
-                    if read:
-                        inner[_numpy_key(name)] = frozenset()
+            inner = self._bind_captures(case, dict(env), subject, read=read)
             if case.guard is not None:
                 self.expression(case.guard, inner)
             end, ends = self.block(case.body, inner)
@@ -1352,6 +1346,22 @@ class _Flow:
         if not reached:
             return env, True
         return _join_envs(reached, self.default), False
+
+    def _bind_captures(
+        self, case: ast.match_case, inner: Env, subject: State, *, read: bool
+    ) -> Env:
+        """*inner* with each name the pattern of *case* captures bound.
+
+        Each is bound to *subject*, and to NumPy's reading of it where the
+        subject is one (*read*).
+        """
+        for capture in ast.walk(case.pattern):
+            name = getattr(capture, "name", None)
+            if isinstance(name, str):
+                self._set(inner, name, subject)
+                if read:
+                    inner[_numpy_key(name)] = frozenset()
+        return inner
 
 
 _STATEMENTS: dict[type[ast.stmt], Callable[[_Flow, Any, Env], tuple[Env, bool]]] = {

@@ -314,7 +314,7 @@ def interval_rms(
     :raises ValueError: For a bad record, a non-positive rate, or an interval
         that is empty or runs outside the record.
     :raises TypeError: if ``fs`` is not a single number.
-        ``interval_s`` is refused the same way when it is not one real number.
+        An element of ``interval_s`` is refused the same way when it is not one real number.
     """
     x = _record(values, "values")
     fs = require_positive(fs, "fs")
@@ -976,7 +976,7 @@ def evaluate_train_passage(
         or a :math:`T_1` longer than :math:`T_2`, or an upper band that is not
         a nominal centre from 80 Hz to 315 Hz.
     :raises TypeError: if ``upper_band_hz`` is not a single number.
-        ``t1_s`` or ``t2_s`` are refused the same way when any is not one real number.
+        An element of ``t1_s`` or ``t2_s`` is refused the same way when it is not one real number.
     """
     raw = _record(velocity_mm_s)
     fs = _sample_rate(fs, "railway")

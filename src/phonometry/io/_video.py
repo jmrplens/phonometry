@@ -38,7 +38,6 @@ import math
 import os
 import subprocess  # nosec B404 - frames piped to the ffmpeg find_ffmpeg resolved; no shell
 import threading
-import uuid
 from collections import deque
 from collections.abc import Sequence
 from contextlib import contextmanager
@@ -51,8 +50,13 @@ from typing import TYPE_CHECKING, Any, Final, cast, get_args
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.json_input import escaped
-from .._internal.validation import require_choice, require_positive, require_scalar
+from .._internal.json_input import beside_name, escaped
+from .._internal.validation import (
+    is_text,
+    require_choice,
+    require_positive,
+    require_scalar,
+)
 from ._video_encoders import (
     CONTAINER_CODECS,
     DEFAULT_VAAPI_DEVICE,
@@ -227,7 +231,7 @@ class VideoRequest:
         unfinished file. The file is not created here: ffmpeg, or the client
         of a node, creates it with the user's usual permissions.
         """
-        return self.path.with_name(f".{self.path.name}.{uuid.uuid4().hex}.partial")
+        return beside_name(self.path, ".partial")
 
 
 def _is_dir(path: Path) -> bool:
@@ -330,7 +334,7 @@ def _raw_ffmpeg(
     ffmpeg_encoder: object, ffmpeg_options: object
 ) -> tuple[str | None, tuple[str, ...]]:
     """The caller's own encoder name and options, checked as text."""
-    if isinstance(ffmpeg_options, str) or not isinstance(ffmpeg_options, Sequence):
+    if is_text(ffmpeg_options) or not isinstance(ffmpeg_options, Sequence):
         msg = (
             "'ffmpeg_options' must be a sequence of separate arguments, such as "
             f"('-crf', '30'), got {ffmpeg_options!r}"

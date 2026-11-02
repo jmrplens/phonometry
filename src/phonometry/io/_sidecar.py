@@ -63,6 +63,7 @@ calibrated measurement with no ceremony at the call site.
 
 from __future__ import annotations
 
+import errno
 import json
 import math
 import os
@@ -717,7 +718,7 @@ def sidecar_bytes(audio_path: str | os.PathLike[str], channels: int) -> bytes | 
         labels that do not give one to each of *channels*.
     """
     source = sidecar_path(audio_path)
-    if not source.exists():
+    if not _sidecar_at(source):
         return None
     raw = _sidecar_bytes(source)
     check_sidecar_labels(audio_path, _record(source, raw).channel_labels, channels)
@@ -744,6 +745,23 @@ def read_sidecar(audio_path: str | os.PathLike[str]) -> CalibrationSidecar | Non
         that is not text, or a text with a lone surrogate, among them.
     """
     source = sidecar_path(audio_path)
-    if not source.exists():
+    if not _sidecar_at(source):
         return None
     return _record(source, _sidecar_bytes(source))
+
+
+def _sidecar_at(source: Path) -> bool:
+    """Whether anything is at the sidecar name *source*.
+
+    A recording whose own name is as long as its directory takes has a
+    sidecar name longer than that, which nothing can be at; asking for it
+    raises :class:`OSError` on the name's length, which is no sidecar.
+
+    :raises OSError: as the file system raises it otherwise, untouched.
+    """
+    try:
+        return source.exists()
+    except OSError as error:
+        if error.errno == errno.ENAMETOOLONG:
+            return False
+        raise

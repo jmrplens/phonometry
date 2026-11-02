@@ -102,6 +102,7 @@ from .._internal.frozen import (
     reduce_with_plain_rows,
 )
 from .._internal.validation import (
+    is_text,
     require_choice,
     require_count,
     require_ranks,
@@ -472,7 +473,7 @@ def _as_material(name: str, value: object) -> Material:
     if isinstance(value, CatalogueRow):
         return _material_of_row(name, value)
     # The length of a fixed-size argument, not a quantity.
-    if isinstance(value, Sequence) and not isinstance(value, str) and len(value) == 3:  # noqa: PLR2004
+    if isinstance(value, Sequence) and not is_text(value) and len(value) == 3:  # noqa: PLR2004
         # Each number is read by the material's own checks, which refuse a
         # complex one rather than keep its real part.
         c_p, c_s, rho = value

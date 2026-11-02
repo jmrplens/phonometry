@@ -471,7 +471,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             the device tag is not a Table 2 column group, a value is not
             finite, or a band is not tabulated or is repeated.
         :raises TypeError: if ``spacing_m`` is not a single number.
-            ``frequencies`` is refused the same way when it is not one real number.
+            An element of ``frequencies`` is refused the same way when it is not one real number.
         """
         _check_device(self.device)
         require_ranks(self, frequencies=1, residual_index=1)

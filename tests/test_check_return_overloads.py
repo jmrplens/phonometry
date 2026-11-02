@@ -1319,3 +1319,41 @@ def test_the_script_reports_and_fails(
     assert "plots.py:" in out
     assert "plot_pair: returns Axes | np.ndarray" in out
     assert cro.main([]) == 0
+
+
+def test_a_statement_in_any_block_is_read_through() -> None:
+    """The statements of a ``case``, an ``except*``, a loop and a ``while`` are
+    read as those of an ``if`` or a ``try`` are.
+
+    Only ``if``, ``try`` and ``with`` were read through, so a definition or an
+    assignment in any other block was missed.
+    """
+    source = textwrap.dedent(
+        """\
+        import contextlib
+        import sys
+
+        match sys.maxsize:
+            case 0:
+                from json import dumps as in_case
+                IN_CASE = 0
+            case _:
+                from json import dumps as in_case
+                IN_CASE = 1
+        try:
+            from json import loads as in_try
+            IN_TRY = 1
+        except* ImportError:
+            pass
+        with contextlib.nullcontext():
+            from json import JSONDecoder as in_with
+            IN_WITH = 1
+        for _ in range(1):
+            from json import JSONEncoder as in_loop
+            IN_LOOP = 1
+        while False:
+            IN_WHILE = 1
+        """
+    )
+    statements = {ast.unparse(node) for node in cro._statements(ast.parse(source).body)}
+    assert {"IN_CASE = 1", "IN_TRY = 1", "IN_LOOP = 1", "IN_WHILE = 1"} <= statements

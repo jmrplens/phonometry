@@ -95,6 +95,42 @@ test('an image by reference is one only when the page defines its label', () => 
 
 test('a pair of display delimiters with a third after it is stray', () => {
   assert.equal(strayDelimiter('$$x$$ text $$'), '$$x$$ text $$');
-  assert.equal(strayDelimiter('$$x$$ $$y$$'), '$$x$$ $$y$$');
+  // Two pairs on one line are two inline maths, not a stray delimiter.
+  assert.equal(strayDelimiter('$$x$$ $$y$$'), null);
   assert.equal(strayDelimiter('$$x$$'), null);
+});
+
+test('a comment holding a backtick hides no figure after it', () => {
+  // The comments were taken out after the code spans, so the backtick in a
+  // comment opened a span that ran to the next backtick and hid the figure.
+  const md = 'Intro.\n\n<!-- old `code -->\n![fig](a.png) and `x`\n';
+  assert.equal(authorsFigure(md), true);
+  const mdx = 'Intro.\n\n{/* old `code */}\n![fig](a.png) and `x`\n';
+  assert.equal(authorsFigure(mdx, { mdx: true }), true);
+  // A comment opened inside a span is code, and hides nothing.
+  assert.equal(authorsFigure('A `<!--` span.\n\n![fig](a.png)\n'), true);
+});
+
+test('the maths check reads a comment with the code spans', () => {
+  const lines = ['<!-- a `', '$$x$$ text $$ -->', 'Prose `y` here.'];
+  const shown = shownLines(lines, [false, false, false]);
+  assert.equal(strayDelimiter(shown[1]), null);
+  const mdx = ['{/* a `', '$$x$$ text $$ */}'];
+  assert.equal(strayDelimiter(shownLines(mdx, [false, false], { mdx: true })[1]), null);
+});
+
+test('two inline displays on a line pair, and a third delimiter does not', () => {
+  // A `$` after the opening run is no display (micromark's math flow refuses
+  // it), so the line is a paragraph of two inline maths.
+  assert.equal(strayDelimiter('$$a$$ and $$b$$'), null);
+  assert.equal(strayDelimiter('$$x$$ text $$'), '$$x$$ text $$');
+  assert.equal(strayDelimiter('$$ x'), '$$ x');
+});
+
+test('a tag with text after it opens no raw block unless it is a block tag', () => {
+  // CommonMark 4.6: any tag but a block tag opens a raw block (type 7) only
+  // alone on its line, so the backslash here escapes the `<` of the image.
+  assert.equal(authorsFigure('<span>\\<img src="x.png"></span>\n'), false);
+  assert.equal(authorsFigure('<div>\\<img src="x.png"></div>\n'), true);
+  assert.equal(authorsFigure('Prose.\n<section>\\<img src="x.png"></section>\n'), true);
 });

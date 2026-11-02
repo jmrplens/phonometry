@@ -21,6 +21,7 @@ refused according to a coincidence between its bands.
 
 from __future__ import annotations
 
+import cmath
 import math
 import warnings
 from collections import deque
@@ -39,6 +40,7 @@ from phonometry._internal.validation import (
     arrays_of,
     check_engine,
     complex_array,
+    complex_number,
     floats_of,
     holds_text,
     indices_of,
@@ -883,6 +885,65 @@ def test_real_array_refuses_a_long_double_past_a_float() -> None:
     with pytest.raises(ValueError, match="'x' holds a number too large"):
         real_array(big, "x")
     assert np.array_equal(real_array(np.array([1.0], dtype=np.longdouble), "x"), [1.0])
+
+
+#: Finite numbers no complex of floats holds, by how a caller writes one.
+_BEYOND_A_COMPLEX: dict[str, Callable[[], object]] = {
+    "Decimal": lambda: Decimal("1e400"),
+    "long double": lambda: np.longdouble("1e400"),
+    "complex long double": lambda: np.clongdouble(np.longdouble("1e400")),
+    "imaginary long double": lambda: np.clongdouble(1j) * np.longdouble("1e400"),
+}
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        pytest.param(
+            spelling,
+            marks=_ONLY_WITH_A_WIDE_LONG_DOUBLE if "long double" in spelling else (),
+        )
+        for spelling in _BEYOND_A_COMPLEX
+    ],
+)
+def test_complex_number_refuses_a_number_no_complex_holds(spelling: str) -> None:
+    """A finite number past a float's largest is refused as too large.
+
+    :func:`complex` reads a ``Decimal``, a long double or a complex long
+    double past a float's range as an infinity, and the reader handed it
+    back as ``(inf+0j)``, which a check after it took for an infinity the
+    caller gave, though its docstring promised a ``ValueError``.
+    """
+    value = _BEYOND_A_COMPLEX[spelling]()
+    with pytest.raises(ValueError, match="'z' must be a number a complex can hold"):
+        complex_number(value, "z")
+
+
+def test_complex_number_keeps_an_infinity_the_caller_gives() -> None:
+    assert cmath.isinf(complex_number(complex(math.inf, 1.0), "z"))
+    assert cmath.isinf(complex_number(Decimal("Infinity"), "z"))
+
+
+@_ONLY_WITH_A_WIDE_LONG_DOUBLE
+@pytest.mark.parametrize(
+    "dtype", [np.longdouble, np.clongdouble], ids=["long double", "complex long double"]
+)
+def test_complex_array_refuses_an_array_of_long_doubles_past_a_float(
+    dtype: type[np.generic],
+) -> None:
+    """An array of long doubles, or of complex long doubles, past a float's
+    largest is refused by name, as a list of them already was.
+
+    The reader handed an array of numbers to numpy as it was, which read the
+    number as an infinity with no more than a ``RuntimeWarning``.
+    """
+    big = np.array([1.0, 1e300], dtype=dtype) * np.longdouble(1e300)
+    with pytest.raises(ValueError, match="'z' holds a number too large for a float"):
+        complex_array(big, "z")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        held = complex_array(np.array([1.0 + 2.0j], dtype=np.clongdouble), "z")
+    assert np.array_equal(held, [1.0 + 2.0j])
 
 
 def test_real_array_keeps_an_infinity_the_caller_gives() -> None:

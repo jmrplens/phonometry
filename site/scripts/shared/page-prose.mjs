@@ -30,14 +30,30 @@ function dropEscapes(text) {
 }
 
 /**
- * Whether a line opens a raw HTML block of a `.md` page (CommonMark 4.6): a
- * tag, opening or closing, at the start of a block. Its lines go to the page
- * as they are written, a backslash in them included.
+ * A line that opens a raw HTML block of type 6 (CommonMark 4.6): one of the
+ * block tags, opening or closing, whatever follows it on the line. It may
+ * interrupt a paragraph.
  */
-const HTML_BLOCK = /^ {0,3}<\/?[A-Za-z]/;
+const HTML_BLOCK_TAG = new RegExp(
+  '^ {0,3}</?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|' +
+    'colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|' +
+    'frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|' +
+    'nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|' +
+    'tfoot|th|thead|title|tr|track|ul)(?:[\\s/>]|$)',
+  'i',
+);
 
-/** An HTML comment, and an MDX one: a sample or a note, never markup shown. */
-const COMMENTS = { md: /<!--[\s\S]*?-->/g, mdx: /<!--[\s\S]*?-->|\{\/\*[\s\S]*?\*\/\}/g };
+/**
+ * A line that opens a raw HTML block of type 7: any other complete tag,
+ * opening or closing, alone on its line. It cannot interrupt a paragraph.
+ */
+const HTML_LONE_TAG =
+  /^ {0,3}(?:<[A-Za-z][A-Za-z0-9-]*(?:\s+[A-Za-z_:][\w.:-]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*\/?>|<\/[A-Za-z][A-Za-z0-9-]*\s*>)\s*$/;
+
+/** Whether a line opens a raw HTML block of a `.md` page, after `previous`. */
+function opensHtmlBlock(line, previous) {
+  return HTML_BLOCK_TAG.test(line) || (!previous.trim() && HTML_LONE_TAG.test(line));
+}
 
 /** An HTML image: a tag named `img` in any case, its name ending there. */
 const HTML_IMAGE = /<img(?=[\s/>])/i;
@@ -72,7 +88,7 @@ function shownEscapes(source, mdx) {
     .split('\n')
     .map((line) => {
       if (!line.trim()) raw = false;
-      else if (!previous.trim() && HTML_BLOCK.test(line)) raw = true;
+      else if (!raw && opensHtmlBlock(line, previous)) raw = true;
       previous = line;
       return raw ? line : dropEscapes(line);
     })
@@ -89,17 +105,19 @@ function shownEscapes(source, mdx) {
  * `img` in any case of its letters, as HTML reads a tag's name, and not a
  * longer name such as `img-card`. A backslash before the `!` or the `<`
  * shows it and opens neither, but on the lines of a raw HTML block of a
- * `.md` page, which go out as written. A comment, HTML or MDX, shows
- * nothing. Code spans are read over the lines of their block, as the page
- * reads them.
+ * `.md` page, which go out as written: a block tag opens one wherever it
+ * stands, with anything after it, and any other tag only alone on its line
+ * after a blank one (CommonMark 4.6, types 6 and 7). A comment, HTML or MDX,
+ * shows nothing, and is read with the code spans over the lines of their
+ * block, as the page reads them, whichever opens first winning.
  *
  * @param {string} markdown The page, as written.
  * @param {{ mdx?: boolean }} [options] Whether the page is MDX (`.mdx`).
  * @returns {boolean} Whether a figure is written outside any code.
  */
 export function authorsFigure(markdown, { mdx = false } = {}) {
-  const spoken = dropInlineSpansByBlock(prose(markdown));
-  const source = shownEscapes(spoken, mdx).replace(COMMENTS[mdx ? 'mdx' : 'md'], SPAN_MARK);
+  const spoken = dropInlineSpansByBlock(prose(markdown), '`', { comments: mdx ? 'mdx' : 'md' });
+  const source = shownEscapes(spoken, mdx);
   if (INLINE_IMAGE.test(source) || HTML_IMAGE.test(source)) return true;
   const defined = new Set(Array.from(source.matchAll(DEFINITION), (m) => normalised(m[1])));
   for (const match of source.matchAll(REFERENCE_IMAGE)) {
@@ -110,25 +128,29 @@ export function authorsFigure(markdown, { mdx = false } = {}) {
 }
 
 /**
- * The lines of a page as the maths check reads them: code spans out, read
- * over the lines of their block, each line where it was.
+ * The lines of a page as the maths check reads them: code spans and
+ * comments out, read over the lines of their block, each line where it was.
  *
  * @param {string[]} lines The lines of a page.
  * @param {boolean[]} code Whether each line is inside a fenced block.
+ * @param {{ mdx?: boolean }} [options] Whether the page is MDX (`.mdx`).
  * @returns {string[]} The lines, a fenced one left blank.
  */
-export function shownLines(lines, code) {
+export function shownLines(lines, code, { mdx = false } = {}) {
   const prose = lines.map((line, index) => (code[index] ? '' : line)).join('\n');
-  return dropInlineSpansByBlock(prose).split('\n');
+  return dropInlineSpansByBlock(prose, '`', { comments: mdx ? 'mdx' : 'md' }).split('\n');
 }
 
 /**
  * The prose of a line that carries a display-maths delimiter beside content.
  *
- * Inline `$$...$$` complete on one line is fine, and so is `$$` alone on its
- * line; what breaks the parser is a block that opens or closes on a line that
- * carries anything else, a line that writes a third `$$` after a complete
- * pair among them. Prose that talks about `$$` writes it in a code span.
+ * `$$` alone on its line opens or closes a display, and is fine. A line that
+ * starts with `$$` and holds no other `$` opens a display with something
+ * after the delimiter, which the parser does not read as maths. Any other
+ * line is a paragraph, where `$$` pairs as inline maths (micromark's math
+ * flow refuses a `$` after its opening run): it is fine when its delimiters
+ * pair, an even count, and a line that writes a third `$$` after a complete
+ * pair leaves one open. Prose that talks about `$$` writes it in a code span.
  *
  * @param {string} line One line of a page, outside any fenced block.
  * @returns {string | null} The line's prose, trimmed, or `null` when it is fine.
@@ -138,8 +160,7 @@ export function strayDelimiter(line) {
   const shown = dropEscapes(trimmed);
   const delimiters = shown.match(/\$\$/g)?.length ?? 0;
   if (!delimiters) return null;
-  const only = shown === '$$';
-  const complete =
-    delimiters === 2 && shown.startsWith('$$') && shown.endsWith('$$') && shown.length > 4;
-  return only || complete ? null : trimmed;
+  if (shown === '$$') return null;
+  const opensDisplay = /^\${2,}[^$]*$/.test(shown);
+  return opensDisplay || delimiters % 2 === 1 ? trimmed : null;
 }

@@ -17,10 +17,14 @@ It reads every Python script under ``scripts/`` but the shared reader and
 itself, and refuses a regular expression handed to the ``re`` module that
 reads a span by hand:
 
-- **A span by its content**: a backtick, or a run of them, followed, inside a
-  group or not, by what a span holds written as anything but a backtick
-  (``[^`]``, ``[^`\\n]``) or as anything at all taken lazily (``.*?``,
-  ``.+?``), and a backtick after it: ``r"`[^`]+`"``, ``r"``(.+?)``"``.
+- **A span by its content**: a backtick, or a run of them written out or
+  with a quantifier (``+``, ``{2}``, ``{2,}``), white space a reader lets
+  pad it (``\\s*``, ``[ \\t]*``, `` ?``), then, inside a group or not, what a
+  span holds written as anything but a backtick (``[^`]``, ``[^`\\n]``) or as
+  anything at all (``.*?``, ``.+``), and a backtick after it:
+  ``r"`[^`]+`"``, ``r"``(.+?)``"``, ``r"`+(.+)`+"``. A pattern that takes
+  only some characters between backticks (``(\\S+?)``, ``([\\w.]+)``) reads a
+  token no span stops at, and is left alone.
 - **A span by its run**: a run of backticks captured (``(`+)``) and matched
   again by a backreference, the shape of a reader that pairs the runs itself.
 
@@ -92,12 +96,20 @@ _RE_FUNCTIONS = frozenset(
     }
 )
 
-#: A backtick that may open a span, not right after the colon of a role, and
-#: the group it may open: ``(``, ``(?:`` or ``(?P<name>``.
-_OPENING = re.compile(r"(?<!:)`+(?:\((?:\?:|\?P<\w+>)?)?")
+#: Padding a reader allows around what a span holds: ``\s*``, ``[ \t]*``,
+#: `` ?`` or `` *``, any of them taken any number of times.
+_PADDING = r"(?:\\s[*+?]?|\[ ?\\t ?\][*+?]?| [*+?]?)*"
+#: A backtick that may open a span, not right after the colon of a role, or a
+#: run of them written with a quantifier (``+``, ``{2}``, ``{2,}``), the
+#: padding before the group it may open (``(``, ``(?:`` or ``(?P<name>``) and
+#: the padding inside it.
+_OPENING = re.compile(
+    rf"(?<!:)`+(?:\+|\{{\d+(?:,\d*)?\}})?{_PADDING}"
+    rf"(?:\((?:\?:|\?P<\w+>)?)?{_PADDING}"
+)
 #: What a span holds, written by hand: a class of anything but a backtick, or
-#: anything at all taken lazily.
-_CONTENT = re.compile(r"\[\^[^\]]*`[^\]]*\]|\.[*+]\?|\(\?:\[\^[^\]]*`")
+#: anything at all, taken lazily or not.
+_CONTENT = re.compile(r"\[\^[^\]]*`[^\]]*\]|\.[*+]|\(\?:\[\^[^\]]*`")
 #: A run of backticks captured, and a backreference that pairs it.
 _RUN_GROUP = re.compile(r"\((?:\?P<\w+>)?`\+\)")
 _BACKREFERENCE = re.compile(r"\\[1-9]|\(\?P=\w+\)|\\k<\w+>")

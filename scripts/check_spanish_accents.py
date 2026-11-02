@@ -131,7 +131,8 @@ import re
 import sys
 from typing import TYPE_CHECKING, NamedTuple
 
-from markdown_spans import blank_inline_spans
+from markdown_fences import code_lines
+from markdown_spans import blank_inline_spans, blank_inline_spans_by_block
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -837,8 +838,18 @@ def page_prose(text: str, *, script: bool = False) -> str:
     """
     if script:
         return text
-    lines = [blank_inline_spans(line) for line in text.split("\n")]
-    return blank_inline_spans("\n".join(lines), "$")
+    lines = text.split("\n")
+    code = list(code_lines(lines))
+    shown = blank_inline_spans_by_block(
+        "\n".join(
+            "" if fenced else line for line, fenced in zip(lines, code, strict=True)
+        )
+    ).split("\n")
+    kept = [
+        line if fenced else spoken
+        for line, spoken, fenced in zip(lines, shown, code, strict=True)
+    ]
+    return blank_inline_spans("\n".join(kept), "$")
 
 
 def _cased(word: str, right: str) -> str:

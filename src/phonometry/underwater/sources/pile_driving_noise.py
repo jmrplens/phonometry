@@ -450,7 +450,7 @@ class StrikeSELSpectrum(OwnsArrays):
             msg = (
                 "StrikeSELSpectrum: 'band_sel' must be finite, or -inf for a "
                 "band that holds no energy at all; the "
-                f"{real_number(np.asarray(self.frequencies)[i], 'np'):g} Hz band states "
+                f"{real_number(np.asarray(self.frequencies)[i], 'frequencies'):g} Hz band states "
                 f"{float(band_sel[i])!r}."
             )
             raise ValueError(msg)

@@ -115,6 +115,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
+    is_text,
     real_array,
     refuse_complex,
     require_choice,
@@ -1555,12 +1556,12 @@ def method_b_source_ranking(
         one participant, an empty source name, no participants, or sites
         that do not match the participants.
     """
-    if isinstance(rankings, str) or not isinstance(rankings, Sequence):
+    if is_text(rankings) or not isinstance(rankings, Sequence):
         msg = "'rankings' must be a sequence of lists of source names, one list per participant."
         raise TypeError(msg)
     lists: list[tuple[str, ...]] = []
     for k, listed in enumerate(rankings):
-        if isinstance(listed, str) or not isinstance(listed, Sequence):
+        if is_text(listed) or not isinstance(listed, Sequence):
             msg = f"'rankings[{k}]' must be a list of source names, the most noticeable first."
             raise TypeError(msg)
         names = tuple(str(name).strip() for name in listed)

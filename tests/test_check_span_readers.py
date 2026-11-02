@@ -37,6 +37,13 @@ _READERS = {
     "a span of two backticks that may hold one": r"``(?:[^`]|`(?!`))+``",
     "a run paired by a backreference": r"(`+)(.+?)\1",
     "a named run paired by name": r"(?P<run>`+)(.+?)(?P=run)",
+    "a run of backticks on each side": r"`+([^`]+)`+",
+    "a run of two or more": r"`{2,}([^`]+)`{2,}",
+    "anything at all, greedily": r"`(.+)`",
+    "anything or nothing, greedily": r"`(.*)`",
+    "padded by white space": r"`\s*([^`]+?)\s*`",
+    "padded by spaces and tabs": r"`[ \t]*([^`]+)[ \t]*`",
+    "padded by one space at most": r"` ?([^`]+) ?`",
 }
 
 #: Patterns that hold a backtick and read no span.
@@ -47,6 +54,10 @@ _NO_READERS = {
     "a run of backticks alone": r"`+",
     "a fence": r"^(\s*)(`{3,}|~{3,})(.*)$",
     "an escaped backtick or dollar": r"\\([`$\\])",
+    # A token between backticks, which no span reader stops at: the limit of
+    # the rule, which reads what a span holds only as anything but a backtick.
+    "a file name between backticks": r"``([\w./-]+\.json)``",
+    "a word between backticks": r"`(\S+?)`",
 }
 
 
@@ -118,6 +129,29 @@ def test_a_line_of_the_site_s_code_is_read(tmp_path: pathlib.Path) -> None:
         const kept = text.replace(/\\$+/g, ' ');
     """
     assert _places(tmp_path, source, "page.mjs") == ["<script>"]
+
+
+@pytest.mark.parametrize(
+    "shape",
+    [
+        "a run of backticks on each side",
+        "a run of two or more",
+        "anything at all, greedily",
+        "anything or nothing, greedily",
+        "padded by white space",
+        "padded by spaces and tabs",
+        "padded by one space at most",
+    ],
+)
+def test_each_shape_is_read_in_a_script_and_in_the_site_s_code(
+    shape: str, tmp_path: pathlib.Path
+) -> None:
+    """A shape is found where Python hands it to ``re`` and on a line of the site."""
+    pattern = _READERS[shape]
+    script = f"import re\n\nSPANS = re.compile({pattern!r})\n"
+    assert _places(tmp_path, script) == ["<module>"]
+    line = f"const spans = text.match(/{pattern}/g);\n"
+    assert _places(tmp_path, line, "page.mjs") == ["<script>"]
 
 
 def test_an_exemption_that_covers_nothing_is_stale(tmp_path: pathlib.Path) -> None:

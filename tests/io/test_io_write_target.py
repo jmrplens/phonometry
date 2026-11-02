@@ -221,3 +221,63 @@ def test_a_directory_at_the_name_raises_what_the_open_raises(
         call()
     assert path.is_dir()
     assert list(path.iterdir()) == []
+
+
+def _longest_name(directory: Path) -> int:
+    """The longest name *directory* takes, 255 where it cannot say."""
+    try:
+        return os.pathconf(directory, "PC_NAME_MAX")
+    except (AttributeError, OSError, ValueError):
+        return 255
+
+
+#: How a recording is written to a name as long as its directory takes: SciPy's
+#: WAV, the in-house packer, and python-soundfile's FLAC with a ``bext``,
+#: which is copied once more beside the file to put the chunk in.
+_LONG_NAME_WRITES: dict[str, tuple[str, Callable[[Path], None], bool]] = {
+    "WAV": (".wav", lambda path: write(path, SAMPLES, FS), False),
+    "PCM_24": (".wav", lambda path: write(path, SAMPLES, FS, subtype="PCM_24"), False),
+    "FLAC with a bext": (
+        ".flac",
+        lambda path: write(path, SAMPLES, FS, bext=fresh_metadata()),
+        True,
+    ),
+}
+
+
+@pytest.mark.parametrize("kind", sorted(_LONG_NAME_WRITES))
+def test_a_name_as_long_as_the_directory_takes_is_written(
+    kind: str, tmp_path: Path
+) -> None:
+    """The hidden name beside the target is cut to what the directory takes.
+
+    It was the whole name with a dot, a token of sixteen digits and
+    ``.partial`` added, 26 characters more, and a FLAC with a ``bext`` added
+    ``.phonometry-tmp`` to that, so a name of 232 characters or more on a
+    file system of 255 was refused as too long before anything was written.
+    """
+    suffix, write_to, needs_soundfile = _LONG_NAME_WRITES[kind]
+    if needs_soundfile and not HAVE_SOUNDFILE:
+        pytest.skip("the [audio] extra (soundfile) is not installed")
+    path = tmp_path / ("m" * (_longest_name(tmp_path) - len(suffix)) + suffix)
+    write_to(path)
+    assert read(path).data.shape[-1] == SAMPLES.size
+    assert [entry.name for entry in tmp_path.iterdir()] == [path.name]
+
+
+def test_the_name_beside_a_target_fits_its_directory_and_is_new(
+    tmp_path: Path,
+) -> None:
+    longest = _longest_name(tmp_path)
+    # Two bytes a character, so a cut through the middle of one is possible.
+    target = tmp_path / ("é" * longest)
+    first = json_input.beside_name(target, ".partial")
+    second = json_input.beside_name(target, ".partial")
+    for beside in (first, second):
+        assert beside.parent == tmp_path
+        assert beside.name.startswith(".é")
+        assert beside.name.endswith(".partial")
+        assert len(os.fsencode(beside.name)) <= longest
+    assert first != second
+    short = json_input.beside_name(tmp_path / "meas.wav", ".tmp")
+    assert short.name.startswith(".meas.wav.")

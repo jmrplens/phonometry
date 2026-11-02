@@ -791,9 +791,11 @@ class QuasiPeakDynamicsResult(OwnsArrays):
         :raises ValueError: if there are not eleven readings, one is not
             positive and finite, or ``fs`` is not positive.
         :raises TypeError: if ``fs`` is not a single number.
-            ``readings_percent`` is refused the same way when it is not one real number.
+            An element of ``readings_percent`` is refused the same way when it is not one real number.
         """
-        readings = tuple(real_number(r, "r") for r in self.readings_percent)
+        readings = tuple(
+            real_number(r, "readings_percent") for r in self.readings_percent
+        )
         if len(readings) != len(_WINDOWS):
             msg = (
                 f"{type(self).__name__}: a verdict is attested over the "

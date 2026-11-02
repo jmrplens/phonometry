@@ -176,6 +176,43 @@ def not_regular_at(path: Path) -> str | None:
     return _not_regular(mode)
 
 
+#: The longest name a directory takes when it cannot say: 255 bytes on every
+#: common file system of Linux and macOS, 255 UTF-16 units on Windows, which
+#: no more than 255 bytes of UTF-8 ever take.
+_NAME_MAX = 255
+
+
+def _name_max(directory: Path) -> int:
+    """The longest name, in bytes, *directory* takes."""
+    try:
+        longest = os.pathconf(directory, "PC_NAME_MAX")
+    except (AttributeError, OSError, ValueError):
+        # No pathconf on Windows; no answer for a directory not there yet,
+        # where the write fails on its own.
+        return _NAME_MAX
+    return longest if longest > 0 else _NAME_MAX
+
+
+def beside_name(target: Path, tail: str) -> Path:
+    """A new hidden name beside *target*, which its directory can hold.
+
+    ``.{name}.{token}{tail}``, with a new random token on every call, so two
+    writers of one name never share theirs. The name of *target* is cut, at a
+    whole character, to what the directory's longest name leaves after the
+    dot, the token and *tail*: a target whose own name is as long as the
+    directory takes still gets a name beside it, where the whole name
+    written out would be refused as too long.
+
+    :param target: The name the file is for.
+    :param tail: What ends the new name, such as ``".partial"``.
+    """
+    token = secrets.token_hex(8)
+    room = _name_max(target.parent) - len(os.fsencode(f"..{token}{tail}"))
+    kept = os.fsencode(target.name)[: max(room, 0)]
+    stem = kept.decode(sys.getfilesystemencoding(), errors="ignore")
+    return target.with_name(f".{stem}.{token}{tail}")
+
+
 def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
     """Put *data* at *target* through a new file beside it, renamed into place.
 
@@ -219,7 +256,7 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
         failure before the file is in place; when the new file cannot be
         removed after it, a note on the error names the file left behind.
     """
-    temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
+    temporary = beside_name(target, ".tmp")
     mode = _mode_of(target) if replace else None
     try:
         with temporary.open("xb") as handle:
@@ -248,7 +285,11 @@ def writing_beside(target: Path) -> Iterator[Path]:
     as it was, and the new file is removed. The new file is flushed to the
     disk before the rename and keeps the permission bits of the old one, and
     a hard link to the old file keeps the old bytes, as :func:`write_beside`
-    says. Anything else at the name, a link, a pipe, a device, a socket or a
+    says. The new file is the writer's own: it takes the writer's owner and
+    group, and keeps neither the access control lists nor the extended
+    attributes of the old file. Its hidden name is cut to what the directory
+    takes (:func:`beside_name`), so a name as long as the directory allows
+    is written as any other. Anything else at the name, a link, a pipe, a device, a socket or a
     directory, is handed back as it is, for the writer to open as Python
     opens a name: a link is followed to what it names, a pipe waits for a
     reader, and a directory raises :class:`IsADirectoryError`. A writer of a
@@ -265,7 +306,7 @@ def writing_beside(target: Path) -> Iterator[Path]:
     if target.is_symlink() or not_regular_at(target) is not None:
         yield target
         return
-    temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.partial")
+    temporary = beside_name(target, ".partial")
     mode = _mode_of(target)
     try:
         yield temporary

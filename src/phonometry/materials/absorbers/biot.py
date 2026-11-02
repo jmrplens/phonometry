@@ -126,7 +126,7 @@ _FLUID = "fluid"
 
 def _require_shear_modulus(value: complex, name: str) -> complex:
     r"""Validate a complex shear modulus :math:`N = N'(1 + j \eta)`."""
-    n = complex_number(value, "value")
+    n = complex_number(value, name)
     if not np.isfinite(n):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)
@@ -171,7 +171,7 @@ def frame_bulk_modulus(shear_modulus: complex, poisson_ratio: float) -> complex:
     :raises ValueError: for a non-positive or non-finite ``N``, a negative
         :math:`\operatorname{Im}(N)` or a ``nu`` outside :math:`(-1, 0.5)`.
     :raises TypeError: if ``poisson_ratio`` is not a single number.
-        ``shear_modulus`` is refused the same way when it is not one real number.
+        ``shear_modulus`` is refused the same way when it is not one number.
     """
     n = _require_shear_modulus(shear_modulus, "shear_modulus")
     nu = _require_poisson_ratio(poisson_ratio)
@@ -195,7 +195,7 @@ def frame_elastic_coefficient(shear_modulus: complex, poisson_ratio: float) -> c
     :return: The complex elastic coefficient ``Kc``, in Pa.
     :raises ValueError: as :func:`frame_bulk_modulus`.
     :raises TypeError: if ``poisson_ratio`` is not a single number.
-        ``shear_modulus`` is refused the same way when it is not one real number.
+        ``shear_modulus`` is refused the same way when it is not one number.
     """
     n = _require_shear_modulus(shear_modulus, "shear_modulus")
     nu = _require_poisson_ratio(poisson_ratio)
@@ -448,7 +448,7 @@ def biot_waves(
         density, shear modulus or Poisson coefficient.
     :raises TypeError: if ``frame_density``, ``poisson_ratio``, ``porosity`` or
         ``tortuosity`` is not a single number.
-        ``shear_modulus`` is refused the same way when it is not one real number.
+        ``shear_modulus`` is refused the same way when it is not one number.
     """
     phi = require_positive(porosity, "porosity")
     if phi > 1.0:

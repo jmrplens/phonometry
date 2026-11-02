@@ -1206,13 +1206,27 @@ class Package:
         at *call* (:meth:`_targets`) and reach different functions reach no
         one function: ``None``.
         """
+        targets = self.call_targets(function, func, call)
+        return targets[0] if len(targets) == 1 else None
+
+    def call_targets(
+        self, function: Function, func: ast.expr, call: ast.AST | None = None
+    ) -> list[str]:
+        """Every dotted name a call written in *function* may reach.
+
+        For a function written in a function around the call, the key in
+        :attr:`functions` of its first definition there, alone. Otherwise each
+        name an import or a definition that may stand for the name at *call*
+        reaches (:meth:`_targets`), once: ``try: from ._fast import helper``
+        and ``except ImportError: from ._slow import helper`` reach both.
+        """
         targets = self._targets(function, func, call)
         if not targets:
-            return None
+            return []
         nested = targets[0] in self.functions and (
             self.functions[targets[0]].parent is not None
         )
-        return targets[0] if nested or len(set(targets)) == 1 else None
+        return [targets[0]] if nested else list(dict.fromkeys(targets))
 
     def reached(
         self, function: Function, func: ast.expr, call: ast.AST | None = None

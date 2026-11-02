@@ -74,7 +74,7 @@ functions.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. `phons` is refused the same way when it is not one real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. An element of `phons` is refused the same way when it is not one real number. |
 
 ## EqualLoudnessContours
 

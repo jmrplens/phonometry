@@ -44,7 +44,7 @@ import tokenize
 from pathlib import Path
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans
+from markdown_spans import drop_inline_spans_by_block
 
 #: The repository, for paths a reader can click.
 _REPO = Path(__file__).resolve().parent.parent
@@ -98,10 +98,16 @@ def _markdown_prose(text: str) -> list[tuple[int, str]]:
     behind a backslash opens no span, and what follows it is prose.
     """
     lines = text.splitlines()
+    code_flags = list(code_lines(lines))
+    shown = drop_inline_spans_by_block(
+        "\n".join(
+            "" if code else line for line, code in zip(lines, code_flags, strict=True)
+        )
+    ).split("\n")
     return [
-        (number, "" if code else drop_inline_spans(line))
-        for number, (line, code) in enumerate(
-            zip(lines, code_lines(lines), strict=True), start=1
+        (number, "" if code else prose)
+        for number, (prose, code) in enumerate(
+            zip(shown, code_flags, strict=True), start=1
         )
     ]
 

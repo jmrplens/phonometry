@@ -258,7 +258,7 @@ severity DIN 4150-2 reads, and the third-octave levels of Figure 6.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate the chain or the upper band cannot take, a stretch outside the record, stretches that do not nest or a $T_1$ longer than $T_2$, or an upper band that is not a nominal centre from 80 Hz to 315 Hz. |
-| TypeError | if `upper_band_hz` is not a single number. `t1_s` or `t2_s` are refused the same way when any is not one real number. |
+| TypeError | if `upper_band_hz` is not a single number. An element of `t1_s` or `t2_s` is refused the same way when it is not one real number. |
 
 ## EVENT_REFERENCE_DURATION_S
 
@@ -357,7 +357,7 @@ Formula (4) and which is what a meter reading its display produces.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a non-positive rate, or an interval that is empty or runs outside the record. |
-| TypeError | if `fs` is not a single number. `interval_s` is refused the same way when it is not one real number. |
+| TypeError | if `fs` is not a single number. An element of `interval_s` is refused the same way when it is not one real number. |
 
 ## narrowband_psd
 

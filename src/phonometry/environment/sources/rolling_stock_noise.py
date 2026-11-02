@@ -1048,7 +1048,7 @@ class RiseSpeedResult(OwnsArrays):
 
         :raises TypeError: if ``levels`` or ``times`` holds a text or a value that is
             not a real number.
-            ``rise_speeds_db_per_s`` is refused the same way when it is not one real number.
+            An element of ``rise_speeds_db_per_s`` is refused the same way when it is not one real number.
         """
         object.__setattr__(self, "times", read_only(real_array(self.times, "times")))
         object.__setattr__(self, "levels", read_only(real_array(self.levels, "levels")))
@@ -2445,7 +2445,7 @@ class PassByUncertainty(RichDisplay):
             is not finite.
         :raises TypeError: if ``coverage_factor`` or ``pressure_level`` is not a single
             number.
-            ``standard_uncertainties_db`` is refused the same way when it is not one real number.
+            An element of ``standard_uncertainties_db`` is refused the same way when it is not one real number.
         """
         require_finite(self.pressure_level, "pressure_level")
         names = tuple(str(name) for name in self.names)

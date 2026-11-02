@@ -61,7 +61,7 @@ import re
 import sys
 from typing import TYPE_CHECKING, Literal
 
-from markdown_spans import drop_inline_spans
+from markdown_spans import drop_inline_spans_by_block
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -931,8 +931,11 @@ def _mdx_safe(text: str, *, where: str) -> str:
     (:mod:`markdown_spans`): a backtick behind a backslash is shown and opens
     no span, so a brace after it is refused.
     """
-    for line_number, line in enumerate(text.splitlines(), start=1):
-        prose = drop_inline_spans(line)
+    lines = text.splitlines()
+    shown = drop_inline_spans_by_block("\n".join(lines)).split("\n")
+    for line_number, (line, prose) in enumerate(
+        zip(lines, shown, strict=True), start=1
+    ):
         if _MDX_HAZARD.search(prose):
             sys.exit(
                 f"{where}, line {line_number}: {line.strip()!r} carries a brace "

@@ -1155,12 +1155,6 @@ class Summary:
     value: Value = _CLEAN
 
 
-#: How many times at most a function's body is read for its helpers to
-#: settle (:meth:`Reader.settled_helpers`): one more than the longest chain of
-#: helpers written before the sibling each calls.
-_HELPER_PASSES = 4
-
-
 def _helpers_written_in(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
     """How many functions are written in *function*'s own body, through its
     compound statements, not inside another function or a class.
@@ -1319,11 +1313,17 @@ class Reader:
         """What each helper written in this function returns, once a pass of
         the body over what the pass before found finds no more.
 
-        Each pass only adds to what a helper may return, so they settle; a
-        bound on their number keeps a cycle of helpers from reading forever.
+        Each pass only adds to what a helper may return, and settles at least
+        one more helper of a chain written before the sibling each calls, so
+        one more pass than the helpers written in the function finds nothing
+        new. Past that bound the guard stops with an error rather than read
+        the helpers as they stood: a value no pass settled is no reading.
+
+        :raises RuntimeError: when the helpers have not settled by the bound.
         """
         held: dict[ast.AST, tuple[Value, frozenset[str]]] = {}
-        for _ in range(_HELPER_PASSES):
+        passes = _helpers_written_in(self.function.node) + 1
+        for _ in range(passes):
             trial = Reader(
                 self.tree,
                 self.function,
@@ -1335,9 +1335,13 @@ class Reader:
             )
             trial.block(self.function.node.body, trial.start())
             if trial.nested_returns == held:
-                break
+                return held
             held = trial.nested_returns
-        return held
+        msg = (
+            f"{self.function.path}: what the helpers written in "
+            f"{self.function.qualname} return did not settle in {passes} passes"
+        )
+        raise RuntimeError(msg)
 
     # -- statements ------------------------------------------------------
     def block(

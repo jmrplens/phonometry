@@ -34,6 +34,7 @@ from .._internal.display import RichDisplay
 from .._internal.validation import (
     indices_of,
     is_integer,
+    is_text,
     real_array,
     real_number,
     require_equal_counts,
@@ -149,7 +150,7 @@ class Signal(RichDisplay):
         # file is, for processing in place.
         object.__setattr__(self, "data", np.array(data, order="C"))
         if self.channel_labels is not None:
-            if isinstance(self.channel_labels, str):
+            if is_text(self.channel_labels):
                 # One text is a sequence of its characters: read as labels it
                 # would name one channel per letter.
                 msg = (

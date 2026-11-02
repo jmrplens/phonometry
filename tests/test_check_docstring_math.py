@@ -206,3 +206,16 @@ def test_a_fence_closes_only_on_its_own_marker(tmp_path: pathlib.Path) -> None:
 def test_the_package_is_clean() -> None:
     """The corpus itself, docstrings and pages, which is what the gate protects."""
     assert cdm.main() == 0
+
+
+def test_a_code_span_across_a_line_break_holds_no_bare_script(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A bare script written in a code span that crosses a line break is code.
+
+    The spans were dropped one line at a time, so a span opened on one line
+    and closed on the next left its script on the first line as prose.
+    """
+    page = tmp_path / "page.md"
+    page.write_text("Write `x_\\sqrt2 and\nmore` in code.\n", encoding="utf-8")
+    assert cdm._page_bare_scripts(page) == []

@@ -1403,7 +1403,7 @@ class SingleModeFitResult(OwnsArrays):
             not a motion-per-force FRF, the pole is not a decaying oscillation,
             or the decay rate is negative.
         :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
-            ``pole_rad_s`` is refused the same way when it is not one real number.
+            ``pole_rad_s`` is refused the same way when it is not one number.
         """
         require_ranks(self, frequencies=1, frf=1)
         require_same_length(self, "frequencies", "frf", axis="frequency")

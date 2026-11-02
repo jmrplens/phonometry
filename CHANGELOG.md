@@ -2307,7 +2307,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   number now, which refuses a text, an array and a complex value with a
   `TypeError` that names the parameter, and a number too large for a float
   with a `ValueError`; a contribution to `combined_standard_uncertainty` that
-  is neither a number nor a pair is refused naming `contributions`. A parser
+  is neither a number nor a pair is refused naming `contributions`. The name
+  is the parameter's where a reading ran in a loop too:
+  `signals.tone_burst(pre_silence="0.1")` named `'value'`,
+  `environment.amplitude_modulation_block` named `'v'` for its range, and the
+  uncertainties of `hearing.earmuff_insertion_loss`, the readings of
+  `broadcast.QuasiPeakDynamicsResult`, the surfaces and dimensions of the
+  reverberation models, the vocal efforts of `speech.standard_speech_spectra`
+  and the shear modulus of the Biot functions named a loop's variable or a
+  word of their own; each names its parameter now. A parser
   of a file's text (an ANP table, a JSON sidecar) still reads its text. A
   number computed with before the result was converted is read the same way:
   `aircraft.Aerodrome.pressure_ratio`, the two numbers of
@@ -2327,8 +2335,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of `building.loudest_corner`, the `labels` of
   `filters.FractionalOctaveBands`, the microphones of the free-field
   corrections and the frequency pairs of the loudspeaker ratings and of the
-  impact mobility were measured or split the same way. Each refuses the
-  wrapper as it refuses the text it wraps, by the parameter's name.
+  impact mobility were measured or split the same way. So were the sources of
+  `environment.method_b_source_ranking`, where `[b"car"]` ranked `'99'`,
+  `'97'` and `'114'`, the `bands` of `environment.bin_amplitude_modulation`,
+  the `ffmpeg_options` of `io.VideoOptions`, the `channel_labels` of
+  `io.Signal` and a material of `simulation.scholte_speed` and of the elastic
+  engine, which read `b"abc"` as the numbers 97, 98 and 99. Each refuses the
+  wrapper, and a `bytes`, as it refuses the text, by the parameter's name;
+  where one name stands for a list of names (`parameters` of
+  `environment.binaural_indicators`, `targets` of
+  `emission.MicrophoneTraverse`, `vocal_efforts` of
+  `speech.standard_speech_spectra`, `basic_standards` of
+  `emission.NoiseEmissionDeclaration`), a wrapper is refused whole by the
+  parameter's name rather than split into its characters.
 - **A number too large for a float is refused among an array's numbers too.**
   The shared readers of a caller's numbers let a Python integer past a
   float's largest, such as `10**400`, through to NumPy's anonymous
@@ -2354,10 +2373,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   for its page was built at the name and removed again, the earlier fiche with
   it. With nothing at the name, or a regular file, the new file is written
   beside it and renamed over it once whole, keeping the old file's permission
-  bits; a hard link to the old file keeps the old bytes, and the directory must
-  take a new file. A link, a pipe, a device or a directory at the name is
-  opened there as Python opens a name, as before: a recording streamed into a
-  pipe on purpose still goes into the pipe.
+  bits; a hard link to the old file keeps the old bytes, the new file takes the
+  writer's owner and group and none of the old file's access control lists or
+  extended attributes, and the directory must take a new file. The hidden name
+  is cut to what the directory takes, as are the copy a FLAC `bext` is written
+  through and the partial file of a video, so a name as long as the directory
+  allows is written as any other, and `io.read` takes a recording of such a
+  name, whose sidecar's name no directory holds, as one with no sidecar. A
+  link, a pipe, a device or a directory at the name is opened there as Python
+  opens a name, as before: a recording streamed into a pipe on purpose still
+  goes into the pipe.
 - **`io.write` refuses a `bext` too long for a FLAC file before it writes
   anything.** A payload past the 16 MiB a FLAC metadata block holds was
   measured only once python-soundfile had written the audio at the path, so

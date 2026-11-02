@@ -97,3 +97,9 @@ def test_a_three_decimal_number_is_left_alone(tmp_path: pathlib.Path) -> None:
 def test_the_corpus_is_clean() -> None:
     """The published prose itself, which is what the gate protects."""
     assert gate.main() == 0
+
+
+def test_a_number_in_a_code_span_across_a_line_break_is_code() -> None:
+    """A literal in a code span that crosses a line break is code on both lines."""
+    lines = gate._markdown_prose("Use `10\n000` here.\n")
+    assert all("10" not in line and "000" not in line for _, line in lines)

@@ -684,6 +684,44 @@ class Spectrum:
     assert cpa.constructor_problems(reader, "pkg.api.Spectrum") == []
 
 
+def test_a_mapping_field_a_wrapper_either_import_may_reach_is_kept_as_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A field stored through a name one import binds to ``MappingProxyType``,
+    which copies nothing, and the other to a copy is kept as the caller gave it.
+
+    Two imports of the name that reach different callees reached none, and
+    the field was read as converted by a call the guard could not name, so
+    the caller's dictionary the wrapper keeps went unreported.
+    """
+    reader = _reader(
+        tmp_path,
+        _TAKER
+        + """
+
+try:
+    from types import MappingProxyType as _kept
+except ImportError:
+    from copy import copy as _kept
+
+
+@dataclass(frozen=True, kw_only=True)
+class Spectrum:
+    levels: tuple[float, ...]
+    wrapped: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "levels", tuple(self.levels))
+        object.__setattr__(self, "wrapped", _kept(self.wrapped))
+""",
+    )
+    kept = {
+        field.name: written
+        for field, written in cpa.kept_as_given(reader, "pkg.api.Spectrum")
+    }
+    assert kept == {"wrapped": ["Mapping[str, float]"]}
+
+
 def test_a_mapping_field_nothing_wraps_is_kept_as_given(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -36,7 +36,7 @@ import shutil
 import struct
 from pathlib import Path
 
-from .._internal.json_input import escaped
+from .._internal.json_input import beside_name, escaped
 from ._audio_file import open_audio
 from ._chunks import _BEXT_CHUNK, BroadcastMetadata, _parse_bext
 
@@ -152,7 +152,7 @@ def embed_flac_bext(
     shown = path if named is None else named
     chunk = flac_bext_block(shown, bext_payload)
     source = Path(path)
-    staging = source.with_name(source.name + ".phonometry-tmp")
+    staging = beside_name(source, ".phonometry-tmp")
     try:
         _copy_with_block(source, staging, chunk, named=escaped(os.fspath(shown)))
         staging.replace(source)

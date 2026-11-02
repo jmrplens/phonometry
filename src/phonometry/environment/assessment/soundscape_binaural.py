@@ -73,7 +73,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import reduce_with_plain_rows
-from ..._internal.validation import real_number, require_choice
+from ..._internal.validation import is_text, real_number, require_choice
 from ..._internal.warnings import PhonometryWarning
 from ...filters.weighting import weighting_filter
 from ...io._resolve import resolve_calibration, resolve_fs, resolve_samples
@@ -676,7 +676,7 @@ def binaural_indicators(
         ISO/TS 12913-2 D.3 or sampled below the 44.1 kHz of D.6.
     """
     require_choice(field, "field", _FIELDS)
-    if isinstance(parameters, str):
+    if is_text(parameters):
         parameters = (parameters,)
     rows = tuple(dict.fromkeys(parameters))
     if not rows:

@@ -564,6 +564,37 @@ def test_a_helper_reads_a_sibling_written_after_it(tmp_path: pathlib.Path) -> No
     assert found == {("later_sibling", "BandResult.frequencies", "frequencies")}
 
 
+def _chain_of_helpers(count: int) -> str:
+    """A function with *count* helpers, each written before the sibling it calls."""
+    names = [f"h{index}" for index in range(count)]
+    helpers = "".join(
+        f"    def {name}():\n        return "
+        f"{names[index + 1] + '()' if index + 1 < count else 'frequencies'}\n\n"
+        for index, name in enumerate(names)
+    )
+    return (
+        "import numpy as np\n\nfrom .results import BandResult\n\n"
+        "def chained(frequencies, levels):\n"
+        f"{helpers}"
+        "    f = h0()\n"
+        "    return BandResult(frequencies=f, levels=f * 0.0)\n"
+    )
+
+
+@pytest.mark.parametrize("count", range(1, 8))
+def test_a_chain_of_helpers_of_any_length_is_read_to_its_end(
+    tmp_path: pathlib.Path, count: int
+) -> None:
+    """Each helper written before the sibling it calls is read through.
+
+    The body was read a fixed four times for its helpers to settle, and each
+    reading settles one more helper of the chain, so a chain of six helpers or
+    more handed the caller's array back unseen.
+    """
+    found = _findings(tmp_path, rating=textwrap.dedent(_chain_of_helpers(count)))
+    assert found == {("chained", "BandResult.frequencies", "frequencies")}
+
+
 @pytest.mark.parametrize(
     "block",
     [

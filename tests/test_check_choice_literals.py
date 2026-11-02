@@ -2728,3 +2728,48 @@ def test_every_published_table_of_a_vocabulary_is_keyed_by_it() -> None:
         if (table.module, table.qualname) not in ccl.OPEN_TABLES
     ] == []
     assert ccl._stale_tables(tables) == []
+
+
+def test_an_alias_or_import_in_any_block_at_the_top_is_the_module_s() -> None:
+    """A ``match``, a ``try`` with ``except*``, a ``with`` and a loop run at
+    import time; the statements of each of their blocks are the module's.
+
+    Only the blocks of an ``if`` were read, so an alias or an import written
+    in any other block was no alias of the module.
+    """
+    source = textwrap.dedent(
+        """\
+        import contextlib
+        import sys
+
+        match sys.maxsize:
+            case 0:
+                from json import dumps as in_case
+                IN_CASE = 0
+            case _:
+                from json import dumps as in_case
+                IN_CASE = 1
+        try:
+            from json import loads as in_try
+            IN_TRY = 1
+        except* ImportError:
+            pass
+        with contextlib.nullcontext():
+            from json import JSONDecoder as in_with
+            IN_WITH = 1
+        for _ in range(1):
+            from json import JSONEncoder as in_loop
+            IN_LOOP = 1
+        """
+    )
+    statements = {
+        ast.unparse(node) for node in ccl._module_statements(ast.parse(source).body)
+    }
+    assert {
+        "IN_CASE = 0",
+        "IN_CASE = 1",
+        "IN_TRY = 1",
+        "IN_WITH = 1",
+        "IN_LOOP = 1",
+        "from json import JSONEncoder as in_loop",
+    } <= statements

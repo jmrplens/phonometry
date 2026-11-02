@@ -702,7 +702,7 @@ def verify_rated_impedance(
     :raises TypeError: if ``rated_impedance_ohm`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number, or
         ``impedance_ohm`` holds a text or a value that is not a number.
-        ``rated_frequency_range_hz`` is refused the same way when it is not one real number.
+        An element of ``rated_frequency_range_hz`` is refused the same way when it is not one real number.
     """
     f = _frequencies(frequencies)
     z = np.abs(np.atleast_1d(complex_array(impedance_ohm, "impedance_ohm")))
@@ -880,7 +880,7 @@ def working_sound_pressure_level(
     :raises ValueError: If an input is out of range.
     :raises TypeError: if ``rated_impedance_ohm``, ``rated_source_impedance_ohm``,
         ``sound_pressure_level`` or ``source_emf_v`` is not a single number.
-        ``headphone_impedance_ohm`` is refused the same way when it is not one real number.
+        ``headphone_impedance_ohm`` is refused the same way when it is not one number.
     """
     emf = require_positive(source_emf_v, "source_emf_v")
     require_scalar(sound_pressure_level, "sound_pressure_level")
@@ -1462,7 +1462,7 @@ def coupler_frequency_response(
     :raises ValueError: If the inputs differ in length or are not finite.
     :raises TypeError: if ``frequencies`` or ``sound_pressure_level`` holds a text or a
         value that is not a real number.
-        ``rated_frequency_range_hz`` is refused the same way when it is not one real number.
+        An element of ``rated_frequency_range_hz`` is refused the same way when it is not one real number.
     """
     f = _frequencies(frequencies)
     levels = _levels(sound_pressure_level, "sound_pressure_level")

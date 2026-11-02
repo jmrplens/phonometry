@@ -90,6 +90,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     is_class_designation,
+    is_text,
     real_number,
     require_choice,
     require_count,
@@ -287,7 +288,10 @@ def amplitude_modulation_band_levels(
 
 def _validated_range(modulation_frequency_range_hz: Sequence[float]) -> tuple[int, int]:
     """Line indices (0.1 Hz grid) bounding the user's fundamental range."""
-    values = tuple(real_number(v, "v") for v in modulation_frequency_range_hz)
+    values = tuple(
+        real_number(v, "modulation_frequency_range_hz")
+        for v in modulation_frequency_range_hz
+    )
     # The length of a fixed-size argument, not a quantity.
     if len(values) != 2 or not all(math.isfinite(v) for v in values):  # noqa: PLR2004
         msg = "'modulation_frequency_range_hz' must be two finite frequencies."
@@ -615,7 +619,7 @@ def amplitude_modulation_block(
     :raises ValueError: If the block does not hold 100 finite values or the
         range is outside 0.3 Hz to 1.6 Hz or holds no spectrum line.
     :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
-        ``modulation_frequency_range_hz`` is refused the same way when it is not one real number.
+        An element of ``modulation_frequency_range_hz`` is refused the same way when it is not one real number.
     """
     first, last_in_range = _validated_range(modulation_frequency_range_hz)
     levels = require_finite_array(levels, "levels")
@@ -1001,7 +1005,7 @@ def bin_amplitude_modulation(
         an integer exclusion flag is other than 0 and 1, or the sector width
         does not divide 360 degrees.
     """
-    if isinstance(bands, str):
+    if is_text(bands):
         msg = f"'bands' must be a sequence of band numbers; got {bands!r}."
         raise TypeError(msg)
     # Read once, so that an iterator is validated and converted from the same

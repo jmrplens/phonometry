@@ -650,16 +650,17 @@ def earmuff_insertion_loss(
             )
             raise ValueError(msg)
     deltas = (
-        fixture_uncertainty_db,
-        sound_field_uncertainty_db,
-        equipment_uncertainty_db,
+        ("fixture_uncertainty_db", fixture_uncertainty_db),
+        ("sound_field_uncertainty_db", sound_field_uncertainty_db),
+        ("equipment_uncertainty_db", equipment_uncertainty_db),
     )
-    if any(
-        not math.isfinite(real_number(d, "d")) or real_number(d, "d") < 0.0
-        for d in deltas
-    ):
-        msg = "the three delta uncertainties must be finite and not negative, in dB."
-        raise ValueError(msg)
+    for name, delta in deltas:
+        number = real_number(delta, name)
+        if not math.isfinite(number) or number < 0.0:
+            msg = (
+                "the three delta uncertainties must be finite and not negative, in dB."
+            )
+            raise ValueError(msg)
     mean_open = open_grid.mean(axis=0)
     return EarmuffInsertionLossResult(
         insertion_loss=mean_open - occluded.mean(axis=0),

@@ -1110,7 +1110,7 @@ class PrecisionCriteria(OwnsArrays):
 
 def _table_1_repeatability_db(frequencies: np.ndarray) -> np.ndarray:
     """The criterion-1 limit ``s`` of ISO 9614-3 Table 1 at each band centre, in dB."""
-    nominal = [round(real_number(f, "f")) for f in frequencies]
+    nominal = [round(real_number(f, "frequencies")) for f in frequencies]
     return np.array([_sigma_r0_9614_3(f) for f in nominal], dtype=np.float64)
 
 

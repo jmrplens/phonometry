@@ -749,11 +749,14 @@ def _annex_b(
     for k, p, i in zip(
         ks[compared], pressure[compared], intensity[compared], strict=True
     ):
-        if not math.isfinite(real_number(i, "ks")):
+        if not math.isfinite(real_number(i, "intensity")):
             msg = "'intensity_sound_power_level' must be finite from 50 Hz to 315 Hz."
             raise ValueError(msg)
         tolerance = float(_stepped(int(k), _TABLE_B1_DB, _K_50, "ISO 6926 Table B.1"))
-        agree &= abs(real_number(i, "ks") - real_number(p, "ks")) <= tolerance + 1e-9
+        agree &= (
+            abs(real_number(i, "intensity") - real_number(p, "pressure"))
+            <= tolerance + 1e-9
+        )
     replaced = (ks >= _K_50) & (ks <= _K_80) if agree else np.zeros(ks.size, dtype=bool)
     return replaced, agree
 

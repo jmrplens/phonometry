@@ -771,7 +771,7 @@ def _harmonic_complex(
     for order in range(1, _MAX_ORDER_SEED + 1):
         f_base = f_opt / order
         ratios = np.array(
-            [_round_half_away(real_number(f, "f") / f_base) for f in rates]
+            [_round_half_away(real_number(f, "rates") / f_base) for f in rates]
         )
         ratios[ratios > _MAX_ORDER] = 0  # Formula 153
         valid = ratios > 0

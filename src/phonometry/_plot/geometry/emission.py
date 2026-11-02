@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.validation import (
+    is_text,
     real_array,
     require_scalar,
 )
@@ -129,7 +130,7 @@ def _number_points(
     """
     from matplotlib.colors import to_rgb
 
-    if isinstance(colours, str) or not isinstance(colours, Sequence):
+    if is_text(colours) or not isinstance(colours, Sequence):
         colours = [colours] * len(pts)
     for index, ((x, y, z), chip) in enumerate(zip(pts, colours, strict=True), start=1):
         red, green, blue = to_rgb(chip)

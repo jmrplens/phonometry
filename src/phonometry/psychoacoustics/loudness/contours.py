@@ -325,7 +325,7 @@ def equal_loudness_contours(
     :return: An :class:`EqualLoudnessContours`.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
-        ``phons`` is refused the same way when it is not one real number.
+        An element of ``phons`` is refused the same way when it is not one real number.
     """
     if frequencies is None:
         grid = _FREQUENCIES

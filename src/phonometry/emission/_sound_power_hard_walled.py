@@ -1154,7 +1154,7 @@ class HardWalledRoomCheck(OwnsArrays):
         :raises TypeError: if ``largest_box_dimension_m``,
             ``reference_box_volume_m3`` or ``volume`` is not a single number, or
             ``n_orientations`` is a flag, a text or an array where a count goes.
-            ``frequencies`` is refused the same way when it is not one real number.
+            An element of ``frequencies`` is refused the same way when it is not one real number.
         """
         # Held as the int require_count returns; two orientations are the
         # fewest values the step below can work with.

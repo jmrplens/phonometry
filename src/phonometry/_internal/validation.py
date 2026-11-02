@@ -8,6 +8,7 @@ through these helpers; existing modules migrate as they are touched.
 
 from __future__ import annotations
 
+import cmath
 import math
 from collections import UserString
 from collections.abc import Iterable, Mapping, Sequence, Set
@@ -20,6 +21,11 @@ from .frozen import _HoldsItself, given_repr, given_type, owned_members
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
+
+    # TypeIs reached typing in Python 3.13; the type checker reads it from
+    # typing_extensions for the 3.12 the package supports, and nothing imports
+    # it at run time.
+    from typing_extensions import TypeIs
 
     from .types import BandFraction, ReportEngine
 
@@ -87,7 +93,7 @@ def is_scalar(value: object) -> bool:
 _TEXT_TYPES = (str, bytes, bytearray, UserString)
 
 
-def is_text(value: object) -> bool:
+def is_text(value: object) -> TypeIs[str | bytes | bytearray | UserString]:
     """Whether *value* is one text: a ``str``, ``bytes``, ``bytearray`` or a
     :class:`~collections.UserString` wrapping one.
 
@@ -380,7 +386,8 @@ def _finite_beyond_a_float(value: object) -> bool:
     a conversion; a value that cannot say so is left as the infinity
     :func:`float` read.
 
-    :param value: A scalar :func:`float` read as an infinity.
+    :param value: A scalar :func:`float` or :func:`complex` read as an
+        infinity; a complex one is finite when its magnitude is.
     """
     if isinstance(value, Decimal):
         return value.is_finite()
@@ -443,7 +450,6 @@ def real_number(value: object, name: str) -> float:
     :param name: Parameter name used in the error message.
     :return: ``float(value)``.
     :raises TypeError: for an array, a text, or anything whose type
-        ``value`` is refused the same way when it is not one real number.
         :func:`float` refuses.
     :raises ValueError: for a number too large for a float.
     """
@@ -465,19 +471,27 @@ def complex_number(value: object, name: str) -> complex:
     :return: ``complex(value)``.
     :raises TypeError: for an array, a text, or anything whose type
         :func:`complex` refuses.
-    :raises ValueError: for a number too large for a complex.
+    :raises ValueError: for a number too large for a complex, whether
+        :func:`complex` refuses it (a Python integer) or reads it as an
+        infinity (a long double, a complex of long doubles or a ``Decimal``
+        past a float's largest).
     """
     if not is_scalar(value) or holds_text(value):
         msg = f"'{name}' must be one number, got {given_repr(value)}."
         raise TypeError(msg)
+    too_large = (
+        f"'{name}' must be a number a complex can hold, got {given_repr(value)}."
+    )
     try:
-        return complex(cast("complex", value))
+        number = complex(cast("complex", value))
     except TypeError:
         msg = f"'{name}' must be a number, got {given_repr(value)}."
         raise TypeError(msg) from None
     except (ValueError, OverflowError):
-        msg = f"'{name}' must be a number a complex can hold, got {given_repr(value)}."
-        raise ValueError(msg) from None
+        raise ValueError(too_large) from None
+    if not cmath.isfinite(number) and _finite_beyond_a_float(value):
+        raise ValueError(too_large)
+    return number
 
 
 def require_positive(value: float, name: str) -> float:
@@ -808,20 +822,16 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
         ``bytearray`` at any depth included), an element that is not a
         number, or a sequence nested more than 32 deep, as one that holds
         itself is.
-    :raises ValueError: for a ragged nesting, to which numpy gives no shape.
+    :raises ValueError: for a ragged nesting, to which numpy gives no shape,
+        or a finite number too large for a float (a Python integer, a long
+        double or a ``Decimal`` past a float's largest).
     """
     if isinstance(x, np.ndarray) and x.dtype.kind in _REAL_KINDS:
         # An array of numbers holds no text, no complex number and no member.
         # np.asarray reads a subclass (a matrix, a masked array) as the plain
         # array of its values; astype would keep the subclass, whose ``**`` is
         # a matrix power and whose reductions skip the masked values.
-        if x.dtype.itemsize <= _FLOAT64_BYTES:
-            return np.asarray(x, dtype=np.float64, copy=True if copy else None)
-        # A long double holds finite numbers past a float's largest.
-        with np.errstate(over="ignore"):
-            read = np.asarray(x, dtype=np.float64, copy=True if copy else None)
-        _refuse_beyond_a_float(np.asarray(x), read, name)
-        return read
+        return _array_of_numbers_read(x, np.float64, name, copy=copy)
     if type(x) in _PLAIN_REALS:
         try:
             return np.asarray(x, dtype=np.float64)
@@ -831,9 +841,51 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
     if holds_complex(array):
         msg = f"'{name}' must be real, not complex."
         raise TypeError(msg)
+    return _converted(array, np.float64, name, copy=copy)
+
+
+def _wider_than_a_float(dtype: np.dtype[Any]) -> bool:
+    """Whether *dtype* holds finite numbers past a float's largest.
+
+    A long double does where it is wider than a float, and a complex number
+    of two long doubles does where each of them is.
+    """
+    if dtype.kind == "f":
+        return dtype.itemsize > _FLOAT64_BYTES
+    return dtype.kind == "c" and dtype.itemsize > 2 * _FLOAT64_BYTES
+
+
+def _array_of_numbers_read[Read: (np.float64, np.complex128)](
+    x: np.ndarray, dtype: type[Read], name: str, *, copy: bool
+) -> NDArray[Read]:
+    """An array of numbers read as *dtype*, refused by name past a float's range.
+
+    Both readers' path for an array that holds numbers already: a long double
+    past a float's largest, alone or as a part of a complex number, is read
+    by numpy as an infinity with no more than a ``RuntimeWarning``.
+
+    :raises ValueError: naming *name*, for such a number.
+    """
+    if not _wider_than_a_float(x.dtype):
+        return np.asarray(x, dtype=dtype, copy=True if copy else None)
+    with np.errstate(over="ignore"):
+        read = np.asarray(x, dtype=dtype, copy=True if copy else None)
+    _refuse_beyond_a_float(np.asarray(x), read, name)
+    return read
+
+
+def _converted[Read: (np.float64, np.complex128)](
+    array: np.ndarray, dtype: type[Read], name: str, *, copy: bool
+) -> NDArray[Read]:
+    """*array*, as numpy read a caller's value, converted to *dtype* by name.
+
+    :raises TypeError: naming *name*, for an element that is no number.
+    :raises ValueError: naming *name*, for an element whose own conversion
+        refuses its value, or a finite number too large for a float.
+    """
     try:
         with np.errstate(over="ignore"):
-            read = array.astype(np.float64, copy=copy)
+            read = array.astype(dtype, copy=copy)
     except TypeError as exc:
         msg = f"'{name}' must be numeric."
         raise TypeError(msg) from exc
@@ -905,31 +957,22 @@ def complex_array(
     :raises TypeError: for a text in any form (a ``bytearray`` at any depth
         included), an element that is not a number, or a sequence nested
         more than 32 deep, as one that holds itself is.
-    :raises ValueError: for a ragged nesting, to which numpy gives no shape.
+    :raises ValueError: for a ragged nesting, to which numpy gives no shape,
+        or a finite number too large for a complex of floats (a Python
+        integer, a long double, a complex of long doubles or a ``Decimal``
+        past a float's largest).
     """
     if isinstance(x, np.ndarray) and x.dtype.kind in _NUMBER_KINDS:
         # An array of numbers holds no text and no member; a subclass of one
         # is read as the plain array of its values, as real_array reads it.
-        return np.asarray(x, dtype=np.complex128, copy=True if copy else None)
+        return _array_of_numbers_read(x, np.complex128, name, copy=copy)
     if type(x) in _PLAIN_NUMBERS_OF_ANY_KIND:
         try:
             return np.asarray(x, dtype=np.complex128)
         except OverflowError:
             raise ValueError(_too_large(name)) from None
     array = _numbers_read(x, name)
-    try:
-        with np.errstate(over="ignore"):
-            read = array.astype(np.complex128, copy=copy)
-    except TypeError as exc:
-        msg = f"'{name}' must be numeric."
-        raise TypeError(msg) from exc
-    except OverflowError:
-        raise ValueError(_too_large(name)) from None
-    except ValueError as exc:
-        msg = f"'{name}' must be numeric."
-        raise ValueError(msg) from exc
-    _refuse_beyond_a_float(array, read, name)
-    return read
+    return _converted(array, np.complex128, name, copy=copy)
 
 
 def _numbers_read(x: object, name: str) -> np.ndarray:

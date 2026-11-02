@@ -666,7 +666,7 @@ class OctaveFilterBank:
             frequency limits or a design the bank cannot be built with.
         :raises TypeError: if ``fraction`` or ``fs`` is not a single number, or
             ``order`` is a flag, a text or an array where a count goes.
-            ``limits`` is refused the same way when it is not one real number.
+            An element of ``limits`` is refused the same way when it is not one real number.
         """
         order = require_count(order, "order")
         limits = _validate_bank_design(fs, fraction, limits, design, block_processing)

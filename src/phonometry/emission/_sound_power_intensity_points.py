@@ -1001,7 +1001,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float), or ``normal_intensity`` or ``segment_areas_m2`` holds a text or a
             value that is not a real number.
-            ``pressure_residual_index`` is refused the same way when it is not one real number.
+            An element of ``pressure_residual_index`` is refused the same way when it is not one real number.
         """
         _check_grade(self.grade)
         object.__setattr__(self, "fraction", _check_fraction(self.fraction))
@@ -1788,7 +1788,7 @@ def _a_weighted_factor(
     high_span = high_row[0] if fraction == 1 else high_row[1]
     total = float(np.sum(contributions))
     nominal = np.asarray(
-        [_nominal_band(real_number(f, "f"), fraction) for f in frequencies],
+        [_nominal_band(real_number(f, "frequencies"), fraction) for f in frequencies],
         dtype=np.float64,
     )
     if high_span is not None and total > 0.0:

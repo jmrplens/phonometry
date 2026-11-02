@@ -823,7 +823,7 @@ def loudness_moore_glasberg_time(
     :return: A :class:`MooreGlasbergTimeVaryingLoudness`.
     :raises TypeError: if ``fs`` is not a single number, or ``presentation`` is not a
         text, or ``x`` holds a text or a value that is not a real number.
-        ``percentiles`` is refused the same way when it is not one real number.
+        An element of ``percentiles`` is refused the same way when it is not one real number.
 
     A steady 1 kHz tone at 40 dB SPL, binaural, free field, yields a peak
     long-term loudness of 1.000 sone (40 phon) by definition of the sone.

@@ -497,7 +497,7 @@ class ProgramSignalCheck(OwnsArrays):
             or the levels do not hold one finite value per band.
         :raises TypeError: if ``band_levels`` holds a text or a value that is not a real
             number.
-            ``frequencies`` is refused the same way when it is not one real number.
+            An element of ``frequencies`` is refused the same way when it is not one real number.
         """
         for value in np.atleast_1d(real_array(self.frequencies, "frequencies")):
             if float(value) not in SIMULATED_PROGRAM_SPECTRUM:

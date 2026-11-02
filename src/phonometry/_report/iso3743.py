@@ -100,7 +100,7 @@ def _widths(columns: int) -> list[float]:
 def _marked(values: np.ndarray, marks: list[str], language: Language) -> list[str]:
     """One decimal per band, followed by the band's background marker."""
     return [
-        d1(real_number(value, "value"), language) + (f" {mark}" if mark else "")
+        d1(real_number(value, "values"), language) + (f" {mark}" if mark else "")
         for value, mark in zip(values, marks, strict=True)
     ]
 

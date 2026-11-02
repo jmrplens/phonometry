@@ -45,6 +45,7 @@ from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
 from .._internal.validation import (
     check_engine,
+    is_text,
     real_number,
     require_choice,
     require_scalar,
@@ -292,9 +293,16 @@ class NoiseEmissionDeclaration(RichDisplay):
             raise ValueError(msg)
         standards = (
             (self.basic_standards,)
-            if isinstance(self.basic_standards, str)
+            if is_text(self.basic_standards)
             else tuple(self.basic_standards)
         )
+        strangers = [s for s in standards if not isinstance(s, str)]
+        if strangers:
+            msg = (
+                "'basic_standards' must be a text or a sequence of texts, "
+                f"got {strangers[0]!r}."
+            )
+            raise TypeError(msg)
         require_choice(self.form, "form", ("dual-number", "single-number"))
         object.__setattr__(self, "modes", modes)
         object.__setattr__(self, "basic_standards", standards)

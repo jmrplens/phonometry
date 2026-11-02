@@ -1093,7 +1093,7 @@ def _band_requirement(
     name: RequirementName, clause: str, values: np.ndarray, low: float, high: float
 ) -> LoopRequirement:
     """A requirement with the same limits for every value."""
-    flat = tuple(real_number(v, "v") for v in values.ravel())
+    flat = tuple(real_number(v, "values") for v in values.ravel())
     return LoopRequirement(
         name=name,
         clause=clause,

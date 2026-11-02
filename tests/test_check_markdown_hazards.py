@@ -463,3 +463,17 @@ def test_a_fence_shown_inside_another_closes_nothing() -> None:
 def test_the_shipped_pages_pass(capsys: pytest.CaptureFixture[str]) -> None:
     assert cmh.main() == 0
     assert "Markdown renders the way it reads" in capsys.readouterr().out
+
+
+def test_a_code_span_across_a_line_break_hides_its_dollar_from_both_lines() -> None:
+    """A span runs over the lines of its paragraph, as the page reads it.
+
+    The spans were dropped one line at a time, so the ``$`` inside a span that
+    crossed a line break was counted on the second line and paired with the
+    real stray ``$`` there, which hid it.
+    """
+    text = "Prose `code with\n$x` and a real $ stray\n- item\n"
+    assert cmh.check_text(text, "x.md") == [
+        "x.md:3: inline maths opened on line 2 is cut off by a block marker; "
+        "rewrap so the line does not start with '- '"
+    ]

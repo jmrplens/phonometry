@@ -121,6 +121,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    is_text,
     real_array,
     real_number,
     require_choice,
@@ -446,7 +447,7 @@ def _checked_targets(
     targets: PathTarget | Sequence[PathTarget],
 ) -> tuple[PathTarget, ...]:
     """The A.3.3 targets of a traverse, one name or several, as a tuple."""
-    named = (targets,) if isinstance(targets, str) else tuple(targets)
+    named = (targets,) if is_text(targets) else tuple(targets)
     for target in named:
         require_choice(target, "targets", _PATH_TARGETS)
     return named

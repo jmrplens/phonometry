@@ -345,10 +345,8 @@ def _tone_burst_scalars(
         msg = "'n_repetitions' must be a positive integer."
         raise ValueError(msg)
     for name, value in (("pre_silence", pre_silence), ("post_silence", post_silence)):
-        if (
-            not np.isfinite(real_number(value, "value"))
-            or real_number(value, "value") < 0.0
-        ):
+        number = real_number(value, name)
+        if not math.isfinite(number) or number < 0.0:
             msg = f"'{name}' must be a non-negative, finite number."
             raise ValueError(msg)
     return fs_v, f_v, cycles_v, amplitude_v, repetitions_v

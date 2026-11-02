@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { dropInlineSpans, dropInlineSpansByLine, inlineSpans, SPAN_MARK } from './markdown-spans.mjs';
+import { dropInlineSpans, inlineSpans, SPAN_MARK } from './markdown-spans.mjs';
 
 const spans = (text, markers = '`') =>
   inlineSpans(text, markers).map(([start, end]) => text.slice(start, end));
@@ -46,10 +46,3 @@ test('the text either side of a span taken out stays apart', () => {
   assert.ok(!dropInlineSpans('$`x`$', '`').includes('$$'));
 });
 
-test('a span is read within its line, as the checks read a page', () => {
-  assert.equal(dropInlineSpansByLine('a `x\ny` b'), 'a `x\ny` b');
-  assert.equal(
-    dropInlineSpansByLine('a `x` b\nc `y` d'),
-    `a ${SPAN_MARK} b\nc ${SPAN_MARK} d`,
-  );
-});

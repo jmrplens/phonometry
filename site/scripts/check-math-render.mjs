@@ -87,7 +87,7 @@ function delimiterProblems(sourceDirs) {
       const code = codeLines(lines);
       // Prose that talks *about* `$$` writes it inside a code span, read as
       // the site reads one, over the lines of its block (shared/page-prose.mjs).
-      const shown = shownLines(lines, code);
+      const shown = shownLines(lines, code, { mdx: file.endsWith('.mdx') });
       lines.forEach((line, index) => {
         if (code[index]) return;
         const trimmed = strayDelimiter(shown[index]);

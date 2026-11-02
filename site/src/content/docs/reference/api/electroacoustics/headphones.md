@@ -289,7 +289,7 @@ the rated source impedance, over "at least the rated frequency range".
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length or are not finite. |
-| TypeError | if `frequencies` or `sound_pressure_level` holds a text or a value that is not a real number. `rated_frequency_range_hz` is refused the same way when it is not one real number. |
+| TypeError | if `frequencies` or `sound_pressure_level` holds a text or a value that is not a real number. An element of `rated_frequency_range_hz` is refused the same way when it is not one real number. |
 
 ## CouplerFrequencyResponse
 
@@ -1603,7 +1603,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length, are not positive and finite, or no measurement frequency falls in the rated range. |
-| TypeError | if `rated_impedance_ohm` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `impedance_ohm` holds a text or a value that is not a number. `rated_frequency_range_hz` is refused the same way when it is not one real number. |
+| TypeError | if `rated_impedance_ohm` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `impedance_ohm` holds a text or a value that is not a number. An element of `rated_frequency_range_hz` is refused the same way when it is not one real number. |
 
 ## working_sound_pressure_level
 
@@ -1656,4 +1656,4 @@ since a noise signal has no single impedance to divide by.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is out of range. |
-| TypeError | if `rated_impedance_ohm`, `rated_source_impedance_ohm`, `sound_pressure_level` or `source_emf_v` is not a single number. `headphone_impedance_ohm` is refused the same way when it is not one real number. |
+| TypeError | if `rated_impedance_ohm`, `rated_source_impedance_ohm`, `sound_pressure_level` or `source_emf_v` is not a single number. `headphone_impedance_ohm` is refused the same way when it is not one number. |

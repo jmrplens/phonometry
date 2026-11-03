@@ -1486,7 +1486,10 @@ class _ScopeNames:
         at every binding that may stand from where it is written on
         (:func:`ast_scan.bindings_from`). With either, whatever a scope
         nested there binds the name to through ``global`` or ``nonlocal``,
-        which may run at any time.
+        which may run at any time. A scope on the way, past none of those,
+        that declares the name ``global`` or ``nonlocal`` and binds it on
+        every way to where the class body or the comprehension is written
+        holds that binding there (:meth:`_bound_before`).
         """
         bound_here = self._bound_before(name, point)
         if bound_here is not None:
@@ -1498,6 +1501,10 @@ class _ScopeNames:
             while names is not holder and names.outer is not None:
                 called = called or isinstance(names.scope, _FUNCTIONS)
                 names, point = names.outer, names.at
+                if not called:
+                    bound_here = names._bound_before(name, point)
+                    if bound_here is not None:
+                        return bound_here
         found = set(names.from_inside.get(name, ()))
         bindings = names.flow.get(name, [])
         if any(kind is not None for _, kind in bindings):
@@ -2124,8 +2131,12 @@ def test_the_float_equality_check_reads_a_global_name_its_function_has_just_boun
     ``None``; the reader took the module's ``from numpy import bool_ as
     flag`` as standing there too. So does a read in the same ``with`` or
     ``try`` body as the binding, which an exception skipping the binding
-    never reaches. A binding in one branch only, another function's read
-    and the enclosing function's own read still meet the import.
+    never reaches, and a read in a list, set or dict comprehension or a
+    class body written after the binding, which runs there at once. A
+    binding in one branch only, another function's read, the enclosing
+    function's own read and a generator expression, which runs as it is
+    consumed, perhaps once another function has bound the name again,
+    still meet the import.
     """
     source = "\n".join(
         [
@@ -2160,10 +2171,28 @@ def test_the_float_equality_check_reads_a_global_name_its_function_has_just_boun
             "        return x.astype(flag)",
             "    except ValueError:",
             "        return None",
+            "def listed(xs):",
+            "    global flag",
+            "    flag = None",
+            "    return [x.astype(flag) for x in xs], {x.astype(flag) for x in xs}",
+            "def keyed(xs):",
+            "    global flag",
+            "    flag = None",
+            "    return {x: x.astype(flag) for x in xs}",
+            "def classy(xs):",
+            "    global flag",
+            "    flag = None",
+            "    class Box:",
+            "        held = xs.astype(flag)",
+            "    return Box",
+            "def lazy(xs):",
+            "    global flag",
+            "    flag = None",
+            "    return (x.astype(flag) for x in xs)",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
-        "10", "12", "19",
+        "10", "12", "19", "49",
     ]  # fmt: skip
 
 

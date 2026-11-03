@@ -28,16 +28,18 @@ itself, and refuses three shapes a hand-rolled reader cannot avoid:
   repetition of one, or as a repetition of a class or a group that holds one
   (``[`~]{3,}``).
 
-A string is read the way Python builds it: written out, repeated (``"`" * 3``),
-joined with ``+`` or in an f-string, chosen (``a if flag else b``, ``a or
-b``), or behind a name bound to one in the function, an enclosing function or
-the module, a loop over a tuple of them included. A join or a choice is read
-as every string it can make, up to :data:`MAX_VALUES`; one that can make more
-is refused unread, since reading
-some of them could pass a reader by hand. A piece spliced into a larger string counts when every alternative
-it offers looks for a marker. The markdown hazard check splices in a list of
-everything that opens a block, a fence among them, to find a wrapped line that
-would open one; that is no reading of fences, and it is not refused.
+A string is read the way Python builds it: written out, repeated
+(``"`" * 3``), joined with ``+`` or in an f-string, chosen
+(``a if flag else b``, ``a or b``), or behind a name bound to one in the
+function, an enclosing function or the module, a loop over a tuple of them
+and a parameter's default included.
+A join or a choice is read as every string it can make, up to
+:data:`MAX_VALUES`; one that can make more is refused unread, since reading
+some of them could pass a reader by hand. A piece spliced into a larger string
+counts when every alternative it offers looks for a marker. The markdown
+hazard check splices in a list of everything that opens a block, a fence among
+them, to find a wrapped line that would open one; that is no reading of
+fences, and it is not refused.
 
 A toggle's name has to say what it holds: the figure checks flip ``inside`` on
 every edge of an outline by the even-odd rule, and the markdown checks flip
@@ -66,7 +68,15 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, binding_scope, exempted, forget_trees, relative, scoped
+from ast_scan import (
+    ROOT,
+    binding_scope,
+    exempted,
+    forget_trees,
+    parameters,
+    relative,
+    scoped,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -311,7 +321,9 @@ def _bound(node: ast.AST) -> Iterator[tuple[ast.Name | ast.arg, ast.expr | None]
 
     An assignment binds its value, ``x += y`` what ``x + y`` makes, a loop
     or a comprehension each item of what it walks, and a function or a
-    lambda its parameters, to what nothing here can know.
+    lambda each parameter to its default, which it stands for when the
+    caller passes nothing, and one without a default to what nothing here
+    can know.
     """
     if isinstance(node, ast.Assign):
         yield from ((t, node.value) for t in node.targets if isinstance(t, ast.Name))
@@ -326,10 +338,7 @@ def _bound(node: ast.AST) -> Iterator[tuple[ast.Name | ast.arg, ast.expr | None]
         if isinstance(node.target, ast.Name):
             yield node.target, node.iter
     elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
-        arguments = node.args
-        every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
-        every += [a for a in (arguments.vararg, arguments.kwarg) if a is not None]
-        yield from ((argument, None) for argument in every)
+        yield from parameters(node)
 
 
 def _re_names(tree: ast.Module) -> tuple[set[str], set[str]]:

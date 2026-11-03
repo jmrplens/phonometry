@@ -325,6 +325,36 @@ def test_a_marker_bound_in_the_scope_python_binds_it_in_is_read_there(
     ]
 
 
+#: Parameters that stand for a marker through their default, read in the
+#: scope around the function or the lambda, where Python computes it.
+_DEFAULTS = {
+    "a_default_written_out": """
+        def opens(line, marker="```"):
+            return line.startswith(marker)
+    """,
+    "a_lambda_s_default": """
+        def opens(lines):
+            return list(filter(lambda line, marker="```": line.startswith(marker), lines))
+    """,
+    "a_default_that_names_the_module_s_marker": """
+        MARKER = "~~~"
+
+        def opens(lines):
+            def fenced(line, marker=MARKER):
+                return line.startswith(marker)
+
+            return list(filter(fenced, lines))
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_DEFAULTS))
+def test_a_parameter_stands_for_its_default(tmp_path: pathlib.Path, shape: str) -> None:
+    """Every parameter was bound to no string, its default left unread."""
+    found = _shapes(tmp_path, _DEFAULTS[shape])
+    assert [shape for _, shape in found] == ["a test for a marker"]
+
+
 def test_a_class_body_s_marker_is_not_read_from_its_methods(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -428,6 +428,54 @@ def test_a_name_bound_in_the_scope_python_binds_it_in_is_read_there(
     assert _places(tmp_path, _BOUND_ELSEWHERE[shape]) == ["finder"]
 
 
+#: Parameters that stand for a span reader through their default, which a
+#: caller that passes nothing hands on: the default is read in the scope
+#: around the function or the lambda, where Python computes it.
+_DEFAULTS = {
+    "a_default_written_out": """
+        import re
+
+        def finder(text, pattern=r"`[^`]+`"):
+            return re.findall(pattern, text)
+    """,
+    "a_keyword_only_default": """
+        import re
+
+        def finder(text, *, pattern=r"`[^`]+`"):
+            return re.findall(pattern, text)
+    """,
+    "a_default_that_names_the_module_s_pattern": """
+        import re
+
+        SPAN = r"`[^`]+`"
+
+        def finder(text):
+            def inner(t, SPAN=SPAN):
+                return re.findall(SPAN, t)
+
+            return inner(text)
+    """,
+    "a_lambda_s_default": """
+        import re
+
+        def finder(text):
+            find = lambda t, pattern=r"`[^`]+`": re.findall(pattern, t)
+            return find(text)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_DEFAULTS))
+def test_a_parameter_stands_for_its_default(tmp_path: pathlib.Path, shape: str) -> None:
+    """Every parameter was bound to no string, its default left unread, so a
+    reader that took its pattern from a default was never found.
+    """
+    nested = shape == "a_default_that_names_the_module_s_pattern"
+    assert _places(tmp_path, _DEFAULTS[shape]) == [
+        "finder.inner" if nested else "finder"
+    ]
+
+
 def test_a_class_body_s_name_is_not_read_from_its_methods(
     tmp_path: pathlib.Path,
 ) -> None:

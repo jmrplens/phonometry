@@ -195,6 +195,29 @@ def _parameter_names(scope: ast.AST) -> frozenset[str]:
     )
 
 
+def parameters(
+    function: ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda,
+) -> list[tuple[ast.arg, ast.expr | None]]:
+    """Each parameter of a function or a lambda with its default, ``None`` for
+    one that has none, in the order of the signature.
+
+    The defaults of the positional parameters belong to the last of them;
+    ``*args`` and ``**kwargs`` have none. A default runs in the scope around
+    the function, once, where it is defined.
+    """
+    arguments = function.args
+    positional = [*arguments.posonlyargs, *arguments.args]
+    missing = len(positional) - len(arguments.defaults)
+    defaults: list[ast.expr | None] = [None] * missing
+    defaults.extend(arguments.defaults)
+    found = list(zip(positional, defaults, strict=True))
+    found.extend(zip(arguments.kwonlyargs, arguments.kw_defaults, strict=True))
+    found.extend(
+        (extra, None) for extra in (arguments.vararg, arguments.kwarg) if extra
+    )
+    return found
+
+
 def _opening(scope: ast.AST) -> list[ast.AST]:
     """The nodes a scope runs as its own, before any scope inside it is left out.
 

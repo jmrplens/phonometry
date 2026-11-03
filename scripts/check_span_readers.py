@@ -30,15 +30,14 @@ reads a span by hand:
 
 A pattern is read the way Python builds it: written out, joined with ``+`` or
 in an f-string, chosen (``a if flag else b``, ``a or b``), or behind a name
-bound to one in the function, an enclosing function or the module. A name
-bound to several strings (in two branches, to the items of a tuple, by
-``+=``, or by a loop or a comprehension to each item it walks) stands for
-each of them, and a pattern built from such names is read as every string it
-can be, up to :data:`MOST_PATTERNS`;
-one that can be more is refused unread, since reading some of them could
-pass a reader by hand. A backtick right after a colon opens a role of
-reStructuredText (``:math:`x```), which Markdown does not have, and is not
-read as a span.
+bound to one in the function, an enclosing function or the module, a
+parameter's default among them. A name bound to several strings (in two
+branches, to the items of a tuple, by ``+=``, or by a loop or a comprehension
+to each item it walks) stands for each of them, and a pattern built from such
+names is read as every string it can be, up to :data:`MOST_PATTERNS`; one that
+can be more is refused unread, since reading some of them could pass a reader
+by hand. A backtick right after a colon opens a role of reStructuredText
+(``:math:`x```), which Markdown does not have, and is not read as a span.
 
 The site's JavaScript has no parser here, so for it the rule is lexical: no
 line of code under ``site/`` but the shared module spells either shape.
@@ -61,7 +60,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, binding_scope, forget_trees, relative, scoped
+from ast_scan import ROOT, binding_scope, forget_trees, parameters, relative, scoped
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
@@ -312,14 +311,13 @@ def _assigned(node: ast.AST) -> Iterator[tuple[ast.Name | ast.arg, ast.expr | No
     An assignment binds its value, ``x += y`` what ``x + y`` makes, and a
     loop or a comprehension each item of what it walks: the items of a tuple,
     a list or a set written out, or the strings a name it walks stands for.
-    A function or a lambda binds its parameters to ``None``, whatever its
-    caller passes, which stands for no string here.
+    A function or a lambda binds each parameter to its default, which it
+    stands for when the caller passes nothing, and one without a default to
+    ``None``: whatever its caller passes stands for no string here.
     """
     if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
-        arguments = node.args
-        every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
-        every += [a for a in (arguments.vararg, arguments.kwarg) if a is not None]
-        yield from ((argument, None) for argument in every)
+        for parameter, default in parameters(node):
+            yield from ((parameter, item) for item in _items(default))
         return
     value: ast.expr | None
     if isinstance(node, ast.Assign):
@@ -336,12 +334,16 @@ def _assigned(node: ast.AST) -> Iterator[tuple[ast.Name | ast.arg, ast.expr | No
         return
     for target in targets:
         if isinstance(target, ast.Name) and value is not None:
-            items = (
-                value.elts
-                if isinstance(value, ast.Tuple | ast.List | ast.Set)
-                else [value]
-            )
-            yield from ((target, item) for item in items)
+            yield from ((target, item) for item in _items(value))
+
+
+def _items(value: ast.expr | None) -> list[ast.expr | None]:
+    """What a name bound to *value* stands for, one by one: the items of a
+    tuple, a list or a set written out, or the value itself.
+    """
+    if isinstance(value, ast.Tuple | ast.List | ast.Set):
+        return list(value.elts)
+    return [value]
 
 
 def _re_names(tree: ast.Module) -> tuple[set[str], set[str]]:

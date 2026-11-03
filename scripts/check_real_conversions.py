@@ -80,7 +80,9 @@ a caller's value that no check has read on every path to it:
   an ``if`` holds after it only when the other branch checks too or leaves
   the function; a check in one branch does not reach the other; a check in
   a loop's body, a conditional expression, the right side of ``and`` or
-  ``or``, or a comprehension may not run, and holds only inside it.
+  ``or``, a later link of a chained comparison, or a comprehension may not
+  run, and holds only inside it; one in an ``assert``, which ``python -O``
+  leaves out, holds nowhere.
 
 A value the function computed (a call of a function of the package that is
 no check, a field of a record it was handed, which the record read when it
@@ -1049,6 +1051,12 @@ class _Flow:
             self.expression(node.values[0], env, sure=sure)
             for value in node.values[1:]:
                 self.expression(value, env, sure=False)
+        elif isinstance(node, ast.Compare) and len(node.comparators) > 1:
+            # A chained comparison stops at the first link that fails.
+            self.expression(node.left, env, sure=sure)
+            self.expression(node.comparators[0], env, sure=sure)
+            for comparator in node.comparators[1:]:
+                self.expression(comparator, env, sure=False)
         elif isinstance(node, _COMPREHENSIONS):
             self._comprehension_env(node, env, record=True)
         elif isinstance(node, ast.NamedExpr):
@@ -1295,6 +1303,15 @@ class _Flow:
         envs = self.used.get(id(function)) or self.defined.get(id(function), [])
         return _join_envs([*envs, end], self.default)
 
+    def _assert(self, node: ast.Assert, env: Env) -> tuple[Env, bool]:
+        """Read an ``assert``, which ``python -O`` leaves out: a conversion in
+        it is a conversion, but no check or binding in it holds after it.
+        """
+        self.expression(node.test, env, sure=False)
+        if node.msg is not None:
+            self.expression(node.msg, env, sure=False)
+        return env, False
+
     def _break(self, node: ast.Break, env: Env) -> tuple[Env, bool]:
         del node
         if self.breaks:
@@ -1373,6 +1390,7 @@ _STATEMENTS: dict[type[ast.stmt], Callable[[_Flow, Any, Env], tuple[Env, bool]]]
     ast.AsyncFor: _Flow._loop,
     ast.While: _Flow._loop,
     ast.Break: _Flow._break,
+    ast.Assert: _Flow._assert,
     ast.With: _Flow._with,
     ast.AsyncWith: _Flow._with,
     ast.Try: _Flow._try,
@@ -1473,7 +1491,8 @@ class _Sure:
     A ``return`` ends what is sure: what follows it in the source runs on the
     other paths only. A call in the body of a ``try`` whose handler can take
     the exception and go on may have raised for nothing, and a call in a
-    loop's body or a ``match`` case may not run. A name bound before a call
+    loop's body or a ``match`` case may not run, nor one in an ``assert``,
+    which ``python -O`` leaves out. A name bound before a call
     holds what it was bound to there, and no longer the caller's value,
     unless it was bound to what keeps that value (``x = np.atleast_1d(x)``).
     """
@@ -1505,7 +1524,8 @@ class _Sure:
             self.block(node.body, sure=sure)
         elif isinstance(node, ast.For | ast.AsyncFor | ast.While | ast.Match):
             self.calls(_header(node), sure=sure)
-        elif not isinstance(node, _SCOPES):
+        elif not isinstance(node, (*_SCOPES, ast.Assert)):
+            # ``python -O`` leaves an ``assert`` out, and a call in it with it.
             for child in ast.iter_child_nodes(node):
                 self.calls(child, sure=sure)
 
@@ -1592,28 +1612,32 @@ def _nested_calls(node: ast.AST) -> Iterator[tuple[ast.Call, bool]]:
             yield child, False
 
 
-def _first_part(node: ast.expr) -> ast.expr | None:
-    """The part of a conditional expression that surely runs: the test of an
-    ``if`` expression, the first operand of ``and`` and ``or``, the first
-    iterable of a comprehension; ``None`` for an expression that runs whole.
+def _sure_parts(node: ast.expr) -> list[ast.expr] | None:
+    """The parts of a conditional expression that surely run: the test of an
+    ``if`` expression, the first operand of ``and`` and ``or``, the first link
+    of a chained comparison, the first iterable of a comprehension; ``None``
+    for an expression that runs whole.
     """
     if isinstance(node, ast.IfExp):
-        return node.test
+        return [node.test]
     if isinstance(node, ast.BoolOp):
-        return node.values[0]
+        return [node.values[0]]
+    if isinstance(node, ast.Compare) and len(node.comparators) > 1:
+        return [node.left, node.comparators[0]]
     if isinstance(node, _COMPREHENSIONS):
-        return node.generators[0].iter
+        return [node.generators[0].iter]
     return None
 
 
 def _expression_calls(node: ast.AST, *, sure: bool) -> Iterator[tuple[ast.Call, bool]]:
     if isinstance(node, _SCOPES):
         return
-    first = _first_part(node) if isinstance(node, ast.expr) else None
-    if first is not None:
-        yield from _expression_calls(first, sure=sure)
+    sure_parts = _sure_parts(node) if isinstance(node, ast.expr) else None
+    if sure_parts is not None:
+        for part in sure_parts:
+            yield from _expression_calls(part, sure=sure)
         for call, _ in _nested_calls(node):
-            if not _within(call, first):
+            if not any(_within(call, part) for part in sure_parts):
                 yield call, False
         return
     for child in ast.iter_child_nodes(node):

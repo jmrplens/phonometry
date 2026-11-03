@@ -509,6 +509,32 @@ _PLANTED_UNCHECKED = {
             ok = flag or require_finite_array(levels, "levels")
             return ok, np.asarray(levels, dtype=np.float64)
     """,
+    "checked_in_a_later_link_of_a_comparison": """
+        def f(levels, flag):
+            ok = 0 < flag < require_finite_array(levels, "levels")
+            return ok, np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_in_an_assert": """
+        def f(levels):
+            assert require_finite_array(levels, "levels") is None
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_in_a_later_link_of_a_comparison": """
+        def _read(levels, flag):
+            return 0 < flag < real_array(levels, "levels")
+
+        def f(levels, flag):
+            _read(levels, flag)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_in_an_assert": """
+        def _read(levels):
+            assert real_array(levels, "levels") is not None
+
+        def f(levels):
+            _read(levels)
+            return np.asarray(levels, dtype=np.float64)
+    """,
     "rebound_in_a_branch": """
         def f(levels, other, flag):
             levels = real_array(levels, "levels")
@@ -945,6 +971,19 @@ _PLANTED_ANSWERED = {
                 levels = real_array(levels, "levels")
             except ValueError:
                 raise TypeError("no") from None
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_in_the_first_link_of_a_comparison": """
+        def f(levels, flag):
+            ok = require_finite_array(levels, "levels") is None is not flag
+            return ok, np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_in_the_first_link_of_a_comparison": """
+        def _read(levels, flag):
+            return real_array(levels, "levels") is not None is not flag
+
+        def f(levels, flag):
+            _read(levels, flag)
             return np.asarray(levels, dtype=np.float64)
     """,
     "the_item_checked_is_the_item_read": """

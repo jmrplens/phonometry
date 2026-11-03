@@ -745,6 +745,46 @@ def test_an_annotation_without_a_value_binds_no_value() -> None:
     assert "field" not in ast_scan.bindings_by_name(tree.body[3])
 
 
+def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> None:
+    """A function, a method or a class body that declares a module name
+    ``global`` and binds it may run at any time, so what it binds the name
+    to may stand once the module has run, beside the bindings at the top
+    that :func:`ast_scan.live_bindings` keeps; a name only such a function
+    binds stands for that alone, and a local of the same spelling is not
+    the module's.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from ._checked import read
+            read = read
+
+            def swap():
+                global read, extra
+                read = loose
+                from ._other import extra
+
+            class Holder:
+                def method(self):
+                    global read
+                    def read(path):
+                        return path
+
+            def own():
+                read = 1
+            """
+        )
+    )
+    inside = ast_scan.global_bindings(tree)
+    assert sorted(inside) == ["extra", "read"]
+    assert [type(node).__name__ for node in inside["read"]] == ["Name", "FunctionDef"]
+    standing = ast_scan.standing_bindings(tree)
+    assert [(type(node).__name__, node.lineno) for node in standing["read"]] == [
+        ("Name", 3), ("Name", 7), ("FunctionDef", 13),
+    ]  # fmt: skip
+    assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

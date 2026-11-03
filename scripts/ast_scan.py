@@ -21,7 +21,9 @@ that bind one name, a ``def`` or an import in each branch of an ``if`` or
 one after the other, which the name holds at a call, or once the scope has
 run, is read here too (:func:`live_bindings`), and which a function written
 at a point may meet when it is called, from that point on
-(:func:`bindings_from`).
+(:func:`bindings_from`); what a module's name may hold once the module has
+run counts what a function inside it binds the name to under ``global``
+(:func:`standing_bindings`).
 """
 
 from __future__ import annotations
@@ -431,6 +433,19 @@ def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
     where it is read is :func:`live_bindings` of the nodes.
     """
     names = own_names(scope)
+    sent_out = names.declared_global | names.declared_nonlocal
+    return {
+        name: nodes
+        for name, nodes in _binding_nodes(scope).items()
+        if name not in sent_out
+    }
+
+
+def _binding_nodes(scope: ast.AST) -> dict[str, list[ast.AST]]:
+    """Each name a statement of *scope* binds, its ``global`` and
+    ``nonlocal`` names among them, with every node that binds it, in the
+    order of the source (:func:`bindings_by_name`).
+    """
     comprehension = isinstance(scope, _COMPREHENSIONS)
     found: dict[str, list[ast.AST]] = {}
     nodes = scope_nodes(scope)
@@ -444,15 +459,60 @@ def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
         else:
             bound = declared[1] if declared[0] in {"defined", "imported"} else set()
         for name in bound:
-            if name not in names.declared_global | names.declared_nonlocal:
-                found.setdefault(name, []).append(node)
+            found.setdefault(name, []).append(node)
     for nodes in found.values():
-        nodes.sort(
-            key=lambda node: (
-                getattr(node, "lineno", 0),
-                getattr(node, "col_offset", 0),
-            )
-        )
+        nodes.sort(key=_position)
+    return found
+
+
+def _position(node: ast.AST) -> tuple[int, int]:
+    """Where *node* is written: its line and its column."""
+    return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
+
+
+@functools.cache
+def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
+    """Each name of *module* that a function, a method or a class body inside
+    it declares ``global`` and binds, with every node that binds it there,
+    in the order of the source.
+
+    Such a scope may run at any time once it is defined, before a call into
+    the module or after it has run, so each of these may be what the
+    module's name holds then (:func:`standing_bindings`).
+    """
+    found: dict[str, list[ast.AST]] = {}
+    for scope in ast.walk(module):
+        if not isinstance(scope, _DEFINITIONS):
+            continue
+        sent = own_names(scope).declared_global
+        for name, nodes in _binding_nodes(scope).items():
+            if name in sent:
+                found.setdefault(name, []).extend(nodes)
+    for nodes in found.values():
+        nodes.sort(key=_position)
+    return found
+
+
+def standing_bindings(
+    module: ast.Module, bindings: Mapping[str, Sequence[ast.AST]] | None = None
+) -> dict[str, list[ast.AST]]:
+    """Each name *module* binds, with every binding of it that may stand once
+    the module has run.
+
+    Of the bindings at the top of the module (:func:`bindings_by_name`, or
+    *bindings* when given, a part of them), those :func:`live_bindings`
+    keeps: the later of two in a row, either of two in the branches of an
+    ``if`` or a ``try``. And every binding a function, a method or a class
+    body inside the module makes of the name under ``global``
+    (:func:`global_bindings`), which may have run by then.
+    """
+    own = bindings_by_name(module) if bindings is None else bindings
+    inside = global_bindings(module)
+    found: dict[str, list[ast.AST]] = {}
+    for name in [*own, *(name for name in inside if name not in own)]:
+        nodes = list(own.get(name, ()))
+        live = nodes if len(nodes) < 2 else live_bindings(module, nodes)
+        found[name] = [*live, *inside.get(name, ())]
     return found
 
 
@@ -537,7 +597,7 @@ def forget_trees() -> None:
     that reads each file once calls this when it is done with the file, so
     that the trees of a whole directory are not all kept at once.
     """
-    for cached in (own_names, _parents, _blocks, _class_is_live):
+    for cached in (own_names, _parents, _blocks, _class_is_live, global_bindings):
         cached.cache_clear()
 
 

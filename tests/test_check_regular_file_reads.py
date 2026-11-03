@@ -758,6 +758,66 @@ def test_a_name_is_looked_up_in_the_scope_the_call_runs_in(
     assert _found(tmp_path, _SCOPED) == [("defined_then_rebound", _FOREIGN)]
 
 
+def test_a_function_of_the_module_another_rebinds_under_global_is_no_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares the module's ``info`` global and binds it may
+    run before the reader does, so ``info`` may be what it bound there and
+    not the check the module defines: the reader is refused, as it is when
+    the module rebinds the name at its top.
+    """
+    source = """
+        import numpy as np
+
+        from phonometry._internal.json_input import not_regular_at
+
+        def info(path):
+            if not_regular_at(Path(path)) is not None:
+                raise ValueError(path)
+
+        def _swap():
+            global info
+            info = make_describer()
+
+        def reader(path):
+            info(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source) == [("reader", _FOREIGN)]
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "found"),
+    [
+        ("require_regular = make_describer()", [("reader", _FOREIGN)]),
+        ("from check import require_regular", []),
+    ],
+    ids=["another-value", "the-same-import"],
+)
+def test_an_import_a_function_rebinds_under_global_is_read_as_it_may_stand(
+    tmp_path: pathlib.Path, rebinding: str, found: list[tuple[str, str]]
+) -> None:
+    """The module's import of the check is what ``require_regular`` holds only
+    while no function that declares it ``global`` has bound it to something
+    else; the module's names were read from its top alone, so the import
+    stood for the name after such a function replaced it.
+    """
+    source = f"""
+        import numpy as np
+
+        from check import require_regular
+
+        def _swap():
+            global require_regular
+            {rebinding}
+
+        def reader(path):
+            require_regular(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source) == found
+
+
 #: A module that defines one reader in each branch of an ``if``, and one in
 #: each block of a ``try``, where only one of the two binds ``info`` itself.
 _TWO_BRANCHES = """
@@ -1126,8 +1186,35 @@ def test_a_re_export_two_branches_agree_on_reaches_the_check(
             """,
             [],
         ),
+        (
+            """
+            from ._audio_file import require_regular_audio
+            from ._loose import check_nothing
+
+            def _swap():
+                global require_regular_audio
+                require_regular_audio = check_nothing
+            """,
+            [("through_the_package", 6)],
+        ),
+        (
+            """
+            from ._audio_file import require_regular_audio
+
+            def _reload():
+                global require_regular_audio
+                from ._audio_file import require_regular_audio
+            """,
+            [],
+        ),
     ],
-    ids=["assignment", "def-that-checks-nothing", "def-that-checks"],
+    ids=[
+        "assignment",
+        "def-that-checks-nothing",
+        "def-that-checks",
+        "global-assignment-in-a-function",
+        "global-import-of-the-same-check",
+    ],
 )
 def test_a_binding_after_a_re_export_takes_the_name_from_it(
     tmp_path: pathlib.Path, init: str, found: list[tuple[str, int]]
@@ -1138,7 +1225,11 @@ def test_a_binding_after_a_re_export_takes_the_name_from_it(
 
     The re-exports were read from the imports alone, so the check imported
     first stood for the name after ``require_regular_audio = check_nothing``
-    or a ``def`` that checks nothing replaced it.
+    or a ``def`` that checks nothing replaced it. A function that declares
+    the name ``global`` and binds it may run at any time, so what it binds
+    may be what the package holds too; the bindings at the top of the
+    module were read alone, and the check stood for the name after such a
+    function replaced it.
     """
     assert _read_through_the_package(tmp_path, init) == found
 

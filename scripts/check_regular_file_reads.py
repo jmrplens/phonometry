@@ -85,11 +85,13 @@ from ast_scan import (
     ROOT,
     bindings_by_name,
     exempted,
+    global_bindings,
     live_bindings,
     live_class_members,
     own_names,
     python_files,
     relative,
+    standing_bindings,
 )
 
 if TYPE_CHECKING:
@@ -457,9 +459,13 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
     it bind and, at the top, the module (:func:`_bound`). A class body is
     skipped by the functions in it, as Python skips it: an import in a class
     body is not seen by the class's methods. A name a function declares
-    ``global`` is the module's, unless the function stores in it.
+    ``global`` is the module's, unless the function stores in it; what it
+    stores there may be what the module's name holds anywhere
+    (:func:`_rebound_from_inside`).
     """
     module = _bound(tree, package, {})
+    if isinstance(tree, ast.Module):
+        _rebound_from_inside(tree, package, module)
     found: dict[ast.AST, dict[str, str]] = {tree: module}
     pending: list[tuple[ast.AST, dict[str, str]]] = [(tree, module)]
     while pending:
@@ -472,6 +478,33 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
             inner = outer if isinstance(child, ast.ClassDef) else found[child]
             pending.append((child, inner))
     return found
+
+
+def _rebound_from_inside(
+    tree: ast.Module, package: str, module: dict[str, str]
+) -> None:
+    """Read into *module*, what the names stand for at the top of *tree*,
+    what a function, a method or a class body inside it binds a name to
+    under ``global`` (:func:`ast_scan.global_bindings`), which it may do
+    before any call into the module.
+
+    A name such a scope only imports from one place, where the top of the
+    module imports it from there too or binds it not at all, stands for
+    that import; any other such name stands for nothing the guard can name.
+    """
+    top = bindings_by_name(tree)
+    for name, nodes in global_bindings(tree).items():
+        targets = {
+            _imported(node, package).get(name)
+            if isinstance(node, ast.Import | ast.ImportFrom)
+            else None
+            for node in nodes
+        }
+        (target,) = targets if len(targets) == 1 else (None,)
+        if target is None or (name in top and module.get(name) != target):
+            module.pop(name, None)
+        else:
+            module[name] = target
 
 
 def _names(call: ast.Call, aliases: Mapping[str, str]) -> set[str]:
@@ -636,9 +669,14 @@ def _names_of(scope: ast.AST) -> _Names:
 
     A name it declares ``global`` and binds all the same is bound otherwise:
     at a call it may be what the module bound or what the scope put there.
+    So is a name of the module that a scope inside it binds under
+    ``global`` (:func:`ast_scan.global_bindings`), which may have run before
+    the call.
     """
     names = own_names(scope)
     rebound = frozenset(name for name in names.declared_global if names.rebinds(name))
+    if isinstance(scope, ast.Module):
+        rebound |= frozenset(global_bindings(scope))
     return _Names(
         _defined_here(scope) - rebound,
         _bound_here(scope) | rebound,
@@ -652,23 +690,23 @@ def exports_of(path: pathlib.Path, tree: ast.Module) -> dict[str, str]:
     ``from ._audio_file import open_audio`` in ``phonometry/io/__init__.py``
     makes ``phonometry.io.open_audio`` stand for
     ``phonometry.io._audio_file.open_audio``, so that a module that imports
-    it from the package reaches the function itself. Every binding of a name
-    at the top of the module is read in the order of the source
-    (:func:`ast_scan.bindings_by_name`), and those that may stand once the
-    module has run (:func:`ast_scan.live_bindings`) say what it holds: a
-    name they all import from one place stands for it. One that an
-    assignment, a ``def`` or a ``class`` may hold, after its import or in
-    the other branch, or that two imports in the branches of a ``try`` or
-    an ``if`` bind to two functions, stands for none of them, so a module
-    that reaches it through the package reaches no function it imports.
+    it from the package reaches the function itself. The bindings of a name
+    that may stand once the module has run
+    (:func:`ast_scan.standing_bindings`) say what it holds: the later of two
+    at the top of the module, either of two in the branches of a ``try`` or
+    an ``if``, and whatever a function inside it binds the name to under
+    ``global``. A name they all import from one place stands for it. One
+    that an assignment, a ``def`` or a ``class`` may hold, after its import,
+    in the other branch or in such a function, or that two imports bind to
+    two functions, stands for none of them, so a module that reaches it
+    through the package reaches no function it imports.
     """
     module = module_name(path)
     package = _package_of(path, module)
     exports: dict[str, str] = {}
-    for name, nodes in bindings_by_name(tree).items():
-        if not any(isinstance(node, ast.Import | ast.ImportFrom) for node in nodes):
+    for name, live in standing_bindings(tree).items():
+        if not any(isinstance(node, ast.Import | ast.ImportFrom) for node in live):
             continue
-        live = nodes if len(nodes) == 1 else live_bindings(tree, nodes)
         targets = {
             _imported(node, package).get(name)
             if isinstance(node, ast.Import | ast.ImportFrom)

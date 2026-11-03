@@ -876,13 +876,14 @@ def _replaces(
     way from it to *point*, or to the end of the scope when *point* is None.
 
     *later* sits after *earlier*, or after the statement that holds it, in a
-    block they share, and nothing between the two may skip *later*: an
-    exception that a ``try`` or a ``with`` around it may catch
-    (:func:`_may_be_caught`), a ``break`` or a ``continue``, or a ``return``
-    before the end of the scope (:func:`_jumps`). A *point* between them in
-    that block is reached before *later* runs; one outside the statement
-    that holds the block, or in a block of it that runs after, is reached
-    after.
+    block they share. A *point* later in that block is reached only through
+    *later* (:func:`_later_in_block`). Elsewhere, nothing between the two
+    may skip *later*: an exception that a ``try`` or a ``with`` around it
+    may catch (:func:`_may_be_caught`), a ``break`` or a ``continue``, or a
+    ``return`` before the end of the scope (:func:`_jumps`). A *point*
+    between them in that block is reached before *later* runs; one outside
+    the statement that holds the block, or in a block of it that runs
+    after, is reached after.
     """
     depth = len(later) - 1
     holder, field, index = later[-1]
@@ -891,6 +892,8 @@ def _replaces(
     _, written_in, place = earlier[depth]
     if written_in != field or place >= index:
         return False
+    if _later_in_block(later, point):
+        return True
     between = getattr(holder, field)[place:index]
     if _may_be_caught(later, point) or _jumps(between, returns=point is None):
         return False

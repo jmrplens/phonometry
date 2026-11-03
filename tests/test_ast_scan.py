@@ -468,6 +468,75 @@ def test_a_def_may_be_skipped_by_what_leaves_the_block_between() -> None:
         assert _held_at(source, "helper", call="a") == [1, 2], source
 
 
+def test_a_def_replaces_an_earlier_one_for_a_read_later_in_its_own_block() -> None:
+    """A read later in the block of the later ``def`` is reached only through
+    it: what leaves the block between the two ``def``s, an exception a
+    ``try`` or a ``with`` around them catches, a ``break`` or a
+    ``continue``, leaves the read behind too.
+
+    The reading asked only whether the block could be left, and kept the
+    earlier ``def`` at a read the later one always runs before.
+    """
+    within_try = """
+    try:
+
+        def helper():
+            return 1
+
+        fail()
+
+        def helper():
+            return 2
+
+        a = helper()
+    except ValueError:
+        pass
+    """
+    within_with = """
+    with suppress(ValueError):
+
+        def helper():
+            return 1
+
+        fail()
+
+        def helper():
+            return 2
+
+        a = helper()
+    """
+    continued = """
+    for item in items:
+
+        def helper():
+            return 1
+
+        if item:
+            continue
+
+        def helper():
+            return 2
+
+        a = helper()
+    """
+    deeper = """
+    with suppress(ValueError):
+
+        def helper():
+            return 1
+
+        fail()
+
+        def helper():
+            return 2
+
+        if item:
+            a = helper()
+    """
+    for source in (within_try, within_with, continued, deeper):
+        assert _held_at(source, "helper", call="a") == [2], source
+
+
 def test_a_def_after_a_call_in_a_loop_reaches_it_on_the_next_turn() -> None:
     """A ``def`` written after a call in the body of a loop runs before that
     call on the next turn, so the call may reach it as well as the one before

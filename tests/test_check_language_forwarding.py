@@ -392,6 +392,51 @@ def test_an_import_after_a_definition_of_its_name_is_what_a_call_reaches(
     ]
 
 
+def test_a_call_reaches_the_bindings_its_name_may_hold_when_it_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reads its name where it runs: in its own scope, the binding
+    standing there; from a function, every binding of the scope around that
+    may stand from the ``def`` on, since the function may be called at once.
+
+    ``TABLE = plot_early(...)`` runs ``plot_early`` while ``axis`` is still
+    the helper that takes the language, though a later import replaces it;
+    a call written before a second import in its own function reaches the
+    first, which takes no language. The names were read as they stand once
+    each scope has run, so the first call passed and the second was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax):
+                return ax
+            """,
+            "pkg.plots": """
+            from .helpers import axis
+
+
+            def plot_early(result, ax, language="en"):
+                axis(ax)
+
+
+            TABLE = plot_early(None, None)
+            from .other import axis
+
+
+            def plot_before_the_import(result, ax, language="en"):
+                from .other import axis as draw
+
+                draw(ax)
+                from .helpers import axis as draw
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_early", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_nested_function_inherits_the_language_of_its_enclosure(
     tmp_path: pathlib.Path,
 ) -> None:

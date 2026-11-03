@@ -35,9 +35,11 @@ is held to the same rule as one inside.
 The callee is found the way the tree imports it: through relative imports,
 package re-exports and module attributes (``noise_control.plot_x``). Of the
 ``def``s, classes and imports that bind one name in a scope, the call reaches
-those that may stand once the scope has run (:func:`ast_scan.live_bindings`):
-the later of two in a row, whichever kind each is, and either of two in the
-branches of a ``try`` or an ``if``, against each of which the call is checked.
+those that may stand where it runs (:func:`ast_scan.live_bindings`): the
+later of two in a row, whichever kind each is, either of two in the branches
+of a ``try`` or an ``if``, against each of which the call is checked, and,
+from a function written in the scope, every one that may stand from its
+``def`` on, since the function may be called before a later binding.
 A method is
 found through the class of its receiver, read from a parameter annotation, from
 the class or function whose result was assigned to it, or from ``self``. Where
@@ -174,6 +176,9 @@ class Binding:
 #: what it imports.
 _Bound = _DefinitionNode | Binding
 
+#: A statement that binds a name, with what it binds it to.
+_Written = tuple[ast.stmt, _Bound]
+
 
 @dataclass(eq=False)
 class Module:
@@ -183,9 +188,9 @@ class Module:
     path: Path
     package: bool
     node: ast.Module
-    #: What each name its top level defines or imports may stand for once it
-    #: has run (:func:`_scope_names`).
-    names: dict[str, list[_Bound]] = field(default_factory=dict)
+    #: Every ``def``, class and import of each name its top level binds, in
+    #: the order of the source (:func:`_scope_names`).
+    names: dict[str, list[_Written]] = field(default_factory=dict)
     #: Every function and class its top level defines, two of one name alike.
     definitions: list[_DefinitionNode] = field(default_factory=list)
     speaks: bool = False
@@ -214,9 +219,9 @@ class Scope:
     qualname: str
     params: frozenset[str] = frozenset()
     locals: set[str] = field(default_factory=set)
-    #: What each name it defines or imports may stand for once it has run
-    #: (:func:`_scope_names`).
-    names: dict[str, list[_Bound]] = field(default_factory=dict)
+    #: Every ``def``, class and import of each name it binds, in the order of
+    #: the source (:func:`_scope_names`).
+    names: dict[str, list[_Written]] = field(default_factory=dict)
     #: Every function and class defined in it, two of one name alike.
     definitions: list[_DefinitionNode] = field(default_factory=list)
     values: dict[str, list[ast.expr]] = field(default_factory=dict)
@@ -381,35 +386,42 @@ def _import_bindings(module: Module, node: ast.AST) -> dict[str, Binding]:
 
 def _scope_names(
     module: Module, body: list[ast.stmt]
-) -> tuple[dict[str, list[_Bound]], list[_DefinitionNode]]:
-    """What each name *body* binds by a ``def``, a ``class`` or an import may
-    stand for once it has run, and every function and class it defines.
+) -> tuple[dict[str, list[_Written]], list[_DefinitionNode]]:
+    """Every ``def``, ``class`` and import of each name *body* binds, in the
+    order of the source, and every function and class it defines.
 
-    The statements are read in the order of the source, and of those that
-    bind one name, the ones that may stand once the body has run are kept
-    (:func:`ast_scan.live_bindings`): the later of two in a row, a ``def`` or
-    an import alike, and either of two in the branches of a ``try`` or an
-    ``if``, which the tree may meet whichever ran.
+    Which of them a call reaches is read where the call runs
+    (:func:`_standing`).
     """
     definitions = list(_definitions(body))
-    written: dict[str, list[tuple[ast.stmt, _Bound]]] = {}
+    written: dict[str, list[_Written]] = {}
     for definition in definitions:
         written.setdefault(definition.name, []).append((definition, definition))
     for node in _own_nodes(body):
         if isinstance(node, ast.Import | ast.ImportFrom):
             for name, binding in _import_bindings(module, node).items():
                 written.setdefault(name, []).append((node, binding))
-    names: dict[str, list[_Bound]] = {}
-    for name, pairs in written.items():
+    for pairs in written.values():
         pairs.sort(key=lambda pair: (pair[0].lineno, pair[0].col_offset))
-        statements = [statement for statement, _ in pairs]
-        live = statements
-        if len(statements) > 1:
-            live = live_bindings(module.node, statements)
-        names[name] = [
-            bound for statement, bound in pairs if any(statement is s for s in live)
-        ]
-    return names, definitions
+    return written, definitions
+
+
+def _standing(
+    module: Module, written: list[_Written], point: ast.AST | None
+) -> list[_Bound]:
+    """What a name *written* binds may stand for at *point*, or once its scope
+    has run when *point* is None (:func:`ast_scan.live_bindings`).
+
+    The later of two in a row, a ``def`` or an import alike, and either of
+    two in the branches of a ``try`` or an ``if``; from a function written
+    in the scope, every one that may stand from the ``def`` on, since the
+    function may be called at once or once the scope has run.
+    """
+    if len(written) == 1:
+        return [written[0][1]]
+    statements = [statement for statement, _ in written]
+    live = live_bindings(module.node, statements, point)
+    return [bound for statement, bound in written if any(statement is s for s in live)]
 
 
 def _removes_language(node: ast.AST) -> str | None:
@@ -659,7 +671,7 @@ class Tree:
         inner = seen | {(module_name, attr)}
         found = [
             target
-            for bound in module.names.get(attr, ())
+            for bound in _standing(module, module.names.get(attr, []), None)
             for target in self._targets(bound, inner)
         ]
         return found or fallback
@@ -680,24 +692,31 @@ class Tree:
         """What an import binding refers to, when every reading of it agrees."""
         return _one(self.bounds(binding))
 
-    def lookups(self, name: str, scope: Scope | None, module: Module) -> list[_Target]:
+    def lookups(
+        self,
+        name: str,
+        scope: Scope | None,
+        module: Module,
+        point: ast.AST | None = None,
+    ) -> list[_Target]:
         """Everything a bare name may stand for inside *scope*, read as Python reads it.
 
-        The innermost scope that binds the name holds it: its ``def``s, classes
-        and imports that may stand once it has run (:func:`_scope_names`), or
-        its parameters and locals.
+        The innermost scope that binds the name holds it: its ``def``s,
+        classes and imports that may stand where *point* reads it, or once it
+        has run when no point is given (:func:`_standing`), or its parameters
+        and locals.
         """
         current = scope
         while current is not None:
-            bound = current.names.get(name)
-            if bound:
+            written = current.names.get(name)
+            if written:
+                bound = _standing(module, written, point)
                 return [target for b in bound for target in self._targets(b)]
             if name in current.params or name in current.locals:
                 return [Local(current, name)]
             current = current.parent
-        return [
-            target for b in module.names.get(name, ()) for target in self._targets(b)
-        ]
+        bound = _standing(module, module.names.get(name, []), point)
+        return [target for b in bound for target in self._targets(b)]
 
     def lookup(self, name: str, scope: Scope | None, module: Module) -> _Target:
         """Resolve a bare name the way Python would inside *scope*.
@@ -894,7 +913,7 @@ class Tree:
         if isinstance(func, ast.Name):
             found = [
                 self._target_callee(target, func, scope)
-                for target in self.lookups(func.id, scope, module)
+                for target in self.lookups(func.id, scope, module, call)
             ]
         elif isinstance(func, ast.Call):
             # ``functools.partial(helper, ax)(...)``, called where it is built.
@@ -969,14 +988,15 @@ class Tree:
     def _binding(self, name: str, scope: Scope) -> Binding | None:
         """The import *name* is bound by, whether or not it is of this tree."""
         current: Scope | None = scope
+        module = scope.module
         while current is not None:
-            bound = current.names.get(name)
-            if bound:
-                return _one_import(bound)
+            written = current.names.get(name)
+            if written:
+                return _one_import(_standing(module, written, None))
             if name in current.params or name in current.locals:
                 return None
             current = current.parent
-        return _one_import(scope.module.names.get(name, []))
+        return _one_import(_standing(module, module.names.get(name, []), None))
 
     def _is_partial(self, func: ast.expr, scope: Scope) -> bool:
         """Whether *func* names ``functools.partial``, imported either way."""

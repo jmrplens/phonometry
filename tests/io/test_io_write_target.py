@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import shutil
 import stat
 import sys
 import threading
@@ -31,6 +32,7 @@ from phonometry.io._bext import fresh_metadata
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from typing import BinaryIO
 
 #: Whether the [audio] extra, which writes FLAC, is installed.
 HAVE_SOUNDFILE = importlib.util.find_spec("soundfile") is not None
@@ -429,6 +431,75 @@ def test_bytes_put_beside_a_private_file_are_never_readable_by_others(
     assert seen == ([0o600] if before is not None else [])
     assert stat.S_IMODE(target.stat().st_mode) == after
     assert target.read_bytes() == b"the new sidecar"
+
+
+def _staging_modes_while_copied(
+    monkeypatch: pytest.MonkeyPatch,
+) -> list[int]:
+    """The bits of the copy a FLAC ``bext`` goes through, read while the frames go in.
+
+    The audio frames are the last bytes the copy takes, streamed by
+    :func:`shutil.copyfileobj` into the copy as it is open to write.
+    """
+    seen: list[int] = []
+    copy = shutil.copyfileobj
+
+    def looked_at(source: BinaryIO, destination: BinaryIO, length: int = 0) -> None:
+        seen.append(stat.S_IMODE(os.fstat(destination.fileno()).st_mode))
+        copy(source, destination, length)
+
+    monkeypatch.setattr(shutil, "copyfileobj", looked_at)
+    return seen
+
+
+@_POSIX
+@_NEEDS_SOUNDFILE
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize("how", ["write", "embed"])
+def test_the_copy_a_bext_goes_through_is_private_while_the_recording_goes_in(
+    how: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The copy was made with the umask's bits and given the recording's once
+    whole, so a FLAC kept private could be read in its copy while the frames
+    went in. Its bits are read while they go in, written over by io.write and
+    given its chunk on its own.
+    """
+    path = tmp_path / "meas.flac"
+    write(path, SAMPLES, FS)
+    path.chmod(0o600)
+    seen = _staging_modes_while_copied(monkeypatch)
+    if how == "write":
+        write(path, SAMPLES, FS, bext=fresh_metadata())
+        assert read(path).data.shape[-1] == SAMPLES.size
+    else:
+        size = path.stat().st_size
+        _flac.embed_flac_bext(path, b"the bext chunk of the recording")
+        assert path.stat().st_size > size
+    assert seen == [0o600]
+    assert stat.S_IMODE(path.stat().st_mode) == 0o600
+    assert path.read_bytes()[:4] == b"fLaC"
+
+
+@_POSIX
+@_NEEDS_SOUNDFILE
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize("before", [None, 0o644, 0o640])
+def test_a_flac_given_its_bext_keeps_the_bits_it_had(
+    before: int | None, tmp_path: Path
+) -> None:
+    """The copy is made readable by its owner alone; the recording's own bits
+    are given to it before it takes the recording's place, so a new FLAC
+    keeps the umask's bits and one given its chunk keeps those it had.
+    """
+    path = tmp_path / "meas.flac"
+    if before is None:
+        write(path, SAMPLES, FS, bext=fresh_metadata())
+    else:
+        write(path, SAMPLES, FS)
+        path.chmod(before)
+        _flac.embed_flac_bext(path, b"the bext chunk of the recording")
+    assert stat.S_IMODE(path.stat().st_mode) == (0o644 if before is None else before)
+    assert [entry.name for entry in tmp_path.iterdir()] == ["meas.flac"]
 
 
 def test_a_writer_left_at_the_yield_leaves_no_file_beside(tmp_path: Path) -> None:

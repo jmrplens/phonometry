@@ -22,6 +22,7 @@ import itertools
 import math
 import operator
 import os
+import re
 import subprocess
 import sys
 import textwrap
@@ -1713,6 +1714,40 @@ def test_the_sections_realise_scipy_s_response(curve: str) -> None:
     _, theirs = sg.sosfreqz(sg.zpk2sos(*digital), worN=grid, fs=48000)
     apart = np.max(np.abs(20.0 * np.log10(np.abs(ours) / np.abs(theirs))))
     assert apart < 1e-9, f"{curve}: {apart:.3e} dB"
+
+
+@pytest.mark.parametrize(
+    ("zeros", "refusal"),
+    [
+        pytest.param(
+            [0.5 + 0.3j],
+            "the roots above the real axis number 1 and those below 0",
+            id="unpaired-count",
+        ),
+        pytest.param(
+            [0.5 + 0.3j, 0.5 - 0.9j],
+            "(0.5+0.3j) and (0.5-0.9j) are not a conjugate pair",
+            id="mismatched-pair",
+        ),
+    ],
+)
+def test_the_sections_refuse_a_complex_root_with_no_conjugate(
+    zeros: list[complex], refusal: str
+) -> None:
+    """Two guards, as in SciPy's ``_cplxreal``, each named by what it found.
+
+    A complex root above the real axis with none below it fails the count,
+    and two roots one on each side that are not each other's conjugate fail
+    the distance, however the roots pair up after that. Both keep SciPy's
+    sentence and say which of the two refused.
+    """
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Array contains complex value with no matching conjugate: {refusal}."
+        ),
+    ):
+        second_order_sections(np.array(zeros), np.array([0.5]), 1.0)
 
 
 def _fused_convolve(a: object, v: object, mode: str = "full") -> np.ndarray:

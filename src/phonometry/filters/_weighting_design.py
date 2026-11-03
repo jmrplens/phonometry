@@ -1323,7 +1323,9 @@ def _conjugate_pairs(roots: list[complex]) -> tuple[list[complex], list[complex]
     numpy divides by ``2 + 0j``.
 
     :return: ``(pairs, reals)``, each pair by its member above the axis.
-    :raises ValueError: if a complex root has no conjugate.
+    :raises ValueError: if a complex root has no conjugate, saying whether the
+        counts above and below the real axis differ or two roots matched in
+        order are not a conjugate pair.
     """
     ordered = sorted(roots, key=lambda z: (z.real, math.fabs(z.imag)))
     flags = [math.fabs(z.imag) <= _PAIRING_TOLERANCE * _magnitude(z) for z in ordered]
@@ -1332,7 +1334,10 @@ def _conjugate_pairs(roots: list[complex]) -> tuple[list[complex], list[complex]
     upper = [z for z in rest if z.imag > 0.0]
     lower = [z for z in rest if z.imag < 0.0]
     if len(upper) != len(lower):
-        msg = "Array contains complex value with no matching conjugate."
+        msg = (
+            "Array contains complex value with no matching conjugate: the roots "
+            f"above the real axis number {len(upper)} and those below {len(lower)}."
+        )
         raise ValueError(msg)
     runs = _runs_of_one_real_part(upper)
     upper, lower = _sorted_runs(upper, runs), _sorted_runs(lower, runs)
@@ -1340,7 +1345,10 @@ def _conjugate_pairs(roots: list[complex]) -> tuple[list[complex], list[complex]
     for above, below in zip(upper, lower, strict=True):
         apart = complex(above.real - below.real, above.imag - -below.imag)
         if _magnitude(apart) > _PAIRING_TOLERANCE * _magnitude(below):
-            msg = "Array contains complex value with no matching conjugate."
+            msg = (
+                "Array contains complex value with no matching conjugate: "
+                f"{above!r} and {below!r} are not a conjugate pair."
+            )
             raise ValueError(msg)
         total = (above.real + below.real, above.imag + -below.imag)
         pairs.append(complex(*complex_quotient(total, (2.0, 0.0))))

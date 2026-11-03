@@ -2822,3 +2822,129 @@ def test_an_alias_or_import_in_any_block_at_the_top_is_the_module_s() -> None:
         "IN_LOOP = 1",
         "from json import JSONEncoder as in_loop",
     } <= statements
+
+
+def _a_kind_beside_a_comprehension(rows: list[str]) -> tuple[str, list[str]]:
+    kind = "fast"
+    names = [kind.upper() for kind in rows]
+    return kind, names
+
+
+def _a_kind_inside_a_comprehension(rows: list[str]) -> tuple[list[str], str]:
+    kind = "fast"
+    return [kind for kind in ("up", "down") if rows], kind
+
+
+def _returned_items(tree: ast.AST) -> list[ast.expr]:
+    returned = next(
+        node.value for node in ast.walk(tree) if isinstance(node, ast.Return)
+    )
+    assert returned is not None
+    return list(returned.elts) if isinstance(returned, ast.Tuple) else [returned]
+
+
+def test_a_comprehension_s_variable_is_no_name_of_the_function_around_it() -> None:
+    """Rule A21 reads what fills a record's text back to where it is bound:
+    a comprehension's variable joined the function's name of the same
+    spelling, so a kind always bound to one closed text read as open, and
+    the field it fills escaped the rule. Inside the comprehension the name
+    stands for the items it walks.
+    """
+    tree = _tree(_a_kind_beside_a_comprehension)
+    function = tree.body[0]
+    kind, _names = _returned_items(tree)
+    assert ccl._source(kind, function, __name__, 0) == ccl._Source(
+        "texts", frozenset({"fast"})
+    )
+    tree = _tree(_a_kind_inside_a_comprehension)
+    function = tree.body[0]
+    listed, kind = _returned_items(tree)
+    assert isinstance(listed, ast.ListComp)
+    assert ccl._source(listed.elt, function, __name__, 0) == ccl._Source(
+        "texts", frozenset({"up", "down"})
+    )
+    assert ccl._source(kind, function, __name__, 0) == ccl._Source(
+        "texts", frozenset({"fast"})
+    )
+
+
+def _a_mode_shadowed_by_a_comprehension(mode: str, rows: list[str]) -> int:
+    return len([row for mode in rows for row in mode if mode == "fast"])
+
+
+def _a_mode_shadowed_by_a_nested_parameter(mode: str) -> bool:
+    def judge(mode: str) -> bool:
+        return mode == "fast"
+
+    return judge(mode.upper())
+
+
+def _a_clean_up_shadowed_in_a_nested_function(mode: str) -> int:
+    low = mode.lower()
+
+    def judge(low: str) -> bool:
+        return low == "fast"
+
+    return len(low) + judge("x")
+
+
+def _items_beside_a_comprehension(sides: Sequence[str], other: list[str]) -> int:
+    for side in sides:
+        print(side)
+    return len([side for side in other if side == "top"])
+
+
+def _values_beside_a_comprehension(levels: Mapping[str, str], other: list[str]) -> int:
+    for value in levels.values():
+        print(value)
+    return len([value for value in other if value == "top"])
+
+
+def _a_table_shadowed_by_a_comprehension(
+    sides: Sequence[str], groups: list[list[str]]
+) -> int:
+    table = _SIDES
+    return len([side for table in groups for side in sides if side in table]) + len(
+        table
+    )
+
+
+@pytest.mark.parametrize(
+    ("function", "name", "collection"),
+    [
+        (_a_table_shadowed_by_a_comprehension, "sides", True),
+        (_a_mode_shadowed_by_a_comprehension, "mode", False),
+        (_a_mode_shadowed_by_a_nested_parameter, "mode", False),
+        (_a_clean_up_shadowed_in_a_nested_function, "mode", False),
+        (_items_beside_a_comprehension, "sides", True),
+    ],
+)
+def test_a_name_another_scope_binds_tells_nothing_of_the_parameter(
+    function: Callable[..., object], name: str, *, collection: bool
+) -> None:
+    """A comprehension's variable, a nested function's parameter, or a loop's
+    item of the same spelling as the parameter, a clean-up of it or one of
+    its items, was read as that name, so a test of it against a text was
+    taken for a test of the parameter.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    tree = _tree(function)
+    found = ccl.code_evidence(
+        tree,
+        ccl._the_name(name, tree),
+        constants,
+        collection=collection,
+        module_name=__name__,
+    )
+    assert found == []
+
+
+def test_a_value_another_scope_binds_tells_nothing_of_the_mapping() -> None:
+    """Each value of a mapping is read under its loop's name only where the
+    loop binds it, not under a comprehension's variable of that spelling.
+    """
+    tree = _tree(_values_beside_a_comprehension)
+    target = ccl._the_name("levels")
+    assert ccl._value_names(tree, target) == {
+        ("value", tree.body[0]),
+    }

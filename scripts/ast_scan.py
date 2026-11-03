@@ -1007,6 +1007,50 @@ def _back_from_a_turn[NodeT: ast.AST](
     ]
 
 
+#: The statements that bind every name they bind each time they run.
+_SURE_BINDINGS = (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.Import, ast.ImportFrom)
+
+
+def runs_before(root: ast.AST, binding: ast.AST, point: ast.AST) -> bool:
+    """Whether the binding at *binding* runs on every way to *point*, a read
+    in the same scope.
+
+    The binding is an assignment or an import, the name a target of it or
+    one it imports, written straight in a block that holds the statement of
+    *point*, before it; not one inside a ``try`` or a ``with`` whose body an
+    exception may leave (:func:`_may_be_caught`), nor a loop's target or a
+    ``:=``, which may not run.
+    """
+    frames = _frames(root, binding)
+    target = _frames(root, point)
+    if not frames or not target:
+        return False
+    holder, field, index = frames[-1]
+    statement = getattr(holder, field)[index]
+    if not isinstance(statement, _SURE_BINDINGS):
+        return False
+    if binding is not statement and not any(
+        binding is target_name
+        for written in _assigned_targets(statement)
+        for target_name in ast.walk(written)
+    ):
+        return False
+    depth = len(frames) - 1
+    if len(target) <= depth or _shared(frames, target) < depth:
+        return False
+    _, read_in, read_at = target[depth]
+    return read_in == field and index < read_at and not _may_be_caught(frames, target)
+
+
+def _assigned_targets(statement: ast.stmt) -> list[ast.expr]:
+    """The targets an assignment statement stores in; none for an import."""
+    if isinstance(statement, ast.Assign):
+        return list(statement.targets)
+    if isinstance(statement, ast.AnnAssign | ast.AugAssign):
+        return [statement.target]
+    return []
+
+
 def bindings_from[NodeT: ast.AST](
     root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
 ) -> list[NodeT]:

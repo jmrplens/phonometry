@@ -26,7 +26,7 @@ if _SCRIPTS not in sys.path:
 
 import check_parameter_annotations as cpa
 import check_return_overloads as return_overloads
-from ast_scan import bindings_from, live_bindings, python_files
+from ast_scan import bindings_from, live_bindings, python_files, runs_before
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -1441,6 +1441,10 @@ class _ScopeNames:
     #: Python never binds there unless something else does, and in a class
     #: body names its body reads from the module.
     annotated: frozenset[str] = frozenset()
+    #: Of :attr:`from_inside`, what each nested scope binds the name to.
+    sent_by: dict[str, list[tuple[_ScopeNames, set[_Kind]]]] = dataclasses.field(
+        default_factory=dict
+    )
 
     def binds(self, name: str) -> bool:
         """Whether *name* is the scope's own, bound in it, or annotated in a function, and declared neither ``global`` nor ``nonlocal``."""
@@ -1484,6 +1488,9 @@ class _ScopeNames:
         nested there binds the name to through ``global`` or ``nonlocal``,
         which may run at any time.
         """
+        bound_here = self._bound_before(name, point)
+        if bound_here is not None:
+            return bound_here
         names = self
         called = False
         while not names.binds(name) and names.outer is not None:
@@ -1502,6 +1509,34 @@ class _ScopeNames:
                 for node, kind in bindings
                 if kind is not None and any(node is other for other in live)
             )
+        return found
+
+    def _bound_before(self, name: str, point: ast.AST | None) -> set[_Kind] | None:
+        """What *name*, declared ``global`` or ``nonlocal`` here, holds at
+        *point* when this scope binds it on every way there
+        (:func:`ast_scan.runs_before`): what its own bindings that may stand
+        there bind it to, and what another scope may bind the name to under
+        ``global`` or ``nonlocal`` meanwhile. ``None`` when no such binding
+        of its own precedes the read, which then reads the scope that holds
+        the name.
+        """
+        declared = name in self.declared_global or name in self.declared_nonlocal
+        bindings = self.flow.get(name, [])
+        if point is None or not declared or not bindings:
+            return None
+        nodes = [node for node, _ in bindings]
+        if not any(runs_before(self.tree, node, point) for node in nodes):
+            return None
+        live = live_bindings(self.tree, nodes, point)
+        found = {
+            kind
+            for node, kind in bindings
+            if kind is not None and any(node is other for other in live)
+        }
+        holder = _declared_holder(self, name)
+        for sender, kinds in holder.sent_by.get(name, []) if holder else []:
+            if sender is not self:
+                found.update(kinds)
         return found
 
     def may_hold(self, name: ast.Name, kind: _Kind) -> bool:
@@ -1558,13 +1593,22 @@ def _send_declared(names: _ScopeNames) -> None:
     """
     for name in names.declared_global | names.declared_nonlocal:
         kinds = {kind for _, kind in names.flow.get(name, []) if kind is not None}
-        target: _ScopeNames | None = names.module()
-        if name not in names.declared_global:
-            target = names.outer
-            while target is not None and not target.binds(name):
-                target = None if name in target.declared_global else target.outer
+        target = _declared_holder(names, name)
         if target is not None and kinds:
             target.from_inside.setdefault(name, set()).update(kinds)
+            target.sent_by.setdefault(name, []).append((names, kinds))
+
+
+def _declared_holder(names: _ScopeNames, name: str) -> _ScopeNames | None:
+    """The scope that holds a name *names*' scope declares ``global`` (the
+    module) or ``nonlocal`` (the nearest function around that binds it).
+    """
+    if name in names.declared_global:
+        return names.module()
+    target = names.outer
+    while target is not None and not target.binds(name):
+        target = None if name in target.declared_global else target.outer
+    return target
 
 
 def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
@@ -2066,6 +2110,47 @@ def test_the_float_equality_check_reads_an_annotation_without_a_value_as_no_bind
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "7", "10",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_global_name_its_function_has_just_bound() -> (
+    None
+):
+    """A function that declares a name ``global`` or ``nonlocal`` and binds it
+    on every way to a read holds that binding there, whatever the scope
+    that holds the name bound it to before.
+
+    ``global flag`` then ``flag = None`` makes ``x.astype(flag)`` a cast to
+    ``None``; the reader took the module's ``from numpy import bool_ as
+    flag`` as standing there too. A binding in one branch only, another
+    function's read and the enclosing function's own read still meet the
+    import.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "def first(x):",
+            "    global flag",
+            "    flag = None",
+            "    return x.astype(flag)",
+            "def branch(x):",
+            "    global flag",
+            "    if x:",
+            "        flag = None",
+            "    return x.astype(flag)",
+            "def other(x):",
+            "    return x.astype(flag)",
+            "def outer(x):",
+            "    from numpy import bool_ as mask",
+            "    def inner(y):",
+            "        nonlocal mask",
+            "        mask = None",
+            "        return y.astype(mask)",
+            "    return inner(x), x.astype(mask)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "10", "12", "19",
     ]  # fmt: skip
 
 

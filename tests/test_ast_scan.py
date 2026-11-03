@@ -823,6 +823,48 @@ def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:
     assert ast_scan.own_names(first).binds("T")
 
 
+def test_a_binding_runs_before_a_read_only_on_every_way_there() -> None:
+    """An assignment or an import straight in a block that holds the read,
+    before it, runs on every way to the read; one in a branch, in the body
+    of a ``try``, a loop's target, or one after the read does not.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def f(x, items):
+                a = 1
+                if x:
+                    b = 1
+                try:
+                    c = 1
+                except ValueError:
+                    pass
+                for d in items:
+                    pass
+                import os as e
+                use(a, b, c, d, e, g)
+                g = 1
+            """
+        )
+    )
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    (call,) = _calls(function, "use")
+    stores = {
+        node.id: node
+        for node in ast.walk(function)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+    }
+    imported = next(n for n in ast.walk(function) if isinstance(n, ast.Import))
+    found = {
+        name: ast_scan.runs_before(tree, node, call)
+        for name, node in [*stores.items(), ("e", imported)]
+    }
+    assert found == {
+        "a": True, "b": False, "c": False, "d": False, "e": True, "g": False,
+    }  # fmt: skip
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

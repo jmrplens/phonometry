@@ -1891,7 +1891,7 @@ out of calibrated results).
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. With nothing at the name, or a regular file, the audio is written to a new hidden file beside it, which takes the name only once it is whole, so a write stopped half way (an error, an interrupt) leaves what was there; the new file keeps the permission bits of the old one, and a hard link to the old file keeps the old bytes. A link, a pipe, a device or a directory at the name is opened there as Python opens it: a link is followed, a pipe waits for a reader, a directory raises `IsADirectoryError`. |
+| `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. With nothing at the name, or a regular file, the audio is written to a new hidden file beside it, which takes the name only once it is whole, so a write stopped half way (an error, an interrupt) leaves what was there; the new file is readable by its owner alone while it is written over a file, then keeps the permission bits of the old one, and a hard link to the old file keeps the old bytes. A link, a pipe, a device or a directory at the name is opened there as Python opens it: a link is followed, a pipe waits for a reader, a directory raises `IsADirectoryError`. |
 | `x` | A [`Signal`](/phonometry/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
 | `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
 | `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. |
@@ -1965,7 +1965,8 @@ document would write it at, and nothing is written.
 Each file is written beside its final name and renamed into place, so a
 reader never finds half of one; a CSV file and its header are two files,
 written one after the other, and the pair is not written as one. A file
-it replaces keeps its permission bits, and a hard link to the old file
+it replaces keeps its permission bits (the new one is readable by its
+owner alone until its bytes are in), and a hard link to the old file
 keeps the old content (on Windows without a read-only flag the old file
 had, since the flag belongs to the file and is cleared for the rename).
 Without *overwrite*, a file at the name is kept, one another program
@@ -2028,9 +2029,10 @@ a recalibration wants. The audio file itself is never touched. The
 sidecar is written to a new file beside it and renamed into place, so a
 reader finds the old sidecar or the new one whole and the name itself is
 never opened for writing; a link at the name is followed to the file it
-names. The file is replaced, not written into: the new one keeps the
-permission bits of the old, and a hard link to the old file keeps the
-old calibration (on Windows without a read-only flag the old file had,
+names. The file is replaced, not written into: the new one is readable
+by its owner alone until its bytes are in, then keeps the permission
+bits of the old, and a hard link to the old file keeps the old
+calibration (on Windows without a read-only flag the old file had,
 since the flag belongs to the file and is cleared for the rename). What
 it writes, [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) reads back, and
 [`read`](/phonometry/reference/api/io/io/#read) reads the audio beside it: fields whose

@@ -1146,32 +1146,154 @@ _BOOL_DTYPE_NAMES = frozenset({"bool", "bool_", "bool8", "?", "b1"})
 _BYTE_ORDER_MARKS = "|=<>"
 
 
-def _bool_aliases(tree: ast.AST) -> frozenset[str]:
-    """The names a ``from numpy import bool_ as b`` binds to the boolean dtype in *tree*."""
-    return frozenset(
-        alias.asname or alias.name
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom) and node.module in {"numpy", "np"}
-        for alias in node.names
-        if alias.name in _BOOL_DTYPE_NAMES
+#: The nodes that open a scope of their own for the names bound in them.
+_NESTED_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
+
+_Scope = ast.Module | ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda | ast.ClassDef
+
+
+def _parameters(arguments: ast.arguments) -> list[ast.arg]:
+    """Every parameter of a function, positional, keyword-only and starred."""
+    starred = [arguments.vararg, arguments.kwarg]
+    return [
+        *arguments.posonlyargs,
+        *arguments.args,
+        *arguments.kwonlyargs,
+        *(parameter for parameter in starred if parameter is not None),
+    ]
+
+
+def _outer_parts(scope: ast.AST) -> list[ast.AST]:
+    """The parts of a nested *scope* that Python evaluates in the scope around it.
+
+    A class's decorators, bases and keywords, and a function's decorators,
+    defaults and annotations.
+    """
+    if isinstance(scope, ast.ClassDef):
+        return [*scope.decorator_list, *scope.bases, *scope.keywords]
+    if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+        return []
+    arguments = scope.args
+    defaults: list[ast.AST] = [*arguments.defaults]
+    defaults.extend(default for default in arguments.kw_defaults if default)
+    if isinstance(scope, ast.Lambda):
+        return defaults
+    annotations = [p.annotation for p in _parameters(arguments) if p.annotation]
+    returns = [scope.returns] if scope.returns else []
+    return [*scope.decorator_list, *defaults, *annotations, *returns]
+
+
+def _scope_body(scope: _Scope) -> list[ast.AST]:
+    """The statements, or a lambda's expression, that run in *scope* itself."""
+    return [scope.body] if isinstance(scope, ast.Lambda) else list(scope.body)
+
+
+def _own_nodes(scope: _Scope) -> tuple[list[ast.AST], list[_Scope]]:
+    """The nodes that run in *scope*, and the scopes nested directly in it.
+
+    A nested function's or class's body is its own scope's; its decorators,
+    defaults, annotations and bases run here.
+    """
+    own: list[ast.AST] = []
+    nested: list[_Scope] = []
+    pending = _scope_body(scope)
+    while pending:
+        node = pending.pop()
+        own.append(node)
+        if isinstance(node, _NESTED_SCOPES):
+            nested.append(node)
+            pending.extend(_outer_parts(node))
+        else:
+            pending.extend(ast.iter_child_nodes(node))
+    return own, nested
+
+
+def _local_names(scope: _Scope, own: list[ast.AST]) -> set[str]:
+    """The names *scope* binds itself, which hide the same names around it.
+
+    Its parameters, and every name assigned, imported, defined, caught or
+    captured in it, less those it declares ``global`` or ``nonlocal`` and a
+    comprehension's own variables, which stay inside the comprehension.
+    """
+    bound: set[str] = set()
+    if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+        bound.update(parameter.arg for parameter in _parameters(scope.args))
+    inside = {
+        id(name)
+        for node in own
+        if isinstance(node, ast.comprehension)
+        for name in ast.walk(node.target)
+    }
+    declared: set[str] = set()
+    for node in own:
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            bound.update([] if id(node) in inside else [node.id])
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            bound.update((a.asname or a.name).partition(".")[0] for a in node.names)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bound.add(node.name)
+        elif isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+            bound.update([node.name] if node.name else [])
+        elif isinstance(node, ast.MatchMapping) and node.rest:
+            bound.add(node.rest)
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            declared.update(node.names)
+    return bound - declared
+
+
+def _bool_alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], frozenset[str]]]:
+    """Each scope of *tree*, as its own nodes and the names bound to numpy's boolean in it.
+
+    A ``from numpy import bool_ as flag`` binds ``flag`` where Python resolves
+    it: in the scope that imports it and in the functions nested there that
+    do not bind ``flag`` themselves, and not in a class body's methods, which
+    do not see the class's names. A name assigned ``bool`` is not followed.
+    """
+    found: list[tuple[list[ast.AST], frozenset[str]]] = []
+    scopes: list[tuple[_Scope, frozenset[str]]] = [(tree, frozenset())]
+    while scopes:
+        scope, inherited = scopes.pop()
+        own, nested = _own_nodes(scope)
+        imported = {
+            alias.asname or alias.name
+            for node in own
+            if isinstance(node, ast.ImportFrom) and node.module in {"numpy", "np"}
+            for alias in node.names
+            if alias.name in _BOOL_DTYPE_NAMES
+        }
+        aliases = frozenset((inherited - _local_names(scope, own)) | imported)
+        found.append((own, aliases))
+        # A class body's names do not reach the functions defined in it.
+        passed = inherited if isinstance(scope, ast.ClassDef) else aliases
+        scopes.extend((inner, passed) for inner in nested)
+    return found
+
+
+def _is_dtype_call(node: ast.expr) -> TypeGuard[ast.Call]:
+    """Whether *node* is a call to a ``dtype`` constructor, ``np.dtype(...)``."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "dtype"
     )
 
 
 def _is_bool_dtype(node: ast.expr, aliases: frozenset[str] = frozenset()) -> bool:
-    """Whether *node* names the boolean dtype, in any spelling.
+    """Whether *node* names the boolean dtype, in a spelling the scan recognises.
 
-    ``bool``, a name bound to numpy's boolean by an import, an attribute
-    ``bool``, ``bool_`` or ``bool8`` of whatever owner (``np``, ``numpy``,
-    an array namespace ``xp``), ``np.dtype`` of any of them, and the strings
-    numpy reads as it with or without a byte-order mark.
+    ``bool``; a name in *aliases*, which an import from numpy binds to its
+    boolean; an attribute ``bool``, ``bool_`` or ``bool8`` of whatever owner
+    (``np``, ``numpy``, an array namespace ``xp``); a ``dtype`` call on any of
+    them, positional or ``dtype=``, and that call's ``.type``; and the strings
+    ``"bool"``, ``"bool_"``, ``"bool8"``, ``"?"`` and ``"b1"``, with or
+    without a byte-order mark. A name assigned ``bool`` (``kind = bool``) is
+    not followed.
     """
-    if (
-        isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Attribute)
-        and node.func.attr == "dtype"
-        and node.args
-    ):
-        return _is_bool_dtype(node.args[0], aliases)
+    if isinstance(node, ast.Attribute) and node.attr == "type":
+        return _is_dtype_call(node.value) and _is_bool_dtype(node.value, aliases)
+    if _is_dtype_call(node):
+        given = [*node.args[:1], *(k.value for k in node.keywords if k.arg == "dtype")]
+        return any(_is_bool_dtype(dtype, aliases) for dtype in given)
     if isinstance(node, ast.Name):
         return node.id == "bool" or node.id in aliases
     if isinstance(node, ast.Attribute):
@@ -1184,13 +1306,14 @@ def _is_bool_dtype(node: ast.expr, aliases: frozenset[str] = frozenset()) -> boo
 
 
 def _is_bool_cast(node: ast.Call, aliases: frozenset[str] = frozenset()) -> bool:
-    """Whether *node* is an ``astype`` to ``bool``, in any spelling of the call or the dtype.
+    """Whether *node* is an ``astype`` to ``bool``, in a spelling the scan recognises.
 
-    ``x.astype(bool)``, ``np.astype(x, bool)`` and ``np.ndarray.astype(x,
-    bool)`` alike: the dtype is read from the first two arguments, where the
-    method form's second is its order string, never a dtype, and from
-    ``dtype=``. A float cast to ``bool`` is ``x != 0.0`` under another name.
-    The source cannot say which arrays are floats, so the cast is refused
+    The call as ``x.astype(bool)``, ``np.astype(x, bool)`` or
+    ``np.ndarray.astype(x, bool)``: the dtype is read from the first two
+    arguments, where the method form's second is its order string, never a
+    dtype, and from ``dtype=``, in the spellings :func:`_is_bool_dtype`
+    lists. A float cast to ``bool`` is ``x != 0.0`` under another name. The
+    source cannot say which arrays are floats, so the cast is refused
     whatever it is applied to: a boolean array needs none, an integer one
     says ``!= 0``.
     """
@@ -1200,38 +1323,40 @@ def _is_bool_cast(node: ast.Call, aliases: frozenset[str] = frozenset()) -> bool
     return any(_is_bool_dtype(dtype, aliases) for dtype in dtypes)
 
 
-def _float_equalities(tree: ast.AST) -> list[str]:
+def _float_equalities(tree: ast.Module) -> list[str]:
     """Each equality with a float constant, or cast to ``bool``, of *tree*, as ``line source``.
 
     An ``==`` or ``!=`` with a float constant on one side, and every
-    ``astype`` to ``bool``, which on a float array is the same test against
-    zero.
+    ``astype`` to ``bool`` that :func:`_is_bool_cast` recognises, which on
+    a float array is the same test against zero, in the order of the lines.
     """
-    aliases = _bool_aliases(tree)
-    found: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and _is_bool_cast(node, aliases):
-            found.append(f"{node.lineno} {ast.unparse(node)}")
-            continue
-        if not isinstance(node, ast.Compare):
-            continue
-        left = node.left
-        for operator, right in zip(node.ops, node.comparators, strict=True):
-            if isinstance(operator, (ast.Eq, ast.NotEq)) and (
-                _is_float_constant(left) or _is_float_constant(right)
-            ):
-                found.append(f"{node.lineno} {ast.unparse(node)}")
-            left = right
-    return found
+    found: list[tuple[int, str]] = []
+    for own, aliases in _bool_alias_scopes(tree):
+        for node in own:
+            if isinstance(node, ast.Call) and _is_bool_cast(node, aliases):
+                found.append((node.lineno, ast.unparse(node)))
+                continue
+            if not isinstance(node, ast.Compare):
+                continue
+            left = node.left
+            for operator, right in zip(node.ops, node.comparators, strict=True):
+                if isinstance(operator, (ast.Eq, ast.NotEq)) and (
+                    _is_float_constant(left) or _is_float_constant(right)
+                ):
+                    found.append((node.lineno, ast.unparse(node)))
+                left = right
+    return [f"{line} {source}" for line, source in sorted(found, key=lambda f: f[0])]
 
 
 def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> None:
     """A literal, a signed one, one named by numpy or math, ``float("inf")``, and a cast to bool.
 
-    The cast in every spelling of the call (the method, ``np.astype`` and
-    ``np.ndarray.astype``) and of the dtype (``np.dtype(bool)``, a string
-    with a byte-order mark, an array namespace's ``bool``, a name imported
-    from numpy); an array built with a boolean dtype is left to review.
+    The cast in each spelling the scan recognises, of the call (the method,
+    ``np.astype`` and ``np.ndarray.astype``) and of the dtype
+    (``np.dtype(bool)``, positional or by keyword, and its ``.type``, a
+    string with a byte-order mark, an array namespace's ``bool``, a name
+    imported from numpy); a name assigned ``bool`` and an array built with
+    a boolean dtype are left to review.
     """
     source = "\n".join(
         [
@@ -1262,11 +1387,59 @@ def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> N
             "y = x.astype(flag)",
             "z = x.astype(np.float64, 'K')",
             "aa = np.astype(x, float64)",
+            "x = y.astype(np.dtype(bool).type)",
+            "ab = x.astype(numpy.dtype(dtype='?'))",
+            "ac = x.astype(np.dtype(float).type)",
+            "ad = x.astype(y.dtype.type)",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "1", "2", "3", "4", "5", "6", "11", "12", "13", "14", "17", "18", "19",
-        "20", "21", "22", "23", "25",
+        "20", "21", "22", "23", "25", "28", "29",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_numpy_bool_alias_in_its_own_scope() -> None:
+    """A name imported as numpy's boolean is one only where Python resolves it there.
+
+    An import at the top of a module reaches every function that does not bind
+    the name itself; one inside a function reaches that function and the
+    functions nested in it, and not a class body's methods or another function,
+    where the same name may hold any dtype.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "def uses_the_module_import(x):",
+            "    return x.astype(flag)",
+            "def binds_the_name_itself(x, flag):",
+            "    return x.astype(flag)",
+            "def assigns_the_name(x):",
+            "    flag = np.float64",
+            "    return x.astype(flag)",
+            "def imports_its_own(x):",
+            "    from numpy import bool_ as mask",
+            "    def inner(y):",
+            "        return y.astype(mask)",
+            "    return x.astype(mask)",
+            "def another(x, mask):",
+            "    return x.astype(mask)",
+            "class Holder:",
+            "    from numpy import bool_ as kept",
+            "    ones = np.ones(2).astype(kept)",
+            "    cast = staticmethod(lambda x: x.astype(kept))",
+            "    def method(self, x, kept=np.float64):",
+            "        return x.astype(kept)",
+            "def global_name(x):",
+            "    global flag",
+            "    return x.astype(flag)",
+            "def comprehension(x, y):",
+            "    kinds = [str(flag) for flag in y]",
+            "    return x.astype(flag)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "12", "13", "18", "24", "27",
     ]  # fmt: skip
 
 

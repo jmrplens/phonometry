@@ -1146,10 +1146,24 @@ _BOOL_DTYPE_NAMES = frozenset({"bool", "bool_", "bool8", "?", "b1"})
 _BYTE_ORDER_MARKS = "|=<>"
 
 
-#: The nodes that open a scope of their own for the names bound in them.
-_NESTED_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
+#: The comprehensions, each a scope of its own for the variables it loops over.
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 
-_Scope = ast.Module | ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda | ast.ClassDef
+#: The nodes that open a scope of their own for the names bound in them.
+_NESTED_SCOPES = (
+    ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef, *_COMPREHENSIONS,
+)  # fmt: skip
+
+_Comprehension = ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp
+
+_Scope = (
+    ast.Module
+    | ast.FunctionDef
+    | ast.AsyncFunctionDef
+    | ast.Lambda
+    | ast.ClassDef
+    | _Comprehension
+)
 
 
 def _parameters(arguments: ast.arguments) -> list[ast.arg]:
@@ -1163,12 +1177,25 @@ def _parameters(arguments: ast.arguments) -> list[ast.arg]:
     ]
 
 
+def _type_parameters(scope: ast.AST) -> set[str]:
+    """The type parameters a generic function or class declares, ``def f[T]``."""
+    if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return {
+            parameter.name
+            for parameter in scope.type_params
+            if isinstance(parameter, (ast.TypeVar, ast.ParamSpec, ast.TypeVarTuple))
+        }
+    return set()
+
+
 def _outer_parts(scope: ast.AST) -> list[ast.AST]:
     """The parts of a nested *scope* that Python evaluates in the scope around it.
 
-    A class's decorators, bases and keywords, and a function's decorators,
-    defaults and annotations.
+    A class's decorators, bases and keywords, a function's decorators,
+    defaults and annotations, and a comprehension's first iterable.
     """
+    if isinstance(scope, _COMPREHENSIONS):
+        return [scope.generators[0].iter]
     if isinstance(scope, ast.ClassDef):
         return [*scope.decorator_list, *scope.bases, *scope.keywords]
     if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
@@ -1184,15 +1211,32 @@ def _outer_parts(scope: ast.AST) -> list[ast.AST]:
 
 
 def _scope_body(scope: _Scope) -> list[ast.AST]:
-    """The statements, or a lambda's expression, that run in *scope* itself."""
-    return [scope.body] if isinstance(scope, ast.Lambda) else list(scope.body)
+    """The statements, or the expressions, that run in *scope* itself.
+
+    A lambda's expression; a comprehension's result, its loop variables, its
+    conditions and every iterable after the first.
+    """
+    if isinstance(scope, ast.Lambda):
+        return [scope.body]
+    if isinstance(scope, _COMPREHENSIONS):
+        generators = scope.generators
+        results: list[ast.AST] = (
+            [scope.key, scope.value] if isinstance(scope, ast.DictComp) else [scope.elt]
+        )
+        return [
+            *results,
+            *(generator.target for generator in generators),
+            *(condition for generator in generators for condition in generator.ifs),
+            *(generator.iter for generator in generators[1:]),
+        ]
+    return list(scope.body)
 
 
 def _own_nodes(scope: _Scope) -> tuple[list[ast.AST], list[_Scope]]:
     """The nodes that run in *scope*, and the scopes nested directly in it.
 
-    A nested function's or class's body is its own scope's; its decorators,
-    defaults, annotations and bases run here.
+    A nested function's, class's or comprehension's body is its own scope's;
+    its decorators, defaults, annotations, bases or first iterable run here.
     """
     own: list[ast.AST] = []
     nested: list[_Scope] = []
@@ -1208,26 +1252,51 @@ def _own_nodes(scope: _Scope) -> tuple[list[ast.AST], list[_Scope]]:
     return own, nested
 
 
-def _local_names(scope: _Scope, own: list[ast.AST]) -> set[str]:
-    """The names *scope* binds itself, which hide the same names around it.
+def _walrus_targets(comprehension: _Comprehension) -> set[str]:
+    """The names a ``:=`` in *comprehension* binds, which belong to the scope around it.
 
-    Its parameters, and every name assigned, imported, defined, caught or
-    captured in it, less those it declares ``global`` or ``nonlocal`` and a
-    comprehension's own variables, which stay inside the comprehension.
+    Read through the comprehensions nested in it, which hand theirs on the
+    same way, and not into a function, class or lambda nested there.
     """
-    bound: set[str] = set()
+    names: set[str] = set()
+    pending = list(ast.iter_child_nodes(comprehension))
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.NamedExpr):
+            names.add(node.target.id)
+        if isinstance(node, _COMPREHENSIONS) or not isinstance(node, _NESTED_SCOPES):
+            pending.extend(ast.iter_child_nodes(node))
+    return names
+
+
+def _local_names(scope: _Scope, own: list[ast.AST]) -> tuple[set[str], set[str]]:
+    """The names *scope* binds itself, and those it declares ``global``.
+
+    The first hide the same names around it: its parameters and type
+    parameters, every name assigned, imported, defined, caught or captured in
+    it, and every name a ``:=`` in its comprehensions binds, less those it
+    declares ``global`` or ``nonlocal``. A comprehension binds only the
+    variables it loops over. A name declared ``global`` is the module's.
+    """
+    if isinstance(scope, _COMPREHENSIONS):
+        loops = [generator.target for generator in scope.generators]
+        targets = {
+            name.id
+            for target in loops
+            for name in ast.walk(target)
+            if isinstance(name, ast.Name)
+        }
+        return targets, set()
+    bound = _type_parameters(scope)
     if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
         bound.update(parameter.arg for parameter in _parameters(scope.args))
-    inside = {
-        id(name)
-        for node in own
-        if isinstance(node, ast.comprehension)
-        for name in ast.walk(node.target)
-    }
-    declared: set[str] = set()
+    declared_global: set[str] = set()
+    declared_nonlocal: set[str] = set()
     for node in own:
         if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
-            bound.update([] if id(node) in inside else [node.id])
+            bound.add(node.id)
+        elif isinstance(node, _COMPREHENSIONS):
+            bound.update(_walrus_targets(node))
         elif isinstance(node, (ast.Import, ast.ImportFrom)):
             bound.update((a.asname or a.name).partition(".")[0] for a in node.names)
         elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -1236,20 +1305,27 @@ def _local_names(scope: _Scope, own: list[ast.AST]) -> set[str]:
             bound.update([node.name] if node.name else [])
         elif isinstance(node, ast.MatchMapping) and node.rest:
             bound.add(node.rest)
-        elif isinstance(node, (ast.Global, ast.Nonlocal)):
-            declared.update(node.names)
-    return bound - declared
+        elif isinstance(node, ast.Global):
+            declared_global.update(node.names)
+        elif isinstance(node, ast.Nonlocal):
+            declared_nonlocal.update(node.names)
+    return bound - declared_global - declared_nonlocal, declared_global
 
 
 def _bool_alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], frozenset[str]]]:
     """Each scope of *tree*, as its own nodes and the names bound to numpy's boolean in it.
 
     A ``from numpy import bool_ as flag`` binds ``flag`` where Python resolves
-    it: in the scope that imports it and in the functions nested there that
-    do not bind ``flag`` themselves, and not in a class body's methods, which
-    do not see the class's names. A name assigned ``bool`` is not followed.
+    it: in the scope that imports it, in the functions and comprehensions
+    nested there that do not bind ``flag`` themselves, and in any function
+    that declares ``flag`` global when the import is the module's; not in a
+    class body's methods and comprehensions, which do not see the class's
+    names, nor where a comprehension loops over ``flag`` or a generic
+    function or class takes it as a type parameter. A name assigned ``bool``
+    is not followed.
     """
     found: list[tuple[list[ast.AST], frozenset[str]]] = []
+    module_aliases: frozenset[str] = frozenset()
     scopes: list[tuple[_Scope, frozenset[str]]] = [(tree, frozenset())]
     while scopes:
         scope, inherited = scopes.pop()
@@ -1261,10 +1337,22 @@ def _bool_alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], frozenset[
             for alias in node.names
             if alias.name in _BOOL_DTYPE_NAMES
         }
-        aliases = frozenset((inherited - _local_names(scope, own)) | imported)
+        local, declared_global = _local_names(scope, own)
+        aliases = frozenset(
+            (inherited - local - declared_global)
+            | imported
+            | (declared_global & module_aliases)
+        )
+        if scope is tree:
+            module_aliases = aliases
         found.append((own, aliases))
-        # A class body's names do not reach the functions defined in it.
-        passed = inherited if isinstance(scope, ast.ClassDef) else aliases
+        # A class body's names do not reach the scopes nested in it; its type
+        # parameters do.
+        passed = (
+            frozenset(inherited - _type_parameters(scope))
+            if isinstance(scope, ast.ClassDef)
+            else aliases
+        )
         scopes.extend((inner, passed) for inner in nested)
     return found
 
@@ -1403,9 +1491,15 @@ def test_the_float_equality_check_reads_a_numpy_bool_alias_in_its_own_scope() ->
     """A name imported as numpy's boolean is one only where Python resolves it there.
 
     An import at the top of a module reaches every function that does not bind
-    the name itself; one inside a function reaches that function and the
-    functions nested in it, and not a class body's methods or another function,
-    where the same name may hold any dtype.
+    the name itself, and one that declares it ``global`` even where the
+    function around it binds the name; one inside a function reaches that
+    function and the functions and comprehensions nested in it, and not a
+    function nested there that declares the name ``global``. None reaches a
+    class body's methods and comprehensions (the comprehension's first
+    iterable runs in the class body), another function, a comprehension that
+    loops over the name, or a generic function or class that takes it as a
+    type parameter, where the same name may hold any dtype; a ``:=`` in a
+    comprehension binds the name in the function around it.
     """
     source = "\n".join(
         [
@@ -1436,10 +1530,39 @@ def test_the_float_equality_check_reads_a_numpy_bool_alias_in_its_own_scope() ->
             "def comprehension(x, y):",
             "    kinds = [str(flag) for flag in y]",
             "    return x.astype(flag)",
+            "def outer(x):",
+            "    flag = np.float64",
+            "    def inner(y):",
+            "        global flag",
+            "        return y.astype(flag)",
+            "    return inner(x)",
+            "def imports_then_declares_global(x):",
+            "    from numpy import bool_ as mask",
+            "    def inner(y):",
+            "        global mask",
+            "        return y.astype(mask)",
+            "    return inner(x)",
+            "def comprehension_variable(xs):",
+            "    return [x.astype(flag) for flag in (np.float32, np.float64)]",
+            "class Casts:",
+            "    from numpy import bool_ as kept",
+            "    each = [x.astype(kept) for x in xs]",
+            "    first = [y for y in xs.astype(kept)]",
+            "def walrus(xs, x):",
+            "    kinds = [(flag := k) for k in xs]",
+            "    return x.astype(flag)",
+            "def generic[flag](x):",
+            "    return x.astype(flag)",
+            "class Box[flag]:",
+            "    def method(self, x):",
+            "        return x.astype(flag)",
+            "def comprehension_sees_its_function(xs):",
+            "    from numpy import bool_ as mask",
+            "    return {x: x.astype(mask) for x in xs}",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
-        "3", "12", "13", "18", "24", "27",
+        "3", "12", "13", "18", "24", "27", "32", "45", "56",
     ]  # fmt: skip
 
 

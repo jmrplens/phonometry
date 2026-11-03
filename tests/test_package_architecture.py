@@ -16,7 +16,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import TypeGuard
+from typing import NamedTuple, TypeGuard
 
 import pytest
 
@@ -1095,6 +1095,9 @@ def _message_text(node: ast.Assign) -> str | None:
 #: The modules whose float constants are spelled by name.
 _FLOAT_CONSTANT_OWNERS = frozenset({"np", "numpy", "math"})
 
+#: The modules whose float constants are spelled by name, as imported.
+_FLOAT_CONSTANT_MODULES = frozenset({"numpy", "math"})
+
 #: Their float constants: a comparison with one is a comparison with a float
 #: literal written out by name, ``x == np.inf`` as much as ``x == 1e308``.
 _FLOAT_CONSTANT_NAMES = frozenset(
@@ -1116,17 +1119,36 @@ _FLOAT_CONSTANT_NAMES = frozenset(
 )
 
 
-def _is_float_constant(node: ast.expr) -> bool:
-    """Whether *node* is a float literal, signed, named or spelled ``float("inf")``."""
+class _Aliases(NamedTuple):
+    """The names one scope binds to numpy's boolean, to a float constant or to the module."""
+
+    #: Names bound to numpy's boolean, ``from numpy import bool_ as flag``.
+    bools: frozenset[str]
+    #: Names bound to a float constant of numpy or ``math``, ``from math import pi``.
+    constants: frozenset[str]
+    #: Names bound to numpy or ``math`` themselves, ``import math as m``.
+    owners: frozenset[str]
+
+
+def _is_float_constant(node: ast.expr, aliases: _Aliases | None = None) -> bool:
+    """Whether *node* is a float literal, signed, named or spelled ``float("inf")``.
+
+    Named by numpy or ``math`` (``np.inf``, ``math.pi``), through the module
+    under a name *aliases* binds it to (``import math as m``, then ``m.pi``),
+    or by a name *aliases* binds to one of their constants (``from math
+    import pi``).
+    """
+    if aliases is None:
+        aliases = _Aliases(frozenset(), frozenset(), frozenset())
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
         node = node.operand
     if isinstance(node, ast.Constant):
         return isinstance(node.value, float)
+    if isinstance(node, ast.Name):
+        return node.id in aliases.constants
     if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
-        return (
-            node.value.id in _FLOAT_CONSTANT_OWNERS
-            and node.attr in _FLOAT_CONSTANT_NAMES
-        )
+        owners = _FLOAT_CONSTANT_OWNERS | aliases.owners
+        return node.value.id in owners and node.attr in _FLOAT_CONSTANT_NAMES
     return (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
@@ -1312,47 +1334,83 @@ def _local_names(scope: _Scope, own: list[ast.AST]) -> tuple[set[str], set[str]]
     return bound - declared_global - declared_nonlocal, declared_global
 
 
-def _bool_alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], frozenset[str]]]:
-    """Each scope of *tree*, as its own nodes and the names bound to numpy's boolean in it.
+def _imported_aliases(own: list[ast.AST]) -> dict[str, str]:
+    """What the imports among *own* bind: each name with ``bool``, ``constant`` or ``owner``."""
+    kinds: dict[str, str] = {}
+    for node in own:
+        if isinstance(node, ast.ImportFrom) and node.level == 0:
+            for alias in node.names:
+                bound = alias.asname or alias.name
+                if node.module in {"numpy", "np"} and alias.name in _BOOL_DTYPE_NAMES:
+                    kinds[bound] = "bool"
+                elif (
+                    node.module in _FLOAT_CONSTANT_MODULES
+                    and alias.name in _FLOAT_CONSTANT_NAMES
+                ):
+                    kinds[bound] = "constant"
+        elif isinstance(node, ast.Import):
+            kinds.update(
+                (alias.asname or alias.name, "owner")
+                for alias in node.names
+                if alias.name in _FLOAT_CONSTANT_MODULES
+            )
+    return kinds
 
-    A ``from numpy import bool_ as flag`` binds ``flag`` where Python resolves
-    it: in the scope that imports it, in the functions and comprehensions
-    nested there that do not bind ``flag`` themselves, and in any function
-    that declares ``flag`` global when the import is the module's; not in a
-    class body's methods and comprehensions, which do not see the class's
-    names, nor where a comprehension loops over ``flag`` or a generic
-    function or class takes it as a type parameter. A name assigned ``bool``
-    is not followed.
+
+def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _Aliases]]:
+    """Each scope of *tree*, as its own nodes and what its imports of numpy and ``math`` bind in it.
+
+    A ``from numpy import bool_ as flag``, a ``from math import pi`` or an
+    ``import math as m`` binds its name where Python resolves it: in the
+    scope that imports it, in the functions and comprehensions nested there
+    that do not bind the name themselves, and in any function that declares
+    the name global when the import is the module's; not in a class body's
+    methods and comprehensions, which do not see the class's names, nor
+    where a comprehension loops over the name or a generic function or class
+    takes it as a type parameter. A name assigned ``bool`` or a constant is
+    not followed.
     """
-    found: list[tuple[list[ast.AST], frozenset[str]]] = []
-    module_aliases: frozenset[str] = frozenset()
-    scopes: list[tuple[_Scope, frozenset[str]]] = [(tree, frozenset())]
+    found: list[tuple[list[ast.AST], _Aliases]] = []
+    module_kinds: dict[str, str] = {}
+    scopes: list[tuple[_Scope, dict[str, str]]] = [(tree, {})]
     while scopes:
         scope, inherited = scopes.pop()
         own, nested = _own_nodes(scope)
-        imported = {
-            alias.asname or alias.name
-            for node in own
-            if isinstance(node, ast.ImportFrom) and node.module in {"numpy", "np"}
-            for alias in node.names
-            if alias.name in _BOOL_DTYPE_NAMES
-        }
         local, declared_global = _local_names(scope, own)
-        aliases = frozenset(
-            (inherited - local - declared_global)
-            | imported
-            | (declared_global & module_aliases)
+        kinds = {
+            name: kind
+            for name, kind in inherited.items()
+            if name not in local and name not in declared_global
+        }
+        kinds.update(
+            (name, kind)
+            for name, kind in module_kinds.items()
+            if name in declared_global
         )
+        kinds.update(_imported_aliases(own))
         if scope is tree:
-            module_aliases = aliases
-        found.append((own, aliases))
+            module_kinds = kinds
+        found.append(
+            (
+                own,
+                _Aliases(
+                    *(
+                        frozenset(
+                            name for name, kind in kinds.items() if kind == wanted
+                        )
+                        for wanted in ("bool", "constant", "owner")
+                    )
+                ),
+            )
+        )
         # A class body's names do not reach the scopes nested in it; its type
         # parameters do.
-        passed = (
-            frozenset(inherited - _type_parameters(scope))
-            if isinstance(scope, ast.ClassDef)
-            else aliases
-        )
+        passed = kinds
+        if isinstance(scope, ast.ClassDef):
+            hidden = _type_parameters(scope)
+            passed = {
+                name: kind for name, kind in inherited.items() if name not in hidden
+            }
         scopes.extend((inner, passed) for inner in nested)
     return found
 
@@ -1414,14 +1472,15 @@ def _is_bool_cast(node: ast.Call, aliases: frozenset[str] = frozenset()) -> bool
 def _float_equalities(tree: ast.Module) -> list[str]:
     """Each equality with a float constant, or cast to ``bool``, of *tree*, as ``line source``.
 
-    An ``==`` or ``!=`` with a float constant on one side, and every
-    ``astype`` to ``bool`` that :func:`_is_bool_cast` recognises, which on
-    a float array is the same test against zero, in the order of the lines.
+    An ``==`` or ``!=`` with a float constant on one side, in the spellings
+    :func:`_is_float_constant` recognises, and every ``astype`` to ``bool``
+    that :func:`_is_bool_cast` recognises, which on a float array is the same
+    test against zero, in the order of the lines.
     """
     found: list[tuple[int, str]] = []
-    for own, aliases in _bool_alias_scopes(tree):
+    for own, aliases in _alias_scopes(tree):
         for node in own:
-            if isinstance(node, ast.Call) and _is_bool_cast(node, aliases):
+            if isinstance(node, ast.Call) and _is_bool_cast(node, aliases.bools):
                 found.append((node.lineno, ast.unparse(node)))
                 continue
             if not isinstance(node, ast.Compare):
@@ -1429,7 +1488,8 @@ def _float_equalities(tree: ast.Module) -> list[str]:
             left = node.left
             for operator, right in zip(node.ops, node.comparators, strict=True):
                 if isinstance(operator, (ast.Eq, ast.NotEq)) and (
-                    _is_float_constant(left) or _is_float_constant(right)
+                    _is_float_constant(left, aliases)
+                    or _is_float_constant(right, aliases)
                 ):
                     found.append((node.lineno, ast.unparse(node)))
                 left = right
@@ -1563,6 +1623,40 @@ def test_the_float_equality_check_reads_a_numpy_bool_alias_in_its_own_scope() ->
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "12", "13", "18", "24", "27", "32", "45", "56",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_constant_imported_by_name() -> None:
+    """A constant imported from numpy or ``math`` by name, or read through the module renamed.
+
+    ``from math import pi`` makes ``x == pi`` the comparison ``x == math.pi``
+    is, and ``import math as m`` makes ``m.pi`` the constant; each is read in
+    the scope where Python resolves the name, so a parameter called ``pi``
+    is a variable, and a name another function imported is not this one's.
+    """
+    source = "\n".join(
+        [
+            "from math import pi, inf as INF",
+            "from numpy import nan",
+            "import math as m",
+            "import numpy as n",
+            "a = x == pi",
+            "b = INF != x",
+            "c = x == nan",
+            "d = x == m.e",
+            "e = x == n.inf",
+            "def takes_pi(x, pi):",
+            "    return x == pi",
+            "def imports_tau(x):",
+            "    from math import tau",
+            "    return x == tau",
+            "def another(x):",
+            "    return x == tau",
+            "f = x == e",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "5", "6", "7", "8", "9", "14",
     ]  # fmt: skip
 
 

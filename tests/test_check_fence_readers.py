@@ -396,3 +396,35 @@ def test_an_exemption_silences_one_function_and_goes_stale(
 def test_the_scripts_read_every_fence_through_the_shared_reader() -> None:
     """The tree itself, the Python scripts and the site's code."""
     assert cfr.main([]) == 0
+
+
+def test_every_string_a_join_can_make_is_read() -> None:
+    """A join kept the first 64 strings its pieces made, in the order of a set,
+    and dropped the rest, so a marker among the dropped ones passed.
+    """
+    letters = frozenset("abcdefghijklmnopqrstuvwxyz")
+    joined = cfr._joined([letters, letters])
+    assert len(joined) == 26 * 26
+    assert "zz" in joined
+
+
+def test_a_pattern_of_too_many_strings_is_refused_unread(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Past the bound a pattern is refused, never read in part.
+
+    Only a piece that looks for a marker counts in a join, so the names stand
+    for markers here: three of them make more patterns than the bound.
+    """
+    letters = ", ".join(repr(f"```{c}") for c in "abcdefghijklmnopqrstuvwxyz")
+    source = f"""
+        import re
+
+        A = ({letters})
+
+        def opens(line):
+            return re.match(f"{{A}}{{A}}{{A}}", line)
+    """
+    assert _shapes(tmp_path, source) == [
+        ("opens", f"a pattern of more than {cfr.MAX_VALUES} strings, not read")
+    ]

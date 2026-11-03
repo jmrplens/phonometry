@@ -15,6 +15,7 @@ a pattern for anything else.
 
 from __future__ import annotations
 
+import ast
 import pathlib
 import sys
 import textwrap
@@ -165,3 +166,75 @@ def test_the_tree_keeps_the_rule() -> None:
     found, stale, _ = csr.check(csr.files([]), csr.EXEMPT)
     assert [finding.describe() for finding in found] == []
     assert stale == []
+
+
+def _folded(source: str, name: str) -> set[str]:
+    """The strings the last expression bound to *name* in a module stands for."""
+    tree = ast.parse(textwrap.dedent(source))
+    strings = csr._Strings()
+    value: ast.expr | None = None
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            for target, item in csr._assigned(node):
+                if target == name:
+                    value = item
+                else:
+                    strings.bind("<module>", target, strings.fold(item, "<module>"))
+    assert value is not None
+    return strings.fold(value, "<module>")
+
+
+def test_an_f_string_stands_for_every_string_its_names_stand_for() -> None:
+    """Each name of an f-string was read as one of its strings, whichever the
+    set of them gave first, so a reader built in one branch passed or failed
+    with the order of a set.
+    """
+    source = """
+        body = "[^`]+"
+        body = "\\\\w+"
+        tick = "`"
+        tick = "'"
+        pattern = f"{tick}{body}{tick}"
+    """
+    assert _folded(source, "pattern") == {
+        f"{a}{b}{c}" for a in "`'" for b in ("[^`]+", "\\w+") for c in "`'"
+    }
+
+
+def test_a_reader_in_one_branch_of_an_f_string_is_found(tmp_path: pathlib.Path) -> None:
+    source = """
+        import re
+
+        def spans(text, strict):
+            if strict:
+                body = "[^`]+"
+            else:
+                body = "\\\\w+"
+            for word in ("a", "b", "c", "d", "e", "f", "g"):
+                body = word
+            return re.findall(f"`{body}`", text)
+    """
+    assert _places(tmp_path, source) == ["spans"]
+
+
+def test_a_pattern_of_too_many_strings_is_refused_unread(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Every combination is read up to a bound; past it the pattern is refused,
+    since reading only some of them could pass a reader by hand.
+    """
+    letters = ", ".join(repr(c) for c in "abcdefghijklmnopqrstuvwxyz")
+    source = f"""
+        import re
+
+        A = ({letters})
+        B = ({letters})
+        C = ({letters})
+
+        def spans(text):
+            return re.findall(f"{{A}}{{B}}{{C}}", text)
+    """
+    path = tmp_path / "reader.py"
+    path.write_text(textwrap.dedent(source), encoding="utf-8")
+    found = csr.findings(path)
+    assert [(f.function, f.unread) for f in found] == [("spans", True)]

@@ -30,7 +30,11 @@ reads a span by hand:
 
 A pattern is read the way Python builds it: written out, joined with ``+`` or
 in an f-string, or behind a name bound to one in the function, an enclosing
-function or the module. A backtick right after a colon opens a role of
+function or the module. A name bound to several strings (in two branches, or
+to the items of a tuple) stands for each of them, and a pattern built from
+such names is read as every string it can be, up to :data:`MOST_PATTERNS`;
+one that can be more is refused unread, since reading some of them could
+pass a reader by hand. A backtick right after a colon opens a role of
 reStructuredText (``:math:`x```), which Markdown does not have, and is not
 read as a span.
 
@@ -114,6 +118,11 @@ _CONTENT = re.compile(r"\[\^[^\]]*`[^\]]*\]|\.[*+]|\(\?:\[\^[^\]]*`")
 _RUN_GROUP = re.compile(r"\((?:\?P<\w+>)?`\+\)")
 _BACKREFERENCE = re.compile(r"\\[1-9]|\(\?P=\w+\)|\\k<\w+>")
 
+#: The most strings one pattern is read as: every combination of the strings
+#: its parts stand for is read, and a pattern that can be more is refused
+#: unread rather than read in part.
+MOST_PATTERNS = 1024
+
 #: Readers that keep their own span logic, keyed by the file relative to the
 #: repository, with the reason.
 EXEMPT: dict[str, str] = {
@@ -140,12 +149,15 @@ EXEMPT: dict[str, str] = {
 
 @dataclass(frozen=True)
 class Finding:
-    """One place a script reads a code span by itself."""
+    """One place a script reads a code span by itself, or builds a pattern
+    out of more strings than :data:`MOST_PATTERNS`, which is not read.
+    """
 
     path: pathlib.Path
     line: int
     function: str
     source: str
+    unread: bool = False
 
     @property
     def file(self) -> str:
@@ -154,7 +166,10 @@ class Finding:
 
     def describe(self) -> str:
         """One line naming the place and the code."""
-        return f"{self.file}:{self.line}  {self.function}  {self.source}"
+        place = f"{self.file}:{self.line}  {self.function}  {self.source}"
+        if self.unread:
+            return f"{place}  (more than {MOST_PATTERNS} patterns, not read)"
+        return place
 
 
 def reads_span(pattern: str) -> bool:
@@ -170,16 +185,46 @@ def reads_span(pattern: str) -> bool:
     return bool(_RUN_GROUP.search(pattern) and _BACKREFERENCE.search(pattern))
 
 
+class UnreadPatternError(Exception):
+    """An expression that stands for more strings than :data:`MOST_PATTERNS`."""
+
+
+def _combined(parts: Iterable[set[str]]) -> set[str]:
+    """Every string the parts make one after the other, a part of none as empty.
+
+    :raises UnreadPatternError: past :data:`MOST_PATTERNS` strings.
+    """
+    combined = {""}
+    for part in parts:
+        choices = part or {""}
+        if len(combined) * len(choices) > MOST_PATTERNS:
+            raise UnreadPatternError
+        combined = {head + tail for head in combined for tail in choices}
+    return combined
+
+
 @dataclass
 class _Strings:
-    """The strings each name of a script stands for, scope by scope."""
+    """The strings each name of a script stands for, scope by scope.
 
-    bindings: dict[str, dict[str, set[str]]] = field(default_factory=dict)
+    A name bound to an expression that stands for more strings than
+    :data:`MOST_PATTERNS` stands for ``None``, and so does everything built
+    from it.
+    """
 
-    def bind(self, scope: str, name: str, values: set[str]) -> None:
-        self.bindings.setdefault(scope, {}).setdefault(name, set()).update(values)
+    bindings: dict[str, dict[str, set[str] | None]] = field(default_factory=dict)
 
-    def lookup(self, scope: str, name: str) -> set[str]:
+    def bind(self, scope: str, name: str, values: set[str] | None) -> None:
+        names = self.bindings.setdefault(scope, {})
+        held = names.setdefault(name, set())
+        if values is None or held is None:
+            names[name] = None
+            return
+        held.update(values)
+        if len(held) > MOST_PATTERNS:
+            names[name] = None
+
+    def lookup(self, scope: str, name: str) -> set[str] | None:
         """What *name* stands for seen from *scope*: its own, then outwards."""
         parts = [] if scope == "<module>" else scope.split(".")
         for end in range(len(parts), -1, -1):
@@ -189,25 +234,37 @@ class _Strings:
         return set()
 
     def fold(self, node: ast.expr, scope: str) -> set[str]:
-        """Every string an expression stands for, as far as the script says."""
+        """Every string an expression stands for, as far as the script says.
+
+        :raises UnreadPatternError: for an expression that stands for more
+            strings than :data:`MOST_PATTERNS`.
+        """
         if isinstance(node, ast.Constant):
             return {node.value} if isinstance(node.value, str) else set()
         if isinstance(node, ast.Name):
-            return self.lookup(scope, node.id)
+            found = self.lookup(scope, node.id)
+            if found is None:
+                raise UnreadPatternError
+            return found
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-            return {
-                left + right
-                for left in self.fold(node.left, scope) or {""}
-                for right in self.fold(node.right, scope) or {""}
-            }
+            return _combined(
+                [self.fold(node.left, scope), self.fold(node.right, scope)]
+            )
         if isinstance(node, ast.JoinedStr):
-            return {"".join(self._pieces(node, scope))}
+            return _combined(self._pieces(node, scope))
         return set()
 
-    def _pieces(self, node: ast.JoinedStr, scope: str) -> Iterator[str]:
+    def _pieces(self, node: ast.JoinedStr, scope: str) -> Iterator[set[str]]:
         for value in node.values:
             inner = value.value if isinstance(value, ast.FormattedValue) else value
-            yield next(iter(self.fold(inner, scope)), "")
+            yield self.fold(inner, scope)
+
+    def bound(self, value: ast.expr, scope: str) -> set[str] | None:
+        """What a name bound to *value* stands for, ``None`` past the bound."""
+        try:
+            return self.fold(value, scope)
+        except UnreadPatternError:
+            return None
 
 
 def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr]]:
@@ -262,15 +319,22 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
     nodes = list(scoped(tree))
     for scope, node in nodes:
         for name, value in _assigned(node):
-            strings.bind(scope, name, strings.fold(value, scope))
+            strings.bind(scope, name, strings.bound(value, scope))
     names = _re_names(tree)
     found: list[Finding] = []
     for scope, node in nodes:
         if not isinstance(node, ast.Call):
             continue
-        texts = {t for p in _patterns(node, names) for t in strings.fold(p, scope)}
+        patterns = _patterns(node, names)
+        if not patterns:
+            continue
+        segment = ast.get_source_segment(source, node) or ast.unparse(node)
+        try:
+            texts = {t for p in patterns for t in strings.fold(p, scope)}
+        except UnreadPatternError:
+            found.append(Finding(path, node.lineno, scope, segment, unread=True))
+            continue
         if any(reads_span(text) for text in texts):
-            segment = ast.get_source_segment(source, node) or ast.unparse(node)
             found.append(Finding(path, node.lineno, scope, segment))
     return found
 
@@ -366,7 +430,9 @@ def main(argv: list[str] | None = None) -> int:
             "  -> read the spans through scripts/markdown_spans.py: inline_spans(), "
             "blank_inline_spans() or drop_inline_spans(); in the site's code "
             "through site/scripts/shared/markdown-spans.mjs. If it cannot, add "
-            "the file to EXEMPT in scripts/check_span_readers.py with the reason."
+            "the file to EXEMPT in scripts/check_span_readers.py with the reason. "
+            f"A pattern built from more than {MOST_PATTERNS} strings is not read: "
+            "build it from fewer."
         )
     for path in stale:
         print(f"::error::EXEMPT lists {path}, which no longer reads a code span")

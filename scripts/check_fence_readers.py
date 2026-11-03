@@ -31,7 +31,9 @@ itself, and refuses three shapes a hand-rolled reader cannot avoid:
 A string is read the way Python builds it: written out, repeated (``"`" * 3``),
 joined with ``+`` or in an f-string, or behind a name bound to one in the
 function, an enclosing function or the module, a loop over a tuple of them
-included. A piece spliced into a larger string counts when every alternative
+included. A join is read as every string its pieces can make, up to
+:data:`MAX_VALUES`; one that can make more is refused unread, since reading
+some of them could pass a reader by hand. A piece spliced into a larger string counts when every alternative
 it offers looks for a marker. The markdown hazard check splices in a list of
 everything that opens a block, a fence among them, to find a wrapped line that
 would open one; that is no reading of fences, and it is not refused.
@@ -56,12 +58,11 @@ from __future__ import annotations
 
 import argparse
 import ast
-import itertools
 import os
 import pathlib
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from ast_scan import ROOT, exempted, relative, scoped
@@ -127,9 +128,10 @@ _MARKER_SEARCHES = frozenset(
         "rpartition",
     }
 )
-#: How many strings one expression may stand for before the rest are dropped,
-#: and the longest repetition that is worked out.
-_MAX_VALUES = 64
+#: How many strings one joined expression is read as: every string its pieces
+#: make is read, and one that can make more is refused unread rather than
+#: read in part. And the longest repetition that is worked out.
+MAX_VALUES = 1024
 _MAX_REPEAT = 1000
 
 #: A flag named for a fence, a code block or a block, flipped in JavaScript.
@@ -216,12 +218,20 @@ def _spliceable(value: str) -> bool:
     return all(_looks_for_marker(part) for part in _alternatives(value))
 
 
+class UnreadPatternError(Exception):
+    """An expression that makes more strings than :data:`MAX_VALUES`."""
+
+
 def _joined(parts: Iterable[frozenset[str]]) -> frozenset[str]:
-    """Every string the pieces make when written one after the other."""
+    """Every string the pieces make when written one after the other.
+
+    :raises UnreadPatternError: past :data:`MAX_VALUES` strings.
+    """
     texts = frozenset({""})
     for part in parts:
-        made = (text + piece for text in texts for piece in part)
-        texts = frozenset(itertools.islice(made, _MAX_VALUES))
+        if len(texts) * len(part) > MAX_VALUES:
+            raise UnreadPatternError
+        texts = frozenset(text + piece for text in texts for piece in part)
     return texts
 
 
@@ -327,6 +337,9 @@ class _File:
     #: The names ``re`` goes by, and the functions imported from it.
     re_modules: frozenset[str]
     re_functions: frozenset[str]
+    #: The names, by scope, bound to a join of more strings than
+    #: :data:`MAX_VALUES`, which stand for no string that is read.
+    unread: set[tuple[str, str]] = field(default_factory=set)
 
     @classmethod
     def of(cls, tree: ast.Module) -> _File:
@@ -339,7 +352,11 @@ class _File:
             names = file.bindings.setdefault(scope, {})
             lookup = file.lookup(scope)
             for name, value in _bound(node):
-                found = frozenset() if value is None else _values(value, lookup)
+                try:
+                    found = frozenset() if value is None else _values(value, lookup)
+                except UnreadPatternError:
+                    file.unread.add((scope, name))
+                    found = frozenset()
                 names[name] = names.get(name, frozenset()) | found
         return file
 
@@ -351,6 +368,8 @@ class _File:
             for link in chain:
                 values = self.bindings.get(link, {}).get(name)
                 if values is not None:
+                    if (link, name) in self.unread:
+                        raise UnreadPatternError
                     return values
             return frozenset()
 
@@ -437,10 +456,13 @@ def _shape(node: ast.AST, file: _File, lookup: Lookup) -> str | None:
     """Which hand-rolled reading a node is, or ``None``."""
     if _is_toggle(node):
         return "a toggle"
-    if _tests_marker(node, lookup):
-        return "a test for a marker"
-    if _matches_marker(node, file, lookup):
-        return "a pattern for a marker"
+    try:
+        if _tests_marker(node, lookup):
+            return "a test for a marker"
+        if _matches_marker(node, file, lookup):
+            return "a pattern for a marker"
+    except UnreadPatternError:
+        return f"a pattern of more than {MAX_VALUES} strings, not read"
     return None
 
 

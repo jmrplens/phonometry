@@ -1948,8 +1948,12 @@ class _Returns:
     names stand for the items of what it walks while its element is read,
     and for nothing outside it, as Python keeps them; what a nested function
     or a lambda binds is its own, but a name it declares ``nonlocal`` and an
-    item it fills of a name it does not bind are the function's, each value
-    read where the nested function writes it. A value is handed back as the
+    item it fills of a name it does not bind are the function's that binds
+    the name, each value read where the nested function writes it. A name a
+    function declares ``global`` is the module's, not the name of that
+    spelling a function around it binds: what any function of the nest
+    writes into it, and into an item of a name none of them binds, is what
+    the module's name stands for where one reads it. A value is handed back as the
     caller gave it bare, in a tuple or a list, on either side of a
     conditional expression or of an ``and`` or an ``or``, by an item,
     transposed, in arithmetic with anything (its sign turned or kept, as
@@ -1977,6 +1981,12 @@ class _Returns:
         #: What each name stands for: the value, where it is read, and the
         #: function whose names it is read with.
         self.assigned: dict[str, list[tuple[ast.expr, _Local, _Returns]]] = {}
+        #: What each name of the module stands for where a function of the
+        #: nest writes it: one table, the outermost function's, for them all.
+        self.module_names: dict[str, list[tuple[ast.expr, _Local, _Returns]]] = (
+            {} if outer is None else outer.module_names
+        )
+        self.declared_global = own_names(function).declared_global
         self.returns: list[ast.expr] = []
         pending: list[ast.stmt] = list(function.body)
         while pending:
@@ -2010,8 +2020,11 @@ class _Returns:
     def _bind(
         self, name: str, value: ast.expr, local: _Local = _FUNCTION_SCOPE
     ) -> None:
-        """Let *name* stand for *value*, read where *local* holds."""
-        self.assigned.setdefault(name, []).append((value, local, self))
+        """Let *name* stand for *value*, read where *local* holds: the
+        module's name, when the function declares it ``global``.
+        """
+        table = self.module_names if name in self.declared_global else self.assigned
+        table.setdefault(name, []).append((value, local, self))
 
     def binds(self, name: str) -> bool:
         """Whether *name* is the function's own, as Python scopes it."""
@@ -2026,7 +2039,11 @@ class _Returns:
 
         Each value is read where it is written, with the nested function's
         names. A class body binds nothing a method reads, and a method's
-        writes go to the function around the class.
+        writes go to the function around the class. A name the nested
+        function declares ``global`` is the module's, and its writes are
+        already the module's (:meth:`_bind`); an item it fills of a name no
+        function around it binds, or one that the function binding it first
+        declares ``global``, is an item of the module's name.
         """
         if isinstance(node, ast.ClassDef):
             pending: list[ast.stmt] = list(node.body)
@@ -2040,10 +2057,16 @@ class _Returns:
             return
         inner = _Returns(self.module, node, frozenset(), outer=self)
         for name, values in inner.assigned.items():
+            if inner.binds(name):
+                continue
             holder: _Returns | None = self
-            while holder is not None and not holder.binds(name):
+            while not (
+                holder is None or holder.binds(name) or name in holder.declared_global
+            ):
                 holder = holder.outer
-            if holder is not None and not inner.binds(name):
+            if holder is None or name in holder.declared_global:
+                self.module_names.setdefault(name, []).extend(values)
+            else:
                 holder.assigned.setdefault(name, []).extend(values)
 
     def _walruses(self, node: ast.AST, local: _Local) -> None:
@@ -2137,11 +2160,19 @@ class _Returns:
     ) -> tuple[Provenance, list[_Handing]]:
         if name in seen:
             return {}, []
-        if self.outer is not None and not self.binds(name):
+        if name in self.declared_global:
+            values = self.module_names.get(name, [])
+        elif self.binds(name):
+            values = self.assigned.get(name, [])
+        elif self.outer is not None:
             return self.outer._name(name, seen)
+        else:
+            # A name no function of the nest binds is the module's, and so
+            # is an item this one fills of it.
+            values = [*self.assigned.get(name, []), *self.module_names.get(name, [])]
         found: Provenance = {}
         calls: list[_Handing] = []
-        for value, local, reader in self.assigned.get(name, []):
+        for value, local, reader in values:
             provenance, through = reader.sources(value, seen | {name}, local)
             found = _either(found, provenance)
             calls.extend(through)
@@ -2538,11 +2569,14 @@ def _scope_env(
     caller's values, or, for a helper read through its calls, what *handed*
     says they are handed (none where no call hands one), and what it shares
     with the function around it as that function holds it, but a name it
-    binds of its own.
+    binds of its own and one it declares ``global``, which is the module's.
     """
-    shared = _declared_shared(body)
+    names = own_names(scope)
+    shared = names.declared_global | names.declared_nonlocal
     own = {name for node in body for name in _bound_names(node)} - shared
-    own |= set(_parameters(scope))
+    # A name it declares ``global`` is the module's, whatever a function
+    # around it binds of that spelling.
+    own |= set(_parameters(scope)) | names.declared_global
     env = {
         name: state
         for name, state in captured.items()
@@ -2551,17 +2585,6 @@ def _scope_env(
     for name in _parameters(scope):
         env[name] = frozenset() if handed is None else handed.get(name)
     return env
-
-
-def _declared_shared(body: Sequence[ast.AST]) -> set[str]:
-    """The names a function declares ``nonlocal`` or ``global``."""
-    return {
-        name
-        for node in body
-        for child in ast.walk(node)
-        if isinstance(child, ast.Nonlocal | ast.Global)
-        for name in child.names
-    }
 
 
 def _spelled(path: pathlib.Path, source: pathlib.Path | None) -> str:

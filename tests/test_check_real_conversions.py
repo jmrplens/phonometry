@@ -438,6 +438,49 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return float(_helper(reference, levels))
     """,
+    "a_check_that_hands_back_a_module_name_a_nested_function_binds": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def inner():
+                global out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_module_name_both_functions_declare_global": """
+        def _helper(reference, levels):
+            global out
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                global out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_an_item_of_a_module_list_a_nested_function_fills": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def inner():
+                OUT[0] = levels
+
+            inner()
+            return OUT[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_check_that_hands_back_what_a_match_captured": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -981,6 +1024,80 @@ _PLANTED_ANSWERED = {
 
         def f(reference, levels):
             return float(_helper(reference, levels))
+    """,
+    "a_name_a_nested_function_declares_global_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                global out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_name_a_function_two_levels_down_declares_global_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                def deeper():
+                    global out
+                    out = levels
+
+                deeper()
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_method_s_global_name_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            class Writer:
+                def write(self):
+                    global out
+                    out = levels
+
+            Writer().write()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_global_name_a_nested_function_reads_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            scale = levels
+
+            def inner():
+                nonlocal out
+                global scale
+                out = scale
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_global_name_a_nested_function_converts_is_the_module_s": """
+        def f(levels):
+            def g():
+                global levels
+                return np.asarray(levels, dtype=np.float64)
+
+            return g(), real_array(levels, "levels")
     """,
     "python_s_float_after_the_shared_reader": """
         def f(value):

@@ -1413,6 +1413,9 @@ class _ScopeNames:
     #: there, or ``None`` for a function or a lambda, which reads the name as
     #: it stands once *outer* has run.
     at: ast.AST | None
+    #: What the scopes nested in it bind its names to through ``global`` or
+    #: ``nonlocal``, whenever they run.
+    from_inside: dict[str, set[_Kind]] = dataclasses.field(default_factory=dict)
 
     def binds(self, name: str) -> bool:
         """Whether *name* is the scope's own, bound in it and declared neither ``global`` nor ``nonlocal``."""
@@ -1437,7 +1440,9 @@ class _ScopeNames:
         which run when called). There, the bindings that may reach the read
         (:func:`ast_scan.live_bindings`): the later of two in a row, either
         of two in the branches of an ``if``, one on an earlier turn of a loop
-        around the read, any of them when none runs before it.
+        around the read, any of them when none runs before it; with whatever
+        a scope nested there binds the name to through ``global`` or
+        ``nonlocal``, which may run at any time.
         """
         names: _ScopeNames | None = self
         called = False
@@ -1449,7 +1454,7 @@ class _ScopeNames:
                 names, point = names.outer, None
                 continue
             if names.binds(name) or names.outer is None:
-                found: set[_Kind] = set()
+                found = set(names.from_inside.get(name, ()))
                 bindings = names.flow.get(name, [])
                 if any(kind is not None for _, kind in bindings):
                     nodes = [node for node, _ in bindings]
@@ -1508,15 +1513,34 @@ def _nested_names(
     )
 
 
+def _send_declared(names: _ScopeNames) -> None:
+    """Hand what *names*' scope binds a name it declares ``global`` or ``nonlocal`` to, to the scope that holds the name.
+
+    The module for ``global``; for ``nonlocal``, the nearest function around
+    that binds the name. The scope may run at any time, so what it binds
+    joins every read of the name there.
+    """
+    for name in names.declared_global | names.declared_nonlocal:
+        kinds = {kind for _, kind in names.flow.get(name, []) if kind is not None}
+        target: _ScopeNames | None = names.module()
+        if name not in names.declared_global:
+            target = names.outer
+            while target is not None and not target.binds(name):
+                target = None if name in target.declared_global else target.outer
+        if target is not None and kinds:
+            target.from_inside.setdefault(name, set()).update(kinds)
+
+
 def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
     """Each scope of *tree*, as its own nodes and what it binds and reads of numpy and ``math``.
 
     A ``from numpy import bool_ as flag``, a ``from math import pi`` or an
     ``import math as m`` binds its name where Python binds it: in the scope
-    that imports it, in the functions, classes and comprehensions nested
-    there that do not bind the name themselves, and in any function that
-    declares the name ``global`` when the import is the module's. A class
-    body's methods
+    that imports it, and in the functions, classes and comprehensions
+    nested there that do not bind the name themselves; in the module when a
+    function that declares the name ``global`` imports it, and in the
+    function around when one declares it ``nonlocal``, which a pass over
+    every scope collects before any name is read. A class body's methods
     and comprehensions do not see the class's names; a comprehension's loop
     variable and a generic function's or class's type parameter hide the
     import. A read takes the bindings the name may hold where it is read
@@ -1536,6 +1560,8 @@ def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
         names = _nested_names(tree, scope, around, own)
         found.append((own, names))
         pending.extend((inner, names) for inner in nested)
+    for _, names in found:
+        _send_declared(names)
     return found
 
 
@@ -1840,6 +1866,57 @@ def test_the_float_equality_check_reads_the_binding_a_name_holds_where_it_is_rea
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "6", "9", "12", "15", "25", "28", "33", "34", "38",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_module_name_a_function_binds() -> None:
+    """An import under ``global`` binds the module's name, one under ``nonlocal`` the function's.
+
+    ``from numpy import bool_ as flag`` in a function that declares ``flag``
+    global makes the module's ``flag`` numpy's boolean once the function has
+    run, for every function that reads the module's name and for the module
+    itself, wherever the function is written; the same for a float constant
+    and for the module ``math`` imported that way, and for a function nested
+    in another that declares the name ``nonlocal``. A function that binds the
+    name itself still holds its own.
+    """
+    source = "\n".join(
+        [
+            "def reads_before_the_import(x):",
+            "    return x.astype(flag)",
+            "def binds_the_module_name():",
+            "    global flag",
+            "    from numpy import bool_ as flag",
+            "def binds_a_constant():",
+            "    global limit",
+            "    from math import inf as limit",
+            "def compares(x):",
+            "    return x == limit",
+            "def binds_the_module():",
+            "    global m",
+            "    import math as m",
+            "def compares_through_it(x):",
+            "    return x == m.pi",
+            "class Holder:",
+            "    def method(self):",
+            "        global kept",
+            "        from numpy import bool_ as kept",
+            "def sibling(x):",
+            "    return x.astype(kept)",
+            "def outer(x):",
+            "    mask = np.float64",
+            "    def inner():",
+            "        nonlocal mask",
+            "        from numpy import bool_ as mask",
+            "    inner()",
+            "    return x.astype(mask)",
+            "def binds_its_own(x, flag):",
+            "    return x.astype(flag)",
+            "a = x.astype(flag)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "2", "10", "15", "21", "28", "31",
     ]  # fmt: skip
 
 

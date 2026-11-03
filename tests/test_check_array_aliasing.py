@@ -503,6 +503,40 @@ def test_a_definition_a_later_one_replaces_is_never_reached(
     assert found == set()
 
 
+def test_a_call_from_a_function_reaches_every_definition_from_its_def_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function reads the module's names when it is called, which may be
+    during the import and before a later definition of a name, so a call in
+    it may reach every definition that stands from its ``def`` on.
+
+    ``TABLE = kept(...)`` runs ``kept`` while ``keep`` still hands back its
+    argument; the module's names were read as they stand once it has run,
+    so only the ``keep`` that copies was reached and the record passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return a
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        TABLE = kept(np.ones(3), np.ones(3))
+
+        def keep(a):
+            return np.array(a)
+        """,
+    )
+    assert found == {("kept", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
     tmp_path: pathlib.Path,
 ) -> None:

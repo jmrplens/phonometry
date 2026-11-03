@@ -880,15 +880,29 @@ class Tree:
         for found in self.definitions.values():
             yield from found
 
-    def resolve_top(self, module: str, name: str) -> tuple[tuple[str, str], ...]:
+    def resolve_top(
+        self, module: str, name: str, point: ast.AST | None = None
+    ) -> tuple[tuple[str, str], ...]:
         """Each ``(module, qualname)`` a bare name may stand for at the top of *module*.
 
         What the module defines, or imports at its top, that the name may
-        hold once the module has run (:func:`ast_scan.live_bindings`): a
+        hold where *point*, a node of the module, reads it, or once the
+        module has run when it is None (:func:`ast_scan.live_bindings`): a
         ``def`` in each branch of an ``if``, or an import in a ``try`` and
-        another in its ``except`` clause, is either. An import written
-        inside one of its functions binds the name for that function alone.
+        another in its ``except`` clause, is either, and a read inside a
+        function meets every one from the ``def`` on, since the function may
+        be called during the import. An import written inside one of its
+        functions binds the name for that function alone.
         """
+        if point is not None:
+            statements = self.top_bindings.get(module, {}).get(name, [])
+            found = (
+                self._bound_at_top(module, statement, name)
+                for statement in live_bindings(self.modules[module], statements, point)
+            )
+            return tuple(
+                dict.fromkeys(target for target in found if target is not None)
+            )
         key = (module, name)
         if key not in self.top_cache:
             statements = self.top_bindings.get(module, {}).get(name, [])
@@ -1634,7 +1648,7 @@ class Reader:
             if binder is not None and binder is not self.function.node:
                 return ()
             if how == "global":
-                return self.tree.resolve_top(self.module, name)
+                return self.tree.resolve_top(self.module, name, node)
         scope: FunctionInfo | None = self.function
         while scope is not None:
             names = own_names(scope.node)
@@ -1645,7 +1659,7 @@ class Reader:
             if names.binds(name):
                 return self._bound_to(scope, name, node)
             scope = scope.parent
-        return self.tree.resolve_top(self.module, name)
+        return self.tree.resolve_top(self.module, name, node)
 
     def _bound_to(
         self, scope: FunctionInfo, name: str, node: ast.AST | None
@@ -2111,7 +2125,9 @@ class Reader:
         One of a module, or of a class, is each definition the name may hold
         once the module has run (:func:`ast_scan.live_bindings`): one in each
         branch of an ``if`` is either, and a later one in a block that holds
-        an earlier one replaces it. One written inside a function is each
+        an earlier one replaces it; a function at the top of this module is
+        read where the call runs instead, so a call inside a function meets
+        every definition from the ``def`` on. One written inside a function is each
         written in the nearest of this function and those around it that
         holds any; in this function itself, each that may have run before
         the call and that no later one replaced on the way to it.
@@ -2121,6 +2137,8 @@ class Reader:
             found = self.tree.functions.get(target)
             return [found] if found is not None else []
         if all(definition.parent is None for definition in definitions):
+            if target[0] == self.module and all(d.owner is None for d in definitions):
+                return _live(self.tree.modules[self.module], definitions, call)
             return self.tree.live_definitions(target)
         scope: FunctionInfo | None = self.function
         while scope is not None:

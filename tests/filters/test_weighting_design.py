@@ -1892,9 +1892,16 @@ _OPERATOR_FORBIDDEN = frozenset(
     {"pow", "ipow", "abs", "__pow__", "__ipow__", "__abs__"}
 )
 
-#: How each module may be imported on the design path: ``math`` and ``numpy``
-#: under the one name the attribute rules read, the rest not at all.
-_IMPORT_NAMES = {"math": "math", "numpy": "np"}
+#: How each module the attribute rules read may be bound on the design path:
+#: under a name those rules read it by. A module bound to another name, or
+#: star-imported, hides its routines from them.
+_IMPORT_NAMES: dict[str, frozenset[str]] = {
+    "math": frozenset({"math"}),
+    "numpy": frozenset({"np"}),
+    "operator": frozenset({"operator"}),
+    "scipy": frozenset({"scipy"}),
+    "scipy.signal": _SIGNAL_OWNERS,
+}
 
 
 def _attribute_finding(owner: str, name: str) -> str | None:
@@ -1911,10 +1918,27 @@ def _attribute_finding(owner: str, name: str) -> str | None:
     return f"{owner}.{name}" if forbidden else None
 
 
+def _renames(module: str, bound: str) -> bool:
+    """Whether binding *module* to *bound* hides it from the attribute rules."""
+    return module in _IMPORT_NAMES and bound not in _IMPORT_NAMES[module]
+
+
 def _import_from_finding(node: ast.ImportFrom) -> str | None:
-    """What a ``from ... import`` brings in that the attribute rules cannot see."""
+    """What a ``from ... import`` brings in that the attribute rules cannot see.
+
+    A forbidden routine or module by its bare name, a module the rules read
+    bound to another name (``from scipy import signal as sig``), and a star
+    import of a module the rules read.
+    """
     module = node.module or ""
     names = {alias.name for alias in node.names}
+    renamed = [
+        f"{alias.name} as {alias.asname}"
+        for alias in node.names
+        if alias.asname and _renames(f"{module}.{alias.name}", alias.asname)
+    ]
+    if renamed:
+        return f"from {module} import {', '.join(sorted(renamed))}"
     hidden = (
         module in {"math", "cmath"}
         or module in _FORBIDDEN_MODULES
@@ -1923,18 +1947,23 @@ def _import_from_finding(node: ast.ImportFrom) -> str | None:
         or (module in _NUMPY_OWNERS and bool(names & _NUMPY_FORBIDDEN))
         or (module == "operator" and bool(names & _OPERATOR_FORBIDDEN))
         or (module == "scipy.signal" and bool(names & _SIGNAL_COMPLEX))
+        or ("*" in names and module in _IMPORT_NAMES)
     )
     return f"from {module} import {', '.join(sorted(names))}" if hidden else None
 
 
 def _import_finding(node: ast.Import) -> list[str]:
-    """Each ``import`` that renames ``math`` or numpy, or brings in a forbidden module."""
+    """Each ``import`` that binds a module the attribute rules read elsewhere, or a forbidden one.
+
+    ``import numpy as numpy``, ``import scipy.signal as sg``, ``import scipy
+    as sp`` and ``import operator as op`` alike: a routine is then reached by
+    a name no rule reads.
+    """
     found = []
     for alias in node.names:
         bound = alias.asname or alias.name
-        renamed = alias.name in _IMPORT_NAMES and bound != _IMPORT_NAMES[alias.name]
         if (
-            renamed
+            _renames(alias.name, bound)
             or alias.name in _FORBIDDEN_MODULES
             or alias.name.startswith(("scipy.special", "scipy.linalg"))
         ):
@@ -2215,6 +2244,47 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
         )
     )
     assert set(_reached_from(module, "root")) == {"root", "leaf", "helper", "_K"}
+
+
+def test_the_guard_refuses_a_module_bound_to_a_name_its_rules_do_not_read() -> None:
+    """An import that binds SciPy's filters, SciPy, :mod:`operator` or numpy elsewhere.
+
+    The attribute rules read a routine by its owner's name: ``signal.zpk2sos``
+    and ``scipy.signal.zpk2sos``, ``operator.pow``, ``np.roots``. Bound to
+    another name, ``import scipy.signal as sg``, ``from scipy import signal
+    as sig``, ``import scipy as sp`` or ``import operator as op``, the same
+    routine is ``sg.zpk2sos`` or ``op.pow`` and no rule reads it, and a star
+    import binds every name of the module bare. So the import itself is the
+    finding, as it is for ``math`` and numpy under another name.
+    """
+    source = textwrap.dedent(
+        """
+        import scipy.signal as sg
+        import scipy as sp
+        import operator as op
+        from scipy import signal as sig
+        from numpy import *
+        from scipy.signal import *
+        from operator import *
+        from scipy import signal
+        import scipy.signal
+        import scipy.signal as signal
+        import scipy
+        import operator
+        def f(z, p, x):
+            a = sg.zpk2sos(z, p, 1.0), sp.signal.zpk2tf(z, p, 1.0)
+            return a, op.pow(x, 2), sig.freqz(z), roots(z)
+        """
+    )
+    assert _platform_operations(ast.parse(source)) == [
+        "2: import scipy.signal as sg",
+        "3: import scipy as sp",
+        "4: import operator as op",
+        "5: from scipy import signal as sig",
+        "6: from numpy import *",
+        "7: from scipy.signal import *",
+        "8: from operator import *",
+    ]
 
 
 _TRANSCENDENTALS = (

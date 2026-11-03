@@ -973,6 +973,102 @@ def test_a_name_another_scope_binds_is_not_the_function_s(
     assert set(found) == {"phonometry_scoped_probe.ScopedProbe.flag"}
 
 
+#: A module whose results are filled by a nested function that writes into
+#: the names of the function around it: it appends to a list of the
+#: function's, writes an item of one, or rebinds a name it declares
+#: ``nonlocal``. Each write lands on the function's name, as Python makes it,
+#: and each field is a verdict. A nested function that binds a list of the
+#: same spelling for itself writes nothing of the function's.
+_CLOSURE_PROBE = """
+from dataclasses import dataclass
+
+EDGE = 3.0
+
+
+@dataclass(frozen=True)
+class AppendProbe:
+    passes: list
+
+
+@dataclass(frozen=True)
+class ItemProbe:
+    marks: list
+
+
+@dataclass(frozen=True)
+class NonlocalProbe:
+    peak: object
+
+
+@dataclass(frozen=True)
+class OwnListProbe:
+    passes: list
+
+
+def appended(a, b):
+    passes = []
+
+    def judge(value):
+        passes.append(value < EDGE)
+
+    judge(a)
+    judge(b)
+    return AppendProbe(passes=passes)
+
+
+def written(rows):
+    marks = [False] * len(rows)
+
+    def judge(index):
+        marks[index] = rows[index] > EDGE
+
+    for index in range(len(rows)):
+        judge(index)
+    return ItemProbe(marks=marks)
+
+
+def rebound(rows):
+    peak = max(rows)
+
+    def judge():
+        nonlocal peak
+        peak = peak > EDGE
+
+    judge()
+    return NonlocalProbe(peak=peak)
+
+
+def kept(a):
+    passes = [a]
+
+    def judge(value):
+        passes = []
+        passes.append(value < EDGE)
+        return passes
+
+    return OwnListProbe(passes=passes), judge
+"""
+
+
+def test_a_nested_function_s_write_to_the_function_s_name_is_the_function_s(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A nested function was left out whole, so a verdict it appended to a
+    list of the function's, wrote into an item of one or gave a name it
+    declares ``nonlocal`` was read as no verdict.
+    """
+    (tmp_path / "phonometry_closure_probe.py").write_text(
+        _CLOSURE_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_closure_probe")
+    assert set(found) == {
+        "phonometry_closure_probe.AppendProbe.passes",
+        "phonometry_closure_probe.ItemProbe.marks",
+        "phonometry_closure_probe.NonlocalProbe.peak",
+    }
+
+
 #: The verdicts the sweep turned into read-only properties, by class, with the
 #: values read beside them that were stored too.
 _DERIVED_FLAGS = {

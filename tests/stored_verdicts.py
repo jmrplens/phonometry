@@ -37,8 +37,15 @@ import functools
 import importlib
 import inspect
 import pkgutil
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from ast_scan import binding_of
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
@@ -200,12 +207,20 @@ def _locals(func: ast.AST) -> _Local:
     local name is bound to anywhere in its own body, a comprehension's
     variables, a nested function's, a lambda's and a class body's names left
     to them.
+
+    A nested scope still writes into a name of *func* it does not bind for
+    itself: it appends to it, writes an item of it, or rebinds a name it
+    declares ``nonlocal``; each such write is *func*'s, as Python makes it.
     """
     out: dict[str, list[object]] = {}
+    # The nested scope being read, when one is: of what it binds, only what
+    # lands on a name of *func* is kept.
+    inside: list[ast.AST] = []
 
     def bind(target: ast.AST, value: object) -> None:
         if isinstance(target, ast.Name):
-            out.setdefault(target.id, []).append(value)
+            if not inside or binding_of(func, target, target.id)[1] is func:
+                out.setdefault(target.id, []).append(value)
         elif isinstance(target, (ast.Tuple, ast.List)) and isinstance(value, ast.AST):
             for index, item in enumerate(target.elts):
                 bind(item, _Unpacked(value, index))
@@ -213,6 +228,11 @@ def _locals(func: ast.AST) -> _Local:
     def visit(node: ast.AST, test: ast.expr | None) -> None:
         # ``test`` is the condition of the innermost ``if`` around ``node``.
         if node is not func and isinstance(node, _NESTED):
+            # It runs when it is called, under no ``if`` of *func*.
+            inside.append(node)
+            for child in ast.iter_child_nodes(node):
+                visit(child, None)
+            inside.pop()
             return
         if isinstance(node, ast.Assign):
             for target in node.targets:

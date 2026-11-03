@@ -168,6 +168,7 @@ from ast_scan import (
     python_files,
     relative,
     scope_nodes,
+    scopes_around,
 )
 
 if TYPE_CHECKING:
@@ -2313,7 +2314,9 @@ class Reader:
 
     def syntax(self) -> tuple[dict[ast.AST, ast.AST], dict[str, list[ast.Name]]]:
         """Each node of the function with the node that holds it, and each
-        name with the places it is written, read once per function.
+        name with the places it is written, read once per function: the
+        places that name the function's own variable, not a variable a
+        nested function, a lambda or a comprehension keeps for itself.
         """
         node = self.function.node
         if node not in self.tree.syntax:
@@ -2322,7 +2325,7 @@ class Reader:
             for parent in ast.walk(node):
                 for child in ast.iter_child_nodes(parent):
                     parents[child] = parent
-                if isinstance(parent, ast.Name):
+                if isinstance(parent, ast.Name) and _of_the_function(node, parent):
                     uses.setdefault(parent.id, []).append(parent)
             self.tree.syntax[node] = (parents, uses)
         return self.tree.syntax[node]
@@ -2930,6 +2933,18 @@ def _parameter_names(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[st
     return names
 
 
+def _of_the_function(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, name: ast.Name
+) -> bool:
+    """Whether *name* reads or binds the function's own variable of its
+    spelling, or one no scope inside the function binds: not a variable a
+    nested function, a lambda or a comprehension keeps for itself, which
+    Python keeps apart (:func:`ast_scan.binding_of`).
+    """
+    scope = binding_of(function, name, name.id)[1]
+    return scope is None or scope is function
+
+
 def _names_in(target: ast.AST, name: str) -> bool:
     """Whether *name* is among the names a target or an expression holds."""
     return any(isinstance(n, ast.Name) and n.id == name for n in ast.walk(target))
@@ -2995,28 +3010,40 @@ def _bindings(
     A plain assignment binds it to its value; any other binding (an
     augmented assignment, unpacking, a loop or ``with`` target, ``:=``, an
     import, a nested definition, ``global``) to ``None``, a value the reading
-    does not know.
+    does not know. A binding of a variable a nested function, a lambda or a
+    comprehension keeps for itself binds another name, and is left out; one
+    a nested function declares ``nonlocal`` is the function's.
     """
-    found: list[ast.expr | None] = []
+    found: list[tuple[ast.AST, ast.expr | None]] = []
     for node in ast.walk(function):
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id == name:
-                    found.append(node.value)
+                    found.append((node, node.value))
                 elif isinstance(target, ast.Tuple | ast.List | ast.Starred) and (
                     _names_in(target, name)
                 ):
-                    found.append(None)
+                    found.append((node, None))
         elif (
             isinstance(node, ast.AnnAssign)
             and isinstance(node.target, ast.Name)
             and node.target.id == name
             and node.value is not None
         ):
-            found.append(node.value)
+            found.append((node, node.value))
         elif _binds_unknown(node, name, function):
-            found.append(None)
-    return found
+            found.append((node, None))
+    return [
+        value
+        for node, value in found
+        # A ``global`` the function itself declares makes the name the
+        # module's, a value the reading does not know.
+        if binding_of(function, node, name)[1] is function
+        or (
+            isinstance(node, ast.Global)
+            and scopes_around(function, node)[0] is function
+        )
+    ]
 
 
 def _binds_unknown(

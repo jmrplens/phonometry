@@ -1806,8 +1806,29 @@ def _handovers(tmp_path: pathlib.Path, body: str) -> set[tuple[str, str]]:
             write_deep_2(frames)
             return Run(frames=handed_over(frames), times=np.arange(n))
         """,
+        # A comprehension, a lambda and a nested function each keep a
+        # variable of the same spelling for themselves: Python keeps them
+        # apart from the array.
+        """
+        def run(n):
+            frames = np.zeros((n, 3))
+            labels = [str(frames) for frames in range(n)]
+            show = lambda frames: str(frames)
+
+            def count():
+                frames = len(labels)
+                return frames
+
+            show(count())
+            return Run(frames=handed_over(frames), times=np.arange(n))
+        """,
     ],
-    ids=["written-in-place", "optional-written-by-helpers", "three-helpers-deep"],
+    ids=[
+        "written-in-place",
+        "optional-written-by-helpers",
+        "three-helpers-deep",
+        "same-name-in-other-scopes",
+    ],
 )
 def test_an_array_nothing_else_can_reach_may_be_handed_over(
     tmp_path: pathlib.Path, body: str
@@ -1894,6 +1915,29 @@ def test_an_array_nothing_else_can_reach_may_be_handed_over(
                 return Run(frames=handed_over(frames), times=build())
             """,
             "frames is not bound once",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+
+                def swap():
+                    nonlocal frames
+                    frames = np.ones(3)
+
+                swap()
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                rows = [frames for _ in range(n)]
+                return Run(frames=handed_over(frames), times=rows)
+            """,
+            "frames is read where it may be kept",
         ),
         (
             """
@@ -2082,6 +2126,8 @@ def test_an_array_nothing_else_can_reach_may_be_handed_over(
         "second-name",
         "loop-target",
         "bound-in-nested-scope",
+        "rebound-nonlocal",
+        "kept-by-a-comprehension",
         "view-kept",
         "transpose-kept",
         "view-written",

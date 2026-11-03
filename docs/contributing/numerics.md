@@ -313,7 +313,7 @@ return DecayCurve(levels=read_only_copy(levels))
 <a id="x12"></a>
 ### X12. Use `handed_over` only for a new array the factory built and returns at once
 
-**Why.** A result of hundreds of megabytes (the frames of a simulation, the field of a march) would be held twice while the record copies it, so `handed_over` lets the record keep that one array without a copy. The gate then has to prove from the code, with no exemption, that nothing else can reach it: the call is an argument of the record built in the `return` statement, and its name is bound once to `np.zeros`, `np.empty` or `np.ones` and otherwise only written into, tested against `None`, or passed to an undecorated package helper that does only that; anything else (a view, a second name, a closure) fails, and an array that cannot be proved alone is copied.
+**Why.** A result of hundreds of megabytes (the frames of a simulation, the field of a march) would be held twice while the record copies it, so `handed_over` lets the record keep that one array without a copy. The gate then has to prove from the code, with no exemption, that nothing else can reach it: the call is an argument of the record built in the `return` statement, and its name is bound once to `np.zeros`, `np.empty` or `np.ones` and otherwise only written into, tested against `None`, or passed to an undecorated package helper that does only that; anything else (a view, a second name, a closure) fails, and an array that cannot be proved alone is copied. A variable of the same spelling that a comprehension, a lambda or a nested function keeps for itself is another name, as Python scopes it, and one a nested function declares `nonlocal` is the same.
 
 **Do**
 

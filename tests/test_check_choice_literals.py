@@ -463,6 +463,47 @@ def test_an_imported_alias_is_read_where_it_is_written(
     assert ccl.takes_any_strings(read)
 
 
+def test_the_later_of_two_imports_of_one_name_is_the_one_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Of two imports of one name, a module holds the later, as Python leaves it.
+
+    ``from ._later_first import KINDS, Names`` then ``from ._later_second
+    import KINDS, Names`` makes the importing module's ``KINDS`` the second
+    module's table and its ``Names`` the second module's alias, a closed
+    choice where the first module's takes any strings.
+    """
+    sources = {
+        "_later_first": (
+            "from collections.abc import Iterable\n\n"
+            "KINDS = ('a', 'b')\n"
+            "Names = Iterable[str]\n"
+        ),
+        "_later_second": (
+            "from typing import Literal\n\n"
+            "KINDS = ('c', 'd')\n"
+            "Names = Literal['c', 'd']\n"
+        ),
+        "_later_user": (
+            "from ._later_first import KINDS, Names\n"
+            "from ._later_second import KINDS, Names\n"
+        ),
+    }
+    for stem, text in sources.items():
+        path = tmp_path / f"{stem}.py"
+        path.write_text(text, encoding="utf-8")
+        name = f"phonometry.{stem}"
+        spec = importlib.util.spec_from_file_location(name, path)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, name, module)
+        spec.loader.exec_module(module)
+    constants = ccl._constants_of("phonometry._later_user")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"c", "d"}
+    assert ccl.expanded("Names", "phonometry._later_user") == "Literal['c', 'd']"
+
+
 def test_a_table_imported_from_a_sibling_module_is_followed() -> None:
     """``from .fdtd import _SIDES`` gives the elastic engine the acoustic one's
     sides, read where they are written, and a set difference with them closes

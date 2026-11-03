@@ -1166,16 +1166,24 @@ def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
 
 @functools.cache
 def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast.expr]:
+    """The constants *module_name* binds as it is imported, by name.
+
+    Each assignment's value, and each constant an import from the package
+    brings in (:func:`_imported_constants`), in the order of the source: of
+    two bindings of one name the later stands, as Python leaves it, and an
+    import of anything else takes the name from a constant before it.
+    """
     parsed = _parsed_module(module_name)
     if parsed is None:
         return MappingProxyType({})
     module, tree, package = parsed
     found: dict[str, ast.expr] = {}
     for node in _module_statements(tree.body):
-        if isinstance(node, ast.ImportFrom):
-            if depth < _IMPORT_DEPTH:
-                for name, value in _imported_constants(node, package, depth):
-                    found.setdefault(name, value)
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            for name in imported_names(node):
+                found.pop(name, None)
+            if isinstance(node, ast.ImportFrom) and depth < _IMPORT_DEPTH:
+                found.update(_imported_constants(node, package, depth))
             continue
         found.update(_assigned(node))
     _read_frozen_tables(found, vars(module))
@@ -2278,27 +2286,32 @@ def _imports_of(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
     """What *module_name* imports from the package, by the name it gives each:
     the module imported from and the name there.
 
-    A name the module also assigns is its own, as :func:`_constants_of` reads
-    it, and is left out.
+    Read in the order of the source, as :func:`_constants_of` reads the
+    module: of two imports of one name the later stands, as Python leaves
+    it, and a name the module assigns, or imports from outside the package,
+    after its import is its own, and is left out.
     """
     parsed = _parsed_module(module_name)
     if parsed is None:
         return MappingProxyType({})
     _, tree, package = parsed
     imports: dict[str, tuple[str, str]] = {}
-    assigned: set[str] = set()
     for node in _module_statements(tree.body):
-        if not isinstance(node, ast.ImportFrom):
-            assigned.update(name for name, _ in _assigned(node))
+        if not isinstance(node, ast.Import | ast.ImportFrom):
+            for name, _ in _assigned(node):
+                imports.pop(name, None)
             continue
-        source = _import_source(node, package)
+        for name in imported_names(node):
+            imports.pop(name, None)
+        source = (
+            _import_source(node, package) if isinstance(node, ast.ImportFrom) else None
+        )
         if source is None:
             continue
         for alias in node.names:
-            imports.setdefault(alias.asname or alias.name, (source, alias.name))
-    return MappingProxyType(
-        {name: where for name, where in imports.items() if name not in assigned}
-    )
+            if alias.name != "*":
+                imports[alias.asname or alias.name] = (source, alias.name)
+    return MappingProxyType(imports)
 
 
 @functools.cache

@@ -996,7 +996,7 @@ off is also assessed against the recommendations of 7.2
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `specified_level` is not a single number, or `field_strength_levels`, `frequencies`, `response_db` or `system_noise_levels` holds a text or a value that is not a real number. |
+| TypeError | if `specified_level` is not a single number, or `background_noise_levels`, `field_strength_levels`, `frequencies`, `response_db` or `system_noise_levels` holds a text or a value that is not a real number. |
 
 ## verify_small_volume_system
 

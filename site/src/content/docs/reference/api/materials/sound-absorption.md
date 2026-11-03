@@ -215,7 +215,7 @@ with-specimen climates differ.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency and reverberation-time arrays do not share one shape, `relative_humidity_percent` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)). |
-| TypeError | if `relative_humidity_percent`, `speed_of_sound`, `temperature_c` or `volume` is not a single number, or `frequencies`, `m`, `t_empty` or `t_specimen` holds a text or a value that is not a real number. |
+| TypeError | if `area`, `relative_humidity_percent`, `speed_of_sound`, `temperature_c` or `volume` is not a single number, or `frequencies`, `m`, `t_empty` or `t_specimen` holds a text or a value that is not a real number. |
 
 ## power_attenuation_from_alpha
 

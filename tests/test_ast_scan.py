@@ -785,6 +785,44 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
     assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
 
 
+def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:
+    """``def f[T]`` and ``class Box[T]`` bind ``T`` for what they hold: the
+    function's body, the class body and the methods of the class, which
+    see the class's type parameters though not its other names. A name of
+    the module of that spelling is not what ``T`` reads there.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            T = make()
+
+            def first[T](x):
+                return T(x)
+
+            class Box[T]:
+                item = T()
+
+                def get(self):
+                    return T()
+
+                def own(self, T):
+                    return T()
+
+            def plain(x):
+                return T(x)
+            """
+        )
+    )
+    first, box = tree.body[1], tree.body[2]
+    in_first, in_body, in_method, in_own, in_plain = _calls(tree, "T")
+    assert ast_scan.binding_of(tree, in_first, "T") == ("binding", first)
+    assert ast_scan.binding_of(tree, in_body, "T") == ("binding", box)
+    assert ast_scan.binding_of(tree, in_method, "T") == ("binding", box)
+    assert ast_scan.binding_of(tree, in_own, "T")[1] is box.body[2]
+    assert ast_scan.binding_of(tree, in_plain, "T") == ("binding", tree)
+    assert ast_scan.own_names(first).binds("T")
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

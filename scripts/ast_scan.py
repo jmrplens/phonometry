@@ -146,11 +146,15 @@ class OwnNames:
     #: (``flag: type``): its own, as Python makes them, though the annotation
     #: binds nothing to them. The module's annotation makes no name its own.
     annotated: frozenset[str] = frozenset()
+    #: The type parameters of a generic function or class (``def f[T]``,
+    #: ``class Box[T]``), which its body reads, and a generic class's methods
+    #: too (:func:`binding_of`).
+    type_parameters: frozenset[str] = frozenset()
 
     def binds(self, name: str) -> bool:
-        """Whether *name* is the scope's own: bound in it, or annotated in a
-        function or a class body, and not declared ``global`` or ``nonlocal``
-        there.
+        """Whether *name* is the scope's own: bound in it, annotated in a
+        function or a class body, or a type parameter of it, and not declared
+        ``global`` or ``nonlocal`` there.
         """
         if name in self.declared_global or name in self.declared_nonlocal:
             return False
@@ -160,6 +164,7 @@ class OwnNames:
             or name in self.imported
             or name in self.stored
             or name in self.annotated
+            or name in self.type_parameters
         )
 
     def rebinds(self, name: str) -> bool:
@@ -180,7 +185,11 @@ class OwnNames:
         ways, which may stand for either at a call, and a name only
         annotated.
         """
-        if name in self.parameters or name in self.stored:
+        if (
+            name in self.parameters
+            or name in self.stored
+            or name in self.type_parameters
+        ):
             return "binding"
         if name in self.defined and name not in self.imported:
             return "definition"
@@ -204,6 +213,17 @@ def _parameter_names(scope: ast.AST) -> frozenset[str]:
             arguments.kwarg,
         )
         if argument is not None
+    )
+
+
+def _type_parameter_names(scope: ast.AST) -> frozenset[str]:
+    """The type parameters of a generic function or class; none for any other scope."""
+    if not isinstance(scope, _DEFINITIONS):
+        return frozenset()
+    return frozenset(
+        parameter.name
+        for parameter in scope.type_params
+        if isinstance(parameter, ast.TypeVar | ast.ParamSpec | ast.TypeVarTuple)
     )
 
 
@@ -417,6 +437,7 @@ def own_names(scope: ast.AST) -> OwnNames:
         frozenset(found["declared_global"]),
         frozenset(found["declared_nonlocal"]),
         frozenset(found["annotated"]),
+        _type_parameter_names(scope),
     )
 
 
@@ -546,20 +567,30 @@ def scopes_around(root: ast.AST, node: ast.AST) -> list[ast.AST]:
     function, a lambda or a comprehension lies between it and *node*, as
     Python leaves it out.
     """
+    return [scope for scope, crossed in _lookup_scopes(root, node) if not crossed]
+
+
+def _lookup_scopes(root: ast.AST, node: ast.AST) -> list[tuple[ast.AST, bool]]:
+    """:func:`scopes_around`, each scope with whether a function, a lambda or
+    a comprehension lies between it and *node*, kept for a generic class
+    then: its methods read its type parameters, though not its other names.
+    """
     parents = _parents(root)
-    found: list[ast.AST] = []
+    found: list[tuple[ast.AST, bool]] = []
     crossed = False
     grandchild: ast.AST | None = None
     child = node
     current = parents.get(node)
     while current is not None and current is not root:
         if isinstance(current, SCOPES) and _runs_inside(current, child, grandchild):
-            if not (isinstance(current, ast.ClassDef) and crossed):
-                found.append(current)
+            skipped = isinstance(current, ast.ClassDef) and crossed
+            if not skipped or _type_parameter_names(current):
+                found.append((current, skipped))
             crossed = crossed or not isinstance(current, ast.ClassDef)
         grandchild, child, current = child, current, parents.get(current)
-    if not (isinstance(root, ast.ClassDef) and crossed):
-        found.append(root)
+    skipped = isinstance(root, ast.ClassDef) and crossed
+    if not skipped or _type_parameter_names(root):
+        found.append((root, skipped))
     return found
 
 
@@ -571,14 +602,20 @@ def binding_of(
     """How *name*, read at *node*, is bound inside *root*, and by which scope.
 
     The scopes around *node* are read innermost first (:func:`scopes_around`):
-    the first that binds the name says how (:meth:`OwnNames.how`); one that
-    declares it ``global`` sends it to the module (``"global"``), unless it
-    binds it too (:meth:`OwnNames.rebinds`), and one that declares it
-    ``nonlocal`` passes it on outwards. ``"outside"`` when no scope up to
-    *root* binds it.
+    the first that binds the name says how (:meth:`OwnNames.how`), a type
+    parameter of a generic function or class among its bindings, which a
+    method of a generic class reads too; one that declares it ``global``
+    sends it to the module (``"global"``), unless it binds it too
+    (:meth:`OwnNames.rebinds`), and one that declares it ``nonlocal`` passes
+    it on outwards. ``"outside"`` when no scope up to *root* binds it.
     """
-    for scope in scopes_around(root, node):
+    for scope, crossed in _lookup_scopes(root, node):
         names = own_names(scope)
+        if crossed:
+            # A method reads its generic class's type parameters alone.
+            if name in names.type_parameters:
+                return "binding", scope
+            continue
         if names.rebinds(name):
             return "binding", scope
         if name in names.declared_global:

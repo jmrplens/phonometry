@@ -619,6 +619,38 @@ def test_a_function_meets_every_binding_from_its_def_on() -> None:
     assert ast_scan.bindings_from(tree, bindings, None) == [bindings[1]]
 
 
+def test_bindings_by_name_lists_every_binding_of_a_scope_in_source_order() -> None:
+    """Each name a scope binds, with the import, the ``def``, the assignment
+    and the other bindings of it in the order of the source; a function's
+    body is its own, and a name it declares ``global`` is the module's.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from pkg import helper
+            def helper():
+                global late
+                late = 1
+                inner = 2
+            helper = None
+            for helper in items:
+                pass
+            try:
+                pass
+            except ValueError as helper:
+                pass
+            """
+        )
+    )
+    found = ast_scan.bindings_by_name(tree)
+    assert sorted(found) == ["helper"]
+    assert [type(node).__name__ for node in found["helper"]] == [
+        "ImportFrom", "FunctionDef", "Name", "Name", "ExceptHandler",
+    ]  # fmt: skip
+    function = tree.body[1]
+    assert sorted(ast_scan.bindings_by_name(function)) == ["inner"]
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

@@ -387,6 +387,39 @@ def own_names(scope: ast.AST) -> OwnNames:
     )
 
 
+def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
+    """Each name *scope* binds itself, with every node that binds it, in the
+    order of the source.
+
+    A ``def`` or a ``class`` statement, an import statement, and the node of
+    every other binding :class:`OwnNames` reads: an assignment's target, a
+    loop's, ``with ... as``, ``except ... as``, a ``match`` capture, ``del``
+    and ``:=``. A name the scope declares ``global`` or ``nonlocal`` is
+    another scope's, and is left out. What the name holds where it is read
+    is :func:`live_bindings` of the nodes.
+    """
+    names = own_names(scope)
+    comprehension = isinstance(scope, _COMPREHENSIONS)
+    found: dict[str, list[ast.AST]] = {}
+    for node in scope_nodes(scope):
+        declared = _declared(node)
+        if declared is None:
+            bound = _stored(node, comprehension=comprehension)
+        else:
+            bound = declared[1] if declared[0] in {"defined", "imported"} else set()
+        for name in bound:
+            if name not in names.declared_global | names.declared_nonlocal:
+                found.setdefault(name, []).append(node)
+    for nodes in found.values():
+        nodes.sort(
+            key=lambda node: (
+                getattr(node, "lineno", 0),
+                getattr(node, "col_offset", 0),
+            )
+        )
+    return found
+
+
 @functools.cache
 def _parents(root: ast.AST) -> dict[ast.AST, ast.AST]:
     """Each node under *root* with the node that holds it, read once for each root."""

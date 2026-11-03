@@ -83,7 +83,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ast_scan import (
     ROOT,
-    block_statements,
+    bindings_by_name,
     exempted,
     live_bindings,
     live_class_members,
@@ -641,36 +641,39 @@ def _names_of(scope: ast.AST) -> _Names:
     )
 
 
-def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
-    """The imports a module makes as it is imported, every compound statement's
-    blocks included (:func:`ast_scan.block_statements`), in the order of the
-    source: of two imports of one name, the later, which Python leaves in
-    place, is the one a table built from them keeps.
-    """
-    pending: list[ast.stmt] = list(tree.body)[::-1]
-    while pending:
-        statement = pending.pop()
-        if isinstance(statement, ast.Import | ast.ImportFrom):
-            yield statement
-        else:
-            pending.extend(block_statements(statement)[::-1])
-
-
 def exports_of(path: pathlib.Path, tree: ast.Module) -> dict[str, str]:
     """What each name a module imports stands for, by the module's own name.
 
     ``from ._audio_file import open_audio`` in ``phonometry/io/__init__.py``
     makes ``phonometry.io.open_audio`` stand for
     ``phonometry.io._audio_file.open_audio``, so that a module that imports
-    it from the package reaches the function itself.
+    it from the package reaches the function itself. Every binding of a name
+    at the top of the module is read in the order of the source
+    (:func:`ast_scan.bindings_by_name`), and those that may stand once the
+    module has run (:func:`ast_scan.live_bindings`) say what it holds: a
+    name they all import from one place stands for it. One that an
+    assignment, a ``def`` or a ``class`` may hold, after its import or in
+    the other branch, or that two imports in the branches of a ``try`` or
+    an ``if`` bind to two functions, stands for none of them, so a module
+    that reaches it through the package reaches no function it imports.
     """
     module = module_name(path)
     package = _package_of(path, module)
-    return {
-        f"{module}.{name}": target
-        for node in _top_level_imports(tree)
-        for name, target in _imported(node, package).items()
-    }
+    exports: dict[str, str] = {}
+    for name, nodes in bindings_by_name(tree).items():
+        if not any(isinstance(node, ast.Import | ast.ImportFrom) for node in nodes):
+            continue
+        live = nodes if len(nodes) == 1 else live_bindings(tree, nodes)
+        targets = {
+            _imported(node, package).get(name)
+            if isinstance(node, ast.Import | ast.ImportFrom)
+            else None
+            for node in live
+        }
+        (target,) = targets if len(targets) == 1 else (None,)
+        if target is not None:
+            exports[f"{module}.{name}"] = target
+    return exports
 
 
 def _canonical(name: str, exports: Mapping[str, str]) -> str:

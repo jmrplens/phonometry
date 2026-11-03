@@ -266,11 +266,14 @@ _POSITIONS_RANK = 2
 _COORDINATES = 3
 
 
-def _band_index(frequency_hz: float) -> int:
-    """The one-third octave band of a frequency, 0 at 1 kHz (base-ten bands)."""
-    require_scalar(frequency_hz, "frequencies")
+def _band_index(frequency_hz: float, name: str = "frequencies") -> int:
+    """The one-third octave band of a frequency, 0 at 1 kHz (base-ten bands).
+
+    :param name: The caller's name for the frequency, which a refusal gives.
+    """
+    require_scalar(frequency_hz, name)
     if not math.isfinite(frequency_hz) or frequency_hz <= 0.0:
-        msg = f"'frequencies' must be positive and finite; got {frequency_hz!r}."
+        msg = f"'{name}' must be positive and finite; got {frequency_hz!r}."
         raise ValueError(msg)
     k = round(10.0 * math.log10(frequency_hz / 1000.0))
     if not 0 <= k - _LOWEST_K < len(_NOMINAL_THIRDS_HZ):
@@ -396,7 +399,7 @@ def qualification_frequencies(
     """
     require_scalar(high_hz, "high_hz")
     require_scalar(low_hz, "low_hz")
-    k_lo, k_hi = _band_index(low_hz), _band_index(high_hz)
+    k_lo, k_hi = _band_index(low_hz, "low_hz"), _band_index(high_hz, "high_hz")
     if k_hi < k_lo:
         msg = "'high_hz' must not lie below 'low_hz'."
         raise ValueError(msg)

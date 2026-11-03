@@ -207,9 +207,9 @@ def _coerce(
         out: list[float] = []
         for c in centers:
             if c in values:
-                out.append(real_number(values[c], "values"))
+                out.append(real_number(values[c], name))
             elif real_number(c, "centers") in values:
-                out.append(real_number(values[real_number(c, "centers")], "values"))
+                out.append(real_number(values[real_number(c, "centers")], name))
             else:
                 msg = f"{name} mapping is missing band {c} Hz; expected keys {centers}"
                 raise ValueError(msg)
@@ -540,7 +540,7 @@ def practical_absorption_coefficient(
         third_octave_alpha_s, RATING_THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s"
     )
     if any(v < 0.0 for v in values):
-        msg = "alpha_s values must be non-negative"
+        msg = "'third_octave_alpha_s' must be non-negative."
         raise ValueError(msg)
     alpha_p = [
         _practical_round((values[3 * i] + values[3 * i + 1] + values[3 * i + 2]) / 3.0)

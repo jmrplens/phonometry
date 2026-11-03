@@ -651,10 +651,10 @@ def _validate_probe_signals(x1: np.ndarray, x2: np.ndarray) -> None:
 
 def _validate_probe_medium(fs: float, spacing: float, rho: float, c: float) -> None:
     """Reject a non-physical sample rate, probe spacing or medium."""
-    require_scalar(c, "c")
+    require_scalar(c, "speed_of_sound")
     require_scalar(fs, "fs")
-    require_scalar(rho, "rho")
-    require_scalar(spacing, "spacing")
+    require_scalar(rho, "density")
+    require_scalar(spacing, "spacing_m")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)

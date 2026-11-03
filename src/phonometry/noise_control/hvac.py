@@ -951,7 +951,7 @@ def _vdi2081_bend_result(
 ) -> HVACSpectrumResult:
     """Pick the Table 7 row the arguments describe and shift it into place."""
     side = require_choice(lined_side, "lined_side", ("both", "one"))
-    size = require_positive(width, "width")
+    size = require_positive(width, "width_m")
     c = require_positive(speed_of_sound, "speed_of_sound")
     shape, key = _vdi2081_bend_row(
         bend_type=bend_type, vanes=vanes, lined=lined, lined_side=side
@@ -2002,7 +2002,7 @@ def _vdi2081_straight_run(
 
 def _perimeter_over_area(width: float, height: float) -> float:
     """``P / S`` of a rectangular duct in ft^-1, from SI side lengths in m."""
-    w = require_positive(width, "width") / _M_PER_FT
+    w = require_positive(width, "width_m") / _M_PER_FT
     h = require_positive(height, "height_m") / _M_PER_FT
     return 2.0 * (w + h) / (w * h)
 

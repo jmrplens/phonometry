@@ -261,6 +261,168 @@ def test_the_check_passes_a_reading_named_after_its_parameter(source: str) -> No
     assert _misnamed_in(source) == []
 
 
+def _parameters(function: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+    arguments = function.args
+    return [
+        a.arg for a in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+    ]
+
+
+def _read_bare(value: ast.expr) -> str | None:
+    """The name *value* reads as it is or by an item (``x``, ``x[i]``), or ``None``.
+
+    A field read off a record (``record.height_m``) is named after the field,
+    which is what the caller wrote, so it is no value read bare.
+    """
+    while isinstance(value, ast.Subscript):
+        value = value.value
+    return value.id if isinstance(value, ast.Name) else None
+
+
+def _helper_readings(
+    helper: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> dict[str, list[tuple[str, int]]]:
+    """``{parameter: [(name handed to the reader, line)]}`` of what *helper* reads by a literal name."""
+    parameters = set(_parameters(helper))
+    found: dict[str, list[tuple[str, int]]] = {}
+    for node in ast.walk(helper):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in _READERS
+            and len(node.args) >= 2  # noqa: PLR2004
+            and isinstance(node.args[1], ast.Constant)
+            and isinstance(node.args[1].value, str)
+        ):
+            continue
+        read = _read_bare(node.args[0])
+        if read in parameters:
+            found.setdefault(read, []).append((node.args[1].value, node.lineno))
+    return found
+
+
+def _handed_misnamings(tree: ast.Module, where: str) -> list[str]:
+    """Readings of a private helper named otherwise than the public parameter handed to it."""
+    tops = [
+        node
+        for owner in (tree, *(n for n in tree.body if isinstance(n, ast.ClassDef)))
+        for node in owner.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    ]
+    helpers = {
+        node.name: (node, _helper_readings(node))
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        and node.name.startswith("_")
+        and not node.name.startswith("__")
+    }
+    found: list[str] = []
+    for caller in tops:
+        if caller.name.startswith("_"):
+            continue
+        given = set(_parameters(caller))
+        for call in ast.walk(caller):
+            if not (isinstance(call, ast.Call) and isinstance(call.func, ast.Name)):
+                continue
+            helper, readings = helpers.get(call.func.id, (None, {}))
+            if helper is None or not readings:
+                continue
+            bound = dict(zip(_parameters(helper), call.args, strict=False))
+            bound.update({k.arg: k.value for k in call.keywords if k.arg})
+            for parameter, uses in readings.items():
+                handed = bound.get(parameter)
+                if not (isinstance(handed, ast.Name) and handed.id in given):
+                    continue
+                found += [
+                    f"{where}:{line}: {helper.name} names {name!r} what "
+                    f"{caller.name} hands it as {handed.id!r}"
+                    for name, line in uses
+                    if name != handed.id
+                ]
+    return found
+
+
+def misnamed_handed_readings(root: pathlib.Path) -> list[str]:
+    """Every reading of a private helper under *root* named after no parameter
+    of the public function that hands it the value.
+    """
+    found: list[str] = []
+    for path in sorted(root.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        found += _handed_misnamings(tree, str(path.relative_to(root)))
+    return found
+
+
+def test_a_helper_names_a_value_as_the_public_caller_does() -> None:
+    """A private helper read a value its public caller handed on under its own
+    name: ``weighted_absorption({250: "x", ...})`` was refused as ``'values'``,
+    ``sound_intensity(..., speed_of_sound="343")`` as ``'c'``.
+    """
+    assert misnamed_handed_readings(_SOURCE) == []
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        # An item of a mapping the helper names after its own parameter.
+        """
+        def _coerce(values, centers, name):
+            return [real_number(values[c], "values") for c in centers]
+
+        def weighted_absorption(alpha_p):
+            return _coerce(alpha_p, (250, 500), "alpha_p")
+        """,
+        # A value handed on by keyword under a shorter name.
+        """
+        def _bend(bands, *, width):
+            return require_positive(width, "width")
+
+        def elbow(frequencies, width_m):
+            return _bend(frequencies, width=width_m)
+        """,
+    ],
+)
+def test_the_check_finds_a_helper_reading_named_after_itself(source: str) -> None:
+    tree = ast.parse(textwrap.dedent(source))
+    assert len(_handed_misnamings(tree, "planted.py")) == 1
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        # The caller's name handed on with the value.
+        """
+        def _coerce(values, centers, name):
+            return [real_number(values[c], name) for c in centers]
+
+        def weighted_absorption(alpha_p):
+            return _coerce(alpha_p, (250, 500), "alpha_p")
+        """,
+        # A field of a record, named after the field the caller set.
+        """
+        def _setup(ground):
+            return require_scalar(ground.receiver_height_m, "receiver_height_m")
+
+        def event_level(ground):
+            return _setup(ground)
+        """,
+        # The helper's name is the public parameter's.
+        """
+        def _spacing(spacing_m):
+            return require_scalar(spacing_m, "spacing_m")
+
+        def range_of(spacing_m):
+            return _spacing(spacing_m)
+        """,
+    ],
+)
+def test_the_check_passes_a_helper_reading_named_as_its_caller_does(
+    source: str,
+) -> None:
+    tree = ast.parse(textwrap.dedent(source))
+    assert _handed_misnamings(tree, "planted.py") == []
+
+
 _LEVELS = np.full(22, 90.0)
 _OCCLUDED = np.full((3, 22), 70.0)
 

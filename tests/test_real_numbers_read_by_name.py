@@ -22,6 +22,7 @@ import numpy as np
 import pytest
 
 from phonometry import (
+    aircraft,
     building,
     emission,
     environment,
@@ -443,6 +444,153 @@ _HANDED_ON: list[tuple[str, Callable[[], object], str]] = [
         lambda: noise_control.room_effect(2.0, room_constant=np.array([4.0 + 1.0j])),
         "'room_constant' must be real, not complex",
     ),
+    (
+        "weighted_absorption: a text in a mapping of bands",
+        lambda: materials.weighted_absorption({**_OCTAVE_ALPHA, 250: "bad"}),
+        "'alpha_p' must be one number, not a text",
+    ),
+    (
+        "weighted_absorption_from_third_octave: a text in a mapping of bands",
+        lambda: materials.weighted_absorption_from_third_octave(
+            {**_THIRD_OCTAVE_ALPHA, 200: "bad"}
+        ),
+        "'third_octave_alpha_s' must be one number, not a text",
+    ),
+    (
+        "practical_absorption_coefficient: a text in a mapping of bands",
+        lambda: materials.practical_absorption_coefficient(
+            {**_THIRD_OCTAVE_ALPHA, 200: "bad"}
+        ),
+        "'third_octave_alpha_s' must be one number, not a text",
+    ),
+    (
+        "event_level: a text among the exposure levels",
+        lambda: aircraft.event_level(
+            _PATH, [0.0, 0.0, 0.0], _POWERS, _DISTANCES, [["x"] * 3] * 2, _NPD
+        ),
+        "'exposure_levels' must be numbers, not text",
+    ),
+    (
+        "noise_contour: a text among the maximum levels",
+        lambda: aircraft.noise_contour(
+            _PATH,
+            _POWERS,
+            _DISTANCES,
+            _NPD,
+            [["x"] * 3] * 2,
+            x=[0.0, 100.0],
+            y=[0.0, 100.0],
+        ),
+        "'max_levels' must be numbers, not text",
+    ),
+    (
+        "sound_intensity: a text for the speed of sound",
+        lambda: emission.sound_intensity(
+            _PROBE, _PROBE, 48000, spacing_m=0.012, speed_of_sound="343"
+        ),
+        "'speed_of_sound' must be one number, not a text",
+    ),
+    (
+        "sound_intensity: a text for the density",
+        lambda: emission.sound_intensity(
+            _PROBE, _PROBE, 48000, spacing_m=0.012, density="1.2"
+        ),
+        "'density' must be one number, not a text",
+    ),
+    (
+        "sound_intensity: a text for the spacing",
+        lambda: emission.sound_intensity(_PROBE, _PROBE, 48000, spacing_m="0.012"),
+        "'spacing_m' must be one number, not a text",
+    ),
+    (
+        "room_absorption_coefficient: a text for the surface area",
+        lambda: emission.room_absorption_coefficient(
+            [1.0], volume=100.0, surface_area="130"
+        ),
+        "'surface_area' must be one number, not a text",
+    ),
+    (
+        "barrier_insertion_loss: a text for the barrier height",
+        lambda: environment.barrier_insertion_loss([500.0], 1.0, 5.0, "3", 5.0, 1.0),
+        "'barrier_height_m' must be one number, not a text",
+    ),
+    (
+        "lined_rectangular_duct_attenuation: a text for the width",
+        lambda: noise_control.lined_rectangular_duct_attenuation(
+            None, "0.3", 0.3, 3.0, 0.025
+        ),
+        "'width_m' must be one number, not a text",
+    ),
+    (
+        "elbow_insertion_loss: a text for the width of a VDI 2081 bend",
+        lambda: noise_control.elbow_insertion_loss([500.0], "0.3", model="vdi2081"),
+        "'width_m' must be one number, not a text",
+    ),
+    (
+        "reflection_index: a text among the directivity corrections",
+        lambda: environment.reflection_index(
+            [np.zeros(64)] * 9,
+            [np.zeros(64)] * 9,
+            48000,
+            speed_of_sound=343.0,
+            directivity_corrections=[["x"] * 18] * 9,
+        ),
+        "'directivity_corrections' must be numbers, not text",
+    ),
+]
+
+#: A small table the calls above read: two powers, three distances.
+_POWERS = [1000.0, 2000.0]
+_DISTANCES = [100.0, 200.0, 400.0]
+_NPD = np.full((2, 3), 80.0)
+_PATH = np.array(
+    [[0.0, -1000.0, 300.0, 70.0, 1000.0], [0.0, 1000.0, 300.0, 70.0, 1000.0]]
+)
+_PROBE = np.random.default_rng(0).standard_normal(4096)
+_OCTAVE_ALPHA: dict[int, object] = dict.fromkeys(materials.RATING_OCTAVE_BANDS_HZ, 0.5)
+_THIRD_OCTAVE_ALPHA: dict[int, object] = dict.fromkeys(
+    materials.RATING_THIRD_OCTAVE_BANDS_HZ, 0.5
+)
+_ROUGHNESS = environment.AcousticRoughnessSpectrum(
+    wavelengths_m=sorted(environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB, reverse=True),
+    levels=[
+        environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[w] - 1.0
+        for w in sorted(environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB, reverse=True)
+    ],
+)
+
+#: The refusals of a value's size or range that a private helper writes,
+#: each of which named the helper's own variable.
+_HANDED_ON_RANGE: list[tuple[str, Callable[[], object], str]] = [
+    (
+        "event_level: maximum levels of the wrong shape",
+        lambda: aircraft.event_level(
+            _PATH, [0.0, 0.0, 0.0], _POWERS, _DISTANCES, _NPD, np.full((3, 3), 80.0)
+        ),
+        "'max_levels' must have shape",
+    ),
+    (
+        "qualification_frequencies: a lowest band below zero",
+        lambda: emission.qualification_frequencies(-1.0, high_hz=1000.0),
+        "'low_hz' must be positive and finite",
+    ),
+    (
+        "qualification_frequencies: a highest band that is no number",
+        lambda: emission.qualification_frequencies(100.0, high_hz=float("nan")),
+        "'high_hz' must be positive and finite",
+    ),
+    (
+        "roughness_comparability: a second noise spectrum of the wrong length",
+        lambda: environment.roughness_comparability(
+            _ROUGHNESS,
+            _ROUGHNESS,
+            [80.0, 81.0],
+            [80.0],
+            frequencies=[500.0, 630.0],
+            speed_kmh=80.0,
+        ),
+        "'noise_levels_2' and 'frequencies' need one value per band each",
+    ),
 ]
 
 
@@ -457,6 +605,22 @@ def test_a_value_a_helper_reads_is_refused_by_the_public_name(
     """
     del label
     with pytest.raises(TypeError, match=message):
+        call()
+
+
+@pytest.mark.parametrize(
+    ("label", "call", "message"),
+    _HANDED_ON_RANGE,
+    ids=[case[0] for case in _HANDED_ON_RANGE],
+)
+def test_a_value_a_helper_refuses_is_named_by_the_public_name(
+    label: str, call: Callable[[], object], message: str
+) -> None:
+    """Each refusal named the helper's variable (``'levels'``,
+    ``'frequencies'``, ``'noise_levels'``) where the caller wrote another.
+    """
+    del label
+    with pytest.raises(ValueError, match=message):
         call()
 
 

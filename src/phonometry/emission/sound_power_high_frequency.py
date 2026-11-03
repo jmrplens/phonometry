@@ -256,11 +256,11 @@ def air_absorption_np_per_m(
 # --- Room constant: Formulae (4), (5) and (7) --------------------------------
 
 
-def _room_geometry(volume: float, surface_area_m2: float) -> tuple[float, float]:
+def _room_geometry(volume: float, surface_area: float) -> tuple[float, float]:
     """The room volume and surface, each positive and finite."""
     return (
         require_positive(volume, "volume"),
-        require_positive(surface_area_m2, "surface_area_m2"),
+        require_positive(surface_area, "surface_area"),
     )
 
 

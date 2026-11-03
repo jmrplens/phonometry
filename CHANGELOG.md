@@ -2296,35 +2296,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- **One number a function reads is read by name.** A function that turned
-  one of its caller's numbers into a float with `float()`, or into a complex
-  number with `complex()`, parsed a text and kept the real part of a NumPy
-  complex number with no more than a `ComplexWarning`:
+- **One number a function reads is read by name.** A function that turned one
+  of its caller's numbers into a float with `float()`, or into a complex number
+  with `complex()`, parsed a text and kept the real part of a NumPy complex
+  number with no more than a `ComplexWarning`:
   `aircraft.npd_atmosphere_increment(temperature_c="25")` read 25 °C, `b"25"`
   too, and `metrology.combined_standard_uncertainty(["12"])` came back as 12.
   About three hundred and sixty such readings, in public functions and in the
   helpers they hand their numbers to, read through the shared reader of one
   number now, which refuses a text, an array and a complex value with a
-  `TypeError` that names the parameter, and a number too large for a float
-  with a `ValueError`; a contribution to `combined_standard_uncertainty` that
-  is neither a number nor a pair is refused naming `contributions`. The name
-  is the parameter's where a reading ran in a loop too:
+  `TypeError` that names the parameter, and a number too large for a float with
+  a `ValueError`; a contribution to `combined_standard_uncertainty` that is
+  neither a number nor a pair is refused naming `contributions`. The name is
+  the parameter's where a reading ran in a loop too:
   `signals.tone_burst(pre_silence="0.1")` named `'value'`,
   `environment.amplitude_modulation_block` named `'v'` for its range, and the
   uncertainties of `hearing.earmuff_insertion_loss`, the readings of
   `broadcast.QuasiPeakDynamicsResult`, the surfaces and dimensions of the
   reverberation models, the vocal efforts of `speech.standard_speech_spectra`
-  and the shear modulus of the Biot functions named a loop's variable or a
-  word of their own; each names its parameter now. A parser
-  of a file's text (an ANP table, a JSON sidecar) still reads its text. A
-  number computed with before the result was converted is read the same way:
+  and the shear modulus of the Biot functions named a loop's variable or a word
+  of their own; each names its parameter now. So does a helper handed a public
+  parameter under a name of its own: `materials.weighted_absorption` and the
+  two third-octave ratings named `'values'` for a mapping of bands,
+  `emission.sound_intensity` named `'c'`, `'rho'` and `'spacing'`,
+  `aircraft.event_level` and `aircraft.noise_contour` named `'levels'` for both
+  tables, `environment.reflection_index` named `'values'`,
+  `environment.roughness_comparability` named `'noise_levels'` for either
+  spectrum, `emission.qualification_frequencies` named `'frequencies'` for its
+  band limits, and `emission.room_absorption_coefficient`,
+  `environment.barrier_insertion_loss` and the rectangular-duct and VDI 2081
+  bend attenuations named `'surface_area_m2'`, `'barrier_height'` and
+  `'width'`, which none of them takes. A parser of a file's text (an ANP table,
+  a JSON sidecar) still reads its text. A number computed with before the
+  result was converted is read the same way:
   `aircraft.Aerodrome.pressure_ratio`, the two numbers of
   `aircraft.MeanGroundPlaneResult.equivalent_height`, the `delay` and the FFT
   length `n` of `materials.in_situ_reflection_factor` and the
-  `efficiency_correction` of a
-  `noise_control.AerodynamicValveNoise` a caller builds failed inside the
-  arithmetic on a text with an error that named nothing, and took a NumPy
-  complex number through it to its real part or into the phase.
+  `efficiency_correction` of a `noise_control.AerodynamicValveNoise` a caller
+  builds failed inside the arithmetic on a text with an error that named
+  nothing, and took a NumPy complex number through it to its real part or into
+  the phase.
 - **A wrapper of a text is refused where the text is.** A
   `collections.UserString` is a sequence of characters, and the tests that
   told a pair or a list of labels from a text by its type let it through:

@@ -178,7 +178,7 @@ def test_practical_mean_of_three() -> None:
 
 
 def test_practical_rejects_negative() -> None:
-    with pytest.raises(ValueError, match="alpha_s values must be non-negative"):
+    with pytest.raises(ValueError, match="'third_octave_alpha_s' must be non-negative"):
         practical_absorption_coefficient([-0.1] + [0.5] * 14)
 
 

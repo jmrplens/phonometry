@@ -855,7 +855,7 @@ def _validate_barrier_geometry(
         height, a mis-ordered geometry, a barrier below the line of sight, or a
         thick barrier whose far edge reaches the receiver.
     """
-    require_scalar(barrier_height, "barrier_height")
+    require_scalar(barrier_height, "barrier_height_m")
     # require_positive rejects NaN/inf as well as non-positive distances and
     # names the one that was wrong; a NaN height would sail through the
     # ordering comparisons below (every comparison against NaN is False) and

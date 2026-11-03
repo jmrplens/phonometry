@@ -932,7 +932,7 @@ def _directivity(values: ArrayLike | None) -> NDArray[np.float64]:
     bands = len(_BANDS_HZ)
     if values is None:
         return np.ones((_MICROPHONES, bands))
-    corrections = real_array(values, "values")
+    corrections = real_array(values, "directivity_corrections")
     if corrections.shape != (_MICROPHONES, bands):
         msg = (
             f"'directivity_corrections' must be a ({_MICROPHONES}, {bands}) array, "

@@ -1493,12 +1493,16 @@ class SmallRoughnessDeviation(OwnsArrays):
 
 
 def _noise_spectrum(
-    noise_levels: ArrayLike, frequencies: ArrayLike
+    noise_levels: ArrayLike, frequencies: ArrayLike, name: str = "noise_levels"
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.int64]]:
-    noise = require_finite_array(noise_levels, "noise_levels")
+    """The noise levels and their bands, one level per band.
+
+    :param name: The caller's name for *noise_levels*, which a refusal gives.
+    """
+    noise = require_finite_array(noise_levels, name)
     frequencies, bands = _frequency_bands(frequencies)
     if noise.size != frequencies.size:
-        msg = "'noise_levels' and 'frequencies' need one value per band each."
+        msg = f"'{name}' and 'frequencies' need one value per band each."
         raise ValueError(msg)
     return noise, frequencies, bands
 
@@ -1716,8 +1720,10 @@ def roughness_comparability(
         real number.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
-    noise_1, axis, bands = _noise_spectrum(noise_levels_1, frequencies)
-    noise_2, _, _ = _noise_spectrum(noise_levels_2, frequencies)
+    noise_1, axis, bands = _noise_spectrum(
+        noise_levels_1, frequencies, "noise_levels_1"
+    )
+    noise_2, _, _ = _noise_spectrum(noise_levels_2, frequencies, "noise_levels_2")
     common, one, two = _common(roughness_1, roughness_2)
     speed_m_s = speed / 3.6
     band_tuple = tuple(common)

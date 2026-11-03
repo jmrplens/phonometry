@@ -354,21 +354,26 @@ def _clean_table(
     powers: ArrayLike,
     distances_m: ArrayLike,
     levels: ArrayLike,
+    name: str = "levels",
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    """The NPD table read: its powers, its distances and the levels at each pair.
+
+    :param name: The caller's name for *levels*, which a refusal gives.
+    """
     p = real_array(powers, "powers").ravel()
     d = real_array(distances_m, "distances_m").ravel()
-    lv = real_array(levels, "levels")
+    lv = real_array(levels, name)
     # The fewest values the step below can work with, not a quantity.
     if p.size < 2 or d.size < 2:  # noqa: PLR2004
         msg = "'powers' and 'distances_m' must each have at least two values."
         raise ValueError(msg)
     if lv.shape != (p.size, d.size):
-        msg = "'levels' must have shape (len(powers), len(distances_m))."
+        msg = f"'{name}' must have shape (len(powers), len(distances_m))."
         raise ValueError(msg)
     if not (
         np.all(np.isfinite(p)) and np.all(np.isfinite(d)) and np.all(np.isfinite(lv))
     ):
-        msg = "'powers', 'distances_m' and 'levels' must be finite."
+        msg = f"'powers', 'distances_m' and '{name}' must be finite."
         raise ValueError(msg)
     if np.any(d <= 0.0):
         msg = "'distances_m' must be strictly positive (slant range in m)."
@@ -1487,8 +1492,8 @@ def event_level(
     gr = _validate_ground_roll(segments.ground_roll, pts.shape[0])
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
-    p, d, le = _clean_table(powers, distances_m, exposure_levels)
-    _, _, lm = _clean_table(powers, distances_m, max_levels)
+    p, d, le = _clean_table(powers, distances_m, exposure_levels, "exposure_levels")
+    _, _, lm = _clean_table(powers, distances_m, max_levels, "max_levels")
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,
         static_pressure_kpa=atmosphere.static_pressure_kpa,
@@ -1616,8 +1621,8 @@ def noise_contour(
     gr = _validate_ground_roll(segments.ground_roll, pts.shape[0])
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
-    p, d, le = _clean_table(powers, distances_m, exposure_levels)
-    _, _, lm = _clean_table(powers, distances_m, max_levels)
+    p, d, le = _clean_table(powers, distances_m, exposure_levels, "exposure_levels")
+    _, _, lm = _clean_table(powers, distances_m, max_levels, "max_levels")
     vref = real_number(reference_speed_m_s, "reference_speed_m_s")
     imp = impedance_adjustment(
         temperature_c=atmosphere.temperature_c,

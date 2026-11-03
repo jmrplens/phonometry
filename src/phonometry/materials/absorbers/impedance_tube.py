@@ -523,7 +523,7 @@ def _frequency_range(
 ) -> tuple[float, float]:
     """Shared ISO/ASTM plane-wave frequency-range arithmetic."""
     require_scalar(diameter_m, "diameter_m")
-    require_scalar(spacing, "spacing")
+    require_scalar(spacing, "spacing_m")
     require_scalar(speed_of_sound, "speed_of_sound")
     if spacing <= 0.0:
         msg = "'spacing_m' must be positive."

@@ -1234,20 +1234,45 @@ class Package:
         """The key in :attr:`functions` of every definition a call can reach.
 
         A function written in a function around the call is each of its
-        definitions there; one of a module is each definition of it the
-        module holds once it has run (:meth:`live_definitions`), one in each
-        branch of an ``if`` being either, whether one import or several may
-        stand for the name at the call.
+        definitions there; one of a module is each definition of it that may
+        stand where the call runs (:meth:`_live_at`), one in each branch of
+        an ``if`` being either, whether one import or several may stand for
+        the name at the call.
         """
         reached: list[str] = []
         for target in self._targets(function, func, call):
             if target not in self.functions:
                 continue
             if self.functions[target].parent is None:
-                reached.extend(self.live_definitions(target))
+                reached.extend(self._live_at(target, function, call))
             else:
                 reached.append(target)
         return list(dict.fromkeys(reached))
+
+    def _live_at(
+        self, dotted: str, function: Function, call: ast.AST | None
+    ) -> list[str]:
+        """The key of each definition of a function at the top of a module
+        that *call*, written in *function*, may reach.
+
+        One of the caller's own module is read where the call runs
+        (:func:`ast_scan.live_bindings`): a call inside a function meets
+        every definition from the ``def`` on, since the function may be
+        called during the import. A method, or a function of another module,
+        is what its name holds once its module has run
+        (:meth:`live_definitions`).
+        """
+        first = self.functions[dotted]
+        if call is None or first.owner is not None or first.module != function.module:
+            return self.live_definitions(dotted)
+        keys = self.every_definition(dotted)
+        last = {
+            self.functions[key].definitions[-1]: key
+            for key in keys
+            if self.functions[key].definitions
+        }
+        live = live_bindings(self.trees[first.module], list(last), call)
+        return [last[node] for node in live] or list(keys)
 
     def live_definitions(self, dotted: str) -> list[str]:
         """The key of each definition of a function of a module, or of a
@@ -1301,16 +1326,21 @@ class Package:
             if names.binds(head.id):
                 at = call if scope is function else None
                 return self._bound_in(scope, node, func, head, at)
-        return self._at_top(function.module, func, head)
+        return self._at_top(function.module, func, head, call)
 
-    def _at_top(self, module: str, func: ast.expr, head: ast.Name) -> tuple[str, ...]:
+    def _at_top(
+        self, module: str, func: ast.expr, head: ast.Name, call: ast.AST | None
+    ) -> tuple[str, ...]:
         """What a call reaches through a name the module binds at its top.
 
-        Each ``def``, ``class`` or import of the name the module holds once
-        it has run (:func:`ast_scan.live_bindings`), one in each branch of an
-        ``if`` being either and a later one replacing an earlier one; a name
-        no such statement binds is read from the module's table of names
-        (:meth:`resolve`), a builtin among them.
+        Each ``def``, ``class`` or import of the name that may stand for it
+        at *call*, or once the module has run when it is None
+        (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
+        either, a later one replaces an earlier one, and a call inside a
+        function meets every one from the ``def`` on, since the function
+        may be called during the import. A name no such statement binds is
+        read from the module's table of names (:meth:`resolve`), a builtin
+        among them.
         """
         statements = self._top_statements(module).get(head.id)
         if not statements:
@@ -1325,7 +1355,7 @@ class Package:
                 if isinstance(statement, ast.Import | ast.ImportFrom)
                 else {head.id: f"{module}.{head.id}"},
             )
-            for statement in live_bindings(self.trees[module], statements)
+            for statement in live_bindings(self.trees[module], statements, call)
         )
         return tuple(dict.fromkeys(target for target in found if target is not None))
 

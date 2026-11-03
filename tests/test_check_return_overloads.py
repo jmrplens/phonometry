@@ -777,6 +777,38 @@ def test_a_definition_a_later_one_replaces_is_never_reached(
     assert sorted(refused) == ["plot_maybe"]
 
 
+def test_a_call_from_a_function_reaches_every_definition_from_its_def_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function reads the module's names when it is called, which may be
+    during the import and before a later definition of a name, so a call in
+    it may reach every definition that stands from its ``def`` on.
+
+    ``FIGURE = plot_early(None)`` runs ``plot_early`` while ``_new_axes``
+    still draws polar axes; the module's names were read as they stand once
+    it has run, so only the plain ``_new_axes`` was reached and the polar
+    axes passed.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def _new_axes():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_early(result: object) -> Axes:
+            return _new_axes()
+
+        FIGURE = plot_early(None)
+
+        def _new_axes():
+            return plt.subplots()[1]
+        """,
+    )
+    assert sorted(refused) == ["plot_early"]
+
+
 def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
     tmp_path: pathlib.Path,
 ) -> None:

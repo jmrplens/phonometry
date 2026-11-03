@@ -50,7 +50,8 @@ How it sees "computed"
 
 Each function is read flow-insensitively: a local name stands for the join of
 everything assigned to it, an element stored into it or appended to it
-included. A parameter of a public function is the caller's value; a parameter
+included. A comprehension's variable stands for an item of what it walks
+inside the comprehension only, as Python keeps it there. A parameter of a public function is the caller's value; a parameter
 of a private function, a private method or a nested function stands for
 whatever the file passes it at its call sites. A call into a function of the
 same file, or of a sibling module it imports by a relative import, is read in
@@ -688,6 +689,9 @@ class Module:
             self.tree, self.top_imports
         )
         self.locals: dict[Function, dict[str, list[tuple[str, ast.AST, int]]]] = {}
+        self.comprehended: dict[
+            Function, dict[int, list[tuple[str, ast.AST, int]]]
+        ] = {}
         self.calls: dict[Function, list[tuple[ast.Call, Function | None]]] = {}
         self.constructions: dict[
             ast.ClassDef, list[tuple[ast.Call, Function | None]]
@@ -932,6 +936,18 @@ class Module:
         """The functions of this file *name* stands for, called from *scope* (:meth:`lookup`)."""
         return self.lookup(name, scope) or ()
 
+    def comprehension_names(
+        self, function: Function | None
+    ) -> dict[int, list[tuple[str, ast.AST, int]]]:
+        """The names a comprehension of *function* reads of its own variables
+        (:func:`_comprehension_names`), keyed by the node of each.
+        """
+        if function is None:
+            return {}
+        if function not in self.comprehended:
+            self.comprehended[function] = _comprehension_names(function)
+        return self.comprehended[function]
+
     def local_bindings(
         self, function: Function
     ) -> dict[str, list[tuple[str, ast.AST, int]]]:
@@ -939,8 +955,10 @@ class Module:
 
         Each binding is ``(how, node, index)``: ``"value"`` for an assignment
         (``node`` is the assigned expression, ``index`` the position in a
-        tuple unpacking or -1), ``"loop"`` for a ``for`` or comprehension
-        target (``node`` is the iterable), ``"opaque"`` for anything else.
+        tuple unpacking or -1), ``"loop"`` for a ``for`` target (``node`` is
+        the iterable), ``"opaque"`` for anything else. A comprehension's
+        variables are its own (:func:`_comprehension_names`), and a ``:=``
+        inside it binds the function's name.
         """
         if function in self.locals:
             return self.locals[function]
@@ -961,7 +979,7 @@ class Module:
                 )
                 for target in targets:
                     _bind(bindings, target, "value", value)
-            elif isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
+            elif isinstance(node, ast.For | ast.AsyncFor):
                 _bind_loop(bindings, node.target, node.iter)
             elif isinstance(node, ast.With | ast.AsyncWith):
                 for item in node.items:
@@ -1024,6 +1042,9 @@ class Module:
         if isinstance(node, ast.Constant | ast.JoinedStr):
             return Value(const=True)
         if isinstance(node, ast.Name):
+            walked = self.comprehension_names(context.function).get(id(node))
+            if walked is not None:
+                return join(self.binding(item, context) for item in walked)
             return self.name(node.id, context)
         if isinstance(node, ast.Attribute):
             return self.attribute(node, context)
@@ -1304,6 +1325,10 @@ class Module:
                 else None
             )
         if not isinstance(node, ast.Name):
+            return None
+        if id(node) in self.comprehension_names(context.function):
+            # An item a comprehension walks, as a loop's item, is followed no
+            # further.
             return None
         current = context.function
         while current is not None:
@@ -1650,6 +1675,7 @@ def _import_source(node: ast.ImportFrom, path: pathlib.Path) -> pathlib.Path:
 
 #: Nodes that open a scope of their own, whose names are not the function's.
 _NESTED_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
 
 
 def _own_definitions(scope: ast.AST) -> Iterator[Function]:
@@ -1677,6 +1703,47 @@ def _walk_own(function: Function) -> Iterator[ast.AST]:
             for child in ast.iter_child_nodes(node)
             if not isinstance(child, _NESTED_SCOPES)
         )
+
+
+def _comprehension_names(
+    function: Function,
+) -> dict[int, list[tuple[str, ast.AST, int]]]:
+    """Each name a comprehension of *function* reads of a variable it binds
+    itself, keyed by the node of the name, with that binding: an item of
+    what the comprehension walks.
+
+    Python keeps a comprehension's variables inside it: the function's name
+    of the same spelling is another name, and so is the comprehension's
+    outside it. The first iterable is read in the scope around the
+    comprehension, the rest of it in its own; an inner comprehension that
+    binds the name again holds its own.
+    """
+    found: dict[int, list[tuple[str, ast.AST, int]]] = {}
+
+    def visit(node: ast.AST, held: dict[str, list[tuple[str, ast.AST, int]]]) -> None:
+        if isinstance(node, _NESTED_SCOPES):
+            return
+        if isinstance(node, ast.Name) and node.id in held:
+            found[id(node)] = held[node.id]
+        if not isinstance(node, _COMPREHENSIONS):
+            for child in ast.iter_child_nodes(node):
+                visit(child, held)
+            return
+        inner = dict(held)
+        for generator in node.generators:
+            visit(generator.iter, inner)
+            bound: dict[str, list[tuple[str, ast.AST, int]]] = {}
+            _bind_loop(bound, generator.target, generator.iter)
+            inner.update(bound)
+            for test in generator.ifs:
+                visit(test, inner)
+        parts = [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+        for part in parts:
+            visit(part, inner)
+
+    for statement in function.body:
+        visit(statement, {})
+    return found
 
 
 def _load(target: ast.expr) -> ast.expr:

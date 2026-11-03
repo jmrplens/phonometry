@@ -1149,3 +1149,34 @@ def test_a_parameter_rebound_to_a_value_of_itself_keeps_the_caller_value(
     assert _texts(source, tmp_path) == [
         "np.max(levels) - np.min(levels) <= _SPREAD_LIMIT_DB"
     ]
+
+
+def test_a_comprehension_s_variable_is_its_own(tmp_path: pathlib.Path) -> None:
+    """Python keeps a comprehension's variable inside it.
+
+    A comprehension that walked numbers under the names of the function's
+    parameters made every use of those names in the function the numbers it
+    walked, a whole number for each, so a margin of the two readings judged
+    against a printed limit was let through.
+    """
+    source = """
+    _MARGIN_DB = 6.0
+    def correct(signal, background):
+        _ = [0 for signal in (1,) for background in (2,)]
+        margin = signal - background
+        return margin >= _MARGIN_DB
+    """
+    assert _texts(source, tmp_path) == ["margin >= _MARGIN_DB"]
+
+
+def test_a_comprehension_reads_its_own_variable(tmp_path: pathlib.Path) -> None:
+    """Inside the comprehension, its variable is an item of what it walks,
+    whatever the function binds under that name.
+    """
+    source = """
+    _MARGIN_DB = 6.0
+    def correct(signal, background, rows):
+        margin = 1
+        return [margin >= _MARGIN_DB for margin in (signal - background,)]
+    """
+    assert _texts(source, tmp_path) == ["margin >= _MARGIN_DB"]

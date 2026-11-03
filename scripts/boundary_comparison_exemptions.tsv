@@ -106,6 +106,7 @@ environment/sources/wind_turbine.py	WindTurbineTonalityResult.__post_init__	cand
 environment/sources/wind_turbine.py	_validate_narrowband	diffs <= 0.0	the line frequencies must increase: one rounding of two consecutive frequencies keeps the sign of their difference, so it is zero or negative exactly when they are not increasing; a domain guard, not a printed limit
 environment/sources/wind_turbine.py	wind_turbine_tonality	fc < _LOW_FREQ_MIN	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 filters/_weighting_design.py	fit_prototype	best[0] > _FIT_FAILED_DB	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
+filters/design.py	_showfilter	f_min <= f <= f_max	a figure's choice of the standard ticks inside its axis span: a tick on the edge of the span is drawn at the edge or left out, no verdict
 filters/frequencies.py	_infer_band_fraction	float(freq[1] / freq[0]) > _OCTAVE_SPACING_MIN_RATIO	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 fluids/_air.py	air	water >= 1.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 hearing/active_noise_reduction.py	ANRLinearityResult.linear_to_110_db	abs(top - _MAXIMUM_EXTERNAL_LEVEL_DB) <= _STEP_READING_DB	raw top level against 110 dB +- 0,5 dB, exact (recorded with the fix)

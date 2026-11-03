@@ -393,6 +393,51 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return float(_helper(reference, levels))
     """,
+    "a_check_that_hands_back_what_a_nested_function_rebinds_nonlocal": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                nonlocal out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_function_adds_nonlocal": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 0.0
+
+            def inner():
+                nonlocal out
+                for level in levels:
+                    out += level
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_list_a_nested_function_fills": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            def inner():
+                out[0] = levels
+
+            inner()
+            return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_check_that_hands_back_what_a_match_captured": """
         def _helper(reference, levels):
             real_array(reference, "reference")

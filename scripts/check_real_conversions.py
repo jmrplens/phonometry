@@ -112,7 +112,14 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
-from ast_scan import ROOT, block_statements, exempted, python_files, relative
+from ast_scan import (
+    ROOT,
+    block_statements,
+    exempted,
+    own_names,
+    python_files,
+    relative,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -1940,10 +1947,12 @@ class _Returns:
     among them, and a parameter for itself as well. A comprehension's own
     names stand for the items of what it walks while its element is read,
     and for nothing outside it, as Python keeps them; what a nested function
-    or a lambda binds is its own. A value is handed back as the caller gave
-    it bare, in a tuple or a list, on either side of a conditional
-    expression or of an ``and`` or an ``or``, by an item, transposed, in
-    arithmetic with anything (its sign turned or kept, as
+    or a lambda binds is its own, but a name it declares ``nonlocal`` and an
+    item it fills of a name it does not bind are the function's, each value
+    read where the nested function writes it. A value is handed back as the
+    caller gave it bare, in a tuple or a list, on either side of a
+    conditional expression or of an ``and`` or an ``or``, by an item,
+    transposed, in arithmetic with anything (its sign turned or kept, as
     :meth:`_Flow.state` reads it), as the element of a comprehension,
     through a call that keeps its values, and through a shared check
     (:data:`CHECKS`), which returns its first argument with what it refuses
@@ -1957,16 +1966,27 @@ class _Returns:
         module: _Module,
         function: ast.FunctionDef | ast.AsyncFunctionDef,
         parameters: frozenset[str],
+        outer: _Returns | None = None,
     ) -> None:
         self.module = module
+        self.function = function
         self.parameters = parameters
-        self.assigned: dict[str, list[tuple[ast.expr, _Local]]] = {}
+        #: The function this one is nested in, which binds the names it
+        #: reads but does not bind.
+        self.outer = outer
+        #: What each name stands for: the value, where it is read, and the
+        #: function whose names it is read with.
+        self.assigned: dict[str, list[tuple[ast.expr, _Local, _Returns]]] = {}
         self.returns: list[ast.expr] = []
         pending: list[ast.stmt] = list(function.body)
         while pending:
             node = pending.pop()
             if isinstance(node, ast.Return) and node.value is not None:
                 self.returns.append(node.value)
+            elif isinstance(
+                node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+            ):
+                self._nested(node)
             elif isinstance(node, ast.Assign | ast.AnnAssign) and node.value:
                 for target in _assigned(node):
                     for name in [*_targets(target), *_filled(target)]:
@@ -1991,7 +2011,40 @@ class _Returns:
         self, name: str, value: ast.expr, local: _Local = _FUNCTION_SCOPE
     ) -> None:
         """Let *name* stand for *value*, read where *local* holds."""
-        self.assigned.setdefault(name, []).append((value, local))
+        self.assigned.setdefault(name, []).append((value, local, self))
+
+    def binds(self, name: str) -> bool:
+        """Whether *name* is the function's own, as Python scopes it."""
+        return own_names(self.function).binds(name)
+
+    def _nested(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+    ) -> None:
+        """Take in what a function nested in this one writes into a name of a
+        function around it: a name it declares ``nonlocal``, rebound, added
+        to or walked into, and an item it fills of a name it does not bind.
+
+        Each value is read where it is written, with the nested function's
+        names. A class body binds nothing a method reads, and a method's
+        writes go to the function around the class.
+        """
+        if isinstance(node, ast.ClassDef):
+            pending: list[ast.stmt] = list(node.body)
+            while pending:
+                statement = pending.pop()
+                if isinstance(
+                    statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+                ):
+                    self._nested(statement)
+                pending.extend(block_statements(statement))
+            return
+        inner = _Returns(self.module, node, frozenset(), outer=self)
+        for name, values in inner.assigned.items():
+            holder: _Returns | None = self
+            while holder is not None and not holder.binds(name):
+                holder = holder.outer
+            if holder is not None and not inner.binds(name):
+                holder.assigned.setdefault(name, []).extend(values)
 
     def _walruses(self, node: ast.AST, local: _Local) -> None:
         """Bind the target of each ``:=`` in *node* that binds a name of the
@@ -2084,7 +2137,14 @@ class _Returns:
     ) -> tuple[Provenance, list[_Handing]]:
         if name in seen:
             return {}, []
-        found, calls = self._joined(self.assigned.get(name, []), seen | {name})
+        if self.outer is not None and not self.binds(name):
+            return self.outer._name(name, seen)
+        found: Provenance = {}
+        calls: list[_Handing] = []
+        for value, local, reader in self.assigned.get(name, []):
+            provenance, through = reader.sources(value, seen | {name}, local)
+            found = _either(found, provenance)
+            calls.extend(through)
         if name in self.parameters:
             found = _either(found, {name: frozenset()})
         return found, calls

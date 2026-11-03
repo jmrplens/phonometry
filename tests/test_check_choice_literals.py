@@ -1774,6 +1774,55 @@ def test_a_check_in_a_comprehension_runs_only_where_its_clauses_let_it() -> None
     assert _verdict_of(_pace_checked_per_step, "pace") == some_paths
 
 
+def _pace_checked_in_a_later_link(pace: _Pace, low: int) -> bool:
+    return 0 < low < len(require_choice(pace, "pace", _PACES))
+
+
+def _pace_checked_in_the_first_link(pace: _Pace, high: int) -> bool:
+    return len(require_choice(pace, "pace", _PACES)) < high < 10  # noqa: PLR2004
+
+
+def _pace_checked_in_an_assert(pace: _Pace) -> _Pace:
+    assert require_choice(pace, "pace", _PACES)
+    return pace
+
+
+def _paces_checked_in_a_generator_left_undrawn(
+    paces: Sequence[_Pace],
+) -> Sequence[_Pace]:
+    checks = (require_choice(pace, "paces", _PACES) for pace in paces)
+    del checks
+    return paces
+
+
+def _paces_checked_in_a_generator_drawn_whole(
+    paces: Sequence[_Pace],
+) -> tuple[_Pace, ...]:
+    return tuple(require_choice(pace, "paces", _PACES) for pace in paces)
+
+
+def test_a_check_that_may_be_skipped_checks_on_some_paths_only() -> None:
+    """A check in a later link of a chained comparison runs only when the
+    links before it hold, ``python -O`` leaves one in an ``assert`` out, and
+    one in a generator runs only as far as something draws from it; one in
+    the first link, or in a generator a call draws whole, always runs.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    assert _verdict_of(_pace_checked_in_a_later_link, "pace") == some_paths
+    assert _verdict_of(_pace_checked_in_the_first_link, "pace") is None
+    assert _verdict_of(_pace_checked_in_an_assert, "pace") == some_paths
+    assert (
+        _verdict_of(
+            _paces_checked_in_a_generator_left_undrawn, "paces", collection=True
+        )
+        == some_paths
+    )
+    assert (
+        _verdict_of(_paces_checked_in_a_generator_drawn_whole, "paces", collection=True)
+        is None
+    )
+
+
 _TERMINATIONS = (
     "Literal['fast', 'slow'] | Mapping[Literal['left', 'right'], "
     "Literal['fast', 'slow'] | float]"

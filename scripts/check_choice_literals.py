@@ -4233,10 +4233,49 @@ def _taken_safely(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
 _COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
 
 
-def _branches_away(holder: ast.AST, child: ast.AST, subject: _Subject) -> bool:
+#: The calls that draw every item of a generator handed to them; ``any`` and
+#: ``all`` stop at the first item that settles them.
+_DRAWING_WHOLE = frozenset(
+    {"list", "tuple", "set", "frozenset", "dict", "sorted", "sum", "min", "max"}
+)
+
+
+def _drawn_whole(generator: ast.GeneratorExp, parents: dict[ast.AST, ast.AST]) -> bool:
+    """Whether a call draws every item of *generator* where it is written."""
+    call = parents.get(generator)
+    return (
+        isinstance(call, ast.Call)
+        and generator in call.args
+        and (
+            (isinstance(call.func, ast.Name) and call.func.id in _DRAWING_WHOLE)
+            or (isinstance(call.func, ast.Attribute) and call.func.attr == "join")
+        )
+    )
+
+
+def _branches_away(
+    holder: ast.AST,
+    child: ast.AST,
+    subject: _Subject,
+    parents: dict[ast.AST, ast.AST],
+) -> bool:
     """Whether *holder* runs *child* on some paths only, and a path that skips
     it may hold a text the check would refuse (:func:`_taken_safely`).
+
+    A later link of a chained comparison runs only when the links before it
+    hold, ``python -O`` leaves an ``assert`` out, and the element of a
+    generator runs only as far as something draws from it.
     """
+    if isinstance(holder, ast.Compare) and child in holder.comparators[1:]:
+        return True
+    if isinstance(holder, ast.Assert):
+        return True
+    if (
+        isinstance(holder, ast.GeneratorExp)
+        and child not in holder.generators
+        and not _drawn_whole(holder, parents)
+    ):
+        return True
     if isinstance(holder, ast.If) and child is not holder.test:
         # The paths that skip a statement of the body are those on which the
         # test fails, and those that skip one of the else block pass it.
@@ -4289,7 +4328,7 @@ def _on_some_path_only(
     """
     child, holder = node, parents.get(node)
     while holder is not None and holder is not root:
-        if _branches_away(holder, child, subject):
+        if _branches_away(holder, child, subject, parents):
             return True
         child, holder = holder, parents.get(holder)
     return False

@@ -120,6 +120,7 @@ from ast_scan import (
     python_files,
     relative,
 )
+from ast_scan import parameters as with_defaults
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -1915,6 +1916,14 @@ type _Local = Mapping[str, tuple[ast.expr, _Local]]
 #: The scope of the function itself, where no comprehension binds a name.
 _FUNCTION_SCOPE: _Local = {}
 
+#: The names already being read, each by the function (or the module's
+#: table) that holds it, so that a name bound to itself ends the reading.
+type _Seen = frozenset[tuple[int, str]]
+
+#: What a name stands for: each value, where it is read, and the function
+#: whose names it is read with.
+type _Values = list[tuple[ast.expr, _Local, _Returns]]
+
 
 def _captures(pattern: ast.pattern) -> list[str]:
     """The names a ``case`` pattern binds, the whole subject or a part of it."""
@@ -1953,7 +1962,11 @@ class _Returns:
     function declares ``global`` is the module's, not the name of that
     spelling a function around it binds: what any function of the nest
     writes into it, and into an item of a name none of them binds, is what
-    the module's name stands for where one reads it. A value is handed back as the
+    the module's name stands for where one reads it. A parameter of a nested
+    function stands for what each call of its name in the nest hands it, by
+    place or by keyword, read where the call is made, and for its default;
+    what reaches it otherwise (``map(inner, values)``) is not followed. A
+    value is handed back as the
     caller gave it bare, in a tuple or a list, on either side of a
     conditional expression or of an ``and`` or an ``or``, by an item,
     transposed, in arithmetic with anything (its sign turned or kept, as
@@ -1980,12 +1993,21 @@ class _Returns:
         self.outer = outer
         #: What each name stands for: the value, where it is read, and the
         #: function whose names it is read with.
-        self.assigned: dict[str, list[tuple[ast.expr, _Local, _Returns]]] = {}
+        self.assigned: dict[str, _Values] = {}
         #: What each name of the module stands for where a function of the
         #: nest writes it: one table, the outermost function's, for them all.
-        self.module_names: dict[str, list[tuple[ast.expr, _Local, _Returns]]] = (
+        self.module_names: dict[str, _Values] = (
             {} if outer is None else outer.module_names
         )
+        #: Every function of the nest, the outermost first: one list for all.
+        self.nest: list[_Returns] = [] if outer is None else outer.nest
+        self.nest.append(self)
+        #: The functions this one defines, by name, whose parameters hold what
+        #: the calls of the nest hand them (:meth:`_hand_parameters`).
+        self.defined: dict[str, list[_Returns]] = {}
+        #: Each call this function makes by a bare name, with the names a
+        #: comprehension binds where it is made.
+        self.calls: list[tuple[ast.Call, _Local]] = []
         self.declared_global = own_names(function).declared_global
         self.returns: list[ast.expr] = []
         pending: list[ast.stmt] = list(function.body)
@@ -2016,22 +2038,80 @@ class _Returns:
             for child in ast.iter_child_nodes(node):
                 self._walruses(child, _FUNCTION_SCOPE)
             pending.extend(block_statements(node))
+        if outer is None:
+            self._hand_parameters()
+
+    def _hand_parameters(self) -> None:
+        """Let each parameter of a function nested in this one stand for what
+        the calls of the nest hand it, by place or by keyword, and for its
+        default, which the function around reads where the ``def`` is.
+
+        A call reaches the functions of its name that the nearest function
+        binding the name defines; a name declared ``global`` reaches none of
+        them. What a nested function is handed by anything but a call of its
+        name (``map(inner, values)``, a callback) is not followed.
+        """
+        for caller in self.nest:
+            for call, local in caller.calls:
+                name = call.func.id if isinstance(call.func, ast.Name) else ""
+                holder: _Returns | None = caller
+                while not (
+                    holder is None
+                    or holder.binds(name)
+                    or name in holder.declared_global
+                ):
+                    holder = holder.outer
+                if holder is None or name in holder.declared_global:
+                    continue
+                for callee in holder.defined.get(name, []):
+                    callee._handed(call, local, caller)
+
+    def _handed(self, call: ast.Call, local: _Local, caller: _Returns) -> None:
+        """Bind this function's parameters to what *call*, made by *caller*
+        where *local* holds, hands them.
+        """
+        arguments = self.function.args
+        positional = [*arguments.posonlyargs, *arguments.args]
+        for index, value in enumerate(call.args):
+            if isinstance(value, ast.Starred):
+                break
+            if index < len(positional):
+                self._bind(positional[index].arg, value, local, reader=caller)
+            elif arguments.vararg is not None:
+                self._bind(arguments.vararg.arg, value, local, reader=caller)
+        by_keyword = {
+            argument.arg for argument in [*arguments.args, *arguments.kwonlyargs]
+        }
+        for keyword in call.keywords:
+            if keyword.arg in by_keyword:
+                self._bind(keyword.arg, keyword.value, local, reader=caller)
+            elif keyword.arg is not None and arguments.kwarg is not None:
+                self._bind(arguments.kwarg.arg, keyword.value, local, reader=caller)
 
     def _bind(
-        self, name: str, value: ast.expr, local: _Local = _FUNCTION_SCOPE
+        self,
+        name: str,
+        value: ast.expr,
+        local: _Local = _FUNCTION_SCOPE,
+        *,
+        reader: _Returns | None = None,
     ) -> None:
-        """Let *name* stand for *value*, read where *local* holds: the
-        module's name, when the function declares it ``global``.
+        """Let *name* stand for *value*, read where *local* holds with the
+        names of *reader*, this function by default: the module's name, when
+        the function declares it ``global``.
         """
         table = self.module_names if name in self.declared_global else self.assigned
-        table.setdefault(name, []).append((value, local, self))
+        table.setdefault(name, []).append((value, local, reader or self))
 
     def binds(self, name: str) -> bool:
         """Whether *name* is the function's own, as Python scopes it."""
         return own_names(self.function).binds(name)
 
     def _nested(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+        self,
+        node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+        *,
+        method: bool = False,
     ) -> None:
         """Take in what a function nested in this one writes into a name of a
         function around it: a name it declares ``nonlocal``, rebound, added
@@ -2052,10 +2132,16 @@ class _Returns:
                 if isinstance(
                     statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
                 ):
-                    self._nested(statement)
+                    self._nested(statement, method=True)
                 pending.extend(block_statements(statement))
             return
         inner = _Returns(self.module, node, frozenset(), outer=self)
+        if not method:
+            # A method is called through its object, which is not followed.
+            self.defined.setdefault(node.name, []).append(inner)
+            for parameter, default in with_defaults(node):
+                if default is not None:
+                    inner._bind(parameter.arg, default, reader=self)
         for name, values in inner.assigned.items():
             if inner.binds(name):
                 continue
@@ -2078,6 +2164,8 @@ class _Returns:
             return
         if isinstance(node, ast.NamedExpr):
             self._bind(node.target.id, node.value, local)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            self.calls.append((node, local))
         if isinstance(node, _COMPREHENSIONS):
             inner = local
             for generator in node.generators:
@@ -2107,7 +2195,7 @@ class _Returns:
         return found, tuple(calls)
 
     def sources(
-        self, node: ast.expr, seen: frozenset[str], local: _Local
+        self, node: ast.expr, seen: _Seen, local: _Local
     ) -> tuple[Provenance, list[_Handing]]:
         """What *node*, read where *local* holds, may hand back, and the calls
         whose result it may be.
@@ -2144,7 +2232,7 @@ class _Returns:
         return self._joined(((part, local) for part in parts), seen)
 
     def _joined(
-        self, parts: Iterable[tuple[ast.expr, _Local]], seen: frozenset[str]
+        self, parts: Iterable[tuple[ast.expr, _Local]], seen: _Seen
     ) -> tuple[Provenance, list[_Handing]]:
         """What any of *parts*, each read where its scope holds, may hand back."""
         found: Provenance = {}
@@ -2155,25 +2243,26 @@ class _Returns:
             calls.extend(through)
         return found, calls
 
-    def _name(
-        self, name: str, seen: frozenset[str]
-    ) -> tuple[Provenance, list[_Handing]]:
-        if name in seen:
-            return {}, []
+    def _name(self, name: str, seen: _Seen) -> tuple[Provenance, list[_Handing]]:
         if name in self.declared_global:
             values = self.module_names.get(name, [])
+            key = (id(self.module_names), name)
         elif self.binds(name):
             values = self.assigned.get(name, [])
+            key = (id(self), name)
         elif self.outer is not None:
             return self.outer._name(name, seen)
         else:
             # A name no function of the nest binds is the module's, and so
             # is an item this one fills of it.
             values = [*self.assigned.get(name, []), *self.module_names.get(name, [])]
+            key = (id(self.module_names), name)
+        if key in seen:
+            return {}, []
         found: Provenance = {}
         calls: list[_Handing] = []
         for value, local, reader in values:
-            provenance, through = reader.sources(value, seen | {name}, local)
+            provenance, through = reader.sources(value, seen | {key}, local)
             found = _either(found, provenance)
             calls.extend(through)
         if name in self.parameters:
@@ -2181,7 +2270,7 @@ class _Returns:
         return found, calls
 
     def _call(
-        self, call: ast.Call, seen: frozenset[str], local: _Local
+        self, call: ast.Call, seen: _Seen, local: _Local
     ) -> tuple[Provenance, list[_Handing]]:
         func = call.func
         if isinstance(func, ast.Name) and func.id in CHECKS and call.args:

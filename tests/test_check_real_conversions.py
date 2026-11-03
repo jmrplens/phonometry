@@ -438,6 +438,97 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return float(_helper(reference, levels))
     """,
+    "a_check_that_hands_back_what_a_nested_function_s_parameter_is_handed": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(levels)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_namesake_parameter_is_handed": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(levels):
+                nonlocal out
+                out = levels
+
+            inner(levels)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_function_s_keyword_is_handed": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            def inner(scale, x=0.0):
+                out[0] = x * scale
+
+            inner(2.0, x=levels)
+            return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_nested_function_s_default": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x=levels):
+                nonlocal out
+                out = x
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_sibling_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            def outer_call():
+                inner(levels)
+
+            outer_call()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_comprehension_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            def inner(x):
+                out[0] = x
+
+            _ = [inner(level) for level in levels]
+            return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_check_that_hands_back_a_module_name_a_nested_function_binds": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -1020,6 +1111,36 @@ _PLANTED_ANSWERED = {
             real_array(reference, "reference")
             out = 1.0
             _ = lambda: [out for out in levels]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_parameter_handed_a_computed_value": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(2.0)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_own_parameter_named_like_the_helper_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(levels):
+                nonlocal out
+                out = levels
+
+            inner(3.0)
             return out
 
         def f(reference, levels):

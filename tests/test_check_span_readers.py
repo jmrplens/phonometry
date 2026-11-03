@@ -238,3 +238,88 @@ def test_a_pattern_of_too_many_strings_is_refused_unread(
     path.write_text(textwrap.dedent(source), encoding="utf-8")
     found = csr.findings(path)
     assert [(f.function, f.unread) for f in found] == [("spans", True)]
+
+
+#: Patterns a script builds from what a choice or a loop binds: every string
+#: such a name or expression can be is read, so a reader on one side of the
+#: choice, or among the items of the loop, is found.
+_CHOSEN_READERS = {
+    "a_name_bound_to_a_conditional_expression": """
+        import re
+
+        TICK = "`"
+
+        def spans(text, flag):
+            inner = r"\\w+" if flag else "[^`]+"
+            return re.findall(f"{TICK}{inner}{TICK}", text)
+    """,
+    "a_conditional_expression_handed_to_re": """
+        import re
+
+        def spans(text, flag):
+            return re.findall(r"`\\w+`" if flag else "`[^`]+`", text)
+    """,
+    "an_or_of_two_patterns": """
+        import re
+
+        def spans(text, pattern):
+            return re.findall(pattern or "`[^`]+`", text)
+    """,
+    "a_name_a_loop_binds_to_the_items_of_a_tuple": """
+        import re
+
+        def spans(text):
+            for body in (r"\\w+", "[^`]+"):
+                re.findall(f"`{body}`", text)
+    """,
+    "a_name_built_with_an_added_piece": """
+        import re
+
+        def spans(text):
+            pattern = "`"
+            pattern += "[^`]+`"
+            return re.findall(pattern, text)
+    """,
+    "a_name_bound_in_the_test_of_an_if": """
+        import re
+
+        def spans(text):
+            if (pattern := "`[^`]+`") and text:
+                return re.findall(pattern, text)
+            return []
+    """,
+    "a_name_a_comprehension_binds_to_the_items_of_a_list": """
+        import re
+
+        def spans(text):
+            return [re.findall(f"`{body}`", text) for body in [r"\\w+", "[^`]+"]]
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_CHOSEN_READERS))
+def test_a_reader_built_from_a_choice_or_a_loop_is_found(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """A conditional expression and an ``or`` folded to no string, and a name a
+    loop bound to the items of a tuple stood for none, so each reader passed.
+    """
+    assert _places(tmp_path, _CHOSEN_READERS[shape]) == ["spans"]
+
+
+def test_a_choice_of_more_strings_than_the_bound_is_refused_unread(
+    tmp_path: pathlib.Path,
+) -> None:
+    letters = ", ".join(repr(c) for c in "abcdefghijklmnopqrstuvwxyz")
+    source = f"""
+        import re
+
+        A = ({letters})
+
+        def spans(text, flag):
+            return re.findall(f"{{A}}{{A}}" if flag else f"{{A}}{{A}}{{A}}", text)
+    """
+    path = tmp_path / "reader.py"
+    path.write_text(textwrap.dedent(source), encoding="utf-8")
+    found = csr.findings(path)
+    assert [(f.function, f.unread) for f in found] == [("spans", True)]

@@ -29,10 +29,12 @@ reads a span by hand:
   again by a backreference, the shape of a reader that pairs the runs itself.
 
 A pattern is read the way Python builds it: written out, joined with ``+`` or
-in an f-string, or behind a name bound to one in the function, an enclosing
-function or the module. A name bound to several strings (in two branches, or
-to the items of a tuple) stands for each of them, and a pattern built from
-such names is read as every string it can be, up to :data:`MOST_PATTERNS`;
+in an f-string, chosen (``a if flag else b``, ``a or b``), or behind a name
+bound to one in the function, an enclosing function or the module. A name
+bound to several strings (in two branches, to the items of a tuple, by
+``+=``, or by a loop or a comprehension to each item it walks) stands for
+each of them, and a pattern built from such names is read as every string it
+can be, up to :data:`MOST_PATTERNS`;
 one that can be more is refused unread, since reading some of them could
 pass a reader by hand. A backtick right after a colon opens a role of
 reStructuredText (``:math:`x```), which Markdown does not have, and is not
@@ -203,6 +205,20 @@ def _combined(parts: Iterable[set[str]]) -> set[str]:
     return combined
 
 
+def _either(parts: Iterable[set[str]]) -> set[str]:
+    """Every string any of the parts stands for: the sides of a conditional
+    expression, or of an ``and`` or an ``or``.
+
+    :raises UnreadPatternError: past :data:`MOST_PATTERNS` strings.
+    """
+    either: set[str] = set()
+    for part in parts:
+        either |= part
+        if len(either) > MOST_PATTERNS:
+            raise UnreadPatternError
+    return either
+
+
 @dataclass
 class _Strings:
     """The strings each name of a script stands for, scope by scope.
@@ -252,6 +268,12 @@ class _Strings:
             )
         if isinstance(node, ast.JoinedStr):
             return _combined(self._pieces(node, scope))
+        if isinstance(node, ast.IfExp):
+            return _either([self.fold(node.body, scope), self.fold(node.orelse, scope)])
+        if isinstance(node, ast.BoolOp):
+            return _either([self.fold(value, scope) for value in node.values])
+        if isinstance(node, ast.NamedExpr):
+            return self.fold(node.value, scope)
         return set()
 
     def _pieces(self, node: ast.JoinedStr, scope: str) -> Iterator[set[str]]:
@@ -268,17 +290,32 @@ class _Strings:
 
 
 def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr]]:
-    """Each name a node binds to an expression, the items of a tuple included."""
+    """Each name a node binds to an expression, the items of a tuple included.
+
+    An assignment binds its value, ``x += y`` what ``x + y`` makes, and a
+    loop or a comprehension each item of what it walks: the items of a tuple,
+    a list or a set written out, or the strings a name it walks stands for.
+    """
+    value: ast.expr | None
     if isinstance(node, ast.Assign):
         targets: list[ast.expr] = list(node.targets)
-        value: ast.expr | None = node.value
-    elif isinstance(node, ast.AnnAssign):
+        value = node.value
+    elif isinstance(node, ast.AnnAssign | ast.NamedExpr):
         targets, value = [node.target], node.value
+    elif isinstance(node, ast.AugAssign) and isinstance(node.op, ast.Add):
+        targets = [node.target]
+        value = ast.BinOp(left=node.target, op=ast.Add(), right=node.value)
+    elif isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
+        targets, value = [node.target], node.iter
     else:
         return
     for target in targets:
         if isinstance(target, ast.Name) and value is not None:
-            items = value.elts if isinstance(value, ast.Tuple | ast.List) else [value]
+            items = (
+                value.elts
+                if isinstance(value, ast.Tuple | ast.List | ast.Set)
+                else [value]
+            )
             yield from ((target.id, item) for item in items)
 
 

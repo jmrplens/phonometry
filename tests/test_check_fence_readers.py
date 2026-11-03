@@ -21,6 +21,8 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -428,3 +430,52 @@ def test_a_pattern_of_too_many_strings_is_refused_unread(
     assert _shapes(tmp_path, source) == [
         ("opens", f"a pattern of more than {cfr.MAX_VALUES} strings, not read")
     ]
+
+
+#: A marker a choice stands for: every string a conditional expression or an
+#: ``or`` can be is read, as the two branches of an ``if`` are.
+_CHOSEN_MARKERS = {
+    "a_name_bound_to_a_conditional_expression": """
+        def opens(line, tilde):
+            marker = "~~~" if tilde else "```"
+            return line.startswith(marker)
+    """,
+    "a_conditional_expression_tested_at_once": """
+        def opens(line, tilde):
+            return line.startswith("~~~" if tilde else "```")
+    """,
+    "a_name_built_with_an_added_piece": """
+        def opens(line):
+            marker = ""
+            marker += "```"
+            return line.startswith(marker)
+    """,
+    "an_or_of_a_marker": """
+        def opens(line, marker):
+            return line.startswith(marker or "```")
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_CHOSEN_MARKERS))
+def test_a_marker_behind_a_choice_is_refused(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """A conditional expression and an ``or`` folded to no string, so a test
+    for a marker on either side passed, where the ``if`` form was found.
+    """
+    assert _shapes(tmp_path, _CHOSEN_MARKERS[shape]) == [
+        ("opens", "a test for a marker")
+    ]
+
+
+def test_a_pattern_behind_a_choice_is_refused(tmp_path: pathlib.Path) -> None:
+    assert _shapes(
+        tmp_path,
+        """
+        import re
+
+        def opens(line, tilde):
+            return re.match(r"~{3}" if tilde else r"`{3}", line)
+        """,
+    ) == [("opens", "a pattern for a marker")]

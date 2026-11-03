@@ -29,10 +29,11 @@ itself, and refuses three shapes a hand-rolled reader cannot avoid:
   (``[`~]{3,}``).
 
 A string is read the way Python builds it: written out, repeated (``"`" * 3``),
-joined with ``+`` or in an f-string, or behind a name bound to one in the
-function, an enclosing function or the module, a loop over a tuple of them
-included. A join is read as every string its pieces can make, up to
-:data:`MAX_VALUES`; one that can make more is refused unread, since reading
+joined with ``+`` or in an f-string, chosen (``a if flag else b``, ``a or
+b``), or behind a name bound to one in the function, an enclosing function or
+the module, a loop over a tuple of them included. A join or a choice is read
+as every string it can make, up to :data:`MAX_VALUES`; one that can make more
+is refused unread, since reading
 some of them could pass a reader by hand. A piece spliced into a larger string counts when every alternative
 it offers looks for a marker. The markdown hazard check splices in a list of
 everything that opens a block, a fence among them, to find a wrapped line that
@@ -275,7 +276,27 @@ def _fold(node: ast.expr, lookup: Lookup) -> frozenset[str]:
             )
             for value in node.values
         )
+    if isinstance(node, ast.IfExp):
+        return _either([_fold(node.body, lookup), _fold(node.orelse, lookup)])
+    if isinstance(node, ast.BoolOp):
+        return _either([_fold(value, lookup) for value in node.values])
+    if isinstance(node, ast.NamedExpr):
+        return _fold(node.value, lookup)
     return frozenset()
+
+
+def _either(parts: Iterable[frozenset[str]]) -> frozenset[str]:
+    """Every string any of the parts stands for: the sides of a conditional
+    expression, or of an ``and`` or an ``or``.
+
+    :raises UnreadPatternError: past :data:`MAX_VALUES` strings.
+    """
+    either: frozenset[str] = frozenset()
+    for part in parts:
+        either |= part
+        if len(either) > MAX_VALUES:
+            raise UnreadPatternError
+    return either
 
 
 def _values(node: ast.expr, lookup: Lookup) -> frozenset[str]:
@@ -288,14 +309,19 @@ def _values(node: ast.expr, lookup: Lookup) -> frozenset[str]:
 def _bound(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
     """The names a node binds, each with the expression it binds or ``None``.
 
-    An assignment binds its value, a loop each item of what it walks, and a
-    function its parameters, to what nothing here can know.
+    An assignment binds its value, ``x += y`` what ``x + y`` makes, a loop
+    each item of what it walks, and a function its parameters, to what
+    nothing here can know.
     """
     if isinstance(node, ast.Assign):
         yield from ((t.id, node.value) for t in node.targets if isinstance(t, ast.Name))
     elif isinstance(node, ast.AnnAssign | ast.NamedExpr):
         if isinstance(node.target, ast.Name) and node.value is not None:
             yield node.target.id, node.value
+    elif isinstance(node, ast.AugAssign) and isinstance(node.op, ast.Add):
+        if isinstance(node.target, ast.Name):
+            added = ast.BinOp(left=node.target, op=ast.Add(), right=node.value)
+            yield node.target.id, added
     elif isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
         if isinstance(node.target, ast.Name):
             yield node.target.id, node.iter

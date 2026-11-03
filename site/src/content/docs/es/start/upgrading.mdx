@@ -2835,7 +2835,8 @@ demasiado larga para su página se construía en el nombre y se borraba después
 y con ella la ficha anterior. En la 4.0, si en el nombre no hay nada o hay un
 fichero regular, cada uno escribe un fichero oculto a su lado y lo renombra
 sobre el nombre cuando está entero, con los bits de permiso del fichero
-antiguo. El fichero nuevo es del escritor: toma su propietario y su grupo, y no
+antiguo, y solo su propietario puede leerlo mientras se escribe sobre un
+fichero. El fichero nuevo es del escritor: toma su propietario y su grupo, y no
 conserva ni las listas de control de acceso ni los atributos extendidos del
 fichero antiguo. Su nombre oculto se recorta a lo que admite el directorio, así
 que un nombre tan largo como el directorio permite se escribe como cualquier

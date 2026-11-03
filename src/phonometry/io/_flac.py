@@ -36,7 +36,7 @@ import shutil
 import struct
 from pathlib import Path
 
-from .._internal.json_input import beside_name, escaped
+from .._internal.json_input import beside_name, escaped, make_new
 from ._audio_file import open_audio
 from ._chunks import _BEXT_CHUNK, BroadcastMetadata, _parse_bext
 
@@ -154,7 +154,13 @@ def embed_flac_bext(
     source = Path(path)
     staging = beside_name(source, ".phonometry-tmp")
     try:
+        # Made private before the recording is copied in, and given the
+        # bits of the file it replaces only once it is whole: a copy made
+        # with the umask's bits could be opened, and read, by anyone the
+        # file at path keeps out.
+        os.close(make_new(staging, private=True))
         _copy_with_block(source, staging, chunk, named=escaped(os.fspath(shown)))
+        shutil.copymode(source, staging)
         staging.replace(source)
     except BaseException:
         # A refusal, a full disk, an interrupt or a refused rename: the file

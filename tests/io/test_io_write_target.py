@@ -281,3 +281,167 @@ def test_the_name_beside_a_target_fits_its_directory_and_is_new(
     assert first != second
     short = json_input.beside_name(tmp_path / "meas.wav", ".tmp")
     assert short.name.startswith(".meas.wav.")
+
+
+@pytest.fixture
+def usual_umask() -> Iterator[None]:
+    """The umask most systems start a user with: new files readable by everyone."""
+    kept = os.umask(0o022)
+    try:
+        yield
+    finally:
+        os.umask(kept)
+
+
+def _hidden_modes(directory: Path) -> dict[str, int]:
+    """The permission bits of each hidden file in *directory*, by name."""
+    return {
+        entry.name: stat.S_IMODE(entry.stat().st_mode)
+        for entry in directory.iterdir()
+        if entry.name.startswith(".")
+    }
+
+
+@_POSIX
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize(
+    ("before", "after"), [(0o600, 0o600), (0o640, 0o640), (None, 0o644)]
+)
+def test_the_file_beside_a_private_one_is_private_while_it_is_written(
+    before: int | None, after: int, tmp_path: Path
+) -> None:
+    """The writer made the file beside the target with the umask's bits, 0644.
+
+    The old file's bits were given to it only once the writer was done, so a
+    recording kept private could be read by anyone, in its new file, while it
+    was written. The file is now made before the writer opens it, readable and
+    writable by its owner alone where it replaces a file, and with the umask's
+    bits where nothing is replaced, as the new file keeps them.
+    """
+    path = tmp_path / "meas.wav"
+    if before is not None:
+        path.write_bytes(OLD_BYTES)
+        path.chmod(before)
+    with json_input.writing_beside(path) as file:
+        with file.open("wb") as handle:
+            handle.write(b"the new recording")
+        while_written = stat.S_IMODE(file.stat().st_mode)
+    assert while_written == (0o600 if before is not None else 0o644)
+    assert stat.S_IMODE(path.stat().st_mode) == after
+    assert path.read_bytes() == b"the new recording"
+    assert [entry.name for entry in tmp_path.iterdir()] == ["meas.wav"]
+
+
+def _write_double(path: Path) -> None:
+    write(path, SAMPLES, FS, subtype="DOUBLE")
+
+
+def _write_pcm24_whole(path: Path) -> None:
+    write(path, SAMPLES, FS, subtype="PCM_24")
+
+
+def _write_flac_with_bext(path: Path) -> None:
+    write(path, SAMPLES, FS, bext=fresh_metadata())
+
+
+def _convert_to(path: Path) -> None:
+    convert(path.with_name("source.wav"), path)
+
+
+#: Each writer of a recording at a caller's name: SciPy's WAV, the in-house
+#: packer, python-soundfile's FLAC with a bext copied once more beside it to
+#: put the chunk in, and a conversion to FLAC, which copies it the same way
+#: (from a source the test writes first).
+_PRIVATE_WRITES: dict[str, tuple[str, Callable[[Path], None], bool]] = {
+    "write WAV": ("meas.wav", _write_double, False),
+    "write PCM_24": ("meas.wav", _write_pcm24_whole, False),
+    "write FLAC with a bext": ("meas.flac", _write_flac_with_bext, True),
+    "convert to FLAC": ("meas.flac", _convert_to, True),
+}
+
+
+@_POSIX
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize("writer", sorted(_PRIVATE_WRITES))
+def test_a_private_recording_is_never_written_where_others_can_read_it(
+    writer: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Every file the new recording passes through beside the old is private.
+
+    The bits of every hidden file are read when the writer is done, before
+    the old file's bits are given to the new one: a FLAC with a bext is
+    copied once more beside the first new file to put the chunk in, and that
+    copy, made with the umask's bits, took the first one's place.
+    """
+    name, write_to, needs_soundfile = _PRIVATE_WRITES[writer]
+    if needs_soundfile and not HAVE_SOUNDFILE:
+        pytest.skip("the [audio] extra (soundfile) is not installed")
+    path = tmp_path / name
+    path.write_bytes(OLD_BYTES)
+    path.chmod(0o600)
+    if writer.startswith("convert"):
+        write(tmp_path / "source.wav", SAMPLES, FS, subtype="PCM_24")
+    seen: list[dict[str, int]] = []
+    flushed = json_input._flushed
+
+    def looked_at(written: Path, mode: int | None) -> None:
+        seen.append(_hidden_modes(tmp_path))
+        flushed(written, mode)
+
+    monkeypatch.setattr(json_input, "_flushed", looked_at)
+    write_to(path)
+    assert len(seen) == 1
+    assert len(seen[0]) == 1
+    assert list(seen[0].values()) == [0o600]
+    assert stat.S_IMODE(path.stat().st_mode) == 0o600
+    assert read(path).data.shape[-1] == SAMPLES.size
+
+
+@_POSIX
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize(
+    ("before", "after"), [(0o600, 0o600), (0o644, 0o644), (None, 0o644)]
+)
+def test_bytes_put_beside_a_private_file_are_never_readable_by_others(
+    before: int | None, after: int, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """write_beside wrote the bytes into a file made with the umask's bits.
+
+    The old file's bits came after the bytes, so a sidecar or a catalogue
+    kept private could be opened by anyone in between, and read through that
+    open file once the bytes were there. The bits are read just before the
+    old file's are given, once the bytes are written.
+    """
+    target = tmp_path / "meas.wav.json"
+    if before is not None:
+        target.write_bytes(OLD_BYTES)
+        target.chmod(before)
+    seen: list[int] = []
+    fchmod = os.fchmod
+
+    def looked_at(descriptor: int, mode: int) -> None:
+        seen.append(stat.S_IMODE(os.fstat(descriptor).st_mode))
+        fchmod(descriptor, mode)
+
+    monkeypatch.setattr(os, "fchmod", looked_at)
+    json_input.write_beside(target, b"the new sidecar")
+    monkeypatch.undo()
+    assert seen == ([0o600] if before is not None else [])
+    assert stat.S_IMODE(target.stat().st_mode) == after
+    assert target.read_bytes() == b"the new sidecar"
+
+
+def test_a_writer_left_at_the_yield_leaves_no_file_beside(tmp_path: Path) -> None:
+    """A writer whose generator is closed at the yield removes the new file.
+
+    Neither resumed nor handed an error: the generator is closed as Python
+    closes any it drops, and the file made beside the target goes with it.
+    """
+    path = tmp_path / "meas.wav"
+    path.write_bytes(OLD_BYTES)
+    manager = json_input.writing_beside(path)
+    beside = manager.__enter__()
+    beside.write_bytes(b"half a recording")
+    manager.gen.close()
+    assert [entry.name for entry in tmp_path.iterdir()] == ["meas.wav"]
+    assert path.read_bytes() == OLD_BYTES

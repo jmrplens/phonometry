@@ -2367,22 +2367,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   now, writes the PDF where the path names, and returns that path as a text.
 - **A recording, a fiche or a response plot stopped half way leaves the file
   that was at its name.** `io.write`, the target of `io.convert`, every
-  `.report()` and the response plot of a filter bank wrote straight at the
-  name they were given, so an error or an interrupt half way left a file begun
+  `.report()` and the response plot of a filter bank wrote straight at the name
+  they were given, so an error or an interrupt half way left a file begun
   there, over the recording or the fiche of an earlier run; a fiche too long
   for its page was built at the name and removed again, the earlier fiche with
   it. With nothing at the name, or a regular file, the new file is written
   beside it and renamed over it once whole, keeping the old file's permission
-  bits; a hard link to the old file keeps the old bytes, the new file takes the
-  writer's owner and group and none of the old file's access control lists or
-  extended attributes, and the directory must take a new file. The hidden name
-  is cut to what the directory takes, as are the copy a FLAC `bext` is written
-  through and the partial file of a video, so a name as long as the directory
-  allows is written as any other, and `io.read` takes a recording of such a
-  name, whose sidecar's name no directory holds, as one with no sidecar. A
-  link, a pipe, a device or a directory at the name is opened there as Python
-  opens a name, as before: a recording streamed into a pipe on purpose still
-  goes into the pipe.
+  bits, and is readable by its owner alone while it is written over a file, as
+  is the copy a FLAC `bext` is written through, so a recording kept private is
+  never written where others can read it (a sidecar or a catalogue written over
+  a file is held the same way); a hard link to the old file keeps the old
+  bytes, the new file takes the writer's owner and group and none of the old
+  file's access control lists or extended attributes, and the directory must
+  take a new file. The hidden name is cut to what the directory takes, as are
+  the copy a FLAC `bext` is written through and the partial file of a video, so
+  a name as long as the directory allows is written as any other, and `io.read`
+  takes a recording of such a name, whose sidecar's name no directory holds, as
+  one with no sidecar. A link, a pipe, a device or a directory at the name is
+  opened there as Python opens a name, as before: a recording streamed into a
+  pipe on purpose still goes into the pipe.
 - **`io.write` refuses a `bext` too long for a FLAC file before it writes
   anything.** A payload past the 16 MiB a FLAC metadata block holds was
   measured only once python-soundfile had written the audio at the path, so

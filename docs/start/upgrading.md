@@ -2749,13 +2749,14 @@ an interrupt half way left a file begun there, over the recording or the fiche
 of an earlier run, and a fiche too long for its page was built at the name and
 removed again, the earlier fiche with it. In 4.0, with nothing at the name or
 a regular file, each writes a hidden file beside it and renames it over the
-name once it is whole, with the old file's permission bits. The new file is
-the writer's own: it takes the writer's owner and group, and keeps neither the
-access control lists nor the extended attributes of the old file. Its hidden
-name is cut to what the directory takes, so a name as long as the directory
-allows is written as any other. A link, a pipe, a device or a directory at the
-name is opened there as before, so a recording streamed into a pipe on purpose
-still goes into the pipe.
+name once it is whole, with the old file's permission bits, and readable by
+its owner alone while it is written over a file. The new file is the writer's
+own: it takes the writer's owner and group, and keeps neither the access
+control lists nor the extended attributes of the old file. Its hidden name is
+cut to what the directory takes, so a name as long as the directory allows is
+written as any other. A link, a pipe, a device or a directory at the name is
+opened there as before, so a recording streamed into a pipe on purpose still
+goes into the pipe.
 
 | Passed | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- | --- |

@@ -473,9 +473,10 @@ def write_sidecar(
     sidecar is written to a new file beside it and renamed into place, so a
     reader finds the old sidecar or the new one whole and the name itself is
     never opened for writing; a link at the name is followed to the file it
-    names. The file is replaced, not written into: the new one keeps the
-    permission bits of the old, and a hard link to the old file keeps the
-    old calibration (on Windows without a read-only flag the old file had,
+    names. The file is replaced, not written into: the new one is readable
+    by its owner alone until its bytes are in, then keeps the permission
+    bits of the old, and a hard link to the old file keeps the old
+    calibration (on Windows without a read-only flag the old file had,
     since the flag belongs to the file and is cleared for the rename). What
     it writes, :func:`read_sidecar` reads back, and
     :func:`~phonometry.io.read` reads the audio beside it: fields whose

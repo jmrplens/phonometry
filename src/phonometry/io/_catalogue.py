@@ -2652,7 +2652,8 @@ def write_catalogue(
     Each file is written beside its final name and renamed into place, so a
     reader never finds half of one; a CSV file and its header are two files,
     written one after the other, and the pair is not written as one. A file
-    it replaces keeps its permission bits, and a hard link to the old file
+    it replaces keeps its permission bits (the new one is readable by its
+    owner alone until its bytes are in), and a hard link to the old file
     keeps the old content (on Windows without a read-only flag the old file
     had, since the flag belongs to the file and is cleared for the rename).
     Without *overwrite*, a file at the name is kept, one another program

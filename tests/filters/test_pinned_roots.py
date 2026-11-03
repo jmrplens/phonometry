@@ -558,11 +558,56 @@ def test_the_root_finder_reaches_no_numerical_library() -> None:
         node.module or "" for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
     }  # fmt: skip
     assert imported <= _EXACT_IMPORTS, sorted(imported - _EXACT_IMPORTS)
-    from_math = {
-        node.attr
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Attribute)
-        and isinstance(node.value, ast.Name)
-        and node.value.id == "math"
-    }
-    assert from_math <= _EXACT_MATH, sorted(from_math - _EXACT_MATH)
+    assert _inexact_math(tree) == []
+
+
+def _inexact_math(tree: ast.AST) -> list[str]:
+    """Each reading of :mod:`math` in *tree* that is not one of its exact steps.
+
+    ``math.name`` for a name outside :data:`_EXACT_MATH`, and an import that
+    binds :mod:`math`, or one of its routines, where that check cannot read
+    it: ``import math as m`` and ``from math import exp`` would hand
+    ``m.exp`` and a bare ``exp`` to the C library unseen.
+    """
+    found: list[str] = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "math"
+            and node.attr not in _EXACT_MATH
+        ):
+            found.append(f"{node.lineno}: math.{node.attr}")
+        elif isinstance(node, ast.Import):
+            found.extend(
+                f"{node.lineno}: import math as {alias.asname}"
+                for alias in node.names
+                if alias.name == "math" and alias.asname not in {None, "math"}
+            )
+        elif isinstance(node, ast.ImportFrom) and node.module == "math":
+            found.extend(
+                f"{node.lineno}: from math import {alias.name}"
+                for alias in node.names
+                if alias.name not in _EXACT_MATH
+            )
+    return sorted(found)
+
+
+def test_the_root_finder_check_sees_math_under_another_name() -> None:
+    """``math`` read through an attribute, renamed, or by a routine's bare name."""
+    source = textwrap.dedent(
+        """
+        import math
+        import math as m
+        from math import exp, isqrt
+        from math import *
+        def f(x):
+            return math.isqrt(x), math.nextafter(x, 0.0), math.log(x), m.exp(x)
+        """
+    )
+    assert _inexact_math(ast.parse(source)) == [
+        "3: import math as m",
+        "4: from math import exp",
+        "5: from math import *",
+        "7: math.log",
+    ]

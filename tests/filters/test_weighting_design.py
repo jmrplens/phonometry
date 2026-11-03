@@ -16,6 +16,7 @@ three things that makes it a design rather than an optimiser's leftovers:
 from __future__ import annotations
 
 import ast
+import builtins
 import hashlib
 import inspect
 import itertools
@@ -34,6 +35,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import numpy._core.numeric as numpy_numeric
 import pytest
+import scipy
 from libm_identity import TUNABLES, WITHOUT_FMA, runs_the_pinned_routines
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
@@ -72,7 +74,7 @@ from phonometry.filters.weighting import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable
 
 #: Sample rates the accuracy table below is measured at: the two broadcast
 #: families (32/44.1/48 kHz), their doubles, and 192 kHz.
@@ -1902,10 +1904,12 @@ _MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite", "prod"})
 #: numpy names that are a transcendental, a power, or a magnitude that may be
 #: complex, each of which numpy computes with a dispatched kernel or the C
 #: library, and the polynomial, dot-product and linear-algebra routines that
-#: hand their sums of products to the BLAS or to LAPACK, and the sorts and
-#: partitions, whose default kind is not stable and orders ties as the
-#: processor's kernel does. A real magnitude is ``np.fabs``, which IEEE 754
-#: fixes and which refuses a complex value.
+#: hand their sums of products to the BLAS or to LAPACK, the polynomial
+#: package among them (its ``polyroots`` is LAPACK's eigenvalues), and the
+#: sorts and partitions, whose default kind is not stable and orders ties as
+#: the processor's kernel does. A real magnitude is ``np.fabs``, which IEEE 754
+#: fixes and which refuses a complex value. The names are refused at any depth
+#: below numpy, ``np.ma.abs`` as much as ``np.abs``.
 _NUMPY_FORBIDDEN = frozenset(
     {
         "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "power",
@@ -1916,6 +1920,7 @@ _NUMPY_FORBIDDEN = frozenset(
         "polyadd", "polysub", "polydiv", "convolve", "correlate", "dot",
         "vdot", "inner", "matmul", "einsum", "tensordot", "linalg", "sort",
         "argsort", "lexsort", "partition", "argpartition", "sort_complex",
+        "polynomial",
     }
 )  # fmt: skip
 
@@ -1927,7 +1932,8 @@ _ARRAY_SORTS = frozenset({"argsort", "argpartition", "partition"})
 #: SciPy's filter routines that evaluate or transform with complex products
 #: and quotients, which numpy computes in a loop a compiler may fuse, and the
 #: conversions that form polynomials with ``numpy.convolve`` (the BLAS) or
-#: find roots with ``numpy.roots`` (LAPACK).
+#: find roots with ``numpy.roots`` (LAPACK), refused at any depth below
+#: SciPy's filters.
 _SIGNAL_COMPLEX = frozenset(
     {
         "bilinear", "bilinear_zpk", "freqs", "freqs_zpk", "freqz", "freqz_zpk",
@@ -1941,6 +1947,10 @@ _SIGNAL_OWNERS = frozenset({"signal", "scipy.signal"})
 
 #: The names numpy is reached by: its alias and its own.
 _NUMPY_OWNERS = frozenset({"np", "numpy"})
+
+#: The names numpy and SciPy are reached by, below which the rules read them
+#: at any depth.
+_LIBRARY_OWNERS = _NUMPY_OWNERS | _SIGNAL_OWNERS | {"scipy"}
 
 #: Modules every name of which is a platform's answer: complex math, SciPy's
 #: special functions, numpy's complex-domain math and the linear algebra of
@@ -1967,55 +1977,167 @@ _IMPORT_NAMES: dict[str, frozenset[str]] = {
     "operator": frozenset({"operator"}),
     "scipy": frozenset({"scipy"}),
     "scipy.signal": _SIGNAL_OWNERS,
+    "builtins": frozenset({"builtins"}),
 }
+
+#: The module each name the attribute rules read a module by stands for.
+_MODULE_NAMES = {
+    "math": "math",
+    "np": "numpy",
+    "numpy": "numpy",
+    "operator": "operator",
+    "scipy": "scipy",
+    "signal": "scipy.signal",
+    "cmath": "cmath",
+    "special": "scipy.special",
+    "linalg": "scipy.linalg",
+}
+
+#: The names the attribute rules read a module by, each with the module it
+#: is: numpy and SciPy are read at any depth below them, the others only at
+#: the top.
+_ROOT_MODULES: dict[str, types.ModuleType] = {
+    "np": np,
+    "numpy": np,
+    "scipy": scipy,
+    "signal": sg,
+    "math": math,
+    "operator": operator,
+    "builtins": builtins,
+    "__builtins__": builtins,
+}
+
+#: The modules that import a module by a string no rule reads.
+_DYNAMIC_IMPORTS = frozenset({"importlib"})
+
+#: The builtins that compute with the platform's arithmetic, or import a
+#: module by a string no rule reads, refused called, as values or read from
+#: :mod:`builtins`.
+_BUILTINS_FORBIDDEN = frozenset({"abs", "pow", "__import__"})
+
+
+def _below(owner: str, roots: Iterable[str]) -> bool:
+    """Whether *owner* is one of *roots* or an attribute path below one of them."""
+    return any(owner == root or owner.startswith(f"{root}.") for root in roots)
+
+
+def _is_module(path: str) -> bool:
+    """Whether the dotted *path*, read from a name in :data:`_ROOT_MODULES`, is a module.
+
+    ``np.ma`` and ``signal._filter_design`` are, ``np.float64`` and
+    ``scipy.signal.zpk2sos`` are not. Read off the modules this process
+    imported, which are the ones the design runs with.
+    """
+    root, *names = path.split(".")
+    found: object = _ROOT_MODULES.get(root)
+    with warnings.catch_warnings():
+        # numpy.core is a deprecated spelling of numpy._core, and says so when read.
+        warnings.simplefilter("ignore", DeprecationWarning)
+        for name in names:
+            found = getattr(found, name, None)
+    return isinstance(found, types.ModuleType)
 
 
 def _attribute_finding(owner: str, name: str) -> str | None:
-    """What ``owner.name`` hands the platform, or ``None`` if nothing."""
+    """What ``owner.name`` hands the platform, or ``None`` if nothing.
+
+    A forbidden routine of numpy or of SciPy's filters at any depth below
+    them, a private module or name of numpy or SciPy (``np._core``,
+    ``signal._filter_design``), whose routines no rule lists, and a module
+    the rules read reached as another module's attribute (``wd.np``,
+    ``fractions.math``), which no rule reads below it.
+    """
     if owner == "math":
         return None if name in _MATH_ALLOWED else f"math.{name}"
+    library = _below(owner, _LIBRARY_OWNERS)
     forbidden = (
-        (owner in _NUMPY_OWNERS and name in _NUMPY_FORBIDDEN)
+        (_below(owner, _NUMPY_OWNERS) and name in _NUMPY_FORBIDDEN)
+        or (library and name.startswith("_"))
+        or (name in _MODULE_NAMES and not library)
         or owner in _FORBIDDEN_MODULES
         or owner.startswith("scipy.special.")
         or (owner == "operator" and name in _OPERATOR_FORBIDDEN)
-        or (owner in _SIGNAL_OWNERS and name in _SIGNAL_COMPLEX)
+        or (owner == "sys" and name == "modules")
+        or (owner in {"builtins", "__builtins__"} and name in _BUILTINS_FORBIDDEN)
+        or (_below(owner, _SIGNAL_OWNERS) and name in _SIGNAL_COMPLEX)
     )
     return f"{owner}.{name}" if forbidden else None
 
 
-def _renames(module: str, bound: str) -> bool:
-    """Whether binding *module* to *bound* hides it from the attribute rules."""
-    return module in _IMPORT_NAMES and bound not in _IMPORT_NAMES[module]
+def _library_submodule(module: str) -> bool:
+    """Whether *module* is a module of numpy or SciPy the rules do not read from the top.
+
+    Every module below numpy or SciPy but SciPy's filters, which the rules
+    read by name, and numpy's typing, which holds no arithmetic.
+    """
+    if module in _IMPORT_NAMES or _below(module, ("numpy.typing",)):
+        return False
+    return module.startswith(("numpy.", "scipy."))
+
+
+def _hides(module: str, bound: str) -> bool:
+    """Whether binding *module* to the name *bound* hides it from the attribute rules.
+
+    A module the rules read, bound to a name they do not read it by, and a
+    module below numpy or SciPy (:func:`_library_submodule`) under any name:
+    ``import numpy.polynomial.polynomial as P`` reaches ``P.polyroots``.
+    """
+    if module in _IMPORT_NAMES:
+        return bound not in _IMPORT_NAMES[module]
+    return _library_submodule(module)
+
+
+def _spelled(alias: ast.alias) -> str:
+    """An imported name as the import spells it, ``name`` or ``name as other``."""
+    return f"{alias.name} as {alias.asname}" if alias.asname else alias.name
+
+
+def _imports_hidden_module(node: ast.ImportFrom, alias: ast.alias) -> bool:
+    """Whether *alias* of *node* binds a module where the attribute rules do not read it.
+
+    From numpy or SciPy, a module they hold (``from numpy import ma``, ``from
+    scipy import signal as sig``); from any other module, one it hands on
+    under a name the rules read a module by (``from .x import np as n``),
+    taken as that module.
+    """
+    bound = alias.asname or alias.name
+    module = node.module or ""
+    if node.level == 0 and module.partition(".")[0] in {"numpy", "scipy"}:
+        path = f"{module}.{alias.name}"
+        return _is_module(path) and _hides(path, bound)
+    handed = _MODULE_NAMES.get(alias.name)
+    return handed is not None and (
+        handed in _FORBIDDEN_MODULES or _hides(handed, bound)
+    )
 
 
 def _import_from_finding(node: ast.ImportFrom) -> str | None:
     """What a ``from ... import`` brings in that the attribute rules cannot see.
 
-    A forbidden routine or module by its bare name, a module the rules read
-    bound to another name (``from scipy import signal as sig``), and a star
-    import of a module the rules read.
+    A forbidden routine or module by its bare name; anything from a module
+    below numpy or SciPy (``from numpy._core.numeric import convolve``) but
+    numpy's typing; a module the rules read bound to another name, whether
+    numpy's or SciPy's own (``from scipy import signal as sig``, ``from numpy
+    import ma``) or handed on by another module (``from .x import np as n``);
+    a dynamic import; and any star import.
     """
     module = node.module or ""
     names = {alias.name for alias in node.names}
-    renamed = [
-        f"{alias.name} as {alias.asname}"
-        for alias in node.names
-        if alias.asname and _renames(f"{module}.{alias.name}", alias.asname)
-    ]
-    if renamed:
-        return f"from {module} import {', '.join(sorted(renamed))}"
+    library = node.level == 0 and module.partition(".")[0] in {"numpy", "scipy"}
     hidden = (
-        module in {"math", "cmath"}
+        "*" in names
+        or (node.level == 0 and module in {"math", "cmath"})
+        or (node.level == 0 and module.partition(".")[0] in _DYNAMIC_IMPORTS)
         or module in _FORBIDDEN_MODULES
-        or module.startswith(("scipy.special", "scipy.linalg"))
-        or (module == "scipy" and bool(names & {"special", "linalg"}))
+        or (library and _library_submodule(module))
+        or any(_imports_hidden_module(node, alias) for alias in node.names)
         or (module in _NUMPY_OWNERS and bool(names & _NUMPY_FORBIDDEN))
         or (module == "operator" and bool(names & _OPERATOR_FORBIDDEN))
+        or (module == "builtins" and bool(names & _BUILTINS_FORBIDDEN))
         or (module == "scipy.signal" and bool(names & _SIGNAL_COMPLEX))
-        or ("*" in names and module in _IMPORT_NAMES)
     )
-    return f"from {module} import {', '.join(sorted(names))}" if hidden else None
+    spelled = ", ".join(sorted(_spelled(alias) for alias in node.names))
+    return f"from {'.' * node.level}{module} import {spelled}" if hidden else None
 
 
 def _import_finding(node: ast.Import) -> list[str]:
@@ -2023,15 +2145,17 @@ def _import_finding(node: ast.Import) -> list[str]:
 
     ``import numpy as numpy``, ``import scipy.signal as sg``, ``import scipy
     as sp`` and ``import operator as op`` alike: a routine is then reached by
-    a name no rule reads.
+    a name no rule reads. So is a module below numpy or SciPy under any name,
+    ``import numpy._core.numeric as nn``, and :mod:`importlib`, which imports
+    a module by a string.
     """
     found = []
     for alias in node.names:
         bound = alias.asname or alias.name
         if (
-            _renames(alias.name, bound)
+            _hides(alias.name, bound)
             or alias.name in _FORBIDDEN_MODULES
-            or alias.name.startswith(("scipy.special", "scipy.linalg"))
+            or alias.name.partition(".")[0] in _DYNAMIC_IMPORTS
         ):
             found.append(f"import {alias.name} as {bound}")
     return found
@@ -2054,6 +2178,22 @@ class _PlatformOperations(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.found: set[str] = set()
+        # The names and attribute paths read as the owner of an attribute.
+        self._owners: set[ast.expr] = set()
+        # The names called, which a builtin's finding names as a call.
+        self._called: set[ast.expr] = set()
+
+    def _module_as_value(self, node: ast.Name | ast.Attribute) -> None:
+        """Note a module the rules read, used as a value rather than as an owner.
+
+        ``sg = signal`` or ``getattr(np, "roots")`` binds or hands on the
+        module, whose routines are then reached by a name no rule reads.
+        """
+        if node in self._owners or not isinstance(node.ctx, ast.Load):
+            return
+        path = ast.unparse(node)
+        if _is_module(path):
+            self.found.add(f"{node.lineno}: the module {path} as a value")
 
     # ast.NodeVisitor dispatches on this name.
     def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
@@ -2075,20 +2215,30 @@ class _PlatformOperations(ast.NodeVisitor):
 
     # ast.NodeVisitor dispatches on this name.
     def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
-        if isinstance(node.func, ast.Name) and node.func.id in {"abs", "pow"}:
+        if isinstance(node.func, ast.Name) and node.func.id in _BUILTINS_FORBIDDEN:
             self.found.add(f"{node.lineno}: builtin {node.func.id}()")
+        self._called.add(node.func)
         self.generic_visit(node)
 
     # ast.NodeVisitor dispatches on this name.
     def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
         finding = None
         if isinstance(node.value, (ast.Name, ast.Attribute)):
+            self._owners.add(node.value)
             finding = _attribute_finding(ast.unparse(node.value), node.attr)
         if finding is None and node.attr in _ARRAY_SORTS:
             finding = f"the .{node.attr} method"
         if finding is not None:
             self.found.add(f"{node.lineno}: {finding}")
+        self._module_as_value(node)
         self.generic_visit(node)
+
+    # ast.NodeVisitor dispatches on this name.
+    def visit_Name(self, node: ast.Name) -> None:  # noqa: N802
+        builtin = node.id in _BUILTINS_FORBIDDEN and isinstance(node.ctx, ast.Load)
+        if builtin and node not in self._called:
+            self.found.add(f"{node.lineno}: the builtin {node.id} as a value")
+        self._module_as_value(node)
 
     # ast.NodeVisitor dispatches on this name.
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
@@ -2313,7 +2463,7 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
 
 
 def test_the_guard_refuses_a_module_bound_to_a_name_its_rules_do_not_read() -> None:
-    """An import that binds SciPy's filters, SciPy, :mod:`operator` or numpy elsewhere.
+    """An import or a binding that puts a module the rules read under a name they do not.
 
     The attribute rules read a routine by its owner's name: ``signal.zpk2sos``
     and ``scipy.signal.zpk2sos``, ``operator.pow``, ``np.roots``. Bound to
@@ -2321,7 +2471,18 @@ def test_the_guard_refuses_a_module_bound_to_a_name_its_rules_do_not_read() -> N
     as sig``, ``import scipy as sp`` or ``import operator as op``, the same
     routine is ``sg.zpk2sos`` or ``op.pow`` and no rule reads it, and a star
     import binds every name of the module bare. So the import itself is the
-    finding, as it is for ``math`` and numpy under another name.
+    finding, as it is for ``math`` and numpy under another name. So is an
+    import of a module below numpy or SciPy (numpy's polynomial package,
+    ``numpy._core.numeric``, ``scipy.signal._filter_design``) under any
+    name, numpy's typing aside; a module of numpy or SciPy imported by its
+    bare name (``from numpy import ma``); a module another module hands on
+    under a name of its own (``from .x import np as n``, ``x.np``); a module
+    the rules read used as a value (``sg = signal``, ``getattr(np, "roots")``);
+    a private module of numpy or SciPy read as an attribute (``np._core``);
+    an import by a string (``__import__``, :mod:`importlib`,
+    ``sys.modules``); and a builtin power or magnitude bound to another name
+    (``f = abs``, ``builtins.pow``). The attribute rules read numpy and
+    SciPy's filters at any depth, so ``np.ma.abs`` is ``np.abs``.
     """
     source = textwrap.dedent(
         """
@@ -2343,6 +2504,7 @@ def test_the_guard_refuses_a_module_bound_to_a_name_its_rules_do_not_read() -> N
         """
     )
     assert _platform_operations(ast.parse(source)) == [
+        "15: sp.signal",
         "2: import scipy.signal as sg",
         "3: import scipy as sp",
         "4: import operator as op",
@@ -2350,6 +2512,84 @@ def test_the_guard_refuses_a_module_bound_to_a_name_its_rules_do_not_read() -> N
         "6: from numpy import *",
         "7: from scipy.signal import *",
         "8: from operator import *",
+    ]
+    submodules = textwrap.dedent(
+        """
+        import numpy as np
+        from scipy import signal
+        import numpy.polynomial.polynomial as P
+        from numpy.polynomial import polynomial as Q
+        from numpy._core.numeric import convolve
+        import numpy._core.numeric as nn
+        from scipy.signal._filter_design import zpk2sos
+        import scipy.signal._filter_design as fd
+        from numpy import ma, float64
+        from scipy import fft
+        from scipy.signal import windows
+        import numpy.typing as npt
+        from numpy.typing import ArrayLike
+        from ._weighting_design import np as numpy_again, np
+        import importlib
+        from importlib import import_module
+        from .helpers import *
+        def g(c, z, p, a, b):
+            r = np.polynomial.polynomial.polyroots(c), P.polyfromroots(z), Q.polyroots(z)
+            v = convolve(a, b), nn.convolve(a, b), zpk2sos(z, p, 1.0), fd.zpk2sos(z, p)
+            sg = signal
+            w = sg.zpk2sos(z, p, 1.0), np._core.numeric.convolve(a, b), np.core
+            u = signal._filter_design.zpk2sos(z, p, 1.0), scipy.signal
+            m = np.ma.abs(z), np.lib.scimath.sqrt(a), getattr(np, "roots")(c), float64(a)
+            return __import__("numpy").roots(c), sys.modules["numpy"], other.np.roots(c)
+        """
+    )
+    assert _platform_operations(ast.parse(submodules)) == [
+        "10: from numpy import float64, ma",
+        "11: from scipy import fft",
+        "12: from scipy.signal import windows",
+        "15: from ._weighting_design import np, np as numpy_again",
+        "16: import importlib as importlib",
+        "17: from importlib import import_module",
+        "18: from .helpers import *",
+        "20: np.polynomial",
+        "20: np.polynomial.polynomial",
+        "22: the module signal as a value",
+        "23: np._core",
+        "23: np._core.numeric.convolve",
+        "23: the module np.core as a value",
+        "24: signal._filter_design",
+        "24: signal._filter_design.zpk2sos",
+        "24: the module scipy.signal as a value",
+        "25: np.lib.scimath.sqrt",
+        "25: np.ma.abs",
+        "25: the module np as a value",
+        "26: builtin __import__()",
+        "26: other.np",
+        "26: sys.modules",
+        "4: import numpy.polynomial.polynomial as P",
+        "5: from numpy.polynomial import polynomial as Q",
+        "6: from numpy._core.numeric import convolve",
+        "7: import numpy._core.numeric as nn",
+        "8: from scipy.signal._filter_design import zpk2sos",
+        "9: import scipy.signal._filter_design as fd",
+    ]
+    hidden_builtins = textwrap.dedent(
+        """
+        import builtins
+        import builtins as bi
+        from builtins import pow as power
+        def h(z, a):
+            k = abs, builtins.pow(a, 2), __builtins__.abs(z), bi.abs(z)
+            return getattr(builtins, "abs")(z), abs(z), k
+        """
+    )
+    assert _platform_operations(ast.parse(hidden_builtins)) == [
+        "3: import builtins as bi",
+        "4: from builtins import pow as power",
+        "6: __builtins__.abs",
+        "6: builtins.pow",
+        "6: the builtin abs as a value",
+        "7: builtin abs()",
+        "7: the module builtins as a value",
     ]
 
 

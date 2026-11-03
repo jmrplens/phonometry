@@ -1117,3 +1117,17 @@ def test_the_rank_check_of_every_scalar_guard_refuses_a_complex_number(
     """
     with pytest.raises(TypeError, match="'x' must be a number, not a complex one"):
         require_scalar(value, "x")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [10**400, -(10**400), Decimal("sNaN")],
+    ids=["an integer past a float", "its negative", "a signalling NaN"],
+)
+def test_complex_number_refuses_what_complex_cannot_read(value: object) -> None:
+    """:func:`complex` raises ``OverflowError`` on an integer past a float's
+    largest and ``ValueError`` on a signalling ``Decimal`` NaN: both are
+    refused as numbers no complex holds, by the parameter's name.
+    """
+    with pytest.raises(ValueError, match="'z' must be a number a complex can hold"):
+        complex_number(value, "z")

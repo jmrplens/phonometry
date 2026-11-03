@@ -178,3 +178,22 @@ def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
     assert re.search(r"\d,\d", text) is not None  # comma decimal separator
     assert "PASS" not in text
     assert "FAIL" not in text
+
+
+def test_a_prediction_without_the_mid_octaves_states_its_first_band(
+    tmp_path: Path,
+) -> None:
+    """Without both the 500 Hz and the 1 kHz octaves there is no mid-frequency
+    mean: the fiche states the first finite band and makes no 500-1000 Hz claim.
+    """
+    res = room.reverberation_time_models(
+        (8.0, 5.0, 3.0),
+        (_TREATED[:2], _SIDE[:2], _FLOOR[:2]),
+        frequencies=_FREQS[:2],
+    )
+    out = tmp_path / "low.pdf"
+    res.report(str(out), metadata=_metadata())
+    text = _text(str(out))
+    assert "Predicted T (Arau-Puchades)" in text
+    assert "500-1000 Hz" not in text
+    assert f"{res.arau_puchades[0]:.2f}" in text

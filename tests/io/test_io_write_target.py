@@ -445,3 +445,16 @@ def test_a_writer_left_at_the_yield_leaves_no_file_beside(tmp_path: Path) -> Non
     manager.gen.close()
     assert [entry.name for entry in tmp_path.iterdir()] == ["meas.wav"]
     assert path.read_bytes() == OLD_BYTES
+
+
+def test_a_directory_that_cannot_say_its_longest_name_takes_255(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A directory not there yet answers no ``pathconf``, and Windows has no
+    ``pathconf`` at all: the name beside a target is cut to 255 bytes then.
+    """
+    assert json_input._name_max(tmp_path / "not-there-yet") == 255
+    monkeypatch.delattr(os, "pathconf", raising=False)
+    assert json_input._name_max(tmp_path) == 255
+    beside = json_input.beside_name(tmp_path / ("m" * 300), ".partial")
+    assert len(os.fsencode(beside.name)) <= 255

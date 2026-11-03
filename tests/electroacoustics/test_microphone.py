@@ -903,3 +903,34 @@ def test_a_pair_or_a_curve_given_as_a_bytearray_is_refused() -> None:
     # what the caller gave.
     with pytest.raises(TypeError, match=r"'spectrum' must be a pair .*, not bytearray"):
         electroacoustics.MicrophoneNoise(spectrum=bytearray(b"ab"))  # type: ignore[arg-type]
+
+
+def test_effective_range_runs_to_the_measured_band_ends() -> None:
+    """A response inside the tolerance over the whole measured band has no
+    limit crossing: the range runs to the first and last measured frequency.
+    """
+    f = np.geomspace(50.0, 16000.0, 200)
+    result = electroacoustics.microphone_characteristics(
+        frequencies=f,
+        response_db=np.zeros_like(f),
+        sensitivity_mv_per_pa=_M_MV,
+        tolerance_db=_TOL,
+    )
+    assert result.effective_range == (pytest.approx(50.0), pytest.approx(16000.0))
+
+
+def test_distortion_above_the_limit_from_the_start_gives_the_lowest_level() -> None:
+    """A curve already past the limit at its lowest level reads that level (15.2.2)."""
+    f, rel = _flat_response()
+    spl = np.linspace(100.0, 120.0, 41)
+    thd = np.full_like(spl, 2.0)
+    result = electroacoustics.microphone_characteristics(
+        frequencies=f,
+        response_db=rel,
+        sensitivity_mv_per_pa=_M_MV,
+        tolerance_db=_TOL,
+        overload=electroacoustics.MicrophoneOverload(
+            distortion=(spl, thd), thd_percent=0.5
+        ),
+    )
+    assert result.max_spl == pytest.approx(100.0)

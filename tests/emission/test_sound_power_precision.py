@@ -483,6 +483,18 @@ def test_uniform_intensity_recovers_lw_exact() -> None:
     assert res.sound_power_level[0] == pytest.approx(10.0 * np.log10(w / _P0), abs=1e-9)
 
 
+def test_one_band_without_frequencies_is_its_own_a_weighted_total() -> None:
+    """With no frequencies there is no A-weighting to apply: one applicable
+    band is its own total, and several bands give none (ISO 9614-3 clause 9.2).
+    """
+    w = 1.0e-4
+    areas = np.array([0.5, 1.5])
+    one = sound_power_intensity_precision(np.full(areas.shape, w / 2.0), areas)
+    assert one.sound_power_level_a == pytest.approx(10.0 * np.log10(w / _P0))
+    two = sound_power_intensity_precision(np.full((2, 2), w / 2.0), areas)
+    assert np.isnan(two.sound_power_level_a)
+
+
 def test_precision_intensity_refuses_a_pressure_that_is_not_one() -> None:
     """ISO 9614-3 states the barometric pressure in pascals, and so does the name.
 

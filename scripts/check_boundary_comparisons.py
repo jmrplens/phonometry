@@ -688,6 +688,9 @@ class Module:
         self.top_functions, self.top_live_imports = _top_bindings(
             self.tree, self.top_imports
         )
+        #: Every ``def`` and every import at the top of the module, by name,
+        #: which a function reads from its own ``def`` on (:meth:`top_at`).
+        self.top_defined, self.top_imported = _top_names(self.tree)
         self.locals: dict[Function, dict[str, list[tuple[str, ast.AST, int]]]] = {}
         self.comprehended: dict[
             Function, dict[int, list[tuple[str, ast.AST, int]]]
@@ -803,8 +806,8 @@ class Module:
         Looked up as Python looks it up, from *scope* outwards to the module:
         the nearest scope that binds the name says what it is, and it stands
         for a class only when every way it binds it there is a ``class``
-        statement and one of them is the name's at *node*, or once that
-        scope has run when *node* is in a function inside it
+        statement and one of them is the name's at *node*: from a function
+        inside that scope, one that may stand from the ``def`` on
         (:func:`ast_scan.live_bindings`). ``None`` otherwise: a name bound
         to a class in each branch of an ``if`` stands for no one class.
         """
@@ -816,11 +819,9 @@ class Module:
             if name in names.declared_global:
                 break
             if names.binds(name):
-                return self._class_in(current, name, node if current is scope else None)
+                return self._class_in(current, name, node)
             current = self.enclosing(current)
-        if scope is None:
-            return self._class_in(self.tree, name, node)
-        return self._class_in(self.tree, name, None)
+        return self._class_in(self.tree, name, node)
 
     def _class_in(
         self, holder: ast.AST, name: str, node: ast.AST | None
@@ -859,7 +860,7 @@ class Module:
         if scope is not None and node is not None:
             how, binder = binding_of(scope, node, name)
             if how == "global":
-                return self.top_functions.get(name, ())
+                return self.top_at(name, node)[0]
             if binder is not None and binder is not scope:
                 return None
         current = scope
@@ -870,27 +871,28 @@ class Module:
             if name in names.declared_global:
                 break
             if names.binds(name):
-                return self._bound_as(current, name, node, here=current is scope)
+                return self._bound_as(current, name, node)
             current = self.enclosing(current)
-        return self.top_functions.get(name, ())
+        return self.top_at(name, node)[0]
 
     def _bound_as(
-        self, function: Function, name: str, node: ast.AST | None, *, here: bool
+        self, function: Function, name: str, node: ast.AST | None
     ) -> tuple[Function, ...] | None:
         """The functions *name* stands for in *function*, which binds it itself.
 
         The functions of that name it defines (inside an ``if``, a ``try`` or
         a ``with`` too): those that may have run before *node* and that no
-        later one replaced on the way, when *node* is written in *function*
-        (*here*, :func:`ast_scan.live_bindings`), or every one; none for an import,
-        which the package follows; and ``None`` for any other binding: the
-        name is then the function's, and no function of the module or of an
-        import is the one it calls.
+        later one replaced on the way, and from a function inside *function*
+        every one that may stand from its ``def`` on
+        (:func:`ast_scan.live_bindings`), or every one when no *node* is
+        given; none for an import, which the package follows; and ``None``
+        for any other binding: the name is then the function's, and no
+        function of the module or of an import is the one it calls.
         """
         how = own_names(function).how(name)
         if how == "definition":
             defined = _by_name(_own_definitions(function)).get(name, ())
-            if node is None or not here:
+            if node is None:
                 return defined
             return tuple(live_bindings(function, list(defined), node))
         if how == "import":
@@ -903,10 +905,12 @@ class Module:
         """Where *name*, read at *node* in *scope*, is imported from.
 
         From the nearest of *scope* and the functions around it that binds
-        the name, its imports of it: in *scope* itself, those that may have
-        run before *node* (:func:`ast_scan.live_bindings`). From the top of
-        the module when none binds it, those the name holds once the module
-        has run. None for a name a scope binds otherwise.
+        the name, its imports of it that may stand for it at *node*
+        (:func:`ast_scan.live_bindings`): in *scope* itself, those that may
+        have run before *node*, and in a function around it, those that may
+        stand from the ``def`` of the one *node* runs in on. From the top of
+        the module when none binds it, the same (:meth:`top_at`). None for a
+        name a scope binds otherwise.
         """
         current = scope
         while current is not None:
@@ -917,11 +921,26 @@ class Module:
                 break
             if names.binds(name):
                 statements = _imports_by_name(scope_nodes(current)).get(name, [])
-                if current is scope:
-                    statements = live_bindings(current, statements, node)
+                statements = live_bindings(current, statements, node)
                 return _import_targets(statements, name, self.path)
             current = self.enclosing(current)
-        return self.top_import_targets(name)
+        return _import_targets(self.top_at(name, node)[1], name, self.path)
+
+    def top_at(
+        self, name: str, node: ast.AST | None
+    ) -> tuple[tuple[Function, ...], list[ast.ImportFrom]]:
+        """The functions and the relative imports at the top of the module
+        that *name* may hold where *node* reads it (:func:`_top_live`), or
+        once the module has run when *node* is None.
+
+        A read in a function meets every one that may stand from the
+        function's ``def`` on, since it may be called during the import.
+        """
+        if node is None:
+            return self.top_functions.get(name, ()), self.top_live_imports.get(name, [])
+        return _top_live(
+            self.tree, self.top_defined, self.top_imported, self.top_imports, name, node
+        )
 
     def top_import_targets(self, name: str) -> list[tuple[pathlib.Path, str]]:
         """Where the imports at the top of the module the name may hold once
@@ -1893,32 +1912,56 @@ def _live_by_name(
     }
 
 
-def _top_bindings(
-    tree: ast.Module, relative: Mapping[str, list[ast.ImportFrom]]
-) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.ImportFrom]]]:
-    """The functions and the relative imports at the top of *tree* each name
-    holds once the module has run.
-
-    Its ``def`` statements and its imports of a name are read in one order
-    (:func:`ast_scan.live_bindings`): an import after a ``def`` replaces it,
-    a ``def`` after an import replaces that, and one in each branch of an
-    ``if`` is either. A name none of whose functions is live has no entry
-    among the functions, so a re-export is followed through its import.
-    """
-    defined = _by_name(_own_definitions(tree))
+def _top_names(
+    tree: ast.Module,
+) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.stmt]]]:
+    """Every ``def`` and every import at the top of *tree*, by the name each binds."""
     imported: dict[str, list[ast.stmt]] = {}
     for node in scope_nodes(tree):
         if isinstance(node, ast.Import | ast.ImportFrom):
             for name in imported_names(node):
                 imported.setdefault(name, []).append(node)
+    return _by_name(_own_definitions(tree)), imported
+
+
+def _top_live(
+    tree: ast.Module,
+    defined: Mapping[str, tuple[Function, ...]],
+    imported: Mapping[str, list[ast.stmt]],
+    relative: Mapping[str, list[ast.ImportFrom]],
+    name: str,
+    point: ast.AST | None,
+) -> tuple[tuple[Function, ...], list[ast.ImportFrom]]:
+    """The functions and the relative imports at the top of *tree* that
+    *name* may hold at *point*, or once the module has run when it is None.
+
+    Its ``def`` statements and its imports of the name are read in one order
+    (:func:`ast_scan.live_bindings`): an import after a ``def`` replaces it,
+    a ``def`` after an import replaces that, one in each branch of an ``if``
+    is either, and a read in a function meets every one from its ``def`` on.
+    """
+    live = live_bindings(tree, [*defined.get(name, ()), *imported.get(name, [])], point)
+    kept = tuple(node for node in defined.get(name, ()) if node in live)
+    return kept, [node for node in relative.get(name, []) if node in live]
+
+
+def _top_bindings(
+    tree: ast.Module, relative: Mapping[str, list[ast.ImportFrom]]
+) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.ImportFrom]]]:
+    """The functions and the relative imports at the top of *tree* each name
+    holds once the module has run (:func:`_top_live`).
+
+    A name none of whose functions is live has no entry among the functions,
+    so a re-export is followed through its import.
+    """
+    defined, imported = _top_names(tree)
     functions: dict[str, tuple[Function, ...]] = {}
     imports: dict[str, list[ast.ImportFrom]] = {}
     for name in defined.keys() | relative.keys():
-        live = live_bindings(tree, [*defined.get(name, ()), *imported.get(name, [])])
-        kept = tuple(node for node in defined.get(name, ()) if node in live)
+        kept, live_imports = _top_live(tree, defined, imported, relative, name, None)
         if kept:
             functions[name] = kept
-        imports[name] = [node for node in relative.get(name, []) if node in live]
+        imports[name] = live_imports
     return functions, imports
 
 

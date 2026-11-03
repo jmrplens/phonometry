@@ -1161,8 +1161,9 @@ _BYTE_ORDER_MARKS = "|=<>"
 #: The comprehensions, each a scope of its own for the variables it loops over.
 _COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 
-#: The scopes that run when called, not where they are written.
-_FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+#: The scopes that run when called, not where they are written, and a
+#: generator expression, whose body runs as it is consumed.
+_FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.GeneratorExp)
 
 #: The nodes that open a scope of their own for the names bound in them.
 _NESTED_SCOPES = (
@@ -1409,9 +1410,10 @@ class _ScopeNames:
     #: The scope it reads a name it does not bind from: the function or the
     #: module around it, past any class body.
     outer: _ScopeNames | None
-    #: Where in *outer* it reads it: the class or the comprehension that runs
-    #: there, or ``None`` for a function or a lambda, which reads the name as
-    #: it stands once *outer* has run.
+    #: Where in *outer* it reads it: the class or the list, set or dict
+    #: comprehension that runs there, or ``None`` for a function, a lambda or
+    #: a generator expression, which reads the name as it stands once
+    #: *outer* has run.
     at: ast.AST | None
     #: What the scopes nested in it bind its names to through ``global`` or
     #: ``nonlocal``, whenever they run.
@@ -1435,9 +1437,10 @@ class _ScopeNames:
         The scope that holds the name is found as Python finds it: this one
         when it binds the name, the module for a name declared ``global``,
         the function around for one declared ``nonlocal``, and otherwise the
-        scope around, read where this one runs (a class body, a
-        comprehension) or once it has run (past a function or a lambda,
-        which run when called). There, the bindings that may reach the read
+        scope around, read where this one runs (a class body, a list, set or
+        dict comprehension) or once it has run (past a function or a lambda,
+        which run when called, and a generator expression, which runs as it
+        is consumed). There, the bindings that may reach the read
         (:func:`ast_scan.live_bindings`): the later of two in a row, either
         of two in the branches of an ``if``, one on an earlier turn of a loop
         around the read, any of them when none runs before it; with whatever
@@ -1479,10 +1482,11 @@ def _nested_names(
 ) -> _ScopeNames:
     """What *scope*, whose own nodes are *own*, binds, and where it reads the names it does not.
 
-    *around* is the scope it is written in. A function and a lambda read
-    the names around them as they stand once that scope has run; a class
-    body and a comprehension run where they are written and read them
-    there. None reads a class body's names: a scope written in one reads
+    *around* is the scope it is written in. A function, a lambda and a
+    generator expression read the names around them as they stand once that
+    scope has run, since they run when called or as they are consumed; a
+    class body and a list, set or dict comprehension run where they are
+    written and read them there. None reads a class body's names: a scope written in one reads
     from the scope around the class, where the class statement runs, and a
     generic class's type parameters hide those names for it.
     """
@@ -1820,7 +1824,7 @@ def test_the_float_equality_check_reads_the_binding_a_name_holds_where_it_is_rea
     of an ``if``, an import on an earlier turn of a loop, and an assignment
     after an import, which the name then holds instead. A function reads its
     module's name as it stands once the module has run; a class body and a
-    comprehension run where they are written, so they read it there.
+    list comprehension run where they are written, so they read it there.
     """
     source = "\n".join(
         [
@@ -1917,6 +1921,34 @@ def test_the_float_equality_check_reads_a_module_name_a_function_binds() -> None
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "2", "10", "15", "21", "28", "31",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_generator_where_it_is_consumed() -> None:
+    """A generator expression runs its body as it is consumed, not where it is written.
+
+    ``(v.astype(flag) for v in xs)`` written while ``flag`` is ``None`` and
+    consumed once ``from numpy import bool_ as flag`` has run casts with
+    numpy's boolean, in a module and in a function alike, so the reader takes
+    the name as the generator may meet it, like a function's; a list
+    comprehension, which runs where it is written, keeps reading it there.
+    """
+    source = "\n".join(
+        [
+            "flag = None",
+            "gen = (v.astype(flag) for v in xs)",
+            "kept = [v.astype(flag) for v in xs]",
+            "from numpy import bool_ as flag",
+            "out = list(gen)",
+            "def consumes_later(xs):",
+            "    mask = None",
+            "    gen = (v.astype(mask) for v in xs)",
+            "    from numpy import bool_ as mask",
+            "    return list(gen)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "2", "8",
     ]  # fmt: skip
 
 

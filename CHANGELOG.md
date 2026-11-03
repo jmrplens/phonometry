@@ -2326,8 +2326,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   band limits, and `emission.room_absorption_coefficient`,
   `environment.barrier_insertion_loss` and the rectangular-duct and VDI 2081
   bend attenuations named `'surface_area_m2'`, `'barrier_height'` and
-  `'width'`, which none of them takes. A parser of a file's text (an ANP table,
-  a JSON sidecar) still reads its text. A number computed with before the
+  `'width'`, which none of them takes. So does a reading further down a chain
+  of calls, or in another public function a public one hands its value to:
+  `emission.sound_power_comparison` and `emission.sound_energy_comparison`
+  named `'levels'` for the reference source's levels and background, and
+  `emission.sound_power_reverberation` for a background spectrum;
+  `building.regulation.spain.ra`, `ra_tr`, `dnt_a`, `d2m_nt_a` and
+  `d2m_nt_atr` named `'band_values'`; `materials.measure_sound_absorption`
+  named `'sample_area'`, `'temperature1_c'` and `'t1'`, and
+  `materials.absorption_coefficient` named `'temperature_c'` and
+  `'speed_of_sound'` for its second measurement and its first speed;
+  `materials.directional_diffusion` named `'area_weights'`;
+  `electroacoustics.verify_induction_loop_system` named `'noise_levels'`;
+  `emission.field_indicators` named `'short_time_intensity'`;
+  `fluids.sea_water` named `'model'`; the two in-situ silencer losses named
+  `'number'` for `case`; `noise_control.band_internal_levels` named `'peak'`;
+  `noise_control.valve_hydrodynamic_noise` named `'form'`;
+  `vibration.impact_mobility` named `'width_s'`, `'start_s'`, `'taper_s'` and
+  `'decay_rate_per_s'` for its window parameters; and the `.plot()` of a
+  `materials.TransferMatrix` named `'frequency'`. A parser of a file's text (an
+  ANP table, a JSON sidecar) still reads its text. A number computed with before the
   result was converted is read the same way:
   `aircraft.Aerodrome.pressure_ratio`, the two numbers of
   `aircraft.MeanGroundPlaneResult.equivalent_height`, the `delay` and the FFT

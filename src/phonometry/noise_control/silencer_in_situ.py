@@ -936,7 +936,10 @@ def in_situ_transmission_loss(
     difference = transmission_level_difference(source_levels, receiver_levels)
     entry = None
     if case is not None:
-        entry = installation_case(case)
+        # Read by this function's name for it, which installation_case calls
+        # number.
+        require_scalar(case, "case")
+        entry = installation_case(require_count(case, "case", at_least=None))
         if entry.quantity != "transmission":
             msg = (
                 f"Case {entry.number} of Figure 1 is an insertion "
@@ -1013,7 +1016,10 @@ def in_situ_insertion_loss(
     difference = insertion_level_difference(levels_without, levels_with)
     entry = None
     if case is not None:
-        entry = installation_case(case)
+        # Read by this function's name for it, which installation_case calls
+        # number.
+        require_scalar(case, "case")
+        entry = installation_case(require_count(case, "case", at_least=None))
         if entry.quantity != "insertion":
             msg = (
                 f"Case {entry.number} of Figure 1 is a transmission "

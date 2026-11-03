@@ -1059,7 +1059,10 @@ def _temporal_indicator_for(
     require_scalar(n_bands, "n_bands")
     if temporal_intensity is None:
         return None
-    f1 = temporal_variability_indicator(temporal_intensity)
+    # Read by field_indicators' name for it, which
+    # temporal_variability_indicator calls short_time_intensity.
+    samples = real_array(temporal_intensity, "temporal_intensity")
+    f1 = temporal_variability_indicator(samples)
     f1_size = 1 if np.ndim(f1) == 0 else np.size(f1)
     if f1_size != n_bands:
         msg = (

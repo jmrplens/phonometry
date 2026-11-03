@@ -24,8 +24,10 @@ import pytest
 from phonometry import (
     aircraft,
     building,
+    electroacoustics,
     emission,
     environment,
+    fluids,
     io,
     materials,
     noise_control,
@@ -537,7 +539,287 @@ _HANDED_ON: list[tuple[str, Callable[[], object], str]] = [
         ),
         "'directivity_corrections' must be numbers, not text",
     ),
+    (
+        "sound_power_comparison: a text among the reference levels",
+        lambda: emission.sound_power_comparison(_LV21, _X21, _LV21, frequencies=_F21),
+        "'reference_levels' must be numbers, not text",
+    ),
+    (
+        "sound_power_comparison: a text among the reference background levels",
+        lambda: emission.sound_power_comparison(
+            _LV21, _LV21, _LV21, frequencies=_F21, reference_background_levels=_X21
+        ),
+        "'reference_background_levels' must be numbers, not text",
+    ),
+    (
+        "sound_power_comparison: a text among the background levels",
+        lambda: emission.sound_power_comparison(
+            _LV21, _LV21, _LV21, frequencies=_F21, background_levels=_X21
+        ),
+        "'background_levels' must be numbers, not text",
+    ),
+    (
+        "sound_power_reverberation: a text among the background levels",
+        lambda: emission.sound_power_reverberation(
+            _LV21,
+            np.full(21, 2.0),
+            200.0,
+            210.0,
+            frequencies=_F21,
+            background_levels=_X21,
+        ),
+        "'background_levels' must be numbers, not text",
+    ),
+    (
+        "sound_energy_comparison: a text among the reference levels",
+        lambda: emission.sound_energy_comparison(_LV21, _X21, _LV21, frequencies=_F21),
+        "'reference_levels' must be numbers, not text",
+    ),
+    (
+        "sound_energy_comparison: a text among the reference background levels",
+        lambda: emission.sound_energy_comparison(
+            _LV21, _LV21, _LV21, frequencies=_F21, reference_background_levels=_X21
+        ),
+        "'reference_background_levels' must be numbers, not text",
+    ),
+    (
+        "ra: a text among the band values",
+        lambda: building.regulation.spain.ra(_X_DB_HR, frequencies=_F18),
+        "'reduction_index' must be numbers, not text",
+    ),
+    (
+        "ra_tr: a text among the band values",
+        lambda: building.regulation.spain.ra_tr(_X_DB_HR, frequencies=_F18),
+        "'reduction_index' must be numbers, not text",
+    ),
+    (
+        "dnt_a: a text among the band values",
+        lambda: building.regulation.spain.dnt_a(_X_DB_HR, frequencies=_F18),
+        "'level_difference' must be numbers, not text",
+    ),
+    (
+        "d2m_nt_a: a text among the band values",
+        lambda: building.regulation.spain.d2m_nt_a(_X_DB_HR, frequencies=_F18),
+        "'level_difference' must be numbers, not text",
+    ),
+    (
+        "d2m_nt_atr: a text among the band values",
+        lambda: building.regulation.spain.d2m_nt_atr(_X_DB_HR, frequencies=_F18),
+        "'level_difference' must be numbers, not text",
+    ),
+    (
+        "measure_sound_absorption: a text area",
+        lambda: materials.measure_sound_absorption(
+            [2.0, 2.0],
+            [1.5, 1.5],
+            frequencies=[500.0, 1000.0],
+            volume=200.0,
+            area="10.8",
+        ),
+        "'area' must be one number, not a text",
+    ),
+    (
+        "measure_sound_absorption: a text temperature with the speed given",
+        lambda: materials.measure_sound_absorption(
+            [2.0, 2.0],
+            [1.5, 1.5],
+            frequencies=[500.0, 1000.0],
+            volume=200.0,
+            area=10.8,
+            temperature_c="20",
+            speed_of_sound=343.0,
+        ),
+        "'temperature_c' must be one number, not a text",
+    ),
+    (
+        "absorption_coefficient: a text first speed of sound",
+        lambda: materials.absorption_coefficient(
+            [2.0], [1.5], 200.0, 10.8, speed_of_sound1="343"
+        ),
+        "'speed_of_sound1' must be one number, not a text",
+    ),
+    (
+        "absorption_coefficient: a text second speed of sound",
+        lambda: materials.absorption_coefficient(
+            [2.0], [1.5], 200.0, 10.8, speed_of_sound2="343"
+        ),
+        "'speed_of_sound2' must be one number, not a text",
+    ),
+    (
+        "absorption_coefficient: a text second temperature",
+        lambda: materials.absorption_coefficient(
+            [2.0], [1.5], 200.0, 10.8, temperature2_c="20"
+        ),
+        "'temperature2_c' must be one number, not a text",
+    ),
+    (
+        "directional_diffusion: a text among the weights",
+        lambda: materials.directional_diffusion(
+            np.linspace(-90.0, 90.0, 37), np.full(37, 70.0), weights=["x"] * 37
+        ),
+        "'weights' must be numbers, not text",
+    ),
+    (
+        "verify_induction_loop_system: a text among the background noise levels",
+        lambda: electroacoustics.verify_induction_loop_system(
+            [0.5, -1.0, 2.0, -2.5], background_noise_levels=["x"] * 4
+        ),
+        "'background_noise_levels' must be numbers, not text",
+    ),
+    (
+        "field_indicators: a text among the short-time intensities",
+        lambda: emission.field_indicators(
+            _LV21, np.full(21, 1e-3), temporal_intensity=[_X21] * 3
+        ),
+        "'temporal_intensity' must be numbers, not text",
+    ),
+    (
+        "sea_water: a sound speed model that is no text",
+        lambda: fluids.sea_water(
+            temperature_c=10.0,
+            sound_speed_model=3,  # type: ignore[arg-type]
+        ),
+        "'sound_speed_model' must be one of",
+    ),
+    (
+        "in_situ_insertion_loss: a text installation case",
+        lambda: noise_control.in_situ_insertion_loss(
+            [90.0],
+            [72.0],
+            area_without_m2=2.0,
+            area_with_m2=1.5,
+            case="2",  # type: ignore[arg-type]
+        ),
+        "'case' must be one number, not a text",
+    ),
+    (
+        "in_situ_transmission_loss: a text installation case",
+        lambda: noise_control.in_situ_transmission_loss(
+            [90.0],
+            [72.0],
+            source_area_m2=2.0,
+            receiver_area_m2=1.5,
+            case="2",  # type: ignore[arg-type]
+        ),
+        "'case' must be one number, not a text",
+    ),
+    (
+        "band_internal_levels: a text cavitation peak",
+        lambda: noise_control.band_internal_levels(
+            [500.0, 1000.0],
+            150.0,
+            turbulent_peak=654.35,
+            cavitation_peak="1088",  # type: ignore[arg-type]
+            cavitation_fraction=0.3,
+        ),
+        "'cavitation_peak' must be one number, not a text",
+    ),
+    (
+        "valve_hydrodynamic_noise: a Strouhal form that is no text",
+        lambda: _valve_noise(strouhal_form=3),
+        "'strouhal_form' must be one of",
+    ),
+    (
+        "impact_mobility: a text force window",
+        lambda: vibration.impact_mobility(
+            _FORCE,
+            _RESPONSE,
+            4096.0,
+            force_window_s="0.02",  # type: ignore[arg-type]
+        ),
+        "'force_window_s' must be one number, not a text",
+    ),
+    (
+        "impact_mobility: a text force window start",
+        lambda: vibration.impact_mobility(
+            _FORCE,
+            _RESPONSE,
+            4096.0,
+            force_window_s=0.02,
+            force_window_start_s="0",  # type: ignore[arg-type]
+        ),
+        "'force_window_start_s' must be one number, not a text",
+    ),
+    (
+        "impact_mobility: a text force window taper",
+        lambda: vibration.impact_mobility(
+            _FORCE,
+            _RESPONSE,
+            4096.0,
+            force_window_s=0.02,
+            force_window_taper_s="0",  # type: ignore[arg-type]
+        ),
+        "'force_window_taper_s' must be one number, not a text",
+    ),
+    (
+        "impact_mobility: a text exponential decay rate",
+        lambda: vibration.impact_mobility(
+            _FORCE,
+            _RESPONSE,
+            4096.0,
+            exponential_decay_rate_per_s="20",  # type: ignore[arg-type]
+        ),
+        "'exponential_decay_rate_per_s' must be one number, not a text",
+    ),
+    (
+        "TransferMatrix.plot: a text among the frequencies",
+        lambda: _transfer_matrix().plot(
+            frequencies=["x"] * 3, characteristic_impedance=413.0
+        ),
+        "'frequencies' must be numbers, not text",
+    ),
 ]
+
+#: The third-octave bands of a reverberation room, a level in each, and a
+#: text in each, for the ISO 3741 calls above.
+_F21 = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0]
+    + [1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0]
+    + [10000.0]
+)
+_LV21 = np.full(21, 80.0)
+_X21 = ["x"] * 21
+#: The eighteen DB-HR bands, and band values with a text in the first.
+_F18 = _F21[:18]
+_X_DB_HR: list[object] = ["x", *([40.0] * 17)]
+#: A hammer's force, a box of ten samples, and a response of noise.
+_FORCE = np.where((np.arange(4096) >= 10) & (np.arange(4096) < 20), 1.0, 0.0)
+_RESPONSE = np.random.default_rng(1).standard_normal(4096)
+
+
+def _transfer_matrix() -> materials.TransferMatrix:
+    """A matrix of three bands that retains neither frequencies nor impedance."""
+    return materials.TransferMatrix(np.ones(3), np.zeros(3), np.zeros(3), np.ones(3))
+
+
+def _valve_noise(**kwargs: object) -> object:
+    """IEC 60534-8-4 Annex A's turbulent column on its DN 100 globe valve."""
+    from phonometry.noise_control import valves_hydrodynamic as hydro
+
+    return hydro.valve_hydrodynamic_noise(
+        hydro.LiquidStream(
+            inlet_pressure_pa=1.0e6,
+            vapor_pressure_pa=2.32e3,
+            density=997.0,
+            speed_of_sound=1400.0,
+            mass_flow=40.0,
+            outlet_pressure_pa=4.0e5,
+        ),
+        hydro.LiquidTrim(
+            flow_coefficient=90.0,
+            style_modifier=0.42,
+            pressure_recovery=0.92,
+            power_ratio=0.25,
+            valve_diameter_m=0.1,
+            seat_diameter_m=0.1,
+            incipient_ratio=hydro.incipient_cavitation_ratio(90.0, 0.42, 0.92),
+        ),
+        hydro.LiquidPipe(
+            internal_diameter_m=0.1071, wall_thickness_m=0.0036, density=7800.0
+        ),
+        **kwargs,  # type: ignore[arg-type]
+    )
+
 
 #: A small table the calls above read: two powers, three distances.
 _POWERS = [1000.0, 2000.0]

@@ -24,6 +24,7 @@ import ast
 import inspect
 import pathlib
 import textwrap
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -301,56 +302,334 @@ def _helper_readings(
     return found
 
 
-def _handed_misnamings(tree: ast.Module, where: str) -> list[str]:
-    """Readings of a private helper named otherwise than the public parameter handed to it."""
-    tops = [
-        node
-        for owner in (tree, *(n for n in tree.body if isinstance(n, ast.ClassDef)))
-        for node in owner.body
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-    ]
-    helpers = {
-        node.name: (node, _helper_readings(node))
+#: One reading of a value by a literal name: the name, its line and the
+#: function whose reader writes it.
+type _Reading = tuple[str, int, str]
+
+
+def _bound_arguments(
+    callee: ast.FunctionDef | ast.AsyncFunctionDef, call: ast.Call
+) -> dict[str, ast.expr]:
+    """What *call* hands each parameter of *callee*, by position or keyword."""
+    bound = dict(zip(_parameters(callee), call.args, strict=False))
+    bound.update({k.arg: k.value for k in call.keywords if k.arg})
+    return bound
+
+
+#: The statements that hold other statements: a reading inside one of them
+#: runs on some paths only, so it is no reading that runs before what follows.
+_COMPOUND = (
+    ast.If,
+    ast.For,
+    ast.AsyncFor,
+    ast.While,
+    ast.Try,
+    ast.TryStar,
+    ast.With,
+    ast.AsyncWith,
+    ast.Match,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+)
+
+
+def _reads_itself(statement: ast.stmt, parameter: str) -> bool:
+    """Whether a statement reads *parameter* under its own name whenever it holds one.
+
+    A simple statement that hands it to a reader does; so does ``if
+    parameter is not None:`` with such a statement in its body, since a
+    parameter that is ``None`` holds no number to read, and every later use
+    of one that is not finds it read.
+    """
+    if (
+        isinstance(statement, ast.If)
+        and isinstance(statement.test, ast.Compare)
+        and isinstance(statement.test.left, ast.Name)
+        and statement.test.left.id == parameter
+        and len(statement.test.ops) == 1
+        and isinstance(statement.test.ops[0], ast.IsNot)
+        and isinstance(statement.test.comparators[0], ast.Constant)
+        and statement.test.comparators[0].value is None
+    ):
+        return any(_reads_itself(inner, parameter) for inner in statement.body)
+    if isinstance(statement, _COMPOUND):
+        return False
+    return any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in _READERS
+        and len(node.args) >= 2  # noqa: PLR2004
+        and _read_bare(node.args[0]) == parameter
+        and isinstance(node.args[1], ast.Constant)
+        and node.args[1].value == parameter
+        for node in ast.walk(statement)
+    )
+
+
+def _read_before(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, call: ast.Call, parameter: str
+) -> bool:
+    """Whether *function* reads *parameter* under its own name on every path to *call*.
+
+    A reading counts where it is a simple statement that comes before one of
+    the statements holding *call*, in the same block: it runs before the call
+    whichever way the function goes. One in a branch, a loop or a handler
+    runs on some paths only.
+    """
+    parents: dict[ast.AST, tuple[ast.AST, list[ast.stmt]]] = {}
+    for node in ast.walk(function):
+        for field in ("body", "orelse", "finalbody", "handlers", "cases"):
+            block = getattr(node, field, None)
+            if isinstance(block, list):
+                for child in block:
+                    parents[child] = (node, block)
+    holder: ast.AST | None = next(
+        (
+            statement
+            for statement in ast.walk(function)
+            if isinstance(statement, ast.stmt)
+            and not isinstance(statement, _COMPOUND)
+            and any(node is call for node in ast.walk(statement))
+        ),
+        None,
+    )
+    while holder is not None and holder in parents:
+        owner, block = parents[holder]
+        if isinstance(holder, ast.stmt):
+            earlier = block[: block.index(holder)]
+            if any(_reads_itself(statement, parameter) for statement in earlier):
+                return True
+        holder = owner if owner is not function else None
+    return False
+
+
+type _Function = ast.FunctionDef | ast.AsyncFunctionDef
+
+
+@dataclass(frozen=True)
+class _Module:
+    """One module of the package as the check reads it."""
+
+    dotted: str
+    where: str
+    tree: ast.Module
+    #: Its functions at the top, by name.
+    functions: dict[str, _Function]
+    #: The names it imports from another module: ``{local: (module, name)}``.
+    imports: dict[str, tuple[str, str]]
+
+    @property
+    def public(self) -> bool:
+        """Whether a caller imports from it by a path with no private part."""
+        return not any(part.startswith("_") for part in self.dotted.split("."))
+
+
+def _module(dotted: str, where: str, tree: ast.Module, *, package: bool) -> _Module:
+    """Read *tree*, the module *dotted* (a package's ``__init__`` when *package*)."""
+    base = dotted if package else dotted.rpartition(".")[0]
+    imports: dict[str, tuple[str, str]] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        source = node.module or ""
+        if node.level:
+            parent = base.rsplit(".", node.level - 1)[0] if node.level > 1 else base
+            source = f"{parent}.{source}" if source else parent
+        for alias in node.names:
+            imports[alias.asname or alias.name] = (source, alias.name)
+    functions = {
+        node.name: node
         for node in tree.body
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-        and node.name.startswith("_")
-        and not node.name.startswith("__")
     }
-    found: list[str] = []
-    for caller in tops:
-        if caller.name.startswith("_"):
-            continue
-        given = set(_parameters(caller))
-        for call in ast.walk(caller):
+    return _Module(dotted, where, tree, functions, imports)
+
+
+def _published(module: _Module) -> set[str]:
+    """The names *module*'s ``__all__`` lists."""
+    for node in module.tree.body:
+        if (
+            isinstance(node, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets)
+            and isinstance(node.value, ast.List | ast.Tuple)
+        ):
+            return {
+                e.value
+                for e in node.value.elts
+                if isinstance(e, ast.Constant) and isinstance(e.value, str)
+            }
+    return set()
+
+
+class _Readings:
+    """What each function of the package reads its parameters as, through its calls too.
+
+    A function reads a parameter under a literal name where it hands it to a
+    reader itself, and wherever it hands it on, bare, to another function of
+    the package, private or public, of its module or one it imports from,
+    that reads it: the name that function's reader writes, however many calls
+    down, is the name the caller's own caller sees. A parameter the function
+    read under its own name on every path to the call is refused there first,
+    so what the callee reads of it after says nothing.
+    """
+
+    def __init__(self, modules: list[_Module]) -> None:
+        self.modules = {module.dotted: module for module in modules}
+        self._memo: dict[tuple[str, str], dict[str, list[_Reading]]] = {}
+
+    def resolve(
+        self, module: _Module, name: str, depth: int = 0
+    ) -> tuple[_Module, _Function] | None:
+        """The function *name* stands for in *module*, followed through its imports."""
+        if name in module.functions:
+            return module, module.functions[name]
+        source, original = module.imports.get(name, ("", ""))
+        if source in self.modules and depth < len(self.modules):
+            return self.resolve(self.modules[source], original, depth + 1)
+        return None
+
+    def handed(
+        self,
+        module: _Module,
+        function: _Function,
+        visiting: frozenset[tuple[str, str]] = frozenset(),
+    ) -> Iterator[tuple[str, list[_Reading]]]:
+        """Each parameter *function* hands on, with how it is read down there."""
+        given = set(_parameters(function))
+        for call in ast.walk(function):
             if not (isinstance(call, ast.Call) and isinstance(call.func, ast.Name)):
                 continue
-            helper, readings = helpers.get(call.func.id, (None, {}))
-            if helper is None or not readings:
+            found = self.resolve(module, call.func.id)
+            if found is None or found[1] is function:
                 continue
-            bound = dict(zip(_parameters(helper), call.args, strict=False))
-            bound.update({k.arg: k.value for k in call.keywords if k.arg})
-            for parameter, uses in readings.items():
-                handed = bound.get(parameter)
-                if not (isinstance(handed, ast.Name) and handed.id in given):
+            owner, callee = found
+            if (owner.dotted, callee.name) in visiting:
+                continue
+            inner = visiting | {(module.dotted, function.name)}
+            readings = self.of(owner, callee, inner)
+            for parameter, value in _bound_arguments(callee, call).items():
+                if not (isinstance(value, ast.Name) and value.id in given):
                     continue
-                found += [
-                    f"{where}:{line}: {helper.name} names {name!r} what "
-                    f"{caller.name} hands it as {handed.id!r}"
-                    for name, line in uses
-                    if name != handed.id
-                ]
-    return found
+                if _read_before(function, call, value.id):
+                    continue
+                if parameter in readings:
+                    yield value.id, readings[parameter]
+
+    def of(
+        self,
+        module: _Module,
+        function: _Function,
+        visiting: frozenset[tuple[str, str]] = frozenset(),
+    ) -> dict[str, list[_Reading]]:
+        """``{parameter: readings}`` of *function*, its own and its callees'."""
+        key = (module.dotted, function.name)
+        if key in self._memo:
+            return self._memo[key]
+        found: dict[str, list[_Reading]] = {
+            parameter: [
+                (name, line, f"{module.where}:{line}: {function.name}")
+                for name, line in uses
+            ]
+            for parameter, uses in _helper_readings(function).items()
+        }
+        for parameter, uses in self.handed(module, function, visiting):
+            found.setdefault(parameter, []).extend(uses)
+        if not visiting:
+            self._memo[key] = found
+        return found
+
+
+def _public_callers(module: _Module, published: set[str]) -> Iterator[_Function]:
+    """The functions and methods of *module* a caller of the library calls."""
+
+    def public(name: str) -> bool:
+        return not name.startswith("_") and (module.public or name in published)
+
+    for node in module.tree.body:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and public(
+            node.name
+        ):
+            yield node
+        elif isinstance(node, ast.ClassDef) and public(node.name):
+            yield from (
+                method
+                for method in node.body
+                if isinstance(method, ast.FunctionDef | ast.AsyncFunctionDef)
+                and not method.name.startswith("_")
+            )
+
+
+def _misnamings(modules: list[_Module]) -> list[str]:
+    """Readings, down any chain of calls in the package, named otherwise than
+    the public parameter handed to them.
+    """
+    readings = _Readings(modules)
+    published = set().union(*(_published(m) for m in modules if m.public))
+    found: set[str] = set()
+    for module in modules:
+        for caller in _public_callers(module, published):
+            for parameter, uses in readings.handed(module, caller):
+                found.update(
+                    f"{place} names {name!r} what {caller.name} hands it as "
+                    f"{parameter!r}"
+                    for name, _line, place in uses
+                    if name != parameter
+                )
+    return sorted(found)
+
+
+def _handed_misnamings(tree: ast.Module, where: str) -> list[str]:
+    """The misnamed readings of one module read on its own, as a public one."""
+    return _misnamings([_module("planted", where, tree, package=False)])
 
 
 def misnamed_handed_readings(root: pathlib.Path) -> list[str]:
-    """Every reading of a private helper under *root* named after no parameter
-    of the public function that hands it the value.
+    """Every reading under *root* named after no parameter of the public
+    function that hands it the value, down any chain of calls.
     """
-    found: list[str] = []
+    modules = []
     for path in sorted(root.rglob("*.py")):
+        relative = path.relative_to(root)
+        parts = (root.name, *relative.with_suffix("").parts)
+        package = parts[-1] == "__init__"
+        dotted = ".".join(parts[:-1] if package else parts)
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        found += _handed_misnamings(tree, str(path.relative_to(root)))
-    return found
+        modules.append(_module(dotted, str(relative), tree, package=package))
+    return _misnamings(modules)
+
+
+def test_a_reading_in_a_module_the_caller_imports_from_is_found() -> None:
+    """A public function of one module hands its value to a function of
+    another, which reads it under that function's own name.
+    """
+    helper = ast.parse(
+        textwrap.dedent(
+            """
+            def plot_transfer_matrix(matrix, frequency):
+                return real_array(frequency, "frequency")
+            """
+        )
+    )
+    caller = ast.parse(
+        textwrap.dedent(
+            """
+            from .._plot.materials import plot_transfer_matrix
+
+            class TransferMatrix:
+                def plot(self, frequencies):
+                    return plot_transfer_matrix(self, frequencies)
+            """
+        )
+    )
+    modules = [
+        _module("pkg._plot.materials", "_plot/materials.py", helper, package=False),
+        _module("pkg.materials.tm", "materials/tm.py", caller, package=False),
+    ]
+    assert _misnamings(modules) == [
+        "_plot/materials.py:3: plot_transfer_matrix names 'frequency' what plot "
+        "hands it as 'frequencies'"
+    ]
 
 
 def test_a_helper_names_a_value_as_the_public_caller_does() -> None:
@@ -379,6 +658,36 @@ def test_a_helper_names_a_value_as_the_public_caller_does() -> None:
 
         def elbow(frequencies, width_m):
             return _bend(frequencies, width=width_m)
+        """,
+        # Two private calls down: the reading names the second helper's own.
+        """
+        def _mean_level(levels):
+            return real_array(levels, "levels")
+
+        def _comparison_inputs(n_bands, reference_levels):
+            return _mean_level(reference_levels)
+
+        def sound_power_comparison(levels, reference_levels):
+            return _comparison_inputs(3, reference_levels)
+        """,
+        # A public function handed another's value, which it reads as its own.
+        """
+        def db_hr_global_index(band_values):
+            return real_array(band_values, "band_values")
+
+        def ra(reduction_index):
+            return db_hr_global_index(reduction_index)
+        """,
+        # Read under its own name in one branch only: the other reaches the
+        # helper unread.
+        """
+        def _mean_level(levels):
+            return real_array(levels, "levels")
+
+        def corrected(levels, background_levels, per_position):
+            if per_position:
+                real_array(background_levels, "background_levels")
+            return _mean_level(background_levels)
         """,
     ],
 )
@@ -413,6 +722,38 @@ def test_the_check_finds_a_helper_reading_named_after_itself(source: str) -> Non
 
         def range_of(spacing_m):
             return _spacing(spacing_m)
+        """,
+        # Read under its own name before another public function reads it.
+        """
+        def db_hr_global_index(band_values):
+            return real_array(band_values, "band_values")
+
+        def ra(reduction_index):
+            real_array(reduction_index, "reduction_index")
+            return db_hr_global_index(reduction_index)
+        """,
+        # Read under its own name whenever it is given, before it goes on.
+        """
+        def assess_background_noise(noise_levels):
+            return real_array(noise_levels, "noise_levels")
+
+        def verify(levels, background_noise_levels=None):
+            if background_noise_levels is not None:
+                real_array(background_noise_levels, "background_noise_levels")
+            if background_noise_levels is not None:
+                return assess_background_noise(background_noise_levels)
+            return None
+        """,
+        # The caller's name handed down the chain with the value.
+        """
+        def _mean_level(levels, name):
+            return real_array(levels, name)
+
+        def _comparison_inputs(reference_levels):
+            return _mean_level(reference_levels, "reference_levels")
+
+        def sound_power_comparison(reference_levels):
+            return _comparison_inputs(reference_levels)
         """,
     ],
 )

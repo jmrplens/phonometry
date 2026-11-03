@@ -1118,12 +1118,18 @@ def impact_mobility(
         )
         raise ValueError(msg)
     require_choice(response_quantity, "response_quantity", tuple(_FRF_OF_RESPONSE))
+    # Read by this function's names for them, which exponential_window and
+    # force_window call decay_rate_per_s, width_s, start_s and taper_s.
+    require_non_negative(exponential_decay_rate_per_s, "exponential_decay_rate_per_s")
     n = f_records.shape[1]
     exponential = exponential_window(
         n, rate, decay_rate_per_s=exponential_decay_rate_per_s
     )
     weighted_force = f_records
     if force_window_s is not None:
+        require_positive(force_window_s, "force_window_s")
+        require_non_negative(force_window_start_s, "force_window_start_s")
+        require_non_negative(force_window_taper_s, "force_window_taper_s")
         window = force_window(
             n,
             rate,

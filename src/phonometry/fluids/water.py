@@ -589,11 +589,14 @@ def sea_water(
     library prints a ratio of specific heats, a viscosity or a thermal
     diffusivity for sea water, so reading one raises rather than guessing.
     """
+    # Read by this function's name for it, which sea_water_sound_speed calls
+    # model.
+    model = require_choice(sound_speed_model, "sound_speed_model", _MODELS)
     speed = sea_water_sound_speed(
         temperature_c,
         salinity_psu,
         depth_m,
-        model=sound_speed_model,
+        model=model,
         latitude_deg=latitude_deg,
     )
     absolute_pa = depth_to_absolute_pressure_pa(

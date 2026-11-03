@@ -519,13 +519,37 @@ def db_hr_global_index(
     :raises TypeError: if ``spectrum`` is not a text, or ``band_values`` or
         ``frequencies`` holds a text or a value that is not a real number.
     """
+    return _global_index(
+        band_values,
+        spectrum,
+        frequencies=frequencies,
+        name=name,
+        owner="db_hr_global_index",
+        values_name="band_values",
+    )
+
+
+def _global_index(
+    band_values: ArrayLike,
+    spectrum: Spectrum,
+    *,
+    frequencies: ArrayLike | None,
+    name: str | None,
+    owner: str,
+    values_name: str,
+) -> DBHRGlobalIndexResult:
+    """The global index of :func:`db_hr_global_index`, refusing by the caller's names.
+
+    :param owner: The public function the caller called.
+    :param values_name: What that function calls *band_values*.
+    """
     key = require_choice(spectrum, "spectrum", _SPECTRA)
-    values = real_array(band_values, "band_values")
+    values = real_array(band_values, values_name)
     if values.ndim != 1:
-        msg = "'band_values' must be one-dimensional."
+        msg = f"'{values_name}' must be one-dimensional."
         raise ValueError(msg)
     if not np.all(np.isfinite(values)):
-        msg = "'band_values' must contain finite values."
+        msg = f"'{values_name}' must contain finite values."
         raise ValueError(msg)
 
     if frequencies is None:
@@ -541,8 +565,8 @@ def db_hr_global_index(
     else:
         given = real_array(frequencies, "frequencies")
         require_equal_shapes(
-            "db_hr_global_index",
-            {"band_values": values.shape, "frequencies": given.shape},
+            owner,
+            {values_name: values.shape, "frequencies": given.shape},
             "band",
         )
         if not np.all(np.isfinite(given)) or np.any(given <= 0.0):
@@ -580,8 +604,13 @@ def ra(
     :param frequencies: Band centre frequencies, in Hz (optional).
     :return: A :class:`DBHRGlobalIndexResult` named ``"RA"``.
     """
-    return db_hr_global_index(
-        reduction_index, "pink", frequencies=frequencies, name="RA"
+    return _global_index(
+        reduction_index,
+        "pink",
+        frequencies=frequencies,
+        name="RA",
+        owner="ra",
+        values_name="reduction_index",
     )
 
 
@@ -596,8 +625,13 @@ def ra_tr(
     :param frequencies: Band centre frequencies, in Hz (optional).
     :return: A :class:`DBHRGlobalIndexResult` named ``"RA,tr"``.
     """
-    return db_hr_global_index(
-        reduction_index, "traffic", frequencies=frequencies, name="RA,tr"
+    return _global_index(
+        reduction_index,
+        "traffic",
+        frequencies=frequencies,
+        name="RA,tr",
+        owner="ra_tr",
+        values_name="reduction_index",
     )
 
 
@@ -612,8 +646,13 @@ def dnt_a(
     :param frequencies: Band centre frequencies, in Hz (optional).
     :return: A :class:`DBHRGlobalIndexResult` named ``_DNT_A``.
     """
-    return db_hr_global_index(
-        level_difference, "pink", frequencies=frequencies, name=_DNT_A
+    return _global_index(
+        level_difference,
+        "pink",
+        frequencies=frequencies,
+        name=_DNT_A,
+        owner="dnt_a",
+        values_name="level_difference",
     )
 
 
@@ -652,8 +691,13 @@ def d2m_nt_a(
         )
         raise ValueError(msg)
     key = require_choice(spectrum, "spectrum", _A5_SPECTRA)
-    return db_hr_global_index(
-        level_difference, key, frequencies=frequencies, name="D2m,nT,A"
+    return _global_index(
+        level_difference,
+        key,
+        frequencies=frequencies,
+        name="D2m,nT,A",
+        owner="d2m_nt_a",
+        values_name="level_difference",
     )
 
 
@@ -695,8 +739,13 @@ def d2m_nt_atr(
         )
         raise ValueError(msg)
     key = require_choice(spectrum, "spectrum", _A6_SPECTRA)
-    return db_hr_global_index(
-        level_difference, key, frequencies=frequencies, name=_D2M_NT_ATR
+    return _global_index(
+        level_difference,
+        key,
+        frequencies=frequencies,
+        name=_D2M_NT_ATR,
+        owner="d2m_nt_atr",
+        values_name="level_difference",
     )
 
 

@@ -1228,6 +1228,11 @@ def verify_induction_loop_system(
         requirements.append(_frequency_response_requirement(frequencies, response_db))
     background = None
     if background_noise_levels is not None:
+        # Read here by this function's name for it, which
+        # assess_background_noise calls noise_levels.
+        background_noise_levels = require_finite_array(
+            background_noise_levels, "background_noise_levels"
+        )
         background = assess_background_noise(
             background_noise_levels, noise_is_tonal=noise_is_tonal
         )

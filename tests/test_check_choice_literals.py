@@ -463,6 +463,199 @@ def test_an_imported_alias_is_read_where_it_is_written(
     assert ccl.takes_any_strings(read)
 
 
+def test_the_later_of_two_imports_of_one_name_is_the_one_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Of two imports of one name, a module holds the later, as Python leaves it.
+
+    ``from ._later_first import KINDS, Names`` then ``from ._later_second
+    import KINDS, Names`` makes the importing module's ``KINDS`` the second
+    module's table and its ``Names`` the second module's alias, a closed
+    choice where the first module's takes any strings.
+    """
+    sources = {
+        "_later_first": (
+            "from collections.abc import Iterable\n\n"
+            "KINDS = ('a', 'b')\n"
+            "Names = Iterable[str]\n"
+        ),
+        "_later_second": (
+            "from typing import Literal\n\n"
+            "KINDS = ('c', 'd')\n"
+            "Names = Literal['c', 'd']\n"
+        ),
+        "_later_user": (
+            "from ._later_first import KINDS, Names\n"
+            "from ._later_second import KINDS, Names\n"
+        ),
+    }
+    for stem, text in sources.items():
+        path = tmp_path / f"{stem}.py"
+        path.write_text(text, encoding="utf-8")
+        name = f"phonometry.{stem}"
+        spec = importlib.util.spec_from_file_location(name, path)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, name, module)
+        spec.loader.exec_module(module)
+    constants = ccl._constants_of("phonometry._later_user")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"c", "d"}
+    assert ccl.expanded("Names", "phonometry._later_user") == "Literal['c', 'd']"
+
+
+def _plant_modules(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, sources: dict[str, str]
+) -> None:
+    """Write and import each of *sources* as ``phonometry.<stem>``, in order."""
+    for stem, text in sources.items():
+        path = tmp_path / f"{stem}.py"
+        path.write_text(textwrap.dedent(text), encoding="utf-8")
+        name = f"phonometry.{stem}"
+        spec = importlib.util.spec_from_file_location(name, path)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, name, module)
+        spec.loader.exec_module(module)
+
+
+#: Two modules that bind ``KINDS`` and ``Names`` to two different choices.
+_TWO_CHOICES = {
+    "_branch_first": """
+        from collections.abc import Iterable
+
+        KINDS = ('a', 'b')
+        Names = Iterable[str]
+        """,
+    "_branch_second": """
+        from typing import Literal
+
+        KINDS = ('c', 'd')
+        Names = Literal['c', 'd']
+        """,
+}
+
+
+@pytest.mark.parametrize(
+    ("stem", "user"),
+    [
+        (
+            "_branch_try_second",
+            """
+            try:
+                from ._branch_second import KINDS, Names
+            except ImportError:
+                from ._branch_first import KINDS, Names
+            """,
+        ),
+        (
+            "_branch_try_first",
+            """
+            try:
+                from ._branch_first import KINDS, Names
+            except ImportError:
+                from ._branch_second import KINDS, Names
+            """,
+        ),
+        (
+            "_branch_if_second",
+            """
+            import sys
+
+            if sys.version_info >= (3,):
+                from ._branch_second import KINDS, Names
+            else:
+                from ._branch_first import KINDS, Names
+            """,
+        ),
+        (
+            "_branch_if_first",
+            """
+            import sys
+
+            if sys.version_info >= (3,):
+                from ._branch_first import KINDS, Names
+            else:
+                from ._branch_second import KINDS, Names
+            """,
+        ),
+    ],
+    ids=["try-second", "try-first", "if-second", "if-first"],
+)
+def test_two_imports_in_branches_that_disagree_give_no_value(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, stem: str, user: str
+) -> None:
+    """Of two imports of one name in the branches of a ``try`` or an ``if``,
+    either may be what the module holds, so a table or an alias they bind to
+    two values is read as neither.
+
+    The later stood for the name, so the ``except`` clause's or the
+    ``else``'s import was read where the ``try`` body's or the ``if``'s,
+    which runs whenever it can, holds another table and another alias. Each
+    case is a module of its own name, since the readers keep what they read
+    of a module by its name.
+    """
+    _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, stem: user})
+    constants = ccl._constants_of(f"phonometry.{stem}")
+    assert "KINDS" not in constants
+    assert ccl.expanded("Names", f"phonometry.{stem}") == "Names"
+
+
+def test_two_imports_in_branches_that_agree_give_their_value(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Two imports of one name in the branches of a ``try`` from one module
+    bind it to one table and one alias, whichever runs.
+    """
+    user = """
+        try:
+            from ._branch_second import KINDS, Names
+        except ImportError:
+            from ._branch_second import KINDS, Names
+        """
+    _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, "_branch_agree": user})
+    constants = ccl._constants_of("phonometry._branch_agree")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"c", "d"}
+    assert ccl.expanded("Names", "phonometry._branch_agree") == "Literal['c', 'd']"
+
+
+def test_a_name_imported_for_the_type_checker_is_the_import_that_stands(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A name a module imports under ``TYPE_CHECKING`` alone is read as the
+    import of it that stands: the later of two in a row, and none of two in
+    the branches of a ``try`` that bring in two different objects.
+
+    The first import of the name in the source was read, so the earlier of
+    two in a row stood for it, and either branch's for two that disagree.
+    """
+    sources = {
+        "_checked_a": "class Thing:\n    pass\n",
+        "_checked_b": "class Thing:\n    pass\n",
+        "_checked_in_a_row": """
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                from ._checked_a import Thing
+                from ._checked_b import Thing
+            """,
+        "_checked_in_branches": """
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                try:
+                    from ._checked_a import Thing
+                except ImportError:
+                    from ._checked_b import Thing
+            """,
+    }
+    _plant_modules(tmp_path, monkeypatch, sources)
+    later = sys.modules["phonometry._checked_b"].Thing
+    assert ccl._resolved("Thing", "phonometry._checked_in_a_row") is later
+    assert ccl._resolved("Thing", "phonometry._checked_in_branches") is None
+
+
 def test_a_table_imported_from_a_sibling_module_is_followed() -> None:
     """``from .fdtd import _SIDES`` gives the elastic engine the acoustic one's
     sides, read where they are written, and a set difference with them closes

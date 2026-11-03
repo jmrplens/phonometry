@@ -717,6 +717,43 @@ def test_a_name_bound_in_any_block_at_the_top_is_read() -> None:
     )
 
 
+def test_an_import_is_read_where_python_leaves_it() -> None:
+    """Of the bindings of a name at the top of a module, the imports that may
+    stand once it has run are its sources: either of two in the branches of
+    a ``try``, none that a later ``def`` replaces, and none under
+    ``TYPE_CHECKING``.
+
+    The imports were read alone and the later kept, so the ``except``
+    clause's import hid the ``try`` body's, which runs whenever it can, and
+    an import a ``def`` replaced still gave the name a source.
+    """
+    module = _module_from(
+        "fake_two_imports",
+        """\
+from typing import TYPE_CHECKING
+
+try:
+    from json import dumps as either
+except ImportError:
+    from _absent_private import dumps as either
+from json import loads as replaced
+
+
+def replaced():
+    return None
+
+
+from json import JSONDecoder as kept
+if TYPE_CHECKING:
+    from _absent_private import JSONDecoder as kept
+""",
+    )
+    sources = gate.imported_from(module)
+    assert sources["either"] == ("json", "_absent_private")
+    assert "replaced" not in sources
+    assert sources["kept"] == ("json",)
+
+
 def test_a_statement_in_a_case_runs_at_the_top_of_a_module() -> None:
     import ast
 

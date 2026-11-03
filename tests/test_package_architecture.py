@@ -16,7 +16,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import TypeGuard
+from typing import Literal, TypeGuard
 
 import pytest
 
@@ -26,7 +26,7 @@ if _SCRIPTS not in sys.path:
 
 import check_parameter_annotations as cpa
 import check_return_overloads as return_overloads
-from ast_scan import python_files
+from ast_scan import bindings_from, live_bindings, python_files
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -1095,6 +1095,9 @@ def _message_text(node: ast.Assign) -> str | None:
 #: The modules whose float constants are spelled by name.
 _FLOAT_CONSTANT_OWNERS = frozenset({"np", "numpy", "math"})
 
+#: The modules whose float constants are spelled by name, as imported.
+_FLOAT_CONSTANT_MODULES = frozenset({"numpy", "math"})
+
 #: Their float constants: a comparison with one is a comparison with a float
 #: literal written out by name, ``x == np.inf`` as much as ``x == 1e308``.
 _FLOAT_CONSTANT_NAMES = frozenset(
@@ -1116,16 +1119,25 @@ _FLOAT_CONSTANT_NAMES = frozenset(
 )
 
 
-def _is_float_constant(node: ast.expr) -> bool:
-    """Whether *node* is a float literal, signed, named or spelled ``float("inf")``."""
+def _is_float_constant(node: ast.expr, names: _ScopeNames | None = None) -> bool:
+    """Whether *node* is a float literal, signed, named or spelled ``float("inf")``.
+
+    Named by numpy or ``math`` (``np.inf``, ``math.pi``), through a name
+    that may hold the module where it is read (``import math as m``, then
+    ``m.pi``), or by a name that may hold one of their constants there
+    (``from math import pi``), as *names*, the scope it is read in, has it.
+    """
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
         node = node.operand
     if isinstance(node, ast.Constant):
         return isinstance(node.value, float)
+    if isinstance(node, ast.Name):
+        return names is not None and names.may_hold(node, "constant")
     if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
-        return (
-            node.value.id in _FLOAT_CONSTANT_OWNERS
-            and node.attr in _FLOAT_CONSTANT_NAMES
+        owner = node.value
+        return node.attr in _FLOAT_CONSTANT_NAMES and (
+            owner.id in _FLOAT_CONSTANT_OWNERS
+            or (names is not None and names.may_hold(owner, "owner"))
         )
     return (
         isinstance(node, ast.Call)
@@ -1137,24 +1149,516 @@ def _is_float_constant(node: ast.expr) -> bool:
     )
 
 
-def _float_equalities(tree: ast.AST) -> list[str]:
-    """Each ``==`` or ``!=`` of *tree* with a float constant on one side, as ``line source``."""
-    found: list[str] = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Compare):
-            continue
-        left = node.left
-        for operator, right in zip(node.ops, node.comparators, strict=True):
-            if isinstance(operator, (ast.Eq, ast.NotEq)) and (
-                _is_float_constant(left) or _is_float_constant(right)
-            ):
-                found.append(f"{node.lineno} {ast.unparse(node)}")
-            left = right
+#: How a dtype argument spells ``bool``: the builtin, numpy's names for it,
+#: and the strings numpy reads as it.
+_BOOL_DTYPE_NAMES = frozenset({"bool", "bool_", "bool8", "?", "b1"})
+
+#: The byte-order marks numpy reads before a dtype string, ``"|b1"`` or
+#: ``"=?"``, which change nothing for a boolean.
+_BYTE_ORDER_MARKS = "|=<>"
+
+
+#: The comprehensions, each a scope of its own for the variables it loops over.
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+#: The scopes that run when called, not where they are written, and a
+#: generator expression, whose body runs as it is consumed.
+_FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.GeneratorExp)
+
+#: The nodes that open a scope of their own for the names bound in them.
+_NESTED_SCOPES = (
+    ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef, *_COMPREHENSIONS,
+)  # fmt: skip
+
+_Comprehension = ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp
+
+_Scope = (
+    ast.Module
+    | ast.FunctionDef
+    | ast.AsyncFunctionDef
+    | ast.Lambda
+    | ast.ClassDef
+    | _Comprehension
+)
+
+
+def _parameters(arguments: ast.arguments) -> list[ast.arg]:
+    """Every parameter of a function, positional, keyword-only and starred."""
+    starred = [arguments.vararg, arguments.kwarg]
+    return [
+        *arguments.posonlyargs,
+        *arguments.args,
+        *arguments.kwonlyargs,
+        *(parameter for parameter in starred if parameter is not None),
+    ]
+
+
+def _type_parameters(scope: ast.AST) -> set[str]:
+    """The type parameters a generic function or class declares, ``def f[T]``."""
+    if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return {
+            parameter.name
+            for parameter in scope.type_params
+            if isinstance(parameter, (ast.TypeVar, ast.ParamSpec, ast.TypeVarTuple))
+        }
+    return set()
+
+
+def _outer_parts(scope: ast.AST) -> list[ast.AST]:
+    """The parts of a nested *scope* that Python evaluates in the scope around it.
+
+    A class's decorators, bases and keywords, a function's decorators,
+    defaults and annotations, and a comprehension's first iterable.
+    """
+    if isinstance(scope, _COMPREHENSIONS):
+        return [scope.generators[0].iter]
+    if isinstance(scope, ast.ClassDef):
+        return [*scope.decorator_list, *scope.bases, *scope.keywords]
+    if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+        return []
+    arguments = scope.args
+    defaults: list[ast.AST] = [*arguments.defaults]
+    defaults.extend(default for default in arguments.kw_defaults if default)
+    if isinstance(scope, ast.Lambda):
+        return defaults
+    annotations = [p.annotation for p in _parameters(arguments) if p.annotation]
+    returns = [scope.returns] if scope.returns else []
+    return [*scope.decorator_list, *defaults, *annotations, *returns]
+
+
+def _scope_body(scope: _Scope) -> list[ast.AST]:
+    """The statements, or the expressions, that run in *scope* itself.
+
+    A lambda's expression; a comprehension's result, its loop variables, its
+    conditions and every iterable after the first.
+    """
+    if isinstance(scope, ast.Lambda):
+        return [scope.body]
+    if isinstance(scope, _COMPREHENSIONS):
+        generators = scope.generators
+        results: list[ast.AST] = (
+            [scope.key, scope.value] if isinstance(scope, ast.DictComp) else [scope.elt]
+        )
+        return [
+            *results,
+            *(generator.target for generator in generators),
+            *(condition for generator in generators for condition in generator.ifs),
+            *(generator.iter for generator in generators[1:]),
+        ]
+    return list(scope.body)
+
+
+def _own_nodes(scope: _Scope) -> tuple[list[ast.AST], list[_Scope]]:
+    """The nodes that run in *scope*, in the order of the source, and the scopes nested directly in it.
+
+    A nested function's, class's or comprehension's body is its own scope's;
+    its decorators, defaults, annotations, bases or first iterable run here.
+    """
+    own: list[ast.AST] = []
+    nested: list[_Scope] = []
+    pending = _scope_body(scope)[::-1]
+    while pending:
+        node = pending.pop()
+        own.append(node)
+        if isinstance(node, _NESTED_SCOPES):
+            nested.append(node)
+            pending.extend(_outer_parts(node)[::-1])
+        else:
+            pending.extend(list(ast.iter_child_nodes(node))[::-1])
+    return own, nested
+
+
+def _walrus_targets(comprehension: _Comprehension) -> set[str]:
+    """The names a ``:=`` in *comprehension* binds, which belong to the scope around it.
+
+    Read through the comprehensions nested in it, which hand theirs on the
+    same way, and not into a function, class or lambda nested there.
+    """
+    names: set[str] = set()
+    pending = list(ast.iter_child_nodes(comprehension))
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.NamedExpr):
+            names.add(node.target.id)
+        if isinstance(node, _COMPREHENSIONS) or not isinstance(node, _NESTED_SCOPES):
+            pending.extend(ast.iter_child_nodes(node))
+    return names
+
+
+#: What the reader follows a name to: numpy's boolean, a float constant of
+#: numpy or ``math``, or one of those modules.
+_Kind = Literal["bool", "constant", "owner"]
+
+#: One binding of a name: the node that binds it, and what it binds the name
+#: to, ``None`` for anything the reader does not follow.
+_Binding = tuple[ast.AST, _Kind | None]
+
+
+def _imported_kind(node: ast.ImportFrom, name: str) -> _Kind | None:
+    """What ``from <module> import <name>`` binds: numpy's boolean, a float constant, or neither."""
+    if node.level != 0:
+        return None
+    if node.module in {"numpy", "np"} and name in _BOOL_DTYPE_NAMES:
+        return "bool"
+    if node.module in _FLOAT_CONSTANT_MODULES and name in _FLOAT_CONSTANT_NAMES:
+        return "constant"
+    return None
+
+
+def _import_kinds(node: ast.Import | ast.ImportFrom) -> list[tuple[str, _Kind | None]]:
+    """Each name *node* binds, with what it binds the name to.
+
+    ``import numpy as n`` and ``import math.x`` bind the module itself, an
+    owner of float constants; a star import binds no name the reader sees.
+    """
+    if isinstance(node, ast.ImportFrom):
+        return [
+            (alias.asname or alias.name, _imported_kind(node, alias.name))
+            for alias in node.names
+            if alias.name != "*"
+        ]
+    found: list[tuple[str, _Kind | None]] = []
+    for alias in node.names:
+        bound = alias.asname or alias.name.partition(".")[0]
+        module = alias.name if alias.asname else bound
+        found.append((bound, "owner" if module in _FLOAT_CONSTANT_MODULES else None))
     return found
 
 
+def _statement_bindings(
+    own: list[ast.AST],
+) -> tuple[dict[str, list[_Binding]], set[str], set[str]]:
+    """Each name the statements among *own* bind, with every binding of it, and the names declared ``global`` and ``nonlocal``.
+
+    An assignment, a ``del``, a loop, ``with``, ``except`` or ``match`` name,
+    a ``def`` or a ``class``, an import, and a ``:=`` in a comprehension,
+    which binds in the scope around the comprehension.
+    """
+    flow: dict[str, list[_Binding]] = {}
+    declared_global: set[str] = set()
+    declared_nonlocal: set[str] = set()
+    for node in own:
+        bound: list[tuple[str, _Kind | None]] = []
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            bound.append((node.id, None))
+        elif isinstance(node, _COMPREHENSIONS):
+            bound.extend((name, None) for name in _walrus_targets(node))
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            bound.extend(_import_kinds(node))
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bound.append((node.name, None))
+        elif isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+            bound.extend([(node.name, None)] if node.name else [])
+        elif isinstance(node, ast.MatchMapping) and node.rest:
+            bound.append((node.rest, None))
+        elif isinstance(node, ast.Global):
+            declared_global.update(node.names)
+        elif isinstance(node, ast.Nonlocal):
+            declared_nonlocal.update(node.names)
+        for name, kind in bound:
+            flow.setdefault(name, []).append((node, kind))
+    return flow, declared_global, declared_nonlocal
+
+
+def _expression_names(
+    scope: ast.Lambda | _Comprehension, own: list[ast.AST]
+) -> set[str]:
+    """The names a lambda or a comprehension binds for the whole of its run.
+
+    A lambda's parameters and the names a ``:=`` in it binds, there or in a
+    comprehension of it; a comprehension's loop variables alone, its ``:=``
+    binding in the scope around it.
+    """
+    if isinstance(scope, _COMPREHENSIONS):
+        return {
+            name.id
+            for generator in scope.generators
+            for name in ast.walk(generator.target)
+            if isinstance(name, ast.Name)
+        }
+    names = {parameter.arg for parameter in _parameters(scope.args)}
+    for node in own:
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            names.add(node.id)
+        elif isinstance(node, _COMPREHENSIONS):
+            names.update(_walrus_targets(node))
+    return names
+
+
+@dataclasses.dataclass(eq=False)
+class _ScopeNames:
+    """What one scope binds of the names the reader follows, and where it reads the rest.
+
+    A read takes the binding Python gives the name where it is read
+    (:meth:`may_hold`).
+    """
+
+    #: The scope.
+    scope: _Scope
+    #: The module the scope is written in, whose blocks place each binding.
+    tree: ast.Module
+    #: Each name the scope's statements bind, with every binding of it.
+    flow: dict[str, list[_Binding]]
+    #: The names it binds for the whole of its run: a function's parameters
+    #: and type parameters, a generic class's, a comprehension's loop
+    #: variables, a lambda's parameters.
+    entry: frozenset[str]
+    #: The names it declares ``global``, which are the module's.
+    declared_global: frozenset[str]
+    #: The names it declares ``nonlocal``, which are a function's around it.
+    declared_nonlocal: frozenset[str]
+    #: The scope it reads a name it does not bind from: the function or the
+    #: module around it, past any class body.
+    outer: _ScopeNames | None
+    #: Where in *outer* it is written: the scope itself, or the class
+    #: statement around it, which runs there; ``None`` for the module.
+    at: ast.AST | None
+    #: What the scopes nested in it bind its names to through ``global`` or
+    #: ``nonlocal``, whenever they run.
+    from_inside: dict[str, set[_Kind]] = dataclasses.field(default_factory=dict)
+
+    def binds(self, name: str) -> bool:
+        """Whether *name* is the scope's own, bound in it and declared neither ``global`` nor ``nonlocal``."""
+        declared = name in self.declared_global or name in self.declared_nonlocal
+        return not declared and (name in self.flow or name in self.entry)
+
+    def module(self) -> _ScopeNames:
+        """The module's names, which a name declared ``global`` reads."""
+        names = self
+        while names.outer is not None:
+            names = names.outer
+        return names
+
+    def kinds(self, name: str, point: ast.AST | None) -> set[_Kind]:
+        """What *name*, read at *point* of this scope or once it has run (``None``), may be bound to.
+
+        The scope that holds the name is found as Python finds it: this one
+        when it binds the name, the module for a name declared ``global``,
+        the function around for one declared ``nonlocal``, and otherwise the
+        scope around. A class body and a list, set or dict comprehension run
+        where they are written, so the scope around is read there, at the
+        bindings that may reach the read (:func:`ast_scan.live_bindings`):
+        the later of two in a row, either of two in the branches of an
+        ``if``, one on an earlier turn of a loop around the read, any of them
+        when none runs before it. A function and a lambda run when they are
+        called, and a generator expression as it is consumed, which may be at
+        once or after a later binding, so past one the scope around is read
+        at every binding that may stand from where it is written on
+        (:func:`ast_scan.bindings_from`). With either, whatever a scope
+        nested there binds the name to through ``global`` or ``nonlocal``,
+        which may run at any time.
+        """
+        names = self
+        called = False
+        while not names.binds(name) and names.outer is not None:
+            holder = names.module() if name in names.declared_global else names.outer
+            while names is not holder and names.outer is not None:
+                called = called or isinstance(names.scope, _FUNCTIONS)
+                names, point = names.outer, names.at
+        found = set(names.from_inside.get(name, ()))
+        bindings = names.flow.get(name, [])
+        if any(kind is not None for _, kind in bindings):
+            nodes = [node for node, _ in bindings]
+            reach = bindings_from if called else live_bindings
+            live = reach(names.tree, nodes, point)
+            found.update(
+                kind
+                for node, kind in bindings
+                if kind is not None and any(node is other for other in live)
+            )
+        return found
+
+    def may_hold(self, name: ast.Name, kind: _Kind) -> bool:
+        """Whether *name*, read in this scope, may be bound to *kind* where it is read."""
+        return kind in self.kinds(name.id, name)
+
+
+def _nested_names(
+    tree: ast.Module, scope: _Scope, around: _ScopeNames, own: list[ast.AST]
+) -> _ScopeNames:
+    """What *scope*, whose own nodes are *own*, binds, and where it reads the names it does not.
+
+    *around* is the scope it is written in, and the scope's own node, or the
+    class statement around it, is where it is written there
+    (:meth:`_ScopeNames.kinds` reads the names around it from that point).
+    None reads a class body's names: a scope written in one reads
+    from the scope around the class, where the class statement runs, and a
+    generic class's type parameters hide those names for it.
+    """
+    hidden: frozenset[str] = frozenset()
+    outer: _ScopeNames | None = around
+    at: ast.AST | None = scope
+    if isinstance(around.scope, ast.ClassDef):
+        hidden = around.entry
+        outer = around.outer
+        at = around.at
+    if isinstance(scope, (ast.Lambda, *_COMPREHENSIONS)):
+        entry = frozenset(_expression_names(scope, own)) | hidden
+        empty: frozenset[str] = frozenset()
+        return _ScopeNames(scope, tree, {}, entry, empty, empty, outer, at)
+    flow, declared_global, declared_nonlocal = _statement_bindings(own)
+    entry = frozenset(_type_parameters(scope)) | hidden
+    if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        entry |= {parameter.arg for parameter in _parameters(scope.args)}
+    return _ScopeNames(
+        scope,
+        tree,
+        flow,
+        entry,
+        frozenset(declared_global),
+        frozenset(declared_nonlocal),
+        outer,
+        at,
+    )
+
+
+def _send_declared(names: _ScopeNames) -> None:
+    """Hand what *names*' scope binds a name it declares ``global`` or ``nonlocal`` to, to the scope that holds the name.
+
+    The module for ``global``; for ``nonlocal``, the nearest function around
+    that binds the name. The scope may run at any time, so what it binds
+    joins every read of the name there.
+    """
+    for name in names.declared_global | names.declared_nonlocal:
+        kinds = {kind for _, kind in names.flow.get(name, []) if kind is not None}
+        target: _ScopeNames | None = names.module()
+        if name not in names.declared_global:
+            target = names.outer
+            while target is not None and not target.binds(name):
+                target = None if name in target.declared_global else target.outer
+        if target is not None and kinds:
+            target.from_inside.setdefault(name, set()).update(kinds)
+
+
+def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
+    """Each scope of *tree*, as its own nodes and what it binds and reads of numpy and ``math``.
+
+    A ``from numpy import bool_ as flag``, a ``from math import pi`` or an
+    ``import math as m`` binds its name where Python binds it: in the scope
+    that imports it, and in the functions, classes and comprehensions
+    nested there that do not bind the name themselves; in the module when a
+    function that declares the name ``global`` imports it, and in the
+    function around when one declares it ``nonlocal``, which a pass over
+    every scope collects before any name is read. A class body's methods
+    and comprehensions do not see the class's names; a comprehension's loop
+    variable and a generic function's or class's type parameter hide the
+    import. A read takes the bindings the name may hold where it is read
+    (:meth:`_ScopeNames.kinds`), so a later binding of the name, an
+    assignment as much as an import, replaces an earlier one; a function, a
+    lambda or a generator expression reads it at a call, which may come
+    before a later binding, so it reads every binding from where it is
+    written on. A name
+    assigned ``bool`` or a constant is not followed.
+    """
+    own, nested = _own_nodes(tree)
+    flow, _, _ = _statement_bindings(own)
+    none: frozenset[str] = frozenset()
+    module = _ScopeNames(tree, tree, flow, none, none, none, None, None)
+    found = [(own, module)]
+    pending = [(inner, module) for inner in nested]
+    while pending:
+        scope, around = pending.pop()
+        own, nested = _own_nodes(scope)
+        names = _nested_names(tree, scope, around, own)
+        found.append((own, names))
+        pending.extend((inner, names) for inner in nested)
+    for _, names in found:
+        _send_declared(names)
+    return found
+
+
+def _is_dtype_call(node: ast.expr) -> TypeGuard[ast.Call]:
+    """Whether *node* is a call to a ``dtype`` constructor, ``np.dtype(...)``."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "dtype"
+    )
+
+
+def _is_bool_dtype(node: ast.expr, names: _ScopeNames | None = None) -> bool:
+    """Whether *node* names the boolean dtype, in a spelling the scan recognises.
+
+    ``bool``; a name that may hold numpy's boolean where it is read, as
+    *names*, the scope it is read in, has it (``from numpy import bool_ as
+    flag``); an attribute ``bool``, ``bool_`` or ``bool8`` of whatever owner
+    (``np``, ``numpy``, an array namespace ``xp``); a ``dtype`` call on any
+    of them, positional or ``dtype=``, and that call's ``.type``; and the
+    strings ``"bool"``, ``"bool_"``, ``"bool8"``, ``"?"`` and ``"b1"``, with
+    or without a byte-order mark. A name assigned ``bool`` (``kind = bool``)
+    is not followed.
+    """
+    if isinstance(node, ast.Attribute) and node.attr == "type":
+        return _is_dtype_call(node.value) and _is_bool_dtype(node.value, names)
+    if _is_dtype_call(node):
+        given = [*node.args[:1], *(k.value for k in node.keywords if k.arg == "dtype")]
+        return any(_is_bool_dtype(dtype, names) for dtype in given)
+    if isinstance(node, ast.Name):
+        return node.id == "bool" or (names is not None and names.may_hold(node, "bool"))
+    if isinstance(node, ast.Attribute):
+        return node.attr in _BOOL_DTYPE_NAMES
+    return (
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, str)
+        and node.value.lstrip(_BYTE_ORDER_MARKS) in _BOOL_DTYPE_NAMES
+    )
+
+
+def _is_bool_cast(node: ast.Call, names: _ScopeNames | None = None) -> bool:
+    """Whether *node* is an ``astype`` to ``bool``, in a spelling the scan recognises.
+
+    The call as ``x.astype(bool)``, ``np.astype(x, bool)`` or
+    ``np.ndarray.astype(x, bool)``: the dtype is read from the first two
+    arguments, where the method form's second is its order string, never a
+    dtype, and from ``dtype=``, in the spellings :func:`_is_bool_dtype`
+    lists. A float cast to ``bool`` is ``x != 0.0`` under another name. The
+    source cannot say which arrays are floats, so the cast is refused
+    whatever it is applied to: a boolean array needs none, an integer one
+    says ``!= 0``.
+    """
+    if not (isinstance(node.func, ast.Attribute) and node.func.attr == "astype"):
+        return False
+    dtypes = [*node.args[:2], *(k.value for k in node.keywords if k.arg == "dtype")]
+    return any(_is_bool_dtype(dtype, names) for dtype in dtypes)
+
+
+def _float_equalities(tree: ast.Module) -> list[str]:
+    """Each equality with a float constant, or cast to ``bool``, of *tree*, as ``line source``.
+
+    An ``==`` or ``!=`` with a float constant on one side, in the spellings
+    :func:`_is_float_constant` recognises, and every ``astype`` to ``bool``
+    that :func:`_is_bool_cast` recognises, which on a float array is the same
+    test against zero, in the order of the lines. A name is read in the
+    scope and at the point where Python reads it (:func:`_alias_scopes`).
+    """
+    found: list[tuple[int, str]] = []
+    for own, names in _alias_scopes(tree):
+        for node in own:
+            if isinstance(node, ast.Call) and _is_bool_cast(node, names):
+                found.append((node.lineno, ast.unparse(node)))
+                continue
+            if not isinstance(node, ast.Compare):
+                continue
+            left = node.left
+            for operator, right in zip(node.ops, node.comparators, strict=True):
+                if isinstance(operator, (ast.Eq, ast.NotEq)) and (
+                    _is_float_constant(left, names) or _is_float_constant(right, names)
+                ):
+                    found.append((node.lineno, ast.unparse(node)))
+                left = right
+    return [f"{line} {source}" for line, source in sorted(found, key=lambda f: f[0])]
+
+
 def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> None:
-    """A literal, a signed one, one named by numpy or math, and ``float("inf")``."""
+    """A literal, a signed one, one named by numpy or math, ``float("inf")``, and a cast to bool.
+
+    The cast in each spelling the scan recognises, of the call (the method,
+    ``np.astype`` and ``np.ndarray.astype``) and of the dtype
+    (``np.dtype(bool)``, positional or by keyword, and its ``.type``, a
+    string with a byte-order mark, an array namespace's ``bool``, a name
+    imported from numpy); a name assigned ``bool`` and an array built with
+    a boolean dtype are left to review.
+    """
     source = "\n".join(
         [
             "a = x == 0.0",
@@ -1167,10 +1671,330 @@ def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> N
             "h = x <= np.inf",
             "i = np.isposinf(x)",
             "j = x == other",
+            "k = x.astype(bool)",
+            "l = x.astype(np.bool_)",
+            "m = np.diff(x).astype(dtype='?')",
+            "n = x.astype(numpy.bool)",
+            "o = x.astype(float)",
+            "p = np.asarray(x > 0.5, dtype=bool)",
+            "q = np.astype(x, bool)",
+            "r = np.ndarray.astype(x, 'b1')",
+            "s = x.astype(np.dtype(bool))",
+            "t = x.astype(dtype=numpy.dtype('?'))",
+            "u = x.astype('|b1')",
+            "v = x.astype('=?')",
+            "w = x.astype(xp.bool)",
+            "from numpy import bool_ as flag, float64",
+            "y = x.astype(flag)",
+            "z = x.astype(np.float64, 'K')",
+            "aa = np.astype(x, float64)",
+            "x = y.astype(np.dtype(bool).type)",
+            "ab = x.astype(numpy.dtype(dtype='?'))",
+            "ac = x.astype(np.dtype(float).type)",
+            "ad = x.astype(y.dtype.type)",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
-        "1", "2", "3", "4", "5", "6",
+        "1", "2", "3", "4", "5", "6", "11", "12", "13", "14", "17", "18", "19",
+        "20", "21", "22", "23", "25", "28", "29",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_numpy_bool_alias_in_its_own_scope() -> None:
+    """A name imported as numpy's boolean is one only where Python resolves it there.
+
+    An import at the top of a module reaches every function that does not bind
+    the name itself, and one that declares it ``global`` even where the
+    function around it binds the name; one inside a function reaches that
+    function and the functions and comprehensions nested in it, and not a
+    function nested there that declares the name ``global``. None reaches a
+    class body's methods and comprehensions (the comprehension's first
+    iterable runs in the class body), another function, a comprehension that
+    loops over the name, or a generic function or class that takes it as a
+    type parameter, where the same name may hold any dtype; a ``:=`` in a
+    comprehension binds the name in the function around it.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "def uses_the_module_import(x):",
+            "    return x.astype(flag)",
+            "def binds_the_name_itself(x, flag):",
+            "    return x.astype(flag)",
+            "def assigns_the_name(x):",
+            "    flag = np.float64",
+            "    return x.astype(flag)",
+            "def imports_its_own(x):",
+            "    from numpy import bool_ as mask",
+            "    def inner(y):",
+            "        return y.astype(mask)",
+            "    return x.astype(mask)",
+            "def another(x, mask):",
+            "    return x.astype(mask)",
+            "class Holder:",
+            "    from numpy import bool_ as kept",
+            "    ones = np.ones(2).astype(kept)",
+            "    cast = staticmethod(lambda x: x.astype(kept))",
+            "    def method(self, x, kept=np.float64):",
+            "        return x.astype(kept)",
+            "def global_name(x):",
+            "    global flag",
+            "    return x.astype(flag)",
+            "def comprehension(x, y):",
+            "    kinds = [str(flag) for flag in y]",
+            "    return x.astype(flag)",
+            "def outer(x):",
+            "    flag = np.float64",
+            "    def inner(y):",
+            "        global flag",
+            "        return y.astype(flag)",
+            "    return inner(x)",
+            "def imports_then_declares_global(x):",
+            "    from numpy import bool_ as mask",
+            "    def inner(y):",
+            "        global mask",
+            "        return y.astype(mask)",
+            "    return inner(x)",
+            "def comprehension_variable(xs):",
+            "    return [x.astype(flag) for flag in (np.float32, np.float64)]",
+            "class Casts:",
+            "    from numpy import bool_ as kept",
+            "    each = [x.astype(kept) for x in xs]",
+            "    first = [y for y in xs.astype(kept)]",
+            "def walrus(xs, x):",
+            "    kinds = [(flag := k) for k in xs]",
+            "    return x.astype(flag)",
+            "def generic[flag](x):",
+            "    return x.astype(flag)",
+            "class Box[flag]:",
+            "    def method(self, x):",
+            "        return x.astype(flag)",
+            "def comprehension_sees_its_function(xs):",
+            "    from numpy import bool_ as mask",
+            "    return {x: x.astype(mask) for x in xs}",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "12", "13", "18", "24", "27", "32", "45", "56",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_constant_imported_by_name() -> None:
+    """A constant imported from numpy or ``math`` by name, or read through the module renamed.
+
+    ``from math import pi`` makes ``x == pi`` the comparison ``x == math.pi``
+    is, and ``import math as m`` makes ``m.pi`` the constant; each is read in
+    the scope where Python resolves the name, so a parameter called ``pi``
+    is a variable, and a name another function imported is not this one's.
+    """
+    source = "\n".join(
+        [
+            "from math import pi, inf as INF",
+            "from numpy import nan",
+            "import math as m",
+            "import numpy as n",
+            "a = x == pi",
+            "b = INF != x",
+            "c = x == nan",
+            "d = x == m.e",
+            "e = x == n.inf",
+            "def takes_pi(x, pi):",
+            "    return x == pi",
+            "def imports_tau(x):",
+            "    from math import tau",
+            "    return x == tau",
+            "def another(x):",
+            "    return x == tau",
+            "f = x == e",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "5", "6", "7", "8", "9", "14",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_the_binding_a_name_holds_where_it_is_read() -> (
+    None
+):
+    """Of two bindings of one name in one scope, a read takes the one Python gives it there.
+
+    The later of two imports in a row, whichever ran of two in the branches
+    of an ``if``, an import on an earlier turn of a loop, and an assignment
+    after an import, which the name then holds instead. A function reads its
+    module's name as it may stand at a call, from its ``def`` on; a class
+    body and a list comprehension run where they are written, so they read
+    it there.
+    """
+    source = "\n".join(
+        [
+            "from math import pi as flag",
+            "from numpy import bool_ as flag",
+            "a = x.astype(flag)",
+            "b = x == flag",
+            "from math import pi as flag",
+            "c = x == flag",
+            "d = x.astype(flag)",
+            "def reads_the_module(x):",
+            "    return x == flag",
+            "def imports_twice(x):",
+            "    from numpy import bool_ as mask",
+            "    y = x.astype(mask)",
+            "    from math import tau as mask",
+            "    z = x.astype(mask)",
+            "    return x == mask",
+            "def rebinds(x):",
+            "    from numpy import bool_ as mask",
+            "    mask = np.float64",
+            "    return x.astype(mask)",
+            "def either(x, wide):",
+            "    if wide:",
+            "        from numpy import bool_ as mask",
+            "    else:",
+            "        from numpy import float64 as mask",
+            "    return x.astype(mask)",
+            "def on_a_later_turn(xs):",
+            "    for x in xs:",
+            "        y = x.astype(mask)",
+            "        from numpy import bool_ as mask",
+            "g = [v.astype(flag) for v in xs]",
+            "from numpy import bool_ as kept",
+            "class Early:",
+            "    h = x.astype(kept)",
+            "    i = [v.astype(kept) for v in xs]",
+            "import math as kept",
+            "class Late:",
+            "    j = x.astype(kept)",
+            "    k = x == kept.pi",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "6", "9", "12", "15", "25", "28", "33", "34", "38",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_module_name_a_function_binds() -> None:
+    """An import under ``global`` binds the module's name, one under ``nonlocal`` the function's.
+
+    ``from numpy import bool_ as flag`` in a function that declares ``flag``
+    global makes the module's ``flag`` numpy's boolean once the function has
+    run, for every function that reads the module's name and for the module
+    itself, wherever the function is written; the same for a float constant
+    and for the module ``math`` imported that way, and for a function nested
+    in another that declares the name ``nonlocal``. A function that binds the
+    name itself still holds its own.
+    """
+    source = "\n".join(
+        [
+            "def reads_before_the_import(x):",
+            "    return x.astype(flag)",
+            "def binds_the_module_name():",
+            "    global flag",
+            "    from numpy import bool_ as flag",
+            "def binds_a_constant():",
+            "    global limit",
+            "    from math import inf as limit",
+            "def compares(x):",
+            "    return x == limit",
+            "def binds_the_module():",
+            "    global m",
+            "    import math as m",
+            "def compares_through_it(x):",
+            "    return x == m.pi",
+            "class Holder:",
+            "    def method(self):",
+            "        global kept",
+            "        from numpy import bool_ as kept",
+            "def sibling(x):",
+            "    return x.astype(kept)",
+            "def outer(x):",
+            "    mask = np.float64",
+            "    def inner():",
+            "        nonlocal mask",
+            "        from numpy import bool_ as mask",
+            "    inner()",
+            "    return x.astype(mask)",
+            "def binds_its_own(x, flag):",
+            "    return x.astype(flag)",
+            "a = x.astype(flag)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "2", "10", "15", "21", "28", "31",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_generator_where_it_is_consumed() -> None:
+    """A generator expression runs its body as it is consumed, not where it is written.
+
+    ``(v.astype(flag) for v in xs)`` written while ``flag`` is ``None`` and
+    consumed once ``from numpy import bool_ as flag`` has run casts with
+    numpy's boolean, in a module and in a function alike, so the reader takes
+    the name as the generator may meet it, like a function's; a list
+    comprehension, which runs where it is written, keeps reading it there.
+    """
+    source = "\n".join(
+        [
+            "flag = None",
+            "gen = (v.astype(flag) for v in xs)",
+            "kept = [v.astype(flag) for v in xs]",
+            "from numpy import bool_ as flag",
+            "out = list(gen)",
+            "def consumes_later(xs):",
+            "    mask = None",
+            "    gen = (v.astype(mask) for v in xs)",
+            "    from numpy import bool_ as mask",
+            "    return list(gen)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "2", "8",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_every_binding_a_call_may_meet() -> None:
+    """A function reads the name around it at each call, and a call may come before a later binding.
+
+    ``TABLE = f(values)`` runs ``f`` while ``flag`` is still numpy's boolean,
+    so ``x.astype(flag)`` in ``f`` casts with it, whether an assignment or an
+    import rebinds ``flag`` afterwards, and the same through ``global flag``,
+    a method, a lambda and a function nested in another. A binding that a
+    later one replaces before the ``def`` runs is never met: ``f`` written
+    after ``flag = None`` reads ``None`` alone.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "def f(x):",
+            "    return x.astype(flag)",
+            "TABLE = f(values)",
+            "flag = None",
+            "from numpy import bool_ as mask",
+            "def g(x):",
+            "    return x.astype(mask)",
+            "TABLE = g(values)",
+            "from math import pi as mask",
+            "from numpy import bool_ as kept",
+            "def h(x):",
+            "    global kept",
+            "    return x.astype(kept)",
+            "class Holder:",
+            "    def method(self, x):",
+            "        return x.astype(kept)",
+            "cast = lambda x: x.astype(kept)",
+            "def outer(x):",
+            "    def inner(y):",
+            "        return y.astype(kept)",
+            "    return inner(x)",
+            "TABLE = h(values)",
+            "kept = None",
+            "from numpy import bool_ as gone",
+            "gone = None",
+            "def reads_none(x):",
+            "    return x.astype(gone)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "8", "14", "17", "18", "21",
     ]  # fmt: skip
 
 
@@ -1183,6 +2007,15 @@ def test_no_source_compares_a_float_for_equality() -> None:
     ``x sinc(x)^2`` removes both the singularity and the comparison. Nothing in
     the repository could see the regression; SonarCloud reported it after the
     branch was already pushed, so the class is closed here instead.
+
+    A cast to ``bool`` is the same test spelt otherwise: on a float array,
+    ``x.astype(bool)`` is ``x != 0.0``, and the literal check let eleven of
+    them through (the pinned exponential's two exactness tests, the weighting
+    design's zeros at the origin, and eight exact tests of the ray and
+    underwater solvers). The exponential's now read the bits, the zeros at the
+    origin are counted from the prototype, and an exact test that is meant
+    names itself through ``exactly_nonzero``. The cast is refused whatever it
+    is applied to, since the source does not say which arrays are floats.
     """
     import pathlib
 

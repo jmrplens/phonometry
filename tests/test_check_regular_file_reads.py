@@ -33,12 +33,8 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from typing import TYPE_CHECKING
-
 import check_regular_file_reads as crf
-
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 #: A module that checks a name the way the audio readers of the library do.
 _CHECK = """
@@ -957,6 +953,196 @@ def test_a_package_re_exports_what_any_compound_statement_imports(
     assert [finding.describe() for finding in findings] == []
 
 
+def test_a_package_re_exports_the_later_of_two_imports_of_one_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name at the top of a package's ``__init__``, the
+    package re-exports the later, which Python leaves in place.
+
+    The re-exports were read from the last statement up, so the earlier
+    import, the check, stood for the name, and a module that reaches the
+    later one through the package, which checks nothing, read unchecked.
+    """
+    package = tmp_path / "phonometry" / "io"
+    package.mkdir(parents=True)
+    sources = {
+        "__init__.py": """
+            from ._audio_file import require_regular_audio
+            from ._loose import check_nothing as require_regular_audio
+            """,
+        "_audio_file.py": """
+            from .._internal.json_input import not_regular_at
+
+            def require_regular_audio(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+            """,
+        "_loose.py": """
+            def check_nothing(path):
+                return path
+            """,
+        "_backends.py": """
+            from phonometry.io import require_regular_audio as exported
+
+            def through_the_package(sf, path):
+                exported(path)
+                return sf.read(str(path))
+            """,
+    }
+    for name, source in sources.items():
+        (package / name).write_text(textwrap.dedent(source), encoding="utf-8")
+    findings, _stale = crf.check(sorted(package.iterdir()))
+    assert [(finding.function, finding.line) for finding in findings] == [
+        ("through_the_package", 6)
+    ]
+
+
+#: The modules beside a package ``__init__`` whose re-export of the check
+#: :func:`_read_through_the_package` varies: the check, a function that
+#: checks nothing, and a module that reaches the name through the package.
+_BESIDE_THE_PACKAGE = {
+    "_audio_file.py": """
+        from .._internal.json_input import not_regular_at
+
+        def require_regular_audio(path):
+            if not_regular_at(Path(path)) is not None:
+                raise ValueError(path)
+        """,
+    "_loose.py": """
+        def check_nothing(path):
+            return path
+        """,
+    "_backends.py": """
+        from phonometry.io import require_regular_audio as exported
+
+        def through_the_package(sf, path):
+            exported(path)
+            return sf.read(str(path))
+        """,
+}
+
+
+def _read_through_the_package(
+    tmp_path: pathlib.Path, init: str
+) -> list[tuple[str, int]]:
+    """The findings of a package whose ``__init__`` is *init*, beside
+    :data:`_BESIDE_THE_PACKAGE`, as ``(function, line)``.
+    """
+    package = tmp_path / "phonometry" / "io"
+    package.mkdir(parents=True)
+    for name, source in {"__init__.py": init, **_BESIDE_THE_PACKAGE}.items():
+        (package / name).write_text(textwrap.dedent(source), encoding="utf-8")
+    findings, _stale = crf.check(sorted(package.iterdir()))
+    return [(finding.function, finding.line) for finding in findings]
+
+
+@pytest.mark.parametrize(
+    "init",
+    [
+        """
+        try:
+            from ._loose import check_nothing as require_regular_audio
+        except ImportError:
+            from ._audio_file import require_regular_audio
+        """,
+        """
+        try:
+            from ._audio_file import require_regular_audio
+        except ImportError:
+            from ._loose import check_nothing as require_regular_audio
+        """,
+        """
+        if FAST:
+            from ._loose import check_nothing as require_regular_audio
+        else:
+            from ._audio_file import require_regular_audio
+        """,
+        """
+        if FAST:
+            from ._audio_file import require_regular_audio
+        else:
+            from ._loose import check_nothing as require_regular_audio
+        """,
+    ],
+    ids=["try-loose", "try-check", "if-loose", "else-loose"],
+)
+def test_a_re_export_two_branches_disagree_on_reaches_no_check(
+    tmp_path: pathlib.Path, init: str
+) -> None:
+    """Two imports of one name in the branches of a ``try`` or an ``if`` of a
+    package's ``__init__`` may each be what the package re-exports, so a name
+    they bind to two functions reaches neither, and the read is unchecked.
+
+    The later of the two stood for the name, so a check imported in the
+    ``except`` clause or the ``else`` hid the function that checks nothing in
+    the ``try`` body or the ``if``, which runs whenever its import works.
+    """
+    assert _read_through_the_package(tmp_path, init) == [("through_the_package", 6)]
+
+
+def test_a_re_export_two_branches_agree_on_reaches_the_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two imports of one name in the branches of a ``try`` that bind it to
+    the same check reach it, whichever runs.
+    """
+    init = """
+        try:
+            from ._audio_file import require_regular_audio
+        except ImportError:
+            from ._audio_file import require_regular_audio
+        """
+    assert _read_through_the_package(tmp_path, init) == []
+
+
+@pytest.mark.parametrize(
+    ("init", "found"),
+    [
+        (
+            """
+            from ._audio_file import require_regular_audio
+            from ._loose import check_nothing
+            require_regular_audio = check_nothing
+            """,
+            [("through_the_package", 6)],
+        ),
+        (
+            """
+            from ._audio_file import require_regular_audio
+
+            def require_regular_audio(path):
+                return path
+            """,
+            [("through_the_package", 6)],
+        ),
+        (
+            """
+            from ._audio_file import require_regular_audio
+            from .._internal.json_input import not_regular_at
+
+            def require_regular_audio(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+            """,
+            [],
+        ),
+    ],
+    ids=["assignment", "def-that-checks-nothing", "def-that-checks"],
+)
+def test_a_binding_after_a_re_export_takes_the_name_from_it(
+    tmp_path: pathlib.Path, init: str, found: list[tuple[str, int]]
+) -> None:
+    """An assignment or a ``def`` after an import of one name in a package's
+    ``__init__`` is what the package holds under it, so a module that reaches
+    the name through the package reaches that, not the import.
+
+    The re-exports were read from the imports alone, so the check imported
+    first stood for the name after ``require_regular_audio = check_nothing``
+    or a ``def`` that checks nothing replaced it.
+    """
+    assert _read_through_the_package(tmp_path, init) == found
+
+
 def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -992,6 +1178,42 @@ def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(
         """
     assert _found(tmp_path, replaced, helpers=_CHECK) == [("reader", _FOREIGN)]
     assert _found(tmp_path, either, helpers=_CHECK) == [("reader", _FOREIGN)]
+
+
+def test_a_function_meets_every_import_of_the_module_from_its_def_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call inside a function reads the module's name when the function
+    runs, which may be during the import and before a later import of the
+    name, so every import that may stand from the ``def`` on is one it may
+    reach; one that a later import replaces before the ``def`` is not.
+
+    The function read the module's imports as they stand once it has run, so
+    the check imported after it hid the import that checks nothing, which a
+    call made at once, ``TABLE = reader(...)``, reaches.
+    """
+    called_early = """
+        import numpy as np
+        from other import require_regular
+
+        def reader(path):
+            require_regular(path)
+            return np.load(path)
+
+        TABLE = reader("table.npy")
+        from check import require_regular
+        """
+    replaced_before = """
+        import numpy as np
+        from other import require_regular
+        from check import require_regular
+
+        def reader(path):
+            require_regular(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, called_early, helpers=_CHECK) == [("reader", _FOREIGN)]
+    assert _found(tmp_path, replaced_before, helpers=_CHECK) == []
 
 
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:

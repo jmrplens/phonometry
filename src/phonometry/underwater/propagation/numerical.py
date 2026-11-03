@@ -61,6 +61,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
+    exactly_nonzero,
     real_array,
     real_number,
     require_choice,
@@ -1232,7 +1233,7 @@ def _caustic_crossings(spreadings: NDArray[np.float64]) -> NDArray[np.int_]:
         # Exact nonzero mask, deliberately: only the launch sample is q = 0 by
         # construction, and a tolerance would count the small real spreadings
         # either side of a caustic as zeros and miss their sign change.
-        signs = np.sign(row[row.astype(bool)])
+        signs = np.sign(row[exactly_nonzero(row)])
         counts[i] = int(np.count_nonzero(np.diff(signs)))
     return counts
 
@@ -1321,7 +1322,7 @@ def _refine_brackets(
     # bit *is* the eigenray; the zero test is exact (a nonzero mask,
     # inverted) because any tolerance would promote near-misses to roots
     # and close their brackets before the bisection has refined them.
-    exact_lo, exact_hi = ~f_lo.astype(bool), ~f_hi.astype(bool)
+    exact_lo, exact_hi = ~exactly_nonzero(f_lo), ~exactly_nonzero(f_hi)
     keep = (np.sign(f_lo) * np.sign(f_hi) < 0.0) | exact_lo | exact_hi
     lo, hi, f_lo = lo[keep], hi[keep], f_lo[keep]
     exact_lo, exact_hi = exact_lo[keep], exact_hi[keep]
@@ -1349,7 +1350,7 @@ def _refine_brackets(
         # march itself certified; the exact test (sign code zero, taken as
         # an inverted nonzero mask) keeps it, where a tolerance would
         # declare roots the marcher never confirmed.
-        hit = ~s_mid.astype(bool) & open_
+        hit = ~exactly_nonzero(s_mid) & open_
         same = (s_mid == s_lo) & open_ & ~hit
         lo = np.where(hit | same, mid, lo)
         hi = np.where(hit | (open_ & ~same), mid, hi)
@@ -2219,7 +2220,7 @@ def _fold_images(
     # (the polyline's own differences, or the level clamp past its ends), and
     # a tolerance would fold gently sloping facets as if they were flat --
     # small slopes are what a finely sampled bathymetry is made of.
-    sloped = m_col.astype(bool)
+    sloped = exactly_nonzero(m_col)
     z_flat = 2.0 * wrap * d_col + side * zr[None, :]
     # Distance from the local apex to the column along the surface, guarded
     # where the facet is level (the apex is then at infinity and the flat
@@ -2274,7 +2275,7 @@ def _fold_margins(
     # The same exact nonzero mask as :func:`_fold_images`, for the same
     # physics: level means slope exactly 0.0, and a tolerance would hand a
     # gently sloping column the flat ladder's floor it is not entitled to.
-    sloped = m_col.astype(bool)
+    sloped = exactly_nonzero(m_col)
     span = d_col if side > 0.0 else 2.0 * d_col
     flat_margin = np.abs(2.0 * wrap * d_col) - span
     beta = np.arctan(np.abs(m_col))
@@ -2830,7 +2831,7 @@ def _check_source_on_kink(
     # A jump of exactly zero is a node the profile runs straight through; any
     # jump at all is a kink, so the test is deliberately exact and carries no
     # tolerance (see :func:`phonometry._internal.rays._prepare_impulses`).
-    kinked = z_prof[1:-1][np.diff(grad).astype(bool)]
+    kinked = z_prof[1:-1][exactly_nonzero(np.diff(grad))]
     if kinked.size and np.min(np.abs(kinked - source_depth)) <= _KINK_PROXIMITY_M:
         _warn_beams(
             "'source_depth' sits on a gradient discontinuity of the profile,"

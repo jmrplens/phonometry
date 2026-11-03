@@ -571,6 +571,32 @@ def test_a_definition_a_later_one_replaces_is_never_followed(
     assert _texts(in_a_function, tmp_path) == []
 
 
+def test_a_call_from_a_function_meets_every_definition_from_its_def_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function reads the module's names when it is called, which may be
+    during the import and before a later definition of a name, so it may
+    reach every definition that stands from its ``def`` on.
+
+    ``TABLE = public(...)`` runs ``public`` while ``_margin`` still hands
+    back the bare difference; the module's names were read as they stand
+    once it has run, so only the second ``_margin``, which settles it, was
+    followed and the comparison passed.
+    """
+    called_early = """
+    from phonometry._internal.boundary import settled
+    _LIMIT_DB = 10.0
+    def _margin(signal, background):
+        return signal - background
+    def public(signal, background):
+        return _margin(signal, background) > _LIMIT_DB
+    TABLE = public(1.0, 2.0)
+    def _margin(signal, background):
+        return settled(signal - background)
+    """
+    assert _texts(called_early, tmp_path) == ["_margin(signal, background) > _LIMIT_DB"]
+
+
 def test_an_instance_is_of_the_class_its_name_holds_where_it_is_built(
     tmp_path: pathlib.Path,
 ) -> None:

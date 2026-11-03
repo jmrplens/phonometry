@@ -3,20 +3,20 @@
 # Same bits on every machine
 
 A weighting filter designed by phonometry is the same filter, byte for byte,
-whatever C library, thread count or hash seed it is designed under,
-whichever compiler built numpy, and on any x86-64 processor, with or without
-AVX-512 or fused multiply-adds, whichever OpenBLAS kernel set runs there.
-The one reservation is two steps
-of the realised cascade that go through a numerical library rather than the
-C library, LAPACK's polynomial roots and the BLAS products SciPy forms,
-which on 64-bit ARM, as measured, part some designs of the other curves and
-none of the A weighting's; Scope below names them and says what was
-measured. No routine of the C library is left in the weighting design's fit:
-every transcendental it takes is spelled in arithmetic IEEE&nbsp;754 fixes
-or computed correctly rounded in exact integer arithmetic, so glibc, Apple's
-libm, musl and the Windows runtime, and the two builds glibc carries for
-x86-64, have no say in its bits. This page records what was pinned and
-measures what it does. The coefficients a laptop designs are the
+whatever C library, BLAS, LAPACK, thread count or hash seed it is designed
+under, whichever compiler built numpy, and on any processor: x86-64 with or
+without AVX-512 or fused multiply-adds, and 64-bit ARM. No library step is
+left on the design path. Every transcendental the fit takes is spelled in
+arithmetic IEEE&nbsp;754 fixes or computed correctly rounded in exact
+integer arithmetic, so glibc, Apple's libm, musl and the Windows runtime,
+and the two builds glibc carries for x86-64, have no say in its bits. The
+two steps after the fit that used to go through a numerical library are the
+package's own arithmetic too: the poles of the BS.468-4 prototype, which
+LAPACK found, are the correctly rounded roots of the network's exact
+polynomial, and the second-order sections, which SciPy formed through the
+BLAS, are SciPy's own procedure with every product rounded once and every
+magnitude correctly rounded. This page records what was pinned and measures
+what it does. The coefficients a laptop designs are the
 coefficients a cluster designs, so a conformance verdict, a published figure
 or a filter shipped inside a measurement chain is a reproducible artifact
 rather than one machine's account of itself.
@@ -107,6 +107,25 @@ The deterministic design path answers each door in kind, in
 - **The grid spelled out.** The geometric frequency grid is generated term
   for term with the endpoints pinned, so the fit evaluates the same
   frequencies everywhere.
+- **No library step after the fit.** The BS.468-4 prototype's six poles
+  were numpy's polynomial roots: eigenvalues of the companion matrix, which
+  LAPACK finds by an iteration whose sums the BLAS and the compiler are free
+  to order and to fuse. The network's denominator is now built from its
+  seven component values in exact rational arithmetic, and its roots are
+  found in exact arithmetic too and rounded once, each part to the double
+  nearest the exact root's, decided by a certificate: a disk around each
+  approximation that provably holds one root and no other, and an extent in
+  each coordinate that lies strictly between the midpoints around one
+  double, or a coordinate shown in exact arithmetic to sit on one of those
+  midpoints, which rounds to even. The second-order sections were SciPy's
+  `zpk2sos`, which forms each section's polynomial with `numpy.convolve`,
+  whose complex products go to the BLAS, and pairs poles with zeros by
+  numpy's own complex magnitude, which is not correctly rounded. It is now
+  spelled step for step and branch for branch, each product and sum
+  rounded once and each magnitude correctly rounded; of two zeros at
+  exactly the same distance from a pole it takes the first, as a stable
+  sort does, where SciPy's choice goes through numpy's default sort, whose
+  order of ties follows the processor.
 
 ## The evidence
 
@@ -135,6 +154,46 @@ run in CI:
   it. Put glibc's arctangent back and the corpus hashes to its old SHA-256
   again, and the six that moved stay inside the response bounds the tests
   hold.
+- **The last two library steps moved 21 designs on Linux, and no others.**
+  Spelling the poles and the sections moved all nineteen BS.468-4 designs,
+  whose poles the correctly rounded roots place 2 to 36 units in the last
+  place of each part away from LAPACK's. The fit starts from the poles, and
+  from a start a few units away it settles on other coefficients inside its
+  tolerance: 7 to 13 of each design's 18 move, by their last 9 to 12 bits
+  at 250, 400 and 500&nbsp;Hz and at 22.05&nbsp;kHz by nearly half the value
+  of one small coefficient, and the response differs by at most
+  0.0072&nbsp;dB, at 125&nbsp;Hz (0.0033&nbsp;dB at 44.1&nbsp;kHz,
+  0.000012&nbsp;dB at 48&nbsp;kHz). It moved the AU weighting by up to two
+  units in the last place of eight coefficients at 100&nbsp;Hz and by one
+  unit of six at 200&nbsp;Hz, where numpy's complex magnitude, one unit
+  off the correctly rounded one, had paired two zeros one unit in the last
+  place apart the other way round. The other 112 checked designs keep
+  their bytes, the A weighting at all nineteen rates among them, and
+  every design that moved stays inside the response bounds the tests hold.
+- **The poles, against the exact value.** The six poles are the roots an
+  arbitrary-precision library finds, rounded part by part, and the test
+  suite holds them to those doubles. Against the same library at 3000 bits,
+  the root finder as it ships returned the correctly rounded value of every
+  part of every root of 10&nbsp;600 random polynomials, each in under half
+  a second: 10&nbsp;200 copies of the 468 network with each component moved
+  by up to 30&nbsp;%, 200 with integer coefficients of degree two to ten,
+  four of them with a root at zero, and 200 whose roots spread over
+  eighteen decades. numpy's own answer differs from them by 4 to 21 units in the last
+  place of the root's magnitude, which is at most 3&nbsp;% of the error
+  LAPACK's backward-stable eigensolver allows itself on that companion
+  matrix, so the poles are what numpy finds, to numpy's own error, and the
+  same bytes everywhere. In CI the root finder is held to roots written in
+  closed form and rounded by exact integer square roots, a method it does
+  not use.
+- **The sections, against SciPy's.** Handed correctly rounded magnitudes,
+  SciPy's `zpk2sos` returns the design's sections bit for bit on the plain
+  and the fitted prototype of every one of the 133 checked designs, on the
+  build of numpy that rounds its complex products step by step; with
+  numpy's own magnitudes it parts from them only at AU at 100 and
+  200&nbsp;Hz, as above, and the two realise the same response to
+  10⁻⁹&nbsp;dB on every curve. With the BLAS's complex dot product fused
+  by emulation, SciPy's sections for the D weighting at 48&nbsp;kHz move by
+  up to 11 units in the last place and the design's do not move at all.
 - **The exponential and the power, bit for bit.** Every distinct value the
   corpus hands `exp` (677&nbsp;596 of them) and `pow` (580&nbsp;455) returns
   glibc's bits, and so does each of 120 million draws over each routine's
@@ -172,18 +231,21 @@ run in CI:
   100&nbsp;kHz for AU meet a sine or a tangent (AU moves from
   `7ee0fe06b2a91373` to `ec6c060d4b27d1b9`), and 176.4&nbsp;kHz for A, B and
   C the arctangent.
-- **No C library left.** With every result the C library returns pushed
-  one unit in the last place, by a shim between Python and the C library,
-  the arctangent's included, twelve designs (the A weighting at 48, 44.1,
-  88.2 and 192&nbsp;kHz, C at 44.1 and 88.2&nbsp;kHz, D at 48 and
-  88.2&nbsp;kHz, G at 1 and 1.5&nbsp;kHz, and 468 and AU at 48&nbsp;kHz) do
-  not move by a bit, where on the code before the pinned arctangent every
-  one of them moved. musl, another C library, designs the whole corpus to
+- **No C library left.** With every result of twenty routines of the C
+  library pushed one unit in the last place, by a shim between Python and
+  the C library (the exponentials, the logarithms, the power, the
+  trigonometric and hyperbolic functions and their inverses, and `hypot`),
+  the whole corpus, fitted and plain, hashes to the same two SHA-256 values
+  as without it, where on the code before the pinned arctangent each of
+  twelve designs measured that way (the A weighting at 48, 44.1, 88.2 and
+  192&nbsp;kHz, C at 44.1 and 88.2&nbsp;kHz, D at 48 and 88.2&nbsp;kHz, G
+  at 1 and 1.5&nbsp;kHz, and 468 and AU at 48&nbsp;kHz) moved. musl, another C library, designs the whole corpus to
   glibc's SHA-256 with nothing replaced, and so does glibc's own build
   without FMA. On 64-bit ARM, the processor family of the macOS leg of the
-  CI matrix, run in emulation under musl, 100 of the 133 designs are the
-  same bytes, and the other 33 part at the two library steps Scope names,
-  none of them in this package's own arithmetic.
+  CI matrix, run in emulation under glibc and under musl with the OpenBLAS
+  numpy ships there, all 133 designs are the x86-64 bytes; until the last
+  two library steps were spelled, 33 of them parted there, the nineteen
+  BS.468-4 designs at the poles and fourteen others at the sections.
 - **Digest for digest across environments.** The designs are bit-identical
   between this host and the same host under AVX-512 emulation, under every
   selectable OpenBLAS kernel set, every thread count and every hash seed;
@@ -201,7 +263,8 @@ run in CI:
   48&nbsp;kHz unchanged with it. A test in the CI matrix designs the A
   weighting as it ships, nothing replaced, and holds it to
   `991833ff389afe91` on all three platforms, and the A weighting at
-  44.1&nbsp;kHz to `dbea4b7fc4ad972b`; a second test
+  44.1&nbsp;kHz to `dbea4b7fc4ad972b`, and every other curve at
+  48&nbsp;kHz to a digest of its own; a second test
   designs both again with an arctangent that owes nothing to the pinned
   routine, the C library's answer walked to the correctly rounded double by
   exact rational bounds, and lands on the same digests. On glibc x86-64
@@ -240,9 +303,9 @@ documented event, never a property of your hardware.
 ## Scope
 
 The guarantee covers the deterministic weighting design path end to end,
-within the two library steps below: on every platform for the A weighting,
-which the CI matrix holds on Linux, macOS and Windows, and for the other
-curves wherever those two steps give the same bytes. Block processing
+for every curve and every rate, on every platform: no step of it is a
+library's, and the CI matrix holds every curve at 48&nbsp;kHz to one digest
+on Linux, macOS and Windows. Block processing
 composes with it: a stateful cascade fed
 block by block is bit-identical to one pass over the whole record, so
 streaming does not spend the guarantee. General analysis functions built on numpy and SciPy in their
@@ -250,39 +313,27 @@ ordinary form remain reproducible on one machine but may differ in the last
 bits across CPUs, which is the normal condition of scientific Python; the
 deterministic treatment is applied where a filter's identity matters.
 
-Two steps of the realised cascade go through a library rather than the C
-library: the poles of the BS.468-4 prototype are numpy's polynomial roots,
-which LAPACK computes, and the second-order sections are formed by SciPy,
-whose polynomial products go through the BLAS. Both give the same bytes under
-every OpenBLAS kernel set on x86-64, under glibc and under musl. On 64-bit
-ARM they do not always: measured under musl in emulation, with the OpenBLAS
-numpy ships there, 100 of the 133 checked designs are the x86-64 bytes, the
-A weighting at all nineteen rates among them, and the other 33 part at
-exactly these two steps. The 468 prototype's poles come out different in
-their last bits, which reaches all nineteen 468 designs; for fourteen
-designs of the B, C, D, G and AU weightings (D at 1.5, 32, 88.2 and
-96&nbsp;kHz, G at 200&nbsp;Hz and 1, 88.2, 96 and 192&nbsp;kHz, AU at 32,
-44.1 and 88.2&nbsp;kHz, B at 96&nbsp;kHz and C at 48&nbsp;kHz) the prototype
-the fit returns and its bilinear transform are the same to the bit, and
-only the sections SciPy forms from them differ. The Accelerate framework the
-macOS build of numpy links is not measured here, so for those curves the
-macOS bytes are not claimed; the A weighting, whose sections come out the
-same on 64-bit ARM, is held by the CI test on macOS. SciPy's `zpk2sos` also takes complex
-magnitudes, through numpy's own complex absolute, a loop numpy picks by
-processor rather than the C library's `hypot`, but only to pair poles with
-zeros and to test them against a tolerance: pushed one ulp, every one of
-them, they move none of the A, D, 468 or AU weightings at 48&nbsp;kHz, the C
-weighting at 44.1&nbsp;kHz or the G weighting at 1&nbsp;kHz.
+Nothing after the fit is a library's either. The BS.468-4 prototype's
+poles and the second-order sections were the last two steps that were, the
+roots LAPACK found and the sections SciPy formed through the BLAS, and on
+64-bit ARM under OpenBLAS they parted 33 of the 133 checked designs from the
+x86-64 bytes; both are now this package's own arithmetic, measured to
+design every one of the 133 to the same bytes on x86-64 under glibc, with
+and without FMA, and under musl, and on 64-bit ARM under glibc and musl.
+Apple's Accelerate, which the macOS build of numpy links, is no longer
+reached by the design, so the macOS bytes are claimed for every curve and
+held by the CI test.
 
 The full engineering account lives with the code, in the module docstrings of
 [`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),
 [`filters/_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_log.py),
-[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py)
+[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py),
+[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py)
 and
-[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py),
+[`filters/_pinned_roots.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_roots.py),
 and the tests that hold it are in
 [`tests/filters/test_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_weighting_design.py)
-and the three `tests/filters/test_pinned_*.py` beside it.
+and the four `tests/filters/test_pinned_*.py` beside it.
 
 ## See also
 

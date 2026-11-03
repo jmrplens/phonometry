@@ -41,6 +41,7 @@ from phonometry._internal.validation import (
     check_engine,
     complex_array,
     complex_number,
+    exactly_nonzero,
     floats_of,
     holds_text,
     indices_of,
@@ -1131,3 +1132,41 @@ def test_complex_number_refuses_what_complex_cannot_read(value: object) -> None:
     """
     with pytest.raises(ValueError, match="'z' must be a number a complex can hold"):
         complex_number(value, "z")
+
+
+def test_exactly_nonzero_is_the_test_against_zero_read_off_the_bits() -> None:
+    """True on everything but a signed zero, NaN and the infinities included.
+
+    The exact test the tree names once instead of spelling ``x != 0.0`` or a
+    cast to ``bool``. It has to answer as ``x != 0.0`` does on every class of
+    double, the subnormals and the negative zero among them, whatever the
+    array's layout.
+    """
+    tiny = float.fromhex("0x1p-1074")
+    values = np.array(
+        [0.0, -0.0, tiny, -tiny, 1.0, -2.5, np.inf, -np.inf, np.nan, 1e308]
+    )
+    expected = [False, False, True, True, True, True, True, True, True, True]
+    assert exactly_nonzero(values).tolist() == expected
+    # A strided view and a zero-dimensional array read the same bits.
+    grid = np.stack([values, values])[:, ::3]
+    assert exactly_nonzero(grid).tolist() == [expected[::3]] * 2
+    assert not bool(exactly_nonzero(np.array(-0.0)))
+
+
+@pytest.mark.parametrize(
+    ("value", "given"),
+    [
+        (np.zeros(3, dtype=np.float32), "an array of float32"),
+        (np.zeros(3, dtype=np.int64), "an array of int64"),
+        ([0.0, 1.0], "list"),
+        (0.0, "float"),
+    ],
+    ids=["float32", "int64", "list", "python-float"],
+)
+def test_exactly_nonzero_refuses_anything_but_doubles(
+    value: object, given: str
+) -> None:
+    """Its bits are read as a double's, so it takes nothing else."""
+    with pytest.raises(TypeError, match=f"must be an array of float64; got {given}"):
+        exactly_nonzero(value)  # type: ignore[arg-type]

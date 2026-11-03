@@ -42,7 +42,11 @@ from phonometry.filters._pinned_trig import (
     pinned_sin,
     pinned_tan,
 )
-from phonometry.filters.weighting import _analog_weighting_zpk, _fit_band
+from phonometry.filters.weighting import (
+    _analog_weighting_zpk,
+    _fit_band,
+    _zeros_at_origin,
+)
 
 #: ``(x, correctly rounded sin x)``, both as hex, at inputs where glibc 2.41's
 #: ``sin`` returns the other neighbour. Computed with mpmath at 400 bits.
@@ -296,6 +300,7 @@ def _design_inputs(
             _fit_band(curve, fs),
             3 if curve == "D" else 4,
             1000.0,
+            n_origin_zeros=_zeros_at_origin(curve),
         )
     return tangents, sines, roots
 

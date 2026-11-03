@@ -19,7 +19,9 @@ name as the strings it stands for find here the scope whose binding a read
 or a write reaches (:func:`binding_scope`). Of two statements of one scope
 that bind one name, a ``def`` or an import in each branch of an ``if`` or
 one after the other, which the name holds at a call, or once the scope has
-run, is read here too (:func:`live_bindings`).
+run, is read here too (:func:`live_bindings`), and which a function written
+at a point may meet when it is called, from that point on
+(:func:`bindings_from`).
 """
 
 from __future__ import annotations
@@ -383,6 +385,39 @@ def own_names(scope: ast.AST) -> OwnNames:
         frozenset(found["declared_global"]),
         frozenset(found["declared_nonlocal"]),
     )
+
+
+def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
+    """Each name *scope* binds itself, with every node that binds it, in the
+    order of the source.
+
+    A ``def`` or a ``class`` statement, an import statement, and the node of
+    every other binding :class:`OwnNames` reads: an assignment's target, a
+    loop's, ``with ... as``, ``except ... as``, a ``match`` capture, ``del``
+    and ``:=``. A name the scope declares ``global`` or ``nonlocal`` is
+    another scope's, and is left out. What the name holds where it is read
+    is :func:`live_bindings` of the nodes.
+    """
+    names = own_names(scope)
+    comprehension = isinstance(scope, _COMPREHENSIONS)
+    found: dict[str, list[ast.AST]] = {}
+    for node in scope_nodes(scope):
+        declared = _declared(node)
+        if declared is None:
+            bound = _stored(node, comprehension=comprehension)
+        else:
+            bound = declared[1] if declared[0] in {"defined", "imported"} else set()
+        for name in bound:
+            if name not in names.declared_global | names.declared_nonlocal:
+                found.setdefault(name, []).append(node)
+    for nodes in found.values():
+        nodes.sort(
+            key=lambda node: (
+                getattr(node, "lineno", 0),
+                getattr(node, "col_offset", 0),
+            )
+        )
+    return found
 
 
 @functools.cache
@@ -769,7 +804,24 @@ def live_bindings[NodeT: ast.AST](
     unless another one runs before the point on every turn
     (:func:`_runs_each_turn`). When none runs before the point (a call read
     before any binding of its scope), every one may be what it holds.
+
+    A point inside a scope nested in the bindings' (:func:`_lifted`) is read
+    where that scope is written: a class body or a list comprehension runs
+    there, and a function, a lambda or a generator expression runs when it
+    is called or consumed, so it meets every binding from there on
+    (:func:`bindings_from`).
     """
+    if point is not None and bindings:
+        point, deferred = _lifted(root, bindings[0], point)
+        if deferred:
+            return _met_from(root, bindings, point)
+    return _held_at(root, bindings, point)
+
+
+def _held_at[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
+) -> list[NodeT]:
+    """:func:`live_bindings` at a *point* written in the bindings' own scope."""
     frames = {binding: _frames(root, binding) for binding in bindings}
     target = _frames(root, point) if point is not None else None
     forward = [
@@ -820,6 +872,90 @@ def _back_from_a_turn[NodeT: ast.AST](
             for other in turns
         )
     ]
+
+
+def bindings_from[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
+) -> list[NodeT]:
+    """Of *bindings*, statements of one scope under *root* that bind one name,
+    those the name may hold at *point* or at any moment after it while the
+    scope runs, and once it has run; those it holds once the scope has run
+    when *point* is None.
+
+    What a function, a lambda or a generator expression written at *point*
+    reads of the name: it reads it when it is called or consumed, which may
+    be at once, before a later binding, or once the scope has run.
+    """
+    if point is None or not bindings:
+        return _held_at(root, bindings, None)
+    point, _ = _lifted(root, bindings[0], point)
+    return _met_from(root, bindings, point)
+
+
+#: The scopes that run when they are called or consumed, not where they are
+#: written.
+_DEFERRED = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.GeneratorExp)
+
+
+def _lifted(root: ast.AST, binding: ast.AST, point: ast.AST) -> tuple[ast.AST, bool]:
+    """Where the scope that holds *binding* reads a name read at *point*, and
+    whether it reads it later than that.
+
+    *point* itself when it runs in that scope; otherwise the function, the
+    class, the lambda or the comprehension written there that it runs in,
+    and whether a function, a lambda or a generator expression lies on the
+    way, which runs when it is called or consumed. A ``def``'s defaults and
+    decorators, a class's bases and a comprehension's first iterable run
+    where they are written (:func:`_runs_inside`).
+    """
+    scope = _scope_holding(root, binding)
+    parents = _parents(root)
+    lifted, deferred = point, False
+    grandchild: ast.AST | None = None
+    child = point
+    current = parents.get(point)
+    while current is not None and current is not scope:
+        if isinstance(current, SCOPES) and _runs_inside(current, child, grandchild):
+            lifted = current
+            deferred = deferred or isinstance(current, _DEFERRED)
+        grandchild, child, current = child, current, parents.get(current)
+    if current is None:
+        return point, False
+    return lifted, deferred
+
+
+def _met_from[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST
+) -> list[NodeT]:
+    """Those the name holds at *point*, written in the bindings' own scope
+    (:func:`_held_at`), and every one that may run after it
+    (:func:`_may_run_after`).
+    """
+    live = _held_at(root, bindings, point)
+    target = _frames(root, point)
+    return [
+        binding
+        for binding in bindings
+        if any(binding is other for other in live)
+        or _may_run_after(_frames(root, binding), target)
+    ]
+
+
+def _may_run_after(binding: Sequence[Frame], point: Sequence[Frame]) -> bool:
+    """Whether a statement written at *binding* may run after *point* does.
+
+    After it in a block they share, or in a block of their statement that
+    runs after (:func:`_may_run_before`, read the other way); on a later
+    turn of a loop whose body holds both (:func:`_turns_back`); and in the
+    body of the statement whose header holds *point*, or as the statement
+    that holds *point* itself, a loop's target bound again on its next turn.
+    """
+    shared = _shared(binding, point)
+    return (
+        shared in {len(binding), len(point)}
+        or _may_run_before(point, binding)
+        or _turns_back(binding, point) is not None
+    )
 
 
 def _scope_holding(root: ast.AST, node: ast.AST) -> ast.AST:

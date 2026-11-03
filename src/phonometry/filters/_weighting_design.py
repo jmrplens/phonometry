@@ -105,9 +105,14 @@ output:
   bit), and ``sin``, ``tan``, ``atan`` and the magnitude of a complex root,
   correctly rounded, in :mod:`~phonometry.filters._pinned_trig`. No routine
   of the C library is left in the fit; :func:`_scalar_arctan` says what the
-  last of them cost. What is left of ``numpy`` on the path is arithmetic
-  IEEE 754 pins, and ``sqrt``, which the standard correctly rounds and which
-  does not move.
+  last of them cost. No library step is left after it either: the
+  second-order sections SciPy's ``zpk2sos`` formed through the BLAS, pairing
+  roots by numpy's complex magnitude, are :func:`second_order_sections`, and
+  the BS.468-4 prototype's poles, which ``numpy.roots`` took from LAPACK, are
+  the correctly rounded roots of
+  :mod:`~phonometry.filters._pinned_roots`. What is left of ``numpy`` on the
+  path is arithmetic IEEE 754 pins, and ``sqrt``, which the standard
+  correctly rounds and which does not move.
 
   The root of it sat *before* the loop rather than inside it.
   :func:`numpy.geomspace` is ``10 ** linspace(...)``, so the grid every
@@ -146,9 +151,15 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from scipy import signal
 
-from .._internal.validation import complex_number, is_positive, real_array, real_number
+from .._internal.validation import (
+    complex_number,
+    exactly_nonzero,
+    is_positive,
+    real_array,
+    real_number,
+    require_count,
+)
 from ._pinned_exp import pinned_exp, pinned_pow
 from ._pinned_log import pinned_log, pinned_log10
 from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
@@ -993,15 +1004,16 @@ def _start_parameters(
     poles: np.ndarray,
     degree: int,
     placement: tuple[float, float],
+    at_origin: int,
 ) -> tuple[np.ndarray, _Layout]:
     """Parameter vector and layout of the prototype the search starts from.
 
     :param placement: Where the spare factors start; see
         :func:`_spare_placements`.
+    :param at_origin: How many of the first *zeros* sit at the origin, as the
+        prototype states them; they are held there and never read as values.
     """
-    away_from_origin = np.asarray(zeros).astype(bool)
-    at_origin = int(np.count_nonzero(~away_from_origin))
-    finite = np.asarray(zeros)[away_from_origin]
+    finite = np.asarray(zeros)[at_origin:]
     num, num_quad, num_lin = _padded_factors(finite, degree, placement, at_origin)
     den, den_quad, den_lin = _padded_factors(np.asarray(poles), degree, placement)
     theta = _scalar_log(np.concatenate([np.asarray(f, dtype=float) for f in num + den]))
@@ -1253,6 +1265,226 @@ def bilinear_zpk(
     return digital_zeros, _mapped_roots(poles, fs2), gain * real
 
 
+#: SciPy's tolerance for a root to count as real and for two roots to count as
+#: a conjugate pair: ``100 * spacing(1)`` of a double, relative to the root's
+#: magnitude.
+_PAIRING_TOLERANCE = 100.0 * float(np.finfo(np.float64).eps)
+
+
+def _magnitude(root: complex) -> float:
+    """``|root|``, correctly rounded, where numpy's complex absolute is its own loop."""
+    return pinned_hypot(root.real, root.imag)
+
+
+def _is_real(root: complex) -> bool:
+    """Whether *root* has no imaginary part, as ``numpy.isreal`` asks, read off its bits."""
+    return not bool(exactly_nonzero(np.array([root.imag]))[0])
+
+
+def _runs_of_one_real_part(upper: list[complex]) -> list[tuple[int, int]]:
+    """``(start, stop)`` of each run of roots whose real parts agree within the tolerance.
+
+    SciPy's ``_cplxreal`` finds them from the differences of the sorted real
+    parts, each against the tolerance times the magnitude of the root before
+    it, and sorts each run by the size of its imaginary parts.
+    """
+    runs: list[tuple[int, int]] = []
+    start: int | None = None
+    for index in range(len(upper) - 1):
+        gap = upper[index + 1].real - upper[index].real
+        same = gap <= _PAIRING_TOLERANCE * _magnitude(upper[index])
+        if same and start is None:
+            start = index
+        elif not same and start is not None:
+            runs.append((start, index + 1))
+            start = None
+    if start is not None:
+        runs.append((start, len(upper)))
+    return runs
+
+
+def _sorted_runs(roots: list[complex], runs: list[tuple[int, int]]) -> list[complex]:
+    """*roots* with each run sorted, stably, by the size of the imaginary part."""
+    ordered = list(roots)
+    for start, stop in runs:
+        ordered[start:stop] = sorted(
+            ordered[start:stop], key=lambda z: math.fabs(z.imag)
+        )
+    return ordered
+
+
+def _conjugate_pairs(roots: list[complex]) -> tuple[list[complex], list[complex]]:
+    """SciPy's ``_cplxreal``: one root of each conjugate pair, and the real roots.
+
+    The roots are sorted by real part and then by the size of the imaginary
+    part; a root whose imaginary part is within the tolerance of its
+    magnitude is real, the rest are split by sign, matched in order and
+    averaged, as SciPy averages them, with the quotient by two spelled as
+    numpy divides by ``2 + 0j``.
+
+    :return: ``(pairs, reals)``, each pair by its member above the axis.
+    :raises ValueError: if a complex root has no conjugate, saying whether the
+        counts above and below the real axis differ or two roots matched in
+        order are not a conjugate pair.
+    """
+    ordered = sorted(roots, key=lambda z: (z.real, math.fabs(z.imag)))
+    flags = [math.fabs(z.imag) <= _PAIRING_TOLERANCE * _magnitude(z) for z in ordered]
+    reals = [complex(z.real) for z, real in zip(ordered, flags, strict=True) if real]
+    rest = [z for z, real in zip(ordered, flags, strict=True) if not real]
+    upper = [z for z in rest if z.imag > 0.0]
+    lower = [z for z in rest if z.imag < 0.0]
+    if len(upper) != len(lower):
+        msg = (
+            "Array contains complex value with no matching conjugate: the roots "
+            f"above the real axis number {len(upper)} and those below {len(lower)}."
+        )
+        raise ValueError(msg)
+    runs = _runs_of_one_real_part(upper)
+    upper, lower = _sorted_runs(upper, runs), _sorted_runs(lower, runs)
+    pairs = []
+    for above, below in zip(upper, lower, strict=True):
+        apart = complex(above.real - below.real, above.imag - -below.imag)
+        if _magnitude(apart) > _PAIRING_TOLERANCE * _magnitude(below):
+            msg = (
+                "Array contains complex value with no matching conjugate: "
+                f"{above!r} and {below!r} are not a conjugate pair."
+            )
+            raise ValueError(msg)
+        total = (above.real + below.real, above.imag + -below.imag)
+        pairs.append(complex(*complex_quotient(total, (2.0, 0.0))))
+    return pairs, reals
+
+
+def _section_polynomial(roots: list[complex]) -> list[float]:
+    r"""``poly(roots)`` for one section: two roots, both real or a conjugate pair.
+
+    SciPy forms it with numpy's ``convolve``, which multiplies complex roots
+    through the BLAS: :math:`(r_1 r_2 - i_1 i_2)` is a sum of products a
+    BLAS may fuse, and the OpenBLAS of 64-bit ARM does. Here each product
+    and each sum is one separately rounded operation, in the order of the
+    dot product numpy hands the BLAS, every sum starting from ``+0.0`` as
+    that dot product does, so a zero comes out positive. The imaginary part
+    of a conjugate pair's product cancels and is dropped, as SciPy drops it.
+
+    :param roots: Two roots: two real ones, or a conjugate pair.
+    :return: The monic coefficients, the highest power first.
+    """
+    first, second = roots
+    middle = (-first.real - second.real) + 0.0
+    last = ((first.real * second.real + 0.0) - (first.imag * second.imag + 0.0)) + 0.0
+    return [1.0, middle, last]
+
+
+def _section(zeros: list[complex], poles: list[complex]) -> list[float]:
+    """SciPy's ``_single_zpksos``: one section's six coefficients, two zeros over two poles."""
+    return _section_polynomial(zeros) + _section_polynomial(poles)
+
+
+def _worst(roots: list[complex]) -> int:
+    """The index of the root nearest the unit circle, the first of any tie."""
+    distance = [math.fabs(1.0 - _magnitude(root)) for root in roots]
+    return distance.index(min(distance))
+
+
+def _nearest(roots: list[complex], to: complex, which: str) -> int:
+    """SciPy's ``_nearest_real_complex_idx``: the nearest root of the kind *which* asks.
+
+    A tie keeps the order the roots are in, as a stable sort does. SciPy
+    picks through numpy's default ``argsort``, which is not stable and whose
+    order of ties follows the processor from four roots up, so of two
+    distinct roots at exactly the same distance the design takes the first
+    in order and SciPy may take the other.
+    """
+    distance = [_magnitude(root - to) for root in roots]
+    order = sorted(range(len(roots)), key=distance.__getitem__)
+    if which == "any":
+        return order[0]
+    wanted = which == "real"
+    return next(i for i in order if _is_real(roots[i]) == wanted)
+
+
+def _paired_zeros(zeros: list[complex], pole: complex) -> list[complex]:
+    """The two zeros the section of *pole* takes, removed from *zeros*: SciPy's general case.
+
+    The nearest zero, and its conjugate if it is complex or else the nearest
+    real zero left, which there always is (:func:`_next_section`).
+    """
+    first = zeros.pop(_nearest(zeros, pole, "any"))
+    if not _is_real(first):
+        return [first, first.conjugate()]
+    return [first, zeros.pop(_nearest(zeros, pole, "real"))]
+
+
+def _next_section(zeros: list[complex], poles: list[complex]) -> list[float]:
+    """The section of the pole nearest the unit circle, the roots it takes removed.
+
+    SciPy's ``zpk2sos`` with its default pairing, ``'nearest'``, for a
+    digital filter, branch for branch of those that pairing reaches, but for
+    the order of exact ties in distance (:func:`_nearest`). SciPy pads the
+    zeros and the poles to one even count, as :func:`second_order_sections`
+    does, so each list holds an even number of real roots, a conjugate pair
+    being one entry of two roots, and every section takes two of each: a
+    real pole with the worst real pole left, a complex one with its
+    conjugate, and two zeros the same way. SciPy's special cases for the last
+    real pole and for one real pole and one real zero left, and its sections
+    of fewer than two zeros, ask for an odd count of real roots, which only
+    its ``'keep_odd'`` and ``'minimal'`` pairings leave, so they are not
+    spelled here.
+    """
+    pole = poles.pop(_worst(poles))
+    if _is_real(pole):
+        real_indices = [i for i, p in enumerate(poles) if _is_real(p)]
+        partner = poles.pop(real_indices[_worst([poles[i] for i in real_indices])])
+    else:
+        partner = pole.conjugate()
+    return _section(_paired_zeros(zeros, pole), [pole, partner])
+
+
+def second_order_sections(
+    zeros: np.ndarray, poles: np.ndarray, gain: float
+) -> np.ndarray:
+    """:func:`scipy.signal.zpk2sos`, step for step, in separately rounded arithmetic.
+
+    SciPy pairs each pole with its zeros by complex magnitudes, numpy's own
+    loop and one numpy picks by processor, and forms each section's
+    polynomial with ``numpy.convolve``, whose complex products go through the
+    BLAS; the OpenBLAS of 64-bit ARM fuses them into multiply-adds and the
+    x86-64 kernels round each product apart, so fourteen of the checked
+    designs came out of SciPy with other last bits on 64-bit ARM. Here every
+    magnitude is the correctly rounded one (:func:`_magnitude`), every
+    product and sum is one separately rounded operation
+    (:func:`_section_polynomial`), and the pairing is SciPy's default,
+    ``'nearest'``, for a digital filter, branch for branch: the poles nearest
+    the unit circle go in the last sections, each with the zeros nearest it.
+    Where two distinct zeros lie at exactly the same distance from a pole,
+    the design takes the first in order, as a stable sort does; SciPy sorts
+    with numpy's default ``argsort``, whose order of ties follows the
+    processor, and may take the other (:func:`_nearest`).
+
+    :param zeros: Digital zeros, a real or complex one-dimensional array.
+    :param poles: Digital poles, likewise.
+    :param gain: The filter's gain, folded into the first section.
+    :return: The cascade, one section ``[b0, b1, b2, a0, a1, a2]`` per row.
+    :raises ValueError: if a complex root has no conjugate.
+    """
+    z = [complex(v) for v in np.asarray(zeros).tolist()]
+    p = [complex(v) for v in np.asarray(poles).tolist()]
+    if not z and not p:
+        return np.array([[gain, 0.0, 0.0, 1.0, 0.0, 0.0]])
+    z += [0j] * max(len(p) - len(z), 0)
+    p += [0j] * max(len(z) - len(p), 0)
+    count = (len(p) + 1) // 2
+    if len(p) % 2:
+        p.append(0j)
+        z.append(0j)
+    z_pairs, z_reals = _conjugate_pairs(z)
+    p_pairs, p_reals = _conjugate_pairs(p)
+    z, p = z_pairs + z_reals, p_pairs + p_reals
+    sections = [_next_section(z, p) for _ in range(count)][::-1]
+    sections[0][:3] = [gain * value for value in sections[0][:3]]
+    return np.array(sections, dtype=np.float64)
+
+
 def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> float:
     r"""``|H|`` of a biquad cascade at one frequency, in real arithmetic.
 
@@ -1307,8 +1539,7 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
 
 
 def _fit_from(
-    zeros: np.ndarray,
-    poles: np.ndarray,
+    prototype: tuple[np.ndarray, np.ndarray, int],
     degree: int,
     grid: tuple[np.ndarray, np.ndarray, np.ndarray],
     span: tuple[float, float],
@@ -1316,12 +1547,15 @@ def _fit_from(
 ) -> tuple[float, np.ndarray, _Layout]:
     """One whole fit, from the start *placement* describes.
 
+    :param prototype: ``(zeros, poles, zeros at the origin)``, the last a count
+        of the first zeros, as :func:`fit_prototype` takes them.
     :return: ``(peak residual in dB, parameters, layout)``. The peak is what
         :func:`fit_prototype` compares attempts on, and it is measured on the
         same grid the fit minimised over, so it says how well the search did
         and not how well the design will be graded.
     """
-    theta, layout = _start_parameters(zeros, poles, degree, placement)
+    zeros, poles, at_origin = prototype
+    theta, layout = _start_parameters(zeros, poles, degree, placement, at_origin)
     bounds = _corner_bounds(layout, span)
     fitted = _lawson_fit(np.clip(theta, *bounds), layout, grid, bounds)
     residual = _residual_db(fitted, layout, grid[0], grid[1], grid[2])
@@ -1335,6 +1569,8 @@ def fit_prototype(
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
+    *,
+    n_origin_zeros: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Analog prototype whose bilinear image tracks *zeros*/*poles* at *fs*.
 
@@ -1357,8 +1593,8 @@ def fit_prototype(
     over one that was chosen against it. It costs eight times the work as well,
     but that is not why it was refused.
 
-    :param zeros: Zeros of the printed prototype, in rad/s. Zeros at the origin
-        are held there.
+    :param zeros: Zeros of the printed prototype, in rad/s, the
+        *n_origin_zeros* of them that sit at the origin first.
     :param poles: Poles of the printed prototype, in rad/s.
     :param fs: Sampling rate in Hz.
     :param band: Frequencies in Hz between which the response is fitted. The
@@ -1369,13 +1605,25 @@ def fit_prototype(
     :param reference_frequency_hz: The standard's reference frequency. The residual is measured
         relative to the response at :func:`_anchor_hz`, which is *reference_frequency_hz* itself
         at every rate that can carry it.
+    :param n_origin_zeros: How many of the first *zeros* sit at the origin,
+        the power of ``s`` the prototype's numerator carries. They are held
+        there, and counted from the prototype rather than recognised by their
+        value.
     :return: ``(zeros, poles)`` of the fitted prototype in rad/s, ready for
-        :func:`scipy.signal.bilinear_zpk`.
-    :raises ValueError: if *band* is empty or *n_sections* cannot hold the
-        prototype's own degree.
-    :raises TypeError: if a coefficient ``poles`` gives the fit is not one real
-        number.
+        :func:`bilinear_zpk`.
+    :raises ValueError: if *band* is empty, *n_sections* cannot hold the
+        prototype's own degree, or *n_origin_zeros* is more than there are
+        zeros.
+    :raises TypeError: if *n_origin_zeros* is not a whole number, or a
+        coefficient ``poles`` gives the fit is not one real number.
     """
+    at_origin = require_count(n_origin_zeros, "n_origin_zeros", at_least=0)
+    if at_origin > len(zeros):
+        msg = (
+            f"'n_origin_zeros' counts {at_origin} zeros at the origin, but the "
+            f"prototype has {len(zeros)} zeros."
+        )
+        raise ValueError(msg)
     low, high = band
     # Spelled out rather than as ``not low < high``: the two differ only on
     # NaN, which the negated comparison happens to refuse, and a guard should
@@ -1395,13 +1643,14 @@ def fit_prototype(
     target_db = _analog_db(np.asarray(zeros), np.asarray(poles), frequencies, anchor)
     grid = (omega, omega_ref, target_db)
     placements = _spare_placements(fs, span)
-    best = _fit_from(zeros, poles, 2 * n_sections, grid, span, placements[0])
+    prototype = (np.asarray(zeros), np.asarray(poles), at_origin)
+    best = _fit_from(prototype, 2 * n_sections, grid, span, placements[0])
     if best[0] > _FIT_FAILED_DB:
         # The closed-form design's own start did not produce a filter, so the
         # question is no longer which start is quickest but which one works:
         # every remaining placement is tried and the best is kept.
         for placement in placements[1:]:
-            attempt = _fit_from(zeros, poles, 2 * n_sections, grid, span, placement)
+            attempt = _fit_from(prototype, 2 * n_sections, grid, span, placement)
             if attempt[0] < best[0]:
                 best = attempt
     return _fitted_zpk(best[1], best[2])
@@ -1414,6 +1663,8 @@ def design_sos(
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
+    *,
+    n_origin_zeros: int,
 ) -> np.ndarray:
     """Second-order sections realising the prototype at *fs*, 0 dB at *reference_frequency_hz*.
 
@@ -1431,14 +1682,22 @@ def design_sos(
     realised response inherits the fit's accuracy at the point it is pinned at
     instead of being pinned somewhere the fit never looked.
 
+    :param n_origin_zeros: How many of the first *zeros* sit at the origin;
+        see :func:`fit_prototype`.
     :return: The cascade.
     """
     fitted_zeros, fitted_poles = fit_prototype(
-        zeros, poles, fs, band, n_sections, reference_frequency_hz
+        zeros,
+        poles,
+        fs,
+        band,
+        n_sections,
+        reference_frequency_hz,
+        n_origin_zeros=n_origin_zeros,
     )
     anchor = _anchor_hz(fs, band, reference_frequency_hz)
     digital = bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
-    sos = signal.zpk2sos(*digital)
+    sos = second_order_sections(*digital)
     printed = _analog_db(
         np.asarray(zeros), np.asarray(poles), np.array([anchor]), reference_frequency_hz
     )
@@ -1454,14 +1713,25 @@ def fitted_prototype_hz(
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
+    *,
+    n_origin_zeros: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     """The fitted prototype's zeros and poles in Hz, for reading beside a table.
 
     The point of fitting a *prototype* rather than digital coefficients is that
     the answer stays comparable with the standard: the poles come back near the
     printed corner frequencies, moved by the warp the fit is undoing.
+
+    :param n_origin_zeros: How many of the first *zeros* sit at the origin;
+        see :func:`fit_prototype`.
     """
     fitted_zeros, fitted_poles = fit_prototype(
-        zeros, poles, fs, band, n_sections, reference_frequency_hz
+        zeros,
+        poles,
+        fs,
+        band,
+        n_sections,
+        reference_frequency_hz,
+        n_origin_zeros=n_origin_zeros,
     )
     return fitted_zeros / (2.0 * np.pi), fitted_poles / (2.0 * np.pi)

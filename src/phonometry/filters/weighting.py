@@ -88,6 +88,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
+from fractions import Fraction
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
@@ -113,12 +114,19 @@ from ..io._resolve import (
     resolve_samples,
 )
 from ..io._signal import Signal
+from ._pinned_roots import (
+    Polynomial,
+    correctly_rounded_roots,
+    exact_polynomial_product,
+    exact_polynomial_sum,
+)
 from ._pinned_trig import pinned_hypot
 from ._weighting_design import (
     bilinear_zpk,
     complex_product,
     complex_quotient,
     design_sos,
+    second_order_sections,
 )
 
 if TYPE_CHECKING:
@@ -220,15 +228,19 @@ _ITU_R_468_LADDER: tuple[tuple[str, float], ...] = (
 )
 
 
-def _abcd_product(
-    left: list[list[np.ndarray]], right: list[list[np.ndarray]]
-) -> list[list[np.ndarray]]:
+#: A two-port's ABCD matrix ``[[A, B], [C, D]]``, each entry a polynomial in
+#: ``s`` held as its exact coefficients, the highest power first.
+_TwoPort = list[list[Polynomial]]
+
+
+def _abcd_product(left: _TwoPort, right: _TwoPort) -> _TwoPort:
     """Product of two 2x2 ABCD matrices whose entries are polynomials in ``s``.
 
-    Each entry is a coefficient array in ``numpy.polynomial`` convention
-    (highest power first), so the chain rule of two-port theory becomes an
-    ordinary matrix product over the polynomial ring and the ladder's
-    transfer function comes out exactly, with no per-frequency evaluation.
+    The chain rule of two-port theory is an ordinary matrix product over the
+    polynomial ring, so the ladder's transfer function comes out as
+    polynomials, with no per-frequency evaluation; and over exact rational
+    coefficients it comes out with no rounding either, where ``numpy``'s
+    ``polymul`` hands each product to the BLAS.
 
     :param left: The upstream two-port, as ``[[A, B], [C, D]]``.
     :param right: The downstream two-port, in the same form.
@@ -236,14 +248,31 @@ def _abcd_product(
     """
     return [
         [
-            np.polyadd(
-                np.polymul(left[row][0], right[0][col]),
-                np.polymul(left[row][1], right[1][col]),
+            exact_polynomial_sum(
+                exact_polynomial_product(left[row][0], right[0][col]),
+                exact_polynomial_product(left[row][1], right[1][col]),
             )
             for col in (0, 1)
         ]
         for row in (0, 1)
     ]
+
+
+def _ladder_element(kind: str, value: float) -> _TwoPort:
+    """The ABCD matrix of one element of the Fig. 1a ladder, exactly.
+
+    The component values are read as the doubles the table holds, each an
+    exact rational number.
+    """
+    one, zero, s = (Fraction(1),), (Fraction(0),), (Fraction(1), Fraction(0))
+    exact = Fraction(value)
+    if kind == "shunt_c":
+        return [[one, zero], [(exact, Fraction(0)), one]]
+    if kind == "series_l":
+        return [[one, (exact, Fraction(0))], [zero, one]]
+    # "series_c": s * [[1, 1 / (s C)], [0, 1]], the scaling the prototype's
+    # docstring describes.
+    return [[s, (1 / exact,)], [zero, s]]
 
 
 def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
@@ -275,44 +304,42 @@ def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
 
     one zero at the origin because that series capacitor blocks dc, and six
     poles because ``C2``, ``C3`` and ``C4`` form a capacitive loop whose
-    third state is dependent (seven reactive elements, order six). Evaluated
-    in double precision the six coefficients agree with exact rational
-    arithmetic over the same component values to 3.4e-16 relative, and the
-    resulting curve reproduces all 21 rows of Table 1 to 0.0503 dB maximum
-    and 0.0264 dB rms, which is the 0.05 dB rounding quantum of the printed
-    table (the 100 Hz row overshoots it by 0.0002 dB, a rounding tie the
-    four-significant-figure component values cannot resolve).
+    third state is dependent (seven reactive elements, order six). The
+    coefficients are exact: the chain runs in rational arithmetic over the
+    component values, so the denominator is the network's own polynomial,
+    and the poles are its roots with each part correctly rounded
+    (:func:`~phonometry.filters._pinned_roots.correctly_rounded_roots`), the
+    same doubles on every platform. ``numpy.roots`` takes them as
+    eigenvalues through LAPACK, which is a library's arithmetic and gave
+    other last bits on 64-bit ARM; its answers lie within its own error of
+    these. The resulting curve reproduces all 21 rows of Table 1 to
+    0.0503 dB maximum and 0.0264 dB rms, which is the 0.05 dB rounding
+    quantum of the printed table (the 100 Hz row overshoots it by
+    0.0002 dB, a rounding tie the four-significant-figure component values
+    cannot resolve).
 
     :return: The six poles in rad/s, sorted for reproducibility, and the
         gain ``K`` that puts the response at 0 dB at the 1 kHz reference
         frequency Table 1 prints as its zero row.
     """
-    one = np.array([1.0])
-    zero = np.array([0.0])
-    s = np.array([1.0, 0.0])
-
-    abcd = [[one, np.array([_ITU_R_468_SOURCE_OHM])], [zero, one]]
+    abcd: _TwoPort = [
+        [(Fraction(1),), (Fraction(_ITU_R_468_SOURCE_OHM),)],
+        [(Fraction(0),), (Fraction(1),)],
+    ]
     for kind, value in _ITU_R_468_LADDER:
-        if kind == "shunt_c":
-            element = [[one, zero], [np.array([value, 0.0]), one]]
-        elif kind == "series_l":
-            element = [[one, np.array([value, 0.0])], [zero, one]]
-        else:  # "series_c": s * [[1, 1 / (s C)], [0, 1]], the scaling above
-            element = [[s, np.array([1.0 / value])], [zero, s]]
-        abcd = _abcd_product(abcd, element)
+        abcd = _abcd_product(abcd, _ladder_element(kind, value))
 
     # Loading the two-port: V_out / V_in = 1 / (A + B / R_load), times the s
     # the series capacitor's matrix was scaled by.
-    denominator = np.polyadd(abcd[0][0], abcd[0][1] / _ITU_R_468_LOAD_OHM)
-    poles = np.roots(denominator / denominator[0])
+    load = Fraction(_ITU_R_468_LOAD_OHM)
+    denominator = exact_polynomial_sum(abcd[0][0], tuple(c / load for c in abcd[0][1]))
+    poles = correctly_rounded_roots(denominator)
     w_ref = 2.0 * np.pi * 1000.0
     # prod(j w_ref - poles), spelled in real arithmetic by complex_product
     # because numpy's own complex product is fused on some builds.
-    at_reference = complex_product(_shifted_to(w_ref, poles))
+    at_reference = complex_product(_shifted_to(w_ref, np.array(poles)))
     gain = pinned_hypot(*at_reference) / w_ref
-    return tuple(sorted((complex(v) for v in poles), key=lambda v: (v.real, v.imag))), (
-        gain
-    )
+    return poles, gain
 
 
 #: The curves that have an analog prototype, i.e. everything but the ``Z``
@@ -395,16 +422,24 @@ def _fit_band(curve: str, fs: int) -> tuple[float, float]:
     return low, min(high, _FIT_NYQUIST_FRACTION * fs / 2.0)
 
 
-def _a_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+#: A prototype as each builder below states it: how many zeros sit at the
+#: origin, the zeros away from it, the poles (all in rad/s) and the gain. The
+#: zeros at the origin are a count, the power of ``s`` the standard writes in
+#: the numerator, because the design holds them there and must not have to
+#: recognise them by their value.
+_Prototype = tuple[int, np.ndarray, np.ndarray, float]
+
+
+def _a_weighting_zpk() -> _Prototype:
     """Analog A weighting, IEC 61672-1:2013 Annex E (E.4.2).
 
     ``f1`` and ``f4`` are shared with C (and, through C, with B); ANSI
     S1.4-1983 Appendix C prints the same poles to fewer digits
-    (f1 = 20.598997, f4 = 12194.22).
+    (f1 = 20.598997, f4 = 12194.22). Four zeros, all at the origin.
     """
     f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
     poles = -2 * np.pi * np.array([f1, f1, f4, f4, f2, f3])
-    return np.zeros(4), poles, 3.5174303309e13
+    return 4, np.zeros(0), poles, 3.5174303309e13
 
 
 def _u_poles() -> np.ndarray:
@@ -431,14 +466,14 @@ def _u_poles() -> np.ndarray:
     )
 
 
-def _c_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
-    """Analog C weighting, IEC 61672-1:2013 Annex E (E.4.1)."""
+def _c_weighting_zpk() -> _Prototype:
+    """Analog C weighting, IEC 61672-1:2013 Annex E (E.4.1): two zeros at the origin."""
     f1, f4 = 20.598997, 12194.217
     poles = -2 * np.pi * np.array([f1, f1, f4, f4])
-    return np.zeros(2), poles, 5.91797e8
+    return 2, np.zeros(0), poles, 5.91797e8
 
 
-def _b_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _b_weighting_zpk() -> _Prototype:
     """Analog B weighting, ANSI S1.4-1983 Appendix C, Formula (C2).
 
     The C weighting times ``f^2 / (f^2 + f5^2)`` in power, i.e. one more zero
@@ -448,13 +483,13 @@ def _b_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     """
     f1, f4, f5 = 20.598997, 12194.217, 158.48932
     poles = -2 * np.pi * np.array([f1, f1, f4, f4, f5])
-    return np.zeros(3), poles, 1.0
+    return 3, np.zeros(0), poles, 1.0
 
 
-def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _d_weighting_zpk() -> _Prototype:
     """Analog D weighting, withdrawn IEC 537:1976, from the published form.
 
-    Zeros at the origin and at the roots of ``s^2 + 6532 s + 4.0975e7``; poles
+    One zero at the origin and two at the roots of ``s^2 + 6532 s + 4.0975e7``; poles
     at -1776.3, -7288.5 and the roots of ``s^2 + 21514 s + 3.8836e8``, all in
     rad/s (module docstring). The complex pairs are expanded with the quadratic
     formula so the design is exact and deterministic. Corroborated against SQAT
@@ -464,9 +499,7 @@ def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     zero_imag = math.sqrt(4.0975e7 - zero_real * zero_real)
     pole_real = -21514.0 / 2.0
     pole_imag = math.sqrt(3.8836e8 - pole_real * pole_real)
-    zeros = np.array(
-        [0.0, complex(zero_real, zero_imag), complex(zero_real, -zero_imag)]
-    )
+    zeros = np.array([complex(zero_real, zero_imag), complex(zero_real, -zero_imag)])
     poles = np.array(
         [
             -1776.3,
@@ -475,10 +508,10 @@ def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
             complex(pole_real, -pole_imag),
         ]
     )
-    return zeros, poles, 1.0
+    return 1, zeros, poles, 1.0
 
 
-def _g_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _g_weighting_zpk() -> _Prototype:
     """Analog G weighting, ISO 7196:1995 Table 1 (p. 2).
 
     Nominal pole/zero coordinates in the complex frequency plane, in Hz: four
@@ -498,10 +531,10 @@ def _g_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
             -5.16 - 19.27j,
         ]
     )
-    return np.zeros(4), 2 * np.pi * pole_coords_hz, 1.0
+    return 4, np.zeros(0), 2 * np.pi * pole_coords_hz, 1.0
 
 
-def _itu_r_468_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _itu_r_468_zpk() -> _Prototype:
     """Analog 468 weighting, ITU-R BS.468-4 clause 1 via Fig. 1a.
 
     One zero at the origin, because the series capacitor blocks dc, and the six
@@ -512,28 +545,48 @@ def _itu_r_468_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     one place for every curve.
     """
     poles, gain = _itu_r_468_prototype()
-    return np.zeros(1), np.array(poles), gain
+    return 1, np.zeros(0), np.array(poles), gain
+
+
+def _prototype(curve: str) -> _Prototype:
+    """The prototype of *curve* as its builder states it, before normalisation.
+
+    :param curve: An upper-case name in :data:`_PROTOTYPE_CURVES`.
+    :return: ``(zeros at the origin, other zeros, poles, gain)``, rad/s.
+    """
+    if curve == "AU":
+        at_origin, zeros, poles, gain = _a_weighting_zpk()
+        return (
+            at_origin,
+            zeros,
+            np.concatenate([poles.astype(complex), _u_poles()]),
+            gain,
+        )
+    builders = {
+        "A": _a_weighting_zpk,
+        "B": _b_weighting_zpk,
+        "C": _c_weighting_zpk,
+        "D": _d_weighting_zpk,
+        "G": _g_weighting_zpk,
+        "468": _itu_r_468_zpk,
+    }
+    return builders[curve]()
+
+
+def _zeros_at_origin(curve: str) -> int:
+    """How many zeros of *curve*'s prototype sit at the origin, as its builder states."""
+    return _prototype(curve)[0]
 
 
 def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
     """Analog prototype of *curve*, normalised to 0 dB at its reference.
 
     :param curve: An upper-case name in :data:`_PROTOTYPE_CURVES`.
-    :return: ``(zeros, poles, gain)`` in rad/s.
+    :return: ``(zeros, poles, gain)`` in rad/s, the zeros at the origin first,
+        :func:`_zeros_at_origin` of them.
     """
-    if curve == "AU":
-        zeros, poles, gain = _a_weighting_zpk()
-        poles = np.concatenate([poles.astype(complex), _u_poles()])
-    else:
-        builders = {
-            "A": _a_weighting_zpk,
-            "B": _b_weighting_zpk,
-            "C": _c_weighting_zpk,
-            "D": _d_weighting_zpk,
-            "G": _g_weighting_zpk,
-            "468": _itu_r_468_zpk,
-        }
-        zeros, poles, gain = builders[curve]()
+    at_origin, away, poles, gain = _prototype(curve)
+    zeros = np.concatenate((np.zeros(at_origin), away))
     w_ref = 2 * np.pi * _REFERENCE_HZ.get(curve, 1000.0)
     # gain * prod(j w_ref - zeros) / prod(j w_ref - poles), numpy's steps in
     # numpy's order, in the real arithmetic complex_product explains.
@@ -554,9 +607,10 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
             _fit_band(curve, fs),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),
+            n_origin_zeros=_zeros_at_origin(curve),
         )
     else:
-        sos = signal.zpk2sos(*bilinear_zpk(zeros, poles, gain, fs))
+        sos = second_order_sections(*bilinear_zpk(zeros, poles, gain, fs))
     shared = np.array(sos, dtype=np.float64)
     shared.flags.writeable = False
     return shared

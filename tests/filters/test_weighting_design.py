@@ -16,38 +16,47 @@ three things that makes it a design rather than an optimiser's leftovers:
 from __future__ import annotations
 
 import ast
+import builtins
 import hashlib
 import inspect
 import itertools
 import math
 import operator
 import os
+import re
 import subprocess
 import sys
 import textwrap
+import types
 import warnings
 from fractions import Fraction
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import numpy._core.numeric as numpy_numeric
 import pytest
+import scipy
 from libm_identity import TUNABLES, WITHOUT_FMA, runs_the_pinned_routines
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
+from scipy._lib._array_api import array_namespace
 from trig_oracle import correctly_rounded_arctangent
 
 from phonometry import filters
 from phonometry.filters import _weighting_design
 from phonometry.filters import weighting as weighting_module
+from phonometry.filters._pinned_trig import pinned_hypot
 from phonometry.filters._weighting_design import (
     _CORNER_DECADES,
     _cascade_magnitude,
+    _conjugate_pairs,
     _ordered_sum,
     _solve_dense,
     bilinear_zpk,
     design_sos,
     fit_prototype,
     fitted_prototype_hz,
+    second_order_sections,
 )
 from phonometry.filters._weighting_design import (
     _analog_db as _shipped_analog_db,
@@ -61,10 +70,11 @@ from phonometry.filters.weighting import (
     _analog_weighting_zpk,
     _cached_weighting_sos,
     _fit_band,
+    _zeros_at_origin,
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable
 
 #: Sample rates the accuracy table below is measured at: the two broadcast
 #: families (32/44.1/48 kHz), their doubles, and 192 kHz.
@@ -124,6 +134,13 @@ _WORST_DEVIATION_DB = {
     "AU": 0.011,
     "468": 0.100,
 }
+
+
+#: The rates of the checked set between the low rates below and
+#: :data:`_RATES`: the telephone and wideband rates and half of 44.1 kHz. The
+#: same per-curve bounds hold there, measured at 0.0119 dB for D at 16 kHz and
+#: 0.0181 dB for 468 at 22.05 kHz, the two nearest their bounds.
+_MID_RATES = (8000, 16000, 22050)
 
 
 #: Sample rates at or below twice the 1 kHz reference frequency, where the
@@ -326,10 +343,15 @@ def _worst_tone_deviation_db(curve: str, fs: int) -> tuple[float, float]:
     return worst, where
 
 
-@pytest.mark.parametrize("fs", _RATES)
+@pytest.mark.parametrize("fs", [*_MID_RATES, *_RATES])
 @pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
 def test_realised_filter_tracks_its_printed_prototype(curve: str, fs: int) -> None:
-    """Every shipped design, against the curve the standard defines."""
+    """Every shipped design, against the curve the standard defines.
+
+    With :data:`_LOW_RATES` below, these are the 133 designs of the checked
+    set, so a change to the arithmetic underneath the design that moves any
+    of them is held to the design's own tolerance.
+    """
     worst = float(np.max(np.abs(_deviation_db(curve, fs))))
     assert worst <= _WORST_DEVIATION_DB[curve], f"{curve} at fs={fs}: {worst:.5f} dB"
 
@@ -381,6 +403,7 @@ def test_the_library_carries_no_coefficients_of_its_own(curve: str) -> None:
         _fit_band(curve, fs),
         _FIT_SECTIONS[curve],
         _REFERENCE_HZ.get(curve, 1000.0),
+        n_origin_zeros=_zeros_at_origin(curve),
     )
     np.testing.assert_array_equal(rebuilt, filters.WeightingFilter(fs, curve).sos)
 
@@ -403,6 +426,7 @@ def test_the_design_is_stable_and_minimum_phase(curve: str) -> None:
             _fit_band(curve, fs),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),
+            n_origin_zeros=_zeros_at_origin(curve),
         )
         assert np.all(fitted_poles.real < 0.0)
         moved = fitted_zeros[np.abs(fitted_zeros) > 0.0]
@@ -597,7 +621,9 @@ def test_repeated_designs_are_bit_identical() -> None:
     """Same inputs, same bits: there is no random state and no clock here."""
     zeros, poles, _ = _analog_weighting_zpk("A")
     args = (zeros, poles, 44100.0, _fit_band("A", 44100), 4, 1000.0)
-    np.testing.assert_array_equal(design_sos(*args), design_sos(*args))
+    np.testing.assert_array_equal(
+        design_sos(*args, n_origin_zeros=4), design_sos(*args, n_origin_zeros=4)
+    )
 
 
 def test_the_design_does_not_depend_on_the_blas_thread_count() -> None:
@@ -831,6 +857,7 @@ def test_no_fitted_corner_leaves_the_representable_band(curve: str) -> None:
             (low, high),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),
+            n_origin_zeros=_zeros_at_origin(curve),
         )
         corners = np.abs(np.concatenate([fitted_zeros, fitted_poles]))
         top = 2.0 * fs * np.tan(np.pi * high / fs)
@@ -848,7 +875,7 @@ def test_an_empty_band_is_refused() -> None:
     zeros, poles, _ = _analog_weighting_zpk("A")
     band = _fit_band("A", 16)
     with pytest.raises(ValueError, match=r"'band' must span a positive frequency"):
-        fit_prototype(zeros, poles, 16.0, band, 4, 1000.0)
+        fit_prototype(zeros, poles, 16.0, band, 4, 1000.0, n_origin_zeros=4)
 
 
 def test_too_few_sections_is_refused() -> None:
@@ -860,7 +887,41 @@ def test_too_few_sections_is_refused() -> None:
     zeros, poles, _ = _analog_weighting_zpk("AU")
     band = _fit_band("AU", 48000)
     with pytest.raises(ValueError, match=r"'n_sections' is too small"):
-        fit_prototype(zeros, poles, 48000.0, band, 2, 1000.0)
+        fit_prototype(zeros, poles, 48000.0, band, 2, 1000.0, n_origin_zeros=4)
+
+
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_each_prototype_states_its_zeros_at_the_origin_first(curve: str) -> None:
+    """The count the design holds at the origin is the one the builder writes.
+
+    The design takes the zeros at the origin as a count, the power of ``s``
+    the prototype's numerator carries, rather than finding them by testing
+    each zero against zero; so the count has to be what the prototype
+    builds, and they have to come first.
+    """
+    zeros, _, _ = _analog_weighting_zpk(curve)
+    count = _zeros_at_origin(curve)
+    assert count >= 1
+    assert np.all(np.abs(zeros[:count]) <= 0.0)
+    assert np.all(np.abs(zeros[count:]) > 0.0)
+
+
+@pytest.mark.parametrize(
+    ("count", "error"),
+    [(5, ValueError), (-1, ValueError), (2.5, ValueError), ("4", TypeError)],
+    ids=["more-than-the-zeros", "negative", "fractional", "text"],
+)
+def test_a_count_of_zeros_at_the_origin_the_prototype_cannot_hold_is_refused(
+    count: object, error: type[Exception]
+) -> None:
+    """A count past the prototype's zeros, or not a count at all, is named."""
+    zeros, poles, _ = _analog_weighting_zpk("A")
+    band = _fit_band("A", 48000)
+    with pytest.raises(error, match="'n_origin_zeros'"):
+        fit_prototype(
+            zeros, poles, 48000.0, band, 4, 1000.0,
+            n_origin_zeros=count,  # type: ignore[arg-type]
+        )  # fmt: skip
 
 
 def test_the_fitted_prototype_is_readable_in_hertz() -> None:
@@ -875,7 +936,7 @@ def test_the_fitted_prototype_is_readable_in_hertz() -> None:
     """
     zeros, poles, _ = _analog_weighting_zpk("A")
     fitted_zeros, fitted_poles = fitted_prototype_hz(
-        zeros, poles, 48000.0, _fit_band("A", 48000), 4, 1000.0
+        zeros, poles, 48000.0, _fit_band("A", 48000), 4, 1000.0, n_origin_zeros=4
     )
     corners = np.sort(np.abs(fitted_poles))
     assert corners[0] == pytest.approx(20.598997, rel=1e-4)
@@ -1438,7 +1499,7 @@ def test_the_bilinear_transform_is_scipy_s_bit_for_bit(curve: str) -> None:
     zeros, poles, gain = _analog_weighting_zpk(curve)
     fitted = fit_prototype(
         zeros, poles, 48000.0, _fit_band(curve, 48000), _FIT_SECTIONS[curve],
-        _REFERENCE_HZ.get(curve, 1000.0),
+        _REFERENCE_HZ.get(curve, 1000.0), n_origin_zeros=_zeros_at_origin(curve),
     )  # fmt: skip
     for case in ((zeros, poles, gain), (*fitted, 1.0), *_TRANSFORM_CASES):
         ours = bilinear_zpk(*case, 48000.0)
@@ -1450,6 +1511,332 @@ def test_the_bilinear_transform_is_scipy_s_bit_for_bit(curve: str) -> None:
             )
         assert np.float64(ours[2]).view(np.uint64) == np.float64(theirs[2]).view(
             np.uint64
+        )
+
+
+#: The head of the SHA-256 of each curve designed at 48 kHz. Every step of the
+#: design is now the package's own arithmetic, the polynomial roots of the
+#: 468 prototype and the second-order sections included, so each curve has
+#: one digest on every platform, as the A weighting has had since its
+#: transcendentals were pinned. The 468 weighting moved here from the
+#: 08f94c9ff182cff1 its LAPACK roots gave on x86-64.
+_DIGESTS_48K = {
+    "A": "991833ff389afe91",
+    "B": "9d614c312cdae506",
+    "C": "84655ec4f8ebcec4",
+    "D": "e68aa3b7e031906a",
+    "G": "57b5f6d57070632c",
+    "AU": "82878978b16b6110",
+    "468": "eee92dba5dcc41f7",
+}
+
+
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_every_curve_is_the_documented_design_on_every_platform(curve: str) -> None:
+    """Each curve at 48 kHz, as it ships, designed to one digest everywhere.
+
+    Before the roots and the sections were spelled here the 468 weighting
+    and some designs of B, C, D, G and AU came out of 64-bit ARM with other
+    last bits, so only the A weighting was held across the matrix.
+    """
+    weighting_module._itu_r_468_prototype.cache_clear()
+    _cached_weighting_sos.cache_clear()
+    sos = filters.WeightingFilter(48000, curve).sos
+    assert hashlib.sha256(sos.tobytes()).hexdigest()[:16] == _DIGESTS_48K[curve]
+
+
+#: Library routines that once formed part of the cascade: the roots LAPACK
+#: finds, the polynomial products numpy hands the BLAS, and the sections
+#: SciPy forms through both.
+_LIBRARY_STEPS = (
+    (np, "roots"),
+    (np, "convolve"),
+    (np, "polymul"),
+    (np.linalg, "eigvals"),
+    (np.linalg, "eig"),
+    (sg, "zpk2sos"),
+    (sg, "zpk2tf"),
+)
+
+
+@pytest.mark.parametrize("curve", ["A", "D", "468", "AU"])
+def test_a_design_calls_no_library_root_finder_or_section_former(
+    curve: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With those routines made to raise, the design and the plain design still run.
+
+    The run-time half of the source check below for the two steps that were
+    a library's: the 468 prototype's poles, which ``numpy.roots`` found
+    through LAPACK, and the second-order sections, which SciPy's ``zpk2sos``
+    formed through ``numpy.convolve`` and the BLAS. D and AU have complex
+    poles, so their sections take the polynomial of a conjugate pair; AU at
+    1 kHz takes every spare placement.
+    """
+
+    def refuse(*_: object, **__: object) -> object:
+        message = "a library step reached the design"
+        raise AssertionError(message)
+
+    for owner, name in _LIBRARY_STEPS:
+        monkeypatch.setattr(owner, name, refuse)
+    weighting_module._itu_r_468_prototype.cache_clear()
+    try:
+        fs = 1000 if curve == "AU" else 48000
+        designed = _cached_weighting_sos.__wrapped__(curve, fs, high_accuracy=True)
+        plain = _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=False)
+    finally:
+        weighting_module._itu_r_468_prototype.cache_clear()
+    assert np.isfinite(designed).all()
+    assert np.isfinite(plain).all()
+
+
+def _unfused_section(a: complex, b: complex) -> list[complex]:
+    """``numpy.convolve([1, -a], [1, -b])``, each operation rounded once."""
+    return [
+        complex(1.0, 0.0),
+        complex((-a.real - b.real) + 0.0, (-a.imag - b.imag) + 0.0),
+        complex(
+            (a.real * b.real + 0.0) - (a.imag * b.imag + 0.0) + 0.0,
+            (a.real * b.imag + 0.0) + (a.imag * b.real + 0.0) + 0.0,
+        ),
+    ]
+
+
+def _numpy_convolves_step_by_step() -> bool:
+    """Whether numpy's complex ``convolve`` rounds every product and sum apart.
+
+    SciPy forms a section's polynomial with ``numpy.convolve``, whose complex
+    dot products go to the BLAS; the OpenBLAS of 64-bit ARM fuses them, and
+    then SciPy's sections are not the separately rounded ones the design
+    spells, so the comparison below has nothing to compare with.
+    """
+    for a, b in _FUSION_PROBES:
+        result = np.convolve(np.array([1.0, -a]), np.array([1.0, -b])).tolist()
+        if [complex(v) for v in result] != _unfused_section(a, b):
+            return False
+    return True
+
+
+def _correctly_rounded_abs(values: object) -> object:
+    """``numpy.abs`` with a complex magnitude correctly rounded, as the design takes it."""
+    array = np.asarray(values)
+    if not np.iscomplexobj(array):
+        return np.fabs(array)
+    flat = [pinned_hypot(z.real, z.imag) for z in array.reshape(-1).tolist()]
+    magnitudes = np.array(flat, dtype=np.float64).reshape(array.shape)
+    return magnitudes if array.ndim else np.float64(magnitudes)
+
+
+class _CorrectlyRoundedNumpy(types.ModuleType):
+    """numpy as SciPy's filter design sees it, its complex absolute correctly rounded."""
+
+    abs = staticmethod(_correctly_rounded_abs)
+    absolute = staticmethod(_correctly_rounded_abs)
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(np, name)
+
+
+def _random_digital_zpk(seed: int) -> tuple[np.ndarray, np.ndarray, float]:
+    """Roots of every kind ``zpk2sos`` branches on: odd counts, real and paired."""
+    rng = np.random.default_rng(seed)
+
+    def roots(count: int, radius: float) -> list[complex]:
+        found: list[complex] = []
+        while len(found) < count:
+            r, angle = radius * rng.uniform(0.1, 1.0), rng.uniform(0.0, np.pi)
+            if count - len(found) >= 2 and rng.uniform() < 0.6:
+                found += [complex(r * np.cos(angle), r * np.sin(angle))]
+                found += [found[-1].conjugate()]
+            else:
+                found.append(complex(rng.uniform(-radius, radius)))
+        return found
+
+    zeros = roots(int(rng.integers(0, 8)), 1.5)
+    poles = roots(int(rng.integers(max(len(zeros) - 1, 1), 9)), 0.98)
+    return np.array(zeros, dtype=complex), np.array(poles, dtype=complex), 0.7
+
+
+@pytest.mark.skipif(
+    not _numpy_convolves_step_by_step(),
+    reason="this numpy's complex convolve fuses its products, so SciPy's sections "
+    "are not the separately rounded ones the design spells",
+)
+def test_the_sections_are_scipy_s_where_scipy_rounds_exactly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Where SciPy's arithmetic is exact, the design's sections are SciPy's, bit for bit.
+
+    The design spells ``zpk2sos`` step by step: each product and sum rounded
+    once, and each complex magnitude its pairing reads correctly rounded.
+    SciPy rounds the products the same way where numpy's ``convolve`` does
+    (the skip above), but its magnitudes are numpy's own loop, which is not
+    correctly rounded, so SciPy is handed the correctly rounded magnitude
+    here; then the two agree on every curve's plain and fitted design at
+    48 kHz, on the AU weighting at 100 Hz, where numpy's magnitude pairs two
+    zeros one unit in the last place apart the other way round and SciPy's
+    own sections differ from these, and on random roots that take every
+    branch of the pairing.
+    """
+    monkeypatch.setattr(sg._filter_design, "np", _CorrectlyRoundedNumpy("np"))
+    monkeypatch.setattr(sg._filter_design, "abs", _correctly_rounded_abs, raising=False)
+    cases = [_random_digital_zpk(seed) for seed in range(60)]
+    for curve in _PROTOTYPE_CURVES:
+        zeros, poles, gain = _analog_weighting_zpk(curve)
+        cases.append(bilinear_zpk(zeros, poles, gain, 48000.0))
+        for fs in (48000, 100) if curve == "AU" else (48000,):
+            fitted = fit_prototype(
+                zeros, poles, float(fs), _fit_band(curve, fs), _FIT_SECTIONS[curve],
+                _REFERENCE_HZ.get(curve, 1000.0), n_origin_zeros=_zeros_at_origin(curve),
+            )  # fmt: skip
+            cases.append(bilinear_zpk(*fitted, 1.0, float(fs)))
+    for case in cases:
+        ours = second_order_sections(*case)
+        theirs = sg.zpk2sos(*case)
+        assert ours.shape == theirs.shape
+        np.testing.assert_array_equal(ours.view(np.uint64), theirs.view(np.uint64))
+
+
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_the_sections_realise_scipy_s_response(curve: str) -> None:
+    """On any platform the sections are the same filter as SciPy's, to its rounding.
+
+    Wherever the BLAS fuses or numpy's magnitudes pair two nearly equal
+    roots the other way, SciPy's sections differ from these in their last
+    bits, and only there: the response the two realise over the fit band is
+    the same to a trillionth of a decibel.
+    """
+    zeros, poles, _ = _analog_weighting_zpk(curve)
+    fitted = fit_prototype(
+        zeros, poles, 48000.0, _fit_band(curve, 48000), _FIT_SECTIONS[curve],
+        _REFERENCE_HZ.get(curve, 1000.0), n_origin_zeros=_zeros_at_origin(curve),
+    )  # fmt: skip
+    digital = bilinear_zpk(*fitted, 1.0, 48000.0)
+    grid = np.geomspace(*_fit_band(curve, 48000), 2001)
+    _, ours = sg.sosfreqz(second_order_sections(*digital), worN=grid, fs=48000)
+    _, theirs = sg.sosfreqz(sg.zpk2sos(*digital), worN=grid, fs=48000)
+    apart = np.max(np.abs(20.0 * np.log10(np.abs(ours) / np.abs(theirs))))
+    assert apart < 1e-9, f"{curve}: {apart:.3e} dB"
+
+
+@pytest.mark.parametrize(
+    ("zeros", "refusal"),
+    [
+        pytest.param(
+            [0.5 + 0.3j],
+            "the roots above the real axis number 1 and those below 0",
+            id="unpaired-count",
+        ),
+        pytest.param(
+            [0.5 + 0.3j, 0.5 - 0.9j],
+            "(0.5+0.3j) and (0.5-0.9j) are not a conjugate pair",
+            id="mismatched-pair",
+        ),
+    ],
+)
+def test_the_sections_refuse_a_complex_root_with_no_conjugate(
+    zeros: list[complex], refusal: str
+) -> None:
+    """Two guards, as in SciPy's ``_cplxreal``, each named by what it found.
+
+    A complex root above the real axis with none below it fails the count,
+    and two roots one on each side that are not each other's conjugate fail
+    the distance, however the roots pair up after that. Both keep SciPy's
+    sentence and say which of the two refused.
+    """
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Array contains complex value with no matching conjugate: {refusal}."
+        ),
+    ):
+        second_order_sections(np.array(zeros), np.array([0.5]), 1.0)
+
+
+def test_a_run_of_one_real_part_is_ordered_by_its_imaginary_parts() -> None:
+    """Pairs whose real parts agree within the tolerance, then one that does not.
+
+    SciPy's ``_cplxreal`` sorts the roots by real part and then sorts each
+    run of real parts that agree within its tolerance by the size of the
+    imaginary part, so ``0.5 + 0.3i`` and ``nextafter(0.5, 1) + 0.1i`` swap
+    and the pair at 0.7 closes the run; the design takes them in SciPy's
+    order and averages each pair to the same bits.
+    """
+    nudged = math.nextafter(0.5, 1.0)
+    upper = [complex(0.5, 0.3), complex(nudged, 0.1), complex(0.7, 0.2)]
+    roots = upper + [z.conjugate() for z in upper]
+    pairs, reals = _conjugate_pairs(roots)
+    theirs, their_reals = sg._filter_design._cplxreal(np.array(roots))
+    assert pairs == [upper[1], upper[0], upper[2]]
+    assert reals == their_reals.tolist() == []
+    np.testing.assert_array_equal(
+        np.array(pairs).view(np.uint64), np.asarray(theirs).view(np.uint64)
+    )
+
+
+def test_no_roots_make_one_section_of_the_gain() -> None:
+    """With neither zeros nor poles the cascade is the gain alone, as SciPy's is."""
+    ours = second_order_sections(np.array([]), np.array([]), 0.7)
+    theirs = sg.zpk2sos(np.array([]), np.array([]), 0.7)
+    assert (
+        ours.tolist() == np.asarray(theirs).tolist() == [[0.7, 0.0, 0.0, 1.0, 0.0, 0.0]]
+    )
+
+
+def _fused_convolve(a: object, v: object, mode: str = "full") -> np.ndarray:
+    """``numpy.convolve`` as a BLAS that fuses its complex dot products returns it."""
+    left, right = np.asarray(a), np.asarray(v)
+    if not (np.iscomplexobj(left) or np.iscomplexobj(right)) or mode != "full":
+        return _UNFUSED_CONVOLVE(a, v, mode)
+    out = [complex(0.0)] * (left.size + right.size - 1)
+    for i, x in enumerate(left.tolist()):
+        for j, y in enumerate(right.tolist()):
+            x, y = complex(x), complex(y)
+            out[i + j] += _fused_product(x, y)
+    return np.array(out, dtype=complex)
+
+
+_UNFUSED_CONVOLVE = np.convolve
+
+
+def test_a_blas_that_fuses_its_complex_dot_designs_the_same_filters(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The design owes nothing to whether the BLAS fuses a complex dot product.
+
+    SciPy forms each section's polynomial with ``numpy.convolve``, whose
+    complex products go to the BLAS's dot product, and the OpenBLAS of 64-bit
+    ARM fuses them. With ``numpy.convolve`` fused here, on any platform,
+    SciPy's sections move for the D and G weightings at 48 kHz (the test
+    asserts it, so that it shows something) and the design's do not, since
+    it no longer reaches either. Every reference SciPy may reach it through
+    is fused: its array namespace from 1.15 on, and before that
+    ``numpy.poly``, which calls the ``convolve`` of ``numpy._core.numeric``.
+    """
+    zeros, poles, _ = _analog_weighting_zpk("D")
+    fitted = fit_prototype(
+        zeros, poles, 48000.0, _fit_band("D", 48000), _FIT_SECTIONS["D"], 1000.0,
+        n_origin_zeros=_zeros_at_origin("D"),
+    )  # fmt: skip
+    digital = bilinear_zpk(*fitted, 1.0, 48000.0)
+    before = {
+        curve: _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=True)
+        for curve in ("D", "G")
+    }
+    unfused_scipy = sg.zpk2sos(*digital)
+    # SciPy reaches numpy through its array namespace, which holds its own
+    # reference to ``convolve``.
+    namespace = array_namespace(np.array([1.0]))
+    monkeypatch.setattr(np, "convolve", _fused_convolve)
+    monkeypatch.setattr(namespace, "convolve", _fused_convolve)
+    monkeypatch.setattr(numpy_numeric, "convolve", _fused_convolve)
+    assert not np.array_equal(
+        sg.zpk2sos(*digital).view(np.uint64), unfused_scipy.view(np.uint64)
+    )
+    for curve, unfused in before.items():
+        fused = _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=True)
+        np.testing.assert_array_equal(
+            fused.view(np.uint64), unfused.view(np.uint64), err_msg=curve
         )
 
 
@@ -1516,24 +1903,42 @@ _MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite", "prod"})
 
 #: numpy names that are a transcendental, a power, or a magnitude that may be
 #: complex, each of which numpy computes with a dispatched kernel or the C
-#: library. A real magnitude is ``np.fabs``, which IEEE 754 fixes and which
-#: refuses a complex value.
+#: library, and the polynomial, dot-product and linear-algebra routines that
+#: hand their sums of products to the BLAS or to LAPACK, the polynomial
+#: package among them (its ``polyroots`` is LAPACK's eigenvalues), and the
+#: sorts and partitions, whose default kind is not stable and orders ties as
+#: the processor's kernel does. A real magnitude is ``np.fabs``, which IEEE 754
+#: fixes and which refuses a complex value. The names are refused at any depth
+#: below numpy, ``np.ma.abs`` as much as ``np.abs``.
 _NUMPY_FORBIDDEN = frozenset(
     {
         "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "power",
         "float_power", "sin", "cos", "tan", "arcsin", "arccos", "arctan",
         "arctan2", "sinh", "cosh", "tanh", "arcsinh", "arccosh", "arctanh",
         "hypot", "cbrt", "geomspace", "logspace", "angle", "abs", "absolute",
-        "emath", "prod", "cumprod", "polyval",
+        "emath", "prod", "cumprod", "polyval", "roots", "poly", "polymul",
+        "polyadd", "polysub", "polydiv", "convolve", "correlate", "dot",
+        "vdot", "inner", "matmul", "einsum", "tensordot", "linalg", "sort",
+        "argsort", "lexsort", "partition", "argpartition", "sort_complex",
+        "polynomial",
     }
 )  # fmt: skip
 
+#: The array methods that sort or partition, refused whatever they are called
+#: on: an array's ``argsort`` and ``partition`` are numpy's unstable kernels.
+#: ``sort`` is left to review, since a list has it too and Python's is stable.
+_ARRAY_SORTS = frozenset({"argsort", "argpartition", "partition"})
+
 #: SciPy's filter routines that evaluate or transform with complex products
-#: and quotients, which numpy computes in a loop a compiler may fuse.
+#: and quotients, which numpy computes in a loop a compiler may fuse, and the
+#: conversions that form polynomials with ``numpy.convolve`` (the BLAS) or
+#: find roots with ``numpy.roots`` (LAPACK), refused at any depth below
+#: SciPy's filters.
 _SIGNAL_COMPLEX = frozenset(
     {
         "bilinear", "bilinear_zpk", "freqs", "freqs_zpk", "freqz", "freqz_zpk",
-        "freqz_sos", "sosfreqz", "group_delay",
+        "freqz_sos", "sosfreqz", "group_delay", "zpk2sos", "zpk2tf", "tf2zpk",
+        "tf2sos", "sos2zpk", "sos2tf", "zpk2ss", "ss2zpk",
     }
 )  # fmt: skip
 
@@ -1543,12 +1948,18 @@ _SIGNAL_OWNERS = frozenset({"signal", "scipy.signal"})
 #: The names numpy is reached by: its alias and its own.
 _NUMPY_OWNERS = frozenset({"np", "numpy"})
 
+#: The names numpy and SciPy are reached by, below which the rules read them
+#: at any depth.
+_LIBRARY_OWNERS = _NUMPY_OWNERS | _SIGNAL_OWNERS | {"scipy"}
+
 #: Modules every name of which is a platform's answer: complex math, SciPy's
-#: special functions and numpy's complex-domain math.
+#: special functions, numpy's complex-domain math and the linear algebra of
+#: numpy and SciPy, which is LAPACK's.
 _FORBIDDEN_MODULES = frozenset(
     {
         "cmath", "scipy.special", "special", "np.emath", "numpy.emath",
-        "np.lib.scimath", "numpy.lib.scimath",
+        "np.lib.scimath", "numpy.lib.scimath", "np.linalg", "numpy.linalg",
+        "scipy.linalg", "linalg",
     }
 )  # fmt: skip
 
@@ -1557,51 +1968,194 @@ _OPERATOR_FORBIDDEN = frozenset(
     {"pow", "ipow", "abs", "__pow__", "__ipow__", "__abs__"}
 )
 
-#: How each module may be imported on the design path: ``math`` and ``numpy``
-#: under the one name the attribute rules read, the rest not at all.
-_IMPORT_NAMES = {"math": "math", "numpy": "np"}
+#: How each module the attribute rules read may be bound on the design path:
+#: under a name those rules read it by. A module bound to another name, or
+#: star-imported, hides its routines from them.
+_IMPORT_NAMES: dict[str, frozenset[str]] = {
+    "math": frozenset({"math"}),
+    "numpy": frozenset({"np"}),
+    "operator": frozenset({"operator"}),
+    "scipy": frozenset({"scipy"}),
+    "scipy.signal": _SIGNAL_OWNERS,
+    "builtins": frozenset({"builtins"}),
+}
+
+#: The module each name the attribute rules read a module by stands for.
+_MODULE_NAMES = {
+    "math": "math",
+    "np": "numpy",
+    "numpy": "numpy",
+    "operator": "operator",
+    "scipy": "scipy",
+    "signal": "scipy.signal",
+    "cmath": "cmath",
+    "special": "scipy.special",
+    "linalg": "scipy.linalg",
+}
+
+#: The names the attribute rules read a module by, each with the module it
+#: is: numpy and SciPy are read at any depth below them, the others only at
+#: the top.
+_ROOT_MODULES: dict[str, types.ModuleType] = {
+    "np": np,
+    "numpy": np,
+    "scipy": scipy,
+    "signal": sg,
+    "math": math,
+    "operator": operator,
+    "builtins": builtins,
+    "__builtins__": builtins,
+}
+
+#: The modules that import a module by a string no rule reads.
+_DYNAMIC_IMPORTS = frozenset({"importlib"})
+
+#: The builtins that compute with the platform's arithmetic, or import a
+#: module by a string no rule reads, refused called, as values or read from
+#: :mod:`builtins`.
+_BUILTINS_FORBIDDEN = frozenset({"abs", "pow", "__import__"})
+
+
+def _below(owner: str, roots: Iterable[str]) -> bool:
+    """Whether *owner* is one of *roots* or an attribute path below one of them."""
+    return any(owner == root or owner.startswith(f"{root}.") for root in roots)
+
+
+def _is_module(path: str) -> bool:
+    """Whether the dotted *path*, read from a name in :data:`_ROOT_MODULES`, is a module.
+
+    ``np.ma`` and ``signal._filter_design`` are, ``np.float64`` and
+    ``scipy.signal.zpk2sos`` are not. Read off the modules this process
+    imported, which are the ones the design runs with.
+    """
+    root, *names = path.split(".")
+    found: object = _ROOT_MODULES.get(root)
+    with warnings.catch_warnings():
+        # numpy.core is a deprecated spelling of numpy._core, and says so when read.
+        warnings.simplefilter("ignore", DeprecationWarning)
+        for name in names:
+            found = getattr(found, name, None)
+    return isinstance(found, types.ModuleType)
 
 
 def _attribute_finding(owner: str, name: str) -> str | None:
-    """What ``owner.name`` hands the platform, or ``None`` if nothing."""
+    """What ``owner.name`` hands the platform, or ``None`` if nothing.
+
+    A forbidden routine of numpy or of SciPy's filters at any depth below
+    them, a private module or name of numpy or SciPy (``np._core``,
+    ``signal._filter_design``), whose routines no rule lists, and a module
+    the rules read reached as another module's attribute (``wd.np``,
+    ``fractions.math``), which no rule reads below it.
+    """
     if owner == "math":
         return None if name in _MATH_ALLOWED else f"math.{name}"
+    library = _below(owner, _LIBRARY_OWNERS)
     forbidden = (
-        (owner in _NUMPY_OWNERS and name in _NUMPY_FORBIDDEN)
+        (_below(owner, _NUMPY_OWNERS) and name in _NUMPY_FORBIDDEN)
+        or (library and name.startswith("_"))
+        or (name in _MODULE_NAMES and not library)
         or owner in _FORBIDDEN_MODULES
         or owner.startswith("scipy.special.")
         or (owner == "operator" and name in _OPERATOR_FORBIDDEN)
-        or (owner in _SIGNAL_OWNERS and name in _SIGNAL_COMPLEX)
+        or (owner == "sys" and name == "modules")
+        or (owner in {"builtins", "__builtins__"} and name in _BUILTINS_FORBIDDEN)
+        or (_below(owner, _SIGNAL_OWNERS) and name in _SIGNAL_COMPLEX)
     )
     return f"{owner}.{name}" if forbidden else None
 
 
+def _library_submodule(module: str) -> bool:
+    """Whether *module* is a module of numpy or SciPy the rules do not read from the top.
+
+    Every module below numpy or SciPy but SciPy's filters, which the rules
+    read by name, and numpy's typing, which holds no arithmetic.
+    """
+    if module in _IMPORT_NAMES or _below(module, ("numpy.typing",)):
+        return False
+    return module.startswith(("numpy.", "scipy."))
+
+
+def _hides(module: str, bound: str) -> bool:
+    """Whether binding *module* to the name *bound* hides it from the attribute rules.
+
+    A module the rules read, bound to a name they do not read it by, and a
+    module below numpy or SciPy (:func:`_library_submodule`) under any name:
+    ``import numpy.polynomial.polynomial as P`` reaches ``P.polyroots``.
+    """
+    if module in _IMPORT_NAMES:
+        return bound not in _IMPORT_NAMES[module]
+    return _library_submodule(module)
+
+
+def _spelled(alias: ast.alias) -> str:
+    """An imported name as the import spells it, ``name`` or ``name as other``."""
+    return f"{alias.name} as {alias.asname}" if alias.asname else alias.name
+
+
+def _imports_hidden_module(node: ast.ImportFrom, alias: ast.alias) -> bool:
+    """Whether *alias* of *node* binds a module where the attribute rules do not read it.
+
+    From numpy or SciPy, a module they hold (``from numpy import ma``, ``from
+    scipy import signal as sig``); from any other module, one it hands on
+    under a name the rules read a module by (``from .x import np as n``),
+    taken as that module.
+    """
+    bound = alias.asname or alias.name
+    module = node.module or ""
+    if node.level == 0 and module.partition(".")[0] in {"numpy", "scipy"}:
+        path = f"{module}.{alias.name}"
+        return _is_module(path) and _hides(path, bound)
+    handed = _MODULE_NAMES.get(alias.name)
+    return handed is not None and (
+        handed in _FORBIDDEN_MODULES or _hides(handed, bound)
+    )
+
+
 def _import_from_finding(node: ast.ImportFrom) -> str | None:
-    """What a ``from ... import`` brings in that the attribute rules cannot see."""
+    """What a ``from ... import`` brings in that the attribute rules cannot see.
+
+    A forbidden routine or module by its bare name; anything from a module
+    below numpy or SciPy (``from numpy._core.numeric import convolve``) but
+    numpy's typing; a module the rules read bound to another name, whether
+    numpy's or SciPy's own (``from scipy import signal as sig``, ``from numpy
+    import ma``) or handed on by another module (``from .x import np as n``);
+    a dynamic import; and any star import.
+    """
     module = node.module or ""
     names = {alias.name for alias in node.names}
+    library = node.level == 0 and module.partition(".")[0] in {"numpy", "scipy"}
     hidden = (
-        module in {"math", "cmath"}
+        "*" in names
+        or (node.level == 0 and module in {"math", "cmath"})
+        or (node.level == 0 and module.partition(".")[0] in _DYNAMIC_IMPORTS)
         or module in _FORBIDDEN_MODULES
-        or module.startswith("scipy.special")
-        or (module == "scipy" and "special" in names)
+        or (library and _library_submodule(module))
+        or any(_imports_hidden_module(node, alias) for alias in node.names)
         or (module in _NUMPY_OWNERS and bool(names & _NUMPY_FORBIDDEN))
         or (module == "operator" and bool(names & _OPERATOR_FORBIDDEN))
+        or (module == "builtins" and bool(names & _BUILTINS_FORBIDDEN))
         or (module == "scipy.signal" and bool(names & _SIGNAL_COMPLEX))
     )
-    return f"from {module} import {', '.join(sorted(names))}" if hidden else None
+    spelled = ", ".join(sorted(_spelled(alias) for alias in node.names))
+    return f"from {'.' * node.level}{module} import {spelled}" if hidden else None
 
 
 def _import_finding(node: ast.Import) -> list[str]:
-    """Each ``import`` that renames ``math`` or numpy, or brings in a forbidden module."""
+    """Each ``import`` that binds a module the attribute rules read elsewhere, or a forbidden one.
+
+    ``import numpy as numpy``, ``import scipy.signal as sg``, ``import scipy
+    as sp`` and ``import operator as op`` alike: a routine is then reached by
+    a name no rule reads. So is a module below numpy or SciPy under any name,
+    ``import numpy._core.numeric as nn``, and :mod:`importlib`, which imports
+    a module by a string.
+    """
     found = []
     for alias in node.names:
         bound = alias.asname or alias.name
-        renamed = alias.name in _IMPORT_NAMES and bound != _IMPORT_NAMES[alias.name]
         if (
-            renamed
+            _hides(alias.name, bound)
             or alias.name in _FORBIDDEN_MODULES
-            or alias.name.startswith("scipy.special")
+            or alias.name.partition(".")[0] in _DYNAMIC_IMPORTS
         ):
             found.append(f"import {alias.name} as {bound}")
     return found
@@ -1624,11 +2178,29 @@ class _PlatformOperations(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.found: set[str] = set()
+        # The names and attribute paths read as the owner of an attribute.
+        self._owners: set[ast.expr] = set()
+        # The names called, which a builtin's finding names as a call.
+        self._called: set[ast.expr] = set()
+
+    def _module_as_value(self, node: ast.Name | ast.Attribute) -> None:
+        """Note a module the rules read, used as a value rather than as an owner.
+
+        ``sg = signal`` or ``getattr(np, "roots")`` binds or hands on the
+        module, whose routines are then reached by a name no rule reads.
+        """
+        if node in self._owners or not isinstance(node.ctx, ast.Load):
+            return
+        path = ast.unparse(node)
+        if _is_module(path):
+            self.found.add(f"{node.lineno}: the module {path} as a value")
 
     # ast.NodeVisitor dispatches on this name.
     def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
         if isinstance(node.op, ast.Pow):
             self.found.add(f"{node.lineno}: the ** operator")
+        if isinstance(node.op, ast.MatMult):
+            self.found.add(f"{node.lineno}: the @ operator")
         if isinstance(node.op, _COMPLEX_PRODUCTS) and any(
             _is_complex_literal(side) for side in (node.left, node.right)
         ):
@@ -1643,17 +2215,30 @@ class _PlatformOperations(ast.NodeVisitor):
 
     # ast.NodeVisitor dispatches on this name.
     def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
-        if isinstance(node.func, ast.Name) and node.func.id in {"abs", "pow"}:
+        if isinstance(node.func, ast.Name) and node.func.id in _BUILTINS_FORBIDDEN:
             self.found.add(f"{node.lineno}: builtin {node.func.id}()")
+        self._called.add(node.func)
         self.generic_visit(node)
 
     # ast.NodeVisitor dispatches on this name.
     def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
+        finding = None
         if isinstance(node.value, (ast.Name, ast.Attribute)):
+            self._owners.add(node.value)
             finding = _attribute_finding(ast.unparse(node.value), node.attr)
-            if finding is not None:
-                self.found.add(f"{node.lineno}: {finding}")
+        if finding is None and node.attr in _ARRAY_SORTS:
+            finding = f"the .{node.attr} method"
+        if finding is not None:
+            self.found.add(f"{node.lineno}: {finding}")
+        self._module_as_value(node)
         self.generic_visit(node)
+
+    # ast.NodeVisitor dispatches on this name.
+    def visit_Name(self, node: ast.Name) -> None:  # noqa: N802
+        builtin = node.id in _BUILTINS_FORBIDDEN and isinstance(node.ctx, ast.Load)
+        if builtin and node not in self._called:
+            self.found.add(f"{node.lineno}: the builtin {node.id} as a value")
+        self._module_as_value(node)
 
     # ast.NodeVisitor dispatches on this name.
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
@@ -1731,7 +2316,17 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     on macOS and on Windows and numpy built with GCC does not. That is how
     the A weighting at 48 kHz once hashed to ``5f5e34e5d3a8aa6e`` on both of
     them; the spelling is :func:`~phonometry.filters._weighting_design.complex_product`
-    and its neighbours.
+    and its neighbours. So is a step that hands a sum of products to the
+    BLAS or to LAPACK: ``numpy.roots``, ``numpy.convolve`` and the polynomial
+    products, ``@`` and ``numpy.linalg``, and SciPy's ``zpk2sos`` and the
+    conversions beside it, which on 64-bit ARM gave the 468 prototype's poles
+    and the sections of fourteen other designs other last bits; the spelling
+    is :func:`~phonometry.filters._pinned_roots.correctly_rounded_roots` and
+    :func:`~phonometry.filters._weighting_design.second_order_sections`.
+    So is numpy's sort or partition, as a function or as an array's method:
+    its default kind is not stable, and the order it gives two equal keys
+    follows the processor's kernel; the design sorts with Python's stable
+    ``sorted``.
     In ``weighting.py`` the scan covers the imports and everything the cached
     design reaches by name, the prototypes and their helpers included.
     """
@@ -1741,7 +2336,8 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     reached = _reached_from(weighting_tree, "_cached_weighting_sos")
     assert {
         "_analog_weighting_zpk", "_itu_r_468_prototype", "_abcd_product",
-        "_u_poles", "_fit_band", "_ITU_R_468_LADDER",
+        "_u_poles", "_fit_band", "_ITU_R_468_LADDER", "_ladder_element",
+        "_prototype", "_zeros_at_origin",
     } <= set(reached)  # fmt: skip
     imports = [
         node
@@ -1801,6 +2397,53 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
     assert _platform_operations(
         ast.parse("from scipy.signal import freqz, zpk2sos\nw = math.prod([2.0])")
     ) == ["1: from scipy.signal import freqz, zpk2sos"]
+    library = textwrap.dedent(
+        """
+        import scipy.linalg
+        from scipy import linalg
+        from numpy import roots
+        def g(a, b, z, p):
+            r = np.roots(a) + np.polymul(a, b) + np.convolve(a, b)
+            e = np.linalg.eigvals(a) + a @ b + numpy.dot(a, b)
+            return signal.zpk2sos(z, p, 1.0), signal.zpk2tf(z, p, 1.0), r, e
+        """
+    )
+    assert _platform_operations(ast.parse(library)) == [
+        "2: import scipy.linalg as scipy.linalg",
+        "3: from scipy import linalg",
+        "4: from numpy import roots",
+        "6: np.convolve",
+        "6: np.polymul",
+        "6: np.roots",
+        "7: np.linalg",
+        "7: np.linalg.eigvals",
+        "7: numpy.dot",
+        "7: the @ operator",
+        "8: signal.zpk2sos",
+        "8: signal.zpk2tf",
+    ]
+    sorts = textwrap.dedent(
+        """
+        from numpy import argsort
+        def s(a, b, items):
+            o = np.sort(a) + np.argsort(a) + numpy.lexsort((a, b))
+            q = np.partition(a, 1) + np.argpartition(a, 1) + np.sort_complex(b)
+            items.sort()
+            return o, q, a.argsort(), (a + b).argpartition(1), b.partition(1)
+        """
+    )
+    assert _platform_operations(ast.parse(sorts)) == [
+        "2: from numpy import argsort",
+        "4: np.argsort",
+        "4: np.sort",
+        "4: numpy.lexsort",
+        "5: np.argpartition",
+        "5: np.partition",
+        "5: np.sort_complex",
+        "7: the .argpartition method",
+        "7: the .argsort method",
+        "7: the .partition method",
+    ]
     module = ast.parse(
         textwrap.dedent(
             """
@@ -1817,6 +2460,137 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
         )
     )
     assert set(_reached_from(module, "root")) == {"root", "leaf", "helper", "_K"}
+
+
+def test_the_guard_refuses_a_module_bound_to_a_name_its_rules_do_not_read() -> None:
+    """An import or a binding that puts a module the rules read under a name they do not.
+
+    The attribute rules read a routine by its owner's name: ``signal.zpk2sos``
+    and ``scipy.signal.zpk2sos``, ``operator.pow``, ``np.roots``. Bound to
+    another name, ``import scipy.signal as sg``, ``from scipy import signal
+    as sig``, ``import scipy as sp`` or ``import operator as op``, the same
+    routine is ``sg.zpk2sos`` or ``op.pow`` and no rule reads it, and a star
+    import binds every name of the module bare. So the import itself is the
+    finding, as it is for ``math`` and numpy under another name. So is an
+    import of a module below numpy or SciPy (numpy's polynomial package,
+    ``numpy._core.numeric``, ``scipy.signal._filter_design``) under any
+    name, numpy's typing aside; a module of numpy or SciPy imported by its
+    bare name (``from numpy import ma``); a module another module hands on
+    under a name of its own (``from .x import np as n``, ``x.np``); a module
+    the rules read used as a value (``sg = signal``, ``getattr(np, "roots")``);
+    a private module of numpy or SciPy read as an attribute (``np._core``);
+    an import by a string (``__import__``, :mod:`importlib`,
+    ``sys.modules``); and a builtin power or magnitude bound to another name
+    (``f = abs``, ``builtins.pow``). The attribute rules read numpy and
+    SciPy's filters at any depth, so ``np.ma.abs`` is ``np.abs``.
+    """
+    source = textwrap.dedent(
+        """
+        import scipy.signal as sg
+        import scipy as sp
+        import operator as op
+        from scipy import signal as sig
+        from numpy import *
+        from scipy.signal import *
+        from operator import *
+        from scipy import signal
+        import scipy.signal
+        import scipy.signal as signal
+        import scipy
+        import operator
+        def f(z, p, x):
+            a = sg.zpk2sos(z, p, 1.0), sp.signal.zpk2tf(z, p, 1.0)
+            return a, op.pow(x, 2), sig.freqz(z), roots(z)
+        """
+    )
+    assert _platform_operations(ast.parse(source)) == [
+        "15: sp.signal",
+        "2: import scipy.signal as sg",
+        "3: import scipy as sp",
+        "4: import operator as op",
+        "5: from scipy import signal as sig",
+        "6: from numpy import *",
+        "7: from scipy.signal import *",
+        "8: from operator import *",
+    ]
+    submodules = textwrap.dedent(
+        """
+        import numpy as np
+        from scipy import signal
+        import numpy.polynomial.polynomial as P
+        from numpy.polynomial import polynomial as Q
+        from numpy._core.numeric import convolve
+        import numpy._core.numeric as nn
+        from scipy.signal._filter_design import zpk2sos
+        import scipy.signal._filter_design as fd
+        from numpy import ma, float64
+        from scipy import fft
+        from scipy.signal import windows
+        import numpy.typing as npt
+        from numpy.typing import ArrayLike
+        from ._weighting_design import np as numpy_again, np
+        import importlib
+        from importlib import import_module
+        from .helpers import *
+        def g(c, z, p, a, b):
+            r = np.polynomial.polynomial.polyroots(c), P.polyfromroots(z), Q.polyroots(z)
+            v = convolve(a, b), nn.convolve(a, b), zpk2sos(z, p, 1.0), fd.zpk2sos(z, p)
+            sg = signal
+            w = sg.zpk2sos(z, p, 1.0), np._core.numeric.convolve(a, b), np.core
+            u = signal._filter_design.zpk2sos(z, p, 1.0), scipy.signal
+            m = np.ma.abs(z), np.lib.scimath.sqrt(a), getattr(np, "roots")(c), float64(a)
+            return __import__("numpy").roots(c), sys.modules["numpy"], other.np.roots(c)
+        """
+    )
+    assert _platform_operations(ast.parse(submodules)) == [
+        "10: from numpy import float64, ma",
+        "11: from scipy import fft",
+        "12: from scipy.signal import windows",
+        "15: from ._weighting_design import np, np as numpy_again",
+        "16: import importlib as importlib",
+        "17: from importlib import import_module",
+        "18: from .helpers import *",
+        "20: np.polynomial",
+        "20: np.polynomial.polynomial",
+        "22: the module signal as a value",
+        "23: np._core",
+        "23: np._core.numeric.convolve",
+        "23: the module np.core as a value",
+        "24: signal._filter_design",
+        "24: signal._filter_design.zpk2sos",
+        "24: the module scipy.signal as a value",
+        "25: np.lib.scimath.sqrt",
+        "25: np.ma.abs",
+        "25: the module np as a value",
+        "26: builtin __import__()",
+        "26: other.np",
+        "26: sys.modules",
+        "4: import numpy.polynomial.polynomial as P",
+        "5: from numpy.polynomial import polynomial as Q",
+        "6: from numpy._core.numeric import convolve",
+        "7: import numpy._core.numeric as nn",
+        "8: from scipy.signal._filter_design import zpk2sos",
+        "9: import scipy.signal._filter_design as fd",
+    ]
+    hidden_builtins = textwrap.dedent(
+        """
+        import builtins
+        import builtins as bi
+        from builtins import pow as power
+        def h(z, a):
+            k = abs, builtins.pow(a, 2), __builtins__.abs(z), bi.abs(z)
+            return getattr(builtins, "abs")(z), abs(z), k
+        """
+    )
+    assert _platform_operations(ast.parse(hidden_builtins)) == [
+        "3: import builtins as bi",
+        "4: from builtins import pow as power",
+        "6: __builtins__.abs",
+        "6: builtins.pow",
+        "6: the builtin abs as a value",
+        "7: builtin abs()",
+        "7: the module builtins as a value",
+    ]
 
 
 _TRANSCENDENTALS = (
@@ -1855,5 +2629,6 @@ def test_a_design_calls_no_math_transcendental(
         _fit_band(curve, fs),
         _FIT_SECTIONS[curve],
         _REFERENCE_HZ.get(curve, 1000.0),
+        n_origin_zeros=_zeros_at_origin(curve),
     )
     assert np.isfinite(sos).all()

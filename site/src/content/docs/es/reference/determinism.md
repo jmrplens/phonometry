@@ -4,20 +4,21 @@ description: "Determinismo: por qué deriva la coma flotante, cómo un filtro si
 ---
 
 Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a
-byte, sean cuales sean la biblioteca C, el número de hilos o la semilla de
-hash con que se diseñe, sea cual sea el compilador con que se construyó
-numpy, y en cualquier procesador x86-64, con o sin AVX-512 o multiply-add
-fusionado, corra allí el juego de kernels de OpenBLAS que corra. La única
-reserva son dos pasos de la cascada realizada que pasan por
-una biblioteca numérica y no por la biblioteca C, las raíces polinómicas de
-LAPACK y los productos BLAS que forma SciPy, que en ARM de 64 bits, según se
-midió, separan algunos diseños de las otras curvas y ninguno de la
-ponderación A; Alcance, más abajo, los nombra y dice qué se midió. En el
-ajuste del diseño de ponderaciones no queda ninguna rutina de la biblioteca
-C: cada trascendente que toma está escrita en aritmética que IEEE&nbsp;754
-fija o calculada correctamente redondeada en aritmética entera exacta, así
-que glibc, la libm de Apple, musl y el runtime de Windows, y las dos
-compilaciones que glibc lleva para x86-64, no tienen voz en sus bits. Esta
+byte, sean cuales sean la biblioteca C, el BLAS, el LAPACK, el número de
+hilos o la semilla de hash con que se diseñe, sea cual sea el compilador
+con que se construyó numpy, y en cualquier procesador: x86-64 con o sin
+AVX-512 o multiply-add fusionado, y ARM de 64 bits. En el camino de diseño
+no queda ningún paso de biblioteca. Cada trascendente que toma el ajuste
+está escrita en aritmética que IEEE&nbsp;754 fija o calculada
+correctamente redondeada en aritmética entera exacta, así que glibc, la
+libm de Apple, musl y el runtime de Windows, y las dos compilaciones que
+glibc lleva para x86-64, no tienen voz en sus bits. Los dos pasos
+posteriores al ajuste que antes pasaban por una biblioteca numérica son
+también aritmética propia del paquete: los polos del prototipo de BS.468-4,
+que hallaba LAPACK, son las raíces correctamente redondeadas del polinomio
+exacto de la red, y las secciones de segundo orden, que SciPy formaba a
+través del BLAS, son el procedimiento del propio SciPy con cada producto
+redondeado una vez y cada módulo correctamente redondeado. Esta
 página registra lo que se fijó y mide lo que hace. Los coeficientes que
 diseña un portátil son los que diseña un clúster, así que un veredicto de
 conformidad, una figura publicada o un filtro embarcado en una cadena de
@@ -117,6 +118,27 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
 - **La rejilla deletreada.** La rejilla geométrica de frecuencias se genera
   término a término con los extremos fijados, así que el ajuste evalúa las
   mismas frecuencias en todas partes.
+- **Ningún paso de biblioteca después del ajuste.** Los seis polos del
+  prototipo de BS.468-4 eran las raíces polinómicas de numpy: valores
+  propios de la matriz compañera, que LAPACK halla con una iteración cuyas
+  sumas el BLAS y el compilador pueden ordenar y fusionar a su gusto. El
+  denominador de la red se construye ahora a partir de sus siete valores de
+  componente en aritmética racional exacta, y sus raíces se hallan también
+  en aritmética exacta y se redondean una sola vez, cada parte al double
+  más cercano a la de la raíz exacta, decidido por un certificado: un disco
+  alrededor de cada aproximación que contiene, demostrablemente, una raíz y
+  ninguna otra, y una extensión en cada coordenada que cae estrictamente
+  entre los puntos medios que rodean a un double, o una coordenada que la
+  aritmética exacta muestra sobre uno de esos puntos medios, y que se
+  redondea al par. Las secciones de segundo orden eran el `zpk2sos` de
+  SciPy, que forma el polinomio de cada sección con `numpy.convolve`, cuyos
+  productos complejos van al BLAS, y empareja polos con ceros por el módulo
+  complejo propio de numpy, que no está correctamente redondeado. Ahora
+  está escrito paso a paso y rama a rama, cada producto y cada suma
+  redondeados una vez y cada módulo correctamente redondeado; de dos ceros
+  exactamente a la misma distancia de un polo toma el primero, como hace
+  una ordenación estable, donde la elección de SciPy pasa por la ordenación
+  por defecto de numpy, cuyo orden de empates depende del procesador.
 
 ## La evidencia
 
@@ -148,6 +170,52 @@ corren en CI:
   ve. Con la arcotangente de glibc de vuelta, el corpus da otra vez su
   SHA-256 anterior, y los seis que se movieron siguen dentro de las cotas de
   respuesta que sostienen los tests.
+- **Los dos últimos pasos de biblioteca movieron 21 diseños en Linux, y
+  ningún otro.** Escribir los polos y las secciones movió los diecinueve
+  diseños de BS.468-4, cuyos polos las raíces correctamente redondeadas
+  sitúan a entre 2 y 36 unidades en el último lugar de cada parte de los de
+  LAPACK. El ajuste parte de los polos, y desde un arranque a unas pocas
+  unidades se asienta en otros coeficientes dentro de su tolerancia: se
+  mueven entre 7 y 13 de los 18 de cada diseño, en sus últimos 9 a 12 bits
+  a 250, 400 y 500&nbsp;Hz y a 22,05&nbsp;kHz en casi la mitad del valor de
+  un coeficiente pequeño, y la respuesta difiere como mucho
+  0,0072&nbsp;dB, a 125&nbsp;Hz (0,0033&nbsp;dB a 44,1&nbsp;kHz,
+  0,000012&nbsp;dB a 48&nbsp;kHz). Movió la ponderación AU hasta dos
+  unidades en el último lugar de ocho coeficientes a 100&nbsp;Hz y una
+  unidad de seis a 200&nbsp;Hz, donde el módulo complejo de numpy, a una
+  unidad del correctamente redondeado, emparejaba al revés dos ceros
+  separados por una unidad en el último lugar. Los otros 112 diseños
+  comprobados conservan sus bytes, entre ellos la ponderación A a las
+  diecinueve frecuencias, y todo diseño que se movió sigue dentro de las
+  cotas de respuesta que sostienen los tests.
+- **Los polos, contra el valor exacto.** Los seis polos son las raíces que
+  halla una biblioteca de precisión arbitraria, redondeadas parte a parte,
+  y la batería de tests los sostiene en esos doubles. Contra esa misma
+  biblioteca a 3000 bits, el buscador de raíces tal como se publica
+  devolvió el valor correctamente redondeado de cada parte de cada raíz de
+  10&nbsp;600 polinomios aleatorios, cada uno en menos de medio segundo:
+  10&nbsp;200 copias de la red 468 con cada componente movido hasta un
+  30&nbsp;%, 200 de coeficientes enteros de grado dos a diez, cuatro de
+  ellos con una raíz en cero, y 200 cuyas raíces se reparten en dieciocho
+  décadas. La
+  respuesta de numpy difiere de ellos entre 4 y 21 unidades en el último
+  lugar del módulo de la raíz, como mucho un 3&nbsp;% del error que el
+  solucionador de valores propios de LAPACK, estable hacia atrás, se
+  permite en esa matriz compañera, así que los polos son lo que halla
+  numpy, dentro del error del propio numpy, y los mismos bytes en todas
+  partes. En CI el buscador de raíces se contrasta con raíces escritas en
+  forma cerrada y redondeadas con raíces cuadradas enteras exactas, un
+  método que él no usa.
+- **Las secciones, contra las de SciPy.** Si se le dan módulos
+  correctamente redondeados, el `zpk2sos` de SciPy devuelve las secciones
+  del diseño bit a bit en el prototipo simple y en el ajustado de cada uno
+  de los 133 diseños comprobados, con la compilación de numpy que redondea
+  sus productos complejos paso a paso; con los módulos propios de numpy
+  solo se separa de ellas en la AU a 100 y 200&nbsp;Hz, como arriba, y las
+  dos realizan la misma respuesta hasta 10⁻⁹&nbsp;dB en cada curva. Con el
+  producto escalar complejo del BLAS fusionado por emulación, las
+  secciones de SciPy para la ponderación D a 48&nbsp;kHz se mueven hasta 11
+  unidades en el último lugar y las del diseño no se mueven nada.
 - **La exponencial y la potencia, bit a bit.** Cada valor distinto que el
   corpus pasa a `exp` (677&nbsp;596) y a `pow` (580&nbsp;455) devuelve los
   bits de glibc, y también cada uno de 120 millones de sorteos sobre el
@@ -188,19 +256,23 @@ corren en CI:
   conjunto comprobado, 50&nbsp;kHz para A, B, C y D y 100&nbsp;kHz para AU
   encuentran un `sin` o una `tan` (AU pasa de `7ee0fe06b2a91373` a
   `ec6c060d4b27d1b9`), y 176,4&nbsp;kHz para A, B y C la arcotangente.
-- **Ninguna biblioteca C.** Con cada resultado que devuelve la biblioteca C
-  empujado una unidad en el último lugar, mediante una capa entre Python y
-  la biblioteca C, el de la arcotangente incluido, doce diseños (la
-  ponderación A a 48, 44,1, 88,2 y 192&nbsp;kHz, la C a 44,1 y
-  88,2&nbsp;kHz, la D a 48 y 88,2&nbsp;kHz, la G a 1 y 1,5&nbsp;kHz, y la
-  468 y la AU a 48&nbsp;kHz) no se mueven ni un bit, mientras que con el
-  código anterior a la arcotangente fijada se movían todos. musl, otra
+- **Ninguna biblioteca C.** Con cada resultado de veinte rutinas de la
+  biblioteca C empujado una unidad en el último lugar, mediante una capa
+  entre Python y la biblioteca C (las exponenciales, los logaritmos, la
+  potencia, las funciones trigonométricas e hiperbólicas y sus inversas, e
+  `hypot`), el corpus entero, ajustado y simple, da los mismos dos SHA-256
+  que sin ella, mientras que con el código anterior a la arcotangente
+  fijada cada uno de doce diseños medidos así (la ponderación A a 48, 44,1,
+  88,2 y 192&nbsp;kHz, la C a 44,1 y 88,2&nbsp;kHz, la D a 48 y
+  88,2&nbsp;kHz, la G a 1 y 1,5&nbsp;kHz, y la 468 y la AU a 48&nbsp;kHz)
+  se movía. musl, otra
   biblioteca C, diseña el corpus entero con el SHA-256 de glibc sin
   sustituir nada, y lo mismo la compilación de glibc sin FMA. En ARM de 64
   bits, la familia de procesadores de la pata de macOS de la matriz de CI,
-  en emulación con musl, 100 de los 133 diseños son los mismos bytes, y los
-  otros 33 se separan en los dos pasos de biblioteca que nombra Alcance,
-  ninguno en la aritmética propia de este paquete.
+  en emulación con glibc y con musl y el OpenBLAS que numpy trae ahí, los
+  133 diseños son los bytes de x86-64; hasta que se escribieron los dos
+  últimos pasos de biblioteca, 33 de ellos se separaban ahí, los diecinueve
+  diseños de BS.468-4 en los polos y otros catorce en las secciones.
 - **Digest a digest entre entornos.** Los diseños son bit-idénticos entre
   este host y el mismo host bajo emulación AVX-512, bajo cada juego de
   kernels de OpenBLAS seleccionable, cada número de hilos y cada semilla de
@@ -218,8 +290,9 @@ corren en CI:
   ella sin cambios los diseños bilineales simples de todas las curvas a
   48&nbsp;kHz. Un test de la matriz de CI diseña la ponderación A tal como
   se entrega, sin sustituir nada, y la sostiene en `991833ff389afe91` en las
-  tres plataformas, y la ponderación A a 44,1&nbsp;kHz en
-  `dbea4b7fc4ad972b`; un
+  tres plataformas, la ponderación A a 44,1&nbsp;kHz en
+  `dbea4b7fc4ad972b`, y cada una de las demás curvas a 48&nbsp;kHz en un
+  digest propio; un
   segundo test diseña las dos otra vez con una arcotangente que no le debe
   nada a la rutina fijada, la respuesta de la biblioteca C llevada hasta el
   double correctamente redondeado con cotas racionales exactas, y cae en
@@ -260,10 +333,10 @@ y el cambio es un suceso documentado, nunca una propiedad de tu hardware.
 ## Alcance
 
 La garantía cubre el camino de diseño determinista de ponderaciones de punta
-a punta, dentro de los dos pasos de biblioteca que siguen: en cualquier
-plataforma para la ponderación A, que la matriz de CI sostiene en Linux,
-macOS y Windows, y para las otras curvas allí donde esos dos pasos dan los
-mismos bytes. El procesamiento por bloques compone con ella: una cascada con
+a punta, para cada curva y cada frecuencia de muestreo, en cualquier
+plataforma: ningún paso es de una biblioteca, y la matriz de CI sostiene
+cada curva a 48&nbsp;kHz en un mismo digest en Linux, macOS y Windows. El
+procesamiento por bloques compone con ella: una cascada con
 estado alimentada bloque a bloque es bit-idéntica a una sola pasada sobre el
 registro entero, así que el streaming no gasta la garantía. Las funciones de
 análisis generales construidas sobre numpy y SciPy en su forma corriente
@@ -272,42 +345,29 @@ siguen siendo reproducibles en una misma máquina pero pueden diferir en los
 el tratamiento determinista se aplica donde importa la identidad de un
 filtro.
 
-Dos pasos de la cascada realizada pasan por una biblioteca y no por la
-biblioteca C: los polos del prototipo de BS.468-4 son las raíces
-polinómicas de numpy, que calcula LAPACK, y las secciones de segundo orden
-las forma SciPy, cuyos productos de polinomios pasan por el BLAS. Los dos
-dan los mismos bytes con cada juego de kernels de OpenBLAS en x86-64, con
-glibc y con musl. En ARM de 64 bits no siempre: medido con musl en
-emulación, con el OpenBLAS que numpy trae ahí, 100 de los 133 diseños
-comprobados son los bytes de x86-64, entre ellos la ponderación A en las
-diecinueve frecuencias, y los otros 33 se separan justo en estos dos pasos.
-Los polos del prototipo 468 salen distintos en sus últimos bits, lo que
-alcanza a los diecinueve diseños 468; en catorce diseños de las
-ponderaciones B, C, D, G y AU (la D a 1,5, 32, 88,2 y 96&nbsp;kHz, la G a
-200&nbsp;Hz y a 1, 88,2, 96 y 192&nbsp;kHz, la AU a 32, 44,1 y
-88,2&nbsp;kHz, la B a 96&nbsp;kHz y la C a 48&nbsp;kHz) el prototipo que
-devuelve el ajuste y su transformada bilineal son iguales hasta el bit, y
-solo difieren las secciones que SciPy forma con ellos. El framework
-Accelerate que enlaza la compilación de numpy para macOS no se mide aquí,
-así que para esas curvas no se afirman los bytes de macOS; la ponderación
-A, cuyas secciones salen iguales en ARM de 64 bits, la sostiene el test de
-CI en macOS. El `zpk2sos` de SciPy toma también módulos complejos, a través
-del valor absoluto complejo propio de numpy, un bucle que numpy elige según
-el procesador y no el `hypot` de la biblioteca C, pero solo para emparejar
-polos con ceros y compararlos con una tolerancia: empujados una ulp, todos
-ellos, no mueven ninguna de las ponderaciones A, D, 468 ni AU a
-48&nbsp;kHz, la C a 44,1&nbsp;kHz ni la G a 1&nbsp;kHz.
+Tampoco después del ajuste queda nada de una biblioteca. Los polos del
+prototipo de BS.468-4 y las secciones de segundo orden fueron los dos
+últimos pasos que lo eran, las raíces que hallaba LAPACK y las secciones
+que SciPy formaba a través del BLAS, y en ARM de 64 bits con OpenBLAS
+separaban 33 de los 133 diseños comprobados de los bytes de x86-64; los dos
+son ahora aritmética propia de este paquete, medida al diseñar cada uno de
+los 133 con los mismos bytes en x86-64 con glibc, con y sin FMA, y con
+musl, y en ARM de 64 bits con glibc y con musl. El diseño ya no llega al
+Accelerate de Apple, que enlaza la compilación de numpy para macOS, así
+que los bytes de macOS se afirman para cada curva y los sostiene el test
+de CI.
 
 El relato de ingeniería completo vive con el código, en los docstrings de
 módulo de
 [`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),
 [`filters/_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_log.py),
-[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py)
+[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py),
+[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py)
 y
-[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py),
+[`filters/_pinned_roots.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_roots.py),
 y los tests que lo sostienen están en
 [`tests/filters/test_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_weighting_design.py)
-y los tres `tests/filters/test_pinned_*.py` que lo acompañan.
+y los cuatro `tests/filters/test_pinned_*.py` que lo acompañan.
 
 ## Véase también
 

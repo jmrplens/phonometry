@@ -535,6 +535,178 @@ def test_a_def_after_a_call_in_a_loop_reaches_it_on_the_next_turn() -> None:
     assert _held_at(while_test, "helper", call="") == [1, 2]
 
 
+def _met_from(source: str, name: str, reader: str) -> list[int]:
+    """The ``def``s of *name* in *source* that a call of the function
+    *reader* may meet, by the number each returns.
+    """
+    tree = ast.parse(textwrap.dedent(source))
+    (point,) = _definitions(tree, reader)
+    met = ast_scan.bindings_from(tree, _definitions(tree, name), point)
+    values: list[int] = []
+    for binding in met:
+        returned = binding.body[0]
+        assert isinstance(returned, ast.Return)
+        assert isinstance(returned.value, ast.Constant)
+        assert isinstance(returned.value.value, int)
+        values.append(returned.value.value)
+    return values
+
+
+def test_a_function_meets_every_binding_from_its_def_on() -> None:
+    """A function reads a name of the scope around it when it is called,
+    which may be at once or after a later binding: it meets the binding that
+    stands where the ``def`` runs and every one that may run after it.
+
+    Not one that a later binding replaces before the ``def``, nor one in the
+    other branch of the ``if`` that holds the ``def``; one on an earlier
+    turn of a loop, called between two bindings on the next turn, is met.
+    """
+    later = """
+    def helper():
+        return 1
+
+    def reader():
+        return helper()
+
+    def helper():
+        return 2
+    """
+    replaced_before = """
+    def helper():
+        return 1
+
+    def helper():
+        return 2
+
+    def reader():
+        return helper()
+    """
+    other_branch = """
+    def helper():
+        return 0
+
+    if FAST:
+
+        def reader():
+            return helper()
+
+    else:
+
+        def helper():
+            return 1
+    """
+    next_turn = """
+    for item in items:
+
+        def helper():
+            return 1
+
+        if item:
+            early = reader()
+
+        def helper():
+            return 2
+
+        def reader():
+            return helper()
+    """
+    assert _met_from(later, "helper", "reader") == [1, 2]
+    assert _met_from(replaced_before, "helper", "reader") == [2]
+    assert _met_from(other_branch, "helper", "reader") == [0]
+    assert _met_from(next_turn, "helper", "reader") == [1, 2]
+    tree = ast.parse(textwrap.dedent(later))
+    bindings = _definitions(tree, "helper")
+    assert ast_scan.bindings_from(tree, bindings, None) == [bindings[1]]
+
+
+def test_a_call_in_a_nested_scope_is_read_where_that_scope_runs() -> None:
+    """A call written inside a function, a lambda or a generator expression
+    reads the name when that runs, so it may meet every ``def`` from where
+    the function is written on; one in a class body, a list comprehension
+    or a default runs where it is written, and meets the one standing there.
+
+    The call was read as if it stood in the module at the place it holds in
+    its own function, so its index there was set against the module's, and
+    a lambda or a generator was read where it is written.
+    """
+    source = textwrap.dedent(
+        """
+        def helper():
+            return 1
+
+        def reader():
+            first = 1
+            second = 2
+            third = 3
+            return helper()
+
+        later = lambda: helper()
+        lazy = (helper() for _ in range(2))
+        each = [helper() for _ in range(2)]
+
+        class Holder:
+            value = helper()
+
+        def defaulted(x=helper()):
+            return x
+
+        def helper():
+            return 2
+        """
+    )
+    tree = ast.parse(source)
+    bindings = _definitions(tree, "helper")
+    calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "helper"
+    ]
+    met = {}
+    for call in sorted(calls, key=lambda node: node.lineno):
+        values = []
+        for binding in ast_scan.live_bindings(tree, bindings, call):
+            returned = binding.body[0]
+            assert isinstance(returned, ast.Return)
+            assert isinstance(returned.value, ast.Constant)
+            values.append(returned.value.value)
+        met[call.lineno] = values
+    assert met == {
+        9: [1, 2], 11: [1, 2], 12: [1, 2], 13: [1], 16: [1], 18: [1],
+    }  # fmt: skip
+
+
+def test_bindings_by_name_lists_every_binding_of_a_scope_in_source_order() -> None:
+    """Each name a scope binds, with the import, the ``def``, the assignment
+    and the other bindings of it in the order of the source; a function's
+    body is its own, and a name it declares ``global`` is the module's.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from pkg import helper
+            def helper():
+                global late
+                late = 1
+                inner = 2
+            helper = None
+            for helper in items:
+                pass
+            try:
+                pass
+            except ValueError as helper:
+                pass
+            """
+        )
+    )
+    found = ast_scan.bindings_by_name(tree)
+    assert sorted(found) == ["helper"]
+    assert [type(node).__name__ for node in found["helper"]] == [
+        "ImportFrom", "FunctionDef", "Name", "Name", "ExceptHandler",
+    ]  # fmt: skip
+    function = tree.body[1]
+    assert sorted(ast_scan.bindings_by_name(function)) == ["inner"]
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

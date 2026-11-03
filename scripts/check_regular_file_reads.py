@@ -83,7 +83,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ast_scan import (
     ROOT,
-    block_statements,
+    bindings_by_name,
     exempted,
     live_bindings,
     live_class_members,
@@ -641,34 +641,39 @@ def _names_of(scope: ast.AST) -> _Names:
     )
 
 
-def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
-    """The imports a module makes as it is imported, every compound statement's
-    blocks included (:func:`ast_scan.block_statements`).
-    """
-    pending: list[ast.stmt] = list(tree.body)
-    while pending:
-        statement = pending.pop()
-        if isinstance(statement, ast.Import | ast.ImportFrom):
-            yield statement
-        else:
-            pending.extend(block_statements(statement))
-
-
 def exports_of(path: pathlib.Path, tree: ast.Module) -> dict[str, str]:
     """What each name a module imports stands for, by the module's own name.
 
     ``from ._audio_file import open_audio`` in ``phonometry/io/__init__.py``
     makes ``phonometry.io.open_audio`` stand for
     ``phonometry.io._audio_file.open_audio``, so that a module that imports
-    it from the package reaches the function itself.
+    it from the package reaches the function itself. Every binding of a name
+    at the top of the module is read in the order of the source
+    (:func:`ast_scan.bindings_by_name`), and those that may stand once the
+    module has run (:func:`ast_scan.live_bindings`) say what it holds: a
+    name they all import from one place stands for it. One that an
+    assignment, a ``def`` or a ``class`` may hold, after its import or in
+    the other branch, or that two imports in the branches of a ``try`` or
+    an ``if`` bind to two functions, stands for none of them, so a module
+    that reaches it through the package reaches no function it imports.
     """
     module = module_name(path)
     package = _package_of(path, module)
-    return {
-        f"{module}.{name}": target
-        for node in _top_level_imports(tree)
-        for name, target in _imported(node, package).items()
-    }
+    exports: dict[str, str] = {}
+    for name, nodes in bindings_by_name(tree).items():
+        if not any(isinstance(node, ast.Import | ast.ImportFrom) for node in nodes):
+            continue
+        live = nodes if len(nodes) == 1 else live_bindings(tree, nodes)
+        targets = {
+            _imported(node, package).get(name)
+            if isinstance(node, ast.Import | ast.ImportFrom)
+            else None
+            for node in live
+        }
+        (target,) = targets if len(targets) == 1 else (None,)
+        if target is not None:
+            exports[f"{module}.{name}"] = target
+    return exports
 
 
 def _canonical(name: str, exports: Mapping[str, str]) -> str:
@@ -755,8 +760,10 @@ def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
     A scope's table of names (:func:`aliases_of`) keeps the last import of a
     name; where the nearest scope around the call that imports the name
     imports it more than once, each import that may stand for it at the call
-    (:func:`ast_scan.live_bindings`), or once that scope has run when the
-    call sits in a function inside it, gives a table of its own.
+    (:func:`ast_scan.live_bindings`) gives a table of its own: when the call
+    sits in a function inside that scope, each that may stand from the
+    ``def`` on, since the function may be called at once or once the scope
+    has run.
     """
     parts = _dotted(call.func)
     head = parts[0] if parts else None
@@ -765,11 +772,10 @@ def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
             continue
         imports = _imported_twice(holder).get(head or "")
         if imports:
-            point = call if holder is scope.node else None
             package = _package_of(scope.path, scope.module)
             return [
                 {**scope.aliases, **_imported(statement, package)}
-                for statement in live_bindings(holder, imports, point)
+                for statement in live_bindings(holder, imports, call)
             ]
     return [scope.aliases]
 

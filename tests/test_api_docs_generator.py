@@ -1454,6 +1454,36 @@ for _ in range(1):
     assert {"in_case", "in_try", "in_with", "in_loop"} <= set(bound)
 
 
+def test_an_import_another_binding_may_stand_for_names_no_alias(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A name is read through its import only when every binding of it that
+    may stand once the module has run imports it from one place.
+
+    The imports were read alone and the later kept, so the ``except``
+    clause's import stood for a name the ``try`` body imports from another
+    place, and an assignment after an import left the import standing.
+    """
+    _written_module(
+        tmp_path,
+        monkeypatch,
+        "fake_docs_two_branches",
+        """\
+try:
+    from json import dumps as either
+except ImportError:
+    from json import loads as either
+from json import dumps as replaced
+replaced = None
+from json import dumps as kept
+""",
+    )
+    bound = gad._module_imports("fake_docs_two_branches")
+    assert "either" not in bound
+    assert "replaced" not in bound
+    assert bound["kept"] == ("json", "dumps")
+
+
 def test_the_keywords_of_a_stub_are_found_in_a_try_block(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -246,6 +246,7 @@ import numpy as np
 
 from .._internal.validation import real_number
 from .validation import (
+    exactly_nonzero,
     real_array,
     require_count,
 )
@@ -588,11 +589,11 @@ def _prepare_impulses(
     grad = _gradients_with_half_spaces(z_prof, c_prof)
     jumps = np.diff(grad)  # per node: segment below minus segment above
     # A jump of exactly zero is a node the profile runs straight through, and
-    # `astype(bool)` is that test: no tolerance is wanted here, because a jump
-    # of any size at all is an impulse the spreading has to take, while a
+    # `exactly_nonzero` is that test: no tolerance is wanted here, because a
+    # jump of any size at all is an impulse the spreading has to take, while a
     # tolerance would silently delete the small ones a finely sampled profile
     # is made of.
-    keep = (z_prof > lower) & jumps.astype(bool)
+    keep = (z_prof > lower) & exactly_nonzero(jumps)
     if upper is not None:
         keep &= z_prof < upper
     interfaces = z_prof[keep]

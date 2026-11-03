@@ -120,7 +120,12 @@ from collections.abc import Collection, Mapping
 from typing import TYPE_CHECKING, TypeAliasType, TypeVar, get_origin
 
 from api_taxonomy import public_names
-from ast_scan import COMPOUND_STATEMENTS, block_statements
+from ast_scan import (
+    COMPOUND_STATEMENTS,
+    bindings_by_name,
+    block_statements,
+    live_bindings,
+)
 from markdown_spans import inline_spans
 
 if TYPE_CHECKING:
@@ -512,34 +517,49 @@ def _is_type_checking_block(statement: ast.stmt) -> bool:
     )
 
 
-def imported_from(module: ModuleType) -> dict[str, str]:
-    """Each name ``module`` binds with ``from X import name``, mapped to ``X``.
+def _for_the_type_checker(tree: ast.Module) -> set[int]:
+    """Every node an ``if TYPE_CHECKING:`` block holds, by its id."""
+    return {
+        id(node)
+        for statement in ast.walk(tree)
+        if isinstance(statement, ast.If) and _is_type_checking_block(statement)
+        for child in statement.body
+        for node in ast.walk(child)
+    }
 
-    Only the imports that bind at run time count: an ``if TYPE_CHECKING:``
-    block binds nothing a caller can import. Relative imports are resolved, so
-    the value is always an absolute module name.
+
+def imported_from(module: ModuleType) -> dict[str, tuple[str, ...]]:
+    """Each name ``module`` binds with ``from X import name``, mapped to every ``X``.
+
+    The bindings of each name at the top of the module are read in the order
+    of the source (:func:`ast_scan.bindings_by_name`), and of those that may
+    stand once it has run (:func:`ast_scan.live_bindings`) its ``from``
+    imports are where the name may come from: either of two in the branches
+    of a ``try`` or an ``if``, and none that a later ``def`` or assignment
+    replaces. Only the bindings that run count: an ``if TYPE_CHECKING:``
+    block binds nothing a caller can import. Relative imports are resolved,
+    so each value is an absolute module name.
 
     :param module: An imported module whose source is available.
-    :return: Bound name to the absolute name of the module it comes from.
+    :return: Bound name to the absolute name of each module it may come from.
     """
     try:
         tree = ast.parse(inspect.getsource(module))
     except (OSError, TypeError):
         return {}
     package = module.__package__ or module.__name__
-    found: dict[str, str] = {}
-    statements = list(tree.body)
-    while statements:
-        statement = statements.pop(0)
-        if isinstance(statement, COMPOUND_STATEMENTS):
-            if not _is_type_checking_block(statement):
-                statements[:0] = block_statements(statement)
-        elif isinstance(statement, ast.ImportFrom):
-            source = importlib.util.resolve_name(
-                "." * statement.level + (statement.module or ""), package
-            )
-            for alias in statement.names:
-                found[alias.asname or alias.name] = source
+    checking = _for_the_type_checker(tree)
+    found: dict[str, tuple[str, ...]] = {}
+    for name, nodes in bindings_by_name(tree).items():
+        running = [node for node in nodes if id(node) not in checking]
+        live = running if len(running) < 2 else live_bindings(tree, running)
+        sources = [
+            importlib.util.resolve_name("." * node.level + (node.module or ""), package)
+            for node in live
+            if isinstance(node, ast.ImportFrom)
+        ]
+        if sources:
+            found[name] = tuple(dict.fromkeys(sources))
     return found
 
 
@@ -594,7 +614,7 @@ def _listing_problem(
     module: ModuleType,
     name: str,
     domain: ModuleType,
-    sources: Mapping[str, str],
+    sources: Mapping[str, tuple[str, ...]],
     listed_by: Mapping[str, str] | None,
 ) -> str:
     """What is wrong with ``module`` listing ``name`` in its ``__all__``.
@@ -611,8 +631,9 @@ def _listing_problem(
         return kind
     if name not in domain.__all__:
         return f"which {domain.__name__} does not publish"
-    if _is_public_path(sources.get(name, "_")):
-        return f"a second address for {sources[name]}.{name}"
+    public = [source for source in sources.get(name, ()) if _is_public_path(source)]
+    if public:
+        return f"a second address for {public[0]}.{name}"
     if listed_by is not None and name in listed_by:
         return f"which {listed_by[name]} lists too"
     return ""

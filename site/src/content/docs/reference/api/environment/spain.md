@@ -171,7 +171,7 @@ Plot the per-period indices against their RD 1367/2007 limits.
 
 ```python
 ActivityAssessment.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

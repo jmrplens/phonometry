@@ -1031,3 +1031,10 @@ def test_contour_grid_matches_scalar_event_level() -> None:
                 land, [xv, yv, 0.0], _NP, _ND, _NSEL, _NMAX, segments=lmask
             ).level
             assert res.levels[iy, ix] == pytest.approx(ref, abs=1e-9)
+
+
+def test_npd_curve_reads_the_distances_it_is_asked_for() -> None:
+    """Given the distances to evaluate, the curve is the levels there."""
+    res = npd_curve(_P, _D, _L, 1500.0, query_distances_m=[200.0, 400.0])
+    assert np.array_equal(res.distances_m, [200.0, 400.0])
+    assert np.allclose(res.levels, npd_level(_P, _D, _L, 1500.0, [200.0, 400.0]))

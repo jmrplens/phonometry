@@ -367,6 +367,7 @@ Coverage factor `k` and expanded uncertainty $U = k u_\mathrm{c}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the effective dof are undefined and no explicit coverage factor is given. |
+| TypeError | if `coverage_factor_override` is not one real number. |
 
 ### UncertaintyResult.plot()
 

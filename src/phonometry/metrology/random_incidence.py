@@ -133,6 +133,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -738,7 +739,7 @@ def _from_planes(
     angles, plane_angles, flat, weights = _plane_readings(
         levels, _weights(half_steps, planes)
     )
-    lrd = _reference_level(reference_level, float(levels[0, 0]))
+    lrd = _reference_level(reference_level, real_number(levels[0, 0], "levels"))
     return DirectivityFactor(
         incidence_angles_deg=angles,
         plane_angles_deg=plane_angles,

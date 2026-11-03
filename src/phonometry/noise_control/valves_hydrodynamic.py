@@ -1162,8 +1162,8 @@ def band_internal_levels(
     :return: :math:`L_{pi}(f_i)`, in dB, one value per band.
     :raises ValueError: If a value is out of range, or the cavitating branch
         was asked for without its peak frequency.
-    :raises TypeError: if ``cavitation_fraction`` or ``internal_level`` is not a single
-        number, or ``turbulent_peak`` is not a single number.
+    :raises TypeError: if ``cavitation_fraction``, ``cavitation_peak``,
+        ``internal_level`` or ``turbulent_peak`` is not a single number.
     """
     require_scalar(turbulent_peak, "turbulent_peak")
     require_scalar(cavitation_fraction, "cavitation_fraction")
@@ -1186,6 +1186,9 @@ def band_internal_levels(
             "'cavitation_fraction'."
         )
         raise ValueError(msg)
+    # Read by this function's name for it, which cavitation_distribution
+    # calls peak.
+    require_positive(cavitation_peak, "cavitation_peak")
     cavitating = cavitation_distribution(frequency, cavitation_peak)
     mixed = (1.0 - cavitation_fraction) * 10.0 ** (
         0.1 * turbulent
@@ -1534,6 +1537,11 @@ def valve_hydrodynamic_noise(
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number, or ``strouhal_form`` is not a text.
     """
+    # Read by this function's name for it, which jet_strouhal_number calls
+    # form, before any of the method runs.
+    strouhal_form = require_choice(
+        strouhal_form, "strouhal_form", tuple(STROUHAL_CONSTANTS)
+    )
     mass_flow = stream.mass_flow
     inlet_pressure_pa = stream.inlet_pressure_pa
     outlet_pressure_pa = stream.outlet_pressure_pa

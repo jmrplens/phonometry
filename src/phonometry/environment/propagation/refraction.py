@@ -58,6 +58,7 @@ from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -660,8 +661,11 @@ class AtmosphericPEResult(OwnsArrays):
         require_same_length(self, "ranges", ("relative_level", 1), axis="range")
 
     def level_at_height(self, height_m: float) -> NDArray[np.float64]:
-        """Relative sound level versus range at the grid height nearest ``height_m``."""
-        i = int(np.argmin(np.abs(self.heights_m - float(height_m))))
+        """Relative sound level versus range at the grid height nearest ``height_m``.
+
+        :raises TypeError: if ``height_m`` is not one real number.
+        """
+        i = int(np.argmin(np.abs(self.heights_m - real_number(height_m, "height_m"))))
         return np.asarray(self.relative_level[i], dtype=np.float64)
 
     def plot(
@@ -686,7 +690,7 @@ def _resolve_pe_impedance(
     """Resolve a single complex normalized ground impedance at ``frequency``."""
     from .ground_barriers import _normalized_ground_impedance
 
-    f = np.array([float(frequency)], dtype=np.float64)
+    f = np.array([real_number(frequency, "frequency")], dtype=np.float64)
     z = _normalized_ground_impedance(f, impedance, flow_resistivity, model, fluid)
     return complex(z[0])
 

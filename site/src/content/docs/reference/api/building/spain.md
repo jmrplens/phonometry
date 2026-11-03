@@ -174,8 +174,8 @@ For a road-traffic or aircraft dominant site the quantity is
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a spectrum Formula (A.5) does not cover. |
-| TypeError | if `spectrum` is not a text. |
+| ValueError | For a spectrum Formula (A.5) does not cover, a wrong band count or non-finite values. |
+| TypeError | if `spectrum` is not a text, or `frequencies` or `level_difference` holds a text or a value that is not a real number. |
 
 ## d2m_nt_atr
 
@@ -216,8 +216,8 @@ report are stated in is not the same.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a spectrum Formula (A.6) does not cover. |
-| TypeError | if `spectrum` is not a text. |
+| ValueError | For a spectrum Formula (A.6) does not cover, a wrong band count or non-finite values. |
+| TypeError | if `spectrum` is not a text, or `frequencies` or `level_difference` holds a text or a value that is not a real number. |
 
 ## db_hr_airborne_requirement
 
@@ -627,6 +627,13 @@ A-weighted standardized level difference `DnT,A` (Formula (A.7)).
 
 **Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `_DNT_A`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a wrong band count or non-finite values. |
+| TypeError | if `frequencies` or `level_difference` holds a text or a value that is not a real number. |
+
 ## ra
 
 ```python
@@ -648,6 +655,13 @@ A-weighted global sound reduction index `RA` for pink noise.
 
 **Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA"`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a wrong band count or non-finite values. |
+| TypeError | if `frequencies` or `reduction_index` holds a text or a value that is not a real number. |
+
 ## ra_tr
 
 ```python
@@ -668,6 +682,13 @@ A-weighted global sound reduction index `RA,tr` for road-traffic noise.
 | `frequencies` | Band centre frequencies, in Hz (optional). |
 
 **Returns:** A [`DBHRGlobalIndexResult`](/phonometry/reference/api/building/spain/#dbhrglobalindexresult) named `"RA,tr"`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a wrong band count or non-finite values. |
+| TypeError | if `frequencies` or `reduction_index` holds a text or a value that is not a real number. |
 
 ## window_size_correction
 

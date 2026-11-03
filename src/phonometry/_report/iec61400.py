@@ -44,6 +44,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -65,6 +66,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
     from .metadata import ReportMetadata
@@ -72,7 +75,7 @@ if TYPE_CHECKING:
 
 def _fmt(value: float, language: Language, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
-    return format_number(float(value), language, decimals=decimals)
+    return format_number(real_number(value, "value"), language, decimals=decimals)
 
 
 def _esc(value: str | None) -> str | None:
@@ -262,7 +265,7 @@ def _decision_note(result: WindTurbineTonalityResult, language: Language = "en")
 
 def render_wind_turbine_tonality_report(
     result: WindTurbineTonalityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -106,6 +106,7 @@ environment/sources/wind_turbine.py	WindTurbineTonalityResult.__post_init__	cand
 environment/sources/wind_turbine.py	_validate_narrowband	diffs <= 0.0	the line frequencies must increase: one rounding of two consecutive frequencies keeps the sign of their difference, so it is zero or negative exactly when they are not increasing; a domain guard, not a printed limit
 environment/sources/wind_turbine.py	wind_turbine_tonality	fc < _LOW_FREQ_MIN	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 filters/_weighting_design.py	fit_prototype	best[0] > _FIT_FAILED_DB	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
+filters/design.py	_showfilter	f_min <= f <= f_max	a figure's choice of the standard ticks inside its axis span: a tick on the edge of the span is drawn at the edge or left out, no verdict
 filters/frequencies.py	_infer_band_fraction	float(freq[1] / freq[0]) > _OCTAVE_SPACING_MIN_RATIO	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 fluids/_air.py	air	water >= 1.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 hearing/active_noise_reduction.py	ANRLinearityResult.linear_to_110_db	abs(top - _MAXIMUM_EXTERNAL_LEVEL_DB) <= _STEP_READING_DB	raw top level against 110 dB +- 0,5 dB, exact (recorded with the fix)
@@ -116,7 +117,7 @@ materials/absorbers/biot.py	_stack_surface_impedance	scale > 0.0	numerical algor
 materials/absorbers/porous.py	_warn_fit_range	x < lo	an extrapolation warning of an empirical fit; X carries the density of air of Annex F, and f/sigma of band frequencies and flow resistivities, whole or half numbers, is one correctly rounded division
 materials/absorbers/porous.py	_warn_fit_range	x > hi	an extrapolation warning of an empirical fit; X carries the density of air of Annex F, and f/sigma of band frequencies and flow resistivities, whole or half numbers, is one correctly rounded division
 materials/absorbers/slow_sound.py	_reaches_perfect_absorption	alpha > _PERFECT_ABSORPTION_THRESHOLD	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
-materials/diffusers/scattering_diffusion.py	directional_diffusion_coefficient	weighted_energy_sq <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
+materials/diffusers/scattering_diffusion.py	_diffusion_coefficient	weighted_energy_sq <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 materials/diffusers/scattering_diffusion.py	random_incidence_diffusion	total <= 0.0	guard that raises on a degenerate or invalid derived input, not a printed limit (recorded with the fix)
 metrology/conformance.py	ConformanceVerification.share_of_acceptance_limit	share > 1.0	operands are inputs, table rows or continuous branches (recorded with the fix)
 metrology/data_qualification.py	PeakStatisticsResult.__post_init__	np.diff(values) < 0.0	monotonicity of peak values the module takes from a record; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types

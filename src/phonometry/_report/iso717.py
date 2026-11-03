@@ -59,6 +59,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -443,7 +445,7 @@ def _basis_line(
 
 def render_iso717_report(
     result: WeightedRatingResult | ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -35,6 +35,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -119,7 +120,7 @@ def _metadata_pairs(
 
 def _freq(value: float, language: Language = "en") -> str:
     """A frequency rounded to the nearest hertz, locale-formatted."""
-    return format_number(round(float(value)), language, decimals=0)
+    return format_number(round(real_number(value, "value")), language, decimals=0)
 
 
 def _range_text(lo: float, hi: float, language: Language = "en") -> str:
@@ -373,7 +374,7 @@ def _verdict(
 
 def render_iec60268_5_report(
     result: LoudspeakerCharacteristics,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     language: Language = "en",

@@ -41,6 +41,8 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..vibration.structural._impact_mobility import ImpactMobilityResult
     from ..vibration.structural.mechanical_mobility import MobilityResult
@@ -142,7 +144,7 @@ def _extended_terms(result: MobilityResult, language: Language = "en") -> list[s
 
 def render_mobility_report(
     result: MobilityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -248,7 +250,7 @@ def _impact_extended(
 
 def render_impact_mobility_report(
     result: ImpactMobilityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

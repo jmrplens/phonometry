@@ -361,7 +361,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 ImpactRatingResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -811,7 +811,7 @@ Unfavourable deviations (reference above measurement) are shaded and
 
 ```python
 WeightedRatingResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

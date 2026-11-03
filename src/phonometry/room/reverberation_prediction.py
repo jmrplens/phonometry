@@ -69,6 +69,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
@@ -83,6 +84,7 @@ from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_finite_fields,
     require_non_negative,
     require_positive,
@@ -181,7 +183,7 @@ def _accumulate_surfaces(
     areas: list[float] = []
     alphas: list[NDArray[np.float64]] = []
     for area, alpha in surfaces:
-        areas.append(require_non_negative(area, "surface area"))
+        areas.append(require_non_negative(area, "surfaces"))
         alpha_arr = real_array(alpha, "surfaces")
         if not np.all(np.isfinite(alpha_arr)):
             msg = "absorption coefficients must be finite."
@@ -472,7 +474,7 @@ def _axial_geometry(
     if len(dimensions) != _N_ROOM_AXES:
         msg = "'dimensions' must be the three room lengths (Lx, Ly, Lz)."
         raise ValueError(msg)
-    lx, ly, lz = (require_positive(d, "dimension") for d in dimensions)
+    lx, ly, lz = (require_positive(d, "dimensions") for d in dimensions)
     volume = lx * ly * lz
     pair_areas = np.array(
         [2.0 * ly * lz, 2.0 * lx * lz, 2.0 * lx * ly], dtype=np.float64
@@ -726,7 +728,7 @@ class ReverberationModelResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -819,8 +821,9 @@ def reverberation_time_models(
     # Two equal-area opposing walls per axis share the axis mean absorption.
     surfaces: list[Surface] = []
     for area, alpha in zip(pair_areas, absorptions, strict=True):
-        surfaces.append((float(area) / 2.0, alpha))
-        surfaces.append((float(area) / 2.0, alpha))
+        half = real_number(area, "dimensions") / 2.0
+        surfaces.append((half, alpha))
+        surfaces.append((half, alpha))
 
     sabine = np.atleast_1d(
         sabine_reverberation_time(

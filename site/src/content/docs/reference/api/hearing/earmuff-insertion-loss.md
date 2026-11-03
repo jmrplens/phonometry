@@ -231,7 +231,7 @@ use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearin
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not finite, grids of different bands, cup levels that do not match, frequencies that do not fit, or an uncertainty that is negative or not finite. |
-| TypeError | if `frequencies`, `isolation_cup_levels`, `occluded_levels` or `open_levels` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies`, `isolation_cup_levels`, `occluded_levels` or `open_levels` holds a text or a value that is not a real number. `equipment_uncertainty_db`, `fixture_uncertainty_db` or `sound_field_uncertainty_db` are refused the same way when any is not one real number. |
 
 ## EARMUFF_INSERTION_LOSS_UNCERTAINTY
 
@@ -309,6 +309,7 @@ The budget of Table B.1 for one band of this measurement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency the measurement does not have. |
+| TypeError | if `frequency` is not one real number. |
 
 ### EarmuffInsertionLossResult.expanded_uncertainty_db
 

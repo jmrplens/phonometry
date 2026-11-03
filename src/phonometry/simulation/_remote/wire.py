@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.validation import real_number
 from ...io._video import VideoOptions
 from .. import elastic_fdtd, fdtd
 from ..video import AnimationFrame
@@ -163,7 +164,11 @@ def _scalar(value: np.generic, where: str) -> _Form:
         msg = f"{where} cannot travel to a node: a {value.dtype} number is not one it can rebuild"
         raise TypeError(msg)
     if value.dtype.kind == "f":
-        return {"$": "scalar", "dtype": value.dtype.name, "hex": float(value).hex()}
+        return {
+            "$": "scalar",
+            "dtype": value.dtype.name,
+            "hex": real_number(value, "value").hex(),
+        }
     return {"$": "scalar", "dtype": value.dtype.name, "value": value.item()}
 
 

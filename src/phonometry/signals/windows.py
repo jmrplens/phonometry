@@ -28,6 +28,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.types import own_window
 from .._internal.validation import (
+    real_number,
     require_axis_count,
     require_count,
     require_equal_counts,
@@ -194,7 +195,7 @@ def _width_3db_bins(level: NDArray[np.float64], oversample: int) -> float:
     """Two-sided -3 dB main-lobe width in bins (linear dB interpolation)."""
     below = np.flatnonzero(level <= _HALF_POWER_DB)
     i = int(below[0])
-    d0, d1 = float(level[i - 1]), float(level[i])
+    d0, d1 = real_number(level[i - 1], "level"), real_number(level[i], "level")
     frac = (_HALF_POWER_DB - d0) / (d1 - d0)
     return 2.0 * (i - 1 + frac) / oversample
 

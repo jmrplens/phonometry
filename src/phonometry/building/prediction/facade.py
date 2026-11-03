@@ -75,6 +75,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_axis_count,
     require_choice,
     require_count,
@@ -88,6 +89,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -363,7 +365,7 @@ class FacadePredictionResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -545,15 +547,16 @@ def facade_sound_reduction(
     :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``fraction``
         is not an integer (a word, a flag or a float), or ``frequencies`` holds a text
         or a value that is not a real number.
+        ``delta_l_fs`` is refused the same way when it is not one real number.
     """
-    delta = float(delta_l_fs)
+    delta = real_number(delta_l_fs, "delta_l_fs")
     require_scalar(volume, "volume")
     v = float(volume)
     if v <= 0:
         msg = "'volume' must be positive."
         raise ValueError(msg)
     r_prime, element_r = _apparent_reduction(
-        elements, float(area), "facade_sound_reduction"
+        elements, real_number(area, "area"), "facade_sound_reduction"
     )
     bands = None if frequencies is None else real_array(frequencies, "frequencies")
     if bands is not None:
@@ -563,7 +566,9 @@ def facade_sound_reduction(
         )
     r_45 = r_prime + 1.0
     r_tr_s = r_prime
-    d_2m_nt = r_prime + delta + 10.0 * log10(v / (6.0 * _T0 * float(area)))
+    d_2m_nt = (
+        r_prime + delta + 10.0 * log10(v / (6.0 * _T0 * real_number(area, "area")))
+    )
 
     r_tr = _single_number(r_tr_s, fraction)
     d_num = _single_number(d_2m_nt, fraction)
@@ -614,10 +619,13 @@ def radiated_sound_power(
     :return: A :class:`RadiatedPowerResult`.
     :raises TypeError: if ``area`` is not a single number, or ``lp_in`` or
         ``octave_bands`` holds a text or a value that is not a real number.
+        ``c_d`` or ``r_prime_cap`` are refused the same way when any is not one real number.
     """
-    r_prime, _ = _apparent_reduction(elements, float(area), "radiated_sound_power")
+    r_prime, _ = _apparent_reduction(
+        elements, real_number(area, "area"), "radiated_sound_power"
+    )
     if r_prime_cap is not None:
-        r_prime = np.minimum(r_prime, float(r_prime_cap))
+        r_prime = np.minimum(r_prime, real_number(r_prime_cap, "r_prime_cap"))
     lp = _as_array(lp_in, "lp_in")
     if lp.size == 1:
         lp = np.full(r_prime.size, float(lp[0]))
@@ -630,7 +638,12 @@ def radiated_sound_power(
             "radiated_sound_power",
             {"octave_bands": bands.size, "r_prime": r_prime.size},
         )
-    l_w = lp + float(c_d) - r_prime + 10.0 * log10(float(area) / _S0)
+    l_w = (
+        lp
+        + real_number(c_d, "c_d")
+        - r_prime
+        + 10.0 * log10(real_number(area, "area") / _S0)
+    )
 
     l_w_dba: float | None = None
     if bands is not None:

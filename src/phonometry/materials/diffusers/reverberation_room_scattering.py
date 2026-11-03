@@ -41,6 +41,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_above_absolute_zero_array,
     require_equal_shapes,
     require_ranks,
@@ -50,6 +51,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -450,7 +453,7 @@ class ScatteringResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -734,9 +737,9 @@ def check_base_plate_scattering(
         values: dict[int, float] = {}
         for band in BASE_PLATE_BANDS_HZ:
             if band in scattering:
-                values[band] = float(scattering[band])
+                values[band] = real_number(scattering[band], "scattering")
             elif float(band) in scattering:
-                values[band] = float(scattering[float(band)])
+                values[band] = real_number(scattering[float(band)], "scattering")
             else:
                 msg = (
                     f"scattering mapping is missing band {band} Hz; "

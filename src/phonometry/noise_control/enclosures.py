@@ -81,6 +81,7 @@ from .._internal.validation import (
 from ..room.steady_field import room_constant
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from .._i18n import Language
@@ -203,7 +204,7 @@ class EnclosureInsertionLossResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

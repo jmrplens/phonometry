@@ -244,6 +244,7 @@ from typing import TYPE_CHECKING, NamedTuple, Protocol
 
 import numpy as np
 
+from .._internal.validation import real_number
 from .validation import (
     real_array,
     require_count,
@@ -555,7 +556,7 @@ def _segment_gradient(
     half space beyond it.
     """
     seg = int(np.searchsorted(z_prof, level, side="right" if inward > 0.0 else "left"))
-    return float(grad[seg])
+    return real_number(grad[seg], "grad")
 
 
 def _prepare_impulses(
@@ -610,7 +611,7 @@ def _prepare_impulses(
     levels.append(interfaces)
     strengths.append(jumps[keep] / speeds)
     if upper is not None:
-        levels.append(np.array([float(upper)]))
+        levels.append(np.array([real_number(upper, "upper")]))
         strengths.append(
             np.array(
                 [
@@ -848,7 +849,7 @@ def _levels_reached(
     target = (
         np.full(z.size, lower)
         if upper is None
-        else np.where(z_end < lower, lower, float(upper))
+        else np.where(z_end < lower, lower, real_number(upper, "upper"))
     )
     if dyn is not None and dyn.impulses.interfaces.size:
         kink, idx = _next_interface(z, z_end, dyn.impulses.interfaces)
@@ -923,7 +924,7 @@ def _advance_one_step(
     not at the end of whatever step happened to contain it. Both kinds of level
     are found together by :func:`_levels_reached`.
     """
-    h = np.full(z.size, float(range_step))
+    h = np.full(z.size, real_number(range_step, "range_step"))
     elapsed = np.zeros(z.size)
     travelled = np.zeros(z.size)
     bounces = np.zeros(z.size, dtype=np.int_)
@@ -1065,7 +1066,7 @@ def _advance_one_step_sloping(
     impulse is Eq. (3.123) on that facet, and a ray the rotation carries past
     the vertical is terminated, since a range march cannot bring it back.
     """
-    h = np.where(stopped, 0.0, float(range_step))
+    h = np.where(stopped, 0.0, real_number(range_step, "range_step"))
     elapsed = np.zeros(z.size)
     travelled = np.zeros(z.size)
     bounces = np.zeros(z.size, dtype=np.int_)
@@ -1078,7 +1079,7 @@ def _advance_one_step_sloping(
     for _ in range(budget):
         moving = h > 0.0
         z_end, zeta_end, dt, ds = _rk4(deriv, z, zeta, h, xi)
-        r_now = r0 + (float(range_step) - h)
+        r_now = r0 + (real_number(range_step, "range_step") - h)
         depth_end = _sloping_position(boundary, r_now + h)
         out_upper = (z_end > depth_end) & moving
         out_lower = (z_end < lower) & moving
@@ -1192,6 +1193,7 @@ def march_rays(
     :raises TypeError: if ``n_steps`` is a flag, a text or an array where a count goes,
         or ``xi``, ``z0`` or ``zeta0`` holds a text or a value that is not a real
         number.
+        ``range_step`` is refused the same way when it is not one real number.
     """
     ns = require_count(n_steps, "n_steps", at_least=None)
     zeta = real_array(zeta0, "zeta0", copy=True)

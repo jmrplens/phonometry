@@ -91,6 +91,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_positive,
 )
@@ -184,8 +185,9 @@ class CalibratorTableRow(RichDisplay):
 
         :param nominal_frequency_hz: The nominal frequency, in hertz.
         :return: ``True`` inside the range, its included ends counted.
+        :raises TypeError: if ``nominal_frequency_hz`` is not one real number.
         """
-        f = float(nominal_frequency_hz)
+        f = real_number(nominal_frequency_hz, "nominal_frequency_hz")
         above = f >= self.lower_hz if self.includes_lower else f > self.lower_hz
         below = f <= self.upper_hz if self.includes_upper else f < self.upper_hz
         return above and below

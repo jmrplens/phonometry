@@ -49,6 +49,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
+    real_number,
     require_count,
     require_ranks,
     require_same_length,
@@ -379,7 +380,7 @@ def _validated_response(
 def _validated_band(f_range: tuple[float, float], fs: float) -> tuple[float, float]:
     """Validate the equalization band against the sample rate."""
     require_scalar(fs, "fs")
-    f1, f2 = float(f_range[0]), float(f_range[1])
+    f1, f2 = real_number(f_range[0], "f_range"), real_number(f_range[1], "f_range")
     if f1 <= 0.0:
         msg = "f_range[0] must be positive"
         raise ValueError(msg)

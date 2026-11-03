@@ -265,12 +265,30 @@ def test_a_bext_embed_stopped_partway_leaves_no_copy_beside_the_file(
 ) -> None:
     # The bext goes into a copy of the FLAC soundfile wrote, beside it, which
     # then takes the file's place. Stopped before that, the copy stayed, a
-    # second FLAC under "carried.flac.phonometry-tmp" that nothing removed.
+    # second FLAC under "carried.flac.phonometry-tmp" that nothing removed,
+    # and the FLAC without its bext stayed at the path. The whole file is
+    # written beside the path now, so a write stopped there leaves nothing.
     path = tmp_path / "carried.flac"
     samples, bext = np.full(16, 0.125), fresh_metadata()
     stop(monkeypatch)
     with pytest.raises(raised, match=said):
         write(path, samples, FS, bext=bext)
     monkeypatch.undo()
-    assert sorted(entry.name for entry in tmp_path.iterdir()) == ["carried.flac"]
-    assert np.asarray(read(path)).ravel().tolist() == samples.tolist()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_a_bext_too_long_for_a_flac_block_is_refused_before_the_audio_is_written(
+    tmp_path: Path,
+) -> None:
+    """A payload past the 16 MiB a FLAC metadata block holds is refused, and
+    nothing is written at the path.
+
+    Its size was tested only once python-soundfile had written the audio, so
+    the refusal left a FLAC file without its ``bext`` where the caller named.
+    """
+    meta = replace(fresh_metadata(), coding_history="A=PCM\r\n" * (1 << 22))
+    path = tmp_path / "too_long.flac"
+    with pytest.raises(ValueError, match="exceeds the 24-bit FLAC metadata block"):
+        write(path, np.full(16, 0.125), FS, bext=meta)
+    assert not path.exists()
+    assert list(tmp_path.iterdir()) == []

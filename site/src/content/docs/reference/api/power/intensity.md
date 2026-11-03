@@ -153,7 +153,7 @@ in that band (clause A.2.3) and a `ValueError` is raised.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `frequencies`, `normal_intensity` or `pressure_levels` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies`, `normal_intensity`, `pressure_levels` or `temporal_intensity` holds a text or a value that is not a real number. |
 
 ## FieldIndicators
 

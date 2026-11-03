@@ -31,6 +31,7 @@ from ._i18n import t
 from ._insulation_fiche import Column, render_insulation_fiche
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from .._i18n import Language
@@ -86,7 +87,7 @@ _SPECS: dict[str, dict[str, str]] = {
 def render_iso10140_report(
     result: LaboratoryAirborneInsulationResult | LaboratoryImpactInsulationResult,
     rating: WeightedRatingResult | ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: str,
     metadata: ReportMetadata | None = None,

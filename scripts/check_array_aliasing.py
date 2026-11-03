@@ -156,15 +156,19 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from ast_scan import (
+    COMPOUND_STATEMENTS,
     ROOT,
     binding_of,
+    block_statements,
     exempted,
     imported_names,
     live_bindings,
+    live_class_members,
     own_names,
     python_files,
     relative,
     scope_nodes,
+    scopes_around,
 )
 
 if TYPE_CHECKING:
@@ -797,10 +801,10 @@ class Tree:
                 self._read_body(
                     module, node.body, qualname, None, nested=True, parent=function
                 )
-            elif isinstance(node, ast.If | ast.Try | ast.With | ast.For | ast.While):
+            elif isinstance(node, COMPOUND_STATEMENTS):
                 self._read_body(
                     module,
-                    _nested_statements(node),
+                    block_statements(node),
                     scope,
                     owner,
                     nested=nested,
@@ -899,12 +903,17 @@ class Tree:
 
     def live_definitions(self, target: tuple[str, str]) -> list[FunctionInfo]:
         """The definitions of a function of a module, or of a class there,
-        that the name may hold once the module has run.
+        that the name may hold once the module has run: a method of a class
+        a later ``class`` of its name replaces is none
+        (:func:`ast_scan.live_class_members`).
         """
         if target not in self.live_cache:
             definitions = self.definitions[target]
             root = self.modules[definitions[0].module]
-            self.live_cache[target] = _live(root, definitions, None)
+            nodes = {definition.node: definition for definition in definitions}
+            self.live_cache[target] = [
+                nodes[node] for node in live_class_members(root, list(nodes))
+            ]
         return self.live_cache[target]
 
     def _bound_at_top(
@@ -1048,8 +1057,8 @@ def _excluded_from_init(value: ast.expr | None) -> bool:
 def _module_statements(body: Iterable[ast.stmt]) -> Iterable[ast.stmt]:
     """A module's statements, those under ``if TYPE_CHECKING:`` and the like too."""
     for node in body:
-        if isinstance(node, ast.If | ast.Try):
-            yield from _module_statements(_nested_statements(node))
+        if isinstance(node, COMPOUND_STATEMENTS):
+            yield from _module_statements(block_statements(node))
         else:
             yield node
 
@@ -1082,17 +1091,6 @@ def _alias(node: ast.stmt) -> tuple[str, str] | None:
     ):
         return node.targets[0].id, ast.unparse(node.value)
     return None
-
-
-def _nested_statements(node: ast.stmt) -> list[ast.stmt]:
-    out: list[ast.stmt] = []
-    for name in ("body", "orelse", "finalbody", "handlers"):
-        for child in getattr(node, name, []) or []:
-            if isinstance(child, ast.ExceptHandler):
-                out.extend(child.body)
-            else:
-                out.append(child)
-    return out
 
 
 #: Annotation words that say a field holds a container, whose ``copy`` is
@@ -1158,6 +1156,21 @@ class Summary:
     value: Value = _CLEAN
 
 
+def _helpers_written_in(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    """How many functions are written in *function*'s own body, through its
+    compound statements, not inside another function or a class.
+    """
+    count = 0
+    pending: list[ast.stmt] = list(function.body)
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            count += 1
+        else:
+            pending.extend(block_statements(node))
+    return count
+
+
 class Reader:
     """Follows the parameters of one function through its body."""
 
@@ -1169,6 +1182,7 @@ class Reader:
         findings: list[Finding] | None,
         closure: Mapping[str, Value] | None = None,
         enclosing: Mapping[ast.AST, tuple[Value, frozenset[str]]] | None = None,
+        helpers: Mapping[ast.AST, tuple[Value, frozenset[str]]] | None = None,
     ) -> None:
         self.tree = tree
         self.function = function
@@ -1193,7 +1207,11 @@ class Reader:
         #: What each function defined here returns, read where it is defined
         #: with what its closure holds there, and the labels that closure
         #: carries, which a call of it hands back as they are.
-        self.nested_returns: dict[ast.AST, tuple[Value, frozenset[str]]] = {}
+        #: *helpers* seeds it: what each returned on a pass before, so that a
+        #: helper written before a sibling it calls reads what that returns.
+        self.nested_returns: dict[ast.AST, tuple[Value, frozenset[str]]] = dict(
+            helpers or {}
+        )
         self.post_init = (
             function.owner is not None and function.node.name == "__post_init__"
         )
@@ -1279,9 +1297,52 @@ class Reader:
         return Many(record) if many else record
 
     def run(self) -> Value:
-        """Read the body, report the kept arrays, and return what is returned."""
+        """Read the body, report the kept arrays, and return what is returned.
+
+        A function with two helpers or more written in it is read first, with
+        no finding kept, until what each helper returns settles
+        (:meth:`settled_helpers`): a helper is read where it is written, so
+        one written before a sibling it calls would otherwise read that
+        sibling as returning nothing.
+        """
+        if _helpers_written_in(self.function.node) > 1:
+            self.nested_returns.update(self.settled_helpers())
         self.block(self.function.node.body, self.start())
         return self.returned
+
+    def settled_helpers(self) -> dict[ast.AST, tuple[Value, frozenset[str]]]:
+        """What each helper written in this function returns, once a pass of
+        the body over what the pass before found finds no more.
+
+        Each pass only adds to what a helper may return, and settles at least
+        one more helper of a chain written before the sibling each calls, so
+        one more pass than the helpers written in the function finds nothing
+        new. Past that bound the guard stops with an error rather than read
+        the helpers as they stood: a value no pass settled is no reading.
+
+        :raises RuntimeError: when the helpers have not settled by the bound.
+        """
+        held: dict[ast.AST, tuple[Value, frozenset[str]]] = {}
+        passes = _helpers_written_in(self.function.node) + 1
+        for _ in range(passes):
+            trial = Reader(
+                self.tree,
+                self.function,
+                self.summaries,
+                None,
+                self.closure,
+                self.enclosing,
+                held,
+            )
+            trial.block(self.function.node.body, trial.start())
+            if trial.nested_returns == held:
+                return held
+            held = trial.nested_returns
+        msg = (
+            f"{self.function.path}: what the helpers written in "
+            f"{self.function.qualname} return did not settle in {passes} passes"
+        )
+        raise RuntimeError(msg)
 
     # -- statements ------------------------------------------------------
     def block(
@@ -2253,7 +2314,9 @@ class Reader:
 
     def syntax(self) -> tuple[dict[ast.AST, ast.AST], dict[str, list[ast.Name]]]:
         """Each node of the function with the node that holds it, and each
-        name with the places it is written, read once per function.
+        name with the places it is written, read once per function: the
+        places that name the function's own variable, not a variable a
+        nested function, a lambda or a comprehension keeps for itself.
         """
         node = self.function.node
         if node not in self.tree.syntax:
@@ -2262,7 +2325,7 @@ class Reader:
             for parent in ast.walk(node):
                 for child in ast.iter_child_nodes(parent):
                     parents[child] = parent
-                if isinstance(parent, ast.Name):
+                if isinstance(parent, ast.Name) and _of_the_function(node, parent):
                     uses.setdefault(parent.id, []).append(parent)
             self.tree.syntax[node] = (parents, uses)
         return self.tree.syntax[node]
@@ -2870,6 +2933,18 @@ def _parameter_names(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[st
     return names
 
 
+def _of_the_function(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, name: ast.Name
+) -> bool:
+    """Whether *name* reads or binds the function's own variable of its
+    spelling, or one no scope inside the function binds: not a variable a
+    nested function, a lambda or a comprehension keeps for itself, which
+    Python keeps apart (:func:`ast_scan.binding_of`).
+    """
+    scope = binding_of(function, name, name.id)[1]
+    return scope is None or scope is function
+
+
 def _names_in(target: ast.AST, name: str) -> bool:
     """Whether *name* is among the names a target or an expression holds."""
     return any(isinstance(n, ast.Name) and n.id == name for n in ast.walk(target))
@@ -2935,28 +3010,40 @@ def _bindings(
     A plain assignment binds it to its value; any other binding (an
     augmented assignment, unpacking, a loop or ``with`` target, ``:=``, an
     import, a nested definition, ``global``) to ``None``, a value the reading
-    does not know.
+    does not know. A binding of a variable a nested function, a lambda or a
+    comprehension keeps for itself binds another name, and is left out; one
+    a nested function declares ``nonlocal`` is the function's.
     """
-    found: list[ast.expr | None] = []
+    found: list[tuple[ast.AST, ast.expr | None]] = []
     for node in ast.walk(function):
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id == name:
-                    found.append(node.value)
+                    found.append((node, node.value))
                 elif isinstance(target, ast.Tuple | ast.List | ast.Starred) and (
                     _names_in(target, name)
                 ):
-                    found.append(None)
+                    found.append((node, None))
         elif (
             isinstance(node, ast.AnnAssign)
             and isinstance(node.target, ast.Name)
             and node.target.id == name
             and node.value is not None
         ):
-            found.append(node.value)
+            found.append((node, node.value))
         elif _binds_unknown(node, name, function):
-            found.append(None)
-    return found
+            found.append((node, None))
+    return [
+        value
+        for node, value in found
+        # A ``global`` the function itself declares makes the name the
+        # module's, a value the reading does not know.
+        if binding_of(function, node, name)[1] is function
+        or (
+            isinstance(node, ast.Global)
+            and scopes_around(function, node)[0] is function
+        )
+    ]
 
 
 def _binds_unknown(

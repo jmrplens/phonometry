@@ -434,7 +434,7 @@ decay-times panel is drawn on it. Requires matplotlib
 
 ```python
 RoomAcousticsResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

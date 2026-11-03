@@ -60,6 +60,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_axis_count,
     require_equal_counts,
     require_ranks,
@@ -68,6 +69,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -203,10 +206,10 @@ def _coerce(
     if isinstance(values, Mapping):
         out: list[float] = []
         for c in centers:
+            # A band centre and its float are one key (250 == 250.0, one
+            # hash), so a mapping keyed either way is read by the centre.
             if c in values:
-                out.append(float(values[c]))
-            elif float(c) in values:
-                out.append(float(values[float(c)]))
+                out.append(real_number(values[c], name))
             else:
                 msg = f"{name} mapping is missing band {c} Hz; expected keys {centers}"
                 raise ValueError(msg)
@@ -466,7 +469,7 @@ class AbsorptionRatingResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -537,7 +540,7 @@ def practical_absorption_coefficient(
         third_octave_alpha_s, RATING_THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s"
     )
     if any(v < 0.0 for v in values):
-        msg = "alpha_s values must be non-negative"
+        msg = "'third_octave_alpha_s' must be non-negative."
         raise ValueError(msg)
     alpha_p = [
         _practical_round((values[3 * i] + values[3 * i + 1] + values[3 * i + 2]) / 3.0)

@@ -139,6 +139,7 @@ from .._internal.validation import (
     is_at_most,
     is_positive,
     real_array,
+    real_number,
     require_band_fraction,
     require_choice,
     require_equal_counts,
@@ -396,7 +397,10 @@ def _dynamic_capability(
     in the library is the one every criterion 1 in it is judged against.
     """
     return np.asarray(
-        [dynamic_capability_index(float(value), _K[grade]) for value in residual_index],
+        [
+            dynamic_capability_index(real_number(value, "residual_index"), _K[grade])
+            for value in residual_index
+        ],
         dtype=np.float64,
     )
 
@@ -524,7 +528,7 @@ def position_count_factor(
         return value
     fraction = _check_fraction(fraction)
     _per_band_or_raise(grade, "Table B.2", _C_A_WEIGHTED["survey"])
-    grade1, grade2 = _row_for(_TABLE_B2, float(frequency), fraction)
+    grade1, grade2 = _row_for(_TABLE_B2, real_number(frequency, "frequency"), fraction)
     return grade1 if grade == "precision" else grade2
 
 
@@ -572,7 +576,7 @@ def determination_standard_deviation(
         return value
     fraction = _check_fraction(fraction)
     _per_band_or_raise(grade, "Table 2", _S_A_WEIGHTED["survey"])
-    grade1, grade2 = _row_for(_TABLE_2_S, float(frequency), fraction)
+    grade1, grade2 = _row_for(_TABLE_2_S, real_number(frequency, "frequency"), fraction)
     return grade1 if grade == "precision" else grade2
 
 
@@ -997,6 +1001,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float), or ``normal_intensity`` or ``segment_areas_m2`` holds a text or a
             value that is not a real number.
+            An element of ``pressure_residual_index`` is refused the same way when it is not one real number.
         """
         _check_grade(self.grade)
         object.__setattr__(self, "fraction", _check_fraction(self.fraction))
@@ -1625,7 +1630,9 @@ def _criterion_2(
         return None, None
     factors = np.asarray(
         [
-            position_count_factor(grade, float(f), fraction=fraction)
+            position_count_factor(
+                grade, real_number(f, "frequencies"), fraction=fraction
+            )
             for f in frequencies
         ],
         dtype=np.float64,
@@ -1672,7 +1679,7 @@ def _per_band_grade(
             continue
         for grade in ("precision", "engineering"):
             factor = position_count_factor(
-                grade, float(frequencies[band]), fraction=fraction
+                grade, real_number(frequencies[band], "frequencies"), fraction=fraction
             )
             if n_positions > float(settled(factor * f4[band] ** 2)):
                 verdict[band] = grade
@@ -1724,7 +1731,7 @@ def _expanded_uncertainty(
             continue
         values[band] = 2.0 * determination_standard_deviation(
             cast(DeterminationGrade, reached),
-            float(frequencies[band]),
+            real_number(frequencies[band], "frequencies"),
             fraction=fraction,
         )
     return values
@@ -1781,7 +1788,8 @@ def _a_weighted_factor(
     high_span = high_row[0] if fraction == 1 else high_row[1]
     total = float(np.sum(contributions))
     nominal = np.asarray(
-        [_nominal_band(float(f), fraction) for f in frequencies], dtype=np.float64
+        [_nominal_band(real_number(f, "frequencies"), fraction) for f in frequencies],
+        dtype=np.float64,
     )
     if high_span is not None and total > 0.0:
         in_high = (nominal >= high_span[0]) & (nominal <= high_span[1])
@@ -1826,7 +1834,9 @@ def _a_weighted_determination(
         kept = applicable if omitted is None else applicable & ~omitted
         single = kept.size == 1 and bool(kept[0])
         return (
-            float(sound_power_level[0]) if single else float("nan"),
+            real_number(sound_power_level[0], "sound_power_level")
+            if single
+            else float("nan"),
             float("nan"),
             None,
         )

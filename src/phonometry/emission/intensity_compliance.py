@@ -73,6 +73,7 @@ from .._internal.frozen import OwnsArrays, given_repr
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_equal_counts,
@@ -82,6 +83,7 @@ from .._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
@@ -333,11 +335,11 @@ def _band_verdicts(
             band_class = 2
         bands.append(
             {
-                "frequency": float(freq),
+                "frequency": real_number(freq, "freqs"),
                 "class": band_class,
-                "residual_index_db": float(measured[i]),
-                "limit_class1_db": float(class1[i]),
-                "limit_class2_db": float(class2[i]),
+                "residual_index_db": real_number(measured[i], "measured"),
+                "limit_class1_db": real_number(class1[i], "class1"),
+                "limit_class2_db": real_number(class2[i], "class2"),
                 "margin_class1_db": m1,
                 "margin_class2_db": m2,
             }
@@ -469,6 +471,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             the device tag is not a Table 2 column group, a value is not
             finite, or a band is not tabulated or is repeated.
         :raises TypeError: if ``spacing_m`` is not a single number.
+            An element of ``frequencies`` is refused the same way when it is not one real number.
         """
         _check_device(self.device)
         require_ranks(self, frequencies=1, residual_index=1)
@@ -484,7 +487,9 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         if np.size(self.frequencies) == 0:
             msg = "At least one measurement band is required."
             raise ValueError(msg)
-        bands = [_match_band(float(f)) for f in np.asarray(self.frequencies)]
+        bands = [
+            _match_band(float(f)) for f in real_array(self.frequencies, "frequencies")
+        ]
         if len(set(bands)) != len(bands):
             msg = (
                 "'frequencies' repeats an IEC 61043 Table 2 band; supply one "
@@ -665,7 +670,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

@@ -63,6 +63,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_ranks,
@@ -190,14 +191,14 @@ def synchronized_sweep_signal(
     require_scalar(fade, "fade")
     fs_v = _positive(fs, "fs")
     f1_v = _positive(f1, "f1")
-    _validate_sweep_band(fs_v, f1_v, float(f2))
+    _validate_sweep_band(fs_v, f1_v, real_number(f2, "f2"))
     duration_s_v = _positive(duration_s, "duration_s")
     amplitude_v = _positive(amplitude, "amplitude")
     if not 0.0 <= fade < _MAX_FADE_FRACTION:
         msg = "fade must be in [0, 0.5)"
         raise ValueError(msg)
-    rate = _sweep_rate(f1_v, float(f2), duration_s_v)
-    duration = rate * np.log(float(f2) / f1_v)
+    rate = _sweep_rate(f1_v, real_number(f2, "f2"), duration_s_v)
+    duration = rate * np.log(real_number(f2, "f2") / f1_v)
     n = int(np.ceil(duration * fs_v))
     t = np.arange(n) / fs_v
     sweep: NDArray[np.float64] = amplitude_v * np.sin(
@@ -710,6 +711,7 @@ def swept_sine_distortion(
         a single number, or ``ir_length`` or ``n_harmonics`` is a flag, a text or an
         array where a count goes, or ``method`` is not a text, or ``recorded`` holds a
         text or a value that is not a real number.
+        ``fade`` is refused the same way when it is not one real number.
     """
     fs = resolve_fs(recorded, fs, name="recorded")
     rec = apply_calibration(recorded, _validated_recording(recorded))
@@ -751,7 +753,7 @@ def swept_sine_distortion(
         pad = int(np.ceil(delays_samples[-1])) + window
         buffer = _deconvolve_synchronized(signal, fs_v, f1_v, rate, pad)
     else:
-        fade_v = 0.01 if fade is None else float(fade)
+        fade_v = 0.01 if fade is None else real_number(fade, "fade")
         buffer = _deconvolve_farina(signal, fs_v, f1_v, f2_v, duration_s_v, fade_v)
 
     irs, responses = _window_harmonics(buffer, delays_samples, window)

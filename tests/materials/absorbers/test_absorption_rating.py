@@ -178,7 +178,7 @@ def test_practical_mean_of_three() -> None:
 
 
 def test_practical_rejects_negative() -> None:
-    with pytest.raises(ValueError, match="alpha_s values must be non-negative"):
+    with pytest.raises(ValueError, match="'third_octave_alpha_s' must be non-negative"):
         practical_absorption_coefficient([-0.1] + [0.5] * 14)
 
 
@@ -369,6 +369,25 @@ def test_weighted_mapping_matches_sequence() -> None:
     res_seq = weighted_absorption(_ANNEX_A2_ALPHA_P)
     assert _almost(res_map.alpha_w, res_seq.alpha_w)
     assert res_map.shape_indicator == res_seq.shape_indicator
+
+
+def test_a_mapping_keyed_by_float_centres_is_read_by_the_same_lookup() -> None:
+    """A band centre and its float are one key: ``250 in {250.0: x}`` is true.
+
+    The mapping is read by the band centre as it is; a second lookup by the
+    centre's float could never find what the first did not.
+    """
+    mapping = {
+        float(centre): alpha
+        for centre, alpha in zip(RATING_OCTAVE_BANDS_HZ, _ANNEX_A2_ALPHA_P, strict=True)
+    }
+    res_map = weighted_absorption(mapping)
+    res_seq = weighted_absorption(_ANNEX_A2_ALPHA_P)
+    assert _almost(res_map.alpha_w, res_seq.alpha_w)
+    assert res_map.shape_indicator == res_seq.shape_indicator
+    missing = {key: value for key, value in mapping.items() if key != 250.0}
+    with pytest.raises(ValueError, match=r"alpha_p mapping is missing band 250 Hz"):
+        weighted_absorption(missing)
 
 
 def test_end_to_end_from_third_octaves() -> None:

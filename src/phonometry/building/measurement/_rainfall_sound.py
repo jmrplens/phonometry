@@ -70,6 +70,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -322,7 +323,7 @@ def _table_values(
     for i, f in enumerate(frequencies):
         hits = np.nonzero(np.abs(keys - f) <= _BAND_MATCH * f)[0]
         if hits.size != 1:
-            raise ValueError(missing(float(f), int(hits.size)))
+            raise ValueError(missing(real_number(f, "frequencies"), int(hits.size)))
         out[i] = values[int(hits[0])]
     return out
 

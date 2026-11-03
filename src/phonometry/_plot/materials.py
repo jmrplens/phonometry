@@ -1177,7 +1177,7 @@ def plot_diffuser_polar_response(
 
 def plot_transfer_matrix(
     matrix: TransferMatrix,
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     characteristic_impedance: float,
     ax: Axes | None = None,
     language: Language = "en",
@@ -1192,7 +1192,7 @@ def plot_transfer_matrix(
     companion on a 0..1 right axis.
 
     :param matrix: A :class:`~phonometry.materials.absorbers.four_microphone.TransferMatrix`.
-    :param frequency: Frequency vector ``f``, in hertz, matching the shape of
+    :param frequencies: Frequency vector ``f``, in hertz, matching the shape of
         the matrix entries.
     :param characteristic_impedance: Characteristic impedance ``rho c`` of the
         air in the tube, in rayls.
@@ -1201,13 +1201,13 @@ def plot_transfer_matrix(
     :return: The axes carrying the transmission-loss curve.
     :raises ValueError: if ``frequencies`` does not match the shape of the
         spectra the four-pole entries produce.
-    :raises TypeError: if ``frequency`` holds a text or a value that is not a real
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = real_array(frequency, "frequency")
+    freqs = real_array(frequencies, "frequencies")
     tl = np.asarray(
         matrix.transmission_loss(characteristic_impedance), dtype=np.float64
     )

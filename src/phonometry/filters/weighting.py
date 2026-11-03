@@ -99,6 +99,7 @@ from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
     holds_complex,
     real_array,
+    real_number,
     refuse_text_beside_choice,
     require_choice,
     require_count,
@@ -549,7 +550,7 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
         sos = design_sos(
             zeros,
             poles,
-            float(fs),
+            real_number(fs, "fs"),
             _fit_band(curve, fs),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),

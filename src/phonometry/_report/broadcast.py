@@ -53,6 +53,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..broadcast._program_loudness import ProgramLoudnessResult
     from .metadata import ReportMetadata
@@ -298,7 +300,7 @@ def _verdict(
 
 def render_program_loudness_report(
     result: ProgramLoudnessResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

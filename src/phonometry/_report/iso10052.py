@@ -39,6 +39,8 @@ import numpy as np
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..building.measurement.survey_insulation import (
@@ -126,7 +128,7 @@ _AIRBORNE_QUANTITIES: dict[str, tuple[str, str, dict[str, str]]] = {
 def _render_survey(
     result: SurveyAirborneResult | SurveyFacadeResult | SurveyImpactResult,
     rating: WeightedRatingResult | ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     spec: dict[str, str],
     is_impact: bool,
@@ -174,7 +176,7 @@ def _render_survey(
 def render_survey_airborne_report(
     result: SurveyAirborneResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: str,
     metadata: ReportMetadata | None = None,
@@ -217,7 +219,7 @@ def render_survey_airborne_report(
 def render_survey_impact_report(
     result: SurveyImpactResult,
     rating: ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -255,7 +257,7 @@ def render_survey_impact_report(
 def render_survey_facade_report(
     result: SurveyFacadeResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -279,7 +279,7 @@ in_situ_absorption_coefficient(
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -345,7 +345,7 @@ in_situ_absorption_spectrum(
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
     f_min: float = 250.0,
     f_max: float = 4000.0,
     clip_negative: bool = True,
@@ -396,7 +396,7 @@ in_situ_reflection_factor(
     incidence_angle_rad: float = 0.0,
     fs: float | None = None,
     delay: float | None = None,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
 ) -> NDArray[np.complex128]
 ```
 
@@ -433,7 +433,7 @@ Annex C; the frequency-dependent form of Annex G).
 | Exception | When |
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or `delay` given without `fs`. |
-| TypeError | if `fs` is not a single number, or `incident_ir` or `reflected_ir` holds a text or a value that is not a real number. |
+| TypeError | if `fs` is not a single number, `delay` is not one real number, `n` is not a whole number, or `incident_ir` or `reflected_ir` holds a text or a value that is not a real number. |
 
 ## InSituAbsorptionResult
 
@@ -726,7 +726,7 @@ power_reflection_coefficient(
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
-    n: int | None = None,
+    n: int | np.integer[Any] | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -756,7 +756,7 @@ independent of any reflected-path time offset.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `incident_ir` or `reflected_ir` holds a text or a value that is not a real number. |
+| TypeError | if `incident_ir` or `reflected_ir` holds a text or a value that is not a real number, or `n` is not a whole number. |
 
 ## reflected_path_delay
 

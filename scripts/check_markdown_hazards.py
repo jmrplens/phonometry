@@ -119,7 +119,11 @@ import re
 import sys
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans
+from markdown_spans import (
+    drop_inline_spans,
+    drop_inline_spans_by_block,
+    lines_read_whole,
+)
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -229,7 +233,11 @@ def _unescaped_dollars(line: str) -> int:
     again, read by :mod:`markdown_spans`: one tick of a longer run never
     closes a shorter one, and a backtick behind a backslash opens no span. A
     ``$`` inside a span is code (the ``$schema`` key of a JSON document), and
-    CommonMark reads the span before any maths could open in it.
+    CommonMark reads the span before any maths could open in it. The page's
+    reading hands *line* with its spans out already, read over the lines of
+    its paragraph (:func:`markdown_spans.drop_inline_spans_by_block`), so that
+    a span that crosses a line break hides none of its dollars from the other
+    line; a span left whole on the line is taken out here.
     """
     prose = drop_inline_spans(line)
     return len(re.findall(r"(?<!\\)\$", re.sub(r"\$\$", "", prose)))
@@ -305,7 +313,7 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
             body, code, _display_maths(body, code), strict=True
         )
     ]
-    return _MDX_READING.sub(_as_mdx_reads_it, "\n".join(kept)).split("\n")
+    return lines_read_whole(kept, lambda text: _MDX_READING.sub(_as_mdx_reads_it, text))
 
 
 def _less_than_problems(rel: str, lines: list[str], start: int) -> list[str]:
@@ -417,6 +425,13 @@ def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
         "code" if is_code else part
         for is_code, part in zip(code, _display_maths(body, code), strict=True)
     ]
+    shown = lines_read_whole(
+        [
+            line if part == "prose" else ""
+            for line, part in zip(lines, parts, strict=True)
+        ],
+        drop_inline_spans_by_block,
+    )
     for index in range(start, len(lines)):
         line = lines[index]
         where = f"{rel}:{index + 1}"
@@ -432,7 +447,7 @@ def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
         problems.extend(_math_meta_problems(where, line))
         if index > start and parts[index - 1] == "prose":
             problems.extend(_setext_problems(where, line, before))
-        open_math = _maths_left_open(line, open_math=open_math)
+        open_math = _maths_left_open(shown[index], open_math=open_math)
     return problems
 
 

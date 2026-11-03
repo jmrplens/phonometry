@@ -166,7 +166,7 @@ Initialize the Octave Filter Bank.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
-| TypeError | if `fraction` or `fs` is not a single number, or `order` is a flag, a text or an array where a count goes. |
+| TypeError | if `fraction` or `fs` is not a single number, or `order` is a flag, a text or an array where a count goes. An element of `limits` is refused the same way when it is not one real number. |
 
 ### OctaveFilterBank.filter()
 

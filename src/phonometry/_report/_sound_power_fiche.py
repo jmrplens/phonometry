@@ -26,10 +26,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
-from .._internal.validation import (
-    real_array,
-    require_scalar,
-)
+from .._internal.validation import real_array, real_number, require_scalar
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -49,6 +46,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from numpy.typing import ArrayLike
@@ -126,10 +124,13 @@ def metadata_pairs(
 
 
 def d1(value: float, language: Language = "en") -> str:
-    """One decimal place, locale-aware separator; em dash when not finite."""
-    if not math.isfinite(float(value)):
+    """One decimal place, locale-aware separator; em dash when not finite.
+
+    :raises TypeError: if ``value`` is not one real number.
+    """
+    if not math.isfinite(real_number(value, "value")):
         return "—"
-    return format_number(float(value), language, decimals=1)
+    return format_number(real_number(value, "value"), language, decimals=1)
 
 
 def nominal_bands(
@@ -277,7 +278,9 @@ def power_statement(
     band screening (ISO 9614-3:2002 clause 10 f) 2) omits the bands its Annex C
     criteria reject, a screening the result object cannot perform on its own).
     """
-    lwa = float(result.sound_power_level_a if level_a is None else level_a)
+    lwa = real_number(
+        result.sound_power_level_a if level_a is None else level_a, "level_a"
+    )
     total = total_power_level(result)
     extended: list[str] = []
     if math.isfinite(lwa):
@@ -318,7 +321,9 @@ def power_verdict(
     """
     value = headline_level(result, level_a)
     weighted = math.isfinite(
-        float(result.sound_power_level_a if level_a is None else level_a)
+        real_number(
+            result.sound_power_level_a if level_a is None else level_a, "level_a"
+        )
     )
     passed = math.isfinite(value) and display_round(value) <= requirement
     if weighted:
@@ -463,7 +468,7 @@ def render_sound_power_fiche(
     # the structure-borne fiches (EN 15657, EN 12354-5) pass plot-only results
     # with a pre-computed verdict. No one protocol covers both contracts.
     result: Any,  # noqa: ANN401
-    path: str,
+    path: str | os.PathLike[str],
     *,
     copy: FicheCopy,
     value_table: Table,

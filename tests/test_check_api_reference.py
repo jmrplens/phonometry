@@ -654,3 +654,85 @@ def test_every_example_in_the_curated_table_binds_to_its_signature() -> None:
         / "index.md"
     ).read_text(encoding="utf-8")
     assert gate.example_problems(markdown, gate.usage_roots()) == []
+
+
+#: A module that binds a name in a block of each compound statement Python
+#: runs at import time: a ``case`` of a ``match``, a ``try`` with ``except*``,
+#: a ``with`` and a loop.
+_IN_EVERY_BLOCK = """\
+import contextlib
+import sys
+
+match sys.maxsize:
+    case 0:
+        from json import dumps as in_case
+        IN_CASE = 0
+    case _:
+        from json import dumps as in_case
+        IN_CASE = 1
+try:
+    from json import loads as in_try
+    IN_TRY = 1
+except* ImportError:
+    pass
+with contextlib.nullcontext():
+    from json import JSONDecoder as in_with
+    IN_WITH = 1
+for _ in range(1):
+    from json import JSONEncoder as in_loop
+    IN_LOOP = 1
+"""
+
+
+def _module_from(name: str, source: str) -> types.ModuleType:
+    """A module run from *source*, whose source ``inspect`` can read."""
+    import linecache
+
+    module = types.ModuleType(name)
+    filename = f"<{name}>"
+    module.__file__ = filename
+    linecache.cache[filename] = (
+        len(source),
+        None,
+        source.splitlines(keepends=True),
+        filename,
+    )
+    exec(compile(source, filename, "exec"), module.__dict__)
+    return module
+
+
+def test_a_name_bound_in_any_block_at_the_top_is_read() -> None:
+    """A ``match``, a ``try`` with ``except*``, a ``with`` and a loop run at
+    import time, so what their blocks bind and import is the module's.
+
+    The walkers went into ``if`` and ``try`` blocks only, and a name bound in
+    any other block was read as no name of the module.
+    """
+    module = _module_from("fake_every_block", _IN_EVERY_BLOCK)
+    assert {"IN_CASE", "IN_TRY", "IN_WITH", "IN_LOOP"} <= set(
+        gate.defined_names(module)
+    )
+    assert {"in_case", "in_try", "in_with", "in_loop"} <= set(
+        gate.imported_from(module)
+    )
+
+
+def test_a_statement_in_a_case_runs_at_the_top_of_a_module() -> None:
+    import ast
+
+    statements = {
+        ast.unparse(node)
+        for node in gate._module_level_statements(ast.parse(_IN_EVERY_BLOCK).body)
+    }
+    assert {"IN_CASE = 0", "IN_CASE = 1", "IN_TRY = 1", "IN_WITH = 1"} <= statements
+
+
+def test_a_cell_s_code_spans_are_read_as_the_site_reads_them() -> None:
+    """A span of two backticks holds a backtick, and an escaped one opens none.
+
+    The cells were read with a pattern of a backtick, anything but one and a
+    backtick, so ````a`b```` read as ``a`` and ``b`` and the prose between
+    escaped backticks read as code.
+    """
+    assert gate.table_names("| ``a`b`` and `c` | kind |\n") == {"a`b", "c"}
+    assert gate.table_names("| \\`x\\` `y` | kind |\n") == {"y"}

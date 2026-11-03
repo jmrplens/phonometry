@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -3625,8 +3625,8 @@ def _db(value: float, language: Language) -> str:
     """A decibel value for a title: typographic minus, the locale's separator."""
     from .._i18n import decimal_comma, fmt_minus
 
-    spec = "g" if float(value).is_integer() else ".1f"
-    return decimal_comma(fmt_minus(float(value), spec), language)
+    spec = "g" if real_number(value, "value").is_integer() else ".1f"
+    return decimal_comma(fmt_minus(real_number(value, "value"), spec), language)
 
 
 def _improvement_curve(

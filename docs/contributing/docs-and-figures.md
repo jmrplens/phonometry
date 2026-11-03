@@ -528,7 +528,7 @@ for line in text.splitlines():
 
 **Enforced by:** `scripts/check_fence_readers.py`, `make fence-readers`, `CI: Markdown renders the way it reads`
 
-**Exceptions.** The site's code reads fences through `site/src/lib/markdown-fences.mjs` (`codeLines()`, `prose()`, `fences()`), and a test holds the two readers to the same answer. A script that writes a fence is not reading one. `EXEMPT` of the check, keyed (file, function) with its reason, is empty.
+**Exceptions.** The site's code reads fences through `site/src/lib/markdown-fences.mjs` (`codeLines()`, `prose()`, `fences()`), and a test holds the two readers to the same answer. A script that writes a fence is not reading one. A pattern joined from names that stand for several strings, or written as a choice (`a if flag else b`, `a or b`), is read as every string it can make; one that can make more than 1024 is refused unread, never read in part. A name is read where Python binds it: a comprehension's variable stands for the items it walks inside the comprehension only, a name a `:=` in a comprehension binds stands for its value in the function around it, one declared `global` or `nonlocal` in the module or in the function that binds it, and a parameter of a lambda or a function for its default, read in the scope around it, as well as for whatever its caller passes; a method does not see the names of its class body. `EXEMPT` of the check, keyed (file, function) with its reason, is empty.
 
 ## What a guide shows
 
@@ -1561,3 +1561,36 @@ class, its column's heading and its unit
 **Enforced by:** `site/scripts/check-page-size.mjs`, `CI: Check every page fits in what a search engine reads`
 
 **Exceptions.** None. The redirect stubs and the error page are small and are counted like any other file; a page that cannot be split or slimmed below the cap is a design question to settle before it is published, not an entry here.
+
+## Inline code spans
+
+<a id="f65"></a>
+### F65. Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own
+
+**Why.** A code span opens on a run of backticks and closes on the next run of exactly as many; a backslash before the opening run escapes its first backtick, and inside the span a backslash escapes nothing (CommonMark 0.31.2, 2.4 and 6.1). Nine scripts that read the prose of a page found spans with a pattern of their own, a backtick, anything but a backtick, a backtick, and each misread a span of two backticks that holds one, an escaped backtick, or a span that ends in a backslash: the prose up to the next backtick was hidden from the check, or code was checked as prose. The curated API table and the translation tables were read that way until this rule.
+
+**Do**
+
+```python
+import pathlib
+import sys
+
+import phonometry
+
+checkout = pathlib.Path(phonometry.__file__).resolve().parents[2]
+sys.path.insert(0, str(checkout / "scripts"))  # a script in scripts/ has it already
+from markdown_spans import inline_spans
+
+cell = "``a`b`` and `c`"
+spans = [cell[start:end] for start, end in inline_spans(cell)]  # ['``a`b``', '`c`']
+```
+
+**Don't**
+
+```py
+names = re.findall(r"`([^`]+)`", cell)  # ['a', ' and ']: the prose read as code
+```
+
+**Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py`
+
+**Exceptions.** The site's scripts read spans through `site/scripts/shared/markdown-spans.mjs`, the same reading in JavaScript. A backtick right after a colon opens a role of reStructuredText (`:math:` and its kin), which Markdown does not have, and is not read as a span. A script that reads the docstrings of the library reads reStructuredText, whose inline literal is two backticks, and one that reads a JavaScript template literal reads no span at all: each is listed in `EXEMPT` of the check, keyed by the file, with the reason, and an entry that covers nothing fails. The site's code is read line by line, without a parser, so a pattern built across lines is not seen there. The check knows a span by its opening, a backtick or a run of them written out or with a quantifier, with any white space after it, and by what it holds written as anything but a backtick or as anything at all; a pattern that takes only some characters between two backticks, a word (`\S+?`) or a file name (`[\w./-]+\.json`), reads a token that no span reader stops at, and is left alone: a pattern of that kind that is meant as a span reader is not seen. A pattern built from names bound to several strings (in two branches, to the items of a tuple, by `+=`, or by a loop or a comprehension to each item it walks), or written as a choice (`a if flag else b`, `a or b`), is read as every string it can be; one that can be more than 1024 is refused unread, never read in part. A name is read where Python binds it: a comprehension's variable stands for the items it walks inside the comprehension only, a name a `:=` in a comprehension binds stands for its value in the function around it, one declared `global` or `nonlocal` in the module or in the function that binds it, and a parameter of a lambda or a function for its default, read in the scope around it, as well as for whatever its caller passes, whatever the function or the module binds under that name; a method does not see the names of its class body.

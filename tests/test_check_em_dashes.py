@@ -731,3 +731,12 @@ def test_a_clean_run_names_every_form_it_refuses(
     assert "em dash" in said
     assert "double hyphen" in said
     assert "list item's head" in said
+
+
+def test_a_code_span_across_a_line_break_hides_its_dash() -> None:
+    """A dash inside a code span that crosses a line break is code.
+
+    The spans were dropped one line at a time, so the first line kept its
+    opening backtick and the dash after it as prose.
+    """
+    assert ced.markdown_hits("Text `a —\nb` more.\n") == []

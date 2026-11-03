@@ -141,7 +141,7 @@ The rating as reported in Clause 5.3, e.g. `"0.60(M)"` or
 
 ```python
 AbsorptionRatingResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

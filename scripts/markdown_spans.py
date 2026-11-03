@@ -24,6 +24,10 @@ from __future__ import annotations
 
 import bisect
 import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
 
 #: A run of backticks or of dollar signs.
 _RUN = re.compile(r"`+|\$+")
@@ -110,3 +114,166 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
         done = end
     pieces.append(text[done:])
     return "".join(pieces)
+
+
+#: A line that opens a block of its own: a heading, a row of a table, an item
+#: of a list or a quotation, which a code span never crosses into
+#: (``BLOCK_START`` of ``site/scripts/shared/markdown-spans.mjs``).
+_BLOCK_START = re.compile(r" {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)")
+#: A block on its own line only: a heading or a row of a table.
+_ONE_LINE_BLOCK = re.compile(r" {0,3}(?:#{1,6}(?:\s|$)|\|)")
+#: A comment and the line that opens one, by the page's kind: an HTML comment
+#: on a ``.md`` page, which opening a line is an HTML block that ends at its
+#: ``-->``, and an MDX comment, an expression, beside it on a ``.mdx`` page.
+_COMMENTS = {
+    "md": re.compile(r"<!--.*?-->", re.DOTALL),
+    "mdx": re.compile(r"<!--.*?-->|\{/\*.*?\*/\}", re.DOTALL),
+}
+_COMMENT_LINE = {
+    "md": re.compile(r" {0,3}<!--"),
+    "mdx": re.compile(r" {0,3}(?:<!--|\{/\*)"),
+}
+
+
+def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
+    """*lines* in the blocks a code span stays inside, every line in one.
+
+    A blank line is a block of its own and ends the one before it; a heading,
+    a table row, a list item or a quotation opens one, and a line that opens
+    a comment opens one that runs to the comment's end, blank lines included.
+    """
+    blocks: list[list[str]] = []
+    current: list[str] = []
+    closer = None if comments is None else _COMMENTS[comments]
+    opener = None if comments is None else _COMMENT_LINE[comments]
+    for line in lines:
+        if current and closer is not None and _unclosed(current, closer, opener):
+            current.append(line)
+            continue
+        if (
+            not line.strip()
+            or _BLOCK_START.match(line)
+            or (opener and opener.match(line))
+        ):
+            if current:
+                blocks.append(current)
+            current = []
+        if not line.strip():
+            blocks.append([line])
+            continue
+        current.append(line)
+        if _ONE_LINE_BLOCK.match(line):
+            blocks.append(current)
+            current = []
+    if current:
+        blocks.append(current)
+    return blocks
+
+
+def _unclosed(
+    block: list[str], closer: re.Pattern[str], opener: re.Pattern[str] | None
+) -> bool:
+    """Whether *block* opens with a comment its lines have not closed yet."""
+    if opener is None or not opener.match(block[0]):
+        return False
+    return closer.match("\n".join(block).lstrip()) is None
+
+
+def _spans_and_comments(
+    text: str, markers: str, comments: str | None
+) -> list[tuple[int, int]]:
+    """The code spans and comments of one block, read left to right.
+
+    Whichever opens first wins: a comment opened in a span is code, and a
+    backtick in a comment is the comment's.
+    """
+    if comments is None:
+        return inline_spans(text, markers)
+    pattern = _COMMENTS[comments]
+    found: list[tuple[int, int]] = []
+    done = 0
+    while True:
+        spans = inline_spans(text[done:], markers)
+        comment = pattern.search(text, done)
+        span = (spans[0][0] + done, spans[0][1] + done) if spans else None
+        if comment is not None and (span is None or comment.start() < span[0]):
+            span = comment.span()
+        if span is None:
+            return found
+        found.append(span)
+        done = span[1]
+
+
+def blank_inline_spans_by_block(
+    text: str, markers: str = "`", comments: str | None = None
+) -> str:
+    """*text* with its spans blanked, each block of a page read whole.
+
+    The reading of ``dropInlineSpansByBlock`` of
+    ``site/scripts/shared/markdown-spans.mjs``: a code span may run over the
+    lines of its paragraph, as the page reads it, but never past a blank line
+    or into another block. Each character of a span but a line end becomes a
+    space, so every line, and every column of it, is where it was.
+
+    :param text: Prose, its fenced code already out (left as blank lines).
+    :param markers: ``"`"`` for the code spans, ``"`$"`` for code and maths.
+    :param comments: ``"md"`` or ``"mdx"`` to blank the page's comments too,
+        read with the spans in one pass, as the page reads them.
+    :return: The text, its spans blanked, with as many lines as it had.
+    """
+    return _by_block(text, markers, comments, lambda span: re.sub(r"[^\n]", " ", span))
+
+
+def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[str]:
+    """*lines* joined, handed to *read* as one text, and split back, a line each.
+
+    For a reader that keeps every line break of what it is handed, as the
+    span readers here do, so that the lines it gives back stand where the
+    ones it was handed did. No lines give none back: joined, they are the
+    empty text, which splits into one empty line, and a reader zipping that
+    against the page's own lines would raise on an empty page.
+
+    :raises ValueError: if *read* added or took away a line break.
+    """
+    if not lines:
+        return []
+    shown = read("\n".join(lines)).split("\n")
+    if len(shown) != len(lines):
+        msg = f"{len(lines)} lines came back as {len(shown)}: the reader moved a line break"
+        raise ValueError(msg)
+    return shown
+
+
+def drop_inline_spans_by_block(
+    text: str, markers: str = "`", comments: str | None = None
+) -> str:
+    """*text* with its spans taken out, each block of a page read whole.
+
+    As :func:`blank_inline_spans_by_block`, but each span leaves
+    :data:`SPAN_MARK` and the line breaks it held, as
+    ``dropInlineSpansByBlock`` of the site leaves them: every line is where
+    it was, its columns past a span are not.
+    """
+    return _by_block(
+        text, markers, comments, lambda span: SPAN_MARK + "\n" * span.count("\n")
+    )
+
+
+def _by_block(
+    text: str,
+    markers: str,
+    comments: str | None,
+    replace: Callable[[str], str],
+) -> str:
+    """*text*, each span and comment of each block replaced by *replace* of it."""
+    read: list[str] = []
+    for block in _blocks(text.split("\n"), comments):
+        joined = "\n".join(block)
+        pieces: list[str] = []
+        done = 0
+        for start, end in _spans_and_comments(joined, markers, comments):
+            pieces.extend((joined[done:start], replace(joined[start:end])))
+            done = end
+        pieces.append(joined[done:])
+        read.append("".join(pieces))
+    return "\n".join(read)

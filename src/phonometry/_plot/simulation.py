@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from .common import (
     _C_MUTED,
     _C_REFERENCE,
@@ -285,7 +285,7 @@ def _time_text(time_s: float, language: Language) -> str:
     """A time in milliseconds, two decimals, in the language's notation."""
     from .._i18n import format_number
 
-    return format_number(float(time_s) * 1000.0, language, decimals=2)
+    return format_number(real_number(time_s, "time_s") * 1000.0, language, decimals=2)
 
 
 def _widest_time_texts(last_time_s: float, language: Language) -> list[str]:
@@ -314,14 +314,20 @@ def _elastic_title(time_text: str, snapshot_field: Field, language: Language) ->
 
 
 def fdtd_snapshot_title(time_s: float, language: Language) -> str:
-    """The title of an acoustic field drawn at *time_s* seconds."""
+    """The title of an acoustic field drawn at *time_s* seconds.
+
+    :raises TypeError: if ``time_s`` is not one real number.
+    """
     return _fdtd_title(_time_text(time_s, language), language)
 
 
 def elastic_snapshot_title(
     time_s: float, snapshot_field: Field, language: Language
 ) -> str:
-    """The title of an elastic field (``"p"``, ``"vx"``, ``"vy"``) at *time_s* seconds."""
+    """The title of an elastic field (``"p"``, ``"vx"``, ``"vy"``) at *time_s* seconds.
+
+    :raises TypeError: if ``time_s`` is not one real number.
+    """
     return _elastic_title(_time_text(time_s, language), snapshot_field, language)
 
 
@@ -708,6 +714,7 @@ def fdtd_frame(
     widest title the run shows.
 
     :raises TypeError: if ``field`` holds a text or a value that is not a real number.
+        ``last_time_s`` or ``time_s`` are refused the same way when any is not one real number.
     """
     return _video_snapshot(
         ax,
@@ -748,6 +755,7 @@ def elastic_frame(
     """The first frame of an elastic video, as :func:`fdtd_frame` draws an acoustic one.
 
     :raises TypeError: if ``field`` holds a text or a value that is not a real number.
+        ``last_time_s`` or ``time_s`` are refused the same way when any is not one real number.
     """
     return _video_snapshot(
         ax,

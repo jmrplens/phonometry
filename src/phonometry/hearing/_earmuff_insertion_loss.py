@@ -71,10 +71,7 @@ import numpy as np
 from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import (
-    real_array,
-    require_scalar,
-)
+from .._internal.validation import real_array, real_number, require_scalar
 from .sound_field_audiometry import (
     _RANDOM_INCIDENCE_CLAUSE,
     DiffuseSoundFieldCheck,
@@ -479,10 +476,13 @@ class EarmuffInsertionLossResult(OwnsArrays):
         :param frequency: A centre frequency of the measurement, in hertz.
         :return: :class:`InsertionLossUncertaintyBudget`.
         :raises ValueError: for a frequency the measurement does not have.
+        :raises TypeError: if ``frequency`` is not one real number.
         """
-        matches = np.isclose(self.frequencies, float(frequency), rtol=1e-3, atol=0.0)
+        matches = np.isclose(
+            self.frequencies, real_number(frequency, "frequency"), rtol=1e-3, atol=0.0
+        )
         if not matches.any():
-            msg = f"{float(frequency):g} Hz is not a band of this measurement."
+            msg = f"{real_number(frequency, 'frequency'):g} Hz is not a band of this measurement."
             raise ValueError(msg)
         k = int(np.argmax(matches))
         return InsertionLossUncertaintyBudget(
@@ -628,6 +628,7 @@ def earmuff_insertion_loss(
         uncertainty that is negative or not finite.
     :raises TypeError: if ``frequencies``, ``isolation_cup_levels``, ``occluded_levels``
         or ``open_levels`` holds a text or a value that is not a real number.
+        ``equipment_uncertainty_db``, ``fixture_uncertainty_db`` or ``sound_field_uncertainty_db`` are refused the same way when any is not one real number.
     """
     open_grid = _level_grid(open_levels, "open_levels")
     occluded = _level_grid(occluded_levels, "occluded_levels")
@@ -649,13 +650,17 @@ def earmuff_insertion_loss(
             )
             raise ValueError(msg)
     deltas = (
-        fixture_uncertainty_db,
-        sound_field_uncertainty_db,
-        equipment_uncertainty_db,
+        ("fixture_uncertainty_db", fixture_uncertainty_db),
+        ("sound_field_uncertainty_db", sound_field_uncertainty_db),
+        ("equipment_uncertainty_db", equipment_uncertainty_db),
     )
-    if any(not math.isfinite(float(d)) or float(d) < 0.0 for d in deltas):
-        msg = "the three delta uncertainties must be finite and not negative, in dB."
-        raise ValueError(msg)
+    for name, delta in deltas:
+        number = real_number(delta, name)
+        if not math.isfinite(number) or number < 0.0:
+            msg = (
+                "the three delta uncertainties must be finite and not negative, in dB."
+            )
+            raise ValueError(msg)
     mean_open = open_grid.mean(axis=0)
     return EarmuffInsertionLossResult(
         insertion_loss=mean_open - occluded.mean(axis=0),
@@ -664,9 +669,15 @@ def earmuff_insertion_loss(
         occluded_levels=occluded,
         open_uncertainty_db=_level_uncertainty(open_grid, _OPEN_LEVEL_U_DB),
         occluded_uncertainty_db=_level_uncertainty(occluded, _OCCLUDED_LEVEL_U_DB),
-        fixture_uncertainty_db=float(fixture_uncertainty_db),
-        sound_field_uncertainty_db=float(sound_field_uncertainty_db),
-        equipment_uncertainty_db=float(equipment_uncertainty_db),
+        fixture_uncertainty_db=real_number(
+            fixture_uncertainty_db, "fixture_uncertainty_db"
+        ),
+        sound_field_uncertainty_db=real_number(
+            sound_field_uncertainty_db, "sound_field_uncertainty_db"
+        ),
+        equipment_uncertainty_db=real_number(
+            equipment_uncertainty_db, "equipment_uncertainty_db"
+        ),
         frequencies=freqs,
         isolation_cup_levels=cup,
     )

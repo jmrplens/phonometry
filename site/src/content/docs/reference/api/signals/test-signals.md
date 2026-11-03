@@ -334,7 +334,7 @@ there
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `n_cycles` or `n_repetitions` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_cycles` or `n_repetitions` is a flag, a text or an array where a count goes. `post_silence` or `pre_silence` are refused the same way when any is not one real number. |
 
 **Warns**
 

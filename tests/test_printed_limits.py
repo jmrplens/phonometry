@@ -920,6 +920,226 @@ def test_the_guard_traces_a_regime_to_where_it_is_chosen(
     }
 
 
+#: A module whose result holds a margin, a mean, a peak and a flag: a
+#: comprehension, a lambda and a nested function each judge something under
+#: the name of one of the readings, which Python keeps to them, and only the
+#: flag is a comparison.
+_SCOPED_PROBE = """
+from dataclasses import dataclass
+
+EDGE = 3.0
+
+
+@dataclass(frozen=True)
+class ScopedProbe:
+    margin: float
+    mean: float
+    peak: float
+    flag: bool
+
+
+def probe(a, b, rows):
+    judged = [margin for margin in (a < EDGE, b < EDGE)]
+    near = lambda mean: mean < EDGE
+
+    def worst():
+        peak = max(rows) > EDGE
+        return peak
+
+    margin = a - b
+    mean = (a + b) / 2
+    peak = max(rows)
+    return ScopedProbe(margin=margin, mean=mean, peak=peak, flag=a < EDGE), (
+        judged,
+        near,
+        worst,
+    )
+"""
+
+
+def test_a_name_another_scope_binds_is_not_the_function_s(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A comprehension's variable, a lambda's parameter and a nested
+    function's local of a reading's name joined the function's own, so the
+    margin, the mean and the peak were read as the comparisons the other
+    scopes made.
+    """
+    (tmp_path / "phonometry_scoped_probe.py").write_text(
+        _SCOPED_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_scoped_probe")
+    assert set(found) == {"phonometry_scoped_probe.ScopedProbe.flag"}
+
+
+#: A module whose results are filled by a nested function that writes into
+#: the names of the function around it: it appends to a list of the
+#: function's, writes an item of one, or rebinds a name it declares
+#: ``nonlocal``. Each write lands on the function's name, as Python makes it,
+#: and each field is a verdict. A nested function that binds a list of the
+#: same spelling for itself writes nothing of the function's.
+_CLOSURE_PROBE = """
+from dataclasses import dataclass
+
+EDGE = 3.0
+
+
+@dataclass(frozen=True)
+class AppendProbe:
+    passes: list
+
+
+@dataclass(frozen=True)
+class ItemProbe:
+    marks: list
+
+
+@dataclass(frozen=True)
+class NonlocalProbe:
+    peak: object
+
+
+@dataclass(frozen=True)
+class OwnListProbe:
+    passes: list
+
+
+def appended(a, b):
+    passes = []
+
+    def judge(value):
+        passes.append(value < EDGE)
+
+    judge(a)
+    judge(b)
+    return AppendProbe(passes=passes)
+
+
+def written(rows):
+    marks = [False] * len(rows)
+
+    def judge(index):
+        marks[index] = rows[index] > EDGE
+
+    for index in range(len(rows)):
+        judge(index)
+    return ItemProbe(marks=marks)
+
+
+def rebound(rows):
+    peak = max(rows)
+
+    def judge():
+        nonlocal peak
+        peak = peak > EDGE
+
+    judge()
+    return NonlocalProbe(peak=peak)
+
+
+def kept(a):
+    passes = [a]
+
+    def judge(value):
+        passes = []
+        passes.append(value < EDGE)
+        return passes
+
+    return OwnListProbe(passes=passes), judge
+"""
+
+
+def test_a_nested_function_s_write_to_the_function_s_name_is_the_function_s(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A nested function was left out whole, so a verdict it appended to a
+    list of the function's, wrote into an item of one or gave a name it
+    declares ``nonlocal`` was read as no verdict.
+    """
+    (tmp_path / "phonometry_closure_probe.py").write_text(
+        _CLOSURE_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_closure_probe")
+    assert set(found) == {
+        "phonometry_closure_probe.AppendProbe.passes",
+        "phonometry_closure_probe.ItemProbe.marks",
+        "phonometry_closure_probe.NonlocalProbe.peak",
+    }
+
+
+#: A module whose results are built inside a nested function or a lambda.
+#: The nested function builds one from a peak of its own, no comparison,
+#: beside a peak of the function around it that is one; it builds another
+#: from a flag it reads from the function around it, and a lambda builds a
+#: third from a comparison it makes itself.
+_NESTED_PROBE = """
+from dataclasses import dataclass
+
+EDGE = 3.0
+
+
+@dataclass(frozen=True)
+class NestedProbe:
+    peak: object
+
+
+@dataclass(frozen=True)
+class ClosureProbe:
+    flag: object
+
+
+@dataclass(frozen=True)
+class LambdaProbe:
+    flag: object
+
+
+def probe(a, rows):
+    peak = a > EDGE
+
+    def build():
+        peak = max(rows)
+        return NestedProbe(peak=peak)
+
+    return build(), peak
+
+
+def closure(a):
+    flag = a > EDGE
+
+    def build():
+        return ClosureProbe(flag=flag)
+
+    return build()
+
+
+def judged(values):
+    make = lambda value: LambdaProbe(flag=value < EDGE)
+    return [make(value) for value in values]
+"""
+
+
+def test_a_record_built_in_a_nested_scope_is_read_with_that_scope_s_names(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A record a nested function built from a name of its own was read with
+    the names of the function around it, so a peak that is no comparison was
+    taken for the verdict the outer function holds under that name. A name
+    the nested function reads from the function around it is that
+    function's, and a record a lambda builds is read with the lambda's.
+    """
+    (tmp_path / "phonometry_nested_probe.py").write_text(
+        _NESTED_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_nested_probe")
+    assert set(found) == {
+        "phonometry_nested_probe.ClosureProbe.flag",
+        "phonometry_nested_probe.LambdaProbe.flag",
+    }
+
+
 #: The verdicts the sweep turned into read-only properties, by class, with the
 #: values read beside them that were stored too.
 _DERIVED_FLAGS = {

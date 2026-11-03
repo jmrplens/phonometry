@@ -480,8 +480,10 @@ FDTD2D.step() -> None
 Advance the leapfrog scheme by one time step.
 
 Every plane wave is sampled before any field moves, so a refused
-sample leaves the engine as it was, and a plane wave a waveform adds
-while the step runs enters on the next step.
+sample leaves the fields and the step count as they were. A plane
+wave a waveform adds while the step samples is registered at once:
+it stays registered when the step raises, and it enters on the next
+step.
 
 **Raises**
 

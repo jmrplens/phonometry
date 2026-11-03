@@ -74,7 +74,9 @@ first: never more of them than the frames can take, and none that do not
 begin as the container `path` names. That file takes `path`'s place once
 the node's whole answer has been read and checked, and is removed if
 anything fails before (or stays, under its own name, if the system does not
-let it go, which hides no error).
+let it go, which hides no error). As the file a video written here goes
+into, it is readable by its owner alone while it replaces a file, and the
+video then keeps the permission bits of the file it replaces.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

@@ -98,7 +98,10 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import (
     complex_array,
+    complex_number,
+    is_text,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -114,6 +117,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_sam
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -966,7 +970,7 @@ class ImpactMobilityResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -1098,8 +1102,10 @@ def impact_mobility(
         short, a non-positive sample rate, an unknown response quantity, an
         invalid window, a range that holds no bin above 0 Hz, or a force
         spectrum that vanishes at some frequency of the range.
-    :raises TypeError: if ``response_quantity`` is not a text, or
-        ``frequency_range_hz`` is not a pair of numbers.
+    :raises TypeError: if ``response_quantity`` is not a text,
+        ``exponential_decay_rate_per_s``, ``force_window_s``,
+        ``force_window_start_s`` or ``force_window_taper_s`` is not a single
+        number, or ``frequency_range_hz`` is not a pair of numbers.
     :warns ImpactExcitationWarning: when the force window removes an impact.
     """
     rate = require_positive(
@@ -1114,12 +1120,18 @@ def impact_mobility(
         )
         raise ValueError(msg)
     require_choice(response_quantity, "response_quantity", tuple(_FRF_OF_RESPONSE))
+    # Read by this function's names for them, which exponential_window and
+    # force_window call decay_rate_per_s, width_s, start_s and taper_s.
+    require_non_negative(exponential_decay_rate_per_s, "exponential_decay_rate_per_s")
     n = f_records.shape[1]
     exponential = exponential_window(
         n, rate, decay_rate_per_s=exponential_decay_rate_per_s
     )
     weighted_force = f_records
     if force_window_s is not None:
+        require_positive(force_window_s, "force_window_s")
+        require_non_negative(force_window_start_s, "force_window_start_s")
+        require_non_negative(force_window_taper_s, "force_window_taper_s")
         window = force_window(
             n,
             rate,
@@ -1254,7 +1266,7 @@ class ExponentialWindowCorrection(OwnsArrays):
             worst = int(np.argmin(corrected))
             msg = (
                 f"{owner}: the window's damping a/omega_r = "
-                f"{float(self.window_damping_ratio[worst]):.4g} is not below the "
+                f"{real_number(self.window_damping_ratio[worst], 'window_damping_ratio'):.4g} is not below the "
                 f"apparent damping {float(zeta[worst]):.4g} of the mode at "
                 f"{float(freqs[worst]):g} Hz; the damping estimate or the decay "
                 "rate is wrong."
@@ -1399,12 +1411,13 @@ class SingleModeFitResult(OwnsArrays):
             not a motion-per-force FRF, the pole is not a decaying oscillation,
             or the decay rate is negative.
         :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
+            ``pole_rad_s`` is refused the same way when it is not one number.
         """
         require_ranks(self, frequencies=1, frf=1)
         require_same_length(self, "frequencies", "frf", axis="frequency")
         owner = type(self).__name__
         require_choice(self.kind, "kind", ("accelerance", "mobility", "receptance"))
-        pole = complex(self.pole_rad_s)
+        pole = complex_number(self.pole_rad_s, "pole_rad_s")
         if not (pole.imag > 0.0 and pole.real < 0.0) or not math.isfinite(abs(pole)):
             msg = f"{owner}: 'pole_rad_s' must be a decaying oscillation, -sigma + j*omega_d."
             raise ValueError(msg)
@@ -1665,7 +1678,7 @@ def _pair(value: object, name: str) -> tuple[float, float]:
         f"'{name}' must be a pair of numbers (f_low, f_high), in hertz; got "
         f"{given_repr(value)}."
     )
-    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Iterable):
+    if is_text(value) or not isinstance(value, Iterable):
         raise TypeError(msg)
     try:
         low, high = (require_real(edge, msg) for edge in value)
@@ -1851,7 +1864,7 @@ def check_force_spectrum(
         frequencies=freqs[1:],
         energy_spectral_density=esd[1:],
         frequency_range_hz=(low, high),
-        max_drop_db=float(max_drop_db),
+        max_drop_db=real_number(max_drop_db, "max_drop_db"),
     )
 
 
@@ -2457,9 +2470,7 @@ def _exclusions(exclude_hz: object) -> list[tuple[float, float]]:
         "'exclude_hz' must be a sequence of (f_low, f_high) pairs, such as "
         f"[(40.0, 50.0)]; got {given_repr(exclude_hz)}."
     )
-    if isinstance(exclude_hz, (str, bytes, bytearray)) or not isinstance(
-        exclude_hz, Iterable
-    ):
+    if is_text(exclude_hz) or not isinstance(exclude_hz, Iterable):
         raise TypeError(msg)
     bands = list(exclude_hz)
     if any(isinstance(band, (int, float, np.number)) for band in bands):

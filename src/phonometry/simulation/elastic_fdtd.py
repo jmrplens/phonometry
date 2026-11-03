@@ -102,6 +102,7 @@ from .._internal.frozen import (
     reduce_with_plain_rows,
 )
 from .._internal.validation import (
+    is_text,
     require_choice,
     require_count,
     require_ranks,
@@ -472,7 +473,7 @@ def _as_material(name: str, value: object) -> Material:
     if isinstance(value, CatalogueRow):
         return _material_of_row(name, value)
     # The length of a fixed-size argument, not a quantity.
-    if isinstance(value, Sequence) and not isinstance(value, str) and len(value) == 3:  # noqa: PLR2004
+    if isinstance(value, Sequence) and not is_text(value) and len(value) == 3:  # noqa: PLR2004
         # Each number is read by the material's own checks, which refuse a
         # complex one rather than keep its real part.
         c_p, c_s, rho = value
@@ -1245,7 +1246,9 @@ class ElasticFDTD2D:
         """One leapfrog step on the backend's arrays.
 
         Every force and explosion is sampled before any field moves, so a
-        sample the step refuses leaves the engine as it was.
+        sample the step refuses leaves the fields and the step count as they
+        were. A source a waveform adds while the step samples is registered
+        at once, and stays registered when the step raises.
         """
         t_half = (self.n + 0.5) * self.dt
         t_next = (self.n + 1) * self.dt

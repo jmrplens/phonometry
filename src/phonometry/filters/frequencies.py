@@ -12,7 +12,9 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
+    is_text,
     real_array,
+    real_number,
     require_count,
     require_positive,
 )
@@ -81,7 +83,7 @@ class FractionalOctaveBands(OwnsArrays):
         :raises TypeError: if ``labels`` is one string rather than one label
             per band, which would otherwise be split into its characters.
         """
-        if isinstance(self.labels, (str, bytes, bytearray)):
+        if is_text(self.labels):
             msg = (
                 "FractionalOctaveBands: 'labels' must hold one label per band, "
                 f"not a single string; got {given_repr(self.labels)}."
@@ -165,7 +167,7 @@ def nominal_frequencies(
     g = 10 ** (3 / 10)
     fr = 1000
 
-    x = _initindex(float(limits[0]), fr, g, fraction)
+    x = _initindex(real_number(limits[0], "limits"), fr, g, fraction)
     freq_list = [_ratio(g, x, fraction) * fr]
 
     while freq_list[-1] * _bandedge(g, fraction) < limits[1]:

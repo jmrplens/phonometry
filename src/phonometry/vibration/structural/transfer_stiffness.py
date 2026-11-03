@@ -82,6 +82,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
@@ -99,6 +100,7 @@ from ..._internal.validation import (
     check_engine,
     complex_array,
     real_array,
+    real_number,
     require_choice,
     require_finite,
     require_finite_fields,
@@ -698,7 +700,7 @@ class TransferStiffnessResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -1638,7 +1640,7 @@ def _limit_crossing(
     first = int(candidates[0])
     before = np.flatnonzero(judged[:first])
     if before.size == 0:
-        return first, float(frequencies[first])
+        return first, real_number(frequencies[first], "frequencies")
     last = int(before[-1])
     fraction = margin[last] / (margin[last] - margin[first])
     if fraction >= 1.0:
@@ -1646,7 +1648,7 @@ def _limit_crossing(
         # line; returning the line itself, not a power that rounds a unit in
         # the last place either side of it, lets a caller keep the line at
         # the limit by comparing frequencies.
-        return first, float(frequencies[first])
+        return first, real_number(frequencies[first], "frequencies")
     ratio = frequencies[first] / frequencies[last]
     return first, float(frequencies[last] * ratio**fraction)
 

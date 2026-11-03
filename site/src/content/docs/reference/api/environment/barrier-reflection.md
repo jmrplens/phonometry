@@ -450,7 +450,7 @@ within 5 % of 1; the value computed is always used here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the records are not shaped as above, the rate is missing or disagrees, a window does not fit its record, or a parameter is out of range. |
-| TypeError | if `speed_of_sound` is not a single number, or `low_band_microphones` is a text or holds a microphone that is not an integer, or `directivity_corrections`, `free_field_irs`, `in_front_irs`, `low_band_window_length_s` or `window_length_s` holds a text or a value that is not a real number. |
+| TypeError | if `speed_of_sound` is not a single number, or `low_band_microphones` is a text or holds a microphone that is not an integer, or `directivity_corrections`, `free_field_irs`, `in_front_irs`, `low_band_window_length_s` or `window_length_s` holds a text or a value that is not a real number. `fs` is refused the same way when it is not one real number. |
 
 **Warns**
 

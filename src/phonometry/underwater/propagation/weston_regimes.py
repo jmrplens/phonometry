@@ -61,6 +61,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_positive,
     require_ranks,
@@ -705,6 +706,7 @@ def weston_propagation_loss(
     :raises TypeError: if ``frequency_hz``, ``speed_of_sound`` or ``water_depth`` is not
         a single number, or ``seabed`` is not a text, or ``range_m`` holds a text or a
         value that is not a real number.
+        ``receiver_depth`` or ``source_depth`` are refused the same way when any is not one real number.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     h = require_positive(water_depth, "water_depth")
@@ -716,8 +718,12 @@ def weston_propagation_loss(
     if np.any(r <= 0.0):
         msg = "'range_m' must be strictly positive."
         raise ValueError(msg)
-    z0 = h / 2.0 if source_depth is None else float(source_depth)
-    zr = h / 2.0 if receiver_depth is None else float(receiver_depth)
+    z0 = h / 2.0 if source_depth is None else real_number(source_depth, "source_depth")
+    zr = (
+        h / 2.0
+        if receiver_depth is None
+        else real_number(receiver_depth, "receiver_depth")
+    )
     for name, value in (("source_depth", z0), ("receiver_depth", zr)):
         if not np.isfinite(value) or not (0.0 <= value <= h):
             msg = f"'{name}' must lie within the water column [0, H]."

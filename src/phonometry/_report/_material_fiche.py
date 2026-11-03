@@ -30,6 +30,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable
 
     from .._i18n import Language
@@ -119,7 +120,7 @@ def material_metadata_pairs(
 
 def render_material_fiche(
     plot_fn: Callable[..., Any],
-    path: str,
+    path: str | os.PathLike[str],
     content: MaterialFicheContent,
     metadata: ReportMetadata | None,
     *,

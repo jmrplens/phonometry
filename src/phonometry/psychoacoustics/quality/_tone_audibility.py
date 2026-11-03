@@ -103,6 +103,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     refuse_text,
     require_choice,
     require_equal_counts,
@@ -114,6 +115,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -633,7 +636,7 @@ def _detect_tones(
             return mean_narrowband_level(
                 lev,
                 frequencies=freq,
-                tone_frequency=float(freq[index]),
+                tone_frequency=real_number(freq[index], "freq"),
                 effective_bandwidth_factor=factor,
             )
         except ValueError:
@@ -1465,7 +1468,7 @@ class ToneAudibilityResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

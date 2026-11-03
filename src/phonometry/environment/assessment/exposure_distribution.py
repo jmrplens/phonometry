@@ -86,6 +86,7 @@ from ..._internal.frozen import OwnsArrays, given_repr, read_only
 from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -400,13 +401,13 @@ def _merge_undefined_classes(
         run = stop - start
         at_end = start == 0 or stop == last
         if run > _EQUAL_PAIR or (run > 1 and at_end):
-            out_levels.append(float(levels[start]))
+            out_levels.append(real_number(levels[start], "levels"))
             out_probs.append(float(np.sum(probs[start:stop])))
             out_members.append(tuple(i for group in members[start:stop] for i in group))
         else:
             for i in range(start, stop):
-                out_levels.append(float(levels[i]))
-                out_probs.append(float(probs[i]))
+                out_levels.append(real_number(levels[i], "levels"))
+                out_probs.append(real_number(probs[i], "probs"))
                 out_members.append(members[i])
     return np.asarray(out_levels), np.asarray(out_probs), out_members
 

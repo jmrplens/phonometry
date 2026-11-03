@@ -142,6 +142,7 @@ from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_at_most,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -823,7 +824,9 @@ def _inside(points: np.ndarray, polygon: np.ndarray) -> np.ndarray:
 
 def _convex_hull(points: np.ndarray) -> np.ndarray:
     """Counter-clockwise convex hull (Andrew's monotone chain)."""
-    pts = sorted({(float(p[0]), float(p[1])) for p in points})
+    pts = sorted(
+        {(real_number(p[0], "points"), real_number(p[1], "points")) for p in points}
+    )
 
     def chain(seq: list[tuple[float, float]]) -> list[tuple[float, float]]:
         out: list[tuple[float, float]] = []
@@ -1968,13 +1971,13 @@ def _row(
         key=key,
         clause=clause,
         description=description,
-        value=float(value),
+        value=real_number(value, "value"),
         comparison=comparison,
-        limit=float(limit),
+        limit=real_number(limit, "limit"),
         unit=unit,
         holds=bool(holds),
         advisory=advisory,
-        tolerance=float(tolerance),
+        tolerance=real_number(tolerance, "tolerance"),
     )
 
 

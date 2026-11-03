@@ -75,6 +75,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_above_absolute_zero,
     require_same_shape,
     require_scalar,
@@ -548,6 +549,7 @@ def atmospheric_attenuation(
         construction.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
+        ``distance`` is refused the same way when it is not one real number.
     """
     freqs = real_array(frequencies, "frequencies")
     alpha = air_attenuation(
@@ -565,5 +567,5 @@ def atmospheric_attenuation(
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),
         static_pressure_kpa=float(static_pressure_kpa),
-        distance=None if distance is None else float(distance),
+        distance=None if distance is None else real_number(distance, "distance"),
     )

@@ -466,7 +466,7 @@ difference the slant distance is built from.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two sequences disagree in length, describe fewer than two points, the distances are not strictly increasing, `source_height_m` or `receiver_height_m` is negative or not finite, or `distance` is not positive and finite. The profile heights themselves are unrestricted: they are read on any datum, so a ground below it is a negative number rather than a mistake. |
-| TypeError | if `receiver_height_m` or `source_height_m` is not a single number, or `profile_distances` or `profile_heights_m` holds a text or a value that is not a real number. |
+| TypeError | if `receiver_height_m` or `source_height_m` is not a single number, or `profile_distances` or `profile_heights_m` holds a text or a value that is not a real number. `distance` is refused the same way when it is not one real number. |
 
 :::note
 Ground rising above the ray subtracts from `F`, exactly as the area of
@@ -627,7 +627,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 OutdoorAttenuation.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

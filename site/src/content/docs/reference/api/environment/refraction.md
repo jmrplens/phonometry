@@ -211,6 +211,12 @@ AtmosphericPEResult.level_at_height(height_m: float) -> NDArray[np.float64]
 
 Relative sound level versus range at the grid height nearest `height_m`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `height_m` is not one real number. |
+
 ### AtmosphericPEResult.plot()
 
 ```python

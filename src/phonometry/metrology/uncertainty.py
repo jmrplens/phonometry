@@ -47,10 +47,12 @@ if TYPE_CHECKING:
 
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, given_repr
 from .._internal.types import RealScalar
 from .._internal.validation import (
+    is_text,
     real_array,
+    real_number,
     require_axis_count,
     require_choice,
     require_count,
@@ -343,9 +345,10 @@ class UncertaintyResult(OwnsArrays):
             :class:`ExpandedUncertainty` (GUM clause 6, Annex G).
         :raises ValueError: If the effective dof are undefined and no
             explicit coverage factor is given.
+        :raises TypeError: if ``coverage_factor_override`` is not one real number.
         """
         if coverage_factor_override is not None:
-            k = float(coverage_factor_override)
+            k = real_number(coverage_factor_override, "coverage_factor_override")
             return ExpandedUncertainty(
                 coverage_factor=k, expanded_uncertainty=k * self.combined_uncertainty
             )
@@ -445,7 +448,7 @@ def _sensitivity(
         # perturbation representable for large-magnitude inputs without
         # abandoning locality (a sqrt(eps)*|xi| floor would probe the model
         # far outside the uncertainty region for large xi).
-        step = float(uncertainties[i])
+        step = real_number(uncertainties[i], "uncertainties")
         if step <= 0.0:
             step = sqrt_eps
         step = max(step, 64.0 * float(np.spacing(abs(values[i]))))
@@ -666,9 +669,13 @@ def combined_standard_uncertainty(
         raise ValueError(msg)
     products = []
     for item in items:
-        if isinstance(item, Sequence | np.ndarray) and not isinstance(
-            item, str | bytes
-        ):
+        if is_text(item):
+            msg = (
+                "'contributions' must hold numbers or (uncertainty, "
+                f"sensitivity) pairs, not text; got {given_repr(item)}."
+            )
+            raise TypeError(msg)
+        if isinstance(item, Sequence | np.ndarray):
             pair = real_array(item, "contributions")
             if pair.shape != (2,):
                 msg = "Each pair must be (uncertainty, sensitivity)."
@@ -681,7 +688,7 @@ def combined_standard_uncertainty(
                 raise ValueError(msg)
             products.append(pair[0] * pair[1])
         else:
-            products.append(float(item))
+            products.append(real_number(item, "contributions"))
     arr = np.asarray(products, dtype=np.float64)
     if not np.all(np.isfinite(arr)):
         msg = "'contributions' must be finite."

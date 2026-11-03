@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from ._i18n import t
 from ._insulation_fiche import (
     Column,
@@ -51,6 +51,7 @@ from ._insulation_fiche import (
 from ._layout import fmt_num
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from numpy.typing import ArrayLike
@@ -154,9 +155,9 @@ def _areas_sentence(
     else:
         return ""
     return " " + t(key, language).format(
-        s=fmt_num(float(area), language) if area is not None else "",
+        s=fmt_num(real_number(area, "area"), language) if area is not None else "",
         sm=(
-            fmt_num(float(measurement_area), language)
+            fmt_num(real_number(measurement_area, "measurement_area"), language)
             if measurement_area is not None
             else ""
         ),
@@ -166,7 +167,7 @@ def _areas_sentence(
 def render_iso15186_report(
     result: IntensityReductionResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -310,7 +311,7 @@ def _element_extras_sentence(
 def render_iso15186_element_report(
     result: IntensityElementNormalizedResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

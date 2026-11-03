@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
+from .._internal.validation import real_number
 from .common import (
     _C_EDGE,
     _C_PRIMARY,
@@ -699,7 +700,7 @@ def _freq_label(value: float, language: Language) -> str:
     """A frequency rounded to the nearest hertz, locale-formatted."""
     from .._i18n import format_number
 
-    return format_number(round(float(value)), language, decimals=0)
+    return format_number(round(real_number(value, "value")), language, decimals=0)
 
 
 def _grid(ax: Axes) -> None:

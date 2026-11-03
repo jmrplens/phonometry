@@ -27,8 +27,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.json_input import writing_beside
 from .._internal.validation import (
     real_array,
+    real_number,
     require_count,
     require_scalar,
 )
@@ -173,10 +175,11 @@ def fmt_meta(value: float, language: Language = "en") -> str:
     silently alter them, so this round-trips the value (``repr``-shortest via
     ``%g``) instead of forcing the one-decimal display rounding of
     :func:`fmt_num`, and only localises the decimal separator.
+    :raises TypeError: if ``value`` is not one real number.
     """
     from ._i18n import decimal_comma
 
-    return decimal_comma(f"{float(value):g}", language)
+    return decimal_comma(f"{real_number(value, 'value'):g}", language)
 
 
 def display_round(value: float, decimals: int = 1) -> float:
@@ -190,9 +193,10 @@ def display_round(value: float, decimals: int = 1) -> float:
     result that rounds to zero returns an unsigned ``0.0`` (never ``-0.0``).
 
     :raises TypeError: if ``decimals`` is a flag, a text or an array where a count goes.
+        ``value`` is refused the same way when it is not one real number.
     """
     scale = 10.0 ** require_count(decimals, "decimals", at_least=None)
-    magnitude = math.floor(abs(float(value)) * scale + 0.5) / scale
+    magnitude = math.floor(abs(real_number(value, "value")) * scale + 0.5) / scale
     if magnitude <= 0.0:  # magnitude is non-negative; <= avoids float equality
         return 0.0
     return -magnitude if value < 0.0 else magnitude
@@ -1169,11 +1173,24 @@ def footer_flow(
     return flow
 
 
-def build_document(path: str, flow: list[Any], title: str) -> str:
+def build_document(path: str | os.PathLike[str], flow: list[Any], title: str) -> str:
     """Build the one-page A4 fiche ``flow`` into a reproducible PDF at ``path``.
 
-    Called only after the renderer has imported reportlab.
+    Called only after the renderer has imported reportlab, which takes the
+    path as a text: any path object is read as the text it stands for
+    (:func:`os.fspath`), and that text is what the fiche returns. The PDF is
+    built beside nothing or a regular file at ``path`` and takes its place
+    whole, so a fiche that fails to build leaves what was there; a link, a
+    pipe or a device at ``path`` is written as Python opens it.
     """
+    target = os.fspath(path)
+    with writing_beside(Path(target)) as file:
+        _build_pdf(os.fspath(file), flow, title)
+    return target
+
+
+def _build_pdf(target: str, flow: list[Any], title: str) -> None:
+    """Build the one-page fiche ``flow`` at ``target``, removing a sheet that runs on."""
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
     from reportlab.platypus import SimpleDocTemplate
@@ -1190,9 +1207,9 @@ def build_document(path: str, flow: list[Any], title: str) -> str:
     # invariant=1 drops the embedded timestamp for a reproducible PDF; the
     # guard tolerates reportlab builds that do not accept the keyword.
     try:
-        doc = SimpleDocTemplate(path, invariant=1, **doc_kwargs)
+        doc = SimpleDocTemplate(target, invariant=1, **doc_kwargs)
     except TypeError:  # pragma: no cover - older reportlab
-        doc = SimpleDocTemplate(path, **doc_kwargs)
+        doc = SimpleDocTemplate(target, **doc_kwargs)
     # A fiche is one page, and nothing checked that it came to one. Too long
     # a table failed in two ways, neither of them useful: up to about forty
     # rows the sheet quietly ran on, leaving page 1 with the title over a
@@ -1212,10 +1229,9 @@ def build_document(path: str, flow: list[Any], title: str) -> str:
     try:
         doc.build(flow)
     except LayoutError as exc:
-        Path(path).unlink(missing_ok=True)
+        Path(target).unlink(missing_ok=True)
         raise ValueError(too_long) from exc
     if doc.page != 1:
-        Path(path).unlink(missing_ok=True)
+        Path(target).unlink(missing_ok=True)
         msg = f"{too_long} It came to {doc.page} pages."
         raise ValueError(msg)
-    return str(path)

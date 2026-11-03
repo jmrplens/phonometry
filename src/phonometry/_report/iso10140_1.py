@@ -45,6 +45,7 @@ from ._insulation_fiche import (
 from ._layout import _REPORTLAB_HINT, fmt_meta, fmt_num
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable
 
     from matplotlib.axes import Axes
@@ -241,7 +242,7 @@ def _floor_box(
 
 def render_floor_covering_form(
     result: LaboratoryFloorCoveringImprovementResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None,
     verbose: bool,
@@ -511,7 +512,7 @@ def _joint_box(
 
 def render_joint_form(
     result: LaboratoryJointInsulationResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None,
     verbose: bool,
@@ -624,7 +625,7 @@ def _widths(widths_mm: tuple[float, ...]) -> list[float]:
 
 
 def _compose(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     title: str,
     basis: str,

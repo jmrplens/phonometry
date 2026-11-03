@@ -248,7 +248,7 @@ automatic rating to be available (16 or 5 bands) and matplotlib
 
 ```python
 LaboratoryAirborneInsulationResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -333,7 +333,7 @@ rating to be available (16 or 5 bands) and matplotlib
 
 ```python
 LaboratoryImpactInsulationResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

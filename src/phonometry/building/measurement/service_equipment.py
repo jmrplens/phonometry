@@ -150,6 +150,7 @@ from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.levels_math import energy_mean
 from ..._internal.types import BAND_SET_NAMES
 from ..._internal.validation import (
+    is_text,
     real_array,
     require_band_fraction,
     require_choice,
@@ -1740,6 +1741,9 @@ def loudest_corner(
         msg = "'c_weighted_levels' must give one level per corner."
         raise ValueError(msg)
     msg = "'excluded' must be a sequence of corner indices, such as [1]."
+    if is_text(excluded):
+        # Asked first: numpy reads a wrapper of a text in its own way.
+        raise TypeError(msg)
     try:
         # A sequence that mixes int and np.int64 is one numpy reads; its
         # static type is no ArrayLike, since numpy's nests hold one kind.
@@ -1748,7 +1752,7 @@ def loudest_corner(
         raise TypeError(msg) from exc
     except ValueError as exc:  # a ragged nesting of lists
         raise ValueError(msg) from exc
-    if isinstance(excluded, (str, bytes, bytearray)) or rank != 1:
+    if rank != 1:
         raise TypeError(msg)
     left = np.ones(levels.size, dtype=bool)
     for value in excluded:

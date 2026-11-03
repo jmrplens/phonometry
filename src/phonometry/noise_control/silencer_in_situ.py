@@ -929,14 +929,17 @@ def in_situ_transmission_loss(
         correction that is neither one value nor one per band, a non-positive
         area or band centre, a field correction that is not finite, or a case
         that is not a transmission one.
-    :raises TypeError: if ``field_correction_difference``, ``frequencies``,
-        ``receiver_area_m2`` or ``source_area_m2`` holds a text or a value that is not a
-        real number.
+    :raises TypeError: if ``case`` is a flag, a text or an array where a count goes,
+        or ``field_correction_difference``, ``frequencies``, ``receiver_area_m2`` or
+        ``source_area_m2`` holds a text or a value that is not a real number.
     """
     difference = transmission_level_difference(source_levels, receiver_levels)
     entry = None
     if case is not None:
-        entry = installation_case(case)
+        # Read by this function's name for it, which installation_case calls
+        # number.
+        require_scalar(case, "case")
+        entry = installation_case(require_count(case, "case", at_least=None))
         if entry.quantity != "transmission":
             msg = (
                 f"Case {entry.number} of Figure 1 is an insertion "
@@ -1006,14 +1009,17 @@ def in_situ_insertion_loss(
         correction that is neither one value nor one per band, a non-positive
         area or band centre, a field correction that is not finite, or a case
         that is not an insertion one.
-    :raises TypeError: if ``area_with_m2``, ``area_without_m2``,
-        ``field_correction_difference`` or ``frequencies`` holds a text or a value that
-        is not a real number.
+    :raises TypeError: if ``case`` is a flag, a text or an array where a count goes,
+        or ``area_with_m2``, ``area_without_m2``, ``field_correction_difference`` or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     difference = insertion_level_difference(levels_without, levels_with)
     entry = None
     if case is not None:
-        entry = installation_case(case)
+        # Read by this function's name for it, which installation_case calls
+        # number.
+        require_scalar(case, "case")
+        entry = installation_case(require_count(case, "case", at_least=None))
         if entry.quantity != "insertion":
             msg = (
                 f"Case {entry.number} of Figure 1 is a transmission "

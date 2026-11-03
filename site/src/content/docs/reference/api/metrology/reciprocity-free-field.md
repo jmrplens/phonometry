@@ -270,6 +270,7 @@ is moved by a fraction of itself,
 | Exception | When |
 | :--- | :--- |
 | ValueError | for other than three distances or centres, a microphone that is not 1, 2 or 3, or acoustic-centre uncertainties that are not one value or one per frequency. |
+| TypeError | if `temperature_c`, `static_pressure_pa` or `relative_humidity_percent` is not one real number. |
 
 ## free_field_reciprocity
 
@@ -663,7 +664,7 @@ refers to, not with the one it prints (`docs/ERRATA.md`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, a pressure that is not positive, a humidity outside 0 % to 100 %, or a temperature at or below absolute zero. |
-| TypeError | if `static_pressure_pa` is not a single number. |
+| TypeError | if `static_pressure_pa` is not a single number. `relative_humidity_percent` or `temperature_c` are refused the same way when any is not one real number. |
 
 ## ReciprocityAirAttenuation
 

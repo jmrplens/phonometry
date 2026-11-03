@@ -43,6 +43,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -53,6 +54,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -187,7 +190,7 @@ def _require_table1_bands(owner: str, frequencies: np.ndarray) -> None:
         return
     msg = (
         f"{owner}: 'frequencies' must be the ten ANSI/ASA S12.2-2019 octave "
-        f"bands 16 Hz - 8000 Hz (Table 1 / Table D.1); got {freqs.tolist()}."
+        f"bands 16 Hz to 8000 Hz (Table 1 / Table D.1); got {freqs.tolist()}."
     )
     raise ValueError(msg)
 
@@ -265,7 +268,7 @@ class NCResult(OwnsArrays):
                     "no NC rating (ANSI/ASA S12.2-2019, Table 1)."
                 )
                 raise ValueError(msg)
-        elif not math.isfinite(float(self.rating)):
+        elif not math.isfinite(real_number(self.rating, "rating")):
             msg = (
                 "NCResult: 'rating' must be finite when 'out_of_range' is "
                 "None; only a spectrum outside the NC-15 to NC-70 family "
@@ -306,7 +309,7 @@ class NCResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -499,7 +502,7 @@ class RCResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -625,7 +628,7 @@ def _align_levels(
     if frequencies is None:
         if lv.size != _N_BANDS:
             msg = (
-                f"levels must have {_N_BANDS} octave-band values (16 Hz - "
+                f"levels must have {_N_BANDS} octave-band values (16 Hz to "
                 f"8000 Hz) when frequencies are not given; got {lv.size}."
             )
             raise ValueError(msg)
@@ -638,7 +641,7 @@ def _align_levels(
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not one of the ANSI S12.2 octave bands "
-                f"(16 Hz - 8000 Hz)."
+                f"(16 Hz to 8000 Hz)."
             )
             raise ValueError(msg)
         aligned[np.argmax(matches)] = level

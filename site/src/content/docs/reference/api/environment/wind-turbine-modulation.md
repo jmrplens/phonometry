@@ -228,7 +228,7 @@ Equation (12) gives it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the block does not hold 100 finite values or the range is outside 0.3 Hz to 1.6 Hz or holds no spectrum line. |
-| TypeError | if `levels` holds a text or a value that is not a real number. |
+| TypeError | if `levels` holds a text or a value that is not a real number. An element of `modulation_frequency_range_hz` is refused the same way when it is not one real number. |
 
 ## amplitude_modulation_period
 

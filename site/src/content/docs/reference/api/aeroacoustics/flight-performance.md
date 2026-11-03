@@ -132,6 +132,7 @@ equations' *corrected* thrust has to lift.
 | Exception | When |
 | :--- | :--- |
 | ValueError | above the tropopause the lapsed temperature Eq. B-4 divides by reaches absolute zero and the bracket turns negative, where raising it to a fractional power leaves the reals; Python answers that with a complex number rather than an error, and a complex pressure ratio propagates silently into every thrust of the profile. Doc 29 claims the coefficients only up to 6,000 ft anyway. |
+| TypeError | if `altitude_ft` is not one real number. |
 
 ### Aerodrome.temperature_c_at()
 
@@ -229,6 +230,7 @@ forwards from the same anchor, so touchdown is where the two sweeps meet.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the procedure carries no Land step to anchor it, or a step cannot be flown as specified. |
+| TypeError | if `weight_lb` is not one real number. |
 
 **Warns**
 

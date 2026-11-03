@@ -50,6 +50,7 @@ from scipy import signal
 from ..io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
@@ -65,6 +66,7 @@ from .._internal.types import ReportEngine, as_float_if_reduced, as_float_or_arr
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_count,
     require_positive,
     require_ranks,
@@ -545,7 +547,7 @@ def _windowed_loudness(
         return np.empty(0), np.empty(0, dtype=np.intp)
     starts = np.arange(0, n_samples - n_window + 1, step, dtype=np.intp)
     ends = starts + n_window
-    mean_square = (csum[:, ends] - csum[:, starts]) / float(n_window)
+    mean_square = (csum[:, ends] - csum[:, starts]) / real_number(n_window, "n_window")
     total = weights @ mean_square
     with np.errstate(divide="ignore"):
         loudness = _K_OFFSET + 10.0 * np.log10(total)
@@ -591,7 +593,7 @@ def _matlab_percentile(sorted_values: np.ndarray, percentile: float) -> float:
     """
     n = sorted_values.size
     index = int(np.floor((n - 1) * percentile / 100.0 + 0.5))
-    return float(sorted_values[index])
+    return real_number(sorted_values[index], "sorted_values")
 
 
 def _lra_distribution(short_term_loudness: np.ndarray) -> np.ndarray:
@@ -913,7 +915,7 @@ class ProgramLoudnessResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

@@ -76,11 +76,21 @@ from __future__ import annotations
 
 import argparse
 import ast
+import functools
 import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, NamedTuple
 
-from ast_scan import ROOT, exempted, live_bindings, own_names, python_files, relative
+from ast_scan import (
+    ROOT,
+    block_statements,
+    exempted,
+    live_bindings,
+    live_class_members,
+    own_names,
+    python_files,
+    relative,
+)
 
 if TYPE_CHECKING:
     import pathlib
@@ -632,19 +642,16 @@ def _names_of(scope: ast.AST) -> _Names:
 
 
 def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
-    """The imports a module makes as it is imported, ``if`` and ``try`` blocks included."""
+    """The imports a module makes as it is imported, every compound statement's
+    blocks included (:func:`ast_scan.block_statements`).
+    """
     pending: list[ast.stmt] = list(tree.body)
     while pending:
         statement = pending.pop()
         if isinstance(statement, ast.Import | ast.ImportFrom):
             yield statement
-        elif isinstance(statement, ast.If | ast.Try):
-            pending.extend(statement.body)
-            pending.extend(statement.orelse)
-            if isinstance(statement, ast.Try):
-                pending.extend(statement.finalbody)
-                for handler in statement.handlers:
-                    pending.extend(handler.body)
+        else:
+            pending.extend(block_statements(statement))
 
 
 def exports_of(path: pathlib.Path, tree: ast.Module) -> dict[str, str]:
@@ -724,6 +731,49 @@ def _owner(scope: _Scope) -> str | None:
     return scope.name.rpartition(".")[0]
 
 
+@functools.cache
+def _imported_twice(scope: ast.AST) -> dict[str, list[ast.Import | ast.ImportFrom]]:
+    """The imports *scope* makes itself of each name it imports more than
+    once, in the order of the source.
+    """
+    found: dict[str, list[ast.Import | ast.ImportFrom]] = {}
+    imports = [
+        node
+        for node in _own_nodes(scope)
+        if isinstance(node, ast.Import | ast.ImportFrom)
+    ]
+    for node in sorted(imports, key=lambda node: (node.lineno, node.col_offset)):
+        for name in _imported(node):
+            found.setdefault(name, []).append(node)
+    return {name: nodes for name, nodes in found.items() if len(nodes) > 1}
+
+
+def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
+    """What the names may stand for at *call*: one table for each import of
+    its first name that may stand for it there.
+
+    A scope's table of names (:func:`aliases_of`) keeps the last import of a
+    name; where the nearest scope around the call that imports the name
+    imports it more than once, each import that may stand for it at the call
+    (:func:`ast_scan.live_bindings`), or once that scope has run when the
+    call sits in a function inside it, gives a table of its own.
+    """
+    parts = _dotted(call.func)
+    head = parts[0] if parts else None
+    for holder in reversed(scope.around or (scope.node,)):
+        if isinstance(holder, ast.ClassDef) and holder is not scope.node:
+            continue
+        imports = _imported_twice(holder).get(head or "")
+        if imports:
+            point = call if holder is scope.node else None
+            package = _package_of(scope.path, scope.module)
+            return [
+                {**scope.aliases, **_imported(statement, package)}
+                for statement in live_bindings(holder, imports, point)
+            ]
+    return [scope.aliases]
+
+
 def qualified_callee(
     call: ast.Call, scope: _Scope, exports: Mapping[str, str]
 ) -> str | None:
@@ -733,8 +783,10 @@ def qualified_callee(
     or dotted name is read through the functions of the module and the
     functions around the call, as far as the nearest scope that binds the
     name otherwise (:func:`_local`), then through what that scope's imports
-    and assignments make it, and followed through :func:`exports_of`; a
-    parameter, or a name stored from a call, is no function of the library.
+    and assignments make it, each import that may stand for it at the call
+    (:func:`aliases_at`), and followed through :func:`exports_of`; two that
+    reach different functions reach no one function, and a parameter, or a
+    name stored from a call, is no function of the library.
     A call that starts from anything
     else (``handle.read_at_most(path)``, ``np.info(path)`` once ``np`` is
     NumPy) reaches no function of the library.
@@ -749,9 +801,14 @@ def qualified_callee(
     local = _local(head, scope)
     if local is not None:
         return ".".join([local, *rest])
-    if head in scope.aliases:
-        return _canonical(".".join([scope.aliases[head], *rest]), exports)
-    return None
+    if head not in scope.aliases:
+        return None
+    reached = {
+        _canonical(".".join([aliases[head], *rest]), exports)
+        for aliases in aliases_at(call, scope)
+        if head in aliases
+    }
+    return reached.pop() if len(reached) == 1 else None
 
 
 def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
@@ -811,11 +868,12 @@ def _reachable(scopes: Sequence[_Scope]) -> list[_Scope]:
     """The functions of *scopes* a call can reach by their names.
 
     Of the definitions of one name at the top of a module or in a class,
-    those it holds once the module or the class has run
-    (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
-    either, and one a later definition replaces is none. Every definition
-    of a function written inside another, which a call may reach before
-    the next one is written.
+    those it holds once the module has run
+    (:func:`ast_scan.live_class_members`): one in each branch of an ``if``
+    is either, one a later definition replaces is none, and a method of a
+    class a later ``class`` of its name replaces is none either. Every
+    definition of a function written inside another, which a call may reach
+    before the next one is written.
     """
     by_name: dict[str, list[_Scope]] = {}
     for scope in scopes:
@@ -828,7 +886,7 @@ def _reachable(scopes: Sequence[_Scope]) -> list[_Scope]:
             reachable.extend(same)
             continue
         nodes = {scope.node: scope for scope in same}
-        live = live_bindings(same[0].around[0], list(nodes))
+        live = live_class_members(same[0].around[0], list(nodes))
         reachable.extend(nodes[node] for node in live)
     return reachable
 
@@ -878,11 +936,12 @@ def scan(
     """Every read of a file by its name in *scope* that skips the shared check."""
     findings: list[Finding] = []
     for call in scope.calls:
-        if _own_open(call, scope.aliases):
+        tables = aliases_at(call, scope)
+        if any(_own_open(call, aliases) for aliases in tables):
             shape = "an open of its own; read through open_regular or read_at_most"
-        elif _foreign_read(call, scope.aliases) and not _checked_before(
-            scope, call, checks, exports
-        ):
+        elif any(
+            _foreign_read(call, aliases) for aliases in tables
+        ) and not _checked_before(scope, call, checks, exports):
             shape = (
                 "a reader of another library with no check of the name before it; "
                 "ask not_regular_at, or a check of the library, first"

@@ -309,7 +309,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not an ISO 7029 audiometric frequency "
-                f"(125 Hz - 8000 Hz)."
+                f"(125 Hz to 8000 Hz)."
             )
             raise ValueError(msg)
         idx.append(int(np.argmax(matches)))
@@ -584,7 +584,7 @@ def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndar
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not an ISO 389-1 test frequency "
-                f"(125 Hz - 8000 Hz)."
+                f"(125 Hz to 8000 Hz)."
             )
             raise ValueError(msg)
         idx.append(int(np.argmax(matches)))

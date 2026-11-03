@@ -571,6 +571,55 @@ def test_a_definition_a_later_one_replaces_is_never_followed(
     assert _texts(in_a_function, tmp_path) == []
 
 
+def test_an_instance_is_of_the_class_its_name_holds_where_it_is_built(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name a call builds an instance of is looked up as Python looks it up.
+
+    The classes of a file were kept by their names, the last one walked
+    standing for the name, so a class another function defines for itself
+    under the same name hid the module's, and the property read on the
+    module's instance went unjudged. Of two classes of one name at the top
+    of a module, the one a later one replaces is never read.
+    """
+    namesake = """
+    from dataclasses import dataclass
+    _LIMIT_DB = 10.0
+    @dataclass
+    class _Judge:
+        signal: float
+        background: float
+        @property
+        def margin(self):
+            return self.signal - self.background
+    def public(signal, background):
+        return _Judge(signal, background).margin > _LIMIT_DB
+    def other():
+        class _Judge:
+            @property
+            def margin(self):
+                return 0.0
+        return _Judge()
+    """
+    replaced = """
+    _LIMIT_DB = 10.0
+    class _Judge:
+        def _exceeds(self, margin):
+            return margin > _LIMIT_DB
+    class _Judge:
+        def _exceeds(self, margin):
+            return False
+        def judge(self, signal, background):
+            return self._exceeds(signal - background)
+    def public(signal, background):
+        return _Judge().judge(signal, background)
+    """
+    assert _texts(namesake, tmp_path) == [
+        "_Judge(signal, background).margin > _LIMIT_DB"
+    ]
+    assert _texts(replaced, tmp_path) == []
+
+
 def test_a_name_a_function_imports_is_read_through_its_own_import(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -604,6 +653,49 @@ def test_a_name_a_function_imports_is_read_through_its_own_import(
     found = cbc.scan(package)
     assert [(f.path, f.scope, f.text) for f in found] == [
         ("verdict.py", "spread_judged", "measure(levels) <= _SPREAD_DB")
+    ]
+
+
+def test_an_import_at_the_top_after_a_def_of_its_name_replaces_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A module's ``def`` statements and its imports of a name are read in
+    one order, as Python runs them.
+
+    At the top of a module the lookup returned the module's own ``def`` of a
+    name and never the import of it written later, which replaces it, so the
+    imported helper, which hands back a difference, was never read; and a
+    re-export was followed only when the module defined no function of its
+    name.
+    """
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n    return max(levels) - min(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "verdict.py").write_text(
+        "_SPREAD_DB = 3.0\n"
+        "def spread(levels):\n"
+        "    return 0.0\n"
+        "from .helpers import spread\n"
+        "def judged(levels):\n"
+        "    return spread(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    (package / "again.py").write_text(
+        "_SPREAD_DB = 3.0\n"
+        "from .helpers import spread\n"
+        "def spread(levels):\n"
+        "    return 0.0\n"
+        "def judged(levels):\n"
+        "    return spread(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "judged", "spread(levels) <= _SPREAD_DB")
     ]
 
 
@@ -1057,3 +1149,34 @@ def test_a_parameter_rebound_to_a_value_of_itself_keeps_the_caller_value(
     assert _texts(source, tmp_path) == [
         "np.max(levels) - np.min(levels) <= _SPREAD_LIMIT_DB"
     ]
+
+
+def test_a_comprehension_s_variable_is_its_own(tmp_path: pathlib.Path) -> None:
+    """Python keeps a comprehension's variable inside it.
+
+    A comprehension that walked numbers under the names of the function's
+    parameters made every use of those names in the function the numbers it
+    walked, a whole number for each, so a margin of the two readings judged
+    against a printed limit was let through.
+    """
+    source = """
+    _MARGIN_DB = 6.0
+    def correct(signal, background):
+        _ = [0 for signal in (1,) for background in (2,)]
+        margin = signal - background
+        return margin >= _MARGIN_DB
+    """
+    assert _texts(source, tmp_path) == ["margin >= _MARGIN_DB"]
+
+
+def test_a_comprehension_reads_its_own_variable(tmp_path: pathlib.Path) -> None:
+    """Inside the comprehension, its variable is an item of what it walks,
+    whatever the function binds under that name.
+    """
+    source = """
+    _MARGIN_DB = 6.0
+    def correct(signal, background, rows):
+        margin = 1
+        return [margin >= _MARGIN_DB for margin in (signal - background,)]
+    """
+    assert _texts(source, tmp_path) == ["margin >= _MARGIN_DB"]

@@ -49,6 +49,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    is_text,
     real_array,
     refuse_text_beside_choice,
     require_axis_count,
@@ -60,6 +61,7 @@ from .._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
@@ -871,7 +873,7 @@ class SIIResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -1030,15 +1032,15 @@ def standard_speech_spectra(
     :raises ValueError: for an unknown vocal effort, or an empty selection.
     :raises TypeError: if an entry of ``vocal_efforts`` is not a text.
     """
-    efforts = (
-        (vocal_efforts,) if isinstance(vocal_efforts, str) else tuple(vocal_efforts)
-    )
+    efforts = (vocal_efforts,) if is_text(vocal_efforts) else tuple(vocal_efforts)
     if not efforts:
         msg = (
             "'vocal_efforts' cannot be empty; choose at least one of "
             f"{', '.join(_VOCAL_EFFORTS)}."
         )
         raise ValueError(msg)
+    for effort in efforts:
+        require_choice(effort, "vocal_efforts", _VOCAL_EFFORTS)
     levels = np.array(
         [standard_speech_spectrum(effort) for effort in efforts],
         dtype=np.float64,
@@ -1075,7 +1077,7 @@ def _as_band_vector(
         msg = (
             f"{name!r} must be a 1-D vector of {expected} "
             f"{proc.method} band values "
-            f"({centres[0]:g} Hz - {centres[-1]:g} Hz); got shape {arr.shape}."
+            f"({centres[0]:g} Hz to {centres[-1]:g} Hz); got shape {arr.shape}."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(arr)):

@@ -212,6 +212,12 @@ unsuitable marked and a lower limit drawn when one is given.
 
 **Returns:** The axes drawn on.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if a frequency of `limit_db_per_m` is not one real number. |
+
 ### TrackDecayRate.rate_at()
 
 ```python

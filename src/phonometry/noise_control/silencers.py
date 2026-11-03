@@ -121,6 +121,7 @@ from .._internal.validation import (
     check_engine,
     complex_array,
     real_array,
+    real_number,
     require_non_negative,
     require_positive,
     require_present,
@@ -132,6 +133,7 @@ from .duct_modes import _warn_above_plane_wave_limit
 from .duct_modes import plane_wave_limit as _plane_wave_limit
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -296,7 +298,7 @@ def _shorting_frequency(
     index = int(np.argmin(magnitude))
     if index in (0, f.size - 1):
         return None
-    return float(f[index])
+    return real_number(f[index], "f")
 
 
 def cascade(*matrices: ArrayLike) -> _Complex:
@@ -732,7 +734,7 @@ class ReactiveSilencerResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

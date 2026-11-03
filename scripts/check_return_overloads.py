@@ -86,11 +86,14 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from ast_scan import (
+    COMPOUND_STATEMENTS,
     ROOT,
     binding_of,
+    block_statements,
     exempted,
     imported_names,
     live_bindings,
+    live_class_members,
     own_names,
     python_files,
     relative,
@@ -672,13 +675,8 @@ class _Requalified(ast.NodeTransformer):
 def _statements(body: Iterable[ast.stmt]) -> Iterator[ast.stmt]:
     """The statements of a body, the branches of its ``if`` and ``try`` blocks read through."""
     for node in body:
-        if isinstance(node, ast.If | ast.Try | ast.With):
-            nested: list[ast.stmt] = []
-            for name in ("body", "orelse", "finalbody"):
-                nested.extend(getattr(node, name, []) or [])
-            for handler in getattr(node, "handlers", []) or []:
-                nested.extend(handler.body)
-            yield from _statements(nested)
+        if isinstance(node, COMPOUND_STATEMENTS):
+            yield from _statements(block_statements(node))
         else:
             yield node
 
@@ -816,6 +814,8 @@ class Package:
         #: Each definition, its overload heads included, with the function it
         #: is one definition of.
         self.by_node: dict[ast.AST, Function] = {}
+        #: What :meth:`_top_statements` found, read once for each module.
+        self._top: dict[str, dict[str, list[ast.stmt]]] = {}
         #: What :meth:`live_definitions` found, read once for each name.
         self._live: dict[str, list[str]] = {}
         for path in files:
@@ -1195,15 +1195,38 @@ class Package:
                 several.append(ast.unparse(member))
         return single, several
 
-    def call_target(self, function: Function, func: ast.expr) -> str | None:
+    def call_target(
+        self, function: Function, func: ast.expr, call: ast.AST | None = None
+    ) -> str | None:
         """The dotted name a call written in *function* reaches, if any.
 
         For a function written in a function around the call, the key in
         :attr:`functions` of its first definition there (:meth:`reached`
-        gives every one).
+        gives every one). Two imports of the name that may each stand for it
+        at *call* (:meth:`_targets`) and reach different functions reach no
+        one function: ``None``.
         """
-        targets = self._targets(function, func)
-        return targets[0] if targets else None
+        targets = self.call_targets(function, func, call)
+        return targets[0] if len(targets) == 1 else None
+
+    def call_targets(
+        self, function: Function, func: ast.expr, call: ast.AST | None = None
+    ) -> list[str]:
+        """Every dotted name a call written in *function* may reach.
+
+        For a function written in a function around the call, the key in
+        :attr:`functions` of its first definition there, alone. Otherwise each
+        name an import or a definition that may stand for the name at *call*
+        reaches (:meth:`_targets`), once: ``try: from ._fast import helper``
+        and ``except ImportError: from ._slow import helper`` reach both.
+        """
+        targets = self._targets(function, func, call)
+        if not targets:
+            return []
+        nested = targets[0] in self.functions and (
+            self.functions[targets[0]].parent is not None
+        )
+        return [targets[0]] if nested else list(dict.fromkeys(targets))
 
     def reached(
         self, function: Function, func: ast.expr, call: ast.AST | None = None
@@ -1211,23 +1234,27 @@ class Package:
         """The key in :attr:`functions` of every definition a call can reach.
 
         A function written in a function around the call is each of its
-        definitions there; one of a module is each definition of it in the
-        module, one in each branch of an ``if`` being either.
+        definitions there; one of a module is each definition of it the
+        module holds once it has run (:meth:`live_definitions`), one in each
+        branch of an ``if`` being either, whether one import or several may
+        stand for the name at the call.
         """
-        targets = self._targets(function, func, call)
-        if (
-            len(targets) == 1
-            and targets[0] in self.functions
-            and self.functions[targets[0]].parent is None
-        ):
-            return self.live_definitions(targets[0])
-        return [target for target in targets if target in self.functions]
+        reached: list[str] = []
+        for target in self._targets(function, func, call):
+            if target not in self.functions:
+                continue
+            if self.functions[target].parent is None:
+                reached.extend(self.live_definitions(target))
+            else:
+                reached.append(target)
+        return list(dict.fromkeys(reached))
 
     def live_definitions(self, dotted: str) -> list[str]:
         """The key of each definition of a function of a module, or of a
-        method, the name may hold once the module or the class has run
-        (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
-        either, and a later one replaces an earlier one it always follows.
+        method, the name may hold once the module has run
+        (:func:`ast_scan.live_class_members`): one in each branch of an ``if``
+        is either, a later one replaces an earlier one it always follows, and
+        a method of a class a later ``class`` of its name replaces is none.
         """
         if dotted not in self._live:
             keys = self.every_definition(dotted)
@@ -1237,7 +1264,7 @@ class Package:
                 if self.functions[key].definitions
             }
             tree = self.trees[self.functions[keys[0]].module]
-            live = live_bindings(tree, list(last), None)
+            live = live_class_members(tree, list(last))
             self._live[dotted] = [last[node] for node in live] or list(keys)
         return self._live[dotted]
 
@@ -1274,8 +1301,53 @@ class Package:
             if names.binds(head.id):
                 at = call if scope is function else None
                 return self._bound_in(scope, node, func, head, at)
-        resolved = self.resolve(function.module, func)
-        return (resolved,) if resolved is not None else ()
+        return self._at_top(function.module, func, head)
+
+    def _at_top(self, module: str, func: ast.expr, head: ast.Name) -> tuple[str, ...]:
+        """What a call reaches through a name the module binds at its top.
+
+        Each ``def``, ``class`` or import of the name the module holds once
+        it has run (:func:`ast_scan.live_bindings`), one in each branch of an
+        ``if`` being either and a later one replacing an earlier one; a name
+        no such statement binds is read from the module's table of names
+        (:meth:`resolve`), a builtin among them.
+        """
+        statements = self._top_statements(module).get(head.id)
+        if not statements:
+            resolved = self.resolve(module, func)
+            return (resolved,) if resolved is not None else ()
+        package = self._package_of(module)
+        found = (
+            self.resolve(
+                module,
+                func,
+                _imports([statement], package, into={})
+                if isinstance(statement, ast.Import | ast.ImportFrom)
+                else {head.id: f"{module}.{head.id}"},
+            )
+            for statement in live_bindings(self.trees[module], statements)
+        )
+        return tuple(dict.fromkeys(target for target in found if target is not None))
+
+    def _top_statements(self, module: str) -> dict[str, list[ast.stmt]]:
+        """The ``def``, ``class`` and import statements of a module that bind
+        a name at its top, through its compound statements, by that name.
+        """
+        if module not in self._top:
+            found: dict[str, list[ast.stmt]] = {}
+            for node in scope_nodes(self.trees[module]):
+                if isinstance(node, ast.Import | ast.ImportFrom):
+                    names = imported_names(node)
+                elif isinstance(
+                    node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+                ):
+                    names = {node.name}
+                else:
+                    continue
+                for name in names:
+                    found.setdefault(name, []).append(node)
+            self._top[module] = found
+        return self._top[module]
 
     def _bound_in(
         self,

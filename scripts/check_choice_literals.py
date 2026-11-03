@@ -115,13 +115,21 @@ import typing
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
-from ast_scan import binding_of, imported_names, live_bindings, scope_nodes
+from ast_scan import (
+    COMPOUND_STATEMENTS,
+    binding_of,
+    block_statements,
+    imported_names,
+    live_bindings,
+    own_names,
+    scope_nodes,
+)
 
 import phonometry
 from phonometry._internal.catalogue import CatalogueRow
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Mapping
+    from collections.abc import Callable, Iterator, Mapping, Set
     from types import FunctionType, ModuleType
 
 #: The members of an annotation that let any string through.
@@ -971,20 +979,62 @@ def _bindings(tree: ast.AST) -> Iterator[_Binding]:
 
 def _one_name(binding: _Binding) -> str | None:
     """The name a binding of one plain name binds, else ``None``."""
+    target = _one_target(binding)
+    return None if target is None else target.id
+
+
+def _one_target(binding: _Binding) -> ast.Name | None:
+    """The one plain name a binding binds, else ``None``."""
     if len(binding.targets) == 1 and isinstance(binding.targets[0], ast.Name):
-        return binding.targets[0].id
+        return binding.targets[0]
     return None
+
+
+#: A name as Python scopes it: its spelling and the scope of the tree that
+#: binds it, ``None`` for one the tree reads from the module or no scope of
+#: it binds.
+type _Bound = tuple[str, ast.AST | None]
+
+
+def _bound_at(tree: ast.AST, node: ast.Name) -> _Bound:
+    """The name read or written at *node*, with the scope whose binding of it
+    the access reaches (:func:`ast_scan.binding_of`): a comprehension's
+    variable, a lambda's or a nested function's parameter is another name
+    than the function's of the same spelling.
+    """
+    return node.id, binding_of(tree, node, node.id)[1]
+
+
+def _named(tree: ast.AST, names: Set[_Bound]) -> Callable[[ast.expr], bool]:
+    """A predicate for a name of *names*, read where its own scope binds it.
+
+    *names* is read at each call, so a set that grows is followed.
+    """
+
+    def matches(node: ast.expr) -> bool:
+        return (
+            isinstance(node, ast.Name)
+            and any(node.id == name for name, _ in names)
+            and _bound_at(tree, node) in names
+        )
+
+    return matches
 
 
 def _following(
     tree: ast.AST, is_target: Callable[[ast.expr], bool]
 ) -> Callable[[ast.expr], bool]:
-    """*is_target* widened to the cleaned-up text and the locals bound from it."""
-    names: set[str] = set()
+    """*is_target* widened to the cleaned-up text and the locals bound from it.
+
+    A local is the name its own scope binds: one of the same spelling that a
+    comprehension, a lambda or a nested function binds is another.
+    """
+    names: set[_Bound] = set()
+    bound = _named(tree, names)
 
     def matches(node: ast.expr) -> bool:
         node = _bare(node)
-        return is_target(node) or (isinstance(node, ast.Name) and node.id in names)
+        return is_target(node) or bound(node)
 
     changed = True
     while changed:
@@ -995,17 +1045,18 @@ def _following(
                 and len(node.targets) == 1
                 and isinstance(node.targets[0], ast.Name)
             ):
-                bound, value = node.targets[0].id, node.value
+                written, value = node.targets[0], node.value
             elif (
                 isinstance(node, ast.AnnAssign)
                 and isinstance(node.target, ast.Name)
                 and node.value is not None
             ):
-                bound, value = node.target.id, node.value
+                written, value = node.target, node.value
             else:
                 continue
-            if bound not in names and _derived_from(value, matches):
-                names.add(bound)
+            key = _bound_at(tree, written)
+            if key not in names and _derived_from(value, matches):
+                names.add(key)
                 changed = True
     return matches
 
@@ -1101,14 +1152,14 @@ def _imported_constants(
 
 
 def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
-    """The statements of a module body, those of its top-level ``if`` blocks
-    included: an alias or an import under ``if TYPE_CHECKING:`` is the
-    module's as surely as one written at the top.
+    """The statements of a module body, those of every compound statement's
+    blocks included (:func:`ast_scan.block_statements`): an alias or an
+    import under ``if TYPE_CHECKING:`` or in a ``try`` is the module's as
+    surely as one written at the top.
     """
     for node in body:
-        if isinstance(node, ast.If):
-            yield from _module_statements(node.body)
-            yield from _module_statements(node.orelse)
+        if isinstance(node, COMPOUND_STATEMENTS):
+            yield from _module_statements(block_statements(node))
         else:
             yield node
 
@@ -1519,14 +1570,16 @@ def _comparison_evidence(
     return found
 
 
-def _item_names(tree: ast.AST, is_target: Callable[[ast.expr], bool]) -> set[str]:
-    """The names a loop or a comprehension binds to each item of the target.
+def _item_names(tree: ast.AST, is_target: Callable[[ast.expr], bool]) -> set[_Bound]:
+    """The names a loop or a comprehension binds to each item of the target,
+    each with the scope that binds it (:func:`_bound_at`).
 
     ``for side in sides``, ``[f for f in fields]``, ``for i, side in
     enumerate(sides)`` and, for a mapping, the key of ``for key, value in
-    levels.items()`` or ``for key in levels.keys()``.
+    levels.items()`` or ``for key in levels.keys()``. A comprehension's
+    variable is its own: a name of the same spelling elsewhere is another.
     """
-    names: set[str] = set()
+    names: set[_Bound] = set()
     for node in ast.walk(tree):
         if not isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
             continue
@@ -1551,7 +1604,7 @@ def _item_names(tree: ast.AST, is_target: Callable[[ast.expr], bool]) -> set[str
         if isinstance(bound, ast.Tuple) and len(bound.elts) > position:
             bound = bound.elts[position]
         if isinstance(bound, ast.Name):
-            names.add(bound.id)
+            names.add(_bound_at(tree, bound))
     return names
 
 
@@ -1565,13 +1618,47 @@ def _local_tables(
     test against the strings it holds (:func:`strings_of`).
     """
     found: dict[str, ast.expr] = {}
+    shadowed = _bound_in_two_scopes(tree)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign | ast.AnnAssign):
             continue
         for name, value in _assigned(node):
             if strings_of(value, {**constants, **found}):
-                found.setdefault(name, value)
+                # A spelling two scopes bind (the function and a
+                # comprehension, a lambda or a nested function in it) names
+                # two values, and a test against it is read against neither.
+                found.setdefault(name, _NO_STRINGS if name in shadowed else value)
     return found
+
+
+#: What a local stands for when it holds strings in one scope and something
+#: else in another of the same function: no set of strings.
+_NO_STRINGS: ast.expr = ast.Constant(value=None)
+
+
+def _bound_in_two_scopes(tree: ast.AST) -> set[str]:
+    """The spellings more than one scope of *tree* binds as its own: the
+    function, a comprehension, a lambda, a nested function or a class body.
+    """
+    seen: set[str] = set()
+    twice: set[str] = set()
+    for scope in ast.walk(tree):
+        if not isinstance(scope, _SCOPES + _COMPREHENSIONS):
+            continue
+        names = own_names(scope)
+        own = {
+            name
+            for name in (
+                *names.parameters,
+                *names.defined,
+                *names.imported,
+                *names.stored,
+            )
+            if names.binds(name)
+        }
+        twice |= own & seen
+        seen |= own
+    return twice
 
 
 def code_evidence(
@@ -1605,7 +1692,7 @@ def code_evidence(
             f"each item {evidence}"
             for evidence in code_evidence(
                 tree,
-                lambda node: isinstance(node, ast.Name) and node.id in items,
+                _named(tree, items),
                 constants,
                 module_name=module_name,
             )
@@ -1959,7 +2046,7 @@ def _checks_received(
     return tree is not None and bool(
         code_evidence(
             tree,
-            _the_name(received),
+            _the_name(received, tree),
             constants,
             module_name=callee.__module__,
             collection=collection,
@@ -1998,7 +2085,7 @@ def passed_on_evidence(  # noqa: PLR0913
     if constants is None:
         constants = _module_constants(sys.modules.get(module_name))
     namespace = _namespace(function, tree, module_name)
-    matches = _following(tree, target or _the_name(name))
+    matches = _following(tree, target or _the_name(name, tree))
     spread = _spread_dicts(tree)
     known = {**constants, **_local_tables(tree, constants)}
     for node in ast.walk(tree):
@@ -2287,13 +2374,37 @@ def _field_of_self(name: str) -> Callable[[ast.expr], bool]:
     return matches
 
 
-def _the_name(name: str) -> Callable[[ast.expr], bool]:
-    """A predicate for the bare name of a parameter."""
+def _the_name(name: str, tree: ast.AST | None = None) -> Callable[[ast.expr], bool]:
+    """A predicate for the bare name of a parameter.
+
+    Given the *tree* of the function that takes it, the name read where the
+    function binds it: a comprehension's variable, a lambda's or a nested
+    function's parameter of the same spelling is another name.
+    """
+    home = _function_in(tree) if tree is not None else None
 
     def matches(node: ast.expr) -> bool:
-        return isinstance(node, ast.Name) and node.id == name
+        if not (isinstance(node, ast.Name) and node.id == name):
+            return False
+        return tree is None or home is None or _bound_at(tree, node)[1] is home
 
     return matches
+
+
+def _function_in(tree: ast.AST) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    """The function *tree* is the source of: itself, or the first one its
+    body defines.
+    """
+    if isinstance(tree, ast.FunctionDef | ast.AsyncFunctionDef):
+        return tree
+    return next(
+        (
+            node
+            for node in getattr(tree, "body", [])
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        ),
+        None,
+    )
 
 
 def _field_read(name: str, *, own: bool) -> Callable[[ast.expr], bool]:
@@ -2488,7 +2599,7 @@ def string_choices() -> Iterator[Choice]:
                 if tree is not None:
                     evidence = code_evidence(
                         tree,
-                        _the_name(name),
+                        _the_name(name, tree),
                         constants,
                         module_name=getattr(obj, "__module__", home),
                         collection=collection,
@@ -2776,9 +2887,10 @@ def _spelling(  # noqa: PLR0913
     """
     constants = {**constants, **_local_tables(tree, constants)}
     items = _item_names(tree, target) if collection else set()
+    an_item = _named(tree, items)
 
     def is_raw(node: ast.expr) -> bool:
-        return target(node) or (isinstance(node, ast.Name) and node.id in items)
+        return target(node) or an_item(node)
 
     reader = _Reader(
         is_raw=is_raw,
@@ -2895,7 +3007,7 @@ def _received(
     module_name = getattr(function, "__module__", "") or ""
     return _spelling(
         tree,
-        _the_name(name),
+        _the_name(name, tree),
         _namespace(function, tree, module_name),
         module_name,
         _module_constants(sys.modules.get(module_name)),
@@ -3643,7 +3755,7 @@ def _source(
         options = _closed_options(*returned) if returned is not None else frozenset()
         return _Source("literal", options) if options else _OPEN_SOURCE
     if isinstance(expression, ast.Name):
-        return _name_source(expression.id, function, module_name, depth)
+        return _name_source(expression, function, module_name, depth)
     if isinstance(expression, ast.Attribute):
         return _attribute_source(expression, function, module_name)
     if isinstance(expression, ast.Subscript) and isinstance(expression.value, ast.Name):
@@ -3658,80 +3770,133 @@ def _source(
 
 
 def _name_source(
-    name: str, function: ast.AST | None, module_name: str, depth: int
+    name: ast.Name, function: ast.AST | None, module_name: str, depth: int
 ) -> _Source:
+    """What the name read at *name* in *function* is made of.
+
+    Read where Python binds it (:func:`ast_scan.binding_of`): a parameter by
+    its annotation or what the callers of a private helper hand it, a local
+    by what the statements of its own scope bind it to, a ``:=`` in a
+    comprehension among them, a comprehension's variable by the items it
+    walks, and a name no scope of *function* binds by the module's value.
+    """
     if function is None:
-        value = getattr(_module_object(module_name), name, None)
-        return (
-            _Source("texts", frozenset({value}))
-            if isinstance(value, str)
-            else _OPEN_SOURCE
-        )
-    for parameter in _parameters_of(function):
-        if parameter.arg != name:
+        return _module_text(name.id, module_name)
+    scope = binding_of(function, name, name.id)[1]
+    if scope is None:
+        return _module_text(name.id, module_name)
+    if isinstance(scope, _COMPREHENSIONS):
+        return _comprehended_source(scope, name.id, function, module_name, depth)
+    if not isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef):
+        return _OPEN_SOURCE
+    for parameter in _parameters_of(scope):
+        if parameter.arg != name.id:
             continue
         options = _literal_annotation(parameter.annotation, module_name)
         if options:
             return _Source("literal", options)
-        if (
-            isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef)
-            and function.name.startswith("_")
-            and not function.name.startswith("__")
-        ):
-            return _callers_source(function, name, module_name, depth)
+        if scope.name.startswith("_") and not scope.name.startswith("__"):
+            return _callers_source(scope, name.id, module_name, depth)
         return _OPEN_SOURCE
-    found: list[_Source] = []
-    for node in ast.walk(function):
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == name
-            for target in node.targets
-        ):
-            found.append(_source(node.value, function, module_name, depth + 1))
-        elif (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Tuple)
-        ):
-            names = node.targets[0].elts
-            for index, bound in enumerate(names):
-                if isinstance(bound, ast.Name) and bound.id == name:
-                    found.append(
-                        _unpacked_source(
-                            node.value, index, len(names), function, module_name, depth
-                        )
-                    )
-        elif (
-            isinstance(node, ast.AnnAssign)
-            and isinstance(node.target, ast.Name)
-            and node.target.id == name
-        ):
-            options = _literal_annotation(node.annotation, module_name)
-            if options:
-                found.append(_Source("literal", options))
-            elif node.value is not None:
-                found.append(_source(node.value, function, module_name, depth + 1))
-        elif (
-            isinstance(node, ast.For | ast.comprehension)
-            and isinstance(node.target, ast.Name)
-            and node.target.id == name
-        ):
-            held = node.iter
-            found.append(
-                _merged(
-                    [
-                        _source(item, function, module_name, depth + 1)
-                        for item in held.elts
-                    ]
-                )
-                if isinstance(held, ast.Tuple | ast.List | ast.Set)
-                else _OPEN_SOURCE
-            )
-    if found:
-        return _merged(found)
+    found = [
+        source
+        for node in _own_bindings(scope)
+        for source in _bound_sources(node, name.id, function, module_name, depth)
+    ]
+    return _merged(found) if found else _module_text(name.id, module_name)
+
+
+def _module_text(name: str, module_name: str) -> _Source:
+    """The module's value of *name*, when it is a text; anything else is open."""
     value = getattr(_module_object(module_name), name, None)
     return (
         _Source("texts", frozenset({value})) if isinstance(value, str) else _OPEN_SOURCE
     )
+
+
+def _own_bindings(scope: ast.AST) -> Iterator[ast.AST]:
+    """The nodes of *scope*'s own that may bind a name of it: those it runs
+    itself (:func:`ast_scan.scope_nodes`), and each ``:=`` in a comprehension
+    it holds, which binds a name of *scope*, not of the comprehension.
+    """
+    for node in scope_nodes(scope):
+        yield node
+        if isinstance(node, _COMPREHENSIONS):
+            pending = list(ast.iter_child_nodes(node))
+            while pending:
+                inner = pending.pop()
+                if isinstance(inner, ast.NamedExpr):
+                    yield inner
+                if not isinstance(inner, _SCOPES):
+                    pending.extend(ast.iter_child_nodes(inner))
+
+
+def _bound_sources(
+    node: ast.AST, name: str, function: ast.AST, module_name: str, depth: int
+) -> list[_Source]:
+    """What *node* binds *name* to, when it binds it."""
+    if isinstance(node, ast.Assign):
+        found = [
+            _source(node.value, function, module_name, depth + 1)
+            for target in node.targets
+            if isinstance(target, ast.Name) and target.id == name
+        ]
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Tuple):
+            names = node.targets[0].elts
+            found.extend(
+                _unpacked_source(
+                    node.value, index, len(names), function, module_name, depth
+                )
+                for index, bound in enumerate(names)
+                if isinstance(bound, ast.Name) and bound.id == name
+            )
+        return found
+    if isinstance(node, ast.AnnAssign | ast.NamedExpr) and (
+        isinstance(node.target, ast.Name) and node.target.id == name
+    ):
+        if isinstance(node, ast.AnnAssign):
+            options = _literal_annotation(node.annotation, module_name)
+            if options:
+                return [_Source("literal", options)]
+        if node.value is None:
+            return []
+        return [_source(node.value, function, module_name, depth + 1)]
+    if isinstance(node, ast.For | ast.AsyncFor) and (
+        isinstance(node.target, ast.Name) and node.target.id == name
+    ):
+        return [_walked_source(node.iter, function, module_name, depth)]
+    return []
+
+
+def _walked_source(
+    walked: ast.expr, function: ast.AST, module_name: str, depth: int
+) -> _Source:
+    """What each item of *walked* is made of: the items of a tuple, a list or
+    a set written out; anything else is open.
+    """
+    if isinstance(walked, ast.Tuple | ast.List | ast.Set):
+        return _merged(
+            [_source(item, function, module_name, depth + 1) for item in walked.elts]
+        )
+    return _OPEN_SOURCE
+
+
+def _comprehended_source(
+    comprehension: ast.ListComp | ast.SetComp | ast.GeneratorExp | ast.DictComp,
+    name: str,
+    function: ast.AST,
+    module_name: str,
+    depth: int,
+) -> _Source:
+    """What a comprehension's variable *name* is made of: the items of what
+    the loop that binds it walks.
+    """
+    found = [
+        _walked_source(generator.iter, function, module_name, depth)
+        for generator in comprehension.generators
+        if isinstance(generator.target, ast.Name) and generator.target.id == name
+    ]
+    return _merged(found) if found else _OPEN_SOURCE
 
 
 def _callers_source(
@@ -3794,14 +3959,20 @@ def _attribute_source(
     holder = expression.value
     if not isinstance(holder, ast.Name) or function is None or module is None:
         return _OPEN_SOURCE
+    # The holder is the name its own scope binds: a parameter of the function,
+    # or a local bound where the read reaches it, never a name of the same
+    # spelling a comprehension, a lambda or a nested function binds.
+    held = _bound_at(function, holder)
     candidates: list[object] = [
         _resolved(ast.unparse(parameter.annotation).strip("'\""), module_name)
         for parameter in _parameters_of(function)
-        if parameter.arg == holder.id and parameter.annotation is not None
+        if parameter.arg == holder.id
+        and parameter.annotation is not None
+        and held[1] is function
     ]
     for binding in _bindings(function):
         if not any(
-            isinstance(target, ast.Name) and target.id == holder.id
+            isinstance(target, ast.Name) and _bound_at(function, target) == held
             for target in binding.targets
         ):
             continue
@@ -4226,10 +4397,49 @@ def _taken_safely(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
 _COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
 
 
-def _branches_away(holder: ast.AST, child: ast.AST, subject: _Subject) -> bool:
+#: The calls that draw every item of a generator handed to them; ``any`` and
+#: ``all`` stop at the first item that settles them.
+_DRAWING_WHOLE = frozenset(
+    {"list", "tuple", "set", "frozenset", "dict", "sorted", "sum", "min", "max"}
+)
+
+
+def _drawn_whole(generator: ast.GeneratorExp, parents: dict[ast.AST, ast.AST]) -> bool:
+    """Whether a call draws every item of *generator* where it is written."""
+    call = parents.get(generator)
+    return (
+        isinstance(call, ast.Call)
+        and generator in call.args
+        and (
+            (isinstance(call.func, ast.Name) and call.func.id in _DRAWING_WHOLE)
+            or (isinstance(call.func, ast.Attribute) and call.func.attr == "join")
+        )
+    )
+
+
+def _branches_away(
+    holder: ast.AST,
+    child: ast.AST,
+    subject: _Subject,
+    parents: dict[ast.AST, ast.AST],
+) -> bool:
     """Whether *holder* runs *child* on some paths only, and a path that skips
     it may hold a text the check would refuse (:func:`_taken_safely`).
+
+    A later link of a chained comparison runs only when the links before it
+    hold, ``python -O`` leaves an ``assert`` out, and the element of a
+    generator runs only as far as something draws from it.
     """
+    if isinstance(holder, ast.Compare) and child in holder.comparators[1:]:
+        return True
+    if isinstance(holder, ast.Assert):
+        return True
+    if (
+        isinstance(holder, ast.GeneratorExp)
+        and child not in holder.generators
+        and not _drawn_whole(holder, parents)
+    ):
+        return True
     if isinstance(holder, ast.If) and child is not holder.test:
         # The paths that skip a statement of the body are those on which the
         # test fails, and those that skip one of the else block pass it.
@@ -4282,7 +4492,7 @@ def _on_some_path_only(
     """
     child, holder = node, parents.get(node)
     while holder is not None and holder is not root:
-        if _branches_away(holder, child, subject):
+        if _branches_away(holder, child, subject, parents):
             return True
         child, holder = holder, parents.get(holder)
     return False
@@ -4507,35 +4717,37 @@ def _with_copies(
     the local is a check of each item of the target. *options* are the texts
     the choice's ``Literal`` lists (:func:`_carries`).
     """
-    copies: set[str] = set()
+    copies: set[_Bound] = set()
     for binding in _bindings(tree):
-        name = _one_name(binding)
-        if name is None:
+        written = _one_target(binding)
+        if written is None:
             continue
         value = binding.value
         branches = (
             [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
         )
         if all(_carries(branch, target, options) for branch in branches):
-            copies.add(name)
+            copies.add(_bound_at(tree, written))
+    a_copy = _named(tree, copies)
 
     def matches(node: ast.expr) -> bool:
-        return target(node) or (isinstance(node, ast.Name) and node.id in copies)
+        return target(node) or a_copy(node)
 
     return matches
 
 
-def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
-    """The locals bound to a one-item tuple of the target, on some branch.
+def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[_Bound]:
+    """The locals bound to a one-item tuple of the target, on some branch,
+    each with the scope that binds it.
 
     ``given = (sides,) if isinstance(sides, str) else sides`` holds the
     single choice of a choice-or-sequence parameter as its one item, so a
     check of each item of ``given`` checks the single choice too.
     """
-    names: set[str] = set()
+    names: set[_Bound] = set()
     for binding in _bindings(tree):
-        name = _one_name(binding)
-        if name is None:
+        written = _one_target(binding)
+        if written is None:
             continue
         value = binding.value
         branches = (
@@ -4547,17 +4759,18 @@ def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[s
             and target(branch.elts[0])
             for branch in map(_held, branches)
         ):
-            names.add(name)
+            names.add(_bound_at(tree, written))
     return names
 
 
-def _value_names(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
-    """The names a loop or a comprehension binds to each value of a mapping target.
+def _value_names(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[_Bound]:
+    """The names a loop or a comprehension binds to each value of a mapping
+    target, each with the scope that binds it.
 
     The value of ``for side, value in sides.items()`` and the name of ``for
     value in sides.values()``.
     """
-    names: set[str] = set()
+    names: set[_Bound] = set()
     for node in ast.walk(tree):
         if not isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
             continue
@@ -4575,7 +4788,7 @@ def _value_names(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
                 continue
             bound = bound.elts[1]
         if isinstance(bound, ast.Name):
-            names.add(bound.id)
+            names.add(_bound_at(tree, bound))
     return names
 
 
@@ -4801,7 +5014,7 @@ def _checks_of(
     module_name = getattr(function, "__module__", "") or ""
     namespace = _namespace(function, tree, module_name)
     spread = _spread_dicts(tree)
-    base = _field_of_self(name) if field else _the_name(name)
+    base = _field_of_self(name) if field else _the_name(name, tree)
     target = _with_copies(tree, base, options)
     whole = part in {None, _WHOLE}
     single = part == _WHOLE or (part is None and not collection)
@@ -4815,19 +5028,21 @@ def _checks_of(
         wrapping = _wrapping_copies(tree, target)
         # The choice as one text has no emptiness to ask about (``""`` is no
         # option); the one-item tuple that holds it is never empty.
-        whole_of = _with_copies(tree, lambda node: _the_names(node, wrapping), options)
+        whole_of = _with_copies(tree, _named(tree, wrapping), options)
         items = _item_names(tree, whole_of)
     elif part == _ITEMS:
         items = _item_names(tree, target)
     else:
         items = _value_names(tree, target)
 
+    an_item = _named(tree, items)
+
     def is_raw(node: ast.expr) -> bool:
         if whole and target(node):
             return True
         if part == _VALUES and isinstance(node, ast.Subscript) and target(node.value):
             return True
-        return isinstance(node, ast.Name) and node.id in items
+        return an_item(node)
 
     def mentions(node: ast.expr) -> bool:
         return target(node) or is_raw(node)
@@ -4965,10 +5180,6 @@ def _checks_of(
 
 def _contains(outer: ast.AST, node: ast.AST) -> bool:
     return any(part is node for part in ast.walk(outer))
-
-
-def _the_names(node: ast.expr, names: set[str]) -> bool:
-    return isinstance(node, ast.Name) and node.id in names
 
 
 def _handed_part(

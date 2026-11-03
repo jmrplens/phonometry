@@ -78,7 +78,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 from scipy.io import wavfile
 
-from .._internal.json_input import escaped
+from .._internal.json_input import escaped, writing_beside
 from .._internal.validation import (
     real_array,
     refuse_text,
@@ -382,7 +382,11 @@ def frame_riff_chunk(chunk_id: bytes, payload: bytes) -> bytes:
 
 
 def append_riff_chunk(
-    path: str | os.PathLike[str], chunk_id: bytes, payload: bytes
+    path: str | os.PathLike[str],
+    chunk_id: bytes,
+    payload: bytes,
+    *,
+    named: str | os.PathLike[str] | None = None,
 ) -> None:
     """Append a chunk to a finished WAV/RF64 file and repair its size field.
 
@@ -395,11 +399,15 @@ def append_riff_chunk(
     RF64/BW64 the 64-bit ``ds64`` riff size at offset 20 (the fixed
     position both scipy's writer and EBU Tech 3306 put it, ``ds64``
     mandatory first after ``WAVE``).
+
+    :param named: The name a refusal gives the file, the caller's own where
+        *path* is the new file written beside it; *path* when ``None``.
     """
+    shown = escaped(os.fspath(path if named is None else named))
     with Path(path).open("r+b") as fh:
         fourcc = fh.read(4)
         if fourcc not in (b"RIFF", b"RF64", b"BW64"):
-            msg = f"{escaped(os.fspath(path))}: not a RIFF/RF64/BW64 file"
+            msg = f"{shown}: not a RIFF/RF64/BW64 file"
             raise ValueError(msg)
         fh.seek(0, 2)
         if fh.tell() % 2:
@@ -409,7 +417,7 @@ def append_riff_chunk(
         if fourcc == _RIFF_FOURCC:
             if riff_size > _RF64_SIZE_SENTINEL:
                 msg = (
-                    f"{escaped(os.fspath(path))}: appending {len(payload)} bytes overflows the "
+                    f"{shown}: appending {len(payload)} bytes overflows the "
                     "32-bit RIFF size; the file needed to be RF64"
                 )
                 raise ValueError(msg)
@@ -496,7 +504,7 @@ def _resolve_bext(
 
 def _reconcile_streamed_header(
     fh: BinaryIO,
-    path: str | os.PathLike[str],
+    shown: str,
     *,
     fs: int,
     channels: int,
@@ -525,7 +533,7 @@ def _reconcile_streamed_header(
     )
     if len(patched) != header_len:
         msg = (
-            f"{escaped(os.fspath(path))}: the {written} frames actually streamed move the "
+            f"{shown}: the {written} frames actually streamed move the "
             "header across the RF64 promotion boundary the estimated "
             "count chose; the estimate was too wrong to reconcile"
         )
@@ -544,6 +552,7 @@ def write_wav_stream(
     *,
     metadata_chunks: bytes = b"",
     frames_are_estimate: bool = False,
+    named: str | os.PathLike[str] | None = None,
 ) -> None:
     """Stream ``(channels, n)`` blocks (codes or floats) into one WAV file.
 
@@ -561,6 +570,8 @@ def write_wav_stream(
         the streamed count differs, the header is then rewritten in
         place at close so the sizes on disk describe what was actually
         written, instead of the mismatch being an error.
+    :param named: The name a refusal gives the file, the caller's own where
+        *path* is the new file written beside it; *path* when ``None``.
     :raises ValueError: If the blocks do not add up to exactly ``frames``
         frames and ``frames`` was not an estimate: the header already
         promised that length, so a mismatch is a corrupt file, not a
@@ -575,6 +586,7 @@ def write_wav_stream(
         frames=frames,
         metadata_chunks=metadata_chunks,
     )
+    shown = escaped(os.fspath(path if named is None else named))
     written = 0
     odd = False
     with Path(path).open("wb") as fh:
@@ -589,7 +601,7 @@ def write_wav_stream(
         if written != frames and frames_are_estimate:
             _reconcile_streamed_header(
                 fh,
-                path,
+                shown,
                 fs=fs,
                 channels=channels,
                 subtype=subtype,
@@ -600,7 +612,7 @@ def write_wav_stream(
             frames = written
     if written != frames:
         msg = (
-            f"{escaped(os.fspath(path))}: the block stream carried {written} frames but the "
+            f"{shown}: the block stream carried {written} frames but the "
             f"header promised {frames}; the file is inconsistent"
         )
         raise ValueError(msg)
@@ -613,6 +625,7 @@ def write_wav(
     subtype: str,
     *,
     metadata_chunks: bytes = b"",
+    named: str | os.PathLike[str] | None = None,
 ) -> None:
     """Write ``(channels, samples)`` data as one WAV file, in one block."""
     write_wav_stream(
@@ -623,6 +636,7 @@ def write_wav(
         subtype,
         int(data.shape[-1]),
         metadata_chunks=metadata_chunks,
+        named=named,
     )
 
 
@@ -675,6 +689,7 @@ def _refuse_passthrough_dither(dither: str | None) -> None:
 
 def _write_pcm24(
     path: str | os.PathLike[str],
+    file: Path,
     data: np.ndarray,
     rate: int,
     resolved: str,
@@ -682,43 +697,51 @@ def _write_pcm24(
     rng: np.random.Generator | int | None,
     bext_payload: bytes | None,
 ) -> None:
-    """Quantise to 24-bit codes and write through the in-house packer."""
+    """Quantise to 24-bit codes and write them at *file* through the in-house packer.
+
+    *path* is the caller's name, which the warnings give.
+    """
     codes, clipped, peak_dbfs = _quantise(data, 24, dither, rng)
     if clipped:
         _warn_clipped(path, resolved, clipped, data.size, peak_dbfs)
     write_wav(
-        path,
+        file,
         codes,
         rate,
         resolved,
         metadata_chunks=(
             frame_riff_chunk(b"bext", bext_payload) if bext_payload is not None else b""
         ),
+        named=path,
     )
 
 
 def _write_through_scipy(
     path: str | os.PathLike[str],
+    file: Path,
     data: np.ndarray,
     rate: int,
     resolved: str,
     dither: str | None,
     rng: np.random.Generator | int | None,
 ) -> None:
-    """Quantise (PCM) or narrow (float) and hand scipy finished samples."""
+    """Quantise (PCM) or narrow (float) and hand scipy finished samples for *file*.
+
+    *path* is the caller's name, which the warnings give.
+    """
     tag, sample_bytes = _SUBTYPE_SPEC[resolved]
     if tag == 0x0001:
         codes, clipped, peak_dbfs = _quantise(data, 8 * sample_bytes, dither, rng)
         if clipped:
             _warn_clipped(path, resolved, clipped, data.size, peak_dbfs)
         _scipy_write(
-            path,
+            file,
             rate,
             codes.astype("<i2" if sample_bytes == _PCM16_SAMPLE_BYTES else "<i4"),
         )
     else:
         _scipy_write(
-            path,
+            file,
             rate,
             data if resolved == "DOUBLE" else real_array(data, "x").astype(np.float32),
         )
@@ -782,10 +805,18 @@ def write(
     quantisation math, the +1.0 edge, and why the scaling choice cancels
     out of calibrated results).
 
-    :param path: Destination file; the suffix picks the container: the
-        WAV family (``.wav``, ``.wave``, ``.bwf``) on the base install,
-        ``.flac`` with the ``[audio]`` extra. Lossy suffixes are refused
-        by decided policy.
+    :param path: Destination file; the suffix picks the container: the WAV
+        family (``.wav``, ``.wave``, ``.bwf``) on the base install,
+        ``.flac`` with the ``[audio]`` extra. Lossy suffixes are refused by
+        decided policy. With nothing at the name, or a regular file, the
+        audio is written to a new hidden file beside it, which takes the
+        name only once it is whole, so a write stopped half way (an error,
+        an interrupt) leaves what was there; the new file is readable by its
+        owner alone while it is written over a file, then keeps the
+        permission bits of the old one, and a hard link to the old file
+        keeps the old bytes. A link, a pipe, a device or a directory at the
+        name is opened there as Python opens it: a link is followed, a pipe
+        waits for a reader, a directory raises ``IsADirectoryError``.
     :param x: A :class:`Signal`, or an array in the library's channel
         convention (1-D mono, 2-D ``(channels, samples)``). Float data is
         quantised per ``subtype``; ``int16``/``int32`` arrays are written
@@ -856,7 +887,8 @@ def write(
         raise ValueError(msg)
     data, rate = _resolve_input(x, fs)
     if target.suffix.lower() == ".flac":
-        _write_flac(path, x, data, rate, subtype, bext, dither, rng)
+        with writing_beside(target) as file:
+            _write_flac(path, file, x, data, rate, subtype, bext, dither, rng)
         _write_signal_sidecar(path, carried)
         return
     resolved = _resolve_subtype(data, subtype)
@@ -864,15 +896,19 @@ def write(
     bext_payload = _resolve_bext(x, bext, data, rate, resolved)
     if data.dtype in _PASSTHROUGH_SUBTYPES:
         _refuse_passthrough_dither(dither)
-        _scipy_write(path, rate, data)
-    elif resolved == "PCM_24":
-        _write_pcm24(path, data, rate, resolved, dither, rng, bext_payload)
-        _write_signal_sidecar(path, carried)
-        return
-    else:
-        _write_through_scipy(path, data, rate, resolved, dither, rng)
-    if bext_payload is not None:
-        append_riff_chunk(path, b"bext", bext_payload)
+    # The audio is written beside a regular file at the name and takes its
+    # place whole: a write stopped half way leaves the old file there.
+    with writing_beside(target) as file:
+        if data.dtype in _PASSTHROUGH_SUBTYPES:
+            _scipy_write(file, rate, data)
+        elif resolved == "PCM_24":
+            _write_pcm24(path, file, data, rate, resolved, dither, rng, bext_payload)
+        else:
+            _write_through_scipy(path, file, data, rate, resolved, dither, rng)
+        # The in-house packer of PCM_24 writes the bext in the header; scipy
+        # writes none, so it is appended to what scipy wrote.
+        if bext_payload is not None and resolved != "PCM_24":
+            append_riff_chunk(file, b"bext", bext_payload, named=path)
     _write_signal_sidecar(path, carried)
 
 
@@ -946,6 +982,7 @@ def _flac_quantised_codes(
 
 def _write_flac(
     path: str | os.PathLike[str],
+    file: Path,
     x: Signal | ArrayLike,
     data: np.ndarray,
     fs: int,
@@ -968,10 +1005,12 @@ def _write_flac(
     CodingHistory line's ``A=FLAC`` naming the coding step.
 
     ``int16`` input passes its codes through bit-exact; ``int32`` input
-    is refused rather than silently dropped to 24 bits.
+    is refused rather than silently dropped to 24 bits. The file is written
+    at *file*; *path* is the caller's name, which a refusal and a warning
+    give.
     """
     from ._backends import _import_soundfile
-    from ._flac import embed_flac_bext
+    from ._flac import embed_flac_bext, flac_bext_block
 
     sf = _import_soundfile("FLAC")
     implied = _PASSTHROUGH_SUBTYPES.get(data.dtype)
@@ -990,13 +1029,16 @@ def _write_flac(
     else:
         resolved, out = _flac_quantised_codes(path, data, subtype, dither, rng)
     bext_payload = _resolve_bext(x, bext, data, fs, resolved, algorithm="FLAC")
+    if bext_payload is not None:
+        # Refused before python-soundfile writes the audio at path.
+        flac_bext_block(path, bext_payload)
     frames_first = np.ascontiguousarray(out.T)
     sf.write(
-        os.fspath(path),
+        os.fspath(file),
         frames_first[:, 0] if out.shape[0] == 1 else frames_first,
         fs,
         subtype=resolved,
         format="FLAC",
     )
     if bext_payload is not None:
-        embed_flac_bext(path, bext_payload)
+        embed_flac_bext(file, bext_payload, named=path)

@@ -11,11 +11,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { authorsFigure, strayDelimiter } from './page-prose.mjs';
+import { authorsFigure, shownLines, strayDelimiter } from './page-prose.mjs';
 
 test('a figure is found as the Spanish figure check reads a page', () => {
   assert.ok(authorsFigure('Texto \\`![alt](x.png)\\` aquí.'));
-  assert.ok(authorsFigure('Texto ![alt][ref] aquí.'));
+  assert.ok(authorsFigure('Texto ![alt][ref] aquí.\n\n[ref]: x.png'));
   assert.ok(authorsFigure('Texto <img src="x.png"> aquí.'));
   assert.ok(!authorsFigure('Texto `![alt](x.png)` aquí.'));
   assert.ok(!authorsFigure('Texto !``x``[alt](x.png) aquí.'));
@@ -45,4 +45,92 @@ test('a stray display delimiter is found as the maths check reads a line', () =>
   // An escaped dollar is shown and opens nothing: no `$$` stands on the line.
   assert.equal(strayDelimiter('Coste \\$$ en euros'), null);
   assert.equal(strayDelimiter('Coste \\\\$$ x'), 'Coste \\\\$$ x');
+});
+
+test('a code span read over the lines of its paragraph hides what it holds', () => {
+  // The renderer reads a code span across the line breaks of its paragraph;
+  // read line by line, a `![`, a `<img` or a `$$` inside one was prose.
+  assert.ok(!authorsFigure('Texto `a\n![alt](x.png)\nb` fin.'));
+  assert.ok(!authorsFigure('Texto `a\n<img src="x.png">\nb` fin.'));
+  // A blank line ends the paragraph, and a span never crosses it.
+  assert.ok(authorsFigure('Texto `a\n\n![alt](x.png) `b'));
+  const lines = ['Un `ejemplo', '$$ x', 'aquí` y fin.'];
+  const shown = shownLines(lines, [false, false, false]);
+  assert.equal(shown.length, 3);
+  assert.equal(strayDelimiter(shown[1]), null);
+  assert.equal(strayDelimiter(shownLines(['Un', '$$ x'], [false, false])[1]), '$$ x');
+});
+
+test('a comment shows no figure, and a figure after one is still one', () => {
+  assert.ok(!authorsFigure('<!-- <IMG src="old.png"> -->'));
+  assert.ok(!authorsFigure('<!-- ![alt](x.png) -->'));
+  assert.ok(authorsFigure('<!-- nota --> <img src="x.png">'));
+  assert.ok(!authorsFigure('{/* <img src="x.png"> */}', { mdx: true }));
+});
+
+test('a tag is an image only when its name is img', () => {
+  assert.ok(!authorsFigure('Texto <img-card src="x.png"> aquí.'));
+  assert.ok(!authorsFigure('Texto <img.card> aquí.'));
+  assert.ok(!authorsFigure('Texto <img:card> aquí.'));
+  assert.ok(authorsFigure('Texto <img/> aquí.'));
+  assert.ok(authorsFigure('Texto <img\nsrc="x.png"> aquí.'));
+});
+
+test('a backslash in a raw HTML block of a .md page escapes nothing', () => {
+  // CommonMark sends an HTML block as written: the image shows after the
+  // backslash. In MDX the backslash is a markdown escape, and shows the `<`.
+  assert.ok(authorsFigure('<div>\\<img src="x.png"></div>'));
+  assert.ok(!authorsFigure('<div>\\<img src="x.png"></div>', { mdx: true }));
+  assert.ok(!authorsFigure('Texto \\<img src="x.png"> aquí.'));
+});
+
+test('an image by reference is one only when the page defines its label', () => {
+  assert.ok(!authorsFigure('Texto ![alt] fin.'));
+  assert.ok(!authorsFigure('Texto ![alt][missing] fin.'));
+  assert.ok(authorsFigure('Texto ![alt][ref] fin.\n\n[ref]: x.png'));
+  assert.ok(authorsFigure('Texto ![Alt  Text][] fin.\n\n[alt text]: x.png'));
+  assert.ok(authorsFigure('Texto ![logo] fin.\n\n[LOGO]: x.png'));
+  assert.ok(authorsFigure('Texto ![alt](x.png) fin.'));
+});
+
+test('a pair of display delimiters with a third after it is stray', () => {
+  assert.equal(strayDelimiter('$$x$$ text $$'), '$$x$$ text $$');
+  // Two pairs on one line are two inline maths, not a stray delimiter.
+  assert.equal(strayDelimiter('$$x$$ $$y$$'), null);
+  assert.equal(strayDelimiter('$$x$$'), null);
+});
+
+test('a comment holding a backtick hides no figure after it', () => {
+  // The comments were taken out after the code spans, so the backtick in a
+  // comment opened a span that ran to the next backtick and hid the figure.
+  const md = 'Intro.\n\n<!-- old `code -->\n![fig](a.png) and `x`\n';
+  assert.equal(authorsFigure(md), true);
+  const mdx = 'Intro.\n\n{/* old `code */}\n![fig](a.png) and `x`\n';
+  assert.equal(authorsFigure(mdx, { mdx: true }), true);
+  // A comment opened inside a span is code, and hides nothing.
+  assert.equal(authorsFigure('A `<!--` span.\n\n![fig](a.png)\n'), true);
+});
+
+test('the maths check reads a comment with the code spans', () => {
+  const lines = ['<!-- a `', '$$x$$ text $$ -->', 'Prose `y` here.'];
+  const shown = shownLines(lines, [false, false, false]);
+  assert.equal(strayDelimiter(shown[1]), null);
+  const mdx = ['{/* a `', '$$x$$ text $$ */}'];
+  assert.equal(strayDelimiter(shownLines(mdx, [false, false], { mdx: true })[1]), null);
+});
+
+test('two inline displays on a line pair, and a third delimiter does not', () => {
+  // A `$` after the opening run is no display (micromark's math flow refuses
+  // it), so the line is a paragraph of two inline maths.
+  assert.equal(strayDelimiter('$$a$$ and $$b$$'), null);
+  assert.equal(strayDelimiter('$$x$$ text $$'), '$$x$$ text $$');
+  assert.equal(strayDelimiter('$$ x'), '$$ x');
+});
+
+test('a tag with text after it opens no raw block unless it is a block tag', () => {
+  // CommonMark 4.6: any tag but a block tag opens a raw block (type 7) only
+  // alone on its line, so the backslash here escapes the `<` of the image.
+  assert.equal(authorsFigure('<span>\\<img src="x.png"></span>\n'), false);
+  assert.equal(authorsFigure('<div>\\<img src="x.png"></div>\n'), true);
+  assert.equal(authorsFigure('Prose.\n<section>\\<img src="x.png"></section>\n'), true);
 });

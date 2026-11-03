@@ -175,7 +175,7 @@ time-varying result drawn without `ax`.
 
 ```python
 ZwickerLoudness.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

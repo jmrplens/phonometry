@@ -32,6 +32,8 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -230,7 +232,7 @@ class STIResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -371,7 +373,7 @@ def _validate_band_vector(values: ArrayLike, name: str) -> np.ndarray:
     if arr.shape != (_NUM_BANDS,):
         msg = (
             f"'{name}' must contain exactly {_NUM_BANDS} octave-band values "
-            f"(125 Hz - 8 kHz), got shape {arr.shape}."
+            f"(125 Hz to 8 kHz), got shape {arr.shape}."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(arr)):
@@ -903,7 +905,7 @@ def _stipa_modulation_depths(env: np.ndarray, fs: float) -> np.ndarray:
             mdr[k, j] = 2.0 * float(np.hypot(s, c)) / total
     if empty_bands:
         warnings.warn(
-            f"No energy in octave band(s) {empty_bands} (125 Hz - 8 kHz, "
+            f"No energy in octave band(s) {empty_bands} (125 Hz to 8 kHz, "
             "index 0-6): modulation depths set to 0 (TI = 0) there. A full "
             "STIPA measurement needs all seven carriers of the test signal.",
             STIWarning,

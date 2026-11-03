@@ -46,6 +46,8 @@ from ..._internal.validation import (
 from .reverberation_room_scattering import _positive_scalar
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike
@@ -176,7 +178,7 @@ class DiffusionResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -309,7 +311,7 @@ class DiffusionSpectrum(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -425,8 +427,8 @@ def directional_diffusion(
     :return: A :class:`DiffusionResult` with ``.plot()``.
     :raises ValueError: if ``angles_deg`` and ``levels`` differ in length or are
         shorter than two receivers.
-    :raises TypeError: if ``angles_deg`` or ``levels`` holds a text or a value that is
-        not a real number.
+    :raises TypeError: if ``angles_deg``, ``levels`` or ``weights`` holds a text or a
+        value that is not a real number.
     """
     ang = np.atleast_1d(real_array(angles_deg, "angles_deg"))
     lev = np.atleast_1d(real_array(levels, "levels"))
@@ -435,7 +437,7 @@ def directional_diffusion(
         {"angles_deg": ang.shape, "levels": lev.shape},
         "receiver",
     )
-    d = float(directional_diffusion_coefficient(lev, area_weights=weights))
+    d = _diffusion_coefficient(lev, weights, weights_name="weights")
     return DiffusionResult(angles_deg=ang, levels=lev, coefficient=d)
 
 
@@ -483,6 +485,21 @@ def directional_diffusion_coefficient(
     :raises TypeError: if ``area_weights`` or ``levels`` holds a text or a value that is
         not a real number.
     """
+    return _diffusion_coefficient(levels, area_weights, weights_name="area_weights")
+
+
+def _diffusion_coefficient(
+    levels: ArrayLike,
+    area_weights: ArrayLike | None,
+    *,
+    weights_name: str,
+) -> float:
+    """Formula (5) or (6), the weights refused by the name their caller gives them.
+
+    :param weights_name: ``area_weights`` from
+        :func:`directional_diffusion_coefficient`, ``weights`` from
+        :func:`directional_diffusion`.
+    """
     lvl = real_array(levels, "levels")
     if lvl.ndim != 1:
         msg = "'levels' must be a 1-D sequence of receiver SPLs."
@@ -495,15 +512,15 @@ def directional_diffusion_coefficient(
     if area_weights is None:
         weights = np.ones(n, dtype=np.float64)
     else:
-        weights = real_array(area_weights, "area_weights")
+        weights = real_array(area_weights, weights_name)
         if weights.ndim != 1 or weights.size != n:
             msg = (
-                "'area_weights' must match the number of receivers "
+                f"'{weights_name}' must match the number of receivers "
                 f"({n}), got shape {weights.shape}."
             )
             raise ValueError(msg)
         if np.any(weights <= 0.0):
-            msg = "'area_weights' values must be positive."
+            msg = f"'{weights_name}' values must be positive."
             raise ValueError(msg)
     weight_sum = float(np.sum(weights))
     # Settled: weights that add up to 1 in decimal leave Formula (6) with a

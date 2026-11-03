@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_ranks, require_same_length
+from .._internal.validation import real_number, require_ranks, require_same_length
 from ..io._resolve import resolve_fs
 from .distortion import (
     _amplitude_spectrum,
@@ -81,7 +81,7 @@ def _imd_component(
     :math:`d_2 = 1`).
     """
     df = float(freqs[1] - freqs[0]) if freqs.size > 1 else 0.0
-    nyquist = float(freqs[-1])
+    nyquist = real_number(freqs[-1], "freqs")
     if frequency <= 0.0 or frequency >= nyquist:
         return 0.0
     half = min(half_width, frequency - df)  # keep the DC bin out

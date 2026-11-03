@@ -121,7 +121,9 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    is_text,
     real_array,
+    real_number,
     require_choice,
     require_finite,
     require_positive,
@@ -264,11 +266,14 @@ _POSITIONS_RANK = 2
 _COORDINATES = 3
 
 
-def _band_index(frequency_hz: float) -> int:
-    """The one-third octave band of a frequency, 0 at 1 kHz (base-ten bands)."""
-    require_scalar(frequency_hz, "frequencies")
+def _band_index(frequency_hz: float, name: str = "frequencies") -> int:
+    """The one-third octave band of a frequency, 0 at 1 kHz (base-ten bands).
+
+    :param name: The caller's name for the frequency, which a refusal gives.
+    """
+    require_scalar(frequency_hz, name)
     if not math.isfinite(frequency_hz) or frequency_hz <= 0.0:
-        msg = f"'frequencies' must be positive and finite; got {frequency_hz!r}."
+        msg = f"'{name}' must be positive and finite; got {frequency_hz!r}."
         raise ValueError(msg)
     k = round(10.0 * math.log10(frequency_hz / 1000.0))
     if not 0 <= k - _LOWEST_K < len(_NOMINAL_THIRDS_HZ):
@@ -394,7 +399,7 @@ def qualification_frequencies(
     """
     require_scalar(high_hz, "high_hz")
     require_scalar(low_hz, "low_hz")
-    k_lo, k_hi = _band_index(low_hz), _band_index(high_hz)
+    k_lo, k_hi = _band_index(low_hz, "low_hz"), _band_index(high_hz, "high_hz")
     if k_hi < k_lo:
         msg = "'high_hz' must not lie below 'low_hz'."
         raise ValueError(msg)
@@ -445,7 +450,7 @@ def _checked_targets(
     targets: PathTarget | Sequence[PathTarget],
 ) -> tuple[PathTarget, ...]:
     """The A.3.3 targets of a traverse, one name or several, as a tuple."""
-    named = (targets,) if isinstance(targets, str) else tuple(targets)
+    named = (targets,) if is_text(targets) else tuple(targets)
     for target in named:
         require_choice(target, "targets", _PATH_TARGETS)
     return named
@@ -724,7 +729,7 @@ def _prefix_radius(
         fails = np.flatnonzero(failing[:, j])
         stop = int(fails[0]) if fails.size else n_points
         passed = np.flatnonzero(valid[:stop, j])
-        radius[j] = float(rs[passed[-1]]) if passed.size else 0.0
+        radius[j] = real_number(rs[passed[-1]], "rs") if passed.size else 0.0
     return radius, np.any(failing, axis=0)
 
 
@@ -1050,6 +1055,7 @@ class InverseSquareLawResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the deviation curves.
         :return: The axes.
+        :raises TypeError: if ``frequency_hz`` is not one real number.
         """
         from .._i18n import check_language
         from .._plot.free_field import plot_inverse_square_law

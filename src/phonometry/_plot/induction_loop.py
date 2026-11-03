@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.validation import real_number
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -353,7 +354,10 @@ def _response_panel(
     )
     ax.set_xscale("log")
     format_frequency_axis(
-        ax, float(frequencies[0]), float(frequencies[-1]), language=language
+        ax,
+        real_number(frequencies[0], "frequencies"),
+        real_number(frequencies[-1], "frequencies"),
+        language=language,
     )
     ax.set_xlabel(_t(_FREQUENCY, language))
     ax.set_ylabel(_t(_RESPONSE, language))

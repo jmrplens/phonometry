@@ -2296,6 +2296,141 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **One number a function reads is read by name.** A function that turned one
+  of its caller's numbers into a float with `float()`, or into a complex number
+  with `complex()`, parsed a text and kept the real part of a NumPy complex
+  number with no more than a `ComplexWarning`:
+  `aircraft.npd_atmosphere_increment(temperature_c="25")` read 25 °C, `b"25"`
+  too, and `metrology.combined_standard_uncertainty(["12"])` came back as 12.
+  About three hundred and sixty such readings, in public functions and in the
+  helpers they hand their numbers to, read through the shared reader of one
+  number now, which refuses a text, an array and a complex value with a
+  `TypeError` that names the parameter, and a number too large for a float with
+  a `ValueError`; a contribution to `combined_standard_uncertainty` that is
+  neither a number nor a pair is refused naming `contributions`. The name is
+  the parameter's where a reading ran in a loop too:
+  `signals.tone_burst(pre_silence="0.1")` named `'value'`,
+  `environment.amplitude_modulation_block` named `'v'` for its range, and the
+  uncertainties of `hearing.earmuff_insertion_loss`, the readings of
+  `broadcast.QuasiPeakDynamicsResult`, the surfaces and dimensions of the
+  reverberation models, the vocal efforts of `speech.standard_speech_spectra`
+  and the shear modulus of the Biot functions named a loop's variable or a word
+  of their own; each names its parameter now. So does a helper handed a public
+  parameter under a name of its own: `materials.weighted_absorption` and the
+  two third-octave ratings named `'values'` for a mapping of bands,
+  `emission.sound_intensity` named `'c'`, `'rho'` and `'spacing'`,
+  `aircraft.event_level` and `aircraft.noise_contour` named `'levels'` for both
+  tables, `environment.reflection_index` named `'values'`,
+  `environment.roughness_comparability` named `'noise_levels'` for either
+  spectrum, `emission.qualification_frequencies` named `'frequencies'` for its
+  band limits, and `emission.room_absorption_coefficient`,
+  `environment.barrier_insertion_loss` and the rectangular-duct and VDI 2081
+  bend attenuations named `'surface_area_m2'`, `'barrier_height'` and
+  `'width'`, which none of them takes. So does a reading further down a chain
+  of calls, or in another public function a public one hands its value to:
+  `emission.sound_power_comparison` and `emission.sound_energy_comparison`
+  named `'levels'` for the reference source's levels and background, and
+  `emission.sound_power_reverberation` for a background spectrum;
+  `building.regulation.spain.ra`, `ra_tr`, `dnt_a`, `d2m_nt_a` and
+  `d2m_nt_atr` named `'band_values'`; `materials.measure_sound_absorption`
+  named `'sample_area'`, `'temperature1_c'` and `'t1'`, and
+  `materials.absorption_coefficient` named `'temperature_c'` and
+  `'speed_of_sound'` for its second measurement and its first speed;
+  `materials.directional_diffusion` named `'area_weights'`;
+  `electroacoustics.verify_induction_loop_system` named `'noise_levels'`;
+  `emission.field_indicators` named `'short_time_intensity'`;
+  `fluids.sea_water` named `'model'`; the two in-situ silencer losses named
+  `'number'` for `case`; `noise_control.band_internal_levels` named `'peak'`;
+  `noise_control.valve_hydrodynamic_noise` named `'form'`;
+  `vibration.impact_mobility` named `'width_s'`, `'start_s'`, `'taper_s'` and
+  `'decay_rate_per_s'` for its window parameters; and the `.plot()` of a
+  `materials.TransferMatrix` named `'frequency'`. A parser of a file's text (an
+  ANP table, a JSON sidecar) still reads its text. A number computed with before the
+  result was converted is read the same way:
+  `aircraft.Aerodrome.pressure_ratio`, the two numbers of
+  `aircraft.MeanGroundPlaneResult.equivalent_height`, the `delay` and the FFT
+  length `n` of `materials.in_situ_reflection_factor` and the
+  `efficiency_correction` of a `noise_control.AerodynamicValveNoise` a caller
+  builds failed inside the arithmetic on a text with an error that named
+  nothing, and took a NumPy complex number through it to its real part or into
+  the phase.
+- **A wrapper of a text is refused where the text is.** A
+  `collections.UserString` is a sequence of characters, and the tests that
+  told a pair or a list of labels from a text by its type let it through:
+  `simulation.FDTD2D(shape=UserString("abc"))` was a `ValueError` about its
+  length where `"abc"` is a `TypeError`,
+  `metrology.combined_standard_uncertainty([UserString("12")])` a
+  `TypeError` about a nesting more than 32 deep, and the `excluded` corners
+  of `building.loudest_corner`, the `labels` of
+  `filters.FractionalOctaveBands`, the microphones of the free-field
+  corrections and the frequency pairs of the loudspeaker ratings and of the
+  impact mobility were measured or split the same way. So were the sources of
+  `environment.method_b_source_ranking`, where `[b"car"]` ranked `'99'`,
+  `'97'` and `'114'`, the `bands` of `environment.bin_amplitude_modulation`,
+  the `ffmpeg_options` of `io.VideoOptions`, the `channel_labels` of
+  `io.Signal` and a material of `simulation.scholte_speed` and of the elastic
+  engine, which read `b"abc"` as the numbers 97, 98 and 99. Each refuses the
+  wrapper, and a `bytes`, as it refuses the text, by the parameter's name;
+  where one name stands for a list of names (`parameters` of
+  `environment.binaural_indicators`, `targets` of
+  `emission.MicrophoneTraverse`, `vocal_efforts` of
+  `speech.standard_speech_spectra`, `basic_standards` of
+  `emission.NoiseEmissionDeclaration`), a wrapper is refused whole by the
+  parameter's name rather than split into its characters.
+- **A number too large for a float is refused among an array's numbers too.**
+  The shared readers of a caller's numbers let a Python integer past a
+  float's largest, such as `10**400`, through to NumPy's anonymous
+  `OverflowError`, and read a long double or a `Decimal` past that range as
+  an infinity with no more than a `RuntimeWarning`, which the checks after
+  them took for an infinity the caller gave. Each is a `ValueError` naming the
+  parameter now, as one such number alone already was, and an infinity the
+  caller gives is still read as one. A `Decimal` too large for its own
+  decimal context, such as `Decimal("1e1000000")`, raised `decimal.Overflow`
+  out of the reader of one number, and a finite `Decimal("1e400")` came back
+  as an infinity where the caller's decimal context traps `FloatOperation`;
+  both are the same `ValueError` now.
+- **`.report()` writes to a `pathlib.Path` or any path object.** The fiche
+  of every result took `path` as a text and handed it to ReportLab as it got
+  it, so a `pathlib.Path` built the whole fiche and then failed with
+  ReportLab's own error. Every `.report()` takes `str | os.PathLike[str]`
+  now, writes the PDF where the path names, and returns that path as a text.
+- **A recording, a fiche or a response plot stopped half way leaves the file
+  that was at its name.** `io.write`, the target of `io.convert`, every
+  `.report()` and the response plot of a filter bank wrote straight at the name
+  they were given, so an error or an interrupt half way left a file begun
+  there, over the recording or the fiche of an earlier run; a fiche too long
+  for its page was built at the name and removed again, the earlier fiche with
+  it. With nothing at the name, or a regular file, the new file is written
+  beside it and renamed over it once whole, keeping the old file's permission
+  bits, and is readable by its owner alone while it is written over a file, as
+  is the copy a FLAC `bext` is written through, so a recording kept private is
+  never written where others can read it (a sidecar or a catalogue written over
+  a file is held the same way, and so is the partial file of a video from
+  `io.write_video` and the two simulation writers, which ffmpeg or a node
+  wrote with the umask's bits and which took the place of a video kept private
+  as it was, readable by everyone; the video now keeps the old file's bits);
+  a hard link to the old file keeps the old bytes, the new file takes the
+  writer's owner and group and none of the old file's access control lists or
+  extended attributes, and the directory must take a new file. The hidden name
+  is cut to what the directory takes, as are the copy a FLAC `bext` is written
+  through and the partial file of a video, so a name as long as the directory
+  allows is written as any other, and `io.read`
+  takes a recording of such a name, whose sidecar's name no directory holds, as
+  one with no sidecar. A link, a pipe, a device or a directory at the name is
+  opened there as Python opens a name, as before: a recording streamed into a
+  pipe on purpose still goes into the pipe.
+- **`io.write` refuses a `bext` too long for a FLAC file before it writes
+  anything.** A payload past the 16 MiB a FLAC metadata block holds was
+  measured only once python-soundfile had written the audio at the path, so
+  the refusal left a FLAC file without its `bext` behind; the path is
+  untouched now.
+- **The refusals of a band range write it with "to".** The errors of
+  the speech transmission index (`speech.sti_from_impulse_response` and its
+  kin), `speech.speech_intelligibility_index`,
+  the noise criteria of `room`, the hearing threshold and the noise-induced
+  hearing loss functions of `hearing`, and the tonality warning wrote a range
+  as "(125 Hz - 8 kHz)", a spaced hyphen that reads as a minus beside
+  numbers; they write "125 Hz to 8 kHz", as the docstrings do.
 - **A record refuses a container that holds itself by the name of the field
   wherever the container sits.** A field the class's own `__post_init__`
   fills (`init=False`), an `InitVar` handed to it, a field a pickled or

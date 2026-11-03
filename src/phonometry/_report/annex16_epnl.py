@@ -56,6 +56,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..aircraft.certification import EPNLResult
     from .metadata import ReportMetadata
@@ -161,7 +163,7 @@ def _verdict_rows(
 
 def render_annex16_epnl_report(
     result: EPNLResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -24,7 +24,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.utils import _typesignal
-from ..._internal.validation import require_choice, require_scalar
+from ..._internal.validation import real_number, require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import apply_calibration, resolve_fs
 from ...signals.spectra import _welch_autospectrum
@@ -129,7 +129,7 @@ def _warn_degenerate(ft: float, band_power: float, df: float) -> None:
     if abs(ft - _F_MIN) <= df or abs(ft - _F_MAX) <= df:
         warnings.warn(
             f"The assessed peak at {ft:.1f} Hz lies within one bin of the "
-            "89.1 Hz - 11.2 kHz range-of-interest edge; the prominence "
+            "89.1 Hz to 11.2 kHz range-of-interest edge; the prominence "
             "verdict can flip with the bin snapping. Use a finer "
             "resolution_hz or check the tone frequency.",
             TonalityWarning,
@@ -280,7 +280,7 @@ def _averaged_spectrum(
             f"resolution: need at least {nperseg} samples, got {x.shape[-1]}."
         )
         raise ValueError(msg)
-    freqs, psd = _welch_autospectrum(x, float(fs), nperseg, nperseg // 2)
+    freqs, psd = _welch_autospectrum(x, real_number(fs, "fs"), nperseg, nperseg // 2)
     df = float(freqs[1] - freqs[0])
     return freqs, psd * df, df
 
@@ -291,7 +291,7 @@ def _find_peak(
     if tone_frequency is None:
         in_range = (freqs >= _F_MIN) & (freqs <= _F_MAX)
         if not np.any(in_range):
-            msg = "Spectrum has no bins in the 89.1 Hz - 11.2 kHz range."
+            msg = "Spectrum has no bins in the 89.1 Hz to 11.2 kHz range."
             raise ValueError(msg)
         return int(np.flatnonzero(in_range)[np.argmax(power[in_range])])
     _, _, dfc = _critical_band(tone_frequency)

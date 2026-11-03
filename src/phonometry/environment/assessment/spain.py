@@ -90,6 +90,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_aliased_choice,
     require_choice,
     require_count,
@@ -100,6 +101,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -512,7 +514,7 @@ def _band_tonal_corrections(
     differences = np.full(band_levels.shape, np.nan, dtype=np.float64)
     band_kt = np.full(band_levels.shape, np.nan, dtype=np.float64)
     for i in range(1, band_levels.size - 1):
-        thresholds = _kt_thresholds(float(freqs[i]))
+        thresholds = _kt_thresholds(real_number(freqs[i], "freqs"))
         if thresholds is None:
             continue
         neighbour_mean = 0.5 * (band_levels[i - 1] + band_levels[i + 1])
@@ -1364,7 +1366,7 @@ class ActivityAssessment(RichDisplay):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         verbose: bool = False,
@@ -1472,7 +1474,7 @@ def _annual_index(
         operating_days, "operating_days", at_least=None
     )
     weights = [float(operating_days)] + ([float(closed)] if closed else [])
-    values = [float(reported)] + ([closed_level] if closed else [])
+    values = [real_number(reported, "reported")] + ([closed_level] if closed else [])
     return long_term_corrected_level(values, weights=weights)
 
 

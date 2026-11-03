@@ -394,6 +394,7 @@ class TrackDecayRate(OwnsArrays):
         :param language: ``"en"`` or ``"es"``.
         :param kwargs: Passed to the rate line.
         :return: The axes drawn on.
+        :raises TypeError: if a frequency of ``limit_db_per_m`` is not one real number.
         """
         from ..._i18n import check_language
         from ..._plot.rolling_stock import plot_track_decay_rate

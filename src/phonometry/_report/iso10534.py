@@ -58,6 +58,8 @@ from ._layout import (
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
@@ -294,7 +296,7 @@ def _body(
 
 def render_iso10534_report(
     result: ImpedanceTubeResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

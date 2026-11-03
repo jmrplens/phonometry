@@ -50,6 +50,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_finite_fields,
@@ -414,11 +415,13 @@ class Aerodrome(RichDisplay):
             answers that with a complex number rather than an error, and a
             complex pressure ratio propagates silently into every thrust of the
             profile. Doc 29 claims the coefficients only up to 6,000 ft anyway.
+        :raises TypeError: if ``altitude_ft`` is not one real number.
         """
+        altitude = real_number(altitude_ft, "altitude_ft")
         base = (self.sea_level_pressure_inhg / _STANDARD_PRESSURE_INHG) ** (
             1.0 / _PRESSURE_EXPONENT
         )
-        bracket = base - _LAPSE_F_PER_FT * altitude_ft / _STANDARD_TEMPERATURE_R
+        bracket = base - _LAPSE_F_PER_FT * altitude / _STANDARD_TEMPERATURE_R
         if bracket <= 0.0:
             msg = (
                 "Eq. B-4 has no real pressure ratio at "
@@ -2850,6 +2853,7 @@ def approach_profile(
     :return: A :class:`FlightProfile` with ``operation="A"``.
     :raises ValueError: if the procedure carries no Land step to anchor it, or
         a step cannot be flown as specified.
+    :raises TypeError: if ``weight_lb`` is not one real number.
     :warns FlightProfileWarning: if consecutive Level-Idle steps are flown at
         different altitudes, or one's calibrated airspeed rises along it.
     """
@@ -2875,7 +2879,9 @@ def approach_profile(
         aircraft=aircraft,
         aerodrome=aerodrome,
         weight_lb=(
-            aircraft.approach_weight_lb if weight_lb is None else float(weight_lb)
+            aircraft.approach_weight_lb
+            if weight_lb is None
+            else real_number(weight_lb, "weight_lb")
         ),
         operation=_ARRIVAL,
     )

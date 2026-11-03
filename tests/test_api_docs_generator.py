@@ -1405,3 +1405,78 @@ def test_a_private_page_names_the_package_of_every_name_on_it() -> None:
         "`vibration.<name>`. `plot_junction_geometry` is published by "
         "`phonometry.building`."
     )
+
+
+def _written_module(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, name: str, source: str
+) -> object:
+    """A module written under *tmp_path* and imported by *name*."""
+    (tmp_path / f"{name}.py").write_text(source, encoding="utf-8")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    return importlib.import_module(name)
+
+
+def test_an_import_in_any_block_at_the_top_is_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The imports of a ``case``, a ``try`` with ``except*``, a ``with`` and a
+    loop bind at import time; only those of an ``if`` were read.
+    """
+    _written_module(
+        tmp_path,
+        monkeypatch,
+        "fake_docs_every_block",
+        """\
+import contextlib
+import sys
+
+match sys.maxsize:
+    case 0:
+        from json import dumps as in_case
+        IN_CASE = 0
+    case _:
+        from json import dumps as in_case
+        IN_CASE = 1
+try:
+    from json import loads as in_try
+    IN_TRY = 1
+except* ImportError:
+    pass
+with contextlib.nullcontext():
+    from json import JSONDecoder as in_with
+    IN_WITH = 1
+for _ in range(1):
+    from json import JSONEncoder as in_loop
+    IN_LOOP = 1
+""",
+    )
+    bound = gad._module_imports("fake_docs_every_block")
+    assert {"in_case", "in_try", "in_with", "in_loop"} <= set(bound)
+
+
+def test_the_keywords_of_a_stub_are_found_in_a_try_block(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The ``TypedDict`` a stub unpacks is found in any block at the top.
+
+    Only the blocks of an ``if`` were read, so one written in a ``try`` gave
+    the stub no keywords.
+    """
+    module = _written_module(
+        tmp_path,
+        monkeypatch,
+        "fake_docs_keywords",
+        "from typing import TypedDict\n"
+        "try:\n"
+        "    class Words(TypedDict):\n"
+        "        level: float\n"
+        "except ImportError:\n"
+        "    pass\n"
+        "class Record:\n"
+        "    pass\n",
+    )
+    stub = ast.parse("def __init__(self, **words: Unpack[Words]) -> None: ...").body[0]
+    assert isinstance(stub, ast.FunctionDef)
+    found = gad._keywords_class(module.Record, stub)  # type: ignore[attr-defined]
+    assert found is not None
+    assert found.name == "Words"

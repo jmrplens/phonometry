@@ -57,6 +57,7 @@ from .._internal.json_input import (
     read_at_most,
 )
 from .._internal.validation import (
+    real_number,
     require_axis_count,
     require_choice,
     require_equal_counts,
@@ -1627,6 +1628,7 @@ class ANPDatabase:
             and not ``"DEPARTURE"`` or ``"takeoff"``).
         :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
             a text.
+            ``relative_humidity_percent`` is refused the same way when it is not one real number.
         """
         atmosphere = _impedance_atmosphere(
             aerodrome, temperature_c, static_pressure_kpa
@@ -1701,6 +1703,7 @@ class ANPDatabase:
             and not ``"DEPARTURE"`` or ``"takeoff"``).
         :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
             a text.
+            ``relative_humidity_percent`` is refused the same way when it is not one real number.
         """
         atmosphere = _impedance_atmosphere(
             aerodrome, temperature_c, static_pressure_kpa
@@ -1795,7 +1798,11 @@ def _npd_air(
     route = require_choice(absorption, "absorption", _ABSORPTION)
     if relative_humidity_percent is None:
         return None
-    return _NPDAir(atmosphere, float(relative_humidity_percent), route)
+    return _NPDAir(
+        atmosphere,
+        real_number(relative_humidity_percent, "relative_humidity_percent"),
+        route,
+    )
 
 
 def _read_tables(path: str | os.PathLike[str] | None) -> dict[str, Traversable]:

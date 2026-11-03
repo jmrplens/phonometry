@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import errno
 import gc
 import logging
 import os
@@ -1116,3 +1117,102 @@ def test_the_choice_is_logged(
     with caplog.at_level(logging.INFO, logger="phonometry.io"):
         io.write_video(tmp_path / "w.webm", _animation())
     assert any("libsvtav1" in r.getMessage() for r in caplog.records)
+
+
+@pytest.fixture
+def usual_umask() -> Iterator[None]:
+    """The umask most systems start a user with: new files readable by everyone."""
+    kept = os.umask(0o022)
+    try:
+        yield
+    finally:
+        os.umask(kept)
+
+
+def _partial_modes(directory: Path) -> list[int]:
+    """The permission bits of each hidden partial file in *directory*."""
+    return sorted(
+        p.stat().st_mode & 0o777
+        for p in directory.iterdir()
+        if p.name.endswith(".partial")
+    )
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize(
+    ("before", "after"), [(0o600, 0o600), (0o640, 0o640), (0o644, 0o644), (None, 0o644)]
+)
+def test_a_video_written_over_a_file_is_private_while_written_and_keeps_its_bits(
+    before: int | None, after: int, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ffmpeg made the partial file with the umask's bits and it was renamed
+    as it was, so a video kept private was readable by everyone for good. The
+    partial file is made before ffmpeg opens it, readable by its owner alone
+    where it replaces a file, and given the old file's bits once whole.
+    """
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "clip.webm"
+    if before is not None:
+        target.write_bytes(b"the video that was there")
+        target.chmod(before)
+    seen: list[list[int]] = []
+    animation = _animation(
+        on_frame=lambda _k, _fig: seen.append(_partial_modes(tmp_path))
+    )
+    io.write_video(target, animation)
+    while_written = 0o600 if before is not None else 0o644
+    assert seen
+    assert all(modes == [while_written] for modes in seen)
+    assert target.stat().st_mode & 0o777 == after
+    assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
+    assert _partial_modes(tmp_path) == []
+
+
+def test_a_partial_file_the_directory_will_not_make_starts_no_ffmpeg(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The file is made before ffmpeg starts, and its refusal names the path."""
+    from phonometry.io import _video
+
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "clip.webm"
+    target.write_bytes(b"the video that was there")
+
+    def refused(path: Path, *, private: bool) -> int:
+        del private
+        raise PermissionError(errno.EACCES, "Permission denied", str(path))
+
+    monkeypatch.setattr(_video, "make_new", refused)
+    animation = _animation()
+    with pytest.raises(io.VideoEncoderError, match="could not write the video for"):
+        io.write_video(target, animation)
+    assert fake.encodes() == []
+    assert target.read_bytes() == b"the video that was there"
+    assert _partial_modes(tmp_path) == []
+
+
+def test_a_disk_that_refuses_the_finished_video_s_bits_leaves_what_was_there(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The old file's bits are given and the video flushed before the rename;
+    a disk that refuses either is the write's failure, naming the path.
+    """
+    from phonometry.io import _video
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "clip.webm"
+    target.write_bytes(b"the video that was there")
+
+    def full(written: Path, mode: int | None) -> None:
+        del mode
+        raise OSError(errno.ENOSPC, "No space left on device", str(written))
+
+    monkeypatch.setattr(_video, "flushed", full)
+    animation = _animation()
+    with pytest.raises(io.VideoEncoderError, match="No space left on device") as caught:
+        io.write_video(target, animation)
+    assert str(target) in str(caught.value)
+    assert ".partial" not in str(caught.value)
+    assert target.read_bytes() == b"the video that was there"
+    assert _partial_modes(tmp_path) == []

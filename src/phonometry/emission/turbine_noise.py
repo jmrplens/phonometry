@@ -124,6 +124,7 @@ from .._internal.levels_math import energy_mean
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -661,7 +662,7 @@ def _distance_along(
         across = float(np.hypot(*(offset - along * direction)))
         inside = -_GEOMETRY_TOLERANCE_M <= along <= span + _GEOMETRY_TOLERANCE_M
         if across <= _GEOMETRY_TOLERANCE_M and inside:
-            return float(lengths[i]) + min(max(along, 0.0), span)
+            return real_number(lengths[i], "lengths") + min(max(along, 0.0), span)
     msg = "A key position does not lie on the outline of the measurement surface."
     raise ValueError(msg)
 
@@ -804,7 +805,7 @@ def turbine_microphone_positions(
     overhead: list[bool] = []
 
     def add(x: float, y: float, z: float, label: str, *, top: bool = False) -> None:
-        rows.append((float(x), float(y), float(z)))
+        rows.append((real_number(x, "x"), real_number(y, "y"), real_number(z, "z")))
         labels.append(label)
         overhead.append(top)
 

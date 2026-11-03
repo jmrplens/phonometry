@@ -50,6 +50,8 @@ from ._material_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..materials.resilient.dynamic_stiffness import DynamicStiffnessResult
     from .metadata import ReportMetadata
@@ -205,7 +207,7 @@ def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> s
 
 def render_dynamic_stiffness_report(
     result: DynamicStiffnessResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

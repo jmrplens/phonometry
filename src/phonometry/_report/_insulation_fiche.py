@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import real_number, require_equal_shapes
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -45,6 +45,7 @@ from ._layout import (
 from .iso717 import _Y_TOP_AIRBORNE, _Y_TOP_IMPACT, _metadata_pairs
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable, Sequence
 
     from matplotlib.axes import Axes
@@ -183,7 +184,9 @@ def band_value_table(
             row.append(
                 cell
                 if isinstance(cell, str)
-                else format_number(float(cell), language, decimals=decimals)
+                else format_number(
+                    real_number(cell, "cell"), language, decimals=decimals
+                )
             )
         rows.append(row)
 
@@ -250,7 +253,7 @@ def iso717_columns_builder(
 def render_insulation_fiche(
     result: object,
     rating: WeightedRatingResult | ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     spec: dict[str, str],
     is_impact: bool,
@@ -426,7 +429,7 @@ class ResultBlock:
 
 
 def compose_insulation_fiche(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     title: str,
     basis: str,

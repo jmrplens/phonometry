@@ -131,7 +131,12 @@ import re
 import sys
 from typing import TYPE_CHECKING, NamedTuple
 
-from markdown_spans import blank_inline_spans
+from markdown_fences import code_lines
+from markdown_spans import (
+    blank_inline_spans,
+    blank_inline_spans_by_block,
+    lines_read_whole,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -728,11 +733,11 @@ _SINGULAR_ION = re.compile(r"[^\W\d_]*[cgsx]ion")
 #: longer matches anything fails the run.
 ALLOWED: dict[tuple[str, str], str] = {}
 
-#: What is not prose inside a value: a ``{placeholder}`` a renderer fills, an
-#: HTML tag or entity of a report fiche, and an inline code span. Mathematics
-#: is taken out separately, by :func:`_maths_runs`, because an escaped dollar
-#: does not open it.
-_NOT_PROSE = re.compile(r"\{[^{}]*\}|<[^<>]*>|&#?\w+;|`[^`]*`")
+#: What is not prose inside a value: a ``{placeholder}`` a renderer fills, and
+#: an HTML tag or entity of a report fiche. An inline code span is taken out
+#: first, as the site reads one (:mod:`markdown_spans`), and the mathematics
+#: after it, by :func:`_maths_runs`, because an escaped dollar does not open it.
+_NOT_PROSE = re.compile(r"\{[^{}]*\}|<[^<>]*>|&#?\w+;")
 
 #: A paragraph of a page: a run of lines up to the next blank one. Mathematics
 #: is paired inside a paragraph, so one stray dollar cannot hide the page.
@@ -788,8 +793,9 @@ def _maths_runs(text: str) -> list[tuple[int, int]]:
 
 def prose(text: str) -> str:
     """*text* with its mathematics, placeholders, markup and code blanked."""
-    chars = list(text)
-    for lo, hi in _maths_runs(text):
+    coded = blank_inline_spans(text)
+    chars = list(coded)
+    for lo, hi in _maths_runs(coded):
         chars[lo : hi + 1] = " " * (hi + 1 - lo)
     return _NOT_PROSE.sub(lambda m: " " * len(m.group(0)), "".join(chars))
 
@@ -836,8 +842,17 @@ def page_prose(text: str, *, script: bool = False) -> str:
     """
     if script:
         return text
-    lines = [blank_inline_spans(line) for line in text.split("\n")]
-    return blank_inline_spans("\n".join(lines), "$")
+    lines = text.split("\n")
+    code = list(code_lines(lines))
+    shown = lines_read_whole(
+        ["" if fenced else line for line, fenced in zip(lines, code, strict=True)],
+        blank_inline_spans_by_block,
+    )
+    kept = [
+        line if fenced else spoken
+        for line, spoken, fenced in zip(lines, shown, code, strict=True)
+    ]
+    return blank_inline_spans("\n".join(kept), "$")
 
 
 def _cased(word: str, right: str) -> str:

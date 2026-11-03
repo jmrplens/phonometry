@@ -28,6 +28,13 @@ bytes (on Windows without the read-only flag, which belongs to the file and
 is cleared for the rename). A writer that keeps a file already at the name
 puts the new file there in a step that refuses one, so that a file another
 program makes at the name while the new one is written is kept as well.
+
+A recording the library writes at a name a caller gives (``io.write``, the
+target of ``io.convert``) is written the same way when nothing or a regular
+file is at the name, through :func:`writing_beside`, so that a write stopped
+half way leaves the name as it was. A link, a pipe, a device, a socket or a
+directory at the name is opened there as Python opens it: a caller who names
+a pipe streams the recording into it on purpose.
 """
 
 from __future__ import annotations
@@ -44,6 +51,7 @@ from typing import TYPE_CHECKING
 from .validation import require_scalar
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
     from typing import BinaryIO
 
@@ -88,6 +96,19 @@ _NO_HARD_LINKS = frozenset({errno.EPERM, errno.ENOTSUP, errno.EOPNOTSUPP, errno.
 #: How the name is taken where no hard link is made: a new file, made only
 #: where nothing is at the name, a link that names nothing among them.
 _RESERVE = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
+
+#: The bits a new file beside a file it replaces is made with: readable and
+#: writable by its owner alone, so that nobody the old file keeps out opens
+#: the new one while its bytes go in (a reader keeps a file it opened however
+#: its bits change later). Nothing narrower lets the writer open it to write.
+_PRIVATE = 0o600
+#: The bits a new file that replaces nothing is made with, which the umask
+#: narrows as it narrows every new file: what Python's open makes it with.
+_USUAL = 0o666
+#: How a new file beside the target is made: as :data:`_RESERVE` makes one,
+#: and on Windows in binary, as Python's open makes it, so that no line end
+#: of the bytes is turned into two.
+_MAKE = _RESERVE | getattr(os, "O_BINARY", 0)
 
 #: The flag that keeps an open from waiting: opening a pipe for reading waits
 #: until a writer comes, which may be never. Windows has no such flag.
@@ -168,6 +189,43 @@ def not_regular_at(path: Path) -> str | None:
     return _not_regular(mode)
 
 
+#: The longest name a directory takes when it cannot say: 255 bytes on every
+#: common file system of Linux and macOS, 255 UTF-16 units on Windows, which
+#: no more than 255 bytes of UTF-8 ever take.
+_NAME_MAX = 255
+
+
+def _name_max(directory: Path) -> int:
+    """The longest name, in bytes, *directory* takes."""
+    try:
+        longest = os.pathconf(directory, "PC_NAME_MAX")
+    except (AttributeError, OSError, ValueError):
+        # No pathconf on Windows; no answer for a directory not there yet,
+        # where the write fails on its own.
+        return _NAME_MAX
+    return longest if longest > 0 else _NAME_MAX
+
+
+def beside_name(target: Path, tail: str) -> Path:
+    """A new hidden name beside *target*, which its directory can hold.
+
+    ``.{name}.{token}{tail}``, with a new random token on every call, so two
+    writers of one name never share theirs. The name of *target* is cut, at a
+    whole character, to what the directory's longest name leaves after the
+    dot, the token and *tail*: a target whose own name is as long as the
+    directory takes still gets a name beside it, where the whole name
+    written out would be refused as too long.
+
+    :param target: The name the file is for.
+    :param tail: What ends the new name, such as ``".partial"``.
+    """
+    token = secrets.token_hex(8)
+    room = _name_max(target.parent) - len(os.fsencode(f"..{token}{tail}"))
+    kept = os.fsencode(target.name)[: max(room, 0)]
+    stem = kept.decode(sys.getfilesystemencoding(), errors="ignore")
+    return target.with_name(f".{stem}.{token}{tail}")
+
+
 def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
     """Put *data* at *target* through a new file beside it, renamed into place.
 
@@ -184,19 +242,21 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
     bytes. The new file is flushed to the disk before the rename, and removed
     when anything fails before it.
 
-    On POSIX the new file is given the old one's bits before the rename, so
-    that a file kept private is never seen with any others. On Windows the
-    bits are the read-only flag, and a file that holds it can be neither
-    replaced nor removed: the new file is written without it, the old one's
-    flag is cleared just before the rename (and set again if the rename
-    fails), and the new file is given it once it is in place. A file the
-    caller keeps read-only is so replaced on Windows as on POSIX, stays
-    read-only, and the new file is never left beside it. Two things differ
-    on Windows. The flag belongs to the file, not to its name, so a hard
-    link to the old file, which keeps the old bytes, is left without it once
-    the flag is cleared for the rename. And a flag that cannot be set on the
-    new file once it is in place is not raised: the file is replaced, which
-    is what was asked, and it is left writable.
+    On POSIX the new file is made readable and writable by its owner alone
+    when it replaces a file, before any byte goes in, and given the old
+    one's bits before the rename, so that a file kept private is never seen
+    with any others. On Windows the bits are the read-only flag, and a file
+    that holds it can be neither replaced nor removed: the new file is
+    written without it, the old one's flag is cleared just before the rename
+    (and set again if the rename fails), and the new file is given it once
+    it is in place. A file the caller keeps read-only is so replaced on
+    Windows as on POSIX, stays read-only, and the new file is never left
+    beside it. Two things differ on Windows. The flag belongs to the file,
+    not to its name, so a hard link to the old file, which keeps the old
+    bytes, is left without it once the flag is cleared for the rename. And a
+    flag that cannot be set on the new file once it is in place is not
+    raised: the file is replaced, which is what was asked, and it is left
+    writable.
 
     :param target: Where the file goes.
     :param data: Its bytes.
@@ -211,10 +271,10 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
         failure before the file is in place; when the new file cannot be
         removed after it, a note on the error names the file left behind.
     """
-    temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
-    mode = _mode_of(target) if replace else None
+    temporary = beside_name(target, ".tmp")
+    mode = mode_of(target) if replace else None
     try:
-        with temporary.open("xb") as handle:
+        with os.fdopen(make_new(temporary, private=mode is not None), "wb") as handle:
             handle.write(data)
             handle.flush()
             if mode is not None and not _WINDOWS:
@@ -229,7 +289,90 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
         raise
 
 
-def _mode_of(target: Path) -> int | None:
+@contextlib.contextmanager
+def writing_beside(target: Path) -> Iterator[Path]:
+    """The name a writer of *target* writes to, renamed over *target* once it is whole.
+
+    With nothing at *target*, or a regular file there that no link stands
+    for, the writer is handed a new hidden name beside it, and the file it
+    writes there takes the place of *target* only once the writer is done: a
+    writer stopped half way, by an error or an interrupt, leaves *target* as
+    it was, and the new file is removed. The new file is made before the
+    writer opens it, readable and writable by its owner alone when it
+    replaces a file, so that a file kept private is never written where
+    others can read it; a writer that opens the name to write, as Python's
+    open does with ``"wb"``, keeps those bits. The new file is flushed to
+    the disk before the rename and keeps the permission bits of the old one,
+    and a hard link to the old file keeps the old bytes, as
+    :func:`write_beside` says. The new file is the writer's own: it takes
+    the writer's owner and group, and keeps neither the access control lists
+    nor the extended attributes of the old file. Its hidden name is cut to
+    what the directory takes (:func:`beside_name`), so a name as long as the
+    directory allows is written as any other. Anything else at the name, a
+    link, a pipe, a device, a socket or a directory, is handed back as it
+    is, for the writer to open as Python opens a name: a link is followed to
+    what it names, a pipe waits for a reader, and a directory raises
+    :class:`IsADirectoryError`. A writer of a recording streams it into a
+    pipe on purpose; a writer of a file the library reads back (a sidecar, a
+    catalogue) uses :func:`write_beside`, which refuses one.
+
+    :param target: Where the file goes.
+    :return: The name to write to, *target* itself or the new one beside it.
+    :raises OSError: as the file system raises it, untouched; when the new
+        file cannot be removed after a failure, a note on the error names the
+        file left behind.
+    """
+    if target.is_symlink() or not_regular_at(target) is not None:
+        yield target
+        return
+    temporary = beside_name(target, ".partial")
+    mode = mode_of(target)
+    os.close(make_new(temporary, private=mode is not None))
+    failure: BaseException | None = None
+    try:
+        yield temporary
+        flushed(temporary, mode)
+        _rename(temporary, target, mode)
+    except BaseException as error:
+        failure = error
+        raise
+    finally:
+        # Run however the generator is left: resumed with an error, closed at
+        # the yield without being resumed, or failing after it.
+        if failure is not None:
+            _discard(temporary, failure)
+
+
+def make_new(path: Path, *, private: bool) -> int:
+    """Make the new file *path*, open to write, where nothing is at the name.
+
+    A new file that is to replace one is made *private*, readable and
+    writable by its owner alone, before any byte goes in: a reader keeps a
+    file it has opened however its bits change after, so bits given once the
+    bytes are in come too late for a file the old one's bits keep from
+    others. Otherwise it takes the bits Python's open gives a new file.
+
+    :param path: The new file, a name beside the one it is for.
+    :param private: Whether it is made readable by its owner alone.
+    :return: The open file's descriptor, which the caller closes.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    return os.open(path, _MAKE, _PRIVATE if private else _USUAL)
+
+
+def flushed(written: Path, mode: int | None) -> None:
+    """Give the file *written* the permission bits *mode* and flush it to the disk.
+
+    On Windows the bits are the read-only flag, which :func:`_rename` sets
+    once the file is in place.
+    """
+    with written.open("r+b") as handle:
+        if mode is not None and not _WINDOWS:
+            os.fchmod(handle.fileno(), mode)
+        os.fsync(handle.fileno())
+
+
+def mode_of(target: Path) -> int | None:
     """The permission bits of the file at *target*, or ``None`` with none there.
 
     A file a caller keeps private (``0600``) stays private when it is written
@@ -313,7 +456,7 @@ def _install_over_reserved(temporary: Path, target: Path) -> None:
     :raises FileExistsError: for anything at *target*.
     :raises OSError: as the file system raises it, untouched.
     """
-    handle = os.open(target, _RESERVE, 0o666)
+    handle = os.open(target, _RESERVE, _USUAL)
     try:
         reserved = os.fstat(handle)
     finally:

@@ -81,6 +81,7 @@ from .._internal.types import answer_form, as_float_if_reduced, one_value
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     real_array,
+    real_number,
     require_axis_count,
     require_band_fraction,
     require_equal_counts,
@@ -650,10 +651,10 @@ def _validate_probe_signals(x1: np.ndarray, x2: np.ndarray) -> None:
 
 def _validate_probe_medium(fs: float, spacing: float, rho: float, c: float) -> None:
     """Reject a non-physical sample rate, probe spacing or medium."""
-    require_scalar(c, "c")
+    require_scalar(c, "speed_of_sound")
     require_scalar(fs, "fs")
-    require_scalar(rho, "rho")
-    require_scalar(spacing, "spacing")
+    require_scalar(rho, "density")
+    require_scalar(spacing, "spacing_m")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
@@ -821,7 +822,7 @@ def sound_intensity(
 
     if fraction is not None:
         band_limits = (
-            [float(limits[0]), float(limits[1])]
+            [real_number(limits[0], "limits"), real_number(limits[1], "limits")]
             if limits is not None
             else [12.0, 20000.0]
         )
@@ -1058,7 +1059,10 @@ def _temporal_indicator_for(
     require_scalar(n_bands, "n_bands")
     if temporal_intensity is None:
         return None
-    f1 = temporal_variability_indicator(temporal_intensity)
+    # Read by field_indicators' name for it, which
+    # temporal_variability_indicator calls short_time_intensity.
+    samples = real_array(temporal_intensity, "temporal_intensity")
+    f1 = temporal_variability_indicator(samples)
     f1_size = 1 if np.ndim(f1) == 0 else np.size(f1)
     if f1_size != n_bands:
         msg = (
@@ -1120,8 +1124,9 @@ def field_indicators(
         one column per band of the surface input. Supplying it fills
         ``f1`` on the returned result.
     :return: :class:`FieldIndicators`.
-    :raises TypeError: if ``frequencies``, ``normal_intensity`` or ``pressure_levels``
-        holds a text or a value that is not a real number.
+    :raises TypeError: if ``frequencies``, ``normal_intensity``, ``pressure_levels``
+        or ``temporal_intensity`` holds a text or a value that is not a real
+        number.
     """
     lp = np.atleast_1d(real_array(pressure_levels, "pressure_levels"))
     i_n = np.atleast_1d(real_array(normal_intensity, "normal_intensity"))

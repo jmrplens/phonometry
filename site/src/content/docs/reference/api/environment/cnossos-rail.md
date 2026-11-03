@@ -1162,6 +1162,7 @@ Wheel transfer function `L_H,VEH,i` of Table G-3b, in dB per axle.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the diameter is not tabulated. |
+| TypeError | if `diameter_mm` is not one real number. |
 
 ## WheelDiameter
 

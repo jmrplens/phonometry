@@ -307,7 +307,7 @@ Plot `Ln,f` against the shifted ISO 717-2 reference curve.
 
 ```python
 FlankingImpactLevelResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -381,7 +381,7 @@ Plot `Dn,f` against the shifted ISO 717-1 reference curve.
 
 ```python
 FlankingLevelDifferenceResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -897,7 +897,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 VibrationReductionResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

@@ -102,6 +102,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_scalar,
 )
@@ -318,7 +319,7 @@ def _warn_when_the_procedure_is_required(
     """
     if supplied is not None or volume is None or frequencies is None:
         return
-    value = float(volume)
+    value = real_number(volume, "volume")
     # `low_frequency_procedure_applies` raises on a volume that is not one, and
     # a warning is the wrong voice for that: every entry point has its own
     # complaint about a non-positive volume, so this check stands aside and
@@ -555,7 +556,7 @@ class LowFrequencyProcedure(OwnsArrays):
         t63 = self.reverberation_63_octave
         if t63 is None:
             return
-        value = float(t63)
+        value = real_number(t63, "t63")
         # Same ordering, and for the same reason, as in
         # `low_frequency_procedure_applies`: NaN is not caught by `<= 0.0`.
         if not math.isfinite(value) or value <= 0.0:

@@ -43,9 +43,16 @@ from typing import TYPE_CHECKING, Literal
 
 from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
-from .._internal.validation import check_engine, require_choice, require_scalar
+from .._internal.validation import (
+    check_engine,
+    is_text,
+    real_number,
+    require_choice,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from .._i18n import Language
@@ -69,7 +76,7 @@ def _round_db(value: float) -> int:
     unrounded measurement is rounded here, settled first so that a level that
     is a half in decimal and a last bit under it in binary rounds up.
     """
-    return int(round_half_up(float(value)))
+    return int(round_half_up(real_number(value, "value")))
 
 
 @dataclass(frozen=True)
@@ -278,7 +285,8 @@ class NoiseEmissionDeclaration(RichDisplay):
     def __post_init__(self) -> None:
         """Coerce the sequences to tuples and validate the form and mode count.
 
-        :raises TypeError: if ``form`` is not a text.
+        :raises TypeError: if ``form`` is not a text, or ``basic_standards`` is
+            neither a text nor a sequence of texts.
         """
         modes = tuple(self.modes)
         if not modes:
@@ -286,16 +294,23 @@ class NoiseEmissionDeclaration(RichDisplay):
             raise ValueError(msg)
         standards = (
             (self.basic_standards,)
-            if isinstance(self.basic_standards, str)
+            if is_text(self.basic_standards)
             else tuple(self.basic_standards)
         )
+        strangers = [s for s in standards if not isinstance(s, str)]
+        if strangers:
+            msg = (
+                "'basic_standards' must be a text or a sequence of texts, "
+                f"got {strangers[0]!r}."
+            )
+            raise TypeError(msg)
         require_choice(self.form, "form", ("dual-number", "single-number"))
         object.__setattr__(self, "modes", modes)
         object.__setattr__(self, "basic_standards", standards)
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

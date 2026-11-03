@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_number
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -203,6 +204,7 @@ def plot_inverse_square_law(
     :param kwargs: Forwarded to every deviation curve.
     :return: The axes.
     :raises ValueError: if ``frequency_hz`` is not one of the test frequencies.
+    :raises TypeError: if ``frequency_hz`` is not one real number.
     """
     from .._i18n import localize_axes
 
@@ -211,7 +213,9 @@ def plot_inverse_square_law(
     if frequency_hz is None:
         column = int(np.argmin(result.band_radius_m))
     else:
-        matches = np.flatnonzero(np.isclose(freqs, float(frequency_hz)))
+        matches = np.flatnonzero(
+            np.isclose(freqs, real_number(frequency_hz, "frequency_hz"))
+        )
         if matches.size == 0:
             msg = f"'frequency_hz' {frequency_hz:g} is not one of the test frequencies."
             raise ValueError(msg)

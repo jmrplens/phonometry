@@ -167,7 +167,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 HTLANResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -305,7 +305,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 NIPTSResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

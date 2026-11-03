@@ -86,6 +86,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_finite_array,
@@ -469,7 +470,11 @@ def _printed(value: float, decimals: int) -> float:
     under it and ties go to even; the standard reads its numbers as printed.
     """
     quantum = Decimal(1).scaleb(-decimals)
-    return float(Decimal(repr(float(value))).quantize(quantum, rounding=ROUND_HALF_UP))
+    return float(
+        Decimal(repr(real_number(value, "value"))).quantize(
+            quantum, rounding=ROUND_HALF_UP
+        )
+    )
 
 
 def _keeps_to(value: float, guide: float) -> bool:

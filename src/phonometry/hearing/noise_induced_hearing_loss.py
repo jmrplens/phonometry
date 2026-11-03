@@ -46,6 +46,8 @@ from .._internal.warnings import PhonometryWarning
 from .threshold import age_threshold
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -284,7 +286,7 @@ class NIPTSResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -438,7 +440,7 @@ class HTLANResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -497,7 +499,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not an ISO 1999 audiometric frequency "
-                f"(500 Hz - 6000 Hz)."
+                f"(500 Hz to 6000 Hz)."
             )
             raise ValueError(msg)
         idx.append(int(np.argmax(matches)))

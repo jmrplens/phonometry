@@ -117,6 +117,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     is_at_most,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -596,7 +597,9 @@ def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.nda
     from ..signals._test_signals import noise_signal
 
     settle = round(_NOISE_SETTLING_S * fs)
-    raw = noise_signal(float(fs), duration_s=(n + settle) / fs, color="pink", seed=seed)
+    raw = noise_signal(
+        real_number(fs, "fs"), duration_s=(n + settle) / fs, color="pink", seed=seed
+    )
     high = signal.butter(
         _BAND_LIMIT_ORDER, _BAND_LIMIT_HZ[0], "highpass", fs=fs, output="sos"
     )
@@ -665,7 +668,7 @@ def _zero_crossings(x: np.ndarray) -> np.ndarray:
 
 def _nearer_zero(x: np.ndarray, k: int) -> int:
     """Of the two samples either side of the crossing at ``k``, the smaller one."""
-    return k + 1 if abs(float(x[k + 1])) < abs(float(x[k])) else k
+    return k + 1 if abs(real_number(x[k + 1], "x")) < abs(real_number(x[k], "x")) else k
 
 
 def combi_signal(
@@ -1090,7 +1093,7 @@ def _band_requirement(
     name: RequirementName, clause: str, values: np.ndarray, low: float, high: float
 ) -> LoopRequirement:
     """A requirement with the same limits for every value."""
-    flat = tuple(float(v) for v in values.ravel())
+    flat = tuple(real_number(v, "values") for v in values.ravel())
     return LoopRequirement(
         name=name,
         clause=clause,
@@ -1197,8 +1200,9 @@ def verify_induction_loop_system(
         the 22 dB relaxation of 7.2 (:func:`assess_background_noise`).
     :return: An :class:`InductionLoopVerification`.
     :raises TypeError: if ``specified_level`` is not a single number, or
-        ``field_strength_levels``, ``frequencies``, ``response_db`` or
-        ``system_noise_levels`` holds a text or a value that is not a real number.
+        ``background_noise_levels``, ``field_strength_levels``, ``frequencies``,
+        ``response_db`` or ``system_noise_levels`` holds a text or a value that is
+        not a real number.
     """
     levels = _levels(field_strength_levels, "field_strength_levels")
     specified = require_finite(specified_level, "specified_level")
@@ -1225,6 +1229,11 @@ def verify_induction_loop_system(
         requirements.append(_frequency_response_requirement(frequencies, response_db))
     background = None
     if background_noise_levels is not None:
+        # Read here by this function's name for it, which
+        # assess_background_noise calls noise_levels.
+        background_noise_levels = require_finite_array(
+            background_noise_levels, "background_noise_levels"
+        )
         background = assess_background_noise(
             background_noise_levels, noise_is_tonal=noise_is_tonal
         )

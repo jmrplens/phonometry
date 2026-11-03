@@ -116,6 +116,59 @@ def test_a_global_name_the_scope_rebinds_is_no_module_function() -> None:
     assert ast_scan.binding_of(function, call, "keep") == ("binding", function)
 
 
+_HOMES = """
+def outer(items):
+    [(last := item) for item in items]
+    pattern = "a"
+
+    def strict():
+        nonlocal pattern
+        pattern = "b"
+
+    def setup():
+        global shared
+        shared = "c"
+
+    class Holder:
+        pattern = "d"
+
+        def method(self):
+            return pattern
+"""
+
+
+def test_a_write_or_a_read_reaches_the_scope_python_binds_the_name_in() -> None:
+    """The scope whose binding a name written or read at a node reaches: the
+    function around a comprehension for ``:=``, the function that binds a
+    name declared ``nonlocal``, the module for one declared ``global`` or
+    bound nowhere, and never a class body from a method.
+    """
+    tree = ast.parse(textwrap.dedent(_HOMES))
+    outer = tree.body[0]
+    assert isinstance(outer, ast.FunctionDef)
+    stores = {
+        (node.id, node.lineno): node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Name)
+    }
+    walrus, nonlocal_write = stores["last", 3], stores["pattern", 8]
+    global_write, read_in_method = stores["shared", 12], stores["pattern", 18]
+    assert ast_scan.binding_scope(tree, walrus, "last") is outer
+    assert ast_scan.binding_scope(tree, nonlocal_write, "pattern") is outer
+    assert ast_scan.binding_scope(tree, global_write, "shared") is tree
+    assert ast_scan.binding_scope(tree, read_in_method, "pattern") is outer
+    assert ast_scan.binding_scope(tree, read_in_method, "nowhere") is tree
+
+
+def test_forgetting_the_trees_empties_what_the_scopes_keep() -> None:
+    """A guard that reads each file once lets go of its tree when it is done."""
+    tree = ast.parse(textwrap.dedent(_HOMES))
+    ast_scan.binding_scope(tree, tree.body[0], "items")
+    assert ast_scan.own_names.cache_info().currsize > 0
+    ast_scan.forget_trees()
+    assert ast_scan.own_names.cache_info().currsize == 0
+
+
 def test_a_name_bound_two_ways_names_no_one_binding() -> None:
     tree = ast.parse("def f():\n    def g(): pass\n    g = make()\n")
     function = tree.body[0]
@@ -271,3 +324,265 @@ def test_a_call_reaches_the_defs_that_may_run_before_it() -> None:
         assert isinstance(call.func, ast.Name)
         bindings = _definitions(caller, call.func.id)
         assert ast_scan.live_bindings(tree, bindings, call) == reached, target
+
+
+def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
+    """The ``def``s of *name* in *source* the name may hold, by the number
+    each returns: at the call stored in *call* (the one call of *name* when
+    it is empty), or once the module has run.
+    """
+    tree = ast.parse(textwrap.dedent(source))
+    bindings = _definitions(tree, name)
+    point = _call_stored_in(tree, call) if call else None
+    if call == "":
+        point = next(
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call) and getattr(node.func, "id", "") == name
+        )
+    live = ast_scan.live_bindings(tree, bindings, point)
+    values = []
+    for binding in live:
+        returned = binding.body[0]
+        assert isinstance(returned, ast.Return)
+        assert isinstance(returned.value, ast.Constant)
+        values.append(returned.value.value)
+    return values
+
+
+def test_a_later_def_in_a_finally_or_an_else_replaces_an_earlier_one() -> None:
+    """Only the body of a ``try`` may be left between two ``def``s by an
+    exception the ``try`` catches: its ``finally`` and its ``else`` run on.
+
+    Every block of a ``try`` was read as the body, so two ``def``s of one name
+    in a ``finally`` were both kept and a guard read the union of the two.
+    """
+    finally_block = """
+    try:
+        pass
+    finally:
+
+        def helper():
+            return 1
+
+        def helper():
+            return 2
+    """
+    else_block = """
+    try:
+        pass
+    except ValueError:
+        pass
+    else:
+
+        def helper():
+            return 1
+
+        def helper():
+            return 2
+    """
+    handler_then_finally = """
+    try:
+        pass
+    except ValueError:
+
+        def helper():
+            return 1
+
+        fail()
+
+        def helper():
+            return 2
+
+    finally:
+        a = helper()
+    """
+    assert _held_at(finally_block, "helper") == [2]
+    assert _held_at(else_block, "helper") == [2]
+    assert _held_at(handler_then_finally, "helper", call="a") == [1, 2]
+
+
+def test_a_def_may_be_skipped_by_what_leaves_the_block_between() -> None:
+    """A later ``def`` replaces an earlier one only where nothing between the
+    two leaves their block and still reaches the point: a ``try`` or a
+    ``with`` around them, however deep, a ``break`` or a ``continue``.
+    """
+    nested_try = """
+    try:
+        if FAST:
+
+            def helper():
+                return 1
+
+            fail()
+
+            def helper():
+                return 2
+
+    except ValueError:
+        pass
+    a = helper()
+    """
+    within_with = """
+    with suppress(ValueError):
+
+        def helper():
+            return 1
+
+        fail()
+
+        def helper():
+            return 2
+
+    a = helper()
+    """
+    broken = """
+    for item in items:
+
+        def helper():
+            return 1
+
+        if item:
+            break
+
+        def helper():
+            return 2
+
+    a = helper()
+    """
+    continued = """
+    for item in items:
+
+        def helper():
+            return 1
+
+        if item:
+            continue
+
+        def helper():
+            return 2
+
+    a = helper()
+    """
+    for source in (nested_try, within_with, broken, continued):
+        assert _held_at(source, "helper", call="a") == [1, 2], source
+
+
+def test_a_def_after_a_call_in_a_loop_reaches_it_on_the_next_turn() -> None:
+    """A ``def`` written after a call in the body of a loop runs before that
+    call on the next turn, so the call may reach it as well as the one before
+    the loop; one written before the call in the body always runs first.
+
+    A binding after the call was read only when none ran before it, so the
+    call kept the ``def`` before the loop alone.
+    """
+    after = """
+    def helper():
+        return 1
+
+    for item in items:
+        a = helper()
+
+        def helper():
+            return 2
+    """
+    before_each_turn = """
+    for item in items:
+
+        def helper():
+            return 1
+
+        a = helper()
+
+        def helper():
+            return 2
+    """
+    replaced_each_turn = """
+    for item in items:
+        a = helper()
+
+        def helper():
+            return 1
+
+        def helper():
+            return 2
+    """
+    inner_loop = """
+    for row in rows:
+
+        def helper():
+            return 1
+
+        for item in row:
+            a = helper()
+
+            def helper():
+                return 2
+    """
+    while_test = """
+    def helper():
+        return 1
+
+    while helper():
+
+        def helper():
+            return 2
+    """
+    assert _held_at(after, "helper", call="a") == [1, 2]
+    assert _held_at(before_each_turn, "helper", call="a") == [1]
+    assert _held_at(replaced_each_turn, "helper", call="a") == [2]
+    assert _held_at(inner_loop, "helper", call="a") == [1, 2]
+    assert _held_at(while_test, "helper", call="") == [1, 2]
+
+
+def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
+    """The one walker the guards share reads each block a compound statement
+    holds, in the order of the source, and nothing of any other node.
+    """
+    source = """
+    if a:
+        b1 = 1
+    else:
+        b2 = 2
+    for x in y:
+        b3 = 3
+    else:
+        b4 = 4
+    async def f():
+        async for x in y:
+            b5 = 5
+        async with z:
+            b6 = 6
+    while a:
+        b7 = 7
+    try:
+        b8 = 8
+    except* ValueError:
+        b9 = 9
+    else:
+        b10 = 10
+    finally:
+        b11 = 11
+    with z:
+        b12 = 12
+    match a:
+        case 1:
+            b13 = 13
+        case _:
+            b14 = 14
+    """
+    tree = ast.parse(textwrap.dedent(source))
+    found = []
+    for node in ast.walk(tree):
+        for statement in ast_scan.block_statements(node):
+            if isinstance(statement, ast.Assign):
+                target = statement.targets[0]
+                assert isinstance(target, ast.Name)
+                found.append(target.id)
+    assert sorted(found, key=lambda name: int(name[1:])) == [
+        f"b{index}" for index in range(1, 15)
+    ]
+    function = next(
+        node for node in tree.body if isinstance(node, ast.AsyncFunctionDef)
+    )
+    assert ast_scan.block_statements(function) == []

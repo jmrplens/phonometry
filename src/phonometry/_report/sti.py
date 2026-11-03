@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -49,6 +50,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -186,7 +189,7 @@ def _verdict(
     0.50 it prints rather than on a digit the reader cannot see.
     """
     value = display_round(float(result.sti), 2)
-    required = display_round(float(requirement), 2)
+    required = display_round(real_number(requirement, "requirement"), 2)
     passed = value >= required
     text = t("STI = {value}, required &#8805; {req}", language).format(
         value=format_number(value, language, decimals=2),
@@ -215,7 +218,7 @@ def _basis_line(
 
 def render_sti_report(
     result: STIResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

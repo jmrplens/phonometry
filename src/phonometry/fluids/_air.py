@@ -22,7 +22,7 @@ from __future__ import annotations
 import math
 import warnings
 
-from .._internal.validation import require_scalar
+from .._internal.validation import real_number, require_scalar
 from ._state import Fluid, FluidAssumptionWarning, FluidWarning
 
 __all__ = [
@@ -244,6 +244,7 @@ def air(
         20 degC and 1 kPa, 50 % relative humidity asks for a water vapour mole
         fraction of 1,17, and a mole fraction cannot reach 1.
     :raises TypeError: if ``temperature_c`` is not a single number.
+        ``co2_mole_fraction``, ``relative_humidity_percent`` or ``static_pressure_pa`` are refused the same way when any is not one real number.
 
     Nothing else is refused. Annex F states a domain for its equations and this
     warns outside it, because a fit past its range is still arithmetic; what it
@@ -258,17 +259,17 @@ def air(
     pressure = (
         DEFAULT_STATIC_PRESSURE_PA
         if static_pressure_pa is None
-        else float(static_pressure_pa)
+        else real_number(static_pressure_pa, "static_pressure_pa")
     )
     humidity = (
         DEFAULT_RELATIVE_HUMIDITY_PERCENT
         if relative_humidity_percent is None
-        else float(relative_humidity_percent)
+        else real_number(relative_humidity_percent, "relative_humidity_percent")
     )
     carbon_dioxide = (
         DEFAULT_CO2_MOLE_FRACTION
         if co2_mole_fraction is None
-        else float(co2_mole_fraction)
+        else real_number(co2_mole_fraction, "co2_mole_fraction")
     )
     if not math.isfinite(pressure) or pressure <= 0.0:
         msg = "'static_pressure_pa' must be a finite positive pressure."

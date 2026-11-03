@@ -81,6 +81,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.validation import (
     real_array,
+    real_number,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -316,6 +317,7 @@ def reciprocity_air_attenuation(
         a pressure that is not positive, a humidity outside 0 % to 100 %, or a
         temperature at or below absolute zero.
     :raises TypeError: if ``static_pressure_pa`` is not a single number.
+        ``relative_humidity_percent`` or ``temperature_c`` are refused the same way when any is not one real number.
     """
     from ..fluids import air
 
@@ -326,7 +328,7 @@ def reciprocity_air_attenuation(
         static_pressure_pa=pressure,
         relative_humidity_percent=relative_humidity_percent,
     )
-    t = float(temperature_c)
+    t = real_number(temperature_c, "temperature_c")
     kelvin = _KELVIN + t
     a = _PSV
     saturation = math.exp(a[0] * kelvin**2 + a[1] * kelvin + a[2] + a[3] / kelvin)
@@ -372,7 +374,9 @@ def reciprocity_air_attenuation(
         frequencies=frequencies,
         temperature_c=t,
         static_pressure_pa=pressure,
-        relative_humidity_percent=float(relative_humidity_percent),
+        relative_humidity_percent=real_number(
+            relative_humidity_percent, "relative_humidity_percent"
+        ),
         water_vapor_mole_fraction=water,
         oxygen_relaxation_hz=oxygen_relaxation,
         nitrogen_relaxation_hz=nitrogen_relaxation,
@@ -1024,7 +1028,9 @@ def check_free_field_arrangement(
     return FreeFieldArrangementCheck(
         diaphragm_distances_m=distances,
         microphone_diameter_m=diameter,
-        support_length_m=None if support_length_m is None else float(support_length_m),
+        support_length_m=None
+        if support_length_m is None
+        else real_number(support_length_m, "support_length_m"),
         air_attenuation=attenuation,
     )
 
@@ -1255,6 +1261,7 @@ def free_field_parameter_uncertainty(
     :raises ValueError: for other than three distances or centres, a
         microphone that is not 1, 2 or 3, or acoustic-centre uncertainties
         that are not one value or one per frequency.
+    :raises TypeError: if ``temperature_c``, ``static_pressure_pa`` or ``relative_humidity_percent`` is not one real number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -1264,9 +1271,9 @@ def free_field_parameter_uncertainty(
     distances = _distances(diaphragm_distances_m, len(_TRIAD_PAIRS))
     centres = _positions(acoustic_centers_m, count, 3)
     conditions = (
-        float(temperature_c),
-        float(static_pressure_pa),
-        float(relative_humidity_percent),
+        real_number(temperature_c, "temperature_c"),
+        real_number(static_pressure_pa, "static_pressure_pa"),
+        real_number(relative_humidity_percent, "relative_humidity_percent"),
     )
     signs = _SIGNS[microphone]
 

@@ -236,7 +236,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 AirborneInsulationResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: Literal['dnt', 'r_prime'] = 'dnt',
     metadata: ReportMetadata | None = None,
@@ -448,7 +448,7 @@ matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 FacadeInsulationResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: Literal['d_2m_nt', 'd_2m_n', 'r_prime'] = 'd_2m_nt',
     metadata: ReportMetadata | None = None,
@@ -608,7 +608,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 ImpactInsulationResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: Literal['l_n_t', 'l_n'] = 'l_n_t',
     metadata: ReportMetadata | None = None,

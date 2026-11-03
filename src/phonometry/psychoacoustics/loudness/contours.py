@@ -16,6 +16,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -324,6 +325,7 @@ def equal_loudness_contours(
     :return: An :class:`EqualLoudnessContours`.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
+        An element of ``phons`` is refused the same way when it is not one real number.
     """
     if frequencies is None:
         grid = _FREQUENCIES
@@ -332,7 +334,7 @@ def equal_loudness_contours(
         for f in grid:
             _params(float(f))  # reject any non-preferred frequency
 
-    phon_tuple = tuple(float(p) for p in phons)
+    phon_tuple = tuple(real_number(p, "phons") for p in phons)
     contours = np.full((len(phon_tuple), grid.size), np.nan)
     for i, phon in enumerate(phon_tuple):
         contour = equal_loudness_contour(phon)

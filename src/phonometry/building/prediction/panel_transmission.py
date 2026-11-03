@@ -112,6 +112,7 @@ from ...vibration.structural._radiation_efficiency import coincidence_frequency
 from ...vibration.structural.point_mobility import plate_bending_stiffness
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
@@ -387,7 +388,7 @@ class SoundReductionResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         language: Language = "en",

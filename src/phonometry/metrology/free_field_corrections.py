@@ -101,7 +101,9 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
     check_engine,
+    is_text,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite,
@@ -119,6 +121,7 @@ from .uncertainty import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Hashable, Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -495,7 +498,7 @@ def _microphone_labels(
         than the number of determinations.
     """
     require_scalar(determinations, "determinations")
-    if isinstance(microphones, (str, bytes, bytearray)):
+    if is_text(microphones):
         msg = (
             "'microphones' must hold one label per determination, not a single string."
         )
@@ -1730,6 +1733,7 @@ def correction_uncertainty_budget(
     :raises TypeError: if ``correction``, ``frequency_hz``, ``repeatability_dof`` or
         ``static_pressure_kpa`` is not a single number, or a key of
         ``stated_uncertainties_db`` is not a text.
+        ``coverage`` is refused the same way when it is not one real number.
     """
     _require_table_i1_components(stated_uncertainties_db)
     frequency = require_positive(frequency_hz, "frequency_hz")
@@ -1742,7 +1746,7 @@ def correction_uncertainty_budget(
     signs: list[float] = []
     distribution: Distribution
     for key, row in IEC62585_TABLE_I1.items():
-        value = float(stated_uncertainties_db[key])
+        value = real_number(stated_uncertainties_db[key], "stated_uncertainties_db")
         if not (math.isfinite(value) and value >= 0.0):
             msg = f"'stated_uncertainties_db[{key!r}]' must be finite and non-negative; got {value!r}."
             raise ValueError(msg)
@@ -1809,7 +1813,7 @@ def correction_uncertainty_budget(
         divisors=np.asarray(divisors),
         dofs=np.array([quantity.dof for quantity in quantities]),
         uncertainty=result,
-        coverage=float(coverage),
+        coverage=real_number(coverage, "coverage"),
     )
 
 
@@ -1848,7 +1852,10 @@ def _at_most_each(
     is forgiven.
     """
     return np.array(
-        [_at_most(float(v), float(b)) for v, b in zip(values, bounds, strict=True)],
+        [
+            _at_most(real_number(v, "values"), real_number(b, "bounds"))
+            for v, b in zip(values, bounds, strict=True)
+        ],
         dtype=np.bool_,
     )
 
@@ -2084,7 +2091,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

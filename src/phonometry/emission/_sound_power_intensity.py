@@ -93,6 +93,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -107,6 +109,7 @@ from .._internal.types import BAND_SET_NAMES, ReportEngine
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_above_absolute_zero,
     require_band_fraction,
     require_equal_shapes,
@@ -424,7 +427,7 @@ class SoundPowerIntensityResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -757,7 +760,7 @@ def _classify(
                 "'repeatability_limit_db' on the result)."
             )
             raise ValueError(msg)
-        nominal = [round(float(f)) for f in np.asarray(frequencies)]
+        nominal = [round(float(f)) for f in real_array(frequencies, "frequencies")]
         s_eng = np.array([_table2_s(f, fraction) for f in nominal], dtype=np.float64)
         s_sur = np.full(n_bands, _S_SURVEY, dtype=np.float64)
 
@@ -834,7 +837,7 @@ def _a_weighted_total(
         total = float(np.sum(contrib[determinable]))
         return 10.0 * np.log10(total) if total > 0.0 else float("nan")
     if n_bands == 1:
-        return float(sound_power_level[0])
+        return real_number(sound_power_level[0], "sound_power_level")
     return float("nan")
 
 
@@ -959,6 +962,7 @@ class PrecisionCriteria(OwnsArrays):
         :raises ValueError: if a reading spans a different number of bands
             than the indicators, or one of a pair is given without the other,
             or the scans come without the limit ``s``.
+        :raises TypeError: if a band of ``frequencies`` is not one real number.
         """
         fields = (
             "scan_intensity_level_1",
@@ -1106,7 +1110,7 @@ class PrecisionCriteria(OwnsArrays):
 
 def _table_1_repeatability_db(frequencies: np.ndarray) -> np.ndarray:
     """The criterion-1 limit ``s`` of ISO 9614-3 Table 1 at each band centre, in dB."""
-    nominal = [round(float(f)) for f in frequencies]
+    nominal = [round(real_number(f, "frequencies")) for f in frequencies]
     return np.array([_sigma_r0_9614_3(f) for f in nominal], dtype=np.float64)
 
 
@@ -1296,7 +1300,7 @@ class PrecisionIntensityResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -1651,7 +1655,7 @@ def _precision_a_weighted_total(
     """
     if frequencies is None:
         if n_bands == 1 and not bool(not_applicable[0]):
-            return float(lw[0])
+            return real_number(lw[0], "lw")
         return float("nan")
     ck = _a_weighting_corrections(frequencies)
     contrib = 10.0 ** (0.1 * (lw + ck))

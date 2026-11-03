@@ -33,6 +33,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_count,
     require_finite_fields,
     require_ranks,
@@ -449,7 +450,7 @@ class StrikeSELSpectrum(OwnsArrays):
             msg = (
                 "StrikeSELSpectrum: 'band_sel' must be finite, or -inf for a "
                 "band that holds no energy at all; the "
-                f"{float(np.asarray(self.frequencies)[i]):g} Hz band states "
+                f"{real_number(np.asarray(self.frequencies)[i], 'frequencies'):g} Hz band states "
                 f"{float(band_sel[i])!r}."
             )
             raise ValueError(msg)

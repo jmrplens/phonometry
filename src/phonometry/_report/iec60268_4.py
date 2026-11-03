@@ -62,6 +62,8 @@ from .iec60268_5 import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.projections.polar import PolarAxes
     from reportlab.graphics.shapes import Drawing
 
@@ -303,7 +305,7 @@ def _verdict(
 
 def render_iec60268_4_report(
     result: MicrophoneCharacteristics,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     language: Language = "en",

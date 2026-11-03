@@ -99,7 +99,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
-from markdown_spans import blank_inline_spans, drop_inline_spans
+from markdown_spans import (
+    blank_inline_spans,
+    drop_inline_spans_by_block,
+    lines_read_whole,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -542,7 +546,6 @@ def _strip_exempt_markdown(
     """The line with every exempt use of the dash removed, and the carried state."""
     if _TITLE_LINE.match(line):
         return "", italic_open, quote_closer
-    line = drop_inline_spans(line)
     if _TABLE_ROW.match(line):
         line = "|".join(_PLACEHOLDER_ITEM.sub("", cell) for cell in line.split("|"))
     line, quote_closer = _outside_quotations(line, closer=quote_closer)
@@ -567,9 +570,14 @@ def markdown_hits(text: str) -> list[int]:
     caption = False
     opening = True
     lines = _decode_page(text).splitlines()
-    for number, (line, code) in enumerate(
-        zip(lines, code_lines(lines), strict=True), start=1
-    ):
+    code_flags = list(code_lines(lines))
+    # The inline code spans, read over the lines of their paragraph: a span
+    # that crosses a line break hides its dash on both lines.
+    shown = lines_read_whole(
+        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
+        drop_inline_spans_by_block,
+    )
+    for number, (line, code) in enumerate(zip(lines, code_flags, strict=True), start=1):
         if code:
             continue
         stripped = line.lstrip()
@@ -587,7 +595,10 @@ def markdown_hits(text: str) -> list[int]:
         if opening:
             caption, opening = _is_caption(line), False
         prose, italic_open, quote_closer = _strip_exempt_markdown(
-            line, italic_open=italic_open, quote_closer=quote_closer, caption=caption
+            shown[number - 1],
+            italic_open=italic_open,
+            quote_closer=quote_closer,
+            caption=caption,
         )
         if EM_DASH in prose and not in_reference:
             hits.append(number)

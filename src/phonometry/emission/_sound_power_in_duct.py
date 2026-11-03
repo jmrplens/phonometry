@@ -98,6 +98,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_finite_fields,
     require_per_band,
@@ -782,7 +783,7 @@ def _nominal_bands(frequencies: ArrayLike) -> np.ndarray:
 
 def _band_keys(frequencies: np.ndarray) -> list[int]:
     """The nominal integer key of each validated band centre."""
-    return [round(float(f)) for f in frequencies]
+    return [round(real_number(f, "frequencies")) for f in frequencies]
 
 
 def _check_shield(shield: object) -> str:

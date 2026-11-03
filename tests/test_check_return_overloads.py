@@ -777,6 +777,109 @@ def test_a_definition_a_later_one_replaces_is_never_reached(
     assert sorted(refused) == ["plot_maybe"]
 
 
+def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method is read in the class that holds it, and a class a later one
+    of its name replaces holds none the module keeps.
+
+    The ``_draw`` of two ``Result`` classes were read against each other, and
+    two blocks that share nothing keep both, so the polar axes of the first,
+    which no call reaches, refused the plain ``plot`` of the second.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        class Result:
+            def _draw(self):
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class Result:
+            def _draw(self):
+                return plt.subplots()[1]
+
+            def plot(self) -> Axes:
+                return self._draw()
+        """,
+    )
+    assert refused == {}
+
+
+def test_a_replaced_definition_is_never_reached_through_either_import(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call that two imports may reach reaches what each module holds.
+
+    The definitions a module holds once it has run were picked only when one
+    target stood for the name, so with an import in each branch of an
+    ``if``, the polar ``make`` a later plain one replaces was still read and
+    the plain ``plot`` refused.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def make():
+            return plt.subplots()[1]
+        """,
+        others="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots()[1]
+        """,
+        plots="""
+        def plot_either(result: object, fast: bool) -> Axes:
+            if fast:
+                from .helpers import make
+            else:
+                from .others import make
+            return make()
+        """,
+    )
+    assert refused == {}
+
+
+def test_a_module_s_import_in_each_branch_is_either(tmp_path: pathlib.Path) -> None:
+    """A name a module imports in each branch of an ``if`` is either at a call.
+
+    The imports of a module were read into one table, the last import of a
+    name standing for it, so the polar ``make`` the first branch imports was
+    never read and the plain ``plot`` that may return it passed.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        others="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots()[1]
+        """,
+        plots="""
+        if FAST:
+            from .helpers import make
+        else:
+            from .others import make
+
+        def plot_either(result: object) -> Axes:
+            return make()
+        """,
+    )
+    assert list(refused) == ["plot_either"]
+
+
 def test_each_branch_keeps_its_own_overload_heads(tmp_path: pathlib.Path) -> None:
     """Overloads written in each branch of an ``if`` belong to that branch's function.
 
@@ -1216,3 +1319,41 @@ def test_the_script_reports_and_fails(
     assert "plots.py:" in out
     assert "plot_pair: returns Axes | np.ndarray" in out
     assert cro.main([]) == 0
+
+
+def test_a_statement_in_any_block_is_read_through() -> None:
+    """The statements of a ``case``, an ``except*``, a loop and a ``while`` are
+    read as those of an ``if`` or a ``try`` are.
+
+    Only ``if``, ``try`` and ``with`` were read through, so a definition or an
+    assignment in any other block was missed.
+    """
+    source = textwrap.dedent(
+        """\
+        import contextlib
+        import sys
+
+        match sys.maxsize:
+            case 0:
+                from json import dumps as in_case
+                IN_CASE = 0
+            case _:
+                from json import dumps as in_case
+                IN_CASE = 1
+        try:
+            from json import loads as in_try
+            IN_TRY = 1
+        except* ImportError:
+            pass
+        with contextlib.nullcontext():
+            from json import JSONDecoder as in_with
+            IN_WITH = 1
+        for _ in range(1):
+            from json import JSONEncoder as in_loop
+            IN_LOOP = 1
+        while False:
+            IN_WHILE = 1
+        """
+    )
+    statements = {ast.unparse(node) for node in cro._statements(ast.parse(source).body)}
+    assert {"IN_CASE = 1", "IN_TRY = 1", "IN_LOOP = 1", "IN_WHILE = 1"} <= statements

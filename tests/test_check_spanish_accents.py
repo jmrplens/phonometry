@@ -436,6 +436,27 @@ def test_an_escaped_backtick_or_dollar_hides_no_word_of_a_page() -> None:
     ]
 
 
+def test_a_code_span_across_a_line_break_hides_its_word_from_a_page() -> None:
+    """A page reads a code span over the lines of its paragraph.
+
+    The spans were blanked one line at a time, so a span that crossed a line
+    break left its first line's word as prose.
+    """
+    assert _departures("Un `seno\nx` de 1 kHz", page=True) == []
+
+
+def test_a_value_reads_its_code_spans_as_the_site_reads_them() -> None:
+    """A span of two backticks holds a backtick, and an escaped backtick opens
+    no span, in a value of a translation table as in a page.
+
+    The values were read with a pattern of a backtick, anything but one and a
+    backtick, which read ````seno`x```` as a span of nothing and the word in
+    it as prose, and the word between two escaped backticks as code.
+    """
+    assert _departures("``seno`x`` de 1 kHz") == []
+    assert _departures("un \\`seno\\` de 1 kHz") == [("seno", "sinusoide")]
+
+
 def test_a_context_exempts_only_its_own_seno() -> None:
     """The function in a sentence does not let the waveform beside it through."""
     text = "el seno del ángulo y un seno de 1 kHz"

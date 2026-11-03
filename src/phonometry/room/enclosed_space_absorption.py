@@ -37,6 +37,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays, read_only
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -408,7 +409,7 @@ class ReverberationResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

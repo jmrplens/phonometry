@@ -185,7 +185,7 @@ One prediction, bundled with the coefficient and the error band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For anything [`fundamental_period`](/phonometry/reference/api/vibration/building-response/#fundamental_period) refuses. |
-| TypeError | if `coefficient` is not a single number, or `model` is not a text. |
+| TypeError | if `coefficient` is not a single number, or `model` is not a text. `height_m` is refused the same way when it is not one real number. |
 
 ## fundamental_frequency
 

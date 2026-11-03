@@ -172,7 +172,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `metric` or `mounting` is not a text, or `distances_m`, `exposure_levels`, `max_levels`, `observer`, `path` or `powers` holds a text or a value that is not a real number. |
+| TypeError | if `metric` or `mounting` is not a text, or `distances_m`, `exposure_levels`, `max_levels`, `observer`, `path` or `powers` holds a text or a value that is not a real number. `reference_speed_m_s` is refused the same way when it is not one real number. |
 
 ## FlightSegmentState
 
@@ -341,7 +341,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `metric` or `mounting` is not a text, or `distances_m`, `exposure_levels`, `max_levels`, `path`, `powers`, `x` or `y` holds a text or a value that is not a real number. |
+| TypeError | if `metric` or `mounting` is not a text, or `distances_m`, `exposure_levels`, `max_levels`, `path`, `powers`, `x` or `y` holds a text or a value that is not a real number. `reference_speed_m_s` is refused the same way when it is not one real number. |
 
 ## noise_fraction
 

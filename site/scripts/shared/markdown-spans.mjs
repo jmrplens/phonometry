@@ -97,10 +97,113 @@ export function dropInlineSpans(text, markers = '`') {
   return kept + text.slice(done);
 }
 
-/** `text` with every span of {@link inlineSpans} taken out, line by line. */
-export function dropInlineSpansByLine(text, markers = '`') {
-  return text
-    .split('\n')
-    .map((line) => dropInlineSpans(line, markers))
+/**
+ * Whether a line opens a block of its own: a heading, a row of a table, an
+ * item of a list or a quotation, which a code span never crosses into.
+ */
+const BLOCK_START = /^ {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)/;
+
+/** Whether a line is a block on its own line only: a heading or a table row. */
+const ONE_LINE_BLOCK = /^ {0,3}(?:#{1,6}(?:\s|$)|\|)/;
+
+/**
+ * A comment, by the page's kind: an HTML comment on a `.md` page, which
+ * opening a line is an HTML block (CommonMark 4.6, type 2) that runs to its
+ * `-->` and may interrupt a paragraph, and an MDX comment, an expression,
+ * beside it on a `.mdx` page.
+ */
+const COMMENTS = { md: /<!--[\s\S]*?-->/g, mdx: /<!--[\s\S]*?-->|\{\/\*[\s\S]*?\*\/\}/g };
+
+/** A line that opens a comment, by the page's kind. */
+const COMMENT_LINE = { md: /^ {0,3}<!--/, mdx: /^ {0,3}(?:<!--|\{\/\*)/ };
+
+/**
+ * `text` with every span of {@link inlineSpans} taken out, each block read
+ * whole: a code span may run over the lines of its paragraph, as the page
+ * reads it, but never past a blank line or into another block. Each span
+ * leaves {@link SPAN_MARK} and the line breaks it held, so the text keeps its
+ * lines, each where it was.
+ *
+ * With `comments` set to the page's kind, its comments go too, read with
+ * the spans in one pass left to right, whichever opens first winning: a
+ * comment opened inside a span is code, and a backtick inside a comment is
+ * the comment's. A line that opens a comment opens a block that runs to the
+ * comment's end, blank lines included.
+ *
+ * @param {string} text Prose, its fenced code already out (left as blank lines).
+ * @param {string} markers "`" for the code spans, "`$" for code and maths.
+ * @param {{ comments?: 'md' | 'mdx' }} [options] The page's kind, to read its
+ *   comments with its spans.
+ * @returns {string} The text, its spans out, with as many lines as it had.
+ */
+export function dropInlineSpansByBlock(text, markers = '`', { comments } = {}) {
+  return blocksOf(text.split('\n'), comments)
+    .map((block) => dropBlockSpans(block.join('\n'), markers, comments))
     .join('\n');
+}
+
+/** The lines of a page in the blocks a code span stays inside, every line in one. */
+function blocksOf(lines, comments) {
+  const opener = comments ? COMMENT_LINE[comments] : null;
+  const blocks = [];
+  let current = [];
+  const close = () => {
+    if (current.length) blocks.push(current);
+    current = [];
+  };
+  for (const line of lines) {
+    if (current.length && opener && unclosed(current, comments)) {
+      current.push(line);
+      continue;
+    }
+    if (!line.trim()) {
+      close();
+      blocks.push([line]);
+      continue;
+    }
+    if (BLOCK_START.test(line) || opener?.test(line)) close();
+    current.push(line);
+    if (ONE_LINE_BLOCK.test(line)) close();
+  }
+  close();
+  return blocks;
+}
+
+/** Whether a block opens with a comment its lines have not closed yet. */
+function unclosed(block, comments) {
+  if (!COMMENT_LINE[comments].test(block[0])) return false;
+  const pattern = new RegExp(COMMENTS[comments].source, 'y');
+  return !pattern.test(block.join('\n').trimStart());
+}
+
+/** The spans of one block, and its comments with `comments`, left to right. */
+function spansAndComments(block, markers, comments) {
+  if (!comments) return inlineSpans(block, markers);
+  const found = [];
+  let done = 0;
+  for (;;) {
+    const spans = inlineSpans(block.slice(done), markers);
+    const pattern = new RegExp(COMMENTS[comments].source, 'g');
+    pattern.lastIndex = done;
+    const comment = pattern.exec(block);
+    let next = spans.length ? [spans[0][0] + done, spans[0][1] + done] : null;
+    if (comment && (!next || comment.index < next[0])) {
+      next = [comment.index, comment.index + comment[0].length];
+    }
+    if (!next) return found;
+    found.push(next);
+    done = next[1];
+  }
+}
+
+/** One block with its spans out, each leaving its mark and its line breaks. */
+function dropBlockSpans(block, markers, comments) {
+  let kept = '';
+  let done = 0;
+  for (const [start, end] of spansAndComments(block, markers, comments)) {
+    const breaks = block.slice(start, end).split('\n').length - 1;
+    kept += block.slice(done, start) + SPAN_MARK + '\n'.repeat(breaks);
+    done = end;
+  }
+  return kept + block.slice(done);
 }

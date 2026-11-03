@@ -90,6 +90,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     real_array,
+    real_number,
     require_band_fraction,
     require_choice,
     require_positive,
@@ -730,8 +731,8 @@ def _room_qualified(check: FreeFieldCheck, freqs: np.ndarray) -> bool:
     else:
         return False
     within = bool(
-        _band_index(float(freqs[0])) >= _band_index(low)
-        and _band_index(float(freqs[-1])) <= _band_index(high)
+        _band_index(real_number(freqs[0], "freqs")) >= _band_index(low)
+        and _band_index(real_number(freqs[-1], "freqs")) <= _band_index(high)
     )
     return within and radius >= _RADIUS_M
 
@@ -748,11 +749,14 @@ def _annex_b(
     for k, p, i in zip(
         ks[compared], pressure[compared], intensity[compared], strict=True
     ):
-        if not math.isfinite(float(i)):
+        if not math.isfinite(real_number(i, "intensity")):
             msg = "'intensity_sound_power_level' must be finite from 50 Hz to 315 Hz."
             raise ValueError(msg)
         tolerance = float(_stepped(int(k), _TABLE_B1_DB, _K_50, "ISO 6926 Table B.1"))
-        agree &= abs(float(i) - float(p)) <= tolerance + 1e-9
+        agree &= (
+            abs(real_number(i, "intensity") - real_number(p, "pressure"))
+            <= tolerance + 1e-9
+        )
     replaced = (ks >= _K_50) & (ks <= _K_80) if agree else np.zeros(ks.size, dtype=bool)
     return replaced, agree
 
@@ -952,6 +956,7 @@ def reference_source_calibration(
         or ``radiation`` is not a text, or ``background_levels``, ``c2``,
         ``frequencies``, ``intensity_sound_power_level``, ``levels`` or ``max_levels``
         holds a text or a value that is not a real number.
+        ``knee_frequency_hz`` is refused the same way when it is not one real number.
     """
     require_choice(radiation, "radiation", ("monopole", "dipole", "unknown"))
     # Checked here as the text it must be: the column helper also serves the
@@ -1002,7 +1007,7 @@ def reference_source_calibration(
         knee_frequency_hz=(
             None
             if c2 is not None or knee_frequency_hz is None
-            else float(knee_frequency_hz)
+            else real_number(knee_frequency_hz, "knee_frequency_hz")
         ),
         intensity_sound_power_level=(
             None

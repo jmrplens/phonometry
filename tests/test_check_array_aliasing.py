@@ -503,6 +503,132 @@ def test_a_definition_a_later_one_replaces_is_never_reached(
     assert found == set()
 
 
+def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method is read in the class that holds it, and a class a later one
+    of its name replaces holds none the module keeps.
+
+    The ``keep`` of two ``Bank`` classes were read against each other, and two
+    blocks that share nothing keep both, so the first, which hands back its
+    argument and which no call reaches, made the record refused.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        class Bank:
+            def keep(self, x):
+                return x
+
+        class Bank:
+            def keep(self, x):
+                return x.copy()
+
+            def build(self, frequencies, levels):
+                f = self.keep(frequencies)
+                return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
+def test_a_helper_reads_a_sibling_written_after_it(tmp_path: pathlib.Path) -> None:
+    """A helper written before the sibling it calls reads what that returns.
+
+    Each helper was read where it is written, so ``hand``, written before
+    ``keep``, read ``keep`` as returning nothing, and the caller's array
+    ``keep`` hands back through ``hand`` was kept by the record unseen.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def later_sibling(frequencies, levels):
+            def hand():
+                return keep()
+
+            def keep():
+                return frequencies
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("later_sibling", "BandResult.frequencies", "frequencies")}
+
+
+def _chain_of_helpers(count: int) -> str:
+    """A function with *count* helpers, each written before the sibling it calls."""
+    names = [f"h{index}" for index in range(count)]
+    helpers = "".join(
+        f"    def {name}():\n        return "
+        f"{names[index + 1] + '()' if index + 1 < count else 'frequencies'}\n\n"
+        for index, name in enumerate(names)
+    )
+    return (
+        "import numpy as np\n\nfrom .results import BandResult\n\n"
+        "def chained(frequencies, levels):\n"
+        f"{helpers}"
+        "    f = h0()\n"
+        "    return BandResult(frequencies=f, levels=f * 0.0)\n"
+    )
+
+
+@pytest.mark.parametrize("count", range(1, 8))
+def test_a_chain_of_helpers_of_any_length_is_read_to_its_end(
+    tmp_path: pathlib.Path, count: int
+) -> None:
+    """Each helper written before the sibling it calls is read through.
+
+    The body was read a fixed four times for its helpers to settle, and each
+    reading settles one more helper of the chain, so a chain of six helpers or
+    more handed the caller's array back unseen.
+    """
+    found = _findings(tmp_path, rating=textwrap.dedent(_chain_of_helpers(count)))
+    assert found == {("chained", "BandResult.frequencies", "frequencies")}
+
+
+@pytest.mark.parametrize(
+    "block",
+    [
+        "match mode:\n    case 'a':\n{helper}\n    case _:\n{helper}",
+        "async with lock:\n{helper}",
+        "async for _ in modes:\n{helper}",
+        "try:\n{helper}\nexcept* ValueError:\n    pass",
+    ],
+)
+def test_a_helper_written_in_any_compound_statement_is_read(
+    tmp_path: pathlib.Path, block: str
+) -> None:
+    """A function written in a ``case`` of a ``match``, an ``async with``, an
+    ``async for`` or a ``try`` with ``except*`` is read as one in an ``if``.
+
+    The functions of a body were collected through ``if``, ``try``, ``with``
+    and the loops alone, so a helper written in a ``case`` got no record of
+    its own and the call of it reached nothing.
+    """
+    helper = "        def keep(x):\n            return x"
+    written = textwrap.indent(block.format(helper=helper), "    ")
+    found = _findings(
+        tmp_path,
+        rating=(
+            "from .results import BandResult\n\n"
+            "async def matched(frequencies, levels, mode, lock, modes):\n"
+            f"{written}\n"
+            "    f = keep(frequencies)\n"
+            "    return BandResult(frequencies=f, levels=f * 0.0)\n"
+        ),
+    )
+    assert found == {("matched", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_call_reaches_a_definition_an_if_may_have_put_before_it(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -1680,8 +1806,29 @@ def _handovers(tmp_path: pathlib.Path, body: str) -> set[tuple[str, str]]:
             write_deep_2(frames)
             return Run(frames=handed_over(frames), times=np.arange(n))
         """,
+        # A comprehension, a lambda and a nested function each keep a
+        # variable of the same spelling for themselves: Python keeps them
+        # apart from the array.
+        """
+        def run(n):
+            frames = np.zeros((n, 3))
+            labels = [str(frames) for frames in range(n)]
+            show = lambda frames: str(frames)
+
+            def count():
+                frames = len(labels)
+                return frames
+
+            show(count())
+            return Run(frames=handed_over(frames), times=np.arange(n))
+        """,
     ],
-    ids=["written-in-place", "optional-written-by-helpers", "three-helpers-deep"],
+    ids=[
+        "written-in-place",
+        "optional-written-by-helpers",
+        "three-helpers-deep",
+        "same-name-in-other-scopes",
+    ],
 )
 def test_an_array_nothing_else_can_reach_may_be_handed_over(
     tmp_path: pathlib.Path, body: str
@@ -1768,6 +1915,29 @@ def test_an_array_nothing_else_can_reach_may_be_handed_over(
                 return Run(frames=handed_over(frames), times=build())
             """,
             "frames is not bound once",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+
+                def swap():
+                    nonlocal frames
+                    frames = np.ones(3)
+
+                swap()
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is not bound once",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                rows = [frames for _ in range(n)]
+                return Run(frames=handed_over(frames), times=rows)
+            """,
+            "frames is read where it may be kept",
         ),
         (
             """
@@ -1956,6 +2126,8 @@ def test_an_array_nothing_else_can_reach_may_be_handed_over(
         "second-name",
         "loop-target",
         "bound-in-nested-scope",
+        "rebound-nonlocal",
+        "kept-by-a-comprehension",
         "view-kept",
         "transpose-kept",
         "view-written",

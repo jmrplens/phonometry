@@ -62,6 +62,7 @@ from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -269,7 +270,7 @@ def _clean_bathymetry(
             " itself, where the water ends, cannot carry a water column."
         )
         raise ValueError(msg)
-    if float(bd.max()) > float(z_prof[-1]) + 1e-9:
+    if float(bd.max()) > real_number(z_prof[-1], "z_prof") + 1e-9:
         msg = (
             "the bathymetry depths must not run below the sound-speed"
             " profile: the profile is the medium, so it must reach the"
@@ -1209,7 +1210,7 @@ def _march_arrival_rays(
         range_step=receiver_range / (n_steps - 1),
         n_steps=n_steps,
         lower=0.0,
-        upper=float(z_prof[-1]),
+        upper=real_number(z_prof[-1], "z_prof"),
         dynamic=DynamicRays(
             np.zeros(thetas.size), np.full(thetas.size, 1.0 / c0), z_prof, c_prof
         ),

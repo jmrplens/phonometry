@@ -84,6 +84,8 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -98,6 +100,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_finite_array,
@@ -252,7 +255,7 @@ class ReverberationSoundPowerResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -313,18 +316,20 @@ def _speed_of_sound(temperature_c: float) -> float:
     return float(20.05 * np.sqrt(273.0 + temperature_c))
 
 
-def _mean_level(levels: ArrayLike) -> np.ndarray:
+def _mean_level(levels: ArrayLike, name: str = "levels") -> np.ndarray:
     """Energy mean over microphone positions (rows), returning one value per
     band. A 1D input is treated as a single averaged spectrum (ISO 3741
     Eq. 16).
+
+    :param name: The caller's name for *levels*, which a refusal gives.
     """
-    arr = real_array(levels, "levels")
+    arr = real_array(levels, name)
     if arr.ndim == 1:
         return arr
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
         return energy_mean(arr, axis=0)
-    msg = "'levels' must be a 1D spectrum or a 2D (positions, bands) array."
+    msg = f"'{name}' must be a 1D spectrum or a 2D (positions, bands) array."
     raise ValueError(msg)
 
 
@@ -400,6 +405,7 @@ def _background_corrected_mean(
     frequencies: np.ndarray,
     *,
     reference: bool = False,
+    names: tuple[str, str] = ("levels", "background_levels"),
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Background-corrected mean room level and effective per-band ``K1``.
 
@@ -417,12 +423,16 @@ def _background_corrected_mean(
     single ``K1`` is computed from the averaged spectra: an approximation of
     the per-position procedure that is exact only when every position has the
     same source-to-background margin. Prefer per-position input.
+
+    :param names: The caller's names for *levels* and *background_levels*,
+        which a refusal gives: the reference source's in a comparison.
     """
-    arr = real_array(levels, "levels")
-    raw_mean = _mean_level(levels)
+    levels_name, background_name = names
+    arr = real_array(levels, levels_name)
+    raw_mean = _mean_level(levels, levels_name)
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
-        bg = real_array(background_levels, "background_levels")
+        bg = real_array(background_levels, background_name)
         # Checked before the broadcast, not after it. A 1-D spectrum of the
         # wrong length used to die inside `np.broadcast_to`, whose message
         # reports two shapes from inside numpy and names neither the argument
@@ -430,8 +440,8 @@ def _background_corrected_mean(
         expected = arr.shape[1:] if bg.ndim == 1 else arr.shape
         if bg.shape != expected:
             msg = (
-                "'background_levels' must match the per-position 'levels' "
-                "shape or be a single (bands,) spectrum."
+                f"'{background_name}' must match the per-position "
+                f"'{levels_name}' shape or be a single (bands,) spectrum."
             )
             raise ValueError(msg)
         if bg.ndim == 1:
@@ -439,14 +449,14 @@ def _background_corrected_mean(
         k1i, clamped = _k1_eq14(arr - bg, frequencies)
         corrected = energy_mean(arr - k1i, axis=0)
     else:
-        bg_mean = _mean_level(background_levels)
+        bg_mean = _mean_level(background_levels, background_name)
         # The per-position branch's check, one axis down: a spectrum of the
         # wrong band count used to die in the subtraction below with numpy's
         # two-shape message, which names neither the argument nor the function.
         if bg_mean.shape != raw_mean.shape:
             msg = (
-                "'background_levels' must carry one value per band "
-                f"({raw_mean.size} in 'levels'); got shape "
+                f"'{background_name}' must carry one value per band "
+                f"({raw_mean.size} in '{levels_name}'); got shape "
                 f"{np.shape(background_levels)}."
             )
             raise ValueError(msg)
@@ -691,7 +701,7 @@ def _comparison_inputs(
     :raises ValueError: if the reference levels, ``reference_sound_power_levels`` or ``frequencies``
         do not span the same bands as the source under test.
     """
-    lp_rss = _mean_level(reference_levels)
+    lp_rss = _mean_level(reference_levels, "reference_levels")
     lw_rss = _reference_power_levels(
         reference_sound_power_levels,
         frequencies,
@@ -732,7 +742,11 @@ def _a_weighted_total(
             # centres from room_parameters); the A-weighted total is undefined.
             return float("nan")
         return energy_sum(sound_power_level + ck)
-    return float(sound_power_level[0]) if n_bands == 1 else float("nan")
+    return (
+        real_number(sound_power_level[0], "sound_power_level")
+        if n_bands == 1
+        else float("nan")
+    )
 
 
 def sound_power_reverberation(
@@ -930,6 +944,7 @@ def _reference_source_level(
         reference_background_levels,
         _require_frequencies(freqs, "reference_background_levels"),
         reference=True,
+        names=("reference_levels", "reference_background_levels"),
     )
     return corrected
 

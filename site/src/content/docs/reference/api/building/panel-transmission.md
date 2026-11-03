@@ -895,7 +895,7 @@ requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 
 ```python
 SoundReductionResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     language: Literal['en', 'es'] = 'en',

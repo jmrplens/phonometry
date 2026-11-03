@@ -129,7 +129,7 @@ $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$ alone.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is out of range, or the cavitating branch was asked for without its peak frequency. |
-| TypeError | if `cavitation_fraction` or `internal_level` is not a single number, or `turbulent_peak` is not a single number. |
+| TypeError | if `cavitation_fraction`, `cavitation_peak`, `internal_level` or `turbulent_peak` is not a single number. |
 
 ## CAPACITY_SCALE_CONSTANTS
 

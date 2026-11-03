@@ -47,6 +47,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -66,6 +67,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable
 
     from reportlab.lib.styles import ParagraphStyle
@@ -142,7 +144,7 @@ def _level_cell(level: float, language: Language, decimals: int = 1) -> str:
     """One octave-band level cell, or an em dash when the band is absent."""
     if not math.isfinite(level):
         return "—"
-    return format_number(float(level), language, decimals=decimals)
+    return format_number(real_number(level, "level"), language, decimals=decimals)
 
 
 def _value_table(
@@ -453,8 +455,10 @@ def _verdict(
         passed = True
         value = "&lt;15"
     else:
-        passed = display_round(float(rating), 1) <= display_round(requirement, 0)
-        value = _rating_label(float(rating))
+        passed = display_round(real_number(rating, "rating"), 1) <= display_round(
+            requirement, 0
+        )
+        value = _rating_label(real_number(rating, "rating"))
     text = t("{symbol} {value}, required &#8804; {req}", language).format(
         symbol=symbol,
         value=value,
@@ -484,7 +488,7 @@ class LeftCellBuilder[R: NCResult | RCResult](Protocol):
 
 def _render_room_noise[R: NCResult | RCResult](
     result: R,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     basis_template: str,
     left_builder: LeftCellBuilder[R],
@@ -566,7 +570,7 @@ def _render_room_noise[R: NCResult | RCResult](
 
 def render_nc_report(
     result: NCResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -605,7 +609,7 @@ def render_nc_report(
 
 def render_rc_report(
     result: RCResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

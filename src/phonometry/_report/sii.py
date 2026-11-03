@@ -36,6 +36,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -53,6 +54,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping
 
     from reportlab.platypus import Table
@@ -234,7 +236,7 @@ def _verdict(
     prints rather than on a digit the reader cannot see.
     """
     value = display_round(float(result.sii), 3)
-    required = display_round(float(requirement), 3)
+    required = display_round(real_number(requirement, "requirement"), 3)
     passed = value >= required
     text = t("SII = {value}, required &#8805; {req}", language).format(
         value=format_number(value, language, decimals=3),
@@ -245,7 +247,7 @@ def _verdict(
 
 def render_sii_report(
     result: SIIResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

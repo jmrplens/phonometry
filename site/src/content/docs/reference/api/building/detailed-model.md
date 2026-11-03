@@ -490,7 +490,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 DetailedAirborneResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -593,7 +593,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 DetailedImpactResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

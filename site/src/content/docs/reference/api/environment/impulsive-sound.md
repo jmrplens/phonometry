@@ -289,7 +289,7 @@ Onset rate above 10 dB/s (clause 4.5; clause 8 applies the adjustment
 
 ```python
 ImpulseProminenceResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -376,7 +376,7 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for invalid `fs`, `dt`, an empty signal, an `x` that is not one channel (a 1-D series), or an `onset_rate_method` other than the two listed. |
-| TypeError | if `onset_rate_method` is not a text. |
+| TypeError | if `onset_rate_method` is not a text. `laeq` is refused the same way when it is not one real number. |
 
 ## ImpulsiveSoundResult
 

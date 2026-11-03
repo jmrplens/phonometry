@@ -562,7 +562,7 @@ def test_standard_speech_spectra_single_effort() -> None:
 
 
 def test_standard_speech_spectra_rejects_unknown_and_empty() -> None:
-    with pytest.raises(ValueError, match="'vocal_effort' must be one of"):
+    with pytest.raises(ValueError, match="'vocal_efforts' must be one of"):
         sii.standard_speech_spectra("whisper")
     with pytest.raises(ValueError, match=r"'vocal_efforts' cannot be empty"):
         sii.standard_speech_spectra([])

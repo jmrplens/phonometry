@@ -76,6 +76,7 @@ from .._internal.frozen import (
 from .._internal.validation import (
     holds_complex,
     holds_text,
+    is_text,
     refuse_complex,
     refuse_text,
     require_choice,
@@ -805,7 +806,7 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     msg = f"shape must be a pair of positive integers (ny, nx); got {given_repr(shape)}"
     if isinstance(shape, np.ndarray) and shape.ndim == 1:
         shape = shape.tolist()
-    if not isinstance(shape, Sequence) or isinstance(shape, str | bytes | bytearray):
+    if not isinstance(shape, Sequence) or is_text(shape):
         raise TypeError(msg)
     # The length of a fixed-size argument, not a quantity.
     if len(shape) != 2:  # noqa: PLR2004
@@ -1959,8 +1960,10 @@ class FDTD2D:
         """Advance the leapfrog scheme by one time step.
 
         Every plane wave is sampled before any field moves, so a refused
-        sample leaves the engine as it was, and a plane wave a waveform adds
-        while the step runs enters on the next step.
+        sample leaves the fields and the step count as they were. A plane
+        wave a waveform adds while the step samples is registered at once:
+        it stays registered when the step raises, and it enters on the next
+        step.
 
         :raises TypeError: if the waveform of a :class:`PlaneWaveSource`
             returns anything but one real number.
@@ -1974,9 +1977,10 @@ class FDTD2D:
         """One leapfrog step on the backend's arrays.
 
         Every plane wave is sampled before any field moves, so a sample the
-        step refuses leaves the engine as it was. The step samples and
-        injects the plane waves the engine held when it began, so one a
-        waveform adds while the step runs enters on the next step.
+        step refuses leaves the fields and the step count as they were. The
+        step samples and injects the plane waves the engine held when it
+        began, so one a waveform adds while the step runs, registered at
+        once and kept when the step raises, enters on the next step.
         """
         t_next = (self.n + 1) * self.dt
         planes = [

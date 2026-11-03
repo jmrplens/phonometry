@@ -42,10 +42,20 @@ a caller's value that no check has read on every path to it:
   ``getattr(x, name, x)``, whose default is the value itself), a tuple or a
   list that holds one, a name bound to one of those, or a name a ``for``
   loop or a comprehension takes from one, and a comprehension whose element
-  is so read; and, in a record's ``__post_init__``, a field, ``self.x``,
-  which the caller set. A private function's parameter counts as much as a
-  public one's: a public function hands its caller's value on to the helper
-  that converts it.
+  is so read; arithmetic on one (``x * 2``, ``-x``, ``x += y``), which
+  keeps a complex value complex and repeats or joins a list or a text,
+  checked as far as every operand it is made of was; and, in a record's
+  ``__post_init__``, a field, ``self.x``, which the caller set.
+- **A helper read through its calls**: a function at the top of a module
+  that no caller of the library reaches (its name, or a name of its
+  module's path, opens with an underscore, and no ``__all__`` publishes it)
+  and that the package only calls, never hands on, keeps in a table or
+  decorates with. Its parameters hold what its calls across the package
+  hand them, joined: a caller's value no check read where any call hands
+  one, checked where every call hands a checked one, and none where only
+  values the library computed reach it. The modules are read again until no
+  call hands anything new. Any other function's parameters, a method's and
+  a nested function's included, are a caller's values.
 - **A check**: a call of one of :data:`CHECKS` with the value among its
   arguments, or of a function of the library that hands that parameter to
   one on every path that leaves it by its end or a ``return`` (found by
@@ -70,11 +80,13 @@ a caller's value that no check has read on every path to it:
   an ``if`` holds after it only when the other branch checks too or leaves
   the function; a check in one branch does not reach the other; a check in
   a loop's body, a conditional expression, the right side of ``and`` or
-  ``or``, or a comprehension may not run, and holds only inside it.
+  ``or``, a later link of a chained comparison, or a comprehension may not
+  run, and holds only inside it; one in an ``assert``, which ``python -O``
+  leaves out, holds nowhere.
 
-A value the function computed (a local of its own arithmetic, a field of a
-record it was handed, which the record read when it was built) is no
-caller's, and the census lists it as computed. A field a record's method
+A value the function computed (a call of a function of the package that is
+no check, a field of a record it was handed, which the record read when it
+was built) is no caller's, and the census lists it as computed. A field a record's method
 reads outside ``__post_init__`` is listed apart: the record's constructor is
 where its caller's value was read.
 
@@ -83,12 +95,12 @@ the class is listed whole and not only what is left of it. ``--source``
 reads another copy of the library, with that copy's own checks.
 
 A conversion of a value that is no caller's number but that the rule cannot
-tell from one (the samples SciPy decoded from a file, a mask the engine
-builds, an array of objects an ``isinstance`` test has read item by item, the
-quick path of the readers themselves, the drawing helpers whose source the
-published clips fingerprint, which draw what a result holds) is listed in
-:data:`EXEMPT`, keyed by file and function with the reason; an entry that
-covers nothing is reported too.
+tell from one (an array of objects an ``isinstance`` test has read item by
+item, the quick path of the readers themselves, the drawing helper whose
+source the published clips fingerprint, which draws what a result holds, a
+stage handed to another function or to a root finder, a function held in a
+table, a private method) is listed in :data:`EXEMPT`, keyed by file and
+function with the reason; an entry that covers nothing is reported too.
 """
 
 from __future__ import annotations
@@ -98,9 +110,16 @@ import ast
 import pathlib
 import sys
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
-from ast_scan import ROOT, exempted, python_files, relative
+from ast_scan import (
+    ROOT,
+    block_statements,
+    exempted,
+    own_names,
+    python_files,
+    relative,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -131,6 +150,8 @@ NEEDS: dict[Kind, frozenset[Refusal]] = {"real": _BOTH, "complex": _TEXT}
 CHECKS: dict[str, frozenset[Refusal]] = {
     "real_array": _BOTH,
     "complex_array": _TEXT,
+    "real_number": _BOTH,
+    "complex_number": _TEXT,
     "refuse_complex": _COMPLEX,
     "refuse_text": _TEXT,
     "refuse_text_beside_choice": _TEXT,
@@ -201,6 +222,10 @@ _COMPLEX_TYPES = frozenset(
 #: ``=``, ``|``).
 _REAL_TEXTS = _REAL_TYPES | {"f2", "f4", "f8", "f16", "d", "f", "e", "g"}
 _COMPLEX_TEXTS = _COMPLEX_TYPES | {"c8", "c16", "c32", "D", "F", "G"}
+#: Python's own conversions of one value: ``float("94")`` parses a text and
+#: ``float(np.complex128(1 + 1j))`` keeps the real part with no more than a
+#: ``ComplexWarning``; ``complex("1+2j")`` parses a text too.
+_BUILTIN_SCALARS: dict[str, Kind] = {"float": "real", "complex": "complex"}
 #: The NumPy scalar types whose call converts one value.
 _SCALARS: dict[str, Kind] = {
     **dict.fromkeys(_REAL_TYPES - {"float", "float_"}, "real"),
@@ -261,26 +286,9 @@ _KEEPING_ATTRIBUTES = frozenset({"T", "mT"})
 #: cannot tell, keyed by the file relative to the repository and the function
 #: that holds them, with the reason.
 EXEMPT: dict[tuple[str, str], str] = {
-    ("src/phonometry/_plot/common.py", "_srgb_to_lab"): (
-        "an sRGB triple of the figure's own palette, which the contrast checks "
-        "of every drawing read; no caller hands it, and the clips fingerprint "
-        "this module's source"
-    ),
-    ("src/phonometry/_plot/common.py", "_facade_x_axis"): (
-        "the band axis of a result being drawn, a field the result read when "
-        "it was built; the clips fingerprint this module's source"
-    ),
-    ("src/phonometry/_plot/common.py", "_bar_width"): (
-        "the bar positions a renderer computed from a result's band axis; the "
-        "clips fingerprint this module's source"
-    ),
     ("src/phonometry/_plot/common.py", "_plot_band_level_bars"): (
         "the levels of a result being drawn, a field the result read when it "
         "was built; the clips fingerprint this module's source"
-    ),
-    ("src/phonometry/_plot/common.py", "_plot_two_runs"): (
-        "the band axis of a result being drawn, a field the result read when "
-        "it was built; the clips fingerprint this module's source"
     ),
     ("src/phonometry/_internal/validation.py", "real_array"): (
         "the shared reader itself, whose quick path converts only an array of "
@@ -290,37 +298,75 @@ EXEMPT: dict[tuple[str, str], str] = {
         "the shared reader itself, which converts only after it has refused a "
         "text at any depth"
     ),
-    ("src/phonometry/_internal/display.py", "_sequence_summary"): (
-        "a record's display, after an isinstance test that every item is an int "
-        "or a float; reading it through real_array would import the validation "
-        "module into the display module it imports"
-    ),
-    ("src/phonometry/io/_wav.py", "_scale_to_float"): (
-        "the samples SciPy decoded from a WAV file, an integer or a float array "
-        "by the format; no caller hands them"
-    ),
-    ("src/phonometry/simulation/elastic_fdtd.py", "_device_mask"): (
-        "a boolean mask the engine builds from the grid, sent to the device as "
-        "zeros and ones; no caller hands it"
-    ),
     ("src/phonometry/simulation/fdtd.py", "_held_map"): (
         "a map converted only when holds_complex and holds_text have found "
         "neither in it; anything else is handed back as given, for the checks "
         "of the medium to refuse in their own words"
     ),
-    ("src/phonometry/filters/weighting_compliance.py", "_edition_masks"): (
-        "the tolerance table of a published edition, the module's own "
-        "_WEIGHTING_EDITIONS that every caller looks up by the edition's name; "
-        "no caller hands it"
+    ("src/phonometry/_internal/catalogue.py", "PrintedNumber.__new__"): (
+        "a number printed in a catalogue, built from the text the table or the "
+        "user's file prints: reading that text is what it is for, and its "
+        "Decimal reads it first"
     ),
-    ("src/phonometry/materials/absorbers/uncertainty.py", "_table_constants"): (
-        "the m and n of the standard's Tables 1 and 2, the module's own tables, "
-        "looked up per band; the caller's frequencies, read through "
-        "_finite_bands first, are only the keys"
+    ("src/phonometry/io/_sidecar.py", "_real"): (
+        "converts only once the value, read by NumPy, is one number of a real "
+        "dtype kind, which no text and no complex value is"
     ),
     ("src/phonometry/simulation/fdtd.py", "_real_objects"): (
         "an array of objects converted only after an isinstance test that every "
         "item is a real number and no truth value"
+    ),
+    (
+        "src/phonometry/environment/propagation/barrier_reflection.py",
+        "_window_spectrum.piece",
+    ): (
+        "the closed form of one piece of the window, called by _window_spectrum "
+        "with the start, the length and the coefficients of its own three pieces"
+    ),
+    (
+        "src/phonometry/filters/weighting_compliance.py",
+        "_analytic_weighting_db._c_gain",
+    ): (
+        "a stage of the analytic weighting, called only with the frequencies "
+        "real_array read at the top of _analytic_weighting_db"
+    ),
+    (
+        "src/phonometry/filters/weighting_compliance.py",
+        "_analytic_weighting_db._a_gain",
+    ): (
+        "a stage of the analytic weighting, called only with the frequencies "
+        "real_array read at the top of _analytic_weighting_db"
+    ),
+    (
+        "src/phonometry/filters/weighting_compliance.py",
+        "_analytic_weighting_db._b_gain",
+    ): (
+        "a stage of the analytic weighting, called only with the frequencies "
+        "real_array read at the top of _analytic_weighting_db"
+    ),
+    ("src/phonometry/simulation/elastic_fdtd.py", "scholte_speed.characteristic"): (
+        "the characteristic equation of the Scholte wave, called on a grid of "
+        "trial values scholte_speed builds between bounds of its own and by the "
+        "root finder it is handed to"
+    ),
+    ("src/phonometry/filters/compliance.py", "_reference_bandwidth_1995"): (
+        "held in _BANDWIDTH_INTEGRALS and called with the fraction of the bank "
+        "under test, which the bank read through require_scalar when it was built"
+    ),
+    ("src/phonometry/vibration/human/exposure.py", "_band_limiting"): (
+        "a stage of the weighting handed to _evaluate_at, which calls it with the "
+        "complex frequencies it builds from the frequencies real_array read"
+    ),
+    ("src/phonometry/vibration/human/exposure.py", "_overall_weighting"): (
+        "a stage of the weighting handed to _evaluate_at, which calls it with the "
+        "complex frequencies it builds from the frequencies real_array read"
+    ),
+    (
+        "src/phonometry/vibration/structural/_impact_mobility.py",
+        "SingleModeFitResult._synthesize",
+    ): (
+        "a private method whose pole is the record's own, made a complex number "
+        "by the method that calls it; the frequencies are read through real_array"
     ),
 }
 
@@ -447,6 +493,13 @@ def converted(call: ast.Call, names: _Names = _PLAIN) -> tuple[ast.expr, Kind] |
         value = call.func.value
     elif name in _SCALARS and len(call.args) == 1:
         kind, value = _SCALARS[name], call.args[0]
+    elif (
+        isinstance(call.func, ast.Name)
+        and call.func.id in _BUILTIN_SCALARS
+        and len(call.args) == 1
+        and not call.keywords
+    ):
+        kind, value = _BUILTIN_SCALARS[call.func.id], call.args[0]
     else:
         return None
     return None if kind is None or value is None else (value, kind)
@@ -575,6 +628,106 @@ def _none_test(test: ast.expr) -> tuple[str | None, bool]:
     return None, False
 
 
+def _or_a_number(node: ast.expr) -> TypeGuard[ast.BoolOp]:
+    """Whether *node* is ``x or d`` with every operand after the first a
+    number or ``None``: what a check handed it reads is *x* whenever *x* is
+    a value at all, and otherwise the number, which the check accepts.
+    """
+    return (
+        isinstance(node, ast.BoolOp)
+        and isinstance(node.op, ast.Or)
+        and all(
+            isinstance(value, ast.Constant)
+            and (value.value is None or type(value.value) in {int, float})
+            for value in node.values[1:]
+        )
+    )
+
+
+#: The types an ``isinstance`` test may name whose instances are real
+#: numbers: neither a text nor a complex value passes the test.
+_REAL_CLASSES = frozenset(
+    {
+        "bool",
+        "int",
+        "float",
+        "Real",
+        "Rational",
+        "Integral",
+        "Fraction",
+        "Decimal",
+        "bool_",
+        "integer",
+        "signedinteger",
+        "unsignedinteger",
+        "floating",
+        *(f"{kind}{bits}" for kind in ("int", "uint") for bits in (8, 16, 32, 64)),
+        "float16",
+        "float32",
+        "float64",
+        "longdouble",
+    }
+)
+#: The types an ``isinstance`` test may name whose instances are numbers,
+#: complex ones among them: no text passes the test.
+_NUMBER_CLASSES = _REAL_CLASSES | frozenset(
+    {"complex", "Complex", "Number", "number", "inexact", "complexfloating"}
+    | {"complex64", "complex128", "clongdouble"}
+)
+
+
+def _class_refusals(node: ast.expr) -> frozenset[Refusal]:
+    """What an ``isinstance`` test of the types *node* names refuses in what
+    passes it: a text and a complex value for real numbers, a text for
+    numbers of any kind, nothing when one of the types is anything else.
+    """
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        return _class_refusals(node.left) & _class_refusals(node.right)
+    if isinstance(node, ast.Tuple):
+        refused = _BOTH
+        for member in node.elts:
+            refused &= _class_refusals(member)
+        return refused
+    name = _last_name(node)
+    if name in _REAL_CLASSES:
+        return _BOTH
+    if name in _NUMBER_CLASSES:
+        return _TEXT
+    return frozenset()
+
+
+#: The arguments of ``isinstance(value, types)``.
+_ISINSTANCE_ARGUMENTS = 2
+
+
+def _narrowed(test: ast.expr, *, holds: bool) -> dict[str, frozenset[Refusal]]:
+    """The names *test* finds to be numbers where it *holds* (or fails), with
+    what that refuses in each: ``isinstance(x, float)`` where it holds,
+    ``not isinstance(x, float)`` where it fails, each test of an ``and``
+    where it holds and each test of an ``or`` where it fails.
+    """
+    if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+        return _narrowed(test.operand, holds=not holds)
+    if isinstance(test, ast.BoolOp) and isinstance(test.op, ast.And) == holds:
+        # Each test of an ``and`` holds where it holds, and each test of an
+        # ``or`` fails where it fails.
+        found: dict[str, frozenset[Refusal]] = {}
+        for value in test.values:
+            found.update(_narrowed(value, holds=holds))
+        return found
+    if (
+        holds
+        and isinstance(test, ast.Call)
+        and isinstance(test.func, ast.Name)
+        and test.func.id == "isinstance"
+        and len(test.args) == _ISINSTANCE_ARGUMENTS
+        and isinstance(test.args[0], ast.Name)
+    ):
+        refused = _class_refusals(test.args[1])
+        return {test.args[0].id: refused} if refused else {}
+    return {}
+
+
 def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
     """The values a call that keeps them reads: its object as a method, its
     first argument as a function, every argument for ``zip`` and its kin;
@@ -615,6 +768,22 @@ def _numpy_function(call: ast.Call, names: _Names) -> bool:
     )
 
 
+def _operands(
+    node: ast.IfExp | ast.BoolOp | ast.BinOp | ast.UnaryOp,
+) -> list[ast.expr]:
+    """The values *node* may hand on: both branches of a conditional
+    expression, every operand of ``and`` and ``or``, and the operands of
+    arithmetic, which keep a bytearray's codes numbers.
+    """
+    if isinstance(node, ast.BoolOp):
+        return list(node.values)
+    if isinstance(node, ast.IfExp):
+        return [node.body, node.orelse]
+    if isinstance(node, ast.BinOp):
+        return [node.left, node.right]
+    return [node.operand] if isinstance(node.op, _ARITHMETIC_SIGNS) else []
+
+
 def _ends(block: Sequence[ast.stmt]) -> bool:
     """Whether *block* leaves the function or the loop at its end on every path."""
     if not block:
@@ -639,6 +808,10 @@ def _raises(block: Sequence[ast.stmt]) -> bool:
     return False
 
 
+#: The signs of arithmetic, which keep a complex value complex and a text
+#: a text where they run at all; ``not`` and ``~`` are no arithmetic.
+_ARITHMETIC_SIGNS = (ast.USub, ast.UAdd)
+
 _SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)
 _COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
 
@@ -652,6 +825,12 @@ class _Flow:
     checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
     names: _Names
     fields: bool
+    #: What a call of a check of the library hands back: the arguments it
+    #: returns, each with what the check refused in it (:func:`_checker`);
+    #: ``None`` for a call of anything else.
+    handed: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]] | None] = (
+        lambda _call: None
+    )
     found: dict[int, tuple[ast.Call, ast.expr, Kind, Verdict]] = field(
         default_factory=dict
     )
@@ -665,6 +844,11 @@ class _Flow:
     )
     #: Each ``lambda`` met, with what the names hold where it is written.
     lambdas: list[tuple[ast.Lambda, Env]] = field(default_factory=list)
+    #: Each ``class`` written in the function, with what the names hold there.
+    classes: list[tuple[ast.ClassDef, Env]] = field(default_factory=list)
+    #: Told of each call with what the names hold there, so that what a
+    #: private helper of the package is handed is read where it is called.
+    calling: Callable[[_Flow, ast.Call, Env], None] = lambda _flow, _call, _env: None
 
     # What a value holds.
 
@@ -697,6 +881,10 @@ class _Flow:
         if isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp):
             inner = self._comprehension_env(node, env, record=False)
             return self.state(node.elt, inner)
+        if isinstance(node, ast.BinOp):
+            return join(self.state(node.left, env), self.state(node.right, env))
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, _ARITHMETIC_SIGNS):
+            return self.state(node.operand, env)
         return None
 
     def _attribute(self, node: ast.Attribute, env: Env) -> State:
@@ -713,6 +901,16 @@ class _Flow:
         return state
 
     def _call(self, call: ast.Call, env: Env) -> State:
+        handed = self.handed(call)
+        if handed is not None:
+            # A check of the library hands back what it returns of its
+            # arguments, checked as far as it checked them: a parameter it
+            # never checked comes back the caller's value as it was.
+            state: State = None
+            for argument, refused in handed:
+                held = self.state(argument, env)
+                state = join(state, None if held is None else held | refused)
+            return state
         read = self.checks(call)
         if read:
             refusals: frozenset[Refusal] = frozenset()
@@ -734,6 +932,8 @@ class _Flow:
             return [ast.unparse(node)]
         if isinstance(node, ast.IfExp):
             return self._branches_read(node)
+        if _or_a_number(node):
+            return self.names_read(node.values[0])
         return [name for part in self._parts(node) for name in self.names_read(part)]
 
     def _branches_read(self, node: ast.IfExp) -> list[str]:
@@ -796,12 +996,29 @@ class _Flow:
             if isinstance(target.value, ast.Name) and target.value.id == "self":
                 env[f"self.{target.attr}"] = state
             return
+        if isinstance(target, ast.Subscript):
+            self._bind_item(target, state, env)
+            return
         if read is None:
             read = value is not None and self._numpy_reading(value, env)
         for name in _targets(target):
             self._set(env, name, state)
             if read:
                 env[_numpy_key(name)] = frozenset()
+
+    def _bind_item(self, target: ast.Subscript, state: State, env: Env) -> None:
+        """``x[i] = value``: the item holds *state* from here on, and *x*, a
+        caller's value, holds it among its items, so what a check made of *x*
+        as a whole holds only as far as *value* was checked too.
+        """
+        names = [name for name in self.names_read(target.value) if "[" not in name]
+        if not names:
+            return
+        env[ast.unparse(target)] = state
+        for name in names:
+            held = self.lookup(env, name)
+            if held is not None:
+                env[name] = join(held, state)
 
     @staticmethod
     def _set(env: Env, name: str, state: State) -> None:
@@ -831,12 +1048,22 @@ class _Flow:
             return
         if isinstance(node, ast.IfExp):
             self.expression(node.test, env, sure=sure)
-            self.expression(node.body, env, sure=False)
-            self.expression(node.orelse, env, sure=False)
+            self.expression(
+                node.body, self.narrowed(node.test, env, holds=True), sure=False
+            )
+            self.expression(
+                node.orelse, self.narrowed(node.test, env, holds=False), sure=False
+            )
         elif isinstance(node, ast.BoolOp):
             self.expression(node.values[0], env, sure=sure)
             for value in node.values[1:]:
                 self.expression(value, env, sure=False)
+        elif isinstance(node, ast.Compare) and len(node.comparators) > 1:
+            # A chained comparison stops at the first link that fails.
+            self.expression(node.left, env, sure=sure)
+            self.expression(node.comparators[0], env, sure=sure)
+            for comparator in node.comparators[1:]:
+                self.expression(comparator, env, sure=False)
         elif isinstance(node, _COMPREHENSIONS):
             self._comprehension_env(node, env, record=True)
         elif isinstance(node, ast.NamedExpr):
@@ -871,6 +1098,7 @@ class _Flow:
         return isinstance(node, _SCOPES)
 
     def _at_call(self, call: ast.Call, env: Env, *, sure: bool) -> None:
+        self.calling(self, call, env)
         if (found := converted(call, self.names)) is not None:
             value, kind = found
             self._record(call, value, kind, self._verdict(value, kind, env))
@@ -895,13 +1123,8 @@ class _Flow:
             return _numpy_key(node.id) in env
         if isinstance(node, ast.NamedExpr):
             return self._numpy_reading(node.value, env)
-        if isinstance(node, ast.IfExp | ast.BoolOp):
-            parts = (
-                node.values
-                if isinstance(node, ast.BoolOp)
-                else [node.body, node.orelse]
-            )
-            return any(self._numpy_reading(part, env) for part in parts)
+        if isinstance(node, ast.IfExp | ast.BoolOp | ast.BinOp | ast.UnaryOp):
+            return any(self._numpy_reading(part, env) for part in _operands(node))
         if not isinstance(node, ast.Call) or not _numpy_function(node, self.names):
             return False
         state = self._joined(_kept(node, self.names), env)
@@ -982,11 +1205,26 @@ class _Flow:
             self.nested[node.name] = node
             self.defined.setdefault(id(node), []).append(dict(env))
             return env, False
+        if isinstance(node, ast.ClassDef):
+            self.classes.append((node, dict(env)))
+            return env, False
         if isinstance(node, _SCOPES):
             return env, False
         for child in ast.iter_child_nodes(node):
             self.expression(child, env)
         return env, isinstance(node, ast.Return | ast.Raise | ast.Continue)
+
+    def narrowed(self, test: ast.expr, env: Env, *, holds: bool) -> Env:
+        """A copy of *env* where *test* holds (or fails): each caller's value
+        an ``isinstance`` test finds to be a number holds what it refuses
+        (:func:`_narrowed`).
+        """
+        inner = dict(env)
+        for name, refused in _narrowed(test, holds=holds).items():
+            held = self.lookup(inner, name)
+            if held is not None:
+                inner[name] = held | refused
+        return inner
 
     def _assign(
         self, node: ast.Assign | ast.AnnAssign | ast.AugAssign, env: Env
@@ -995,6 +1233,7 @@ class _Flow:
             return env, False
         self.expression(node.value, env)
         if isinstance(node, ast.AugAssign):
+            self._augment(node, env)
             return env, False
         state = self.state(node.value, env)
         read = self._numpy_reading(node.value, env)
@@ -1003,10 +1242,27 @@ class _Flow:
             self.bind(target, node.value, state, env, read=read)
         return env, False
 
+    def _augment(self, node: ast.AugAssign, env: Env) -> None:
+        """``x += y``: *x* holds what arithmetic on both holds, a caller's
+        value when either is one, with only the refusals both made.
+        """
+        target = node.target
+        state = join(self.state(target, env), self.state(node.value, env))
+        if isinstance(target, ast.Name):
+            env[target.id] = state
+        elif isinstance(target, ast.Subscript):
+            self._bind_item(target, state, env)
+        elif self.fields and self._reads_field(target):
+            env[f"self.{target.attr}"] = state
+
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
         self.expression(node.test, env)
-        body, body_ends = self.block(node.body, dict(env))
-        other, other_ends = self.block(node.orelse, dict(env))
+        body, body_ends = self.block(
+            node.body, self.narrowed(node.test, env, holds=True)
+        )
+        other, other_ends = self.block(
+            node.orelse, self.narrowed(node.test, env, holds=False)
+        )
         reached = [
             e for e, ends in ((body, body_ends), (other, other_ends)) if not ends
         ]
@@ -1043,12 +1299,25 @@ class _Flow:
             return after, True
         return _join_envs(reached, self.default), False
 
-    def captured(self, function: ast.FunctionDef | ast.AsyncFunctionDef) -> Env:
+    def captured(
+        self, function: ast.FunctionDef | ast.AsyncFunctionDef, end: Env
+    ) -> Env:
         """What the names a nested *function* shares with this one hold for
-        it: where it is used, or, used nowhere here, where it is defined.
+        it: where it is used, or, used nowhere here, where it is defined,
+        joined with what they hold at the end of this one, *end*, after which
+        a closure handed out may still be called.
         """
         envs = self.used.get(id(function)) or self.defined.get(id(function), [])
-        return _join_envs(envs, self.default)
+        return _join_envs([*envs, end], self.default)
+
+    def _assert(self, node: ast.Assert, env: Env) -> tuple[Env, bool]:
+        """Read an ``assert``, which ``python -O`` leaves out: a conversion in
+        it is a conversion, but no check or binding in it holds after it.
+        """
+        self.expression(node.test, env, sure=False)
+        if node.msg is not None:
+            self.expression(node.msg, env, sure=False)
+        return env, False
 
     def _break(self, node: ast.Break, env: Env) -> tuple[Env, bool]:
         del node
@@ -1061,7 +1330,8 @@ class _Flow:
             self.expression(item.context_expr, env)
             if item.optional_vars is not None:
                 state = self.state(item.context_expr, env)
-                self.bind(item.optional_vars, None, state, env)
+                read = self._numpy_reading(item.context_expr, env)
+                self.bind(item.optional_vars, None, state, env, read=read)
         return self.block(node.body, env)
 
     def _try(self, node: ast.Try | ast.TryStar, env: Env) -> tuple[Env, bool]:
@@ -1085,13 +1355,10 @@ class _Flow:
     def _match(self, node: ast.Match, env: Env) -> tuple[Env, bool]:
         self.expression(node.subject, env)
         subject = self.state(node.subject, env)
+        read = self._numpy_reading(node.subject, env)
         reached: list[Env] = []
         for case in node.cases:
-            inner = dict(env)
-            for capture in ast.walk(case.pattern):
-                name = getattr(capture, "name", None)
-                if isinstance(name, str):
-                    self._set(inner, name, subject)
+            inner = self._bind_captures(case, dict(env), subject, read=read)
             if case.guard is not None:
                 self.expression(case.guard, inner)
             end, ends = self.block(case.body, inner)
@@ -1104,6 +1371,22 @@ class _Flow:
             return env, True
         return _join_envs(reached, self.default), False
 
+    def _bind_captures(
+        self, case: ast.match_case, inner: Env, subject: State, *, read: bool
+    ) -> Env:
+        """*inner* with each name the pattern of *case* captures bound.
+
+        Each is bound to *subject*, and to NumPy's reading of it where the
+        subject is one (*read*).
+        """
+        for capture in ast.walk(case.pattern):
+            name = getattr(capture, "name", None)
+            if isinstance(name, str):
+                self._set(inner, name, subject)
+                if read:
+                    inner[_numpy_key(name)] = frozenset()
+        return inner
+
 
 _STATEMENTS: dict[type[ast.stmt], Callable[[_Flow, Any, Env], tuple[Env, bool]]] = {
     ast.Assign: _Flow._assign,
@@ -1114,6 +1397,7 @@ _STATEMENTS: dict[type[ast.stmt], Callable[[_Flow, Any, Env], tuple[Env, bool]]]
     ast.AsyncFor: _Flow._loop,
     ast.While: _Flow._loop,
     ast.Break: _Flow._break,
+    ast.Assert: _Flow._assert,
     ast.With: _Flow._with,
     ast.AsyncWith: _Flow._with,
     ast.Try: _Flow._try,
@@ -1214,7 +1498,8 @@ class _Sure:
     A ``return`` ends what is sure: what follows it in the source runs on the
     other paths only. A call in the body of a ``try`` whose handler can take
     the exception and go on may have raised for nothing, and a call in a
-    loop's body or a ``match`` case may not run. A name bound before a call
+    loop's body or a ``match`` case may not run, nor one in an ``assert``,
+    which ``python -O`` leaves out. A name bound before a call
     holds what it was bound to there, and no longer the caller's value,
     unless it was bound to what keeps that value (``x = np.atleast_1d(x)``).
     """
@@ -1246,7 +1531,8 @@ class _Sure:
             self.block(node.body, sure=sure)
         elif isinstance(node, ast.For | ast.AsyncFor | ast.While | ast.Match):
             self.calls(_header(node), sure=sure)
-        elif not isinstance(node, _SCOPES):
+        elif not isinstance(node, (*_SCOPES, ast.Assert)):
+            # ``python -O`` leaves an ``assert`` out, and a call in it with it.
             for child in ast.iter_child_nodes(node):
                 self.calls(child, sure=sure)
 
@@ -1276,6 +1562,24 @@ class _Sure:
 
 def _assigned(node: ast.Assign | ast.AnnAssign) -> list[ast.expr]:
     return node.targets if isinstance(node, ast.Assign) else [node.target]
+
+
+def _filled(target: ast.expr) -> list[str]:
+    """The names an assignment to *target* puts a value inside: ``x`` for
+    ``x[i] = y`` and ``x[i][j] += y``, which holds *y* among its items, as
+    :meth:`_Flow._bind_item` reads it; each of a tuple's or a list's items
+    alike.
+    """
+    if isinstance(target, ast.Tuple | ast.List):
+        return [name for item in target.elts for name in _filled(item)]
+    if isinstance(target, ast.Starred):
+        return _filled(target.value)
+    if not isinstance(target, ast.Subscript):
+        return []
+    owner: ast.expr = target
+    while isinstance(owner, ast.Subscript):
+        owner = owner.value
+    return [owner.id] if isinstance(owner, ast.Name) else []
 
 
 def _header(node: ast.For | ast.AsyncFor | ast.While | ast.Match) -> ast.expr:
@@ -1315,28 +1619,32 @@ def _nested_calls(node: ast.AST) -> Iterator[tuple[ast.Call, bool]]:
             yield child, False
 
 
-def _first_part(node: ast.expr) -> ast.expr | None:
-    """The part of a conditional expression that surely runs: the test of an
-    ``if`` expression, the first operand of ``and`` and ``or``, the first
-    iterable of a comprehension; ``None`` for an expression that runs whole.
+def _sure_parts(node: ast.expr) -> list[ast.expr] | None:
+    """The parts of a conditional expression that surely run: the test of an
+    ``if`` expression, the first operand of ``and`` and ``or``, the first link
+    of a chained comparison, the first iterable of a comprehension; ``None``
+    for an expression that runs whole.
     """
     if isinstance(node, ast.IfExp):
-        return node.test
+        return [node.test]
     if isinstance(node, ast.BoolOp):
-        return node.values[0]
+        return [node.values[0]]
+    if isinstance(node, ast.Compare) and len(node.comparators) > 1:
+        return [node.left, node.comparators[0]]
     if isinstance(node, _COMPREHENSIONS):
-        return node.generators[0].iter
+        return [node.generators[0].iter]
     return None
 
 
 def _expression_calls(node: ast.AST, *, sure: bool) -> Iterator[tuple[ast.Call, bool]]:
     if isinstance(node, _SCOPES):
         return
-    first = _first_part(node) if isinstance(node, ast.expr) else None
-    if first is not None:
-        yield from _expression_calls(first, sure=sure)
+    sure_parts = _sure_parts(node) if isinstance(node, ast.expr) else None
+    if sure_parts is not None:
+        for part in sure_parts:
+            yield from _expression_calls(part, sure=sure)
         for call, _ in _nested_calls(node):
-            if not _within(call, first):
+            if not any(_within(call, part) for part in sure_parts):
                 yield call, False
         return
     for child in ast.iter_child_nodes(node):
@@ -1365,16 +1673,24 @@ class _Call:
 
 @dataclass(frozen=True)
 class _Signature:
-    """What the search for the checks of the package needs of one function."""
+    """What the search for the checks of the package needs of one function.
+
+    With what its ``return`` statements hand back of its parameters: those
+    returned as the caller gave them (*returned*), and the calls of the
+    library whose result is returned (*returned_calls*), each with the
+    parameters its arguments are read from (:func:`_returns_of`).
+    """
 
     dotted: str
     positional: tuple[str, ...]
     parameters: frozenset[str]
     calls: tuple[_Call, ...]
+    returned: Provenance = field(default_factory=dict)
+    returned_calls: tuple[_Handing, ...] = ()
 
 
-def _signatures(path: pathlib.Path) -> list[_Signature]:
-    """The functions at the top of the module at *path*, each without its tree.
+def _signatures(module: _Module) -> list[_Signature]:
+    """The functions at the top of *module*, each without its tree.
 
     A method is called through an object the rule does not follow, so only
     a function at the top of a module can be a check of its own; and only a
@@ -1382,7 +1698,6 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
     and is not in the body of a ``try`` a handler of which goes on, makes it
     one, of a parameter the call reads before anything rebinds it.
     """
-    module = _module(path)
     reader = _Flow(lambda _: [], module.numpy, fields=False)
     found = []
     for node in module.tree.body:
@@ -1401,14 +1716,504 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
         )
         arguments = node.args
         positional = tuple(a.arg for a in arguments.posonlyargs + arguments.args)
+        parameters = frozenset(_parameters(node))
+        returned, returned_calls = _Returns(module, node, parameters).read()
         found.append(
             _Signature(
                 f"{module.name}.{node.name}",
                 positional,
-                frozenset(_parameters(node)),
+                parameters,
                 calls,
+                returned,
+                returned_calls,
             )
         )
+    return found
+
+
+def _private(name: str) -> bool:
+    """Whether *name* is a private one: a leading underscore, and no dunder."""
+    return name.startswith("_") and not name.startswith("__")
+
+
+def _dotted(module: _Module, node: ast.AST) -> str | None:
+    """The function of the package *node* names in *module*: a name, by what
+    the module imports or defines, or an attribute of a module it imports;
+    ``None`` for anything else.
+    """
+    if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+        return module.imports.get(node.id, f"{module.name}.{node.id}")
+    if (
+        isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id in module.imports
+    ):
+        return f"{module.imports[node.value.id]}.{node.attr}"
+    return None
+
+
+@dataclass(frozen=True)
+class _Helper:
+    """A function at the top of a module of the package that no caller of the
+    library reaches, which every module that names it calls: what it is
+    handed is read where it is called, and its parameters hold that, not a
+    caller's value of their own.
+    """
+
+    path: pathlib.Path
+    positional: tuple[str, ...]
+    keywords: frozenset[str]
+    vararg: str | None
+    kwarg: str | None
+
+    def handed(
+        self, call: ast.Call, state_of: Callable[[ast.expr], State]
+    ) -> Iterator[tuple[str, State]]:
+        """Each parameter *call* hands a value, with what the value holds; an
+        unpacked argument may reach any parameter from its place on.
+        """
+        spread: tuple[str, ...] | None = None
+        for place, argument in enumerate(call.args):
+            if isinstance(argument, ast.Starred) and spread is None:
+                spread = self.positional[place:] + tuple(filter(None, [self.vararg]))
+            value = argument.value if isinstance(argument, ast.Starred) else argument
+            if spread is not None:
+                yield from ((name, state_of(value)) for name in spread)
+            elif place < len(self.positional):
+                yield self.positional[place], state_of(value)
+            elif self.vararg is not None:
+                yield self.vararg, state_of(value)
+        for keyword in call.keywords:
+            yield from self._keyword(keyword, state_of(keyword.value))
+
+    def _keyword(
+        self, keyword: ast.keyword, state: State
+    ) -> Iterator[tuple[str, State]]:
+        if keyword.arg is None:
+            for name in (*sorted(self.keywords), *filter(None, [self.kwarg])):
+                yield name, state
+        elif keyword.arg in self.keywords:
+            yield keyword.arg, state
+        elif self.kwarg is not None:
+            yield self.kwarg, state
+
+
+def _published(module: _Module) -> set[str]:
+    """The functions *module* publishes in its ``__all__``, its own or those it
+    imports, by the name the package knows them by.
+    """
+    found: set[str] = set()
+    for node in module.tree.body:
+        for name in _all_names(node):
+            found.add(module.imports.get(name, f"{module.name}.{name}"))
+    return found
+
+
+def _all_names(node: ast.stmt) -> list[str]:
+    """The names *node* writes into ``__all__``, when it is an assignment to it."""
+    if isinstance(node, ast.Assign):
+        targets = node.targets
+    elif isinstance(node, ast.AnnAssign | ast.AugAssign):
+        targets = [node.target]
+    else:
+        return []
+    value = node.value
+    if not any(isinstance(t, ast.Name) and t.id == "__all__" for t in targets) or (
+        not isinstance(value, ast.List | ast.Tuple)
+    ):
+        return []
+    return [
+        item.value
+        for item in value.elts
+        if isinstance(item, ast.Constant) and isinstance(item.value, str)
+    ]
+
+
+def _helpers(module: _Module) -> tuple[dict[str, _Helper], set[str]]:
+    """The functions at the top of *module* no caller of the library reaches,
+    by the name the package knows them by, and every function of the package
+    *module* names other than by calling it (handed on, kept in a table,
+    decorated with) or publishes, whose parameters a call cannot be read for.
+
+    A function no caller reaches is a private one, or one of a private module
+    (a name of its path opens with an underscore); one that a module
+    publishes in its ``__all__`` is reached all the same.
+    """
+    inner = any(_private(part) for part in module.name.split("."))
+    defined: dict[str, _Helper] = {}
+    for node in module.tree.body:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and (
+            inner or _private(node.name)
+        ):
+            arguments = node.args
+            defined[f"{module.name}.{node.name}"] = _Helper(
+                module.path,
+                tuple(a.arg for a in arguments.posonlyargs + arguments.args),
+                frozenset(a.arg for a in arguments.args + arguments.kwonlyargs),
+                arguments.vararg.arg if arguments.vararg else None,
+                arguments.kwarg.arg if arguments.kwarg else None,
+            )
+    called = {id(n.func) for n in ast.walk(module.tree) if isinstance(n, ast.Call)}
+    named = {
+        dotted
+        for node in ast.walk(module.tree)
+        if id(node) not in called and (dotted := _dotted(module, node)) is not None
+    }
+    return defined, named | _published(module)
+
+
+#: What each parameter of each helper (:class:`_Helper`) is handed, joined
+#: over its calls: by the helper's name, then the parameter's.
+Seeds = dict[str, dict[str, State]]
+
+
+def _joined_seeds(handed: Iterable[Seeds]) -> Seeds:
+    """What each helper's parameters are handed across every module's calls."""
+    joined: Seeds = {}
+    for seeds in handed:
+        for helper, parameters in seeds.items():
+            into = joined.setdefault(helper, {})
+            for name, state in parameters.items():
+                into[name] = join(into[name], state) if name in into else state
+    return joined
+
+
+#: What a value may hand back of a function's parameters: each parameter it
+#: may be read from as the caller gave it, with what the checks on the way
+#: refused in it (a parameter returned through ``real_array`` is refused a
+#: complex value and a text).
+Provenance = dict[str, frozenset[Refusal]]
+
+
+def _either(one: Provenance, other: Provenance) -> Provenance:
+    """What either of two values may hand back: a parameter either may be read
+    from, with only what the checks of both refused in it.
+    """
+    found = dict(one)
+    for name, refused in other.items():
+        found[name] = found[name] & refused if name in found else refused
+    return found
+
+
+@dataclass(frozen=True)
+class _Handing:
+    """A call of a function of the library whose result a ``return`` hands
+    back: what it reaches, and what each argument is read from
+    (:data:`Provenance`), in order for the positional ones, by keyword for
+    the rest.
+    """
+
+    target: str
+    positional: tuple[Provenance, ...]
+    keywords: tuple[tuple[str | None, Provenance], ...]
+
+
+#: The names a comprehension binds where its element is read: each with
+#: what it walks and the names in scope where that is read.
+type _Local = Mapping[str, tuple[ast.expr, _Local]]
+
+#: The scope of the function itself, where no comprehension binds a name.
+_FUNCTION_SCOPE: _Local = {}
+
+
+def _captures(pattern: ast.pattern) -> list[str]:
+    """The names a ``case`` pattern binds, the whole subject or a part of it."""
+    return [
+        name
+        for node in ast.walk(pattern)
+        for name in (
+            getattr(node, "name", None),
+            getattr(node, "rest", None),
+        )
+        if isinstance(name, str)
+    ]
+
+
+def _walking(generator: ast.comprehension, local: _Local) -> _Local:
+    """*local* with each name *generator* binds standing for the items of
+    what it walks, which is read where *local* holds.
+    """
+    walked = (generator.iter, local)
+    return {**local, **dict.fromkeys(_targets(generator.target), walked)}
+
+
+class _Returns:
+    """What a function's ``return`` statements hand back of its parameters.
+
+    Read without the order the function runs in: a name stands for every
+    value an assignment in the function binds it to, a ``:=`` among them,
+    adds to it (``x += y``) or puts in one of its items (``x[i] = y``), the
+    items of what a loop walks and what a ``case`` captures of its subject
+    among them, and a parameter for itself as well. A comprehension's own
+    names stand for the items of what it walks while its element is read,
+    and for nothing outside it, as Python keeps them; what a nested function
+    or a lambda binds is its own, but a name it declares ``nonlocal`` and an
+    item it fills of a name it does not bind are the function's, each value
+    read where the nested function writes it. A value is handed back as the
+    caller gave it bare, in a tuple or a list, on either side of a
+    conditional expression or of an ``and`` or an ``or``, by an item,
+    transposed, in arithmetic with anything (its sign turned or kept, as
+    :meth:`_Flow.state` reads it), as the element of a comprehension,
+    through a call that keeps its values, and through a shared check
+    (:data:`CHECKS`), which returns its first argument with what it refuses
+    refused; a call of a function of the library hands back what that
+    function returns (:func:`returned_parameters`); anything else is a value
+    the function computed.
+    """
+
+    def __init__(
+        self,
+        module: _Module,
+        function: ast.FunctionDef | ast.AsyncFunctionDef,
+        parameters: frozenset[str],
+        outer: _Returns | None = None,
+    ) -> None:
+        self.module = module
+        self.function = function
+        self.parameters = parameters
+        #: The function this one is nested in, which binds the names it
+        #: reads but does not bind.
+        self.outer = outer
+        #: What each name stands for: the value, where it is read, and the
+        #: function whose names it is read with.
+        self.assigned: dict[str, list[tuple[ast.expr, _Local, _Returns]]] = {}
+        self.returns: list[ast.expr] = []
+        pending: list[ast.stmt] = list(function.body)
+        while pending:
+            node = pending.pop()
+            if isinstance(node, ast.Return) and node.value is not None:
+                self.returns.append(node.value)
+            elif isinstance(
+                node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+            ):
+                self._nested(node)
+            elif isinstance(node, ast.Assign | ast.AnnAssign) and node.value:
+                for target in _assigned(node):
+                    for name in [*_targets(target), *_filled(target)]:
+                        self._bind(name, node.value)
+            elif isinstance(node, ast.AugAssign):
+                # x += y holds what arithmetic on both holds: y joins what x
+                # was bound to, as it joins an array an item of which it adds to.
+                for name in [*_targets(node.target), *_filled(node.target)]:
+                    self._bind(name, node.value)
+            elif isinstance(node, ast.For | ast.AsyncFor):
+                for name in _targets(node.target):
+                    self._bind(name, node.iter)
+            elif isinstance(node, ast.Match):
+                for case in node.cases:
+                    for name in _captures(case.pattern):
+                        self._bind(name, node.subject)
+            for child in ast.iter_child_nodes(node):
+                self._walruses(child, _FUNCTION_SCOPE)
+            pending.extend(block_statements(node))
+
+    def _bind(
+        self, name: str, value: ast.expr, local: _Local = _FUNCTION_SCOPE
+    ) -> None:
+        """Let *name* stand for *value*, read where *local* holds."""
+        self.assigned.setdefault(name, []).append((value, local, self))
+
+    def binds(self, name: str) -> bool:
+        """Whether *name* is the function's own, as Python scopes it."""
+        return own_names(self.function).binds(name)
+
+    def _nested(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+    ) -> None:
+        """Take in what a function nested in this one writes into a name of a
+        function around it: a name it declares ``nonlocal``, rebound, added
+        to or walked into, and an item it fills of a name it does not bind.
+
+        Each value is read where it is written, with the nested function's
+        names. A class body binds nothing a method reads, and a method's
+        writes go to the function around the class.
+        """
+        if isinstance(node, ast.ClassDef):
+            pending: list[ast.stmt] = list(node.body)
+            while pending:
+                statement = pending.pop()
+                if isinstance(
+                    statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+                ):
+                    self._nested(statement)
+                pending.extend(block_statements(statement))
+            return
+        inner = _Returns(self.module, node, frozenset(), outer=self)
+        for name, values in inner.assigned.items():
+            holder: _Returns | None = self
+            while holder is not None and not holder.binds(name):
+                holder = holder.outer
+            if holder is not None and not inner.binds(name):
+                holder.assigned.setdefault(name, []).extend(values)
+
+    def _walruses(self, node: ast.AST, local: _Local) -> None:
+        """Bind the target of each ``:=`` in *node* that binds a name of the
+        function: one in a comprehension's too, read in that comprehension,
+        but none in a statement of its own, a nested function or a lambda.
+        """
+        if isinstance(node, (ast.stmt, *_SCOPES)):
+            return
+        if isinstance(node, ast.NamedExpr):
+            self._bind(node.target.id, node.value, local)
+        if isinstance(node, _COMPREHENSIONS):
+            inner = local
+            for generator in node.generators:
+                self._walruses(generator.iter, inner)
+                inner = _walking(generator, inner)
+                for test in generator.ifs:
+                    self._walruses(test, inner)
+            parts = (
+                [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+            )
+            for part in parts:
+                self._walruses(part, inner)
+            return
+        for child in ast.iter_child_nodes(node):
+            self._walruses(child, local)
+
+    def read(self) -> tuple[Provenance, tuple[_Handing, ...]]:
+        """What the returns hand back as the caller gave it, and the calls whose
+        result they hand back.
+        """
+        found: Provenance = {}
+        calls: list[_Handing] = []
+        for value in self.returns:
+            provenance, through = self.sources(value, frozenset(), _FUNCTION_SCOPE)
+            found = _either(found, provenance)
+            calls.extend(through)
+        return found, tuple(calls)
+
+    def sources(
+        self, node: ast.expr, seen: frozenset[str], local: _Local
+    ) -> tuple[Provenance, list[_Handing]]:
+        """What *node*, read where *local* holds, may hand back, and the calls
+        whose result it may be.
+        """
+        if isinstance(node, ast.Name):
+            if node.id in local:
+                walked, around = local[node.id]
+                return self.sources(walked, seen, around)
+            return self._name(node.id, seen)
+        if isinstance(node, ast.Call):
+            return self._call(node, seen, local)
+        if isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp):
+            inner = local
+            for generator in node.generators:
+                inner = _walking(generator, inner)
+            return self.sources(node.elt, seen, inner)
+        parts: list[ast.expr]
+        if isinstance(node, ast.Tuple | ast.List | ast.Set):
+            parts = list(node.elts)
+        elif isinstance(node, ast.IfExp):
+            parts = [node.body, node.orelse]
+        elif isinstance(node, ast.BoolOp):
+            parts = list(node.values)
+        elif isinstance(node, ast.Subscript | ast.Starred | ast.NamedExpr) or (
+            isinstance(node, ast.Attribute) and node.attr in _KEEPING_ATTRIBUTES
+        ):
+            parts = [node.value]
+        elif isinstance(node, ast.BinOp):
+            parts = [node.left, node.right]
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, _ARITHMETIC_SIGNS):
+            parts = [node.operand]
+        else:
+            parts = []
+        return self._joined(((part, local) for part in parts), seen)
+
+    def _joined(
+        self, parts: Iterable[tuple[ast.expr, _Local]], seen: frozenset[str]
+    ) -> tuple[Provenance, list[_Handing]]:
+        """What any of *parts*, each read where its scope holds, may hand back."""
+        found: Provenance = {}
+        calls: list[_Handing] = []
+        for part, local in parts:
+            provenance, through = self.sources(part, seen, local)
+            found = _either(found, provenance)
+            calls.extend(through)
+        return found, calls
+
+    def _name(
+        self, name: str, seen: frozenset[str]
+    ) -> tuple[Provenance, list[_Handing]]:
+        if name in seen:
+            return {}, []
+        if self.outer is not None and not self.binds(name):
+            return self.outer._name(name, seen)
+        found: Provenance = {}
+        calls: list[_Handing] = []
+        for value, local, reader in self.assigned.get(name, []):
+            provenance, through = reader.sources(value, seen | {name}, local)
+            found = _either(found, provenance)
+            calls.extend(through)
+        if name in self.parameters:
+            found = _either(found, {name: frozenset()})
+        return found, calls
+
+    def _call(
+        self, call: ast.Call, seen: frozenset[str], local: _Local
+    ) -> tuple[Provenance, list[_Handing]]:
+        func = call.func
+        if isinstance(func, ast.Name) and func.id in CHECKS and call.args:
+            found, calls = self.sources(call.args[0], seen, local)
+            refused = CHECKS[func.id]
+            return {name: held | refused for name, held in found.items()}, calls
+        kept = _kept(call, self.module.numpy)
+        if kept:
+            return self._joined(((part, local) for part in kept), seen)
+        if not isinstance(func, ast.Name):
+            return {}, []
+        target = self.module.imports.get(func.id, f"{self.module.name}.{func.id}")
+        handed = _Handing(
+            target,
+            tuple(self.sources(a, seen, local)[0] for a in call.args),
+            tuple(
+                (k.arg, self.sources(k.value, seen, local)[0]) for k in call.keywords
+            ),
+        )
+        return {}, [handed]
+
+
+def returned_parameters(signatures: Sequence[_Signature]) -> dict[str, Provenance]:
+    """What each function of *signatures* may hand back of its parameters,
+    through the functions of the library whose result it returns too,
+    followed until no new one turns up.
+    """
+    by_name = {signature.dotted: signature for signature in signatures}
+    found = {signature.dotted: dict(signature.returned) for signature in signatures}
+    grown = True
+    while grown:
+        grown = False
+        for signature in signatures:
+            more = found[signature.dotted]
+            for call in signature.returned_calls:
+                callee = by_name.get(call.target)
+                if callee is not None:
+                    more = _either(
+                        more, _handed_back(call, callee, found[callee.dotted])
+                    )
+            if more != found[signature.dotted]:
+                found[signature.dotted] = more
+                grown = True
+    return found
+
+
+def _handed_back(
+    call: _Handing, callee: _Signature, returned: Provenance
+) -> Provenance:
+    """What the arguments of *call* that *callee* hands back are read from,
+    with what *callee* refused in each on the way.
+    """
+    found: Provenance = {}
+    pairs = [
+        *zip(callee.positional, call.positional, strict=False),
+        *((name, provenance) for name, provenance in call.keywords if name),
+    ]
+    for name, provenance in pairs:
+        if name in returned:
+            refused = returned[name]
+            found = _either(
+                found, {source: held | refused for source, held in provenance.items()}
+            )
     return found
 
 
@@ -1490,6 +2295,38 @@ def _checker(
     return checked_by
 
 
+def _hander(
+    module: _Module,
+    checks: Mapping[str, Check],
+    returned: Mapping[str, Provenance],
+) -> Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]] | None]:
+    """What a call made in *module* of a check of the library hands back:
+    each argument the check returns (*returned*), with what it refused in it;
+    ``None`` for a call of a shared check or of anything else.
+    """
+
+    def handed(call: ast.Call) -> list[tuple[ast.expr, frozenset[Refusal]]] | None:
+        if not isinstance(call.func, ast.Name):
+            return None
+        name = call.func.id
+        target = module.imports.get(name, f"{module.name}.{name}")
+        check = checks.get(target)
+        if check is None or check.shared:
+            return None
+        back = returned.get(target, {})
+        pairs = [
+            *zip(check.parameters, call.args, strict=False),
+            *((k.arg, k.value) for k in call.keywords if k.arg is not None),
+        ]
+        return [
+            (argument, check.refused.get(parameter, frozenset()) | back[parameter])
+            for parameter, argument in pairs
+            if parameter in back
+        ]
+
+    return handed
+
+
 def package_checks(signatures: Sequence[_Signature]) -> dict[str, Check]:
     """Every check of the package, shared and local, by the module that defines it.
 
@@ -1542,13 +2379,44 @@ def _function_names(
 
 
 def conversions_in(
-    module: _Module, checks: Mapping[str, Check], file: str = ""
+    module: _Module,
+    checks: Mapping[str, Check],
+    file: str = "",
+    returned: Mapping[str, Provenance] | None = None,
 ) -> list[Conversion]:
-    """Every conversion in *module*, with what it reads."""
-    reading = _Reading(module, _checker(module, checks), file)
+    """Every conversion in *module*, with what it reads.
+
+    *returned* says what each check of the library hands back of its
+    parameters (:func:`returned_parameters`); without it, none.
+    """
+    found, _ = _read_module(module, checks, file, returned or {}, {}, {})
+    return found
+
+
+def _read_module(
+    module: _Module,
+    checks: Mapping[str, Check],
+    file: str,
+    returned: Mapping[str, Provenance],
+    helpers: Mapping[str, _Helper],
+    seeds: Seeds,
+) -> tuple[list[Conversion], Seeds]:
+    """Every conversion in *module*, with what it reads, and what its calls
+    hand each helper of *helpers*, whose parameters hold what *seeds* says
+    they are handed.
+    """
+    reading = _Reading(
+        module,
+        _checker(module, checks),
+        file,
+        _hander(module, checks, returned),
+        helpers,
+        seeds,
+    )
     for qualified, function in _functions(module.tree):
         reading.function(qualified, function)
-    return sorted(reading.found, key=lambda c: (c.key[0], c.line, c.source))
+    found = sorted(reading.found, key=lambda c: (c.key[0], c.line, c.source))
+    return found, reading.handing
 
 
 @dataclass
@@ -1560,6 +2428,13 @@ class _Reading:
     module: _Module
     checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
     file: str
+    handed: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]] | None]
+    #: The private helpers of the package, read through their calls, and what
+    #: their parameters are handed (:data:`Seeds`).
+    helpers: Mapping[str, _Helper] = field(default_factory=dict)
+    seeds: Seeds = field(default_factory=dict)
+    #: What this module's calls hand each helper.
+    handing: Seeds = field(default_factory=dict)
     found: list[Conversion] = field(default_factory=list)
     #: What a nested function's enclosing names hold, and whether it reads a
     #: record's fields, by the definition's id, kept until it is read.
@@ -1573,20 +2448,51 @@ class _Reading:
             self.checks,
             _function_names(self.module, function),
             fields=fields or function.name == "__post_init__",
+            handed=self.handed,
+            calling=self._calling,
         )
-        env = _scope_env(captured, function, function.body)
-        flow.block(function.body, env)
+        dotted = f"{self.module.name}.{qualified}"
+        env = _scope_env(
+            captured,
+            function,
+            function.body,
+            self.seeds.get(dotted, {}) if dotted in self.helpers else None,
+        )
+        end, _ = flow.block(function.body, env)
         self._keep(qualified, flow)
         for inner in flow.nested.values():
-            self.enclosed[id(inner)] = (flow.captured(inner), flow.fields)
+            self.enclosed[id(inner)] = (flow.captured(inner, end), flow.fields)
+        for node, defined in flow.classes:
+            # A method of a class written here reads the names it shares with
+            # this function as they stand where the class is written, or at
+            # the end, whenever an instance's method is called.
+            shared = _join_envs([defined, end], flow.default)
+            for method in _methods(node):
+                self.enclosed[id(method)] = (shared, False)
 
     def _lambda(
         self, qualified: str, node: ast.Lambda, captured: Env, outer: _Flow
     ) -> None:
-        flow = _Flow(self.checks, outer.names, fields=outer.fields)
+        flow = _Flow(
+            self.checks,
+            outer.names,
+            fields=outer.fields,
+            handed=self.handed,
+            calling=self._calling,
+        )
         env = _scope_env(captured, node, [node.body])
         flow.expression(node.body, env)
         self._keep(qualified, flow)
+
+    def _calling(self, flow: _Flow, call: ast.Call, env: Env) -> None:
+        """Join what *call* hands a helper into what its parameters are handed."""
+        target = _dotted(self.module, call.func)
+        helper = self.helpers.get(target) if target is not None else None
+        if target is None or helper is None:
+            return
+        into = self.handing.setdefault(target, {})
+        for name, state in helper.handed(call, lambda node: flow.state(node, env)):
+            into[name] = join(into[name], state) if name in into else state
 
     def _keep(self, qualified: str, flow: _Flow) -> None:
         for call, value, kind, verdict in flow.found.values():
@@ -1605,14 +2511,34 @@ class _Reading:
             self._lambda(f"{qualified}.<lambda>", node, captured, flow)
 
 
+def _methods(
+    node: ast.ClassDef,
+) -> Iterator[ast.FunctionDef | ast.AsyncFunctionDef]:
+    """The methods of a class, through its compound statements and the
+    classes written in it, whose methods share the same enclosing names.
+    """
+    pending: list[ast.stmt] = list(node.body)
+    while pending:
+        statement = pending.pop()
+        if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef):
+            yield statement
+        elif isinstance(statement, ast.ClassDef):
+            pending.extend(statement.body)
+        else:
+            pending.extend(block_statements(statement))
+
+
 def _scope_env(
     captured: Env,
     scope: ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda,
     body: Sequence[ast.AST],
+    handed: Mapping[str, State] | None = None,
 ) -> Env:
     """What a function's names hold where it starts: its parameters the
-    caller's values, and what it shares with the function around it as that
-    function holds it, but a name it binds of its own.
+    caller's values, or, for a helper read through its calls, what *handed*
+    says they are handed (none where no call hands one), and what it shares
+    with the function around it as that function holds it, but a name it
+    binds of its own.
     """
     shared = _declared_shared(body)
     own = {name for node in body for name in _bound_names(node)} - shared
@@ -1622,7 +2548,8 @@ def _scope_env(
         for name, state in captured.items()
         if name.partition("[")[0].partition(".")[0] not in own
     }
-    env.update(dict.fromkeys(_parameters(scope), frozenset()))
+    for name in _parameters(scope):
+        env[name] = frozenset() if handed is None else handed.get(name)
     return env
 
 
@@ -1662,12 +2589,59 @@ def census(
     sources = set(read)
     if source is not None:
         sources |= {path.resolve() for path in source.rglob("*.py")}
-    checks = package_checks([s for path in sorted(sources) for s in _signatures(path)])
-    return [
-        c
-        for path in read
-        for c in conversions_in(_module(path), checks, _spelled(path, source))
-    ]
+    signatures: list[_Signature] = []
+    helpers: dict[str, _Helper] = {}
+    named: set[str] = set()
+    for path in sorted(sources):
+        module = _module(path)
+        signatures.extend(_signatures(module))
+        defined, names = _helpers(module)
+        helpers.update(defined)
+        named |= names
+    helpers = {name: h for name, h in helpers.items() if name not in named}
+    checks = package_checks(signatures)
+    returned = returned_parameters(signatures)
+    found = _through_callers(read, sources, source, (checks, returned), helpers)
+    return [c for path in read for c in found[path]]
+
+
+def _through_callers(
+    read: Sequence[pathlib.Path],
+    sources: set[pathlib.Path],
+    source: pathlib.Path | None,
+    package: tuple[Mapping[str, Check], Mapping[str, Provenance]],
+    helpers: Mapping[str, _Helper],
+) -> dict[pathlib.Path, list[Conversion]]:
+    """The conversions of each module of *read*, every helper's parameters
+    holding what its calls across *sources* hand it.
+
+    Every module is read once with the helpers handed nothing, and then each
+    module that defines a helper whose calls hand it something new is read
+    again, until no call hands anything new: what a parameter is handed only
+    grows, toward a caller's value no check has read, so the reading ends.
+    """
+    checks, returned = package
+    wanted = set(read)
+    seeds: Seeds = {}
+    handing: dict[pathlib.Path, Seeds] = {}
+    found: dict[pathlib.Path, list[Conversion]] = {}
+    pending = sorted(sources)
+    while pending:
+        for path in pending:
+            conversions, handing[path] = _read_module(
+                _module(path), checks, _spelled(path, source), returned, helpers, seeds
+            )
+            if path in wanted:
+                found[path] = conversions
+        joined = _joined_seeds(handing.values())
+        moved = {
+            name
+            for name in joined.keys() | seeds.keys()
+            if joined.get(name) != seeds.get(name)
+        }
+        seeds = joined
+        pending = sorted({helpers[name].path for name in moved})
+    return found
 
 
 def unchecked(

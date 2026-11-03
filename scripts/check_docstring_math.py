@@ -61,7 +61,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans
+from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -260,14 +260,19 @@ def _page_bare_scripts(path: Path) -> list[tuple[int, str, str]]:
     """Every refused bare script in the prose of one page: line, command, passage."""
     found: list[tuple[int, str, str]] = []
     lines = path.read_text(encoding="utf-8").splitlines()
-    for number, (line, code) in enumerate(
-        zip(lines, code_lines(lines), strict=True), start=1
+    code_flags = list(code_lines(lines))
+    # The inline code spans, read by markdown_spans over the lines of their
+    # paragraph: a backtick behind a backslash opens none, and a span may
+    # cross a line break.
+    shown = lines_read_whole(
+        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
+        drop_inline_spans_by_block,
+    )
+    for number, (prose, code) in enumerate(
+        zip(shown, code_flags, strict=True), start=1
     ):
         if code:
             continue
-        # The inline code spans, read by markdown_spans: a backtick behind a
-        # backslash opens none.
-        prose = drop_inline_spans(line)
         for match in bare_script_commands(prose):
             excerpt = _excerpt(prose, match.start(), match.end())
             found.append((number, match.group(1), excerpt))

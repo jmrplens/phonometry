@@ -48,6 +48,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_ranks,
     require_same_length,
@@ -280,8 +281,8 @@ def _bundle(
         group=group,
         source=source,
         in_air=in_air,
-        best_frequency=float(freq_hz[best]),
-        best_threshold=float(threshold[best]),
+        best_frequency=real_number(freq_hz[best], "freq_hz"),
+        best_threshold=real_number(threshold[best], "threshold"),
     )
 
 

@@ -99,6 +99,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
@@ -615,7 +616,7 @@ class WeightedRatingResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -749,7 +750,7 @@ class ImpactRatingResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -802,7 +803,7 @@ class ImpactRatingResult(OwnsArrays):
 
 def _render_iso717(
     result: WeightedRatingResult | ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None,
     engine: ReportEngine,

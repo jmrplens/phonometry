@@ -161,7 +161,7 @@ not. Never calls `plt.show`.
 
 ```python
 DiffusionResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -250,7 +250,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 DiffusionSpectrum.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -321,7 +321,7 @@ keeps the receiver angles alongside the levels and returns a plottable
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `angles_deg` and `levels` differ in length or are shorter than two receivers. |
-| TypeError | if `angles_deg` or `levels` holds a text or a value that is not a real number. |
+| TypeError | if `angles_deg`, `levels` or `weights` holds a text or a value that is not a real number. |
 
 ## directional_diffusion_coefficient
 

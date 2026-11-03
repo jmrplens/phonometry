@@ -459,3 +459,20 @@ def test_an_escaped_backtick_hides_no_brace_from_the_mdx_check() -> None:
         generate_site_reports._mdx_safe("A bare {x} brace.", where="t")
     kept = "A `{x}` in code and ``a ` {b}`` in a longer run."
     assert generate_site_reports._mdx_safe(kept, where="t") == kept
+
+
+def test_a_brace_in_a_code_span_across_a_line_break_is_code() -> None:
+    """A code span runs over the lines of its paragraph, braces and all.
+
+    The spans were dropped one line at a time, so a brace in a span that
+    crossed a line break stopped the run as a brace of prose.
+    """
+    text = "A set `{1,\n2}` in code.\n"
+    assert generate_site_reports._mdx_safe(text, where="t") == text
+
+
+def test_an_empty_introduction_is_mdx_safe() -> None:
+    """An empty text read as one empty line against no lines, and the zip of
+    the two raised a ``ValueError`` where nothing is unsafe.
+    """
+    assert generate_site_reports._mdx_safe("", where="test") == ""

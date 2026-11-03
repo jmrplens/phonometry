@@ -51,6 +51,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_number
 from ._i18n import decimal_comma, t
 from ._layout import (
     _ACCENT_HEX,
@@ -71,6 +72,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -112,7 +115,7 @@ def _fmt_acc(value: float, language: Language = "en") -> str:
     from ._i18n import format_number
 
     return format_number(
-        display_round(float(value), _ACC_DECIMALS),
+        display_round(real_number(value, "value"), _ACC_DECIMALS),
         language,
         decimals=_ACC_DECIMALS,
     )
@@ -122,7 +125,9 @@ def _fmt_hours(seconds: float, language: Language = "en") -> str:
     """A daily exposure time in hours, up to two decimals (trailing zeros cut)."""
     from ._i18n import format_number
 
-    return format_number(float(seconds) / 3600.0, language, decimals=2, trim=True)
+    return format_number(
+        real_number(seconds, "seconds") / 3600.0, language, decimals=2, trim=True
+    )
 
 
 def _basis(result: DailyVibrationExposure, language: Language = "en") -> str:
@@ -393,7 +398,7 @@ def _verdict(
 
 def render_human_vibration_report(
     result: DailyVibrationExposure,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

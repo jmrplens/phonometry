@@ -64,7 +64,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, real_number
 from ._i18n import format_number, t
 from ._sound_power_fiche import (
     FicheCopy,
@@ -81,6 +81,8 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from numpy.typing import ArrayLike
     from reportlab.platypus import Table
 
@@ -306,7 +308,7 @@ def _indicator_range(
 
 def render_intensity_power_report(
     result: SoundPowerIntensityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
@@ -429,10 +431,12 @@ def d2(value: float, language: Language = "en") -> str:
     The temporal-variability and field-non-uniformity indicators are ratios,
     not levels: ``FT`` is judged against 0,6 and ``FS`` against 2, and a scan
     whose ``FT`` is 0,04 reads as 0,0 at the one decimal a decibel gets.
+
+    :raises TypeError: if ``value`` is not one real number.
     """
-    if not math.isfinite(float(value)):
+    if not math.isfinite(real_number(value, "value")):
         return _ABSENT
-    return format_number(float(value), language, decimals=2)
+    return format_number(real_number(value, "value"), language, decimals=2)
 
 
 def _qualified_cell(
@@ -846,7 +850,7 @@ def _precision_criteria_strip(
 
 def render_precision_intensity_report(
     result: PrecisionIntensityResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

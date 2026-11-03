@@ -73,6 +73,9 @@ def scalar(value):
 def positional(levels):
     return np.asarray(levels, float)
 
+def arithmetic(levels):
+    return np.asarray(10.0 ** (levels / 10.0), dtype=np.float64)
+
 class Record:
     def __post_init__(self):
         object.__setattr__(self, "levels", np.asarray(self.levels, dtype=np.float64))
@@ -108,11 +111,8 @@ def through_a_local_check(levels):
     _real_numbers("levels", levels)
     return np.asarray(levels, dtype=np.float64)
 
-def computed(levels):
+def checked_arithmetic(levels):
     return np.asarray(real_array(levels, "levels") + 3.0, dtype=np.float64)
-
-def arithmetic(levels):
-    return np.asarray(10.0 ** (levels / 10.0), dtype=np.float64)
 
 def own(n):
     return np.asarray(np.arange(n), dtype=np.float64)
@@ -132,7 +132,7 @@ class Record:
 def test_each_shape_of_a_caller_s_value_is_found(tmp_path: Path) -> None:
     """A parameter read bare, copied, by an item, through a call that keeps its
     dtype or in a loop, cast with ``astype``, a NumPy scalar, a positional
-    dtype, and a field in ``__post_init__``.
+    dtype, through arithmetic, and a field in ``__post_init__``.
     """
     verdicts = _verdicts(tmp_path, _UNCHECKED)
     assert verdicts == {
@@ -144,21 +144,22 @@ def test_each_shape_of_a_caller_s_value_is_found(tmp_path: Path) -> None:
         "cast": "unchecked",
         "scalar": "unchecked",
         "positional": "unchecked",
+        "arithmetic": "unchecked",
         "Record.__post_init__": "unchecked",
     }
 
 
 def test_each_shape_that_answers_it_passes(tmp_path: Path) -> None:
     """The shared reader, a check first, a name rebound to a check, a check of the
-    module on any parameter, a value the function computed, a field a method reads.
+    module on any parameter, arithmetic on a checked value, a value the function
+    computed, a field a method reads.
     """
     verdicts = _verdicts(tmp_path, _ANSWERED)
     assert verdicts == {
         "refused_first": "checked",
         "rebound": "checked",
         "through_a_local_check": "checked",
-        "computed": "computed",
-        "arithmetic": "computed",
+        "checked_arithmetic": "checked",
         "own": "computed",
         "Record.total": "field",
     }
@@ -197,6 +198,8 @@ def test_a_check_of_another_module_is_known_by_the_module(tmp_path: Path) -> Non
 _CALLS: dict[str, Callable[[object], object]] = {
     "real_array": lambda v: validation.real_array(v, "x"),
     "complex_array": lambda v: validation.complex_array(v, "x"),
+    "real_number": lambda v: validation.real_number(v, "x"),
+    "complex_number": lambda v: validation.complex_number(v, "x"),
     "refuse_complex": lambda v: validation.refuse_complex(v, "x"),
     "refuse_text": lambda v: validation.refuse_text(v, "x"),
     "refuse_text_beside_choice": lambda v: validation.refuse_text_beside_choice(
@@ -232,6 +235,8 @@ _CALLS: dict[str, Callable[[object], object]] = {
 #: value and the texts each kind is tried with.
 _ONE_NUMBER = frozenset(
     {
+        "real_number",
+        "complex_number",
         "require_real",
         "require_scalar",
         "require_positive",
@@ -289,6 +294,241 @@ def test_a_predicate_is_no_check(tmp_path: Path) -> None:
 #: Each shape a caller's value reaches a conversion in, one function each,
 #: that no check has read on every path to it: what the guard must report.
 _PLANTED_UNCHECKED = {
+    "python_s_float_of_a_parameter": """
+        def f(value):
+            return float(value)
+    """,
+    "python_s_complex_of_a_parameter": """
+        def f(value):
+            return complex(value)
+    """,
+    "an_item_replaced_after_its_check": """
+        def f(levels, other):
+            require_finite(levels[0], "levels")
+            levels[0] = other
+            return np.float64(levels[0])
+    """,
+    "an_item_replaced_after_the_whole_check": """
+        def f(levels, other):
+            levels = real_array(levels, "levels")
+            levels[0] = other
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return levels
+
+        def f(reference, levels):
+            out = _helper(reference, levels)
+            return np.asarray(out, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_arithmetic_on_a_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return levels * 2
+
+        def f(reference, levels):
+            out = _helper(reference, levels)
+            return np.asarray(out, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_negated_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return -levels
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_transposed_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return levels.T
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_comprehension_of_a_parameter": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return [level * 2 for level in levels]
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_comprehension_naming_its_own_variable": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            return [out for out in levels]
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_nested_comprehension_of_a_parameter": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return [[v for v in row] for row in levels]
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_what_a_walrus_bound": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            if (out := levels) is None:
+                return 0.0
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_walrus_in_a_comprehension_bound": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            last = 0.0
+            _ = [(last := level) for level in levels]
+            return last
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_function_rebinds_nonlocal": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                nonlocal out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_function_adds_nonlocal": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 0.0
+
+            def inner():
+                nonlocal out
+                for level in levels:
+                    out += level
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_list_a_nested_function_fills": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            def inner():
+                out[0] = levels
+
+            inner()
+            return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_match_captured": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            match levels:
+                case [first, *_]:
+                    return first
+            return 0.0
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_loop_s_item_of_a_parameter": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            for level in levels:
+                return level
+            return 0.0
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_sum_it_added_a_parameter_to": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            total = 0.0
+            for level in levels:
+                total += level
+            return total
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_an_array_it_added_a_parameter_to": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = np.zeros(3)
+            out += levels
+            return out
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_an_array_it_set_a_parameter_in": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = np.zeros(3)
+            out[0] = levels
+            return out
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_an_array_it_added_a_parameter_to_an_item_of": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = np.zeros((2, 3))
+            out[0][1] += levels
+            return out
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "numpy_s_reading_captured_by_a_match": """
+        def f(levels):
+            match np.asarray(levels):
+                case captured:
+                    return refuse_text(captured, "no")
+    """,
+    "numpy_s_reading_bound_by_a_with": """
+        def f(levels):
+            with np.asarray(levels) as held:
+                return refuse_text(held, "no")
+    """,
+    "a_closure_handed_out_before_its_function_rebinds_what_it_reads": """
+        def f(levels, other, sink):
+            levels = real_array(levels, "levels")
+
+            def read():
+                return np.asarray(levels, dtype=np.float64)
+
+            sink.append(read)
+            levels = other
+    """,
+    "a_method_of_a_class_written_in_the_function": """
+        def f(levels):
+            class Reader:
+                def read(self):
+                    return np.asarray(levels, dtype=np.float64)
+
+            return Reader()
+    """,
     "checked_in_one_branch": """
         def f(levels, flag):
             if flag:
@@ -313,6 +553,32 @@ _PLANTED_UNCHECKED = {
         def f(levels, flag):
             ok = flag or require_finite_array(levels, "levels")
             return ok, np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_in_a_later_link_of_a_comparison": """
+        def f(levels, flag):
+            ok = 0 < flag < require_finite_array(levels, "levels")
+            return ok, np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_in_an_assert": """
+        def f(levels):
+            assert require_finite_array(levels, "levels") is None
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_in_a_later_link_of_a_comparison": """
+        def _read(levels, flag):
+            return 0 < flag < real_array(levels, "levels")
+
+        def f(levels, flag):
+            _read(levels, flag)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_in_an_assert": """
+        def _read(levels):
+            assert real_array(levels, "levels") is not None
+
+        def f(levels):
+            _read(levels)
+            return np.asarray(levels, dtype=np.float64)
     """,
     "rebound_in_a_branch": """
         def f(levels, other, flag):
@@ -603,10 +869,124 @@ _PLANTED_UNCHECKED = {
                 return real_array(arr, "levels")
             return None
     """,
+    "arithmetic_on_the_value": """
+        def f(levels):
+            return np.asarray(levels * 2, dtype=np.float64)
+    """,
+    "a_sign_on_the_value": """
+        def f(levels):
+            return np.asarray(-levels, dtype=np.float64)
+    """,
+    "arithmetic_of_a_checked_value_with_one_no_check_read": """
+        def f(levels, gain):
+            return np.asarray(real_array(levels, "levels") * gain, dtype=np.float64)
+    """,
+    "an_augmented_assignment_of_the_value": """
+        def f(levels, gain):
+            scaled = real_array(levels, "levels")
+            scaled *= gain
+            return np.asarray(scaled, dtype=np.float64)
+    """,
+    "one_number_of_arithmetic_on_the_value": """
+        def f(level):
+            return float(level / 2.0)
+    """,
+    "a_check_handed_arithmetic_on_numpy_s_reading": """
+        def f(levels):
+            return real_array(np.asarray(levels) * 2, "levels")
+    """,
 }
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_check_handed_the_value_or_a_number": """
+        def f(value):
+            require_finite(value or 0.0, "value")
+            return np.float64(value)
+    """,
+    "an_isinstance_test_of_real_numbers": """
+        def f(value):
+            if isinstance(value, float | int):
+                return np.float64(value)
+            if not isinstance(value, numbers.Real):
+                raise TypeError("value")
+            return np.float64(value)
+    """,
+    "a_check_that_hands_back_what_it_checked": """
+        def _helper(levels):
+            return real_array(levels, "levels")
+
+        def f(levels):
+            out = _helper(levels)
+            return np.asarray(out, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_arithmetic_on_what_it_checked": """
+        def _helper(levels):
+            return -real_array(levels, "levels") * 2
+
+        def f(levels):
+            return np.asarray(_helper(levels), dtype=np.float64)
+    """,
+    "a_comprehension_s_variable_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = [out for out in levels]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_generator_s_variable_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = any(out for out in levels)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_dict_comprehension_s_variable_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = {out: 0 for out in levels}
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_variables_are_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                out = levels
+                return [out for out in levels]
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_lambda_s_comprehension_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = lambda: [out for out in levels]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "python_s_float_after_the_shared_reader": """
+        def f(value):
+            value = real_number(value, "value")
+            return float(value)
+    """,
     "checked_in_both_branches": """
         def f(levels, flag):
             if flag:
@@ -636,6 +1016,19 @@ _PLANTED_ANSWERED = {
                 levels = real_array(levels, "levels")
             except ValueError:
                 raise TypeError("no") from None
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "checked_in_the_first_link_of_a_comparison": """
+        def f(levels, flag):
+            ok = require_finite_array(levels, "levels") is None is not flag
+            return ok, np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_in_the_first_link_of_a_comparison": """
+        def _read(levels, flag):
+            return real_array(levels, "levels") is not None is not flag
+
+        def f(levels, flag):
+            _read(levels, flag)
             return np.asarray(levels, dtype=np.float64)
     """,
     "the_item_checked_is_the_item_read": """
@@ -777,12 +1170,113 @@ _PLANTED_ANSWERED = {
     """,
 }
 
+#: A private helper of the package, read through its calls: each caller
+#: hands it something, and the helper's conversion reads what it is handed.
+_HELPER = """
+def _convert(values):
+    return np.asarray(values, dtype=np.float64)
+"""
+
+#: What a public function hands the helper, and what the helper's conversion
+#: then reads: a parameter of a private function is no caller's value of its
+#: own, but what its calls hand it, joined over all of them.
+_HANDED = {
+    "the_caller_s_value": (
+        "def f(levels):\n    return _convert(levels)\n",
+        "unchecked",
+    ),
+    "arithmetic_on_the_caller_s_value": (
+        "def f(levels):\n    return _convert(levels * 2)\n",
+        "unchecked",
+    ),
+    "the_value_a_check_read": (
+        "def f(levels):\n    return _convert(real_array(levels, 'levels'))\n",
+        "checked",
+    ),
+    "a_value_the_library_computed": (
+        "def f(levels):\n    return _convert(np.zeros(3))\n",
+        "computed",
+    ),
+    "a_value_by_keyword": (
+        "def f(levels):\n    return _convert(values=np.zeros(3))\n",
+        "computed",
+    ),
+    "the_caller_s_value_through_another_helper": (
+        "def _relay(values):\n    return _convert(values)\n\n"
+        "def f(levels):\n    return _relay(levels)\n",
+        "unchecked",
+    ),
+    "a_computed_value_through_another_helper": (
+        "def _relay(values):\n    return _convert(values)\n\n"
+        "def f(levels):\n    return _relay(np.zeros(3))\n",
+        "computed",
+    ),
+    "a_computed_value_and_elsewhere_the_caller_s": (
+        "def f(levels):\n    return _convert(np.zeros(3))\n\n"
+        "def g(levels):\n    return _convert(levels)\n",
+        "unchecked",
+    ),
+    "the_helper_handed_on_rather_than_called": (
+        "def f(levels):\n    return list(map(_convert, [np.zeros(3)]))\n",
+        "unchecked",
+    ),
+    "an_unpacked_argument": (
+        "def f(levels):\n    return _convert(*levels)\n",
+        "unchecked",
+    ),
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_HANDED))
+def test_a_private_helper_reads_what_its_calls_hand_it(
+    tmp_path: Path, shape: str
+) -> None:
+    caller, verdict = _HANDED[shape]
+    source = _PLANTED_HEADER + _HELPER + "\n" + caller
+    assert _verdicts(tmp_path, source)["_convert"] == verdict
+
+
+def _read_apart(tmp_path: Path, published: str) -> str:
+    """The verdict on a conversion in a private module that a public one calls."""
+    package = tmp_path / "phonometry"
+    package.mkdir()
+    inner = package / "_inner.py"
+    inner.write_text(
+        _PLANTED_HEADER + "\ndef convert(values):\n"
+        "    return np.asarray(values, dtype=np.float64)\n",
+        encoding="utf-8",
+    )
+    outer = package / "outer.py"
+    outer.write_text(
+        "import numpy as np\n\nfrom ._inner import convert\n\n"
+        f"{published}\n\ndef f(levels):\n    return convert(np.zeros(3))\n",
+        encoding="utf-8",
+    )
+    found = guard.census([inner, outer], source=None)
+    return next(c.verdict for c in found if c.function == "convert")
+
+
+def test_a_function_of_a_private_module_is_read_through_its_calls(
+    tmp_path: Path,
+) -> None:
+    assert _read_apart(tmp_path, "") == "computed"
+
+
+def test_a_function_a_public_module_publishes_reads_a_caller_s_value(
+    tmp_path: Path,
+) -> None:
+    assert _read_apart(tmp_path, '__all__ = ["convert"]') == "unchecked"
+
+
 _PLANTED_HEADER = """
+import numbers
+
 import numpy as np
 
 from phonometry._internal.validation import (
     complex_array,
     real_array,
+    real_number,
     refuse_complex,
     refuse_text,
     require_finite,

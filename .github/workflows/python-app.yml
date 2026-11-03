@@ -883,6 +883,14 @@ jobs:
       # inside another fence inside out. Static, stdlib only, so it runs here
       # with the checks that use the shared reader.
       run: python scripts/check_fence_readers.py
+    - name: Every script reads an inline code span the one way
+      # Where a code span opens and closes is decided in
+      # scripts/markdown_spans.py, as CommonMark decides it, and in
+      # site/scripts/shared/markdown-spans.mjs for the site's scripts. Nine
+      # readers used to find spans with a pattern of their own, each misreading
+      # a span of two backticks, an escaped backtick or a span that holds a
+      # backslash. Static, stdlib only.
+      run: python scripts/check_span_readers.py
     - name: No em dash in the published prose
       # The house style writes its prose without the em dash, in the pages,
       # the mirrors, the CHANGELOG, the docstrings and the figure labels

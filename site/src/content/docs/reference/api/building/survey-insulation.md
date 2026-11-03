@@ -380,7 +380,7 @@ Delegates to the weighted-rating plot. Requires the automatic rating
 
 ```python
 SurveyAirborneResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: Literal['dnt', 'r_prime'] = 'dnt',
     metadata: ReportMetadata | None = None,
@@ -460,7 +460,7 @@ Plot `D2m,nT` against the shifted ISO 717-1 reference curve.
 
 ```python
 SurveyFacadeResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',
@@ -537,7 +537,7 @@ Plot `L'nT` against the shifted ISO 717-2 reference curve.
 
 ```python
 SurveyImpactResult.report(
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     engine: Literal['reportlab'] = 'reportlab',

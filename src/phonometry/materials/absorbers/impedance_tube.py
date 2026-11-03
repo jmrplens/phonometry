@@ -54,6 +54,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    import os
+
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
@@ -521,7 +523,7 @@ def _frequency_range(
 ) -> tuple[float, float]:
     """Shared ISO/ASTM plane-wave frequency-range arithmetic."""
     require_scalar(diameter_m, "diameter_m")
-    require_scalar(spacing, "spacing")
+    require_scalar(spacing, "spacing_m")
     require_scalar(speed_of_sound, "speed_of_sound")
     if spacing <= 0.0:
         msg = "'spacing_m' must be positive."
@@ -686,7 +688,7 @@ class ImpedanceTubeResult(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

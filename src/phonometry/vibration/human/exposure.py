@@ -71,6 +71,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     real_array,
+    real_number,
     require_choice,
     require_equal_counts,
     require_equal_shapes,
@@ -84,6 +85,7 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
     from collections.abc import Callable, Mapping
 
     from matplotlib.axes import Axes
@@ -1354,12 +1356,15 @@ def exposure_assessment(
     :raises ValueError: for an unknown ``kind``/``metric`` combination or a
         non-finite or negative ``value``.
     :raises TypeError: if ``kind`` or ``metric`` is not a text.
+        ``value`` is refused the same way when it is not one real number.
     """
     require_choice(kind, "kind", ("hav", "wbv"))
     require_choice(metric, "metric", ("a8", "vdv"))
     if (kind, metric) not in _DIRECTIVE_VALUES:
         raise ValueError(_KIND_METRIC_MSG)
-    return ExposureAssessment(value=float(value), kind=kind, metric=metric)
+    return ExposureAssessment(
+        value=real_number(value, "value"), kind=kind, metric=metric
+    )
 
 
 @dataclass(frozen=True)
@@ -1431,7 +1436,7 @@ class DailyVibrationExposure(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

@@ -14,10 +14,12 @@ The guards that follow a call to the function it reaches look its name up as
 Python does, and what a scope binds of its own is read here once
 (:func:`own_names`, :func:`binding_of`): a function, a lambda, a class body or
 a comprehension inside a scope binds its names for itself, and a ``global``
-or a ``nonlocal`` statement sends the name out. Of two statements of one
-scope that bind one name, a ``def`` or an import in each branch of an ``if``
-or one after the other, which the name holds at a call, or once the scope
-has run, is read here too (:func:`live_bindings`).
+or a ``nonlocal`` statement sends the name out. The guards that read a
+name as the strings it stands for find here the scope whose binding a read
+or a write reaches (:func:`binding_scope`). Of two statements of one scope
+that bind one name, a ``def`` or an import in each branch of an ``if`` or
+one after the other, which the name holds at a call, or once the scope has
+run, is read here too (:func:`live_bindings`).
 """
 
 from __future__ import annotations
@@ -191,6 +193,29 @@ def _parameter_names(scope: ast.AST) -> frozenset[str]:
         )
         if argument is not None
     )
+
+
+def parameters(
+    function: ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda,
+) -> list[tuple[ast.arg, ast.expr | None]]:
+    """Each parameter of a function or a lambda with its default, ``None`` for
+    one that has none, in the order of the signature.
+
+    The defaults of the positional parameters belong to the last of them;
+    ``*args`` and ``**kwargs`` have none. A default runs in the scope around
+    the function, once, where it is defined.
+    """
+    arguments = function.args
+    positional = [*arguments.posonlyargs, *arguments.args]
+    missing = len(positional) - len(arguments.defaults)
+    defaults: list[ast.expr | None] = [None] * missing
+    defaults.extend(arguments.defaults)
+    found = list(zip(positional, defaults, strict=True))
+    found.extend(zip(arguments.kwonlyargs, arguments.kw_defaults, strict=True))
+    found.extend(
+        (extra, None) for extra in (arguments.vararg, arguments.kwarg) if extra
+    )
+    return found
 
 
 def _opening(scope: ast.AST) -> list[ast.AST]:
@@ -432,6 +457,71 @@ def binding_of(
     return "outside", None
 
 
+def forget_trees() -> None:
+    """Let go of every tree the scopes and the blocks were read from.
+
+    What :func:`own_names`, :func:`binding_of` and :func:`live_bindings` read
+    of a tree is kept for as long as the process runs, which a guard that
+    reads one package again on each pass of its fixed point needs; a guard
+    that reads each file once calls this when it is done with the file, so
+    that the trees of a whole directory are not all kept at once.
+    """
+    for cached in (own_names, _parents, _blocks, _class_is_live):
+        cached.cache_clear()
+
+
+def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:
+    """The scope whose binding of *name* a read or a write at *node* reaches.
+
+    The scope :func:`binding_of` finds: a ``:=`` in a comprehension reaches
+    the function around it, a name a scope declares ``nonlocal`` the
+    function that binds it, and a method passes over the class body around
+    it. The module, *root*, for a name declared ``global`` where it is read
+    or written, and for one no scope around *node* binds, which the module
+    stands for once a function has declared it ``global`` and bound it.
+    """
+    scope = binding_of(root, node, name)[1]
+    if scope is None or name in own_names(scope).declared_global:
+        return root
+    return scope
+
+
+#: The compound statements: those whose blocks hold statements of the scope
+#: they are written in.
+COMPOUND_STATEMENTS = (
+    ast.If,
+    ast.For,
+    ast.AsyncFor,
+    ast.While,
+    ast.Try,
+    ast.TryStar,
+    ast.With,
+    ast.AsyncWith,
+    ast.Match,
+)
+
+
+def block_statements(node: ast.AST) -> list[ast.stmt]:
+    """The statements of every block a compound statement holds, in the order
+    of the source: its body, each ``except`` clause's and each ``case``'s
+    body, its ``else`` and its ``finally``; none for any other node.
+
+    A walker that lists the blocks itself forgets one sooner or later: a
+    ``match``, a ``try`` with ``except*``, an ``async for`` or an ``async
+    with`` were each missing from one guard or another.
+    """
+    if not isinstance(node, COMPOUND_STATEMENTS):
+        return []
+    found: list[ast.stmt] = []
+    for field in ("body", "handlers", "cases", "orelse", "finalbody"):
+        for child in getattr(node, field, None) or []:
+            if isinstance(child, ast.ExceptHandler | ast.match_case):
+                found.extend(child.body)
+            else:
+                found.append(child)
+    return found
+
+
 #: The fields of a node that hold a block of statements: a compound
 #: statement's, an ``except`` clause's and a ``case``'s.
 _BLOCKS = ("body", "orelse", "finalbody", "handlers", "cases")
@@ -528,6 +618,73 @@ def _may_run_before(binding: Sequence[Frame], point: Sequence[Frame]) -> bool:
     return _runs_into(holder, field, other)
 
 
+#: The loops: a statement in the body of one may run again after a later one.
+_LOOPS = (ast.For, ast.AsyncFor, ast.While)
+
+#: The statements whose own body an exception may leave and the program go
+#: on after them: a ``try`` catches it, a ``with`` may hand it to a context
+#: manager that swallows it.
+_CATCHING = (ast.Try, ast.TryStar, ast.With, ast.AsyncWith)
+
+#: The definitions a jump inside them belongs to: never one of the scope around.
+_DEFINITIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+
+
+def _may_be_caught(later: Sequence[Frame], point: Sequence[Frame] | None) -> bool:
+    """Whether an exception raised on the way to the binding at *later* may be
+    caught and the scope go on to *point* without it.
+
+    The body of a ``try`` or a ``with`` around *later* may be left that way;
+    so may an ``except`` clause or the ``else`` of a ``try`` whose
+    ``finally`` holds *point*, which runs on the way out.
+    """
+    for depth, (holder, field, _) in enumerate(later):
+        if isinstance(holder, _CATCHING) and field == "body":
+            return True
+        if (
+            isinstance(holder, ast.Try | ast.TryStar)
+            and field in {"handlers", "orelse"}
+            and point is not None
+            and len(point) > depth
+            and _shared(point, later) >= depth
+            and point[depth][:2] == (holder, "finalbody")
+        ):
+            return True
+    return False
+
+
+def _jumps(statements: Sequence[ast.AST], *, returns: bool) -> bool:
+    """Whether *statements* hold a ``break`` or a ``continue`` of a loop around
+    them, or, with *returns*, a ``return``: a jump past what follows them.
+
+    A ``break`` or a ``continue`` in the body of a loop among them belongs to
+    that loop; a ``return`` there still leaves the scope.
+    """
+    pending = [(statement, False) for statement in statements]
+    while pending:
+        node, looped = pending.pop()
+        if isinstance(node, ast.Return):
+            if returns:
+                return True
+        elif isinstance(node, ast.Break | ast.Continue):
+            if not looped:
+                return True
+        elif not isinstance(node, _DEFINITIONS):
+            pending.extend(_inner_statements(node, looped=looped))
+    return False
+
+
+def _inner_statements(node: ast.AST, *, looped: bool) -> Iterator[tuple[ast.AST, bool]]:
+    """The statements of each block of *node*, each with whether a loop among
+    them or around them, *looped*, holds it.
+    """
+    for field in _BLOCKS:
+        block = getattr(node, field, None)
+        if isinstance(block, list):
+            inner = looped or (isinstance(node, _LOOPS) and field == "body")
+            yield from ((child, inner) for child in block)
+
+
 def _replaces(
     later: Sequence[Frame], earlier: Sequence[Frame], point: Sequence[Frame] | None
 ) -> bool:
@@ -535,10 +692,13 @@ def _replaces(
     way from it to *point*, or to the end of the scope when *point* is None.
 
     *later* sits after *earlier*, or after the statement that holds it, in a
-    block they share; not in a block of a ``try``, which an exception may
-    leave between the two. A *point* between them in that block is reached
-    before *later* runs; one outside the statement that holds the block, or
-    in a block of it that runs after, is reached after.
+    block they share, and nothing between the two may skip *later*: an
+    exception that a ``try`` or a ``with`` around it may catch
+    (:func:`_may_be_caught`), a ``break`` or a ``continue``, or a ``return``
+    before the end of the scope (:func:`_jumps`). A *point* between them in
+    that block is reached before *later* runs; one outside the statement
+    that holds the block, or in a block of it that runs after, is reached
+    after.
     """
     depth = len(later) - 1
     holder, field, index = later[-1]
@@ -547,12 +707,51 @@ def _replaces(
     _, written_in, place = earlier[depth]
     if written_in != field or place >= index:
         return False
-    if isinstance(holder, ast.Try | ast.TryStar):
+    between = getattr(holder, field)[place:index]
+    if _may_be_caught(later, point) or _jumps(between, returns=point is None):
         return False
     if point is None or len(point) <= depth or _shared(point, later) < depth:
         return True
     _, read_in, read_at = point[depth]
     return read_in != field or read_at > index
+
+
+def _turns_back(binding: Sequence[Frame], point: Sequence[Frame]) -> int | None:
+    """The depth of the innermost loop on whose earlier turn the binding at
+    *binding* may run before *point*, or None when no loop takes it there.
+
+    Both written in the body of the loop, or the binding in the body of a
+    ``while`` whose test holds *point*, which reads it again after each turn.
+    """
+    shared = _shared(binding, point)
+    found = None
+    for depth in range(min(shared + 1, len(binding), len(point))):
+        holder, field, _ = binding[depth]
+        if isinstance(holder, _LOOPS) and field == "body" == point[depth][1]:
+            found = depth
+    if shared == len(point) < len(binding):
+        holder, field, _ = binding[shared]
+        if isinstance(holder, ast.While) and field == "body":
+            found = shared
+    return found
+
+
+def _runs_each_turn(
+    binding: Sequence[Frame], point: Sequence[Frame], loop: int
+) -> bool:
+    """Whether the binding at *binding* runs before *point* on every turn of
+    the loop at depth *loop* that reaches it: written straight in a block
+    that holds *point*, before it, inside that loop's body.
+
+    A block is entered at its top, so what it holds before the statement
+    around *point* has run whenever *point* is reached from it.
+    """
+    depth = len(binding) - 1
+    if depth < loop or len(point) <= depth or _shared(binding, point) < depth:
+        return False
+    _, field, index = binding[depth]
+    _, read_in, read_at = point[depth]
+    return field == read_in and index < read_at
 
 
 def live_bindings[NodeT: ast.AST](
@@ -565,24 +764,111 @@ def live_bindings[NodeT: ast.AST](
     A binding that runs before the point and that no other one replaces on
     the way to it (:func:`_replaces`): one in each branch of an ``if`` is
     either, and a later one in a block that holds an earlier one, or the
-    statement around it, replaces it. When none runs before the point (a
-    call in a loop, read before the binding it reaches on a later turn),
-    every one may be what it holds.
+    statement around it, replaces it. A binding in the body of a loop that
+    holds the point may run before it on an earlier turn (:func:`_turns_back`),
+    unless another one runs before the point on every turn
+    (:func:`_runs_each_turn`). When none runs before the point (a call read
+    before any binding of its scope), every one may be what it holds.
     """
     frames = {binding: _frames(root, binding) for binding in bindings}
     target = _frames(root, point) if point is not None else None
-    candidates = [
+    forward = [
         binding
         for binding in bindings
         if target is None or _may_run_before(frames[binding], target)
     ]
-    if not candidates:
-        return list(bindings)
-    return [
+    live = [
         binding
-        for binding in candidates
+        for binding in forward
         if not any(
             other is not binding and _replaces(frames[other], frames[binding], target)
-            for other in candidates
+            for other in forward
         )
+    ]
+    if target is not None:
+        live.extend(_back_from_a_turn(bindings, frames, target, forward))
+    return live or list(bindings)
+
+
+def _back_from_a_turn[NodeT: ast.AST](
+    bindings: Sequence[NodeT],
+    frames: Mapping[NodeT, tuple[Frame, ...]],
+    target: Sequence[Frame],
+    forward: Sequence[NodeT],
+) -> list[NodeT]:
+    """Of *bindings* not in *forward*, those an earlier turn of a loop around
+    *target* may leave in place there (:func:`_turns_back`).
+
+    Not one that another binding of the same loop replaces before the turn
+    ends (:func:`_replaces`), nor any when a binding runs before *target* on
+    every turn (:func:`_runs_each_turn`).
+    """
+    turns = {
+        binding: loop
+        for binding in bindings
+        if binding not in forward
+        and (loop := _turns_back(frames[binding], target)) is not None
+    }
+    return [
+        binding
+        for binding, loop in turns.items()
+        if not any(_runs_each_turn(frames[other], target, loop) for other in bindings)
+        and not any(
+            other is not binding
+            and turns[other] == loop
+            and _replaces(frames[other], frames[binding], None)
+            for other in turns
+        )
+    ]
+
+
+def _scope_holding(root: ast.AST, node: ast.AST) -> ast.AST:
+    """The module, function or class body whose own statements hold *node*."""
+    frames = _frames(root, node)
+    return frames[0][0] if frames else root
+
+
+@functools.cache
+def _class_is_live(root: ast.AST, node: ast.AST) -> bool:
+    """Whether *node*, when it is a ``class`` statement, is what its name holds
+    once the scope around it has run, and so is every class around it.
+
+    Of two ``class`` statements of one name in one scope, one in each branch
+    of an ``if`` is either and a later one replaces an earlier one it always
+    follows (:func:`live_bindings`). Any other node is live.
+    """
+    if not isinstance(node, ast.ClassDef):
+        return True
+    scope = _scope_holding(root, node)
+    namesakes = [
+        statement
+        for statement in _blocks(root)
+        if isinstance(statement, ast.ClassDef)
+        and statement.name == node.name
+        and _scope_holding(root, statement) is scope
+    ]
+    return node in live_bindings(root, namesakes) and _class_is_live(root, scope)
+
+
+def live_class_members[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT]
+) -> list[NodeT]:
+    """Of *bindings*, definitions of one qualified name under *root* (a
+    function of the module, or a method of a class, which two ``class``
+    statements of one name may each define), those the name holds once the
+    module has run.
+
+    Each class is read first, in the scope that holds it
+    (:func:`_class_is_live`), and only the definitions of a live class are
+    read against one another (:func:`live_bindings`): the methods of two
+    classes of one name share no block, so read together each would be kept.
+    """
+    by_scope: dict[ast.AST, list[NodeT]] = {}
+    for binding in bindings:
+        by_scope.setdefault(_scope_holding(root, binding), []).append(binding)
+    return [
+        binding
+        for scope, members in by_scope.items()
+        if _class_is_live(root, scope)
+        for binding in live_bindings(root, members)
     ]

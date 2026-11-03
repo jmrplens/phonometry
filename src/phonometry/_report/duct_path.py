@@ -56,6 +56,8 @@ from ._noise_control_fiche import PREDICTION_DISCLAIMER
 from ._sound_power_fiche import metadata_pairs
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..noise_control._duct_path import DuctPathResult
     from ..room.noise_criteria import NCResult, RCResult
@@ -380,7 +382,7 @@ def _basis_strips(result: DuctPathResult, language: Language) -> list[str]:
 
 def render_duct_path_report(
     result: DuctPathResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

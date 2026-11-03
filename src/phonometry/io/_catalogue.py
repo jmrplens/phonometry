@@ -131,7 +131,7 @@ from .._internal.json_input import (
     text_location,
     write_beside,
 )
-from .._internal.validation import require_scalar
+from .._internal.validation import real_number, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._sidecar import _SIDECAR_TAIL
 
@@ -2043,7 +2043,7 @@ def _same_float(one: float, other: object) -> bool:
     """Whether two numbers are the same double, bit for bit."""
     if not isinstance(other, numbers.Real):
         return False
-    return float(one).hex() == float(other).hex()
+    return real_number(one, "one").hex() == float(other).hex()
 
 
 def _renamed(
@@ -2652,7 +2652,8 @@ def write_catalogue(
     Each file is written beside its final name and renamed into place, so a
     reader never finds half of one; a CSV file and its header are two files,
     written one after the other, and the pair is not written as one. A file
-    it replaces keeps its permission bits, and a hard link to the old file
+    it replaces keeps its permission bits (the new one is readable by its
+    owner alone until its bytes are in), and a hard link to the old file
     keeps the old content (on Windows without a read-only flag the old file
     had, since the flag belongs to the file and is cleared for the rename).
     Without *overwrite*, a file at the name is kept, one another program

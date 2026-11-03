@@ -314,3 +314,30 @@ def test_a_table_longer_than_the_page_is_refused(tmp_path: Path, points: int) ->
     with pytest.raises(ValueError, match="does not fit the single page"):
         trimmed.report(str(out))
     assert not out.exists()  # a fiche that does not fit is not left behind
+
+
+@pytest.mark.parametrize("points", [38, 60], ids=["runs-on", "layout-error"])
+def test_a_fiche_that_does_not_fit_leaves_the_file_that_was_at_the_name(
+    tmp_path: Path, points: int
+) -> None:
+    """The sheet was built at the name and removed again when it did not fit,
+    so the fiche of an earlier run at that name went with it.
+    """
+    base = result_factories._impedance_tube()
+    size = np.size(base.frequencies)
+    trimmed = dataclasses.replace(
+        base,
+        **{
+            field.name: np.asarray(getattr(base, field.name))[:points]
+            for field in dataclasses.fields(base)
+            if isinstance(getattr(base, field.name), np.ndarray)
+            and np.ndim(getattr(base, field.name)) == 1
+            and np.size(getattr(base, field.name)) == size
+        },
+    )
+    out = tmp_path / "fiche.pdf"
+    out.write_bytes(b"%PDF the fiche of an earlier run")
+    with pytest.raises(ValueError, match="does not fit the single page"):
+        trimmed.report(out)
+    assert out.read_bytes() == b"%PDF the fiche of an earlier run"
+    assert [entry.name for entry in tmp_path.iterdir()] == ["fiche.pdf"]

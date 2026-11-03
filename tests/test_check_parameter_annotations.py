@@ -187,6 +187,76 @@ def test_a_bare_array_handed_to_a_helper_on_a_continuation_line_is_refused(
     ]
 
 
+def test_a_helper_is_the_one_its_name_is_imported_as_at_the_call(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name in a function, the call reaches the one
+    that stands for the name where it runs.
+
+    The call read the first import of the function, so ``_mean`` was the
+    converting helper of ``_helpers`` though the function imports the one
+    of ``_other`` after it, and the parameter was refused for a conversion
+    the call never reaches.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["sound_power"]
+
+        def sound_power(levels: np.ndarray) -> float:
+            from ._helpers import _mean
+            from ._other import _mean
+
+            return _mean(0.0, levels)
+        """,
+        _helpers="""
+        def _mean(offset: float, values: np.ndarray) -> float:
+            return offset + float(np.mean(np.asarray(values)))
+        """,
+        _other="""
+        def _mean(offset: float, values: np.ndarray) -> float:
+            return offset + float(values.mean())
+        """,
+    )
+    assert refused == {}
+
+
+def test_a_helper_either_of_two_imports_may_reach_is_read_through_both(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name a ``try`` imports from one module and its ``except`` from another
+    reaches either helper, and the annotation admits what each converts.
+
+    The call reached no helper once two imports that may stand for the name
+    at it reached different ones, where one table had followed the last, so
+    the conversion of the first helper was never asked of the annotation.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["sound_power"]
+
+        try:
+            from ._fast import _mean
+        except ImportError:
+            from ._slow import _mean
+
+        def sound_power(levels: np.ndarray) -> float:
+            return _mean(0.0, levels)
+        """,
+        _fast="""
+        def _mean(offset: float, values: np.ndarray) -> float:
+            return offset + float(np.mean(np.asarray(values)))
+        """,
+        _slow="""
+        def _mean(offset: float, values: np.ndarray) -> float:
+            return offset + float(values.mean())
+        """,
+    )
+    problems = refused["sound_power(levels)"]
+    assert any("np.asarray() converts any array-like" in p for p in problems)
+
+
 def test_a_parameter_handed_by_keyword_or_through_a_local_name_is_followed(
     tmp_path: pathlib.Path,
 ) -> None:

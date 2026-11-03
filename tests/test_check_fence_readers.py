@@ -21,6 +21,8 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -225,6 +227,155 @@ def test_a_parameter_shadows_a_module_marker(tmp_path: pathlib.Path) -> None:
     )
 
 
+def test_a_comprehension_s_variable_stays_in_the_comprehension(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Python keeps a comprehension's variable to itself: the function's name
+    of the same spelling stands for its own string, and only inside the
+    comprehension does the name stand for the markers it walks.
+    """
+    assert (
+        _shapes(
+            tmp_path,
+            """
+            def opens(line):
+                marker = "#"
+                seen = [marker for marker in ("```", "~~~")]
+                return line.startswith(marker), seen
+            """,
+        )
+        == []
+    )
+    assert _shapes(
+        tmp_path,
+        """
+        def opens(line):
+            marker = "#"
+            return [line.startswith(marker) for marker in ("```", "~~~")]
+        """,
+    ) == [("opens", "a test for a marker")]
+
+
+def test_a_lambda_s_parameter_shadows_a_module_marker(tmp_path: pathlib.Path) -> None:
+    """A lambda's parameter stands for whatever its caller passes, as a
+    function's does.
+    """
+    assert (
+        _shapes(
+            tmp_path,
+            """
+            marker = "```"
+
+            def opens(line):
+                starts = lambda marker: line.startswith(marker)
+                return starts("#")
+            """,
+        )
+        == []
+    )
+
+
+#: Markers written in one scope that Python binds in another: a ``:=`` in a
+#: comprehension binds in the function around it, a name declared ``global``
+#: in the module and one declared ``nonlocal`` in the function that binds it.
+_BOUND_ELSEWHERE = {
+    "a_walrus_in_a_list_comprehension": """
+        def opens(lines, text):
+            [marker := "```" for _ in lines]
+            return text.startswith(marker)
+    """,
+    "a_walrus_in_a_generator_handed_to_any": """
+        def opens(lines, text):
+            if any((marker := "~~~") for _ in lines):
+                pass
+            return text.startswith(marker)
+    """,
+    "a_name_a_function_declares_global": """
+        def setup():
+            global MARKER
+            MARKER = "```"
+
+        def opens(text):
+            return text.startswith(MARKER)
+    """,
+    "a_name_a_nested_function_declares_nonlocal": """
+        def opens(text):
+            marker = "#"
+
+            def fenced():
+                nonlocal marker
+                marker = "```"
+
+            fenced()
+            return text.startswith(marker)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_BOUND_ELSEWHERE))
+def test_a_marker_bound_in_the_scope_python_binds_it_in_is_read_there(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """Each name landed in the scope it was written in, a comprehension's or
+    the function's, and the test Python reads through the function around it
+    or through the module found no marker.
+    """
+    assert _shapes(tmp_path, _BOUND_ELSEWHERE[shape]) == [
+        ("opens", "a test for a marker")
+    ]
+
+
+#: Parameters that stand for a marker through their default, read in the
+#: scope around the function or the lambda, where Python computes it.
+_DEFAULTS = {
+    "a_default_written_out": """
+        def opens(line, marker="```"):
+            return line.startswith(marker)
+    """,
+    "a_lambda_s_default": """
+        def opens(lines):
+            return list(filter(lambda line, marker="```": line.startswith(marker), lines))
+    """,
+    "a_default_that_names_the_module_s_marker": """
+        MARKER = "~~~"
+
+        def opens(lines):
+            def fenced(line, marker=MARKER):
+                return line.startswith(marker)
+
+            return list(filter(fenced, lines))
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_DEFAULTS))
+def test_a_parameter_stands_for_its_default(tmp_path: pathlib.Path, shape: str) -> None:
+    """Every parameter was bound to no string, its default left unread."""
+    found = _shapes(tmp_path, _DEFAULTS[shape])
+    assert [shape for _, shape in found] == ["a test for a marker"]
+
+
+def test_a_class_body_s_marker_is_not_read_from_its_methods(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method reads a name of the module, never one of the class body around it."""
+    assert (
+        _shapes(
+            tmp_path,
+            """
+            MARKER = "#"
+
+            class Reader:
+                MARKER = "```"
+
+                def opens(self, line):
+                    return line.startswith(MARKER)
+            """,
+        )
+        == []
+    )
+
+
 def test_the_regular_expressions_that_read_fences_are_refused(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -396,3 +547,84 @@ def test_an_exemption_silences_one_function_and_goes_stale(
 def test_the_scripts_read_every_fence_through_the_shared_reader() -> None:
     """The tree itself, the Python scripts and the site's code."""
     assert cfr.main([]) == 0
+
+
+def test_every_string_a_join_can_make_is_read() -> None:
+    """A join kept the first 64 strings its pieces made, in the order of a set,
+    and dropped the rest, so a marker among the dropped ones passed.
+    """
+    letters = frozenset("abcdefghijklmnopqrstuvwxyz")
+    joined = cfr._joined([letters, letters])
+    assert len(joined) == 26 * 26
+    assert "zz" in joined
+
+
+def test_a_pattern_of_too_many_strings_is_refused_unread(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Past the bound a pattern is refused, never read in part.
+
+    Only a piece that looks for a marker counts in a join, so the names stand
+    for markers here: three of them make more patterns than the bound.
+    """
+    letters = ", ".join(repr(f"```{c}") for c in "abcdefghijklmnopqrstuvwxyz")
+    source = f"""
+        import re
+
+        A = ({letters})
+
+        def opens(line):
+            return re.match(f"{{A}}{{A}}{{A}}", line)
+    """
+    assert _shapes(tmp_path, source) == [
+        ("opens", f"a pattern of more than {cfr.MAX_VALUES} strings, not read")
+    ]
+
+
+#: A marker a choice stands for: every string a conditional expression or an
+#: ``or`` can be is read, as the two branches of an ``if`` are.
+_CHOSEN_MARKERS = {
+    "a_name_bound_to_a_conditional_expression": """
+        def opens(line, tilde):
+            marker = "~~~" if tilde else "```"
+            return line.startswith(marker)
+    """,
+    "a_conditional_expression_tested_at_once": """
+        def opens(line, tilde):
+            return line.startswith("~~~" if tilde else "```")
+    """,
+    "a_name_built_with_an_added_piece": """
+        def opens(line):
+            marker = ""
+            marker += "```"
+            return line.startswith(marker)
+    """,
+    "an_or_of_a_marker": """
+        def opens(line, marker):
+            return line.startswith(marker or "```")
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_CHOSEN_MARKERS))
+def test_a_marker_behind_a_choice_is_refused(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """A conditional expression and an ``or`` folded to no string, so a test
+    for a marker on either side passed, where the ``if`` form was found.
+    """
+    assert _shapes(tmp_path, _CHOSEN_MARKERS[shape]) == [
+        ("opens", "a test for a marker")
+    ]
+
+
+def test_a_pattern_behind_a_choice_is_refused(tmp_path: pathlib.Path) -> None:
+    assert _shapes(
+        tmp_path,
+        """
+        import re
+
+        def opens(line, tilde):
+            return re.match(r"~{3}" if tilde else r"`{3}", line)
+        """,
+    ) == [("opens", "a pattern for a marker")]

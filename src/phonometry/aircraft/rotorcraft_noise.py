@@ -65,6 +65,7 @@ from .._internal.validation import (
     arrays_of,
     is_scalar,
     real_array,
+    real_number,
     refuse_text_beside_choice,
     require_choice,
     require_equal_shapes,
@@ -597,12 +598,13 @@ def hover_derived_hemisphere(
         (``NaN`` bins stay ``NaN``).
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``condition`` is not a text.
+        ``offset_db`` is refused the same way when it is not one real number.
     """
     key = require_choice(condition, "condition", tuple(_TABLE3_OFFSETS_DB))
     if offset_db is None:
         offset = _TABLE3_OFFSETS_DB[key]
     elif math.isfinite(offset_db):
-        offset = float(offset_db)
+        offset = real_number(offset_db, "offset_db")
     else:
         msg = "'offset_db' must be finite."
         raise ValueError(msg)
@@ -1937,9 +1939,13 @@ def _terrain_adjustments(
     freqs = setup.frequencies
     sigma = float(np.atleast_1d(np.asarray(setup.sigma, dtype=np.float64))[0])
     out = np.empty((receivers.shape[0], freqs.size), dtype=np.float64)
-    sx, sy, sz = float(position[0]), float(position[1]), float(position[2])
+    sx, sy, sz = (
+        real_number(position[0], "position"),
+        real_number(position[1], "position"),
+        real_number(position[2], "position"),
+    )
     for i in range(receivers.shape[0]):
-        span = float(dp[i])
+        span = real_number(dp[i], "dp")
         n = min(
             max(2, math.ceil(span / setup.terrain_resolution) + 1), _MAX_SECTION_SAMPLES
         )
@@ -1956,7 +1962,12 @@ def _terrain_adjustments(
             continue
         sigma_seg = np.full(n - 1, sigma)
         adj, _, _ = _screening_core(
-            freqs, (0.0, sz), (span, float(receivers[i, 2])), d, pz, sigma_seg
+            freqs,
+            (0.0, sz),
+            (span, real_number(receivers[i, 2], "receivers")),
+            d,
+            pz,
+            sigma_seg,
         )
         out[i] = adj
     return out

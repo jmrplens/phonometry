@@ -55,6 +55,7 @@ from ._insulation_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Sequence
 
     from .._i18n import Language
@@ -146,7 +147,7 @@ _IMPACT_QUANTITIES = ("l_n_t", "l_n")
 def render_iso16283_report(
     result: AirborneInsulationResult | ImpactInsulationResult,
     rating: WeightedRatingResult | ImpactRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: str,
     metadata: ReportMetadata | None = None,
@@ -306,7 +307,7 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
 def render_iso16283_facade_report(
     result: FacadeInsulationResult,
     rating: WeightedRatingResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     quantity: str,
     metadata: ReportMetadata | None = None,

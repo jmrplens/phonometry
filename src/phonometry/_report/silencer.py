@@ -48,6 +48,8 @@ from ._noise_control_fiche import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -176,7 +178,7 @@ def _basis_strip(language: Language = "en") -> str:
 
 def render_reactive_silencer_report(
     result: ReactiveSilencerResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

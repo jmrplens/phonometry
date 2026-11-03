@@ -69,6 +69,7 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
@@ -645,7 +646,7 @@ class ExposureResult(RichDisplay):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",

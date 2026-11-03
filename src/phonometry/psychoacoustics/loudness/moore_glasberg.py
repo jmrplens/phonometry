@@ -55,6 +55,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     real_array,
+    real_number,
     require_1d_signal,
     require_choice,
     require_ranks,
@@ -942,7 +943,7 @@ def _third_octave_components(
     levels: list[float] = []
     for centre, level in zip(_THIRD_OCTAVE_FREQ, band_levels, strict=True):
         width = centre * (_THIRD_OCTAVE_RATIO - 1.0 / _THIRD_OCTAVE_RATIO)
-        spectrum_level = float(level) - 10.0 * math.log10(width)
+        spectrum_level = real_number(level, "band_levels") - 10.0 * math.log10(width)
         spacing = 1.0 if centre <= _FINE_SPACING_MAX_CENTRE_HZ else 10.0
         component_level = spectrum_level + 10.0 * math.log10(spacing)
         f_lo = centre / _THIRD_OCTAVE_RATIO

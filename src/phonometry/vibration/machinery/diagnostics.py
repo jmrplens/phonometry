@@ -98,6 +98,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import (
+    real_number,
     require_choice,
     require_count,
     require_non_negative,
@@ -184,8 +185,8 @@ def _line(
     """Build a :class:`FaultLine`, deriving its shaft order from ``fs``."""
     return FaultLine(
         name=name,
-        frequency=float(frequency),
-        order=float(frequency) / fs,
+        frequency=real_number(frequency, "frequency"),
+        order=real_number(frequency, "frequency") / fs,
         family=family,
         description=description,
     )

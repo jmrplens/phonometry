@@ -117,3 +117,9 @@ def test_lden_manual_es_published_example() -> None:
     # Ln = 54 dBA give Lden = 65.1 dB with the standard 12/4/8 h day.
     # The book prints one decimal (exact value 65.12), so 0.05 covers it.
     assert environment.lden(65.0, 62.0, 54.0) == pytest.approx(65.1, abs=0.05)
+
+
+def test_a_period_that_is_not_three_numbers_is_refused() -> None:
+    """Each period is a level, its hours and its adjustment, and no other shape."""
+    with pytest.raises(ValueError, match="Every period must be a"):
+        environment.composite_rating_level([(60.0, 24.0)])

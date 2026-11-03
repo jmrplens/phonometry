@@ -246,7 +246,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for bands that are not ascending one-third octaves from 50 Hz to 20 kHz, no position, levels, background levels, maxima or a manufacturer's $C_2$ that are not finite, or inconsistent shapes. |
-| TypeError | if `coverage_factor` is not a single number, or `arrangement` or `radiation` is not a text, or `background_levels`, `c2`, `frequencies`, `intensity_sound_power_level`, `levels` or `max_levels` holds a text or a value that is not a real number. |
+| TypeError | if `coverage_factor` is not a single number, or `arrangement` or `radiation` is not a text, or `background_levels`, `c2`, `frequencies`, `intensity_sound_power_level`, `levels` or `max_levels` holds a text or a value that is not a real number. `knee_frequency_hz` is refused the same way when it is not one real number. |
 
 ## reference_source_reproducibility
 

@@ -168,6 +168,12 @@ Whether a nominal frequency falls in this row's range.
 
 **Returns:** `True` inside the range, its included ends counted.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `nominal_frequency_hz` is not one real number. |
+
 ### CalibratorTableRow.for_class()
 
 ```python

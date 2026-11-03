@@ -60,6 +60,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     real_array,
+    real_number,
     require_choice,
     require_count,
     require_ranks,
@@ -344,7 +345,8 @@ def _tone_burst_scalars(
         msg = "'n_repetitions' must be a positive integer."
         raise ValueError(msg)
     for name, value in (("pre_silence", pre_silence), ("post_silence", post_silence)):
-        if not np.isfinite(float(value)) or float(value) < 0.0:
+        number = real_number(value, name)
+        if not math.isfinite(number) or number < 0.0:
             msg = f"'{name}' must be a non-negative, finite number."
             raise ValueError(msg)
     return fs_v, f_v, cycles_v, amplitude_v, repetitions_v
@@ -426,6 +428,7 @@ def tone_burst(
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``n_cycles`` or ``n_repetitions`` is a flag, a text or an
         array where a count goes.
+        ``post_silence`` or ``pre_silence`` are refused the same way when any is not one real number.
     :warns ToneBurstWarning: If ``fs`` and ``frequency`` are incommensurate.
     """
     fs_v, f_v, cycles_v, amplitude_v, repetitions_v = _tone_burst_scalars(
@@ -465,8 +468,8 @@ def tone_burst(
             stacklevel=2,
         )
 
-    n_pre = round(float(pre_silence) * fs_v)
-    n_post = round(float(post_silence) * fs_v)
+    n_pre = round(real_number(pre_silence, "pre_silence") * fs_v)
+    n_post = round(real_number(post_silence, "post_silence") * fs_v)
     block = period if period is not None else n_on
     n_total = n_pre + repetitions_v * block + n_post
 

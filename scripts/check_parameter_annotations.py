@@ -2086,37 +2086,61 @@ class Reader:
     def _callee(
         self, function: overloads.Function, call: ast.Call, ends: Iterable[str]
     ) -> tuple[str, bool] | None:
-        """What a call reaches: a function of the package, or one that ends a route.
+        """What a call reaches, when it reaches one callee (:meth:`_callees`)."""
+        callees = self._callees(function, call, ends)
+        return callees[0] if len(callees) == 1 else None
+
+    def _callees(
+        self, function: overloads.Function, call: ast.Call, ends: Iterable[str]
+    ) -> list[tuple[str, bool]]:
+        """Every callee a call may reach: a function of the package, or one
+        that ends a route, each once.
 
         With whether the callee's first parameter is filled by the call
-        itself (``self`` of a method, the instance of a constructor).
+        itself (``self`` of a method, the instance of a constructor). Two
+        imports that may each stand for the name at the call reach two
+        callees, and a route through the call is one through either.
         """
         func = call.func
+        own = self._own_method(function, func)
+        if own is not None:
+            return [own] if own[0] else []
+        found = (
+            self._resolved_callee(target, func, ends)
+            for target in self.package.call_targets(function, func, call)
+        )
+        return [callee for callee in found if callee is not None]
+
+    def _own_method(
+        self, function: overloads.Function, func: ast.expr
+    ) -> tuple[str, bool] | None:
+        """The method a call on ``super()`` or on the record reaches, ``("",
+        False)`` when it reaches none, or ``None`` for a call of neither.
+        """
         if (
             isinstance(func, ast.Attribute)
             and _is_super(func.value)
             and function.owner is not None
         ):
             method = self._inherited(f"{function.module}.{function.owner}", func.attr)
-            if method is None:
-                return None
-            node = self.package.functions[method].implementation
-            return method, node is not None and not _is_static(node)
-        if (
+        elif (
             isinstance(func, ast.Attribute)
             and isinstance(func.value, ast.Name)
             and func.value.id in _OWNERS
             and function.owner is not None
         ):
-            owner = f"{function.module}.{function.owner}"
-            method = self._method(owner, func.attr)
-            if method is None:
-                return None
-            node = self.package.functions[method].implementation
-            return method, node is not None and not _is_static(node)
-        target = self.package.call_target(function, func)
-        if target is None:
+            method = self._method(f"{function.module}.{function.owner}", func.attr)
+        else:
             return None
+        if method is None:
+            return "", False
+        node = self.package.functions[method].implementation
+        return method, node is not None and not _is_static(node)
+
+    def _resolved_callee(
+        self, target: str, func: ast.expr, ends: Iterable[str]
+    ) -> tuple[str, bool] | None:
+        """The callee a call reaches through *target*, the dotted name it names."""
         if target in ends or target == "builtins.isinstance":
             return target, False
         if target in self.annotations.classes:
@@ -2337,9 +2361,26 @@ class Reader:
         one level deeper here, as far as an element of an item.
         """
         ends = self._ends(target)
-        callee = self._callee(function, call, ends)
-        if callee is None:
-            return
+        for callee in self._callees(function, call, ends):
+            yield from self._called_through(
+                function, call, (positions, keywords, level), target, callee
+            )
+
+    def _called_through(
+        self,
+        function: overloads.Function,
+        call: ast.Call,
+        given: tuple[list[int], list[str], int],
+        target: Target,
+        callee: tuple[str, bool],
+    ) -> Iterator[tuple[str, int, int]]:
+        """Where a call takes the parameter leads through one callee it may reach.
+
+        *given* is where the call takes it, by position and by keyword, and
+        the level it is read at.
+        """
+        positions, keywords, level = given
+        ends = self._ends(target)
         reached, bound_self = callee
         if reached == "builtins.isinstance":
             if 0 in positions and self._admits(function, call, target):
@@ -5397,14 +5438,26 @@ def _given_back(
             return True
         if not (isinstance(value, ast.Call) and value.args):
             return False
-        dotted = reader.package.call_target(function, value.func)
-        if dotted is None:
+        wrapper = _wrapper_reached(reader, function, value)
+        if wrapper is None:
             return False
-        below = dotted.removeprefix(f"{reader.root}.")
-        if dotted not in _NOT_COPIED and below not in _NOT_COPIED_HERE:
-            return False
-        value = value.args[-1] if dotted.endswith(".cast") else value.args[0]
+        value = value.args[-1] if wrapper.endswith(".cast") else value.args[0]
     return False
+
+
+def _wrapper_reached(
+    reader: Reader, function: overloads.Function, call: ast.Call
+) -> str | None:
+    """A wrapper that copies nothing (:data:`_NOT_COPIED`) *call* may reach.
+
+    Any one of the callees two imports of the name may stand for at the call
+    is enough: the field may be stored back as the caller gave it.
+    """
+    for dotted in reader.package.call_targets(function, call.func, call):
+        below = dotted.removeprefix(f"{reader.root}.")
+        if dotted in _NOT_COPIED or below in _NOT_COPIED_HERE:
+            return dotted
+    return None
 
 
 def _stores(

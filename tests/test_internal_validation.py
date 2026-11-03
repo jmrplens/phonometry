@@ -21,11 +21,12 @@ refused according to a coincidence between its bands.
 
 from __future__ import annotations
 
+import cmath
 import math
 import warnings
 from collections import deque
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, FloatOperation, localcontext
 from fractions import Fraction
 from typing import TYPE_CHECKING
 
@@ -39,6 +40,7 @@ from phonometry._internal.validation import (
     arrays_of,
     check_engine,
     complex_array,
+    complex_number,
     floats_of,
     holds_text,
     indices_of,
@@ -821,6 +823,145 @@ def test_an_infinity_the_caller_gives_is_read_as_that_infinity(value: object) ->
     assert (read > 0) is bool(value > 0)  # type: ignore[operator]
 
 
+def test_a_decimal_past_its_context_s_exponent_is_refused_as_too_large() -> None:
+    """A ``Decimal`` too large for the decimal context's own arithmetic is
+    still one number too large for a float, refused with ``ValueError``.
+
+    Its magnitude was asked through ``abs()``, which runs in the decimal
+    context, so ``Decimal("1e1000000")`` raised ``decimal.Overflow`` out of
+    the guard instead of the refusal it words.
+    """
+    huge = Decimal("1e1000000")
+    with pytest.raises(ValueError, match="'x' must be a number"):
+        require_real(huge, "'x' must be a number")
+
+
+def test_a_finite_decimal_is_refused_when_its_context_traps_float_operations() -> None:
+    """A finite ``Decimal`` beyond a float's range is refused whatever the
+    caller's decimal context traps.
+
+    Comparing its magnitude with ``math.inf`` is an operation a context that
+    traps ``FloatOperation`` refuses with a ``TypeError``, which the guard
+    took for a value that cannot say whether it is finite, and so it handed
+    back ``inf`` for ``Decimal("1e400")``.
+    """
+    beyond = Decimal("1e400")
+    with localcontext() as context:
+        context.traps[FloatOperation] = True
+        with pytest.raises(ValueError, match="'x' must be a number"):
+            require_real(beyond, "'x' must be a number")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        [10**400],
+        10**400,
+        [Decimal("1e400")],
+        np.array([Decimal("-1e400"), Decimal(1)], dtype=object),
+    ],
+    ids=["int in a list", "int", "Decimal in a list", "array of objects"],
+)
+def test_real_array_refuses_a_number_too_large_for_a_float(value: object) -> None:
+    """A number past a float's largest is refused by name as too large.
+
+    numpy raised an anonymous ``OverflowError`` for a Python integer, and read
+    a ``Decimal`` past the range as an infinity with no more than a warning,
+    which the checks after it took for an infinity the caller gave.
+    """
+    with pytest.raises(ValueError, match="'x' holds a number too large for a float"):
+        real_array(value, "x")
+    as_complex = 10**400 if isinstance(value, np.ndarray) else value
+    with pytest.raises(ValueError, match="'x' holds a number too large for a float"):
+        complex_array(as_complex, "x")
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).max <= np.finfo(np.float64).max,
+    reason="a long double here holds no number past a float's largest",
+)
+def test_real_array_refuses_a_long_double_past_a_float() -> None:
+    big = np.array([1.0, 1e300], dtype=np.longdouble) * np.longdouble(1e300)
+    with pytest.raises(ValueError, match="'x' holds a number too large"):
+        real_array(big, "x")
+    assert np.array_equal(real_array(np.array([1.0], dtype=np.longdouble), "x"), [1.0])
+
+
+#: Finite numbers no complex of floats holds, by how a caller writes one.
+_BEYOND_A_COMPLEX: dict[str, Callable[[], object]] = {
+    "Decimal": lambda: Decimal("1e400"),
+    "long double": lambda: np.longdouble("1e400"),
+    "complex long double": lambda: np.clongdouble(np.longdouble("1e400")),
+    "imaginary long double": lambda: np.clongdouble(1j) * np.longdouble("1e400"),
+}
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        pytest.param(
+            spelling,
+            marks=_ONLY_WITH_A_WIDE_LONG_DOUBLE if "long double" in spelling else (),
+        )
+        for spelling in _BEYOND_A_COMPLEX
+    ],
+)
+def test_complex_number_refuses_a_number_no_complex_holds(spelling: str) -> None:
+    """A finite number past a float's largest is refused as too large.
+
+    :func:`complex` reads a ``Decimal``, a long double or a complex long
+    double past a float's range as an infinity, and the reader handed it
+    back as ``(inf+0j)``, which a check after it took for an infinity the
+    caller gave, though its docstring promised a ``ValueError``.
+    """
+    value = _BEYOND_A_COMPLEX[spelling]()
+    with pytest.raises(ValueError, match="'z' must be a number a complex can hold"):
+        complex_number(value, "z")
+
+
+def test_complex_number_keeps_an_infinity_the_caller_gives() -> None:
+    assert cmath.isinf(complex_number(complex(math.inf, 1.0), "z"))
+    assert cmath.isinf(complex_number(Decimal("Infinity"), "z"))
+
+
+@_ONLY_WITH_A_WIDE_LONG_DOUBLE
+@pytest.mark.parametrize(
+    "dtype", [np.longdouble, np.clongdouble], ids=["long double", "complex long double"]
+)
+def test_complex_array_refuses_an_array_of_long_doubles_past_a_float(
+    dtype: type[np.generic],
+) -> None:
+    """An array of long doubles, or of complex long doubles, past a float's
+    largest is refused by name, as a list of them already was.
+
+    The reader handed an array of numbers to numpy as it was, which read the
+    number as an infinity with no more than a ``RuntimeWarning``.
+    """
+    big = np.array([1.0, 1e300], dtype=dtype) * np.longdouble(1e300)
+    with pytest.raises(ValueError, match="'z' holds a number too large for a float"):
+        complex_array(big, "z")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        held = complex_array(np.array([1.0 + 2.0j], dtype=np.clongdouble), "z")
+    assert np.array_equal(held, [1.0 + 2.0j])
+
+
+def test_real_array_keeps_an_infinity_the_caller_gives() -> None:
+    assert np.isinf(real_array([np.inf, 1.0], "x")[0])
+    assert np.isinf(real_array([Decimal("Infinity")], "x")[0])
+
+
+def test_real_array_names_an_element_whose_conversion_fails_as_a_value() -> None:
+    class Refuses:
+        def __float__(self) -> float:
+            msg = "no float"
+            raise ValueError(msg)
+
+    refused = [Refuses()]
+    with pytest.raises(ValueError, match="'x' must be numeric"):
+        real_array(refused, "x")
+
+
 #: A text that numpy does not see as one: a ``bytearray`` alone, inside a
 #: list, beside numbers in a nested list, inside a list beside an array, and
 #: in an array of objects.
@@ -976,3 +1117,17 @@ def test_the_rank_check_of_every_scalar_guard_refuses_a_complex_number(
     """
     with pytest.raises(TypeError, match="'x' must be a number, not a complex one"):
         require_scalar(value, "x")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [10**400, -(10**400), Decimal("sNaN")],
+    ids=["an integer past a float", "its negative", "a signalling NaN"],
+)
+def test_complex_number_refuses_what_complex_cannot_read(value: object) -> None:
+    """:func:`complex` raises ``OverflowError`` on an integer past a float's
+    largest and ``ValueError`` on a signalling ``Decimal`` NaN: both are
+    refused as numbers no complex holds, by the parameter's name.
+    """
+    with pytest.raises(ValueError, match="'z' must be a number a complex can hold"):
+        complex_number(value, "z")

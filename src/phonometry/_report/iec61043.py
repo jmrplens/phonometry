@@ -70,6 +70,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from .._i18n import Language
     from ..emission.intensity_compliance import (
         IntensityInstrumentComplianceResult,
@@ -285,7 +287,7 @@ def _verdict(
 
 def render_iec61043_report(
     result: IntensityInstrumentComplianceResult,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

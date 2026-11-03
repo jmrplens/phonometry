@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import real_number, require_equal_shapes
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -62,6 +62,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    import os
+
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -81,7 +83,7 @@ def _cell(value: float, decimals: int, language: Language) -> str:
     rather than the literal ``nan`` that used to sit between two real
     coefficients.
     """
-    v = float(value)
+    v = real_number(value, "value")
     if not math.isfinite(v):
         return "—"
     return format_number(v, language, decimals=decimals)
@@ -233,7 +235,7 @@ def _statement(result: SoundAbsorptionMeasurement, language: Language = "en") ->
 
 def render_iso354_report(
     result: SoundAbsorptionMeasurement,
-    path: str,
+    path: str | os.PathLike[str],
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,

@@ -73,6 +73,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    import os
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -158,25 +160,35 @@ def _speed_of_sound(temperature_c: float) -> float:
     return 331.0 + 0.6 * temperature_c
 
 
-def _resolve_speed(temperature_c: float, speed_of_sound: float | None) -> float:
+def _resolve_speed(
+    temperature_c: float,
+    speed_of_sound: float | None,
+    *,
+    names: tuple[str, str] = ("temperature_c", "speed_of_sound"),
+) -> float:
     """Return ``speed_of_sound`` if given, else Eq. (6) from ``temperature_c``.
 
     Warns when the speed is derived from a temperature outside the 15..30 degC
     validity range of Eq. (6). An explicit ``speed_of_sound`` bypasses the check.
     Rejects a physically impossible ``temperature_c`` outright: Eq. (6) applied at
     or below absolute zero would hand back a zero or negative speed of sound.
+
+    :param names: The caller's names for the temperature and the speed, which
+        a refusal gives: ``temperature2_c`` and ``speed_of_sound2`` for the
+        second measurement of :func:`absorption_coefficient`.
     """
+    temperature_name, speed_name = names
     if speed_of_sound is not None:
         # NaN passes a bare <= comparison and propagates into every derived
         # quantity; infinity is positive but zeroes the speed-dependent terms.
-        require_scalar(speed_of_sound, "speed_of_sound")
+        require_scalar(speed_of_sound, speed_name)
         if not math.isfinite(speed_of_sound) or speed_of_sound <= 0.0:
-            msg = "'speed_of_sound' must be finite and positive."
+            msg = f"'{speed_name}' must be finite and positive."
             raise ValueError(msg)
         return float(speed_of_sound)
     # NaN is named alongside the bound: a NaN temperature would otherwise
     # propagate through Eq. (6) into every derived quantity.
-    require_above_absolute_zero(temperature_c, "temperature_c")
+    require_above_absolute_zero(temperature_c, temperature_name)
     lo, hi = _EQ6_TEMPERATURE_RANGE
     if not lo <= temperature_c <= hi:
         warnings.warn(
@@ -273,19 +285,21 @@ def _absorption_area(
     m: ArrayLike,
     t_name: str = "t60",
     m_name: str = "m",
+    climate_names: tuple[str, str] = ("temperature_c", "speed_of_sound"),
 ) -> NDArray[np.float64]:
     """Core Eq. (5)/(7) evaluation without the advisory volume warning.
 
     Shared by :func:`absorption_area` (which adds the ISO 354 clause 6.1.1
     volume advisory) and :func:`absorption_coefficient` (which advises the
-    volume once for the pair of measurements). ``t_name`` and ``m_name`` are
-    what the public caller calls these two arguments, so a rejection names the
+    volume once for the pair of measurements). ``t_name``, ``m_name`` and
+    ``climate_names`` (the temperature's and the speed of sound's) are what
+    the public caller calls these arguments, so a rejection names the
     parameter that was actually passed.
     """
     t = real_array(t60, t_name)
     m_arr = real_array(m, m_name)
     _validate_area_inputs(t, volume, m_arr, t_name=t_name, m_name=m_name)
-    c = _resolve_speed(temperature_c, speed_of_sound)
+    c = _resolve_speed(temperature_c, speed_of_sound, names=climate_names)
     return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
 
 
@@ -419,6 +433,7 @@ def absorption_coefficient(
         m=m1,
         t_name="t1",
         m_name="m1",
+        climate_names=("temperature1_c", "speed_of_sound1"),
     )
     a2 = _absorption_area(
         t2,
@@ -428,6 +443,7 @@ def absorption_coefficient(
         m=m2,
         t_name="t2",
         m_name="m2",
+        climate_names=("temperature2_c", "speed_of_sound2"),
     )
     area_specimen = a2 - a1
     alpha_s = area_specimen / sample_area
@@ -569,7 +585,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
 
     def report(
         self,
-        path: str,
+        path: str | os.PathLike[str],
         *,
         metadata: ReportMetadata | None = None,
         engine: ReportEngine = "reportlab",
@@ -672,14 +688,21 @@ def measure_sound_absorption(
     :raises ValueError: If the frequency and reverberation-time arrays do not
         share one shape, ``relative_humidity_percent`` is not within ``[0, 100]`` %, or an
         input is non-physical (see :func:`absorption_coefficient`).
-    :raises TypeError: if ``relative_humidity_percent``, ``speed_of_sound``,
-        ``temperature_c`` or ``volume`` is not a single number, or ``frequencies``,
-        ``m``, ``t_empty`` or ``t_specimen`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``area``, ``relative_humidity_percent``,
+        ``speed_of_sound``, ``temperature_c`` or ``volume`` is not a single number,
+        or ``frequencies``, ``m``, ``t_empty`` or ``t_specimen`` holds a text or a
+        value that is not a real number.
     """
     freqs = real_array(frequencies, "frequencies")
     t1 = real_array(t_empty, "t_empty")
     t2 = real_array(t_specimen, "t_specimen")
+    # Read here by the names this function gives them: absorption_coefficient,
+    # which they go on to, calls them sample_area and temperature1_c.
+    require_scalar(area, "area")
+    if area <= 0.0:
+        msg = "'area' must be positive."
+        raise ValueError(msg)
+    require_scalar(temperature_c, "temperature_c")
     require_equal_shapes(
         "measure_sound_absorption",
         {
@@ -709,10 +732,20 @@ def measure_sound_absorption(
     c = _resolve_speed(temperature_c, speed_of_sound)
     # A1/A2 reuse the Eq. (5)/(7) evaluation.
     a1 = _absorption_area(
-        t1, volume, temperature_c=temperature_c, speed_of_sound=c, m=m_arr, t_name="t1"
+        t1,
+        volume,
+        temperature_c=temperature_c,
+        speed_of_sound=c,
+        m=m_arr,
+        t_name="t_empty",
     )
     a2 = _absorption_area(
-        t2, volume, temperature_c=temperature_c, speed_of_sound=c, m=m_arr, t_name="t2"
+        t2,
+        volume,
+        temperature_c=temperature_c,
+        speed_of_sound=c,
+        m=m_arr,
+        t_name="t_specimen",
     )
     # alpha_s reuses the validated Eq. (8)/(9) path (it also emits the volume,
     # sample-area and non-physical advisories exactly once).

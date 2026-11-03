@@ -323,6 +323,49 @@ _PLANTED_UNCHECKED = {
             out = _helper(reference, levels)
             return np.asarray(out, dtype=np.float64)
     """,
+    "a_check_that_hands_back_arithmetic_on_a_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return levels * 2
+
+        def f(reference, levels):
+            out = _helper(reference, levels)
+            return np.asarray(out, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_negated_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return -levels
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_transposed_parameter_it_never_checked": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return levels.T
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_comprehension_of_a_parameter": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return [level * 2 for level in levels]
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_loop_s_item_of_a_parameter": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            for level in levels:
+                return level
+            return 0.0
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "numpy_s_reading_captured_by_a_match": """
         def f(levels):
             match np.asarray(levels):
@@ -716,6 +759,13 @@ _PLANTED_ANSWERED = {
         def f(levels):
             out = _helper(levels)
             return np.asarray(out, dtype=np.float64)
+    """,
+    "a_check_that_hands_back_arithmetic_on_what_it_checked": """
+        def _helper(levels):
+            return -real_array(levels, "levels") * 2
+
+        def f(levels):
+            return np.asarray(_helper(levels), dtype=np.float64)
     """,
     "python_s_float_after_the_shared_reader": """
         def f(value):

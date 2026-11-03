@@ -1863,15 +1863,17 @@ class _Returns:
     """What a function's ``return`` statements hand back of its parameters.
 
     Read without the order the function runs in: a name stands for every
-    value an assignment in the function binds it to, and a parameter for
-    itself as well. A value is handed back as the caller gave it bare, in a
-    tuple or a list, on either side of a conditional expression or of an
-    ``and`` or an ``or``, by an item, through a call that keeps its values,
-    and through a shared check (:data:`CHECKS`), which returns its first
-    argument with what it refuses refused; a call of a function of the
-    library hands back what that function returns
-    (:func:`returned_parameters`); anything else is a value the function
-    computed.
+    value an assignment in the function binds it to, the items of what a
+    loop or a comprehension walks among them, and a parameter for itself as
+    well. A value is handed back as the caller gave it bare, in a tuple or a
+    list, on either side of a conditional expression or of an ``and`` or an
+    ``or``, by an item, transposed, in arithmetic with anything (its sign
+    turned or kept, as :meth:`_Flow.state` reads it), as the element of a
+    comprehension, through a call that keeps its values, and through a
+    shared check (:data:`CHECKS`), which returns its first argument with
+    what it refuses refused; a call of a function of the library hands back
+    what that function returns (:func:`returned_parameters`); anything else
+    is a value the function computed.
     """
 
     def __init__(
@@ -1893,7 +1895,17 @@ class _Returns:
                 for target in _assigned(node):
                     for name in _targets(target):
                         self.assigned.setdefault(name, []).append(node.value)
+            elif isinstance(node, ast.For | ast.AsyncFor):
+                self._walks(node.target, node.iter)
             pending.extend(block_statements(node))
+        for found in ast.walk(function):
+            if isinstance(found, ast.comprehension):
+                self._walks(found.target, found.iter)
+
+    def _walks(self, target: ast.expr, walked: ast.expr) -> None:
+        """Bind each name of *target* to the items of *walked*, read as *walked*."""
+        for name in _targets(target):
+            self.assigned.setdefault(name, []).append(walked)
 
     def read(self) -> tuple[Provenance, tuple[_Handing, ...]]:
         """What the returns hand back as the caller gave it, and the calls whose
@@ -1922,8 +1934,16 @@ class _Returns:
             parts = [node.body, node.orelse]
         elif isinstance(node, ast.BoolOp):
             parts = list(node.values)
-        elif isinstance(node, ast.Subscript | ast.Starred | ast.NamedExpr):
+        elif isinstance(node, ast.Subscript | ast.Starred | ast.NamedExpr) or (
+            isinstance(node, ast.Attribute) and node.attr in _KEEPING_ATTRIBUTES
+        ):
             parts = [node.value]
+        elif isinstance(node, ast.BinOp):
+            parts = [node.left, node.right]
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, _ARITHMETIC_SIGNS):
+            parts = [node.operand]
+        elif isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp):
+            parts = [node.elt]
         else:
             parts = []
         return self._joined(parts, seen)

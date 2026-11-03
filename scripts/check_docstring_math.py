@@ -61,7 +61,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans_by_block
+from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -264,11 +264,10 @@ def _page_bare_scripts(path: Path) -> list[tuple[int, str, str]]:
     # The inline code spans, read by markdown_spans over the lines of their
     # paragraph: a backtick behind a backslash opens none, and a span may
     # cross a line break.
-    shown = drop_inline_spans_by_block(
-        "\n".join(
-            "" if code else line for line, code in zip(lines, code_flags, strict=True)
-        )
-    ).split("\n")
+    shown = lines_read_whole(
+        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
+        drop_inline_spans_by_block,
+    )
     for number, (prose, code) in enumerate(
         zip(shown, code_flags, strict=True), start=1
     ):

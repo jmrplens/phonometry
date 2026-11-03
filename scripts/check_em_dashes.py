@@ -99,7 +99,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
-from markdown_spans import blank_inline_spans, drop_inline_spans_by_block
+from markdown_spans import (
+    blank_inline_spans,
+    drop_inline_spans_by_block,
+    lines_read_whole,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -569,11 +573,10 @@ def markdown_hits(text: str) -> list[int]:
     code_flags = list(code_lines(lines))
     # The inline code spans, read over the lines of their paragraph: a span
     # that crosses a line break hides its dash on both lines.
-    shown = drop_inline_spans_by_block(
-        "\n".join(
-            "" if code else line for line, code in zip(lines, code_flags, strict=True)
-        )
-    ).split("\n")
+    shown = lines_read_whole(
+        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
+        drop_inline_spans_by_block,
+    )
     for number, (line, code) in enumerate(zip(lines, code_flags, strict=True), start=1):
         if code:
             continue

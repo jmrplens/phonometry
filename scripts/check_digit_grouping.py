@@ -44,7 +44,7 @@ import tokenize
 from pathlib import Path
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans_by_block
+from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 #: The repository, for paths a reader can click.
 _REPO = Path(__file__).resolve().parent.parent
@@ -99,11 +99,10 @@ def _markdown_prose(text: str) -> list[tuple[int, str]]:
     """
     lines = text.splitlines()
     code_flags = list(code_lines(lines))
-    shown = drop_inline_spans_by_block(
-        "\n".join(
-            "" if code else line for line, code in zip(lines, code_flags, strict=True)
-        )
-    ).split("\n")
+    shown = lines_read_whole(
+        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
+        drop_inline_spans_by_block,
+    )
     return [
         (number, "" if code else prose)
         for number, (prose, code) in enumerate(

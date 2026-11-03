@@ -119,7 +119,11 @@ import re
 import sys
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans, drop_inline_spans_by_block
+from markdown_spans import (
+    drop_inline_spans,
+    drop_inline_spans_by_block,
+    lines_read_whole,
+)
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -309,7 +313,7 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
             body, code, _display_maths(body, code), strict=True
         )
     ]
-    return _MDX_READING.sub(_as_mdx_reads_it, "\n".join(kept)).split("\n")
+    return lines_read_whole(kept, lambda text: _MDX_READING.sub(_as_mdx_reads_it, text))
 
 
 def _less_than_problems(rel: str, lines: list[str], start: int) -> list[str]:
@@ -421,12 +425,13 @@ def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
         "code" if is_code else part
         for is_code, part in zip(code, _display_maths(body, code), strict=True)
     ]
-    shown = drop_inline_spans_by_block(
-        "\n".join(
+    shown = lines_read_whole(
+        [
             line if part == "prose" else ""
             for line, part in zip(lines, parts, strict=True)
-        )
-    ).split("\n")
+        ],
+        drop_inline_spans_by_block,
+    )
     for index in range(start, len(lines)):
         line = lines[index]
         where = f"{rel}:{index + 1}"

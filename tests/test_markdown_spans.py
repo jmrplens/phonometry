@@ -26,7 +26,9 @@ from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans,
     drop_inline_spans,
+    drop_inline_spans_by_block,
     inline_spans,
+    lines_read_whole,
 )
 
 
@@ -103,3 +105,21 @@ def test_the_text_either_side_of_a_span_stays_apart(text: str, joined: str) -> N
     a display delimiter, none of which the page shows.
     """
     assert joined not in drop_inline_spans(text)
+
+
+def test_lines_read_whole_give_back_a_line_for_each_line() -> None:
+    """No lines give none back: joined, they were the empty text, which split
+    back into one empty line, and every reader that zipped that against the
+    page's own lines raised a ``ValueError`` on an empty page.
+    """
+    assert lines_read_whole([], drop_inline_spans_by_block) == []
+    assert lines_read_whole([""], drop_inline_spans_by_block) == [""]
+    assert lines_read_whole(["a `b", "c` d"], drop_inline_spans_by_block) == [
+        f"a {SPAN_MARK}",
+        " d",
+    ]
+
+
+def test_a_reader_that_moves_a_line_break_is_refused() -> None:
+    with pytest.raises(ValueError, match="2 lines came back as 1"):
+        lines_read_whole(["a", "b"], lambda text: text.replace("\n", " "))

@@ -219,3 +219,12 @@ def test_a_code_span_across_a_line_break_holds_no_bare_script(
     page = tmp_path / "page.md"
     page.write_text("Write `x_\\sqrt2 and\nmore` in code.\n", encoding="utf-8")
     assert cdm._page_bare_scripts(page) == []
+
+
+def test_an_empty_page_has_no_bare_script(tmp_path: pathlib.Path) -> None:
+    """An empty page read as one empty line against no lines, and the zip of
+    the two raised a ``ValueError`` where the page has nothing to report.
+    """
+    page = tmp_path / "page.md"
+    page.write_text("", encoding="utf-8")
+    assert cdm._page_bare_scripts(page) == []

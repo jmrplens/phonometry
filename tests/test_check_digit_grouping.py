@@ -103,3 +103,10 @@ def test_a_number_in_a_code_span_across_a_line_break_is_code() -> None:
     """A literal in a code span that crosses a line break is code on both lines."""
     lines = gate._markdown_prose("Use `10\n000` here.\n")
     assert all("10" not in line and "000" not in line for _, line in lines)
+
+
+def test_an_empty_page_has_no_findings(tmp_path: pathlib.Path) -> None:
+    """An empty page read as one empty line against no lines, and the zip of
+    the two raised a ``ValueError`` where the page has nothing to report.
+    """
+    assert gate._findings(_file("", tmp_path)) == []

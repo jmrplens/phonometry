@@ -61,7 +61,7 @@ import re
 import sys
 from typing import TYPE_CHECKING, Literal
 
-from markdown_spans import drop_inline_spans_by_block
+from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -932,7 +932,7 @@ def _mdx_safe(text: str, *, where: str) -> str:
     no span, so a brace after it is refused.
     """
     lines = text.splitlines()
-    shown = drop_inline_spans_by_block("\n".join(lines)).split("\n")
+    shown = lines_read_whole(lines, drop_inline_spans_by_block)
     for line_number, (line, prose) in enumerate(
         zip(lines, shown, strict=True), start=1
     ):

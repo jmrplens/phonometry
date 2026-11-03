@@ -469,3 +469,10 @@ def test_a_brace_in_a_code_span_across_a_line_break_is_code() -> None:
     """
     text = "A set `{1,\n2}` in code.\n"
     assert generate_site_reports._mdx_safe(text, where="t") == text
+
+
+def test_an_empty_introduction_is_mdx_safe() -> None:
+    """An empty text read as one empty line against no lines, and the zip of
+    the two raised a ``ValueError`` where nothing is unsafe.
+    """
+    assert generate_site_reports._mdx_safe("", where="test") == ""

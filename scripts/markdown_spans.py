@@ -27,7 +27,7 @@ import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
 #: A run of backticks or of dollar signs.
 _RUN = re.compile(r"`+|\$+")
@@ -222,6 +222,26 @@ def blank_inline_spans_by_block(
     :return: The text, its spans blanked, with as many lines as it had.
     """
     return _by_block(text, markers, comments, lambda span: re.sub(r"[^\n]", " ", span))
+
+
+def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[str]:
+    """*lines* joined, handed to *read* as one text, and split back, a line each.
+
+    For a reader that keeps every line break of what it is handed, as the
+    span readers here do, so that the lines it gives back stand where the
+    ones it was handed did. No lines give none back: joined, they are the
+    empty text, which splits into one empty line, and a reader zipping that
+    against the page's own lines would raise on an empty page.
+
+    :raises ValueError: if *read* added or took away a line break.
+    """
+    if not lines:
+        return []
+    shown = read("\n".join(lines)).split("\n")
+    if len(shown) != len(lines):
+        msg = f"{len(lines)} lines came back as {len(shown)}: the reader moved a line break"
+        raise ValueError(msg)
+    return shown
 
 
 def drop_inline_spans_by_block(

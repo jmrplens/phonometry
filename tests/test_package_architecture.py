@@ -16,7 +16,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Literal, TypeGuard
+from typing import Literal, NamedTuple, TypeGuard
 
 import pytest
 
@@ -1325,21 +1325,42 @@ def _import_kinds(node: ast.Import | ast.ImportFrom) -> list[tuple[str, _Kind | 
     return found
 
 
-def _statement_bindings(
-    own: list[ast.AST],
-) -> tuple[dict[str, list[_Binding]], set[str], set[str]]:
-    """Each name the statements among *own* bind, with every binding of it, and the names declared ``global`` and ``nonlocal``.
+class _Statements(NamedTuple):
+    """What the statements of one scope bind (:func:`_statement_bindings`)."""
+
+    #: Each name they bind, with every binding of it.
+    flow: dict[str, list[_Binding]]
+    #: The names declared ``global``.
+    declared_global: set[str]
+    #: The names declared ``nonlocal``.
+    declared_nonlocal: set[str]
+    #: The names annotated without a value (``flag: type``), which binds
+    #: nothing to them.
+    annotated: set[str]
+
+
+def _statement_bindings(own: list[ast.AST]) -> _Statements:
+    """Each name the statements among *own* bind, with every binding of it, the names declared ``global`` and ``nonlocal``, and those annotated without a value.
 
     An assignment, a ``del``, a loop, ``with``, ``except`` or ``match`` name,
     a ``def`` or a ``class``, an import, and a ``:=`` in a comprehension,
-    which binds in the scope around the comprehension.
+    which binds in the scope around the comprehension. An annotation without
+    a value binds nothing, and the name keeps what it held.
     """
     flow: dict[str, list[_Binding]] = {}
     declared_global: set[str] = set()
     declared_nonlocal: set[str] = set()
+    annotated: set[str] = set()
+    bare = {
+        id(node.target)
+        for node in own
+        if isinstance(node, ast.AnnAssign) and node.value is None
+    }
     for node in own:
         bound: list[tuple[str, _Kind | None]] = []
-        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+        if isinstance(node, ast.Name) and id(node) in bare:
+            annotated.add(node.id)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
             bound.append((node.id, None))
         elif isinstance(node, _COMPREHENSIONS):
             bound.extend((name, None) for name in _walrus_targets(node))
@@ -1357,7 +1378,7 @@ def _statement_bindings(
             declared_nonlocal.update(node.names)
         for name, kind in bound:
             flow.setdefault(name, []).append((node, kind))
-    return flow, declared_global, declared_nonlocal
+    return _Statements(flow, declared_global, declared_nonlocal, annotated)
 
 
 def _expression_names(
@@ -1416,11 +1437,26 @@ class _ScopeNames:
     #: What the scopes nested in it bind its names to through ``global`` or
     #: ``nonlocal``, whenever they run.
     from_inside: dict[str, set[_Kind]] = dataclasses.field(default_factory=dict)
+    #: The names it annotates without a value: a function's own, which
+    #: Python never binds there unless something else does, and in a class
+    #: body names its body reads from the module.
+    annotated: frozenset[str] = frozenset()
 
     def binds(self, name: str) -> bool:
-        """Whether *name* is the scope's own, bound in it and declared neither ``global`` nor ``nonlocal``."""
+        """Whether *name* is the scope's own, bound in it, or annotated in a function, and declared neither ``global`` nor ``nonlocal``."""
         declared = name in self.declared_global or name in self.declared_nonlocal
-        return not declared and (name in self.flow or name in self.entry)
+        local = name in self.annotated and isinstance(self.scope, _FUNCTIONS)
+        return not declared and (name in self.flow or name in self.entry or local)
+
+    def _holder(self, name: str) -> _ScopeNames | None:
+        """The scope a name this one does not bind is read from: the module for
+        one declared ``global`` here, or annotated in a class body, which
+        Python then reads from the module; the scope around otherwise.
+        """
+        annotated = name in self.annotated and isinstance(self.scope, ast.ClassDef)
+        if name in self.declared_global or annotated:
+            return self.module()
+        return self.outer
 
     def module(self) -> _ScopeNames:
         """The module's names, which a name declared ``global`` reads."""
@@ -1451,7 +1487,7 @@ class _ScopeNames:
         names = self
         called = False
         while not names.binds(name) and names.outer is not None:
-            holder = names.module() if name in names.declared_global else names.outer
+            holder = names._holder(name)
             while names is not holder and names.outer is not None:
                 called = called or isinstance(names.scope, _FUNCTIONS)
                 names, point = names.outer, names.at
@@ -1496,19 +1532,20 @@ def _nested_names(
         entry = frozenset(_expression_names(scope, own)) | hidden
         empty: frozenset[str] = frozenset()
         return _ScopeNames(scope, tree, {}, entry, empty, empty, outer, at)
-    flow, declared_global, declared_nonlocal = _statement_bindings(own)
+    statements = _statement_bindings(own)
     entry = frozenset(_type_parameters(scope)) | hidden
     if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
         entry |= {parameter.arg for parameter in _parameters(scope.args)}
     return _ScopeNames(
         scope,
         tree,
-        flow,
+        statements.flow,
         entry,
-        frozenset(declared_global),
-        frozenset(declared_nonlocal),
+        frozenset(statements.declared_global),
+        frozenset(statements.declared_nonlocal),
         outer,
         at,
+        annotated=frozenset(statements.annotated),
     )
 
 
@@ -1551,7 +1588,7 @@ def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
     assigned ``bool`` or a constant is not followed.
     """
     own, nested = _own_nodes(tree)
-    flow, _, _ = _statement_bindings(own)
+    flow = _statement_bindings(own).flow
     none: frozenset[str] = frozenset()
     module = _ScopeNames(tree, tree, flow, none, none, none, None, None)
     found = [(own, module)]
@@ -1995,6 +2032,40 @@ def test_the_float_equality_check_reads_every_binding_a_call_may_meet() -> None:
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "8", "14", "17", "18", "21",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_an_annotation_without_a_value_as_no_binding() -> (
+    None
+):
+    """``flag: type`` annotates a name and binds no value to it.
+
+    After ``from numpy import bool_ as flag``, the name still holds numpy's
+    boolean, at the top of the module, in a function and in a class body,
+    whose annotation leaves the class without the name, so its body reads
+    the module's. A function that only annotates the name makes it its own
+    all the same, which Python never binds there, so its read reaches no
+    import around it.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "flag: type",
+            "a = x.astype(flag)",
+            "def f(x):",
+            "    from numpy import bool_ as kind",
+            "    kind: type",
+            "    return x.astype(kind)",
+            "class Holder:",
+            "    flag: type",
+            "    cast = x.astype(flag)",
+            "def own(x):",
+            "    flag: type",
+            "    return x.astype(flag)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "7", "10",
     ]  # fmt: skip
 
 

@@ -366,6 +366,47 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return float(_helper(reference, levels))
     """,
+    "a_check_that_hands_back_a_sum_it_added_a_parameter_to": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            total = 0.0
+            for level in levels:
+                total += level
+            return total
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_an_array_it_added_a_parameter_to": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = np.zeros(3)
+            out += levels
+            return out
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_an_array_it_set_a_parameter_in": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = np.zeros(3)
+            out[0] = levels
+            return out
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_an_array_it_added_a_parameter_to_an_item_of": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = np.zeros((2, 3))
+            out[0][1] += levels
+            return out
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
     "numpy_s_reading_captured_by_a_match": """
         def f(levels):
             match np.asarray(levels):

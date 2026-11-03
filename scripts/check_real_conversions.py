@@ -1537,6 +1537,24 @@ def _assigned(node: ast.Assign | ast.AnnAssign) -> list[ast.expr]:
     return node.targets if isinstance(node, ast.Assign) else [node.target]
 
 
+def _filled(target: ast.expr) -> list[str]:
+    """The names an assignment to *target* puts a value inside: ``x`` for
+    ``x[i] = y`` and ``x[i][j] += y``, which holds *y* among its items, as
+    :meth:`_Flow._bind_item` reads it; each of a tuple's or a list's items
+    alike.
+    """
+    if isinstance(target, ast.Tuple | ast.List):
+        return [name for item in target.elts for name in _filled(item)]
+    if isinstance(target, ast.Starred):
+        return _filled(target.value)
+    if not isinstance(target, ast.Subscript):
+        return []
+    owner: ast.expr = target
+    while isinstance(owner, ast.Subscript):
+        owner = owner.value
+    return [owner.id] if isinstance(owner, ast.Name) else []
+
+
 def _header(node: ast.For | ast.AsyncFor | ast.While | ast.Match) -> ast.expr:
     """The part of a loop or a ``match`` that surely runs."""
     if isinstance(node, ast.While):
@@ -1863,9 +1881,9 @@ class _Returns:
     """What a function's ``return`` statements hand back of its parameters.
 
     Read without the order the function runs in: a name stands for every
-    value an assignment in the function binds it to, the items of what a
-    loop or a comprehension walks among them, and a parameter for itself as
-    well. A value is handed back as the caller gave it bare, in a tuple or a
+    value an assignment in the function binds it to, adds to it (``x += y``)
+    or puts in one of its items (``x[i] = y``), the items of what a loop or a
+    comprehension walks among them, and a parameter for itself as well. A value is handed back as the caller gave it bare, in a tuple or a
     list, on either side of a conditional expression or of an ``and`` or an
     ``or``, by an item, transposed, in arithmetic with anything (its sign
     turned or kept, as :meth:`_Flow.state` reads it), as the element of a
@@ -1893,8 +1911,13 @@ class _Returns:
                 self.returns.append(node.value)
             elif isinstance(node, ast.Assign | ast.AnnAssign) and node.value:
                 for target in _assigned(node):
-                    for name in _targets(target):
+                    for name in [*_targets(target), *_filled(target)]:
                         self.assigned.setdefault(name, []).append(node.value)
+            elif isinstance(node, ast.AugAssign):
+                # x += y holds what arithmetic on both holds: y joins what x
+                # was bound to, as it joins an array an item of which it adds to.
+                for name in [*_targets(node.target), *_filled(node.target)]:
+                    self.assigned.setdefault(name, []).append(node.value)
             elif isinstance(node, ast.For | ast.AsyncFor):
                 self._walks(node.target, node.iter)
             pending.extend(block_statements(node))

@@ -26,7 +26,7 @@ if _SCRIPTS not in sys.path:
 
 import check_parameter_annotations as cpa
 import check_return_overloads as return_overloads
-from ast_scan import live_bindings, python_files
+from ast_scan import bindings_from, live_bindings, python_files
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -1410,10 +1410,8 @@ class _ScopeNames:
     #: The scope it reads a name it does not bind from: the function or the
     #: module around it, past any class body.
     outer: _ScopeNames | None
-    #: Where in *outer* it reads it: the class or the list, set or dict
-    #: comprehension that runs there, or ``None`` for a function, a lambda or
-    #: a generator expression, which reads the name as it stands once
-    #: *outer* has run.
+    #: Where in *outer* it is written: the scope itself, or the class
+    #: statement around it, which runs there; ``None`` for the module.
     at: ast.AST | None
     #: What the scopes nested in it bind its names to through ``global`` or
     #: ``nonlocal``, whenever they run.
@@ -1437,40 +1435,38 @@ class _ScopeNames:
         The scope that holds the name is found as Python finds it: this one
         when it binds the name, the module for a name declared ``global``,
         the function around for one declared ``nonlocal``, and otherwise the
-        scope around, read where this one runs (a class body, a list, set or
-        dict comprehension) or once it has run (past a function or a lambda,
-        which run when called, and a generator expression, which runs as it
-        is consumed). There, the bindings that may reach the read
-        (:func:`ast_scan.live_bindings`): the later of two in a row, either
-        of two in the branches of an ``if``, one on an earlier turn of a loop
-        around the read, any of them when none runs before it; with whatever
-        a scope nested there binds the name to through ``global`` or
-        ``nonlocal``, which may run at any time.
+        scope around. A class body and a list, set or dict comprehension run
+        where they are written, so the scope around is read there, at the
+        bindings that may reach the read (:func:`ast_scan.live_bindings`):
+        the later of two in a row, either of two in the branches of an
+        ``if``, one on an earlier turn of a loop around the read, any of them
+        when none runs before it. A function and a lambda run when they are
+        called, and a generator expression as it is consumed, which may be at
+        once or after a later binding, so past one the scope around is read
+        at every binding that may stand from where it is written on
+        (:func:`ast_scan.bindings_from`). With either, whatever a scope
+        nested there binds the name to through ``global`` or ``nonlocal``,
+        which may run at any time.
         """
-        names: _ScopeNames | None = self
+        names = self
         called = False
-        while names is not None:
-            if name in names.declared_global:
-                names, point = names.module(), None
-                continue
-            if name in names.declared_nonlocal:
-                names, point = names.outer, None
-                continue
-            if names.binds(name) or names.outer is None:
-                found = set(names.from_inside.get(name, ()))
-                bindings = names.flow.get(name, [])
-                if any(kind is not None for _, kind in bindings):
-                    nodes = [node for node, _ in bindings]
-                    live = live_bindings(names.tree, nodes, point)
-                    found.update(
-                        kind
-                        for node, kind in bindings
-                        if kind is not None and any(node is other for other in live)
-                    )
-                return found
-            called = called or isinstance(names.scope, _FUNCTIONS)
-            names, point = names.outer, None if called else names.at
-        return set()
+        while not names.binds(name) and names.outer is not None:
+            holder = names.module() if name in names.declared_global else names.outer
+            while names is not holder and names.outer is not None:
+                called = called or isinstance(names.scope, _FUNCTIONS)
+                names, point = names.outer, names.at
+        found = set(names.from_inside.get(name, ()))
+        bindings = names.flow.get(name, [])
+        if any(kind is not None for _, kind in bindings):
+            nodes = [node for node, _ in bindings]
+            reach = bindings_from if called else live_bindings
+            live = reach(names.tree, nodes, point)
+            found.update(
+                kind
+                for node, kind in bindings
+                if kind is not None and any(node is other for other in live)
+            )
+        return found
 
     def may_hold(self, name: ast.Name, kind: _Kind) -> bool:
         """Whether *name*, read in this scope, may be bound to *kind* where it is read."""
@@ -1482,21 +1478,20 @@ def _nested_names(
 ) -> _ScopeNames:
     """What *scope*, whose own nodes are *own*, binds, and where it reads the names it does not.
 
-    *around* is the scope it is written in. A function, a lambda and a
-    generator expression read the names around them as they stand once that
-    scope has run, since they run when called or as they are consumed; a
-    class body and a list, set or dict comprehension run where they are
-    written and read them there. None reads a class body's names: a scope written in one reads
+    *around* is the scope it is written in, and the scope's own node, or the
+    class statement around it, is where it is written there
+    (:meth:`_ScopeNames.kinds` reads the names around it from that point).
+    None reads a class body's names: a scope written in one reads
     from the scope around the class, where the class statement runs, and a
     generic class's type parameters hide those names for it.
     """
     hidden: frozenset[str] = frozenset()
     outer: _ScopeNames | None = around
-    at: ast.AST | None = None if isinstance(scope, _FUNCTIONS) else scope
+    at: ast.AST | None = scope
     if isinstance(around.scope, ast.ClassDef):
         hidden = around.entry
         outer = around.outer
-        at = None if isinstance(scope, _FUNCTIONS) else around.at
+        at = around.at
     if isinstance(scope, (ast.Lambda, *_COMPREHENSIONS)):
         entry = frozenset(_expression_names(scope, own)) | hidden
         empty: frozenset[str] = frozenset()
@@ -1549,7 +1544,10 @@ def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
     variable and a generic function's or class's type parameter hide the
     import. A read takes the bindings the name may hold where it is read
     (:meth:`_ScopeNames.kinds`), so a later binding of the name, an
-    assignment as much as an import, replaces an earlier one. A name
+    assignment as much as an import, replaces an earlier one; a function, a
+    lambda or a generator expression reads it at a call, which may come
+    before a later binding, so it reads every binding from where it is
+    written on. A name
     assigned ``bool`` or a constant is not followed.
     """
     own, nested = _own_nodes(tree)
@@ -1823,8 +1821,9 @@ def test_the_float_equality_check_reads_the_binding_a_name_holds_where_it_is_rea
     The later of two imports in a row, whichever ran of two in the branches
     of an ``if``, an import on an earlier turn of a loop, and an assignment
     after an import, which the name then holds instead. A function reads its
-    module's name as it stands once the module has run; a class body and a
-    list comprehension run where they are written, so they read it there.
+    module's name as it may stand at a call, from its ``def`` on; a class
+    body and a list comprehension run where they are written, so they read
+    it there.
     """
     source = "\n".join(
         [
@@ -1949,6 +1948,53 @@ def test_the_float_equality_check_reads_a_generator_where_it_is_consumed() -> No
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "2", "8",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_every_binding_a_call_may_meet() -> None:
+    """A function reads the name around it at each call, and a call may come before a later binding.
+
+    ``TABLE = f(values)`` runs ``f`` while ``flag`` is still numpy's boolean,
+    so ``x.astype(flag)`` in ``f`` casts with it, whether an assignment or an
+    import rebinds ``flag`` afterwards, and the same through ``global flag``,
+    a method, a lambda and a function nested in another. A binding that a
+    later one replaces before the ``def`` runs is never met: ``f`` written
+    after ``flag = None`` reads ``None`` alone.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "def f(x):",
+            "    return x.astype(flag)",
+            "TABLE = f(values)",
+            "flag = None",
+            "from numpy import bool_ as mask",
+            "def g(x):",
+            "    return x.astype(mask)",
+            "TABLE = g(values)",
+            "from math import pi as mask",
+            "from numpy import bool_ as kept",
+            "def h(x):",
+            "    global kept",
+            "    return x.astype(kept)",
+            "class Holder:",
+            "    def method(self, x):",
+            "        return x.astype(kept)",
+            "cast = lambda x: x.astype(kept)",
+            "def outer(x):",
+            "    def inner(y):",
+            "        return y.astype(kept)",
+            "    return inner(x)",
+            "TABLE = h(values)",
+            "kept = None",
+            "from numpy import bool_ as gone",
+            "gone = None",
+            "def reads_none(x):",
+            "    return x.astype(gone)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "8", "14", "17", "18", "21",
     ]  # fmt: skip
 
 

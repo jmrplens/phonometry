@@ -535,6 +535,90 @@ def test_a_def_after_a_call_in_a_loop_reaches_it_on_the_next_turn() -> None:
     assert _held_at(while_test, "helper", call="") == [1, 2]
 
 
+def _met_from(source: str, name: str, reader: str) -> list[int]:
+    """The ``def``s of *name* in *source* that a call of the function
+    *reader* may meet, by the number each returns.
+    """
+    tree = ast.parse(textwrap.dedent(source))
+    (point,) = _definitions(tree, reader)
+    met = ast_scan.bindings_from(tree, _definitions(tree, name), point)
+    values: list[int] = []
+    for binding in met:
+        returned = binding.body[0]
+        assert isinstance(returned, ast.Return)
+        assert isinstance(returned.value, ast.Constant)
+        assert isinstance(returned.value.value, int)
+        values.append(returned.value.value)
+    return values
+
+
+def test_a_function_meets_every_binding_from_its_def_on() -> None:
+    """A function reads a name of the scope around it when it is called,
+    which may be at once or after a later binding: it meets the binding that
+    stands where the ``def`` runs and every one that may run after it.
+
+    Not one that a later binding replaces before the ``def``, nor one in the
+    other branch of the ``if`` that holds the ``def``; one on an earlier
+    turn of a loop, called between two bindings on the next turn, is met.
+    """
+    later = """
+    def helper():
+        return 1
+
+    def reader():
+        return helper()
+
+    def helper():
+        return 2
+    """
+    replaced_before = """
+    def helper():
+        return 1
+
+    def helper():
+        return 2
+
+    def reader():
+        return helper()
+    """
+    other_branch = """
+    def helper():
+        return 0
+
+    if FAST:
+
+        def reader():
+            return helper()
+
+    else:
+
+        def helper():
+            return 1
+    """
+    next_turn = """
+    for item in items:
+
+        def helper():
+            return 1
+
+        if item:
+            early = reader()
+
+        def helper():
+            return 2
+
+        def reader():
+            return helper()
+    """
+    assert _met_from(later, "helper", "reader") == [1, 2]
+    assert _met_from(replaced_before, "helper", "reader") == [2]
+    assert _met_from(other_branch, "helper", "reader") == [0]
+    assert _met_from(next_turn, "helper", "reader") == [1, 2]
+    tree = ast.parse(textwrap.dedent(later))
+    bindings = _definitions(tree, "helper")
+    assert ast_scan.bindings_from(tree, bindings, None) == [bindings[1]]
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

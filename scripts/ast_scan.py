@@ -19,7 +19,9 @@ name as the strings it stands for find here the scope whose binding a read
 or a write reaches (:func:`binding_scope`). Of two statements of one scope
 that bind one name, a ``def`` or an import in each branch of an ``if`` or
 one after the other, which the name holds at a call, or once the scope has
-run, is read here too (:func:`live_bindings`).
+run, is read here too (:func:`live_bindings`), and which a function written
+at a point may meet when it is called, from that point on
+(:func:`bindings_from`).
 """
 
 from __future__ import annotations
@@ -820,6 +822,49 @@ def _back_from_a_turn[NodeT: ast.AST](
             for other in turns
         )
     ]
+
+
+def bindings_from[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
+) -> list[NodeT]:
+    """Of *bindings*, statements of one scope under *root* that bind one name,
+    those the name may hold at *point* or at any moment after it while the
+    scope runs, and once it has run; those it holds once the scope has run
+    when *point* is None.
+
+    What a function, a lambda or a generator expression written at *point*
+    reads of the name: it reads it when it is called or consumed, which may
+    be at once, before a later binding, or once the scope has run. Those
+    the name holds at *point* (:func:`live_bindings`), and every one that
+    may run after it (:func:`_may_run_after`).
+    """
+    live = live_bindings(root, bindings, point)
+    if point is None:
+        return live
+    target = _frames(root, point)
+    return [
+        binding
+        for binding in bindings
+        if any(binding is other for other in live)
+        or _may_run_after(_frames(root, binding), target)
+    ]
+
+
+def _may_run_after(binding: Sequence[Frame], point: Sequence[Frame]) -> bool:
+    """Whether a statement written at *binding* may run after *point* does.
+
+    After it in a block they share, or in a block of their statement that
+    runs after (:func:`_may_run_before`, read the other way); on a later
+    turn of a loop whose body holds both (:func:`_turns_back`); and in the
+    body of the statement whose header holds *point*, or as the statement
+    that holds *point* itself, a loop's target bound again on its next turn.
+    """
+    shared = _shared(binding, point)
+    return (
+        shared in {len(binding), len(point)}
+        or _may_run_before(point, binding)
+        or _turns_back(binding, point) is not None
+    )
 
 
 def _scope_holding(root: ast.AST, node: ast.AST) -> ast.AST:

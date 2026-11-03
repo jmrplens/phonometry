@@ -177,6 +177,7 @@ def _folded(source: str, name: str) -> set[str]:
         if isinstance(node, ast.Assign):
             for target, item in csr._assigned(node):
                 assert isinstance(target, ast.Name)
+                assert item is not None
                 if target.id == name:
                     value = item
                 else:

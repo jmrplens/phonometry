@@ -377,7 +377,7 @@ def _runs_whole(node: ast.AST) -> Iterator[ast.AST]:
     elif isinstance(node, ast.IfExp):
         parts = [node.test]
     elif isinstance(node, ast.BoolOp):
-        parts = node.values[:1]
+        parts = [*node.values[:1]]
     elif isinstance(node, ast.Compare):
         parts = [node.left, node.comparators[0]]
     elif isinstance(node, ast.Lambda):

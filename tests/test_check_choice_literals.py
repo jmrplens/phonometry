@@ -2851,13 +2851,13 @@ def test_a_comprehension_s_variable_is_no_name_of_the_function_around_it() -> No
     stands for the items it walks.
     """
     tree = _tree(_a_kind_beside_a_comprehension)
-    function = tree.body[0]
+    function = ccl._function_in(tree)
     kind, _names = _returned_items(tree)
     assert ccl._source(kind, function, __name__, 0) == ccl._Source(
         "texts", frozenset({"fast"})
     )
     tree = _tree(_a_kind_inside_a_comprehension)
-    function = tree.body[0]
+    function = ccl._function_in(tree)
     listed, kind = _returned_items(tree)
     assert isinstance(listed, ast.ListComp)
     assert ccl._source(listed.elt, function, __name__, 0) == ccl._Source(
@@ -2946,5 +2946,5 @@ def test_a_value_another_scope_binds_tells_nothing_of_the_mapping() -> None:
     tree = _tree(_values_beside_a_comprehension)
     target = ccl._the_name("levels")
     assert ccl._value_names(tree, target) == {
-        ("value", tree.body[0]),
+        ("value", ccl._function_in(tree)),
     }

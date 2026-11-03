@@ -844,8 +844,9 @@ def test_a_disk_that_refuses_a_node_s_finished_video_s_bits_leaves_what_was_ther
         raise OSError(errno.ENOSPC, "No space left on device", str(written))
 
     monkeypatch.setattr(io_video, "flushed", full)
+    request = Compute(host=node)
     with pytest.raises(io.VideoEncoderError, match="No space left on device") as caught:
-        write_fdtd_animation(target, _RUN, compute=Compute(host=node), frame=_FRAME)
+        write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
     assert str(target) in str(caught.value)
     assert ".partial" not in str(caught.value)
     assert target.read_bytes() == b"the video that was there"

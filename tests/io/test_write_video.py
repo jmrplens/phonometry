@@ -1184,8 +1184,9 @@ def test_a_partial_file_the_directory_will_not_make_starts_no_ffmpeg(
         raise PermissionError(errno.EACCES, "Permission denied", str(path))
 
     monkeypatch.setattr(_video, "make_new", refused)
+    animation = _animation()
     with pytest.raises(io.VideoEncoderError, match="could not write the video for"):
-        io.write_video(target, _animation())
+        io.write_video(target, animation)
     assert fake.encodes() == []
     assert target.read_bytes() == b"the video that was there"
     assert _partial_modes(tmp_path) == []
@@ -1208,8 +1209,9 @@ def test_a_disk_that_refuses_the_finished_video_s_bits_leaves_what_was_there(
         raise OSError(errno.ENOSPC, "No space left on device", str(written))
 
     monkeypatch.setattr(_video, "flushed", full)
+    animation = _animation()
     with pytest.raises(io.VideoEncoderError, match="No space left on device") as caught:
-        io.write_video(target, _animation())
+        io.write_video(target, animation)
     assert str(target) in str(caught.value)
     assert ".partial" not in str(caught.value)
     assert target.read_bytes() == b"the video that was there"

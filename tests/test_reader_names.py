@@ -23,6 +23,7 @@ from __future__ import annotations
 import ast
 import inspect
 import pathlib
+import sys
 import textwrap
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -33,6 +34,12 @@ import pytest
 import phonometry
 from phonometry import broadcast, environment, hearing, materials, room, signals
 from phonometry._internal import validation
+
+_SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from ast_scan import binding_of
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -280,11 +287,25 @@ def _read_bare(value: ast.expr) -> str | None:
     return value.id if isinstance(value, ast.Name) else None
 
 
+def _the_parameter(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, name: ast.expr
+) -> str | None:
+    """The parameter of *function* the name *name* reads, or ``None``.
+
+    A name of a parameter's spelling that a comprehension, a lambda or a
+    nested function binds for itself is another name, as Python scopes it
+    (:func:`ast_scan.binding_of`); a closure that only reads it reads the
+    parameter.
+    """
+    if not (isinstance(name, ast.Name) and name.id in _parameters(function)):
+        return None
+    return name.id if binding_of(function, name, name.id)[1] is function else None
+
+
 def _helper_readings(
     helper: ast.FunctionDef | ast.AsyncFunctionDef,
 ) -> dict[str, list[tuple[str, int]]]:
     """``{parameter: [(name handed to the reader, line)]}`` of what *helper* reads by a literal name."""
-    parameters = set(_parameters(helper))
     found: dict[str, list[tuple[str, int]]] = {}
     for node in ast.walk(helper):
         if not (
@@ -296,8 +317,11 @@ def _helper_readings(
             and isinstance(node.args[1].value, str)
         ):
             continue
-        read = _read_bare(node.args[0])
-        if read in parameters:
+        value: ast.expr = node.args[0]
+        while isinstance(value, ast.Subscript):
+            value = value.value
+        read = _the_parameter(helper, value)
+        if read is not None:
             found.setdefault(read, []).append((node.args[1].value, node.lineno))
     return found
 
@@ -536,7 +560,6 @@ class _Readings:
         visiting: frozenset[tuple[str, str]] = frozenset(),
     ) -> Iterator[tuple[str, list[_Reading]]]:
         """Each parameter *function* hands on, with how it is read down there."""
-        given = set(_parameters(function))
         for call in ast.walk(function):
             if not (isinstance(call, ast.Call) and isinstance(call.func, ast.Name)):
                 continue
@@ -549,12 +572,11 @@ class _Readings:
             inner = visiting | {(module.dotted, function.name)}
             readings = self.of(owner, callee, inner)
             for parameter, value in _bound_arguments(callee, call).items():
-                if not (isinstance(value, ast.Name) and value.id in given):
-                    continue
-                if _read_before(function, call, value.id):
+                handed = _the_parameter(function, value)
+                if handed is None or _read_before(function, call, handed):
                     continue
                 if parameter in readings:
-                    yield value.id, readings[parameter]
+                    yield handed, readings[parameter]
 
     def of(
         self,
@@ -865,6 +887,67 @@ def test_the_check_passes_a_helper_reading_named_as_its_caller_does(
 ) -> None:
     tree = ast.parse(textwrap.dedent(source))
     assert _handed_misnamings(tree, "planted.py") == []
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        # A comprehension's variable of the parameter's spelling is the item
+        # it walks, not the caller's value.
+        """
+        def _mean_level(levels):
+            return real_array(levels, "levels")
+
+        def corrected(background_levels, rows):
+            return [_mean_level(background_levels) for background_levels in rows]
+        """,
+        # A nested function's parameter of the helper's spelling is its own.
+        """
+        def _mean_level(levels):
+            def inner(levels):
+                return real_array(levels, "levels")
+
+            return inner([1.0])
+
+        def corrected(background_levels):
+            return _mean_level(background_levels)
+        """,
+        # So is a lambda's.
+        """
+        def _mean_level(levels):
+            read = lambda levels: real_array(levels, "levels")
+            return read([1.0])
+
+        def corrected(background_levels):
+            return _mean_level(background_levels)
+        """,
+    ],
+)
+def test_a_name_another_scope_binds_is_not_the_parameter(source: str) -> None:
+    """Python keeps what a comprehension, a lambda or a nested function binds
+    to itself, so neither the value handed on nor the value read there is the
+    parameter of that spelling.
+    """
+    tree = ast.parse(textwrap.dedent(source))
+    assert _handed_misnamings(tree, "planted.py") == []
+
+
+def test_a_closure_reads_the_function_s_own_parameter() -> None:
+    """A nested function that reads the helper's parameter without binding it
+    reads the value the caller handed on.
+    """
+    source = """
+    def _mean_level(levels):
+        def inner():
+            return real_array(levels, "levels")
+
+        return inner()
+
+    def corrected(background_levels):
+        return _mean_level(background_levels)
+    """
+    tree = ast.parse(textwrap.dedent(source))
+    assert len(_handed_misnamings(tree, "planted.py")) == 1
 
 
 _LEVELS = np.full(22, 90.0)

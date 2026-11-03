@@ -732,20 +732,28 @@ def test_the_root_finder_reaches_no_numerical_library() -> None:
 def _inexact_math(tree: ast.AST) -> list[str]:
     """Each reading of :mod:`math` in *tree* that is not one of its exact steps.
 
-    ``math.name`` for a name outside :data:`_EXACT_MATH`, and an import that
-    binds :mod:`math`, or one of its routines, where that check cannot read
-    it: ``import math as m`` and ``from math import exp`` would hand
-    ``m.exp`` and a bare ``exp`` to the C library unseen.
+    ``math.name`` for a name outside :data:`_EXACT_MATH`, and what binds
+    :mod:`math`, or one of its routines, where that check cannot read it:
+    ``import math as m`` and ``from math import exp`` would hand ``m.exp``
+    and a bare ``exp`` to the C library unseen, and so would ``math`` used as
+    a value (``m = math``, ``getattr(math, "exp")``), the module another
+    module hands on (``fractions.math``, ``from fractions import math as
+    fm``), and an import by a string (``__import__("math")``).
     """
+    owners = {node.value for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
     found: list[str] = []
     for node in ast.walk(tree):
-        if (
-            isinstance(node, ast.Attribute)
-            and isinstance(node.value, ast.Name)
-            and node.value.id == "math"
-            and node.attr not in _EXACT_MATH
-        ):
-            found.append(f"{node.lineno}: math.{node.attr}")
+        if isinstance(node, ast.Attribute):
+            if isinstance(node.value, ast.Name) and node.value.id == "math":
+                if node.attr not in _EXACT_MATH:
+                    found.append(f"{node.lineno}: math.{node.attr}")
+            elif node.attr == "math":
+                found.append(f"{node.lineno}: {ast.unparse(node)}")
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+            if node.id == "math" and node not in owners:
+                found.append(f"{node.lineno}: math as a value")
+            elif node.id == "__import__":
+                found.append(f"{node.lineno}: __import__")
         elif isinstance(node, ast.Import):
             found.extend(
                 f"{node.lineno}: import math as {alias.asname}"
@@ -758,7 +766,13 @@ def _inexact_math(tree: ast.AST) -> list[str]:
                 for alias in node.names
                 if alias.name not in _EXACT_MATH
             )
-    return sorted(found)
+        elif isinstance(node, ast.ImportFrom):
+            found.extend(
+                f"{node.lineno}: from {node.module} import math as {alias.asname}"
+                for alias in node.names
+                if alias.name == "math" and alias.asname not in {None, "math"}
+            )
+    return sorted(set(found))
 
 
 def test_the_root_finder_check_sees_math_under_another_name() -> None:
@@ -778,4 +792,22 @@ def test_the_root_finder_check_sees_math_under_another_name() -> None:
         "4: from math import exp",
         "5: from math import *",
         "7: math.log",
+    ]
+    handed_on = textwrap.dedent(
+        """
+        import fractions
+        from fractions import math as fm
+        from fractions import math
+        def g(x):
+            m = math
+            e = getattr(math, "exp")(x) + fractions.math.log(x) + m.exp(x)
+            return __import__("math").exp(x) + math.isqrt(x) + e
+        """
+    )
+    assert _inexact_math(ast.parse(handed_on)) == [
+        "3: from fractions import math as fm",
+        "6: math as a value",
+        "7: fractions.math",
+        "7: math as a value",
+        "8: __import__",
     ]

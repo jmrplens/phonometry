@@ -337,7 +337,8 @@ def _bindings(func: ast.FunctionDef) -> dict[str, list[ast.expr | None]]:
 
     A parameter, a name unpacked from anything but a tuple literal of its own
     length, a ``with`` or comprehension name and any other way of binding a
-    name is None.
+    name is None. An annotation without a value (``rate: float``) binds
+    nothing.
     """
     found: dict[str, list[ast.expr | None]] = {}
     seen: set[int] = set()
@@ -348,6 +349,11 @@ def _bindings(func: ast.FunctionDef) -> dict[str, list[ast.expr | None]]:
     for name, value in (named for t, v in pairs for named in _paired(t, v)):
         found.setdefault(name.id, []).append(value)
         seen.add(id(name))
+    seen.update(
+        id(node.target)
+        for node in ast.walk(func)
+        if isinstance(node, ast.AnnAssign) and node.value is None
+    )
     others = (
         node
         for node in ast.walk(func)
@@ -906,6 +912,7 @@ def _reasons(line: str) -> list[str]:
         "sim.p *= np.cos(xp.pi)",
         "sim.p *= np.cos(sim._backend.xp.pi / 4.0)",
         "sim.p *= np.exp(-xp.e) + xp.nan * 0.0",
+        "rate: float; rate = 0.5; sim.p *= np.exp(-rate)",
     ],
 )
 def test_a_field_s_shape_and_a_numpy_number_are_not_device_arrays(line: str) -> None:
@@ -914,7 +921,9 @@ def test_a_field_s_shape_and_a_numpy_number_are_not_device_arrays(line: str) -> 
     A NumPy number is one element of a host array picked by an integer, or a
     NumPy function of numbers: constants, the count of a ``for`` over
     ``range``, names bound only to numbers, such elements, and the named
-    constants of NumPy, ``math`` and the engine's namespace (``xp.pi``).
+    constants of NumPy, ``math`` and the engine's namespace (``xp.pi``). An
+    annotation without a value (``rate: float``) binds nothing, so the name
+    stays bound only to its number.
     """
     assert _reasons(line) == []
 

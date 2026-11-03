@@ -167,10 +167,23 @@ def _aliases(tree: ast.AST) -> dict[str, str]:
 
 
 def _bound(tree: ast.AST) -> set[str]:
-    """Every name the file binds itself, which then no longer means a builtin."""
+    """Every name the file binds itself, which then no longer means a builtin.
+
+    An annotation without a value (``format: Callable[..., str]``) binds
+    nothing, and leaves the builtin where it was.
+    """
     names: set[str] = set()
+    bare = {
+        id(node.target)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AnnAssign) and node.value is None
+    }
     for node in ast.walk(tree):
-        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+        if (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Store)
+            and id(node) not in bare
+        ):
             names.add(node.id)
         elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
             names.add(node.name)

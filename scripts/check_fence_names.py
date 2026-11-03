@@ -158,13 +158,23 @@ def _defined(tree: ast.AST) -> set[str]:
     :rtype: set[str]
     """
     names: set[str] = set()
+    # An annotation without a value (``spl: list[float]``) binds nothing.
+    bare = {
+        id(node.target)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AnnAssign) and node.value is None
+    }
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             for entry in node.names:
                 names.add((entry.asname or entry.name).split(".")[0])
         elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             names.add(node.name)
-        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+        elif (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Store)
+            and id(node) not in bare
+        ):
             names.add(node.id)
         elif isinstance(node, ast.arg):
             names.add(node.arg)

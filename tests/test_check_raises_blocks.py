@@ -194,6 +194,29 @@ def test_a_builtin_name_the_file_rebinds_is_not_the_builtin(
     assert [f.calls for f in found] == [("check", "format")]
 
 
+def test_an_annotation_without_a_value_leaves_the_builtin(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``format: Callable[..., str]`` at the top of the module binds nothing:
+    ``format`` is still the builtin there, which Sonar holds safe.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        from collections.abc import Callable
+
+        import pytest
+
+        format: Callable[..., str]
+
+        def test_annotated():
+            with pytest.raises(ValueError, match="x"):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == []
+
+
 def test_a_deferred_call_does_not_count(tmp_path: pathlib.Path) -> None:
     """A lambda or a nested function inside the block is defined, not called."""
     found = _findings(

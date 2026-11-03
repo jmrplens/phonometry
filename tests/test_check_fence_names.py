@@ -75,6 +75,16 @@ def test_an_undefined_name_is_flagged_toward_the_registry(
     assert "PLACEHOLDERS" in problems[0]
 
 
+def test_an_annotation_without_a_value_defines_nothing(tmp_path: pathlib.Path) -> None:
+    """``spl: list[float]`` names a type and binds nothing, so a read of
+    ``spl`` after it raises ``NameError`` and the name is still undefined.
+    """
+    page = _page(tmp_path, "```python\nspl: list[float]\nprint(max(spl))\n```\n")
+    problems = check_fence_names.check_page(page)
+    assert len(problems) == 1
+    assert "fence 1 uses spl, which no fence of the page defines" in problems[0]
+
+
 def test_a_registered_placeholder_is_accepted(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

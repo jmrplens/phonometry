@@ -1356,7 +1356,7 @@ def _conjugate_pairs(roots: list[complex]) -> tuple[list[complex], list[complex]
 
 
 def _section_polynomial(roots: list[complex]) -> list[float]:
-    r"""``poly(roots)`` for one section: up to two roots, real or a conjugate pair.
+    r"""``poly(roots)`` for one section: two roots, both real or a conjugate pair.
 
     SciPy forms it with numpy's ``convolve``, which multiplies complex roots
     through the BLAS: :math:`(r_1 r_2 - i_1 i_2)` is a sum of products a
@@ -1366,25 +1366,18 @@ def _section_polynomial(roots: list[complex]) -> list[float]:
     that dot product does, so a zero comes out positive. The imaginary part
     of a conjugate pair's product cancels and is dropped, as SciPy drops it.
 
-    :param roots: No more than two roots: two real ones, or a conjugate pair.
+    :param roots: Two roots: two real ones, or a conjugate pair.
     :return: The monic coefficients, the highest power first.
     """
-    if not roots:
-        return [1.0]
-    first = roots[0]
-    if len(roots) == 1:
-        return [1.0, -first.real + 0.0]
-    second = roots[1]
+    first, second = roots
     middle = (-first.real - second.real) + 0.0
     last = ((first.real * second.real + 0.0) - (first.imag * second.imag + 0.0)) + 0.0
     return [1.0, middle, last]
 
 
 def _section(zeros: list[complex], poles: list[complex]) -> list[float]:
-    """SciPy's ``_single_zpksos``: one section's six coefficients, each half right-aligned."""
-    above = _section_polynomial(zeros)
-    below = _section_polynomial(poles)
-    return [0.0] * (3 - len(above)) + above + [0.0] * (3 - len(below)) + below
+    """SciPy's ``_single_zpksos``: one section's six coefficients, two zeros over two poles."""
+    return _section_polynomial(zeros) + _section_polynomial(poles)
 
 
 def _worst(roots: list[complex]) -> int:
@@ -1411,14 +1404,14 @@ def _nearest(roots: list[complex], to: complex, which: str) -> int:
 
 
 def _paired_zeros(zeros: list[complex], pole: complex) -> list[complex]:
-    """The zeros the section of *pole* takes, removed from *zeros*: SciPy's general case."""
-    if not zeros:
-        return []
+    """The two zeros the section of *pole* takes, removed from *zeros*: SciPy's general case.
+
+    The nearest zero, and its conjugate if it is complex or else the nearest
+    real zero left, which there always is (:func:`_next_section`).
+    """
     first = zeros.pop(_nearest(zeros, pole, "any"))
     if not _is_real(first):
         return [first, first.conjugate()]
-    if not zeros:
-        return [first]
     return [first, zeros.pop(_nearest(zeros, pole, "real"))]
 
 
@@ -1426,22 +1419,19 @@ def _next_section(zeros: list[complex], poles: list[complex]) -> list[float]:
     """The section of the pole nearest the unit circle, the roots it takes removed.
 
     SciPy's ``zpk2sos`` with its default pairing, ``'nearest'``, for a
-    digital filter, branch for branch, but for the order of exact ties in
-    distance (:func:`_nearest`).
+    digital filter, branch for branch of those that pairing reaches, but for
+    the order of exact ties in distance (:func:`_nearest`). SciPy pads the
+    zeros and the poles to one even count, as :func:`second_order_sections`
+    does, so each list holds an even number of real roots, a conjugate pair
+    being one entry of two roots, and every section takes two of each: a
+    real pole with the worst real pole left, a complex one with its
+    conjugate, and two zeros the same way. SciPy's special cases for the last
+    real pole and for one real pole and one real zero left, and its sections
+    of fewer than two zeros, ask for an odd count of real roots, which only
+    its ``'keep_odd'`` and ``'minimal'`` pairings leave, so they are not
+    spelled here.
     """
     pole = poles.pop(_worst(poles))
-    real_poles = sum(_is_real(p) for p in poles)
-    if _is_real(pole) and real_poles == 0:
-        zero = zeros.pop(_nearest(zeros, pole, "real"))
-        return _section([zero, 0j], [pole, 0j])
-    real_zeros = sum(_is_real(z) for z in zeros)
-    if (
-        len(poles) + 1 == len(zeros)
-        and not _is_real(pole)
-        and real_poles == real_zeros == 1
-    ):
-        zero = zeros.pop(_nearest(zeros, pole, "complex"))
-        return _section([zero, zero.conjugate()], [pole, pole.conjugate()])
     if _is_real(pole):
         real_indices = [i for i, p in enumerate(poles) if _is_real(p)]
         partner = poles.pop(real_indices[_worst([poles[i] for i in real_indices])])

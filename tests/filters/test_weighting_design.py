@@ -47,6 +47,7 @@ from phonometry.filters._pinned_trig import pinned_hypot
 from phonometry.filters._weighting_design import (
     _CORNER_DECADES,
     _cascade_magnitude,
+    _conjugate_pairs,
     _ordered_sum,
     _solve_dense,
     bilinear_zpk,
@@ -1748,6 +1749,36 @@ def test_the_sections_refuse_a_complex_root_with_no_conjugate(
         ),
     ):
         second_order_sections(np.array(zeros), np.array([0.5]), 1.0)
+
+
+def test_a_run_of_one_real_part_is_ordered_by_its_imaginary_parts() -> None:
+    """Pairs whose real parts agree within the tolerance, then one that does not.
+
+    SciPy's ``_cplxreal`` sorts the roots by real part and then sorts each
+    run of real parts that agree within its tolerance by the size of the
+    imaginary part, so ``0.5 + 0.3i`` and ``nextafter(0.5, 1) + 0.1i`` swap
+    and the pair at 0.7 closes the run; the design takes them in SciPy's
+    order and averages each pair to the same bits.
+    """
+    nudged = math.nextafter(0.5, 1.0)
+    upper = [complex(0.5, 0.3), complex(nudged, 0.1), complex(0.7, 0.2)]
+    roots = upper + [z.conjugate() for z in upper]
+    pairs, reals = _conjugate_pairs(roots)
+    theirs, their_reals = sg._filter_design._cplxreal(np.array(roots))
+    assert pairs == [upper[1], upper[0], upper[2]]
+    assert reals == their_reals.tolist() == []
+    np.testing.assert_array_equal(
+        np.array(pairs).view(np.uint64), np.asarray(theirs).view(np.uint64)
+    )
+
+
+def test_no_roots_make_one_section_of_the_gain() -> None:
+    """With neither zeros nor poles the cascade is the gain alone, as SciPy's is."""
+    ours = second_order_sections(np.array([]), np.array([]), 0.7)
+    theirs = sg.zpk2sos(np.array([]), np.array([]), 0.7)
+    assert (
+        ours.tolist() == np.asarray(theirs).tolist() == [[0.7, 0.0, 0.0, 1.0, 0.0, 0.0]]
+    )
 
 
 def _fused_convolve(a: object, v: object, mode: str = "full") -> np.ndarray:

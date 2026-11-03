@@ -185,9 +185,9 @@ corren en CI:
   unidad de seis a 200&nbsp;Hz, donde el módulo complejo de numpy, a una
   unidad del correctamente redondeado, emparejaba al revés dos ceros
   separados por una unidad en el último lugar. Los otros 112 diseños
-  comprobados conservan sus bytes, entre ellos la ponderación A a todas
-  las frecuencias, y todo diseño que se movió sigue dentro de las cotas de
-  respuesta que sostienen los tests.
+  comprobados conservan sus bytes, entre ellos la ponderación A a las
+  diecinueve frecuencias, y todo diseño que se movió sigue dentro de las
+  cotas de respuesta que sostienen los tests.
 - **Los polos, contra el valor exacto.** Los seis polos son las raíces que
   halla una biblioteca de precisión arbitraria, redondeadas parte a parte,
   y la batería de tests los sostiene en esos doubles. Contra esa misma

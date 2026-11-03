@@ -169,8 +169,8 @@ run in CI:
   unit of six at 200&nbsp;Hz, where numpy's complex magnitude, one unit
   off the correctly rounded one, had paired two zeros one unit in the last
   place apart the other way round. The other 112 checked designs keep
-  their bytes, the A weighting at every rate among them, and every design
-  that moved stays inside the response bounds the tests hold.
+  their bytes, the A weighting at all nineteen rates among them, and
+  every design that moved stays inside the response bounds the tests hold.
 - **The poles, against the exact value.** The six poles are the roots an
   arbitrary-precision library finds, rounded part by part, and the test
   suite holds them to those doubles. Against the same library at 3000 bits,

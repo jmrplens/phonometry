@@ -4203,7 +4203,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   musl, as on x86-64 under glibc with and without FMA and under musl, and
   the CI matrix holds every curve at 48 kHz to one digest, where it held
   only the A weighting. On Linux 21 of the 133 move, and the other 112 keep
-  their bytes, the A weighting at every rate among them. The nineteen
+  their bytes, the A weighting at all nineteen rates among them. The nineteen
   BS.468-4 designs move because their poles move by 2 to 36 units in the
   last place of each part from LAPACK's, and the fit, started from them,
   settles on other coefficients inside its tolerance: 7 to 13 of each

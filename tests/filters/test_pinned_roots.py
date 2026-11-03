@@ -323,10 +323,12 @@ def test_zero_as_a_multiple_root_is_refused_at_once() -> None:
     """``x^2 (x - 1)`` ends in two zeros, so zero is a double root, refused as such.
 
     It was refused before only after every grid had failed, with the
-    message of a root the iteration could not resolve.
+    message of a root the iteration could not resolve; it is refused now
+    before the iteration starts, so it is run here and not in a child.
     """
-    printed = _roots_in_a_child([Fraction(1), Fraction(-1), Fraction(0), Fraction(0)])
-    assert printed.startswith("ArithmeticError zero is a root 2 times over"), printed
+    polynomial = [Fraction(1), Fraction(-1), Fraction(0), Fraction(0)]
+    with pytest.raises(ArithmeticError, match="zero is a root 2 times over"):
+        correctly_rounded_roots(polynomial)
 
 
 def _conjugate_pair(re: Fraction, im: Fraction) -> tuple[Fraction, ...]:
@@ -363,18 +365,164 @@ def test_close_roots_are_told_apart(apart: int) -> None:
     assert _bits(pairs) == _bits(sorted(expected, key=lambda z: (z.real, z.imag)))
 
 
+#: The root finder's helpers as it ships them, which :class:`_Path` wraps.
+_VALUE_AND_SLOPE = _pinned_roots._value_and_slope
+_RADIUS_ABOVE = _pinned_roots._radius_above
+_SHIFTED = _pinned_roots._shifted
+_CERTIFIED_ROOT = _pinned_roots._certified_root
+_BOUNDARY_WITHIN = _pinned_roots._boundary_within
+
+
+class _Path:
+    """The edge cases the root finder meets on one polynomial, counted by wrapping its helpers."""
+
+    def __init__(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self.zero_slopes = 0
+        self.no_radius = 0
+        self.parted = 0
+        self.decided_on_the_axis = 0
+        self.waited_across_the_axis = 0
+        self.at_the_threshold = 0
+        module = _pinned_roots
+        value_and_slope, radius_above = _VALUE_AND_SLOPE, _RADIUS_ABOVE
+        shifted, certified_root = _SHIFTED, _CERTIFIED_ROOT
+        boundary_within = _BOUNDARY_WITHIN
+
+        def counted_value_and_slope(
+            coefficients: tuple[Fraction, ...], x: tuple[Fraction, Fraction]
+        ) -> tuple[tuple[Fraction, Fraction], tuple[Fraction, Fraction]]:
+            value, slope = value_and_slope(coefficients, x)
+            self.zero_slopes += not any(slope)
+            return value, slope
+
+        def counted_radius_above(
+            coefficients: tuple[Fraction, ...], x: tuple[Fraction, Fraction]
+        ) -> Fraction:
+            radius = radius_above(coefficients, x)
+            self.no_radius += radius < 0
+            return radius
+
+        def counted_shifted(
+            x: tuple[Fraction, Fraction], index: int, exponent: int, bits: int
+        ) -> tuple[Fraction, Fraction]:
+            self.parted += exponent == 8 - bits
+            return shifted(x, index, exponent, bits)
+
+        def counted_certified_root(
+            coefficients: tuple[Fraction, ...],
+            index: int,
+            points: list[tuple[Fraction, Fraction]],
+            radii: list[Fraction],
+        ) -> list[complex] | None:
+            x, radius = points[index], radii[index]
+            widened = module._alone_on_the_axis(index, points, radii)
+            if widened is not None:
+                on_axis = radius_above(coefficients, (x[0], Fraction(0)))
+                self.decided_on_the_axis += 0 <= on_axis < widened
+            else:
+                self.waited_across_the_axis += -radius <= x[1] <= radius
+            return certified_root(coefficients, index, points, radii)
+
+        def counted_boundary_within(low: Fraction, high: Fraction) -> Fraction | None:
+            boundary = boundary_within(low, high)
+            self.at_the_threshold += boundary in {module._OVERFLOW, -module._OVERFLOW}
+            return boundary
+
+        monkeypatch.setattr(module, "_value_and_slope", counted_value_and_slope)
+        monkeypatch.setattr(module, "_radius_above", counted_radius_above)
+        monkeypatch.setattr(module, "_shifted", counted_shifted)
+        monkeypatch.setattr(module, "_certified_root", counted_certified_root)
+        monkeypatch.setattr(module, "_boundary_within", counted_boundary_within)
+
+
+def _close_reals(a: Fraction, b: Fraction) -> tuple[Fraction, ...]:
+    """``(x - a)(x - b)``."""
+    return exact_polynomial_product((Fraction(1), -a), (Fraction(1), -b))
+
+
+def test_the_iteration_meets_its_edge_cases_on_close_real_roots(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Three pairs of real roots a few dozen bits apart, each through one edge of the search.
+
+    ``-5`` and ``-5 + 2**-54``: the derivative of a quadratic vanishes
+    midway between its roots, an approximation lands there exactly, where
+    Newton's step has no value and the disk no radius, so the sweep leaves
+    it and the certificate waits for the next pass; two approximations land
+    on one point on the way and are parted. ``2`` and ``2 + 2**-77``: an
+    approximation alone on the axis decides on the radius at its real part,
+    which is smaller. ``-2`` and ``-2 + 2**-77``: a disk across the axis that
+    is not alone on it waits for the next pass. Each pair rounds to one
+    double twice, and the counts show each edge was met, so that the test
+    keeps holding them when the search changes.
+    """
+    path = _Path(monkeypatch)
+    roots = correctly_rounded_roots(_close_reals(Fraction(-5), -5 + Fraction(1, 2**54)))
+    assert _bits(roots) == _bits([complex(-5.0), complex(-5.0)])
+    assert path.zero_slopes > 0
+    assert path.no_radius > 0
+    assert path.parted > 0
+    path = _Path(monkeypatch)
+    roots = correctly_rounded_roots(_close_reals(Fraction(2), 2 + Fraction(1, 2**77)))
+    assert _bits(roots) == _bits([complex(2.0), complex(2.0)])
+    assert path.decided_on_the_axis > 0
+    path = _Path(monkeypatch)
+    roots = correctly_rounded_roots(_close_reals(Fraction(-2), -2 + Fraction(1, 2**77)))
+    assert _bits(roots) == _bits([complex(-2.0), complex(-2.0)])
+    assert path.waited_across_the_axis > 0
+
+
+def test_a_disk_across_the_threshold_of_overflow_waits_for_the_next_pass(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``x^2 - (t^2 - 1)`` and ``x^2 - (t^2 + 1)``, ``t`` the threshold ``2^1024 - 2^970``.
+
+    Their roots lie a hair inside and outside the threshold of overflow. The
+    first disks reach across it, which decides nothing, and the search waits
+    until a disk lies on one side: the roots inside round to the largest
+    double and its negative, those outside are refused with ``OverflowError``.
+    """
+    threshold = Fraction(2**1024 - 2**970)
+    largest = _double(Fraction(_LARGEST))
+    path = _Path(monkeypatch)
+    roots = correctly_rounded_roots((Fraction(1), Fraction(0), -(threshold**2 - 1)))
+    assert _bits(roots) == _bits([complex(-largest), complex(largest)])
+    assert path.at_the_threshold > 0
+    path = _Path(monkeypatch)
+    outside = (Fraction(1), Fraction(0), -(threshold**2 + 1))
+    with pytest.raises(OverflowError, match=r"2\*\*1024 - 2\*\*970"):
+        correctly_rounded_roots(outside)
+    assert path.at_the_threshold > 0
+
+
+def test_the_grid_keeps_the_origin_and_a_lone_point_reaches_no_boundary() -> None:
+    """Two contracts of the search's helpers that no polynomial reaches on its own.
+
+    A point at the origin stays there on every grid, its scale having no
+    exponent to read; and a single point that is not a midpoint between two
+    doubles reaches no rounding boundary, which the certificate only asks of
+    an interval that has reached one.
+    """
+    origin = (Fraction(0), Fraction(0))
+    assert _pinned_roots._on_grid(origin, 64) == origin
+    assert _pinned_roots._boundary_within(Fraction(1), Fraction(1)) is None
+
+
 def _double(value: Fraction) -> float:
     """The double nearest *value*, by Python's correctly rounded integer division."""
     return value.numerator / value.denominator
 
 
-def test_two_approximations_that_land_on_one_point_are_parted() -> None:
+def test_two_conjugate_pairs_2_to_the_minus_92_apart_come_back_rounded() -> None:
     """Two conjugate pairs ``0.886 * 2**-92`` apart, and a real root beside them.
 
-    On the first grid the two approximations of the upper pair rounded to the
-    same point, where the pull between them divides by zero, and the root
-    finder raised ``ZeroDivisionError``; the point is now moved off the other
-    first. The pairs' parts round to the same doubles.
+    With the starting points of the time, two approximations of the upper
+    pair rounded to the same point on the first grid, where the pull between
+    them divides by zero, and the root finder raised ``ZeroDivisionError``.
+    From the shifted starting points they no longer meet there; where two
+    approximations do land on one point, they are parted first
+    (:func:`test_the_iteration_meets_its_edge_cases_on_close_real_roots`).
+    The pairs' parts round to the same doubles.
     """
     centre, height = Fraction(-48185, 542566), Fraction(138853, 148271)
     shifted = centre + Fraction(886, 1000) / 2**92

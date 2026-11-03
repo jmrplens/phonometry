@@ -570,6 +570,30 @@ _HANDED_ON_RANGE: list[tuple[str, Callable[[], object], str]] = [
         "'max_levels' must have shape",
     ),
     (
+        "event_level: a maximum level that is no number",
+        lambda: aircraft.event_level(
+            _PATH,
+            [0.0, 0.0, 0.0],
+            _POWERS,
+            _DISTANCES,
+            _NPD,
+            np.where(np.eye(2, 3, dtype=bool), np.nan, 80.0),
+        ),
+        "'powers', 'distances_m' and 'max_levels' must be finite",
+    ),
+    (
+        "event_level: an exposure level that is no number",
+        lambda: aircraft.event_level(
+            _PATH,
+            [0.0, 0.0, 0.0],
+            _POWERS,
+            _DISTANCES,
+            np.where(np.eye(2, 3, dtype=bool), np.nan, 80.0),
+            _NPD,
+        ),
+        "'powers', 'distances_m' and 'exposure_levels' must be finite",
+    ),
+    (
         "qualification_frequencies: a lowest band below zero",
         lambda: emission.qualification_frequencies(-1.0, high_hz=1000.0),
         "'low_hz' must be positive and finite",

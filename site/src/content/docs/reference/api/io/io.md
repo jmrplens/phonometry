@@ -2080,7 +2080,10 @@ of up to 256 colours. Every frame is drawn with Agg and piped to ffmpeg,
 so this process holds one frame at a time; for a GIF, ffmpeg itself
 holds every frame until the last one has arrived, since the palette is
 computed from all of them. The file appears at `path` only when ffmpeg
-has finished it, so a failure leaves whatever was there before.
+has finished it, so a failure leaves whatever was there before. On POSIX
+the file it is written into beside `path` is readable by its owner
+alone while it replaces a file, and the video then keeps the permission
+bits of the file it replaces; a new one takes the bits a new file takes.
 
 ffmpeg is the program matplotlib's `rcParams["animation.ffmpeg_path"]`
 names (`"ffmpeg"` on `PATH` by default). How it encodes is `video`,

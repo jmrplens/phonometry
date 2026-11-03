@@ -2663,9 +2663,10 @@ def _scope_env(
     names = own_names(scope)
     shared = names.declared_global | names.declared_nonlocal
     own = {name for node in body for name in _bound_names(node)} - shared
-    # A name it declares ``global`` is the module's, whatever a function
-    # around it binds of that spelling.
-    own |= set(_parameters(scope)) | names.declared_global
+    # A name it declares ``global`` is the module's, and one of its type
+    # parameters its own, whatever a function around it binds of that
+    # spelling.
+    own |= set(_parameters(scope)) | names.declared_global | names.type_parameters
     env = {
         name: state
         for name, state in captured.items()

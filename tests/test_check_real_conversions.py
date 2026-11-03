@@ -1146,6 +1146,13 @@ _PLANTED_ANSWERED = {
         def f(reference, levels):
             return float(_helper(reference, levels))
     """,
+    "a_nested_function_s_type_parameter_is_its_own": """
+        def f(T):
+            def g[T]():
+                return np.asarray(T, dtype=np.float64)
+
+            return g(), real_array(T, "T")
+    """,
     "a_name_a_nested_function_declares_global_is_the_module_s": """
         def _helper(reference, levels):
             real_array(reference, "reference")

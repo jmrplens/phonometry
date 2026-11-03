@@ -760,8 +760,10 @@ def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
     A scope's table of names (:func:`aliases_of`) keeps the last import of a
     name; where the nearest scope around the call that imports the name
     imports it more than once, each import that may stand for it at the call
-    (:func:`ast_scan.live_bindings`), or once that scope has run when the
-    call sits in a function inside it, gives a table of its own.
+    (:func:`ast_scan.live_bindings`) gives a table of its own: when the call
+    sits in a function inside that scope, each that may stand from the
+    ``def`` on, since the function may be called at once or once the scope
+    has run.
     """
     parts = _dotted(call.func)
     head = parts[0] if parts else None
@@ -770,11 +772,10 @@ def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
             continue
         imports = _imported_twice(holder).get(head or "")
         if imports:
-            point = call if holder is scope.node else None
             package = _package_of(scope.path, scope.module)
             return [
                 {**scope.aliases, **_imported(statement, package)}
-                for statement in live_bindings(holder, imports, point)
+                for statement in live_bindings(holder, imports, call)
             ]
     return [scope.aliases]
 

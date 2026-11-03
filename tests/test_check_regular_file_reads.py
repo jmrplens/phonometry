@@ -1180,6 +1180,42 @@ def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(
     assert _found(tmp_path, either, helpers=_CHECK) == [("reader", _FOREIGN)]
 
 
+def test_a_function_meets_every_import_of_the_module_from_its_def_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call inside a function reads the module's name when the function
+    runs, which may be during the import and before a later import of the
+    name, so every import that may stand from the ``def`` on is one it may
+    reach; one that a later import replaces before the ``def`` is not.
+
+    The function read the module's imports as they stand once it has run, so
+    the check imported after it hid the import that checks nothing, which a
+    call made at once, ``TABLE = reader(...)``, reaches.
+    """
+    called_early = """
+        import numpy as np
+        from other import require_regular
+
+        def reader(path):
+            require_regular(path)
+            return np.load(path)
+
+        TABLE = reader("table.npy")
+        from check import require_regular
+        """
+    replaced_before = """
+        import numpy as np
+        from other import require_regular
+        from check import require_regular
+
+        def reader(path):
+            require_regular(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, called_early, helpers=_CHECK) == [("reader", _FOREIGN)]
+    assert _found(tmp_path, replaced_before, helpers=_CHECK) == []
+
+
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:
     owner = tmp_path / "phonometry" / "_internal" / "json_input.py"
     owner.parent.mkdir(parents=True)

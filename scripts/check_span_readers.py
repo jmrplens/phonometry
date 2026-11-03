@@ -61,7 +61,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, relative, scoped
+from ast_scan import ROOT, lexical_scoped, relative
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
@@ -289,13 +289,21 @@ class _Strings:
             return None
 
 
-def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr]]:
+def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
     """Each name a node binds to an expression, the items of a tuple included.
 
     An assignment binds its value, ``x += y`` what ``x + y`` makes, and a
     loop or a comprehension each item of what it walks: the items of a tuple,
     a list or a set written out, or the strings a name it walks stands for.
+    A function or a lambda binds its parameters to ``None``, whatever its
+    caller passes, which stands for no string here.
     """
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+        arguments = node.args
+        every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
+        every += [a for a in (arguments.vararg, arguments.kwarg) if a is not None]
+        yield from ((argument.arg, None) for argument in every)
+        return
     value: ast.expr | None
     if isinstance(node, ast.Assign):
         targets: list[ast.expr] = list(node.targets)
@@ -353,13 +361,16 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
     strings = _Strings()
-    nodes = list(scoped(tree))
-    for scope, node in nodes:
+    # A comprehension's variables and a lambda's parameters are bound in a
+    # scope of their own, inside the function's, as Python keeps them.
+    nodes = list(lexical_scoped(tree))
+    for _function, scope, node in nodes:
         for name, value in _assigned(node):
-            strings.bind(scope, name, strings.bound(value, scope))
+            bound = set() if value is None else strings.bound(value, scope)
+            strings.bind(scope, name, bound)
     names = _re_names(tree)
     found: list[Finding] = []
-    for scope, node in nodes:
+    for function, scope, node in nodes:
         if not isinstance(node, ast.Call):
             continue
         patterns = _patterns(node, names)
@@ -369,10 +380,10 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
         try:
             texts = {t for p in patterns for t in strings.fold(p, scope)}
         except UnreadPatternError:
-            found.append(Finding(path, node.lineno, scope, segment, unread=True))
+            found.append(Finding(path, node.lineno, function, segment, unread=True))
             continue
         if any(reads_span(text) for text in texts):
-            found.append(Finding(path, node.lineno, scope, segment))
+            found.append(Finding(path, node.lineno, function, segment))
     return found
 
 

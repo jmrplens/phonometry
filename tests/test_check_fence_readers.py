@@ -227,6 +227,54 @@ def test_a_parameter_shadows_a_module_marker(tmp_path: pathlib.Path) -> None:
     )
 
 
+def test_a_comprehension_s_variable_stays_in_the_comprehension(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Python keeps a comprehension's variable to itself: the function's name
+    of the same spelling stands for its own string, and only inside the
+    comprehension does the name stand for the markers it walks.
+    """
+    assert (
+        _shapes(
+            tmp_path,
+            """
+            def opens(line):
+                marker = "#"
+                seen = [marker for marker in ("```", "~~~")]
+                return line.startswith(marker), seen
+            """,
+        )
+        == []
+    )
+    assert _shapes(
+        tmp_path,
+        """
+        def opens(line):
+            marker = "#"
+            return [line.startswith(marker) for marker in ("```", "~~~")]
+        """,
+    ) == [("opens", "a test for a marker")]
+
+
+def test_a_lambda_s_parameter_shadows_a_module_marker(tmp_path: pathlib.Path) -> None:
+    """A lambda's parameter stands for whatever its caller passes, as a
+    function's does.
+    """
+    assert (
+        _shapes(
+            tmp_path,
+            """
+            marker = "```"
+
+            def opens(line):
+                starts = lambda marker: line.startswith(marker)
+                return starts("#")
+            """,
+        )
+        == []
+    )
+
+
 def test_the_regular_expressions_that_read_fences_are_refused(
     tmp_path: pathlib.Path,
 ) -> None:

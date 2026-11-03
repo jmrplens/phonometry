@@ -66,7 +66,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, exempted, relative, scoped
+from ast_scan import ROOT, exempted, lexical_scoped, relative
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -310,8 +310,8 @@ def _bound(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
     """The names a node binds, each with the expression it binds or ``None``.
 
     An assignment binds its value, ``x += y`` what ``x + y`` makes, a loop
-    each item of what it walks, and a function its parameters, to what
-    nothing here can know.
+    or a comprehension each item of what it walks, and a function or a
+    lambda its parameters, to what nothing here can know.
     """
     if isinstance(node, ast.Assign):
         yield from ((t.id, node.value) for t in node.targets if isinstance(t, ast.Name))
@@ -325,7 +325,7 @@ def _bound(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
     elif isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
         if isinstance(node.target, ast.Name):
             yield node.target.id, node.iter
-    elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+    elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
         arguments = node.args
         every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
         every += [a for a in (arguments.vararg, arguments.kwarg) if a is not None]
@@ -372,9 +372,11 @@ class _File:
         """Read what a parsed script binds, in source order."""
         modules, functions = _re_names(tree)
         file = cls({}, frozenset(modules), frozenset(functions))
-        # ``scoped`` names a function after itself, so its parameters land in
-        # its own scope with the names its body binds.
-        for scope, node in scoped(tree):
+        # ``lexical_scoped`` names a function after itself, so its parameters
+        # land in its own scope with the names its body binds; a
+        # comprehension's variables and a lambda's parameters land in a scope
+        # of their own inside it, as Python keeps them.
+        for _function, scope, node in lexical_scoped(tree):
             names = file.bindings.setdefault(scope, {})
             lookup = file.lookup(scope)
             for name, value in _bound(node):
@@ -498,8 +500,8 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
     tree = ast.parse(source, filename=str(path))
     file = _File.of(tree)
     found: list[Finding] = []
-    for function, node in scoped(tree):
-        shape = _shape(node, file, file.lookup(function))
+    for function, scope, node in lexical_scoped(tree):
+        shape = _shape(node, file, file.lookup(scope))
         if shape is not None:
             found.append(
                 Finding(

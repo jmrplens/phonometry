@@ -307,6 +307,69 @@ def test_a_reader_built_from_a_choice_or_a_loop_is_found(
     assert _places(tmp_path, _CHOSEN_READERS[shape]) == ["spans"]
 
 
+#: Names a comprehension, a lambda or a nested function binds for itself:
+#: Python keeps them there, so the same spelling outside stands for its own
+#: strings only, and inside for theirs.
+_OWN_SCOPES = {
+    "a_comprehension_s_variable_beside_a_name_of_the_function": """
+        import re
+
+        def words(text):
+            pattern = r"\\w+"
+            ticks = [pattern for pattern in ("`[^`]+`",)]
+            return re.findall(pattern, text), ticks
+    """,
+    "a_lambda_s_parameter_beside_a_module_name": """
+        import re
+
+        PATTERN = "`[^`]+`"
+
+        def words(text):
+            find = lambda PATTERN: re.findall(PATTERN, text)
+            return find(r"\\w+")
+    """,
+    "a_nested_function_s_parameter_beside_a_module_name": """
+        import re
+
+        PATTERN = "`[^`]+`"
+
+        def words(text):
+            def find(PATTERN):
+                return re.findall(PATTERN, text)
+
+            return find(r"\\w+")
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_OWN_SCOPES))
+def test_a_name_another_scope_binds_for_itself_stays_there(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """A comprehension's variable joined the function's name of the same
+    spelling, and a parameter of a lambda or a nested function was read as
+    the module's name it shadows, so each pattern for words was found as a
+    span reader.
+    """
+    assert _places(tmp_path, _OWN_SCOPES[shape]) == []
+
+
+def test_a_reader_in_a_comprehension_is_read_with_its_variable(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Inside the comprehension, its variable stands for the items it walks,
+    whatever the function binds under that name.
+    """
+    source = """
+        import re
+
+        def spans(text):
+            body = r"\\w+"
+            return [re.findall(f"`{body}`", text) for body in ("[^`]+",)], body
+    """
+    assert _places(tmp_path, source) == ["spans"]
+
+
 def test_a_choice_of_more_strings_than_the_bound_is_refused_unread(
     tmp_path: pathlib.Path,
 ) -> None:

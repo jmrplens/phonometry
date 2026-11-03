@@ -81,6 +81,67 @@ def scoped(tree: ast.AST) -> Iterator[tuple[str, ast.AST]]:
     yield from walk(tree, "")
 
 
+#: The expressions that bind names of their own: Python keeps a
+#: comprehension's variables and a lambda's parameters inside them.
+_EXPRESSION_SCOPES = (
+    ast.ListComp,
+    ast.SetComp,
+    ast.GeneratorExp,
+    ast.DictComp,
+    ast.Lambda,
+)
+
+
+def lexical_scoped(tree: ast.AST) -> Iterator[tuple[str, str, ast.AST]]:
+    """Every node with the function or class that holds it, as :func:`scoped`
+    names it, and the scope a name read there is looked up in.
+
+    That scope is the function's, or that of a comprehension or a lambda in
+    it, which bind names of their own: the function's name followed by
+    ``.<comprehension@line:col>`` or ``.<lambda@line:col>``, so that a lookup
+    that walks a dotted scope outwards finds them first and the function's
+    after. A comprehension reads its first iterable in the scope around it
+    and the rest in its own, and a lambda computes its defaults around it;
+    the comprehension or the lambda itself, its loops and its parameters
+    come with its own scope, where a reader binds its variables.
+    """
+
+    def visit(
+        node: ast.AST, scope: str, lookup: str
+    ) -> Iterator[tuple[str, str, ast.AST]]:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            inner = f"{scope}.{node.name}" if scope else node.name
+            yield inner, inner, node
+            for child in ast.iter_child_nodes(node):
+                yield from visit(child, inner, inner)
+            return
+        if not isinstance(node, _EXPRESSION_SCOPES):
+            yield scope or "<module>", lookup or "<module>", node
+            for child in ast.iter_child_nodes(node):
+                yield from visit(child, scope, lookup)
+            return
+        kind = "lambda" if isinstance(node, ast.Lambda) else "comprehension"
+        own = f"<{kind}@{node.lineno}:{node.col_offset}>"
+        inner = f"{lookup}.{own}" if lookup else own
+        around: list[ast.AST] = (
+            [*node.args.defaults, *filter(None, node.args.kw_defaults)]
+            if isinstance(node, ast.Lambda)
+            else [node.generators[0].iter]
+        )
+        yield scope or "<module>", inner, node
+        for child in ast.iter_child_nodes(node):
+            if not isinstance(child, ast.arguments | ast.comprehension):
+                yield from visit(child, scope, inner)
+                continue
+            yield scope or "<module>", inner, child
+            for part in ast.iter_child_nodes(child):
+                outside = any(part is each for each in around)
+                yield from visit(part, scope, lookup if outside else inner)
+
+    for child in ast.iter_child_nodes(tree):
+        yield from visit(child, "", "")
+
+
 def exempted[FindingT: Keyed](
     findings: Sequence[FindingT], exempt: Mapping[tuple[str, str], str]
 ) -> tuple[list[FindingT], list[tuple[str, str]]]:

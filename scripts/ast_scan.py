@@ -804,7 +804,24 @@ def live_bindings[NodeT: ast.AST](
     unless another one runs before the point on every turn
     (:func:`_runs_each_turn`). When none runs before the point (a call read
     before any binding of its scope), every one may be what it holds.
+
+    A point inside a scope nested in the bindings' (:func:`_lifted`) is read
+    where that scope is written: a class body or a list comprehension runs
+    there, and a function, a lambda or a generator expression runs when it
+    is called or consumed, so it meets every binding from there on
+    (:func:`bindings_from`).
     """
+    if point is not None and bindings:
+        point, deferred = _lifted(root, bindings[0], point)
+        if deferred:
+            return _met_from(root, bindings, point)
+    return _held_at(root, bindings, point)
+
+
+def _held_at[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
+) -> list[NodeT]:
+    """:func:`live_bindings` at a *point* written in the bindings' own scope."""
     frames = {binding: _frames(root, binding) for binding in bindings}
     target = _frames(root, point) if point is not None else None
     forward = [
@@ -867,13 +884,54 @@ def bindings_from[NodeT: ast.AST](
 
     What a function, a lambda or a generator expression written at *point*
     reads of the name: it reads it when it is called or consumed, which may
-    be at once, before a later binding, or once the scope has run. Those
-    the name holds at *point* (:func:`live_bindings`), and every one that
-    may run after it (:func:`_may_run_after`).
+    be at once, before a later binding, or once the scope has run.
     """
-    live = live_bindings(root, bindings, point)
-    if point is None:
-        return live
+    if point is None or not bindings:
+        return _held_at(root, bindings, None)
+    point, _ = _lifted(root, bindings[0], point)
+    return _met_from(root, bindings, point)
+
+
+#: The scopes that run when they are called or consumed, not where they are
+#: written.
+_DEFERRED = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.GeneratorExp)
+
+
+def _lifted(root: ast.AST, binding: ast.AST, point: ast.AST) -> tuple[ast.AST, bool]:
+    """Where the scope that holds *binding* reads a name read at *point*, and
+    whether it reads it later than that.
+
+    *point* itself when it runs in that scope; otherwise the function, the
+    class, the lambda or the comprehension written there that it runs in,
+    and whether a function, a lambda or a generator expression lies on the
+    way, which runs when it is called or consumed. A ``def``'s defaults and
+    decorators, a class's bases and a comprehension's first iterable run
+    where they are written (:func:`_runs_inside`).
+    """
+    scope = _scope_holding(root, binding)
+    parents = _parents(root)
+    lifted, deferred = point, False
+    grandchild: ast.AST | None = None
+    child = point
+    current = parents.get(point)
+    while current is not None and current is not scope:
+        if isinstance(current, SCOPES) and _runs_inside(current, child, grandchild):
+            lifted = current
+            deferred = deferred or isinstance(current, _DEFERRED)
+        grandchild, child, current = child, current, parents.get(current)
+    if current is None:
+        return point, False
+    return lifted, deferred
+
+
+def _met_from[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST
+) -> list[NodeT]:
+    """Those the name holds at *point*, written in the bindings' own scope
+    (:func:`_held_at`), and every one that may run after it
+    (:func:`_may_run_after`).
+    """
+    live = _held_at(root, bindings, point)
     target = _frames(root, point)
     return [
         binding

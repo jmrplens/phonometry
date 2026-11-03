@@ -619,6 +619,62 @@ def test_a_function_meets_every_binding_from_its_def_on() -> None:
     assert ast_scan.bindings_from(tree, bindings, None) == [bindings[1]]
 
 
+def test_a_call_in_a_nested_scope_is_read_where_that_scope_runs() -> None:
+    """A call written inside a function, a lambda or a generator expression
+    reads the name when that runs, so it may meet every ``def`` from where
+    the function is written on; one in a class body, a list comprehension
+    or a default runs where it is written, and meets the one standing there.
+
+    The call was read as if it stood in the module at the place it holds in
+    its own function, so its index there was set against the module's, and
+    a lambda or a generator was read where it is written.
+    """
+    source = textwrap.dedent(
+        """
+        def helper():
+            return 1
+
+        def reader():
+            first = 1
+            second = 2
+            third = 3
+            return helper()
+
+        later = lambda: helper()
+        lazy = (helper() for _ in range(2))
+        each = [helper() for _ in range(2)]
+
+        class Holder:
+            value = helper()
+
+        def defaulted(x=helper()):
+            return x
+
+        def helper():
+            return 2
+        """
+    )
+    tree = ast.parse(source)
+    bindings = _definitions(tree, "helper")
+    calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "helper"
+    ]
+    met = {}
+    for call in sorted(calls, key=lambda node: node.lineno):
+        values = []
+        for binding in ast_scan.live_bindings(tree, bindings, call):
+            returned = binding.body[0]
+            assert isinstance(returned, ast.Return)
+            assert isinstance(returned.value, ast.Constant)
+            values.append(returned.value.value)
+        met[call.lineno] = values
+    assert met == {
+        9: [1, 2], 11: [1, 2], 12: [1, 2], 13: [1], 16: [1], 18: [1],
+    }  # fmt: skip
+
+
 def test_bindings_by_name_lists_every_binding_of_a_scope_in_source_order() -> None:
     """Each name a scope binds, with the import, the ``def``, the assignment
     and the other bindings of it in the order of the source; a function's

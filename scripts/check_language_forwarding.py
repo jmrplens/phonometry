@@ -284,26 +284,28 @@ _Target = Scope | Class | ModuleRef | Local | None
 
 
 def _own_nodes(roots: Iterable[ast.AST]) -> Iterator[ast.AST]:
-    """Every node that runs in this scope, not descending into a nested body.
+    """Every node that runs in this scope, in the order of the source, not
+    descending into a nested body.
 
     A nested function's decorators and defaults run here, and so do a class's
     bases, but their bodies do not. A lambda has no statements of its own, so a
-    call inside one is counted as the enclosing function's.
+    call inside one is counted as the enclosing function's. The order is the
+    source's so that of two imports or two definitions of one name, the later,
+    which Python leaves in place, is the one a table built from the walk keeps.
     """
-    stack = list(roots)
+    stack = list(roots)[::-1]
     while stack:
         node = stack.pop()
         yield node
+        children: list[ast.AST]
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-            stack.extend(node.decorator_list)
-            stack.extend(node.args.defaults)
-            stack.extend(d for d in node.args.kw_defaults if d is not None)
-            continue
-        if isinstance(node, ast.ClassDef):
-            stack.extend(node.decorator_list)
-            stack.extend(node.bases)
-            continue
-        stack.extend(ast.iter_child_nodes(node))
+            children = [*node.decorator_list, *node.args.defaults]
+            children.extend(d for d in node.args.kw_defaults if d is not None)
+        elif isinstance(node, ast.ClassDef):
+            children = [*node.decorator_list, *node.bases]
+        else:
+            children = list(ast.iter_child_nodes(node))
+        stack.extend(children[::-1])
 
 
 def _for_the_type_checker(node: ast.AST) -> bool:
@@ -453,7 +455,7 @@ def _build_scope(
         removed = _removes_language(child)
         if removed is not None:
             scope.removes.add(removed)
-    # The walk is a stack, so the calls are put back into source order.
+    # Calls are read in the order of their position in the source.
     scope.calls.sort(key=lambda call: (call.lineno, call.col_offset))
     return scope
 

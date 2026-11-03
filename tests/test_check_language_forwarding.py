@@ -184,6 +184,57 @@ def test_a_function_without_a_language_in_scope_is_not_flagged(
     assert found == []
 
 
+def test_the_later_of_two_bindings_of_a_name_is_the_one_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name, or two definitions, the call reaches the later.
+
+    In the module and in a function alike, as Python binds them: the first
+    of each pair takes no language, the second does, so each call drops it.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax):
+                return ax
+            """,
+            "pkg.plots": """
+            from .other import axis
+            from .helpers import axis
+
+
+            def tick(ax):
+                return ax
+
+
+            def tick(ax, *, language="en"):
+                return ax
+
+
+            def plot_module_import(result, ax, language="en"):
+                axis(ax)
+
+
+            def plot_function_import(result, ax, language="en"):
+                from .other import axis as draw
+                from .helpers import axis as draw
+
+                draw(ax)
+
+
+            def plot_definition(result, ax, language="en"):
+                tick(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_module_import", "pkg.helpers.axis"),
+        ("plot_function_import", "pkg.helpers.axis"),
+        ("plot_definition", "pkg.plots.tick"),
+    ]
+
+
 def test_a_nested_function_inherits_the_language_of_its_enclosure(
     tmp_path: pathlib.Path,
 ) -> None:

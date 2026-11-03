@@ -356,6 +356,54 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return np.asarray(_helper(reference, levels), dtype=np.float64)
     """,
+    "a_check_that_hands_back_a_comprehension_naming_its_own_variable": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            return [out for out in levels]
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_a_nested_comprehension_of_a_parameter": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return [[v for v in row] for row in levels]
+
+        def f(reference, levels):
+            return np.asarray(_helper(reference, levels), dtype=np.float64)
+    """,
+    "a_check_that_hands_back_what_a_walrus_bound": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            if (out := levels) is None:
+                return 0.0
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_walrus_in_a_comprehension_bound": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            last = 0.0
+            _ = [(last := level) for level in levels]
+            return last
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_match_captured": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            match levels:
+                case [first, *_]:
+                    return first
+            return 0.0
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_check_that_hands_back_a_loop_s_item_of_a_parameter": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -807,6 +855,61 @@ _PLANTED_ANSWERED = {
 
         def f(levels):
             return np.asarray(_helper(levels), dtype=np.float64)
+    """,
+    "a_comprehension_s_variable_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = [out for out in levels]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_generator_s_variable_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = any(out for out in levels)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_dict_comprehension_s_variable_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = {out: 0 for out in levels}
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_variables_are_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                out = levels
+                return [out for out in levels]
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_lambda_s_comprehension_is_its_own": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            _ = lambda: [out for out in levels]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
     """,
     "python_s_float_after_the_shared_reader": """
         def f(value):

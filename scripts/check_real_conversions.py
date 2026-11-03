@@ -1877,21 +1877,55 @@ class _Handing:
     keywords: tuple[tuple[str | None, Provenance], ...]
 
 
+#: The names a comprehension binds where its element is read: each with
+#: what it walks and the names in scope where that is read.
+type _Local = Mapping[str, tuple[ast.expr, _Local]]
+
+#: The scope of the function itself, where no comprehension binds a name.
+_FUNCTION_SCOPE: _Local = {}
+
+
+def _captures(pattern: ast.pattern) -> list[str]:
+    """The names a ``case`` pattern binds, the whole subject or a part of it."""
+    return [
+        name
+        for node in ast.walk(pattern)
+        for name in (
+            getattr(node, "name", None),
+            getattr(node, "rest", None),
+        )
+        if isinstance(name, str)
+    ]
+
+
+def _walking(generator: ast.comprehension, local: _Local) -> _Local:
+    """*local* with each name *generator* binds standing for the items of
+    what it walks, which is read where *local* holds.
+    """
+    walked = (generator.iter, local)
+    return {**local, **dict.fromkeys(_targets(generator.target), walked)}
+
+
 class _Returns:
     """What a function's ``return`` statements hand back of its parameters.
 
     Read without the order the function runs in: a name stands for every
-    value an assignment in the function binds it to, adds to it (``x += y``)
-    or puts in one of its items (``x[i] = y``), the items of what a loop or a
-    comprehension walks among them, and a parameter for itself as well. A value is handed back as the caller gave it bare, in a tuple or a
-    list, on either side of a conditional expression or of an ``and`` or an
-    ``or``, by an item, transposed, in arithmetic with anything (its sign
-    turned or kept, as :meth:`_Flow.state` reads it), as the element of a
-    comprehension, through a call that keeps its values, and through a
-    shared check (:data:`CHECKS`), which returns its first argument with
-    what it refuses refused; a call of a function of the library hands back
-    what that function returns (:func:`returned_parameters`); anything else
-    is a value the function computed.
+    value an assignment in the function binds it to, a ``:=`` among them,
+    adds to it (``x += y``) or puts in one of its items (``x[i] = y``), the
+    items of what a loop walks and what a ``case`` captures of its subject
+    among them, and a parameter for itself as well. A comprehension's own
+    names stand for the items of what it walks while its element is read,
+    and for nothing outside it, as Python keeps them; what a nested function
+    or a lambda binds is its own. A value is handed back as the caller gave
+    it bare, in a tuple or a list, on either side of a conditional
+    expression or of an ``and`` or an ``or``, by an item, transposed, in
+    arithmetic with anything (its sign turned or kept, as
+    :meth:`_Flow.state` reads it), as the element of a comprehension,
+    through a call that keeps its values, and through a shared check
+    (:data:`CHECKS`), which returns its first argument with what it refuses
+    refused; a call of a function of the library hands back what that
+    function returns (:func:`returned_parameters`); anything else is a value
+    the function computed.
     """
 
     def __init__(
@@ -1902,7 +1936,7 @@ class _Returns:
     ) -> None:
         self.module = module
         self.parameters = parameters
-        self.assigned: dict[str, list[ast.expr]] = {}
+        self.assigned: dict[str, list[tuple[ast.expr, _Local]]] = {}
         self.returns: list[ast.expr] = []
         pending: list[ast.stmt] = list(function.body)
         while pending:
@@ -1912,23 +1946,53 @@ class _Returns:
             elif isinstance(node, ast.Assign | ast.AnnAssign) and node.value:
                 for target in _assigned(node):
                     for name in [*_targets(target), *_filled(target)]:
-                        self.assigned.setdefault(name, []).append(node.value)
+                        self._bind(name, node.value)
             elif isinstance(node, ast.AugAssign):
                 # x += y holds what arithmetic on both holds: y joins what x
                 # was bound to, as it joins an array an item of which it adds to.
                 for name in [*_targets(node.target), *_filled(node.target)]:
-                    self.assigned.setdefault(name, []).append(node.value)
+                    self._bind(name, node.value)
             elif isinstance(node, ast.For | ast.AsyncFor):
-                self._walks(node.target, node.iter)
+                for name in _targets(node.target):
+                    self._bind(name, node.iter)
+            elif isinstance(node, ast.Match):
+                for case in node.cases:
+                    for name in _captures(case.pattern):
+                        self._bind(name, node.subject)
+            for child in ast.iter_child_nodes(node):
+                self._walruses(child, _FUNCTION_SCOPE)
             pending.extend(block_statements(node))
-        for found in ast.walk(function):
-            if isinstance(found, ast.comprehension):
-                self._walks(found.target, found.iter)
 
-    def _walks(self, target: ast.expr, walked: ast.expr) -> None:
-        """Bind each name of *target* to the items of *walked*, read as *walked*."""
-        for name in _targets(target):
-            self.assigned.setdefault(name, []).append(walked)
+    def _bind(
+        self, name: str, value: ast.expr, local: _Local = _FUNCTION_SCOPE
+    ) -> None:
+        """Let *name* stand for *value*, read where *local* holds."""
+        self.assigned.setdefault(name, []).append((value, local))
+
+    def _walruses(self, node: ast.AST, local: _Local) -> None:
+        """Bind the target of each ``:=`` in *node* that binds a name of the
+        function: one in a comprehension's too, read in that comprehension,
+        but none in a statement of its own, a nested function or a lambda.
+        """
+        if isinstance(node, (ast.stmt, *_SCOPES)):
+            return
+        if isinstance(node, ast.NamedExpr):
+            self._bind(node.target.id, node.value, local)
+        if isinstance(node, _COMPREHENSIONS):
+            inner = local
+            for generator in node.generators:
+                self._walruses(generator.iter, inner)
+                inner = _walking(generator, inner)
+                for test in generator.ifs:
+                    self._walruses(test, inner)
+            parts = (
+                [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+            )
+            for part in parts:
+                self._walruses(part, inner)
+            return
+        for child in ast.iter_child_nodes(node):
+            self._walruses(child, local)
 
     def read(self) -> tuple[Provenance, tuple[_Handing, ...]]:
         """What the returns hand back as the caller gave it, and the calls whose
@@ -1937,19 +2001,29 @@ class _Returns:
         found: Provenance = {}
         calls: list[_Handing] = []
         for value in self.returns:
-            provenance, through = self.sources(value, frozenset())
+            provenance, through = self.sources(value, frozenset(), _FUNCTION_SCOPE)
             found = _either(found, provenance)
             calls.extend(through)
         return found, tuple(calls)
 
     def sources(
-        self, node: ast.expr, seen: frozenset[str]
+        self, node: ast.expr, seen: frozenset[str], local: _Local
     ) -> tuple[Provenance, list[_Handing]]:
-        """What *node* may hand back, and the calls whose result it may be."""
+        """What *node*, read where *local* holds, may hand back, and the calls
+        whose result it may be.
+        """
         if isinstance(node, ast.Name):
+            if node.id in local:
+                walked, around = local[node.id]
+                return self.sources(walked, seen, around)
             return self._name(node.id, seen)
         if isinstance(node, ast.Call):
-            return self._call(node, seen)
+            return self._call(node, seen, local)
+        if isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp):
+            inner = local
+            for generator in node.generators:
+                inner = _walking(generator, inner)
+            return self.sources(node.elt, seen, inner)
         parts: list[ast.expr]
         if isinstance(node, ast.Tuple | ast.List | ast.Set):
             parts = list(node.elts)
@@ -1965,19 +2039,18 @@ class _Returns:
             parts = [node.left, node.right]
         elif isinstance(node, ast.UnaryOp) and isinstance(node.op, _ARITHMETIC_SIGNS):
             parts = [node.operand]
-        elif isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp):
-            parts = [node.elt]
         else:
             parts = []
-        return self._joined(parts, seen)
+        return self._joined(((part, local) for part in parts), seen)
 
     def _joined(
-        self, parts: Iterable[ast.expr], seen: frozenset[str]
+        self, parts: Iterable[tuple[ast.expr, _Local]], seen: frozenset[str]
     ) -> tuple[Provenance, list[_Handing]]:
+        """What any of *parts*, each read where its scope holds, may hand back."""
         found: Provenance = {}
         calls: list[_Handing] = []
-        for part in parts:
-            provenance, through = self.sources(part, seen)
+        for part, local in parts:
+            provenance, through = self.sources(part, seen, local)
             found = _either(found, provenance)
             calls.extend(through)
         return found, calls
@@ -1993,23 +2066,25 @@ class _Returns:
         return found, calls
 
     def _call(
-        self, call: ast.Call, seen: frozenset[str]
+        self, call: ast.Call, seen: frozenset[str], local: _Local
     ) -> tuple[Provenance, list[_Handing]]:
         func = call.func
         if isinstance(func, ast.Name) and func.id in CHECKS and call.args:
-            found, calls = self.sources(call.args[0], seen)
+            found, calls = self.sources(call.args[0], seen, local)
             refused = CHECKS[func.id]
             return {name: held | refused for name, held in found.items()}, calls
         kept = _kept(call, self.module.numpy)
         if kept:
-            return self._joined(kept, seen)
+            return self._joined(((part, local) for part in kept), seen)
         if not isinstance(func, ast.Name):
             return {}, []
         target = self.module.imports.get(func.id, f"{self.module.name}.{func.id}")
         handed = _Handing(
             target,
-            tuple(self.sources(a, seen)[0] for a in call.args),
-            tuple((k.arg, self.sources(k.value, seen)[0]) for k in call.keywords),
+            tuple(self.sources(a, seen, local)[0] for a in call.args),
+            tuple(
+                (k.arg, self.sources(k.value, seen, local)[0]) for k in call.keywords
+            ),
         )
         return {}, [handed]
 

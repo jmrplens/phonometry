@@ -460,6 +460,17 @@ def _enclosing_function(scope: _Scope, name: str) -> _Scope:
     return nearest or scope
 
 
+def _type_parameter_names(
+    node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+) -> list[str]:
+    """The type parameters a generic function or class declares."""
+    return [
+        parameter.name
+        for parameter in node.type_params
+        if isinstance(parameter, ast.TypeVar | ast.ParamSpec | ast.TypeVarTuple)
+    ]
+
+
 def _parameters(args: ast.arguments) -> list[str]:
     """The names *args* binds in the function's own scope."""
     every = [*args.posonlyargs, *args.args, *args.kwonlyargs]
@@ -555,7 +566,11 @@ class _ScopeBuilder(ast.NodeVisitor):
             if default is not None:
                 self.visit(default)
         body = [node.body] if isinstance(node, ast.Lambda) else node.body
-        self._nested("function", _parameters(node.args), body)
+        names = _parameters(node.args)
+        if not isinstance(node, ast.Lambda):
+            # A generic function's type parameters are its body's names too.
+            names += _type_parameter_names(node)
+        self._nested("function", names, body)
 
     visit_FunctionDef = _function
     visit_AsyncFunctionDef = _function
@@ -569,7 +584,15 @@ class _ScopeBuilder(ast.NodeVisitor):
             *(k.value for k in node.keywords),
         ]:
             self.visit(part)
+        outer = self.scope
+        if node.type_params:
+            # A generic class's type parameters live in a scope of their own
+            # around the class body, which its methods read as well.
+            self.scope = _Scope("function", outer)
+            for name in _type_parameter_names(node):
+                self.scope.bindings[name] = [_Binding("", guarded=False)]
         scope = self._nested("class", (), node.body)
+        self.scope = outer
         self.class_scopes[id(node)] = scope
         self.class_nodes[id(scope)] = node
 

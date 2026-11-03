@@ -897,6 +897,64 @@ _HANDED_ON_RANGE: list[tuple[str, Callable[[], object], str]] = [
         ),
         "'noise_levels_2' and 'frequencies' need one value per band each",
     ),
+    (
+        "sound_power_comparison: reference levels of three axes",
+        lambda: emission.sound_power_comparison(
+            _LV21, np.full((2, 2, 21), 80.0), _LV21, frequencies=_F21
+        ),
+        "'reference_levels' must be a 1D spectrum or a 2D",
+    ),
+    (
+        "sound_power_comparison: a reference background of the wrong band count",
+        lambda: emission.sound_power_comparison(
+            _LV21,
+            _LV21,
+            _LV21,
+            frequencies=_F21,
+            reference_background_levels=np.full(20, 60.0),
+        ),
+        "'reference_background_levels' must carry one value per band",
+    ),
+    (
+        "ra: band values of two axes",
+        lambda: building.regulation.spain.ra(np.full((2, 18), 40.0)),
+        "'reduction_index' must be one-dimensional",
+    ),
+    (
+        "measure_sound_absorption: an area of zero",
+        lambda: materials.measure_sound_absorption(
+            [2.0, 2.0], [1.5, 1.5], frequencies=[500.0, 1000.0], volume=200.0, area=0.0
+        ),
+        "'area' must be positive",
+    ),
+    (
+        "measure_sound_absorption: an empty-room time of zero",
+        lambda: materials.measure_sound_absorption(
+            [0.0, 2.0], [1.5, 1.5], frequencies=[500.0, 1000.0], volume=200.0, area=10.8
+        ),
+        "'t_empty' must be positive",
+    ),
+    (
+        "absorption_coefficient: a second speed of sound of zero",
+        lambda: materials.absorption_coefficient(
+            [2.0], [1.5], 200.0, 10.8, speed_of_sound2=0.0
+        ),
+        "'speed_of_sound2' must be finite and positive",
+    ),
+    (
+        "directional_diffusion: a weight of zero",
+        lambda: materials.directional_diffusion(
+            np.linspace(-90.0, 90.0, 37), np.full(37, 70.0), weights=np.zeros(37)
+        ),
+        "'weights' values must be positive",
+    ),
+    (
+        "directional_diffusion: weights of the wrong count",
+        lambda: materials.directional_diffusion(
+            np.linspace(-90.0, 90.0, 37), np.full(37, 70.0), weights=np.ones(36)
+        ),
+        "'weights' must match the number of receivers",
+    ),
 ]
 
 

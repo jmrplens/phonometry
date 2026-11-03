@@ -31,6 +31,7 @@ from fractions import Fraction
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import numpy._core.numeric as numpy_numeric
 import pytest
 from libm_identity import TUNABLES, WITHOUT_FMA, runs_the_pinned_routines
 from reference_data import IEC61672_TABLE3 as TABLE3
@@ -1740,7 +1741,9 @@ def test_a_blas_that_fuses_its_complex_dot_designs_the_same_filters(
     ARM fuses them. With ``numpy.convolve`` fused here, on any platform,
     SciPy's sections move for the D and G weightings at 48 kHz (the test
     asserts it, so that it shows something) and the design's do not, since
-    it no longer reaches either.
+    it no longer reaches either. Every reference SciPy may reach it through
+    is fused: its array namespace from 1.15 on, and before that
+    ``numpy.poly``, which calls the ``convolve`` of ``numpy._core.numeric``.
     """
     zeros, poles, _ = _analog_weighting_zpk("D")
     fitted = fit_prototype(
@@ -1758,6 +1761,7 @@ def test_a_blas_that_fuses_its_complex_dot_designs_the_same_filters(
     namespace = array_namespace(np.array([1.0]))
     monkeypatch.setattr(np, "convolve", _fused_convolve)
     monkeypatch.setattr(namespace, "convolve", _fused_convolve)
+    monkeypatch.setattr(numpy_numeric, "convolve", _fused_convolve)
     assert not np.array_equal(
         sg.zpk2sos(*digital).view(np.uint64), unfused_scipy.view(np.uint64)
     )

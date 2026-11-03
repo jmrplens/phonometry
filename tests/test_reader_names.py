@@ -334,10 +334,48 @@ _COMPOUND = (
 )
 
 
+def _runs_whole(node: ast.AST) -> Iterator[ast.AST]:
+    """The nodes of *node* that run whenever it runs, *node* among them.
+
+    A conditional expression runs its test, an ``and`` or an ``or`` its
+    first operand and a chained comparison its first link, and the rest
+    on some paths only. A lambda computes its defaults where it is written
+    and runs its body when it is called, which may be never; a
+    comprehension reads its first iterable before any item and the rest
+    once for each item, of which there may be none, and a generator only
+    when it is drawn from. ``python -O`` leaves an ``assert`` out, and the
+    annotation of a variable is never read.
+    """
+    yield node
+    parts: list[ast.AST]
+    if isinstance(node, ast.Assert):
+        parts = []
+    elif isinstance(node, ast.IfExp):
+        parts = [node.test]
+    elif isinstance(node, ast.BoolOp):
+        parts = node.values[:1]
+    elif isinstance(node, ast.Compare):
+        parts = [node.left, node.comparators[0]]
+    elif isinstance(node, ast.Lambda):
+        parts = [
+            *node.args.defaults,
+            *(default for default in node.args.kw_defaults if default is not None),
+        ]
+    elif isinstance(node, ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp):
+        parts = [node.generators[0].iter]
+    elif isinstance(node, ast.AnnAssign):
+        parts = [node.target] if node.value is None else [node.target, node.value]
+    else:
+        parts = list(ast.iter_child_nodes(node))
+    for part in parts:
+        yield from _runs_whole(part)
+
+
 def _reads_itself(statement: ast.stmt, parameter: str) -> bool:
     """Whether a statement reads *parameter* under its own name whenever it holds one.
 
-    A simple statement that hands it to a reader does; so does ``if
+    A simple statement that hands it to a reader in a part that runs
+    whenever the statement does (:func:`_runs_whole`) does; so does ``if
     parameter is not None:`` with such a statement in its body, since a
     parameter that is ``None`` holds no number to read, and every later use
     of one that is not finds it read.
@@ -363,7 +401,7 @@ def _reads_itself(statement: ast.stmt, parameter: str) -> bool:
         and _read_bare(node.args[0]) == parameter
         and isinstance(node.args[1], ast.Constant)
         and node.args[1].value == parameter
-        for node in ast.walk(statement)
+        for node in _runs_whole(statement)
     )
 
 
@@ -373,9 +411,11 @@ def _read_before(
     """Whether *function* reads *parameter* under its own name on every path to *call*.
 
     A reading counts where it is a simple statement that comes before one of
-    the statements holding *call*, in the same block: it runs before the call
-    whichever way the function goes. One in a branch, a loop or a handler
-    runs on some paths only.
+    the statements holding *call*, in the same block, and sits in a part of
+    it that runs whole: it runs before the call whichever way the function
+    goes. One in a branch, a loop or a handler runs on some paths only, as
+    does one on a side of a conditional expression, after an ``and`` or an
+    ``or``, or in a lambda, a comprehension or a generator.
     """
     parents: dict[ast.AST, tuple[ast.AST, list[ast.stmt]]] = {}
     for node in ast.walk(function):
@@ -689,6 +729,41 @@ def test_a_helper_names_a_value_as_the_public_caller_does() -> None:
                 real_array(background_levels, "background_levels")
             return _mean_level(background_levels)
         """,
+        *(
+            f"""
+            def _mean_level(levels):
+                return real_array(levels, "levels")
+
+            def corrected(background_levels, flag, rows):
+                {reading}
+                return _mean_level(background_levels)
+            """
+            for reading in (
+                # Read on one side of a conditional expression only.
+                'checked = real_array(background_levels, "background_levels") '
+                "if flag else None",
+                # Read after an ``and`` or an ``or`` that may stop before it.
+                'checked = flag and real_array(background_levels, "background_levels")',
+                'checked = flag or real_array(background_levels, "background_levels")',
+                # Read in a later link of a chained comparison, which runs
+                # only when the first one holds.
+                'checked = 0 < flag < real_array(background_levels, "background_levels")',
+                # Read when a lambda is called, which may be never.
+                'read = lambda: real_array(background_levels, "background_levels")',
+                # Read in a comprehension's element, once for each item of
+                # what may hold none.
+                'checked = [real_array(background_levels, "background_levels") '
+                "for _ in rows]",
+                # Read in the iterable of a comprehension's second loop.
+                "checked = [v for _ in rows for v in "
+                'real_array(background_levels, "background_levels")]',
+                # Read when a generator is drawn from, which may be never.
+                'checked = (real_array(background_levels, "background_levels") '
+                "for _ in (1,))",
+                # Read in an ``assert``, which ``python -O`` leaves out.
+                'assert real_array(background_levels, "background_levels") is not None',
+            )
+        ),
     ],
 )
 def test_the_check_finds_a_helper_reading_named_after_itself(source: str) -> None:
@@ -755,6 +830,34 @@ def test_the_check_finds_a_helper_reading_named_after_itself(source: str) -> Non
         def sound_power_comparison(reference_levels):
             return _comparison_inputs(reference_levels)
         """,
+        *(
+            f"""
+            def _mean_level(levels):
+                return real_array(levels, "levels")
+
+            def corrected(background_levels, flag, rows):
+                {reading}
+                return _mean_level(background_levels)
+            """
+            for reading in (
+                # Read in the test of a conditional expression, which runs
+                # whichever side it picks.
+                'checked = None if real_array(background_levels, "background_levels") '
+                "is None else flag",
+                # Read in the first operand of an ``or``, which always runs.
+                'checked = real_array(background_levels, "background_levels") or flag',
+                # Read in the first link of a chained comparison.
+                'checked = real_array(background_levels, "background_levels") < flag < 1',
+                # Read in the first iterable of a comprehension, read before
+                # its first item, and of a generator, read where it is written.
+                "checked = [v for v in "
+                'real_array(background_levels, "background_levels")]',
+                "checked = (v for v in "
+                'real_array(background_levels, "background_levels"))',
+                # Read in a lambda's default, computed where it is written.
+                'read = lambda v=real_array(background_levels, "background_levels"): v',
+            )
+        ),
     ],
 )
 def test_the_check_passes_a_helper_reading_named_as_its_caller_does(

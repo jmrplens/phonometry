@@ -38,8 +38,10 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   are read scope by scope: a nested function, lambda or comprehension that
   binds the parameter's name for itself (its own parameter, an assignment,
   a loop variable) holds another value under it, which is not followed,
-  while one that reads the name from the body around it, a closure, reads
-  the parameter. A function whose parameter is annotated a single number, a
+  and so does one that declares it ``global`` (the module's, in the scopes
+  nested in it too), while one that reads the name from the body around
+  it, a closure, or declares it ``nonlocal``, reads the parameter. A
+  function whose parameter is annotated a single number, a
   text or a record says it takes no array, and is not followed. A ``tuple``
   of a fixed length at the top of the annotation (``tuple[float, float]``,
   a pair of limits) is a record of numbers whose arity the annotation
@@ -1709,9 +1711,10 @@ def _own_bindings(
     """The names a nested scope binds for itself, which hide the enclosing body's.
 
     A function's or a lambda's parameters and the names its body assigns,
-    loops over, imports or defines, less those it declares ``nonlocal`` or
-    ``global``; a class body's own names; the names a comprehension's
-    loops take.
+    loops over, imports or defines, less those it declares ``nonlocal``,
+    which are the enclosing body's; the names it declares ``global``, which
+    are the module's, here and in the scopes nested in it; a class body's
+    own names; the names a comprehension's loops take.
     """
     if isinstance(scope, _COMPREHENSIONS):
         return frozenset(
@@ -1742,8 +1745,12 @@ def _own_bindings(
             names.add((node.asname or node.name).split(".")[0])
         elif isinstance(node, ast.ExceptHandler) and node.name:
             names.add(node.name)
-        elif isinstance(node, ast.Global | ast.Nonlocal):
+        elif isinstance(node, ast.Nonlocal):
             declared.update(node.names)
+        elif isinstance(node, ast.Global):
+            # The module's name, here and in every scope nested in this one,
+            # whatever the body around binds of that spelling.
+            names.update(node.names)
     names.update(
         inner.name
         for inner in nested

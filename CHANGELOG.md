@@ -4220,8 +4220,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   evaluates the same prototype, moves by at most 4e-14 dB from 1 Hz to
   100 kHz. The design also takes the number of each prototype's zeros at the
   origin from the prototype, where it tested each zero against zero, and
-  the check against float equality in src refuses an `astype` to `bool` in
-  any spelling, which on a float array is the same test.
+  the check against float equality in src refuses an `astype` to `bool`,
+  which on a float array is the same test, in the spellings of the call and
+  of the dtype that rule X1 of the contributor guide lists.
 
 - **`vibration.evaluate_train_passage`, `signals.resample_signal` handed a
   Signal and the EN 15610 Method B bank of `environment` run at a fractional

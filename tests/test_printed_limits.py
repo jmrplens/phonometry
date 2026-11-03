@@ -920,6 +920,59 @@ def test_the_guard_traces_a_regime_to_where_it_is_chosen(
     }
 
 
+#: A module whose result holds a margin, a mean, a peak and a flag: a
+#: comprehension, a lambda and a nested function each judge something under
+#: the name of one of the readings, which Python keeps to them, and only the
+#: flag is a comparison.
+_SCOPED_PROBE = """
+from dataclasses import dataclass
+
+EDGE = 3.0
+
+
+@dataclass(frozen=True)
+class ScopedProbe:
+    margin: float
+    mean: float
+    peak: float
+    flag: bool
+
+
+def probe(a, b, rows):
+    judged = [margin for margin in (a < EDGE, b < EDGE)]
+    near = lambda mean: mean < EDGE
+
+    def worst():
+        peak = max(rows) > EDGE
+        return peak
+
+    margin = a - b
+    mean = (a + b) / 2
+    peak = max(rows)
+    return ScopedProbe(margin=margin, mean=mean, peak=peak, flag=a < EDGE), (
+        judged,
+        near,
+        worst,
+    )
+"""
+
+
+def test_a_name_another_scope_binds_is_not_the_function_s(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A comprehension's variable, a lambda's parameter and a nested
+    function's local of a reading's name joined the function's own, so the
+    margin, the mean and the peak were read as the comparisons the other
+    scopes made.
+    """
+    (tmp_path / "phonometry_scoped_probe.py").write_text(
+        _SCOPED_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_scoped_probe")
+    assert set(found) == {"phonometry_scoped_probe.ScopedProbe.flag"}
+
+
 #: The verdicts the sweep turned into read-only properties, by class, with the
 #: values read beside them that were stored too.
 _DERIVED_FLAGS = {

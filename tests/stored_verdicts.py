@@ -92,7 +92,28 @@ class _Unpacked:
     index: int
 
 
-type _Local = Mapping[str, tuple[object, ...]]
+@dataclasses.dataclass(frozen=True)
+class _Local:
+    """What the names of one function stand for, as Python scopes them."""
+
+    #: Every value each local name of the function is bound to, anywhere in
+    #: its own body.
+    names: Mapping[str, tuple[object, ...]]
+    #: What each name a comprehension reads of its own variables walks, by
+    #: the node of the name: a comprehension keeps its variables to itself.
+    comprehended: Mapping[int, tuple[object, ...]]
+
+    def of(self, name: ast.Name) -> tuple[object, ...]:
+        """What *name*, read where it is written, may stand for."""
+        if id(name) in self.comprehended:
+            return self.comprehended[id(name)]
+        return self.names.get(name.id, ())
+
+
+#: The scopes whose names are their own: a nested function's, a lambda's and
+#: a class body's bindings bind no name of the function around them.
+_NESTED = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
 
 
 @functools.cache
@@ -126,9 +147,60 @@ def _bind_loop(
         bind(node.target, iterable)
 
 
+def _bind_name(into: dict[str, list[object]], target: ast.AST, value: object) -> None:
+    """Add *value* to what the name *target* stands for in *into*."""
+    if isinstance(target, ast.Name):
+        into.setdefault(target.id, []).append(value)
+
+
+def _comprehended(func: ast.AST) -> dict[int, tuple[object, ...]]:
+    """What each name a comprehension of *func* reads of its own variables
+    walks, by the node of the name.
+
+    The first iterable is read in the scope around the comprehension and the
+    rest in its own; an inner comprehension that binds the name again holds
+    its own; a nested function or a lambda is read on its own.
+    """
+    found: dict[int, tuple[object, ...]] = {}
+
+    def visit(node: ast.AST, held: Mapping[str, tuple[object, ...]]) -> None:
+        if node is not func and isinstance(node, _NESTED):
+            return
+        if isinstance(node, ast.Name) and node.id in held:
+            found[id(node)] = held[node.id]
+        if not isinstance(node, _COMPREHENSIONS):
+            for child in ast.iter_child_nodes(node):
+                visit(child, held)
+            return
+        inner = dict(held)
+        for generator in node.generators:
+            visit(generator.iter, inner)
+            walked: dict[str, list[object]] = {}
+            _bind_loop(generator, functools.partial(_bind_name, walked))
+            # A target the loop does not bind to an item it can read stands
+            # for nothing here, as the function's name of that spelling is
+            # another name.
+            names = {
+                n.id for n in ast.walk(generator.target) if isinstance(n, ast.Name)
+            }
+            inner.update({name: tuple(walked.get(name, ())) for name in names})
+            for test in generator.ifs:
+                visit(test, inner)
+        parts = [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+        for part in parts:
+            visit(part, inner)
+
+    visit(func, {})
+    return found
+
+
 @functools.cache
-def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
-    """Every value each local name of *func* is bound to, anywhere in its body."""
+def _locals(func: ast.AST) -> _Local:
+    """What each name of *func* stands for (:class:`_Local`): every value each
+    local name is bound to anywhere in its own body, a comprehension's
+    variables, a nested function's, a lambda's and a class body's names left
+    to them.
+    """
     out: dict[str, list[object]] = {}
 
     def bind(target: ast.AST, value: object) -> None:
@@ -140,6 +212,8 @@ def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
 
     def visit(node: ast.AST, test: ast.expr | None) -> None:
         # ``test`` is the condition of the innermost ``if`` around ``node``.
+        if node is not func and isinstance(node, _NESTED):
+            return
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 bind(_base(target), node.value)
@@ -157,7 +231,7 @@ def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
                 _base(node.target),
                 ast.BinOp(left=node.target, op=node.op, right=node.value),
             )
-        elif isinstance(node, (ast.For, ast.comprehension)):
+        elif isinstance(node, ast.For):
             _bind_loop(node, bind)
         elif (
             isinstance(node, ast.Call)
@@ -177,7 +251,9 @@ def _locals(func: ast.AST) -> dict[str, tuple[object, ...]]:
             visit(child, test)
 
     visit(func, None)
-    return {name: tuple(values) for name, values in out.items()}
+    return _Local(
+        {name: tuple(values) for name, values in out.items()}, _comprehended(func)
+    )
 
 
 def _base(target: ast.AST) -> ast.AST:
@@ -249,12 +325,13 @@ class _Tracer:
     def _name(
         self, expr: ast.Name, local: _Local, seen: frozenset[str], depth: int
     ) -> bool:
-        key = f"{id(local)}:{expr.id}"
+        own = id(expr) in local.comprehended
+        key = f"{id(local)}:{id(expr) if own else expr.id}"
         if key in seen:
             return False
         return any(
             self.verdict(value, local, seen | {key}, depth + 1)
-            for value in local.get(expr.id, ())
+            for value in local.of(expr)
         )
 
     def _call(

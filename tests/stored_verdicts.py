@@ -10,9 +10,10 @@ produced it. A field is reported when the value it is given is
 
 * an ordering comparison (``margin < LIMIT``, ``a >= b``), or a combination of
   them (``and``/``or``/``not``, ``&``/``|``/``~``, ``np.all``, ``np.any``,
-  ``np.asarray``, ``bool`` and the like), reached through local names, tuple
-  unpacking, comprehensions and the module-level helpers of the package that
-  return one; or
+  ``np.asarray``, ``bool`` and the like), reached through local names, the
+  names a nested function reads from the function around it or writes into
+  it, tuple unpacking, comprehensions and the module-level helpers of the
+  package that return one; or
 * a label (a string, a bool, an enum member, a string constant of the module,
   one item of a module tuple of strings, or a number a module constant in
   capitals names a case by) chosen by such a comparison: ``"a" if x < LIMIT
@@ -31,6 +32,7 @@ of equality, which is how a fact is checked rather than how a limit is judged.
 from __future__ import annotations
 
 import ast
+import collections
 import dataclasses
 import enum
 import functools
@@ -45,7 +47,7 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from ast_scan import binding_of
+from ast_scan import binding_of, scopes_around
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
@@ -103,6 +105,11 @@ class _Unpacked:
 class _Local:
     """What the names of one function stand for, as Python scopes them."""
 
+    #: The function, or the lambda, whose names these are.
+    func: ast.AST
+    #: The module the function is written in, where a name it reads but
+    #: does not bind is looked up.
+    root: ast.Module
     #: Every value each local name of the function is bound to, anywhere in
     #: its own body.
     names: Mapping[str, tuple[object, ...]]
@@ -111,16 +118,76 @@ class _Local:
     comprehended: Mapping[int, tuple[object, ...]]
 
     def of(self, name: ast.Name) -> tuple[object, ...]:
-        """What *name*, read where it is written, may stand for."""
+        """What *name*, read where it is written, may stand for.
+
+        A name the function binds stands for what it binds; one a function
+        around it binds, or a function inside it whose value is read here,
+        for what that function binds (:func:`ast_scan.binding_of`); one of
+        the module, a class body or a lambda's parameter for nothing here.
+        """
         if id(name) in self.comprehended:
             return self.comprehended[id(name)]
-        return self.names.get(name.id, ())
+        owner = _function_of(self.root, binding_of(self.root, name, name.id)[1])
+        if owner is self.func:
+            return self.names.get(name.id, ())
+        if owner is None:
+            return ()
+        return _locals(owner, self.root).of(name)
 
 
 #: The scopes whose names are their own: a nested function's, a lambda's and
 #: a class body's bindings bind no name of the function around them.
 _NESTED = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
 _COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
+_FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+
+
+def _function_of(root: ast.Module, scope: ast.AST | None) -> ast.AST | None:
+    """The function or the lambda whose names hold what *scope* binds: the
+    scope itself, or the one around a comprehension; ``None`` for the
+    module and a class body.
+    """
+    if scope is None or isinstance(scope, _FUNCTIONS):
+        return scope
+    if isinstance(scope, _COMPREHENSIONS):
+        around = scopes_around(root, scope)
+        return next((s for s in around if isinstance(s, _FUNCTIONS)), None)
+    return None
+
+
+def _around(node: ast.AST) -> list[ast.AST]:
+    """What a nested function, a lambda or a class runs in the scope around
+    it: its decorators, its defaults, its bases.
+    """
+    if isinstance(node, ast.ClassDef):
+        return [*node.decorator_list, *node.bases, *(k.value for k in node.keywords)]
+    if isinstance(node, _FUNCTIONS):
+        defaults = [*node.args.defaults, *filter(None, node.args.kw_defaults)]
+        decorators = [] if isinstance(node, ast.Lambda) else node.decorator_list
+        return [*decorators, *defaults]
+    return []
+
+
+def _own_nodes(*roots: ast.AST) -> list[ast.AST]:
+    """The nodes under *roots* that run in the scope the roots run in, in the
+    order :func:`ast.walk` meets them: what a nested function, a lambda or a
+    class body holds is theirs, each read on its own, and only what each
+    runs around it is read here.
+    """
+    found: list[ast.AST] = []
+    pending = collections.deque(roots)
+    while pending:
+        node = pending.popleft()
+        found.append(node)
+        inner = _around(node) if isinstance(node, _NESTED) else None
+        pending.extend(ast.iter_child_nodes(node) if inner is None else inner)
+    return found
+
+
+def _body(func: ast.AST) -> list[ast.AST]:
+    """The statements of a function, or the expression of a lambda."""
+    body = getattr(func, "body", [])
+    return list(body) if isinstance(body, list) else [body]
 
 
 @functools.cache
@@ -202,7 +269,7 @@ def _comprehended(func: ast.AST) -> dict[int, tuple[object, ...]]:
 
 
 @functools.cache
-def _locals(func: ast.AST) -> _Local:
+def _locals(func: ast.AST, root: ast.Module) -> _Local:
     """What each name of *func* stands for (:class:`_Local`): every value each
     local name is bound to anywhere in its own body, a comprehension's
     variables, a nested function's, a lambda's and a class body's names left
@@ -272,7 +339,10 @@ def _locals(func: ast.AST) -> _Local:
 
     visit(func, None)
     return _Local(
-        {name: tuple(values) for name, values in out.items()}, _comprehended(func)
+        func,
+        root,
+        {name: tuple(values) for name, values in out.items()},
+        _comprehended(func),
     )
 
 
@@ -300,6 +370,7 @@ class _Tracer:
 
     def __init__(self, module: ModuleType) -> None:
         self.namespace = vars(module)
+        self.tree = _module_tree(module.__name__)
 
     def label(self, expr: object) -> bool:
         """Whether *expr* is a label: a string or bool, a module string, an enum member.
@@ -423,7 +494,7 @@ class _Tracer:
         if target is None or target[1].name in seen:
             return False
         tracer = _Tracer(target[0])
-        inner = _locals(target[1])
+        inner = _locals(target[1], tracer.tree)
         return any(
             isinstance(node, ast.Return)
             and isinstance(node.value, ast.Tuple)
@@ -434,15 +505,15 @@ class _Tracer:
                 seen | {target[1].name},
                 depth + 1,
             )
-            for node in ast.walk(target[1])
+            for node in _own_nodes(*_body(target[1]))
         )
 
     def returns_verdict(
         self, func: ast.FunctionDef, seen: frozenset[str], depth: int
     ) -> bool:
         """Whether *func* returns a verdict, or a label chosen under an ``if`` on one."""
-        local = _locals(func)
-        for node in ast.walk(func):
+        local = _locals(func, self.tree)
+        for node in _own_nodes(*_body(func)):
             if (
                 isinstance(node, ast.If)
                 and self.verdict(node.test, local, seen, depth + 1)
@@ -459,7 +530,7 @@ class _Tracer:
         return False
 
     def _labels_under(self, branch: ast.If) -> bool:
-        for inner in ast.walk(branch):
+        for inner in _own_nodes(branch):
             if (
                 isinstance(inner, ast.Return)
                 and inner.value is not None
@@ -519,18 +590,22 @@ def module_verdict_fields(name: str) -> dict[str, str]:
     module = importlib.import_module(name)
     tracer = _Tracer(module)
     namespace = vars(module)
+    tree = _module_tree(name)
     found: dict[str, str] = {}
-    for func in ast.walk(_module_tree(name)):
-        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+    # Each function and each lambda is read on its own, with its own names:
+    # what a nested one holds is not read again with the names around it.
+    for func in ast.walk(tree):
+        if not isinstance(func, _FUNCTIONS):
             continue
-        local = _locals(func)
+        local = _locals(func, tree)
+        own = _own_nodes(*_body(func))
         chosen: set[int] = set()
-        for node in ast.walk(func):
+        for node in own:
             if isinstance(node, ast.If) and tracer.verdict(
                 node.test, local, frozenset()
             ):
-                chosen.update(id(inner) for inner in ast.walk(node))
-        for call in ast.walk(func):
+                chosen.update(id(inner) for inner in _own_nodes(node))
+        for call in own:
             if not isinstance(call, ast.Call):
                 continue
             cls = _built_class(call, namespace)

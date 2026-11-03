@@ -1069,6 +1069,77 @@ def test_a_nested_function_s_write_to_the_function_s_name_is_the_function_s(
     }
 
 
+#: A module whose results are built inside a nested function or a lambda.
+#: The nested function builds one from a peak of its own, no comparison,
+#: beside a peak of the function around it that is one; it builds another
+#: from a flag it reads from the function around it, and a lambda builds a
+#: third from a comparison it makes itself.
+_NESTED_PROBE = """
+from dataclasses import dataclass
+
+EDGE = 3.0
+
+
+@dataclass(frozen=True)
+class NestedProbe:
+    peak: object
+
+
+@dataclass(frozen=True)
+class ClosureProbe:
+    flag: object
+
+
+@dataclass(frozen=True)
+class LambdaProbe:
+    flag: object
+
+
+def probe(a, rows):
+    peak = a > EDGE
+
+    def build():
+        peak = max(rows)
+        return NestedProbe(peak=peak)
+
+    return build(), peak
+
+
+def closure(a):
+    flag = a > EDGE
+
+    def build():
+        return ClosureProbe(flag=flag)
+
+    return build()
+
+
+def judged(values):
+    make = lambda value: LambdaProbe(flag=value < EDGE)
+    return [make(value) for value in values]
+"""
+
+
+def test_a_record_built_in_a_nested_scope_is_read_with_that_scope_s_names(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A record a nested function built from a name of its own was read with
+    the names of the function around it, so a peak that is no comparison was
+    taken for the verdict the outer function holds under that name. A name
+    the nested function reads from the function around it is that
+    function's, and a record a lambda builds is read with the lambda's.
+    """
+    (tmp_path / "phonometry_nested_probe.py").write_text(
+        _NESTED_PROBE, encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    found = stored_verdicts.module_verdict_fields("phonometry_nested_probe")
+    assert set(found) == {
+        "phonometry_nested_probe.ClosureProbe.flag",
+        "phonometry_nested_probe.LambdaProbe.flag",
+    }
+
+
 #: The verdicts the sweep turned into read-only properties, by class, with the
 #: values read beside them that were stored too.
 _DERIVED_FLAGS = {

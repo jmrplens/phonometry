@@ -90,7 +90,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ast_scan import live_bindings
+from ast_scan import global_bindings, live_bindings
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -415,13 +415,28 @@ def _standing(
     The later of two in a row, a ``def`` or an import alike, and either of
     two in the branches of a ``try`` or an ``if``; from a function written
     in the scope, every one that may stand from the ``def`` on, since the
-    function may be called at once or once the scope has run.
+    function may be called at once or once the scope has run. A ``def`` or
+    an import that a function makes of a module name under ``global``
+    (:func:`ast_scan.global_bindings`) may stand anywhere, since that
+    function may run at any time.
     """
-    if len(written) == 1:
-        return [written[0][1]]
-    statements = [statement for statement, _ in written]
+    inside = {
+        id(node) for nodes in global_bindings(module.node).values() for node in nodes
+    }
+    anywhere = [bound for statement, bound in written if id(statement) in inside]
+    own = [
+        (statement, bound)
+        for statement, bound in written
+        if id(statement) not in inside
+    ]
+    if len(own) < 2:
+        return [*(bound for _, bound in own), *anywhere]
+    statements = [statement for statement, _ in own]
     live = live_bindings(module.node, statements, point)
-    return [bound for statement, bound in written if any(statement is s for s in live)]
+    return [
+        *(bound for statement, bound in own if any(statement is s for s in live)),
+        *anywhere,
+    ]
 
 
 def _removes_language(node: ast.AST) -> str | None:
@@ -527,6 +542,24 @@ def _one(targets: list[_Target]) -> _Target:
     return first if all(t is first or t == first for t in targets) else None
 
 
+def _add_global_bindings(module: Module) -> None:
+    """Add to the names of *module* every ``def``, ``class`` and import that a
+    function, a method or a class body inside it makes of a module name
+    under ``global`` (:func:`ast_scan.global_bindings`), which may be what
+    the name stands for at any call.
+    """
+    for name, nodes in global_bindings(module.node).items():
+        for node in nodes:
+            if isinstance(node, ast.Import | ast.ImportFrom):
+                binding = _import_bindings(module, node).get(name)
+                if binding is not None:
+                    module.names.setdefault(name, []).append((node, binding))
+            elif isinstance(
+                node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+            ):
+                module.names.setdefault(name, []).append((node, node))
+
+
 def _one_import(bound: list[_Bound]) -> Binding | None:
     """The import every binding of a name that may stand is, or None."""
     first = bound[0] if bound else None
@@ -548,6 +581,7 @@ class Tree:
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
         for module in modules.values():
             module.names, module.definitions = _scope_names(module, module.node.body)
+            _add_global_bindings(module)
             module.speaks = any(
                 module.name == name or module.name.startswith(f"{name}.")
                 for name in LANGUAGE_PASSES

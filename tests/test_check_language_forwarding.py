@@ -305,6 +305,41 @@ def test_a_call_is_checked_against_either_import_of_two_branches(
     ]
 
 
+def test_an_import_a_function_makes_under_global_may_be_what_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and imports it may
+    run before a call of the name, so the call may reach that import too.
+
+    The module's names were read from its top alone, so the call was checked
+    against the import there, which takes no language, and passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax):
+                return ax
+            """,
+            "pkg.plots": """
+            from .other import axis
+
+
+            def _localized():
+                global axis
+                from .helpers import axis
+
+
+            def plot_thing(result, ax, language="en"):
+                axis(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_thing", "pkg.helpers.axis"),
+    ]
+
+
 def test_each_of_two_definitions_of_one_name_is_read(tmp_path: pathlib.Path) -> None:
     """A function defined in each branch of an ``if`` has its calls read in both.
 

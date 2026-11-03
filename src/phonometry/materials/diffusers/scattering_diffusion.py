@@ -427,8 +427,8 @@ def directional_diffusion(
     :return: A :class:`DiffusionResult` with ``.plot()``.
     :raises ValueError: if ``angles_deg`` and ``levels`` differ in length or are
         shorter than two receivers.
-    :raises TypeError: if ``angles_deg`` or ``levels`` holds a text or a value that is
-        not a real number.
+    :raises TypeError: if ``angles_deg``, ``levels`` or ``weights`` holds a text or a
+        value that is not a real number.
     """
     ang = np.atleast_1d(real_array(angles_deg, "angles_deg"))
     lev = np.atleast_1d(real_array(levels, "levels"))

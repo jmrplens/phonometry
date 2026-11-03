@@ -1200,8 +1200,9 @@ def verify_induction_loop_system(
         the 22 dB relaxation of 7.2 (:func:`assess_background_noise`).
     :return: An :class:`InductionLoopVerification`.
     :raises TypeError: if ``specified_level`` is not a single number, or
-        ``field_strength_levels``, ``frequencies``, ``response_db`` or
-        ``system_noise_levels`` holds a text or a value that is not a real number.
+        ``background_noise_levels``, ``field_strength_levels``, ``frequencies``,
+        ``response_db`` or ``system_noise_levels`` holds a text or a value that is
+        not a real number.
     """
     levels = _levels(field_strength_levels, "field_strength_levels")
     specified = require_finite(specified_level, "specified_level")

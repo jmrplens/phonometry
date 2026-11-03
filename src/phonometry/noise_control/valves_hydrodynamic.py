@@ -1162,8 +1162,8 @@ def band_internal_levels(
     :return: :math:`L_{pi}(f_i)`, in dB, one value per band.
     :raises ValueError: If a value is out of range, or the cavitating branch
         was asked for without its peak frequency.
-    :raises TypeError: if ``cavitation_fraction`` or ``internal_level`` is not a single
-        number, or ``turbulent_peak`` is not a single number.
+    :raises TypeError: if ``cavitation_fraction``, ``cavitation_peak``,
+        ``internal_level`` or ``turbulent_peak`` is not a single number.
     """
     require_scalar(turbulent_peak, "turbulent_peak")
     require_scalar(cavitation_fraction, "cavitation_fraction")

@@ -603,6 +603,9 @@ def ra(
     :param reduction_index: Band sound reduction index ``R`` (or ``R'``), in dB.
     :param frequencies: Band centre frequencies, in Hz (optional).
     :return: A :class:`DBHRGlobalIndexResult` named ``"RA"``.
+    :raises ValueError: For a wrong band count or non-finite values.
+    :raises TypeError: if ``frequencies`` or ``reduction_index`` holds a text or a value
+        that is not a real number.
     """
     return _global_index(
         reduction_index,
@@ -624,6 +627,9 @@ def ra_tr(
     :param reduction_index: Band sound reduction index ``R`` (or ``R'``), in dB.
     :param frequencies: Band centre frequencies, in Hz (optional).
     :return: A :class:`DBHRGlobalIndexResult` named ``"RA,tr"``.
+    :raises ValueError: For a wrong band count or non-finite values.
+    :raises TypeError: if ``frequencies`` or ``reduction_index`` holds a text or a value
+        that is not a real number.
     """
     return _global_index(
         reduction_index,
@@ -645,6 +651,9 @@ def dnt_a(
     :param level_difference: Band standardized level difference ``DnT``, in dB.
     :param frequencies: Band centre frequencies, in Hz (optional).
     :return: A :class:`DBHRGlobalIndexResult` named ``_DNT_A``.
+    :raises ValueError: For a wrong band count or non-finite values.
+    :raises TypeError: if ``frequencies`` or ``level_difference`` holds a text or a value
+        that is not a real number.
     """
     return _global_index(
         level_difference,
@@ -679,8 +688,10 @@ def d2m_nt_a(
     :param spectrum: ``"pink"`` (default, Table A.5) or ``"railway"``
         (Table A.4), per the dominant outdoor noise.
     :return: A :class:`DBHRGlobalIndexResult` named ``"D2m,nT,A"``.
-    :raises ValueError: For a spectrum Formula (A.5) does not cover.
-    :raises TypeError: if ``spectrum`` is not a text.
+    :raises ValueError: For a spectrum Formula (A.5) does not cover, a wrong
+        band count or non-finite values.
+    :raises TypeError: if ``spectrum`` is not a text, or ``frequencies`` or
+        ``level_difference`` holds a text or a value that is not a real number.
     """
     if isinstance(spectrum, str) and spectrum in _A6_SPECTRA:
         msg = (
@@ -727,8 +738,10 @@ def d2m_nt_atr(
     :param spectrum: ``"traffic"`` (default, Table A.3) or ``"aircraft"``
         (Table A.2), per the dominant outdoor noise.
     :return: A :class:`DBHRGlobalIndexResult` named ``_D2M_NT_ATR``.
-    :raises ValueError: For a spectrum Formula (A.6) does not cover.
-    :raises TypeError: if ``spectrum`` is not a text.
+    :raises ValueError: For a spectrum Formula (A.6) does not cover, a wrong
+        band count or non-finite values.
+    :raises TypeError: if ``spectrum`` is not a text, or ``frequencies`` or
+        ``level_difference`` holds a text or a value that is not a real number.
     """
     if isinstance(spectrum, str) and spectrum in _A5_SPECTRA:
         msg = (

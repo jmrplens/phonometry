@@ -1124,8 +1124,9 @@ def field_indicators(
         one column per band of the surface input. Supplying it fills
         ``f1`` on the returned result.
     :return: :class:`FieldIndicators`.
-    :raises TypeError: if ``frequencies``, ``normal_intensity`` or ``pressure_levels``
-        holds a text or a value that is not a real number.
+    :raises TypeError: if ``frequencies``, ``normal_intensity``, ``pressure_levels``
+        or ``temporal_intensity`` holds a text or a value that is not a real
+        number.
     """
     lp = np.atleast_1d(real_array(pressure_levels, "pressure_levels"))
     i_n = np.atleast_1d(real_array(normal_intensity, "normal_intensity"))

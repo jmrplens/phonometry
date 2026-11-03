@@ -1102,8 +1102,10 @@ def impact_mobility(
         short, a non-positive sample rate, an unknown response quantity, an
         invalid window, a range that holds no bin above 0 Hz, or a force
         spectrum that vanishes at some frequency of the range.
-    :raises TypeError: if ``response_quantity`` is not a text, or
-        ``frequency_range_hz`` is not a pair of numbers.
+    :raises TypeError: if ``response_quantity`` is not a text,
+        ``exponential_decay_rate_per_s``, ``force_window_s``,
+        ``force_window_start_s`` or ``force_window_taper_s`` is not a single
+        number, or ``frequency_range_hz`` is not a pair of numbers.
     :warns ImpactExcitationWarning: when the force window removes an impact.
     """
     rate = require_positive(

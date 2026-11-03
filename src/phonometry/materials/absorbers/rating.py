@@ -206,10 +206,10 @@ def _coerce(
     if isinstance(values, Mapping):
         out: list[float] = []
         for c in centers:
+            # A band centre and its float are one key (250 == 250.0, one
+            # hash), so a mapping keyed either way is read by the centre.
             if c in values:
                 out.append(real_number(values[c], name))
-            elif real_number(c, "centers") in values:
-                out.append(real_number(values[real_number(c, "centers")], name))
             else:
                 msg = f"{name} mapping is missing band {c} Hz; expected keys {centers}"
                 raise ValueError(msg)

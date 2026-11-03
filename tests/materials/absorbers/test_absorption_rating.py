@@ -371,6 +371,25 @@ def test_weighted_mapping_matches_sequence() -> None:
     assert res_map.shape_indicator == res_seq.shape_indicator
 
 
+def test_a_mapping_keyed_by_float_centres_is_read_by_the_same_lookup() -> None:
+    """A band centre and its float are one key: ``250 in {250.0: x}`` is true.
+
+    The mapping is read by the band centre as it is; a second lookup by the
+    centre's float could never find what the first did not.
+    """
+    mapping = {
+        float(centre): alpha
+        for centre, alpha in zip(RATING_OCTAVE_BANDS_HZ, _ANNEX_A2_ALPHA_P, strict=True)
+    }
+    res_map = weighted_absorption(mapping)
+    res_seq = weighted_absorption(_ANNEX_A2_ALPHA_P)
+    assert _almost(res_map.alpha_w, res_seq.alpha_w)
+    assert res_map.shape_indicator == res_seq.shape_indicator
+    missing = {key: value for key, value in mapping.items() if key != 250.0}
+    with pytest.raises(ValueError, match=r"alpha_p mapping is missing band 250 Hz"):
+        weighted_absorption(missing)
+
+
 def test_end_to_end_from_third_octaves() -> None:
     # Build a 15-band alpha_s whose octave means reproduce the A.1 alpha_p,
     # then rate it: identical alpha_w to feeding alpha_p directly.

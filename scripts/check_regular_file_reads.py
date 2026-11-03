@@ -643,15 +643,17 @@ def _names_of(scope: ast.AST) -> _Names:
 
 def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
     """The imports a module makes as it is imported, every compound statement's
-    blocks included (:func:`ast_scan.block_statements`).
+    blocks included (:func:`ast_scan.block_statements`), in the order of the
+    source: of two imports of one name, the later, which Python leaves in
+    place, is the one a table built from them keeps.
     """
-    pending: list[ast.stmt] = list(tree.body)
+    pending: list[ast.stmt] = list(tree.body)[::-1]
     while pending:
         statement = pending.pop()
         if isinstance(statement, ast.Import | ast.ImportFrom):
             yield statement
         else:
-            pending.extend(block_statements(statement))
+            pending.extend(block_statements(statement)[::-1])
 
 
 def exports_of(path: pathlib.Path, tree: ast.Module) -> dict[str, str]:

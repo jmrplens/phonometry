@@ -957,6 +957,50 @@ def test_a_package_re_exports_what_any_compound_statement_imports(
     assert [finding.describe() for finding in findings] == []
 
 
+def test_a_package_re_exports_the_later_of_two_imports_of_one_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name at the top of a package's ``__init__``, the
+    package re-exports the later, which Python leaves in place.
+
+    The re-exports were read from the last statement up, so the earlier
+    import, the check, stood for the name, and a module that reaches the
+    later one through the package, which checks nothing, read unchecked.
+    """
+    package = tmp_path / "phonometry" / "io"
+    package.mkdir(parents=True)
+    sources = {
+        "__init__.py": """
+            from ._audio_file import require_regular_audio
+            from ._loose import check_nothing as require_regular_audio
+            """,
+        "_audio_file.py": """
+            from .._internal.json_input import not_regular_at
+
+            def require_regular_audio(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+            """,
+        "_loose.py": """
+            def check_nothing(path):
+                return path
+            """,
+        "_backends.py": """
+            from phonometry.io import require_regular_audio as exported
+
+            def through_the_package(sf, path):
+                exported(path)
+                return sf.read(str(path))
+            """,
+    }
+    for name, source in sources.items():
+        (package / name).write_text(textwrap.dedent(source), encoding="utf-8")
+    findings, _stale = crf.check(sorted(package.iterdir()))
+    assert [(finding.function, finding.line) for finding in findings] == [
+        ("through_the_package", 6)
+    ]
+
+
 def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(
     tmp_path: pathlib.Path,
 ) -> None:

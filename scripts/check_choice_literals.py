@@ -118,12 +118,12 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 from ast_scan import (
     COMPOUND_STATEMENTS,
     binding_of,
-    bindings_by_name,
     block_statements,
     imported_names,
     live_bindings,
     own_names,
     scope_nodes,
+    standing_bindings,
 )
 
 import phonometry
@@ -1167,17 +1167,12 @@ def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
 
 def _standing(tree: ast.Module) -> dict[str, list[ast.AST]]:
     """Each name a module binds, with the bindings of it that may stand once
-    the module has run.
-
-    Every binding at the top of the module in the order of the source
-    (:func:`ast_scan.bindings_by_name`), and of those the later of two in a
-    row and either of two in the branches of a ``try`` or an ``if``
-    (:func:`ast_scan.live_bindings`).
+    the module has run (:func:`ast_scan.standing_bindings`): of those at the
+    top of the module the later of two in a row and either of two in the
+    branches of a ``try`` or an ``if``, and whatever a function inside it
+    binds the name to under ``global``.
     """
-    return {
-        name: nodes if len(nodes) == 1 else live_bindings(tree, nodes)
-        for name, nodes in bindings_by_name(tree).items()
-    }
+    return standing_bindings(tree)
 
 
 @functools.cache

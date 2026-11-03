@@ -580,8 +580,18 @@ _TWO_CHOICES = {
                 from ._branch_second import KINDS, Names
             """,
         ),
+        (
+            "_branch_global_in_a_function",
+            """
+            from ._branch_first import KINDS, Names
+
+            def _swap():
+                global KINDS, Names
+                from ._branch_second import KINDS, Names
+            """,
+        ),
     ],
-    ids=["try-second", "try-first", "if-second", "if-first"],
+    ids=["try-second", "try-first", "if-second", "if-first", "global-in-a-function"],
 )
 def test_two_imports_in_branches_that_disagree_give_no_value(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, stem: str, user: str
@@ -592,9 +602,10 @@ def test_two_imports_in_branches_that_disagree_give_no_value(
 
     The later stood for the name, so the ``except`` clause's or the
     ``else``'s import was read where the ``try`` body's or the ``if``'s,
-    which runs whenever it can, holds another table and another alias. Each
-    case is a module of its own name, since the readers keep what they read
-    of a module by its name.
+    which runs whenever it can, holds another table and another alias. A
+    function that imports the name under ``global`` may have run too, and
+    what it binds may stand as much. Each case is a module of its own name,
+    since the readers keep what they read of a module by its name.
     """
     _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, stem: user})
     constants = ccl._constants_of(f"phonometry.{stem}")

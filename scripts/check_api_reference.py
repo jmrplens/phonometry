@@ -124,7 +124,7 @@ from ast_scan import (
     COMPOUND_STATEMENTS,
     bindings_by_name,
     block_statements,
-    live_bindings,
+    standing_bindings,
 )
 from markdown_spans import inline_spans
 
@@ -531,14 +531,14 @@ def _for_the_type_checker(tree: ast.Module) -> set[int]:
 def imported_from(module: ModuleType) -> dict[str, tuple[str, ...]]:
     """Each name ``module`` binds with ``from X import name``, mapped to every ``X``.
 
-    The bindings of each name at the top of the module are read in the order
-    of the source (:func:`ast_scan.bindings_by_name`), and of those that may
-    stand once it has run (:func:`ast_scan.live_bindings`) its ``from``
-    imports are where the name may come from: either of two in the branches
-    of a ``try`` or an ``if``, and none that a later ``def`` or assignment
-    replaces. Only the bindings that run count: an ``if TYPE_CHECKING:``
-    block binds nothing a caller can import. Relative imports are resolved,
-    so each value is an absolute module name.
+    Of the bindings of each name that may stand once the module has run
+    (:func:`ast_scan.standing_bindings`), its ``from`` imports are where the
+    name may come from: either of two in the branches of a ``try`` or an
+    ``if``, none that a later ``def`` or assignment replaces, and one a
+    function inside the module makes under ``global``. Only the bindings
+    that run count: an ``if TYPE_CHECKING:`` block binds nothing a caller
+    can import. Relative imports are resolved, so each value is an absolute
+    module name.
 
     :param module: An imported module whose source is available.
     :return: Bound name to the absolute name of each module it may come from.
@@ -549,10 +549,12 @@ def imported_from(module: ModuleType) -> dict[str, tuple[str, ...]]:
         return {}
     package = module.__package__ or module.__name__
     checking = _for_the_type_checker(tree)
+    running = {
+        name: [node for node in nodes if id(node) not in checking]
+        for name, nodes in bindings_by_name(tree).items()
+    }
     found: dict[str, tuple[str, ...]] = {}
-    for name, nodes in bindings_by_name(tree).items():
-        running = [node for node in nodes if id(node) not in checking]
-        live = running if len(running) < 2 else live_bindings(tree, running)
+    for name, live in standing_bindings(tree, running).items():
         sources = [
             importlib.util.resolve_name("." * node.level + (node.module or ""), package)
             for node in live

@@ -57,9 +57,8 @@ from api_taxonomy import (
 )
 from ast_scan import (
     COMPOUND_STATEMENTS,
-    bindings_by_name,
     block_statements,
-    live_bindings,
+    standing_bindings,
 )
 from markdown_fences import code_lines
 
@@ -1021,17 +1020,17 @@ def _module_imports(module_name: str) -> Mapping[str, tuple[str, str]]:
     An annotation may name an alias the module imports only for the type
     checker, so the runtime namespace does not hold it; the import does. A
     name is read through its import only when every binding of it that may
-    stand once the module has run (:func:`ast_scan.live_bindings`) imports it
-    from one place: an assignment after the import, or two imports in the
-    branches of a ``try`` that take it from two places, leave it unread.
+    stand once the module has run (:func:`ast_scan.standing_bindings`)
+    imports it from one place: an assignment after the import, two imports
+    in the branches of a ``try`` that take it from two places, or a function
+    that binds the name otherwise under ``global``, leave it unread.
     """
     tree = _module_tree(module_name)
     if tree is None:
         return {}
     package = sys.modules[module_name].__package__ or module_name
     bindings: dict[str, tuple[str, str]] = {}
-    for name, nodes in bindings_by_name(tree).items():
-        live = nodes if len(nodes) == 1 else live_bindings(tree, nodes)
+    for name, live in standing_bindings(tree).items():
         targets = {_from_import(node, name, package) for node in live}
         (target,) = targets if len(targets) == 1 else (None,)
         if target is not None:

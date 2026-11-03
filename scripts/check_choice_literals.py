@@ -1725,6 +1725,7 @@ def _bound_in_two_scopes(tree: ast.AST) -> set[str]:
                 *names.defined,
                 *names.imported,
                 *names.stored,
+                *names.annotated,
             )
             if names.binds(name)
         }

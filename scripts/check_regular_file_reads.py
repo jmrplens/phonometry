@@ -382,11 +382,14 @@ def _stored(scope: ast.AST) -> set[str]:
     An assignment, a loop, a ``with ... as``, an ``except ... as`` and the
     other statements that bind a name, read as Python reads the scope
     (:func:`ast_scan.own_names`): a comprehension's loop target is the
-    comprehension's, and what a lambda binds is the lambda's. The imports
-    are read by :func:`_imported`, and the functions and classes defined
-    in *scope* are the scope's definitions (:func:`_defined_here`).
+    comprehension's, and what a lambda binds is the lambda's. A name a
+    function or a class body annotates without a value is its own too,
+    though nothing is stored in it. The imports are read by
+    :func:`_imported`, and the functions and classes defined in *scope* are
+    the scope's definitions (:func:`_defined_here`).
     """
-    return set(own_names(scope).stored)
+    names = own_names(scope)
+    return set(names.stored | names.annotated)
 
 
 def _bound_here(scope: ast.AST) -> frozenset[str]:
@@ -400,7 +403,9 @@ def _bound_here(scope: ast.AST) -> frozenset[str]:
     """
     names = own_names(scope)
     sent_out = names.declared_global | names.declared_nonlocal
-    return frozenset(names.parameters | names.stored | (names.imported - sent_out))
+    return frozenset(
+        names.parameters | names.stored | names.annotated | (names.imported - sent_out)
+    )
 
 
 def _bound(

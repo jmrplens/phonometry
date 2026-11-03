@@ -707,6 +707,44 @@ def test_bindings_by_name_lists_every_binding_of_a_scope_in_source_order() -> No
     assert sorted(ast_scan.bindings_by_name(function)) == ["inner"]
 
 
+def test_an_annotation_without_a_value_binds_no_value() -> None:
+    """``flag: type`` binds nothing: the import before it is what the name holds.
+
+    A function that annotates a name makes it its own all the same, as
+    Python does, and so does a class body; the module does not, and none of
+    them counts the annotation among the bindings of the name.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from numpy import bool_ as flag
+            flag: type
+
+            def f():
+                from numpy import bool_ as kind
+                kind: type
+                own: int
+
+            class Holder:
+                field: int
+            """
+        )
+    )
+    found = ast_scan.bindings_by_name(tree)
+    assert [type(node).__name__ for node in found["flag"]] == ["ImportFrom"]
+    assert ast_scan.own_names(tree).how("flag") == "import"
+    function = tree.body[2]
+    assert [type(n).__name__ for n in ast_scan.bindings_by_name(function)["kind"]] == [
+        "ImportFrom"
+    ]
+    assert "own" not in ast_scan.bindings_by_name(function)
+    names = ast_scan.own_names(function)
+    assert names.how("kind") == "import"
+    assert names.binds("own")
+    assert ast_scan.own_names(tree.body[3]).binds("field")
+    assert "field" not in ast_scan.bindings_by_name(tree.body[3])
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

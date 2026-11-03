@@ -1143,6 +1143,26 @@ def test_a_binding_after_a_re_export_takes_the_name_from_it(
     assert _read_through_the_package(tmp_path, init) == found
 
 
+def test_an_annotation_after_a_re_export_leaves_the_name_to_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An annotation without a value binds nothing, so the package still
+    holds the check it imported under the name.
+
+    ``require_regular_audio: Callable[..., None]`` after the import was read
+    as a binding that replaced it, and a module that reaches the check
+    through the package was reported as reaching no check.
+    """
+    init = """
+        from collections.abc import Callable
+
+        from ._audio_file import require_regular_audio
+
+        require_regular_audio: Callable[..., None]
+        """
+    assert _read_through_the_package(tmp_path, init) == []
+
+
 def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(
     tmp_path: pathlib.Path,
 ) -> None:

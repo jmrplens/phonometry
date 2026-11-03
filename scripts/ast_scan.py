@@ -140,10 +140,15 @@ class OwnNames:
     declared_global: frozenset[str]
     #: The names a ``nonlocal`` statement in it sends to the function around.
     declared_nonlocal: frozenset[str]
+    #: The names a function or a class body annotates without a value
+    #: (``flag: type``): its own, as Python makes them, though the annotation
+    #: binds nothing to them. The module's annotation makes no name its own.
+    annotated: frozenset[str] = frozenset()
 
     def binds(self, name: str) -> bool:
-        """Whether *name* is the scope's own: bound in it, and not declared
-        ``global`` or ``nonlocal`` there.
+        """Whether *name* is the scope's own: bound in it, or annotated in a
+        function or a class body, and not declared ``global`` or ``nonlocal``
+        there.
         """
         if name in self.declared_global or name in self.declared_nonlocal:
             return False
@@ -152,6 +157,7 @@ class OwnNames:
             or name in self.defined
             or name in self.imported
             or name in self.stored
+            or name in self.annotated
         )
 
     def rebinds(self, name: str) -> bool:
@@ -166,9 +172,11 @@ class OwnNames:
     def how(self, name: str) -> Literal["definition", "import", "binding"]:
         """How the scope binds *name*, which :meth:`binds` says it does.
 
-        ``"definition"`` and ``"import"`` when that is the only way it does;
-        ``"binding"`` for a parameter, any other binding, and a name bound
-        two ways, which may stand for either at a call.
+        ``"definition"`` and ``"import"`` when that is the only way it does,
+        an annotation without a value aside, which binds nothing;
+        ``"binding"`` for a parameter, any other binding, a name bound two
+        ways, which may stand for either at a call, and a name only
+        annotated.
         """
         if name in self.parameters or name in self.stored:
             return "binding"
@@ -335,6 +343,19 @@ def _declared(node: ast.AST) -> tuple[str, set[str]] | None:
     return None
 
 
+def _annotated_only(nodes: Sequence[ast.AST]) -> set[int]:
+    """The ids of the names among *nodes* that an annotation without a value
+    targets (``flag: type``), which binds nothing to the name.
+    """
+    return {
+        id(node.target)
+        for node in nodes
+        if isinstance(node, ast.AnnAssign)
+        and node.value is None
+        and isinstance(node.target, ast.Name)
+    }
+
+
 def _stored(node: ast.AST, *, comprehension: bool) -> set[str]:
     """The names any other binding of *node* stores in, in the scope it runs in.
 
@@ -369,12 +390,21 @@ def own_names(scope: ast.AST) -> OwnNames:
         "stored": set(),
         "declared_global": set(),
         "declared_nonlocal": set(),
+        "annotated": set(),
     }
     comprehension = isinstance(scope, _COMPREHENSIONS)
-    for node in scope_nodes(scope):
+    nodes = scope_nodes(scope)
+    bare = _annotated_only(nodes)
+    for node in nodes:
         declared = _declared(node)
         if declared is not None:
             found[declared[0]].update(declared[1])
+        elif isinstance(node, ast.Name) and id(node) in bare:
+            # A function's annotation makes the name local, and a class
+            # body's keeps the name of the function around from it; the
+            # module's name is the module's either way.
+            if not isinstance(scope, ast.Module):
+                found["annotated"].add(node.id)
         else:
             found["stored"].update(_stored(node, comprehension=comprehension))
     return OwnNames(
@@ -384,6 +414,7 @@ def own_names(scope: ast.AST) -> OwnNames:
         frozenset(found["stored"]),
         frozenset(found["declared_global"]),
         frozenset(found["declared_nonlocal"]),
+        frozenset(found["annotated"]),
     )
 
 
@@ -394,14 +425,19 @@ def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
     A ``def`` or a ``class`` statement, an import statement, and the node of
     every other binding :class:`OwnNames` reads: an assignment's target, a
     loop's, ``with ... as``, ``except ... as``, a ``match`` capture, ``del``
-    and ``:=``. A name the scope declares ``global`` or ``nonlocal`` is
-    another scope's, and is left out. What the name holds where it is read
-    is :func:`live_bindings` of the nodes.
+    and ``:=``. An annotation without a value (``flag: type``) binds nothing,
+    and the name keeps what it held. A name the scope declares ``global`` or
+    ``nonlocal`` is another scope's, and is left out. What the name holds
+    where it is read is :func:`live_bindings` of the nodes.
     """
     names = own_names(scope)
     comprehension = isinstance(scope, _COMPREHENSIONS)
     found: dict[str, list[ast.AST]] = {}
-    for node in scope_nodes(scope):
+    nodes = scope_nodes(scope)
+    bare = _annotated_only(nodes)
+    for node in nodes:
+        if id(node) in bare:
+            continue
         declared = _declared(node)
         if declared is None:
             bound = _stored(node, comprehension=comprehension)

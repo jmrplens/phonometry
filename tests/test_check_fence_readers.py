@@ -275,6 +275,77 @@ def test_a_lambda_s_parameter_shadows_a_module_marker(tmp_path: pathlib.Path) ->
     )
 
 
+#: Markers written in one scope that Python binds in another: a ``:=`` in a
+#: comprehension binds in the function around it, a name declared ``global``
+#: in the module and one declared ``nonlocal`` in the function that binds it.
+_BOUND_ELSEWHERE = {
+    "a_walrus_in_a_list_comprehension": """
+        def opens(lines, text):
+            [marker := "```" for _ in lines]
+            return text.startswith(marker)
+    """,
+    "a_walrus_in_a_generator_handed_to_any": """
+        def opens(lines, text):
+            if any((marker := "~~~") for _ in lines):
+                pass
+            return text.startswith(marker)
+    """,
+    "a_name_a_function_declares_global": """
+        def setup():
+            global MARKER
+            MARKER = "```"
+
+        def opens(text):
+            return text.startswith(MARKER)
+    """,
+    "a_name_a_nested_function_declares_nonlocal": """
+        def opens(text):
+            marker = "#"
+
+            def fenced():
+                nonlocal marker
+                marker = "```"
+
+            fenced()
+            return text.startswith(marker)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_BOUND_ELSEWHERE))
+def test_a_marker_bound_in_the_scope_python_binds_it_in_is_read_there(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """Each name landed in the scope it was written in, a comprehension's or
+    the function's, and the test Python reads through the function around it
+    or through the module found no marker.
+    """
+    assert _shapes(tmp_path, _BOUND_ELSEWHERE[shape]) == [
+        ("opens", "a test for a marker")
+    ]
+
+
+def test_a_class_body_s_marker_is_not_read_from_its_methods(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method reads a name of the module, never one of the class body around it."""
+    assert (
+        _shapes(
+            tmp_path,
+            """
+            MARKER = "#"
+
+            class Reader:
+                MARKER = "```"
+
+                def opens(self, line):
+                    return line.startswith(MARKER)
+            """,
+        )
+        == []
+    )
+
+
 def test_the_regular_expressions_that_read_fences_are_refused(
     tmp_path: pathlib.Path,
 ) -> None:

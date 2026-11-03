@@ -116,6 +116,59 @@ def test_a_global_name_the_scope_rebinds_is_no_module_function() -> None:
     assert ast_scan.binding_of(function, call, "keep") == ("binding", function)
 
 
+_HOMES = """
+def outer(items):
+    [(last := item) for item in items]
+    pattern = "a"
+
+    def strict():
+        nonlocal pattern
+        pattern = "b"
+
+    def setup():
+        global shared
+        shared = "c"
+
+    class Holder:
+        pattern = "d"
+
+        def method(self):
+            return pattern
+"""
+
+
+def test_a_write_or_a_read_reaches_the_scope_python_binds_the_name_in() -> None:
+    """The scope whose binding a name written or read at a node reaches: the
+    function around a comprehension for ``:=``, the function that binds a
+    name declared ``nonlocal``, the module for one declared ``global`` or
+    bound nowhere, and never a class body from a method.
+    """
+    tree = ast.parse(textwrap.dedent(_HOMES))
+    outer = tree.body[0]
+    assert isinstance(outer, ast.FunctionDef)
+    stores = {
+        (node.id, node.lineno): node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Name)
+    }
+    walrus, nonlocal_write = stores["last", 3], stores["pattern", 8]
+    global_write, read_in_method = stores["shared", 12], stores["pattern", 18]
+    assert ast_scan.binding_scope(tree, walrus, "last") is outer
+    assert ast_scan.binding_scope(tree, nonlocal_write, "pattern") is outer
+    assert ast_scan.binding_scope(tree, global_write, "shared") is tree
+    assert ast_scan.binding_scope(tree, read_in_method, "pattern") is outer
+    assert ast_scan.binding_scope(tree, read_in_method, "nowhere") is tree
+
+
+def test_forgetting_the_trees_empties_what_the_scopes_keep() -> None:
+    """A guard that reads each file once lets go of its tree when it is done."""
+    tree = ast.parse(textwrap.dedent(_HOMES))
+    ast_scan.binding_scope(tree, tree.body[0], "items")
+    assert ast_scan.own_names.cache_info().currsize > 0
+    ast_scan.forget_trees()
+    assert ast_scan.own_names.cache_info().currsize == 0
+
+
 def test_a_name_bound_two_ways_names_no_one_binding() -> None:
     tree = ast.parse("def f():\n    def g(): pass\n    g = make()\n")
     function = tree.body[0]

@@ -66,7 +66,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, exempted, lexical_scoped, relative
+from ast_scan import ROOT, binding_scope, exempted, forget_trees, relative, scoped
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -156,8 +156,8 @@ EXEMPT: dict[tuple[str, str], str] = {
     ),
 }
 
-#: The strings a name in scope stands for.
-type Lookup = Callable[[str], frozenset[str]]
+#: The strings the name read at a node stands for.
+type Lookup = Callable[[ast.Name], frozenset[str]]
 
 
 @dataclass(frozen=True)
@@ -264,7 +264,7 @@ def _fold(node: ast.expr, lookup: Lookup) -> frozenset[str]:
     if isinstance(node, ast.Constant):
         return frozenset({node.value}) if isinstance(node.value, str) else frozenset()
     if isinstance(node, ast.Name):
-        return lookup(node.id)
+        return lookup(node)
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
         return _joined([_part(node.left, lookup), _part(node.right, lookup)])
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mult):
@@ -306,7 +306,7 @@ def _values(node: ast.expr, lookup: Lookup) -> frozenset[str]:
     return _fold(node, lookup)
 
 
-def _bound(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
+def _bound(node: ast.AST) -> Iterator[tuple[ast.Name | ast.arg, ast.expr | None]]:
     """The names a node binds, each with the expression it binds or ``None``.
 
     An assignment binds its value, ``x += y`` what ``x + y`` makes, a loop
@@ -314,30 +314,22 @@ def _bound(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
     lambda its parameters, to what nothing here can know.
     """
     if isinstance(node, ast.Assign):
-        yield from ((t.id, node.value) for t in node.targets if isinstance(t, ast.Name))
+        yield from ((t, node.value) for t in node.targets if isinstance(t, ast.Name))
     elif isinstance(node, ast.AnnAssign | ast.NamedExpr):
         if isinstance(node.target, ast.Name) and node.value is not None:
-            yield node.target.id, node.value
+            yield node.target, node.value
     elif isinstance(node, ast.AugAssign) and isinstance(node.op, ast.Add):
         if isinstance(node.target, ast.Name):
             added = ast.BinOp(left=node.target, op=ast.Add(), right=node.value)
-            yield node.target.id, added
+            yield node.target, added
     elif isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
         if isinstance(node.target, ast.Name):
-            yield node.target.id, node.iter
+            yield node.target, node.iter
     elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
         arguments = node.args
         every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
         every += [a for a in (arguments.vararg, arguments.kwarg) if a is not None]
-        yield from ((argument.arg, None) for argument in every)
-
-
-def _chain(scope: str) -> list[str]:
-    """The scopes a name is looked up in from ``scope``, innermost first."""
-    if scope == "<module>":
-        return [scope]
-    parts = scope.split(".")
-    return [".".join(parts[:end]) for end in range(len(parts), 0, -1)] + ["<module>"]
+        yield from ((argument, None) for argument in every)
 
 
 def _re_names(tree: ast.Module) -> tuple[set[str], set[str]]:
@@ -356,52 +348,65 @@ def _re_names(tree: ast.Module) -> tuple[set[str], set[str]]:
 
 @dataclass(frozen=True)
 class _File:
-    """What one script binds that the shapes are read against."""
+    """What one script binds that the shapes are read against.
 
+    A scope is the node that binds a name, as Python scopes it
+    (:func:`ast_scan.binding_scope`): the module, a function, a lambda, a
+    class body or a comprehension.
+    """
+
+    #: The script, whose module is the outermost scope.
+    tree: ast.Module
     #: Per scope, the strings each name bound there stands for.
-    bindings: dict[str, dict[str, frozenset[str]]]
+    bindings: dict[ast.AST, dict[str, frozenset[str]]]
     #: The names ``re`` goes by, and the functions imported from it.
     re_modules: frozenset[str]
     re_functions: frozenset[str]
     #: The names, by scope, bound to a join of more strings than
     #: :data:`MAX_VALUES`, which stand for no string that is read.
-    unread: set[tuple[str, str]] = field(default_factory=set)
+    unread: set[tuple[ast.AST, str]] = field(default_factory=set)
 
     @classmethod
     def of(cls, tree: ast.Module) -> _File:
-        """Read what a parsed script binds, in source order."""
+        """Read what a parsed script binds, in source order, each name in the
+        scope Python binds it in: a parameter in its function or its lambda,
+        any other name in the scope a write to it reaches.
+        """
         modules, functions = _re_names(tree)
-        file = cls({}, frozenset(modules), frozenset(functions))
-        # ``lexical_scoped`` names a function after itself, so its parameters
-        # land in its own scope with the names its body binds; a
-        # comprehension's variables and a lambda's parameters land in a scope
-        # of their own inside it, as Python keeps them.
-        for _function, scope, node in lexical_scoped(tree):
-            names = file.bindings.setdefault(scope, {})
-            lookup = file.lookup(scope)
-            for name, value in _bound(node):
+        file = cls(tree, {}, frozenset(modules), frozenset(functions))
+        for _function, node in scoped(tree):
+            for target, value in _bound(node):
+                unread = False
                 try:
-                    found = frozenset() if value is None else _values(value, lookup)
+                    found = frozenset() if value is None else _values(value, file.read)
                 except UnreadPatternError:
+                    unread, found = True, frozenset()
+                # A binding to no string is not kept: the scope that makes it
+                # is still the one a read reaches, and finds nothing there.
+                if not (found or unread):
+                    continue
+                if isinstance(target, ast.arg):
+                    scope, name = node, target.arg
+                else:
+                    scope, name = binding_scope(tree, target, target.id), target.id
+                if unread:
                     file.unread.add((scope, name))
-                    found = frozenset()
+                names = file.bindings.setdefault(scope, {})
                 names[name] = names.get(name, frozenset()) | found
         return file
 
-    def lookup(self, scope: str) -> Lookup:
-        """The strings a name stands for, seen from ``scope``."""
-        chain = _chain(scope)
+    def read(self, node: ast.Name) -> frozenset[str]:
+        """The strings the name read at *node* stands for, in the scope whose
+        binding of it the read reaches: none when that scope binds it to no
+        string, whatever a scope around it binds under the same spelling.
 
-        def find(name: str) -> frozenset[str]:
-            for link in chain:
-                values = self.bindings.get(link, {}).get(name)
-                if values is not None:
-                    if (link, name) in self.unread:
-                        raise UnreadPatternError
-                    return values
-            return frozenset()
-
-        return find
+        :raises UnreadPatternError: for a name bound to more strings than
+            :data:`MAX_VALUES`.
+        """
+        scope = binding_scope(self.tree, node, node.id)
+        if (scope, node.id) in self.unread:
+            raise UnreadPatternError
+        return self.bindings.get(scope, {}).get(node.id, frozenset())
 
 
 def _holds_marker(node: ast.expr, lookup: Lookup) -> bool:
@@ -498,10 +503,20 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
     """The places in one Python script that read a fence by hand."""
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
+    try:
+        return _fence_readers(path, source, tree)
+    finally:
+        # What ``ast_scan`` read of the scopes of this tree is not needed
+        # for the next file.
+        forget_trees()
+
+
+def _fence_readers(path: pathlib.Path, source: str, tree: ast.Module) -> list[Finding]:
+    """The places in one parsed script that read a fence by hand."""
     file = _File.of(tree)
     found: list[Finding] = []
-    for function, scope, node in lexical_scoped(tree):
-        shape = _shape(node, file, file.lookup(scope))
+    for function, node in scoped(tree):
+        shape = _shape(node, file, file.read)
         if shape is not None:
             found.append(
                 Finding(

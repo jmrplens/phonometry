@@ -61,7 +61,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, lexical_scoped, relative
+from ast_scan import ROOT, binding_scope, forget_trees, relative, scoped
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
@@ -223,14 +223,17 @@ def _either(parts: Iterable[set[str]]) -> set[str]:
 class _Strings:
     """The strings each name of a script stands for, scope by scope.
 
-    A name bound to an expression that stands for more strings than
-    :data:`MOST_PATTERNS` stands for ``None``, and so does everything built
-    from it.
+    A scope is the node that binds the name, as Python scopes it
+    (:func:`ast_scan.binding_scope`): the module, a function, a lambda, a
+    class body or a comprehension. A name bound to an expression that stands
+    for more strings than :data:`MOST_PATTERNS` stands for ``None``, and so
+    does everything built from it.
     """
 
-    bindings: dict[str, dict[str, set[str] | None]] = field(default_factory=dict)
+    tree: ast.Module
+    bindings: dict[ast.AST, dict[str, set[str] | None]] = field(default_factory=dict)
 
-    def bind(self, scope: str, name: str, values: set[str] | None) -> None:
+    def bind(self, scope: ast.AST, name: str, values: set[str] | None) -> None:
         names = self.bindings.setdefault(scope, {})
         held = names.setdefault(name, set())
         if values is None or held is None:
@@ -240,16 +243,15 @@ class _Strings:
         if len(held) > MOST_PATTERNS:
             names[name] = None
 
-    def lookup(self, scope: str, name: str) -> set[str] | None:
-        """What *name* stands for seen from *scope*: its own, then outwards."""
-        parts = [] if scope == "<module>" else scope.split(".")
-        for end in range(len(parts), -1, -1):
-            found = self.bindings.get(".".join(parts[:end]) or "<module>", {})
-            if name in found:
-                return found[name]
-        return set()
+    def lookup(self, node: ast.Name) -> set[str] | None:
+        """What the name read at *node* stands for, in the scope whose
+        binding of it the read reaches: none when that scope binds it to no
+        string, whatever a scope around it binds under the same spelling.
+        """
+        scope = binding_scope(self.tree, node, node.id)
+        return self.bindings.get(scope, {}).get(node.id, set())
 
-    def fold(self, node: ast.expr, scope: str) -> set[str]:
+    def fold(self, node: ast.expr) -> set[str]:
         """Every string an expression stands for, as far as the script says.
 
         :raises UnreadPatternError: for an expression that stands for more
@@ -258,38 +260,53 @@ class _Strings:
         if isinstance(node, ast.Constant):
             return {node.value} if isinstance(node.value, str) else set()
         if isinstance(node, ast.Name):
-            found = self.lookup(scope, node.id)
+            found = self.lookup(node)
             if found is None:
                 raise UnreadPatternError
             return found
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-            return _combined(
-                [self.fold(node.left, scope), self.fold(node.right, scope)]
-            )
+            return _combined([self.fold(node.left), self.fold(node.right)])
         if isinstance(node, ast.JoinedStr):
-            return _combined(self._pieces(node, scope))
+            return _combined(self._pieces(node))
         if isinstance(node, ast.IfExp):
-            return _either([self.fold(node.body, scope), self.fold(node.orelse, scope)])
+            return _either([self.fold(node.body), self.fold(node.orelse)])
         if isinstance(node, ast.BoolOp):
-            return _either([self.fold(value, scope) for value in node.values])
+            return _either([self.fold(value) for value in node.values])
         if isinstance(node, ast.NamedExpr):
-            return self.fold(node.value, scope)
+            return self.fold(node.value)
         return set()
 
-    def _pieces(self, node: ast.JoinedStr, scope: str) -> Iterator[set[str]]:
+    def _pieces(self, node: ast.JoinedStr) -> Iterator[set[str]]:
         for value in node.values:
             inner = value.value if isinstance(value, ast.FormattedValue) else value
-            yield self.fold(inner, scope)
+            yield self.fold(inner)
 
-    def bound(self, value: ast.expr, scope: str) -> set[str] | None:
+    def bound(self, value: ast.expr) -> set[str] | None:
         """What a name bound to *value* stands for, ``None`` past the bound."""
         try:
-            return self.fold(value, scope)
+            return self.fold(value)
         except UnreadPatternError:
             return None
 
+    def read(self, node: ast.AST) -> None:
+        """Bind what *node* binds, each name in the scope Python binds it in.
 
-def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
+        A binding to no string is not kept: the scope that makes it is still
+        the one a read of the name reaches (:meth:`lookup`), and it finds
+        nothing there.
+        """
+        for target, value in _assigned(node):
+            values = set() if value is None else self.bound(value)
+            if values == set():
+                continue
+            if isinstance(target, ast.arg):
+                scope, name = node, target.arg
+            else:
+                scope, name = binding_scope(self.tree, target, target.id), target.id
+            self.bind(scope, name, values)
+
+
+def _assigned(node: ast.AST) -> Iterator[tuple[ast.Name | ast.arg, ast.expr | None]]:
     """Each name a node binds to an expression, the items of a tuple included.
 
     An assignment binds its value, ``x += y`` what ``x + y`` makes, and a
@@ -302,7 +319,7 @@ def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
         arguments = node.args
         every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
         every += [a for a in (arguments.vararg, arguments.kwarg) if a is not None]
-        yield from ((argument.arg, None) for argument in every)
+        yield from ((argument, None) for argument in every)
         return
     value: ast.expr | None
     if isinstance(node, ast.Assign):
@@ -324,7 +341,7 @@ def _assigned(node: ast.AST) -> Iterator[tuple[str, ast.expr | None]]:
                 if isinstance(value, ast.Tuple | ast.List | ast.Set)
                 else [value]
             )
-            yield from ((target.id, item) for item in items)
+            yield from ((target, item) for item in items)
 
 
 def _re_names(tree: ast.Module) -> tuple[set[str], set[str]]:
@@ -360,17 +377,23 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
     """The calls of one Python script that read a code span by hand."""
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
-    strings = _Strings()
-    # A comprehension's variables and a lambda's parameters are bound in a
-    # scope of their own, inside the function's, as Python keeps them.
-    nodes = list(lexical_scoped(tree))
-    for _function, scope, node in nodes:
-        for name, value in _assigned(node):
-            bound = set() if value is None else strings.bound(value, scope)
-            strings.bind(scope, name, bound)
+    try:
+        return _span_readers(path, source, tree)
+    finally:
+        # What ``ast_scan`` read of the scopes of this tree is not needed
+        # for the next file.
+        forget_trees()
+
+
+def _span_readers(path: pathlib.Path, source: str, tree: ast.Module) -> list[Finding]:
+    """The calls of one parsed script that read a code span by hand."""
+    strings = _Strings(tree)
+    nodes = list(scoped(tree))
+    for _function, node in nodes:
+        strings.read(node)
     names = _re_names(tree)
     found: list[Finding] = []
-    for function, scope, node in nodes:
+    for function, node in nodes:
         if not isinstance(node, ast.Call):
             continue
         patterns = _patterns(node, names)
@@ -378,7 +401,7 @@ def _python_findings(path: pathlib.Path) -> list[Finding]:
             continue
         segment = ast.get_source_segment(source, node) or ast.unparse(node)
         try:
-            texts = {t for p in patterns for t in strings.fold(p, scope)}
+            texts = {t for p in patterns for t in strings.fold(p)}
         except UnreadPatternError:
             found.append(Finding(path, node.lineno, function, segment, unread=True))
             continue

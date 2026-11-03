@@ -171,17 +171,18 @@ def test_the_tree_keeps_the_rule() -> None:
 def _folded(source: str, name: str) -> set[str]:
     """The strings the last expression bound to *name* in a module stands for."""
     tree = ast.parse(textwrap.dedent(source))
-    strings = csr._Strings()
+    strings = csr._Strings(tree)
     value: ast.expr | None = None
     for node in tree.body:
         if isinstance(node, ast.Assign):
             for target, item in csr._assigned(node):
-                if target == name:
+                assert isinstance(target, ast.Name)
+                if target.id == name:
                     value = item
                 else:
-                    strings.bind("<module>", target, strings.fold(item, "<module>"))
+                    strings.bind(tree, target.id, strings.fold(item))
     assert value is not None
-    return strings.fold(value, "<module>")
+    return strings.fold(value)
 
 
 def test_an_f_string_stands_for_every_string_its_names_stand_for() -> None:
@@ -368,6 +369,83 @@ def test_a_reader_in_a_comprehension_is_read_with_its_variable(
             return [re.findall(f"`{body}`", text) for body in ("[^`]+",)], body
     """
     assert _places(tmp_path, source) == ["spans"]
+
+
+#: Names written in one scope that Python binds in another: a ``:=`` in a
+#: comprehension binds in the function around it, a name declared ``global``
+#: in the module and one declared ``nonlocal`` in the function that binds it.
+#: Each pattern is a span reader read through the name where Python reads it.
+_BOUND_ELSEWHERE = {
+    "a_walrus_in_a_generator_handed_to_any": """
+        import re
+
+        def finder(lines, text):
+            if any((pat := r"`[^`]+`") for _ in lines):
+                pass
+            return re.findall(pat, text)
+    """,
+    "a_walrus_in_a_list_comprehension": """
+        import re
+
+        def finder(lines, text):
+            [pat := r"`[^`]+`" for _ in lines]
+            return re.findall(pat, text)
+    """,
+    "a_name_a_function_declares_global": """
+        import re
+
+        def setup():
+            global PATTERN
+            PATTERN = r"`[^`]+`"
+
+        def finder(text):
+            return re.findall(PATTERN, text)
+    """,
+    "a_name_a_nested_function_declares_nonlocal": """
+        import re
+
+        def finder(text):
+            pattern = r"\\w+"
+
+            def strict():
+                nonlocal pattern
+                pattern = r"`[^`]+`"
+
+            strict()
+            return re.findall(pattern, text)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_BOUND_ELSEWHERE))
+def test_a_name_bound_in_the_scope_python_binds_it_in_is_read_there(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """Each name landed in the scope it was written in, a comprehension's or
+    the function's, and the read that Python makes through the function
+    around it or through the module found nothing.
+    """
+    assert _places(tmp_path, _BOUND_ELSEWHERE[shape]) == ["finder"]
+
+
+def test_a_class_body_s_name_is_not_read_from_its_methods(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method reads a name of the module, never one of the class body around
+    it, so the class's pattern of the same spelling is no pattern it hands on.
+    """
+    source = """
+        import re
+
+        PATTERN = r"\\w+"
+
+        class Reader:
+            PATTERN = r"`[^`]+`"
+
+            def words(self, text):
+                return re.findall(PATTERN, text)
+    """
+    assert _places(tmp_path, source) == []
 
 
 def test_a_choice_of_more_strings_than_the_bound_is_refused_unread(

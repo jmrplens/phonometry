@@ -14,10 +14,12 @@ The guards that follow a call to the function it reaches look its name up as
 Python does, and what a scope binds of its own is read here once
 (:func:`own_names`, :func:`binding_of`): a function, a lambda, a class body or
 a comprehension inside a scope binds its names for itself, and a ``global``
-or a ``nonlocal`` statement sends the name out. Of two statements of one
-scope that bind one name, a ``def`` or an import in each branch of an ``if``
-or one after the other, which the name holds at a call, or once the scope
-has run, is read here too (:func:`live_bindings`).
+or a ``nonlocal`` statement sends the name out. The guards that read a
+name as the strings it stands for find here the scope whose binding a read
+or a write reaches (:func:`binding_scope`). Of two statements of one scope
+that bind one name, a ``def`` or an import in each branch of an ``if`` or
+one after the other, which the name holds at a call, or once the scope has
+run, is read here too (:func:`live_bindings`).
 """
 
 from __future__ import annotations
@@ -79,67 +81,6 @@ def scoped(tree: ast.AST) -> Iterator[tuple[str, ast.AST]]:
             yield from walk(child, inner)
 
     yield from walk(tree, "")
-
-
-#: The expressions that bind names of their own: Python keeps a
-#: comprehension's variables and a lambda's parameters inside them.
-_EXPRESSION_SCOPES = (
-    ast.ListComp,
-    ast.SetComp,
-    ast.GeneratorExp,
-    ast.DictComp,
-    ast.Lambda,
-)
-
-
-def lexical_scoped(tree: ast.AST) -> Iterator[tuple[str, str, ast.AST]]:
-    """Every node with the function or class that holds it, as :func:`scoped`
-    names it, and the scope a name read there is looked up in.
-
-    That scope is the function's, or that of a comprehension or a lambda in
-    it, which bind names of their own: the function's name followed by
-    ``.<comprehension@line:col>`` or ``.<lambda@line:col>``, so that a lookup
-    that walks a dotted scope outwards finds them first and the function's
-    after. A comprehension reads its first iterable in the scope around it
-    and the rest in its own, and a lambda computes its defaults around it;
-    the comprehension or the lambda itself, its loops and its parameters
-    come with its own scope, where a reader binds its variables.
-    """
-
-    def visit(
-        node: ast.AST, scope: str, lookup: str
-    ) -> Iterator[tuple[str, str, ast.AST]]:
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-            inner = f"{scope}.{node.name}" if scope else node.name
-            yield inner, inner, node
-            for child in ast.iter_child_nodes(node):
-                yield from visit(child, inner, inner)
-            return
-        if not isinstance(node, _EXPRESSION_SCOPES):
-            yield scope or "<module>", lookup or "<module>", node
-            for child in ast.iter_child_nodes(node):
-                yield from visit(child, scope, lookup)
-            return
-        kind = "lambda" if isinstance(node, ast.Lambda) else "comprehension"
-        own = f"<{kind}@{node.lineno}:{node.col_offset}>"
-        inner = f"{lookup}.{own}" if lookup else own
-        around: list[ast.AST] = (
-            [*node.args.defaults, *filter(None, node.args.kw_defaults)]
-            if isinstance(node, ast.Lambda)
-            else [node.generators[0].iter]
-        )
-        yield scope or "<module>", inner, node
-        for child in ast.iter_child_nodes(node):
-            if not isinstance(child, ast.arguments | ast.comprehension):
-                yield from visit(child, scope, inner)
-                continue
-            yield scope or "<module>", inner, child
-            for part in ast.iter_child_nodes(child):
-                outside = any(part is each for each in around)
-                yield from visit(part, scope, lookup if outside else inner)
-
-    for child in ast.iter_child_nodes(tree):
-        yield from visit(child, "", "")
 
 
 def exempted[FindingT: Keyed](
@@ -491,6 +432,35 @@ def binding_of(
         if names.binds(name):
             return names.how(name), scope
     return "outside", None
+
+
+def forget_trees() -> None:
+    """Let go of every tree the scopes and the blocks were read from.
+
+    What :func:`own_names`, :func:`binding_of` and :func:`live_bindings` read
+    of a tree is kept for as long as the process runs, which a guard that
+    reads one package again on each pass of its fixed point needs; a guard
+    that reads each file once calls this when it is done with the file, so
+    that the trees of a whole directory are not all kept at once.
+    """
+    for cached in (own_names, _parents, _blocks, _class_is_live):
+        cached.cache_clear()
+
+
+def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:
+    """The scope whose binding of *name* a read or a write at *node* reaches.
+
+    The scope :func:`binding_of` finds: a ``:=`` in a comprehension reaches
+    the function around it, a name a scope declares ``nonlocal`` the
+    function that binds it, and a method passes over the class body around
+    it. The module, *root*, for a name declared ``global`` where it is read
+    or written, and for one no scope around *node* binds, which the module
+    stands for once a function has declared it ``global`` and bound it.
+    """
+    scope = binding_of(root, node, name)[1]
+    if scope is None or name in own_names(scope).declared_global:
+        return root
+    return scope
 
 
 #: The compound statements: those whose blocks hold statements of the scope

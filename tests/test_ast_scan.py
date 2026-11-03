@@ -975,6 +975,31 @@ def test_a_binding_runs_before_a_read_in_the_same_with_or_try_body() -> None:
     assert found == {"a": True, "b": True, "c": False}
 
 
+def test_an_annotation_without_a_value_runs_no_binding_before_a_read() -> None:
+    """``a: int`` binds nothing, so it is no binding that runs before a read;
+    ``b: int = 1`` binds ``b`` as an assignment does.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def f():
+                a: int
+                b: int = 1
+                use(a, b)
+            """
+        )
+    )
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    (call,) = _calls(function, "use")
+    found = {
+        node.id: ast_scan.runs_before(tree, node, call)
+        for node in ast.walk(function)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+    }
+    assert found == {"a": False, "b": True}
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

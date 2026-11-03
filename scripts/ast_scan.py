@@ -1036,7 +1036,8 @@ def runs_before(root: ast.AST, binding: ast.AST, point: ast.AST) -> bool:
 
     The binding is an assignment or an import, the name a target of it or
     one it imports, written straight in a block that holds the statement of
-    *point*, before it; not a loop's target or a ``:=``, which may not run.
+    *point*, before it; not a loop's target or a ``:=``, which may not run,
+    nor an annotation without a value, which binds nothing.
     A block is entered at its top and an exception leaves it whole, so a
     read later in the block, or in a later statement of it, is reached only
     once the binding has run, in the body of a ``try`` or a ``with`` too; a
@@ -1049,7 +1050,7 @@ def runs_before(root: ast.AST, binding: ast.AST, point: ast.AST) -> bool:
         return False
     holder, field, index = frames[-1]
     statement = getattr(holder, field)[index]
-    if not isinstance(statement, _SURE_BINDINGS):
+    if not isinstance(statement, _SURE_BINDINGS) or _annotates_only(statement):
         return False
     if binding is not statement and not any(
         binding is target_name
@@ -1058,6 +1059,11 @@ def runs_before(root: ast.AST, binding: ast.AST, point: ast.AST) -> bool:
     ):
         return False
     return _later_in_block(frames, target)
+
+
+def _annotates_only(statement: ast.stmt) -> bool:
+    """Whether *statement* annotates a name without a value (``flag: type``)."""
+    return isinstance(statement, ast.AnnAssign) and statement.value is None
 
 
 def _assigned_targets(statement: ast.stmt) -> list[ast.expr]:

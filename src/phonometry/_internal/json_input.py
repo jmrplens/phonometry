@@ -272,7 +272,7 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
         removed after it, a note on the error names the file left behind.
     """
     temporary = beside_name(target, ".tmp")
-    mode = _mode_of(target) if replace else None
+    mode = mode_of(target) if replace else None
     try:
         with os.fdopen(make_new(temporary, private=mode is not None), "wb") as handle:
             handle.write(data)
@@ -326,12 +326,12 @@ def writing_beside(target: Path) -> Iterator[Path]:
         yield target
         return
     temporary = beside_name(target, ".partial")
-    mode = _mode_of(target)
+    mode = mode_of(target)
     os.close(make_new(temporary, private=mode is not None))
     failure: BaseException | None = None
     try:
         yield temporary
-        _flushed(temporary, mode)
+        flushed(temporary, mode)
         _rename(temporary, target, mode)
     except BaseException as error:
         failure = error
@@ -360,7 +360,7 @@ def make_new(path: Path, *, private: bool) -> int:
     return os.open(path, _MAKE, _PRIVATE if private else _USUAL)
 
 
-def _flushed(written: Path, mode: int | None) -> None:
+def flushed(written: Path, mode: int | None) -> None:
     """Give the file *written* the permission bits *mode* and flush it to the disk.
 
     On Windows the bits are the read-only flag, which :func:`_rename` sets
@@ -372,7 +372,7 @@ def _flushed(written: Path, mode: int | None) -> None:
         os.fsync(handle.fileno())
 
 
-def _mode_of(target: Path) -> int | None:
+def mode_of(target: Path) -> int | None:
     """The permission bits of the file at *target*, or ``None`` with none there.
 
     A file a caller keeps private (``0600``) stays private when it is written

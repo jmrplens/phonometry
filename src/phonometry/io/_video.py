@@ -14,7 +14,11 @@ one; a partial file the system will not let go (a scanner holding it on
 Windows) stays under its hidden name, and the error raised is still the
 one that stopped the write. A finished video that the system will not let
 take ``path``'s place (on Windows, while a player holds the old file open)
-stays under its partial name, and the error says where.
+stays under its partial name, and the error says where. The partial file is
+made before ffmpeg opens it, readable and writable by its owner alone where
+it replaces a file, which ffmpeg keeps as it writes into it, and is given the
+old file's permission bits once whole, so a video kept private is never
+written where others can read it.
 
 How a video is encoded is one record, :class:`VideoOptions`, which checks
 its fields when it is built; what depends on the file (the container its
@@ -50,7 +54,7 @@ from typing import TYPE_CHECKING, Any, Final, cast, get_args
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.json_input import beside_name, escaped
+from .._internal.json_input import beside_name, escaped, flushed, make_new, mode_of
 from .._internal.validation import (
     is_text,
     require_choice,
@@ -228,10 +232,52 @@ class VideoRequest:
 
         Two writes to the same path at once (two test workers, two render
         lanes) each get their own, so neither overwrites the other's
-        unfinished file. The file is not created here: ffmpeg, or the client
-        of a node, creates it with the user's usual permissions.
+        unfinished file. The file is not created here: :func:`made_partial`
+        makes it, before ffmpeg or the client of a node writes into it.
         """
         return beside_name(self.path, ".partial")
+
+
+def made_partial(partial: Path, path: Path) -> int | None:
+    """Make the empty file *partial* the video for *path* is written into.
+
+    It is made readable and writable by its owner alone when a file is at
+    *path*, before any byte goes in, so a video kept private is never written
+    where others can read it; a writer that opens it to write, as ffmpeg does,
+    keeps those bits. With nothing at *path* it takes the bits a new file
+    takes. A name whose status cannot be read is taken to hold a file kept
+    private: the video is made private too, and keeps those bits.
+
+    :return: The bits of the file at *path*, which :func:`keep_bits` gives
+        the finished video; ``None`` with nothing there, or none that can be
+        read.
+    :raises OSError: as the file system raises it, when *partial* cannot be
+        made (the directory does not take a file, or the name is taken).
+    """
+    try:
+        mode = mode_of(path)
+    except OSError:
+        mode, private = None, True
+    else:
+        private = mode is not None
+    os.close(make_new(partial, private=private))
+    return mode
+
+
+def keep_bits(partial: Path, path: Path, mode: int | None) -> None:
+    """Give the finished video at *partial* the bits *mode* and flush it to the disk.
+
+    On Windows the bits are the read-only flag, which the video does not
+    take: a file at *path* that holds it refuses the rename, as
+    :func:`settle` says.
+
+    :raises VideoEncoderError: when the disk refuses either (the message
+        names *path*, never the hidden file).
+    """
+    try:
+        flushed(partial, mode)
+    except OSError as exc:
+        raise disk_failure(path, exc) from exc
 
 
 def _is_dir(path: Path) -> bool:
@@ -882,6 +928,10 @@ def encode(
     # Absolute, so that ffmpeg reads it as a file: a relative "x:y/w.webm"
     # would be the protocol "x".
     partial = request.new_partial().absolute()
+    try:
+        mode = made_partial(partial, request.path)
+    except OSError as exc:
+        raise disk_failure(request.path, exc) from exc
     pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
     settling = False
     try:
@@ -894,6 +944,7 @@ def encode(
             }
         ):
             animation.save(str(partial), writer=_movie_writer(pipe))
+        keep_bits(partial, request.path, mode)
         settling = True
         settle(partial, request.path)
     except BaseException as exc:
@@ -940,7 +991,10 @@ def write_video(
     so this process holds one frame at a time; for a GIF, ffmpeg itself
     holds every frame until the last one has arrived, since the palette is
     computed from all of them. The file appears at ``path`` only when ffmpeg
-    has finished it, so a failure leaves whatever was there before.
+    has finished it, so a failure leaves whatever was there before. On POSIX
+    the file it is written into beside ``path`` is readable by its owner
+    alone while it replaces a file, and the video then keeps the permission
+    bits of the file it replaces; a new one takes the bits a new file takes.
 
     ffmpeg is the program matplotlib's ``rcParams["animation.ffmpeg_path"]``
     names (``"ffmpeg"`` on ``PATH`` by default). How it encodes is ``video``,

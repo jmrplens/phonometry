@@ -12,6 +12,7 @@ import contextlib
 import dataclasses
 import errno
 import inspect
+import os
 import pathlib
 import shutil
 import subprocess
@@ -54,7 +55,7 @@ from phonometry.simulation import video as video_module
 from phonometry.simulation._remote import client, package
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
     from pathlib import Path
     from typing import BinaryIO
 
@@ -658,6 +659,9 @@ def test_a_directory_that_cannot_take_the_video_is_refused_before_ssh_starts(
     assert ".partial" not in str(caught.value)
     assert not log.exists()
     assert fake.calls() == []
+    if directory == "refusing":
+        # Made, and refused when opened to write: it goes.
+        assert _partials(tmp_path) == []
     # Listed, not stat'ed: the name of an unsearchable directory has no status.
     assert target.name not in [p.name for p in target.parent.iterdir()]
 
@@ -774,5 +778,75 @@ def test_an_encoder_or_option_of_the_caller_s_that_the_node_s_ffmpeg_refuses(
     request = Compute(host=node)
     with pytest.raises(ComputeRemoteError, match=said):
         write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME, video=video)
+    assert target.read_bytes() == b"the video that was there"
+    assert _partials(tmp_path) == []
+
+
+@pytest.fixture
+def usual_umask() -> Iterator[None]:
+    """The umask most systems start a user with: new files readable by everyone."""
+    kept = os.umask(0o022)
+    try:
+        yield
+    finally:
+        os.umask(kept)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
+@pytest.mark.usefixtures("usual_umask")
+@pytest.mark.parametrize(
+    ("before", "after"), [(0o600, 0o600), (0o644, 0o644), (None, 0o644)]
+)
+def test_a_node_s_video_written_over_a_file_is_private_while_written_and_keeps_its_bits(
+    before: int | None,
+    after: int,
+    node: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The file the node's bytes went into was made with the umask's bits and
+    renamed as it was, so a video kept private was readable by everyone for
+    good. It is made readable by its owner alone where it replaces a file,
+    and given the old file's bits once whole.
+    """
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "kept.webm"
+    if before is not None:
+        target.write_bytes(b"the video that was there")
+        target.chmod(before)
+    seen: list[int] = []
+    write = video_module._PartialFile.write
+
+    def looked_at(self: video_module._PartialFile, data: bytes) -> int:
+        seen.append(self.path.stat().st_mode & 0o777)
+        return write(self, data)
+
+    monkeypatch.setattr(video_module._PartialFile, "write", looked_at)
+    write_fdtd_animation(target, _RUN, compute=Compute(host=node), frame=_FRAME)
+    assert seen
+    assert set(seen) == {0o600 if before is not None else 0o644}
+    assert target.stat().st_mode & 0o777 == after
+    assert target.read_bytes().startswith(_WEBM)
+    assert _partials(tmp_path) == []
+
+
+def test_a_disk_that_refuses_a_node_s_finished_video_s_bits_leaves_what_was_there(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from phonometry.io import _video as io_video
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "kept.webm"
+    target.write_bytes(b"the video that was there")
+
+    def full(written: pathlib.Path, mode: int | None) -> None:
+        del mode
+        raise OSError(errno.ENOSPC, "No space left on device", str(written))
+
+    monkeypatch.setattr(io_video, "flushed", full)
+    with pytest.raises(io.VideoEncoderError, match="No space left on device") as caught:
+        write_fdtd_animation(target, _RUN, compute=Compute(host=node), frame=_FRAME)
+    assert str(target) in str(caught.value)
+    assert ".partial" not in str(caught.value)
     assert target.read_bytes() == b"the video that was there"
     assert _partials(tmp_path) == []

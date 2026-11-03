@@ -68,7 +68,9 @@ first: never more of them than the frames can take, and none that do not
 begin as the container ``path`` names. That file takes ``path``'s place once
 the node's whole answer has been read and checked, and is removed if
 anything fails before (or stays, under its own name, if the system does not
-let it go, which hides no error).
+let it go, which hides no error). As the file a video written here goes
+into, it is readable by its owner alone while it replaces a file, and the
+video then keeps the permission bits of the file it replaces.
 """
 
 from __future__ import annotations
@@ -747,17 +749,23 @@ def _color_limit[R: (FDTDRun, ElasticRun)](
 class _PartialFile:
     """The hidden file beside ``path`` a node's video goes into, before it takes ``path``'s place.
 
-    A failure of this machine's disk, to create the file, to write the bytes
-    or to close it (a directory that refuses files, a full disk, a quota), is
-    a :class:`~phonometry.io.VideoEncoderError` naming ``path``, as ffmpeg's
-    is on this machine; it never names the hidden file, which the caller
-    did not ask for.
+    It is made as the video written here makes its own
+    (:func:`~phonometry.io._video.made_partial`): readable by its owner alone
+    where it replaces a file, before any byte goes in, and given the old
+    file's bits by :meth:`keep_bits` once whole. A failure of this machine's
+    disk, to create the file, to write the bytes or to close it (a directory
+    that refuses files, a full disk, a quota), is a
+    :class:`~phonometry.io.VideoEncoderError` naming ``path``, as ffmpeg's is
+    on this machine; it never names the hidden file, which the caller did not
+    ask for.
     """
 
     def __init__(self, request: VideoRequest) -> None:
         self.path = request.new_partial()
         self._target = request.path
         self._handle: BinaryIO | None = None
+        self._mode: int | None = None
+        self._made = False
 
     def _failure(self, exc: OSError) -> VideoEncoderError:
         from ..io._video import disk_failure
@@ -765,10 +773,20 @@ class _PartialFile:
         return disk_failure(self._target, exc)
 
     def _opened(self) -> BinaryIO:
+        from ..io._video import made_partial
+
         if self._handle is None:
             try:
-                self._handle = self.path.open("xb")
+                if not self._made:
+                    self._mode = made_partial(self.path, self._target)
+                    self._made = True
+                self._handle = self.path.open("wb")
             except OSError as exc:
+                if self._made:
+                    # Made, and not opened: it goes, as nothing will write it.
+                    with contextlib.suppress(OSError):
+                        self.path.unlink(missing_ok=True)
+                    self._made = False
                 raise self._failure(exc) from exc
         return self._handle
 
@@ -802,6 +820,15 @@ class _PartialFile:
             handle.close()
         except OSError as exc:
             raise self._failure(exc) from exc
+
+    def keep_bits(self) -> None:
+        """Give the whole file the bits of the file at ``path`` and flush it to the disk.
+
+        :raises VideoEncoderError: when the disk refuses either.
+        """
+        from ..io._video import keep_bits
+
+        keep_bits(self.path, self._target, self._mode)
 
     def discard(self) -> None:
         """Close and remove the file: the run failed, or falls back to this machine.
@@ -882,6 +909,7 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
         if ran is None:
             partial.discard()
             return None
+        partial.keep_bits()
         settling = True
         settle(partial.path, request.path)
     except BaseException as exc:

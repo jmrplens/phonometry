@@ -2387,12 +2387,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   bits, and is readable by its owner alone while it is written over a file, as
   is the copy a FLAC `bext` is written through, so a recording kept private is
   never written where others can read it (a sidecar or a catalogue written over
-  a file is held the same way); a hard link to the old file keeps the old
-  bytes, the new file takes the writer's owner and group and none of the old
-  file's access control lists or extended attributes, and the directory must
-  take a new file. The hidden name is cut to what the directory takes, as are
-  the copy a FLAC `bext` is written through and the partial file of a video, so
-  a name as long as the directory allows is written as any other, and `io.read`
+  a file is held the same way, and so is the partial file of a video from
+  `io.write_video` and the two simulation writers, which ffmpeg or a node
+  wrote with the umask's bits and which took the place of a video kept private
+  as it was, readable by everyone; the video now keeps the old file's bits);
+  a hard link to the old file keeps the old bytes, the new file takes the
+  writer's owner and group and none of the old file's access control lists or
+  extended attributes, and the directory must take a new file. The hidden name
+  is cut to what the directory takes, as are the copy a FLAC `bext` is written
+  through and the partial file of a video, so a name as long as the directory
+  allows is written as any other, and `io.read`
   takes a recording of such a name, whose sidecar's name no directory holds, as
   one with no sidecar. A link, a pipe, a device or a directory at the name is
   opened there as Python opens a name, as before: a recording streamed into a

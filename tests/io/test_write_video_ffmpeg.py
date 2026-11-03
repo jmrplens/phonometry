@@ -7,6 +7,7 @@ and the CI job that installs them. Elsewhere they skip and say why.
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -46,9 +47,17 @@ def _svt_av1() -> bool:
 
 
 def _animation(
-    width: int, height: int, frames: int = 6, drawn: list[int] | None = None
+    width: int,
+    height: int,
+    frames: int = 6,
+    drawn: list[int] | None = None,
+    partials: tuple[Path, list[list[int]]] | None = None,
 ) -> FuncAnimation:
-    """A line animation exactly *width* by *height* pixels; each frame it draws goes into *drawn*."""
+    """A line animation exactly *width* by *height* pixels; each frame it draws goes into *drawn*.
+
+    :param partials: A directory, and a list each frame adds the permission
+        bits of the hidden partial files in it to.
+    """
     fig = Figure(figsize=((width + 0.5) / 100, (height + 0.5) / 100), dpi=100)
     FigureCanvasAgg(fig)
     ax = fig.add_subplot()
@@ -57,6 +66,15 @@ def _animation(
     def update(k: int) -> tuple[Line2D]:
         if drawn is not None:
             drawn.append(k)
+        if partials is not None:
+            directory, seen = partials
+            seen.append(
+                sorted(
+                    p.stat().st_mode & 0o777
+                    for p in directory.iterdir()
+                    if p.name.endswith(".partial")
+                )
+            )
         line.set_ydata([0.0, float(k)])
         return (line,)
 
@@ -194,3 +212,37 @@ def test_an_encoder_or_option_of_the_caller_s_that_ffmpeg_refuses_fails_at_once(
     assert 0 < len(drawn) < n_frames // 2
     assert target.read_bytes() == b"the video that was there"
     assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
+@pytest.mark.parametrize(
+    ("name", "video"),
+    [
+        ("w.webm", io.VideoOptions(encoder="cpu")),
+        ("w.mp4", io.VideoOptions(encoder="cpu", codec="h264")),
+        ("w.gif", io.VideoOptions()),
+    ],
+)
+def test_ffmpeg_keeps_the_bits_the_partial_file_was_made_with(
+    tmp_path: Path, name: str, video: io.VideoOptions
+) -> None:
+    """ffmpeg opens the partial file it is handed to write, an MP4 that starts
+    playing before it has downloaded twice, and keeps the bits it was made
+    with: readable by its owner alone while the frames go in, then the old
+    file's.
+    """
+    kept = os.umask(0o022)
+    try:
+        target = tmp_path / name
+        target.write_bytes(b"the video that was there")
+        target.chmod(0o640)
+        seen: list[list[int]] = []
+        io.write_video(
+            target, _animation(200, 150, partials=(tmp_path, seen)), video=video
+        )
+    finally:
+        os.umask(kept)
+    assert seen
+    assert all(modes == [0o600] for modes in seen)
+    assert target.stat().st_mode & 0o777 == 0o640
+    assert _probe(target)["nb_read_frames"] == "6"

@@ -384,13 +384,13 @@ def test_a_private_recording_is_never_written_where_others_can_read_it(
     if writer.startswith("convert"):
         write(tmp_path / "source.wav", SAMPLES, FS, subtype="PCM_24")
     seen: list[dict[str, int]] = []
-    flushed = json_input._flushed
+    flushed = json_input.flushed
 
     def looked_at(written: Path, mode: int | None) -> None:
         seen.append(_hidden_modes(tmp_path))
         flushed(written, mode)
 
-    monkeypatch.setattr(json_input, "_flushed", looked_at)
+    monkeypatch.setattr(json_input, "flushed", looked_at)
     write_to(path)
     assert len(seen) == 1
     assert len(seen[0]) == 1

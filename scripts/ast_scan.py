@@ -853,6 +853,22 @@ def _inner_statements(node: ast.AST, *, looped: bool) -> Iterator[tuple[ast.AST,
             yield from ((child, inner) for child in block)
 
 
+def _later_in_block(statement: Sequence[Frame], point: Sequence[Frame] | None) -> bool:
+    """Whether *point* is written after the statement at *statement* in the
+    block that holds it, or inside a later statement of that block.
+
+    A block is entered at its top, and whatever leaves it before *point*
+    (an exception, a ``break``, a ``continue``, a ``return``) leaves *point*
+    behind too, so every way to *point* runs the statement first.
+    """
+    depth = len(statement) - 1
+    if point is None or len(point) <= depth or _shared(point, statement) < depth:
+        return False
+    _, field, index = statement[depth]
+    _, read_in, read_at = point[depth]
+    return read_in == field and read_at > index
+
+
 def _replaces(
     later: Sequence[Frame], earlier: Sequence[Frame], point: Sequence[Frame] | None
 ) -> bool:
@@ -1017,9 +1033,12 @@ def runs_before(root: ast.AST, binding: ast.AST, point: ast.AST) -> bool:
 
     The binding is an assignment or an import, the name a target of it or
     one it imports, written straight in a block that holds the statement of
-    *point*, before it; not one inside a ``try`` or a ``with`` whose body an
-    exception may leave (:func:`_may_be_caught`), nor a loop's target or a
-    ``:=``, which may not run.
+    *point*, before it; not a loop's target or a ``:=``, which may not run.
+    A block is entered at its top and an exception leaves it whole, so a
+    read later in the block, or in a later statement of it, is reached only
+    once the binding has run, in the body of a ``try`` or a ``with`` too; a
+    read after that statement is not in the block, and an exception the
+    statement catches before the binding ran may reach it.
     """
     frames = _frames(root, binding)
     target = _frames(root, point)
@@ -1035,11 +1054,7 @@ def runs_before(root: ast.AST, binding: ast.AST, point: ast.AST) -> bool:
         for target_name in ast.walk(written)
     ):
         return False
-    depth = len(frames) - 1
-    if len(target) <= depth or _shared(frames, target) < depth:
-        return False
-    _, read_in, read_at = target[depth]
-    return read_in == field and index < read_at and not _may_be_caught(frames, target)
+    return _later_in_block(frames, target)
 
 
 def _assigned_targets(statement: ast.stmt) -> list[ast.expr]:

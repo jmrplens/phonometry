@@ -2122,9 +2122,10 @@ def test_the_float_equality_check_reads_a_global_name_its_function_has_just_boun
 
     ``global flag`` then ``flag = None`` makes ``x.astype(flag)`` a cast to
     ``None``; the reader took the module's ``from numpy import bool_ as
-    flag`` as standing there too. A binding in one branch only, another
-    function's read and the enclosing function's own read still meet the
-    import.
+    flag`` as standing there too. So does a read in the same ``with`` or
+    ``try`` body as the binding, which an exception skipping the binding
+    never reaches. A binding in one branch only, another function's read
+    and the enclosing function's own read still meet the import.
     """
     source = "\n".join(
         [
@@ -2147,6 +2148,18 @@ def test_the_float_equality_check_reads_a_global_name_its_function_has_just_boun
             "        mask = None",
             "        return y.astype(mask)",
             "    return inner(x), x.astype(mask)",
+            "def guarded(x):",
+            "    global flag",
+            "    with ctx():",
+            "        flag = None",
+            "        return x.astype(flag)",
+            "def tried(x):",
+            "    global flag",
+            "    try:",
+            "        flag = None",
+            "        return x.astype(flag)",
+            "    except ValueError:",
+            "        return None",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [

@@ -865,6 +865,47 @@ def test_a_binding_runs_before_a_read_only_on_every_way_there() -> None:
     }  # fmt: skip
 
 
+def test_a_binding_runs_before_a_read_in_the_same_with_or_try_body() -> None:
+    """A binding and a read in one ``with`` or ``try`` body: an exception
+    that skips the binding leaves that body, and the read with it, so the
+    read is reached only through the binding. A read after the statement
+    still meets an exception caught before the binding ran.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def f():
+                with ctx():
+                    a = 1
+                    use(a)
+                try:
+                    b = 1
+                    use(b)
+                except ValueError:
+                    pass
+                try:
+                    c = 1
+                except ValueError:
+                    pass
+                use(c)
+            """
+        )
+    )
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    reads = {
+        node.id: node
+        for node in ast.walk(function)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+    }
+    found = {
+        node.id: ast_scan.runs_before(tree, node, reads[node.id])
+        for node in ast.walk(function)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+    }
+    assert found == {"a": True, "b": True, "c": False}
+
+
 def test_block_statements_reads_every_block_of_every_compound_statement() -> None:
     """The one walker the guards share reads each block a compound statement
     holds, in the order of the source, and nothing of any other node.

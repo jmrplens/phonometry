@@ -118,6 +118,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 from ast_scan import (
     COMPOUND_STATEMENTS,
     binding_of,
+    bindings_by_name,
     block_statements,
     imported_names,
     live_bindings,
@@ -1164,28 +1165,91 @@ def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
             yield node
 
 
+def _standing(tree: ast.Module) -> dict[str, list[ast.AST]]:
+    """Each name a module binds, with the bindings of it that may stand once
+    the module has run.
+
+    Every binding at the top of the module in the order of the source
+    (:func:`ast_scan.bindings_by_name`), and of those the later of two in a
+    row and either of two in the branches of a ``try`` or an ``if``
+    (:func:`ast_scan.live_bindings`).
+    """
+    return {
+        name: nodes if len(nodes) == 1 else live_bindings(tree, nodes)
+        for name, nodes in bindings_by_name(tree).items()
+    }
+
+
+@functools.cache
+def _read_module(
+    module_name: str,
+) -> tuple[ModuleType, ast.Module, str, dict[str, list[ast.AST]]] | None:
+    """:func:`_parsed_module` with the bindings that stand in it
+    (:func:`_standing`), read once for each module whatever reads it.
+    """
+    parsed = _parsed_module(module_name)
+    if parsed is None:
+        return None
+    module, tree, package = parsed
+    return module, tree, package, _standing(tree)
+
+
+def _assignments(tree: ast.Module) -> dict[ast.AST, ast.stmt]:
+    """Each node of an assignment at the top of a module, with the assignment."""
+    return {
+        node: statement
+        for statement in _module_statements(tree.body)
+        if isinstance(statement, ast.Assign | ast.AnnAssign | ast.TypeAlias)
+        for node in ast.walk(statement)
+    }
+
+
+def _agreed(values: list[ast.expr | None]) -> ast.expr | None:
+    """The one expression *values* all read as.
+
+    None when one is missing or two differ.
+    """
+    first = values[0] if values else None
+    if first is None:
+        return None
+    spelled = ast.dump(first)
+    return (
+        first if all(v is not None and ast.dump(v) == spelled for v in values) else None
+    )
+
+
 @functools.cache
 def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast.expr]:
     """The constants *module_name* binds as it is imported, by name.
 
     Each assignment's value, and each constant an import from the package
-    brings in (:func:`_imported_constants`), in the order of the source: of
-    two bindings of one name the later stands, as Python leaves it, and an
-    import of anything else takes the name from a constant before it.
+    brings in (:func:`_imported_constants`), read from the bindings of the
+    name that may stand once the module has run (:func:`_standing`): of two
+    in a row the later, as Python leaves it, so an import of anything else
+    or a ``def`` after a constant takes the name from it. Two that may each
+    stand, in the branches of a ``try`` or an ``if``, give the name a value
+    only when they agree.
     """
-    parsed = _parsed_module(module_name)
-    if parsed is None:
+    read = _read_module(module_name)
+    if read is None:
         return MappingProxyType({})
-    module, tree, package = parsed
+    module, tree, package, standing = read
+    assignments = _assignments(tree)
+    imported: dict[ast.AST, dict[str, ast.expr]] = {}
+
+    def value(node: ast.AST, name: str) -> ast.expr | None:
+        if isinstance(node, ast.ImportFrom) and depth < _IMPORT_DEPTH:
+            if node not in imported:
+                imported[node] = dict(_imported_constants(node, package, depth))
+            return imported[node].get(name)
+        statement = assignments.get(node)
+        return dict(_assigned(statement)).get(name) if statement else None
+
     found: dict[str, ast.expr] = {}
-    for node in _module_statements(tree.body):
-        if isinstance(node, ast.Import | ast.ImportFrom):
-            for name in imported_names(node):
-                found.pop(name, None)
-            if isinstance(node, ast.ImportFrom) and depth < _IMPORT_DEPTH:
-                found.update(_imported_constants(node, package, depth))
-            continue
-        found.update(_assigned(node))
+    for name, nodes in standing.items():
+        agreed = _agreed([value(node, name) for node in nodes])
+        if agreed is not None:
+            found[name] = agreed
     _read_frozen_tables(found, vars(module))
     return MappingProxyType(found)
 
@@ -2286,32 +2350,40 @@ def _imports_of(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
     """What *module_name* imports from the package, by the name it gives each:
     the module imported from and the name there.
 
-    Read in the order of the source, as :func:`_constants_of` reads the
-    module: of two imports of one name the later stands, as Python leaves
-    it, and a name the module assigns, or imports from outside the package,
-    after its import is its own, and is left out.
+    Read from the bindings of each name that may stand once the module has
+    run (:func:`_standing`), as :func:`_constants_of` reads the module: of
+    two imports of one name in a row the later stands, as Python leaves it,
+    and a name the module assigns, defines, or imports from outside the
+    package after its import is its own, and is left out, as is one that two
+    imports in the branches of a ``try`` or an ``if`` take from two places.
     """
-    parsed = _parsed_module(module_name)
-    if parsed is None:
+    read = _read_module(module_name)
+    if read is None:
         return MappingProxyType({})
-    _, tree, package = parsed
+    _, _, package, standing = read
     imports: dict[str, tuple[str, str]] = {}
-    for node in _module_statements(tree.body):
-        if not isinstance(node, ast.Import | ast.ImportFrom):
-            for name, _ in _assigned(node):
-                imports.pop(name, None)
-            continue
-        for name in imported_names(node):
-            imports.pop(name, None)
-        source = (
-            _import_source(node, package) if isinstance(node, ast.ImportFrom) else None
-        )
-        if source is None:
-            continue
-        for alias in node.names:
-            if alias.name != "*":
-                imports[alias.asname or alias.name] = (source, alias.name)
+    for name, nodes in standing.items():
+        sources = {_import_of(node, name, package) for node in nodes}
+        (source,) = sources if len(sources) == 1 else (None,)
+        if source is not None:
+            imports[name] = source
     return MappingProxyType(imports)
+
+
+def _import_of(node: ast.AST, name: str, package: str) -> tuple[str, str] | None:
+    """The module of the package and the name there that *node* imports as *name*.
+
+    None for any other binding, and for an import from outside the package.
+    """
+    if not isinstance(node, ast.ImportFrom):
+        return None
+    source = _import_source(node, package)
+    if source is None:
+        return None
+    for alias in node.names:
+        if alias.name != "*" and (alias.asname or alias.name) == name:
+            return source, alias.name
+    return None
 
 
 @functools.cache
@@ -3642,8 +3714,22 @@ def _resolved(name: str, module_name: str) -> object:
     except (OSError, TypeError, SyntaxError):
         return None
     package = module.__package__ or module_name.rpartition(".")[0]
-    for node in _module_statements(tree.body):
+    found = {id(held): held for held in _imported_objects(tree, name, package)}
+    (held,) = found.values() if len(found) == 1 else (None,)
+    return held
+
+
+def _imported_objects(tree: ast.Module, name: str, package: str) -> list[object]:
+    """What each import of *name* that may stand once the module has run
+    (:func:`_standing`) binds it to: the later of two in a row, either of two
+    in the branches of a ``try`` or an ``if``; ``None`` for one that cannot
+    be imported and for any other binding of the name.
+    """
+    found: list[object] = []
+    for node in _standing(tree).get(name, []):
+        held = None
         if not isinstance(node, ast.ImportFrom):
+            found.append(held)
             continue
         for alias in node.names:
             if (alias.asname or alias.name) != name:
@@ -3652,10 +3738,11 @@ def _resolved(name: str, module_name: str) -> object:
                 source = importlib.util.resolve_name(
                     "." * node.level + (node.module or ""), package
                 )
-                return getattr(importlib.import_module(source), alias.name, None)
+                held = getattr(importlib.import_module(source), alias.name, None)
             except (ImportError, ValueError):
-                return None
-    return None
+                held = None
+        found.append(held)
+    return found
 
 
 def _returned(

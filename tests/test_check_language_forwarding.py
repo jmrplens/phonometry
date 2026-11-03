@@ -235,6 +235,163 @@ def test_the_later_of_two_bindings_of_a_name_is_the_one_a_call_reaches(
     ]
 
 
+def test_a_call_is_checked_against_either_import_of_two_branches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Of two imports of one name in the branches of a ``try`` or an ``if``, either may stand.
+
+    The ``try`` body stands when its import succeeds and the ``except``
+    clause's when it fails; one branch of an ``if`` runs. A call that drops
+    the language is found whichever of the two takes it, in either order,
+    in the module and in a function.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax):
+                return ax
+            """,
+            "pkg.plots": """
+            try:
+                from .helpers import axis as tried_first
+            except ImportError:
+                from .other import axis as tried_first
+            try:
+                from .other import axis as tried_second
+            except ImportError:
+                from .helpers import axis as tried_second
+            if FAST:
+                from .helpers import axis as then_first
+            else:
+                from .other import axis as then_first
+            if FAST:
+                from .other import axis as then_second
+            else:
+                from .helpers import axis as then_second
+
+
+            def plot_tried_first(result, ax, language="en"):
+                tried_first(ax)
+
+
+            def plot_tried_second(result, ax, language="en"):
+                tried_second(ax)
+
+
+            def plot_then_first(result, ax, language="en"):
+                then_first(ax)
+
+
+            def plot_then_second(result, ax, language="en"):
+                then_second(ax)
+
+
+            def plot_in_a_function(result, ax, language="en"):
+                try:
+                    from .helpers import axis as draw
+                except ImportError:
+                    from .other import axis as draw
+                draw(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_tried_first", "pkg.helpers.axis"),
+        ("plot_tried_second", "pkg.helpers.axis"),
+        ("plot_then_first", "pkg.helpers.axis"),
+        ("plot_then_second", "pkg.helpers.axis"),
+        ("plot_in_a_function", "pkg.helpers.axis"),
+    ]
+
+
+def test_each_of_two_definitions_of_one_name_is_read(tmp_path: pathlib.Path) -> None:
+    """A function defined in each branch of an ``if`` has its calls read in both.
+
+    Either may be the one that runs, and so may one a later ``def`` of its
+    name replaces, so neither body is passed over.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis
+
+            if FAST:
+
+                def plot_branch(result, ax, language="en"):
+                    axis(ax)
+
+            else:
+
+                def plot_branch(result, ax, language="en"):
+                    axis(ax, language=language)
+
+
+            def plot_twice(result, ax, language="en"):
+                axis(ax)
+
+
+            def plot_twice(result, ax, language="en"):
+                axis(ax, language=language)
+            """,
+        },
+    )
+    assert [(f.line, f.caller) for f in found] == [
+        (7, "plot_branch"),
+        (16, "plot_twice"),
+    ]
+
+
+def test_an_import_after_a_definition_of_its_name_is_what_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A definition and an import of one name stand in the order of the source.
+
+    An import after a ``def`` of its name replaces it, in the module and in
+    a function, so a call reaches the import's helper; a ``def`` after an
+    import replaces the import the same way.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            def axis(ax):
+                return ax
+
+
+            from .helpers import axis
+            from .helpers import axis as replaced
+
+
+            def replaced(ax):
+                return ax
+
+
+            def plot_module(result, ax, language="en"):
+                axis(ax)
+
+
+            def plot_function(result, ax, language="en"):
+                def draw(ax):
+                    return ax
+
+                from .helpers import axis as draw
+
+                draw(ax)
+
+
+            def plot_replaced(result, ax, language="en"):
+                replaced(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_module", "pkg.helpers.axis"),
+        ("plot_function", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_nested_function_inherits_the_language_of_its_enclosure(
     tmp_path: pathlib.Path,
 ) -> None:

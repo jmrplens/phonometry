@@ -33,7 +33,12 @@ body and a class body are read too, so a call that sits outside every function
 is held to the same rule as one inside.
 
 The callee is found the way the tree imports it: through relative imports,
-package re-exports and module attributes (``noise_control.plot_x``). A method is
+package re-exports and module attributes (``noise_control.plot_x``). Of the
+``def``s, classes and imports that bind one name in a scope, the call reaches
+those that may stand once the scope has run (:func:`ast_scan.live_bindings`):
+the later of two in a row, whichever kind each is, and either of two in the
+branches of a ``try`` or an ``if``, against each of which the call is checked.
+A method is
 found through the class of its receiver, read from a parameter annotation, from
 the class or function whose result was assigned to it, or from ``self``. Where
 the receiver cannot be typed, a method name every method of which takes the
@@ -82,6 +87,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+from ast_scan import live_bindings
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -163,6 +170,11 @@ class Binding:
     name: str | None = None
 
 
+#: What a statement binds a name to: a function or a class it defines, or
+#: what it imports.
+_Bound = _DefinitionNode | Binding
+
+
 @dataclass(eq=False)
 class Module:
     """One parsed source file, with what its top level defines and imports."""
@@ -171,8 +183,11 @@ class Module:
     path: Path
     package: bool
     node: ast.Module
-    defs: dict[str, _DefinitionNode] = field(default_factory=dict)
-    imports: dict[str, Binding] = field(default_factory=dict)
+    #: What each name its top level defines or imports may stand for once it
+    #: has run (:func:`_scope_names`).
+    names: dict[str, list[_Bound]] = field(default_factory=dict)
+    #: Every function and class its top level defines, two of one name alike.
+    definitions: list[_DefinitionNode] = field(default_factory=list)
     speaks: bool = False
 
 
@@ -199,8 +214,11 @@ class Scope:
     qualname: str
     params: frozenset[str] = frozenset()
     locals: set[str] = field(default_factory=set)
-    nested: dict[str, _DefinitionNode] = field(default_factory=dict)
-    imports: dict[str, Binding] = field(default_factory=dict)
+    #: What each name it defines or imports may stand for once it has run
+    #: (:func:`_scope_names`).
+    names: dict[str, list[_Bound]] = field(default_factory=dict)
+    #: Every function and class defined in it, two of one name alike.
+    definitions: list[_DefinitionNode] = field(default_factory=list)
     values: dict[str, list[ast.expr]] = field(default_factory=dict)
     annotations: dict[str, ast.expr] = field(default_factory=dict)
     inserts: set[str] = field(default_factory=set)
@@ -361,6 +379,39 @@ def _import_bindings(module: Module, node: ast.AST) -> dict[str, Binding]:
     }
 
 
+def _scope_names(
+    module: Module, body: list[ast.stmt]
+) -> tuple[dict[str, list[_Bound]], list[_DefinitionNode]]:
+    """What each name *body* binds by a ``def``, a ``class`` or an import may
+    stand for once it has run, and every function and class it defines.
+
+    The statements are read in the order of the source, and of those that
+    bind one name, the ones that may stand once the body has run are kept
+    (:func:`ast_scan.live_bindings`): the later of two in a row, a ``def`` or
+    an import alike, and either of two in the branches of a ``try`` or an
+    ``if``, which the tree may meet whichever ran.
+    """
+    definitions = list(_definitions(body))
+    written: dict[str, list[tuple[ast.stmt, _Bound]]] = {}
+    for definition in definitions:
+        written.setdefault(definition.name, []).append((definition, definition))
+    for node in _own_nodes(body):
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            for name, binding in _import_bindings(module, node).items():
+                written.setdefault(name, []).append((node, binding))
+    names: dict[str, list[_Bound]] = {}
+    for name, pairs in written.items():
+        pairs.sort(key=lambda pair: (pair[0].lineno, pair[0].col_offset))
+        statements = [statement for statement, _ in pairs]
+        live = statements
+        if len(statements) > 1:
+            live = live_bindings(module.node, statements)
+        names[name] = [
+            bound for statement, bound in pairs if any(statement is s for s in live)
+        ]
+    return names, definitions
+
+
 def _removes_language(node: ast.AST) -> str | None:
     """The mapping a call pops the ``language`` key out of, if it does."""
     if (
@@ -431,14 +482,12 @@ def _build_scope(
         params=frozenset(a.arg for a in every),
         annotations={a.arg: a.annotation for a in every if a.annotation is not None},
     )
-    scope.nested = {d.name: d for d in _definitions(node.body)}
+    scope.names, scope.definitions = _scope_names(module, node.body)
     for child in _own_nodes(node.body):
         if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store):
             scope.locals.add(child.id)
         elif isinstance(child, ast.ExceptHandler) and child.name:
             scope.locals.add(child.name)
-        elif isinstance(child, ast.Import | ast.ImportFrom):
-            scope.imports.update(_import_bindings(module, child))
         elif isinstance(child, ast.Call):
             scope.calls.append(child)
         if isinstance(child, ast.Assign):
@@ -460,6 +509,20 @@ def _build_scope(
     return scope
 
 
+def _one(targets: list[_Target]) -> _Target:
+    """The one thing every reading of a name agrees on, or None when they differ."""
+    first = targets[0] if targets else None
+    return first if all(t is first or t == first for t in targets) else None
+
+
+def _one_import(bound: list[_Bound]) -> Binding | None:
+    """The import every binding of a name that may stand is, or None."""
+    first = bound[0] if bound else None
+    if isinstance(first, Binding) and all(b == first for b in bound):
+        return first
+    return None
+
+
 class Tree:
     """Every module of the scanned trees, ready to say what a call reaches."""
 
@@ -472,14 +535,12 @@ class Tree:
         self.methods: dict[str, list[Scope]] = {}
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
         for module in modules.values():
-            for child in _own_nodes(module.node.body):
-                module.imports.update(_import_bindings(module, child))
-            module.defs = {d.name: d for d in _definitions(module.node.body)}
+            module.names, module.definitions = _scope_names(module, module.node.body)
             module.speaks = any(
                 module.name == name or module.name.startswith(f"{name}.")
                 for name in LANGUAGE_PASSES
             )
-            for definition in module.defs.values():
+            for definition in module.definitions:
                 self._define(definition, module, None, None, "")
             self._define_body(module.node.body, module, None, None, "<module>")
 
@@ -526,7 +587,7 @@ class Tree:
         self.functions[node] = scope
         if owner is not None:
             self.methods.setdefault(node.name, []).append(scope)
-        for nested in scope.nested.values():
+        for nested in scope.definitions:
             self._define(nested, module, scope, None, qualname + ".<locals>.")
 
     def _define_body(
@@ -570,49 +631,80 @@ class Tree:
     def _definition(self, node: _DefinitionNode) -> Scope | Class | None:
         return self.functions.get(node) or self.classes.get(node)
 
-    def attribute(
-        self, module_name: str, attr: str, seen: set[tuple[str, str]] | None = None
-    ) -> _Target:
-        """What ``module.attr`` is, following re-exports to where it is defined."""
-        seen = set() if seen is None else seen
+    def _targets(
+        self, bound: _Bound, seen: frozenset[tuple[str, str]] = frozenset()
+    ) -> list[_Target]:
+        """What one binding of a name refers to: a definition, or an import's."""
+        if isinstance(bound, Binding):
+            return self.bounds(bound, seen)
+        found = self._definition(bound)
+        return [found] if found is not None else []
+
+    def attributes(
+        self,
+        module_name: str,
+        attr: str,
+        seen: frozenset[tuple[str, str]] = frozenset(),
+    ) -> list[_Target]:
+        """What ``module.attr`` may be, following re-exports to where it is defined.
+
+        Each binding of the name that may stand once the module has run, so
+        two imports of it in the branches of a ``try`` give two.
+        """
         child = f"{module_name}.{attr}"
+        fallback: list[_Target] = [ModuleRef(child)] if child in self.modules else []
         module = self.modules.get(module_name)
-        if module is None:
-            return ModuleRef(child) if child in self.modules else None
-        if attr in module.defs:
-            return self._definition(module.defs[attr])
-        binding = module.imports.get(attr)
-        if binding is not None and (module_name, attr) not in seen:
-            seen.add((module_name, attr))
-            found = self.bound(binding, seen)
-            if found is not None:
-                return found
-        return ModuleRef(child) if child in self.modules else None
+        if module is None or (module_name, attr) in seen:
+            return fallback
+        inner = seen | {(module_name, attr)}
+        found = [
+            target
+            for bound in module.names.get(attr, ())
+            for target in self._targets(bound, inner)
+        ]
+        return found or fallback
 
-    def bound(
-        self, binding: Binding, seen: set[tuple[str, str]] | None = None
-    ) -> _Target:
-        """What an import binding refers to, when it is part of the tree."""
+    def attribute(self, module_name: str, attr: str) -> _Target:
+        """What ``module.attr`` is, when every binding it may hold agrees."""
+        return _one(self.attributes(module_name, attr))
+
+    def bounds(
+        self, binding: Binding, seen: frozenset[tuple[str, str]] = frozenset()
+    ) -> list[_Target]:
+        """What an import binding may refer to, when it is part of the tree."""
         if binding.name is None:
-            return ModuleRef(binding.module) if binding.module in self.modules else None
-        return self.attribute(binding.module, binding.name, seen)
+            return [ModuleRef(binding.module)] if binding.module in self.modules else []
+        return self.attributes(binding.module, binding.name, seen)
 
-    def lookup(self, name: str, scope: Scope | None, module: Module) -> _Target:
-        """Resolve a bare name the way Python would inside *scope*."""
+    def bound(self, binding: Binding) -> _Target:
+        """What an import binding refers to, when every reading of it agrees."""
+        return _one(self.bounds(binding))
+
+    def lookups(self, name: str, scope: Scope | None, module: Module) -> list[_Target]:
+        """Everything a bare name may stand for inside *scope*, read as Python reads it.
+
+        The innermost scope that binds the name holds it: its ``def``s, classes
+        and imports that may stand once it has run (:func:`_scope_names`), or
+        its parameters and locals.
+        """
         current = scope
         while current is not None:
-            if name in current.nested:
-                return self._definition(current.nested[name])
-            if name in current.imports:
-                return self.bound(current.imports[name])
+            bound = current.names.get(name)
+            if bound:
+                return [target for b in bound for target in self._targets(b)]
             if name in current.params or name in current.locals:
-                return Local(current, name)
+                return [Local(current, name)]
             current = current.parent
-        if name in module.defs:
-            return self._definition(module.defs[name])
-        if name in module.imports:
-            return self.bound(module.imports[name])
-        return None
+        return [
+            target for b in module.names.get(name, ()) for target in self._targets(b)
+        ]
+
+    def lookup(self, name: str, scope: Scope | None, module: Module) -> _Target:
+        """Resolve a bare name the way Python would inside *scope*.
+
+        None when the bindings it may hold disagree (:meth:`lookups`).
+        """
+        return _one(self.lookups(name, scope, module))
 
     def resolve(self, expr: ast.expr, scope: Scope | None, module: Module) -> _Target:
         """Resolve a name or a dotted module path to what it refers to."""
@@ -784,52 +876,76 @@ class Tree:
                     for k in call.keywords
                 ):
                     continue
-                if self.callee(call, function) is not None:
+                if self.callees(call, function):
                     found = Slot(None)
                     break
         self._slots[key] = found
         return found
 
-    def callee(self, call: ast.Call, scope: Scope) -> Callee | None:
-        """The helper *call* reaches, if it is one that takes the language."""
+    def callees(self, call: ast.Call, scope: Scope) -> list[Callee]:
+        """The helpers *call* may reach that take the language.
+
+        A name that two bindings may hold, two imports in the branches of a
+        ``try`` say, gives one for each that takes it.
+        """
         func = call.func
         module = scope.module
+        found: list[Callee | None] = []
         if isinstance(func, ast.Name):
-            target = self.lookup(func.id, scope, module)
-            if isinstance(target, Scope):
-                return self._callee(target, bound=False)
-            if isinstance(target, Class):
-                init = self.member(target, "__init__")
-                return self._callee(init, bound=True) if init else None
-            if isinstance(target, Local):
-                typed = self.type_of(func, scope)
-                method = self.member(typed, "__call__") if typed else None
-                if method is not None:
-                    return self._callee(method, bound=True)
-                return self._value_callee(target)
-            return None
-        if isinstance(func, ast.Call):
+            found = [
+                self._target_callee(target, func, scope)
+                for target in self.lookups(func.id, scope, module)
+            ]
+        elif isinstance(func, ast.Call):
             # ``functools.partial(helper, ax)(...)``, called where it is built.
-            return self._partial_callee(func, scope)
-        if not isinstance(func, ast.Attribute):
-            return None
-        base = self.resolve(func.value, scope, module)
+            found = [self._partial_callee(func, scope)]
+        elif isinstance(func, ast.Attribute):
+            found = self._attribute_callees(call, func, scope)
+        unique: list[Callee] = []
+        for callee in found:
+            if callee is not None and callee not in unique:
+                unique.append(callee)
+        return unique
+
+    def _target_callee(
+        self, target: _Target, func: ast.Name, scope: Scope
+    ) -> Callee | None:
+        """The helper a name reaches when it stands for *target*."""
+        if isinstance(target, Scope):
+            return self._callee(target, bound=False)
+        if isinstance(target, Class):
+            init = self.member(target, "__init__")
+            return self._callee(init, bound=True) if init else None
+        if isinstance(target, Local):
+            typed = self.type_of(func, scope)
+            method = self.member(typed, "__call__") if typed else None
+            if method is not None:
+                return self._callee(method, bound=True)
+            return self._value_callee(target)
+        return None
+
+    def _attribute_callees(
+        self, call: ast.Call, func: ast.Attribute, scope: Scope
+    ) -> list[Callee | None]:
+        """The helpers ``owner.name(...)`` may reach."""
+        base = self.resolve(func.value, scope, scope.module)
         if isinstance(base, ModuleRef):
-            target = self.attribute(base.name, func.attr)
-            if isinstance(target, Scope):
-                return self._callee(target, bound=False)
-            if isinstance(target, Class):
-                init = self.member(target, "__init__")
-                return self._callee(init, bound=True) if init else None
-            return None
+            found: list[Callee | None] = []
+            for target in self.attributes(base.name, func.attr):
+                if isinstance(target, Scope):
+                    found.append(self._callee(target, bound=False))
+                elif isinstance(target, Class):
+                    init = self.member(target, "__init__")
+                    found.append(self._callee(init, bound=True) if init else None)
+            return found
         if isinstance(base, Class):
             method = self.member(base, func.attr)
-            return self._callee(method, bound=False) if method else None
+            return [self._callee(method, bound=False) if method else None]
         receiver = self._receiver(func.value, scope)
         if receiver is not None:
             method = self.member(receiver, func.attr)
-            return self._callee(method, bound=not method.static) if method else None
-        return self._by_name(call, func.attr)
+            return [self._callee(method, bound=not method.static) if method else None]
+        return [self._by_name(call, func.attr)]
 
     def _receiver(self, expr: ast.expr, scope: Scope) -> Class | None:
         if (
@@ -854,16 +970,13 @@ class Tree:
         """The import *name* is bound by, whether or not it is of this tree."""
         current: Scope | None = scope
         while current is not None:
-            if name in current.imports:
-                return current.imports[name]
-            if (
-                name in current.nested
-                or name in current.params
-                or name in current.locals
-            ):
+            bound = current.names.get(name)
+            if bound:
+                return _one_import(bound)
+            if name in current.params or name in current.locals:
                 return None
             current = current.parent
-        return scope.module.imports.get(name)
+        return _one_import(scope.module.names.get(name, []))
 
     def _is_partial(self, func: ast.expr, scope: Scope) -> bool:
         """Whether *func* names ``functools.partial``, imported either way."""
@@ -1049,19 +1162,16 @@ class Tree:
         for scope in self.scopes:
             if not self.speaks(scope):
                 continue
+            path = scope.module.path
+            shown = (
+                path.relative_to(self.root) if path.is_relative_to(self.root) else path
+            )
             for call in scope.calls:
-                callee = self.callee(call, scope)
-                if callee is None or self.forwards(call, callee, scope):
-                    continue
-                path = scope.module.path
-                shown = (
-                    path.relative_to(self.root)
-                    if path.is_relative_to(self.root)
-                    else path
-                )
-                yield Finding(
-                    shown.as_posix(), call.lineno, scope.qualname, callee.label
-                )
+                for callee in self.callees(call, scope):
+                    if not self.forwards(call, callee, scope):
+                        yield Finding(
+                            shown.as_posix(), call.lineno, scope.qualname, callee.label
+                        )
 
 
 #: How far a name is followed through assignments and bases before giving up.

@@ -263,19 +263,39 @@ def _printed(roots: list[complex]) -> str:
 
 
 def _roots_in_a_child(coefficients: list[Fraction]) -> str:
-    """What the root finder prints for *coefficients*, in a child given a minute."""
-    try:
-        # Fixed argv, no shell, no user input
-        finished = subprocess.run(
-            [sys.executable, "-c", _CHILD, *(str(c) for c in coefficients)],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-    except subprocess.TimeoutExpired:
-        pytest.fail(f"the root finder did not return within 60 s: {coefficients}")
+    """What the root finder prints for *coefficients*, in a child given a minute.
+
+    A child that does not return within the minute fails the test with
+    ``subprocess.TimeoutExpired``, whose command line carries the coefficients.
+    """
+    # Fixed argv, no shell, no user input
+    finished = subprocess.run(
+        [sys.executable, "-c", _CHILD, *(str(c) for c in coefficients)],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
     return finished.stdout.strip()
+
+
+def test_a_child_past_its_minute_fails_with_the_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A root finder that never returns fails the test with the timeout itself.
+
+    ``subprocess.run`` raises ``TimeoutExpired`` naming the command, which
+    carries the coefficients, and the minute it waited; the helper lets it
+    through rather than catching it to fail the test by hand.
+    """
+
+    def overrun(command: list[str], **options: object) -> object:
+        raise subprocess.TimeoutExpired(command, 60)
+
+    monkeypatch.setattr(subprocess, "run", overrun)
+    coefficients = [Fraction(1), Fraction(-1, 3)]
+    with pytest.raises(subprocess.TimeoutExpired, match=r"'-1/3'.*60 seconds"):
+        _roots_in_a_child(coefficients)
 
 
 def test_a_root_at_zero_is_read_off_the_coefficients() -> None:

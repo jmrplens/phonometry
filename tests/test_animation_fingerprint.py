@@ -1909,6 +1909,19 @@ _READS = {
         "    import json as _codec\n\n    def inner():\n        nonlocal _codec\n"
         "        _codec = s\n\n    inner()\n    return json.dumps(s), _codec",
     ),
+    # A function nested in one that declares a name ``global`` reads the
+    # module's name, not what a function further out binds of that spelling.
+    "below-a-global-declaration": (
+        "import json as _codec\n",
+        "    import pickle as _codec\n    import pickle as _p\n\n    def inner():\n"
+        "        global _codec\n\n        def deeper():\n"
+        "            return _codec.dumps(s)\n\n        return deeper()\n\n"
+        "    return inner(), _codec.loads, _p.loads",
+        "    import pickle as _codec\n    import pickle as _p\n\n    def inner():\n"
+        "        global _codec\n\n        def deeper():\n"
+        "            return _p.dumps(s)\n\n        return deeper()\n\n"
+        "    return inner(), _codec.loads, _p.loads",
+    ),
 }
 
 

@@ -423,7 +423,9 @@ class _Scope:
 
         This scope first, unless it declares the name global; then the
         enclosing functions, never a class body (a method does not see the
-        names of its class); then the module.
+        names of its class), up to one that declares the name global, below
+        which the name is the module's whatever a function further out
+        binds; then the module.
         """
         if name in self.global_names:
             return top if name in top.bindings else None
@@ -431,8 +433,11 @@ class _Scope:
             return self
         scope = self.parent
         while scope is not None:
-            if scope.kind != "class" and name in scope.bindings:
-                return scope
+            if scope.kind != "class":
+                if name in scope.global_names:
+                    return top if name in top.bindings else None
+                if name in scope.bindings:
+                    return scope
             scope = scope.parent
         return None
 

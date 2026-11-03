@@ -55,7 +55,12 @@ from api_taxonomy import (
     module_section,
     public_names,
 )
-from ast_scan import COMPOUND_STATEMENTS, block_statements
+from ast_scan import (
+    COMPOUND_STATEMENTS,
+    bindings_by_name,
+    block_statements,
+    live_bindings,
+)
 from markdown_fences import code_lines
 
 if TYPE_CHECKING:
@@ -1014,25 +1019,40 @@ def _module_imports(module_name: str) -> Mapping[str, tuple[str, str]]:
     """``from X import name`` bindings at top level, ``TYPE_CHECKING`` included.
 
     An annotation may name an alias the module imports only for the type
-    checker, so the runtime namespace does not hold it; the import does.
+    checker, so the runtime namespace does not hold it; the import does. A
+    name is read through its import only when every binding of it that may
+    stand once the module has run (:func:`ast_scan.live_bindings`) imports it
+    from one place: an assignment after the import, or two imports in the
+    branches of a ``try`` that take it from two places, leave it unread.
     """
     tree = _module_tree(module_name)
     if tree is None:
         return {}
     package = sys.modules[module_name].__package__ or module_name
     bindings: dict[str, tuple[str, str]] = {}
-    statements = list(tree.body)
-    while statements:
-        statement = statements.pop(0)
-        if isinstance(statement, COMPOUND_STATEMENTS):
-            statements[:0] = block_statements(statement)
-        elif isinstance(statement, ast.ImportFrom):
-            source = importlib.util.resolve_name(
-                "." * statement.level + (statement.module or ""), package
-            )
-            for alias in statement.names:
-                bindings[alias.asname or alias.name] = (source, alias.name)
+    for name, nodes in bindings_by_name(tree).items():
+        live = nodes if len(nodes) == 1 else live_bindings(tree, nodes)
+        targets = {_from_import(node, name, package) for node in live}
+        (target,) = targets if len(targets) == 1 else (None,)
+        if target is not None:
+            bindings[name] = target
     return MappingProxyType(bindings)
+
+
+def _from_import(node: ast.AST, name: str, package: str) -> tuple[str, str] | None:
+    """The module and the name there that *node* imports as *name*.
+
+    None for any other binding of the name.
+    """
+    if not isinstance(node, ast.ImportFrom):
+        return None
+    for alias in node.names:
+        if (alias.asname or alias.name) == name:
+            source = importlib.util.resolve_name(
+                "." * node.level + (node.module or ""), package
+            )
+            return source, alias.name
+    return None
 
 
 def _find_alias(module_name: str, name: str, depth: int = 0) -> tuple[str, str] | None:

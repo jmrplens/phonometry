@@ -57,7 +57,8 @@ source that looks right and renders wrong.
    centred display equation ships as a small one in the run of text.
 
 Only that opening form is a hazard: a ``$$`` alone on its line is exactly what
-the convention wants, opening and closing.
+the convention wants, opening and closing, and a formula with text after its
+closing run is a paragraph that holds inline maths, which swallows nothing.
 
 5. **A less-than sign glued to what follows it, in MDX.** MDX reads ``<`` as
    the start of a JSX tag, and a tag name has to start with a letter. So a
@@ -132,6 +133,7 @@ from markdown_spans import (
     block_starts,
     drop_inline_spans,
     drop_inline_spans_by_block,
+    inline_spans,
     lines_read_whole,
 )
 
@@ -169,10 +171,6 @@ _EXTERNAL = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 #: The line that opens and closes the YAML frontmatter, and nothing else.
 _FRONTMATTER = "---"
 
-
-#: An opening display-maths fence with the formula on the same line. The tail
-#: is the fence's meta, so the block does not end where the author thinks.
-_MATH_META = re.compile(r"^[ \t]*\$\$\s*\S")
 
 #: In MDX prose, a ``<`` followed by a character no JSX tag can start with:
 #: MDX still reads it as a tag and the build fails. An escaped ``\<`` never
@@ -353,21 +351,31 @@ def _anchor_problems(where: str, line: str) -> list[str]:
     ]
 
 
+def _closes_on_its_line(rest: str) -> bool:
+    """Whether a line past its marks is one display formula, ``$$x$$`` and no more."""
+    shape = rest.strip()
+    return shape.startswith("$$") and inline_spans(shape, "$")[:1] == [(0, len(shape))]
+
+
 def _math_meta_problems(where: str, line: PageLine) -> list[str]:
-    """Rule 4: an opening ``$$`` with the formula on the same line, past any marks."""
-    opens = line.role in ("maths-open", "paragraph", "text")
-    if not (opens and _MATH_META.match(line.rest)):
-        return []
-    if line.text.rstrip().endswith("$$"):
+    """Rule 4: a formula on the line of an opening ``$$``, past any marks.
+
+    Only two lines are that: one the walk reads as opening a block with a meta,
+    and a formula closed at the line's end. Text after the closing run makes the
+    line a paragraph that holds inline maths, which swallows nothing.
+    """
+    if line.role == "maths-open" and line.info:
+        consequence = (
+            "Nothing closes it until a line that is exactly '$$', so it "
+            "swallows the prose in between and breaks the build far from here."
+        )
+    elif line.role in ("paragraph", "text") and _closes_on_its_line(line.rest):
         consequence = (
             "It closes on this line, so it ships as inline maths instead of a "
             "centred display block."
         )
     else:
-        consequence = (
-            "Nothing closes it until a line that is exactly '$$', so it "
-            "swallows the prose in between and breaks the build far from here."
-        )
+        return []
     return [
         f"{where}: {line.text.strip()[:40]!r} puts the formula on the opening "
         f"'$$', where it is read as the fence's meta, not as maths. "

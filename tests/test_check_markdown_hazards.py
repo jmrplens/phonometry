@@ -361,6 +361,42 @@ def test_a_line_in_the_paragraphs_containers_underlines_it(
     assert level in problems[0]
 
 
+@pytest.mark.parametrize(
+    "page",
+    [
+        pytest.param("$$x$$ is the formula\n", id="at the top level"),
+        pytest.param("- $$x$$ is the formula\n", id="on an item"),
+        pytest.param("> $$x$$ is the formula\n", id="in a quotation"),
+        pytest.param("$$x$$ and $$y$$\n", id="two formulas with text between"),
+        pytest.param("$$ x $ y\n", id="a run nothing closes"),
+        pytest.param("$$$\nx\n$$$\n", id="a longer fence alone"),
+        pytest.param(
+            "a\n2. $$x$$\n", id="behind a marker that is the paragraph's text"
+        ),
+    ],
+)
+def test_rule_four_passes_a_line_with_nothing_to_swallow(page: str) -> None:
+    """The site reads each as it reads it: inline maths, or a fence with no meta."""
+    assert cmh.check_text(page, "page.md") == []
+
+
+@pytest.mark.parametrize(
+    ("page", "says"),
+    [
+        pytest.param("$$x\n$$\n", "Nothing closes it", id="a formula on the fence"),
+        pytest.param("- $$x\n  $$\n", "Nothing closes it", id="and on an item"),
+        pytest.param("$$$ x\n$$$\n", "Nothing closes it", id="and on a longer run"),
+        pytest.param("$$x$$\n", "It closes on this line", id="a formula closed there"),
+        pytest.param("> $$x$$\n", "It closes on this line", id="and in a quotation"),
+        pytest.param("- $$x$$  \n", "It closes on this line", id="and on an item"),
+    ],
+)
+def test_rule_four_refuses_a_formula_on_a_fence(page: str, says: str) -> None:
+    problems = cmh.check_text(page, "page.md")
+    assert len(problems) == 1
+    assert says in problems[0]
+
+
 def test_a_code_span_beside_open_maths_does_not_close_it(
     tmp_path: pathlib.Path,
 ) -> None:

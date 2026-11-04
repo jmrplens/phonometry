@@ -126,7 +126,7 @@ import tokenize
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from markdown_fences import code_lines, display_math_parts
+from markdown_fences import PageLine, code_lines, display_math_parts, page_lines
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans_by_block,
@@ -648,7 +648,7 @@ def _span_remainder(span: str) -> str:
     return SPAN_MARK + "\n" * span.count("\n")
 
 
-def _drop_code_and_math(text: str) -> str:
+def _drop_code_and_math(text: str, *, kind: str) -> str:
     """The text of a page with its code and maths spans taken out, as the site reads them.
 
     Code and maths are read together, left to right and a block of the page
@@ -663,8 +663,10 @@ def _drop_code_and_math(text: str) -> str:
     as :data:`_MATHS_DASH`, because no title is reproduced in maths: no
     exemption covers it, whatever quotation, italic span, reference or part
     number stands around it.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
-    return replace_inline_spans_by_block(text, _span_remainder, "`$")
+    return replace_inline_spans_by_block(text, _span_remainder, "`$", kind=kind)
 
 
 @dataclass
@@ -722,7 +724,7 @@ def _frontmatter_hits(lines: list[str]) -> list[int]:
     ]
 
 
-def markdown_hits(text: str) -> list[int]:
+def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
     """The 1-based lines of a markdown or MDX page that carry a prose dash.
 
     A fenced block and a display-math block end the paragraph before them, as
@@ -732,27 +734,28 @@ def markdown_hits(text: str) -> list[int]:
     line of a quotation is read through its marks. The frontmatter is plain
     text, read apart (:func:`_frontmatter_hits`): nothing a value of it opens
     reaches the body.
+
+    :param mdx: Whether the page is MDX, whose blocks read apart from Markdown's.
     """
+    kind = "mdx" if mdx else "md"
     lines = _decode_page(text).splitlines()
     head = _frontmatter_head(lines)
     written = lines[head:]
-    code_flags = list(code_lines(written))
-    math_flags = _math_lines(written, code_flags)
-    body = [
-        "" if code or math else line
-        for line, code, math in zip(written, code_flags, math_flags, strict=True)
-    ]
-    shown = lines_read_whole(body, _drop_code_and_math)
+    code_flags = list(code_lines(written, kind=kind))
+    math_flags = _math_lines(written, kind=kind)
+    shown = lines_read_whole(written, lambda page: _drop_code_and_math(page, kind=kind))
     reading = _PageReading()
     hits = _frontmatter_hits(lines)
-    for index, opens_block in enumerate(block_starts(body)):
+    for index, opens_block in enumerate(block_starts(written, kind=kind)):
         line = written[index]
         if opens_block:
             reading.open_block(line)
-        if body[index].strip():
-            found = reading.holds_dash(line, shown[index])
+        if code_flags[index]:
+            found = False
+        elif math_flags[index]:
+            found = EM_DASH in line
         else:
-            found = math_flags[index] and EM_DASH in line
+            found = line.strip() != "" and reading.holds_dash(line, shown[index])
         if found:
             hits.append(head + index + 1)
     return hits
@@ -932,11 +935,16 @@ def text_hits(text: str) -> list[int]:
     ]
 
 
+def _mdx_hits(text: str) -> list[int]:
+    """:func:`markdown_hits` on an MDX page."""
+    return markdown_hits(text, mdx=True)
+
+
 #: The suffixes the guard reads, each with the reader that knows its kind.
 _READERS = {
     ".py": python_hits,
     ".md": markdown_hits,
-    ".mdx": markdown_hits,
+    ".mdx": _mdx_hits,
     ".mjs": data_hits,
     ".ts": data_hits,
     ".json": json_hits,
@@ -1014,7 +1022,7 @@ def _blank_out(match: re.Match[str]) -> str:
     return re.sub(r"[^\n]", " ", match.group())
 
 
-def _blank_page_spans(text: str) -> str:
+def _blank_page_spans(text: str, *, walked: list[PageLine]) -> str:
     """The text of a page with every code span and every maths span blanked.
 
     Read as the site reads them (:mod:`markdown_spans`): left to right and a
@@ -1025,8 +1033,11 @@ def _blank_page_spans(text: str) -> str:
     span. A span never runs from one list item, heading, table row or
     quotation into the next, so the dollar sign of one item does not pair
     with the one of the next and hide the prose between them.
+
+    :param walked: The walk of the page as written, of which *text* has lines
+        blanked.
     """
-    return blank_inline_spans_by_block(text, "`$")
+    return blank_inline_spans_by_block(text, "`$", walked=walked)
 
 
 def _blank_docstring_code_spans(text: str) -> str:
@@ -1070,25 +1081,29 @@ def _double_hyphen_lines(written: list[str], masked: list[str]) -> list[int]:
     return hits
 
 
-def _math_lines(lines: list[str], code: list[bool]) -> list[bool]:
+def _math_lines(lines: list[str], *, kind: str) -> list[bool]:
     """Whether each line of a page is in a display-math block, its fences included.
 
     The block is read as the site reads it (:func:`display_math_parts`): behind
     the marks of a quotation or a list item as anywhere else, and wherever it
     stands, so the backtick on the other side of its fence closes nothing.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
-    return [part != "prose" for part in display_math_parts(lines, code)]
+    return [part != "prose" for part in display_math_parts(lines, kind=kind)]
 
 
-def _page_code_lines(lines: list[str]) -> list[bool]:
+def _page_code_lines(lines: list[str], *, kind: str) -> list[bool]:
     """Whether each line of a page is code or display math, not prose.
 
     The frontmatter holds neither: a value is plain text, and what it opens
     stops there.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
     head = _frontmatter_head(lines)
-    code = list(code_lines(lines[head:]))
-    maths = _math_lines(lines[head:], code)
+    code = code_lines(lines[head:], kind=kind)
+    maths = _math_lines(lines[head:], kind=kind)
     return [False] * head + [a or b for a, b in zip(code, maths, strict=True)]
 
 
@@ -1102,9 +1117,12 @@ def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> list[str
 
     :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
     """
+    kind = "mdx" if mdx else "md"
     lines = [
         "" if code else line
-        for line, code in zip(written, _page_code_lines(written), strict=True)
+        for line, code in zip(
+            written, _page_code_lines(written, kind=kind), strict=True
+        )
     ]
     _read_frontmatter(lines, _Frontmatter(decode_escapes=False, blank_comments=True))
 
@@ -1137,8 +1155,10 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     written = text.split("\n")
     lines = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
+    walked = list(page_lines(written[head:], kind="mdx" if mdx else "md"))
     masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
-        lines[head:], lambda body: _blank_page_spans(_without_addresses(body))
+        lines[head:],
+        lambda body: _blank_page_spans(_without_addresses(body), walked=walked),
     )
     return [
         index + 1

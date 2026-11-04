@@ -269,10 +269,102 @@ def test_maths_cut_off_by_a_block_marker_is_still_found(tmp_path: pathlib.Path) 
     assert "inline maths opened on line 1" in problems[0]
 
 
+@pytest.mark.parametrize(
+    ("page", "rel"),
+    [
+        pytest.param(
+            "- a $x\n    2. y$\n", "page.mdx", id="an ordered marker in an item"
+        ),
+        pytest.param("- a $x\n    | y$\n", "page.mdx", id="a pipe in an item"),
+        pytest.param(
+            "a $x\n2. y$\n", "page.mdx", id="an ordered marker in a paragraph"
+        ),
+        pytest.param("a $x\n| y$\n", "page.md", id="a pipe in a paragraph"),
+        pytest.param("a $x\n<span>\ny$\n", "page.md", id="an inline tag"),
+    ],
+)
+def test_a_line_that_cannot_interrupt_a_paragraph_cuts_no_maths(
+    page: str, rel: str
+) -> None:
+    assert cmh.check_text(page, rel) == []
+
+
+@pytest.mark.parametrize(
+    ("page", "rel"),
+    [
+        pytest.param("a $x\n<div>\ny$\n", "page.md", id="a block tag"),
+        pytest.param("- a $x\n    - y$\n", "page.md", id="an item under an item"),
+        pytest.param("a $x\n<A />\ny$\n", "page.mdx", id="a tag alone in MDX"),
+        pytest.param("a $x\n    - y$\n", "page.mdx", id="an item in MDX"),
+    ],
+)
+def test_a_block_a_line_opens_cuts_maths_off(page: str, rel: str) -> None:
+    problems = cmh.check_text(page, rel)
+    assert len(problems) == 1
+    assert "cut off by a block marker" in problems[0]
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        pytest.param("a `b\n2. <3 c` d\n", id="an ordered marker"),
+        pytest.param("a `b\n| <3 c` d\n", id="a pipe"),
+    ],
+)
+def test_a_span_of_mdx_runs_over_a_line_that_opens_no_block(page: str) -> None:
+    """Rule 5 had a list of markers of its own, which took these for block starts."""
+    assert cmh.check_text(page, "page.mdx") == []
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        pytest.param("a `b\n<A />\nc <3 d` e\n", id="a tag alone"),
+        pytest.param("- > ```\n> a <3 b\n", id="a line out of the fence's item"),
+        pytest.param("a `b\n| c |\n|---|\nd <3 e` f\n", id="a table"),
+    ],
+)
+def test_a_span_of_mdx_stops_where_a_block_opens(page: str) -> None:
+    problems = cmh.check_text(page, "page.mdx")
+    assert len(problems) == 1
+    assert "'<3" in problems[0]
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        pytest.param("> a\n===\n", id="under a quotation"),
+        pytest.param("> a\n--\n", id="two hyphens under a quotation"),
+        pytest.param("- a\n===\n", id="out of an item"),
+        pytest.param("> > a\n> ===\n", id="at a shallower mark"),
+        pytest.param("- > a\n  ===\n", id="in the item but not the quotation"),
+        pytest.param("- a\n---\n", id="a rule out of an item"),
+    ],
+)
+def test_a_line_outside_the_paragraphs_containers_underlines_nothing(page: str) -> None:
+    assert cmh.check_text(page, "page.md") == []
+
+
+@pytest.mark.parametrize(
+    ("page", "level"),
+    [
+        pytest.param("- a\n  ===\n", "an h1", id="in its item"),
+        pytest.param("> - a\n>   --\n", "an h2", id="in an item of a quotation"),
+        pytest.param("| a\n---\n", "an h2", id="under a pipe with no table"),
+    ],
+)
+def test_a_line_in_the_paragraphs_containers_underlines_it(
+    page: str, level: str
+) -> None:
+    problems = cmh.check_text(page, "page.md")
+    assert len(problems) == 1
+    assert level in problems[0]
+
+
 def test_a_code_span_beside_open_maths_does_not_close_it(
     tmp_path: pathlib.Path,
 ) -> None:
-    text = "Write `$schema` and the level $L_{p,A}\n| a | b |\n"
+    text = "Write `$schema` and the level $L_{p,A}\n| a | b |\n|---|---|\n"
     problems = _problems(tmp_path, text)
     assert len(problems) == 1
     assert "cut off by a block marker" in problems[0]

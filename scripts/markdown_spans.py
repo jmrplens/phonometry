@@ -27,8 +27,12 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from markdown_fences import NOT_INLINE_ROLES, cell_spans, page_lines
+
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
+
+    from markdown_fences import PageLine
 
 #: A run of backticks or of dollar signs.
 _RUN = re.compile(r"`+|\$+")
@@ -117,23 +121,6 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
     return "".join(pieces)
 
 
-#: A block on its own line only: a heading, a row of a table, a thematic break,
-#: a setext underline, the fence of a display-math block (a run of two dollar
-#: signs or more and no other after it) and a comment closed on its line.
-_ONE_LINE_SHAPES = (
-    r"#{1,6}(?:\s|$)|\||([-*_])[ \t]*(?:\1[ \t]*){2,}$|(?:=+|-+)[ \t]*$"
-    r"|\${2,}[^$]*$|<!--.*-->"
-)
-#: A line that opens a block of its own, which a code span never crosses into:
-#: those, an item of a list, a quotation and a comment
-#: (``BLOCK_START`` of ``site/scripts/shared/markdown-spans.mjs``).
-_BLOCK_START = re.compile(
-    rf" {{0,3}}(?:{_ONE_LINE_SHAPES}|[-*+]\s|\d{{1,9}}[.)]\s|>|<!--)"
-)
-_ONE_LINE_BLOCK = re.compile(rf" {{0,3}}(?:{_ONE_LINE_SHAPES})")
-#: The marker of a list item, its indentation and the blanks after it, whose
-#: width is the column the item's content stands at (CommonMark 0.31.2, 5.2).
-_ITEM = re.compile(r" *(?:[-*+]|\d{1,9}[.)]) +")
 #: The marks of a quotation that open a line, each with what may stand before
 #: it, and the one blank after the last of them (CommonMark 0.31.2, 5.1).
 _QUOTE_MARKS = re.compile(r"(?: {0,3}>)+ ?")
@@ -163,105 +150,84 @@ def inside_quotation(line: str) -> str:
 
 
 @dataclass
-class _Under:
-    """Where a line stands: the quotation it is in and the list item it is under.
+class _Block:
+    """The lines a code span stays inside, and how they read.
 
-    A list item's content sets the column a block opens at, so an item nested
-    in it may stand four columns in or more, where anywhere else it would be a
-    line of the paragraph (CommonMark 0.31.2, 5.2). A line the paragraph carries
-    on leaves that column alone, a lazy one too; one that opens a block sets it.
+    :param reads: ``"text"``: spans read over the lines of the block. ``"raw"``: a
+        raw HTML block, shown as written, where no span opens. ``"row"``: a row of
+        a table, whose cells each bound what opens in them. ``"code"``: a line of
+        code or display maths, which nothing reads.
     """
 
-    depth: int = 0
-    column: int = 0
-
-    def read(self, line: str) -> str:
-        """*line* past the marks of its quotation and the column of the item above."""
-        depth = quote_depth(line)
-        if depth != self.depth:
-            self.depth, self.column = depth, 0
-        rest = inside_quotation(line)
-        return rest[min(self.column, len(rest) - len(rest.lstrip(" "))) :]
-
-    def settle(self, line: str) -> None:
-        """Take the column of *line*, which opens a block; a bare mark has none."""
-        rest = inside_quotation(line)
-        if not rest.strip():
-            return
-        item = _ITEM.match(rest)
-        self.column = (
-            item.end() if item else min(self.column, len(rest) - len(rest.lstrip(" ")))
-        )
+    lines: list[str]
+    reads: str = "text"
 
 
-def _opens_block(line: str, read: str, block: list[str]) -> bool:
-    """Whether *line*, which reads as *read*, opens a block after the lines of *block*.
-
-    The marks of a quotation are not the paragraph's text, so what decides is
-    what stands after them: a blank, a heading, a table row, a list item or a
-    deeper quotation ends the paragraph inside the quotation as it would outside
-    it. A line with fewer marks than the block opened with carries it on lazily.
-    """
-    if _BLOCK_START.match(read):
-        return True
-    depth = quote_depth(line)
-    return depth > 0 and (
-        not block or depth > quote_depth(block[0]) or not read.strip()
-    )
-
-
-def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
+def _blocks(
+    lines: list[str],
+    comments: str | None,
+    kind: str,
+    walked: Iterable[PageLine] | None = None,
+) -> list[_Block]:
     """*lines* in the blocks a code span stays inside, every line in one.
 
-    A blank line is a block of its own and ends the one before it; a heading,
-    a table row, a list item, a quotation, a thematic break, a setext underline,
-    a display fence or a comment opens one, and a line that opens a comment with
-    *comments* set opens one that runs to the comment's end, blank lines
-    included. A quotation is read through its marks: a later line of its
-    paragraph stays in the block, and what opens a block outside a quotation
-    opens one inside, a line that holds only the marks being its blank line.
+    The walk of the page says what each line is (:func:`markdown_fences.page_lines`):
+    only the lines of a paragraph, and those of a raw HTML block, stay together. A
+    blank line is a block of its own, a line that holds only the marks of a
+    quotation among them, and so is a heading, a row of a table, a thematic break,
+    a setext underline, an aside's fence, a line of a fence or of a display block.
+    With *comments* set a line that opens a comment opens a block that runs to the
+    comment's end, blank lines included.
+
+    :param walked: The walk of the page as written, for a reader that blanks some
+        of its lines first: a line blanked is no line the walk can read, and the
+        container it opened would be lost with it.
     """
-    blocks: list[list[str]] = []
-    current: list[str] = []
+    blocks: list[_Block] = []
+    current: _Block | None = None
     closer = None if comments is None else _COMMENTS[comments]
     opener = None if comments is None else _COMMENT_LINE[comments]
-    under = _Under()
-    for line in lines:
-        if current and closer is not None and _unclosed(current, closer, opener):
-            current.append(line)
+    read_lines = page_lines(lines, kind=kind) if walked is None else walked
+    for line, read in zip(lines, read_lines, strict=True):
+        if (
+            current is not None
+            and closer is not None
+            and _unclosed(current.lines, closer, opener)
+        ):
+            current.lines.append(line)
             continue
-        if not line.strip():
-            if current:
-                blocks.append(current)
-            blocks.append([line])
-            current = []
+        if current is not None and read.role in ("text", "raw"):
+            current.lines.append(line)
             continue
-        read = under.read(line)
-        opens = _opens_block(line, read, current) or bool(opener and opener.match(line))
-        if opens or not current:
-            under.settle(line)
-        if opens and current:
+        if current is not None:
             blocks.append(current)
-            current = []
-        current.append(line)
-        if not read.strip() or _ONE_LINE_BLOCK.match(read):
-            blocks.append(current)
-            current = []
-    if current:
+            current = None
+        if read.role in NOT_INLINE_ROLES:
+            blocks.append(_Block([line], "code"))
+        elif read.role in ("paragraph", "text") or (opener and opener.match(line)):
+            current = _Block([line])
+        elif read.role in ("html", "raw"):
+            current = _Block([line], "raw")
+        else:
+            blocks.append(_Block([line], "row" if read.role == "row" else "text"))
+    if current is not None:
         blocks.append(current)
     return blocks
 
 
-def block_starts(lines: Sequence[str]) -> list[bool]:
+def block_starts(lines: Sequence[str], *, kind: str = "md") -> list[bool]:
     """Whether each of *lines* opens a block of the page, a blank line among them.
 
     For a reader that carries a state of its own down a paragraph, such as an
-    open italic span, and has to drop it where a code span would stop.
+    open italic span, and has to drop it where a code span would stop. Each line
+    of a raw HTML block counts as one: nothing there is markup to carry.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
     return [
-        index == 0
-        for block in _blocks(list(lines), None)
-        for index in range(len(block))
+        index == 0 or block.reads == "raw"
+        for block in _blocks(list(lines), None, kind)
+        for index in range(len(block.lines))
     ]
 
 
@@ -277,7 +243,7 @@ def _unclosed(
 def _spans_and_comments(
     text: str, markers: str, comments: str | None
 ) -> list[tuple[int, int]]:
-    """The code spans and comments of one block, read left to right.
+    """The code spans and comments of a piece of a block, read left to right.
 
     Whichever opens first wins: a comment opened in a span is code, and a
     backtick in a comment is the comment's.
@@ -299,8 +265,30 @@ def _spans_and_comments(
         done = span[1]
 
 
+def _block_spans(
+    block: _Block, text: str, markers: str, comments: str | None
+) -> list[tuple[int, int]]:
+    """The spans and comments of one block, whose lines are joined in *text*."""
+    if block.reads == "code":
+        return []
+    if block.reads == "raw":
+        return _spans_and_comments(text, "", comments)
+    if block.reads == "text":
+        return _spans_and_comments(text, markers, comments)
+    return [
+        (first + start, last + start)
+        for start, end in cell_spans(text)
+        for first, last in _spans_and_comments(text[start:end], markers, comments)
+    ]
+
+
 def blank_inline_spans_by_block(
-    text: str, markers: str = "`", comments: str | None = None
+    text: str,
+    markers: str = "`",
+    comments: str | None = None,
+    *,
+    kind: str = "",
+    walked: Iterable[PageLine] | None = None,
 ) -> str:
     """*text* with its spans blanked, each block of a page read whole.
 
@@ -314,10 +302,19 @@ def blank_inline_spans_by_block(
     :param markers: ``"`"`` for the code spans, ``"`$"`` for code and maths.
     :param comments: ``"md"`` or ``"mdx"`` to blank the page's comments too,
         read with the spans in one pass, as the page reads them.
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind, if not said by *comments*;
+        a ``.md`` page if neither says.
+    :param walked: The walk of the page as written, for a reader that blanked some
+        of its lines (:func:`_blocks`).
     :return: The text, its spans blanked, with as many lines as it had.
     """
     return replace_inline_spans_by_block(
-        text, lambda span: re.sub(r"[^\n]", " ", span), markers, comments
+        text,
+        lambda span: re.sub(r"[^\n]", " ", span),
+        markers,
+        comments,
+        kind=kind,
+        walked=walked,
     )
 
 
@@ -342,7 +339,7 @@ def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[s
 
 
 def drop_inline_spans_by_block(
-    text: str, markers: str = "`", comments: str | None = None
+    text: str, markers: str = "`", comments: str | None = None, *, kind: str = ""
 ) -> str:
     """*text* with its spans taken out, each block of a page read whole.
 
@@ -352,7 +349,11 @@ def drop_inline_spans_by_block(
     it was, its columns past a span are not.
     """
     return replace_inline_spans_by_block(
-        text, lambda span: SPAN_MARK + "\n" * span.count("\n"), markers, comments
+        text,
+        lambda span: SPAN_MARK + "\n" * span.count("\n"),
+        markers,
+        comments,
+        kind=kind,
     )
 
 
@@ -361,6 +362,9 @@ def replace_inline_spans_by_block(
     replace: Callable[[str], str],
     markers: str = "`",
     comments: str | None = None,
+    *,
+    kind: str = "",
+    walked: Iterable[PageLine] | None = None,
 ) -> str:
     """*text*, each span and comment of each block replaced by what *replace* makes of it.
 
@@ -376,13 +380,18 @@ def replace_inline_spans_by_block(
     :param markers: ``"`"`` for the code spans, ``"`$"`` for code and maths.
     :param comments: ``"md"`` or ``"mdx"`` to hand the page's comments to
         *replace* too, read with the spans in one pass.
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind, if not said by *comments*;
+        a ``.md`` page if neither says.
+    :param walked: The walk of the page as written, for a reader that blanked some
+        of its lines (:func:`_blocks`).
     """
     read: list[str] = []
-    for block in _blocks(text.split("\n"), comments):
-        joined = "\n".join(block)
+    page_kind = kind or comments or "md"
+    for block in _blocks(text.split("\n"), comments, page_kind, walked):
+        joined = "\n".join(block.lines)
         pieces: list[str] = []
         done = 0
-        for start, end in _spans_and_comments(joined, markers, comments):
+        for start, end in _block_spans(block, joined, markers, comments):
             pieces.extend((joined[done:start], replace(joined[start:end])))
             done = end
         pieces.append(joined[done:])

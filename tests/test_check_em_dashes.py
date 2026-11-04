@@ -254,7 +254,7 @@ def test_nothing_is_carried_from_one_block_to_the_next() -> None:
     assert ced.markdown_hits("- An *open\n- prose — here* end.\n") == [2]
     assert ced.markdown_hits('- A "quote\n- prose — here" end.\n') == [2]
     assert ced.markdown_hits("# A *heading\nprose — here* end.\n") == [2]
-    assert ced.markdown_hits("| a *b |\n| prose — here* |\n") == [2]
+    assert ced.markdown_hits("| a *b |\n|---|\n| prose — here* |\n") == [3]
     assert ced.markdown_hits("> - An *open\n> - prose — here* end.\n") == [2]
 
 
@@ -794,6 +794,100 @@ def test_a_line_of_a_quotation_is_read_through_its_marks() -> None:
     assert ced.markdown_bullet_hyphen_hits("> - `x` - the text\n") == [1]
 
 
+#: Pages the walk of the page decides, with the lines where the site's parser
+#: shows a dash, each measured on it: ``markdown_hits`` of each with an em dash,
+#: and ``markdown_double_hyphen_hits`` of each with a double hyphen in its place.
+_WALKED_PAGES = (
+    pytest.param("- > ```\n> text — y\n", [2], id="behind a quotation in an item"),
+    pytest.param("- > $$\n> text — y\n", [2], id="maths behind a quotation in an item"),
+    pytest.param("1. > ```\n> text — y\n", [2], id="behind a quotation in a numbered"),
+    pytest.param("> - > ```\n> > text — y\n", [2], id="and in a quotation"),
+    pytest.param("a\n2. ```\n   b — y\n", [3], id="a marker that cannot interrupt"),
+    pytest.param("a\n2. ~~~\n   b — y\n", [3], id="a marker on a tilde fence"),
+    pytest.param("a\n2. $$\n   b — y\n   $$\n", [3], id="a marker on a display block"),
+    pytest.param("> a `b — x\n===\nc` d\n", [], id="a lazy line of ==="),
+    pytest.param("> a `b — x\n=\nc` d\n", [], id="a lazy line of ="),
+    pytest.param("- a `b — x\n===\nc` d\n", [], id="a line of === out of an item"),
+    pytest.param("1. a `b — x\n===\nc` d\n", [], id="and out of a numbered one"),
+    pytest.param("> > a `b — x\n> ===\n> c` d\n", [], id="a shallower quotation"),
+    pytest.param("- > a `b — x\n  ===\n  c` d\n", [], id="an item's own column"),
+    pytest.param("- a `b — x\n    2. c` d\n", [], id="an ordered marker in an item"),
+    pytest.param("- a `b — x\n    | c` d\n", [], id="a pipe in an item"),
+    pytest.param("a `b — x\n2. c` d\n", [], id="an ordered marker in a paragraph"),
+    pytest.param("- # h `b\nc — x` d\n", [2], id="a heading on an item's line"),
+    pytest.param("- ## h `b\n  c — x` d\n", [2], id="and the item goes on"),
+    pytest.param("1. # h `b\n   c — x` d\n", [2], id="on a numbered item's line"),
+    pytest.param("> - # h `b\n> c — x` d\n", [2], id="and in a quotation"),
+    pytest.param("- ***\n  c — x\n", [2], id="a rule on an item's line"),
+    pytest.param("> - ***\n> c — x\n", [2], id="and in a quotation"),
+    pytest.param(
+        "- <!-- y --> `b\n  c — x` d\n", [2], id="a comment on an item's line"
+    ),
+    pytest.param("a `b — x\n<div>\nc` d\n", [1], id="a block tag"),
+    pytest.param("a `b — x\n</div>\nc` d\n", [1], id="a closing block tag"),
+    pytest.param("a `b — x\n<details>\nc` d\n", [1], id="a details tag"),
+    pytest.param("a `b — x\n<script>\nc` d\n", [1], id="a script tag"),
+    pytest.param("a `b — x\n<?php\nc` d\n", [1], id="a processing instruction"),
+    pytest.param("<div>\n`x — y`\n</div>\n", [2], id="a raw block holds no code span"),
+    pytest.param("a `b — x\n<span>\nc` d\n", [], id="an inline tag"),
+    pytest.param("- a\n  ```\n  x\nprose — y\n", [4], id="a fence ends with its item"),
+    pytest.param("- a\n  ~~~\n  x\nprose — y\n", [4], id="and a tilde fence"),
+    pytest.param("- a\n  $$\n  x\nprose — y\n", [4], id="and a display block"),
+    pytest.param("* a `b —\n  ```\n- item —\n", [1, 3], id="an item after the fence"),
+    pytest.param("-\ta `b — x\n    - c` d\n", [1], id="an item marked with a tab"),
+    pytest.param("$$\n```\n$$\nprose — y\n", [4], id="a fence in a display block"),
+    pytest.param("a `b — x\n:::note\nc` d\n:::\n", [1], id="an aside"),
+    pytest.param(":::note\na `b — x\n:::\nc` d\n", [2], id="the end of an aside"),
+    pytest.param("| `a | b — x` |\n|---|---|\n", [1], id="two cells of a row"),
+    pytest.param("| a `b — x\nc` d\n", [], id="a pipe with no table"),
+    pytest.param("    a `b\nc — x` d\n", [2], id="indented code"),
+)
+
+
+@pytest.mark.parametrize(("page", "hits"), _WALKED_PAGES)
+def test_a_dash_is_read_where_the_walk_of_the_page_says_it_stands(
+    page: str, hits: list[int]
+) -> None:
+    """Each of these read otherwise, hiding prose or refusing a code span.
+
+    A reader of each line by itself cannot say which of them opens a block: that
+    takes the quotations and the items open at it and the paragraph above it.
+    """
+    assert ced.markdown_hits(page) == hits
+    assert ced.markdown_double_hyphen_hits(page.replace("—", "--")) == hits
+
+
+@pytest.mark.parametrize(
+    ("page", "md", "mdx"),
+    [
+        pytest.param("a `b — x\n    - c` d\n", [], [1], id="an item four columns in"),
+        pytest.param("a `b — x\n<A />\nc` d\n", [], [1], id="a tag alone"),
+        pytest.param("<A />\n`x — y`\n", [2], [], id="a line under a lone tag"),
+        pytest.param("    a — b\n", [], [1], id="indented code"),
+        pytest.param(
+            "a\n    ```\n    b — y\n", [3], [], id="a fence under a paragraph"
+        ),
+    ],
+)
+def test_the_kind_of_a_page_says_what_a_line_opens(
+    page: str, md: list[int], mdx: list[int]
+) -> None:
+    """On an MDX page any indentation opens a block, and there is no raw HTML."""
+    assert ced.markdown_hits(page) == md
+    assert ced.markdown_hits(page, mdx=True) == mdx
+    assert ced.markdown_double_hyphen_hits(page.replace("—", "--")) == md
+    assert ced.markdown_double_hyphen_hits(page.replace("—", "--"), mdx=True) == mdx
+
+
+def test_the_guard_reads_a_page_by_its_kind(tmp_path: pathlib.Path) -> None:
+    """The suffix says which: both spellings of the dash go by it."""
+    page = "a `b — x\n    - c` d\n"
+    (tmp_path / "page.md").write_text(page, encoding="utf-8")
+    (tmp_path / "page.mdx").write_text(page, encoding="utf-8")
+    assert ced.scan(tmp_path / "page.md") == []
+    assert ced.scan(tmp_path / "page.mdx") == [1]
+
+
 def test_a_block_under_a_reference_is_read_for_itself() -> None:
     """Only the wrapped lines of a bibliographic entry reproduce its title.
 
@@ -802,7 +896,7 @@ def test_a_block_under_a_reference_is_read_for_itself() -> None:
     """
     assert ced.markdown_hits("- Author (2001) x\n  ## Heading — y\n") == [2]
     assert ced.markdown_hits("- Author (2001) x\n  - item — y\n") == [2]
-    assert ced.markdown_hits("- Author (2001) x\n  | a — b |\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  | a — b |\n  |---|\n") == [2]
     assert ced.markdown_hits("> - Author (2001) x\n>   ## Heading — y\n") == [2]
     assert ced.markdown_hits("- Author (2001) x\n  wrapped — title\n") == []
     assert ced.markdown_hits("- Author (2001) x\n- Author (2002) a — b\n") == []

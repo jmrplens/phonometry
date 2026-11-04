@@ -1,5 +1,5 @@
 /**
- * Where the fences of a markdown page open and close, as CommonMark reads them.
+ * Where the blocks of a markdown page open and close, as the site's parser reads them.
  *
  * The site's own JavaScript reads its pages here, as the Python scripts read
  * them through `scripts/markdown_fences.py`; the two are one reading written
@@ -15,72 +15,554 @@
  * `scripts/check_fence_readers.py` fails on a script of the site that reads
  * fences any other way.
  *
- * Any indentation of the marker is read as a fence, because the pages nest
- * fences inside list items, and the body of an indented fence loses as much
- * indentation as its opening marker carried.
+ * Whether a line opens a block depends on the lines above it, so the page is
+ * walked once, line by line (`pageLines`), as a parser's first phase walks it,
+ * keeping the quotations and the list items open at each line and what stands
+ * open inside them. A block ends with what holds it. A paragraph carries on
+ * through a line with fewer marks or less indentation than it opened with, unless
+ * that line opens a block of its own, which a setext underline never does; an
+ * ordered marker other than 1 and an empty marker do not interrupt the paragraph
+ * above them in their own container. A pipe opens a table only over a delimiter
+ * row with as many cells, and a cell bounds what opens in it. An aside
+ * (`:::note`) interrupts a paragraph, and a lone `:::` closes one and is text with
+ * none open. `scripts/markdown_fences.py` says the same at more length.
  *
- * The marks of the containers that hold a fence are not the text of its line
- * (CommonMark 0.31.2, 5.1 and 5.2): a fence opens behind the marks of a
- * quotation and on the first line of a list item, each of its lines loses those
- * marks, and it ends with what holds it, where its quotation or its item ends.
+ * The page's kind decides what indentation and a tag mean. On a `.md` page, four
+ * columns past the container open no block, and a raw HTML block runs to its end
+ * condition. On a `.mdx` page any indentation opens a block, there is no HTML,
+ * and a tag or an expression with its lines to itself ends a paragraph. A reader
+ * that does not say which page it holds is read as `.mdx`, whose fences are the
+ * wider reading.
+ *
+ * The body of an indented fence loses as much indentation as its opening marker
+ * carried.
  */
 
 /** A run of three or more backticks or tildes opening a line, and the rest. */
 const MARKER = /^(\s*)(`{3,}|~{3,})(.*)$/;
 
-/** The mark of a quotation, what may stand before it and the one blank after it. */
-const QUOTE_MARK = /^[ \t]*>[ \t]?/;
+/**
+ * A line that may open or close display maths, as remark-math reads it: a run of
+ * two dollar signs or more and a meta with no dollar sign in it.
+ */
+const DISPLAY = /^[ \t]*(\${2,})([^$]*)$/;
 
-/** The marker of a list item and the blanks after it. */
-const ITEM_MARKER = /^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+/;
+/** What stands for a quotation among the containers open at a line. */
+const QUOTATION = -1;
+
+/** Four columns past its container, a line opens no block on a `.md` page. */
+const CODE_INDENT = 4;
 
 /**
- * A line read past the quotation marks and the list markers that open it.
- *
- * @param {string} line
- * @returns {{depth: number, within: number, rest: string}} How many quotation
- *   marks stand before its text, the column of the content of the list item it
- *   opens (0 when the marks end on a quotation or there are none), and the line
- *   past its marks, each list marker left as blanks.
+ * How many columns a marker may leave before its text and still set its column,
+ * on a `.md` page: past those, the item opens on indented code.
  */
-export function pastMarks(line) {
-  let rest = line;
-  let depth = 0;
-  let width = 0;
-  for (;;) {
-    const mark = QUOTE_MARK.exec(rest);
-    if (mark) {
-      depth += 1;
-      width = 0;
-      rest = rest.slice(mark[0].length);
-      continue;
+const MOST_BLANKS_AFTER_MARKER = 4;
+
+/** A tab's stop, in columns. */
+const TAB_STOP = 4;
+
+/** The marker of a list item, the number of an ordered one captured. */
+const ITEM_MARKER = /^(?:[-*+]|(\d{1,9})[.)])(?=[ \t]|$)/;
+
+/** A heading written with its marks. */
+const ATX_HEADING = /^#{1,6}(?:[ \t]|$)/;
+
+/** A thematic break, as written past what opens the line. */
+const THEMATIC_BREAK = /^([-*_])[ \t]*(?:\1[ \t]*){2,}$/;
+
+/** A setext underline, as written past what opens the line. */
+const UNDERLINE = /^(?:=+|-+)[ \t]*$/;
+
+/** The delimiter row of a table: one cell or more of hyphens and alignment colons. */
+const DELIMITER_ROW = /^\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$/;
+
+/** What decides a table's cells, left to right: an escape, or the pipe between two. */
+const CELL_MARK = /\\.|\|/g;
+
+/** The attributes and the label a directive may carry. */
+const DIRECTIVE_REST = '[A-Za-z0-9][A-Za-z0-9_-]*(?:\\[[^\\]]*\\])?(?:\\{[^}]*\\})?[ \\t]*$';
+
+/** A line that opens an aside, a container directive of three colons or more. */
+const ASIDE = new RegExp(`^(:{3,})${DIRECTIVE_REST}`);
+
+/** A line that is one leaf directive, of two colons exactly. */
+const LEAF_DIRECTIVE = new RegExp(`^::${DIRECTIVE_REST}`);
+
+/** A line of colons alone, which closes an aside as long as it or longer. */
+const ASIDE_CLOSE = /^(:{3,})[ \t]*$/;
+
+/**
+ * The element names of a raw HTML block of type 6, which may interrupt a paragraph
+ * (CommonMark 4.6). `_HTML_BLOCK_NAMES` of `scripts/markdown_fences.py`.
+ */
+const HTML_BLOCK_NAMES =
+  'address|article|aside|base|basefont|blockquote|body|caption|center|col|' +
+  'colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|' +
+  'form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|' +
+  'menu|menuitem|nav|noframes|ol|optgroup|option|p|param|search|section|summary|' +
+  'table|tbody|td|tfoot|th|thead|title|tr|track|ul';
+
+/**
+ * How a raw HTML block of types 1 to 6 opens and what ends it, `null` being a
+ * blank line (CommonMark 0.31.2, 4.6).
+ */
+const HTML_BLOCKS = [
+  [/^<(?:script|pre|style|textarea)(?:[ \t>]|$)/i, /<\/(?:script|pre|style|textarea)>/i],
+  [/^<!--/, /-->/],
+  [/^<\?/, /\?>/],
+  [/^<![A-Za-z]/, />/],
+  [/^<!\[CDATA\[/, /\]\]>/],
+  [new RegExp(`^</?(?:${HTML_BLOCK_NAMES})(?:[ \\t]|/?>|$)`, 'i'), null],
+];
+
+/**
+ * A raw HTML block of type 7: any other complete tag alone on its line. It runs to
+ * a blank line, it cannot interrupt a paragraph in its own container, and on a lazy
+ * line the site's parser opens it in the paragraph's container, which stays.
+ */
+const HTML_LONE_TAG =
+  /^(?:<[A-Za-z][A-Za-z0-9-]*(?:[ \t]+[A-Za-z_:][\w.:-]*(?:[ \t]*=[ \t]*(?:[^ \t"'=<>`]+|'[^']*'|"[^"]*"))?)*[ \t]*\/?>|<\/[A-Za-z][A-Za-z0-9-]*[ \t]*>)[ \t]*$/;
+
+/**
+ * A tag of an `.mdx` page, over as many lines as it takes: a quoted value and an
+ * expression among its attributes may hold a `>`.
+ */
+const MDX_TAG = /<\/?(?:[A-Za-z_$][\w.:$-]*(?:[^"'>{]|"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\})*)?>/y;
+
+/**
+ * An expression of an `.mdx` page, over as many lines as it takes: a comment, or
+ * braces balanced three levels down.
+ */
+const MDX_EXPRESSION = /\{\s*\/\*[\s\S]*?\*\/\s*\}|\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}/y;
+
+/** The roles of a line that is code. */
+const CODE_ROLES = new Set(['open', 'body', 'close', 'indented']);
+
+/** The roles of a line whose text no inline span of the page reaches. */
+export const NOT_INLINE_ROLES = new Set([...CODE_ROLES, 'maths-open', 'maths']);
+
+/** What is blank on a line, as CommonMark has it: nothing but spaces and tabs. */
+function isBlank(text) {
+  return /^[ \t]*$/.test(text);
+}
+
+/** `text` without the spaces and tabs that open it. */
+function pastBlanks(text) {
+  return text.replace(/^[ \t]+/, '');
+}
+
+/** `text` without the spaces and tabs on either side of it. */
+function stripBlanks(text) {
+  return pastBlanks(text).replace(/[ \t]+$/, '');
+}
+
+/** How many columns the blanks that open `text` take, it standing at `column`. */
+function blankColumns(text, column) {
+  let at = column;
+  for (const char of text) {
+    if (char === ' ') at += 1;
+    else if (char === '\t') at += TAB_STOP - (at % TAB_STOP);
+    else break;
+  }
+  return at - column;
+}
+
+/** `text` past `width` columns of its opening blanks, a split tab left as spaces. */
+function pastColumns(text, column, width) {
+  let at = column;
+  const end = column + width;
+  for (let index = 0; index < text.length; index += 1) {
+    if (at >= end) return ' '.repeat(at - end) + text.slice(index);
+    if (text[index] === ' ') at += 1;
+    else if (text[index] === '\t') at += TAB_STOP - (at % TAB_STOP);
+    else return text.slice(index);
+  }
+  return ' '.repeat(Math.max(at - end, 0));
+}
+
+/**
+ * The `[start, end]` of each piece of a table's row, between its unescaped pipes.
+ *
+ * @param {string} row
+ * @returns {Array<[number, number]>}
+ */
+export function cellSpans(row) {
+  const spans = [];
+  let start = 0;
+  for (const mark of row.matchAll(CELL_MARK)) {
+    if (mark[0] === '|') {
+      spans.push([start, mark.index]);
+      start = mark.index + 1;
     }
-    const marker = ITEM_MARKER.exec(rest);
-    if (!marker) return { depth, within: width, rest: ' '.repeat(width) + rest };
-    width += marker[0].length;
-    rest = rest.slice(marker[0].length);
+  }
+  spans.push([start, row.length]);
+  return spans;
+}
+
+/** How many cells a row holds, its outer pipes opening and closing none. */
+function cellCount(row) {
+  const stripped = stripBlanks(row);
+  const pieces = cellSpans(stripped).map(([start, end]) => stripped.slice(start, end));
+  if (pieces.length > 1 && isBlank(pieces[0])) pieces.shift();
+  if (pieces.length > 1 && isBlank(pieces[pieces.length - 1])) pieces.pop();
+  return pieces.length;
+}
+
+/**
+ * @typedef {object} PageLine One line of a page, as the walk reads it.
+ * @property {string} text The line as written.
+ * @property {string} role Its part in the page: `blank`, `paragraph`, `text` (a line
+ *   that carries a paragraph on, a lazy one among them), `single` (a block of its
+ *   own), `underline`, `row`, `html` (it opens a raw HTML block), `raw` (it carries
+ *   one on), `indented`, `open`, `body`, `close` (a line of a fence), `maths-open`
+ *   and `maths` (any other line of a display block).
+ * @property {string} info The info string of a fence or the meta of a display block,
+ *   on the line that opens it.
+ * @property {number} indent The indentation of the opening marker, on every line of
+ *   a fence.
+ * @property {string} rest The line past the marks and the columns of its containers,
+ *   and past those it opens.
+ */
+
+/** @returns {PageLine} */
+function pageLine(text, role, rest, info = '', indent = 0) {
+  return { text, role, rest, info, indent };
+}
+
+/** What stands open at each line of a page, read a line at a time. */
+class Walk {
+  /**
+   * @param {string[]} lines The lines, without their line ends.
+   * @param {string} kind The page's kind.
+   */
+  constructor(lines, kind) {
+    this.lines = lines;
+    this.markdown = kind === 'md';
+    this.held = [];
+    this.fresh = false;
+    this.leaf = '';
+    this.opening = '';
+    this.indent = 0;
+    this.htmlEnd = null;
+    this.asides = [];
+    this.left = 0;
+  }
+
+  /** The line at `index`, which has to come after the one read last. */
+  read(index) {
+    const text = this.lines[index];
+    const closed = this.closesAside(text);
+    if (closed !== null) return pageLine(text, 'single', closed);
+    const [rest, column, matched] = this.pastHeld(text, this.held.length);
+    this.fresh = false;
+    if (this.left) {
+      this.left -= 1;
+      return pageLine(text, 'single', rest);
+    }
+    if (['fence', 'maths', 'html'].includes(this.leaf)) {
+      if (matched === this.held.length && !this.endsOnBlank(rest)) {
+        return this.inside(text, rest);
+      }
+      this.leaf = '';
+    }
+    return this.opens(index, text, rest, column, matched);
+  }
+
+  /** `text` past the first `upto` containers: what is left, its column, how many held it. */
+  pastHeld(text, upto) {
+    let rest = text;
+    let column = 0;
+    for (let index = 0; index < upto; index += 1) {
+      const held = this.held[index];
+      if (held === QUOTATION) {
+        const mark = this.quoteMark(rest, column);
+        if (mark === null) return [rest, column, index];
+        [rest, column] = mark;
+      } else if (!isBlank(rest)) {
+        if (blankColumns(rest, column) < held) return [rest, column, index];
+        rest = pastColumns(rest, column, held);
+        column += held;
+      } else if (this.fresh && index === this.held.length - 1) {
+        return [rest, column, index];
+      }
+    }
+    return [rest, column, upto];
+  }
+
+  /** What a quotation's mark leaves of `rest`, and at which column, or `null`. */
+  quoteMark(rest, column) {
+    const blanks = blankColumns(rest, column);
+    const body = pastBlanks(rest);
+    if (!body.startsWith('>') || (this.markdown && blanks >= CODE_INDENT)) return null;
+    const at = column + blanks + 1;
+    const after = body.slice(1);
+    if (after[0] === ' ' || after[0] === '\t') return [pastColumns(after, at, 1), at + 1];
+    return [after, at];
+  }
+
+  /** What is left of a line that closes the innermost aside, or `null`. */
+  closesAside(text) {
+    if (!this.asides.length) return null;
+    const [colons, around] = this.asides[this.asides.length - 1];
+    const [rest, column, matched] = this.pastHeld(text, around);
+    const close = ASIDE_CLOSE.exec(pastBlanks(rest));
+    if (
+      matched < around ||
+      close === null ||
+      close[1].length < colons ||
+      (this.markdown && blankColumns(rest, column) >= CODE_INDENT)
+    ) {
+      return null;
+    }
+    this.asides.pop();
+    this.closeTo(around);
+    this.leaf = '';
+    return rest;
+  }
+
+  /** Whether `rest` ends a raw HTML block that a blank line ends. */
+  endsOnBlank(rest) {
+    return this.leaf === 'html' && this.htmlEnd === null && isBlank(rest);
+  }
+
+  /** A line that the fence, the display block or the HTML block open holds. */
+  inside(text, rest) {
+    if (this.leaf === 'html') {
+      if (this.htmlEnd !== null && this.htmlEnd.test(rest)) this.leaf = '';
+      return pageLine(text, 'raw', rest);
+    }
+    const deep = this.markdown && blankColumns(rest, 0) >= CODE_INDENT;
+    if (this.leaf === 'maths') {
+      const closing = DISPLAY.exec(rest);
+      if (
+        closing !== null &&
+        !deep &&
+        closing[1].length >= this.opening.length &&
+        !closing[2].trim()
+      ) {
+        this.leaf = '';
+      }
+      return pageLine(text, 'maths', rest);
+    }
+    const marker = MARKER.exec(rest);
+    if (
+      marker !== null &&
+      !deep &&
+      marker[2][0] === this.opening[0] &&
+      marker[2].length >= this.opening.length &&
+      !marker[3].trim()
+    ) {
+      this.leaf = '';
+      return pageLine(text, 'close', rest, '', this.indent);
+    }
+    return pageLine(text, 'body', rest, '', this.indent);
+  }
+
+  /** Close the containers past the first `kept`, and the asides they held. */
+  closeTo(kept) {
+    this.held.length = Math.min(this.held.length, kept);
+    this.asides = this.asides.filter(([, around]) => around <= kept);
+  }
+
+  /** A line that nothing concrete holds: what it opens, or the paragraph it carries on. */
+  opens(index, text, written, startColumn, startMatched) {
+    let rest = written;
+    let column = startColumn;
+    let matched = startMatched;
+    let paragraph =
+      this.leaf === 'paragraph' && this.asides.every(([, around]) => around <= matched);
+    const strict = (paragraph || this.leaf === 'indented') && matched === this.held.length;
+    let opened = false;
+    while (!(this.markdown && blankColumns(rest, column) >= CODE_INDENT)) {
+      const container = this.container(rest, column, strict);
+      if (container === null) break;
+      if (!opened) {
+        this.closeTo(matched);
+        this.leaf = '';
+        opened = true;
+        paragraph = false;
+      }
+      [rest, column] = container;
+      this.held.push(container[2]);
+      this.fresh = container[3];
+      matched = this.held.length;
+    }
+    if (isBlank(rest)) {
+      const kept = this.leaf === 'indented' && matched === this.held.length;
+      this.closeTo(matched);
+      this.leaf = kept ? 'indented' : '';
+      return pageLine(text, 'blank', rest);
+    }
+    if (this.markdown && blankColumns(rest, column) >= CODE_INDENT) {
+      if (paragraph) return pageLine(text, 'text', rest);
+      this.closeTo(matched);
+      this.leaf = 'indented';
+      return pageLine(text, 'indented', rest);
+    }
+    return this.leafOf(index, text, rest, matched, paragraph);
+  }
+
+  /**
+   * The container `rest` opens: what it leaves, at which column, itself, whether
+   * empty. `strict`: whether a paragraph or indented code stood open above in the
+   * line's own container, which an ordered marker other than 1 and an empty marker
+   * do not interrupt, on any container the line opens.
+   */
+  container(rest, column, strict) {
+    const mark = this.quoteMark(rest, column);
+    if (mark !== null) return [mark[0], mark[1], QUOTATION, false];
+    const body = pastBlanks(rest);
+    if ((strict && UNDERLINE.test(body)) || THEMATIC_BREAK.test(body)) return null;
+    const marker = ITEM_MARKER.exec(body);
+    if (marker === null) return null;
+    const after = body.slice(marker[0].length);
+    const empty = isBlank(after);
+    if (strict && (empty || (marker[1] !== undefined && marker[1] !== '1'))) return null;
+    const blanks = blankColumns(rest, column);
+    const start = column + blanks + marker[0].length;
+    const spaces = blankColumns(after, start);
+    const deep = this.markdown && spaces > MOST_BLANKS_AFTER_MARKER;
+    const padding = empty || deep ? 1 : spaces;
+    const left = empty ? '' : pastColumns(after, start, padding);
+    return [left, start + padding, blanks + marker[0].length + padding, empty];
+  }
+
+  /** What a line with text on it opens past its containers, or the paragraph it continues. */
+  leafOf(index, text, rest, matched, paragraph) {
+    const body = stripBlanks(rest);
+    const strict = paragraph && matched === this.held.length;
+    const role = this.oneLineRole(index, body, strict);
+    if (role !== null) {
+      this.closeTo(matched);
+      this.leaf = '';
+      return pageLine(text, role, rest);
+    }
+    const opened = this.concrete(text, rest, body, matched, paragraph);
+    if (opened !== null) return opened;
+    if (this.tableRow(index, body, matched, paragraph)) return pageLine(text, 'row', rest);
+    if (paragraph) return pageLine(text, 'text', rest);
+    this.closeTo(matched);
+    this.leaf = 'paragraph';
+    return pageLine(text, 'paragraph', rest);
+  }
+
+  /** The role of a line that is a block by itself, or `null`. */
+  oneLineRole(index, body, strict) {
+    if (strict && UNDERLINE.test(body)) return 'underline';
+    if (ATX_HEADING.test(body) || THEMATIC_BREAK.test(body)) return 'single';
+    if (LEAF_DIRECTIVE.test(body)) return 'single';
+    if (!this.markdown && (body[0] === '<' || body[0] === '{')) {
+      const taken = this.mdxFlow(index, body);
+      if (taken !== null) {
+        this.left = taken;
+        return 'single';
+      }
+    }
+    return null;
+  }
+
+  /**
+   * How many more lines the tags and expressions `body` opens take. `null` when
+   * text stands beside them, so they are inline ones of a paragraph.
+   */
+  mdxFlow(index, body) {
+    const text = [body, ...this.lines.slice(index + 1)].join('\n');
+    let at = 0;
+    for (;;) {
+      const reader = text[at] === '<' ? MDX_TAG : MDX_EXPRESSION;
+      reader.lastIndex = at;
+      const found = reader.exec(text);
+      if (found === null) return null;
+      at = found.index + found[0].length;
+      while (text[at] === ' ' || text[at] === '\t') at += 1;
+      if (at >= text.length || text[at] === '\n') {
+        return text.slice(0, at).split('\n').length - 1;
+      }
+      if (text[at] !== '<' && text[at] !== '{') return null;
+    }
+  }
+
+  /** The fence, the display block, the aside or the HTML block a line opens, or `null`. */
+  concrete(text, rest, body, matched, paragraph) {
+    const marker = MARKER.exec(rest);
+    if (marker !== null && !(marker[2][0] === '`' && marker[3].includes('`'))) {
+      this.closeTo(matched);
+      this.leaf = 'fence';
+      this.opening = marker[2];
+      this.indent = marker[1].length;
+      return pageLine(text, 'open', rest, marker[3].trim(), this.indent);
+    }
+    const display = DISPLAY.exec(rest);
+    if (display !== null) {
+      this.closeTo(matched);
+      this.leaf = 'maths';
+      this.opening = display[1];
+      return pageLine(text, 'maths-open', rest, display[2].trim());
+    }
+    const aside = ASIDE.exec(body);
+    if (aside !== null) {
+      this.closeTo(matched);
+      this.leaf = '';
+      this.asides.push([aside[1].length, this.held.length]);
+      return pageLine(text, 'single', rest);
+    }
+    return this.markdown ? this.html(text, rest, body, matched, paragraph) : null;
+  }
+
+  /** The raw HTML block a line of a `.md` page opens, or `null`. */
+  html(text, rest, body, matched, paragraph) {
+    for (const [opens, ends] of HTML_BLOCKS) {
+      if (opens.test(body)) {
+        this.closeTo(matched);
+        this.leaf = ends !== null && ends.test(body) ? '' : 'html';
+        this.htmlEnd = ends;
+        return pageLine(text, 'html', rest);
+      }
+    }
+    const lazy = paragraph && matched < this.held.length;
+    if ((lazy || !paragraph) && HTML_LONE_TAG.test(body)) {
+      if (!lazy) this.closeTo(matched);
+      this.leaf = 'html';
+      this.htmlEnd = null;
+      return pageLine(text, 'html', rest);
+    }
+    return null;
+  }
+
+  /** Whether a line of text is a row of a table: the open one's, or a new one's head. */
+  tableRow(index, body, matched, paragraph) {
+    if (this.leaf === 'table' && matched === this.held.length) return true;
+    if (!paragraph) this.closeTo(matched);
+    if (index + 1 >= this.lines.length || body === '|') return false;
+    const [rest, column, held] = this.pastHeld(this.lines[index + 1], this.held.length);
+    const delimiter = stripBlanks(rest);
+    if (
+      held !== this.held.length ||
+      (this.markdown && blankColumns(rest, column) >= CODE_INDENT) ||
+      !(delimiter.includes('|') || delimiter.includes(':')) ||
+      !DELIMITER_ROW.test(delimiter) ||
+      ITEM_MARKER.test(delimiter) ||
+      cellCount(body) !== cellCount(delimiter)
+    ) {
+      return false;
+    }
+    this.leaf = 'table';
+    return true;
   }
 }
 
 /**
- * A line inside a block opened behind marks, or `null` if the block has ended:
- * at a line with fewer quotation marks than it opened behind, or a line of text
- * indented less than the content of the list item it opened on.
+ * Every line of a page with its part in the page, read in one walk.
  *
- * @param {string} line
- * @param {number} depth The quotation marks it opened behind.
- * @param {number} within The column of the content of the item it opened on, or 0.
- * @returns {string | null}
+ * @param {Iterable<string>} lines The lines, without their line ends.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind, which decides what
+ *   indentation and a tag mean; a reader that does not know it reads `mdx`.
+ * @returns {PageLine[]} One entry per line.
  */
-function insideBlock(line, depth, within) {
-  let rest = line;
-  for (let crossed = 0; crossed < depth; crossed += 1) {
-    const mark = QUOTE_MARK.exec(rest);
-    if (!mark) return null;
-    rest = rest.slice(mark[0].length);
-  }
-  if (rest.trim() && rest.length - rest.replace(/^[ \t]+/, '').length < within) return null;
-  return rest;
+export function pageLines(lines, { kind = 'mdx' } = {}) {
+  const walk = new Walk(Array.from(lines), kind);
+  return walk.lines.map((_, index) => walk.read(index));
 }
 
 /**
@@ -104,69 +586,29 @@ function withEnds(text) {
 }
 
 /**
- * Every line with its part in the page.
+ * Whether each line is code: a fence's opening line, its body or its closing line,
+ * and indented code on the one kind of page that has it. A fence never closed runs
+ * to the end of the page or of what holds it.
  *
  * @param {Iterable<string>} lines The lines, without their line ends.
- * @returns {Generator<{text: string, inner: string, role: 'prose' | 'open' | 'body' | 'close', info: string, indent: number}>}
- */
-function* read(lines) {
-  let opening = '';
-  let indent = 0;
-  let depth = 0;
-  let within = 0;
-  for (const text of lines) {
-    const inner = opening ? insideBlock(text, depth, within) : null;
-    if (inner === null) {
-      opening = '';
-      const marks = pastMarks(text);
-      const [, lead = '', run = '', rest = ''] = MARKER.exec(marks.rest) ?? [];
-      if (run && !(run[0] === '`' && rest.includes('`'))) {
-        opening = run;
-        indent = lead.length;
-        depth = marks.depth;
-        within = marks.within;
-        yield { text, inner: '', role: 'open', info: rest.trim(), indent };
-      } else {
-        yield { text, inner: '', role: 'prose', info: '', indent: 0 };
-      }
-      continue;
-    }
-    const marker = MARKER.exec(inner);
-    if (
-      marker !== null &&
-      marker[2][0] === opening[0] &&
-      marker[2].length >= opening.length &&
-      !marker[3].trim()
-    ) {
-      opening = '';
-      yield { text, inner, role: 'close', info: '', indent };
-    } else {
-      yield { text, inner, role: 'body', info: '', indent };
-    }
-  }
-}
-
-/**
- * Whether each line is code: a fence's opening line, its body or its closing
- * line. A fence never closed runs to the end of the page.
- *
- * @param {Iterable<string>} lines The lines, without their line ends.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
  * @returns {boolean[]} One entry per line.
  */
-export function codeLines(lines) {
-  return Array.from(read(lines), (line) => line.role !== 'prose');
+export function codeLines(lines, { kind = 'mdx' } = {}) {
+  return pageLines(lines, { kind }).map((line) => CODE_ROLES.has(line.role));
 }
 
 /**
  * The page with every line of a fence emptied, so that line numbers still hold.
  *
  * @param {string} text The page.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
  * @returns {string} The prose of the page, its lines joined by a line feed.
  */
-export function prose(text) {
-  return Array.from(read(splitLines(text)), (line) =>
-    line.role === 'prose' ? line.text : '',
-  ).join('\n');
+export function prose(text, { kind = 'mdx' } = {}) {
+  return pageLines(splitLines(text), { kind })
+    .map((line) => (CODE_ROLES.has(line.role) ? '' : line.text))
+    .join('\n');
 }
 
 /**
@@ -214,18 +656,21 @@ export function fences(text) {
   let body = [];
   const lines = withEnds(text);
   let number = 0;
-  for (const line of read(splitLines(text))) {
+  for (const line of pageLines(splitLines(text))) {
     const end = lines[number].slice(line.text.length);
     number += 1;
+    if (line.role === 'body') {
+      body.push(dedent(line.rest, line.indent) + end);
+      continue;
+    }
+    if (start) {
+      found.push(fence(start, info, body));
+      start = 0;
+    }
     if (line.role === 'open') {
       start = number;
       info = line.info;
       body = [];
-    } else if (line.role === 'body') {
-      body.push(dedent(line.inner, line.indent) + end);
-    } else if (line.role === 'close') {
-      found.push(fence(start, info, body));
-      start = 0;
     }
   }
   if (start) found.push(fence(start, info, body));

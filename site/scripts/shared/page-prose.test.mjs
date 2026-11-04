@@ -11,6 +11,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { codeLines, pageLines, splitLines } from '../../src/lib/markdown-fences.mjs';
 import { authorsFigure, shownLines, strayDelimiter } from './page-prose.mjs';
 
 test('a figure is found as the Spanish figure check reads a page', () => {
@@ -59,6 +60,22 @@ test('a display delimiter behind the marks of its containers is read as one', ()
   assert.equal(strayDelimiter('> $$x$$'), null);
   assert.equal(strayDelimiter('> $$ x = 1'), '> $$ x = 1');
   assert.equal(strayDelimiter('- $$ x = 1'), '- $$ x = 1');
+});
+
+test('a marker that cannot interrupt a paragraph is the text of the paragraph', () => {
+  // The walk of the page says which marks are marks: `2. ` under a paragraph is
+  // the paragraph's text, so what stands after it opens nothing.
+  const read = (page) => {
+    const lines = splitLines(page);
+    const shown = shownLines(lines, codeLines(lines, { kind: 'md' }));
+    return [shown, pageLines(shown, { kind: 'md' })];
+  };
+  const [cut, cutRead] = read('Texto\n2. $$');
+  assert.equal(strayDelimiter(cut[1], cutRead[1].rest), '2. $$');
+  const [opens, opensRead] = read('Texto\n1. $$');
+  assert.equal(strayDelimiter(opens[1], opensRead[1].rest), null);
+  const [out, outRead] = read('> Texto\n2. $$');
+  assert.equal(strayDelimiter(out[1], outRead[1].rest), null);
 });
 
 test('a code span read over the lines of its paragraph hides what it holds', () => {
@@ -144,6 +161,14 @@ test('two inline displays on a line pair, and a third delimiter does not', () =>
   assert.equal(strayDelimiter('$$a$$ and $$b$$'), null);
   assert.equal(strayDelimiter('$$x$$ text $$'), '$$x$$ text $$');
   assert.equal(strayDelimiter('$$ x'), '$$ x');
+});
+
+test('a raw block of a page holds no code span and no escape', () => {
+  // The page shows it as written: the backticks and the image are text to the
+  // parser on a `.md` page, and markdown to it on an `.mdx` one.
+  const lines = ['<div>', '`$$`', '</div>'];
+  assert.equal(shownLines(lines, [false, false, false])[1], '`$$`');
+  assert.notEqual(shownLines(lines, [false, false, false], { mdx: true })[1], '`$$`');
 });
 
 test('a tag with text after it opens no raw block unless it is a block tag', () => {

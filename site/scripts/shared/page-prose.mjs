@@ -7,7 +7,7 @@
 // as the site reads them (markdown-spans.mjs), each span leaving a mark that
 // keeps the text either side of it apart, as the page shows it apart.
 
-import { pastMarks, prose } from '../../src/lib/markdown-fences.mjs';
+import { codeLines, pageLines, splitLines } from '../../src/lib/markdown-fences.mjs';
 import { dropInlineSpans, dropInlineSpansByBlock, SPAN_MARK } from './markdown-spans.mjs';
 
 /**
@@ -29,31 +29,8 @@ function dropEscapes(text) {
   return text.replace(ESCAPE, SPAN_MARK);
 }
 
-/**
- * A line that opens a raw HTML block of type 6 (CommonMark 4.6): one of the
- * block tags, opening or closing, whatever follows it on the line. It may
- * interrupt a paragraph.
- */
-const HTML_BLOCK_TAG = new RegExp(
-  '^ {0,3}</?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|' +
-    'colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|' +
-    'frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|' +
-    'nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|' +
-    'tfoot|th|thead|title|tr|track|ul)(?:[\\s/>]|$)',
-  'i',
-);
-
-/**
- * A line that opens a raw HTML block of type 7: any other complete tag,
- * opening or closing, alone on its line. It cannot interrupt a paragraph.
- */
-const HTML_LONE_TAG =
-  /^ {0,3}(?:<[A-Za-z][A-Za-z0-9-]*(?:\s+[A-Za-z_:][\w.:-]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*\/?>|<\/[A-Za-z][A-Za-z0-9-]*\s*>)\s*$/;
-
-/** Whether a line opens a raw HTML block of a `.md` page, after `previous`. */
-function opensHtmlBlock(line, previous) {
-  return HTML_BLOCK_TAG.test(line) || (!previous.trim() && HTML_LONE_TAG.test(line));
-}
+/** The lines of a raw HTML block of a `.md` page, which go out as written. */
+const RAW_ROLES = new Set(['html', 'raw']);
 
 /** An HTML image: a tag named `img` in any case, its name ending there. */
 const HTML_IMAGE = /<img(?=[\s/>])/i;
@@ -70,29 +47,6 @@ const DEFINITION = /^ {0,3}\[([^\]]+)\]:/gm;
 /** A label as CommonMark matches one: case folded, inner whitespace one space. */
 function normalised(label) {
   return label.trim().replace(/\s+/g, ' ').toLowerCase();
-}
-
-/**
- * `source` with its escapes taken out, but on the lines of a raw HTML block
- * of a `.md` page, which the page shows as written, backslash and all.
- *
- * @param {string} source Prose, its code out, as many lines as the page.
- * @param {boolean} mdx Whether the page is MDX, where a backslash escapes
- *   inside a tag's text as anywhere else.
- */
-function shownEscapes(source, mdx) {
-  if (mdx) return dropEscapes(source);
-  let raw = false;
-  let previous = '';
-  return source
-    .split('\n')
-    .map((line) => {
-      if (!line.trim()) raw = false;
-      else if (!raw && opensHtmlBlock(line, previous)) raw = true;
-      previous = line;
-      return raw ? line : dropEscapes(line);
-    })
-    .join('\n');
 }
 
 /**
@@ -116,8 +70,13 @@ function shownEscapes(source, mdx) {
  * @returns {boolean} Whether a figure is written outside any code.
  */
 export function authorsFigure(markdown, { mdx = false } = {}) {
-  const spoken = dropInlineSpansByBlock(prose(markdown), '`', { comments: mdx ? 'mdx' : 'md' });
-  const source = shownEscapes(spoken, mdx);
+  const kind = mdx ? 'mdx' : 'md';
+  const lines = splitLines(markdown);
+  const code = codeLines(lines, { kind });
+  const read = pageLines(lines, { kind });
+  const source = shownLines(lines, code, { mdx })
+    .map((line, index) => (RAW_ROLES.has(read[index].role) ? line : dropEscapes(line)))
+    .join('\n');
   if (INLINE_IMAGE.test(source) || HTML_IMAGE.test(source)) return true;
   const defined = new Set(Array.from(source.matchAll(DEFINITION), (m) => normalised(m[1])));
   for (const match of source.matchAll(REFERENCE_IMAGE)) {
@@ -137,8 +96,9 @@ export function authorsFigure(markdown, { mdx = false } = {}) {
  * @returns {string[]} The lines, a fenced one left blank.
  */
 export function shownLines(lines, code, { mdx = false } = {}) {
-  const prose = lines.map((line, index) => (code[index] ? '' : line)).join('\n');
-  return dropInlineSpansByBlock(prose, '`', { comments: mdx ? 'mdx' : 'md' }).split('\n');
+  return dropInlineSpansByBlock(lines.join('\n'), '`', { comments: mdx ? 'mdx' : 'md' })
+    .split('\n')
+    .map((line, index) => (code[index] ? '' : line));
 }
 
 /**
@@ -152,14 +112,18 @@ export function shownLines(lines, code, { mdx = false } = {}) {
  * pair, an even count, and a line that writes a third `$$` after a complete
  * pair leaves one open. Prose that talks about `$$` writes it in a code span.
  * The marks of a quotation or a list item are not the line's text, so what
- * stands behind them is what is read.
+ * stands behind them is what is read: the walk of the page says which marks those
+ * are, an ordered marker other than 1 under a paragraph being the paragraph's text.
  *
  * @param {string} line One line of a page, outside any fenced block.
+ * @param {string} [rest] What the walk of the page leaves of the line past its
+ *   containers; with none, the line is read as a page of its own.
  * @returns {string | null} The line's prose, trimmed, or `null` when it is fine.
  */
-export function strayDelimiter(line) {
+export function strayDelimiter(line, rest) {
   const trimmed = dropInlineSpans(line).trim();
-  const shown = dropEscapes(pastMarks(trimmed).rest).trim();
+  const past = rest ?? pageLines([trimmed])[0].rest;
+  const shown = dropEscapes(past).trim();
   const delimiters = shown.match(/\$\$/g)?.length ?? 0;
   if (!delimiters) return null;
   if (shown === '$$') return null;

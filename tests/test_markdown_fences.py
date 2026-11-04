@@ -9,13 +9,16 @@ on. The tests fix the cases where the two readings part, and the plain ones
 that must not move, and then the blocks the example checks take out of a page
 through the same reading. The site's JavaScript reads its pages with the
 same reading written again, ``site/src/lib/markdown-fences.mjs``, and the last
-test holds the two to the same answer on every page and every case here.
+tests hold the two to the same answer on every page and every case here. What
+each case expects is what the site's parser reads, micromark with its math, GFM
+and directive extensions, and MDX on top of them on an ``.mdx`` page.
 """
 
 from __future__ import annotations
 
 import json
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -32,6 +35,7 @@ from markdown_fences import (
     code_lines,
     display_math_parts,
     fences,
+    page_lines,
     python_fences,
 )
 
@@ -143,6 +147,28 @@ _BEHIND_MARKS = (
     ("- ```a`b\nprose\n", [False, False]),
     ("> ```a`b\nprose\n", [False, False]),
     ("- ``x`` y\n", [False]),
+    ("- > ```\n> text\n", [True, False]),
+    ("1. > ```\n> text\n", [True, False]),
+    ("> - > ```\n> > text\n", [True, False]),
+    ("- > ```\n  > x\n> y\n", [True, True, False]),
+    ("a\n2. ```\n   b\n", [False, False, False]),
+    ("a\n2. ~~~\n   b\n", [False, False, False]),
+    ("a\n1. ```\n   b\n", [False, True, True]),
+    ("> a\n2. ```\n   b\n", [False, True, True]),
+    ("- a\n2. ```\n   b\n", [False, True, True]),
+    ("- a\n  2. ```\n     b\n", [False, False, False]),
+    ("a\n> 2. ```\n> b\n", [False, False, False]),
+    ("- a\n  ```\n  x\nprose\n", [False, True, True, False]),
+    ("- a\n  ~~~\n  x\nprose\n", [False, True, True, False]),
+    ("- a\n\n  ```\n  x\nprose\n", [False, False, True, True, False]),
+    ("> - a\n>   ```\n>   x\n> prose\n", [False, True, True, False]),
+    ("- a\nb\n  ```\n  x\nprose\n", [False, False, True, True, False]),
+    ("- a\n\nb\n  ```\n  x\nprose\n", [False, False, False, True, True, True]),
+    ("-\ta\n    ```\n    x\nprose\n", [False, True, True, False]),
+    ("-\t```\n\tx\nprose\n", [True, True, False]),
+    (">\t```\n>\tx\n>\t```\n> prose\n", [True, True, True, False]),
+    ("$$\n```\n$$\nprose\n", [False, False, False, False]),
+    (":::note\n```\nx\n:::\nprose\n", [False, True, True, False, False]),
 )
 
 
@@ -153,8 +179,9 @@ def test_a_fence_behind_marks_is_code(page: str, code: list[bool]) -> None:
     Nothing saw a fence behind a mark, so a backtick on one side of it paired
     with one on the other and hid the prose between them, and the closing fence
     of one a list item opened read as an opening one that ran to the end of the
-    page. A quoted fence ends with its quotation, and one a list item opens with
-    the item.
+    page. A quoted fence ends with its quotation, and one a list item holds with
+    the item, on whichever of its lines the fence opened and behind whatever else.
+    A marker that cannot interrupt the paragraph above is that paragraph's text.
     """
     assert _code(page) == code
 
@@ -171,6 +198,61 @@ def test_a_fence_behind_marks_is_code(page: str, code: list[bool]) -> None:
 )
 def test_the_body_of_a_fence_behind_marks_has_lost_them(page: str, body: str) -> None:
     assert python_fences(page) == [body]
+
+
+def test_a_fence_that_ends_with_what_holds_it_is_a_fence_all_the_same() -> None:
+    """The reader lost one whose container ended: a later fence took its place."""
+    page = "> ```python\n> x = 1\n\n```python\ny = 2\n```\n"
+    assert python_fences(page) == ["x = 1\n", "y = 2\n"]
+    assert python_fences("- ```python\n  x = 1\nprose\n") == ["x = 1\n"]
+
+
+@pytest.mark.parametrize(
+    ("page", "md", "mdx"),
+    [
+        pytest.param("    ```\n    x\n", [True, True], [True, True], id="alone"),
+        pytest.param(
+            "a\n    ```\n    x\n",
+            [False, False, False],
+            [False, True, True],
+            id="under a paragraph",
+        ),
+        pytest.param(
+            "    ```\nprose\n", [True, False], [True, True], id="closed by nothing"
+        ),
+        pytest.param(
+            "```\na\n    ```\nb\n",
+            [True, True, True, True],
+            [True, True, True, False],
+            id="a closing fence four columns in",
+        ),
+        pytest.param(
+            "- a\n\n      ```\n      b\n  c\n",
+            [False, False, True, True, False],
+            [False, False, True, True, True],
+            id="four columns past its item",
+        ),
+        pytest.param(
+            "<pre>\n```\n</pre>\nprose\n",
+            [False, False, False, False],
+            [False, True, True, True],
+            id="in a raw HTML block",
+        ),
+        pytest.param(
+            "<A>\n```\nx\n```\n</A>\nprose\n",
+            [False, False, False, False, False, False],
+            [False, True, True, True, False, False],
+            id="in a component",
+        ),
+    ],
+)
+def test_the_kind_of_a_page_says_what_indentation_and_a_tag_mean(
+    page: str, md: list[bool], mdx: list[bool]
+) -> None:
+    """A ``.md`` page has indented code and raw HTML; an ``.mdx`` page has neither."""
+    lines = page.splitlines()
+    assert list(code_lines(lines, kind="md")) == md
+    assert list(code_lines(lines, kind="mdx")) == mdx
 
 
 @pytest.mark.parametrize(
@@ -256,6 +338,29 @@ def test_the_body_of_a_fence_behind_marks_has_lost_them(page: str, body: str) ->
             ["prose", "prose", "prose", "prose"],
             id="in a fence",
         ),
+        pytest.param(
+            "$$\n```\n$$\nprose\n",
+            ["open", "maths", "maths", "prose"],
+            id="a fence in the block is maths",
+        ),
+        pytest.param(
+            "- > $$\n> prose\n", ["open", "prose"], id="out of the item behind it"
+        ),
+        pytest.param(
+            "a\n2. $$\n   b\n   $$\n",
+            ["prose", "prose", "prose", "open"],
+            id="a marker that cannot interrupt the paragraph",
+        ),
+        pytest.param(
+            "a\n1. $$\n   b\n",
+            ["prose", "open", "maths"],
+            id="a marker that can",
+        ),
+        pytest.param(
+            "- a\n  $$\n  x\nprose\n",
+            ["prose", "open", "maths", "prose"],
+            id="ends with the item it opened on a later line of",
+        ),
     ],
 )
 def test_a_display_block_is_read_through_the_marks_of_its_containers(
@@ -263,7 +368,7 @@ def test_a_display_block_is_read_through_the_marks_of_its_containers(
 ) -> None:
     """What the site's parser reads: a block ends with what holds it."""
     lines = page.splitlines()
-    assert display_math_parts(lines, list(code_lines(lines))) == parts
+    assert display_math_parts(lines) == parts
 
 
 _NODE = shutil.which("node")
@@ -286,6 +391,63 @@ _CASES = (
     "> a\r\n> ```\r\n> b\r\n> ```\r\n",
     *(page for page, _ in _BEHIND_MARKS),
 )
+
+
+#: Pages that walk through every shape, for the two languages to agree on.
+_WALKS = (
+    "> a\n===\nb\n",
+    "- a\n  ===\nb\n",
+    "- a\n---\nb\n",
+    "> a\n-\nb\n",
+    "a\n-\nb\n",
+    "a\n2. b\n",
+    "a\n1. b\n",
+    "- a\n2. b\n",
+    "- a\n  2. b\n",
+    "a\n> 2. b\n",
+    "    a\n\n2. b\n",
+    "| a |\n|---|\n| b |\nc\n",
+    "| a |\nb\n",
+    "a | b\n--|--\nc\n",
+    "a | b\n- | -\n",
+    "a \\| b\n-|-\n",
+    "|\n|-\n",
+    "> a\n| b |\n> |---|\n",
+    "> a\n| b |\n|---|\n",
+    "<div>\na\n\nb\n",
+    "<!-- a\n\nb -->\nc\n",
+    "<?a\n?>\nb\n",
+    "<!x\n>\nb\n",
+    "<![CDATA[\n]]>\nb\n",
+    "<script>\n\n</script>\nb\n",
+    "<A />\na\n\nb\n",
+    "| a |\n|---|\n<A />\nb\n",
+    "a\n<A />\nb\n",
+    "> a\n<A />\n> b\nc\n",
+    '<A\n  b="c"\n/>\nd\n',
+    "{x}\na\n",
+    "{\n  x\n}\na\n",
+    "<b>a</b> c\nd\n",
+    ":::note\na\n:::\nb\n",
+    "a\n:::\nb\n",
+    "::::note\n:::\n::::\nb\n",
+    "> :::note\n> a\nb\n> :::\n",
+    ":::note\n> a\nb\n:::\n",
+    "::x\na\n",
+    "-\n\n  a\n",
+    "-\n  a\n",
+    "-      a\n  b\n",
+    "-\ta\n\tb\n",
+    ">\ta\n",
+    "1.\t  a\n",
+    "\ta\n",
+    "- a\n\n\t\tb\n",
+)
+
+
+def _split_as_the_site_does(text: str) -> list[str]:
+    """The lines of a page without their ends, as ``splitLines`` of the site gives them."""
+    return re.split(r"\r\n|\r|\n", text.removesuffix("\n").removesuffix("\r"))
 
 
 def _pages() -> list[str]:
@@ -334,3 +496,41 @@ def test_the_site_reads_every_page_as_the_scripts_do() -> None:
         if one != other
     ]
     assert (len(pages) > len(_CASES), differ) == (True, [])
+
+
+@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.parametrize("kind", ["md", "mdx"])
+def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
+    """Each line's role and what the walk leaves of it, on each kind of page."""
+    pages = [*_pages(), *_WALKS]
+    script = (
+        "import {pageLines, splitLines} from "
+        f"{json.dumps(_SITE_READER.as_uri())};"
+        "let input = '';"
+        "for await (const chunk of process.stdin) input += chunk;"
+        "process.stdout.write(JSON.stringify(JSON.parse(input).map((text) => "
+        f"  pageLines(splitLines(text), {{kind: {json.dumps(kind)}}})"
+        "    .map((line) => [line.role, line.rest]))));"
+    )
+    ran = subprocess.run(
+        [str(_NODE), "--input-type=module", "-e", script],
+        input=json.dumps(pages),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=300,
+        check=True,
+    )
+    python = [
+        [
+            [line.role, line.rest]
+            for line in page_lines(_split_as_the_site_does(text), kind=kind)
+        ]
+        for text in pages
+    ]
+    differ = [
+        text[:80]
+        for text, one, other in zip(pages, python, json.loads(ran.stdout), strict=True)
+        if one != other
+    ]
+    assert differ == []

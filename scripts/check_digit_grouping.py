@@ -87,7 +87,7 @@ _BREAKABLE = re.compile(
 )
 
 
-def _markdown_prose(text: str) -> list[tuple[int, str]]:
+def _markdown_prose(text: str, *, kind: str = "md") -> list[tuple[int, str]]:
     """The lines of a Markdown file with the code blanked out, line numbers kept.
 
     A span of inline code, read by :mod:`markdown_spans`, goes as a fenced
@@ -96,12 +96,13 @@ def _markdown_prose(text: str) -> list[tuple[int, str]]:
     and a table keyed by ``"diesel locomotive, c. 2 200 kW"`` is keyed by
     that exact string; neither is prose, and neither reflows. A backtick
     behind a backslash opens no span, and what follows it is prose.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
     lines = text.splitlines()
-    code_flags = list(code_lines(lines))
+    code_flags = list(code_lines(lines, kind=kind))
     shown = lines_read_whole(
-        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
-        drop_inline_spans_by_block,
+        lines, lambda page: drop_inline_spans_by_block(page, kind=kind)
     )
     return [
         (number, "" if code else prose)
@@ -119,7 +120,7 @@ def _prose_of(path: Path) -> list[tuple[int, str]]:
     """
     text = path.read_text(encoding="utf-8")
     if path.suffix != ".py":
-        return _markdown_prose(text)
+        return _markdown_prose(text, kind="mdx" if path.suffix == ".mdx" else "md")
     prose: list[tuple[int, str]] = []
     tree = ast.parse(text, filename=str(path))
     for node in ast.walk(tree):

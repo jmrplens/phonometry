@@ -845,8 +845,7 @@ def page_prose(text: str, *, script: bool = False) -> str:
     lines = text.split("\n")
     code = list(code_lines(lines))
     shown = lines_read_whole(
-        ["" if fenced else line for line, fenced in zip(lines, code, strict=True)],
-        blank_inline_spans_by_block,
+        lines, lambda page: blank_inline_spans_by_block(page, kind="mdx")
     )
     kept = [
         line if fenced else spoken

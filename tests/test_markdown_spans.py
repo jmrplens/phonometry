@@ -22,6 +22,7 @@ _SCRIPTS = str(_ROOT / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
+from markdown_fences import page_lines
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans,
@@ -174,7 +175,9 @@ def test_a_span_wraps_inside_a_quotation(text: str, shown: str) -> None:
         pytest.param("> - Run `python\n> - --version` here.", id="two items in it"),
         pytest.param("> Run `python\n> > --version` here.", id="a deeper quotation"),
         pytest.param("> # Run `python\n> --version` here.", id="a heading in it"),
-        pytest.param("> | Run `python |\n> --version` here.", id="a table row in it"),
+        pytest.param(
+            "> | Run `python |\n> |---|\n> --version` here.", id="a table row in it"
+        ),
         pytest.param("Run `python\n> --version` here.", id="a quotation that opens"),
         pytest.param("- Run `python\n> --version` here.", id="after a list item"),
         pytest.param("- Run `python\n- --version` here.", id="two list items"),
@@ -215,6 +218,32 @@ def test_a_span_stays_inside_the_paragraph_of_a_quotation(text: str) -> None:
             "> - a\n>\n>   b `c\n>     - d` e", id="past a bare mark of a quotation"
         ),
         pytest.param("---\nkey: a `b\n---\nc` d", id="the fence of a frontmatter"),
+        pytest.param("- # h `b\nc` d", id="a heading on an item's first line"),
+        pytest.param("- ## h `b\n  c` d", id="a heading the item goes on after"),
+        pytest.param("1. # h `b\n   c` d", id="a heading on a numbered item"),
+        pytest.param("> - # h `b\n> c` d", id="a heading on an item of a quotation"),
+        pytest.param("- <!-- y --> `b\n  c` d", id="a comment on an item's first line"),
+        pytest.param("a `b\n<div>\nc` d", id="a block tag"),
+        pytest.param("a `b\n</div>\nc` d", id="a closing block tag"),
+        pytest.param("a `b\n<details>\nc` d", id="a details tag"),
+        pytest.param("a `b\n<script>\nc` d", id="a script tag"),
+        pytest.param("a `b\n<pre>\nc` d", id="a pre tag"),
+        pytest.param("a `b\n<?php\nc` d", id="a processing instruction"),
+        pytest.param("a `b\n<!x\nc` d", id="a declaration"),
+        pytest.param("a `b\n<![CDATA[\nc` d", id="a CDATA section"),
+        pytest.param("> a `b\n> <div>\n> c` d", id="a block tag of a quotation"),
+        pytest.param("-\ta `b\n    - c` d", id="an item a tab sets the column of"),
+        pytest.param("-\ta `b\n\t- c` d", id="a nested item behind a tab"),
+        pytest.param("a `b\n| c |\n|---|\nd` e", id="the head of a table"),
+        pytest.param("a `b\nc | d\n--|--\ne` f", id="a head with no outer pipes"),
+        pytest.param("a `b\nc\n:--\nd` e", id="a head over a colon"),
+        pytest.param("| a `b |\n|---|\n| c` d |", id="two rows of a table"),
+        pytest.param("| a |\n|---|\nb `c\nd` e", id="two rows with no pipes"),
+        pytest.param("| `a | b` |\n|---|---|", id="two cells of a row"),
+        pytest.param("a `b\n:::note\nc` d\n:::", id="an aside"),
+        pytest.param(":::note\na `b\n:::\nc` d", id="the end of an aside"),
+        pytest.param("a `b\n::x\nc` d", id="a leaf directive"),
+        pytest.param("    a `b\nc` d", id="indented code"),
     ],
 )
 def test_a_span_stops_at_a_line_that_ends_the_paragraph(text: str) -> None:
@@ -222,6 +251,8 @@ def test_a_span_stops_at_a_line_that_ends_the_paragraph(text: str) -> None:
 
     The reader took all of them for a line of the paragraph: a rule, a setext
     underline, a display fence, a comment and an item nested past three columns.
+    A block on an item's first line went unread behind the marker, as did all but
+    one of the raw HTML blocks, which end a paragraph as a comment does.
     """
     assert drop_inline_spans_by_block(text) == text
 
@@ -240,11 +271,114 @@ def test_a_span_stops_at_a_line_that_ends_the_paragraph(text: str) -> None:
         pytest.param(
             "- a\n\nb `c\n    - d` e", f"- a\n\nb {SPAN_MARK}\n e", id="out of the item"
         ),
+        pytest.param("> a `b\n===\nc` d", f"> a {SPAN_MARK}\n\n d", id="a lazy ==="),
+        pytest.param("> a `b\n=\nc` d", f"> a {SPAN_MARK}\n\n d", id="a lazy ="),
+        pytest.param("> a `b\n--\nc` d", f"> a {SPAN_MARK}\n\n d", id="a lazy --"),
+        pytest.param(
+            "- a `b\n===\nc` d", f"- a {SPAN_MARK}\n\n d", id="out of an item"
+        ),
+        pytest.param(
+            "1. a `b\n===\nc` d",
+            f"1. a {SPAN_MARK}\n\n d",
+            id="out of a numbered item",
+        ),
+        pytest.param(
+            "> > a `b\n> ===\n> c` d",
+            f"> > a {SPAN_MARK}\n\n d",
+            id="a shallower mark",
+        ),
+        pytest.param(
+            "- > a `b\n  ===\n  c` d",
+            f"- > a {SPAN_MARK}\n\n d",
+            id="in the item only",
+        ),
+        pytest.param("a `b\n2. c` d", f"a {SPAN_MARK}\n d", id="an ordered marker"),
+        pytest.param(
+            "- a `b\n    2. c` d", f"- a {SPAN_MARK}\n d", id="an ordered marker in it"
+        ),
+        pytest.param("a `b\n* \nc` d", f"a {SPAN_MARK}\n\n d", id="an empty marker"),
+        pytest.param("a `b\n| c` d", f"a {SPAN_MARK}\n d", id="a lone pipe"),
+        pytest.param("- a `b\n    | c` d", f"- a {SPAN_MARK}\n d", id="a pipe in it"),
+        pytest.param("| a `b\nc` d", f"| a {SPAN_MARK}\n d", id="a pipe that opens it"),
+        pytest.param(
+            "> | Run `python |\n> --version` here.",
+            f"> | Run {SPAN_MARK}\n here.",
+            id="a pipe of a quotation",
+        ),
+        pytest.param("a `b\n:::\nc` d", f"a {SPAN_MARK}\n\n d", id="no aside to close"),
+        pytest.param(
+            "a `b\n:::x y\nc` d", f"a {SPAN_MARK}\n\n d", id="no aside to open"
+        ),
+        pytest.param(
+            "a `b\n</span>\nc` d", f"a {SPAN_MARK}\n\n d", id="a closing inline tag"
+        ),
     ],
 )
 def test_a_span_still_runs_over_a_line_of_its_paragraph(text: str, shown: str) -> None:
-    """The site reads each of these as a line of the paragraph, so a span crosses."""
+    """The site reads each of these as a line of the paragraph, so a span crosses.
+
+    An underline is never lazy, and a pipe with no delimiter row under it, an
+    ordered marker other than 1 and an empty marker do not interrupt a paragraph.
+    """
     assert drop_inline_spans_by_block(text) == shown
+
+
+@pytest.mark.parametrize(
+    ("text", "shown_md", "shown_mdx"),
+    [
+        pytest.param(
+            "a `b\n<A />\nc` d",
+            f"a {SPAN_MARK}\n\n d",
+            "a `b\n<A />\nc` d",
+            id="a tag alone ends a paragraph of a component page",
+        ),
+        pytest.param(
+            "a `b\n    - c` d",
+            f"a {SPAN_MARK}\n d",
+            "a `b\n    - c` d",
+            id="any indentation opens an item there",
+        ),
+        pytest.param(
+            "a `b\n{x}\nc` d",
+            f"a {SPAN_MARK}\n\n d",
+            "a `b\n{x}\nc` d",
+            id="and an expression alone ends one",
+        ),
+        pytest.param(
+            "<div>\n`a`\n</div>",
+            "<div>\n`a`\n</div>",
+            f"<div>\n{SPAN_MARK}\n</div>",
+            id="a raw HTML block holds no span",
+        ),
+    ],
+)
+def test_the_kind_of_a_page_says_where_a_span_stops(
+    text: str, shown_md: str, shown_mdx: str
+) -> None:
+    """A ``.md`` page has raw HTML and indented code; an ``.mdx`` page has neither."""
+    assert drop_inline_spans_by_block(text, kind="md") == shown_md
+    assert drop_inline_spans_by_block(text, kind="mdx") == shown_mdx
+    assert drop_inline_spans_by_block(text, comments="mdx") == shown_mdx
+
+
+def test_a_line_of_code_is_not_read_for_a_span() -> None:
+    """A span pairs on no line of a fence, handed over with its fence or not."""
+    text = "a `b\n```\nc` d\n```\ne` f"
+    assert drop_inline_spans_by_block(text) == text
+
+
+def test_a_blanked_page_reads_by_the_walk_of_the_page_as_written() -> None:
+    """A line blanked is no line the walk can read: it took its container along."""
+    written = ["- ```", "  x", "  ```", "  a `b", "    - c` d"]
+    blanked = ["", "", "", *written[3:]]
+    text = "\n".join(blanked)
+    assert drop_inline_spans_by_block(text) != text
+    assert (
+        replace_inline_spans_by_block(
+            text, lambda span: span, walked=list(page_lines(written, kind="md"))
+        )
+        == text
+    )
 
 
 def test_the_lines_that_open_a_block_are_the_ones_the_spans_stop_at() -> None:
@@ -265,6 +399,18 @@ def test_the_lines_that_open_a_block_are_the_ones_the_spans_stop_at() -> None:
     ]
     assert block_starts(lines) == opening
     assert block_starts([]) == []
+
+
+def test_each_line_of_a_raw_html_block_opens_a_block() -> None:
+    """Nothing there is markup, so no state is carried from one line to the next."""
+    assert block_starts(["<div>", "a", "b", "", "c", "d"]) == [
+        True,
+        True,
+        True,
+        True,
+        True,
+        False,
+    ]
 
 
 def test_lines_read_whole_give_back_a_line_for_each_line() -> None:

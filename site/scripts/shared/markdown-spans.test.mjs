@@ -69,7 +69,7 @@ test('a span stays inside the paragraph of a quotation', () => {
     '> - Run `python\n> - --version` here.',
     '> Run `python\n> > --version` here.',
     '> # Run `python\n> --version` here.',
-    '> | Run `python |\n> --version` here.',
+    '> | Run `python |\n> |---|\n> --version` here.',
     'Run `python\n> --version` here.',
     '- Run `python\n> --version` here.',
     '- Run `python\n- --version` here.',
@@ -107,6 +107,32 @@ test('a span stops at a line that ends the paragraph', () => {
     '- a\nb `c\n    - d` e',
     '> - a\n>\n>   b `c\n>     - d` e',
     '---\nkey: a `b\n---\nc` d',
+    '- # h `b\nc` d',
+    '- ## h `b\n  c` d',
+    '1. # h `b\n   c` d',
+    '> - # h `b\n> c` d',
+    '- <!-- y --> `b\n  c` d',
+    'a `b\n<div>\nc` d',
+    'a `b\n</div>\nc` d',
+    'a `b\n<details>\nc` d',
+    'a `b\n<script>\nc` d',
+    'a `b\n<pre>\nc` d',
+    'a `b\n<?php\nc` d',
+    'a `b\n<!x\nc` d',
+    'a `b\n<![CDATA[\nc` d',
+    '> a `b\n> <div>\n> c` d',
+    '-\ta `b\n    - c` d',
+    '-\ta `b\n\t- c` d',
+    'a `b\n| c |\n|---|\nd` e',
+    'a `b\nc | d\n--|--\ne` f',
+    'a `b\nc\n:--\nd` e',
+    '| a `b |\n|---|\n| c` d |',
+    '| a |\n|---|\nb `c\nd` e',
+    '| `a | b` |\n|---|---|',
+    'a `b\n:::note\nc` d\n:::',
+    ':::note\na `b\n:::\nc` d',
+    'a `b\n::x\nc` d',
+    '    a `b\nc` d',
   ];
   for (const text of cases) {
     assert.equal(dropInlineSpansByBlock(text), text, text);
@@ -122,8 +148,47 @@ test('a span still runs over a line of its paragraph', () => {
     ['- a `b\n      - c` d', `- a ${SPAN_MARK}\n d`],
     ['- a `b\n  c` d', `- a ${SPAN_MARK}\n d`],
     ['- a\n\nb `c\n    - d` e', `- a\n\nb ${SPAN_MARK}\n e`],
+    // An underline is never lazy, and a pipe with no delimiter row under it, an
+    // ordered marker other than 1 and an empty marker do not interrupt a paragraph.
+    ['> a `b\n===\nc` d', `> a ${SPAN_MARK}\n\n d`],
+    ['> a `b\n=\nc` d', `> a ${SPAN_MARK}\n\n d`],
+    ['> a `b\n--\nc` d', `> a ${SPAN_MARK}\n\n d`],
+    ['- a `b\n===\nc` d', `- a ${SPAN_MARK}\n\n d`],
+    ['1. a `b\n===\nc` d', `1. a ${SPAN_MARK}\n\n d`],
+    ['> > a `b\n> ===\n> c` d', `> > a ${SPAN_MARK}\n\n d`],
+    ['- > a `b\n  ===\n  c` d', `- > a ${SPAN_MARK}\n\n d`],
+    ['a `b\n2. c` d', `a ${SPAN_MARK}\n d`],
+    ['- a `b\n    2. c` d', `- a ${SPAN_MARK}\n d`],
+    ['a `b\n* \nc` d', `a ${SPAN_MARK}\n\n d`],
+    ['a `b\n| c` d', `a ${SPAN_MARK}\n d`],
+    ['- a `b\n    | c` d', `- a ${SPAN_MARK}\n d`],
+    ['| a `b\nc` d', `| a ${SPAN_MARK}\n d`],
+    ['> | Run `python |\n> --version` here.', `> | Run ${SPAN_MARK}\n here.`],
+    ['a `b\n:::\nc` d', `a ${SPAN_MARK}\n\n d`],
+    ['a `b\n:::x y\nc` d', `a ${SPAN_MARK}\n\n d`],
+    ['a `b\n</span>\nc` d', `a ${SPAN_MARK}\n\n d`],
   ];
   for (const [text, shown] of cases) {
     assert.equal(dropInlineSpansByBlock(text), shown, text);
   }
+});
+
+test('the kind of a page says where a span stops', () => {
+  // A `.md` page has raw HTML and indented code; an `.mdx` page has neither.
+  const cases = [
+    ['a `b\n<A />\nc` d', `a ${SPAN_MARK}\n\n d`, 'a `b\n<A />\nc` d'],
+    ['a `b\n    - c` d', `a ${SPAN_MARK}\n d`, 'a `b\n    - c` d'],
+    ['a `b\n{x}\nc` d', `a ${SPAN_MARK}\n\n d`, 'a `b\n{x}\nc` d'],
+    ['<div>\n`a`\n</div>', '<div>\n`a`\n</div>', `<div>\n${SPAN_MARK}\n</div>`],
+  ];
+  for (const [text, md, mdx] of cases) {
+    assert.equal(dropInlineSpansByBlock(text, '`', { kind: 'md' }), md, text);
+    assert.equal(dropInlineSpansByBlock(text, '`', { kind: 'mdx' }), mdx, text);
+    assert.equal(dropInlineSpansByBlock(text, '`', { comments: 'mdx' }), mdx, text);
+  }
+});
+
+test('a line of code is not read for a span', () => {
+  const text = 'a `b\n```\nc` d\n```\ne` f';
+  assert.equal(dropInlineSpansByBlock(text), text);
 });

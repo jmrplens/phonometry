@@ -47,6 +47,20 @@ test('a stray display delimiter is found as the maths check reads a line', () =>
   assert.equal(strayDelimiter('Coste \\\\$$ x'), 'Coste \\\\$$ x');
 });
 
+test('a display delimiter behind the marks of its containers is read as one', () => {
+  // The marks are not the line's text: the site renders a display block in a
+  // quotation or on a list item's first line, and the check called both stray.
+  assert.equal(strayDelimiter('> $$'), null);
+  assert.equal(strayDelimiter('>$$'), null);
+  assert.equal(strayDelimiter('> > $$'), null);
+  assert.equal(strayDelimiter('- $$'), null);
+  assert.equal(strayDelimiter('1. $$'), null);
+  assert.equal(strayDelimiter('> - $$'), null);
+  assert.equal(strayDelimiter('> $$x$$'), null);
+  assert.equal(strayDelimiter('> $$ x = 1'), '> $$ x = 1');
+  assert.equal(strayDelimiter('- $$ x = 1'), '- $$ x = 1');
+});
+
 test('a code span read over the lines of its paragraph hides what it holds', () => {
   // The renderer reads a code span across the line breaks of its paragraph;
   // read line by line, a `![`, a `<img` or a `$$` inside one was prose.

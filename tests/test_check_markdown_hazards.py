@@ -419,6 +419,37 @@ def test_a_display_fence_that_holds_a_dollar_opens_no_block() -> None:
     assert "becomes an h1" in problems[1]
 
 
+@pytest.mark.parametrize(
+    ("text", "line"),
+    [
+        pytest.param("> $$ x = 1\n> y\n> $$\n", 1, id="in a quotation"),
+        pytest.param("- $$ x = 1\n  y\n  $$\n", 1, id="on a list item's first line"),
+        pytest.param("> $$x = 1$$\n", 1, id="closed on its line in a quotation"),
+    ],
+)
+def test_a_formula_on_a_display_fence_behind_marks_is_refused(
+    text: str, line: int
+) -> None:
+    """The marks are not the line's text, so the fourth rule looks past them."""
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert f"p.md:{line}:" in problems[0]
+    assert "puts the formula on the opening" in problems[0]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("> $$\n> x = 1\n> $$\n", id="in a quotation"),
+        pytest.param("> a\n> $$\n> =\n> $$\n", id="a line of equals in one"),
+        pytest.param("- $$\n  x = 1\n  $$\n", id="on a list item's first line"),
+        pytest.param("> $$\n> $x\n> $$\n> rest\n", id="a dollar in one opens nothing"),
+    ],
+)
+def test_a_display_block_behind_marks_is_read_as_one(text: str) -> None:
+    assert cmh.check_text(text, "p.md") == []
+
+
 def test_a_formula_on_the_opening_display_fence_is_refused() -> None:
     problems = cmh.check_text("$$x = 1\n", "p.md")
     assert len(problems) == 1

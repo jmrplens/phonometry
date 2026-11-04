@@ -808,6 +808,121 @@ def test_a_block_under_a_reference_is_read_for_itself() -> None:
     assert ced.markdown_hits("- Author (2001) x\n- Author (2002) a — b\n") == []
 
 
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "> First `a — b\n> $$\n> x\n> $$\n> c` after.\n",
+            [1],
+            id="a code span across quoted maths",
+        ),
+        pytest.param(
+            "> First `a — b\n> ```\n> x\n> ```\n> c` after.\n",
+            [1],
+            id="a code span across a quoted fence",
+        ),
+        pytest.param(
+            "> First `a — b\n> ~~~\n> x\n> ~~~\n> c` after.\n",
+            [1],
+            id="a code span across a quoted tilde fence",
+        ),
+        pytest.param(
+            "> a *b\n> $$\n> x\n> $$\n> c — d* after.\n",
+            [5],
+            id="an italic span across quoted maths",
+        ),
+        pytest.param(
+            '> a "b\n> $$\n> x\n> $$\n> c — d" after.\n',
+            [5],
+            id="a quotation across quoted maths",
+        ),
+        pytest.param("> $$\n> a — b\n> $$\n", [2], id="a dash in quoted maths"),
+        pytest.param("> ```\n> a — b\n> ```\n", [], id="a dash in a quoted fence"),
+        pytest.param("> $$\n> *a\n> $$\n> c — d\n", [4], id="a star in quoted maths"),
+        pytest.param(
+            "> $$\n> x\nc — d\n", [3], id="quoted maths ends with its quotation"
+        ),
+        pytest.param(
+            "- First `a — b\n  $$\n  x\n  $$\n  c` after.\n",
+            [1],
+            id="a code span across an item's maths",
+        ),
+        pytest.param(
+            "- $$\n  a\n  $$\nSee *Acoustics — Rooms* here.\n",
+            [],
+            id="a title after maths on an item's first line",
+        ),
+        pytest.param(
+            "- $$\n  a — b\n  $$\n", [2], id="a dash in maths on an item's first line"
+        ),
+        pytest.param(
+            "- ```\n  a\n  ```\n*The level — rises.*\n",
+            [4],
+            id="a caption after a fence on an item's first line",
+        ),
+        pytest.param(
+            "- ```\n  a — b\n  ```\n",
+            [],
+            id="a dash in a fence on an item's first line",
+        ),
+    ],
+)
+def test_a_block_behind_marks_ends_the_paragraph_as_any_other(
+    text: str, hits: list[int]
+) -> None:
+    """The site ends the paragraph there, so nothing pairs across such a block.
+
+    The fence readers saw no fence behind a mark, so to them the block was part
+    of the paragraph, and the block a list item opened ran to the end of the
+    page, refusing every dash after it, a title's among them.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "> First `a -- b\n> $$\n> x\n> $$\n> c` after.\n",
+            [1],
+            id="a code span across quoted maths",
+        ),
+        pytest.param(
+            "> First `a -- b\n> ```\n> x\n> ```\n> c` after.\n",
+            [1],
+            id="a code span across a quoted fence",
+        ),
+        pytest.param(
+            "> ```\n> a\n>\n> b -- c\n> ```\n", [], id="a bare mark in a quoted fence"
+        ),
+        pytest.param(
+            "> $$\n> a\n>\n> b -- c\n> $$\n", [], id="a bare mark in quoted maths"
+        ),
+        pytest.param(
+            "- $$\n  a\n  $$\nafter -- prose\n",
+            [4],
+            id="after maths on an item's first line",
+        ),
+        pytest.param(
+            "- ```\n  a\n  ```\nafter -- prose\n",
+            [4],
+            id="after a fence on an item's first line",
+        ),
+    ],
+)
+def test_a_block_behind_marks_hides_no_double_hyphen_after_it(
+    text: str, hits: list[int]
+) -> None:
+    assert ced.markdown_double_hyphen_hits(text) == hits
+
+
+def test_a_block_behind_marks_is_no_list_item() -> None:
+    assert ced.markdown_bullet_hyphen_hits("> ```\n> - `x` - text\n> ```\n") == []
+    assert ced.markdown_bullet_hyphen_hits("> $$\n> - `x` - text\n> $$\n") == []
+    after = "- $$\n  a\n  $$\n- `x` - text\n"
+    assert ced.markdown_bullet_hyphen_hits(after) == [4]
+
+
 def test_an_escaped_backtick_opens_no_code_span() -> None:
     r"""``\`x -- y\``` is prose a reader sees, backticks and all.
 

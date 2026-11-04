@@ -49,9 +49,10 @@ no bibliographic entry. The code and maths spans are read together, a block
 of the page at a time, as the site reads them, and a ``$$`` block is read
 apart, as the site reads a fenced code block: a line of it that opens with
 ``+ ``, ``|`` or ``>`` starts no block of markdown, and the block ends the
-paragraph before it, so nothing pairs across it. An italic span and a
-quotation stop at the start of a block as a code span does, so one left open
-in a list item is not closed by the next.
+paragraph before it, so nothing pairs across it, behind the marks of a
+quotation or a list item as anywhere else. An italic span and a quotation stop
+at the start of a block as a code span does, so one left open in a list item
+is not closed by the next.
 
 The character has other spellings that publish it all the same, and each is
 read as the character where it is decoded on its way to a reader: the HTML
@@ -125,7 +126,7 @@ import tokenize
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from markdown_fences import code_lines
+from markdown_fences import code_lines, display_math_parts
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans_by_block,
@@ -991,10 +992,6 @@ _ADDRESSES = (
 _ADDRESS_ATTRIBUTE = re.compile(
     r"\b(?:href|src|style|id|class|className)=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})"
 )
-#: A line that may open a display-math block of a page: two dollar signs or
-#: more, and no other dollar sign after them. Only a run at least as long as
-#: the opening one, with nothing but blanks after it, closes the block.
-_MATH_FENCE = re.compile(r"^\s*(\${2,})([^$]*)$")
 #: An inline literal, a role or an interpreted span of a docstring, across the
 #: lines of a paragraph if it wraps: ``x``, :func:`x` or `x`.
 _DOCSTRING_CODE_SPAN = re.compile(r"``(?:[^`]|`(?!`))+``|(?::[\w:+-]+:)?`[^`]+`")
@@ -1076,25 +1073,11 @@ def _double_hyphen_lines(written: list[str], masked: list[str]) -> list[int]:
 def _math_lines(lines: list[str], code: list[bool]) -> list[bool]:
     """Whether each line of a page is in a display-math block, its fences included.
 
-    A line that is code is never a fence, and a block never closed runs to
-    the end of the page, as a fenced code block does. The block opens on such
-    a line wherever it stands, in the middle of a paragraph too, even one that
-    leaves a code span open: the structure of the blocks comes before the
-    spans inside them (CommonMark 0.31.2, 6), so the backtick on the other side
-    of the fence closes nothing.
+    The block is read as the site reads it (:func:`display_math_parts`): behind
+    the marks of a quotation or a list item as anywhere else, and wherever it
+    stands, so the backtick on the other side of its fence closes nothing.
     """
-    math: list[bool] = []
-    opening = ""
-    for line, is_code in zip(lines, code, strict=True):
-        fence = None if is_code else _MATH_FENCE.match(line)
-        math.append(bool(opening) or fence is not None)
-        if fence is None:
-            continue
-        if not opening:
-            opening = fence.group(1)
-        elif len(fence.group(1)) >= len(opening) and not fence.group(2).strip():
-            opening = ""
-    return math
+    return [part != "prose" for part in display_math_parts(lines, code)]
 
 
 def _page_code_lines(lines: list[str]) -> list[bool]:

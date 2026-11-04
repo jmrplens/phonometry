@@ -7,7 +7,7 @@
 // as the site reads them (markdown-spans.mjs), each span leaving a mark that
 // keeps the text either side of it apart, as the page shows it apart.
 
-import { prose } from '../../src/lib/markdown-fences.mjs';
+import { pastMarks, prose } from '../../src/lib/markdown-fences.mjs';
 import { dropInlineSpans, dropInlineSpansByBlock, SPAN_MARK } from './markdown-spans.mjs';
 
 /**
@@ -151,13 +151,15 @@ export function shownLines(lines, code, { mdx = false } = {}) {
  * flow refuses a `$` after its opening run): it is fine when its delimiters
  * pair, an even count, and a line that writes a third `$$` after a complete
  * pair leaves one open. Prose that talks about `$$` writes it in a code span.
+ * The marks of a quotation or a list item are not the line's text, so what
+ * stands behind them is what is read.
  *
  * @param {string} line One line of a page, outside any fenced block.
  * @returns {string | null} The line's prose, trimmed, or `null` when it is fine.
  */
 export function strayDelimiter(line) {
   const trimmed = dropInlineSpans(line).trim();
-  const shown = dropEscapes(trimmed);
+  const shown = dropEscapes(pastMarks(trimmed).rest).trim();
   const delimiters = shown.match(/\$\$/g)?.length ?? 0;
   if (!delimiters) return null;
   if (shown === '$$') return null;

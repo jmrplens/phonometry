@@ -118,7 +118,7 @@ import pathlib
 import re
 import sys
 
-from markdown_fences import code_lines
+from markdown_fences import code_lines, display_math_parts, past_marks
 from markdown_spans import (
     drop_inline_spans,
     drop_inline_spans_by_block,
@@ -163,15 +163,6 @@ _MATH_META = re.compile(r"^[ \t]*\$\$\s*\S")
 
 #: A line of nothing but ``=`` or ``-``: a setext underline when text is above it.
 _SETEXT = re.compile(r"^[ \t]*(?:=+|-+)[ \t]*$")
-
-#: A line that opens display maths, as remark-math reads it: a run of two
-#: ``$`` or more and a meta with no ``$`` in it. A line with another ``$``
-#: after the run opens nothing: it is a paragraph that holds inline maths.
-_DISPLAY_OPEN = re.compile(r"^[ \t]*(\${2,})[^$]*$")
-
-#: A line that may close display maths: a run of ``$`` and nothing after it
-#: but blanks. It closes the block when the run is as long as the opening one.
-_DISPLAY_CLOSE = re.compile(r"^[ \t]*(\${2,})[ \t]*$")
 
 #: The line that opens and closes the YAML frontmatter, and nothing else.
 _FRONTMATTER = "---"
@@ -271,31 +262,6 @@ def _body_start(lines: list[str]) -> int:
     return 0
 
 
-def _display_maths(lines: list[str], code: list[bool]) -> list[str]:
-    """Each line's part in display maths: ``"open"``, ``"maths"`` or ``"prose"``.
-
-    ``"maths"`` is a line of the formula or the line that closes it. A line of
-    code opens nothing, and a block never closed runs to the end of the page,
-    as remark-math has it.
-    """
-    parts: list[str] = []
-    opening = ""
-    for line, is_code in zip(lines, code, strict=True):
-        if opening:
-            closing = _DISPLAY_CLOSE.match(line)
-            if closing and len(closing.group(1)) >= len(opening):
-                opening = ""
-            parts.append("maths")
-            continue
-        found = None if is_code else _DISPLAY_OPEN.match(line)
-        if found is None:
-            parts.append("prose")
-        else:
-            opening = found.group(1)
-            parts.append("open")
-    return parts
-
-
 def _mdx_prose(lines: list[str], start: int) -> list[str]:
     """The lines as MDX reads their prose, everything else blanked.
 
@@ -310,7 +276,7 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
     kept = [""] * start + [
         line if not is_code and part == "prose" else ""
         for line, is_code, part in zip(
-            body, code, _display_maths(body, code), strict=True
+            body, code, display_math_parts(body, code), strict=True
         )
     ]
     return lines_read_whole(kept, lambda text: _MDX_READING.sub(_as_mdx_reads_it, text))
@@ -366,8 +332,8 @@ def _anchor_problems(where: str, line: str) -> list[str]:
 
 
 def _math_meta_problems(where: str, line: str) -> list[str]:
-    """Rule 4: an opening ``$$`` with the formula on the same line."""
-    if not _MATH_META.match(line):
+    """Rule 4: an opening ``$$`` with the formula on the same line, past any marks."""
+    if not _MATH_META.match(past_marks(line).rest):
         return []
     if line.rstrip().endswith("$$"):
         consequence = (
@@ -423,7 +389,7 @@ def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
     code = list(code_lines(body))
     parts = [""] * start + [
         "code" if is_code else part
-        for is_code, part in zip(code, _display_maths(body, code), strict=True)
+        for is_code, part in zip(code, display_math_parts(body, code), strict=True)
     ]
     shown = lines_read_whole(
         [

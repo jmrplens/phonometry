@@ -139,7 +139,7 @@ from markdown_spans import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable, Iterator
 
 EM_DASH = "—"
 #: What a dash in maths leaves in the text of a page: a private-use character,
@@ -887,30 +887,32 @@ def _string_is_prose(value: str) -> bool:
     return value.strip() != EM_DASH and _text_holds_prose_dash(value)
 
 
-def _string_token_hits(token: tokenize.TokenInfo) -> list[int]:
+def _literal_hits(literal: str, first_line: int) -> list[int]:
     r"""The 1-based lines of one string literal whose value carries a prose dash.
 
     The value is what is published, so it is the value that is read: an
     escape or an entity of the em dash counts as the character, and a raw
     string's ``\u2014`` stays the six characters it is.
+
+    :param literal: The literal as written.
+    :param first_line: The line it opens on.
     """
     try:
-        value = ast.literal_eval(token.string)
+        value = ast.literal_eval(literal)
     except (ValueError, SyntaxError):
-        value = token.string
+        value = literal
     if not isinstance(value, str):
         return []
     value = _decode_entities(value)
     if EM_DASH not in value or not _string_is_prose(value):
         return []
-    lines = token.string.splitlines()
     found = [
-        token.start[0] + offset
-        for offset, line in enumerate(lines)
+        first_line + offset
+        for offset, line in enumerate(literal.splitlines())
         if _spells_em_dash(line)
         and _string_is_prose(_decode_spellings(line, _PYTHON_EM_DASH_ESCAPE))
     ]
-    return found or [token.start[0]]
+    return found or [first_line]
 
 
 #: The tokens of an f-string (Python 3.12 on): its opening, the text between
@@ -920,30 +922,63 @@ _FSTRING_MIDDLE = getattr(tokenize, "FSTRING_MIDDLE", -1)
 _FSTRING_END = getattr(tokenize, "FSTRING_END", -1)
 
 
-def _track_fstrings(token: tokenize.TokenInfo, raw_fstrings: list[bool]) -> None:
-    """Keep, innermost last, whether each f-string open at ``token`` is raw."""
-    if token.type == _FSTRING_START:
-        raw_fstrings.append("r" in token.string.lower())
-    elif token.type == _FSTRING_END:
-        raw_fstrings.pop()
+@dataclass
+class _OpenFString:
+    """An f-string being read: its text so far, each field a mark in its place.
 
-
-def _token_hits(token: tokenize.TokenInfo, *, raw: bool) -> list[int]:
-    """The 1-based lines of one comment or string token that carry a prose dash.
-
-    :param raw: Whether the f-string the token belongs to is raw, so that its
-        backslashes are the characters they are.
+    A field is unknown text, so it leaves :data:`~markdown_spans.SPAN_MARK`, and
+    the line breaks it holds, so that each line of the text is where it was.
     """
-    if token.type == tokenize.COMMENT:
-        return [token.start[0]] if EM_DASH in token.string else []
-    if token.type == tokenize.STRING:
-        return _string_token_hits(token)
-    if token.type == _FSTRING_MIDDLE:
-        middle = _decode_entities(token.string)
-        if not raw:
-            middle = _decode_escapes(middle, _PYTHON_EM_DASH_ESCAPE)
-        return [token.start[0]] if _text_holds_prose_dash(middle) else []
-    return []
+
+    #: Its string prefix without the ``f``, and the quote it opened with.
+    prefix: str
+    quote: str
+    #: The line it opens on.
+    first_line: int
+    #: How many braces are open at this point, one for a field of its text.
+    depth: int = 0
+    text: str = ""
+
+    @classmethod
+    def opened_by(cls, token: tokenize.TokenInfo) -> _OpenFString:
+        """The f-string that *token*, its opening, opens."""
+        opening = token.string.rstrip("'\"")
+        return cls(
+            opening.lower().replace("f", ""),
+            token.string[len(opening) :][0],
+            token.start[0],
+        )
+
+    def read(self, token: tokenize.TokenInfo) -> None:
+        """Take in a token that stands inside it, the fields' own strings apart."""
+        if token.type == _FSTRING_MIDDLE:
+            self.text += token.string
+        elif token.exact_type == tokenize.LBRACE:
+            self.text += SPAN_MARK if not self.depth else ""
+            self.depth += 1
+        elif token.exact_type == tokenize.RBRACE:
+            self.depth -= 1
+            on_line = self.first_line + self.text.count("\n")
+            self.text += "\n" * (token.start[0] - on_line) if not self.depth else ""
+
+    def literal(self) -> str:
+        """The string literal it would be with no field: its value is the one read."""
+        return f"{self.prefix}{self.quote * 3}{self.text}{self.quote * 3}"
+
+
+def _string_literals(tokens: Iterable[tokenize.TokenInfo]) -> Iterator[tuple[str, int]]:
+    """Every string literal of a module and the line it opens on, an f-string read whole."""
+    open_fstrings: list[_OpenFString] = []
+    for token in tokens:
+        if token.type == tokenize.STRING:
+            yield token.string, token.start[0]
+        elif token.type == _FSTRING_START:
+            open_fstrings.append(_OpenFString.opened_by(token))
+        elif token.type == _FSTRING_END:
+            closed = open_fstrings.pop()
+            yield closed.literal(), closed.first_line
+        elif open_fstrings:
+            open_fstrings[-1].read(token)
 
 
 def python_hits(text: str) -> list[int]:
@@ -956,13 +991,14 @@ def python_hits(text: str) -> list[int]:
             for n, line in enumerate(text.splitlines(), 1)
             if EM_DASH in _decode_spellings(line, _PYTHON_EM_DASH_ESCAPE)
         ]
-    hits: set[int] = set()
-    raw_fstrings: list[bool] = []
-    for token in tokens:
-        _track_fstrings(token, raw_fstrings)
-        if _spells_em_dash(token.string):
-            raw = bool(raw_fstrings) and raw_fstrings[-1]
-            hits.update(_token_hits(token, raw=raw))
+    hits = {
+        token.start[0]
+        for token in tokens
+        if token.type == tokenize.COMMENT and EM_DASH in token.string
+    }
+    for literal, first_line in _string_literals(tokens):
+        if _spells_em_dash(literal):
+            hits.update(_literal_hits(literal, first_line))
     return sorted(hits)
 
 
@@ -1370,13 +1406,13 @@ def _docstring_lines(
 def _string_hits(text: str, docstring_lines: set[int]) -> set[int]:
     """The 1-based lines of the strings that are not docstrings holding `` -- ``."""
     hits: set[int] = set()
-    kinds = (tokenize.STRING, _FSTRING_MIDDLE)
-    for token in tokenize.generate_tokens(io.StringIO(text).readline):
-        if token.type not in kinds or token.start[0] in docstring_lines:
+    tokens = tokenize.generate_tokens(io.StringIO(text).readline)
+    for literal, first_line in _string_literals(tokens):
+        if first_line in docstring_lines:
             continue
-        masked = _blank_docstring_code_spans(token.string)
+        masked = _blank_docstring_code_spans(literal)
         hits.update(
-            token.start[0] + offset
+            first_line + offset
             for offset, line in enumerate(masked.split("\n"))
             if _SPACED_DOUBLE_HYPHEN.search(line)
         )

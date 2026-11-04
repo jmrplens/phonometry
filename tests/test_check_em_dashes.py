@@ -822,6 +822,60 @@ def test_an_f_string_exempts_what_any_other_string_does(
     assert ced.python_hits(f"{line}\n") == hits
 
 
+@pytest.mark.parametrize(
+    ("source", "hits"),
+    [
+        pytest.param(
+            'x = f"\\"A — B\\" {y}"\n', [], id="a quotation in escaped quotes"
+        ),
+        pytest.param('x = f"\\"A {y} — B\\""\n', [], id="and a field inside it"),
+        pytest.param('x = f"“A {y} — B”"\n', [], id="a field inside curly quotes"),
+        pytest.param('x = f"—"\n', [], id="a dash that fills it"),
+        pytest.param(
+            'x = fr"\\"A — B\\" {y}"\n', [1], id="raw, where it escapes nothing"
+        ),
+        pytest.param('x = f"a — b {y}"\n', [1], id="prose before a field"),
+        pytest.param('x = f"{y} a — b"\n', [1], id="prose after a field"),
+        pytest.param('x = f"{{a — b}}"\n', [1], id="prose in doubled braces"),
+        pytest.param('x = f"{y:—>3}"\n', [1], id="a dash that fills a field"),
+        pytest.param("x = f\"{f'a — b'}\"\n", [1], id="an f-string in a field"),
+        pytest.param('x = f"\\u2014 {y}"\n', [1], id="an escape of the dash"),
+        pytest.param('x = rf"\\u2014 {y}"\n', [], id="and a raw one, which is none"),
+        pytest.param('x = f"""a {y}\nb\nc — d\n"""\n', [3], id="its own line"),
+        pytest.param('x = f"""a {y}\nb {z}\nc — d\n"""\n', [3], id="past two fields"),
+        pytest.param('x = f"a {\n  y\n} b — c"\n', [3], id="past a field of lines"),
+        pytest.param('x = f"""\n{y}\nA — Part 3\n"""\n', [], id="a part number"),
+    ],
+)
+def test_an_f_string_is_read_whole_as_any_other_string(
+    source: str, hits: list[int]
+) -> None:
+    """Its value is what is read, each field a mark, and each dash names its line.
+
+    Each piece between two fields was read alone with its escapes as written, so a
+    quote escaped in it quoted nothing and a field in a quotation split it, and
+    every dash was reported on the line the piece began on.
+    """
+    assert ced.python_hits(source) == hits
+
+
+@pytest.mark.parametrize(
+    ("source", "hits"),
+    [
+        pytest.param('x = f"{y} -- {z}"\n', [1], id="between two fields"),
+        pytest.param('x = f"a -- {y}"\n', [1], id="before one"),
+        pytest.param('x = f"--{y}"\n', [], id="an option of a command line"),
+        pytest.param('x = f"-- {y}"\n', [], id="at its start, as in any other string"),
+        pytest.param('x = f"`a {y} -- b`"\n', [], id="in a literal a field splits"),
+        pytest.param('x = f"""a {y}\nb\nc -- d\n"""\n', [3], id="its own line"),
+    ],
+)
+def test_an_f_string_reads_whole_for_a_double_hyphen_too(
+    source: str, hits: list[int]
+) -> None:
+    assert ced.python_double_hyphen_hits(source) == hits
+
+
 def test_a_title_of_several_dashes_is_marked_as_a_title() -> None:
     """Only the dash before the part number says so; the marks say the rest."""
     title = "Acoustics — Rooms — Part 3: halls"

@@ -912,6 +912,92 @@ def test_a_module_s_import_in_each_branch_is_either(tmp_path: pathlib.Path) -> N
     assert list(refused) == ["plot_either"]
 
 
+def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and defines or
+    imports it there may have run before any call of the name, so the call
+    may reach what it bound, as one in a branch of an ``if`` at the top may.
+
+    The module's names were read from its top alone, so after ``_go_polar()``
+    swapped in a helper that makes polar axes, a plain ``plot`` that returns
+    what it makes passed, called bare, through an import of the name, through
+    the module's attribute and through a module that re-exports the name and
+    swaps it there; so did one whose helper a function imports under
+    ``global`` from a module of polar helpers.
+    """
+    refused = _refused(
+        tmp_path,
+        polar="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _new_axes():
+            return plt.subplots()[1]
+
+        def _go_polar():
+            global _new_axes
+            def _new_axes():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_swapped(result: object) -> Axes:
+            return _new_axes()
+
+        def _plain():
+            return plt.subplots()[1]
+
+        def _import_polar():
+            global _plain
+            from .polar import make as _plain
+
+        def plot_imported(result: object) -> Axes:
+            return _plain()
+
+        def _kept():
+            return plt.subplots()[1]
+
+        def plot_kept(result: object) -> Axes:
+            return _kept()
+        """,
+        shelf="""
+        import matplotlib.pyplot as plt
+
+        from .helpers import _kept
+
+        def _swap():
+            global _kept
+            def _kept():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        plots="""
+        from . import helpers
+        from .helpers import _new_axes
+        from .shelf import _kept
+
+        def plot_through_the_import(result: object) -> Axes:
+            return _new_axes()
+
+        def plot_through_the_attribute(result: object) -> Axes:
+            return helpers._new_axes()
+
+        def plot_through_a_re_export(result: object) -> Axes:
+            return _kept()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_imported",
+        "plot_swapped",
+        "plot_through_a_re_export",
+        "plot_through_the_attribute",
+        "plot_through_the_import",
+    ]
+
+
 def test_each_branch_keeps_its_own_overload_heads(tmp_path: pathlib.Path) -> None:
     """Overloads written in each branch of an ``if`` belong to that branch's function.
 

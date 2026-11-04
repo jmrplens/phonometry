@@ -165,6 +165,65 @@ def test_a_citation_inside_a_caption_still_carries_its_own_dash() -> None:
     assert ced.markdown_hits(text) == []
 
 
+# Maths: what sits between dollar signs is read by remark-math, not as prose, so
+# an asterisk there is a superscript star and a quotation mark a symbol. The
+# guard toggled its italic state on every asterisk of the paragraph, and the
+# star of $DI_i^*$ and of $F v^*$ opened a span that ran on to the paragraph's
+# end, where three dashes of the published guides passed as titles in italics.
+
+
+def test_an_asterisk_in_math_opens_no_italic_span() -> None:
+    """The apparent directivity index, as the sound power guide writes it."""
+    text = (
+        "$DI_i^*$ is the apparent directivity index, per position\n"
+        "*and* per band. A machine does not have a broken array — it has a\n"
+        "directivity the positions cannot resolve.\n"
+    )
+    assert ced.markdown_hits(text) == [2]
+
+
+def test_an_asterisk_in_math_does_not_run_on_through_a_list() -> None:
+    """A list with no blank line between its items is one paragraph to the guard."""
+    text = (
+        "- Form $\\tfrac{1}{2}\\operatorname{Re}\\{F v^*\\}$ at the drive point.\n"
+        "- The band must hold enough modes — which is what the densities are for.\n"
+    )
+    assert ced.markdown_hits(text) == [2]
+
+
+def test_an_asterisk_in_a_display_math_block_opens_no_italic_span() -> None:
+    text = "$$\nv^* = v_x - i v_y\n$$\nThe level rises — and falls.\n"
+    assert ced.markdown_hits(text) == [4]
+
+
+def test_a_quotation_mark_in_math_opens_no_quotation() -> None:
+    text = 'The ditto $\\text{"}$ repeats the row, and the level rises — and falls.\n'
+    assert ced.markdown_hits(text) == [1]
+
+
+def test_a_year_in_math_or_code_opens_no_bibliographic_entry() -> None:
+    """A level at 1000 Hz in parentheses is not an author's year.
+
+    The guard took a list item with four digits in parentheses for the first
+    line of a reference, and exempted every dash of the item as a reproduced
+    title, wherever the digits stood.
+    """
+    assert ced.markdown_hits("- At $L(1000)$ the level rises — and falls.\n") == [1]
+    assert ced.markdown_hits(
+        "- The call `band(2000)` returns — wrongly — a list.\n"
+    ) == [1]
+
+
+def test_a_dash_written_inside_math_is_still_read() -> None:
+    """The site shows a dash between dollar signs, so the guard reads it there.
+
+    Two dollar signs are maths to the site even where they were meant as
+    money, so taking maths out of the reading whole would hide the sentence
+    between them.
+    """
+    assert ced.markdown_hits("It costs $5 — or $6 with the case.\n") == [1]
+
+
 def test_the_site_data_modules_are_read_by_default(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -530,6 +589,17 @@ def test_math_on_a_page_keeps_its_double_hyphen() -> None:
         "It costs \\$5 -- or \\$6, which is prose.\n"
     )
     assert ced.markdown_double_hyphen_hits(text) == [7]
+
+
+def test_a_math_span_does_not_cross_into_the_next_list_item() -> None:
+    """The site reads a span within one block, and a list item is a block.
+
+    Read a paragraph at a time, the dollar sign of one item paired with the
+    one of the next, and the double hyphen between them was taken for maths
+    where the site publishes it as an em dash.
+    """
+    text = "- The kit costs $5 -- the case included.\n- The spare costs $6.\n"
+    assert ced.markdown_double_hyphen_hits(text) == [1]
 
 
 def test_a_docstring_and_its_page_read_the_same() -> None:

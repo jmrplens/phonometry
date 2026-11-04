@@ -28,6 +28,17 @@ What is NOT prose keeps its dash, and every exemption below says why:
 - **Two bare dashes** in a table row separator or a horizontal rule are
   hyphens, not em dashes.
 
+Maths on a page (``$...$`` and a ``$$`` block) is not prose either, but it
+exempts nothing: the site shows a dash written there, and two dollar signs
+are maths to it even where they were meant as money, so the dash is read.
+What maths does not do is mark the prose around it. An asterisk between
+dollar signs is a superscript star (``$DI_i^*$``, ``$F v^*$``) and a
+quotation mark there is a symbol, so neither opens an italic span or a
+quotation that would exempt the rest of the paragraph, and four digits in
+parentheses (``$L(1000)$``, or a code span holding ``band(2000)``) open
+no bibliographic entry. The code and maths spans are read together, a block
+of the page at a time, as the site reads them.
+
 The character has other spellings that publish it all the same, and each is
 read as the character where it is decoded on its way to a reader: the HTML
 entities ``&mdash;``, ``&#8212;`` and ``&#x2014;`` in a page and in a string,
@@ -100,9 +111,10 @@ from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
 from markdown_spans import (
-    blank_inline_spans,
-    drop_inline_spans_by_block,
+    SPAN_MARK,
+    blank_inline_spans_by_block,
     lines_read_whole,
+    replace_inline_spans_by_block,
 )
 
 if TYPE_CHECKING:
@@ -561,6 +573,37 @@ def _strip_exempt_markdown(
     return line, italic_open, quote_closer
 
 
+def _span_remainder(span: str) -> str:
+    """What one code or maths span leaves in the text of a page.
+
+    A code span is data and leaves :data:`~markdown_spans.SPAN_MARK` alone,
+    with the line breaks it held. A maths span leaves the mark on each of its
+    lines, and after it the em dashes that line of the span held: see
+    :func:`_drop_code_and_math`.
+    """
+    if span.startswith("$"):
+        return "\n".join(
+            SPAN_MARK + EM_DASH * piece.count(EM_DASH) for piece in span.split("\n")
+        )
+    return SPAN_MARK + "\n" * span.count("\n")
+
+
+def _drop_code_and_math(text: str) -> str:
+    """The text of a page with its code and maths spans taken out, as the site reads them.
+
+    Code and maths are read together, left to right and a block of the page
+    at a time (:func:`markdown_spans.replace_inline_spans_by_block`), so a
+    span that crosses a line break is out of both lines. What maths holds is
+    read by remark-math, not as prose: its asterisk is a superscript star
+    (``$DI_i^*$``, ``$F v^*$``) and its quotation mark a symbol, so neither
+    opens an italic span or a quotation, and four digits in parentheses
+    there (``$L(1000)$``) are no author's year. A dash in maths is still read,
+    because the site shows it, and two dollar signs are maths to the site
+    even where they were meant as money.
+    """
+    return replace_inline_spans_by_block(text, _span_remainder, "`$")
+
+
 def markdown_hits(text: str) -> list[int]:
     """The 1-based lines of a markdown or MDX page that carry a prose dash."""
     hits: list[int] = []
@@ -571,11 +614,11 @@ def markdown_hits(text: str) -> list[int]:
     opening = True
     lines = _decode_page(text).splitlines()
     code_flags = list(code_lines(lines))
-    # The inline code spans, read over the lines of their paragraph: a span
-    # that crosses a line break hides its dash on both lines.
+    # The inline code and maths spans, read over the lines of their block:
+    # see _drop_code_and_math.
     shown = lines_read_whole(
         ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
-        drop_inline_spans_by_block,
+        _drop_code_and_math,
     )
     for number, (line, code) in enumerate(zip(lines, code_flags, strict=True), start=1):
         if code:
@@ -588,7 +631,7 @@ def markdown_hits(text: str) -> list[int]:
             caption = False
             opening = True
             continue
-        if _REFERENCE_ENTRY.match(line):
+        if _REFERENCE_ENTRY.match(shown[number - 1]):
             in_reference = True
         elif not line.startswith((" ", "\t")):
             in_reference = False
@@ -816,13 +859,16 @@ def _blank_out(match: re.Match[str]) -> str:
 def _blank_page_spans(text: str) -> str:
     """The text of a page with every code span and every maths span blanked.
 
-    Read as the site reads them (:mod:`markdown_spans`): left to right, the
-    first run of backticks or dollar signs that a run of the same length
-    closes is the span, a backslash before an opening run shows its first
-    character as written, and one inside a span escapes nothing. remark-math
-    reads ``$...$`` as CommonMark reads a code span.
+    Read as the site reads them (:mod:`markdown_spans`): left to right and a
+    block of the page at a time, the first run of backticks or dollar signs
+    that a run of the same length closes is the span, a backslash before an
+    opening run shows its first character as written, and one inside a span
+    escapes nothing. remark-math reads ``$...$`` as CommonMark reads a code
+    span. A span never runs from one list item, heading, table row or
+    quotation into the next, so the dollar sign of one item does not pair
+    with the one of the next and hide the prose between them.
     """
-    return blank_inline_spans(text, "`$")
+    return blank_inline_spans_by_block(text, "`$")
 
 
 def _blank_docstring_code_spans(text: str) -> str:
@@ -924,7 +970,7 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     for address in _ADDRESSES:
         text = address.sub(_blank_out, text)
     text = _ADDRESS_ATTRIBUTE.sub(_blank_out, text)
-    masked = _mask_paragraphs(text.split("\n"), _blank_page_spans)
+    masked = _blank_page_spans(text).split("\n")
     return [index + 1 for index in _double_hyphen_lines(written, masked)]
 
 

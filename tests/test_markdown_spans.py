@@ -29,6 +29,7 @@ from markdown_spans import (
     drop_inline_spans_by_block,
     inline_spans,
     lines_read_whole,
+    replace_inline_spans_by_block,
 )
 
 
@@ -86,6 +87,25 @@ def test_blanking_keeps_every_column_and_line() -> None:
 def test_dropping_takes_the_spans_out() -> None:
     assert drop_inline_spans("a `x` b `y`") == f"a {SPAN_MARK} b {SPAN_MARK}"
     assert drop_inline_spans(r"a \`x -- y\` b") == r"a \`x -- y\` b"
+
+
+def test_a_replacement_is_handed_each_span_whole_opening_run_first() -> None:
+    """A reader can tell a maths span from a code span by its first character.
+
+    A backslash before an opening run escapes its first character alone, so
+    the span handed over starts on the run's second one, still the marker.
+    """
+    handed: list[str] = []
+
+    def keep(span: str) -> str:
+        handed.append(span)
+        return span[0] + "\n" * span.count("\n")
+
+    text = "a `x` $y\nz$ \\$$w$\n\n- one `p\n- two` q"
+    assert replace_inline_spans_by_block(text, keep, "`$") == (
+        "a ` $\n \\$$\n\n- one `p\n- two` q"
+    )
+    assert handed == ["`x`", "$y\nz$", "$w$"]
 
 
 @pytest.mark.parametrize(

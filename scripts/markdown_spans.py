@@ -221,7 +221,9 @@ def blank_inline_spans_by_block(
         read with the spans in one pass, as the page reads them.
     :return: The text, its spans blanked, with as many lines as it had.
     """
-    return _by_block(text, markers, comments, lambda span: re.sub(r"[^\n]", " ", span))
+    return replace_inline_spans_by_block(
+        text, lambda span: re.sub(r"[^\n]", " ", span), markers, comments
+    )
 
 
 def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[str]:
@@ -254,18 +256,32 @@ def drop_inline_spans_by_block(
     ``dropInlineSpansByBlock`` of the site leaves them: every line is where
     it was, its columns past a span are not.
     """
-    return _by_block(
-        text, markers, comments, lambda span: SPAN_MARK + "\n" * span.count("\n")
+    return replace_inline_spans_by_block(
+        text, lambda span: SPAN_MARK + "\n" * span.count("\n"), markers, comments
     )
 
 
-def _by_block(
+def replace_inline_spans_by_block(
     text: str,
-    markers: str,
-    comments: str | None,
     replace: Callable[[str], str],
+    markers: str = "`",
+    comments: str | None = None,
 ) -> str:
-    """*text*, each span and comment of each block replaced by *replace* of it."""
+    """*text*, each span and comment of each block replaced by what *replace* makes of it.
+
+    Read as :func:`blank_inline_spans_by_block` reads them, for a reader
+    that treats a code span and a maths span apart: *replace* is handed each
+    span whole, from its opening run to its closing one, so its first
+    character is the marker that opened it (a backslash before a run escapes
+    that one character, which the span does not hold). A comment begins with
+    the ``<`` or ``{`` that opens it.
+
+    :param replace: What a span leaves in its place. It has to hold as many
+        line breaks as the span did, or the lines after it move.
+    :param markers: ``"`"`` for the code spans, ``"`$"`` for code and maths.
+    :param comments: ``"md"`` or ``"mdx"`` to hand the page's comments to
+        *replace* too, read with the spans in one pass.
+    """
     read: list[str] = []
     for block in _blocks(text.split("\n"), comments):
         joined = "\n".join(block)

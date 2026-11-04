@@ -839,6 +839,32 @@ def test_math_on_a_page_keeps_its_double_hyphen() -> None:
     assert ced.markdown_double_hyphen_hits(text) == [7]
 
 
+def test_a_display_math_fence_opens_inside_a_code_span_left_open() -> None:
+    """The structure of the blocks comes before the spans inside them.
+
+    remark-math opens the block on the ``$$`` line and shows the rest as
+    maths, so the backtick on the far side of it closes nothing and the dash
+    there is shown, as a fenced code block does in the same place.
+    """
+    assert ced.markdown_hits("Write `a\n$$\nb — c` here.\n") == [3]
+    assert ced.markdown_double_hyphen_hits("Write `a\n$$\nb -- c` here.\n") == []
+
+
+def test_a_display_math_block_closes_only_on_a_fence_of_its_own() -> None:
+    """Only a run as long as the opening one, with nothing after it, closes a block.
+
+    The reader closed on any line of two dollar signs, as remark-math does
+    not, so a line of the block was read as prose and the true closing fence
+    opened a block that hid the rest of the page.
+    """
+    text = "$$\na\n$$ b\nc -- d\n$$\nThe level rises -- and falls.\n"
+    assert ced.markdown_double_hyphen_hits(text) == [6]
+    longer = "$$$\na\n$$\nc -- d\n$$$\nThe level rises -- and falls.\n"
+    assert ced.markdown_double_hyphen_hits(longer) == [6]
+    shut = "$$\na\n$$$  \nThe level rises -- and falls.\n"
+    assert ced.markdown_double_hyphen_hits(shut) == [4]
+
+
 def test_a_math_span_does_not_cross_into_the_next_list_item() -> None:
     """The site reads a span within one block, and a list item is a block.
 

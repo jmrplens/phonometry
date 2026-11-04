@@ -918,9 +918,10 @@ _ADDRESSES = (
 _ADDRESS_ATTRIBUTE = re.compile(
     r"\b(?:href|src|style|id|class|className)=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})"
 )
-#: The line that opens a display-math block of a page, and the one that
-#: closes it: two dollar signs or more, and no other dollar sign after them.
-_MATH_FENCE = re.compile(r"^\s*\${2,}[^$]*$")
+#: A line that may open a display-math block of a page: two dollar signs or
+#: more, and no other dollar sign after them. Only a run at least as long as
+#: the opening one, with nothing but blanks after it, closes the block.
+_MATH_FENCE = re.compile(r"^\s*(\${2,})([^$]*)$")
 #: An inline literal, a role or an interpreted span of a docstring, across the
 #: lines of a paragraph if it wraps: ``x``, :func:`x` or `x`.
 _DOCSTRING_CODE_SPAN = re.compile(r"``(?:[^`]|`(?!`))+``|(?::[\w:+-]+:)?`[^`]+`")
@@ -1006,15 +1007,23 @@ def _math_lines(lines: list[str], code: list[bool]) -> list[bool]:
     """Whether each line of a page is in a display-math block, its fences included.
 
     A line that is code is never a fence, and a block never closed runs to
-    the end of the page, as a fenced code block does.
+    the end of the page, as a fenced code block does. The block opens on such
+    a line wherever it stands, in the middle of a paragraph too, even one that
+    leaves a code span open: the structure of the blocks comes before the
+    spans inside them (CommonMark 0.31.2, 6), so the backtick on the other side
+    of the fence closes nothing.
     """
     math: list[bool] = []
-    inside = False
+    opening = ""
     for line, is_code in zip(lines, code, strict=True):
-        fence = not is_code and bool(_MATH_FENCE.match(line))
-        math.append(inside or fence)
-        if fence:
-            inside = not inside
+        fence = None if is_code else _MATH_FENCE.match(line)
+        math.append(bool(opening) or fence is not None)
+        if fence is None:
+            continue
+        if not opening:
+            opening = fence.group(1)
+        elif len(fence.group(1)) >= len(opening) and not fence.group(2).strip():
+            opening = ""
     return math
 
 

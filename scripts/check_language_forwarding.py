@@ -90,7 +90,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ast_scan import global_bindings, live_bindings, own_names
+from ast_scan import binding_of, global_bindings, live_bindings, own_names
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -510,12 +510,12 @@ def _build_scope(
         annotations={a.arg: a.annotation for a in every if a.annotation is not None},
     )
     scope.names, scope.definitions = _scope_names(module, node.body)
+    # As Python scopes them: a comprehension's variable and a lambda's
+    # parameter are not the function's (:func:`_bound_inside`).
+    names = own_names(node)
+    scope.locals |= names.stored | names.annotated
     for child in _own_nodes(node.body):
-        if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store):
-            scope.locals.add(child.id)
-        elif isinstance(child, ast.ExceptHandler) and child.name:
-            scope.locals.add(child.name)
-        elif isinstance(child, ast.Call):
+        if isinstance(child, ast.Call):
             scope.calls.append(child)
         if isinstance(child, ast.Assign):
             for target in child.targets:
@@ -534,6 +534,14 @@ def _build_scope(
     # Calls are read in the order of their position in the source.
     scope.calls.sort(key=lambda call: (call.lineno, call.col_offset))
     return scope
+
+
+def _bound_inside(scope: Scope, point: ast.AST, name: str) -> bool:
+    """Whether a comprehension or a lambda around *point*, inside *scope*, binds
+    *name* for itself, which then stands for nothing a scope's name does.
+    """
+    binder = binding_of(scope.node, point, name)[1]
+    return binder is not None and binder is not scope.node
 
 
 def _one(targets: list[_Target]) -> _Target:
@@ -750,8 +758,15 @@ class Tree:
         The innermost scope that binds the name holds it: its ``def``s,
         classes and imports that may stand where *point* reads it, or once it
         has run when no point is given (:func:`_standing`), or its parameters
-        and locals.
+        and locals. A comprehension or a lambda around *point* that binds the
+        name holds nothing the tree defines (:func:`_bound_inside`).
         """
+        if (
+            scope is not None
+            and point is not None
+            and _bound_inside(scope, point, name)
+        ):
+            return []
         current = scope
         while current is not None:
             written = current.names.get(name)
@@ -993,6 +1008,10 @@ class Tree:
         self, call: ast.Call, func: ast.Attribute, scope: Scope
     ) -> list[Callee | None]:
         """The helpers ``owner.name(...)`` may reach."""
+        if isinstance(func.value, ast.Name) and _bound_inside(
+            scope, call, func.value.id
+        ):
+            return [self._by_name(call, func.attr)]
         base = self.resolve(func.value, scope, scope.module)
         if isinstance(base, ModuleRef):
             found: list[Callee | None] = []

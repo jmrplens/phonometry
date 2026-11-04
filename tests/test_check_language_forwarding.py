@@ -103,6 +103,59 @@ def test_what_an_if_type_checking_block_imports_is_no_helper_a_call_reaches(
     }
 
 
+def test_a_comprehension_or_a_lambda_keeps_the_name_it_binds_for_itself(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comprehension's variable and a lambda's parameter are names of their
+    own, for what they hold and no further. A call of one is no call of the
+    helper of that spelling; a call of that spelling beside them still is.
+
+    Every name a comprehension stored counted as a local of the whole
+    function, so ``axis(ax)`` written after one passed, and a lambda's
+    parameter was not read at all, so a call of it was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.inside": """
+            from . import helpers
+            from .helpers import axis
+
+
+            def by_comprehension(result, ax, makers, language="en"):
+                return [axis(ax) for axis in makers]
+
+
+            def by_lambda(result, ax, language="en"):
+                return (lambda axis: axis(ax))(print)
+
+
+            def by_module(result, ax, modules, language="en"):
+                return [helpers.axis(ax) for helpers in modules]
+            """,
+            "pkg.beside": """
+            from .helpers import axis
+
+
+            def beside_comprehension(result, ax, makers, language="en"):
+                names = [axis for axis in makers]
+                axis(ax)
+                return names
+
+
+            def beside_lambda(result, ax, language="en"):
+                other = lambda axis: axis
+                axis(ax)
+                return other
+            """,
+        },
+    )
+    assert sorted(f.caller for f in found) == [
+        "beside_comprehension",
+        "beside_lambda",
+    ]
+
+
 def test_a_type_parameter_spelt_like_a_helper_is_not_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

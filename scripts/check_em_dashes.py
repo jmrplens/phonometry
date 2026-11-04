@@ -177,6 +177,10 @@ _PART_AFTER_DASH = re.compile(EM_DASH + r"\s*(?:Part|Teil|Partie|Parte)\s+\d")
 #: closed by its own mark, so a straight quote inside guillemets does not end
 #: them.
 _QUOTE_PAIRS = {'"': '"', "«": "»", "“": "”"}
+#: The marks that say which end they are, the only ones a data module's lines
+#: can quote with: read as written, a straight quote there delimits a string,
+#: and the prose between two of them quotes nothing.
+_TYPOGRAPHIC_QUOTE_PAIRS = {"«": "»", "“": "”"}
 #: What may sit before a straight quote that opens a quotation. A straight
 #: quote is the one mark that opens and closes with the same character, so it
 #: is read as an opening one only where an opening one can stand.
@@ -565,18 +569,20 @@ def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | No
     return "".join(kept), closer
 
 
-def _outside_closed_quotations(line: str) -> str:
+def _outside_closed_quotations(line: str, pairs: dict[str, str]) -> str:
     """The characters of the line outside each quotation it closes, read left to right.
 
     A string and a line of a plain-text file have no paragraph to carry an
     open quotation over, so a mark that does not close on its line quotes
     nothing. Reading from the left is what keeps the closing mark of one
     quotation from opening another over the dash between them.
+
+    :param pairs: The mark that opens a quotation, and the one that closes it.
     """
     kept: list[str] = []
     at = 0
     while at < len(line):
-        closer = _QUOTE_PAIRS.get(line[at])
+        closer = pairs.get(line[at])
         end = line.find(closer, at + 1) if closer and _opens_quotation(line, at) else -1
         if end >= 0:
             at = end + 1
@@ -751,27 +757,35 @@ def markdown_hits(text: str) -> list[int]:
     return hits
 
 
-def _holds_prose_dash(line: str) -> bool:
+def _holds_prose_dash(line: str, pairs: dict[str, str] = _QUOTE_PAIRS) -> bool:
     """Whether a dash of the line is neither in a quotation nor before a part number.
 
     Each exemption covers the dash it reads and nothing else on the line.
+
+    :param pairs: The marks that quote on the line.
     """
-    return EM_DASH in _PART_AFTER_DASH.sub("", _outside_closed_quotations(line))
+    return EM_DASH in _PART_AFTER_DASH.sub("", _outside_closed_quotations(line, pairs))
+
+
+def _text_holds_prose_dash(text: str) -> bool:
+    """Whether the text of a string holds a dash that is prose.
+
+    A dash in an inline literal is code; otherwise each line is read for
+    itself, so that a title reproduced on one exempts no other line.
+    """
+    return any(
+        _holds_prose_dash(line)
+        for line in _mask_paragraphs(text.split("\n"), _blank_docstring_code_spans)
+    )
 
 
 def _string_is_prose(value: str) -> bool:
     """Whether a string literal with a dash holds one that is prose.
 
-    A dash that fills the string is a placeholder and one in an inline literal
-    is code; otherwise each line of the value is read for itself, so that a
-    title reproduced on one exempts no other line.
+    A dash that fills the string is a placeholder; otherwise its text is read
+    (:func:`_text_holds_prose_dash`).
     """
-    if value.strip() == EM_DASH:
-        return False
-    return any(
-        _holds_prose_dash(line)
-        for line in _mask_paragraphs(value.split("\n"), _blank_docstring_code_spans)
-    )
+    return value.strip() != EM_DASH and _text_holds_prose_dash(value)
 
 
 def _string_token_hits(token: tokenize.TokenInfo) -> list[int]:
@@ -829,7 +843,7 @@ def _token_hits(token: tokenize.TokenInfo, *, raw: bool) -> list[int]:
         middle = _decode_entities(token.string)
         if not raw:
             middle = _decode_escapes(middle, _PYTHON_EM_DASH_ESCAPE)
-        return [token.start[0]] if EM_DASH in middle else []
+        return [token.start[0]] if _text_holds_prose_dash(middle) else []
     return []
 
 
@@ -857,15 +871,18 @@ def data_hits(text: str) -> list[int]:
     """The 1-based lines of a data module (glossary, home page) whose text has a dash.
 
     A comment is not published and keeps its dash; a standard's title is
-    exempt as everywhere else. A string is read with JavaScript's escapes,
-    the language of the module (:data:`_JS_EM_DASH_ESCAPE`).
+    exempt as everywhere else, inside curly quotes or guillemets or before a
+    part number, each exempting its own dash. The lines are read as written,
+    so a straight quote is the string's and quotes nothing. A string is read
+    with JavaScript's escapes, the language of the module
+    (:data:`_JS_EM_DASH_ESCAPE`).
     """
     hits: list[int] = []
     for number, written in enumerate(text.splitlines(), start=1):
         line = _decode_spellings(written, _JS_EM_DASH_ESCAPE)
         if line.lstrip().startswith(("//", "*", "/*")):
             continue
-        if EM_DASH in _PART_AFTER_DASH.sub("", line):
+        if _holds_prose_dash(line, _TYPOGRAPHIC_QUOTE_PAIRS):
             hits.append(number)
     return hits
 

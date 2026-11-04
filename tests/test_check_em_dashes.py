@@ -611,6 +611,53 @@ def test_a_part_number_exempts_only_its_own_dash(tmp_path: pathlib.Path) -> None
         assert ced.python_hits(f'"""{title}"""\n') == []
 
 
+@pytest.mark.parametrize(
+    ("line", "hits"),
+    [
+        pytest.param(
+            "A = 'ISO 1 — Part 3: “Acoustics — Rooms”';", [], id="both titles"
+        ),
+        pytest.param("A = '“Acoustics — Rooms”';", [], id="a curly quotation"),
+        pytest.param("A = '«Acoustics — Rooms»';", [], id="guillemets"),
+        pytest.param('A = "“Acoustics — Rooms”";', [], id="inside a double-quoted one"),
+        pytest.param("A = '“Acoustics — Rooms” — and more';", [1], id="beside one"),
+        pytest.param("A = 'ISO 1 — Part 3: a — b';", [1], id="beside a part number"),
+        pytest.param("A = '“Acoustics — Rooms';", [1], id="never closed"),
+        pytest.param('A = "The level rises — and falls";', [1], id="a string's quotes"),
+        pytest.param('A = "ISO 1 — Part 3: a — b";', [1], id="a string's quotes too"),
+    ],
+)
+def test_a_data_module_reads_a_quotation_by_the_marks_that_say_which_end(
+    line: str, hits: list[int]
+) -> None:
+    """A curly quote and a guillemet quote; a straight one delimits the string.
+
+    The module's strings are read as written, so a straight quote there is
+    the language's, and the prose between two of them quotes nothing. The
+    other marks can only be a quotation, and it exempts its own dash as it
+    does everywhere else.
+    """
+    assert ced.data_hits(f"{line}\n") == hits
+
+
+@pytest.mark.parametrize(
+    ("line", "hits"),
+    [
+        pytest.param('A = f"ISO 1 — Part 3: {x}"', [], id="a part number"),
+        pytest.param('A = f"“Acoustics — Rooms” {x}"', [], id="a quotation"),
+        pytest.param('A = f"``a — b`` {x}"', [], id="an inline literal"),
+        pytest.param('A = f"{x} — {y}"', [1], id="a dash alone between two fields"),
+        pytest.param('A = f"The level — {x}"', [1], id="prose"),
+        pytest.param('A = f"“Acoustics — Rooms” — {x}"', [1], id="beside a quotation"),
+    ],
+)
+def test_an_f_string_exempts_what_any_other_string_does(
+    line: str, hits: list[int]
+) -> None:
+    """The text between its fields is read as the lines of a string are."""
+    assert ced.python_hits(f"{line}\n") == hits
+
+
 def test_a_title_of_several_dashes_is_marked_as_a_title() -> None:
     """Only the dash before the part number says so; the marks say the rest."""
     title = "Acoustics — Rooms — Part 3: halls"

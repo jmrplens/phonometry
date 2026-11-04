@@ -56,6 +56,7 @@ import os
 import pathlib
 import sys
 
+from ast_scan import forget_trees, own_names
 from markdown_fences import python_fences
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -195,6 +196,26 @@ def _used(tree: ast.AST) -> set[str]:
     }
 
 
+def _unbound_reads(tree: ast.AST) -> set[str]:
+    """Every name a function of a fence annotates without a value and reads.
+
+    The annotation makes the name local and stores nothing, so the read raises
+    ``UnboundLocalError``, and the builtin of that spelling does not answer it.
+
+    :param tree: A parsed fence.
+    :type tree: ast.AST
+    :return: The names read unbound.
+    :rtype: set[str]
+    """
+    found: set[str] = set()
+    for scope in ast.walk(tree):
+        if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            annotated = own_names(scope).annotated
+            found |= _used(scope) & annotated
+    forget_trees()
+    return found
+
+
 def _pages() -> list[pathlib.Path]:
     """Every documentation page the rule applies to, in a fixed order."""
     found: list[pathlib.Path] = []
@@ -243,7 +264,7 @@ def check_page(path: pathlib.Path) -> list[str]:
             seen |= definitions[index]
             continue
         seen |= definitions[index]
-        missing = _used(tree) - seen - _BUILTINS - allowed
+        missing = _used(tree) - seen - (_BUILTINS - _unbound_reads(tree)) - allowed
         if not missing:
             continue
         later: set[str] = set()

@@ -85,6 +85,31 @@ def test_an_annotation_without_a_value_defines_nothing(tmp_path: pathlib.Path) -
     assert "fence 1 uses spl, which no fence of the page defines" in problems[0]
 
 
+def test_a_builtin_a_function_annotates_is_no_builtin_there(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``format: object`` in a function makes ``format`` local and unbound, so
+    a read of it in that function raises ``UnboundLocalError`` and the builtin
+    does not answer it. At the top of a fence, or read by another function,
+    the builtin still does.
+    """
+    page = _page(
+        tmp_path,
+        "```python\ndef shown():\n    format: object\n    return format(1)\n```\n",
+    )
+    problems = check_fence_names.check_page(page)
+    assert len(problems) == 1
+    assert "fence 1 uses format, which no fence of the page defines" in problems[0]
+    page = _page(
+        tmp_path,
+        "```python\nformat: object\n\n"
+        "def declared():\n    format: object\n\n"
+        "def shown():\n    return format(1)\n\n"
+        "print(format(1))\n```\n",
+    )
+    assert check_fence_names.check_page(page) == []
+
+
 def test_a_registered_placeholder_is_accepted(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

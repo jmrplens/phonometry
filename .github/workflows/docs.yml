@@ -241,6 +241,17 @@ jobs:
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build
         working-directory: site
+        env:
+          # Starlight's lastUpdated and add-sitemap-lastmod.mjs each ask for the
+          # newest commit that touched a path, which needs no rename detection,
+          # and with blob:none rename detection fetches history over the network.
+          # Both give the same date for every page with it off. page-dates.mjs
+          # does need it and asks for it with -M, so the one pass that uses those
+          # blobs is the one that fetches them. check:redirects needs it too, in
+          # a step of its own that this does not reach.
+          GIT_CONFIG_COUNT: "1"
+          GIT_CONFIG_KEY_0: diff.renames
+          GIT_CONFIG_VALUE_0: "false"
 
       # Every page, component and script of the site type-checked in strict
       # mode. A catalogue row read through a field its table does not carry,

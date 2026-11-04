@@ -85,6 +85,7 @@ from ast_scan import (
     ROOT,
     binding_of,
     bindings_by_name,
+    empty_type_checking_bodies,
     exempted,
     for_the_type_checker,
     global_bindings,
@@ -1039,7 +1040,9 @@ def check(files: Sequence[pathlib.Path]) -> tuple[list[Finding], list[tuple[str,
     :param files: The modules to read; the shared module is left out.
     """
     trees = {
-        path: ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        path: empty_type_checking_bodies(
+            ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        )
         for path in files
     }
     scopes = [scope for path, tree in trees.items() for scope in _scopes(path, tree)]

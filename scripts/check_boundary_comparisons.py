@@ -130,6 +130,7 @@ from typing import TYPE_CHECKING
 
 from ast_scan import (
     binding_of,
+    empty_type_checking_bodies,
     for_the_type_checker,
     global_bindings,
     imported_names,
@@ -676,7 +677,7 @@ class Module:
         self.relative = relative
         self.package = package
         self.source = path.read_text(encoding="utf-8") if source is None else source
-        self.tree = ast.parse(self.source)
+        self.tree = empty_type_checking_bodies(ast.parse(self.source))
         self.parent: dict[ast.AST, ast.AST] = {}
         for node in ast.walk(self.tree):
             for child in ast.iter_child_nodes(node):

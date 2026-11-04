@@ -156,6 +156,37 @@ def test_a_comprehension_or_a_lambda_keeps_the_name_it_binds_for_itself(
     ]
 
 
+def test_a_call_in_a_function_s_if_type_checking_block_drops_nothing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so a call
+    written there drops no language; one in its ``else`` runs, and does.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+
+            def in_the_block(result, ax, language="en"):
+                if TYPE_CHECKING:
+                    axis(ax)
+
+
+            def in_the_else(result, ax, language="en"):
+                if TYPE_CHECKING:
+                    pass
+                else:
+                    axis(ax)
+            """,
+        },
+    )
+    assert [f.caller for f in found] == ["in_the_else"]
+
+
 def test_a_type_parameter_spelt_like_a_helper_is_not_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

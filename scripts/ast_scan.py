@@ -513,6 +513,23 @@ def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
     )
 
 
+def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
+    """*tree*, with the body of every ``if TYPE_CHECKING:`` a function holds
+    emptied in place and its ``else`` kept, for a guard that reads what a
+    function does: no run of the program reaches that body.
+
+    The blocks at the top of a module and in a class body stay, where a guard
+    reads the imports of annotations and a constructor declared for the type
+    checker. Call it on a tree just parsed, before anything has read its scopes.
+    """
+    for function in ast.walk(tree):
+        if isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
+            for node in scope_nodes(function):
+                if isinstance(node, ast.If) and is_type_checking_block(node):
+                    node.body = [ast.Pass()]
+    return tree
+
+
 @functools.cache
 def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
     """Each name of *module* that a function, a method or a class body inside

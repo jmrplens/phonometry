@@ -969,6 +969,26 @@ def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
     assert refused == {}
 
 
+def test_what_a_function_s_if_type_checking_block_returns_is_not_returned(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so the polar
+    axes it returns are no return of a plain ``plot``.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def plot_it(result: object) -> Axes:
+            if TYPE_CHECKING:
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+            return plt.subplots()[1]
+        """,
+    )
+    assert refused == {}
+
+
 def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -90,7 +90,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ast_scan import binding_of, global_bindings, live_bindings, own_names
+from ast_scan import (
+    binding_of,
+    empty_type_checking_bodies,
+    global_bindings,
+    live_bindings,
+    own_names,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -610,7 +616,7 @@ class Tree:
                 package = parts[-1] == "__init__"
                 name = ".".join(parts[:-1] if package else parts)
                 source = path.read_text(encoding="utf-8")
-                node = ast.parse(source, filename=str(path))
+                node = empty_type_checking_bodies(ast.parse(source, filename=str(path)))
                 modules[name] = Module(name, path, package, node)
         return cls(modules, root)
 

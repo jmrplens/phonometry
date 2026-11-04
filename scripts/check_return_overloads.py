@@ -90,6 +90,7 @@ from ast_scan import (
     ROOT,
     binding_of,
     block_statements,
+    empty_type_checking_bodies,
     exempted,
     global_bindings,
     imported_names,
@@ -839,8 +840,8 @@ class Package:
         for path in files:
             module = _module_name(path, root)
             self.paths[module] = relative(path)
-            self.trees[module] = ast.parse(
-                path.read_text(encoding="utf-8"), filename=str(path)
+            self.trees[module] = empty_type_checking_bodies(
+                ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             )
         candidates: dict[str, tuple[str, ast.expr]] = {}
         for module, tree in self.trees.items():

@@ -160,6 +160,7 @@ from ast_scan import (
     ROOT,
     binding_of,
     block_statements,
+    empty_type_checking_bodies,
     exempted,
     global_bindings,
     imported_names,
@@ -663,7 +664,9 @@ class Tree:
         ] = {}
         for path in files:
             module = _module_name(path, root)
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            tree = empty_type_checking_bodies(
+                ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            )
             self.modules[module] = tree
             self.paths[module] = relative(path)
             if path.name == "__init__.py":

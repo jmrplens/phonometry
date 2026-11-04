@@ -204,6 +204,28 @@ def test_a_name_a_comprehension_binds_leaves_the_rest_of_the_function_alone(
     ]
 
 
+def test_a_read_in_a_function_s_if_type_checking_block_is_no_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so nothing
+    it opens is opened; its ``else`` runs.
+    """
+    assert _found(
+        tmp_path,
+        """
+        def in_the_block(path):
+            if TYPE_CHECKING:
+                return open(path).read()
+
+        def in_the_else(path):
+            if TYPE_CHECKING:
+                pass
+            else:
+                return open(path).read()
+        """,
+    ) == [("in_the_else", _OWN)]
+
+
 def test_a_whole_file_read_is_refused(tmp_path: pathlib.Path) -> None:
     """The hosts file and the ANP tables were read so, a pipe there waited forever."""
     assert _found(

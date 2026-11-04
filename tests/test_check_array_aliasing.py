@@ -615,6 +615,31 @@ def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
     assert found == set()
 
 
+def test_what_a_function_s_if_type_checking_block_binds_is_not_kept(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so the copy
+    is what the record keeps, and the caller's array that body binds is not.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        from typing import TYPE_CHECKING
+
+        import numpy as np
+
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            f = np.array(frequencies)
+            if TYPE_CHECKING:
+                f = frequencies
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
 def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     tmp_path: pathlib.Path,
 ) -> None:

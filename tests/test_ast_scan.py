@@ -939,6 +939,39 @@ def test_a_binding_for_the_type_checker_stands_beside_none_that_runs() -> None:
     assert ast_scan.standing_bindings(tree, left_out)["alone"] == []
 
 
+def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
+    """What a function's ``if TYPE_CHECKING:`` holds goes and its ``else`` stays,
+    at any depth of the function. The block at the top of a module and in a class
+    body stay, where a guard reads annotations and a declared constructor.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            if TYPE_CHECKING:
+                from a import b
+
+            class Record:
+                if TYPE_CHECKING:
+                    def __init__(self, x): ...
+
+            def f(x):
+                for _ in x:
+                    if TYPE_CHECKING:
+                        y = 1
+                    else:
+                        y = 2
+                return y
+            """
+        )
+    )
+    ast_scan.empty_type_checking_bodies(tree)
+    source = ast.unparse(tree)
+    assert "from a import b" in source
+    assert "def __init__" in source
+    assert "y = 1" not in source
+    assert "y = 2" in source
+
+
 def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:
     """``def f[T]`` and ``class Box[T]`` bind ``T`` for what they hold: the
     function's body, the class body and the methods of the class, which

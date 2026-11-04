@@ -998,6 +998,26 @@ def test_what_an_if_type_checking_block_binds_is_no_value_of_the_name(
     assert _texts(source, tmp_path) == []
 
 
+def test_a_comparison_in_a_function_s_if_type_checking_block_is_not_judged(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so a
+    comparison written there decides nothing; one in its ``else`` does.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+    def in_the_block(levels):
+        if TYPE_CHECKING:
+            return max(levels) - min(levels) <= _LIMIT_DB
+    def in_the_else(levels):
+        if TYPE_CHECKING:
+            pass
+        else:
+            return max(levels) - min(levels) > _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == ["max(levels) - min(levels) > _LIMIT_DB"]
+
+
 def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
     tmp_path: pathlib.Path,
 ) -> None:

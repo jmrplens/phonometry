@@ -15,8 +15,9 @@ import functools
 import re
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
-from typing import Literal, TypeGuard
+from typing import Literal, NamedTuple, TypeGuard
 
 import pytest
 
@@ -26,7 +27,15 @@ if _SCRIPTS not in sys.path:
 
 import check_parameter_annotations as cpa
 import check_return_overloads as return_overloads
-from ast_scan import bindings_from, live_bindings, python_files
+from ast_scan import (
+    bindings_from,
+    for_the_type_checker,
+    live_bindings,
+    python_files,
+    runs_before,
+    spells,
+    values_bound,
+)
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -1143,6 +1152,7 @@ def _is_float_constant(node: ast.expr, names: _ScopeNames | None = None) -> bool
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id == "float"
+        and (names is None or names.reads_the_builtin("float"))
         and len(node.args) == 1
         and isinstance(node.args[0], ast.Constant)
         and isinstance(node.args[0].value, str)
@@ -1325,21 +1335,45 @@ def _import_kinds(node: ast.Import | ast.ImportFrom) -> list[tuple[str, _Kind | 
     return found
 
 
-def _statement_bindings(
-    own: list[ast.AST],
-) -> tuple[dict[str, list[_Binding]], set[str], set[str]]:
-    """Each name the statements among *own* bind, with every binding of it, and the names declared ``global`` and ``nonlocal``.
+class _Statements(NamedTuple):
+    """What the statements of one scope bind (:func:`_statement_bindings`)."""
+
+    #: Each name they bind, with every binding of it.
+    flow: dict[str, list[_Binding]]
+    #: The names declared ``global``.
+    declared_global: set[str]
+    #: The names declared ``nonlocal``.
+    declared_nonlocal: set[str]
+    #: The names annotated without a value (``flag: type``), which binds
+    #: nothing to them.
+    annotated: set[str]
+
+
+def _statement_bindings(own: list[ast.AST], tree: ast.Module) -> _Statements:
+    """Each name the statements among *own* bind, with every binding of it, the names declared ``global`` and ``nonlocal``, and those annotated without a value.
 
     An assignment, a ``del``, a loop, ``with``, ``except`` or ``match`` name,
     a ``def`` or a ``class``, an import, and a ``:=`` in a comprehension,
-    which binds in the scope around the comprehension.
+    which binds in the scope around the comprehension. An annotation without
+    a value binds nothing, and the name keeps what it held. What an ``if
+    TYPE_CHECKING:`` block of *tree* holds never runs, and binds nothing.
     """
+    checker = for_the_type_checker(tree)
+    own = [node for node in own if id(node) not in checker]
     flow: dict[str, list[_Binding]] = {}
     declared_global: set[str] = set()
     declared_nonlocal: set[str] = set()
+    annotated: set[str] = set()
+    bare = {
+        id(node.target)
+        for node in own
+        if isinstance(node, ast.AnnAssign) and node.value is None
+    }
     for node in own:
         bound: list[tuple[str, _Kind | None]] = []
-        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+        if isinstance(node, ast.Name) and id(node) in bare:
+            annotated.add(node.id)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
             bound.append((node.id, None))
         elif isinstance(node, _COMPREHENSIONS):
             bound.extend((name, None) for name in _walrus_targets(node))
@@ -1357,7 +1391,7 @@ def _statement_bindings(
             declared_nonlocal.update(node.names)
         for name, kind in bound:
             flow.setdefault(name, []).append((node, kind))
-    return flow, declared_global, declared_nonlocal
+    return _Statements(flow, declared_global, declared_nonlocal, annotated)
 
 
 def _expression_names(
@@ -1416,11 +1450,51 @@ class _ScopeNames:
     #: What the scopes nested in it bind its names to through ``global`` or
     #: ``nonlocal``, whenever they run.
     from_inside: dict[str, set[_Kind]] = dataclasses.field(default_factory=dict)
+    #: The names it annotates without a value: a function's own, which
+    #: Python never binds there unless something else does, and in a class
+    #: body names its body reads from the module.
+    annotated: frozenset[str] = frozenset()
+    #: Of :attr:`from_inside`, what each nested scope binds the name to.
+    sent_by: dict[str, list[tuple[_ScopeNames, set[_Kind]]]] = dataclasses.field(
+        default_factory=dict
+    )
 
     def binds(self, name: str) -> bool:
-        """Whether *name* is the scope's own, bound in it and declared neither ``global`` nor ``nonlocal``."""
+        """Whether *name* is the scope's own, bound in it, or annotated in a function, and declared neither ``global`` nor ``nonlocal``."""
         declared = name in self.declared_global or name in self.declared_nonlocal
-        return not declared and (name in self.flow or name in self.entry)
+        local = name in self.annotated and isinstance(self.scope, _FUNCTIONS)
+        return not declared and (name in self.flow or name in self.entry or local)
+
+    def reads_the_builtin(self, name: str) -> bool:
+        """Whether *name*, read in this scope, may be the builtin of that
+        spelling: no scope Python looks it up in binds it to anything else.
+
+        A parameter defaulting to the name, or a name assigned from it, reads
+        the scope around, where the ``def`` or the assignment runs; one that
+        holds ``builtins.float`` is the builtin wherever it is.
+        """
+        names: _ScopeNames | None = self
+        while names is not None:
+            if names.binds(name):
+                values = values_bound(names.tree, names.scope, name)
+                if not values or not all(
+                    spells(value, name, {"builtins"}) for value in values
+                ):
+                    return False
+                if any(isinstance(value, ast.Attribute) for value in values):
+                    return True
+            names = names._holder(name)
+        return True
+
+    def _holder(self, name: str) -> _ScopeNames | None:
+        """The scope a name this one does not bind is read from: the module for
+        one declared ``global`` here, or annotated in a class body, which
+        Python then reads from the module; the scope around otherwise.
+        """
+        annotated = name in self.annotated and isinstance(self.scope, ast.ClassDef)
+        if name in self.declared_global or annotated:
+            return self.module()
+        return self.outer
 
     def module(self) -> _ScopeNames:
         """The module's names, which a name declared ``global`` reads."""
@@ -1446,15 +1520,25 @@ class _ScopeNames:
         at every binding that may stand from where it is written on
         (:func:`ast_scan.bindings_from`). With either, whatever a scope
         nested there binds the name to through ``global`` or ``nonlocal``,
-        which may run at any time.
+        which may run at any time. A scope on the way, past none of those,
+        that declares the name ``global`` or ``nonlocal`` and binds it on
+        every way to where the class body or the comprehension is written
+        holds that binding there (:meth:`_bound_before`).
         """
+        bound_here = self._bound_before(name, point)
+        if bound_here is not None:
+            return bound_here
         names = self
         called = False
         while not names.binds(name) and names.outer is not None:
-            holder = names.module() if name in names.declared_global else names.outer
+            holder = names._holder(name)
             while names is not holder and names.outer is not None:
                 called = called or isinstance(names.scope, _FUNCTIONS)
                 names, point = names.outer, names.at
+                if not called:
+                    bound_here = names._bound_before(name, point)
+                    if bound_here is not None:
+                        return bound_here
         found = set(names.from_inside.get(name, ()))
         bindings = names.flow.get(name, [])
         if any(kind is not None for _, kind in bindings):
@@ -1466,6 +1550,34 @@ class _ScopeNames:
                 for node, kind in bindings
                 if kind is not None and any(node is other for other in live)
             )
+        return found
+
+    def _bound_before(self, name: str, point: ast.AST | None) -> set[_Kind] | None:
+        """What *name*, declared ``global`` or ``nonlocal`` here, holds at
+        *point* when this scope binds it on every way there
+        (:func:`ast_scan.runs_before`): what its own bindings that may stand
+        there bind it to, and what another scope may bind the name to under
+        ``global`` or ``nonlocal`` meanwhile. ``None`` when no such binding
+        of its own precedes the read, which then reads the scope that holds
+        the name.
+        """
+        declared = name in self.declared_global or name in self.declared_nonlocal
+        bindings = self.flow.get(name, [])
+        if point is None or not declared or not bindings:
+            return None
+        nodes = [node for node, _ in bindings]
+        if not any(runs_before(self.tree, node, point) for node in nodes):
+            return None
+        live = live_bindings(self.tree, nodes, point)
+        found = {
+            kind
+            for node, kind in bindings
+            if kind is not None and any(node is other for other in live)
+        }
+        holder = _declared_holder(self, name)
+        for sender, kinds in holder.sent_by.get(name, []) if holder else []:
+            if sender is not self:
+                found.update(kinds)
         return found
 
     def may_hold(self, name: ast.Name, kind: _Kind) -> bool:
@@ -1496,19 +1608,20 @@ def _nested_names(
         entry = frozenset(_expression_names(scope, own)) | hidden
         empty: frozenset[str] = frozenset()
         return _ScopeNames(scope, tree, {}, entry, empty, empty, outer, at)
-    flow, declared_global, declared_nonlocal = _statement_bindings(own)
+    statements = _statement_bindings(own, tree)
     entry = frozenset(_type_parameters(scope)) | hidden
     if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
         entry |= {parameter.arg for parameter in _parameters(scope.args)}
     return _ScopeNames(
         scope,
         tree,
-        flow,
+        statements.flow,
         entry,
-        frozenset(declared_global),
-        frozenset(declared_nonlocal),
+        frozenset(statements.declared_global),
+        frozenset(statements.declared_nonlocal),
         outer,
         at,
+        annotated=frozenset(statements.annotated),
     )
 
 
@@ -1521,13 +1634,22 @@ def _send_declared(names: _ScopeNames) -> None:
     """
     for name in names.declared_global | names.declared_nonlocal:
         kinds = {kind for _, kind in names.flow.get(name, []) if kind is not None}
-        target: _ScopeNames | None = names.module()
-        if name not in names.declared_global:
-            target = names.outer
-            while target is not None and not target.binds(name):
-                target = None if name in target.declared_global else target.outer
+        target = _declared_holder(names, name)
         if target is not None and kinds:
             target.from_inside.setdefault(name, set()).update(kinds)
+            target.sent_by.setdefault(name, []).append((names, kinds))
+
+
+def _declared_holder(names: _ScopeNames, name: str) -> _ScopeNames | None:
+    """The scope that holds a name *names*' scope declares ``global`` (the
+    module) or ``nonlocal`` (the nearest function around that binds it).
+    """
+    if name in names.declared_global:
+        return names.module()
+    target = names.outer
+    while target is not None and not target.binds(name):
+        target = None if name in target.declared_global else target.outer
+    return target
 
 
 def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
@@ -1551,7 +1673,7 @@ def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
     assigned ``bool`` or a constant is not followed.
     """
     own, nested = _own_nodes(tree)
-    flow, _, _ = _statement_bindings(own)
+    flow = _statement_bindings(own, tree).flow
     none: frozenset[str] = frozenset()
     module = _ScopeNames(tree, tree, flow, none, none, none, None, None)
     found = [(own, module)]
@@ -1594,7 +1716,11 @@ def _is_bool_dtype(node: ast.expr, names: _ScopeNames | None = None) -> bool:
         given = [*node.args[:1], *(k.value for k in node.keywords if k.arg == "dtype")]
         return any(_is_bool_dtype(dtype, names) for dtype in given)
     if isinstance(node, ast.Name):
-        return node.id == "bool" or (names is not None and names.may_hold(node, "bool"))
+        if names is None:
+            return node.id == "bool"
+        return names.may_hold(node, "bool") or (
+            node.id == "bool" and names.reads_the_builtin("bool")
+        )
     if isinstance(node, ast.Attribute):
         return node.attr in _BOOL_DTYPE_NAMES
     return (
@@ -1629,11 +1755,15 @@ def _float_equalities(tree: ast.Module) -> list[str]:
     :func:`_is_float_constant` recognises, and every ``astype`` to ``bool``
     that :func:`_is_bool_cast` recognises, which on a float array is the same
     test against zero, in the order of the lines. A name is read in the
-    scope and at the point where Python reads it (:func:`_alias_scopes`).
+    scope and at the point where Python reads it (:func:`_alias_scopes`). What a
+    test on ``TYPE_CHECKING`` keeps from running compares nothing.
     """
     found: list[tuple[int, str]] = []
+    never_runs = for_the_type_checker(tree)
     for own, names in _alias_scopes(tree):
         for node in own:
+            if id(node) in never_runs:
+                continue
             if isinstance(node, ast.Call) and _is_bool_cast(node, names):
                 found.append((node.lineno, ast.unparse(node)))
                 continue
@@ -1995,6 +2125,321 @@ def test_the_float_equality_check_reads_every_binding_a_call_may_meet() -> None:
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "8", "14", "17", "18", "21",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_an_annotation_without_a_value_as_no_binding() -> (
+    None
+):
+    """``flag: type`` annotates a name and binds no value to it.
+
+    After ``from numpy import bool_ as flag``, the name still holds numpy's
+    boolean, at the top of the module, in a function and in a class body,
+    whose annotation leaves the class without the name, so its body reads
+    the module's. A function that only annotates the name makes it its own
+    all the same, which Python never binds there, so its read reaches no
+    import around it.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "flag: type",
+            "a = x.astype(flag)",
+            "def f(x):",
+            "    from numpy import bool_ as kind",
+            "    kind: type",
+            "    return x.astype(kind)",
+            "class Holder:",
+            "    flag: type",
+            "    cast = x.astype(flag)",
+            "def own(x):",
+            "    flag: type",
+            "    return x.astype(flag)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "3", "7", "10",
+    ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_builtin_only_where_nothing_binds_it() -> None:
+    """``float("0")`` and ``astype(bool)`` read the builtin only where no scope
+    binds its name: a comprehension's variable, a lambda's or a function's
+    parameter, a local, an annotation in a function or a ``def`` of the module
+    is another name, which the reader took for the builtin of that spelling.
+    """
+    source = textwrap.dedent(
+        """\
+        def plain(x):
+            return x == float("0"), x.astype(bool)
+
+        def by_comprehension(x, kinds):
+            return [x == float("0") for float in kinds]
+
+        def by_comprehension_bool(x, kinds):
+            return [x.astype(bool) for bool in kinds]
+
+        def by_lambda(x):
+            return (lambda float: x == float("0"))(print)
+
+        def by_parameter(x, float):
+            return x == float("0")
+
+        def by_local(x):
+            bool = make()
+            return x.astype(bool)
+
+        def by_annotation(x):
+            float: object
+            return x == float("0")
+
+        def beside(x, kinds):
+            names = [float for float in kinds]
+            return x == float("0"), names
+
+        class Holder:
+            float = make()
+
+            def method(self, x):
+                return x == float("0")
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "2",
+        "2",
+        "26",
+        "32",
+    ]
+    source = textwrap.dedent(
+        """\
+        def float(text):
+            return text
+
+        def by_module(x):
+            return x == float("0")
+        """
+    )
+    assert _float_equalities(ast.parse(source)) == []
+
+
+def test_the_float_equality_check_reads_a_binding_that_holds_the_builtin() -> None:
+    """A parameter defaulting to ``float`` or ``bool``, or a local assigned from
+    ``builtins``, holds the very builtin, so the comparison and the cast are what
+    they read as. Any other binding stays another name.
+    """
+    source = textwrap.dedent(
+        """\
+        import builtins
+
+        def by_default(x, float=float):
+            return x == float("0")
+
+        def cast_by_default(x, bool=bool):
+            return x.astype(bool)
+
+        def by_builtins(x, float=builtins.float):
+            return x == float("0")
+
+        def by_local(x):
+            float = builtins.float
+            return x == float("0")
+
+        def by_keyword_only(x, *, bool=bool):
+            return x.astype(bool)
+
+        def by_lambda(x):
+            return (lambda float=float: x == float("0"))()
+
+        def another_default(x, float=print):
+            return x == float("0")
+
+        def no_default(x, bool):
+            return x.astype(bool)
+
+        def another_local(x, make):
+            float = builtins.float
+            float = make()
+            return x == float("0")
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "4",
+        "7",
+        "10",
+        "14",
+        "17",
+        "20",
+    ]
+
+
+def test_the_float_equality_check_reads_nothing_a_type_checking_test_keeps_from_running() -> (
+    None
+):
+    """A comparison or a cast no run reaches compares nothing: one in the block, in
+    a function nested there, at the top of the module, in the ``else`` of the
+    negated test and in a branch of a conditional expression. Only what the block
+    binds was left out, so each was reported; the branch that runs still is.
+    """
+    source = textwrap.dedent(
+        """\
+        def in_the_block(x):
+            if TYPE_CHECKING:
+                return x == 0.0
+
+        def cast_in_the_block(x):
+            if TYPE_CHECKING:
+                return x.astype(bool)
+
+        def nested_in_the_block(x):
+            if TYPE_CHECKING:
+                def inner(y):
+                    return y == 0.0
+
+        if TYPE_CHECKING:
+            held = y == 0.0
+
+        def in_the_else_of_the_negated(x):
+            if not TYPE_CHECKING:
+                return 1
+            else:
+                return x == 0.0
+
+        def in_a_branch(x):
+            return x == 0.0 if TYPE_CHECKING else 1
+
+        def runs_in_the_negated(x):
+            if not TYPE_CHECKING:
+                return x == 0.0
+
+        def runs_in_the_else(x):
+            if TYPE_CHECKING:
+                pass
+            else:
+                return x == 0.0
+
+        def runs_in_the_branch(x):
+            return 1 if TYPE_CHECKING else x == 0.0
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "28",
+        "34",
+        "37",
+    ]
+
+
+def test_the_float_equality_check_reads_nothing_an_if_type_checking_block_binds() -> (
+    None
+):
+    """An import under ``if TYPE_CHECKING:`` never runs, so ``flag`` is what the
+    block's ``else`` imports, and a function that declares it ``global`` and
+    imports it only there binds nothing. Each was read as the boolean it names.
+    """
+    source = textwrap.dedent(
+        """\
+        if TYPE_CHECKING:
+            from numpy import bool_ as flag
+        else:
+            from json import dumps as flag
+
+        def beside_else(x):
+            return x.astype(flag)
+
+        from json import loads as other
+
+        def swap():
+            global other
+            if TYPE_CHECKING:
+                from numpy import bool_ as other
+
+        def under_global(x):
+            return x.astype(other)
+
+        if TYPE_CHECKING:
+            from json import load as checked
+        else:
+            from numpy import bool_ as checked
+
+        def in_the_else(x):
+            return x.astype(checked)
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == ["25"]
+
+
+def test_the_float_equality_check_reads_a_global_name_its_function_has_just_bound() -> (
+    None
+):
+    """A function that declares a name ``global`` or ``nonlocal`` and binds it
+    on every way to a read holds that binding there, whatever the scope
+    that holds the name bound it to before.
+
+    ``global flag`` then ``flag = None`` makes ``x.astype(flag)`` a cast to
+    ``None``; the reader took the module's ``from numpy import bool_ as
+    flag`` as standing there too. So does a read in the same ``with`` or
+    ``try`` body as the binding, which an exception skipping the binding
+    never reaches, and a read in a list, set or dict comprehension or a
+    class body written after the binding, which runs there at once. A
+    binding in one branch only, another function's read, the enclosing
+    function's own read and a generator expression, which runs as it is
+    consumed, perhaps once another function has bound the name again,
+    still meet the import.
+    """
+    source = "\n".join(
+        [
+            "from numpy import bool_ as flag",
+            "def first(x):",
+            "    global flag",
+            "    flag = None",
+            "    return x.astype(flag)",
+            "def branch(x):",
+            "    global flag",
+            "    if x:",
+            "        flag = None",
+            "    return x.astype(flag)",
+            "def other(x):",
+            "    return x.astype(flag)",
+            "def outer(x):",
+            "    from numpy import bool_ as mask",
+            "    def inner(y):",
+            "        nonlocal mask",
+            "        mask = None",
+            "        return y.astype(mask)",
+            "    return inner(x), x.astype(mask)",
+            "def guarded(x):",
+            "    global flag",
+            "    with ctx():",
+            "        flag = None",
+            "        return x.astype(flag)",
+            "def tried(x):",
+            "    global flag",
+            "    try:",
+            "        flag = None",
+            "        return x.astype(flag)",
+            "    except ValueError:",
+            "        return None",
+            "def listed(xs):",
+            "    global flag",
+            "    flag = None",
+            "    return [x.astype(flag) for x in xs], {x.astype(flag) for x in xs}",
+            "def keyed(xs):",
+            "    global flag",
+            "    flag = None",
+            "    return {x: x.astype(flag) for x in xs}",
+            "def classy(xs):",
+            "    global flag",
+            "    flag = None",
+            "    class Box:",
+            "        held = xs.astype(flag)",
+            "    return Box",
+            "def lazy(xs):",
+            "    global flag",
+            "    flag = None",
+            "    return (x.astype(flag) for x in xs)",
+        ]
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "10", "12", "19", "49",
     ]  # fmt: skip
 
 

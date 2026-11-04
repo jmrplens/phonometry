@@ -912,6 +912,273 @@ def test_a_module_s_import_in_each_branch_is_either(tmp_path: pathlib.Path) -> N
     assert list(refused) == ["plot_either"]
 
 
+def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` or an import under ``if TYPE_CHECKING:`` never runs, so a
+    plain ``plot`` that returns what ``make`` makes reaches none of them. They
+    were read as what a function swaps in under ``global``, and as either of
+    two beside the block's ``else``, so the polar axes they make were held
+    against the plot.
+    """
+    refused = _refused(
+        tmp_path,
+        polar="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots()[1]
+
+        def swap():
+            global make
+            if TYPE_CHECKING:
+                from .polar import make
+
+        def plot_imported(result: object) -> Axes:
+            return make()
+
+        def build():
+            return plt.subplots()[1]
+
+        def swap_def():
+            global build
+            if TYPE_CHECKING:
+                def build():
+                    return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_defined(result: object) -> Axes:
+            return build()
+
+        if TYPE_CHECKING:
+            def either():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        else:
+            def either():
+                return plt.subplots()[1]
+
+        def plot_either(result: object) -> Axes:
+            return either()
+        """,
+    )
+    assert refused == {}
+
+
+_POLAR = 'plt.subplots(subplot_kw={"projection": "polar"})[1]'
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            f"""
+        def plot_it(result: object) -> Axes:
+            if not TYPE_CHECKING:
+                return plt.subplots()[1]
+            else:
+                return {_POLAR}
+        """,
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            f"""
+        def plot_it(result: object) -> Axes:
+            return {_POLAR} if TYPE_CHECKING else plt.subplots()[1]
+        """,
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            f"""
+        if TYPE_CHECKING:
+            def plot_it(result: object) -> Axes:
+                return {_POLAR}
+        """,
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            f"""
+        class Plotter:
+            if TYPE_CHECKING:
+                def plot_it(self) -> Axes:
+                    return {_POLAR}
+        """,
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_what_a_test_on_type_checking_keeps_from_running_returns_nothing(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """Polar axes no run returns hide nothing, wherever the block is written."""
+    planted = "import matplotlib.pyplot as plt\n" + textwrap.dedent(source)
+    assert _refused(tmp_path, plots=planted) == {}
+
+
+def test_the_body_of_a_negated_test_returns_what_it_returns(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``if not TYPE_CHECKING:`` is what the program runs."""
+    refused = _refused(
+        tmp_path,
+        plots=f"""
+        import matplotlib.pyplot as plt
+
+        def plot_it(result: object) -> Axes:
+            if not TYPE_CHECKING:
+                return {_POLAR}
+            return plt.subplots()[1]
+        """,
+    )
+    assert set(refused) == {"plot_it"}
+
+
+def test_what_a_function_s_if_type_checking_block_returns_is_not_returned(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so the polar
+    axes it returns are no return of a plain ``plot``.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def plot_it(result: object) -> Axes:
+            if TYPE_CHECKING:
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+            return plt.subplots()[1]
+        """,
+    )
+    assert refused == {}
+
+
+def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and defines or
+    imports it there may have run before any call of the name, so the call
+    may reach what it bound, as one in a branch of an ``if`` at the top may.
+
+    The module's names were read from its top alone, so after ``_go_polar()``
+    swapped in a helper that makes polar axes, a plain ``plot`` that returns
+    what it makes passed, called bare, through an import of the name, through
+    the module's attribute and through a module that re-exports the name and
+    swaps it there; so did one whose helper a function imports under
+    ``global`` from a module of polar helpers.
+    """
+    refused = _refused(
+        tmp_path,
+        polar="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _new_axes():
+            return plt.subplots()[1]
+
+        def _go_polar():
+            global _new_axes
+            def _new_axes():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_swapped(result: object) -> Axes:
+            return _new_axes()
+
+        def _plain():
+            return plt.subplots()[1]
+
+        def _import_polar():
+            global _plain
+            from .polar import make as _plain
+
+        def plot_imported(result: object) -> Axes:
+            return _plain()
+
+        def _kept():
+            return plt.subplots()[1]
+
+        def plot_kept(result: object) -> Axes:
+            return _kept()
+        """,
+        shelf="""
+        import matplotlib.pyplot as plt
+
+        from .helpers import _kept
+
+        def _swap():
+            global _kept
+            def _kept():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        plots="""
+        from . import helpers
+        from .helpers import _new_axes
+        from .shelf import _kept
+
+        def plot_through_the_import(result: object) -> Axes:
+            return _new_axes()
+
+        def plot_through_the_attribute(result: object) -> Axes:
+            return helpers._new_axes()
+
+        def plot_through_a_re_export(result: object) -> Axes:
+            return _kept()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_imported",
+        "plot_swapped",
+        "plot_through_a_re_export",
+        "plot_through_the_attribute",
+        "plot_through_the_import",
+    ]
+
+
+def test_a_generic_class_s_type_parameter_is_no_function_of_the_module(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method reads a generic class's type parameter as the class's own, a
+    method of a class written inside it too, whatever the module binds of that
+    spelling.
+
+    The lookup went from the method to the module past the class, so a call
+    of ``T`` read as a call of the module's function ``T``, which makes polar
+    axes, and the plain ``plot`` was refused. The same call in a class that
+    declares no type parameter still reaches it.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def T():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class Plotter[T]:
+            def plot(self, result: object) -> Axes:
+                return T()
+
+            class Inner:
+                def plot(self, result: object) -> Axes:
+                    return T()
+
+        class Plain:
+            def plot(self, result: object) -> Axes:
+                return T()
+        """,
+    )
+    assert list(refused) == ["Plain.plot"]
+
+
 def test_each_branch_keeps_its_own_overload_heads(tmp_path: pathlib.Path) -> None:
     """Overloads written in each branch of an ``if`` belong to that branch's function.
 

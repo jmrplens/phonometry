@@ -38,8 +38,10 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   are read scope by scope: a nested function, lambda or comprehension that
   binds the parameter's name for itself (its own parameter, an assignment,
   a loop variable) holds another value under it, which is not followed,
-  while one that reads the name from the body around it, a closure, reads
-  the parameter. A function whose parameter is annotated a single number, a
+  and so does one that declares it ``global`` (the module's, in the scopes
+  nested in it too), while one that reads the name from the body around
+  it, a closure, or declares it ``nonlocal``, reads the parameter. A
+  function whose parameter is annotated a single number, a
   text or a record says it takes no array, and is not followed. A ``tuple``
   of a fixed length at the top of the annotation (``tuple[float, float]``,
   a pair of limits) is a record of numbers whose arity the annotation
@@ -193,7 +195,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import check_return_overloads as overloads
-from ast_scan import ROOT, python_files
+from ast_scan import ROOT, own_names, python_files
 
 if TYPE_CHECKING:
     from collections.abc import (
@@ -1709,9 +1711,11 @@ def _own_bindings(
     """The names a nested scope binds for itself, which hide the enclosing body's.
 
     A function's or a lambda's parameters and the names its body assigns,
-    loops over, imports or defines, less those it declares ``nonlocal`` or
-    ``global``; a class body's own names; the names a comprehension's
-    loops take.
+    loops over, imports or defines, less those it declares ``nonlocal``,
+    which are the enclosing body's; the names it declares ``global``, which
+    are the module's, here and in the scopes nested in it; a class body's
+    own names; a generic function's or class's type parameters; the names a
+    comprehension's loops take.
     """
     if isinstance(scope, _COMPREHENSIONS):
         return frozenset(
@@ -1721,6 +1725,8 @@ def _own_bindings(
             if isinstance(node, ast.Name)
         )
     names: set[str] = set()
+    if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        names.update(own_names(scope).type_parameters)
     if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
         arguments = scope.args
         names.update(
@@ -1742,8 +1748,12 @@ def _own_bindings(
             names.add((node.asname or node.name).split(".")[0])
         elif isinstance(node, ast.ExceptHandler) and node.name:
             names.add(node.name)
-        elif isinstance(node, ast.Global | ast.Nonlocal):
+        elif isinstance(node, ast.Nonlocal):
             declared.update(node.names)
+        elif isinstance(node, ast.Global):
+            # The module's name, here and in every scope nested in this one,
+            # whatever the body around binds of that spelling.
+            names.update(node.names)
     names.update(
         inner.name
         for inner in nested
@@ -1851,7 +1861,9 @@ def _scoped(
     variable) is another variable there than the enclosing body's name of
     the same spelling, and is not the parameter; a name it reads from the
     enclosing body, a closure, is. The scopes nested in a class body read
-    the scope around the class (*outside*), not the class's own names.
+    the scope around the class (*outside*), not the class's own names, but
+    for a generic class's type parameters, which hide the names of that
+    spelling around it.
     """
     own, nested = reading.split(scope)
     first = [scope.generators[0]] if isinstance(scope, _COMPREHENSIONS) else []
@@ -1869,6 +1881,12 @@ def _scoped(
     around = (
         outside if isinstance(scope, ast.ClassDef) and outside is not None else names
     )
+    if isinstance(scope, ast.ClassDef):
+        types = own_names(scope).type_parameters
+        around = {
+            kind: {value for value in values if _visible(value, types)}
+            for kind, values in around.items()
+        }
     for inner in nested:
         hidden = _own_bindings(inner, *reading.split(inner))
         seeds = {

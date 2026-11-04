@@ -122,12 +122,22 @@ import ast
 import collections
 import dataclasses
 import functools
+import itertools
 import pathlib
 import re
 import sys
 from typing import TYPE_CHECKING
 
-from ast_scan import binding_of, imported_names, live_bindings, own_names, scope_nodes
+from ast_scan import (
+    binding_of,
+    empty_type_checking_bodies,
+    for_the_type_checker,
+    global_bindings,
+    imported_names,
+    live_bindings,
+    own_names,
+    scope_nodes,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -667,7 +677,7 @@ class Module:
         self.relative = relative
         self.package = package
         self.source = path.read_text(encoding="utf-8") if source is None else source
-        self.tree = ast.parse(self.source)
+        self.tree = empty_type_checking_bodies(ast.parse(self.source))
         self.parent: dict[ast.AST, ast.AST] = {}
         for node in ast.walk(self.tree):
             for child in ast.iter_child_nodes(node):
@@ -699,6 +709,9 @@ class Module:
         self.constructions: dict[
             ast.ClassDef, list[tuple[ast.Call, Function | None]]
         ] = {}
+        self._written: (
+            dict[str, list[tuple[tuple[str, ast.AST, int], Function]]] | None
+        ) = None
         self._index_calls()
         self._memo: dict[object, Value] = {}
         self._classes: dict[object, ast.ClassDef | None] = {}
@@ -977,12 +990,16 @@ class Module:
         tuple unpacking or -1), ``"loop"`` for a ``for`` target (``node`` is
         the iterable), ``"opaque"`` for anything else. A comprehension's
         variables are its own (:func:`_comprehension_names`), and a ``:=``
-        inside it binds the function's name.
+        inside it binds the function's name. What an ``if TYPE_CHECKING:``
+        block holds never runs, and binds nothing.
         """
         if function in self.locals:
             return self.locals[function]
         bindings: dict[str, list[tuple[str, ast.AST, int]]] = {}
+        checker = for_the_type_checker(function)
         for node in _walk_own(function):
+            if id(node) in checker:
+                continue
             if isinstance(
                 node, ast.Assign | ast.AnnAssign | ast.AugAssign | ast.NamedExpr
             ):
@@ -1172,18 +1189,64 @@ class Module:
                     ("param", current, name),
                     functools.partial(self.parameter, current, name),
                 )
+            if name in self.type_parameters_of(function):
+                return OPAQUE
             current = Context(self.enclosing(function))
         if is_constant_name(name):
             return self.published(name)
-        if name in self.module_names:
+        written = self.written_under_global().get(name, [])
+        if name in self.module_names or written:
             return self._guarded(
                 ("module", name),
                 lambda: join(
-                    self.value(value, Context(None))
-                    for value in self.module_names[name]
+                    [
+                        *(
+                            self.value(value, Context(None))
+                            for value in self.module_names.get(name, [])
+                        ),
+                        *(
+                            self.binding(item, Context(function))
+                            for item, function in written
+                        ),
+                    ]
                 ),
             )
         return OPAQUE
+
+    def type_parameters_of(self, function: Function) -> frozenset[str]:
+        """The type parameters *function* reads as names of its own: those it
+        declares, and those of the generic classes around it, up to the
+        function they are written in.
+        """
+        found = own_names(function).type_parameters
+        current = self.parent.get(function)
+        while current is not None and not isinstance(
+            current, ast.FunctionDef | ast.AsyncFunctionDef
+        ):
+            if isinstance(current, ast.ClassDef):
+                found |= own_names(current).type_parameters
+            current = self.parent.get(current)
+        return found
+
+    def written_under_global(
+        self,
+    ) -> dict[str, list[tuple[tuple[str, ast.AST, int], Function]]]:
+        """Each binding a function of the file makes of a module name it
+        declares ``global`` (:meth:`local_bindings`), with that function, by
+        the name: once the function has run, the module's name holds what it
+        wrote, wherever another function reads it.
+        """
+        if self._written is None:
+            found: dict[str, list[tuple[tuple[str, ast.AST, int], Function]]] = {}
+            for node in ast.walk(self.tree):
+                if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                    continue
+                bindings = self.local_bindings(node)
+                for name in sorted(own_names(node).declared_global):
+                    for item in bindings.get(name, []):
+                        found.setdefault(name, []).append((item, node))
+            self._written = found
+        return self._written
 
     def local(self, context: Context, name: str) -> Value:
         """A local name: the join of every binding it has in the function."""
@@ -1269,6 +1332,7 @@ class Module:
             skip:
         ]
         names = positional + [arg.arg for arg in arguments.kwonlyargs]
+        by_place = {arg.arg for arg in arguments.posonlyargs}
         starred = _has_star(call)
         bound: dict[str, Value] = {}
         for name in names:
@@ -1277,7 +1341,17 @@ class Module:
                 bound[name] = self.value(argument, context)
                 continue
             default = _default(function, name)
-            if starred or default is None:
+            unpacked = [
+                self.value(value, context)
+                for value in _unpacked_into(
+                    call, positional, name, keyword=name not in by_place
+                )
+            ]
+            if unpacked:
+                if default is not None:
+                    unpacked.append(self.value(default, Context(None)))
+                bound[name] = join(unpacked)
+            elif starred or default is None:
                 bound[name] = OPAQUE
             else:
                 bound[name] = self.value(default, Context(None))
@@ -1434,8 +1508,13 @@ class Module:
         values: list[Value] = []
         for call, scope in sites:
             argument = _argument(call, fields, attr)
+            unpacked = _unpacked_into(call, fields, attr, keyword=True)
             if argument is not None:
                 values.append(self.value(argument, Context(scope)))
+            elif unpacked:
+                values.extend(self.value(value, Context(scope)) for value in unpacked)
+                if default is not None:
+                    values.append(self.value(default, Context(None)))
             elif _has_star(call) or default is None:
                 values.append(OPAQUE)
             else:
@@ -1587,11 +1666,14 @@ class Module:
         """The comparisons of the class in this file, one per comparison written.
 
         A chained comparison (``low <= x < high``) is one comparison: it is
-        refused once, for the first of its pairs that is.
+        refused once, for the first of its pairs that is. What a test on
+        ``TYPE_CHECKING`` keeps from running decides nothing, in a function
+        written in such a block at the top of the module or in a class too.
         """
         refused: set[ast.expr] = set()
+        never_runs = for_the_type_checker(self.tree)
         for node, left, right in self.comparisons():
-            if node in refused:
+            if node in refused or id(node) in never_runs:
                 continue
             reason = self.judge(left, right, Context(self.enclosing(node)))
             if reason is None:
@@ -1858,13 +1940,52 @@ def _argument(call: ast.Call, positional: list[str], name: str) -> ast.expr | No
         if keyword.arg == name:
             return keyword.value
     if name in positional:
+        # An argument before the first ``*`` keeps its place; one after it
+        # may land anywhere from there on (:func:`_unpacked_into`).
         index = positional.index(name)
-        plain = [
-            argument for argument in call.args if not isinstance(argument, ast.Starred)
-        ]
-        if index < len(plain) and len(plain) == len(call.args):
+        placed = itertools.takewhile(
+            lambda argument: not isinstance(argument, ast.Starred), call.args
+        )
+        plain = list(placed)
+        if index < len(plain):
             return plain[index]
     return None
+
+
+def _unpacked_into(
+    call: ast.Call, positional: list[str], name: str, *, keyword: bool
+) -> list[ast.expr]:
+    """What a call that unpacks its arguments may hand the parameter *name*
+    when no argument of its own does (:func:`_argument`).
+
+    A ``*`` argument, and every argument after it, may land in any place
+    from its own on: in the place of *name* when that is one of them. A
+    ``**`` mapping may hand any parameter that takes a keyword (*keyword*)
+    one of its values: those of a ``{...}`` written there, or the mapping.
+    """
+    found: list[ast.expr] = []
+    spread = next(
+        (
+            index
+            for index, argument in enumerate(call.args)
+            if isinstance(argument, ast.Starred)
+        ),
+        None,
+    )
+    if spread is not None and name in positional[spread:]:
+        found.extend(
+            argument.value if isinstance(argument, ast.Starred) else argument
+            for argument in call.args[spread:]
+        )
+    if keyword:
+        for item in call.keywords:
+            if item.arg is not None:
+                continue
+            if isinstance(item.value, ast.Dict):
+                found.extend(item.value.values)
+            else:
+                found.append(item.value)
+    return found
 
 
 def _has_star(call: ast.Call) -> bool:
@@ -1939,10 +2060,43 @@ def _top_live(
     (:func:`ast_scan.live_bindings`): an import after a ``def`` replaces it,
     a ``def`` after an import replaces that, one in each branch of an ``if``
     is either, and a read in a function meets every one from its ``def`` on.
+    A ``def`` or a relative import that a function makes of the name under
+    ``global`` (:func:`_made_under_global`) may stand at any point, since
+    that function may have run before it.
     """
     live = live_bindings(tree, [*defined.get(name, ()), *imported.get(name, [])], point)
     kept = tuple(node for node in defined.get(name, ()) if node in live)
-    return kept, [node for node in relative.get(name, []) if node in live]
+    imports = [node for node in relative.get(name, []) if node in live]
+    inside_defined, inside_imported = _made_under_global(tree)
+    return (
+        (*kept, *inside_defined.get(name, ())),
+        [*imports, *inside_imported.get(name, [])],
+    )
+
+
+@functools.cache
+def _made_under_global(
+    tree: ast.Module,
+) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.ImportFrom]]]:
+    """Every ``def`` and every relative import a function, a method or a
+    class body of *tree* makes of a module name under ``global``
+    (:func:`ast_scan.global_bindings`), by the name: each may be what the
+    name holds once that function has run, at any call.
+    """
+    defined: dict[str, tuple[Function, ...]] = {}
+    imported: dict[str, list[ast.ImportFrom]] = {}
+    for name, nodes in global_bindings(tree).items():
+        functions = tuple(
+            node
+            for node in nodes
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        )
+        if functions:
+            defined[name] = functions
+        imports = _imports_by_name(nodes).get(name, [])
+        if imports:
+            imported[name] = imports
+    return defined, imported
 
 
 def _top_bindings(
@@ -1957,7 +2111,9 @@ def _top_bindings(
     defined, imported = _top_names(tree)
     functions: dict[str, tuple[Function, ...]] = {}
     imports: dict[str, list[ast.ImportFrom]] = {}
-    for name in defined.keys() | relative.keys():
+    inside_defined, inside_imported = _made_under_global(tree)
+    names = defined.keys() | relative.keys() | inside_defined.keys()
+    for name in names | inside_imported.keys():
         kept, live_imports = _top_live(tree, defined, imported, relative, name, None)
         if kept:
             functions[name] = kept

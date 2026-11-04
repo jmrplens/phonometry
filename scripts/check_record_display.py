@@ -58,26 +58,39 @@ NAMED_TUPLE_CALLS: Mapping[str, str] = {
 EXEMPT: dict[tuple[str, str], str] = {}
 
 
-def _base(tree: Tree, info: ClassInfo, name: str) -> ClassInfo | None:
-    """The class of the package a base of *info* names, if it is one."""
-    resolved = tree.resolve(info.module, name)
-    if resolved is not None and resolved in tree.classes:
-        return tree.classes[resolved]
+def _bases(tree: Tree, info: ClassInfo, name: str) -> list[ClassInfo]:
+    """Every class of the package a base of *info* may name: each one the
+    name may hold once its module has run (:meth:`Tree.resolve_all`), a
+    class a function writes under ``global`` among them; none when it names
+    none.
+    """
+    resolved = [
+        tree.classes[key]
+        for key in tree.resolve_all(info.module, name)
+        if key in tree.classes
+    ]
+    if resolved:
+        return resolved
     local = tree.classes.get((info.module, name))
     if local is not None:
-        return local
+        return [local]
     candidates = tree.class_by_name.get(name, [])
-    return candidates[0] if len(candidates) == 1 else None
+    return candidates[:1] if len(candidates) == 1 else []
 
 
 def displays(tree: Tree, info: ClassInfo, seen: frozenset[str] = frozenset()) -> bool:
-    """Whether a class inherits :data:`MECHANISM`, itself or through a base."""
+    """Whether a class inherits :data:`MECHANISM`, itself or through a base
+    every class of which its name may hold inherits it.
+    """
     if MECHANISM in info.bases:
         return True
     for name in info.bases:
-        base = _base(tree, info, name)
-        key = f"{base.module}.{base.name}" if base is not None else ""
-        if base is not None and key not in seen and displays(tree, base, seen | {key}):
+        bases = _bases(tree, info, name)
+        keys = [f"{base.module}.{base.name}.{base.line}" for base in bases]
+        if bases and all(
+            key not in seen and displays(tree, base, seen | {key})
+            for base, key in zip(bases, keys, strict=True)
+        ):
             return True
     return False
 

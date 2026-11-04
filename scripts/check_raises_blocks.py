@@ -41,7 +41,16 @@ import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, exempted, python_files, relative, scoped
+from ast_scan import (
+    ROOT,
+    binding_of,
+    exempted,
+    forget_trees,
+    own_names,
+    python_files,
+    relative,
+    scoped,
+)
 
 if TYPE_CHECKING:
     import pathlib
@@ -166,13 +175,40 @@ def _aliases(tree: ast.AST) -> dict[str, str]:
     return found
 
 
+#: The nodes that bind the name they hold in ``name``.
+_NAMED_BINDINGS = (
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+    ast.TypeVar,
+    ast.ParamSpec,
+    ast.TypeVarTuple,
+)
+
+
 def _bound(tree: ast.AST) -> set[str]:
-    """Every name the file binds itself, which then no longer means a builtin."""
+    """Every name the file binds itself, which then no longer means a builtin.
+
+    A type parameter of a generic function or class counts among them. An
+    annotation without a value (``format: Callable[..., str]``) stores
+    nothing, so it is none of them: at the top of the module or in a class
+    body it leaves the builtin where it was, and in a function it makes the
+    name local there alone (:meth:`_Resolver.unbound_local`).
+    """
     names: set[str] = set()
+    bare = {
+        id(node.target)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AnnAssign) and node.value is None
+    }
     for node in ast.walk(tree):
-        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+        if (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Store)
+            and id(node) not in bare
+        ):
             names.add(node.id)
-        elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        elif isinstance(node, _NAMED_BINDINGS):
             names.add(node.name)
         elif isinstance(node, ast.arg):
             names.add(node.arg)
@@ -185,8 +221,20 @@ class _Resolver:
     """Resolves what a callee names, through the imports of one file."""
 
     def __init__(self, tree: ast.AST) -> None:
+        self._tree = tree
         self._aliases = _aliases(tree)
         self._bound = _bound(tree) - set(self._aliases)
+
+    def unbound_local(self, read: ast.Name) -> bool:
+        """Whether a function *read* looks its name up in annotates it without
+        a value, which makes the name local there and stores nothing: the read
+        raises ``UnboundLocalError``, and no builtin answers it.
+        """
+        _how, scope = binding_of(self._tree, read, read.id)
+        return (
+            isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef)
+            and read.id in own_names(scope).annotated
+        )
 
     def name(self, expression: ast.expr) -> str | None:
         """The dotted name a callee resolves to, or ``None`` when it is computed."""
@@ -201,7 +249,9 @@ class _Resolver:
             is_builtin = hasattr(builtins, expression.id)
             base = (
                 f"builtins.{expression.id}"
-                if is_builtin and expression.id not in self._bound
+                if is_builtin
+                and expression.id not in self._bound
+                and not self.unbound_local(expression)
                 else expression.id
             )
         return ".".join([base, *reversed(attributes)])
@@ -305,6 +355,7 @@ def findings(path: pathlib.Path) -> list[Finding]:
                     statements=statements,
                 )
             )
+    forget_trees()
     return found
 
 

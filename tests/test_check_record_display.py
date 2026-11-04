@@ -146,6 +146,52 @@ def test_every_way_of_inheriting_the_mechanism_is_accepted(
     assert refused == {}
 
 
+def test_a_base_a_function_may_swap_under_global_must_give_the_table_too(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a base's name ``global`` and writes a class
+    of that name there may have run before the record's ``class`` statement,
+    so the record shows itself as a table only when every class the base may
+    name gives it.
+
+    The base was read from the top of the module alone, so a record whose
+    base a function may swap for a plain class passed.
+    """
+    refused = _refused(
+        tmp_path,
+        results="""
+        from dataclasses import dataclass
+
+        from ._internal.frozen import OwnsArrays
+
+        class _Shown(OwnsArrays):
+            pass
+
+        def _plain():
+            global _Shown
+            class _Shown:
+                pass
+
+        @dataclass(frozen=True)
+        class Swapped(_Shown):
+            level: float
+
+        class _Kept(OwnsArrays):
+            pass
+
+        def _also_shown():
+            global _Kept
+            class _Kept(OwnsArrays):
+                pass
+
+        @dataclass(frozen=True)
+        class Kept(_Kept):
+            level: float
+        """,
+    )
+    assert refused == {"Swapped": "Swapped does not inherit RichDisplay"}
+
+
 def test_a_record_with_a_display_of_its_own_is_refused(tmp_path: pathlib.Path) -> None:
     refused = _refused(
         tmp_path,

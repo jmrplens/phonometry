@@ -18,6 +18,8 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -187,6 +189,162 @@ def test_a_builtin_name_the_file_rebinds_is_not_the_builtin(
             return value
 
         def test_rebound():
+            with pytest.raises(ValueError, match="x"):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+
+
+def test_an_annotation_without_a_value_leaves_the_builtin(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``format: Callable[..., str]`` at the top of the module binds nothing:
+    ``format`` is still the builtin there, which Sonar holds safe.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        from collections.abc import Callable
+
+        import pytest
+
+        format: Callable[..., str]
+
+        def test_annotated():
+            with pytest.raises(ValueError, match="x"):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == []
+
+
+def test_an_annotation_in_a_function_makes_the_name_the_function_s(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``format: object`` in a function makes ``format`` local and unbound, so
+    a call of it there raises ``UnboundLocalError``, a ``NameError``, before
+    ``check`` runs: it is no call of the builtin Sonar holds safe, and the
+    block has two calls that could raise. An async function does the same; a
+    class body's annotation leaves its methods the builtin.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        def test_annotated():
+            format: object
+            with pytest.raises(NameError):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        async def test_annotated():
+            format: object
+            with pytest.raises(NameError):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        class TestAnnotated:
+            format: object
+
+            def test_annotated(self):
+                with pytest.raises(ValueError, match="x"):
+                    check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == []
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        """
+        import pytest
+
+        def helper():
+            format: object
+
+        def test_beside():
+            with pytest.raises(ValueError, match="x"):
+                check(format(1))
+        """,
+        """
+        import pytest
+
+        def test_nested():
+            def inner():
+                format: object
+            with pytest.raises(ValueError, match="x"):
+                check(format(1))
+        """,
+        """
+        import pytest
+
+        def test_class():
+            class Held:
+                format: object
+                with pytest.raises(ValueError, match="x"):
+                    check(format(1))
+        """,
+    ],
+)
+def test_a_function_s_annotation_leaves_the_builtin_to_every_other_scope(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """The annotation makes the name local to the function that writes it, so
+    another function, one around it and a class body written in it still read
+    the builtin Sonar holds safe. The whole file lost the builtin of that
+    spelling.
+    """
+    assert [f.calls for f in _findings(tmp_path, source)] == []
+
+
+def test_a_nested_function_reads_the_name_the_function_around_it_annotates(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A nested function finds the name local to the function around it, and
+    unbound there, so the builtin does not answer it there either.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        def test_outer():
+            format: object
+            def test_inner():
+                with pytest.raises(NameError):
+                    check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+
+
+def test_a_type_parameter_spelt_like_a_builtin_is_not_the_builtin(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``def test_generic[format]()`` binds ``format`` for the function, so a
+    call of it there is no call of the builtin Sonar holds safe.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        def test_generic[format]():
             with pytest.raises(ValueError, match="x"):
                 check(format(1))
         """,

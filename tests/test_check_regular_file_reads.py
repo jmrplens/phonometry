@@ -74,6 +74,502 @@ def test_the_sniffer_opening_the_name_itself_is_refused(tmp_path: pathlib.Path) 
     ) == [("_sniff", _OWN)]
 
 
+def test_what_an_if_type_checking_block_imports_is_no_callee(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import under ``if TYPE_CHECKING:`` never runs, so ``open`` is still
+    the builtin. It was read as what the name stands for, at the top of a
+    module and under ``global`` in a function, so a whole read passed for a
+    call of ``pathlib.Path``.
+    """
+    assert _found(
+        tmp_path,
+        """
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from pathlib import Path as open
+
+        def at_the_top(path):
+            with open(path) as handle:
+                return handle.read()
+        """,
+    ) == [("at_the_top", _OWN)]
+    assert _found(
+        tmp_path,
+        """
+        from typing import TYPE_CHECKING
+
+        def swap():
+            global open
+            if TYPE_CHECKING:
+                from pathlib import Path as open
+
+        def under_global(path):
+            with open(path) as handle:
+                return handle.read()
+        """,
+    ) == [("under_global", _OWN)]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def read(path):
+                if not TYPE_CHECKING:
+                    return 1
+                else:
+                    return open(path).read()
+            """,
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def read(path):
+                return open(path).read() if TYPE_CHECKING else None
+            """,
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                held = open("x").read()
+            """,
+            id="the-block-at-the-top-of-the-module",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                def read(path):
+                    return open(path).read()
+            """,
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            """
+            class Reader:
+                if TYPE_CHECKING:
+                    def read(self, path):
+                        return open(path).read()
+            """,
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_what_a_test_on_type_checking_keeps_from_running_reads_no_file(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A read no run reaches waits on nothing. Each was refused."""
+    planted = "from typing import TYPE_CHECKING\n" + textwrap.dedent(source)
+    assert _found(tmp_path, planted) == []
+
+
+@pytest.mark.parametrize(
+    ("source", "function"),
+    [
+        pytest.param(
+            """
+            def read(path):
+                if not TYPE_CHECKING:
+                    return open(path).read()
+            """,
+            "read",
+            id="the-body-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def read(path):
+                return None if TYPE_CHECKING else open(path).read()
+            """,
+            "read",
+            id="the-else-of-an-expression",
+        ),
+        pytest.param(
+            """
+            if not TYPE_CHECKING:
+                def read(path):
+                    return open(path).read()
+            """,
+            "read",
+            id="a-function-in-the-body-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                pass
+            else:
+                held = open("x").read()
+            """,
+            "<module>",
+            id="the-else-of-the-block-at-the-top",
+        ),
+    ],
+)
+def test_the_branch_of_a_test_on_type_checking_that_runs_is_read(
+    tmp_path: pathlib.Path, source: str, function: str
+) -> None:
+    """The branch that runs is a read like any other."""
+    planted = "from typing import TYPE_CHECKING\n" + textwrap.dedent(source)
+    assert _found(tmp_path, planted) == [(function, _OWN)]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        """
+        def read(paths, openers):
+            return [open(paths).read() for open in openers]
+        """,
+        """
+        def read(path):
+            return (lambda open: open(path))(print)
+        """,
+        """
+        def read(path, open):
+            return open(path).read()
+        """,
+        """
+        def read(path):
+            open = make_opener()
+            return open(path).read()
+        """,
+        """
+        def read(path):
+            def open(name):
+                return name
+            return open(path)
+        """,
+        """
+        def open(name):
+            return name
+
+        def read(path):
+            return open(path)
+        """,
+        """
+        import soundfile as sf
+
+        def read(paths, readers):
+            return [sf.read(paths) for sf in readers]
+        """,
+    ],
+)
+def test_a_name_bound_nearer_is_not_the_builtin_or_the_import(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """``open`` stands for the builtin only where nothing binds it, and a
+    comprehension's or a lambda's own name stands for nothing the module
+    imports. Each was read as the read of a file its spelling names.
+    """
+    assert _found(tmp_path, source) == []
+
+
+@pytest.mark.parametrize(
+    ("source", "shape"),
+    [
+        pytest.param(
+            """
+            import io
+
+            open = io.open
+
+            def read(path):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="an-alias-at-the-top",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def read(path):
+                open = io.open
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="an-alias-in-the-function",
+        ),
+        pytest.param(
+            """
+            import io
+
+            open = io.open
+
+            def read(path):
+                def inner():
+                    return open(path).read()
+                return inner()
+            """,
+            _OWN,
+            id="an-alias-a-nested-function-reads",
+        ),
+        pytest.param(
+            """
+            def read(path, open=open):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="a-default-of-the-builtin",
+        ),
+        pytest.param(
+            """
+            def read(path, *, open=open):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="a-keyword-only-default-of-the-builtin",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def read(path, open=io.open):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="a-default-of-another-spelling",
+        ),
+        pytest.param(
+            """
+            def read(path, reader=open):
+                return reader(path).read()
+            """,
+            _OWN,
+            id="a-default-under-another-name",
+        ),
+        pytest.param(
+            """
+            import soundfile
+
+            def read(path, loader=soundfile.read):
+                return loader(path)
+            """,
+            _FOREIGN,
+            id="a-default-of-a-foreign-reader",
+        ),
+        pytest.param(
+            """
+            import io
+
+            class Reader:
+                open = io.open
+
+                def read(self, path, open=open):
+                    return open(path).read()
+            """,
+            _OWN,
+            id="a-default-read-in-the-class-body",
+        ),
+        pytest.param(
+            """
+            def read(path):
+                return (lambda open=open: open(path))().read()
+            """,
+            _OWN,
+            id="a-lambda-default-of-the-builtin",
+        ),
+        pytest.param(
+            """
+            try:
+                from gzip import open
+            except ImportError:
+                open = None
+
+            def read(path):
+                return open(path).read()
+            """,
+            _FOREIGN,
+            id="an-import-in-a-try-branch",
+        ),
+        pytest.param(
+            """
+            def read(path, soundfile):
+                return (lambda sf: sf.read(path))(soundfile)
+            """,
+            _FOREIGN,
+            id="a-lambda-parameter-spelt-as-the-module",
+        ),
+    ],
+)
+def test_a_binding_that_holds_a_reader_is_still_read_as_it(
+    tmp_path: pathlib.Path, source: str, shape: str
+) -> None:
+    """A binding hides what the spelling names only when it holds nothing the
+    guard knows: an alias, an import in a branch and a parameter's default say
+    what the name holds, and a lambda's parameter spelt ``sf`` is the module
+    handed in, as a function's is. Each passed a whole read for a name bound
+    to something unknown.
+    """
+    assert [found for _function, found in _found(tmp_path, source)] == [shape]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        """
+        def read(path, open=None):
+            return open(path)
+        """,
+        """
+        def read(path, opener=print):
+            return opener(path)
+        """,
+        """
+        import math
+
+        def read(path, np=math):
+            return np.load(path)
+        """,
+        """
+        from pathlib import Path
+
+        def read(path, open=Path):
+            return open(path)
+        """,
+        """
+        from pathlib import Path as open
+
+        def read(path, open=open):
+            return open(path)
+        """,
+        """
+        import soundfile
+
+        def read(path):
+            return (lambda sf=None: sf)(soundfile)
+        """,
+        """
+        import math
+
+        def read(path):
+            return (lambda sf=math: sf.read(path))()
+        """,
+        """
+        def read(path):
+            return (lambda: [sf := make_reader(), sf.read(path)])()
+        """,
+    ],
+)
+def test_a_default_that_names_no_reader_reads_nothing(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A default of ``None`` leaves a parameter unknown, and a default that
+    names something else says it is that: neither is a read of a file.
+    """
+    assert _found(tmp_path, source) == []
+
+
+def test_a_function_of_the_module_named_open_is_read_as_that_function(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def open`` of the module is no builtin, and it is the function a call
+    reaches: when it checks its name, it answers for the read after it. A
+    lambda's parameter of a check's spelling answers for nothing.
+    """
+    assert (
+        _found(
+            tmp_path,
+            """
+            import numpy as np
+
+            from phonometry._internal.json_input import not_regular_at
+
+            def open(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+
+            def checked(path):
+                open(path)
+                return np.fromfile(path)
+            """,
+        )
+        == []
+    )
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+
+        from check import require_regular
+
+        def by_a_lambda(path):
+            (lambda require_regular: require_regular(path))(print)
+            return np.fromfile(path)
+        """,
+    ) == [("by_a_lambda", _FOREIGN)]
+
+
+def test_a_name_a_comprehension_binds_leaves_the_rest_of_the_function_alone(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comprehension's variable is its own: the function's ``open`` beside it
+    is still the builtin, a method called on an item still reads a file, a
+    check of that spelling is no check, and a module handed in as ``sf`` is
+    still read by its spelling.
+    """
+    assert _found(
+        tmp_path,
+        """
+        from check import require_regular
+
+        def beside(path, openers):
+            names = [open for open in openers]
+            with open(path) as handle:
+                return handle.read(), names
+
+        def items(files):
+            return [f.read_text() for f in files]
+
+        def handed_in(path, sf):
+            return sf.read(path)
+
+        def checked_by_nothing(path):
+            _ = [require_regular(path) for require_regular in [print]]
+            return np.fromfile(path)
+
+        def checked(path):
+            require_regular(path)
+            return np.fromfile(path)
+        """,
+        helpers=_CHECK,
+    ) == [
+        ("beside", _OWN),
+        ("items", _OWN),
+        ("handed_in", _FOREIGN),
+        ("checked_by_nothing", _FOREIGN),
+    ]
+
+
+def test_a_read_in_a_function_s_if_type_checking_block_is_no_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so nothing
+    it opens is opened; its ``else`` runs.
+    """
+    assert _found(
+        tmp_path,
+        """
+        def in_the_block(path):
+            if TYPE_CHECKING:
+                return open(path).read()
+
+        def in_the_else(path):
+            if TYPE_CHECKING:
+                pass
+            else:
+                return open(path).read()
+        """,
+    ) == [("in_the_else", _OWN)]
+
+
 def test_a_whole_file_read_is_refused(tmp_path: pathlib.Path) -> None:
     """The hosts file and the ANP tables were read so, a pipe there waited forever."""
     assert _found(
@@ -758,6 +1254,133 @@ def test_a_name_is_looked_up_in_the_scope_the_call_runs_in(
     assert _found(tmp_path, _SCOPED) == [("defined_then_rebound", _FOREIGN)]
 
 
+def test_a_function_of_the_module_another_rebinds_under_global_is_no_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares the module's ``info`` global and binds it may
+    run before the reader does, so ``info`` may be what it bound there and
+    not the check the module defines: the reader is refused, as it is when
+    the module rebinds the name at its top.
+    """
+    source = """
+        import numpy as np
+
+        from phonometry._internal.json_input import not_regular_at
+
+        def info(path):
+            if not_regular_at(Path(path)) is not None:
+                raise ValueError(path)
+
+        def _swap():
+            global info
+            info = make_describer()
+
+        def reader(path):
+            info(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source) == [("reader", _FOREIGN)]
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "found"),
+    [
+        ("require_regular = make_describer()", [("reader", _FOREIGN)]),
+        ("from check import require_regular", []),
+    ],
+    ids=["another-value", "the-same-import"],
+)
+def test_an_import_a_function_rebinds_under_global_is_read_as_it_may_stand(
+    tmp_path: pathlib.Path, rebinding: str, found: list[tuple[str, str]]
+) -> None:
+    """The module's import of the check is what ``require_regular`` holds only
+    while no function that declares it ``global`` has bound it to something
+    else; the module's names were read from its top alone, so the import
+    stood for the name after such a function replaced it.
+    """
+    source = f"""
+        import numpy as np
+
+        from check import require_regular
+
+        def _swap():
+            global require_regular
+            {rebinding}
+
+        def reader(path):
+            require_regular(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    ("annotation", "lazy", "call"),
+    [
+        ("import soundfile as snd", "import soundfile as snd", "snd.read(path)"),
+        ("import numpy as snd", "import soundfile as snd", "snd.read(path)"),
+        (
+            "from soundfile import read as reader",
+            "from soundfile import read as reader",
+            "reader(path)",
+        ),
+        (
+            "import numpy as numpy_module",
+            "import numpy as numpy_module",
+            "numpy_module.fromfile(path)",
+        ),
+    ],
+    ids=["same-module", "another-module", "from-import", "numpy"],
+)
+def test_an_import_for_the_type_checker_leaves_a_lazy_global_import_its_name(
+    tmp_path: pathlib.Path, annotation: str, lazy: str, call: str
+) -> None:
+    """An annotation's import beside a function that imports the name under
+    ``global`` is the ordinary lazy import. The block never runs, so the
+    function's import is all the name can hold, and the read through it is
+    refused as it is with no block there. The block's import counted as the
+    module binding the name, which took the alias away and passed the read.
+    """
+    source = f"""
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            {annotation}
+
+        def _load():
+            global {lazy.rpartition(" as ")[2]}
+            {lazy}
+
+        def f(path):
+            return {call}
+        """
+    assert _found(tmp_path, source) == [("f", _FOREIGN)]
+
+
+def test_an_import_for_the_type_checker_is_no_second_reading_of_a_running_one(
+    tmp_path: pathlib.Path,
+) -> None:
+    """What runs at the top of the module still disagrees with a function's
+    import under ``global``: the name may hold either, and neither is read.
+    """
+    source = """
+        from typing import TYPE_CHECKING
+
+        import numpy as snd
+
+        if TYPE_CHECKING:
+            import soundfile as snd
+
+        def _load():
+            global snd
+            import soundfile as snd
+
+        def f(path):
+            return snd.read(path)
+        """
+    assert _found(tmp_path, source) == []
+
+
 #: A module that defines one reader in each branch of an ``if``, and one in
 #: each block of a ``try``, where only one of the two binds ``info`` itself.
 _TWO_BRANCHES = """
@@ -1126,8 +1749,35 @@ def test_a_re_export_two_branches_agree_on_reaches_the_check(
             """,
             [],
         ),
+        (
+            """
+            from ._audio_file import require_regular_audio
+            from ._loose import check_nothing
+
+            def _swap():
+                global require_regular_audio
+                require_regular_audio = check_nothing
+            """,
+            [("through_the_package", 6)],
+        ),
+        (
+            """
+            from ._audio_file import require_regular_audio
+
+            def _reload():
+                global require_regular_audio
+                from ._audio_file import require_regular_audio
+            """,
+            [],
+        ),
     ],
-    ids=["assignment", "def-that-checks-nothing", "def-that-checks"],
+    ids=[
+        "assignment",
+        "def-that-checks-nothing",
+        "def-that-checks",
+        "global-assignment-in-a-function",
+        "global-import-of-the-same-check",
+    ],
 )
 def test_a_binding_after_a_re_export_takes_the_name_from_it(
     tmp_path: pathlib.Path, init: str, found: list[tuple[str, int]]
@@ -1138,9 +1788,33 @@ def test_a_binding_after_a_re_export_takes_the_name_from_it(
 
     The re-exports were read from the imports alone, so the check imported
     first stood for the name after ``require_regular_audio = check_nothing``
-    or a ``def`` that checks nothing replaced it.
+    or a ``def`` that checks nothing replaced it. A function that declares
+    the name ``global`` and binds it may run at any time, so what it binds
+    may be what the package holds too; the bindings at the top of the
+    module were read alone, and the check stood for the name after such a
+    function replaced it.
     """
     assert _read_through_the_package(tmp_path, init) == found
+
+
+def test_an_annotation_after_a_re_export_leaves_the_name_to_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An annotation without a value binds nothing, so the package still
+    holds the check it imported under the name.
+
+    ``require_regular_audio: Callable[..., None]`` after the import was read
+    as a binding that replaced it, and a module that reaches the check
+    through the package was reported as reaching no check.
+    """
+    init = """
+        from collections.abc import Callable
+
+        from ._audio_file import require_regular_audio
+
+        require_regular_audio: Callable[..., None]
+        """
+    assert _read_through_the_package(tmp_path, init) == []
 
 
 def test_a_check_is_the_import_that_stands_for_its_name_at_the_call(

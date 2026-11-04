@@ -57,6 +57,238 @@ def _dropped(tmp_path: pathlib.Path, **modules: str) -> list[clf.Finding]:
     return found
 
 
+def test_what_an_if_type_checking_block_imports_is_no_helper_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import under ``if TYPE_CHECKING:`` never runs, so a call of ``axis``
+    reaches the helper of that name and no other. It was read as what a
+    function swaps in under ``global``, and as either of two beside the import
+    at the top, so the call was refused for dropping ``fmt``'s language too.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.under_global": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+
+            def swap():
+                global axis
+                if TYPE_CHECKING:
+                    from .helpers import fmt as axis
+
+
+            def plot(result, ax, language="en"):
+                axis(ax)
+            """,
+            "pkg.at_the_top": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+            if TYPE_CHECKING:
+                from .helpers import fmt as axis
+
+
+            def plot(result, ax, language="en"):
+                axis(ax)
+            """,
+        },
+    )
+    assert {(f.path, f.helper) for f in found} == {
+        ("pkg/under_global.py", "pkg.helpers.axis"),
+        ("pkg/at_the_top.py", "pkg.helpers.axis"),
+    }
+
+
+def test_a_definition_the_negated_test_keeps_from_running_is_no_definition(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The ``else`` of ``if not TYPE_CHECKING:`` never runs, so a function written
+    there is judged as nothing, and the body of that test runs, so one written
+    there is judged as any other.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.mod": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+            if not TYPE_CHECKING:
+                def runs(ax, language="en"):
+                    return axis(ax)
+            else:
+                def never(ax, language="en"):
+                    return axis(ax)
+            """
+        },
+    )
+    assert [finding.caller for finding in found] == ["runs"]
+
+
+def test_a_parameter_defaulting_to_the_helper_reaches_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A parameter whose default names a helper holds it at any call that does
+    not hand it another, read where the ``def`` runs its defaults, so the call
+    drops the language as a call of the helper does. A parameter with no default,
+    or a default that names no helper, reaches none.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.mod": """
+            from . import helpers
+            from .helpers import axis
+
+            def same_name(ax, axis=axis, language="en"):
+                return axis(ax)
+
+            def other_name(ax, draw=axis, *, language="en"):
+                return draw(ax)
+
+            def dotted(ax, axis=helpers.axis, language="en"):
+                return axis(ax)
+
+            def no_default(ax, axis, language="en"):
+                return axis(ax)
+
+            def default_of_none(ax, axis=None, language="en"):
+                return axis(ax)
+            """
+        },
+    )
+    assert sorted(finding.caller for finding in found) == [
+        "dotted",
+        "other_name",
+        "same_name",
+    ]
+
+
+def test_a_comprehension_or_a_lambda_keeps_the_name_it_binds_for_itself(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comprehension's variable and a lambda's parameter are names of their
+    own, for what they hold and no further. A call of one is no call of the
+    helper of that spelling; a call of that spelling beside them still is.
+
+    Every name a comprehension stored counted as a local of the whole
+    function, so ``axis(ax)`` written after one passed, and a lambda's
+    parameter was not read at all, so a call of it was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.inside": """
+            from . import helpers
+            from .helpers import axis
+
+
+            def by_comprehension(result, ax, makers, language="en"):
+                return [axis(ax) for axis in makers]
+
+
+            def by_lambda(result, ax, language="en"):
+                return (lambda axis: axis(ax))(print)
+
+
+            def by_module(result, ax, modules, language="en"):
+                return [helpers.axis(ax) for helpers in modules]
+            """,
+            "pkg.beside": """
+            from .helpers import axis
+
+
+            def beside_comprehension(result, ax, makers, language="en"):
+                names = [axis for axis in makers]
+                axis(ax)
+                return names
+
+
+            def beside_lambda(result, ax, language="en"):
+                other = lambda axis: axis
+                axis(ax)
+                return other
+            """,
+        },
+    )
+    assert sorted(f.caller for f in found) == [
+        "beside_comprehension",
+        "beside_lambda",
+    ]
+
+
+def test_a_call_in_a_function_s_if_type_checking_block_drops_nothing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so a call
+    written there drops no language; one in its ``else`` runs, and does.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+
+            def in_the_block(result, ax, language="en"):
+                if TYPE_CHECKING:
+                    axis(ax)
+
+
+            def in_the_else(result, ax, language="en"):
+                if TYPE_CHECKING:
+                    pass
+                else:
+                    axis(ax)
+            """,
+        },
+    )
+    assert [f.caller for f in found] == ["in_the_else"]
+
+
+def test_a_type_parameter_spelt_like_a_helper_is_not_the_helper(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A generic function's type parameter is its own name, and a generic
+    class's is its methods' and those of a class written in it, so a call of
+    one is no call of the helper of that spelling. The same call with no type
+    parameter still drops the language.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis
+
+
+            def by_function[axis](result, ax, language="en"):
+                axis(ax, 20.0, 20000.0)
+
+
+            class ByClass[axis]:
+                def draw(self, ax, language="en"):
+                    axis(ax, 20.0, 20000.0)
+
+                class Inner:
+                    def draw(self, ax, language="en"):
+                        axis(ax, 20.0, 20000.0)
+
+
+            def plain(result, ax, language="en"):
+                axis(ax, 20.0, 20000.0)
+            """
+        },
+    )
+    assert [f.caller for f in found] == ["plain"]
+
+
 def test_a_dropped_language_is_found(tmp_path: pathlib.Path) -> None:
     """The defect itself: the plot has the language and the axis never sees it."""
     found = _dropped(
@@ -302,6 +534,41 @@ def test_a_call_is_checked_against_either_import_of_two_branches(
         ("plot_then_first", "pkg.helpers.axis"),
         ("plot_then_second", "pkg.helpers.axis"),
         ("plot_in_a_function", "pkg.helpers.axis"),
+    ]
+
+
+def test_an_import_a_function_makes_under_global_may_be_what_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and imports it may
+    run before a call of the name, so the call may reach that import too.
+
+    The module's names were read from its top alone, so the call was checked
+    against the import there, which takes no language, and passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax):
+                return ax
+            """,
+            "pkg.plots": """
+            from .other import axis
+
+
+            def _localized():
+                global axis
+                from .helpers import axis
+
+
+            def plot_thing(result, ax, language="en"):
+                axis(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_thing", "pkg.helpers.axis"),
     ]
 
 

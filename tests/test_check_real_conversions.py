@@ -348,6 +348,81 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return np.asarray(_helper(reference, levels), dtype=np.float64)
     """,
+    "a_call_in_a_comprehension_s_first_iterable_reaches_the_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+                return [x]
+
+            _ = [y for inner in inner(levels) for y in [inner]]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_local_spelt_like_a_private_check_checks_nothing": """
+        def _check(x):
+            real_array(x, "x")
+
+        def f(levels):
+            _check = print
+            _check(levels)
+            return float(levels)
+    """,
+    "a_parameter_spelt_like_a_private_check_checks_nothing": """
+        def _check(x):
+            real_array(x, "x")
+
+        def f(levels, _check):
+            _check(levels)
+            return float(levels)
+    """,
+    "a_nested_function_spelt_like_a_private_check_checks_nothing": """
+        def _check(x):
+            real_array(x, "x")
+
+        def f(levels):
+            def _check(x):
+                return None
+
+            _check(levels)
+            return float(levels)
+    """,
+    "a_local_spelt_like_a_shared_check_checks_nothing": """
+        def f(levels):
+            real_array = print
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_local_spelt_like_a_private_check_hands_on_no_check_to_its_caller": """
+        def _check(x):
+            real_array(x, "x")
+
+        def _forward(values):
+            _check = print
+            _check(values)
+
+        def f(levels):
+            _forward(levels)
+            return float(levels)
+    """,
+    "a_check_only_a_type_checker_imports_beside_the_function_that_runs": """
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from phonometry._internal.validation import real_array as _check
+
+        def _check(x, name):
+            return x
+
+        def f(levels):
+            _check(levels, "levels")
+            return float(levels)
+    """,
     "a_check_that_hands_back_a_comprehension_of_a_parameter": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -434,6 +509,202 @@ _PLANTED_UNCHECKED = {
 
             inner()
             return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_function_s_parameter_is_handed": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(levels)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_namesake_parameter_is_handed": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(levels):
+                nonlocal out
+                out = levels
+
+            inner(levels)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_nested_function_s_keyword_is_handed": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            def inner(scale, x=0.0):
+                out[0] = x * scale
+
+            inner(2.0, x=levels)
+            return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_starred_list_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(*[levels])
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_starred_name_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(scale, x, *rest):
+                nonlocal out
+                out = rest[0] if rest else x
+
+            arguments = (levels, levels)
+            inner(2.0, *arguments)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_mapping_literal_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(**{"x": levels})
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_mapping_name_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(scale=1.0, **options):
+                nonlocal out
+                out = options["x"]
+
+            settings = {"x": levels}
+            inner(**settings)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_nested_function_s_default": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x=levels):
+                nonlocal out
+                out = x
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_sibling_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            def outer_call():
+                inner(levels)
+
+            outer_call()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_comprehension_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            def inner(x):
+                out[0] = x
+
+            _ = [inner(level) for level in levels]
+            return out[0]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_module_name_a_nested_function_binds": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def inner():
+                global out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_a_module_name_both_functions_declare_global": """
+        def _helper(reference, levels):
+            global out
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                global out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_an_item_of_a_module_list_a_nested_function_fills": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def inner():
+                OUT[0] = levels
+
+            inner()
+            return OUT[0]
 
         def f(reference, levels):
             return float(_helper(reference, levels))
@@ -899,6 +1170,123 @@ _PLANTED_UNCHECKED = {
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_call_of_a_name_a_comprehension_binds_reaches_no_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            _ = [inner(levels) for inner in [lambda x: None]]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_call_of_a_name_a_later_loop_of_a_comprehension_binds": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            _ = [y for inner in [lambda x: [x]] for y in inner(levels)]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_call_of_a_name_a_comprehension_binds_reaches_no_module_function": """
+        def _keep(x):
+            return x
+
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return [_keep(levels) for _keep in [lambda x: 1.0]]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels)[0])
+    """,
+    "a_call_of_a_nested_function_spelt_like_a_module_function": """
+        def _keep(x):
+            return x
+
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def _keep(x):
+                return 1.0
+
+            return _keep(levels)
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_call_of_a_name_a_comprehension_binds_spelt_like_float": """
+        def f(levels):
+            return [float(levels) for float in [lambda x: 1.0]]
+    """,
+    "a_call_of_a_parameter_spelt_like_float": """
+        def f(levels, float):
+            return float(levels)
+    """,
+    "a_value_only_a_type_checker_block_hands_back": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            if TYPE_CHECKING:
+                out = levels
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_value_a_nested_function_writes_under_global_only_for_the_type_checker": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def inner():
+                global out
+                if TYPE_CHECKING:
+                    out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_name_only_the_else_of_a_type_checker_block_binds": """
+        def f(levels):
+            if TYPE_CHECKING:
+                x = levels
+            else:
+                x = 1.0
+            return float(x)
+    """,
+    "a_check_in_the_else_of_a_type_checker_block": """
+        def f(levels):
+            if TYPE_CHECKING:
+                pass
+            else:
+                real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_private_check_whose_check_sits_in_the_else_of_a_type_checker_block": """
+        def _check(values):
+            if TYPE_CHECKING:
+                pass
+            else:
+                real_array(values, "values")
+
+        def f(levels):
+            _check(levels)
+            return float(levels)
+    """,
     "a_check_handed_the_value_or_a_number": """
         def f(value):
             require_finite(value or 0.0, "value")
@@ -981,6 +1369,149 @@ _PLANTED_ANSWERED = {
 
         def f(reference, levels):
             return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_parameter_handed_a_computed_value": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(2.0)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_own_parameter_named_like_the_helper_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(levels):
+                nonlocal out
+                out = levels
+
+            inner(3.0)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_nested_function_s_type_parameter_is_its_own": """
+        def f(T):
+            def g[T]():
+                return np.asarray(T, dtype=np.float64)
+
+            return g(), real_array(T, "T")
+    """,
+    "a_generic_class_s_type_parameter_is_its_methods_own": """
+        def f(T):
+            class Box[T]:
+                def get(self):
+                    return np.asarray(T, dtype=np.float64)
+
+            return Box().get(), real_array(T, "T")
+    """,
+    "a_generic_class_s_type_parameter_reaches_a_class_inside_it": """
+        def f(T):
+            class Box[T]:
+                class Inner:
+                    def get(self):
+                        return np.asarray(T, dtype=np.float64)
+
+            return Box.Inner().get(), real_array(T, "T")
+    """,
+    "a_generic_class_s_type_parameter_is_not_what_its_method_writes": """
+        def _helper(reference, T):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            class Box[T]:
+                def fill(self):
+                    out[0] = T
+
+            Box().fill()
+            return out[0]
+
+        def f(reference, T):
+            return float(_helper(reference, T))
+    """,
+    "a_name_a_nested_function_declares_global_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                global out
+                out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_name_a_function_two_levels_down_declares_global_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner():
+                def deeper():
+                    global out
+                    out = levels
+
+                deeper()
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_method_s_global_name_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            class Writer:
+                def write(self):
+                    global out
+                    out = levels
+
+            Writer().write()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_global_name_a_nested_function_reads_is_the_module_s": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            scale = levels
+
+            def inner():
+                nonlocal out
+                global scale
+                out = scale
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_global_name_a_nested_function_converts_is_the_module_s": """
+        def f(levels):
+            def g():
+                global levels
+                return np.asarray(levels, dtype=np.float64)
+
+            return g(), real_array(levels, "levels")
     """,
     "python_s_float_after_the_shared_reader": """
         def f(value):
@@ -1292,6 +1823,669 @@ def _planted(tmp_path: Path, body: str) -> set[str]:
         for function, verdict in _verdicts(tmp_path, source).items()
         if function == "f" or function.startswith("f.")
     }
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        """
+        def f(levels):
+            return [float(real_array(levels, "levels")) for real_array in [print]]
+        """,
+        """
+        def _check(x):
+            real_array(x, "x")
+            return x
+
+        def f(levels):
+            return [float(_check(levels)) for _check in [print]]
+        """,
+    ],
+)
+def test_a_check_a_comprehension_binds_answers_for_nothing(
+    tmp_path: Path, body: str
+) -> None:
+    """A comprehension's variable spelt like a check is another name: what it
+    calls hands back something the guard does not follow, no refusal of a check.
+    """
+    assert _planted(tmp_path, body) == {"computed"}
+
+
+#: A nearer name that holds the very function its spelling names, written whole
+#: with its own imports, since the header imports NumPy under its usual name.
+_NEARER_HOLDS_THE_SAME = {
+    "a_parameter_defaulting_to_the_builtin": """
+        def f(levels, float=float):
+            return float(levels)
+    """,
+    "a_keyword_only_parameter_defaulting_to_the_builtin": """
+        def f(levels, *, complex=complex):
+            return complex(levels)
+    """,
+    "a_parameter_defaulting_to_builtins_float": """
+        import builtins
+
+        def f(levels, float=builtins.float):
+            return float(levels)
+    """,
+    "a_local_assigned_from_builtins_float": """
+        import builtins
+
+        def f(levels):
+            float = builtins.float
+            return float(levels)
+    """,
+    "a_parameter_defaulting_to_the_numpy_function": """
+        from numpy import asarray
+
+        def f(levels, asarray=asarray):
+            return asarray(levels, dtype=float)
+    """,
+    "a_parameter_defaulting_to_np_asarray": """
+        import numpy as np
+        from numpy import asarray
+
+        def f(levels, asarray=np.asarray):
+            return asarray(levels, dtype=float)
+    """,
+    "a_local_assigned_from_np_asarray": """
+        import numpy as np
+        from numpy import asarray
+
+        def f(levels):
+            asarray = np.asarray
+            return asarray(levels, dtype=float)
+    """,
+    "a_lambda_parameter_defaulting_to_the_builtin": """
+        def f(levels):
+            return (lambda float=float: float(levels))()
+    """,
+    "a_nested_function_reads_the_parameter_around_it": """
+        def f(levels, float=float):
+            def g(x):
+                return float(x)
+            return g(levels)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_NEARER_HOLDS_THE_SAME))
+def test_a_nearer_name_that_holds_the_same_function_still_converts(
+    tmp_path: Path, shape: str
+) -> None:
+    """A parameter defaulting to the builtin or the NumPy function it is spelt
+    as, or a local assigned from it, holds that very function, so the call is
+    the conversion it reads as. The binder's kind alone hid it, and the
+    conversion vanished from the census.
+    """
+    found = _verdicts(tmp_path, _NEARER_HOLDS_THE_SAME[shape])
+    assert found
+    assert set(found.values()) == {"unchecked"}
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        """
+        def f(levels, float):
+            return float(levels)
+        """,
+        """
+        def f(levels, float=print):
+            return float(levels)
+        """,
+        """
+        def f(levels, float=None):
+            return float(levels)
+        """,
+        """
+        def f(levels):
+            float = print
+            return float(levels)
+        """,
+        """
+        import builtins
+
+        def f(levels, other):
+            float = builtins.float
+            float = other
+            return float(levels)
+        """,
+    ],
+)
+def test_a_nearer_name_that_holds_anything_else_is_no_conversion(
+    tmp_path: Path, body: str
+) -> None:
+    """A parameter with no default or another one, and a local that holds or may
+    hold anything else, are other names: what they call is no conversion.
+    """
+    assert _verdicts(tmp_path, body) == {}
+
+
+def test_a_check_a_nearer_name_holds_still_answers_for_the_conversion(
+    tmp_path: Path,
+) -> None:
+    """A parameter defaulting to the check it is spelt as is that check: it read
+    as no check, so a checked value read as unchecked.
+    """
+    assert _planted(
+        tmp_path,
+        """
+        def f(levels, real_array=real_array):
+            real_array(levels, "levels")
+            return float(levels)
+        """,
+    ) == {"checked"}
+
+
+#: A name the module imports and its own binding replaces, written whole, since
+#: the header imports the checks. Each stands for the later binding.
+_REPLACED_AT_THE_TOP = {
+    "a_def_after_the_import_of_a_check": """
+        from phonometry._internal.validation import real_array as _check
+
+        def _check(x, name):
+            return x
+
+        def f(levels):
+            _check(levels, "levels")
+            return float(levels)
+    """,
+    "an_assignment_after_the_import_of_a_check": """
+        from phonometry._internal.validation import real_array
+
+        real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_check_of_its_own_spelling_defined_by_the_module": """
+        def real_array(x, name):
+            return x
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_check_a_function_replaces_under_global": """
+        from phonometry._internal.validation import real_array
+
+        def _swap():
+            global real_array
+            real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_check_in_one_branch_of_a_try_and_none_in_the_other": """
+        try:
+            from phonometry._internal.validation import real_array
+        except ImportError:
+            real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_REPLACED_AT_THE_TOP))
+def test_a_binding_of_the_module_replaces_the_check_it_imported(
+    tmp_path: Path, shape: str
+) -> None:
+    """An import is a check only while it stands: a later ``def`` or assignment
+    takes the name from it, in the module or from a function under ``global``, and
+    a branch that binds anything else may leave no check. Each read as checked.
+    """
+    assert _verdicts(tmp_path, _REPLACED_AT_THE_TOP[shape]) == {"f": "unchecked"}
+
+
+def test_a_function_s_own_import_stands_past_the_module_s_binding(
+    tmp_path: Path,
+) -> None:
+    """A function that imports the name holds the import, whatever the module
+    binds of that spelling, and every other function holds the module's binding.
+    The module's binding took the name from the whole module, so the conversion
+    left the census and the check answered for nothing.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        def asarray(x, dtype=None):
+            return x
+
+        def imports_it(levels):
+            from numpy import asarray
+            return asarray(levels, dtype=float)
+
+        def reads_the_module_s(levels):
+            return asarray(levels, dtype=float)
+        """,
+    ) == {"imports_it": "unchecked"}
+    assert _verdicts(
+        tmp_path,
+        """
+        def real_array(x, name):
+            return x
+
+        def imports_it(levels):
+            from phonometry._internal.validation import real_array
+            real_array(levels, "levels")
+            return float(levels)
+
+        def reads_the_module_s(levels):
+            real_array(levels, "levels")
+            return float(levels)
+        """,
+    ) == {"imports_it": "checked", "reads_the_module_s": "unchecked"}
+
+
+def test_a_function_of_a_check_s_spelling_hands_back_no_refusal(tmp_path: Path) -> None:
+    """What the module's own ``real_array`` hands back is a value it computed, as
+    of any function that is no check; it read as the shared check's refusal.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        def real_array(x, name):
+            return x
+
+        def f(levels):
+            return float(real_array(levels, "levels"))
+        """,
+    ) == {"f": "computed"}
+
+
+def test_a_check_for_the_type_checker_replaces_nothing_that_runs(
+    tmp_path: Path,
+) -> None:
+    """An ``if TYPE_CHECKING:`` block's binding never runs: it takes the check
+    from no import beside it, and it answers for nothing on its own.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        from typing import TYPE_CHECKING
+
+        from phonometry._internal.validation import real_array
+
+        if TYPE_CHECKING:
+            real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+        """,
+    ) == {"f": "checked"}
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def float(x):
+                return 1.0
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="a-def-of-float",
+        ),
+        pytest.param(
+            """
+            float = print
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-assignment-to-float",
+        ),
+        pytest.param(
+            """
+            def _swap():
+                global float
+                float = print
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="float-a-function-replaces-under-global",
+        ),
+        pytest.param(
+            """
+            def float(x):
+                return 1.0
+
+            def f(levels, float=float):
+                return float(levels)
+            """,
+            id="a-default-of-the-module-s-float",
+        ),
+        pytest.param(
+            """
+            from decimal import Decimal as float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-import-of-float-from-elsewhere",
+        ),
+        pytest.param(
+            """
+            from numpy import asarray
+
+            def asarray(x, dtype=None):
+                return x
+
+            def f(levels):
+                return asarray(levels, dtype=float)
+            """,
+            id="a-def-after-the-import-from-numpy",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels):
+                return [np.asarray(levels, dtype=np.float64) for np in [print]]
+            """,
+            id="a-comprehension-binds-a-plain-import",
+        ),
+        pytest.param(
+            """
+            import math
+
+            def f(levels):
+                return (lambda math: math.float64(levels))(print)
+            """,
+            id="a-lambda-binds-a-plain-import",
+        ),
+    ],
+)
+def test_a_binding_of_the_module_is_no_conversion_of_that_spelling(
+    tmp_path: Path, source: str
+) -> None:
+    """The module's own ``float`` is no builtin, and a comprehension's or a
+    lambda's variable hides a plain import as it hides a ``from`` import. Each
+    read as a conversion of the caller's value.
+    """
+    assert _verdicts(tmp_path, source) == {}
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            import builtins
+
+            float = builtins.float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-assignment-from-builtins",
+        ),
+        pytest.param(
+            """
+            from builtins import float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-import-from-builtins",
+        ),
+        pytest.param(
+            """
+            from numpy import float64 as float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-import-from-numpy",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels, np):
+                return np.asarray(levels, dtype=float)
+            """,
+            id="a-parameter-spelt-as-the-module",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels):
+                return (lambda np: np.asarray(levels, dtype=float))(np)
+            """,
+            id="a-lambda-parameter-spelt-as-the-module",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels):
+                return [np.asarray(row, dtype=float) for row in levels]
+            """,
+            id="a-comprehension-beside-the-module",
+        ),
+        pytest.param(
+            """
+            if not_defined_here:
+                float = print
+
+            import builtins
+            float = builtins.float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="a-later-binding-that-holds-the-builtin",
+        ),
+    ],
+)
+def test_a_binding_that_keeps_the_function_of_its_spelling_still_converts(
+    tmp_path: Path, source: str
+) -> None:
+    """What holds the builtin or NumPy's function stays a conversion, and a
+    parameter spelt ``np``, a lambda's as a function's, is the module handed in.
+    """
+    assert set(_verdicts(tmp_path, source).values()) == {"unchecked"}
+
+
+def test_a_function_of_the_module_read_for_float_is_still_followed(
+    tmp_path: Path,
+) -> None:
+    """The module's ``float`` that checks its parameter answers for a conversion
+    as any function of the module does: it was read as a conversion itself, and
+    as nothing, since the read stopped at the builtin of that spelling.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        import numpy as np
+
+        from phonometry._internal.validation import real_array
+
+        def float(x):
+            real_array(x, "x")
+
+        def f(levels):
+            float(levels)
+            return np.asarray(levels, dtype=np.float64)
+        """,
+    ) == {"f": "checked"}
+
+
+def test_a_keeping_call_the_module_replaces_keeps_nothing(tmp_path: Path) -> None:
+    """A ``def list`` of the module hands back what it computes, not the caller's
+    value, as a nested function of that spelling does.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        def list(values):
+            return [1.0]
+
+        def f(levels):
+            return float(list(levels))
+        """,
+    ) == {"f": "computed"}
+
+
+#: What a test on ``TYPE_CHECKING`` keeps from running, each holding a conversion
+#: a caller's value would reach if it ran.
+_NEVER_RUNS = {
+    "a_nested_function_in_the_block": """
+        def f(levels):
+            if TYPE_CHECKING:
+                def g(x):
+                    return float(x)
+            return 1.0
+    """,
+    "the_else_of_a_negated_test": """
+        def f(levels):
+            if not TYPE_CHECKING:
+                return 1.0
+            else:
+                return float(levels)
+    """,
+    "a_function_at_the_top_in_the_block": """
+        if TYPE_CHECKING:
+            def g(x):
+                return float(x)
+    """,
+    "a_function_at_the_top_in_the_else_of_a_negated_test": """
+        if not TYPE_CHECKING:
+            pass
+        else:
+            def g(x):
+                return float(x)
+    """,
+    "a_method_in_the_block": """
+        class Record:
+            if TYPE_CHECKING:
+                def method(self, x):
+                    return float(x)
+    """,
+    "a_conversion_in_a_branch_of_an_expression": """
+        def f(levels):
+            return float(levels) if TYPE_CHECKING else 1.0
+    """,
+    "the_same_in_a_lambda": """
+        def f(levels):
+            return (lambda: float(levels) if TYPE_CHECKING else 1.0)()
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_NEVER_RUNS))
+def test_what_a_test_on_type_checking_keeps_from_running_converts_nothing(
+    tmp_path: Path, shape: str
+) -> None:
+    """A conversion no run reaches reads nothing of a caller's. Each was reported."""
+    source = "from typing import TYPE_CHECKING\n" + textwrap.dedent(_NEVER_RUNS[shape])
+    assert _verdicts(tmp_path, source) == {}
+
+
+@pytest.mark.parametrize(
+    ("source", "verdict"),
+    [
+        pytest.param(
+            """
+            def f(levels):
+                out = 1.0
+                if not TYPE_CHECKING:
+                    pass
+                else:
+                    out = levels
+                return float(out)
+            """,
+            "computed",
+            id="a-binding-in-the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(levels if TYPE_CHECKING else 1.0)
+            """,
+            "computed",
+            id="a-value-in-the-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(1.0 if not TYPE_CHECKING else levels)
+            """,
+            "computed",
+            id="a-value-in-the-else-of-a-negated-expression",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                if not TYPE_CHECKING:
+                    return float(levels)
+                return 1.0
+            """,
+            "unchecked",
+            id="the-body-of-a-negated-test-runs",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                if not TYPE_CHECKING:
+                    levels = 1.0
+                return float(levels)
+            """,
+            "computed",
+            id="a-binding-in-the-body-of-a-negated-test-always-runs",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(1.0 if TYPE_CHECKING else levels)
+            """,
+            "unchecked",
+            id="the-else-of-an-expression-runs",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(levels if not TYPE_CHECKING else 1.0)
+            """,
+            "unchecked",
+            id="the-body-of-a-negated-expression-runs",
+        ),
+    ],
+)
+def test_the_flow_reads_the_branch_of_a_test_on_type_checking_that_runs(
+    tmp_path: Path, source: str, verdict: str
+) -> None:
+    """The branch that runs always runs and the other never does, in a statement
+    and in a conditional expression, whichever way the test is spelt.
+    """
+    planted = "from typing import TYPE_CHECKING\n" + textwrap.dedent(source)
+    assert _verdicts(tmp_path, planted) == {"f": verdict}
+
+
+def test_a_function_in_the_body_of_a_negated_test_is_read(tmp_path: Path) -> None:
+    """``if not TYPE_CHECKING:`` is what the program runs, the module's
+    ``__getattr__`` at the top of the package among such functions.
+    """
+    source = """
+        from typing import TYPE_CHECKING
+
+        if not TYPE_CHECKING:
+            def g(x):
+                return float(x)
+        """
+    assert _verdicts(tmp_path, source) == {"g": "unchecked"}
 
 
 @pytest.mark.parametrize("shape", sorted(_PLANTED_UNCHECKED))

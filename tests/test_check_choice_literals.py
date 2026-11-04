@@ -580,8 +580,18 @@ _TWO_CHOICES = {
                 from ._branch_second import KINDS, Names
             """,
         ),
+        (
+            "_branch_global_in_a_function",
+            """
+            from ._branch_first import KINDS, Names
+
+            def _swap():
+                global KINDS, Names
+                from ._branch_second import KINDS, Names
+            """,
+        ),
     ],
-    ids=["try-second", "try-first", "if-second", "if-first"],
+    ids=["try-second", "try-first", "if-second", "if-first", "global-in-a-function"],
 )
 def test_two_imports_in_branches_that_disagree_give_no_value(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, stem: str, user: str
@@ -592,9 +602,10 @@ def test_two_imports_in_branches_that_disagree_give_no_value(
 
     The later stood for the name, so the ``except`` clause's or the
     ``else``'s import was read where the ``try`` body's or the ``if``'s,
-    which runs whenever it can, holds another table and another alias. Each
-    case is a module of its own name, since the readers keep what they read
-    of a module by its name.
+    which runs whenever it can, holds another table and another alias. A
+    function that imports the name under ``global`` may have run too, and
+    what it binds may stand as much. Each case is a module of its own name,
+    since the readers keep what they read of a module by its name.
     """
     _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, stem: user})
     constants = ccl._constants_of(f"phonometry.{stem}")
@@ -654,6 +665,132 @@ def test_a_name_imported_for_the_type_checker_is_the_import_that_stands(
     later = sys.modules["phonometry._checked_b"].Thing
     assert ccl._resolved("Thing", "phonometry._checked_in_a_row") is later
     assert ccl._resolved("Thing", "phonometry._checked_in_branches") is None
+
+
+def test_an_annotation_reads_the_type_checker_s_block_and_a_value_the_else(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A type checker reads an ``if TYPE_CHECKING:`` block and never its ``else``,
+    so an alias is what the block says, while the program runs the ``else``, so a
+    table read as values is what that says. The ``else`` stood for the alias too,
+    which read a valid ``Literal`` as a closed choice typed ``str``.
+    """
+    sources = {
+        "_mode_alias": """
+            from __future__ import annotations
+
+            from typing import TYPE_CHECKING, Literal
+
+            if TYPE_CHECKING:
+                Mode = Literal['fast', 'slow']
+                KINDS = ('a', 'b')
+            else:
+                Mode = str
+                KINDS = ('c', 'd')
+
+            def weigh(levels, mode: Mode = 'fast'):
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+                raise ValueError(mode)
+            """,
+        "_mode_user": """
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                from ._branch_second import KINDS, Names
+            else:
+                from ._branch_first import KINDS, Names
+            """,
+        "_mode_negated": """
+            from typing import TYPE_CHECKING
+
+            if not TYPE_CHECKING:
+                from ._branch_first import KINDS, Names
+            else:
+                from ._branch_second import KINDS, Names
+            """,
+    }
+    _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, **sources})
+    planted = sys.modules["phonometry._mode_alias"]
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter([("phonometry._mode_alias", "weigh", planted.weigh)]),
+    )
+    assert list(ccl.string_choices()) == []
+    assert ccl.expanded("Mode", "phonometry._mode_alias") == "Literal['fast', 'slow']"
+    constants = ccl._constants_of("phonometry._mode_alias")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"c", "d"}
+    assert ccl.expanded("Names", "phonometry._mode_user") == "Literal['c', 'd']"
+    constants = ccl._constants_of("phonometry._mode_user")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"a", "b"}
+    assert ccl.expanded("Names", "phonometry._mode_negated") == "Literal['c', 'd']"
+    constants = ccl._constants_of("phonometry._mode_negated")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"a", "b"}
+
+
+def test_a_comparison_a_test_on_type_checking_keeps_from_running_says_nothing(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A comparison no run reaches is no evidence of a closed choice: what only a
+    type checker reads of a function was read as what the function does.
+    """
+    source = """
+        from __future__ import annotations
+
+        from typing import TYPE_CHECKING
+
+        def in_the_block(levels, mode: str = 'fast'):
+            if TYPE_CHECKING:
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+            return levels
+
+        def in_the_negated_else(levels, mode: str = 'fast'):
+            if not TYPE_CHECKING:
+                return levels
+            else:
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+
+        def in_a_branch(levels, mode: str = 'fast'):
+            return (mode == 'fast' or mode == 'slow') if TYPE_CHECKING else levels
+
+        def runs_in_the_negated(levels, mode: str = 'fast'):
+            if not TYPE_CHECKING:
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+            return levels
+        """
+    _plant_modules(tmp_path, monkeypatch, {"_kept_from_running": source})
+    planted = sys.modules["phonometry._kept_from_running"]
+    names = (
+        "in_the_block",
+        "in_the_negated_else",
+        "in_a_branch",
+        "runs_in_the_negated",
+    )
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter(
+            [("phonometry._kept_from_running", n, getattr(planted, n)) for n in names]
+        ),
+    )
+    assert {choice.qualname: choice.evidence for choice in ccl.string_choices()} == {
+        "in_the_block": (),
+        "in_the_negated_else": (),
+        "in_a_branch": (),
+        "runs_in_the_negated": ("== 'fast'", "== 'slow'"),
+    }
 
 
 def test_a_table_imported_from_a_sibling_module_is_followed() -> None:

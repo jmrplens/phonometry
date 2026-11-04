@@ -19,6 +19,7 @@ import dataclasses
 import enum
 import pathlib
 import sys
+import textwrap
 import types
 from typing import TYPE_CHECKING
 
@@ -752,6 +753,64 @@ if TYPE_CHECKING:
     assert sources["either"] == ("json", "_absent_private")
     assert "replaced" not in sources
     assert sources["kept"] == ("json",)
+
+
+def test_a_module_defines_what_a_test_on_type_checking_lets_run(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The ``else`` of the block runs, so it defines what it binds, and it was
+    skipped with the block; the ``else`` of the negated test never runs, and it
+    was read as defining what it binds.
+    """
+    module = types.ModuleType("fake_type_checking_names")
+    source = textwrap.dedent(
+        """\
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            NEVER_IN_THE_BLOCK = 1
+        else:
+            RUNS_IN_THE_ELSE = 1
+
+        if not TYPE_CHECKING:
+            RUNS_IN_THE_NEGATED = 1
+        else:
+            NEVER_IN_THE_ELSE = 1
+        """
+    )
+    monkeypatch.setattr(gate.inspect, "getsource", lambda _: source)
+    assert gate.defined_names(module) == ["RUNS_IN_THE_ELSE", "RUNS_IN_THE_NEGATED"]
+
+
+def test_an_import_a_function_makes_for_the_type_checker_is_no_source() -> None:
+    """A function that declares a name ``global`` and imports it under ``if
+    TYPE_CHECKING:`` never binds it, so the name has no source there and the
+    module's own ``def`` keeps its one address. The same import outside the
+    block runs when the function does, and is a source.
+
+    The top of the module left those blocks out, but what a function binds
+    under ``global`` came back with them in.
+    """
+    module = _module_from(
+        "fake_checker_inside",
+        """\
+from typing import TYPE_CHECKING
+
+
+def name():
+    return None
+
+
+def swap():
+    global name, other
+    if TYPE_CHECKING:
+        from json import dumps as name
+    from json import loads as other
+""",
+    )
+    sources = gate.imported_from(module)
+    assert "name" not in sources
+    assert sources["other"] == ("json",)
 
 
 def test_a_statement_in_a_case_runs_at_the_top_of_a_module() -> None:

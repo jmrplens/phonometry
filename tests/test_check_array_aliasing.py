@@ -570,6 +570,287 @@ def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
     assert found == set()
 
 
+def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` under ``if TYPE_CHECKING:`` never runs, so the helper that
+    copies is what the record keeps. It was read as what a function swaps in
+    under ``global``, and as either of two beside the block's ``else``, so the
+    record that keeps the copy was refused for keeping its argument.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        from typing import TYPE_CHECKING
+
+        import numpy as np
+
+        from .results import BandResult
+
+        def hand(a):
+            return np.array(a)
+
+        def swap():
+            global hand
+            if TYPE_CHECKING:
+                def hand(a):
+                    return a
+
+        def rating(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        if TYPE_CHECKING:
+            def either(a):
+                return a
+        else:
+            def either(a):
+                return np.array(a)
+
+        def rating_either(frequencies, levels):
+            f = either(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
+_RATING_HEAD = """
+from typing import TYPE_CHECKING
+
+import numpy as np
+
+from .results import BandResult
+"""
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+def rating(frequencies, levels):
+    f = np.array(frequencies)
+    if not TYPE_CHECKING:
+        pass
+    else:
+        f = frequencies
+    return BandResult(frequencies=f, levels=f * 0.0)
+""",
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+def rating(frequencies, levels):
+    f = np.array(frequencies)
+    held = frequencies if TYPE_CHECKING else f
+    return BandResult(frequencies=held, levels=f * 0.0)
+""",
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+if TYPE_CHECKING:
+    def rating(frequencies, levels):
+        return BandResult(frequencies=frequencies, levels=levels)
+""",
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            """
+class Rater:
+    if TYPE_CHECKING:
+        def rating(self, frequencies, levels):
+            return BandResult(frequencies=frequencies, levels=levels)
+""",
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_what_a_test_on_type_checking_keeps_from_running_keeps_no_array(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A record no run builds keeps nothing, wherever the block is written."""
+    assert _findings(tmp_path, rating=_RATING_HEAD + source) == set()
+
+
+def test_the_body_of_a_negated_test_keeps_what_it_keeps(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``if not TYPE_CHECKING:`` is what the program runs."""
+    found = _findings(
+        tmp_path,
+        rating=_RATING_HEAD
+        + """
+def rating(frequencies, levels):
+    f = np.array(frequencies)
+    if not TYPE_CHECKING:
+        f = frequencies
+    return BandResult(frequencies=f, levels=f * 0.0)
+""",
+    )
+    assert {function for function, _sink, _parameters in found} == {"rating"}
+
+
+def test_what_a_function_s_if_type_checking_block_binds_is_not_kept(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so the copy
+    is what the record keeps, and the caller's array that body binds is not.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        from typing import TYPE_CHECKING
+
+        import numpy as np
+
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            f = np.array(frequencies)
+            if TYPE_CHECKING:
+                f = frequencies
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
+def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and defines or
+    imports it there may have run before any call into the module, so a call
+    of the name may reach what it bound, as one in a branch of an ``if`` at
+    the top may.
+
+    The module's names were read from its top alone, so after ``swap()``
+    replaced the ``hand`` that copies with one that hands back its argument,
+    the record that keeps the result passed, in the module, through an
+    import of the name and through the module's attribute; and so did one
+    that keeps what the validation helper ``_swap_in`` imports under
+    ``global`` returns.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def hand(a):
+            return np.array(a)
+
+        def swap():
+            global hand
+            def hand(a):
+                return a
+
+        def rating(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def check(a):
+            return np.array(a, dtype=np.float64)
+
+        def _swap_in():
+            global check
+            from ._internal.validation import require_finite_array as check
+
+        def checked(frequencies, levels):
+            f = check(frequencies, "frequencies")
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def keep(a):
+            return np.array(a)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        caller="""
+        from . import rating as module
+        from .rating import hand
+        from .results import BandResult
+
+        def through_the_import(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_the_attribute(frequencies, levels):
+            f = module.hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("rating", "BandResult.frequencies", "frequencies"),
+        ("checked", "BandResult.frequencies", "frequencies"),
+        ("through_the_import", "BandResult.frequencies", "frequencies"),
+        ("through_the_attribute", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument unpacks an unknown number of values, so it and every
+    argument after it may land in any place from its own on.
+
+    Each argument was bound to the parameter of its index, so with ``rest``
+    empty, ``keep(*rest, frequencies)`` handing the caller's array to ``a``,
+    which ``keep`` returns, read as handing it to ``b``, and the record that
+    keeps the result passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a, b=None):
+            return a
+
+        def rating(frequencies, levels):
+            rest = []
+            f = keep(*rest, frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def placed(frequencies, levels):
+            f = keep(np.array(frequencies), frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_helper_s_type_parameter_is_not_what_its_closure_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A generic helper's type parameter is its own name, so what it returns
+    under that spelling is no array of the function around.
+
+    The helper was read with everything its closure holds, the name of its
+    type parameter included, so the record that keeps what it returns was
+    refused for the caller's array.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            def hand[frequencies]():
+                return frequencies
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
 def test_a_helper_reads_a_sibling_written_after_it(tmp_path: pathlib.Path) -> None:
     """A helper written before the sibling it calls reads what that returns.
 

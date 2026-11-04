@@ -90,7 +90,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ast_scan import live_bindings
+from ast_scan import (
+    binding_of,
+    empty_type_checking_bodies,
+    global_bindings,
+    is_type_checking_block,
+    live_bindings,
+    own_names,
+    what_never_runs,
+)
+from ast_scan import parameters as with_defaults
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -225,6 +234,9 @@ class Scope:
     #: Every function and class defined in it, two of one name alike.
     definitions: list[_DefinitionNode] = field(default_factory=list)
     values: dict[str, list[ast.expr]] = field(default_factory=dict)
+    #: What each parameter holds at a call that hands it nothing, read where the
+    #: ``def`` runs its defaults: in the scope around, not here.
+    defaults: dict[str, ast.expr] = field(default_factory=dict)
     annotations: dict[str, ast.expr] = field(default_factory=dict)
     inserts: set[str] = field(default_factory=set)
     removes: set[str] = field(default_factory=set)
@@ -331,26 +343,18 @@ def _own_nodes(roots: Iterable[ast.AST]) -> Iterator[ast.AST]:
         stack.extend(children[::-1])
 
 
-def _for_the_type_checker(node: ast.AST) -> bool:
-    """Whether a block runs for the type checker only: ``if TYPE_CHECKING:``."""
-    test = node.test if isinstance(node, ast.If) else None
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-    )
-
-
 def _definitions(body: Iterable[ast.AST]) -> Iterator[_DefinitionNode]:
     """The functions and classes a body defines, however deep in its blocks.
 
-    One defined under ``if TYPE_CHECKING:`` is never defined when the code
-    runs (the constructor a record declares for the type checker): it is
-    no definition of the program, and is passed over.
+    One defined where a test on ``TYPE_CHECKING`` keeps it from running is
+    never defined when the code runs (the constructor a record declares for
+    the type checker): it is no definition of the program, and is passed over.
     """
     skipped = {
         id(child)
         for node in _own_nodes(body)
-        if isinstance(node, ast.If) and _for_the_type_checker(node)
-        for child in node.body
+        if isinstance(node, ast.If) and is_type_checking_block(node)
+        for child in what_never_runs(node)
     }
     for node in _own_nodes(body):
         if id(node) in skipped:
@@ -415,13 +419,28 @@ def _standing(
     The later of two in a row, a ``def`` or an import alike, and either of
     two in the branches of a ``try`` or an ``if``; from a function written
     in the scope, every one that may stand from the ``def`` on, since the
-    function may be called at once or once the scope has run.
+    function may be called at once or once the scope has run. A ``def`` or
+    an import that a function makes of a module name under ``global``
+    (:func:`ast_scan.global_bindings`) may stand anywhere, since that
+    function may run at any time.
     """
-    if len(written) == 1:
-        return [written[0][1]]
-    statements = [statement for statement, _ in written]
+    inside = {
+        id(node) for nodes in global_bindings(module.node).values() for node in nodes
+    }
+    anywhere = [bound for statement, bound in written if id(statement) in inside]
+    own = [
+        (statement, bound)
+        for statement, bound in written
+        if id(statement) not in inside
+    ]
+    if len(own) < 2:
+        return [*(bound for _, bound in own), *anywhere]
+    statements = [statement for statement, _ in own]
     live = live_bindings(module.node, statements, point)
-    return [bound for statement, bound in written if any(statement is s for s in live)]
+    return [
+        *(bound for statement, bound in own if any(statement is s for s in live)),
+        *anywhere,
+    ]
 
 
 def _removes_language(node: ast.AST) -> str | None:
@@ -493,14 +512,17 @@ def _build_scope(
         qualname,
         params=frozenset(a.arg for a in every),
         annotations={a.arg: a.annotation for a in every if a.annotation is not None},
+        defaults={
+            a.arg: default for a, default in with_defaults(node) if default is not None
+        },
     )
     scope.names, scope.definitions = _scope_names(module, node.body)
+    # As Python scopes them: a comprehension's variable and a lambda's
+    # parameter are not the function's (:func:`_bound_inside`).
+    names = own_names(node)
+    scope.locals |= names.stored | names.annotated
     for child in _own_nodes(node.body):
-        if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store):
-            scope.locals.add(child.id)
-        elif isinstance(child, ast.ExceptHandler) and child.name:
-            scope.locals.add(child.name)
-        elif isinstance(child, ast.Call):
+        if isinstance(child, ast.Call):
             scope.calls.append(child)
         if isinstance(child, ast.Assign):
             for target in child.targets:
@@ -521,10 +543,36 @@ def _build_scope(
     return scope
 
 
+def _bound_inside(scope: Scope, point: ast.AST, name: str) -> bool:
+    """Whether a comprehension or a lambda around *point*, inside *scope*, binds
+    *name* for itself, which then stands for nothing a scope's name does.
+    """
+    binder = binding_of(scope.node, point, name)[1]
+    return binder is not None and binder is not scope.node
+
+
 def _one(targets: list[_Target]) -> _Target:
     """The one thing every reading of a name agrees on, or None when they differ."""
     first = targets[0] if targets else None
     return first if all(t is first or t == first for t in targets) else None
+
+
+def _add_global_bindings(module: Module) -> None:
+    """Add to the names of *module* every ``def``, ``class`` and import that a
+    function, a method or a class body inside it makes of a module name
+    under ``global`` (:func:`ast_scan.global_bindings`), which may be what
+    the name stands for at any call.
+    """
+    for name, nodes in global_bindings(module.node).items():
+        for node in nodes:
+            if isinstance(node, ast.Import | ast.ImportFrom):
+                binding = _import_bindings(module, node).get(name)
+                if binding is not None:
+                    module.names.setdefault(name, []).append((node, binding))
+            elif isinstance(
+                node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+            ):
+                module.names.setdefault(name, []).append((node, node))
 
 
 def _one_import(bound: list[_Bound]) -> Binding | None:
@@ -548,6 +596,7 @@ class Tree:
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
         for module in modules.values():
             module.names, module.definitions = _scope_names(module, module.node.body)
+            _add_global_bindings(module)
             module.speaks = any(
                 module.name == name or module.name.startswith(f"{name}.")
                 for name in LANGUAGE_PASSES
@@ -568,7 +617,7 @@ class Tree:
                 package = parts[-1] == "__init__"
                 name = ".".join(parts[:-1] if package else parts)
                 source = path.read_text(encoding="utf-8")
-                node = ast.parse(source, filename=str(path))
+                node = empty_type_checking_bodies(ast.parse(source, filename=str(path)))
                 modules[name] = Module(name, path, package, node)
         return cls(modules, root)
 
@@ -579,9 +628,14 @@ class Tree:
         parent: Scope | None,
         owner: Class | None,
         prefix: str,
+        hidden: frozenset[str] = frozenset(),
     ) -> None:
+        """Index a definition; *hidden* holds the type parameters of the
+        generic classes it is written in, which it reads as theirs.
+        """
         qualname = prefix + node.name
         if isinstance(node, ast.ClassDef):
+            hidden |= own_names(node).type_parameters
             klass = Class(module, node, qualname, parent)
             klass.members = {d.name: d for d in _definitions(node.body)}
             klass.fields = {
@@ -591,10 +645,13 @@ class Tree:
             }
             self.classes[node] = klass
             for member in klass.members.values():
-                self._define(member, module, parent, klass, qualname + ".")
-            self._define_body(node.body, module, parent, None, qualname + ".<class>")
+                self._define(member, module, parent, klass, qualname + ".", hidden)
+            self._define_body(
+                node.body, module, parent, None, qualname + ".<class>", hidden
+            )
             return
         scope = _build_scope(module, node, parent, owner, qualname)
+        scope.locals |= hidden | own_names(node).type_parameters
         self.scopes.append(scope)
         self.functions[node] = scope
         if owner is not None:
@@ -609,6 +666,7 @@ class Tree:
         parent: Scope | None,
         owner: Class | None,
         qualname: str,
+        hidden: frozenset[str] = frozenset(),
     ) -> None:
         """Index the calls of a module body or a class body.
 
@@ -617,8 +675,9 @@ class Tree:
         language pass wherever its code sits, and a class body nested in a
         function that takes the language has it in scope like any other
         statement of that function. The pseudo-scope takes no parameters and
-        declares no locals, so ``speaks`` reads the enclosing function's, and
-        failing that the module's, exactly as a real scope does.
+        declares no locals but the type parameters of a generic class
+        (*hidden*), so ``speaks`` reads the enclosing function's, and failing
+        that the module's, exactly as a real scope does.
         """
         node = ast.FunctionDef(
             name=qualname,
@@ -636,7 +695,9 @@ class Tree:
             returns=None,
             type_params=[],
         )
-        self.scopes.append(_build_scope(module, node, parent, owner, qualname))
+        scope = _build_scope(module, node, parent, owner, qualname)
+        scope.locals |= hidden
+        self.scopes.append(scope)
 
     # -- names ------------------------------------------------------------
 
@@ -704,8 +765,15 @@ class Tree:
         The innermost scope that binds the name holds it: its ``def``s,
         classes and imports that may stand where *point* reads it, or once it
         has run when no point is given (:func:`_standing`), or its parameters
-        and locals.
+        and locals. A comprehension or a lambda around *point* that binds the
+        name holds nothing the tree defines (:func:`_bound_inside`).
         """
+        if (
+            scope is not None
+            and point is not None
+            and _bound_inside(scope, point, name)
+        ):
+            return []
         current = scope
         while current is not None:
             written = current.names.get(name)
@@ -947,6 +1015,10 @@ class Tree:
         self, call: ast.Call, func: ast.Attribute, scope: Scope
     ) -> list[Callee | None]:
         """The helpers ``owner.name(...)`` may reach."""
+        if isinstance(func.value, ast.Name) and _bound_inside(
+            scope, call, func.value.id
+        ):
+            return [self._by_name(call, func.attr)]
         base = self.resolve(func.value, scope, scope.module)
         if isinstance(base, ModuleRef):
             found: list[Callee | None] = []
@@ -1064,13 +1136,22 @@ class Tree:
         return None
 
     def _value_callee(self, local: Local, depth: int = 0) -> Callee | None:
-        """The helper a local name holds: an alias, or a ``partial`` of one."""
+        """The helper a local name holds: an alias, a ``partial`` of one, or a
+        parameter's default that names one.
+        """
         if depth > _DEPTH:
             return None
         for value in local.scope.values.get(local.name, ()):
             found = self._expression_callee(value, local.scope, depth + 1)
             if found is not None:
                 return found
+        default = local.scope.defaults.get(local.name)
+        if isinstance(default, ast.Name | ast.Attribute):
+            target = self.resolve(default, local.scope.parent, local.scope.module)
+            if isinstance(target, Scope):
+                return self._callee(target, bound=False)
+            if isinstance(target, Local):
+                return self._value_callee(target, depth + 1)
         return None
 
     def _by_name(self, call: ast.Call, name: str) -> Callee | None:

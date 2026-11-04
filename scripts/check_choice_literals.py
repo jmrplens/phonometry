@@ -118,12 +118,13 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 from ast_scan import (
     COMPOUND_STATEMENTS,
     binding_of,
-    bindings_by_name,
     block_statements,
+    empty_type_checking_bodies,
     imported_names,
     live_bindings,
     own_names,
     scope_nodes,
+    standing_bindings,
 )
 
 import phonometry
@@ -1136,7 +1137,7 @@ def _parsed_module(module_name: str) -> tuple[ModuleType, ast.Module, str] | Non
 
 
 def _imported_constants(
-    node: ast.ImportFrom, package: str, depth: int
+    node: ast.ImportFrom, package: str, depth: int, *, annotations: bool = False
 ) -> list[tuple[str, ast.expr]]:
     """The constants a ``from ... import`` of the package brings in, by the
     name the importing module gives them.
@@ -1144,7 +1145,7 @@ def _imported_constants(
     source = _import_source(node, package)
     if source is None:
         return []
-    imported = _constants_of(source, depth + 1)
+    imported = _constants_of(source, depth + 1, annotations=annotations)
     return [
         (alias.asname or alias.name, imported[alias.name])
         for alias in node.names
@@ -1165,24 +1166,25 @@ def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
             yield node
 
 
-def _standing(tree: ast.Module) -> dict[str, list[ast.AST]]:
+def _standing(
+    tree: ast.Module, *, annotations: bool = False
+) -> dict[str, list[ast.AST]]:
     """Each name a module binds, with the bindings of it that may stand once
-    the module has run.
+    the module has run (:func:`ast_scan.standing_bindings`): of those at the
+    top of the module the later of two in a row and either of two in the
+    branches of a ``try`` or an ``if``, and whatever a function inside it
+    binds the name to under ``global``.
 
-    Every binding at the top of the module in the order of the source
-    (:func:`ast_scan.bindings_by_name`), and of those the later of two in a
-    row and either of two in the branches of a ``try`` or an ``if``
-    (:func:`ast_scan.live_bindings`).
+    A value is what the program holds, the ``else`` of an ``if TYPE_CHECKING:``
+    block; with *annotations*, what an annotation names is what the type
+    checker reads, the block.
     """
-    return {
-        name: nodes if len(nodes) == 1 else live_bindings(tree, nodes)
-        for name, nodes in bindings_by_name(tree).items()
-    }
+    return standing_bindings(tree, annotations=annotations)
 
 
 @functools.cache
 def _read_module(
-    module_name: str,
+    module_name: str, *, annotations: bool = False
 ) -> tuple[ModuleType, ast.Module, str, dict[str, list[ast.AST]]] | None:
     """:func:`_parsed_module` with the bindings that stand in it
     (:func:`_standing`), read once for each module whatever reads it.
@@ -1191,7 +1193,7 @@ def _read_module(
     if parsed is None:
         return None
     module, tree, package = parsed
-    return module, tree, package, _standing(tree)
+    return module, tree, package, _standing(tree, annotations=annotations)
 
 
 def _assignments(tree: ast.Module) -> dict[ast.AST, ast.stmt]:
@@ -1219,7 +1221,9 @@ def _agreed(values: list[ast.expr | None]) -> ast.expr | None:
 
 
 @functools.cache
-def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast.expr]:
+def _constants_of(
+    module_name: str, depth: int = 0, *, annotations: bool = False
+) -> MappingProxyType[str, ast.expr]:
     """The constants *module_name* binds as it is imported, by name.
 
     Each assignment's value, and each constant an import from the package
@@ -1228,9 +1232,10 @@ def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast
     in a row the later, as Python leaves it, so an import of anything else
     or a ``def`` after a constant takes the name from it. Two that may each
     stand, in the branches of a ``try`` or an ``if``, give the name a value
-    only when they agree.
+    only when they agree. *annotations* reads what a type checker reads, for
+    an alias.
     """
-    read = _read_module(module_name)
+    read = _read_module(module_name, annotations=annotations)
     if read is None:
         return MappingProxyType({})
     module, tree, package, standing = read
@@ -1240,7 +1245,9 @@ def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast
     def value(node: ast.AST, name: str) -> ast.expr | None:
         if isinstance(node, ast.ImportFrom) and depth < _IMPORT_DEPTH:
             if node not in imported:
-                imported[node] = dict(_imported_constants(node, package, depth))
+                imported[node] = dict(
+                    _imported_constants(node, package, depth, annotations=annotations)
+                )
             return imported[node].get(name)
         statement = assignments.get(node)
         return dict(_assigned(statement)).get(name) if statement else None
@@ -1725,6 +1732,7 @@ def _bound_in_two_scopes(tree: ast.AST) -> set[str]:
                 *names.defined,
                 *names.imported,
                 *names.stored,
+                *names.annotated,
             )
             if names.binds(name)
         }
@@ -2306,8 +2314,13 @@ def _inherited_methods(cls: type) -> Iterator[tuple[type, str, object]]:
 
 
 def _parsed(obj: object) -> ast.AST | None:
+    """The source of *obj*, without what a function of it never runs
+    (:func:`ast_scan.empty_type_checking_bodies`): what it compares or hands on
+    there says nothing of what its caller may pass.
+    """
     try:
-        return ast.parse(textwrap.dedent(inspect.getsource(obj)))  # type: ignore[arg-type]
+        source = textwrap.dedent(inspect.getsource(obj))  # type: ignore[arg-type]
+        return empty_type_checking_bodies(ast.parse(source))
     except (OSError, TypeError, SyntaxError):
         return None
 
@@ -2356,8 +2369,9 @@ def _imports_of(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
     and a name the module assigns, defines, or imports from outside the
     package after its import is its own, and is left out, as is one that two
     imports in the branches of a ``try`` or an ``if`` take from two places.
+    It serves the aliases, so it reads what a type checker reads.
     """
-    read = _read_module(module_name)
+    read = _read_module(module_name, annotations=True)
     if read is None:
         return MappingProxyType({})
     _, _, package, standing = read
@@ -2397,7 +2411,7 @@ def _type_aliases(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
     """
     imports = _imports_of(module_name)
     aliases: dict[str, tuple[str, str]] = {}
-    for name, value in _constants_of(module_name).items():
+    for name, value in _constants_of(module_name, annotations=True).items():
         if not _reads_as_type(value):
             continue
         where = imports.get(name)
@@ -2526,7 +2540,7 @@ def _module_functions(
     if module is None:
         return ()
     try:
-        tree = ast.parse(inspect.getsource(module))
+        tree = empty_type_checking_bodies(ast.parse(inspect.getsource(module)))
     except (OSError, TypeError, SyntaxError):
         return ()
     found: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]] = []
@@ -3626,7 +3640,7 @@ def _construction_sites() -> MappingProxyType[
         if parts[-1] == "__init__":
             parts = parts[:-1]
         module_name = ".".join(parts)
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+        tree = empty_type_checking_bodies(ast.parse(path.read_text(encoding="utf-8")))
 
         def visit(
             node: ast.AST, function: ast.AST | None, module_name: str = module_name
@@ -3726,7 +3740,7 @@ def _imported_objects(tree: ast.Module, name: str, package: str) -> list[object]
     be imported and for any other binding of the name.
     """
     found: list[object] = []
-    for node in _standing(tree).get(name, []):
+    for node in _standing(tree, annotations=True).get(name, []):
         held = None
         if not isinstance(node, ast.ImportFrom):
             found.append(held)

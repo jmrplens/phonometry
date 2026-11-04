@@ -963,6 +963,329 @@ def test_a_name_is_looked_up_in_the_scopes_the_call_runs_in(
     ]
 
 
+def test_what_an_if_type_checking_block_binds_is_no_value_of_the_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` or a value under ``if TYPE_CHECKING:`` never runs. It was read
+    as what a function writes under ``global``, and as either of two beside the
+    block's ``else``, so the difference it computes was compared against the
+    printed limit though the name only ever holds the constant.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+    _spread = 0.0
+    def _width(levels):
+        return 0.0
+    def swap(levels):
+        global _spread, _width
+        if TYPE_CHECKING:
+            _spread = max(levels) - min(levels)
+            def _width(levels):
+                return max(levels) - min(levels)
+    if TYPE_CHECKING:
+        def _either(levels):
+            return max(levels) - min(levels)
+    else:
+        def _either(levels):
+            return 0.0
+    def judge():
+        return _spread <= _LIMIT_DB
+    def judge_width(levels):
+        return _width(levels) <= _LIMIT_DB
+    def judge_either(levels):
+        return _either(levels) <= _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == []
+
+
+def test_a_comparison_in_a_function_s_if_type_checking_block_is_not_judged(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The body of an ``if TYPE_CHECKING:`` in a function never runs, so a
+    comparison written there decides nothing; one in its ``else`` does.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+    def in_the_block(levels):
+        if TYPE_CHECKING:
+            return max(levels) - min(levels) <= _LIMIT_DB
+    def in_the_else(levels):
+        if TYPE_CHECKING:
+            pass
+        else:
+            return max(levels) - min(levels) > _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == ["max(levels) - min(levels) > _LIMIT_DB"]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def never(levels):
+                if not TYPE_CHECKING:
+                    return 0
+                else:
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def never(levels):
+                return (max(levels) - min(levels) > _LIMIT_DB) if TYPE_CHECKING else 0
+            """,
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                def never(levels):
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            """
+            class Record:
+                if TYPE_CHECKING:
+                    def never(self, levels):
+                        return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_a_comparison_a_test_on_type_checking_keeps_from_running_is_not_judged(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A comparison no run reaches decides nothing, wherever the block is written."""
+    planted = "_LIMIT_DB = 3.0\n" + textwrap.dedent(source)
+    assert _texts(planted, tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def runs(levels):
+                if not TYPE_CHECKING:
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="the-body-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            if not TYPE_CHECKING:
+                def runs(levels):
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="a-function-in-the-body-of-a-negated-test",
+        ),
+    ],
+)
+def test_the_branch_of_a_test_on_type_checking_that_runs_is_judged(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    planted = "_LIMIT_DB = 3.0\n" + textwrap.dedent(source)
+    assert _texts(planted, tmp_path) == ["max(levels) - min(levels) > _LIMIT_DB"]
+
+
+def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and defines or
+    imports it there may have run before any call into the module, so its
+    ``def`` or import is one the name may hold, as one in a branch of an
+    ``if`` at the top is.
+
+    The module's names were read from its top alone, so a call of
+    ``_spread`` after ``swap()`` replaced it with a helper that returns a
+    difference was read as the constant the first ``def`` returns, in the
+    module and through an import of it.
+    """
+    source = """
+    _SPREAD_DB = 3.0
+    def _spread(levels):
+        return 0.0
+    def swap():
+        global _spread
+        def _spread(levels):
+            return max(levels) - min(levels)
+    def judge(levels):
+        return _spread(levels) <= _SPREAD_DB
+    """
+    assert _texts(source, tmp_path) == ["_spread(levels) <= _SPREAD_DB"]
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n"
+        "    return 0.0\n"
+        "def swap():\n"
+        "    global spread\n"
+        "    def spread(levels):\n"
+        "        return max(levels) - min(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "other.py").write_text(
+        "def width(levels):\n    return max(levels) - min(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "verdict.py").write_text(
+        "from .helpers import spread\n"
+        "_SPREAD_DB = 3.0\n"
+        "def _width(levels):\n"
+        "    return 0.0\n"
+        "def _swap():\n"
+        "    global _width\n"
+        "    from .other import width as _width\n"
+        "def through_the_import(levels):\n"
+        "    return spread(levels) <= _SPREAD_DB\n"
+        "def through_a_global_import(levels):\n"
+        "    return _width(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "through_the_import", "spread(levels) <= _SPREAD_DB"),
+        ("verdict.py", "through_a_global_import", "_width(levels) <= _SPREAD_DB"),
+    ]
+
+
+def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and assigns it may
+    have run before a read of the name in another function, so the value it
+    writes is one the name may hold there, read with that function's names.
+
+    The module's values were read from its top alone, so a spread that
+    ``measure`` computes from the caller's levels and stores in ``_spread``
+    read as the ``0.0`` the top assigns, and as nothing at all for a name only
+    the function assigns; the comparison against the printed limit passed.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+    _spread = 0.0
+    def measure(levels):
+        global _spread, _width
+        _spread = max(levels) - min(levels)
+        _width = max(levels) - min(levels)
+    def judge():
+        return _spread <= _LIMIT_DB
+    def judge_width():
+        return _width <= _LIMIT_DB
+    _kept = 0.0
+    def judge_kept():
+        return _kept <= _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == [
+        "_spread <= _LIMIT_DB",
+        "_width <= _LIMIT_DB",
+    ]
+
+
+def test_an_unpacked_argument_reaches_every_parameter_it_may_fill(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument, and every argument after it, may land in any place
+    from its own on, and a ``**`` mapping may hand its values to any
+    parameter that takes a keyword, of a private function or a field of a
+    record built here; an argument before the first ``*`` keeps its place.
+
+    A call that unpacked anything bound the parameters it could not place,
+    and every one when a ``*`` came after them, to nothing the guard reads,
+    so a spread of the caller's levels handed to ``_within`` or ``_before``
+    that way, or to the field of ``_Reading``, passed.
+    """
+    source = """
+    from dataclasses import dataclass
+
+    _LIMIT_DB = 3.0
+
+    def _within(spread, scale=1.0):
+        return spread <= _LIMIT_DB
+
+    def by_a_starred_list(levels):
+        return _within(*[max(levels) - min(levels)])
+
+    def after_a_starred_name(levels):
+        rest = []
+        return _within(*rest, max(levels) - min(levels))
+
+    def by_a_mapping(levels):
+        return _within(**{"spread": max(levels) - min(levels)})
+
+    @dataclass
+    class _Reading:
+        spread: float
+
+        def within(self):
+            return self.spread <= _LIMIT_DB
+
+    def built(levels):
+        return _Reading(*[max(levels) - min(levels)]).within()
+
+    def _before(width, scale=1.0):
+        return width <= _LIMIT_DB
+
+    def before_a_star(levels):
+        rest = []
+        return _before(max(levels) - min(levels), *rest)
+
+    def _kept(spread):
+        return spread <= _LIMIT_DB
+
+    def constant(levels):
+        return _kept(*[2.0])
+    """
+    assert _texts(source, tmp_path) == [
+        "spread <= _LIMIT_DB",
+        "width <= _LIMIT_DB",
+        "self.spread <= _LIMIT_DB",
+    ]
+
+
+def test_a_type_parameter_is_no_value_of_a_scope_around_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A generic function's type parameter is its own name, and a generic
+    class's is its methods', whatever the function around or the module
+    holds under that spelling.
+
+    A name was looked up through the function's assignments and parameters
+    and then outwards, past the type parameter, so a comparison of one read as
+    a comparison of the spread the function around computes.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+
+    def by_function(levels):
+        spread = max(levels) - min(levels)
+        def inner[spread]():
+            return spread <= _LIMIT_DB
+        return inner()
+
+    def by_class(levels):
+        spread = max(levels) - min(levels)
+        class Box[spread]:
+            def inner(self):
+                return spread <= _LIMIT_DB
+        return Box().inner()
+
+    def measure(levels):
+        global width
+        width = max(levels) - min(levels)
+
+    def of_the_module[width]():
+        return width <= _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == []
+
+
 def test_a_name_the_caller_binds_is_not_the_module_s_import(
     tmp_path: pathlib.Path,
 ) -> None:

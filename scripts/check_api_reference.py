@@ -122,9 +122,11 @@ from typing import TYPE_CHECKING, TypeAliasType, TypeVar, get_origin
 from api_taxonomy import public_names
 from ast_scan import (
     COMPOUND_STATEMENTS,
-    bindings_by_name,
     block_statements,
-    live_bindings,
+    for_the_type_checker,
+    is_type_checking_block,
+    standing_bindings,
+    what_runs,
 )
 from markdown_spans import inline_spans
 
@@ -510,35 +512,17 @@ def is_type_alias(obj: object) -> bool:
     return get_origin(obj) is not None or isinstance(obj, TypeAliasType)
 
 
-def _is_type_checking_block(statement: ast.stmt) -> bool:
-    test = statement.test if isinstance(statement, ast.If) else None
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-    )
-
-
-def _for_the_type_checker(tree: ast.Module) -> set[int]:
-    """Every node an ``if TYPE_CHECKING:`` block holds, by its id."""
-    return {
-        id(node)
-        for statement in ast.walk(tree)
-        if isinstance(statement, ast.If) and _is_type_checking_block(statement)
-        for child in statement.body
-        for node in ast.walk(child)
-    }
-
-
 def imported_from(module: ModuleType) -> dict[str, tuple[str, ...]]:
     """Each name ``module`` binds with ``from X import name``, mapped to every ``X``.
 
-    The bindings of each name at the top of the module are read in the order
-    of the source (:func:`ast_scan.bindings_by_name`), and of those that may
-    stand once it has run (:func:`ast_scan.live_bindings`) its ``from``
-    imports are where the name may come from: either of two in the branches
-    of a ``try`` or an ``if``, and none that a later ``def`` or assignment
-    replaces. Only the bindings that run count: an ``if TYPE_CHECKING:``
-    block binds nothing a caller can import. Relative imports are resolved,
-    so each value is an absolute module name.
+    Of the bindings of each name that may stand once the module has run
+    (:func:`ast_scan.standing_bindings`), its ``from`` imports are where the
+    name may come from: either of two in the branches of a ``try`` or an
+    ``if``, none that a later ``def`` or assignment replaces, and one a
+    function inside the module makes under ``global``. Only the bindings
+    that run count: an ``if TYPE_CHECKING:`` block, at the top of the module
+    or in such a function, binds nothing a caller can import. Relative
+    imports are resolved, so each value is an absolute module name.
 
     :param module: An imported module whose source is available.
     :return: Bound name to the absolute name of each module it may come from.
@@ -548,11 +532,8 @@ def imported_from(module: ModuleType) -> dict[str, tuple[str, ...]]:
     except (OSError, TypeError):
         return {}
     package = module.__package__ or module.__name__
-    checking = _for_the_type_checker(tree)
     found: dict[str, tuple[str, ...]] = {}
-    for name, nodes in bindings_by_name(tree).items():
-        running = [node for node in nodes if id(node) not in checking]
-        live = running if len(running) < 2 else live_bindings(tree, running)
+    for name, live in standing_bindings(tree, for_the_type_checker(tree)).items():
         sources = [
             importlib.util.resolve_name("." * node.level + (node.module or ""), package)
             for node in live
@@ -650,8 +631,9 @@ def defined_names(module: ModuleType) -> list[str]:
 
     A ``def``, a ``class``, an assignment or a ``type`` statement at module
     level, also inside an ``if`` or a ``try`` that runs; an import binds a name
-    too but defines nothing, and an ``if TYPE_CHECKING:`` block binds nothing a
-    caller can reach. An annotation without a value binds nothing either.
+    too but defines nothing, and the branch of a test on ``TYPE_CHECKING`` that
+    never runs binds nothing a caller can reach, though the other branch does.
+    An annotation without a value binds nothing either.
 
     :param module: An imported module whose source is available.
     :return: The bound names, each once, in the order the source binds them.
@@ -664,9 +646,10 @@ def defined_names(module: ModuleType) -> list[str]:
     statements = list(tree.body)
     while statements:
         statement = statements.pop(0)
-        if isinstance(statement, COMPOUND_STATEMENTS):
-            if not _is_type_checking_block(statement):
-                statements[:0] = block_statements(statement)
+        if isinstance(statement, ast.If) and is_type_checking_block(statement):
+            statements[:0] = what_runs(statement)
+        elif isinstance(statement, COMPOUND_STATEMENTS):
+            statements[:0] = block_statements(statement)
         elif isinstance(
             statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
         ):

@@ -1909,6 +1909,32 @@ _READS = {
         "    import json as _codec\n\n    def inner():\n        nonlocal _codec\n"
         "        _codec = s\n\n    inner()\n    return json.dumps(s), _codec",
     ),
+    # A generic function's type parameter, and a generic class's in its
+    # methods, is not the module's name of that spelling.
+    "type-parameter": (
+        "import json\nimport json as _codec\n",
+        "    def inner[_codec](x):\n        return _codec.dumps(x)\n\n"
+        "    class Box[_codec]:\n        def get(self, x):\n"
+        "            return _codec.dumps(x)\n\n"
+        "    return inner(s), Box().get(s)",
+        "    def inner[_codec](x):\n        return json.dumps(x)\n\n"
+        "    class Box[_codec]:\n        def get(self, x):\n"
+        "            return json.dumps(x)\n\n"
+        "    return inner(s), Box().get(s)",
+    ),
+    # A function nested in one that declares a name ``global`` reads the
+    # module's name, not what a function further out binds of that spelling.
+    "below-a-global-declaration": (
+        "import json as _codec\n",
+        "    import pickle as _codec\n    import pickle as _p\n\n    def inner():\n"
+        "        global _codec\n\n        def deeper():\n"
+        "            return _codec.dumps(s)\n\n        return deeper()\n\n"
+        "    return inner(), _codec.loads, _p.loads",
+        "    import pickle as _codec\n    import pickle as _p\n\n    def inner():\n"
+        "        global _codec\n\n        def deeper():\n"
+        "            return _p.dumps(s)\n\n        return deeper()\n\n"
+        "    return inner(), _codec.loads, _p.loads",
+    ),
 }
 
 

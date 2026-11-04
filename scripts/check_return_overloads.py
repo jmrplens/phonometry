@@ -90,7 +90,10 @@ from ast_scan import (
     ROOT,
     binding_of,
     block_statements,
+    empty_type_checking_bodies,
     exempted,
+    for_the_type_checker,
+    global_bindings,
     imported_names,
     live_bindings,
     live_class_members,
@@ -550,6 +553,17 @@ def _imports(
     return into
 
 
+def _spelled(func: ast.expr, head: str) -> str:
+    """The dotted path a name or an attribute chain is written as, with its
+    first name read as *head*.
+    """
+    attributes: list[str] = []
+    while isinstance(func, ast.Attribute):
+        attributes.append(func.attr)
+        func = func.value
+    return ".".join([head, *reversed(attributes)])
+
+
 def _alias(node: ast.stmt) -> tuple[str, ast.expr] | None:
     """The name and the value of a type alias a statement may define.
 
@@ -816,13 +830,19 @@ class Package:
         self.by_node: dict[ast.AST, Function] = {}
         #: What :meth:`_top_statements` found, read once for each module.
         self._top: dict[str, dict[str, list[ast.stmt]]] = {}
+        #: The key in :attr:`functions` of each definition, by its node.
+        self.keys: dict[ast.AST, str] = {}
+        #: The type parameters of each generic class, by its dotted name.
+        self.class_types: dict[str, frozenset[str]] = {}
+        #: What :meth:`_made_under_global` found, read once for each module.
+        self._global: dict[str, dict[str, list[ast.stmt]]] = {}
         #: What :meth:`live_definitions` found, read once for each name.
         self._live: dict[str, list[str]] = {}
         for path in files:
             module = _module_name(path, root)
             self.paths[module] = relative(path)
-            self.trees[module] = ast.parse(
-                path.read_text(encoding="utf-8"), filename=str(path)
+            self.trees[module] = empty_type_checking_bodies(
+                ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             )
         candidates: dict[str, tuple[str, ast.expr]] = {}
         for module, tree in self.trees.items():
@@ -960,6 +980,9 @@ class Package:
         for node in _statements(body):
             if isinstance(node, ast.ClassDef):
                 inner = f"{scope}.{node.name}" if scope else node.name
+                types = own_names(node).type_parameters
+                if types:
+                    self.class_types[f"{module}.{inner}"] = types
                 self._read_body(module, package, node.body, inner, inner, parent)
             elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 qualname = f"{scope}.{node.name}" if scope else node.name
@@ -979,6 +1002,7 @@ class Package:
         function.
         """
         key, function = self._definition_of(new)
+        self.keys[node] = key
         if self.overload(new.module, node):
             function.heads.append(node)
         else:
@@ -1223,8 +1247,15 @@ class Package:
         targets = self._targets(function, func, call)
         if not targets:
             return []
-        nested = targets[0] in self.functions and (
-            self.functions[targets[0]].parent is not None
+        first = self.functions.get(targets[0])
+        nested = (
+            first is not None
+            and first.parent is not None
+            and not any(
+                self.keys.get(statement) == targets[0]
+                for statements in self._made_under_global(first.module).values()
+                for statement in statements
+            )
         )
         return [targets[0]] if nested else list(dict.fromkeys(targets))
 
@@ -1309,6 +1340,8 @@ class Package:
         name reaches it; one that binds the name otherwise, by a parameter or
         an assignment, or both defines and binds it, reaches no function of
         the package; one that declares it ``global`` sends it to the module.
+        A type parameter of a generic class around a method is the class's,
+        and reaches no function of the package either.
         """
         head = func
         while isinstance(head, ast.Attribute):
@@ -1326,6 +1359,8 @@ class Package:
             if names.binds(head.id):
                 at = call if scope is function else None
                 return self._bound_in(scope, node, func, head, at)
+            if head.id in self._type_parameters_around(scope):
+                return ()
         return self._at_top(function.module, func, head, call)
 
     def _at_top(
@@ -1342,22 +1377,74 @@ class Package:
         read from the module's table of names (:meth:`resolve`), a builtin
         among them.
         """
+        swapped = self._swapped(_spelled(func, f"{module}.{head.id}"))
         statements = self._top_statements(module).get(head.id)
         if not statements:
             resolved = self.resolve(module, func)
-            return (resolved,) if resolved is not None else ()
+            found = (resolved,) if resolved is not None else ()
+            return tuple(dict.fromkeys((*found, *swapped)))
         package = self._package_of(module)
-        found = (
-            self.resolve(
-                module,
-                func,
+        targets: list[str] = []
+        for statement in live_bindings(self.trees[module], statements, call):
+            local = (
                 _imports([statement], package, into={})
                 if isinstance(statement, ast.Import | ast.ImportFrom)
-                else {head.id: f"{module}.{head.id}"},
+                else {head.id: f"{module}.{head.id}"}
             )
-            for statement in live_bindings(self.trees[module], statements, call)
-        )
-        return tuple(dict.fromkeys(target for target in found if target is not None))
+            target = self.resolve(module, func, local)
+            if target is not None:
+                targets.append(target)
+            targets.extend(self._swapped(_spelled(func, local[head.id])))
+        return tuple(dict.fromkeys((*targets, *swapped)))
+
+    def _made_under_global(self, module: str) -> dict[str, list[ast.stmt]]:
+        """The ``def`` and import statements that a function, a method or a
+        class body of a module makes of a module name under ``global``
+        (:func:`ast_scan.global_bindings`), by that name: that function may
+        have run before any call of the name, wherever it is written.
+        """
+        if module not in self._global:
+            found: dict[str, list[ast.stmt]] = {}
+            for name, nodes in global_bindings(self.trees[module]).items():
+                statements: list[ast.stmt] = [
+                    node
+                    for node in nodes
+                    if isinstance(
+                        node,
+                        ast.FunctionDef
+                        | ast.AsyncFunctionDef
+                        | ast.Import
+                        | ast.ImportFrom,
+                    )
+                ]
+                if statements:
+                    found[name] = statements
+            self._global[module] = found
+        return self._global[module]
+
+    def _swapped(self, dotted: str, depth: int = 0) -> tuple[str, ...]:
+        """What a function may have swapped in under ``global`` for a module
+        name the call reaches as *dotted*, spelt as the import or the module
+        writes it: the key of each ``def`` and the target of each import
+        (:meth:`_made_under_global`), in that module and in each module it
+        is re-exported through on the way to the one that defines it.
+        """
+        found: list[str] = []
+        module, _, name = dotted.rpartition(".")
+        while module in self.trees and depth <= 8:
+            package = self._package_of(module)
+            for statement in self._made_under_global(module).get(name, []):
+                if isinstance(statement, ast.Import | ast.ImportFrom):
+                    target = _imports([statement], package, into={})[name]
+                    found.append(self.canonical(target))
+                    found.extend(self._swapped(target, depth + 1))
+                elif statement in self.keys:
+                    found.append(self.keys[statement])
+            if name in self.defined[module] or name not in self.imports[module]:
+                break
+            module, _, name = self.imports[module][name].rpartition(".")
+            depth += 1
+        return tuple(dict.fromkeys(found))
 
     def _top_statements(self, module: str) -> dict[str, list[ast.stmt]]:
         """The ``def``, ``class`` and import statements of a module that bind
@@ -1424,17 +1511,32 @@ class Package:
         if call is not None:
             imports = live_bindings(node, imports, call)
         package = self._package_of(module)
-        found = (
-            self.resolve(module, func, _imports([statement], package, into={}))
-            for statement in imports
-        )
-        return tuple(dict.fromkeys(target for target in found if target is not None))
+        targets: list[str] = []
+        for statement in imports:
+            local = _imports([statement], package, into={})
+            target = self.resolve(module, func, local)
+            if target is not None:
+                targets.append(target)
+            targets.extend(self._swapped(_spelled(func, local[head.id])))
+        return tuple(dict.fromkeys(targets))
 
     def _package_of(self, module: str) -> str:
         """The package a relative import written in *module* is read from."""
         if self.paths[module].endswith("__init__.py"):
             return module
         return module.rpartition(".")[0]
+
+    def _type_parameters_around(self, function: Function) -> frozenset[str]:
+        """The type parameters of the generic classes *function* is written
+        in, between it and the function around them.
+        """
+        found: frozenset[str] = frozenset()
+        outer = function.parent.qualname if function.parent is not None else ""
+        qualname = function.qualname.rpartition(".")[0]
+        while qualname and qualname != outer:
+            found |= self.class_types.get(f"{function.module}.{qualname}", frozenset())
+            qualname = qualname.rpartition(".")[0]
+        return found
 
     def _scopes_around(
         self, function: Function
@@ -1719,7 +1821,10 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                     f"returns {returns}, and no overload says which argument decides",
                 )
             )
-        if name not in polar:
+        # What a function written where it never runs returns reaches nothing;
+        # its annotation is still what a type checker reads, as a head's is.
+        never_runs = for_the_type_checker(package.trees[module])
+        if name not in polar or id(implementation) in never_runs:
             continue
         if function.heads:
             if not any(

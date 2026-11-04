@@ -127,7 +127,14 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
-from ast_scan import binding_of, imported_names, live_bindings, own_names, scope_nodes
+from ast_scan import (
+    binding_of,
+    global_bindings,
+    imported_names,
+    live_bindings,
+    own_names,
+    scope_nodes,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -1939,10 +1946,43 @@ def _top_live(
     (:func:`ast_scan.live_bindings`): an import after a ``def`` replaces it,
     a ``def`` after an import replaces that, one in each branch of an ``if``
     is either, and a read in a function meets every one from its ``def`` on.
+    A ``def`` or a relative import that a function makes of the name under
+    ``global`` (:func:`_made_under_global`) may stand at any point, since
+    that function may have run before it.
     """
     live = live_bindings(tree, [*defined.get(name, ()), *imported.get(name, [])], point)
     kept = tuple(node for node in defined.get(name, ()) if node in live)
-    return kept, [node for node in relative.get(name, []) if node in live]
+    imports = [node for node in relative.get(name, []) if node in live]
+    inside_defined, inside_imported = _made_under_global(tree)
+    return (
+        (*kept, *inside_defined.get(name, ())),
+        [*imports, *inside_imported.get(name, [])],
+    )
+
+
+@functools.cache
+def _made_under_global(
+    tree: ast.Module,
+) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.ImportFrom]]]:
+    """Every ``def`` and every relative import a function, a method or a
+    class body of *tree* makes of a module name under ``global``
+    (:func:`ast_scan.global_bindings`), by the name: each may be what the
+    name holds once that function has run, at any call.
+    """
+    defined: dict[str, tuple[Function, ...]] = {}
+    imported: dict[str, list[ast.ImportFrom]] = {}
+    for name, nodes in global_bindings(tree).items():
+        functions = tuple(
+            node
+            for node in nodes
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        )
+        if functions:
+            defined[name] = functions
+        imports = _imports_by_name(nodes).get(name, [])
+        if imports:
+            imported[name] = imports
+    return defined, imported
 
 
 def _top_bindings(
@@ -1957,7 +1997,9 @@ def _top_bindings(
     defined, imported = _top_names(tree)
     functions: dict[str, tuple[Function, ...]] = {}
     imports: dict[str, list[ast.ImportFrom]] = {}
-    for name in defined.keys() | relative.keys():
+    inside_defined, inside_imported = _made_under_global(tree)
+    names = defined.keys() | relative.keys() | inside_defined.keys()
+    for name in names | inside_imported.keys():
         kept, live_imports = _top_live(tree, defined, imported, relative, name, None)
         if kept:
             functions[name] = kept

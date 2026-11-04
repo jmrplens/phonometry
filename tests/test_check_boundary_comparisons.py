@@ -963,6 +963,68 @@ def test_a_name_is_looked_up_in_the_scopes_the_call_runs_in(
     ]
 
 
+def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and defines or
+    imports it there may have run before any call into the module, so its
+    ``def`` or import is one the name may hold, as one in a branch of an
+    ``if`` at the top is.
+
+    The module's names were read from its top alone, so a call of
+    ``_spread`` after ``swap()`` replaced it with a helper that returns a
+    difference was read as the constant the first ``def`` returns, in the
+    module and through an import of it.
+    """
+    source = """
+    _SPREAD_DB = 3.0
+    def _spread(levels):
+        return 0.0
+    def swap():
+        global _spread
+        def _spread(levels):
+            return max(levels) - min(levels)
+    def judge(levels):
+        return _spread(levels) <= _SPREAD_DB
+    """
+    assert _texts(source, tmp_path) == ["_spread(levels) <= _SPREAD_DB"]
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n"
+        "    return 0.0\n"
+        "def swap():\n"
+        "    global spread\n"
+        "    def spread(levels):\n"
+        "        return max(levels) - min(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "other.py").write_text(
+        "def width(levels):\n    return max(levels) - min(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "verdict.py").write_text(
+        "from .helpers import spread\n"
+        "_SPREAD_DB = 3.0\n"
+        "def _width(levels):\n"
+        "    return 0.0\n"
+        "def _swap():\n"
+        "    global _width\n"
+        "    from .other import width as _width\n"
+        "def through_the_import(levels):\n"
+        "    return spread(levels) <= _SPREAD_DB\n"
+        "def through_a_global_import(levels):\n"
+        "    return _width(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "through_the_import", "spread(levels) <= _SPREAD_DB"),
+        ("verdict.py", "through_a_global_import", "_width(levels) <= _SPREAD_DB"),
+    ]
+
+
 def test_a_name_the_caller_binds_is_not_the_module_s_import(
     tmp_path: pathlib.Path,
 ) -> None:

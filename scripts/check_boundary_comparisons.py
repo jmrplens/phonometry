@@ -706,6 +706,9 @@ class Module:
         self.constructions: dict[
             ast.ClassDef, list[tuple[ast.Call, Function | None]]
         ] = {}
+        self._written: (
+            dict[str, list[tuple[tuple[str, ast.AST, int], Function]]] | None
+        ) = None
         self._index_calls()
         self._memo: dict[object, Value] = {}
         self._classes: dict[object, ast.ClassDef | None] = {}
@@ -1182,15 +1185,44 @@ class Module:
             current = Context(self.enclosing(function))
         if is_constant_name(name):
             return self.published(name)
-        if name in self.module_names:
+        written = self.written_under_global().get(name, [])
+        if name in self.module_names or written:
             return self._guarded(
                 ("module", name),
                 lambda: join(
-                    self.value(value, Context(None))
-                    for value in self.module_names[name]
+                    [
+                        *(
+                            self.value(value, Context(None))
+                            for value in self.module_names.get(name, [])
+                        ),
+                        *(
+                            self.binding(item, Context(function))
+                            for item, function in written
+                        ),
+                    ]
                 ),
             )
         return OPAQUE
+
+    def written_under_global(
+        self,
+    ) -> dict[str, list[tuple[tuple[str, ast.AST, int], Function]]]:
+        """Each binding a function of the file makes of a module name it
+        declares ``global`` (:meth:`local_bindings`), with that function, by
+        the name: once the function has run, the module's name holds what it
+        wrote, wherever another function reads it.
+        """
+        if self._written is None:
+            found: dict[str, list[tuple[tuple[str, ast.AST, int], Function]]] = {}
+            for node in ast.walk(self.tree):
+                if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                    continue
+                bindings = self.local_bindings(node)
+                for name in sorted(own_names(node).declared_global):
+                    for item in bindings.get(name, []):
+                        found.setdefault(name, []).append((item, node))
+            self._written = found
+        return self._written
 
     def local(self, context: Context, name: str) -> Value:
         """A local name: the join of every binding it has in the function."""

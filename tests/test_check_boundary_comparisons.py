@@ -1025,6 +1025,39 @@ def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
     ]
 
 
+def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and assigns it may
+    have run before a read of the name in another function, so the value it
+    writes is one the name may hold there, read with that function's names.
+
+    The module's values were read from its top alone, so a spread that
+    ``measure`` computes from the caller's levels and stores in ``_spread``
+    read as the ``0.0`` the top assigns, and as nothing at all for a name only
+    the function assigns; the comparison against the printed limit passed.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+    _spread = 0.0
+    def measure(levels):
+        global _spread, _width
+        _spread = max(levels) - min(levels)
+        _width = max(levels) - min(levels)
+    def judge():
+        return _spread <= _LIMIT_DB
+    def judge_width():
+        return _width <= _LIMIT_DB
+    _kept = 0.0
+    def judge_kept():
+        return _kept <= _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == [
+        "_spread <= _LIMIT_DB",
+        "_width <= _LIMIT_DB",
+    ]
+
+
 def test_a_name_the_caller_binds_is_not_the_module_s_import(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -274,6 +274,7 @@ class Walk {
     let rest = text;
     let column = 0;
     for (let index = 0; index < upto; index += 1) {
+      [rest, column] = this.pastAside(rest, column, index);
       const held = this.held[index];
       if (held === QUOTATION) {
         const mark = this.quoteMark(rest, column);
@@ -287,7 +288,22 @@ class Walk {
         return [rest, column, index];
       }
     }
+    [rest, column] = this.pastAside(rest, column, upto);
     return [rest, column, upto];
+  }
+
+  /** `text` past the indentation of the asides at `depth` containers, and its column. */
+  pastAside(text, start, depth) {
+    let rest = text;
+    let column = start;
+    for (const [, around, indent] of this.asides) {
+      if (around === depth) {
+        const width = Math.min(indent, blankColumns(rest, column));
+        rest = pastColumns(rest, column, width);
+        column += width;
+      }
+    }
+    return [rest, column];
   }
 
   /** What a quotation's mark leaves of `rest`, and at which column, or `null`. */
@@ -504,7 +520,7 @@ class Walk {
     if (aside !== null) {
       this.closeTo(matched);
       this.leaf = '';
-      this.asides.push([aside[1].length, this.held.length]);
+      this.asides.push([aside[1].length, this.held.length, blankColumns(rest, 0)]);
       return pageLine(text, 'single', rest);
     }
     return this.markdown ? this.html(text, rest, body, matched, paragraph) : null;

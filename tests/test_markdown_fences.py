@@ -169,6 +169,7 @@ _BEHIND_MARKS = (
     (">\t```\n>\tx\n>\t```\n> prose\n", [True, True, True, False]),
     ("$$\n```\n$$\nprose\n", [False, False, False, False]),
     (":::note\n```\nx\n:::\nprose\n", [False, True, True, False, False]),
+    ("   :::note\n    a\n   :::\n", [False, False, False]),
 )
 
 
@@ -231,6 +232,12 @@ def test_a_fence_that_ends_with_what_holds_it_is_a_fence_all_the_same() -> None:
             [False, False, True, True, False],
             [False, False, True, True, True],
             id="four columns past its item",
+        ),
+        pytest.param(
+            "  :::note\n      a\n  :::\n",
+            [False, True, False],
+            [False, False, False],
+            id="four columns past its aside's fence",
         ),
         pytest.param(
             "<pre>\n```\n</pre>\nprose\n",
@@ -433,6 +440,9 @@ _WALKS = (
     "::::note\n:::\n::::\nb\n",
     "> :::note\n> a\nb\n> :::\n",
     ":::note\n> a\nb\n:::\n",
+    "   :::note\n    2. a\n   :::\n",
+    "> :::note\n>   a\n> :::\n",
+    "  :::note\n\t- a\n  :::\n",
     "::x\na\n",
     "-\n\n  a\n",
     "-\n  a\n",

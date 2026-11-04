@@ -257,9 +257,10 @@ class _Walk:
         self.indent = 0
         #: What ends the raw HTML block open, ``None`` being a blank line.
         self.html_end: re.Pattern[str] | None = None
-        #: The asides open, innermost last, each with its colons and how many
-        #: containers stood around it.
-        self.asides: list[tuple[int, int]] = []
+        #: The asides open, innermost last, each with its colons, how many
+        #: containers stood around it and the indentation of its fence, which its
+        #: lines lose.
+        self.asides: list[tuple[int, int, int]] = []
         #: How many more lines a tag or an expression of an ``.mdx`` page takes.
         self.left = 0
 
@@ -285,6 +286,7 @@ class _Walk:
         """*text* past the first *upto* containers: what is left, its column, how many held it."""
         rest, column = text, 0
         for index, held in enumerate(self.held[:upto]):
+            rest, column = self._past_aside(rest, column, index)
             if held == _QUOTATION:
                 mark = self._quote_mark(rest, column)
                 if mark is None:
@@ -297,7 +299,17 @@ class _Walk:
                 column += held
             elif self.fresh and index == len(self.held) - 1:
                 return rest, column, index
+        rest, column = self._past_aside(rest, column, upto)
         return rest, column, upto
+
+    def _past_aside(self, rest: str, column: int, depth: int) -> tuple[str, int]:
+        """*rest* past the indentation of the asides at *depth* containers, and its column."""
+        for _, around, indent in self.asides:
+            if around == depth:
+                width = min(indent, _blank_columns(rest, column))
+                rest = _past_columns(rest, column, width)
+                column += width
+        return rest, column
 
     def _quote_mark(self, rest: str, column: int) -> tuple[str, int] | None:
         """What a quotation's mark leaves of *rest*, and at which column, or ``None``."""
@@ -315,7 +327,7 @@ class _Walk:
         """What is left of a line that closes the innermost aside, or ``None``."""
         if not self.asides:
             return None
-        colons, around = self.asides[-1]
+        colons, around, _ = self.asides[-1]
         rest, column, matched = self._past_held(text, around)
         close = _ASIDE_CLOSE.match(rest.lstrip(" \t"))
         if (
@@ -374,7 +386,7 @@ class _Walk:
     ) -> PageLine:
         """A line that nothing concrete holds: what it opens, or the paragraph it carries on."""
         paragraph = self.leaf == "paragraph" and all(
-            around <= matched for _, around in self.asides
+            around <= matched for _, around, _ in self.asides
         )
         strict = (paragraph or self.leaf == "indented") and matched == len(self.held)
         opened = False
@@ -515,7 +527,8 @@ class _Walk:
         if aside is not None:
             self._close_to(matched)
             self.leaf = ""
-            self.asides.append((len(aside.group(1)), len(self.held)))
+            indent = _blank_columns(rest, 0)
+            self.asides.append((len(aside.group(1)), len(self.held), indent))
             return PageLine(written, "single", rest=rest)
         if not self.markdown:
             return None

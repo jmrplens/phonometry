@@ -939,6 +939,41 @@ def test_a_binding_for_the_type_checker_stands_beside_none_that_runs() -> None:
     assert ast_scan.standing_bindings(tree, left_out)["alone"] == []
 
 
+def test_a_reader_of_annotations_reads_the_block_and_not_its_else() -> None:
+    """A type checker reads what the program never runs and leaves out the
+    ``else``, so a reader of annotations takes the block, while what runs stays
+    what a reader of the program takes; a binding a function makes under
+    ``global`` runs for both.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            if TYPE_CHECKING:
+                Mode = 1
+            else:
+                Mode = 2
+
+            if TYPE_CHECKING:
+                from json import dumps as lazy
+                from json import dumps as swapped
+
+            def load():
+                global lazy, swapped
+                from json import loads as lazy
+                swapped = 3
+            """
+        )
+    )
+    program = ast_scan.standing_bindings(tree)
+    assert [node.lineno for node in program["Mode"]] == [5]
+    assert [node.lineno for node in program["lazy"]] == [13]
+    assert [node.lineno for node in program["swapped"]] == [14]
+    read = ast_scan.standing_bindings(tree, annotations=True)
+    assert [node.lineno for node in read["Mode"]] == [3]
+    assert [node.lineno for node in read["lazy"]] == [8, 13]
+    assert [node.lineno for node in read["swapped"]] == [9, 14]
+
+
 def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
     """What a function's ``if TYPE_CHECKING:`` holds goes and its ``else`` stays,
     at any depth of the function. The block at the top of a module and in a class

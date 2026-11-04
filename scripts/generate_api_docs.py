@@ -1018,7 +1018,8 @@ def _module_imports(module_name: str) -> Mapping[str, tuple[str, str]]:
     """``from X import name`` bindings at top level, ``TYPE_CHECKING`` included.
 
     An annotation may name an alias the module imports only for the type
-    checker, so the runtime namespace does not hold it; the import does. A
+    checker, so the runtime namespace does not hold it; the import does, and
+    what an ``else`` beside it binds is not what the type checker reads. A
     name is read through its import only when every binding of it that may
     stand once the module has run (:func:`ast_scan.standing_bindings`)
     imports it from one place: an assignment after the import, two imports
@@ -1030,7 +1031,7 @@ def _module_imports(module_name: str) -> Mapping[str, tuple[str, str]]:
         return {}
     package = sys.modules[module_name].__package__ or module_name
     bindings: dict[str, tuple[str, str]] = {}
-    for name, live in standing_bindings(tree).items():
+    for name, live in standing_bindings(tree, annotations=True).items():
         targets = {_from_import(node, name, package) for node in live}
         (target,) = targets if len(targets) == 1 else (None,)
         if target is not None:

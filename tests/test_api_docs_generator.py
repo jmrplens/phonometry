@@ -1484,6 +1484,32 @@ from json import dumps as kept
     assert bound["kept"] == ("json", "dumps")
 
 
+def test_an_alias_a_block_imports_is_read_past_the_else(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A signature's alias reads as the type checker reads it: the import of an
+    ``if TYPE_CHECKING:`` block and not what its ``else`` binds.
+    """
+    _written_module(
+        tmp_path,
+        monkeypatch,
+        "fake_docs_checker_else",
+        """\
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from json import dumps as assigned
+    from json import dumps as imported
+else:
+    assigned = None
+    from json import loads as imported
+""",
+    )
+    bound = gad._module_imports("fake_docs_checker_else")
+    assert bound["assigned"] == ("json", "dumps")
+    assert bound["imported"] == ("json", "dumps")
+
+
 def test_the_keywords_of_a_stub_are_found_in_a_try_block(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

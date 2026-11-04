@@ -513,6 +513,20 @@ def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
     )
 
 
+@functools.cache
+def for_the_program(tree: ast.AST) -> frozenset[int]:
+    """Every node the ``else`` of an ``if TYPE_CHECKING:`` under *tree* holds, by
+    its id, at any depth: what the program runs and no type checker reads.
+    """
+    return frozenset(
+        id(node)
+        for statement in ast.walk(tree)
+        if isinstance(statement, ast.If) and is_type_checking_block(statement)
+        for child in statement.orelse
+        for node in ast.walk(child)
+    )
+
+
 def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
     """*tree*, with the body of every ``if TYPE_CHECKING:`` a function holds
     emptied in place and its ``else`` kept, for a guard that reads what a
@@ -558,7 +572,10 @@ def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
 
 
 def standing_bindings(
-    module: ast.Module, left_out: Collection[int] = frozenset()
+    module: ast.Module,
+    left_out: Collection[int] = frozenset(),
+    *,
+    annotations: bool = False,
 ) -> dict[str, list[ast.AST]]:
     """Each name *module* binds, with every binding of it that may stand once
     the module has run.
@@ -570,17 +587,35 @@ def standing_bindings(
     under ``global`` (:func:`global_bindings`), which may have run by then.
     A node whose ``id`` is in *left_out* is no binding wherever it is written
     (:func:`for_the_type_checker`).
+
+    What an ``if TYPE_CHECKING:`` block holds stands beside no binding that
+    runs, since it never runs; a name nothing else binds keeps it. A reader of
+    annotations asks for what a type checker reads instead, with
+    *annotations*: the block stands and its ``else`` does not, so an alias is
+    what the block says it is (:func:`for_the_program`), and a binding under
+    ``global`` stands beside it, as the type checker sees that one too.
     """
     own = bindings_by_name(module)
     inside = global_bindings(module)
+    unread = for_the_program(module) if annotations else frozenset()
+    keep = _held_at if annotations else live_bindings
+    checker = for_the_type_checker(module)
     found: dict[str, list[ast.AST]] = {}
     for name in [*own, *(name for name in inside if name not in own)]:
-        nodes = [node for node in own.get(name, ()) if id(node) not in left_out]
-        live = nodes if len(nodes) < 2 else live_bindings(module, nodes)
-        found[name] = [
-            *live,
+        nodes = [
+            node
+            for node in own.get(name, ())
+            if id(node) not in left_out and id(node) not in unread
+        ]
+        written = [
+            *(nodes if len(nodes) < 2 else keep(module, nodes, None)),
             *(node for node in inside.get(name, ()) if id(node) not in left_out),
         ]
+        found[name] = (
+            written
+            if annotations
+            else [node for node in written if id(node) not in checker] or written
+        )
     return found
 
 
@@ -687,6 +722,7 @@ def forget_trees() -> None:
         _blocks,
         _class_is_live,
         for_the_type_checker,
+        for_the_program,
         global_bindings,
     ):
         cached.cache_clear()

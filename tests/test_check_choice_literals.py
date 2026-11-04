@@ -667,6 +667,59 @@ def test_a_name_imported_for_the_type_checker_is_the_import_that_stands(
     assert ccl._resolved("Thing", "phonometry._checked_in_branches") is None
 
 
+def test_an_annotation_reads_the_type_checker_s_block_and_a_value_the_else(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A type checker reads an ``if TYPE_CHECKING:`` block and never its ``else``,
+    so an alias is what the block says, while the program runs the ``else``, so a
+    table read as values is what that says. The ``else`` stood for the alias too,
+    which read a valid ``Literal`` as a closed choice typed ``str``.
+    """
+    sources = {
+        "_mode_alias": """
+            from __future__ import annotations
+
+            from typing import TYPE_CHECKING, Literal
+
+            if TYPE_CHECKING:
+                Mode = Literal['fast', 'slow']
+                KINDS = ('a', 'b')
+            else:
+                Mode = str
+                KINDS = ('c', 'd')
+
+            def weigh(levels, mode: Mode = 'fast'):
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+                raise ValueError(mode)
+            """,
+        "_mode_user": """
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                from ._branch_second import KINDS, Names
+            else:
+                from ._branch_first import KINDS, Names
+            """,
+    }
+    _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, **sources})
+    planted = sys.modules["phonometry._mode_alias"]
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter([("phonometry._mode_alias", "weigh", planted.weigh)]),
+    )
+    assert list(ccl.string_choices()) == []
+    assert ccl.expanded("Mode", "phonometry._mode_alias") == "Literal['fast', 'slow']"
+    constants = ccl._constants_of("phonometry._mode_alias")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"c", "d"}
+    assert ccl.expanded("Names", "phonometry._mode_user") == "Literal['c', 'd']"
+    constants = ccl._constants_of("phonometry._mode_user")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"a", "b"}
+
+
 def test_a_table_imported_from_a_sibling_module_is_followed() -> None:
     """``from .fdtd import _SIDES`` gives the elastic engine the acoustic one's
     sides, read where they are written, and a set difference with them closes

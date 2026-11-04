@@ -56,7 +56,7 @@ import os
 import pathlib
 import sys
 
-from ast_scan import forget_trees, own_names
+from ast_scan import forget_trees, own_names, scope_nodes
 from markdown_fences import python_fences
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -199,8 +199,10 @@ def _used(tree: ast.AST) -> set[str]:
 def _unbound_reads(tree: ast.AST) -> set[str]:
     """Every name a function of a fence annotates without a value and reads.
 
-    The annotation makes the name local and stores nothing, so the read raises
-    ``UnboundLocalError``, and the builtin of that spelling does not answer it.
+    The annotation makes the name local and stores nothing, so a read in the
+    body raises ``UnboundLocalError``, and the builtin of that spelling does
+    not answer it. The function's defaults, decorators and signature run in
+    the scope around it, where the builtin still does.
 
     :param tree: A parsed fence.
     :type tree: ast.AST
@@ -211,9 +213,38 @@ def _unbound_reads(tree: ast.AST) -> set[str]:
     for scope in ast.walk(tree):
         if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
             annotated = own_names(scope).annotated
-            found |= _used(scope) & annotated
+            found |= _read_by_the_body(scope) & annotated
     forget_trees()
     return found
+
+
+def _read_by_the_body(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    """Every bare name the body of *function* reads, nested scopes included.
+
+    A function never evaluates an annotation of its own locals, so that reads
+    nothing; a class body evaluates its own, so a class written there does.
+
+    :param function: A function of a fence.
+    :type function: ast.FunctionDef | ast.AsyncFunctionDef
+    :return: The names read.
+    :rtype: set[str]
+    """
+    never_evaluated = {
+        id(node)
+        for inner in ast.walk(function)
+        if isinstance(inner, (ast.FunctionDef, ast.AsyncFunctionDef))
+        for statement in scope_nodes(inner)
+        if isinstance(statement, ast.AnnAssign)
+        for node in ast.walk(statement.annotation)
+    }
+    return {
+        node.id
+        for statement in function.body
+        for node in ast.walk(statement)
+        if isinstance(node, ast.Name)
+        and isinstance(node.ctx, ast.Load)
+        and id(node) not in never_evaluated
+    }
 
 
 def _pages() -> list[pathlib.Path]:

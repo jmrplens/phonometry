@@ -12,10 +12,8 @@ from __future__ import annotations
 
 import pathlib
 import sys
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -108,6 +106,48 @@ def test_a_builtin_a_function_annotates_is_no_builtin_there(
         "print(format(1))\n```\n",
     )
     assert check_fence_names.check_page(page) == []
+
+
+@pytest.mark.parametrize(
+    "fence",
+    [
+        "def shown(x=format(1)):\n    format: object\n    return x\n",
+        "def shown(*, x=format(1)):\n    format: object\n    return x\n",
+        "def shown() -> int:\n    int: object\n    return 1\n",
+        "def shown(x: int):\n    int: object\n    return x\n",
+        "@staticmethod\ndef shown():\n    staticmethod: object\n",
+        "def shown():\n    int: object\n    held: int = 1\n    return held\n",
+    ],
+)
+def test_what_runs_around_a_function_still_reads_the_builtin(
+    tmp_path: pathlib.Path, fence: str
+) -> None:
+    """A default, an annotation of the signature and a decorator run in the
+    scope around the function, where the builtin answers, whatever the body
+    annotates; a local annotation is never evaluated at all. Only a read in
+    the body meets the unbound local.
+    """
+    assert (
+        check_fence_names.check_page(_page(tmp_path, f"```python\n{fence}```\n")) == []
+    )
+
+
+def test_what_a_body_holds_still_meets_the_name_it_annotates(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A nested function's default and signature run in the body, and a nested
+    function reads the name from the function that made it local: each is a
+    read of the unbound local, and the builtin does not answer it.
+    """
+    for fence in (
+        "def shown():\n    format: object\n    def inner(x=format(1)):\n        return x\n",
+        "def shown():\n    int: object\n    def inner(x: int):\n        return x\n",
+        "def shown():\n    format: object\n    def inner():\n        return format(1)\n",
+    ):
+        problems = check_fence_names.check_page(
+            _page(tmp_path, f"```python\n{fence}```\n")
+        )
+        assert len(problems) == 1, fence
 
 
 def test_a_registered_placeholder_is_accepted(

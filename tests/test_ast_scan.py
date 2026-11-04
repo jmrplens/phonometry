@@ -854,6 +854,43 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
     assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
 
 
+def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None:
+    """What a caller leaves out of a module's bindings, as the blocks only a
+    type checker reads, is left out wherever it is written: of what the top
+    of the module binds, and of what a function binds under ``global``.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from json import dumps as read
+
+            if TYPE_CHECKING:
+                from json import loads as read
+
+            def swap():
+                global read, extra
+                if TYPE_CHECKING:
+                    from json import load as read
+                    from json import load as extra
+                from json import JSONDecoder as read
+            """
+        )
+    )
+    left_out = {
+        id(node)
+        for statement in ast.walk(tree)
+        if isinstance(statement, ast.If)
+        for child in statement.body
+        for node in ast.walk(child)
+    }
+    standing = ast_scan.standing_bindings(tree, left_out)
+    assert [node.lineno for node in standing["read"]] == [2, 12]
+    assert standing["extra"] == []
+    assert [node.lineno for node in ast_scan.standing_bindings(tree)["read"]] == [
+        2, 5, 10, 12,
+    ]  # fmt: skip
+
+
 def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:
     """``def f[T]`` and ``class Box[T]`` bind ``T`` for what they hold: the
     function's body, the class body and the methods of the class, which

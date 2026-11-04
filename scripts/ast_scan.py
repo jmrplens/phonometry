@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping, Sequence
+    from collections.abc import Collection, Iterator, Mapping, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -515,26 +515,51 @@ def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
 
 
 def standing_bindings(
-    module: ast.Module, bindings: Mapping[str, Sequence[ast.AST]] | None = None
+    module: ast.Module, left_out: Collection[int] = frozenset()
 ) -> dict[str, list[ast.AST]]:
     """Each name *module* binds, with every binding of it that may stand once
     the module has run.
 
-    Of the bindings at the top of the module (:func:`bindings_by_name`, or
-    *bindings* when given, a part of them), those :func:`live_bindings`
-    keeps: the later of two in a row, either of two in the branches of an
-    ``if`` or a ``try``. And every binding a function, a method or a class
-    body inside the module makes of the name under ``global``
-    (:func:`global_bindings`), which may have run by then.
+    Of the bindings at the top of the module (:func:`bindings_by_name`),
+    those :func:`live_bindings` keeps: the later of two in a row, either of
+    two in the branches of an ``if`` or a ``try``. And every binding a
+    function, a method or a class body inside the module makes of the name
+    under ``global`` (:func:`global_bindings`), which may have run by then.
+    A node whose ``id`` is in *left_out* is no binding wherever it is written
+    (:func:`for_the_type_checker`).
     """
-    own = bindings_by_name(module) if bindings is None else bindings
+    own = bindings_by_name(module)
     inside = global_bindings(module)
     found: dict[str, list[ast.AST]] = {}
     for name in [*own, *(name for name in inside if name not in own)]:
-        nodes = list(own.get(name, ()))
+        nodes = [node for node in own.get(name, ()) if id(node) not in left_out]
         live = nodes if len(nodes) < 2 else live_bindings(module, nodes)
-        found[name] = [*live, *inside.get(name, ())]
+        found[name] = [
+            *live,
+            *(node for node in inside.get(name, ()) if id(node) not in left_out),
+        ]
     return found
+
+
+def is_type_checking_block(statement: ast.AST) -> bool:
+    """Whether *statement* is an ``if TYPE_CHECKING:``, however it was imported."""
+    test = statement.test if isinstance(statement, ast.If) else None
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def for_the_type_checker(tree: ast.AST) -> set[int]:
+    """Every node an ``if TYPE_CHECKING:`` block under *tree* holds, by its id,
+    at any depth, its ``else`` left out: what no run of the program reaches.
+    """
+    return {
+        id(node)
+        for statement in ast.walk(tree)
+        if isinstance(statement, ast.If) and is_type_checking_block(statement)
+        for child in statement.body
+        for node in ast.walk(child)
+    }
 
 
 @functools.cache

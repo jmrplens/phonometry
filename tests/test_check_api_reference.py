@@ -754,6 +754,37 @@ if TYPE_CHECKING:
     assert sources["kept"] == ("json",)
 
 
+def test_an_import_a_function_makes_for_the_type_checker_is_no_source() -> None:
+    """A function that declares a name ``global`` and imports it under ``if
+    TYPE_CHECKING:`` never binds it, so the name has no source there and the
+    module's own ``def`` keeps its one address. The same import outside the
+    block runs when the function does, and is a source.
+
+    The top of the module left those blocks out, but what a function binds
+    under ``global`` came back with them in.
+    """
+    module = _module_from(
+        "fake_checker_inside",
+        """\
+from typing import TYPE_CHECKING
+
+
+def name():
+    return None
+
+
+def swap():
+    global name, other
+    if TYPE_CHECKING:
+        from json import dumps as name
+    from json import loads as other
+""",
+    )
+    sources = gate.imported_from(module)
+    assert "name" not in sources
+    assert sources["other"] == ("json",)
+
+
 def test_a_statement_in_a_case_runs_at_the_top_of_a_module() -> None:
     import ast
 

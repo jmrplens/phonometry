@@ -166,6 +166,17 @@ def _aliases(tree: ast.AST) -> dict[str, str]:
     return found
 
 
+#: The nodes that bind the name they hold in ``name``.
+_NAMED_BINDINGS = (
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+    ast.TypeVar,
+    ast.ParamSpec,
+    ast.TypeVarTuple,
+)
+
+
 def _bound(tree: ast.AST) -> set[str]:
     """Every name the file binds itself, which then no longer means a builtin.
 
@@ -186,9 +197,7 @@ def _bound(tree: ast.AST) -> set[str]:
             and id(node) not in bare
         ):
             names.add(node.id)
-        elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-            names.add(node.name)
-        elif isinstance(node, ast.TypeVar | ast.ParamSpec | ast.TypeVarTuple):
+        elif isinstance(node, _NAMED_BINDINGS):
             names.add(node.name)
         elif isinstance(node, ast.arg):
             names.add(node.arg)

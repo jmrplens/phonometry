@@ -295,6 +295,48 @@ def test_a_dash_written_inside_math_is_still_read() -> None:
     assert ced.markdown_hits("It costs $5 — or $6 with the case.\n") == [1]
 
 
+def test_no_title_exemption_covers_a_dash_in_maths() -> None:
+    """A dash in maths is shown whatever stands around it, so it is always read.
+
+    What a maths span left in the text was the dash itself, which the exempt
+    readings could not tell from a dash of the prose: a quotation took it
+    out, and a part number in the prose after it read as a standard's title.
+    """
+    assert ced.markdown_hits('"A $a — b$"\n') == [1]
+    assert ced.markdown_hits("«A $a — b$»\n") == [1]
+    assert ced.markdown_hits('A "wrapped $a\n— b$ quotation"\n') == [2]
+    assert ced.markdown_hits("A level $a — b$ Part 3 of it.\n") == [1]
+    assert ced.markdown_hits("A level $a —$Part 3 of it.\n") == [1]
+    assert ced.markdown_hits("A *title $a — b$* here.\n") == [1]
+    assert ced.markdown_hits("- Author (2001) $a — b$\n") == [1]
+    assert ced.markdown_hits("- Author (2001) x\n  $a — b$ y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  $$\n  a — b\n  $$\n") == [3]
+    assert ced.markdown_hits("title: $a — b$\n") == [1]
+
+
+def test_a_dash_in_maths_inside_a_caption_is_read() -> None:
+    assert ced.markdown_hits("*The ratio $a — b$ holds across the band.*\n") == [1]
+
+
+def test_the_exemptions_still_hold_for_the_prose_beside_maths() -> None:
+    assert ced.markdown_hits('"Acoustics — Rooms" and $a$ here.\n') == []
+    assert ced.markdown_hits("See *Acoustics — Rooms* and $a$ here.\n") == []
+    assert ced.markdown_hits("ISO 1 — Part 3: rooms, and $a$ here.\n") == []
+    assert ced.markdown_hits("- Author (2001) Acoustics — Rooms, $a$.\n") == []
+
+
+def test_the_frontmatter_holds_no_span() -> None:
+    """A value of the frontmatter is plain text, shown with its marks as written.
+
+    Two dollar signs in a title are no maths, so its dash stays the title's,
+    and a pair of backticks in a description is no code, so its dash is shown.
+    """
+    assert ced.markdown_hits("---\ntitle: Costs $5 — or $6\n---\n") == []
+    assert ced.markdown_hits("---\ndescription: Uses `a — b` here\n---\n") == [2]
+    assert ced.markdown_hits("---\ndescription: Costs $5 — or $6\n---\n") == [2]
+    assert ced.markdown_hits("---\ntitle: A `page\n---\nCode` and — this.\n") == [4]
+
+
 def test_the_site_data_modules_are_read_by_default(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

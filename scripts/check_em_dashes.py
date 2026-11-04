@@ -31,7 +31,8 @@ What is NOT prose keeps its dash, and every exemption below says why:
 
 Maths on a page (``$...$`` and a ``$$`` block) is not prose either, but it
 exempts nothing: the site shows a dash written there, and two dollar signs
-are maths to it even where they were meant as money, so the dash is read.
+are maths to it even where they were meant as money, so the dash is read,
+whatever quotation, italic span, reference or part number stands around it.
 What maths does not do is mark the prose around it. An asterisk between
 dollar signs is a superscript star (``$DI_i^*$``, ``$F v^*$``) and a
 quotation mark there is a symbol, so neither opens an italic span or a
@@ -130,6 +131,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 EM_DASH = "—"
+#: What a dash in maths leaves in the text of a page: a private-use character,
+#: so that no reading of the prose around it takes it for a dash of that prose.
+_MATHS_DASH = "\ue000"
 
 #: Where the published prose lives: the pages and their mirrors, the data
 #: modules the site's pages are built from (the glossary cards, the home page's
@@ -470,11 +474,15 @@ def _read_frontmatter(lines: list[str], reader: _Frontmatter) -> None:
     ``---``; a page that opens on a ``---`` no later line closes has none, as
     Astro reads it, and its lines are the body's.
     """
-    if not lines or lines[0].strip() != "---":
-        return
-    end = next((n for n in range(1, len(lines)) if lines[n].strip() == "---"), 0)
-    for index in range(1, end):
+    for index in range(1, _frontmatter_end(lines)):
         lines[index] = reader.decode(lines[index])
+
+
+def _frontmatter_end(lines: list[str]) -> int:
+    """The index of the line that closes a page's frontmatter, 0 when it has none."""
+    if not lines or lines[0].strip() != "---":
+        return 0
+    return next((n for n in range(1, len(lines)) if lines[n].strip() == "---"), 0)
 
 
 def _outside_italics(line: str, *, italic_open: bool) -> tuple[str, bool]:
@@ -589,12 +597,13 @@ def _span_remainder(span: str) -> str:
 
     A code span is data and leaves :data:`~markdown_spans.SPAN_MARK` alone,
     with the line breaks it held. A maths span leaves the mark on each of its
-    lines, and after it the em dashes that line of the span held: see
-    :func:`_drop_code_and_math`.
+    lines, and after it a :data:`_MATHS_DASH` for each em dash that line of
+    the span held: see :func:`_drop_code_and_math`.
     """
     if span.startswith("$"):
         return "\n".join(
-            SPAN_MARK + EM_DASH * piece.count(EM_DASH) for piece in span.split("\n")
+            SPAN_MARK + _MATHS_DASH * piece.count(EM_DASH)
+            for piece in span.split("\n")
         )
     return SPAN_MARK + "\n" * span.count("\n")
 
@@ -610,7 +619,10 @@ def _drop_code_and_math(text: str) -> str:
     opens an italic span or a quotation, and four digits in parentheses
     there (``$L(1000)$``) are no author's year. A dash in maths is still read,
     because the site shows it, and two dollar signs are maths to the site
-    even where they were meant as money.
+    even where they were meant as money. It stays out of the prose's reading,
+    as :data:`_MATHS_DASH`, because no title is reproduced in maths: no
+    exemption covers it, whatever quotation, italic span, reference or part
+    number stands around it.
     """
     return replace_inline_spans_by_block(text, _span_remainder, "`$")
 
@@ -621,7 +633,8 @@ def markdown_hits(text: str) -> list[int]:
     A fenced block and a display-math block end the paragraph before them, as
     the site reads them, so each reaches the span reader as a blank line:
     nothing pairs across it, whatever its lines open with. An italic span and
-    a quotation stop where a code span does, at the start of any block.
+    a quotation stop where a code span does, at the start of any block. The
+    frontmatter is plain text, not markdown, so it holds no span at all.
     """
     hits: list[int] = []
     italic_open = False
@@ -631,17 +644,19 @@ def markdown_hits(text: str) -> list[int]:
     lines = _decode_page(text).splitlines()
     code_flags = list(code_lines(lines))
     math_flags = _math_lines(lines, code_flags)
-    inline = [
+    closing = _frontmatter_end(lines)
+    head = closing + 1 if closing else 0
+    body = [
         "" if code or math else line
         for line, code, math in zip(lines, code_flags, math_flags, strict=True)
-    ]
-    shown = lines_read_whole(inline, _drop_code_and_math)
-    for index, opens_block in enumerate(block_starts(inline)):
+    ][head:]
+    shown = lines[:head] + lines_read_whole(body, _drop_code_and_math)
+    for index, opens_block in enumerate(block_starts(lines[:head] + body)):
         line = lines[index]
         if opens_block:
             italic_open, quote_closer = False, None
             caption = _is_caption(line)
-        if not inline[index].strip():
+        if index >= head and not body[index - head].strip():
             in_reference = False
             if math_flags[index] and EM_DASH in line:
                 hits.append(index + 1)
@@ -656,7 +671,7 @@ def markdown_hits(text: str) -> list[int]:
             quote_closer=quote_closer,
             caption=caption,
         )
-        if EM_DASH in prose and not in_reference:
+        if _MATHS_DASH in shown[index] or (EM_DASH in prose and not in_reference):
             hits.append(index + 1)
     return hits
 

@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; and how much HTML a page may weigh. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; how much HTML a page may weigh; and the processes a page may start. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the docs mirror
 
@@ -1594,3 +1594,27 @@ names = re.findall(r"`([^`]+)`", cell)  # ['a', ' and ']: the prose read as code
 **Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py`
 
 **Exceptions.** The site's scripts read spans through `site/scripts/shared/markdown-spans.mjs`, the same reading in JavaScript. A backtick right after a colon opens a role of reStructuredText (`:math:` and its kin), which Markdown does not have, and is not read as a span. A script that reads the docstrings of the library reads reStructuredText, whose inline literal is two backticks, and one that reads a JavaScript template literal reads no span at all: each is listed in `EXEMPT` of the check, keyed by the file, with the reason, and an entry that covers nothing fails. The site's code is read line by line, without a parser, so a pattern built across lines is not seen there. The check knows a span by its opening, a backtick or a run of them written out or with a quantifier, with any white space after it, and by what it holds written as anything but a backtick or as anything at all; a pattern that takes only some characters between two backticks, a word (`\S+?`) or a file name (`[\w./-]+\.json`), reads a token that no span reader stops at, and is left alone: a pattern of that kind that is meant as a span reader is not seen. A pattern built from names bound to several strings (in two branches, to the items of a tuple, by `+=`, or by a loop or a comprehension to each item it walks), or written as a choice (`a if flag else b`, `a or b`), is read as every string it can be; one that can be more than 1024 is refused unread, never read in part. A name is read where Python binds it: a comprehension's variable stands for the items it walks inside the comprehension only, a name a `:=` in a comprehension binds stands for its value in the function around it, one declared `global` or `nonlocal` in the module or in the function that binds it, and a parameter of a lambda or a function for its default, read in the scope around it, as well as for whatever its caller passes, whatever the function or the module binds under that name; a method does not see the names of its class body.
+
+## Processes a page starts
+
+<a id="f66"></a>
+### F66. Start a process from the site's source once per build, never once per page
+
+**Why.** A build renders about a thousand pages, so a process a page starts is about a thousand processes, and a synchronous one stops every other page while it runs: `build.concurrency` buys nothing. One `git log --follow` per page, called from the head of each page through `site/src/lib/page-dates.mjs`, was 86 % of a CPU profile of the route phase. In the docs workflow's blobless clone each one could also wait on old blobs from the network. And the same pages took 12 minutes on one day and 45 on the next with every check of the job green, because nothing fails on a build that is merely slow. Read what the whole build needs in one pass, on first use, and answer each page from the result.
+
+**Do**
+
+```text
+the first page that asks runs one git log over the docs tree, and every page
+after it reads the map that pass built
+```
+
+**Don't**
+
+```text
+each page runs git log --follow on its own file while it renders its head
+```
+
+**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+
+**Exceptions.** A file whose process does run once per build is listed in `ONCE_PER_BUILD` of the check, with the reason, the number of calls it holds and what it exports; a call the entry does not count, an export it does not name, which would hand the process to every page, and an entry that covers nothing, fail. The check reads what a page can run: everything under `site/src/`, `site/astro.config.mjs` and what those import from elsewhere in the site, found the way Vite finds them. The scripts the build runs before and after it renders start what they need, because each runs once. The check reads text, so that it needs no install: a module name built up at run time is not seen, a call under an alias is not counted, and it does not read the dependencies. The packages it knows to wrap `child_process` are a closed list, `SPAWNER`: a package not on it is not seen, and a new wrapper has to be added to it.

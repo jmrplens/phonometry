@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, and the processes a page may start.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -301,6 +301,7 @@ Each rule on a page has the same parts:
 | [F63](docs-and-figures.md#f63) | Give every page a description of 160 characters or fewer that no other page of its language repeats | `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `site/scripts/check-descriptions.test.mjs`, `CI: Test the build checks on small builds made to fail them`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole` |
 | [F64](docs-and-figures.md#f64) | Keep every built page under 1 800 000 bytes of HTML | `site/scripts/check-page-size.mjs`, `CI: Check every page fits in what a search engine reads` |
 | [F65](docs-and-figures.md#f65) | Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own | `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py` |
+| [F66](docs-and-figures.md#f66) | Start a process from the site's source once per build, never once per page | `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 
 ### Prose, commits and pull requests
 

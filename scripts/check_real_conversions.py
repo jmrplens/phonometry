@@ -84,6 +84,13 @@ a caller's value that no check has read on every path to it:
   run, and holds only inside it; one in an ``assert``, which ``python -O``
   leaves out, holds nowhere.
 
+A call is read as Python reads its name: a scope nearer than the module that
+binds the name to anything else hides the function of that spelling, though a
+parameter defaulting to it and a local assigned from it hold it all the same
+(``float=float``, ``asarray = np.asarray``). So does the module's own binding: a
+later ``def`` or assignment takes the name from a check or a NumPy function the
+module imported, and a ``def float`` is no builtin.
+
 A value the function computed (a call of a function of the package that is
 no check, a field of a record it was handed, which the record read when it
 was built) is no caller's, and the census lists it as computed. A field a record's method
@@ -109,20 +116,23 @@ import argparse
 import ast
 import pathlib
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
 from ast_scan import (
     ROOT,
+    assigned_value,
     binding_of,
     block_statements,
     exempted,
     for_the_type_checker,
+    imported_names,
     is_type_checking_block,
     own_names,
     python_files,
     relative,
     spells,
+    standing_bindings,
     values_bound,
 )
 from ast_scan import parameters as with_defaults
@@ -451,8 +461,11 @@ class _Names:
     numpy: frozenset[str] = frozenset()
     dtypes: Mapping[str, Kind] = field(default_factory=dict)
     #: Each call of the module, by its id, of a name a nearer scope binds
-    #: (:func:`_calls_of_nearer_names`), which reaches no function by name.
+    #: (:func:`_calls_by_what_they_reach`), which reaches no function by name.
     hidden: frozenset[int] = frozenset()
+    #: Each call, by its id, of a name read by its spelling that the module's
+    #: own binding replaces, which reaches that and no builtin or NumPy function.
+    replaced: frozenset[int] = frozenset()
 
     def callee(self, func: ast.expr) -> str | None:
         """The NumPy name a call reaches: any attribute, or a name imported from NumPy."""
@@ -490,7 +503,7 @@ _PLAIN = _Names()
 
 def converted(call: ast.Call, names: _Names = _PLAIN) -> tuple[ast.expr, Kind] | None:
     """The value *call* converts and to what, or ``None`` when it converts none."""
-    if id(call) in names.hidden:
+    if id(call) in names.hidden or id(call) in names.replaced:
         return None
     name = names.callee(call.func)
     if name in _ARRAY_CONVERSIONS:
@@ -745,7 +758,11 @@ def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
     nothing for a call that keeps none, a conversion included.
     """
     callee = _last_name(call.func)
-    if id(call) in names.hidden or converted(call, names) is not None:
+    if (
+        id(call) in names.hidden
+        or id(call) in names.replaced
+        or converted(call, names) is not None
+    ):
         return []
     if callee == "getattr" and len(call.args) == _GETATTR_WITH_DEFAULT:
         return [call.args[2]]
@@ -766,7 +783,7 @@ def _numpy_function(call: ast.Call, names: _Names) -> bool:
     given no floating or complex dtype: ``np.asarray(x)``, ``np.atleast_1d(x)``
     and their kin, which read a ``bytearray`` as the codes of its characters.
     """
-    if id(call) in names.hidden:
+    if id(call) in names.hidden or id(call) in names.replaced:
         return False
     func = call.func
     through_numpy = (
@@ -1448,10 +1465,15 @@ def _module_name(path: pathlib.Path) -> str:
 
 def _imports(tree: ast.Module, module: str, *, is_package: bool) -> dict[str, str]:
     """``{name: "module.name"}`` for each ``from`` import of the module, but
-    one an ``if TYPE_CHECKING:`` block holds, which never runs.
+    one an ``if TYPE_CHECKING:`` block holds, which never runs, and one anything
+    else the module binds the name to may stand for: a later ``def`` or
+    assignment, the other branch of a ``try``, a function that binds it under
+    ``global`` (:func:`ast_scan.standing_bindings`). The name is then the
+    module's own, and no check or NumPy function it imported.
     """
     package = module if is_package else module.rpartition(".")[0]
     checker = for_the_type_checker(tree)
+    standing = standing_bindings(tree, checker)
     found: dict[str, str] = {}
     for node in ast.walk(tree):
         if not isinstance(node, ast.ImportFrom) or id(node) in checker:
@@ -1464,7 +1486,11 @@ def _imports(tree: ast.Module, module: str, *, is_package: bool) -> dict[str, st
             source = node.module or ""
         for alias in node.names:
             found[alias.asname or alias.name] = f"{source}.{alias.name}"
-    return found
+    return {
+        name: dotted
+        for name, dotted in found.items()
+        if all(isinstance(bound, ast.ImportFrom) for bound in standing.get(name, ()))
+    }
 
 
 def _numpy_names(tree: ast.Module, imports: Mapping[str, str]) -> _Names:
@@ -1473,66 +1499,133 @@ def _numpy_names(tree: ast.Module, imports: Mapping[str, str]) -> _Names:
         name for name, dotted in imports.items() if dotted.startswith("numpy.")
     )
     plain = _Names(numpy)
-    return _Names(
-        numpy, _dtype_names(tree.body, plain), _calls_of_nearer_names(tree, imports)
-    )
+    hidden, replaced = _calls_by_what_they_reach(tree, imports)
+    return _Names(numpy, _dtype_names(tree.body, plain), hidden, replaced)
 
 
-def _calls_of_nearer_names(
+def _calls_by_what_they_reach(
     tree: ast.Module, imports: Mapping[str, str]
-) -> frozenset[int]:
-    """Each call of *tree*, by its id, whose callee is a name, or an attribute of
-    a name the module imports, that a scope inside the module binds nearer than
-    the module does: a parameter, a local, a comprehension's variable, a nested
-    function. It reaches no function of the module by that spelling. A scope's
-    own import is read as the module's (:func:`_imports`). A binding that holds
-    what the spelling names hides nothing: a parameter defaulting to it and a
-    local assigned from it (:func:`_holds_the_spelling`).
+) -> tuple[frozenset[int], frozenset[int]]:
+    """Each call of *tree*, by its id, that reaches no function of its spelling.
+
+    First those whose callee is a name, or an attribute of a name the module
+    imports with ``from``, that a scope inside the module binds nearer than the
+    module does: a parameter, a local, a comprehension's variable, a nested
+    function. A plain import's name is hidden by a comprehension's variable and a
+    lambda's parameter alone: a parameter spelt ``np`` is the module handed in,
+    and a lambda's is a parameter too. A scope's own import is read as the
+    module's (:func:`_imports`).
+
+    Then those of a name read by its spelling (:data:`_READ_BY_SPELLING`) that
+    the module's own binding replaces (:func:`_reach`).
     """
-    found: set[int] = set()
+    standing = standing_bindings(tree, for_the_type_checker(tree))
+    checker = for_the_type_checker(tree)
+    plain = {
+        name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import) and id(node) not in checker
+        for name in imported_names(node)
+    }
+    hidden: set[int] = set()
+    replaced: set[int] = set()
     for call in ast.walk(tree):
         if not isinstance(call, ast.Call):
             continue
         head = call.func
         while isinstance(head, ast.Attribute):
             head = head.value
-        if not isinstance(head, ast.Name) or (
-            head is not call.func and head.id not in imports
+        if not isinstance(head, ast.Name):
+            continue
+        name = head.id
+        bare = head is call.func
+        if (
+            not bare
+            and name not in imports
+            and (name not in plain or not _names_its_own_module(tree, head))
         ):
             continue
-        how, binder = binding_of(tree, call, head.id)
-        if (
-            binder is not None
-            and binder is not tree
-            and how != "import"
-            and not _holds_the_spelling(tree, binder, head.id)
-        ):
-            found.add(id(call))
-    return frozenset(found)
+        reached = _reach(tree, head, name, standing)
+        if reached == "nearer":
+            hidden.add(id(call))
+        elif reached == "replaced" and bare:
+            replaced.add(id(call))
+    return frozenset(hidden), frozenset(replaced)
 
 
-def _holds_the_spelling(tree: ast.Module, scope: ast.AST, name: str) -> bool:
-    """Whether every binding *scope* makes of *name* holds what the spelling
-    names: a parameter defaulting to it and a name assigned from it
-    (``float=float``, ``float=builtins.float``, ``asarray = np.asarray``). A value
-    that is the name itself reads the scope around, where a ``def`` runs its
-    defaults, and that scope's binding may hold something else.
+def _names_its_own_module(tree: ast.Module, read: ast.Name) -> bool:
+    """Whether a comprehension's variable or a lambda's parameter is what *read*
+    finds, which stands for nothing the module imports; a lambda's parameter
+    spelt as NumPy is the module handed in, as a function's is.
     """
-    values = values_bound(tree, scope, name)
+    binder = binding_of(tree, read, read.id)[1]
+    if isinstance(binder, ast.Lambda):
+        return read.id not in {"np", "numpy"}
+    return isinstance(binder, _COMPREHENSIONS)
+
+
+#: The names a call is read by the spelling of: the builtins that convert, and
+#: the calls that keep their values.
+_READ_BY_SPELLING = (
+    frozenset(_BUILTIN_SCALARS) | _KEEPING_ALL | _KEEPING_CALLS | {"getattr"}
+)
+
+
+def _reach(
+    tree: ast.Module,
+    read: ast.expr,
+    name: str,
+    standing: Mapping[str, Sequence[ast.AST]],
+) -> Literal["nearer", "replaced", "spelt"]:
+    """What *name*, read at *read*, reaches.
+
+    ``"nearer"`` when a scope inside the module binds it to anything but what the
+    spelling names; a parameter defaulting to that and a local assigned from it
+    (``float=float``, ``asarray = np.asarray``) hide nothing, and a default of the
+    name itself is read where the ``def`` runs its defaults. ``"replaced"`` when
+    the module's own bindings of a name read by its spelling, those that may stand
+    once it has run, hold nothing of that spelling. ``"spelt"`` otherwise.
+    """
+    how, binder = binding_of(tree, read, name)
+    if binder is None or binder is tree:
+        live = standing.get(name, ())
+        replaced = (
+            name in _READ_BY_SPELLING
+            and bool(live)
+            and all(_replaces_the_spelling(tree, node, name) for node in live)
+        )
+        return "replaced" if replaced else "spelt"
+    if how == "import":
+        return "spelt"
+    values = values_bound(tree, binder, name)
     if not values or not all(spells(value, name) for value in values):
-        return False
+        return "nearer"
     for value in values:
-        if isinstance(value, ast.Name):
-            how, binder = binding_of(tree, value, name)
-            if (
-                binder is not None
-                and binder is not tree
-                and binder is not scope
-                and how != "import"
-                and not _holds_the_spelling(tree, binder, name)
-            ):
-                return False
-    return True
+        if (
+            isinstance(value, ast.Name)
+            and binding_of(tree, value, name)[1] is not binder
+        ):
+            reached = _reach(tree, value, name, standing)
+            if reached != "spelt":
+                return reached
+    return "spelt"
+
+
+def _replaces_the_spelling(tree: ast.Module, node: ast.AST, name: str) -> bool:
+    """Whether *node*, a binding of *name* the module may hold, holds anything but
+    what the spelling names.
+
+    Any ``def``, ``class`` and other binding does, and an assignment of anything
+    else. An import of a builtin's name does unless it comes from ``builtins`` or
+    NumPy; any other import is read by its spelling as it always was, since what
+    keeps a value may well be imported from anywhere.
+    """
+    if isinstance(node, ast.ImportFrom):
+        source = "" if node.level else (node.module or "").partition(".")[0]
+        return name in _BUILTIN_SCALARS and source not in {"builtins", "numpy"}
+    if isinstance(node, ast.Import):
+        return name in _BUILTIN_SCALARS
+    return not spells(assigned_value(tree, node), name)
 
 
 @dataclass(frozen=True, eq=False)
@@ -2388,13 +2481,22 @@ class _Returns:
             found = _either(found, {name: frozenset()})
         return found, calls
 
+    def _target(self, name: str) -> str:
+        """The function of the package a call of *name* reaches, by its module."""
+        return self.module.imports.get(name, f"{self.module.name}.{name}")
+
     def _call(
         self, call: ast.Call, seen: _Seen, local: _Local
     ) -> tuple[Provenance, list[_Handing]]:
         if id(call) in self.module.numpy.hidden:
             return {}, []
         func = call.func
-        if isinstance(func, ast.Name) and func.id in CHECKS and call.args:
+        if (
+            isinstance(func, ast.Name)
+            and func.id in CHECKS
+            and call.args
+            and self._target(func.id) == f"{SHARED}.{func.id}"
+        ):
             found, calls = self.sources(call.args[0], seen, local)
             refused = CHECKS[func.id]
             return {name: held | refused for name, held in found.items()}, calls
@@ -2403,9 +2505,8 @@ class _Returns:
             return self._joined(((part, local) for part in kept), seen)
         if not isinstance(func, ast.Name):
             return {}, []
-        target = self.module.imports.get(func.id, f"{self.module.name}.{func.id}")
         handed = _Handing(
-            target,
+            self._target(func.id),
             tuple(self.sources(a, seen, local)[0] for a in call.args),
             tuple(
                 (k.arg, self.sources(k.value, seen, local)[0]) for k in call.keywords
@@ -2616,9 +2717,7 @@ def _function_names(
     own = _dtype_names(ast.walk(function), module.numpy, function)
     if not own:
         return module.numpy
-    return _Names(
-        module.numpy.numpy, {**module.numpy.dtypes, **own}, module.numpy.hidden
-    )
+    return replace(module.numpy, dtypes={**module.numpy.dtypes, **own})
 
 
 def conversions_in(

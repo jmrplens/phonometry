@@ -1978,6 +1978,327 @@ def test_a_check_a_nearer_name_holds_still_answers_for_the_conversion(
     ) == {"checked"}
 
 
+#: A name the module imports and its own binding replaces, written whole, since
+#: the header imports the checks. Each stands for the later binding.
+_REPLACED_AT_THE_TOP = {
+    "a_def_after_the_import_of_a_check": """
+        from phonometry._internal.validation import real_array as _check
+
+        def _check(x, name):
+            return x
+
+        def f(levels):
+            _check(levels, "levels")
+            return float(levels)
+    """,
+    "an_assignment_after_the_import_of_a_check": """
+        from phonometry._internal.validation import real_array
+
+        real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_check_of_its_own_spelling_defined_by_the_module": """
+        def real_array(x, name):
+            return x
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_check_a_function_replaces_under_global": """
+        from phonometry._internal.validation import real_array
+
+        def _swap():
+            global real_array
+            real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_check_in_one_branch_of_a_try_and_none_in_the_other": """
+        try:
+            from phonometry._internal.validation import real_array
+        except ImportError:
+            real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_REPLACED_AT_THE_TOP))
+def test_a_binding_of_the_module_replaces_the_check_it_imported(
+    tmp_path: Path, shape: str
+) -> None:
+    """An import is a check only while it stands: a later ``def`` or assignment
+    takes the name from it, in the module or from a function under ``global``, and
+    a branch that binds anything else may leave no check. Each read as checked.
+    """
+    assert _verdicts(tmp_path, _REPLACED_AT_THE_TOP[shape]) == {"f": "unchecked"}
+
+
+def test_a_function_of_a_check_s_spelling_hands_back_no_refusal(tmp_path: Path) -> None:
+    """What the module's own ``real_array`` hands back is a value it computed, as
+    of any function that is no check; it read as the shared check's refusal.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        def real_array(x, name):
+            return x
+
+        def f(levels):
+            return float(real_array(levels, "levels"))
+        """,
+    ) == {"f": "computed"}
+
+
+def test_a_check_for_the_type_checker_replaces_nothing_that_runs(
+    tmp_path: Path,
+) -> None:
+    """An ``if TYPE_CHECKING:`` block's binding never runs: it takes the check
+    from no import beside it, and it answers for nothing on its own.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        from typing import TYPE_CHECKING
+
+        from phonometry._internal.validation import real_array
+
+        if TYPE_CHECKING:
+            real_array = print
+
+        def f(levels):
+            real_array(levels, "levels")
+            return float(levels)
+        """,
+    ) == {"f": "checked"}
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def float(x):
+                return 1.0
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="a-def-of-float",
+        ),
+        pytest.param(
+            """
+            float = print
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-assignment-to-float",
+        ),
+        pytest.param(
+            """
+            def _swap():
+                global float
+                float = print
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="float-a-function-replaces-under-global",
+        ),
+        pytest.param(
+            """
+            def float(x):
+                return 1.0
+
+            def f(levels, float=float):
+                return float(levels)
+            """,
+            id="a-default-of-the-module-s-float",
+        ),
+        pytest.param(
+            """
+            from decimal import Decimal as float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-import-of-float-from-elsewhere",
+        ),
+        pytest.param(
+            """
+            from numpy import asarray
+
+            def asarray(x, dtype=None):
+                return x
+
+            def f(levels):
+                return asarray(levels, dtype=float)
+            """,
+            id="a-def-after-the-import-from-numpy",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels):
+                return [np.asarray(levels, dtype=np.float64) for np in [print]]
+            """,
+            id="a-comprehension-binds-a-plain-import",
+        ),
+        pytest.param(
+            """
+            import math
+
+            def f(levels):
+                return (lambda math: math.float64(levels))(print)
+            """,
+            id="a-lambda-binds-a-plain-import",
+        ),
+    ],
+)
+def test_a_binding_of_the_module_is_no_conversion_of_that_spelling(
+    tmp_path: Path, source: str
+) -> None:
+    """The module's own ``float`` is no builtin, and a comprehension's or a
+    lambda's variable hides a plain import as it hides a ``from`` import. Each
+    read as a conversion of the caller's value.
+    """
+    assert _verdicts(tmp_path, source) == {}
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            import builtins
+
+            float = builtins.float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-assignment-from-builtins",
+        ),
+        pytest.param(
+            """
+            from builtins import float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-import-from-builtins",
+        ),
+        pytest.param(
+            """
+            from numpy import float64 as float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="an-import-from-numpy",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels, np):
+                return np.asarray(levels, dtype=float)
+            """,
+            id="a-parameter-spelt-as-the-module",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels):
+                return (lambda np: np.asarray(levels, dtype=float))(np)
+            """,
+            id="a-lambda-parameter-spelt-as-the-module",
+        ),
+        pytest.param(
+            """
+            import numpy as np
+
+            def f(levels):
+                return [np.asarray(row, dtype=float) for row in levels]
+            """,
+            id="a-comprehension-beside-the-module",
+        ),
+        pytest.param(
+            """
+            if not_defined_here:
+                float = print
+
+            import builtins
+            float = builtins.float
+
+            def f(levels):
+                return float(levels)
+            """,
+            id="a-later-binding-that-holds-the-builtin",
+        ),
+    ],
+)
+def test_a_binding_that_keeps_the_function_of_its_spelling_still_converts(
+    tmp_path: Path, source: str
+) -> None:
+    """What holds the builtin or NumPy's function stays a conversion, and a
+    parameter spelt ``np``, a lambda's as a function's, is the module handed in.
+    """
+    assert set(_verdicts(tmp_path, source).values()) == {"unchecked"}
+
+
+def test_a_function_of_the_module_read_for_float_is_still_followed(
+    tmp_path: Path,
+) -> None:
+    """The module's ``float`` that checks its parameter answers for a conversion
+    as any function of the module does: it was read as a conversion itself, and
+    as nothing, since the read stopped at the builtin of that spelling.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        import numpy as np
+
+        from phonometry._internal.validation import real_array
+
+        def float(x):
+            real_array(x, "x")
+
+        def f(levels):
+            float(levels)
+            return np.asarray(levels, dtype=np.float64)
+        """,
+    ) == {"f": "checked"}
+
+
+def test_a_keeping_call_the_module_replaces_keeps_nothing(tmp_path: Path) -> None:
+    """A ``def list`` of the module hands back what it computes, not the caller's
+    value, as a nested function of that spelling does.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        def list(values):
+            return [1.0]
+
+        def f(levels):
+            return float(list(levels))
+        """,
+    ) == {"f": "computed"}
+
+
 @pytest.mark.parametrize("shape", sorted(_PLANTED_UNCHECKED))
 def test_a_caller_s_value_no_check_reads_on_every_path_is_found(
     tmp_path: Path, shape: str

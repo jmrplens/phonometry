@@ -456,19 +456,24 @@ def values_bound(root: ast.AST, scope: ast.AST, name: str) -> list[ast.expr | No
             default for argument, default in parameters(scope) if argument.arg == name
         )
     checker = for_the_type_checker(root)
-    parents = _parents(root)
-    for node in _binding_nodes(scope).get(name, ()):
-        if id(node) in checker:
-            continue
-        held = parents.get(node)
-        found.append(
-            held.value
-            if isinstance(held, ast.Assign | ast.AnnAssign)
-            and (held.targets if isinstance(held, ast.Assign) else [held.target])
-            == [node]
-            else None
-        )
+    found.extend(
+        assigned_value(root, node)
+        for node in _binding_nodes(scope).get(name, ())
+        if id(node) not in checker
+    )
     return found
+
+
+def assigned_value(root: ast.AST, node: ast.AST) -> ast.expr | None:
+    """The value an assignment to one name alone stores at *node*, its target,
+    under *root*; None for any other binding, whose value is not written there.
+    """
+    held = _parents(root).get(node)
+    if isinstance(held, ast.Assign) and held.targets == [node]:
+        return held.value
+    if isinstance(held, ast.AnnAssign) and held.target is node:
+        return held.value
+    return None
 
 
 def spells(value: ast.expr | None, name: str, owners: Collection[str] = ()) -> bool:

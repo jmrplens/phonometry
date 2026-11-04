@@ -19,6 +19,7 @@ import dataclasses
 import enum
 import pathlib
 import sys
+import textwrap
 import types
 from typing import TYPE_CHECKING
 
@@ -752,6 +753,33 @@ if TYPE_CHECKING:
     assert sources["either"] == ("json", "_absent_private")
     assert "replaced" not in sources
     assert sources["kept"] == ("json",)
+
+
+def test_a_module_defines_what_a_test_on_type_checking_lets_run(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The ``else`` of the block runs, so it defines what it binds, and it was
+    skipped with the block; the ``else`` of the negated test never runs, and it
+    was read as defining what it binds.
+    """
+    module = types.ModuleType("fake_type_checking_names")
+    source = textwrap.dedent(
+        """\
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            NEVER_IN_THE_BLOCK = 1
+        else:
+            RUNS_IN_THE_ELSE = 1
+
+        if not TYPE_CHECKING:
+            RUNS_IN_THE_NEGATED = 1
+        else:
+            NEVER_IN_THE_ELSE = 1
+        """
+    )
+    monkeypatch.setattr(gate.inspect, "getsource", lambda _: source)
+    assert gate.defined_names(module) == ["RUNS_IN_THE_ELSE", "RUNS_IN_THE_NEGATED"]
 
 
 def test_an_import_a_function_makes_for_the_type_checker_is_no_source() -> None:

@@ -541,56 +541,123 @@ def _position(node: ast.AST) -> tuple[int, int]:
     return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
 
 
-def is_type_checking_block(statement: ast.AST) -> bool:
-    """Whether *statement* is an ``if TYPE_CHECKING:``, however it was imported."""
-    test = statement.test if isinstance(statement, ast.If) else None
+def _names_type_checking(test: ast.AST) -> bool:
+    """Whether *test* is ``TYPE_CHECKING``, however it was imported."""
     return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
         isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
     )
 
 
+def _negates_type_checking(test: ast.AST) -> bool:
+    """Whether *test* is ``not TYPE_CHECKING``, however it was imported."""
+    return (
+        isinstance(test, ast.UnaryOp)
+        and isinstance(test.op, ast.Not)
+        and _names_type_checking(test.operand)
+    )
+
+
+def is_type_checking_block(statement: ast.AST) -> bool:
+    """Whether *statement* is an ``if TYPE_CHECKING:`` or an ``if not
+    TYPE_CHECKING:``, however it was imported: one of its branches runs whenever
+    the program does and the other never does. Any other test on the name decides
+    no branch: ``if TYPE_CHECKING or enabled:`` runs whenever ``enabled`` is true.
+    """
+    return isinstance(statement, ast.If) and (
+        _names_type_checking(statement.test) or _negates_type_checking(statement.test)
+    )
+
+
+def what_runs(statement: ast.If) -> list[ast.stmt]:
+    """What a program runs of an ``if`` on ``TYPE_CHECKING``
+    (:func:`is_type_checking_block`): its ``else``, or the body when it negates it.
+    """
+    return (
+        statement.body if _negates_type_checking(statement.test) else statement.orelse
+    )
+
+
+def what_never_runs(statement: ast.If) -> list[ast.stmt]:
+    """What only a type checker reads of an ``if`` on ``TYPE_CHECKING``
+    (:func:`is_type_checking_block`): its body, or the ``else`` when it negates it.
+    """
+    return (
+        statement.orelse if _negates_type_checking(statement.test) else statement.body
+    )
+
+
+def _branches(node: ast.AST) -> tuple[list[ast.AST], list[ast.AST]] | None:
+    """What never runs and what runs of an ``if`` or a conditional expression on
+    ``TYPE_CHECKING``; None for any other node.
+    """
+    if isinstance(node, ast.If):
+        if is_type_checking_block(node):
+            return [*what_never_runs(node)], [*what_runs(node)]
+    elif isinstance(node, ast.IfExp):
+        if _names_type_checking(node.test):
+            return [node.body], [node.orelse]
+        if _negates_type_checking(node.test):
+            return [node.orelse], [node.body]
+    return None
+
+
 @functools.cache
 def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
-    """Every node an ``if TYPE_CHECKING:`` block under *tree* holds, by its id,
-    at any depth, its ``else`` left out: what no run of the program reaches.
+    """Every node the branch of an ``if`` or a conditional expression on
+    ``TYPE_CHECKING`` that never runs holds, by its id, at any depth, under
+    *tree*: what no run of the program reaches (:func:`what_never_runs`).
     """
     return frozenset(
         id(node)
         for statement in ast.walk(tree)
-        if isinstance(statement, ast.If) and is_type_checking_block(statement)
-        for child in statement.body
+        if (branches := _branches(statement)) is not None
+        for child in branches[0]
         for node in ast.walk(child)
     )
 
 
 @functools.cache
 def for_the_program(tree: ast.AST) -> frozenset[int]:
-    """Every node the ``else`` of an ``if TYPE_CHECKING:`` under *tree* holds, by
-    its id, at any depth: what the program runs and no type checker reads.
+    """Every node the branch of an ``if`` or a conditional expression on
+    ``TYPE_CHECKING`` that runs holds, by its id, at any depth, under *tree*:
+    what the program runs and no type checker reads (:func:`what_runs`).
     """
     return frozenset(
         id(node)
         for statement in ast.walk(tree)
-        if isinstance(statement, ast.If) and is_type_checking_block(statement)
-        for child in statement.orelse
+        if (branches := _branches(statement)) is not None
+        for child in branches[1]
         for node in ast.walk(child)
     )
 
 
 def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
-    """*tree*, with the body of every ``if TYPE_CHECKING:`` a function holds
-    emptied in place and its ``else`` kept, for a guard that reads what a
-    function does: no run of the program reaches that body.
+    """*tree*, with what a function never runs of a test on ``TYPE_CHECKING``
+    emptied in place and the branch that runs kept, for a guard that reads what a
+    function does: the body of an ``if TYPE_CHECKING:``, the ``else`` of an ``if
+    not TYPE_CHECKING:``, and that branch of a conditional expression, which reads
+    ``None`` instead, in a lambda or a comprehension of the function too.
 
     The blocks at the top of a module and in a class body stay, where a guard
     reads the imports of annotations and a constructor declared for the type
     checker. Call it on a tree just parsed, before anything has read its scopes.
     """
     for function in ast.walk(tree):
-        if isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
-            for node in scope_nodes(function):
-                if isinstance(node, ast.If) and is_type_checking_block(node):
+        if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
+            continue
+        for node in scope_nodes(function):
+            if isinstance(node, ast.If) and is_type_checking_block(node):
+                if _negates_type_checking(node.test):
+                    node.orelse = []
+                else:
                     node.body = [ast.Pass()]
+        for node in ast.walk(function):
+            if isinstance(node, ast.IfExp):
+                blank = ast.copy_location(ast.Constant(value=None), node)
+                if _names_type_checking(node.test):
+                    node.body = blank
+                elif _negates_type_checking(node.test):
+                    node.orelse = blank
     return tree
 
 

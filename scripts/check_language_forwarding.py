@@ -94,8 +94,10 @@ from ast_scan import (
     binding_of,
     empty_type_checking_bodies,
     global_bindings,
+    is_type_checking_block,
     live_bindings,
     own_names,
+    what_never_runs,
 )
 from ast_scan import parameters as with_defaults
 
@@ -341,26 +343,18 @@ def _own_nodes(roots: Iterable[ast.AST]) -> Iterator[ast.AST]:
         stack.extend(children[::-1])
 
 
-def _for_the_type_checker(node: ast.AST) -> bool:
-    """Whether a block runs for the type checker only: ``if TYPE_CHECKING:``."""
-    test = node.test if isinstance(node, ast.If) else None
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-    )
-
-
 def _definitions(body: Iterable[ast.AST]) -> Iterator[_DefinitionNode]:
     """The functions and classes a body defines, however deep in its blocks.
 
-    One defined under ``if TYPE_CHECKING:`` is never defined when the code
-    runs (the constructor a record declares for the type checker): it is
-    no definition of the program, and is passed over.
+    One defined where a test on ``TYPE_CHECKING`` keeps it from running is
+    never defined when the code runs (the constructor a record declares for
+    the type checker): it is no definition of the program, and is passed over.
     """
     skipped = {
         id(child)
         for node in _own_nodes(body)
-        if isinstance(node, ast.If) and _for_the_type_checker(node)
-        for child in node.body
+        if isinstance(node, ast.If) and is_type_checking_block(node)
+        for child in what_never_runs(node)
     }
     for node in _own_nodes(body):
         if id(node) in skipped:

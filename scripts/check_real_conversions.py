@@ -124,6 +124,7 @@ from ast_scan import (
     assigned_value,
     binding_of,
     block_statements,
+    empty_type_checking_bodies,
     exempted,
     for_the_type_checker,
     imported_names,
@@ -134,6 +135,7 @@ from ast_scan import (
     spells,
     standing_bindings,
     values_bound,
+    what_runs,
 )
 from ast_scan import parameters as with_defaults
 
@@ -1287,8 +1289,8 @@ class _Flow:
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
         if is_type_checking_block(node):
-            # Its body never runs, and its ``else`` always does.
-            return self.block(node.orelse, env)
+            # One branch never runs, and the other always does.
+            return self.block(what_runs(node), env)
         self.expression(node.test, env)
         body, body_ends = self.block(
             node.body, self.narrowed(node.test, env, holds=True)
@@ -1640,7 +1642,9 @@ class _Module:
 
 
 def _module(path: pathlib.Path) -> _Module:
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    tree = empty_type_checking_bodies(
+        ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    )
     name = _module_name(path)
     imports = _imports(tree, name, is_package=path.stem == "__init__")
     return _Module(path, name, tree, imports, _numpy_names(tree, imports))
@@ -1687,9 +1691,9 @@ class _Sure:
             sure = sure and not _returns(statement)
 
     def statement(self, node: ast.stmt, *, sure: bool) -> None:
-        if is_type_checking_block(node) and isinstance(node, ast.If):
-            # Its body never runs, and its ``else`` always does.
-            self.block(node.orelse, sure=sure)
+        if isinstance(node, ast.If) and is_type_checking_block(node):
+            # One branch never runs, and the other always does.
+            self.block(what_runs(node), sure=sure)
         elif isinstance(node, ast.If):
             self.calls(node.test, sure=sure)
             self.block(node.body, sure=sure and _raises(node.orelse))
@@ -2216,7 +2220,7 @@ class _Returns:
             for child in ast.iter_child_nodes(node):
                 self._walruses(child, _FUNCTION_SCOPE)
             pending.extend(
-                node.orelse
+                what_runs(node)
                 if isinstance(node, ast.If) and is_type_checking_block(node)
                 else block_statements(node)
             )
@@ -2755,8 +2759,10 @@ def _read_module(
         helpers,
         seeds,
     )
+    never_runs = for_the_type_checker(module.tree)
     for qualified, function in _functions(module.tree):
-        reading.function(qualified, function)
+        if id(function) not in never_runs:
+            reading.function(qualified, function)
     found = sorted(reading.found, key=lambda c: (c.key[0], c.line, c.source))
     return found, reading.handing
 

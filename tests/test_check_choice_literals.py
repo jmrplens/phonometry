@@ -703,6 +703,14 @@ def test_an_annotation_reads_the_type_checker_s_block_and_a_value_the_else(
             else:
                 from ._branch_first import KINDS, Names
             """,
+        "_mode_negated": """
+            from typing import TYPE_CHECKING
+
+            if not TYPE_CHECKING:
+                from ._branch_first import KINDS, Names
+            else:
+                from ._branch_second import KINDS, Names
+            """,
     }
     _plant_modules(tmp_path, monkeypatch, {**_TWO_CHOICES, **sources})
     planted = sys.modules["phonometry._mode_alias"]
@@ -717,6 +725,9 @@ def test_an_annotation_reads_the_type_checker_s_block_and_a_value_the_else(
     assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"c", "d"}
     assert ccl.expanded("Names", "phonometry._mode_user") == "Literal['c', 'd']"
     constants = ccl._constants_of("phonometry._mode_user")
+    assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"a", "b"}
+    assert ccl.expanded("Names", "phonometry._mode_negated") == "Literal['c', 'd']"
+    constants = ccl._constants_of("phonometry._mode_negated")
     assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"a", "b"}
 
 

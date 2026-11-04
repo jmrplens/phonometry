@@ -103,6 +103,33 @@ def test_what_an_if_type_checking_block_imports_is_no_helper_a_call_reaches(
     }
 
 
+def test_a_definition_the_negated_test_keeps_from_running_is_no_definition(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The ``else`` of ``if not TYPE_CHECKING:`` never runs, so a function written
+    there is judged as nothing, and the body of that test runs, so one written
+    there is judged as any other.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.mod": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+            if not TYPE_CHECKING:
+                def runs(ax, language="en"):
+                    return axis(ax)
+            else:
+                def never(ax, language="en"):
+                    return axis(ax)
+            """
+        },
+    )
+    assert [finding.caller for finding in found] == ["runs"]
+
+
 def test_a_parameter_defaulting_to_the_helper_reaches_it(
     tmp_path: pathlib.Path,
 ) -> None:

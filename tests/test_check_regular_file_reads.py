@@ -115,6 +115,109 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
 @pytest.mark.parametrize(
     "source",
     [
+        pytest.param(
+            """
+            def read(path):
+                if not TYPE_CHECKING:
+                    return 1
+                else:
+                    return open(path).read()
+            """,
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def read(path):
+                return open(path).read() if TYPE_CHECKING else None
+            """,
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                held = open("x").read()
+            """,
+            id="the-block-at-the-top-of-the-module",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                def read(path):
+                    return open(path).read()
+            """,
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            """
+            class Reader:
+                if TYPE_CHECKING:
+                    def read(self, path):
+                        return open(path).read()
+            """,
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_what_a_test_on_type_checking_keeps_from_running_reads_no_file(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A read no run reaches waits on nothing. Each was refused."""
+    planted = "from typing import TYPE_CHECKING\n" + textwrap.dedent(source)
+    assert _found(tmp_path, planted) == []
+
+
+@pytest.mark.parametrize(
+    ("source", "function"),
+    [
+        pytest.param(
+            """
+            def read(path):
+                if not TYPE_CHECKING:
+                    return open(path).read()
+            """,
+            "read",
+            id="the-body-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def read(path):
+                return None if TYPE_CHECKING else open(path).read()
+            """,
+            "read",
+            id="the-else-of-an-expression",
+        ),
+        pytest.param(
+            """
+            if not TYPE_CHECKING:
+                def read(path):
+                    return open(path).read()
+            """,
+            "read",
+            id="a-function-in-the-body-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                pass
+            else:
+                held = open("x").read()
+            """,
+            "<module>",
+            id="the-else-of-the-block-at-the-top",
+        ),
+    ],
+)
+def test_the_branch_of_a_test_on_type_checking_that_runs_is_read(
+    tmp_path: pathlib.Path, source: str, function: str
+) -> None:
+    """The branch that runs is a read like any other."""
+    planted = "from typing import TYPE_CHECKING\n" + textwrap.dedent(source)
+    assert _found(tmp_path, planted) == [(function, _OWN)]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
         """
         def read(paths, openers):
             return [open(paths).read() for open in openers]

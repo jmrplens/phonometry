@@ -949,10 +949,22 @@ def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     """Every function and class body of *tree*, and the module, each with its own calls and names."""
     module = module_name(path)
     aliases = aliases_of(tree, _package_of(path, module))
-    functions = list(_functions(tree))
+    never_runs = for_the_type_checker(tree)
+    functions = [
+        function for function in _functions(tree) if id(function[1]) not in never_runs
+    ]
     names = {node: _names_of(node) for _name, node, _around in functions}
     return [
-        _Scope(path, name, node, _own_calls(node), aliases[node], module, around, names)
+        _Scope(
+            path,
+            name,
+            node,
+            [call for call in _own_calls(node) if id(call) not in never_runs],
+            aliases[node],
+            module,
+            around,
+            names,
+        )
         for name, node, around in functions
     ]
 

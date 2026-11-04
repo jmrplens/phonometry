@@ -1755,11 +1755,15 @@ def _float_equalities(tree: ast.Module) -> list[str]:
     :func:`_is_float_constant` recognises, and every ``astype`` to ``bool``
     that :func:`_is_bool_cast` recognises, which on a float array is the same
     test against zero, in the order of the lines. A name is read in the
-    scope and at the point where Python reads it (:func:`_alias_scopes`).
+    scope and at the point where Python reads it (:func:`_alias_scopes`). What a
+    test on ``TYPE_CHECKING`` keeps from running compares nothing.
     """
     found: list[tuple[int, str]] = []
+    never_runs = for_the_type_checker(tree)
     for own, names in _alias_scopes(tree):
         for node in own:
+            if id(node) in never_runs:
+                continue
             if isinstance(node, ast.Call) and _is_bool_cast(node, names):
                 found.append((node.lineno, ast.unparse(node)))
                 continue
@@ -2265,6 +2269,62 @@ def test_the_float_equality_check_reads_a_binding_that_holds_the_builtin() -> No
         "14",
         "17",
         "20",
+    ]
+
+
+def test_the_float_equality_check_reads_nothing_a_type_checking_test_keeps_from_running() -> (
+    None
+):
+    """A comparison or a cast no run reaches compares nothing: one in the block, in
+    a function nested there, at the top of the module, in the ``else`` of the
+    negated test and in a branch of a conditional expression. Only what the block
+    binds was left out, so each was reported; the branch that runs still is.
+    """
+    source = textwrap.dedent(
+        """\
+        def in_the_block(x):
+            if TYPE_CHECKING:
+                return x == 0.0
+
+        def cast_in_the_block(x):
+            if TYPE_CHECKING:
+                return x.astype(bool)
+
+        def nested_in_the_block(x):
+            if TYPE_CHECKING:
+                def inner(y):
+                    return y == 0.0
+
+        if TYPE_CHECKING:
+            held = y == 0.0
+
+        def in_the_else_of_the_negated(x):
+            if not TYPE_CHECKING:
+                return 1
+            else:
+                return x == 0.0
+
+        def in_a_branch(x):
+            return x == 0.0 if TYPE_CHECKING else 1
+
+        def runs_in_the_negated(x):
+            if not TYPE_CHECKING:
+                return x == 0.0
+
+        def runs_in_the_else(x):
+            if TYPE_CHECKING:
+                pass
+            else:
+                return x == 0.0
+
+        def runs_in_the_branch(x):
+            return 1 if TYPE_CHECKING else x == 0.0
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "28",
+        "34",
+        "37",
     ]
 
 

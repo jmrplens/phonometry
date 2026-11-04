@@ -18,6 +18,8 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -1005,6 +1007,88 @@ def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
     assert "def __init__" in source
     assert "y = 1" not in source
     assert "y = 2" in source
+
+
+@pytest.mark.parametrize(
+    ("test", "never", "runs"),
+    [
+        ("TYPE_CHECKING", "first", "second"),
+        ("typing.TYPE_CHECKING", "first", "second"),
+        ("not TYPE_CHECKING", "second", "first"),
+        ("not typing.TYPE_CHECKING", "second", "first"),
+    ],
+)
+def test_a_test_on_type_checking_says_which_branch_runs(
+    test: str, never: str, runs: str
+) -> None:
+    """``if not TYPE_CHECKING:`` is the same test with its branches swapped, in a
+    statement and in a conditional expression: what the program runs is one branch
+    and what the type checker alone reads the other.
+    """
+    tree = ast.parse(f"if {test}:\n    first = 1\nelse:\n    second = 2\n")
+    statement = tree.body[0]
+    assert isinstance(statement, ast.If)
+    assert ast_scan.is_type_checking_block(statement)
+    written = {name.id: name for name in ast.walk(tree) if isinstance(name, ast.Name)}
+    assert id(written[never]) in ast_scan.for_the_type_checker(tree)
+    assert id(written[runs]) not in ast_scan.for_the_type_checker(tree)
+    assert id(written[runs]) in ast_scan.for_the_program(tree)
+    assert id(written[never]) not in ast_scan.for_the_program(tree)
+    assert [line.targets[0].id for line in ast_scan.what_runs(statement)] == [runs]
+
+    tree = ast.parse(f"held = first if {test} else second\n")
+    read = {
+        name.id: name
+        for name in ast.walk(tree)
+        if isinstance(name, ast.Name) and isinstance(name.ctx, ast.Load)
+    }
+    assert id(read[never]) in ast_scan.for_the_type_checker(tree)
+    assert id(read[runs]) not in ast_scan.for_the_type_checker(tree)
+
+
+@pytest.mark.parametrize(
+    "test",
+    ["TYPE_CHECKING or enabled", "enabled and TYPE_CHECKING", "not enabled", "enabled"],
+)
+def test_any_other_test_says_nothing_of_either_branch(test: str) -> None:
+    """Only the name itself, or its negation, decides a branch: ``TYPE_CHECKING or
+    enabled`` runs whenever ``enabled`` is true.
+    """
+    tree = ast.parse(f"if {test}:\n    first = 1\nelse:\n    second = 2\n")
+    assert not ast_scan.is_type_checking_block(tree.body[0])
+    assert ast_scan.for_the_type_checker(tree) == frozenset()
+    assert ast_scan.for_the_program(tree) == frozenset()
+
+
+def test_what_a_function_never_runs_is_emptied_in_every_form() -> None:
+    """The negated test keeps its body and loses its ``else``, and a conditional
+    expression loses the branch that never runs, in a lambda or a comprehension of
+    the function too. Each still reads what runs.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def f(x):
+                if not TYPE_CHECKING:
+                    runs_a = 1
+                else:
+                    never_a = 2
+                runs_b = 3 if not TYPE_CHECKING else never_b
+                runs_c = never_c if TYPE_CHECKING else 4
+                held = lambda: never_d if TYPE_CHECKING else 5
+                return [never_e if TYPE_CHECKING else 6 for _ in x]
+
+            top = 7 if TYPE_CHECKING else 8
+            """
+        )
+    )
+    ast_scan.empty_type_checking_bodies(tree)
+    source = ast.unparse(tree)
+    assert "runs_a = 1" in source
+    assert "runs_b = 3" in source
+    assert "runs_c" in source
+    assert "never_" not in source
+    assert "top = 7 if TYPE_CHECKING else 8" in source
 
 
 def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:

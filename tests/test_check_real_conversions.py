@@ -2299,6 +2299,155 @@ def test_a_keeping_call_the_module_replaces_keeps_nothing(tmp_path: Path) -> Non
     ) == {"f": "computed"}
 
 
+#: What a test on ``TYPE_CHECKING`` keeps from running, each holding a conversion
+#: a caller's value would reach if it ran.
+_NEVER_RUNS = {
+    "a_nested_function_in_the_block": """
+        def f(levels):
+            if TYPE_CHECKING:
+                def g(x):
+                    return float(x)
+            return 1.0
+    """,
+    "the_else_of_a_negated_test": """
+        def f(levels):
+            if not TYPE_CHECKING:
+                return 1.0
+            else:
+                return float(levels)
+    """,
+    "a_function_at_the_top_in_the_block": """
+        if TYPE_CHECKING:
+            def g(x):
+                return float(x)
+    """,
+    "a_function_at_the_top_in_the_else_of_a_negated_test": """
+        if not TYPE_CHECKING:
+            pass
+        else:
+            def g(x):
+                return float(x)
+    """,
+    "a_method_in_the_block": """
+        class Record:
+            if TYPE_CHECKING:
+                def method(self, x):
+                    return float(x)
+    """,
+    "a_conversion_in_a_branch_of_an_expression": """
+        def f(levels):
+            return float(levels) if TYPE_CHECKING else 1.0
+    """,
+    "the_same_in_a_lambda": """
+        def f(levels):
+            return (lambda: float(levels) if TYPE_CHECKING else 1.0)()
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_NEVER_RUNS))
+def test_what_a_test_on_type_checking_keeps_from_running_converts_nothing(
+    tmp_path: Path, shape: str
+) -> None:
+    """A conversion no run reaches reads nothing of a caller's. Each was reported."""
+    source = "from typing import TYPE_CHECKING\n" + textwrap.dedent(_NEVER_RUNS[shape])
+    assert _verdicts(tmp_path, source) == {}
+
+
+@pytest.mark.parametrize(
+    ("source", "verdict"),
+    [
+        pytest.param(
+            """
+            def f(levels):
+                out = 1.0
+                if not TYPE_CHECKING:
+                    pass
+                else:
+                    out = levels
+                return float(out)
+            """,
+            "computed",
+            id="a-binding-in-the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(levels if TYPE_CHECKING else 1.0)
+            """,
+            "computed",
+            id="a-value-in-the-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(1.0 if not TYPE_CHECKING else levels)
+            """,
+            "computed",
+            id="a-value-in-the-else-of-a-negated-expression",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                if not TYPE_CHECKING:
+                    return float(levels)
+                return 1.0
+            """,
+            "unchecked",
+            id="the-body-of-a-negated-test-runs",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                if not TYPE_CHECKING:
+                    levels = 1.0
+                return float(levels)
+            """,
+            "computed",
+            id="a-binding-in-the-body-of-a-negated-test-always-runs",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(1.0 if TYPE_CHECKING else levels)
+            """,
+            "unchecked",
+            id="the-else-of-an-expression-runs",
+        ),
+        pytest.param(
+            """
+            def f(levels):
+                return float(levels if not TYPE_CHECKING else 1.0)
+            """,
+            "unchecked",
+            id="the-body-of-a-negated-expression-runs",
+        ),
+    ],
+)
+def test_the_flow_reads_the_branch_of_a_test_on_type_checking_that_runs(
+    tmp_path: Path, source: str, verdict: str
+) -> None:
+    """The branch that runs always runs and the other never does, in a statement
+    and in a conditional expression, whichever way the test is spelt.
+    """
+    planted = "from typing import TYPE_CHECKING\n" + textwrap.dedent(source)
+    assert _verdicts(tmp_path, planted) == {"f": verdict}
+
+
+def test_a_function_in_the_body_of_a_negated_test_is_read(tmp_path: Path) -> None:
+    """``if not TYPE_CHECKING:`` is what the program runs, the module's
+    ``__getattr__`` at the top of the package among such functions.
+    """
+    source = """
+        from typing import TYPE_CHECKING
+
+        if not TYPE_CHECKING:
+            def g(x):
+                return float(x)
+        """
+    assert _verdicts(tmp_path, source) == {"g": "unchecked"}
+
+
 @pytest.mark.parametrize("shape", sorted(_PLANTED_UNCHECKED))
 def test_a_caller_s_value_no_check_reads_on_every_path_is_found(
     tmp_path: Path, shape: str

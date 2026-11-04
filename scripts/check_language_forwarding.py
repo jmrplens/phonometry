@@ -97,6 +97,7 @@ from ast_scan import (
     live_bindings,
     own_names,
 )
+from ast_scan import parameters as with_defaults
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -231,6 +232,9 @@ class Scope:
     #: Every function and class defined in it, two of one name alike.
     definitions: list[_DefinitionNode] = field(default_factory=list)
     values: dict[str, list[ast.expr]] = field(default_factory=dict)
+    #: What each parameter holds at a call that hands it nothing, read where the
+    #: ``def`` runs its defaults: in the scope around, not here.
+    defaults: dict[str, ast.expr] = field(default_factory=dict)
     annotations: dict[str, ast.expr] = field(default_factory=dict)
     inserts: set[str] = field(default_factory=set)
     removes: set[str] = field(default_factory=set)
@@ -514,6 +518,9 @@ def _build_scope(
         qualname,
         params=frozenset(a.arg for a in every),
         annotations={a.arg: a.annotation for a in every if a.annotation is not None},
+        defaults={
+            a.arg: default for a, default in with_defaults(node) if default is not None
+        },
     )
     scope.names, scope.definitions = _scope_names(module, node.body)
     # As Python scopes them: a comprehension's variable and a lambda's
@@ -1135,13 +1142,22 @@ class Tree:
         return None
 
     def _value_callee(self, local: Local, depth: int = 0) -> Callee | None:
-        """The helper a local name holds: an alias, or a ``partial`` of one."""
+        """The helper a local name holds: an alias, a ``partial`` of one, or a
+        parameter's default that names one.
+        """
         if depth > _DEPTH:
             return None
         for value in local.scope.values.get(local.name, ()):
             found = self._expression_callee(value, local.scope, depth + 1)
             if found is not None:
                 return found
+        default = local.scope.defaults.get(local.name)
+        if isinstance(default, ast.Name | ast.Attribute):
+            target = self.resolve(default, local.scope.parent, local.scope.module)
+            if isinstance(target, Scope):
+                return self._callee(target, bound=False)
+            if isinstance(target, Local):
+                return self._value_callee(target, depth + 1)
         return None
 
     def _by_name(self, call: ast.Call, name: str) -> Callee | None:

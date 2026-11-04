@@ -103,6 +103,45 @@ def test_what_an_if_type_checking_block_imports_is_no_helper_a_call_reaches(
     }
 
 
+def test_a_parameter_defaulting_to_the_helper_reaches_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A parameter whose default names a helper holds it at any call that does
+    not hand it another, read where the ``def`` runs its defaults, so the call
+    drops the language as a call of the helper does. A parameter with no default,
+    or a default that names no helper, reaches none.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.mod": """
+            from . import helpers
+            from .helpers import axis
+
+            def same_name(ax, axis=axis, language="en"):
+                return axis(ax)
+
+            def other_name(ax, draw=axis, *, language="en"):
+                return draw(ax)
+
+            def dotted(ax, axis=helpers.axis, language="en"):
+                return axis(ax)
+
+            def no_default(ax, axis, language="en"):
+                return axis(ax)
+
+            def default_of_none(ax, axis=None, language="en"):
+                return axis(ax)
+            """
+        },
+    )
+    assert sorted(finding.caller for finding in found) == [
+        "dotted",
+        "other_name",
+        "same_name",
+    ]
+
+
 def test_a_comprehension_or_a_lambda_keeps_the_name_it_binds_for_itself(
     tmp_path: pathlib.Path,
 ) -> None:

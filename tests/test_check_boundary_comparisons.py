@@ -1119,6 +1119,43 @@ def test_an_unpacked_argument_reaches_every_parameter_it_may_fill(
     ]
 
 
+def test_a_type_parameter_is_no_value_of_a_scope_around_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A generic function's type parameter is its own name, and a generic
+    class's is its methods', whatever the function around or the module
+    holds under that spelling.
+
+    A name was looked up through the function's assignments and parameters
+    and then outwards, past the type parameter, so a comparison of one read as
+    a comparison of the spread the function around computes.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+
+    def by_function(levels):
+        spread = max(levels) - min(levels)
+        def inner[spread]():
+            return spread <= _LIMIT_DB
+        return inner()
+
+    def by_class(levels):
+        spread = max(levels) - min(levels)
+        class Box[spread]:
+            def inner(self):
+                return spread <= _LIMIT_DB
+        return Box().inner()
+
+    def measure(levels):
+        global width
+        width = max(levels) - min(levels)
+
+    def of_the_module[width]():
+        return width <= _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == []
+
+
 def test_a_name_the_caller_binds_is_not_the_module_s_import(
     tmp_path: pathlib.Path,
 ) -> None:

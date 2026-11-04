@@ -1183,6 +1183,8 @@ class Module:
                     ("param", current, name),
                     functools.partial(self.parameter, current, name),
                 )
+            if name in self.type_parameters_of(function):
+                return OPAQUE
             current = Context(self.enclosing(function))
         if is_constant_name(name):
             return self.published(name)
@@ -1204,6 +1206,21 @@ class Module:
                 ),
             )
         return OPAQUE
+
+    def type_parameters_of(self, function: Function) -> frozenset[str]:
+        """The type parameters *function* reads as names of its own: those it
+        declares, and those of the generic classes around it, up to the
+        function they are written in.
+        """
+        found = own_names(function).type_parameters
+        current = self.parent.get(function)
+        while current is not None and not isinstance(
+            current, ast.FunctionDef | ast.AsyncFunctionDef
+        ):
+            if isinstance(current, ast.ClassDef):
+                found |= own_names(current).type_parameters
+            current = self.parent.get(current)
+        return found
 
     def written_under_global(
         self,

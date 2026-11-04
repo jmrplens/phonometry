@@ -2043,6 +2043,46 @@ def test_a_binding_of_the_module_replaces_the_check_it_imported(
     assert _verdicts(tmp_path, _REPLACED_AT_THE_TOP[shape]) == {"f": "unchecked"}
 
 
+def test_a_function_s_own_import_stands_past_the_module_s_binding(
+    tmp_path: Path,
+) -> None:
+    """A function that imports the name holds the import, whatever the module
+    binds of that spelling, and every other function holds the module's binding.
+    The module's binding took the name from the whole module, so the conversion
+    left the census and the check answered for nothing.
+    """
+    assert _verdicts(
+        tmp_path,
+        """
+        def asarray(x, dtype=None):
+            return x
+
+        def imports_it(levels):
+            from numpy import asarray
+            return asarray(levels, dtype=float)
+
+        def reads_the_module_s(levels):
+            return asarray(levels, dtype=float)
+        """,
+    ) == {"imports_it": "unchecked"}
+    assert _verdicts(
+        tmp_path,
+        """
+        def real_array(x, name):
+            return x
+
+        def imports_it(levels):
+            from phonometry._internal.validation import real_array
+            real_array(levels, "levels")
+            return float(levels)
+
+        def reads_the_module_s(levels):
+            real_array(levels, "levels")
+            return float(levels)
+        """,
+    ) == {"imports_it": "checked", "reads_the_module_s": "unchecked"}
+
+
 def test_a_function_of_a_check_s_spelling_hands_back_no_refusal(tmp_path: Path) -> None:
     """What the module's own ``real_array`` hands back is a value it computed, as
     of any function that is no check; it read as the shared check's refusal.

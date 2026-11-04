@@ -1471,7 +1471,9 @@ def _imports(tree: ast.Module, module: str, *, is_package: bool) -> dict[str, st
     else the module binds the name to may stand for: a later ``def`` or
     assignment, the other branch of a ``try``, a function that binds it under
     ``global`` (:func:`ast_scan.standing_bindings`). The name is then the
-    module's own, and no check or NumPy function it imported.
+    module's own, and no check or NumPy function it imported, unless a function
+    or a class body imports it for itself: the table then holds that import,
+    and a call that finds the module's binding reaches none (:func:`_reach`).
     """
     package = module if is_package else module.rpartition(".")[0]
     checker = for_the_type_checker(tree)
@@ -1488,10 +1490,17 @@ def _imports(tree: ast.Module, module: str, *, is_package: bool) -> dict[str, st
             source = node.module or ""
         for alias in node.names:
             found[alias.asname or alias.name] = f"{source}.{alias.name}"
+    own_imports = {
+        name
+        for scope in ast.walk(tree)
+        if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+        for name in own_names(scope).imported - own_names(scope).declared_global
+    }
     return {
         name: dotted
         for name, dotted in found.items()
-        if all(isinstance(bound, ast.ImportFrom) for bound in standing.get(name, ()))
+        if name in own_imports
+        or all(isinstance(bound, ast.ImportFrom) for bound in standing.get(name, ()))
     }
 
 
@@ -1521,8 +1530,8 @@ def _calls_by_what_they_reach(
     Then those of a name read by its spelling (:data:`_READ_BY_SPELLING`) that
     the module's own binding replaces (:func:`_reach`).
     """
-    standing = standing_bindings(tree, for_the_type_checker(tree))
     checker = for_the_type_checker(tree)
+    standing = standing_bindings(tree, checker)
     plain = {
         name
         for node in ast.walk(tree)
@@ -1547,7 +1556,7 @@ def _calls_by_what_they_reach(
             and (name not in plain or not _names_its_own_module(tree, head))
         ):
             continue
-        reached = _reach(tree, head, name, standing)
+        reached = _reach(tree, head, name, standing, imports)
         if reached == "nearer":
             hidden.add(id(call))
         elif reached == "replaced" and bare:
@@ -1578,19 +1587,27 @@ def _reach(
     read: ast.expr,
     name: str,
     standing: Mapping[str, Sequence[ast.AST]],
+    imports: Mapping[str, str],
 ) -> Literal["nearer", "replaced", "spelt"]:
     """What *name*, read at *read*, reaches.
 
     ``"nearer"`` when a scope inside the module binds it to anything but what the
     spelling names; a parameter defaulting to that and a local assigned from it
     (``float=float``, ``asarray = np.asarray``) hide nothing, and a default of the
-    name itself is read where the ``def`` runs its defaults. ``"replaced"`` when
-    the module's own bindings of a name read by its spelling, those that may stand
-    once it has run, hold nothing of that spelling. ``"spelt"`` otherwise.
+    name itself is read where the ``def`` runs its defaults. ``"nearer"`` too when
+    the read finds a binding of the module that replaces its imports, while
+    *imports* holds a function's own import of the name, which this read does not
+    reach. ``"replaced"`` when the module's own bindings of a name read by its
+    spelling, those that may stand once it has run, hold nothing of that spelling.
+    ``"spelt"`` otherwise.
     """
     how, binder = binding_of(tree, read, name)
     if binder is None or binder is tree:
         live = standing.get(name, ())
+        if name in imports and not all(
+            isinstance(node, ast.ImportFrom) for node in live
+        ):
+            return "nearer"
         replaced = (
             name in _READ_BY_SPELLING
             and bool(live)
@@ -1607,7 +1624,7 @@ def _reach(
             isinstance(value, ast.Name)
             and binding_of(tree, value, name)[1] is not binder
         ):
-            reached = _reach(tree, value, name, standing)
+            reached = _reach(tree, value, name, standing, imports)
             if reached != "spelt":
                 return reached
     return "spelt"

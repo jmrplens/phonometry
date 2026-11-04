@@ -520,7 +520,7 @@ def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
         "for await (const chunk of process.stdin) input += chunk;"
         "process.stdout.write(JSON.stringify(JSON.parse(input).map((text) => "
         f"  pageLines(splitLines(text), {{kind: {json.dumps(kind)}}})"
-        "    .map((line) => [line.role, line.rest]))));"
+        "    .map((line) => [line.role, line.rest, line.item]))));"
     )
     ran = subprocess.run(
         [str(_NODE), "--input-type=module", "-e", script],
@@ -533,7 +533,7 @@ def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
     )
     python = [
         [
-            [line.role, line.rest]
+            [line.role, line.rest, line.item]
             for line in page_lines(_split_as_the_site_does(text), kind=kind)
         ]
         for text in pages

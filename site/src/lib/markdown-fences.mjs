@@ -223,11 +223,13 @@ function cellCount(row) {
  *   a fence.
  * @property {string} rest The line past the marks and the columns of its containers,
  *   and past those it opens.
+ * @property {boolean} item Whether the last container it opens is a list item, so
+ *   that `rest` opens with the item's text.
  */
 
 /** @returns {PageLine} */
 function pageLine(text, role, rest, info = '', indent = 0) {
-  return { text, role, rest, info, indent };
+  return { text, role, rest, info, indent, item: false };
 }
 
 /** What stands open at each line of a page, read a line at a time. */
@@ -247,6 +249,7 @@ class Walk {
     this.htmlEnd = null;
     this.asides = [];
     this.left = 0;
+    this.item = false;
   }
 
   /** The line at `index`, which has to come after the one read last. */
@@ -266,7 +269,9 @@ class Walk {
       }
       this.leaf = '';
     }
-    return this.opens(index, text, rest, column, matched);
+    const opened = this.opens(index, text, rest, column, matched);
+    opened.item = this.item;
+    return opened;
   }
 
   /** `text` past the first `upto` containers: what is left, its column, how many held it. */
@@ -390,6 +395,7 @@ class Walk {
       this.leaf === 'paragraph' && this.asides.every(([, around]) => around <= matched);
     const strict = (paragraph || this.leaf === 'indented') && matched === this.held.length;
     let opened = false;
+    this.item = false;
     while (!(this.markdown && blankColumns(rest, column) >= CODE_INDENT)) {
       const container = this.container(rest, column, strict);
       if (container === null) break;
@@ -400,6 +406,7 @@ class Walk {
         paragraph = false;
       }
       [rest, column] = container;
+      this.item = container[2] !== QUOTATION;
       this.held.push(container[2]);
       this.fresh = container[3];
       matched = this.held.length;

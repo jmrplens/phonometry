@@ -131,7 +131,13 @@ import tokenize
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from markdown_fences import PageLine, code_lines, display_math_parts, page_lines
+from markdown_fences import (
+    PageLine,
+    cell_spans,
+    code_lines,
+    display_math_parts,
+    page_lines,
+)
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans_by_block,
@@ -734,17 +740,23 @@ def _strip_exempt_markdown(
     quote_closer: str | None,
     caption: bool = False,
     raw: bool = False,
+    row: bool = False,
 ) -> tuple[str, bool, str | None, bool, bool]:
     """The line with every exempt use of the dash removed, and the carried state.
 
     :param raw: Whether the line stands in a raw HTML block, where a star is the
         character the page shows, so it marks no italics.
+    :param row: Whether the line is a row of a table, the one place a dash that
+        fills a cell is an empty cell: a pipe with no delimiter row under it is text.
     :return: The line, whether an italic span is open, the mark that closes the
         quotation open, whether what an open one holds on this line has a dash, and
         whether the span open when the line began turned out to be none.
     """
-    if _TABLE_ROW.match(line):
-        line = "|".join(_PLACEHOLDER_ITEM.sub("", cell) for cell in line.split("|"))
+    if row:
+        line = "|".join(
+            _PLACEHOLDER_ITEM.sub("", line[start:end])
+            for start, end in cell_spans(line)
+        )
     line, quote_closer, quoted = _outside_quotations(line, closer=quote_closer)
     if raw:
         open_dash = EM_DASH in _PART_AFTER_DASH.sub("", quoted)
@@ -835,13 +847,13 @@ class _PageReading:
         self.left_open, self.opened_nothing = [], []
         return unclosed
 
-    def holds_dash(self, line: str, shown: str, number: int, *, raw: bool) -> bool:
+    def holds_dash(self, line: str, shown: str, number: int, *, role: str) -> bool:
         """Whether the line carries a dash no exemption covers, read through its marks.
 
         :param line: The line as written.
         :param shown: The same line with its code and maths spans out.
         :param number: Its number, kept if a mark still open is all that exempts it.
-        :param raw: Whether it stands in a raw HTML block.
+        :param role: Its role in the walk of the page.
         """
         inner = inside_quotation(shown)
         if _REFERENCE_ENTRY.match(inner):
@@ -859,7 +871,8 @@ class _PageReading:
             italic_open=self.italic_open,
             quote_closer=self.quote_closer,
             caption=self.caption,
-            raw=raw,
+            raw=role in _RAW_ROLES,
+            row=role == "row",
         )
         if shown_again:
             self.opened_nothing.extend(self.left_open)
@@ -947,7 +960,7 @@ def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
             found = EM_DASH in line
         else:
             found = line.strip() != "" and reading.holds_dash(
-                line, shown[index], number, raw=read[index].role in _RAW_ROLES
+                line, shown[index], number, role=read[index].role
             )
         if found:
             hits.append(number)
@@ -1291,18 +1304,27 @@ def _mask_paragraphs(lines: list[str], blank: Callable[[str], str]) -> list[str]
     return masked
 
 
-def _double_hyphen_lines(written: list[str], masked: list[str]) -> list[int]:
+def _double_hyphen_lines(
+    written: list[str], masked: list[str], walked: dict[int, PageLine] | None = None
+) -> list[int]:
     """The 0-based indexes of the lines that keep a double hyphen in prose.
 
     :param written: The lines as written, which say whether a line is a rule:
         once its code is blanked, a bullet that names a function reads as one.
     :param masked: The same lines with everything that is not prose blanked.
+    :param walked: The walk of a page, by index, the lines of its frontmatter out:
+        a line of a paragraph is no rule and no row, whatever it looks like, and a
+        setext underline publishes nothing.
     """
     hits: list[int] = []
     for index, (source, line) in enumerate(zip(written, masked, strict=True)):
-        if _RULE_LINE.match(source):
+        read = walked.get(index) if walked else None
+        role = read.role if read else None
+        if role == "underline" or (
+            role not in ("paragraph", "text") and _RULE_LINE.match(source)
+        ):
             continue
-        if _TABLE_ROW.match(line):
+        if role == "row" or (role is None and _TABLE_ROW.match(line)):
             line = "|".join(
                 _HYPHEN_PLACEHOLDER.sub("", cell) for cell in line.split("|")
             )
@@ -1395,6 +1417,7 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
         for index in _double_hyphen_lines(
             [inside_quotation(line) for line in written],
             [inside_quotation(line) for line in masked],
+            {head + offset: read for offset, read in enumerate(walked)},
         )
     ]
 
@@ -1583,16 +1606,21 @@ def _head_end(line: str, start: int, heads: tuple[re.Pattern[str], ...]) -> int 
 
 
 def _joins_head_with_hyphen(line: str, heads: tuple[re.Pattern[str], ...]) -> bool:
-    """Whether a list item joins its head to its text with a spaced hyphen.
+    """Whether a line of a docstring is a list item joining its head to its text with `` - ``."""
+    marker = _LIST_MARKER.match(line)
+    return marker is not None and _head_joined_with_hyphen(line, marker.end(), heads)
+
+
+def _head_joined_with_hyphen(
+    line: str, start: int, heads: tuple[re.Pattern[str], ...]
+) -> bool:
+    """Whether the text of a list item, from *start*, joins its head to the rest with `` - ``.
 
     The heads are matched whole from the marker on, so the hyphen is looked
     for right after the last of them: a minus inside a role
     (``:math:`445.2 F - 344.3```) is part of the head and never read.
     """
-    marker = _LIST_MARKER.match(line)
-    if marker is None:
-        return False
-    at = _head_end(line, marker.end(), heads)
+    at = _head_end(line, start, heads)
     if at is None:
         return False
     while joiner := _HEAD_JOINER.match(line, at):
@@ -1611,16 +1639,23 @@ def markdown_bullet_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
 
     A list item in code or in a comment the page does not show is not read,
     and an entry of the frontmatter is no list item: the site shows it as text.
+    The walk of the page says where an item opens: a marker that cannot interrupt
+    the paragraph above it is the paragraph's text, and an item nested on the line
+    of another has a head too.
 
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
     prose = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
+    walked = page_lines(written[head:], kind="mdx" if mdx else "md")
     return [
         number
-        for number, line in enumerate(prose[head:], start=head + 1)
-        if _joins_head_with_hyphen(inside_quotation(line), _PAGE_HEADS)
+        for number, (line, read) in enumerate(
+            zip(prose[head:], walked, strict=True), start=head + 1
+        )
+        if read.item
+        and _head_joined_with_hyphen(line, len(line) - len(read.rest), _PAGE_HEADS)
     ]
 
 

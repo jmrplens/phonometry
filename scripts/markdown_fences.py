@@ -57,7 +57,7 @@ carried, as CommonMark has it, so the code it holds reads as written.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -225,6 +225,8 @@ class PageLine:
         its body, its line end kept.
     :param rest: The line past the marks and the columns of its containers, and
         past those it opens.
+    :param item: Whether the last container it opens is a list item, so that
+        *rest* opens with the item's text.
     """
 
     text: str
@@ -233,6 +235,7 @@ class PageLine:
     indent: int = 0
     inner: str = ""
     rest: str = ""
+    item: bool = False
 
 
 class _Walk:
@@ -263,6 +266,8 @@ class _Walk:
         self.asides: list[tuple[int, int, int]] = []
         #: How many more lines a tag or an expression of an ``.mdx`` page takes.
         self.left = 0
+        #: Whether the last container the line read opened is a list item.
+        self.item = False
 
     def read(self, index: int) -> PageLine:
         """The line at *index*, which has to come after the one read last."""
@@ -280,7 +285,9 @@ class _Walk:
             if matched == len(self.held) and not self._ends_on_blank(rest):
                 return self._inside(written, text, rest)
             self.leaf = ""
-        return self._opening(index, written, rest, column, matched)
+        return replace(
+            self._opening(index, written, rest, column, matched), item=self.item
+        )
 
     def _past_held(self, text: str, upto: int) -> tuple[str, int, int]:
         """*text* past the first *upto* containers: what is left, its column, how many held it."""
@@ -389,7 +396,7 @@ class _Walk:
             around <= matched for _, around, _ in self.asides
         )
         strict = (paragraph or self.leaf == "indented") and matched == len(self.held)
-        opened = False
+        opened = self.item = False
         while not (self.markdown and _blank_columns(rest, column) >= _CODE_INDENT):
             container = self._container(rest, column, strict=strict)
             if container is None:
@@ -399,6 +406,7 @@ class _Walk:
                 self.leaf = ""
                 opened, paragraph = True, False
             rest, column, held, self.fresh = container
+            self.item = held != _QUOTATION
             self.held.append(held)
             matched = len(self.held)
         if not rest.strip(" \t"):

@@ -112,7 +112,7 @@ def test_dash_after_a_fence_shown_inside_another_is_prose() -> None:
 
 
 def test_dash_alone_in_a_table_cell_is_an_empty_cell() -> None:
-    assert ced.markdown_hits("| a | — | b |\n") == []
+    assert ced.markdown_hits("| a | — | b |\n|---|---|---|\n") == []
 
 
 def test_an_unclosed_quotation_quotes_nothing() -> None:
@@ -290,6 +290,59 @@ def test_a_mark_that_closes_nothing_exempts_nothing(text: str, hits: list[int]) 
     block, so a multiplication hid the rest of its paragraph.
     """
     assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("| a | — |\nb\n", [1], id="a pipe line with no table"),
+        pytest.param("| a | — |\n", [1], id="alone"),
+        pytest.param("| a | — |\n|---|---|\n", [], id="a cell of a table"),
+        pytest.param("a | —\n--|--\n", [], id="a cell with no outer pipes"),
+        pytest.param("> | a | — |\n> |---|---|\n", [], id="in a quotation"),
+        pytest.param("- | a | — |\n  |---|---|\n", [], id="in an item"),
+        pytest.param("| a |\n|---|\n— / h\n", [], id="a row with no pipes"),
+    ],
+)
+def test_an_empty_cell_is_one_only_in_a_table(text: str, hits: list[int]) -> None:
+    """A pipe with no delimiter row under it is text, and so is what it fills."""
+    assert ced.markdown_hits(text) == hits
+    assert ced.markdown_double_hyphen_hits(text.replace("—", "--")) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("a\n--\n", [], id="under a paragraph"),
+        pytest.param("- a\n  --\n", [], id="in its item"),
+        pytest.param("> a\n--\nb\n", [2], id="a lazy line of the paragraph"),
+        pytest.param("- a\n--\nb\n", [2], id="out of the item"),
+    ],
+)
+def test_a_double_hyphen_that_underlines_is_published_by_nothing(
+    text: str, hits: list[int]
+) -> None:
+    assert ced.markdown_double_hyphen_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("- `x` - y\n", [1], id="an item"),
+        pytest.param("a\n1. `x` - y\n", [2], id="a marker that can interrupt"),
+        pytest.param("a\n2. `x` - y\n", [], id="a marker that cannot"),
+        pytest.param("- a\n  2. `x` - y\n", [], id="and in an item"),
+        pytest.param("> a\n2. `x` - y\n", [2], id="where the container has ended"),
+        pytest.param("- - `x` - y\n", [1], id="a nested item"),
+        pytest.param("> - - `x` - y\n", [1], id="and in a quotation"),
+        pytest.param("- > `x` - y\n", [], id="a quotation, no item's head"),
+        pytest.param("    - `x` - y\n", [], id="indented code"),
+    ],
+)
+def test_an_item_head_is_read_where_the_walk_says_an_item_opens(
+    text: str, hits: list[int]
+) -> None:
+    assert ced.markdown_bullet_hyphen_hits(text) == hits
 
 
 def test_a_title_stays_exempt_over_the_lines_of_its_own_block() -> None:
@@ -1032,7 +1085,7 @@ def test_a_line_of_a_quotation_is_read_through_its_marks() -> None:
     assert ced.markdown_hits("> The level rises — and falls.\n") == [1]
     assert ced.markdown_hits("> * A list item — with a dash.\n") == [1]
     assert ced.markdown_hits("> *A caption — with a dash.*\n") == [1]
-    assert ced.markdown_hits("> | a | — | b |\n") == []
+    assert ced.markdown_hits("> | a | — | b |\n> |---|---|---|\n") == []
     assert ced.markdown_hits("> - Author (2001) Acoustics — Rooms\n") == []
     assert (
         ced.markdown_hits("> - Author (2001) Acoustics — Rooms,\n>   wrapped — title\n")

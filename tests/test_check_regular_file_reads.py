@@ -163,6 +163,243 @@ def test_a_name_bound_nearer_is_not_the_builtin_or_the_import(
     assert _found(tmp_path, source) == []
 
 
+@pytest.mark.parametrize(
+    ("source", "shape"),
+    [
+        pytest.param(
+            """
+            import io
+
+            open = io.open
+
+            def read(path):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="an-alias-at-the-top",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def read(path):
+                open = io.open
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="an-alias-in-the-function",
+        ),
+        pytest.param(
+            """
+            import io
+
+            open = io.open
+
+            def read(path):
+                def inner():
+                    return open(path).read()
+                return inner()
+            """,
+            _OWN,
+            id="an-alias-a-nested-function-reads",
+        ),
+        pytest.param(
+            """
+            def read(path, open=open):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="a-default-of-the-builtin",
+        ),
+        pytest.param(
+            """
+            def read(path, *, open=open):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="a-keyword-only-default-of-the-builtin",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def read(path, open=io.open):
+                with open(path) as handle:
+                    return handle.read()
+            """,
+            _OWN,
+            id="a-default-of-another-spelling",
+        ),
+        pytest.param(
+            """
+            def read(path, reader=open):
+                return reader(path).read()
+            """,
+            _OWN,
+            id="a-default-under-another-name",
+        ),
+        pytest.param(
+            """
+            import soundfile
+
+            def read(path, loader=soundfile.read):
+                return loader(path)
+            """,
+            _FOREIGN,
+            id="a-default-of-a-foreign-reader",
+        ),
+        pytest.param(
+            """
+            import io
+
+            class Reader:
+                open = io.open
+
+                def read(self, path, open=open):
+                    return open(path).read()
+            """,
+            _OWN,
+            id="a-default-read-in-the-class-body",
+        ),
+        pytest.param(
+            """
+            def read(path):
+                return (lambda open=open: open(path))().read()
+            """,
+            _OWN,
+            id="a-lambda-default-of-the-builtin",
+        ),
+        pytest.param(
+            """
+            try:
+                from gzip import open
+            except ImportError:
+                open = None
+
+            def read(path):
+                return open(path).read()
+            """,
+            _FOREIGN,
+            id="an-import-in-a-try-branch",
+        ),
+        pytest.param(
+            """
+            def read(path, soundfile):
+                return (lambda sf: sf.read(path))(soundfile)
+            """,
+            _FOREIGN,
+            id="a-lambda-parameter-spelt-as-the-module",
+        ),
+    ],
+)
+def test_a_binding_that_holds_a_reader_is_still_read_as_it(
+    tmp_path: pathlib.Path, source: str, shape: str
+) -> None:
+    """A binding hides what the spelling names only when it holds nothing the
+    guard knows: an alias, an import in a branch and a parameter's default say
+    what the name holds, and a lambda's parameter spelt ``sf`` is the module
+    handed in, as a function's is. Each passed a whole read for a name bound
+    to something unknown.
+    """
+    assert [found for _function, found in _found(tmp_path, source)] == [shape]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        """
+        def read(path, open=None):
+            return open(path)
+        """,
+        """
+        def read(path, opener=print):
+            return opener(path)
+        """,
+        """
+        import math
+
+        def read(path, np=math):
+            return np.load(path)
+        """,
+        """
+        from pathlib import Path
+
+        def read(path, open=Path):
+            return open(path)
+        """,
+        """
+        from pathlib import Path as open
+
+        def read(path, open=open):
+            return open(path)
+        """,
+        """
+        import soundfile
+
+        def read(path):
+            return (lambda sf=None: sf)(soundfile)
+        """,
+        """
+        import math
+
+        def read(path):
+            return (lambda sf=math: sf.read(path))()
+        """,
+    ],
+)
+def test_a_default_that_names_no_reader_reads_nothing(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A default of ``None`` leaves a parameter unknown, and a default that
+    names something else says it is that: neither is a read of a file.
+    """
+    assert _found(tmp_path, source) == []
+
+
+def test_a_function_of_the_module_named_open_is_read_as_that_function(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def open`` of the module is no builtin, and it is the function a call
+    reaches: when it checks its name, it answers for the read after it. A
+    lambda's parameter of a check's spelling answers for nothing.
+    """
+    assert (
+        _found(
+            tmp_path,
+            """
+            import numpy as np
+
+            from phonometry._internal.json_input import not_regular_at
+
+            def open(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+
+            def checked(path):
+                open(path)
+                return np.fromfile(path)
+            """,
+        )
+        == []
+    )
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+
+        from check import require_regular
+
+        def by_a_lambda(path):
+            (lambda require_regular: require_regular(path))(print)
+            return np.fromfile(path)
+        """,
+    ) == [("by_a_lambda", _FOREIGN)]
+
+
 def test_a_name_a_comprehension_binds_leaves_the_rest_of_the_function_alone(
     tmp_path: pathlib.Path,
 ) -> None:

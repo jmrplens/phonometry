@@ -14,8 +14,8 @@ the quoted title in between, where a line-scoped match sees an opening mark
 and no closing one and calls the dash prose. The tests below fix that reading
 together with the readings that must not move: an attribute value and a YAML
 value are the page's own prose and are scanned, a quotation that never closes
-stops at the end of its paragraph, and everything the gate caught before it
-learned about wrapping it still catches.
+in its paragraph quotes nothing, and everything the gate caught before it learned
+about wrapping it still catches.
 """
 
 from __future__ import annotations
@@ -115,10 +115,10 @@ def test_dash_alone_in_a_table_cell_is_an_empty_cell() -> None:
     assert ced.markdown_hits("| a | — | b |\n") == []
 
 
-def test_an_unclosed_quotation_stops_at_the_end_of_its_paragraph() -> None:
-    """A quotation mark with no partner must not silence the whole page."""
+def test_an_unclosed_quotation_quotes_nothing() -> None:
+    """A quotation mark with no partner silences neither the page nor its paragraph."""
     text = 'He said "Table 1 — Maximum\n\nThe level rises — and falls.\n'
-    assert ced.markdown_hits(text) == [3]
+    assert ced.markdown_hits(text) == [1, 3]
 
 
 def test_dash_in_a_docstring_is_refused() -> None:
@@ -256,6 +256,40 @@ def test_nothing_is_carried_from_one_block_to_the_next() -> None:
     assert ced.markdown_hits("# A *heading\nprose — here* end.\n") == [2]
     assert ced.markdown_hits("| a *b |\n|---|\n| prose — here* |\n") == [3]
     assert ced.markdown_hits("> - An *open\n> - prose — here* end.\n") == [2]
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("a * b — c * d\n", [1], id="a star between blanks"),
+        pytest.param("2 * 3 — x\n", [1], id="a multiplication"),
+        pytest.param("a ***\nb — c\n", [2], id="three stars at a line's end"),
+        pytest.param("a *\nb — c* d\n", [2], id="a star a line break follows"),
+        pytest.param("a *b — c * d\n", [1], id="a star nothing closes"),
+        pytest.param("a *b — c\nd — e\n", [1, 2], id="over the lines of the paragraph"),
+        pytest.param("a *b — c\n\nd — e* f\n", [1, 3], id="and across a blank line"),
+        pytest.param('a "b — c\nd — e\n', [1, 2], id="a quote nothing closes"),
+        pytest.param("a «b — c\n\nd» e\n", [1], id="guillemets nothing closes"),
+        pytest.param("- a “b — c\n- d\n", [1], id="curly quotes on an item"),
+        pytest.param("a *b — c\n", [1], id="to the end of the page"),
+        pytest.param("a *b — c* d\n", [], id="a span"),
+        pytest.param("x *a\nb — c* d\n", [], id="a span over two lines"),
+        pytest.param("a*b — c*d\n", [], id="a span inside a word"),
+        pytest.param("a ***b — c*** d\n", [], id="a span in bold"),
+        pytest.param('a "b\nc — d" e\n', [], id="a quotation over two lines"),
+        pytest.param("a *b — c* d *e — f\n", [1], id="a span, then a star left open"),
+        pytest.param("<div>\nx *a — b* c\n</div>\n", [2], id="a raw block's stars"),
+        pytest.param("a *b — c *d e* f\n", [1], id="a closing star takes the nearest"),
+        pytest.param("a *b — c\nd *e f* g\n", [1], id="and over a line"),
+    ],
+)
+def test_a_mark_that_closes_nothing_exempts_nothing(text: str, hits: list[int]) -> None:
+    """The site shows a star or a quote left open as written, and the dash after it.
+
+    The reader took any star for a mark and carried it open to the end of the
+    block, so a multiplication hid the rest of its paragraph.
+    """
+    assert ced.markdown_hits(text) == hits
 
 
 def test_a_title_stays_exempt_over_the_lines_of_its_own_block() -> None:

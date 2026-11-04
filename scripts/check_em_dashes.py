@@ -22,8 +22,10 @@ What is NOT prose keeps its dash, and every exemption below says why:
   one, in italics or quotation marks. A quotation long enough is wrapped by
   the paragraph that carries it, opening on one line and closing two lines
   below, so the open quotation is carried from line to line within a
-  paragraph exactly as the italic span is; in a string, whose lines are read
-  one by one, a quotation closes on its line or quotes nothing. A value of the
+  paragraph exactly as the italic span is, and one that nothing closes in its
+  paragraph quotes nothing, since the site shows its mark as written; in a
+  string, whose lines are read one by one, a quotation closes on its line or
+  quotes nothing. A value of the
   frontmatter is read as one such text, over the lines it wraps: the site shows
   it as plain text, so it holds no span, no italics, no reference and no empty
   cell, the quotes that delimit it are YAML's, a quotation closes inside the
@@ -53,7 +55,8 @@ apart, as the site reads a fenced code block: a line of it that opens with
 paragraph before it, so nothing pairs across it, behind the marks of a
 quotation or a list item as anywhere else. An italic span and a quotation stop
 at the start of a block as a code span does, so one left open in a list item
-is not closed by the next.
+is not closed by the next. A star with a blank on the side of its span is no
+mark at all: the site shows it, as it does a multiplication.
 
 The character has other spellings that publish it all the same, and each is
 read as the character where it is decoded on its way to a reader: the HTML
@@ -125,7 +128,7 @@ import pathlib
 import re
 import sys
 import tokenize
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from markdown_fences import PageLine, code_lines, display_math_parts, page_lines
@@ -142,6 +145,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
 
 EM_DASH = "—"
+#: The lines of a raw HTML block, which a ``.md`` page shows as written.
+_RAW_ROLES = ("html", "raw")
 #: What a dash in maths leaves in the text of a page: a private-use character,
 #: so that no reading of the prose around it takes it for a dash of that prose.
 _MATHS_DASH = "\ue000"
@@ -188,6 +193,8 @@ _TYPOGRAPHIC_QUOTE_PAIRS = {"«": "»", "“": "”"}
 #: quote is the one mark that opens and closes with the same character, so it
 #: is read as an opening one only where an opening one can stand.
 _BEFORE_OPENING = ("", " ", "\t", "\n", "(", "[", "{")
+#: What stands beside a star that has nothing on that side: a blank or a line's end.
+_BESIDE_NOTHING = ("", " ", "\t")
 #: A row of a pipe table.
 _TABLE_ROW = re.compile(r"^\s*\|.*\|")
 #: A dash that fills a whole cell, or a whole slash-separated item of one: the
@@ -577,24 +584,48 @@ def _frontmatter_head(lines: list[str]) -> int:
     return closing + 1 if closing else 0
 
 
-def _outside_italics(line: str, *, italic_open: bool) -> tuple[str, bool]:
-    """The characters of the line outside italic spans, and the state at its end.
+def _outside_italics(line: str, *, italic_open: bool) -> tuple[str, bool, str, bool]:
+    """The characters of the line outside italic spans, the state at its end, and what is open.
 
     A title in italics is a citation reproduced as printed, and the
     bibliography wraps a title over several lines, so the italic state is
-    carried from one line to the next within a paragraph.
+    carried from one line to the next within a paragraph. A star is a mark only
+    with something beside it on the side of the span: one with a blank there is
+    a star the page shows, a multiplication among them (CommonMark 0.31.2, 6.2).
+    A closing star closes the nearest opening one, so a star that can only open,
+    met with a span open, leaves the one before it a star the page shows.
 
     Only a citation, though: see :func:`_is_caption`, which is what tells the
     two italics of this corpus apart.
+
+    :return: The characters outside, whether a span is still open, the text that
+        span holds so far on this line, and whether a later star showed that the
+        one open when the line began opened nothing.
     """
     text = _BULLET.sub(lambda m: " " * len(m.group()), _BOLD.sub("", line))
     kept: list[str] = []
-    for char in text:
-        if char == "*":
-            italic_open = not italic_open
+    opened_at = 0
+    began_open = italic_open
+    shown_again = False
+    for index, char in enumerate(text):
+        before, after = text[index - 1 : index], text[index + 1 : index + 2]
+        can_open, can_close = (
+            after not in _BESIDE_NOTHING,
+            before not in _BESIDE_NOTHING,
+        )
+        if char == "*" and italic_open and can_close:
+            italic_open = False
+        elif char == "*" and italic_open and can_open:
+            kept.extend(text[opened_at:index])
+            shown_again = shown_again or (began_open and not opened_at)
+            opened_at = index
+        elif char == "*" and can_open:
+            italic_open = True
+            opened_at = index
         elif not italic_open:
             kept.append(char)
-    return "".join(kept), italic_open
+    open_text = text[opened_at:] if italic_open else ""
+    return "".join(kept), italic_open, open_text, shown_again
 
 
 def _opens_quotation(line: str, index: int) -> bool:
@@ -617,8 +648,10 @@ def _opens_quotation(line: str, index: int) -> bool:
     ] not in ("", " ", "\t", "\n")
 
 
-def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | None]:
-    """The characters of the line outside quotations, and the state at its end.
+def _outside_quotations(
+    line: str, *, closer: str | None
+) -> tuple[str, str | None, str]:
+    """The characters of the line outside quotations, the state at its end, and what is open.
 
     A citation is reproduced as printed, and a title long enough is wrapped by
     the paragraph that quotes it: the opening mark sits on one line and the
@@ -626,8 +659,12 @@ def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | No
     line-scoped match cannot see that such a dash is inside the quotation, so
     the open quotation is carried from one line to the next within a
     paragraph, as the italic state is.
+
+    :return: The characters outside, the mark that closes the quotation still
+        open, and the text that quotation holds so far on this line.
     """
     kept: list[str] = []
+    opened_at = 0
     for index, char in enumerate(line):
         if closer is not None:
             if char == closer:
@@ -635,9 +672,10 @@ def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | No
             continue
         if char in _QUOTE_PAIRS and _opens_quotation(line, index):
             closer = _QUOTE_PAIRS[char]
+            opened_at = index
             continue
         kept.append(char)
-    return "".join(kept), closer
+    return "".join(kept), closer, line[opened_at:] if closer else ""
 
 
 def _outside_closed_quotations(line: str, pairs: dict[str, str]) -> str:
@@ -690,20 +728,42 @@ def _is_caption(line: str) -> bool:
 
 
 def _strip_exempt_markdown(
-    line: str, *, italic_open: bool, quote_closer: str | None, caption: bool = False
-) -> tuple[str, bool, str | None]:
-    """The line with every exempt use of the dash removed, and the carried state."""
+    line: str,
+    *,
+    italic_open: bool,
+    quote_closer: str | None,
+    caption: bool = False,
+    raw: bool = False,
+) -> tuple[str, bool, str | None, bool, bool]:
+    """The line with every exempt use of the dash removed, and the carried state.
+
+    :param raw: Whether the line stands in a raw HTML block, where a star is the
+        character the page shows, so it marks no italics.
+    :return: The line, whether an italic span is open, the mark that closes the
+        quotation open, whether what an open one holds on this line has a dash, and
+        whether the span open when the line began turned out to be none.
+    """
     if _TABLE_ROW.match(line):
         line = "|".join(_PLACEHOLDER_ITEM.sub("", cell) for cell in line.split("|"))
-    line, quote_closer = _outside_quotations(line, closer=quote_closer)
-    if caption:
-        # The whole paragraph is the span, so there is no "outside" to keep:
-        # the state still has to be carried, because the closing ``*`` may be
-        # several lines below.
-        _, italic_open = _outside_italics(line, italic_open=italic_open)
-    else:
-        line, italic_open = _outside_italics(line, italic_open=italic_open)
-    return _PART_AFTER_DASH.sub("", line), italic_open, quote_closer
+    line, quote_closer, quoted = _outside_quotations(line, closer=quote_closer)
+    if raw:
+        open_dash = EM_DASH in _PART_AFTER_DASH.sub("", quoted)
+        return _PART_AFTER_DASH.sub("", line), False, quote_closer, open_dash, False
+    outside, italic_open, italic, shown_again = _outside_italics(
+        line, italic_open=italic_open
+    )
+    # In a caption the whole paragraph is the span, so there is no "outside" to
+    # keep: the state still has to be carried, because the closing ``*`` may be
+    # several lines below.
+    line = line if caption else outside
+    open_dash = EM_DASH in _PART_AFTER_DASH.sub("", quoted + italic)
+    return (
+        _PART_AFTER_DASH.sub("", line),
+        italic_open,
+        quote_closer,
+        open_dash,
+        shown_again,
+    )
 
 
 def _span_remainder(span: str) -> str:
@@ -750,30 +810,64 @@ class _PageReading:
     quote_closer: str | None = None
     in_reference: bool = False
     caption: bool = False
+    #: The lines whose dash only a mark still open exempts: if nothing closes
+    #: it, the site shows the mark as written and the dash with it.
+    left_open: list[int] = field(default_factory=list)
+    #: The lines whose dash a star exempted that a later one showed opened nothing.
+    opened_nothing: list[int] = field(default_factory=list)
 
-    def open_block(self, line: str) -> None:
-        """Start a block on ``line``: what the last one left open stays there."""
-        self.italic_open, self.quote_closer = False, None
+    def open_block(self, line: str) -> list[int]:
+        """Start a block on ``line``: what the last one left open stays there.
+
+        :return: The lines whose dash the last block's open mark held, with
+            nothing to close it.
+        """
+        unclosed = self.close_block()
         self.in_reference = False
         self.caption = _is_caption(inside_quotation(line))
+        return unclosed
 
-    def holds_dash(self, line: str, shown: str) -> bool:
+    def close_block(self) -> list[int]:
+        """End the block; the lines whose dash a mark left open held, with nothing to close it."""
+        unclosed = self.left_open if self.italic_open or self.quote_closer else []
+        unclosed = [*self.opened_nothing, *unclosed]
+        self.italic_open, self.quote_closer = False, None
+        self.left_open, self.opened_nothing = [], []
+        return unclosed
+
+    def holds_dash(self, line: str, shown: str, number: int, *, raw: bool) -> bool:
         """Whether the line carries a dash no exemption covers, read through its marks.
 
         :param line: The line as written.
         :param shown: The same line with its code and maths spans out.
+        :param number: Its number, kept if a mark still open is all that exempts it.
+        :param raw: Whether it stands in a raw HTML block.
         """
         inner = inside_quotation(shown)
         if _REFERENCE_ENTRY.match(inner):
             self.in_reference = True
         elif not inside_quotation(line).startswith((" ", "\t")):
             self.in_reference = False
-        prose, self.italic_open, self.quote_closer = _strip_exempt_markdown(
+        (
+            prose,
+            self.italic_open,
+            self.quote_closer,
+            open_dash,
+            shown_again,
+        ) = _strip_exempt_markdown(
             inner,
             italic_open=self.italic_open,
             quote_closer=self.quote_closer,
             caption=self.caption,
+            raw=raw,
         )
+        if shown_again:
+            self.opened_nothing.extend(self.left_open)
+            self.left_open.clear()
+        if not (self.italic_open or self.quote_closer):
+            self.left_open.clear()
+        elif open_dash and not self.in_reference:
+            self.left_open.append(number)
         return _MATHS_DASH in shown or (EM_DASH in prose and not self.in_reference)
 
 
@@ -836,6 +930,7 @@ def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
     lines = _decode_page(text).splitlines()
     head = _frontmatter_head(lines)
     written = lines[head:]
+    read = list(page_lines(written, kind=kind))
     code_flags = list(code_lines(written, kind=kind))
     math_flags = _math_lines(written, kind=kind)
     shown = lines_read_whole(written, lambda page: _drop_code_and_math(page, kind=kind))
@@ -843,17 +938,21 @@ def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
     hits = _frontmatter_hits(lines)
     for index, opens_block in enumerate(block_starts(written, kind=kind)):
         line = written[index]
+        number = head + index + 1
         if opens_block:
-            reading.open_block(line)
+            hits.extend(reading.open_block(line))
         if code_flags[index]:
             found = False
         elif math_flags[index]:
             found = EM_DASH in line
         else:
-            found = line.strip() != "" and reading.holds_dash(line, shown[index])
+            found = line.strip() != "" and reading.holds_dash(
+                line, shown[index], number, raw=read[index].role in _RAW_ROLES
+            )
         if found:
-            hits.append(head + index + 1)
-    return hits
+            hits.append(number)
+    hits.extend(reading.close_block())
+    return sorted(set(hits))
 
 
 def _holds_prose_dash(line: str, pairs: dict[str, str] = _QUOTE_PAIRS) -> bool:

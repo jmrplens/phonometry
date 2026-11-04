@@ -476,6 +476,18 @@ def test_an_inline_literal_of_a_string_is_code() -> None:
     assert ced.python_hits('"""Shown as ``a``, the empty cell — or not."""\n') == [1]
 
 
+def test_a_plain_text_file_has_no_empty_cell_and_no_code() -> None:
+    """A line of robots.txt is no table cell and no string, whatever it holds.
+
+    The file was read as a string of a module, which took a line of nothing
+    but a dash for a placeholder and a pair of backticks for code, and rule
+    P6 grants neither outside a table and a page.
+    """
+    assert ced.text_hits("—\n") == [1]
+    assert ced.text_hits("  —  \n") == [1]
+    assert ced.text_hits("# `a — b`\n") == [1]
+
+
 def test_the_robots_file_is_read_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
     """The guard read no plain-text file, so the subpath robots.txt opened on a dash."""
     monkeypatch.chdir(pathlib.Path(__file__).resolve().parent.parent)

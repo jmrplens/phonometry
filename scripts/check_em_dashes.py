@@ -847,14 +847,14 @@ def text_hits(text: str) -> list[int]:
     The file reaches a reader as written, so every line is read, a comment
     among them: a crawler reads the ``#`` lines of robots.txt with the rules,
     and so does anyone who opens it. Nothing in it is decoded, so an entity
-    or an escape is the characters it is. Each line is read as a string of a
-    module is (:func:`_string_is_prose`): a standard's title reproduced as
-    printed keeps its dash.
+    or an escape is the characters it is, and nothing marks code or an empty
+    cell there. A standard's title reproduced as printed keeps its dash, in a
+    quotation or before a part number (:func:`_holds_prose_dash`).
     """
     return [
         number
         for number, line in enumerate(text.splitlines(), start=1)
-        if EM_DASH in line and _string_is_prose(line)
+        if _holds_prose_dash(line)
     ]
 
 

@@ -222,10 +222,21 @@ jobs:
         # than as read would stay green here for good. A check's tests hand it
         # builds of a few pages that have the defect, and the routes it skips,
         # and assert its exit status; check-descriptions.mjs has them, and the
-        # first-publication dates are tested the same way, on small
-        # repositories. Node's own test runner and no dependencies, so it runs
-        # before the install.
+        # first-publication dates and the check of a page's processes are tested
+        # the same way, on small repositories and small sites. Node's own test
+        # runner and no dependencies, so it runs before the install.
         run: pnpm run test:scripts
+        working-directory: site
+      - name: Check the pages start no process of their own
+        # A process a page starts runs about a thousand times in a build, and a
+        # synchronous one stops every other page while it runs. One git log per
+        # page was 86 % of the route phase in a CPU profile, and the same pages
+        # took 12 minutes on one day and 45 on the next with this whole job
+        # green, because nothing fails on a build that is merely slow. This reads
+        # the site's source for anything that reaches for a process and fails
+        # unless the file is listed with why it runs once per build. It reads
+        # text, so it runs before the install.
+        run: pnpm run check:render-spawns
         working-directory: site
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build

@@ -116,6 +116,8 @@ from ast_scan import (
     ROOT,
     block_statements,
     exempted,
+    for_the_type_checker,
+    is_type_checking_block,
     own_names,
     python_files,
     relative,
@@ -1257,6 +1259,9 @@ class _Flow:
             env[f"self.{target.attr}"] = state
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
+        if is_type_checking_block(node):
+            # Its body never runs, and its ``else`` always does.
+            return self.block(node.orelse, env)
         self.expression(node.test, env)
         body, body_ends = self.block(
             node.body, self.narrowed(node.test, env, holds=True)
@@ -1432,11 +1437,14 @@ def _module_name(path: pathlib.Path) -> str:
 
 
 def _imports(tree: ast.Module, module: str, *, is_package: bool) -> dict[str, str]:
-    """``{name: "module.name"}`` for each ``from`` import of the module."""
+    """``{name: "module.name"}`` for each ``from`` import of the module, but
+    one an ``if TYPE_CHECKING:`` block holds, which never runs.
+    """
     package = module if is_package else module.rpartition(".")[0]
+    checker = for_the_type_checker(tree)
     found: dict[str, str] = {}
     for node in ast.walk(tree):
-        if not isinstance(node, ast.ImportFrom):
+        if not isinstance(node, ast.ImportFrom) or id(node) in checker:
             continue
         if node.level:
             parts = package.split(".")
@@ -1517,7 +1525,10 @@ class _Sure:
             sure = sure and not _returns(statement)
 
     def statement(self, node: ast.stmt, *, sure: bool) -> None:
-        if isinstance(node, ast.If):
+        if is_type_checking_block(node) and isinstance(node, ast.If):
+            # Its body never runs, and its ``else`` always does.
+            self.block(node.orelse, sure=sure)
+        elif isinstance(node, ast.If):
             self.calls(node.test, sure=sure)
             self.block(node.body, sure=sure and _raises(node.orelse))
             self.block(node.orelse, sure=sure and _raises(node.body))
@@ -2042,7 +2053,11 @@ class _Returns:
                         self._bind(name, node.subject)
             for child in ast.iter_child_nodes(node):
                 self._walruses(child, _FUNCTION_SCOPE)
-            pending.extend(block_statements(node))
+            pending.extend(
+                node.orelse
+                if isinstance(node, ast.If) and is_type_checking_block(node)
+                else block_statements(node)
+            )
         if outer is None:
             self._hand_parameters()
 

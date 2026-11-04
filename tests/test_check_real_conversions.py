@@ -348,6 +348,19 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return np.asarray(_helper(reference, levels), dtype=np.float64)
     """,
+    "a_check_only_a_type_checker_imports_beside_the_function_that_runs": """
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from phonometry._internal.validation import real_array as _check
+
+        def _check(x, name):
+            return x
+
+        def f(levels):
+            _check(levels, "levels")
+            return float(levels)
+    """,
     "a_check_that_hands_back_a_comprehension_of_a_parameter": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -1095,6 +1108,59 @@ _PLANTED_UNCHECKED = {
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_value_only_a_type_checker_block_hands_back": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+            if TYPE_CHECKING:
+                out = levels
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_value_a_nested_function_writes_under_global_only_for_the_type_checker": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def inner():
+                global out
+                if TYPE_CHECKING:
+                    out = levels
+
+            inner()
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_name_only_the_else_of_a_type_checker_block_binds": """
+        def f(levels):
+            if TYPE_CHECKING:
+                x = levels
+            else:
+                x = 1.0
+            return float(x)
+    """,
+    "a_check_in_the_else_of_a_type_checker_block": """
+        def f(levels):
+            if TYPE_CHECKING:
+                pass
+            else:
+                real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_private_check_whose_check_sits_in_the_else_of_a_type_checker_block": """
+        def _check(values):
+            if TYPE_CHECKING:
+                pass
+            else:
+                real_array(values, "values")
+
+        def f(levels):
+            _check(levels)
+            return float(levels)
+    """,
     "a_check_handed_the_value_or_a_number": """
         def f(value):
             require_finite(value or 0.0, "value")

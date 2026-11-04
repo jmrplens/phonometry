@@ -450,6 +450,59 @@ def test_a_display_block_behind_marks_is_read_as_one(text: str) -> None:
     assert cmh.check_text(text, "p.md") == []
 
 
+def test_inline_maths_wrapped_in_a_quotation_is_not_cut_off() -> None:
+    """The marks are not the text, so the paragraph of a quotation reads as one.
+
+    Every line that opened with ``>`` read as a block marker, so inline maths
+    the quotation wraps, which the site renders, was refused as cut off.
+    """
+    assert cmh.check_text("> a $x\n> b$ c\n", "p.md") == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("> a $x\n> - b$ c\n", id="a list item of a quotation"),
+        pytest.param("> a $x\n>\n> b$ c\n", id="a blank line of a quotation"),
+        pytest.param("- a $x\n    - b$ c\n", id="a nested item"),
+        pytest.param("a $x\n***\nb$ c\n", id="a rule"),
+    ],
+)
+def test_inline_maths_is_cut_off_where_the_paragraph_ends(text: str) -> None:
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert "p.md:2:" in problems[0]
+    assert "is cut off by a block marker" in problems[0]
+
+
+@pytest.mark.parametrize(
+    ("text", "level"),
+    [("> a\n> ===\n", "h1"), ("> a\n> ---\n", "h2"), ("> > a\n> > ---\n", "h2")],
+)
+def test_a_setext_underline_is_read_through_the_marks_of_a_quotation(
+    text: str, level: str
+) -> None:
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert "p.md:2:" in problems[0]
+    assert f"becomes an {level}" in problems[0]
+
+
+@pytest.mark.parametrize("text", ["> a\n---\n", "> > a\n> ---\n"], ids=["out", "up"])
+def test_a_rule_at_another_depth_than_the_text_above_underlines_nothing(
+    text: str,
+) -> None:
+    """A setext underline is never lazy: outside the quotation it is a rule."""
+    assert cmh.check_text(text, "p.md") == []
+
+
+def test_a_less_than_is_read_past_a_rule_a_code_span_cannot_cross() -> None:
+    """The rule ends the paragraph, so the two backticks are text."""
+    problems = cmh.check_text("a `b <1\n***\nc` d\n", "p.mdx")
+    assert len(problems) == 1
+    assert "p.mdx:1:" in problems[0]
+
+
 def test_a_formula_on_the_opening_display_fence_is_refused() -> None:
     problems = cmh.check_text("$$x = 1\n", "p.md")
     assert len(problems) == 1

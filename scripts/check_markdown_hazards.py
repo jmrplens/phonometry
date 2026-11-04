@@ -100,6 +100,13 @@ rule but the fourth reads the opening line, and none reads what follows it
 until the block closes: like code, it is not markdown. Fenced code is not
 read at all, a ``math`` fence included.
 
+The marks of a quotation and the marker of a list item are not the text of a
+line. A display block and a fence open behind them and end with what holds
+them, the fourth rule looks past them, the first and the sixth read a quotation
+through its marks, so inline maths a quotation wraps is not cut off, and an
+underline is one only at the depth of the text above it: under a quotation and
+outside it, a line of hyphens is a rule.
+
 The YAML frontmatter at the top of a page is not markdown: it is read as
 data, and Astro blanks it before MDX compiles the body. No rule reads it, so
 a ``description`` may say "<0,02 dB".
@@ -120,9 +127,12 @@ import sys
 
 from markdown_fences import code_lines, display_math_parts, past_marks
 from markdown_spans import (
+    block_starts,
     drop_inline_spans,
     drop_inline_spans_by_block,
+    inside_quotation,
     lines_read_whole,
+    quote_depth,
 )
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -135,11 +145,14 @@ _ROOTS = (
 )
 _SKIP = ("reference/api/", "superpowers/")
 
-#: The markers that open a new CommonMark block at the start of a line.
-_BLOCK_MARKER = r"[-*+]\s|>|#{1,6}\s|\d{1,9}[.)]\s|\||```|~~~"
-
-#: A line that opens a new CommonMark block rather than continuing a paragraph.
-_BLOCK = re.compile(rf"^\s{{0,3}}(?:{_BLOCK_MARKER})")
+#: What ends a paragraph at the start of a line, for the reading of a span
+#: over the whole page: the marker of a new CommonMark block, a thematic break
+#: or a setext underline.
+_BLOCK_MARKER = (
+    r"[-*+]\s|>|#{1,6}\s|\d{1,9}[.)]\s|\||```|~~~"
+    r"|-[ \t]*(?:-[ \t]*){2,}$|\*[ \t]*(?:\*[ \t]*){2,}$|_[ \t]*(?:_[ \t]*){2,}$"
+    r"|(?:=+|-+)[ \t]*$"
+)
 
 #: ``>`` opening a line with content after it: a wrapped comparison operator,
 #: unless the paragraph deliberately starts a quotation, which is always
@@ -295,10 +308,18 @@ def _less_than_problems(rel: str, lines: list[str], start: int) -> list[str]:
 
 
 def _cut_maths_problems(
-    where: str, line: str, line_before: int, *, open_math: bool
+    where: str, line: str, line_before: int, *, open_math: bool, opens_block: bool
 ) -> list[str]:
-    """Rule 1: inline maths still open when a block marker ends the paragraph."""
-    if not (open_math and _BLOCK.match(line)):
+    """Rule 1: inline maths still open when a block marker ends the paragraph.
+
+    A setext underline has a rule of its own, the sixth.
+
+    :param opens_block: Whether the line opens a block, as the site reads it, a
+        later line of a quotation's paragraph not being one.
+    """
+    if not (open_math and opens_block and line.strip()):
+        return []
+    if _SETEXT.match(inside_quotation(line)):
         return []
     return [
         f"{where}: inline maths opened on line {line_before} is cut off by a "
@@ -353,24 +374,31 @@ def _math_meta_problems(where: str, line: str) -> list[str]:
 
 
 def _setext_problems(where: str, line: str, before: str) -> list[str]:
-    """Rule 6: a line of ``=`` or ``-`` that turns the text above into a heading."""
-    if not (_SETEXT.match(line) and before.strip()):
+    """Rule 6: a line of ``=`` or ``-`` that turns the text above into a heading.
+
+    Both are read through the marks of a quotation, and an underline is never
+    lazy: at another depth than the text above it is a rule of its own.
+    """
+    rest, above = inside_quotation(line), inside_quotation(before)
+    if not (_SETEXT.match(rest) and above.strip()):
+        return []
+    if quote_depth(line) != quote_depth(before):
         return []
     # A fence line above is code, and the caller does not ask about it; what is
     # left to tell apart is a heading, a table row, a tag and a rule of its own.
-    if before.lstrip().startswith(("#", "|", "<")) or _SETEXT.match(before):
+    if above.lstrip().startswith(("#", "|", "<")) or _SETEXT.match(above):
         return []
-    level = "an h1" if "=" in line else "an h2"
+    level = "an h1" if "=" in rest else "an h2"
     return [
-        f"{where}: a line of only {line.strip()[0]!r} under text is a setext "
+        f"{where}: a line of only {rest.strip()[0]!r} under text is a setext "
         f"underline, so the text above becomes {level}; rewrap so the line "
         f"carries text, or leave a blank line before a thematic break"
     ]
 
 
-def _maths_left_open(line: str, *, open_math: bool) -> bool:
+def _maths_left_open(line: str, *, open_math: bool, opens_block: bool) -> bool:
     """Whether an inline ``$`` is still open once this line is read."""
-    if not line.strip() or _BLOCK.match(line):
+    if opens_block:
         open_math = False
     if _unescaped_dollars(line) % 2 == 1:
         open_math = not open_math
@@ -391,13 +419,11 @@ def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
         "code" if is_code else part
         for is_code, part in zip(code, display_math_parts(body, code), strict=True)
     ]
-    shown = lines_read_whole(
-        [
-            line if part == "prose" else ""
-            for line, part in zip(lines, parts, strict=True)
-        ],
-        drop_inline_spans_by_block,
-    )
+    prose = [
+        line if part == "prose" else "" for line, part in zip(lines, parts, strict=True)
+    ]
+    shown = lines_read_whole(prose, drop_inline_spans_by_block)
+    opens_block = block_starts(prose)
     for index in range(start, len(lines)):
         line = lines[index]
         where = f"{rel}:{index + 1}"
@@ -407,13 +433,19 @@ def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
             open_math = False
             continue
         before = lines[index - 1] if index else ""
-        problems.extend(_cut_maths_problems(where, line, index, open_math=open_math))
+        problems.extend(
+            _cut_maths_problems(
+                where, line, index, open_math=open_math, opens_block=opens_block[index]
+            )
+        )
         problems.extend(_wrapped_quote_problems(where, line, before))
         problems.extend(_anchor_problems(where, line))
         problems.extend(_math_meta_problems(where, line))
         if index > start and parts[index - 1] == "prose":
             problems.extend(_setext_problems(where, line, before))
-        open_math = _maths_left_open(shown[index], open_math=open_math)
+        open_math = _maths_left_open(
+            shown[index], open_math=open_math, opens_block=opens_block[index]
+        )
     return problems
 
 

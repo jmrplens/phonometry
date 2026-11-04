@@ -178,3 +178,9 @@ test('a tag with text after it opens no raw block unless it is a block tag', () 
   assert.equal(authorsFigure('<div>\\<img src="x.png"></div>\n'), true);
   assert.equal(authorsFigure('Prose.\n<section>\\<img src="x.png"></section>\n'), true);
 });
+
+test('only the end the Markdown parser reads ends a comment', () => {
+  const lines = ['<!-- a --!>', 'b', 'c -->', 'd'];
+  const roles = pageLines(lines, { kind: 'md' }).map((line) => line.role);
+  assert.deepEqual(roles, ['html', 'raw', 'raw', 'paragraph']);
+});

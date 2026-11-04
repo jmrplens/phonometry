@@ -105,14 +105,19 @@ const HTML_BLOCK_NAMES =
 
 /**
  * How a raw HTML block of types 1 to 6 opens and what ends it, `null` being a
- * blank line (CommonMark 0.31.2, 4.6).
+ * blank line (CommonMark 0.31.2, 4.6). These are the ends the Markdown parser
+ * reads, which is what decides this page: `--!>`, which a browser takes as the end
+ * of a comment, does not end a block here.
  */
 const HTML_BLOCKS = [
-  [/^<(?:script|pre|style|textarea)(?:[ \t>]|$)/i, /<\/(?:script|pre|style|textarea)>/i],
-  [/^<!--/, /-->/],
-  [/^<\?/, /\?>/],
-  [/^<![A-Za-z]/, />/],
-  [/^<!\[CDATA\[/, /\]\]>/],
+  [
+    /^<(?:script|pre|style|textarea)(?:[ \t>]|$)/i,
+    (line) => /<\/(?:script|pre|style|textarea)>/i.test(line),
+  ],
+  [/^<!--/, (line) => line.includes('-->')],
+  [/^<\?/, (line) => line.includes('?>')],
+  [/^<![A-Za-z]/, (line) => line.includes('>')],
+  [/^<!\[CDATA\[/, (line) => line.includes(']]>')],
   [new RegExp(`^</?(?:${HTML_BLOCK_NAMES})(?:[ \\t]|/?>|$)`, 'i'), null],
 ];
 
@@ -350,7 +355,7 @@ class Walk {
   /** A line that the fence, the display block or the HTML block open holds. */
   inside(text, rest) {
     if (this.leaf === 'html') {
-      if (this.htmlEnd !== null && this.htmlEnd.test(rest)) this.leaf = '';
+      if (this.htmlEnd !== null && this.htmlEnd(rest)) this.leaf = '';
       return pageLine(text, 'raw', rest);
     }
     const deep = this.markdown && blankColumns(rest, 0) >= CODE_INDENT;
@@ -538,7 +543,7 @@ class Walk {
     for (const [opens, ends] of HTML_BLOCKS) {
       if (opens.test(body)) {
         this.closeTo(matched);
-        this.leaf = ends !== null && ends.test(body) ? '' : 'html';
+        this.leaf = ends !== null && ends(body) ? '' : 'html';
         this.htmlEnd = ends;
         return pageLine(text, 'html', rest);
       }

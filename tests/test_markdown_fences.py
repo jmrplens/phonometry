@@ -544,3 +544,10 @@ def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
         if one != other
     ]
     assert differ == []
+
+
+def test_only_the_end_the_markdown_parser_reads_ends_a_comment() -> None:
+    """``--!>`` ends a comment in a browser, and no raw HTML block of a page."""
+    lines = ["<!-- a --!>", "b", "c -->", "d"]
+    roles = [line.role for line in page_lines(lines, kind="md")]
+    assert roles == ["html", "raw", "raw", "paragraph"]

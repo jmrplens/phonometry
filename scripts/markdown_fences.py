@@ -61,7 +61,7 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
 
 #: A run of three or more backticks or tildes opening a line, and the rest.
 _MARKER = re.compile(r"^(\s*)(`{3,}|~{3,})(.*)$")
@@ -111,16 +111,19 @@ _HTML_BLOCK_NAMES = (
     "table|tbody|td|tfoot|th|thead|title|tr|track|ul"
 )
 #: How a raw HTML block of types 1 to 6 opens and what ends it, ``None`` being a
-#: blank line (CommonMark 0.31.2, 4.6).
-_HTML_BLOCKS = (
+#: blank line (CommonMark 0.31.2, 4.6). These are the ends the Markdown parser reads,
+#: which is what decides a page: ``--!>``, which a browser takes as the end of a
+#: comment, does not end a block here.
+_HTML_BLOCKS: tuple[tuple[re.Pattern[str], Callable[[str], bool] | None], ...] = (
     (
         re.compile(r"<(?:script|pre|style|textarea)(?:[ \t>]|$)", re.IGNORECASE),
-        re.compile(r"</(?:script|pre|style|textarea)>", re.IGNORECASE),
+        lambda line: re.search(r"</(?:script|pre|style|textarea)>", line, re.IGNORECASE)
+        is not None,
     ),
-    (re.compile(r"<!--"), re.compile(r"-->")),
-    (re.compile(r"<\?"), re.compile(r"\?>")),
-    (re.compile(r"<![A-Za-z]"), re.compile(r">")),
-    (re.compile(r"<!\[CDATA\["), re.compile(r"\]\]>")),
+    (re.compile(r"<!--"), lambda line: "-->" in line),
+    (re.compile(r"<\?"), lambda line: "?>" in line),
+    (re.compile(r"<![A-Za-z]"), lambda line: ">" in line),
+    (re.compile(r"<!\[CDATA\["), lambda line: "]]>" in line),
     (
         re.compile(rf"</?(?:{_HTML_BLOCK_NAMES})(?:[ \t]|/?>|$)", re.IGNORECASE),
         None,
@@ -259,7 +262,7 @@ class _Walk:
         #: The indentation of the marker of the fence open.
         self.indent = 0
         #: What ends the raw HTML block open, ``None`` being a blank line.
-        self.html_end: re.Pattern[str] | None = None
+        self.html_end: Callable[[str], bool] | None = None
         #: The asides open, innermost last, each with its colons, how many
         #: containers stood around it and the indentation of its fence, which its
         #: lines lose.
@@ -356,7 +359,7 @@ class _Walk:
     def _inside(self, written: str, text: str, rest: str) -> PageLine:
         """A line that the fence, the display block or the HTML block open holds."""
         if self.leaf == "html":
-            if self.html_end is not None and self.html_end.search(rest):
+            if self.html_end is not None and self.html_end(rest):
                 self.leaf = ""
             return PageLine(written, "raw", rest=rest)
         deep = self.markdown and _blank_columns(rest, 0) >= _CODE_INDENT
@@ -550,7 +553,7 @@ class _Walk:
             if opens.match(body):
                 self._close_to(matched)
                 self.leaf, self.html_end = "html", ends
-                if ends is not None and ends.search(body):
+                if ends is not None and ends(body):
                     self.leaf = ""
                 return PageLine(written, "html", rest=rest)
         lazy = paragraph and matched < len(self.held)

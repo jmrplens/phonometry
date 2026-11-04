@@ -217,6 +217,55 @@ def test_an_annotation_without_a_value_leaves_the_builtin(
     assert [f.calls for f in found] == []
 
 
+def test_an_annotation_in_a_function_makes_the_name_the_function_s(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``format: object`` in a function makes ``format`` local and unbound, so
+    a call of it there raises ``UnboundLocalError``, a ``NameError``, before
+    ``check`` runs: it is no call of the builtin Sonar holds safe, and the
+    block has two calls that could raise. An async function does the same; a
+    class body's annotation leaves its methods the builtin.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        def test_annotated():
+            format: object
+            with pytest.raises(NameError):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        async def test_annotated():
+            format: object
+            with pytest.raises(NameError):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        class TestAnnotated:
+            format: object
+
+            def test_annotated(self):
+                with pytest.raises(ValueError, match="x"):
+                    check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == []
+
+
 def test_a_type_parameter_spelt_like_a_builtin_is_not_the_builtin(
     tmp_path: pathlib.Path,
 ) -> None:

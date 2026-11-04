@@ -41,7 +41,15 @@ import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, exempted, python_files, relative, scoped
+from ast_scan import (
+    ROOT,
+    exempted,
+    forget_trees,
+    own_names,
+    python_files,
+    relative,
+    scoped,
+)
 
 if TYPE_CHECKING:
     import pathlib
@@ -181,8 +189,10 @@ def _bound(tree: ast.AST) -> set[str]:
     """Every name the file binds itself, which then no longer means a builtin.
 
     A type parameter of a generic function or class counts among them. An
-    annotation without a value (``format: Callable[..., str]``) binds
-    nothing, and leaves the builtin where it was.
+    annotation without a value (``format: Callable[..., str]``) stores
+    nothing: at the top of the module or in a class body it leaves the
+    builtin where it was, but in a function it makes the name local, which
+    a read there finds unbound and never takes for the builtin.
     """
     names: set[str] = set()
     bare = {
@@ -199,6 +209,8 @@ def _bound(tree: ast.AST) -> set[str]:
             names.add(node.id)
         elif isinstance(node, _NAMED_BINDINGS):
             names.add(node.name)
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                names |= own_names(node).annotated
         elif isinstance(node, ast.arg):
             names.add(node.arg)
         elif isinstance(node, ast.ExceptHandler) and node.name:
@@ -312,6 +324,7 @@ def findings(path: pathlib.Path) -> list[Finding]:
     """
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     resolver = _Resolver(tree)
+    forget_trees()
     found: list[Finding] = []
     for test, node in scoped(tree):
         block = _block(node, resolver)

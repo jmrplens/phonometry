@@ -127,6 +127,63 @@ def test_the_text_either_side_of_a_span_stays_apart(text: str, joined: str) -> N
     assert joined not in drop_inline_spans(text)
 
 
+@pytest.mark.parametrize(
+    ("text", "shown"),
+    [
+        pytest.param(
+            "> Run `python\n> --version` here.",
+            f"> Run {SPAN_MARK}\n here.",
+            id="over the lines of a quotation",
+        ),
+        pytest.param(
+            "> - Run `python\n>   --version` here.",
+            f"> - Run {SPAN_MARK}\n here.",
+            id="over the lines of a list item in a quotation",
+        ),
+        pytest.param(
+            "> Run `python\n--version` here.",
+            f"> Run {SPAN_MARK}\n here.",
+            id="onto a lazy line",
+        ),
+        pytest.param(
+            "> > Run `python\n> --version` here.",
+            f"> > Run {SPAN_MARK}\n here.",
+            id="onto a lazy line of a nested quotation",
+        ),
+        pytest.param(
+            "> Run\nlazily\n> `python\n> --version` here.",
+            f"> Run\nlazily\n> {SPAN_MARK}\n here.",
+            id="past a lazy line",
+        ),
+    ],
+)
+def test_a_span_wraps_inside_a_quotation(text: str, shown: str) -> None:
+    """A quotation's marks are not its text, so its paragraph reads as one.
+
+    Each line that opened with ``>`` was read as a block of its own, so the
+    two backticks of a span the quotation wraps never paired.
+    """
+    assert drop_inline_spans_by_block(text) == shown
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("> Run `python\n>\n> --version` here.", id="a blank line of it"),
+        pytest.param("> - Run `python\n> - --version` here.", id="two items in it"),
+        pytest.param("> Run `python\n> > --version` here.", id="a deeper quotation"),
+        pytest.param("> # Run `python\n> --version` here.", id="a heading in it"),
+        pytest.param("> | Run `python |\n> --version` here.", id="a table row in it"),
+        pytest.param("Run `python\n> --version` here.", id="a quotation that opens"),
+        pytest.param("- Run `python\n> --version` here.", id="after a list item"),
+        pytest.param("- Run `python\n- --version` here.", id="two list items"),
+    ],
+)
+def test_a_span_stays_inside_the_paragraph_of_a_quotation(text: str) -> None:
+    """Each of these is two blocks to the site, so the two backticks stay apart."""
+    assert drop_inline_spans_by_block(text) == text
+
+
 def test_lines_read_whole_give_back_a_line_for_each_line() -> None:
     """No lines give none back: joined, they were the empty text, which split
     back into one empty line, and every reader that zipped that against the

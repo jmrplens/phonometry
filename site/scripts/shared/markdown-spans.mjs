@@ -107,6 +107,12 @@ const BLOCK_START = /^ {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)/;
 const ONE_LINE_BLOCK = /^ {0,3}(?:#{1,6}(?:\s|$)|\|)/;
 
 /**
+ * The marks of a quotation that open a line, each with what may stand before
+ * it, and the one blank after the last of them (CommonMark 0.31.2, 5.1).
+ */
+const QUOTE_MARKS = /^(?: {0,3}>)+ ?/;
+
+/**
  * A comment, by the page's kind: an HTML comment on a `.md` page, which
  * opening a line is an HTML block (CommonMark 4.6, type 2) that runs to its
  * `-->` and may interrupt a paragraph, and an MDX comment, an expression,
@@ -142,7 +148,40 @@ export function dropInlineSpansByBlock(text, markers = '`', { comments } = {}) {
     .join('\n');
 }
 
-/** The lines of a page in the blocks a code span stays inside, every line in one. */
+/** How many quotation marks open `line`. */
+function quoteDepth(line) {
+  return (QUOTE_MARKS.exec(line)?.[0].match(/>/g) ?? []).length;
+}
+
+/** `line` without the quotation marks that open it. */
+function insideQuotation(line) {
+  return line.replace(QUOTE_MARKS, '');
+}
+
+/**
+ * Whether `line`, which opens with a quotation mark, carries on the paragraph
+ * of `block`. The marks are not the paragraph's text, so what decides is what
+ * stands after them: a blank, a heading, a table row, a list item or a deeper
+ * quotation ends the paragraph inside the quotation as it would outside it. A
+ * line with fewer marks than the block opened with carries it on lazily.
+ */
+function continuesQuotation(line, block) {
+  const rest = insideQuotation(line);
+  return (
+    block.length > 0 &&
+    quoteDepth(line) > 0 &&
+    quoteDepth(line) <= quoteDepth(block[0]) &&
+    rest.trim() !== '' &&
+    !BLOCK_START.test(rest)
+  );
+}
+
+/**
+ * The lines of a page in the blocks a code span stays inside, every line in
+ * one. A quotation is read through its marks: a later line of its paragraph
+ * stays in the block, and what opens a block outside a quotation opens one
+ * inside.
+ */
 function blocksOf(lines, comments) {
   const opener = comments ? COMMENT_LINE[comments] : null;
   const blocks = [];
@@ -161,9 +200,11 @@ function blocksOf(lines, comments) {
       blocks.push([line]);
       continue;
     }
-    if (BLOCK_START.test(line) || opener?.test(line)) close();
+    if ((BLOCK_START.test(line) && !continuesQuotation(line, current)) || opener?.test(line)) {
+      close();
+    }
     current.push(line);
-    if (ONE_LINE_BLOCK.test(line)) close();
+    if (ONE_LINE_BLOCK.test(insideQuotation(line))) close();
   }
   close();
   return blocks;

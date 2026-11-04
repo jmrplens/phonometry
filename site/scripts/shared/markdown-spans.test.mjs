@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { dropInlineSpans, inlineSpans, SPAN_MARK } from './markdown-spans.mjs';
+import { dropInlineSpans, dropInlineSpansByBlock, inlineSpans, SPAN_MARK } from './markdown-spans.mjs';
 
 const spans = (text, markers = '`') =>
   inlineSpans(text, markers).map(([start, end]) => text.slice(start, end));
@@ -46,3 +46,35 @@ test('the text either side of a span taken out stays apart', () => {
   assert.ok(!dropInlineSpans('$`x`$', '`').includes('$$'));
 });
 
+test('a span wraps inside a quotation', () => {
+  // A quotation's marks are not its text, so its paragraph reads as one: each
+  // line that opened with `>` was a block of its own, and the two backticks
+  // of a span the quotation wraps never paired.
+  const cases = [
+    ['> Run `python\n> --version` here.', `> Run ${SPAN_MARK}\n here.`],
+    ['> - Run `python\n>   --version` here.', `> - Run ${SPAN_MARK}\n here.`],
+    ['> Run `python\n--version` here.', `> Run ${SPAN_MARK}\n here.`],
+    ['> > Run `python\n> --version` here.', `> > Run ${SPAN_MARK}\n here.`],
+    ['> Run\nlazily\n> `python\n> --version` here.', `> Run\nlazily\n> ${SPAN_MARK}\n here.`],
+  ];
+  for (const [text, shown] of cases) {
+    assert.equal(dropInlineSpansByBlock(text), shown, text);
+  }
+});
+
+test('a span stays inside the paragraph of a quotation', () => {
+  // Each of these is two blocks to the site, so the two backticks stay apart.
+  const cases = [
+    '> Run `python\n>\n> --version` here.',
+    '> - Run `python\n> - --version` here.',
+    '> Run `python\n> > --version` here.',
+    '> # Run `python\n> --version` here.',
+    '> | Run `python |\n> --version` here.',
+    'Run `python\n> --version` here.',
+    '- Run `python\n> --version` here.',
+    '- Run `python\n- --version` here.',
+  ];
+  for (const text of cases) {
+    assert.equal(dropInlineSpansByBlock(text), text, text);
+  }
+});

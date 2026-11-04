@@ -122,6 +122,9 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
 _BLOCK_START = re.compile(r" {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)")
 #: A block on its own line only: a heading or a row of a table.
 _ONE_LINE_BLOCK = re.compile(r" {0,3}(?:#{1,6}(?:\s|$)|\|)")
+#: The marks of a quotation that open a line, each with what may stand before
+#: it, and the one blank after the last of them (CommonMark 0.31.2, 5.1).
+_QUOTE_MARKS = re.compile(r"(?: {0,3}>)+ ?")
 #: A comment and the line that opens one, by the page's kind: an HTML comment
 #: on a ``.md`` page, which opening a line is an HTML block that ends at its
 #: ``-->``, and an MDX comment, an expression, beside it on a ``.mdx`` page.
@@ -135,12 +138,43 @@ _COMMENT_LINE = {
 }
 
 
+def _quote_depth(line: str) -> int:
+    """How many quotation marks open *line*."""
+    marks = _QUOTE_MARKS.match(line)
+    return marks.group().count(">") if marks else 0
+
+
+def _inside_quotation(line: str) -> str:
+    """*line* without the quotation marks that open it."""
+    marks = _QUOTE_MARKS.match(line)
+    return line[marks.end() :] if marks else line
+
+
+def _continues_quotation(line: str, block: list[str]) -> bool:
+    """Whether *line*, which opens with a quotation mark, carries on the paragraph of *block*.
+
+    The marks are not the paragraph's text, so what decides is what stands
+    after them: a blank, a heading, a table row, a list item or a deeper
+    quotation ends the paragraph inside the quotation as it would outside it.
+    A line with fewer marks than the block opened with carries it on lazily.
+    """
+    rest = _inside_quotation(line)
+    return (
+        bool(block)
+        and 0 < _quote_depth(line) <= _quote_depth(block[0])
+        and bool(rest.strip())
+        and not _BLOCK_START.match(rest)
+    )
+
+
 def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
     """*lines* in the blocks a code span stays inside, every line in one.
 
     A blank line is a block of its own and ends the one before it; a heading,
     a table row, a list item or a quotation opens one, and a line that opens
     a comment opens one that runs to the comment's end, blank lines included.
+    A quotation is read through its marks: a later line of its paragraph stays
+    in the block, and what opens a block outside a quotation opens one inside.
     """
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -152,7 +186,7 @@ def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
             continue
         if (
             not line.strip()
-            or _BLOCK_START.match(line)
+            or (_BLOCK_START.match(line) and not _continues_quotation(line, current))
             or (opener and opener.match(line))
         ):
             if current:
@@ -162,7 +196,7 @@ def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
             blocks.append([line])
             continue
         current.append(line)
-        if _ONE_LINE_BLOCK.match(line):
+        if _ONE_LINE_BLOCK.match(_inside_quotation(line)):
             blocks.append(current)
             current = []
     if current:

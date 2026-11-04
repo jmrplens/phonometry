@@ -351,6 +351,19 @@ def test_a_code_span_that_wraps_keeps_its_option() -> None:
     assert ced.markdown_double_hyphen_hits(text) == []
 
 
+def test_a_code_span_that_wraps_in_a_quotation_keeps_its_option() -> None:
+    """A quotation's marks are not its text, so its paragraph reads as one."""
+    text = "> Run `python\n> --version` here.\n"
+    assert ced.markdown_double_hyphen_hits(text) == []
+    assert ced.markdown_hits("> Run `a —\n> b` here.\n") == []
+    assert ced.markdown_hits("> Run `a\n> b` here — and stop.\n") == [2]
+
+
+def test_a_code_span_does_not_cross_into_the_next_item_of_a_quotation() -> None:
+    assert ced.markdown_double_hyphen_hits("> - Run `a\n> - b -- c` here.\n") == [2]
+    assert ced.markdown_hits("> - Run `a\n> - b — c` here.\n") == [2]
+
+
 def test_an_escaped_backtick_opens_no_code_span() -> None:
     r"""``\`x -- y\``` is prose a reader sees, backticks and all.
 

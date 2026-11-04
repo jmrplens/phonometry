@@ -117,8 +117,10 @@ _HTML_BLOCK_NAMES = (
 _HTML_BLOCKS: tuple[tuple[re.Pattern[str], Callable[[str], bool] | None], ...] = (
     (
         re.compile(r"<(?:script|pre|style|textarea)(?:[ \t>]|$)", re.IGNORECASE),
-        lambda line: re.search(r"</(?:script|pre|style|textarea)>", line, re.IGNORECASE)
-        is not None,
+        lambda line: (
+            re.search(r"</(?:script|pre|style|textarea)>", line, re.IGNORECASE)
+            is not None
+        ),
     ),
     (re.compile(r"<!--"), lambda line: "-->" in line),
     (re.compile(r"<\?"), lambda line: "?>" in line),

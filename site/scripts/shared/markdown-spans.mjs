@@ -180,7 +180,7 @@ function continuesQuotation(line, block) {
  * The lines of a page in the blocks a code span stays inside, every line in
  * one. A quotation is read through its marks: a later line of its paragraph
  * stays in the block, and what opens a block outside a quotation opens one
- * inside.
+ * inside, a line that holds only the marks being its blank line.
  */
 function blocksOf(lines, comments) {
   const opener = comments ? COMMENT_LINE[comments] : null;
@@ -204,7 +204,8 @@ function blocksOf(lines, comments) {
       close();
     }
     current.push(line);
-    if (ONE_LINE_BLOCK.test(insideQuotation(line))) close();
+    const rest = insideQuotation(line);
+    if (!rest.trim() || ONE_LINE_BLOCK.test(rest)) close();
   }
   close();
   return blocks;

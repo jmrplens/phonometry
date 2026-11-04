@@ -222,6 +222,51 @@ def test_a_dash_in_a_display_math_block_is_still_read() -> None:
     assert ced.markdown_hits("$$ —\nx\n$$\n") == [1]
 
 
+def test_nothing_pairs_across_a_display_math_block() -> None:
+    """A ``$$`` fence ends the paragraph before it, as a code fence does.
+
+    The block was read as a mark on the lines of the paragraph, so a backtick,
+    an asterisk or a quotation mark on one side paired with its partner on
+    the other, and the dash between them was taken for code or for a title.
+    """
+    assert ced.markdown_hits("First `a — b\n$$\nx\n$$\nc` after.\n") == [1]
+    assert ced.markdown_hits("An *open\n$$\nx\n$$\nprose — here* end.\n") == [5]
+    assert ced.markdown_hits('A "quote\n$$\nx\n$$\nprose — here" end.\n') == [5]
+
+
+def test_nothing_is_carried_across_a_fenced_block() -> None:
+    """The same for a code fence: the reader stepped over it with its state open."""
+    assert ced.markdown_hits("An *open\n```\nx\n```\nprose — here* end.\n") == [5]
+    assert ced.markdown_hits('A "quote\n```\nx\n```\nprose — here" end.\n') == [5]
+
+
+def test_the_paragraph_after_a_block_is_read_afresh() -> None:
+    """A caption right under a block opens a paragraph, so it is a caption."""
+    assert ced.markdown_hits("$$\nx\n$$\n*A caption — with a dash.*\n") == [4]
+    assert ced.markdown_hits("Text.\n```\nx\n```\n*A caption — with a dash.*\n") == [5]
+
+
+def test_nothing_is_carried_from_one_block_to_the_next() -> None:
+    """A list item, a heading and a table row are blocks to the site.
+
+    An italic span or a quotation left open in one does not close in the
+    next, so the marks there are shown as written and the dash after them is
+    the page's own.
+    """
+    assert ced.markdown_hits("- An *open\n- prose — here* end.\n") == [2]
+    assert ced.markdown_hits('- A "quote\n- prose — here" end.\n') == [2]
+    assert ced.markdown_hits("# A *heading\nprose — here* end.\n") == [2]
+    assert ced.markdown_hits("| a *b |\n| prose — here* |\n") == [2]
+    assert ced.markdown_hits("> - An *open\n> - prose — here* end.\n") == [2]
+
+
+def test_a_title_stays_exempt_over_the_lines_of_its_own_block() -> None:
+    """What wraps inside one block is still read whole."""
+    assert ced.markdown_hits("- See *Acoustics — Rooms,\n  wrapped — here* now.\n") == []
+    assert ced.markdown_hits("> See *Acoustics — Rooms,\n> wrapped — here* now.\n") == []
+    assert ced.markdown_hits('> See "Acoustics — Rooms,\n> wrapped — here" now.\n') == []
+
+
 def test_a_quotation_mark_in_math_opens_no_quotation() -> None:
     text = 'The ditto $\\text{"}$ repeats the row, and the level rises — and falls.\n'
     assert ced.markdown_hits(text) == [1]

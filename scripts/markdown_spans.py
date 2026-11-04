@@ -174,7 +174,8 @@ def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
     a table row, a list item or a quotation opens one, and a line that opens
     a comment opens one that runs to the comment's end, blank lines included.
     A quotation is read through its marks: a later line of its paragraph stays
-    in the block, and what opens a block outside a quotation opens one inside.
+    in the block, and what opens a block outside a quotation opens one inside,
+    a line that holds only the marks being its blank line.
     """
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -196,12 +197,26 @@ def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
             blocks.append([line])
             continue
         current.append(line)
-        if _ONE_LINE_BLOCK.match(_inside_quotation(line)):
+        rest = _inside_quotation(line)
+        if not rest.strip() or _ONE_LINE_BLOCK.match(rest):
             blocks.append(current)
             current = []
     if current:
         blocks.append(current)
     return blocks
+
+
+def block_starts(lines: Sequence[str]) -> list[bool]:
+    """Whether each of *lines* opens a block of the page, a blank line among them.
+
+    For a reader that carries a state of its own down a paragraph, such as an
+    open italic span, and has to drop it where a code span would stop.
+    """
+    return [
+        index == 0
+        for block in _blocks(list(lines), None)
+        for index in range(len(block))
+    ]
 
 
 def _unclosed(

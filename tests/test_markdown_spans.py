@@ -25,6 +25,7 @@ if _SCRIPTS not in sys.path:
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans,
+    block_starts,
     drop_inline_spans,
     drop_inline_spans_by_block,
     inline_spans,
@@ -182,6 +183,13 @@ def test_a_span_wraps_inside_a_quotation(text: str, shown: str) -> None:
 def test_a_span_stays_inside_the_paragraph_of_a_quotation(text: str) -> None:
     """Each of these is two blocks to the site, so the two backticks stay apart."""
     assert drop_inline_spans_by_block(text) == text
+
+
+def test_the_lines_that_open_a_block_are_the_ones_the_spans_stop_at() -> None:
+    lines = ["a", "b", "", "- c", "  d", "- e", "> f", "> g", ">", "> h", "# i", "j"]
+    opening = [True, False, True, True, False, True, True, False, True, True, True, True]
+    assert block_starts(lines) == opening
+    assert block_starts([]) == []
 
 
 def test_lines_read_whole_give_back_a_line_for_each_line() -> None:

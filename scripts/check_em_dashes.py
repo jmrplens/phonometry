@@ -40,7 +40,10 @@ parentheses (``$L(1000)$``, or a code span holding ``band(2000)``) open
 no bibliographic entry. The code and maths spans are read together, a block
 of the page at a time, as the site reads them, and a ``$$`` block is read
 apart, as the site reads a fenced code block: a line of it that opens with
-``+ ``, ``|`` or ``>`` starts no block of markdown.
+``+ ``, ``|`` or ``>`` starts no block of markdown, and the block ends the
+paragraph before it, so nothing pairs across it. An italic span and a
+quotation stop at the start of a block as a code span does, so one left open
+in a list item is not closed by the next.
 
 The character has other spellings that publish it all the same, and each is
 read as the character where it is decoded on its way to a reader: the HTML
@@ -118,6 +121,7 @@ from markdown_fences import code_lines
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans_by_block,
+    block_starts,
     lines_read_whole,
     replace_inline_spans_by_block,
 )
@@ -612,54 +616,48 @@ def _drop_code_and_math(text: str) -> str:
 
 
 def markdown_hits(text: str) -> list[int]:
-    """The 1-based lines of a markdown or MDX page that carry a prose dash."""
+    """The 1-based lines of a markdown or MDX page that carry a prose dash.
+
+    A fenced block and a display-math block end the paragraph before them, as
+    the site reads them, so each reaches the span reader as a blank line:
+    nothing pairs across it, whatever its lines open with. An italic span and
+    a quotation stop where a code span does, at the start of any block.
+    """
     hits: list[int] = []
     italic_open = False
     quote_closer: str | None = None
     in_reference = False
     caption = False
-    opening = True
     lines = _decode_page(text).splitlines()
     code_flags = list(code_lines(lines))
     math_flags = _math_lines(lines, code_flags)
-    # The inline code and maths spans, read over the lines of their block:
-    # see _drop_code_and_math. A display-math block is read apart first, as
-    # remark-math reads it, like a fenced code block: a line of it that opens
-    # with ``+ ``, ``|`` or ``>`` starts no block, so the inline reader is
-    # handed what a maths span leaves of each line, fences included, and not
-    # the line, which would part the fences into two blocks that never pair.
-    shown = lines_read_whole(
-        [
-            "" if code else SPAN_MARK + EM_DASH * line.count(EM_DASH) if math else line
-            for line, code, math in zip(lines, code_flags, math_flags, strict=True)
-        ],
-        _drop_code_and_math,
-    )
-    for number, (line, code) in enumerate(zip(lines, code_flags, strict=True), start=1):
-        if code:
-            continue
-        stripped = line.lstrip()
-        if not stripped:
-            italic_open = False
-            quote_closer = None
+    inline = [
+        "" if code or math else line
+        for line, code, math in zip(lines, code_flags, math_flags, strict=True)
+    ]
+    shown = lines_read_whole(inline, _drop_code_and_math)
+    for index, opens_block in enumerate(block_starts(inline)):
+        line = lines[index]
+        if opens_block:
+            italic_open, quote_closer = False, None
+            caption = _is_caption(line)
+        if not inline[index].strip():
             in_reference = False
-            caption = False
-            opening = True
+            if math_flags[index] and EM_DASH in line:
+                hits.append(index + 1)
             continue
-        if _REFERENCE_ENTRY.match(shown[number - 1]):
+        if _REFERENCE_ENTRY.match(shown[index]):
             in_reference = True
         elif not line.startswith((" ", "\t")):
             in_reference = False
-        if opening:
-            caption, opening = _is_caption(line), False
         prose, italic_open, quote_closer = _strip_exempt_markdown(
-            shown[number - 1],
+            shown[index],
             italic_open=italic_open,
             quote_closer=quote_closer,
             caption=caption,
         )
         if EM_DASH in prose and not in_reference:
-            hits.append(number)
+            hits.append(index + 1)
     return hits
 
 

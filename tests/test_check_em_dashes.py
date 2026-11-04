@@ -262,9 +262,15 @@ def test_nothing_is_carried_from_one_block_to_the_next() -> None:
 
 def test_a_title_stays_exempt_over_the_lines_of_its_own_block() -> None:
     """What wraps inside one block is still read whole."""
-    assert ced.markdown_hits("- See *Acoustics — Rooms,\n  wrapped — here* now.\n") == []
-    assert ced.markdown_hits("> See *Acoustics — Rooms,\n> wrapped — here* now.\n") == []
-    assert ced.markdown_hits('> See "Acoustics — Rooms,\n> wrapped — here" now.\n') == []
+    assert (
+        ced.markdown_hits("- See *Acoustics — Rooms,\n  wrapped — here* now.\n") == []
+    )
+    assert (
+        ced.markdown_hits("> See *Acoustics — Rooms,\n> wrapped — here* now.\n") == []
+    )
+    assert (
+        ced.markdown_hits('> See "Acoustics — Rooms,\n> wrapped — here" now.\n') == []
+    )
 
 
 def test_a_quotation_mark_in_math_opens_no_quotation() -> None:

@@ -187,7 +187,20 @@ def test_a_span_stays_inside_the_paragraph_of_a_quotation(text: str) -> None:
 
 def test_the_lines_that_open_a_block_are_the_ones_the_spans_stop_at() -> None:
     lines = ["a", "b", "", "- c", "  d", "- e", "> f", "> g", ">", "> h", "# i", "j"]
-    opening = [True, False, True, True, False, True, True, False, True, True, True, True]
+    opening = [
+        True,
+        False,
+        True,
+        True,
+        False,
+        True,
+        True,
+        False,
+        True,
+        True,
+        True,
+        True,
+    ]
     assert block_starts(lines) == opening
     assert block_starts([]) == []
 

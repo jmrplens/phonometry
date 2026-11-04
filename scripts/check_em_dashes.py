@@ -620,8 +620,7 @@ def _span_remainder(span: str) -> str:
     """
     if span.startswith("$"):
         return "\n".join(
-            SPAN_MARK + _MATHS_DASH * piece.count(EM_DASH)
-            for piece in span.split("\n")
+            SPAN_MARK + _MATHS_DASH * piece.count(EM_DASH) for piece in span.split("\n")
         )
     return SPAN_MARK + "\n" * span.count("\n")
 

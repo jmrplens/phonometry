@@ -122,6 +122,8 @@ from ast_scan import (
     own_names,
     python_files,
     relative,
+    spells,
+    values_bound,
 )
 from ast_scan import parameters as with_defaults
 
@@ -1483,7 +1485,9 @@ def _calls_of_nearer_names(
     a name the module imports, that a scope inside the module binds nearer than
     the module does: a parameter, a local, a comprehension's variable, a nested
     function. It reaches no function of the module by that spelling. A scope's
-    own import is read as the module's (:func:`_imports`).
+    own import is read as the module's (:func:`_imports`). A binding that holds
+    what the spelling names hides nothing: a parameter defaulting to it and a
+    local assigned from it (:func:`_holds_the_spelling`).
     """
     found: set[int] = set()
     for call in ast.walk(tree):
@@ -1497,9 +1501,38 @@ def _calls_of_nearer_names(
         ):
             continue
         how, binder = binding_of(tree, call, head.id)
-        if binder is not None and binder is not tree and how != "import":
+        if (
+            binder is not None
+            and binder is not tree
+            and how != "import"
+            and not _holds_the_spelling(tree, binder, head.id)
+        ):
             found.add(id(call))
     return frozenset(found)
+
+
+def _holds_the_spelling(tree: ast.Module, scope: ast.AST, name: str) -> bool:
+    """Whether every binding *scope* makes of *name* holds what the spelling
+    names: a parameter defaulting to it and a name assigned from it
+    (``float=float``, ``float=builtins.float``, ``asarray = np.asarray``). A value
+    that is the name itself reads the scope around, where a ``def`` runs its
+    defaults, and that scope's binding may hold something else.
+    """
+    values = values_bound(tree, scope, name)
+    if not values or not all(spells(value, name) for value in values):
+        return False
+    for value in values:
+        if isinstance(value, ast.Name):
+            how, binder = binding_of(tree, value, name)
+            if (
+                binder is not None
+                and binder is not tree
+                and binder is not scope
+                and how != "import"
+                and not _holds_the_spelling(tree, binder, name)
+            ):
+                return False
+    return True
 
 
 @dataclass(frozen=True, eq=False)

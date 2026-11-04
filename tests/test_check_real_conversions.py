@@ -1851,6 +1851,133 @@ def test_a_check_a_comprehension_binds_answers_for_nothing(
     assert _planted(tmp_path, body) == {"computed"}
 
 
+#: A nearer name that holds the very function its spelling names, written whole
+#: with its own imports, since the header imports NumPy under its usual name.
+_NEARER_HOLDS_THE_SAME = {
+    "a_parameter_defaulting_to_the_builtin": """
+        def f(levels, float=float):
+            return float(levels)
+    """,
+    "a_keyword_only_parameter_defaulting_to_the_builtin": """
+        def f(levels, *, complex=complex):
+            return complex(levels)
+    """,
+    "a_parameter_defaulting_to_builtins_float": """
+        import builtins
+
+        def f(levels, float=builtins.float):
+            return float(levels)
+    """,
+    "a_local_assigned_from_builtins_float": """
+        import builtins
+
+        def f(levels):
+            float = builtins.float
+            return float(levels)
+    """,
+    "a_parameter_defaulting_to_the_numpy_function": """
+        from numpy import asarray
+
+        def f(levels, asarray=asarray):
+            return asarray(levels, dtype=float)
+    """,
+    "a_parameter_defaulting_to_np_asarray": """
+        import numpy as np
+        from numpy import asarray
+
+        def f(levels, asarray=np.asarray):
+            return asarray(levels, dtype=float)
+    """,
+    "a_local_assigned_from_np_asarray": """
+        import numpy as np
+        from numpy import asarray
+
+        def f(levels):
+            asarray = np.asarray
+            return asarray(levels, dtype=float)
+    """,
+    "a_lambda_parameter_defaulting_to_the_builtin": """
+        def f(levels):
+            return (lambda float=float: float(levels))()
+    """,
+    "a_nested_function_reads_the_parameter_around_it": """
+        def f(levels, float=float):
+            def g(x):
+                return float(x)
+            return g(levels)
+    """,
+}
+
+
+@pytest.mark.parametrize("shape", sorted(_NEARER_HOLDS_THE_SAME))
+def test_a_nearer_name_that_holds_the_same_function_still_converts(
+    tmp_path: Path, shape: str
+) -> None:
+    """A parameter defaulting to the builtin or the NumPy function it is spelt
+    as, or a local assigned from it, holds that very function, so the call is
+    the conversion it reads as. The binder's kind alone hid it, and the
+    conversion vanished from the census.
+    """
+    found = _verdicts(tmp_path, _NEARER_HOLDS_THE_SAME[shape])
+    assert found
+    assert set(found.values()) == {"unchecked"}
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        """
+        def f(levels, float):
+            return float(levels)
+        """,
+        """
+        def f(levels, float=print):
+            return float(levels)
+        """,
+        """
+        def f(levels, float=None):
+            return float(levels)
+        """,
+        """
+        def f(levels):
+            float = print
+            return float(levels)
+        """,
+        """
+        import builtins
+
+        def f(levels, other):
+            float = builtins.float
+            float = other
+            return float(levels)
+        """,
+    ],
+)
+def test_a_nearer_name_that_holds_anything_else_is_no_conversion(
+    tmp_path: Path, body: str
+) -> None:
+    """A parameter with no default or another one, and a local that holds or may
+    hold anything else, are other names: what they call is no conversion.
+    """
+    assert _verdicts(tmp_path, body) == {}
+
+
+def test_a_check_a_nearer_name_holds_still_answers_for_the_conversion(
+    tmp_path: Path,
+) -> None:
+    """A parameter defaulting to the check it is spelt as is that check: it read
+    as no check, so a checked value read as unchecked.
+    """
+    assert _planted(
+        tmp_path,
+        """
+        def f(levels, real_array=real_array):
+            real_array(levels, "levels")
+            return float(levels)
+        """,
+    ) == {"checked"}
+
+
 @pytest.mark.parametrize("shape", sorted(_PLANTED_UNCHECKED))
 def test_a_caller_s_value_no_check_reads_on_every_path_is_found(
     tmp_path: Path, shape: str

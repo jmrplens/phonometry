@@ -441,6 +441,51 @@ def own_names(scope: ast.AST) -> OwnNames:
     )
 
 
+def values_bound(root: ast.AST, scope: ast.AST, name: str) -> list[ast.expr | None]:
+    """What each binding *scope*, a scope under *root*, makes of *name* holds.
+
+    A parameter's default and the value of an assignment to the name alone; None
+    for a parameter with no default and for any other binding, whose value is not
+    written there. What an ``if TYPE_CHECKING:`` block holds binds nothing
+    (:func:`for_the_type_checker`). An annotation without a value binds nothing
+    either, so a name only annotated holds nothing at all.
+    """
+    found: list[ast.expr | None] = []
+    if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+        found.extend(
+            default for argument, default in parameters(scope) if argument.arg == name
+        )
+    checker = for_the_type_checker(root)
+    parents = _parents(root)
+    for node in _binding_nodes(scope).get(name, ()):
+        if id(node) in checker:
+            continue
+        held = parents.get(node)
+        found.append(
+            held.value
+            if isinstance(held, ast.Assign | ast.AnnAssign)
+            and (held.targets if isinstance(held, ast.Assign) else [held.target])
+            == [node]
+            else None
+        )
+    return found
+
+
+def spells(value: ast.expr | None, name: str, owners: Collection[str] = ()) -> bool:
+    """Whether *value* names what the spelling *name* names: the name itself, or
+    an attribute of that name of a dotted name, one of *owners* when any are given
+    (``float``, ``builtins.float``, ``np.asarray``).
+    """
+    if isinstance(value, ast.Name):
+        return value.id == name
+    if not isinstance(value, ast.Attribute) or value.attr != name:
+        return False
+    head = value.value
+    while isinstance(head, ast.Attribute):
+        head = head.value
+    return isinstance(head, ast.Name) and (not owners or head.id in owners)
+
+
 def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
     """Each name *scope* binds itself, with every node that binds it, in the
     order of the source.

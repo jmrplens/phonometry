@@ -33,6 +33,8 @@ from ast_scan import (
     live_bindings,
     python_files,
     runs_before,
+    spells,
+    values_bound,
 )
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
@@ -1465,12 +1467,22 @@ class _ScopeNames:
 
     def reads_the_builtin(self, name: str) -> bool:
         """Whether *name*, read in this scope, may be the builtin of that
-        spelling: no scope Python looks it up in binds it.
+        spelling: no scope Python looks it up in binds it to anything else.
+
+        A parameter defaulting to the name, or a name assigned from it, reads
+        the scope around, where the ``def`` or the assignment runs; one that
+        holds ``builtins.float`` is the builtin wherever it is.
         """
         names: _ScopeNames | None = self
         while names is not None:
             if names.binds(name):
-                return False
+                values = values_bound(names.tree, names.scope, name)
+                if not values or not all(
+                    spells(value, name, {"builtins"}) for value in values
+                ):
+                    return False
+                if any(isinstance(value, ast.Attribute) for value in values):
+                    return True
             names = names._holder(name)
         return True
 
@@ -2204,6 +2216,56 @@ def test_the_float_equality_check_reads_a_builtin_only_where_nothing_binds_it() 
         """
     )
     assert _float_equalities(ast.parse(source)) == []
+
+
+def test_the_float_equality_check_reads_a_binding_that_holds_the_builtin() -> None:
+    """A parameter defaulting to ``float`` or ``bool``, or a local assigned from
+    ``builtins``, holds the very builtin, so the comparison and the cast are what
+    they read as. Any other binding stays another name.
+    """
+    source = textwrap.dedent(
+        """\
+        import builtins
+
+        def by_default(x, float=float):
+            return x == float("0")
+
+        def cast_by_default(x, bool=bool):
+            return x.astype(bool)
+
+        def by_builtins(x, float=builtins.float):
+            return x == float("0")
+
+        def by_local(x):
+            float = builtins.float
+            return x == float("0")
+
+        def by_keyword_only(x, *, bool=bool):
+            return x.astype(bool)
+
+        def by_lambda(x):
+            return (lambda float=float: x == float("0"))()
+
+        def another_default(x, float=print):
+            return x == float("0")
+
+        def no_default(x, bool):
+            return x.astype(bool)
+
+        def another_local(x, make):
+            float = builtins.float
+            float = make()
+            return x == float("0")
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "4",
+        "7",
+        "10",
+        "14",
+        "17",
+        "20",
+    ]
 
 
 def test_the_float_equality_check_reads_nothing_an_if_type_checking_block_binds() -> (

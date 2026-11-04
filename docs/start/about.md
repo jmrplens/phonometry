@@ -32,7 +32,7 @@ The background behind it is acoustics and signal processing, and it is on the
 record: Telecommunications Engineer specialised in Sound and Image at the
 Universidad de Alicante (2011-2018), MSc in Acoustics Engineering at the
 Universitat Politècnica de València (2018-2019), and acoustics researcher at
-the UPV from 2020 to 2023, publishing on acoustic metasurfaces, sound diffusers
+the UPV from 2019 to 2023, publishing on acoustic metasurfaces, sound diffusers
 and acoustic field prediction; the papers are under the ORCID and Scholar
 profiles above. Today I work in industrial R&D as a firmware and software
 engineer.

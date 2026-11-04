@@ -34,7 +34,7 @@ Mi formación es de acústica y de tratamiento de señal, y está registrada en
 lugar de autodescrita: soy Ingeniero de Telecomunicación especializado en
 Sonido e Imagen por la Universidad de Alicante (2011-2018), cursé el Máster en
 Ingeniería Acústica de la Universitat Politècnica de València (2018-2019) y
-trabajé como investigador en acústica en la UPV de 2020 a 2023, donde publiqué
+trabajé como investigador en acústica en la UPV de 2019 a 2023, donde publiqué
 sobre metasuperficies acústicas, difusores de sonido y predicción de campos
 acústicos; los artículos están listados en los perfiles de Google Scholar y
 ORCID de arriba. Hoy trabajo en I+D industrial como ingeniero de firmware y

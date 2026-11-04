@@ -34,7 +34,7 @@ record rather than self-described: I trained as a Telecommunications Engineer
 specialised in Sound and Image at the Universidad de Alicante (2011-2018),
 took the MSc in Acoustics Engineering at the Universitat Politècnica de
 València (2018-2019), and worked as an acoustics researcher at the UPV from
-2020 to 2023, publishing there on acoustic metasurfaces, sound diffusers and
+2019 to 2023, publishing there on acoustic metasurfaces, sound diffusers and
 acoustic field prediction; the papers are listed under the Google Scholar and
 ORCID profiles above. Today I work in industrial R&D as a firmware and
 software engineer.

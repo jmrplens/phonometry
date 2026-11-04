@@ -57,6 +57,52 @@ def _dropped(tmp_path: pathlib.Path, **modules: str) -> list[clf.Finding]:
     return found
 
 
+def test_what_an_if_type_checking_block_imports_is_no_helper_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import under ``if TYPE_CHECKING:`` never runs, so a call of ``axis``
+    reaches the helper of that name and no other. It was read as what a
+    function swaps in under ``global``, and as either of two beside the import
+    at the top, so the call was refused for dropping ``fmt``'s language too.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.under_global": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+
+            def swap():
+                global axis
+                if TYPE_CHECKING:
+                    from .helpers import fmt as axis
+
+
+            def plot(result, ax, language="en"):
+                axis(ax)
+            """,
+            "pkg.at_the_top": """
+            from typing import TYPE_CHECKING
+
+            from .helpers import axis
+
+            if TYPE_CHECKING:
+                from .helpers import fmt as axis
+
+
+            def plot(result, ax, language="en"):
+                axis(ax)
+            """,
+        },
+    )
+    assert {(f.path, f.helper) for f in found} == {
+        ("pkg/under_global.py", "pkg.helpers.axis"),
+        ("pkg/at_the_top.py", "pkg.helpers.axis"),
+    }
+
+
 def test_a_type_parameter_spelt_like_a_helper_is_not_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

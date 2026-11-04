@@ -491,6 +491,28 @@ def _position(node: ast.AST) -> tuple[int, int]:
     return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
 
 
+def is_type_checking_block(statement: ast.AST) -> bool:
+    """Whether *statement* is an ``if TYPE_CHECKING:``, however it was imported."""
+    test = statement.test if isinstance(statement, ast.If) else None
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+@functools.cache
+def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
+    """Every node an ``if TYPE_CHECKING:`` block under *tree* holds, by its id,
+    at any depth, its ``else`` left out: what no run of the program reaches.
+    """
+    return frozenset(
+        id(node)
+        for statement in ast.walk(tree)
+        if isinstance(statement, ast.If) and is_type_checking_block(statement)
+        for child in statement.body
+        for node in ast.walk(child)
+    )
+
+
 @functools.cache
 def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
     """Each name of *module* that a function, a method or a class body inside
@@ -499,16 +521,20 @@ def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
 
     Such a scope may run at any time once it is defined, before a call into
     the module or after it has run, so each of these may be what the
-    module's name holds then (:func:`standing_bindings`).
+    module's name holds then (:func:`standing_bindings`). What an ``if
+    TYPE_CHECKING:`` block holds never runs, and is none of them
+    (:func:`for_the_type_checker`).
     """
+    checker = for_the_type_checker(module)
     found: dict[str, list[ast.AST]] = {}
     for scope in ast.walk(module):
         if not isinstance(scope, _DEFINITIONS):
             continue
         sent = own_names(scope).declared_global
         for name, nodes in _binding_nodes(scope).items():
-            if name in sent:
-                found.setdefault(name, []).extend(nodes)
+            running = [node for node in nodes if id(node) not in checker]
+            if name in sent and running:
+                found.setdefault(name, []).extend(running)
     for nodes in found.values():
         nodes.sort(key=_position)
     return found
@@ -539,27 +565,6 @@ def standing_bindings(
             *(node for node in inside.get(name, ()) if id(node) not in left_out),
         ]
     return found
-
-
-def is_type_checking_block(statement: ast.AST) -> bool:
-    """Whether *statement* is an ``if TYPE_CHECKING:``, however it was imported."""
-    test = statement.test if isinstance(statement, ast.If) else None
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-    )
-
-
-def for_the_type_checker(tree: ast.AST) -> set[int]:
-    """Every node an ``if TYPE_CHECKING:`` block under *tree* holds, by its id,
-    at any depth, its ``else`` left out: what no run of the program reaches.
-    """
-    return {
-        id(node)
-        for statement in ast.walk(tree)
-        if isinstance(statement, ast.If) and is_type_checking_block(statement)
-        for child in statement.body
-        for node in ast.walk(child)
-    }
 
 
 @functools.cache
@@ -659,7 +664,14 @@ def forget_trees() -> None:
     that reads each file once calls this when it is done with the file, so
     that the trees of a whole directory are not all kept at once.
     """
-    for cached in (own_names, _parents, _blocks, _class_is_live, global_bindings):
+    for cached in (
+        own_names,
+        _parents,
+        _blocks,
+        _class_is_live,
+        for_the_type_checker,
+        global_bindings,
+    ):
         cached.cache_clear()
 
 
@@ -987,7 +999,13 @@ def live_bindings[NodeT: ast.AST](
     there, and a function, a lambda or a generator expression runs when it
     is called or consumed, so it meets every binding from there on
     (:func:`bindings_from`).
+
+    A binding an ``if TYPE_CHECKING:`` block holds never runs, so it stands
+    beside no binding that does; a name nothing else binds keeps it, for what
+    reads annotations through it (:func:`for_the_type_checker`).
     """
+    checker = for_the_type_checker(root)
+    bindings = [b for b in bindings if id(b) not in checker] or bindings
     if point is not None and bindings:
         point, deferred = _lifted(root, bindings[0], point)
         if deferred:

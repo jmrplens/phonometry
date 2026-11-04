@@ -912,6 +912,63 @@ def test_a_module_s_import_in_each_branch_is_either(tmp_path: pathlib.Path) -> N
     assert list(refused) == ["plot_either"]
 
 
+def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` or an import under ``if TYPE_CHECKING:`` never runs, so a
+    plain ``plot`` that returns what ``make`` makes reaches none of them. They
+    were read as what a function swaps in under ``global``, and as either of
+    two beside the block's ``else``, so the polar axes they make were held
+    against the plot.
+    """
+    refused = _refused(
+        tmp_path,
+        polar="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        """,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def make():
+            return plt.subplots()[1]
+
+        def swap():
+            global make
+            if TYPE_CHECKING:
+                from .polar import make
+
+        def plot_imported(result: object) -> Axes:
+            return make()
+
+        def build():
+            return plt.subplots()[1]
+
+        def swap_def():
+            global build
+            if TYPE_CHECKING:
+                def build():
+                    return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_defined(result: object) -> Axes:
+            return build()
+
+        if TYPE_CHECKING:
+            def either():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        else:
+            def either():
+                return plt.subplots()[1]
+
+        def plot_either(result: object) -> Axes:
+            return either()
+        """,
+    )
+    assert refused == {}
+
+
 def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     tmp_path: pathlib.Path,
 ) -> None:

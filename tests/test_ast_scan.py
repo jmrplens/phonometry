@@ -855,21 +855,21 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
 
 
 def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None:
-    """What a caller leaves out of a module's bindings, as the blocks only a
-    type checker reads, is left out wherever it is written: of what the top
-    of the module binds, and of what a function binds under ``global``.
+    """What a caller leaves out of a module's bindings is left out wherever it
+    is written: of what the top of the module binds, and of what a function
+    binds under ``global``.
     """
     tree = ast.parse(
         textwrap.dedent(
             """
             from json import dumps as read
 
-            if TYPE_CHECKING:
+            if LEFT_OUT:
                 from json import loads as read
 
             def swap():
                 global read, extra
-                if TYPE_CHECKING:
+                if LEFT_OUT:
                     from json import load as read
                     from json import load as extra
                 from json import JSONDecoder as read
@@ -889,6 +889,47 @@ def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None
     assert [node.lineno for node in ast_scan.standing_bindings(tree)["read"]] == [
         2, 5, 10, 12,
     ]  # fmt: skip
+
+
+def test_a_binding_for_the_type_checker_stands_beside_none_that_runs() -> None:
+    """What an ``if TYPE_CHECKING:`` block holds never runs, so it is no value
+    a name may hold beside a binding that does: not in a function under
+    ``global``, not at the top of a module and not in the block's ``else``,
+    which is what runs. A name nothing else binds keeps it, for what reads
+    annotations through it.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from json import dumps as beside
+
+            if TYPE_CHECKING:
+                from json import loads as beside
+                from json import load as alone
+
+            if typing.TYPE_CHECKING:
+                def either():
+                    return 1
+            else:
+                def either():
+                    return 2
+
+            def swap():
+                global beside, inside
+                if TYPE_CHECKING:
+                    from json import load as beside
+                    inside = 1
+            """
+        )
+    )
+    assert ast_scan.global_bindings(tree) == {}
+    standing = ast_scan.standing_bindings(tree)
+    assert [node.lineno for node in standing["beside"]] == [2]
+    assert [node.lineno for node in standing["alone"]] == [6]
+    assert [node.lineno for node in standing["either"]] == [12]
+    assert "inside" not in standing
+    left_out = ast_scan.for_the_type_checker(tree)
+    assert ast_scan.standing_bindings(tree, left_out)["alone"] == []
 
 
 def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:

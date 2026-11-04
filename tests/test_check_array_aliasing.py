@@ -570,6 +570,51 @@ def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
     assert found == set()
 
 
+def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` under ``if TYPE_CHECKING:`` never runs, so the helper that
+    copies is what the record keeps. It was read as what a function swaps in
+    under ``global``, and as either of two beside the block's ``else``, so the
+    record that keeps the copy was refused for keeping its argument.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        from typing import TYPE_CHECKING
+
+        import numpy as np
+
+        from .results import BandResult
+
+        def hand(a):
+            return np.array(a)
+
+        def swap():
+            global hand
+            if TYPE_CHECKING:
+                def hand(a):
+                    return a
+
+        def rating(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        if TYPE_CHECKING:
+            def either(a):
+                return a
+        else:
+            def either(a):
+                return np.array(a)
+
+        def rating_either(frequencies, levels):
+            f = either(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
 def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     tmp_path: pathlib.Path,
 ) -> None:

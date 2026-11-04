@@ -83,6 +83,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ast_scan import (
     ROOT,
+    binding_of,
     bindings_by_name,
     exempted,
     for_the_type_checker,
@@ -172,6 +173,9 @@ _SPELLINGS = {
     "FileIO": "io.FileIO",
     "open": "builtins.open",
 }
+#: What a name stands for that something nearer than an import binds
+#: (:func:`_read_by_no_spelling`): no module the guard names.
+_BOUND_NEARER = "<bound nearer>"
 #: The calls taken off a name before two names are compared.
 _WRAPPERS = frozenset({"str", "Path", "PurePath", "fspath"})
 #: The methods that read a whole file by its name.
@@ -801,6 +805,22 @@ def _imported_twice(scope: ast.AST) -> dict[str, list[ast.Import | ast.ImportFro
     return {name: nodes for name, nodes in found.items() if len(nodes) > 1}
 
 
+def _read_by_no_spelling(name: str, call: ast.Call, scope: _Scope) -> bool:
+    """Whether *name*, the first name of *call*, stands for no module or builtin
+    of that spelling (:data:`_SPELLINGS`), since something other than an import
+    binds it nearer: a comprehension's or a lambda's own name, or ``open``
+    wherever a scope binds it. A parameter or a local spelt ``sf`` is the module
+    handed in, which the library spells so.
+    """
+    how, binder = binding_of(scope.around[0], call, name)
+    if binder is None or how == "import":
+        return False
+    return name == "open" or isinstance(
+        binder,
+        ast.Lambda | ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp,
+    )
+
+
 def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
     """What the names may stand for at *call*: one table for each import of
     its first name that may stand for it there.
@@ -811,10 +831,13 @@ def aliases_at(call: ast.Call, scope: _Scope) -> list[Mapping[str, str]]:
     (:func:`ast_scan.live_bindings`) gives a table of its own: when the call
     sits in a function inside that scope, each that may stand from the
     ``def`` on, since the function may be called at once or once the scope
-    has run.
+    has run. A name read by no spelling (:func:`_read_by_no_spelling`) stands
+    for what no read of a file is.
     """
     parts = _dotted(call.func)
     head = parts[0] if parts else None
+    if head is not None and _read_by_no_spelling(head, call, scope):
+        return [{**scope.aliases, head: _BOUND_NEARER}]
     for holder in reversed(scope.around or (scope.node,)):
         if isinstance(holder, ast.ClassDef) and holder is not scope.node:
             continue
@@ -849,6 +872,8 @@ def qualified_callee(
     if parts is None:
         return None
     head, rest = parts[0], parts[1:]
+    if _read_by_no_spelling(head, call, scope):
+        return None
     owner = _owner(scope)
     if head in {"self", "cls"} and len(rest) == 1 and owner is not None:
         return f"{scope.module}.{owner}.{rest[0]}"

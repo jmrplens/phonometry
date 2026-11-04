@@ -112,6 +112,98 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
     ) == [("under_global", _OWN)]
 
 
+@pytest.mark.parametrize(
+    "source",
+    [
+        """
+        def read(paths, openers):
+            return [open(paths).read() for open in openers]
+        """,
+        """
+        def read(path):
+            return (lambda open: open(path))(print)
+        """,
+        """
+        def read(path, open):
+            return open(path).read()
+        """,
+        """
+        def read(path):
+            open = make_opener()
+            return open(path).read()
+        """,
+        """
+        def read(path):
+            def open(name):
+                return name
+            return open(path)
+        """,
+        """
+        def open(name):
+            return name
+
+        def read(path):
+            return open(path)
+        """,
+        """
+        import soundfile as sf
+
+        def read(paths, readers):
+            return [sf.read(paths) for sf in readers]
+        """,
+    ],
+)
+def test_a_name_bound_nearer_is_not_the_builtin_or_the_import(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """``open`` stands for the builtin only where nothing binds it, and a
+    comprehension's or a lambda's own name stands for nothing the module
+    imports. Each was read as the read of a file its spelling names.
+    """
+    assert _found(tmp_path, source) == []
+
+
+def test_a_name_a_comprehension_binds_leaves_the_rest_of_the_function_alone(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comprehension's variable is its own: the function's ``open`` beside it
+    is still the builtin, a method called on an item still reads a file, a
+    check of that spelling is no check, and a module handed in as ``sf`` is
+    still read by its spelling.
+    """
+    assert _found(
+        tmp_path,
+        """
+        from check import require_regular
+
+        def beside(path, openers):
+            names = [open for open in openers]
+            with open(path) as handle:
+                return handle.read(), names
+
+        def items(files):
+            return [f.read_text() for f in files]
+
+        def handed_in(path, sf):
+            return sf.read(path)
+
+        def checked_by_nothing(path):
+            _ = [require_regular(path) for require_regular in [print]]
+            return np.fromfile(path)
+
+        def checked(path):
+            require_regular(path)
+            return np.fromfile(path)
+        """,
+        helpers=_CHECK,
+    ) == [
+        ("beside", _OWN),
+        ("items", _OWN),
+        ("handed_in", _FOREIGN),
+        ("checked_by_nothing", _FOREIGN),
+    ]
+
+
 def test_a_whole_file_read_is_refused(tmp_path: pathlib.Path) -> None:
     """The hosts file and the ANP tables were read so, a pipe there waited forever."""
     assert _found(

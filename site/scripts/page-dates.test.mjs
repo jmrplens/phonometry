@@ -6,14 +6,15 @@
 // per page cost the build most of an hour, and a page written from another
 // published the older page's date. Each test here builds a repository of its
 // own, laid out as this one is with the pages under site/src/content/docs, and
-// asks from the site's root the way a build does.
+// asks from the site's root the way a build does, unless it is about asking from
+// somewhere else.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { devNull, tmpdir } from 'node:os';
-import { delimiter, dirname, join } from 'node:path';
+import { delimiter, dirname, join, relative } from 'node:path';
 import { test } from 'node:test';
 
 const MODULE = new URL('../src/lib/page-dates.mjs', import.meta.url).href;
@@ -52,6 +53,13 @@ function setEnv(t, name, value) {
 		if (before === undefined) delete process.env[name];
 		else process.env[name] = before;
 	});
+}
+
+/** Set one git setting through the environment for the rest of the test, as the docs workflow does. */
+function setGitConfig(t, key, value) {
+	setEnv(t, 'GIT_CONFIG_COUNT', '1');
+	setEnv(t, 'GIT_CONFIG_KEY_0', key);
+	setEnv(t, 'GIT_CONFIG_VALUE_0', value);
 }
 
 /** A directory of its own for one test. */
@@ -213,9 +221,7 @@ for (const setting of ['false', 'copies']) {
 		repo.write('copy.mdx', `${body('guide')}and a line of its own\n`);
 		repo.commit('2024-08-05');
 		chdir(t, repo.site);
-		setEnv(t, 'GIT_CONFIG_COUNT', '1');
-		setEnv(t, 'GIT_CONFIG_KEY_0', 'diff.renames');
-		setEnv(t, 'GIT_CONFIG_VALUE_0', setting);
+		setGitConfig(t, 'diff.renames', setting);
 		const firstPublished = await fresh();
 		assert.equal(firstPublished(repo.path('new.mdx')), '2024-01-05');
 		assert.equal(firstPublished(repo.path('copy.mdx')), '2024-08-05');
@@ -234,13 +240,55 @@ test('more renames in one commit than the limit of rename candidates still carry
 	repo.commit('2024-08-12');
 	chdir(t, repo.site);
 	// The real limit is a thousand of each; this one is reached by two.
-	setEnv(t, 'GIT_CONFIG_COUNT', '1');
-	setEnv(t, 'GIT_CONFIG_KEY_0', 'diff.renameLimit');
-	setEnv(t, 'GIT_CONFIG_VALUE_0', '1');
+	setGitConfig(t, 'diff.renameLimit', '1');
 	const firstPublished = await fresh();
 	assert.equal(firstPublished(repo.path('new-a.mdx')), '2024-01-12');
 	assert.equal(firstPublished(repo.path('new-b.mdx')), '2024-01-12');
 });
+
+test('diff.relative set to true in the environment changes no date', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', body('a'));
+	repo.commit('2024-03-03');
+	chdir(t, repo.site);
+	setGitConfig(t, 'diff.relative', 'true');
+	const firstPublished = await fresh();
+	assert.equal(firstPublished(repo.path('a.mdx')), '2024-03-03');
+});
+
+test(
+	'log.showSignature set to true in the environment changes no date',
+	{ skip: process.platform === 'win32' && 'signs through a shell script' },
+	async (t) => {
+		const repo = repository(t);
+		// A gpg that signs anything and vouches for it, so that the setting has a
+		// signature to print in front of the commit's own line.
+		const gpg = join(tempDir(t, 'page-dates-gpg-'), 'gpg');
+		writeFileSync(
+			gpg,
+			`#!/bin/sh
+case "$*" in
+*--verify*) echo 'gpg: Signature made by a test' >&2 ;;
+*) cat > /dev/null; echo '[GNUPG:] SIG_CREATED ' >&2; printf -- '-----BEGIN PGP SIGNATURE-----\\n\\nZmFrZQ==\\n-----END PGP SIGNATURE-----\\n' ;;
+esac
+`,
+		);
+		chmodSync(gpg, 0o755);
+		repo.git(['config', 'gpg.program', gpg]);
+		repo.git(['config', 'user.signingkey', 'a test']);
+		repo.git(['config', 'commit.gpgsign', 'true']);
+		repo.write('old.mdx', body('moved'));
+		repo.commit('2024-03-13');
+		rmSync(join(repo.docs, 'old.mdx'));
+		repo.write('new.mdx', `${body('moved')}and an edit\n`);
+		repo.commit('2024-04-13');
+		chdir(t, repo.site);
+		setGitConfig(t, 'log.showSignature', 'true');
+		assert.match(repo.git(['log', '-1', '--format=%H']), /^gpg: Signature made by a test/);
+		const firstPublished = await fresh();
+		assert.equal(firstPublished(repo.path('new.mdx')), '2024-03-13');
+	},
+);
 
 test('a path from the site root and an absolute one reach the same page', async (t) => {
 	const repo = repository(t);
@@ -251,6 +299,22 @@ test('a path from the site root and an absolute one reach the same page', async 
 	assert.equal(firstPublished(repo.path('sub/page.mdx')), '2024-04-04');
 	assert.equal(firstPublished(join(repo.docs, 'sub/page.mdx')), '2024-04-04');
 });
+
+for (const [where, from] of [
+	['the root of the repository', (repo) => repo.root],
+	['a directory of the site other than its root', (repo) => join(repo.site, 'src')],
+]) {
+	test(`asked from ${where}, an absolute path and one from there reach the page`, async (t) => {
+		const repo = repository(t);
+		repo.write('sub/page.mdx', body('page'));
+		repo.commit('2024-04-24');
+		const cwd = from(repo);
+		chdir(t, cwd);
+		const firstPublished = await fresh();
+		assert.equal(firstPublished(join(repo.docs, 'sub/page.mdx')), '2024-04-24');
+		assert.equal(firstPublished(relative(cwd, join(repo.docs, 'sub/page.mdx'))), '2024-04-24');
+	});
+}
 
 test('a page whose name holds a space or an accent is read whole', async (t) => {
 	const repo = repository(t);
@@ -340,7 +404,7 @@ test(
 		const seen = calls();
 		assert.equal(seen.length, 2, seen.join('\n'));
 		assert.match(seen[0], /^rev-parse /);
-		assert.match(seen[1], /^log /);
+		assert.match(seen[1], /^-C .+ log /);
 	},
 );
 

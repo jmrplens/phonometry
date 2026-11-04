@@ -18,19 +18,18 @@
  * was slow: a synchronous process per page stops the event loop, so the build's
  * concurrency buys nothing while it runs, and in the blobless clone the docs
  * workflow checks out, each rename search can wait on old blobs from the
- * network as well: the same pages took 12 minutes on one day and 45 on the next.
- * And it was false: `--follow` looks for copies as well as renames, among all
- * the files of the parent commit, so a page written or split from another took
- * that page's date. Reading the tree in one pass pairs each deleted file with
- * one added file, and a page copied from one that is still there is an add of
- * its own.
+ * network as well. And it was false: `--follow` looks for copies as well as
+ * renames, among all the files of the parent commit, so a page written or split
+ * from another took that page's date. Reading the tree in one pass pairs each
+ * deleted file with one added file, and a page copied from one that is still
+ * there is an add of its own.
  */
 import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 
-/** Where the docs collection lives, from the site's root, where a build runs. */
-const DOCS_TREE = 'src/content/docs';
+/** Where the docs collection lives, from the repository's root. */
+const DOCS_TREE = 'site/src/content/docs';
 
 /** What is known where git cannot answer: nothing, so every caller falls back. */
 const NO_HISTORY = { root: '', added: new Map() };
@@ -93,15 +92,21 @@ function readHistory() {
     const [root, shallow] = git('rev-parse', '--show-toplevel', '--is-shallow-repository').split('\n');
     // A shallow clone's oldest commit seems to add every page it holds.
     if (shallow !== 'false') return NO_HISTORY;
-    // -M because the pass depends on renames whatever `diff.renames` says, and
-    // -l0 because past a limit of candidates git stops comparing files without a
-    // word, which a move of the whole tree would reach and the search for one
-    // file never could. The rest because it depends on seeing every add:
-    // --full-history keeps a branch whose merge left the tree as it was, --root
-    // keeps the first commit, and --topo-order puts each add before the renames
-    // of the file it added.
+    // From the root, like the other readers of this tree, so that the paths come
+    // out the same from wherever the build runs and whatever `diff.relative` says.
+    // --no-show-signature because `log.showSignature` prints in front of each
+    // commit's line. -M because the pass depends on renames whatever
+    // `diff.renames` says, and -l0 because past a limit of candidates git gives up
+    // on similarity with only a warning on stderr, which a move of the whole tree
+    // will reach once it passes a thousand pages and the search for one file never
+    // could. The rest because it depends on seeing every add: --full-history keeps
+    // a branch whose merge left the tree as it was, --root keeps the first commit,
+    // and --topo-order puts each add before the renames of the file it added.
     const log = git(
+      '-C',
+      root,
       'log',
+      '--no-show-signature',
       '--reverse',
       '--topo-order',
       '--full-history',
@@ -141,8 +146,8 @@ let history;
  * The date a file first appeared in history.
  *
  * @param {string} filePath Absolute path to the content file, or relative to
- *   the site's root, which is what `route.entry.filePath` is and where a build
- *   runs.
+ *   the working directory: `route.entry.filePath` is relative to the site's
+ *   root, which is where a build runs.
  * @returns {string|undefined} ISO-8601 date (`YYYY-MM-DD`), or undefined when
  *   the file is untracked or outside the docs tree, git is unavailable, or the
  *   checkout is shallow.

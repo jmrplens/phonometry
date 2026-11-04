@@ -1058,6 +1058,67 @@ def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(
     ]
 
 
+def test_an_unpacked_argument_reaches_every_parameter_it_may_fill(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument, and every argument after it, may land in any place
+    from its own on, and a ``**`` mapping may hand its values to any
+    parameter that takes a keyword, of a private function or a field of a
+    record built here; an argument before the first ``*`` keeps its place.
+
+    A call that unpacked anything bound the parameters it could not place,
+    and every one when a ``*`` came after them, to nothing the guard reads,
+    so a spread of the caller's levels handed to ``_within`` or ``_before``
+    that way, or to the field of ``_Reading``, passed.
+    """
+    source = """
+    from dataclasses import dataclass
+
+    _LIMIT_DB = 3.0
+
+    def _within(spread, scale=1.0):
+        return spread <= _LIMIT_DB
+
+    def by_a_starred_list(levels):
+        return _within(*[max(levels) - min(levels)])
+
+    def after_a_starred_name(levels):
+        rest = []
+        return _within(*rest, max(levels) - min(levels))
+
+    def by_a_mapping(levels):
+        return _within(**{"spread": max(levels) - min(levels)})
+
+    @dataclass
+    class _Reading:
+        spread: float
+
+        def within(self):
+            return self.spread <= _LIMIT_DB
+
+    def built(levels):
+        return _Reading(*[max(levels) - min(levels)]).within()
+
+    def _before(width, scale=1.0):
+        return width <= _LIMIT_DB
+
+    def before_a_star(levels):
+        rest = []
+        return _before(max(levels) - min(levels), *rest)
+
+    def _kept(spread):
+        return spread <= _LIMIT_DB
+
+    def constant(levels):
+        return _kept(*[2.0])
+    """
+    assert _texts(source, tmp_path) == [
+        "spread <= _LIMIT_DB",
+        "width <= _LIMIT_DB",
+        "self.spread <= _LIMIT_DB",
+    ]
+
+
 def test_a_name_the_caller_binds_is_not_the_module_s_import(
     tmp_path: pathlib.Path,
 ) -> None:

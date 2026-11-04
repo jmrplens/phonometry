@@ -122,6 +122,7 @@ import ast
 import collections
 import dataclasses
 import functools
+import itertools
 import pathlib
 import re
 import sys
@@ -1308,6 +1309,7 @@ class Module:
             skip:
         ]
         names = positional + [arg.arg for arg in arguments.kwonlyargs]
+        by_place = {arg.arg for arg in arguments.posonlyargs}
         starred = _has_star(call)
         bound: dict[str, Value] = {}
         for name in names:
@@ -1316,7 +1318,17 @@ class Module:
                 bound[name] = self.value(argument, context)
                 continue
             default = _default(function, name)
-            if starred or default is None:
+            unpacked = [
+                self.value(value, context)
+                for value in _unpacked_into(
+                    call, positional, name, keyword=name not in by_place
+                )
+            ]
+            if unpacked:
+                if default is not None:
+                    unpacked.append(self.value(default, Context(None)))
+                bound[name] = join(unpacked)
+            elif starred or default is None:
                 bound[name] = OPAQUE
             else:
                 bound[name] = self.value(default, Context(None))
@@ -1473,8 +1485,13 @@ class Module:
         values: list[Value] = []
         for call, scope in sites:
             argument = _argument(call, fields, attr)
+            unpacked = _unpacked_into(call, fields, attr, keyword=True)
             if argument is not None:
                 values.append(self.value(argument, Context(scope)))
+            elif unpacked:
+                values.extend(self.value(value, Context(scope)) for value in unpacked)
+                if default is not None:
+                    values.append(self.value(default, Context(None)))
             elif _has_star(call) or default is None:
                 values.append(OPAQUE)
             else:
@@ -1897,13 +1914,52 @@ def _argument(call: ast.Call, positional: list[str], name: str) -> ast.expr | No
         if keyword.arg == name:
             return keyword.value
     if name in positional:
+        # An argument before the first ``*`` keeps its place; one after it
+        # may land anywhere from there on (:func:`_unpacked_into`).
         index = positional.index(name)
-        plain = [
-            argument for argument in call.args if not isinstance(argument, ast.Starred)
-        ]
-        if index < len(plain) and len(plain) == len(call.args):
+        placed = itertools.takewhile(
+            lambda argument: not isinstance(argument, ast.Starred), call.args
+        )
+        plain = list(placed)
+        if index < len(plain):
             return plain[index]
     return None
+
+
+def _unpacked_into(
+    call: ast.Call, positional: list[str], name: str, *, keyword: bool
+) -> list[ast.expr]:
+    """What a call that unpacks its arguments may hand the parameter *name*
+    when no argument of its own does (:func:`_argument`).
+
+    A ``*`` argument, and every argument after it, may land in any place
+    from its own on: in the place of *name* when that is one of them. A
+    ``**`` mapping may hand any parameter that takes a keyword (*keyword*)
+    one of its values: those of a ``{...}`` written there, or the mapping.
+    """
+    found: list[ast.expr] = []
+    spread = next(
+        (
+            index
+            for index, argument in enumerate(call.args)
+            if isinstance(argument, ast.Starred)
+        ),
+        None,
+    )
+    if spread is not None and name in positional[spread:]:
+        found.extend(
+            argument.value if isinstance(argument, ast.Starred) else argument
+            for argument in call.args[spread:]
+        )
+    if keyword:
+        for item in call.keywords:
+            if item.arg is not None:
+                continue
+            if isinstance(item.value, ast.Dict):
+                found.extend(item.value.values)
+            else:
+                found.append(item.value)
+    return found
 
 
 def _has_star(call: ast.Call) -> bool:

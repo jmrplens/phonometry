@@ -89,7 +89,9 @@ binds the name to anything else hides the function of that spelling, though a
 parameter defaulting to it and a local assigned from it hold it all the same
 (``float=float``, ``asarray = np.asarray``). So does the module's own binding: a
 later ``def`` or assignment takes the name from a check or a NumPy function the
-module imported, and a ``def float`` is no builtin.
+module imported, and a ``def float`` is no builtin. What a test on
+``TYPE_CHECKING`` keeps from running converts and checks nothing, in a statement
+or a conditional expression, negated or not, wherever it is written.
 
 A value the function computed (a call of a function of the package that is
 no check, a field of a record it was handed, which the record read when it

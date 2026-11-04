@@ -86,21 +86,23 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          # Full history: add-sitemap-lastmod.mjs stamps per-file git dates
-          # and check:redirects re-derives the redirect map from renames.
+          # Full history: add-sitemap-lastmod.mjs stamps per-file git dates,
+          # page-dates.mjs reads when each page was first added, and
+          # check:redirects re-derives the redirect map from renames.
           fetch-depth: 0
-          # ... but the history those two need is commits and trees, never
-          # blob contents, while a plain fetch-depth-0 downloads the whole
-          # 2.4 GiB pack, most of it superseded generations of the
-          # committed artwork. That made the checkout the third-largest
-          # step of the job at close to three minutes. `blob:none` fetches
-          # blobs only for what is checked out, so the artwork arrives at
-          # its HEAD size once instead of every size it has ever been.
-          # Rename detection in check:redirects can still demand the odd
-          # historical blob when a page was edited in the same commit that
-          # moved it; those are small text files served on demand by the
-          # same remote, which is why this stays correct rather than
-          # merely fast.
+          # ... but the history those need is commits, trees and some small
+          # text files, never the artwork, while a plain fetch-depth-0
+          # downloads the whole 2.4 GiB pack, most of it superseded
+          # generations of the committed artwork. That made the checkout the
+          # third-largest step of the job at close to three minutes.
+          # `blob:none` fetches blobs only for what is checked out, so the
+          # artwork arrives at its HEAD size once instead of every size it has
+          # ever been.
+          # Rename detection in page-dates.mjs and check:redirects still
+          # demands the historical blobs of the pages edited in the commit
+          # that moved them, about 1 500 small text files and 6 MiB, fetched
+          # once and on demand from the same remote, which is why this stays
+          # correct rather than merely fast.
           filter: blob:none
           # Cone mode: these directories plus every repository-root file.
           # docs/ and scripts/ feed the mirror, glossary and llms checks;
@@ -219,8 +221,10 @@ jobs:
         # character too many or compared two descriptions as written rather
         # than as read would stay green here for good. A check's tests hand it
         # builds of a few pages that have the defect, and the routes it skips,
-        # and assert its exit status; check-descriptions.mjs has them. Node's
-        # own test runner and no dependencies, so it runs before the install.
+        # and assert its exit status; check-descriptions.mjs has them, and the
+        # first-publication dates are tested the same way, on small
+        # repositories. Node's own test runner and no dependencies, so it runs
+        # before the install.
         run: pnpm run test:scripts
         working-directory: site
       - name: Build site

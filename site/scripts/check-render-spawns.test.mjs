@@ -18,6 +18,9 @@ import { fileURLToPath } from 'node:url';
 
 const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-render-spawns.mjs');
 
+/** A path as a regular expression matches it literally. */
+const literal = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /** A module that reaches for child_process and calls it once, the way the listed ones do. */
 const ONE_CALL = `import { execFileSync } from 'node:child_process';\nexecFileSync('git', ['log']);\n`;
 
@@ -98,7 +101,7 @@ for (const path of [
 	test(`a planted spawn in ${path} fails`, (t) => {
 		const ran = check(t, { ...LISTED, [path]: ONE_CALL });
 		assert.equal(ran.status, 1);
-		assert.match(ran.err, new RegExp(path.replace(/[.]/g, '\\.')));
+		assert.ok(ran.err.includes(path), ran.err);
 	});
 }
 
@@ -146,7 +149,7 @@ for (const [form, specifier, path] of [
 	test(`a module outside the source imported as ${form} is read as well`, (t) => {
 		const ran = check(t, { ...LISTED, ...OUTSIDE(specifier, path) });
 		assert.equal(ran.status, 1);
-		assert.match(ran.err, new RegExp(`FAIL 1 file\\(s\\)[^\\n]*:\\s+${path.replace(/[.]/g, '\\.')}`));
+		assert.match(ran.err, new RegExp(`FAIL 1 file\\(s\\)[^\\n]*:\\s+${literal(path)}`));
 	});
 }
 

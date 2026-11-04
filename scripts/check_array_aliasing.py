@@ -1304,7 +1304,9 @@ class Reader:
 
     # -- the parameters -------------------------------------------------
     def start(self) -> dict[str, Value]:
-        """Every parameter carries itself; ``self`` and ``cls`` carry nothing."""
+        """Every parameter carries itself; ``self`` and ``cls`` carry nothing;
+        a name of a type parameter is the function's, not its closure's.
+        """
         arguments = self.function.node.args
         names = [
             a.arg
@@ -1318,7 +1320,10 @@ class Reader:
             a.arg: a.annotation
             for a in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
         }
-        env: dict[str, Value] = dict(self.closure)
+        types = own_names(self.function.node).type_parameters
+        env: dict[str, Value] = {
+            name: value for name, value in self.closure.items() if name not in types
+        }
         for index, name in enumerate(names):
             if index == 0 and self.function.kind in {"method", "classmethod"}:
                 env[name] = _CLEAN

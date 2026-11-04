@@ -678,6 +678,32 @@ def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
 
 
+def test_a_helper_s_type_parameter_is_not_what_its_closure_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A generic helper's type parameter is its own name, so what it returns
+    under that spelling is no array of the function around.
+
+    The helper was read with everything its closure holds, the name of its
+    type parameter included, so the record that keeps what it returns was
+    refused for the caller's array.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            def hand[frequencies]():
+                return frequencies
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
 def test_a_helper_reads_a_sibling_written_after_it(tmp_path: pathlib.Path) -> None:
     """A helper written before the sibling it calls reads what that returns.
 

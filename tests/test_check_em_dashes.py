@@ -923,6 +923,29 @@ def test_a_block_behind_marks_is_no_list_item() -> None:
     assert ced.markdown_bullet_hyphen_hits(after) == [4]
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("a `b {dash} c\n---\nd` e\n", id="a rule"),
+        pytest.param("a `b {dash} c\n***\nd` e\n", id="a rule of asterisks"),
+        pytest.param("a `b {dash} c\n===\nd` e\n", id="a setext underline"),
+        pytest.param("> a `b {dash} c\n> ---\n> d` e\n", id="a rule of a quotation"),
+        pytest.param("a `b {dash} c\n<!-- x -->\nd` e\n", id="a comment"),
+        pytest.param("- a `b {dash} c\n    - d` e\n", id="a nested item"),
+    ],
+)
+def test_nothing_pairs_across_a_line_that_ends_the_paragraph(text: str) -> None:
+    """Each of them ends the paragraph, so the backticks are text and the dash prose."""
+    assert ced.markdown_hits(text.format(dash="—")) == [1]
+    assert ced.markdown_double_hyphen_hits(text.format(dash="--")) == [1]
+
+
+def test_an_item_nested_under_a_reference_is_read_for_itself() -> None:
+    assert ced.markdown_hits("- Author (2001) x\n    - item — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n    ## Heading — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n      - wrapped — y\n") == []
+
+
 def test_an_escaped_backtick_opens_no_code_span() -> None:
     r"""``\`x -- y\``` is prose a reader sees, backticks and all.
 

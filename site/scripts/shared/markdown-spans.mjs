@@ -98,13 +98,27 @@ export function dropInlineSpans(text, markers = '`') {
 }
 
 /**
- * Whether a line opens a block of its own: a heading, a row of a table, an
- * item of a list or a quotation, which a code span never crosses into.
+ * A block on its own line only: a heading, a row of a table, a thematic break,
+ * a setext underline, the fence of a display-math block (a run of two dollar
+ * signs or more and no other after it) and a comment closed on its line.
  */
-const BLOCK_START = /^ {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)/;
+const ONE_LINE_SHAPES =
+  '#{1,6}(?:\\s|$)|\\||([-*_])[ \\t]*(?:\\1[ \\t]*){2,}$|(?:=+|-+)[ \\t]*$|\\${2,}[^$]*$|<!--.*-->';
 
-/** Whether a line is a block on its own line only: a heading or a table row. */
-const ONE_LINE_BLOCK = /^ {0,3}(?:#{1,6}(?:\s|$)|\|)/;
+/**
+ * Whether a line opens a block of its own, which a code span never crosses
+ * into: those, an item of a list, a quotation and a comment.
+ */
+const BLOCK_START = new RegExp(`^ {0,3}(?:${ONE_LINE_SHAPES}|[-*+]\\s|\\d{1,9}[.)]\\s|>|<!--)`);
+
+/** Whether a line is a block on its own line only. */
+const ONE_LINE_BLOCK = new RegExp(`^ {0,3}(?:${ONE_LINE_SHAPES})`);
+
+/**
+ * The marker of a list item, its indentation and the blanks after it, whose
+ * width is the column the item's content stands at (CommonMark 0.31.2, 5.2).
+ */
+const ITEM = /^ *(?:[-*+]|\d{1,9}[.)]) +/;
 
 /**
  * The marks of a quotation that open a line, each with what may stand before
@@ -158,34 +172,41 @@ function insideQuotation(line) {
   return line.replace(QUOTE_MARKS, '');
 }
 
+/** How many blanks open `line`. */
+function indentOf(line) {
+  return line.length - line.replace(/^ +/, '').length;
+}
+
 /**
- * Whether `line`, which opens with a quotation mark, carries on the paragraph
- * of `block`. The marks are not the paragraph's text, so what decides is what
- * stands after them: a blank, a heading, a table row, a list item or a deeper
- * quotation ends the paragraph inside the quotation as it would outside it. A
- * line with fewer marks than the block opened with carries it on lazily.
+ * Whether `line`, which reads as `read`, opens a block after the lines of
+ * `block`. The marks of a quotation are not the paragraph's text, so what
+ * decides is what stands after them: a blank, a heading, a table row, a list
+ * item or a deeper quotation ends the paragraph inside the quotation as it
+ * would outside it. A line with fewer marks than the block opened with carries
+ * it on lazily.
  */
-function continuesQuotation(line, block) {
-  const rest = insideQuotation(line);
-  return (
-    block.length > 0 &&
-    quoteDepth(line) > 0 &&
-    quoteDepth(line) <= quoteDepth(block[0]) &&
-    rest.trim() !== '' &&
-    !BLOCK_START.test(rest)
-  );
+function opensBlock(line, read, block) {
+  if (BLOCK_START.test(read)) return true;
+  const depth = quoteDepth(line);
+  return depth > 0 && (!block.length || depth > quoteDepth(block[0]) || !read.trim());
 }
 
 /**
  * The lines of a page in the blocks a code span stays inside, every line in
  * one. A quotation is read through its marks: a later line of its paragraph
  * stays in the block, and what opens a block outside a quotation opens one
- * inside, a line that holds only the marks being its blank line.
+ * inside, a line that holds only the marks being its blank line. A list item's
+ * content sets the column a block opens at, so an item nested in it may stand
+ * four columns in or more, where anywhere else it would be a line of the
+ * paragraph (CommonMark 0.31.2, 5.2). A line the paragraph carries on leaves
+ * that column alone, a lazy one too; one that opens a block sets it.
  */
 function blocksOf(lines, comments) {
   const opener = comments ? COMMENT_LINE[comments] : null;
   const blocks = [];
   let current = [];
+  let depth = 0;
+  let column = 0;
   const close = () => {
     if (current.length) blocks.push(current);
     current = [];
@@ -200,12 +221,20 @@ function blocksOf(lines, comments) {
       blocks.push([line]);
       continue;
     }
-    if ((BLOCK_START.test(line) && !continuesQuotation(line, current)) || opener?.test(line)) {
-      close();
+    if (quoteDepth(line) !== depth) {
+      depth = quoteDepth(line);
+      column = 0;
     }
-    current.push(line);
     const rest = insideQuotation(line);
-    if (!rest.trim() || ONE_LINE_BLOCK.test(rest)) close();
+    const read = rest.slice(Math.min(column, indentOf(rest)));
+    const opens = opensBlock(line, read, current) || Boolean(opener?.test(line));
+    if ((opens || !current.length) && rest.trim()) {
+      const item = ITEM.exec(rest);
+      column = item ? item[0].length : Math.min(column, indentOf(rest));
+    }
+    if (opens) close();
+    current.push(line);
+    if (!read.trim() || ONE_LINE_BLOCK.test(read)) close();
   }
   close();
   return blocks;

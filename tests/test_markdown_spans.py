@@ -185,6 +185,68 @@ def test_a_span_stays_inside_the_paragraph_of_a_quotation(text: str) -> None:
     assert drop_inline_spans_by_block(text) == text
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("a `b\n---\nc` d", id="a rule of hyphens"),
+        pytest.param("a `b\n***\nc` d", id="a rule of asterisks"),
+        pytest.param("a `b\n___\nc` d", id="a rule of underscores"),
+        pytest.param("a `b\n* * *\nc` d", id="a spaced rule"),
+        pytest.param("a `b\n- - -\nc` d", id="a spaced rule of hyphens"),
+        pytest.param("a `b\n===\nc` d", id="a setext underline"),
+        pytest.param("a `b\n-\nc` d", id="an underline of one hyphen"),
+        pytest.param("a `b\n--\nc` d", id="an underline of two hyphens"),
+        pytest.param("> a `b\n> ---\n> c` d", id="a rule of a quotation"),
+        pytest.param("> a `b\n> ===\n> c` d", id="an underline of a quotation"),
+        pytest.param("- a `b\n  ---\n  c` d", id="a rule of a list item"),
+        pytest.param("a `b\n$$\nc` d", id="a display fence"),
+        pytest.param("a `b\n$$ meta\nc` d", id="a display fence with a meta"),
+        pytest.param("> a `b\n> $$\n> c` d", id="a display fence of a quotation"),
+        pytest.param("a `b\n<!-- x -->\nc` d", id="a comment"),
+        pytest.param("> a `b\n> <!-- x -->\n> c` d", id="a comment of a quotation"),
+        pytest.param("- a `b\n    - c` d", id="an item nested four columns in"),
+        pytest.param("1. a `b\n    - c` d", id="an item under a numbered one"),
+        pytest.param("> - a `b\n>     - c` d", id="a nested item of a quotation"),
+        pytest.param("- a `b\n    ## c` d", id="a heading under an item"),
+        pytest.param("- a\n\n  b `c\n    - d` e", id="under a paragraph of an item"),
+        pytest.param("- a\n  - b `c\n      - d` e", id="three levels down"),
+        pytest.param("- a\nb `c\n    - d` e", id="under a lazy line of an item"),
+        pytest.param(
+            "> - a\n>\n>   b `c\n>     - d` e", id="past a bare mark of a quotation"
+        ),
+        pytest.param("---\nkey: a `b\n---\nc` d", id="the fence of a frontmatter"),
+    ],
+)
+def test_a_span_stops_at_a_line_that_ends_the_paragraph(text: str) -> None:
+    """Each of these is two blocks to the site, so the two backticks stay apart.
+
+    The reader took all of them for a line of the paragraph: a rule, a setext
+    underline, a display fence, a comment and an item nested past three columns.
+    """
+    assert drop_inline_spans_by_block(text) == text
+
+
+@pytest.mark.parametrize(
+    ("text", "shown"),
+    [
+        pytest.param("a `b\n$$x$$\nc` d", f"a {SPAN_MARK}\n\n d", id="inline maths"),
+        pytest.param(
+            "a `b\n----x\nc` d", f"a {SPAN_MARK}\n\n d", id="hyphens and text"
+        ),
+        pytest.param("a `b\n<span>\nc` d", f"a {SPAN_MARK}\n\n d", id="an inline tag"),
+        pytest.param("  a `b\n    - c` d", f"  a {SPAN_MARK}\n d", id="no item above"),
+        pytest.param("- a `b\n      - c` d", f"- a {SPAN_MARK}\n d", id="too deep"),
+        pytest.param("- a `b\n  c` d", f"- a {SPAN_MARK}\n d", id="a wrapped item"),
+        pytest.param(
+            "- a\n\nb `c\n    - d` e", f"- a\n\nb {SPAN_MARK}\n e", id="out of the item"
+        ),
+    ],
+)
+def test_a_span_still_runs_over_a_line_of_its_paragraph(text: str, shown: str) -> None:
+    """The site reads each of these as a line of the paragraph, so a span crosses."""
+    assert drop_inline_spans_by_block(text) == shown
+
+
 def test_the_lines_that_open_a_block_are_the_ones_the_spans_stop_at() -> None:
     lines = ["a", "b", "", "- c", "  d", "- e", "> f", "> g", ">", "> h", "# i", "j"]
     opening = [

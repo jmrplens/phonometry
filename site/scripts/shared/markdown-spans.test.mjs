@@ -78,3 +78,52 @@ test('a span stays inside the paragraph of a quotation', () => {
     assert.equal(dropInlineSpansByBlock(text), text, text);
   }
 });
+
+test('a span stops at a line that ends the paragraph', () => {
+  // Each of these is two blocks to the site, so the two backticks stay apart.
+  const cases = [
+    'a `b\n---\nc` d',
+    'a `b\n***\nc` d',
+    'a `b\n___\nc` d',
+    'a `b\n* * *\nc` d',
+    'a `b\n- - -\nc` d',
+    'a `b\n===\nc` d',
+    'a `b\n-\nc` d',
+    'a `b\n--\nc` d',
+    '> a `b\n> ---\n> c` d',
+    '> a `b\n> ===\n> c` d',
+    '- a `b\n  ---\n  c` d',
+    'a `b\n$$\nc` d',
+    'a `b\n$$ meta\nc` d',
+    '> a `b\n> $$\n> c` d',
+    'a `b\n<!-- x -->\nc` d',
+    '> a `b\n> <!-- x -->\n> c` d',
+    '- a `b\n    - c` d',
+    '1. a `b\n    - c` d',
+    '> - a `b\n>     - c` d',
+    '- a `b\n    ## c` d',
+    '- a\n\n  b `c\n    - d` e',
+    '- a\n  - b `c\n      - d` e',
+    '- a\nb `c\n    - d` e',
+    '> - a\n>\n>   b `c\n>     - d` e',
+    '---\nkey: a `b\n---\nc` d',
+  ];
+  for (const text of cases) {
+    assert.equal(dropInlineSpansByBlock(text), text, text);
+  }
+});
+
+test('a span still runs over a line of its paragraph', () => {
+  const cases = [
+    ['a `b\n$$x$$\nc` d', `a ${SPAN_MARK}\n\n d`],
+    ['a `b\n----x\nc` d', `a ${SPAN_MARK}\n\n d`],
+    ['a `b\n<span>\nc` d', `a ${SPAN_MARK}\n\n d`],
+    ['  a `b\n    - c` d', `  a ${SPAN_MARK}\n d`],
+    ['- a `b\n      - c` d', `- a ${SPAN_MARK}\n d`],
+    ['- a `b\n  c` d', `- a ${SPAN_MARK}\n d`],
+    ['- a\n\nb `c\n    - d` e', `- a\n\nb ${SPAN_MARK}\n e`],
+  ];
+  for (const [text, shown] of cases) {
+    assert.equal(dropInlineSpansByBlock(text), shown, text);
+  }
+});

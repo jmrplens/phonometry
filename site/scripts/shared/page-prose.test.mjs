@@ -68,11 +68,16 @@ test('a code span read over the lines of its paragraph hides what it holds', () 
   assert.ok(!authorsFigure('Texto `a\n<img src="x.png">\nb` fin.'));
   // A blank line ends the paragraph, and a span never crosses it.
   assert.ok(authorsFigure('Texto `a\n\n![alt](x.png) `b'));
-  const lines = ['Un `ejemplo', '$$ x', 'aquí` y fin.'];
+  const lines = ['Un `ejemplo', 'con $$ x', 'aquí` y fin.'];
   const shown = shownLines(lines, [false, false, false]);
   assert.equal(shown.length, 3);
   assert.equal(strayDelimiter(shown[1]), null);
   assert.equal(strayDelimiter(shownLines(['Un', '$$ x'], [false, false])[1]), '$$ x');
+  // A line that opens a display block ends the paragraph before any span is
+  // read, so a backtick on either side of it closes nothing and the block is
+  // seen: the site opens one there and takes the next lines for its formula.
+  const fenced = shownLines(['Un `ejemplo', '$$ x', 'aquí` y fin.'], [false, false, false]);
+  assert.equal(strayDelimiter(fenced[1]), '$$ x');
 });
 
 test('a comment shows no figure, and a figure after one is still one', () => {

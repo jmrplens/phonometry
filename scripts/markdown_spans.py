@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import bisect
 import re
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -116,12 +117,23 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
     return "".join(pieces)
 
 
-#: A line that opens a block of its own: a heading, a row of a table, an item
-#: of a list or a quotation, which a code span never crosses into
+#: A block on its own line only: a heading, a row of a table, a thematic break,
+#: a setext underline, the fence of a display-math block (a run of two dollar
+#: signs or more and no other after it) and a comment closed on its line.
+_ONE_LINE_SHAPES = (
+    r"#{1,6}(?:\s|$)|\||([-*_])[ \t]*(?:\1[ \t]*){2,}$|(?:=+|-+)[ \t]*$"
+    r"|\${2,}[^$]*$|<!--.*-->"
+)
+#: A line that opens a block of its own, which a code span never crosses into:
+#: those, an item of a list, a quotation and a comment
 #: (``BLOCK_START`` of ``site/scripts/shared/markdown-spans.mjs``).
-_BLOCK_START = re.compile(r" {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)")
-#: A block on its own line only: a heading or a row of a table.
-_ONE_LINE_BLOCK = re.compile(r" {0,3}(?:#{1,6}(?:\s|$)|\|)")
+_BLOCK_START = re.compile(
+    rf" {{0,3}}(?:{_ONE_LINE_SHAPES}|[-*+]\s|\d{{1,9}}[.)]\s|>|<!--)"
+)
+_ONE_LINE_BLOCK = re.compile(rf" {{0,3}}(?:{_ONE_LINE_SHAPES})")
+#: The marker of a list item, its indentation and the blanks after it, whose
+#: width is the column the item's content stands at (CommonMark 0.31.2, 5.2).
+_ITEM = re.compile(r" *(?:[-*+]|\d{1,9}[.)]) +")
 #: The marks of a quotation that open a line, each with what may stand before
 #: it, and the one blank after the last of them (CommonMark 0.31.2, 5.1).
 _QUOTE_MARKS = re.compile(r"(?: {0,3}>)+ ?")
@@ -138,7 +150,7 @@ _COMMENT_LINE = {
 }
 
 
-def _quote_depth(line: str) -> int:
+def quote_depth(line: str) -> int:
     """How many quotation marks open *line*."""
     marks = _QUOTE_MARKS.match(line)
     return marks.group().count(">") if marks else 0
@@ -150,20 +162,51 @@ def inside_quotation(line: str) -> str:
     return line[marks.end() :] if marks else line
 
 
-def _continues_quotation(line: str, block: list[str]) -> bool:
-    """Whether *line*, which opens with a quotation mark, carries on the paragraph of *block*.
+@dataclass
+class _Under:
+    """Where a line stands: the quotation it is in and the list item it is under.
 
-    The marks are not the paragraph's text, so what decides is what stands
-    after them: a blank, a heading, a table row, a list item or a deeper
-    quotation ends the paragraph inside the quotation as it would outside it.
-    A line with fewer marks than the block opened with carries it on lazily.
+    A list item's content sets the column a block opens at, so an item nested
+    in it may stand four columns in or more, where anywhere else it would be a
+    line of the paragraph (CommonMark 0.31.2, 5.2). A line the paragraph carries
+    on leaves that column alone, a lazy one too; one that opens a block sets it.
     """
-    rest = inside_quotation(line)
-    return (
-        bool(block)
-        and 0 < _quote_depth(line) <= _quote_depth(block[0])
-        and bool(rest.strip())
-        and not _BLOCK_START.match(rest)
+
+    depth: int = 0
+    column: int = 0
+
+    def read(self, line: str) -> str:
+        """*line* past the marks of its quotation and the column of the item above."""
+        depth = quote_depth(line)
+        if depth != self.depth:
+            self.depth, self.column = depth, 0
+        rest = inside_quotation(line)
+        return rest[min(self.column, len(rest) - len(rest.lstrip(" "))) :]
+
+    def settle(self, line: str) -> None:
+        """Take the column of *line*, which opens a block; a bare mark has none."""
+        rest = inside_quotation(line)
+        if not rest.strip():
+            return
+        item = _ITEM.match(rest)
+        self.column = (
+            item.end() if item else min(self.column, len(rest) - len(rest.lstrip(" ")))
+        )
+
+
+def _opens_block(line: str, read: str, block: list[str]) -> bool:
+    """Whether *line*, which reads as *read*, opens a block after the lines of *block*.
+
+    The marks of a quotation are not the paragraph's text, so what decides is
+    what stands after them: a blank, a heading, a table row, a list item or a
+    deeper quotation ends the paragraph inside the quotation as it would outside
+    it. A line with fewer marks than the block opened with carries it on lazily.
+    """
+    if _BLOCK_START.match(read):
+        return True
+    depth = quote_depth(line)
+    return depth > 0 and (
+        not block or depth > quote_depth(block[0]) or not read.strip()
     )
 
 
@@ -171,34 +214,37 @@ def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
     """*lines* in the blocks a code span stays inside, every line in one.
 
     A blank line is a block of its own and ends the one before it; a heading,
-    a table row, a list item or a quotation opens one, and a line that opens
-    a comment opens one that runs to the comment's end, blank lines included.
-    A quotation is read through its marks: a later line of its paragraph stays
-    in the block, and what opens a block outside a quotation opens one inside,
-    a line that holds only the marks being its blank line.
+    a table row, a list item, a quotation, a thematic break, a setext underline,
+    a display fence or a comment opens one, and a line that opens a comment with
+    *comments* set opens one that runs to the comment's end, blank lines
+    included. A quotation is read through its marks: a later line of its
+    paragraph stays in the block, and what opens a block outside a quotation
+    opens one inside, a line that holds only the marks being its blank line.
     """
     blocks: list[list[str]] = []
     current: list[str] = []
     closer = None if comments is None else _COMMENTS[comments]
     opener = None if comments is None else _COMMENT_LINE[comments]
+    under = _Under()
     for line in lines:
         if current and closer is not None and _unclosed(current, closer, opener):
             current.append(line)
             continue
-        if (
-            not line.strip()
-            or (_BLOCK_START.match(line) and not _continues_quotation(line, current))
-            or (opener and opener.match(line))
-        ):
+        if not line.strip():
             if current:
                 blocks.append(current)
-            current = []
-        if not line.strip():
             blocks.append([line])
+            current = []
             continue
+        read = under.read(line)
+        opens = _opens_block(line, read, current) or bool(opener and opener.match(line))
+        if opens or not current:
+            under.settle(line)
+        if opens and current:
+            blocks.append(current)
+            current = []
         current.append(line)
-        rest = inside_quotation(line)
-        if not rest.strip() or _ONE_LINE_BLOCK.match(rest):
+        if not read.strip() or _ONE_LINE_BLOCK.match(read):
             blocks.append(current)
             current = []
     if current:

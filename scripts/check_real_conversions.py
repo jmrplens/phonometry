@@ -114,6 +114,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
 from ast_scan import (
     ROOT,
+    binding_of,
     block_statements,
     exempted,
     for_the_type_checker,
@@ -447,6 +448,9 @@ class _Names:
 
     numpy: frozenset[str] = frozenset()
     dtypes: Mapping[str, Kind] = field(default_factory=dict)
+    #: Each call of the module, by its id, of a name a nearer scope binds
+    #: (:func:`_calls_of_nearer_names`), which reaches no function by name.
+    hidden: frozenset[int] = frozenset()
 
     def callee(self, func: ast.expr) -> str | None:
         """The NumPy name a call reaches: any attribute, or a name imported from NumPy."""
@@ -484,6 +488,8 @@ _PLAIN = _Names()
 
 def converted(call: ast.Call, names: _Names = _PLAIN) -> tuple[ast.expr, Kind] | None:
     """The value *call* converts and to what, or ``None`` when it converts none."""
+    if id(call) in names.hidden:
+        return None
     name = names.callee(call.func)
     if name in _ARRAY_CONVERSIONS:
         kind = names.kind(_argument(call, 1, "dtype"))
@@ -737,7 +743,7 @@ def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
     nothing for a call that keeps none, a conversion included.
     """
     callee = _last_name(call.func)
-    if converted(call, names) is not None:
+    if id(call) in names.hidden or converted(call, names) is not None:
         return []
     if callee == "getattr" and len(call.args) == _GETATTR_WITH_DEFAULT:
         return [call.args[2]]
@@ -758,6 +764,8 @@ def _numpy_function(call: ast.Call, names: _Names) -> bool:
     given no floating or complex dtype: ``np.asarray(x)``, ``np.atleast_1d(x)``
     and their kin, which read a ``bytearray`` as the codes of its characters.
     """
+    if id(call) in names.hidden:
+        return False
     func = call.func
     through_numpy = (
         isinstance(func, ast.Attribute)
@@ -1463,7 +1471,35 @@ def _numpy_names(tree: ast.Module, imports: Mapping[str, str]) -> _Names:
         name for name, dotted in imports.items() if dotted.startswith("numpy.")
     )
     plain = _Names(numpy)
-    return _Names(numpy, _dtype_names(tree.body, plain))
+    return _Names(
+        numpy, _dtype_names(tree.body, plain), _calls_of_nearer_names(tree, imports)
+    )
+
+
+def _calls_of_nearer_names(
+    tree: ast.Module, imports: Mapping[str, str]
+) -> frozenset[int]:
+    """Each call of *tree*, by its id, whose callee is a name, or an attribute of
+    a name the module imports, that a scope inside the module binds nearer than
+    the module does: a parameter, a local, a comprehension's variable, a nested
+    function. It reaches no function of the module by that spelling. A scope's
+    own import is read as the module's (:func:`_imports`).
+    """
+    found: set[int] = set()
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call):
+            continue
+        head = call.func
+        while isinstance(head, ast.Attribute):
+            head = head.value
+        if not isinstance(head, ast.Name) or (
+            head is not call.func and head.id not in imports
+        ):
+            continue
+        how, binder = binding_of(tree, call, head.id)
+        if binder is not None and binder is not tree and how != "import":
+            found.add(id(call))
+    return frozenset(found)
 
 
 @dataclass(frozen=True, eq=False)
@@ -1724,7 +1760,7 @@ def _signatures(module: _Module) -> list[_Signature]:
                 tuple((k.arg, _held(reader, k.value, bound)) for k in call.keywords),
             )
             for call, bound in sure.found
-            if isinstance(call.func, ast.Name)
+            if isinstance(call.func, ast.Name) and id(call) not in module.numpy.hidden
         )
         arguments = node.args
         positional = tuple(a.arg for a in arguments.posonlyargs + arguments.args)
@@ -2067,13 +2103,16 @@ class _Returns:
         default, which the function around reads where the ``def`` is.
 
         A call reaches the functions of its name that the nearest function
-        binding the name defines; a name declared ``global`` reaches none of
-        them. What a nested function is handed by anything but a call of its
-        name (``map(inner, values)``, a callback) is not followed.
+        binding the name defines; a name declared ``global``, or one a
+        comprehension binds where the call is made, reaches none of them. What
+        a nested function is handed by anything but a call of its name
+        (``map(inner, values)``, a callback) is not followed.
         """
         for caller in self.nest:
             for call, local in caller.calls:
                 name = call.func.id if isinstance(call.func, ast.Name) else ""
+                if name in local:
+                    continue
                 holder: _Returns | None = caller
                 while not (
                     holder is None
@@ -2319,6 +2358,8 @@ class _Returns:
     def _call(
         self, call: ast.Call, seen: _Seen, local: _Local
     ) -> tuple[Provenance, list[_Handing]]:
+        if id(call) in self.module.numpy.hidden:
+            return {}, []
         func = call.func
         if isinstance(func, ast.Name) and func.id in CHECKS and call.args:
             found, calls = self.sources(call.args[0], seen, local)
@@ -2453,7 +2494,7 @@ def _checker(
     """
 
     def checked_by(call: ast.Call) -> list[tuple[ast.expr, frozenset[Refusal]]]:
-        if not isinstance(call.func, ast.Name):
+        if not isinstance(call.func, ast.Name) or id(call) in module.numpy.hidden:
             return []
         name = call.func.id
         check = checks.get(module.imports.get(name, f"{module.name}.{name}"))
@@ -2473,7 +2514,7 @@ def _hander(
     """
 
     def handed(call: ast.Call) -> list[tuple[ast.expr, frozenset[Refusal]]] | None:
-        if not isinstance(call.func, ast.Name):
+        if not isinstance(call.func, ast.Name) or id(call) in module.numpy.hidden:
             return None
         name = call.func.id
         target = module.imports.get(name, f"{module.name}.{name}")
@@ -2542,7 +2583,9 @@ def _function_names(
     own = _dtype_names(ast.walk(function), module.numpy, function)
     if not own:
         return module.numpy
-    return _Names(module.numpy.numpy, {**module.numpy.dtypes, **own})
+    return _Names(
+        module.numpy.numpy, {**module.numpy.dtypes, **own}, module.numpy.hidden
+    )
 
 
 def conversions_in(
@@ -2657,6 +2700,8 @@ class _Reading:
 
     def _calling(self, flow: _Flow, call: ast.Call, env: Env) -> None:
         """Join what *call* hands a helper into what its parameters are handed."""
+        if id(call) in self.module.numpy.hidden:
+            return
         target = _dotted(self.module, call.func)
         helper = self.helpers.get(target) if target is not None else None
         if target is None or helper is None:

@@ -348,6 +348,68 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return np.asarray(_helper(reference, levels), dtype=np.float64)
     """,
+    "a_call_in_a_comprehension_s_first_iterable_reaches_the_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+                return [x]
+
+            _ = [y for inner in inner(levels) for y in [inner]]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_local_spelt_like_a_private_check_checks_nothing": """
+        def _check(x):
+            real_array(x, "x")
+
+        def f(levels):
+            _check = print
+            _check(levels)
+            return float(levels)
+    """,
+    "a_parameter_spelt_like_a_private_check_checks_nothing": """
+        def _check(x):
+            real_array(x, "x")
+
+        def f(levels, _check):
+            _check(levels)
+            return float(levels)
+    """,
+    "a_nested_function_spelt_like_a_private_check_checks_nothing": """
+        def _check(x):
+            real_array(x, "x")
+
+        def f(levels):
+            def _check(x):
+                return None
+
+            _check(levels)
+            return float(levels)
+    """,
+    "a_local_spelt_like_a_shared_check_checks_nothing": """
+        def f(levels):
+            real_array = print
+            real_array(levels, "levels")
+            return float(levels)
+    """,
+    "a_local_spelt_like_a_private_check_hands_on_no_check_to_its_caller": """
+        def _check(x):
+            real_array(x, "x")
+
+        def _forward(values):
+            _check = print
+            _check(values)
+
+        def f(levels):
+            _forward(levels)
+            return float(levels)
+    """,
     "a_check_only_a_type_checker_imports_beside_the_function_that_runs": """
         from typing import TYPE_CHECKING
 
@@ -1108,6 +1170,70 @@ _PLANTED_UNCHECKED = {
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_call_of_a_name_a_comprehension_binds_reaches_no_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            _ = [inner(levels) for inner in [lambda x: None]]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_call_of_a_name_a_later_loop_of_a_comprehension_binds": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            _ = [y for inner in [lambda x: [x]] for y in inner(levels)]
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_call_of_a_name_a_comprehension_binds_reaches_no_module_function": """
+        def _keep(x):
+            return x
+
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            return [_keep(levels) for _keep in [lambda x: 1.0]]
+
+        def f(reference, levels):
+            return float(_helper(reference, levels)[0])
+    """,
+    "a_call_of_a_nested_function_spelt_like_a_module_function": """
+        def _keep(x):
+            return x
+
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+
+            def _keep(x):
+                return 1.0
+
+            return _keep(levels)
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_call_of_a_name_a_comprehension_binds_spelt_like_float": """
+        def f(levels):
+            return [float(levels) for float in [lambda x: 1.0]]
+    """,
+    "a_call_of_a_parameter_spelt_like_float": """
+        def f(levels, float):
+            return float(levels)
+    """,
     "a_value_only_a_type_checker_block_hands_back": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -1697,6 +1823,32 @@ def _planted(tmp_path: Path, body: str) -> set[str]:
         for function, verdict in _verdicts(tmp_path, source).items()
         if function == "f" or function.startswith("f.")
     }
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        """
+        def f(levels):
+            return [float(real_array(levels, "levels")) for real_array in [print]]
+        """,
+        """
+        def _check(x):
+            real_array(x, "x")
+            return x
+
+        def f(levels):
+            return [float(_check(levels)) for _check in [print]]
+        """,
+    ],
+)
+def test_a_check_a_comprehension_binds_answers_for_nothing(
+    tmp_path: Path, body: str
+) -> None:
+    """A comprehension's variable spelt like a check is another name: what it
+    calls hands back something the guard does not follow, no refusal of a check.
+    """
+    assert _planted(tmp_path, body) == {"computed"}
 
 
 @pytest.mark.parametrize("shape", sorted(_PLANTED_UNCHECKED))

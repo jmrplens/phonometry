@@ -24,10 +24,11 @@ What is NOT prose keeps its dash, and every exemption below says why:
   below, so the open quotation is carried from line to line within a
   paragraph exactly as the italic span is; in a string, whose lines are read
   one by one, a quotation closes on its line or quotes nothing. A value of the
-  frontmatter is read as such a line too: the site shows it as plain text, so
-  it holds no span, no italics, no reference and no empty cell, the quotes
-  that delimit it are YAML's, and nothing it opens reaches the next value or
-  the body.
+  frontmatter is read as one such text, over the lines it wraps: the site shows
+  it as plain text, so it holds no span, no italics, no reference and no empty
+  cell, the quotes that delimit it are YAML's, a quotation closes inside the
+  value or quotes nothing, and nothing it opens reaches the next value or the
+  body.
 - **Code.** A fenced block, an inline code span and a string a test compares
   with are data, not prose, and a dash that fills a whole table cell, or a
   whole slash-separated item of one, is the placeholder of an empty cell, not
@@ -185,7 +186,7 @@ _TYPOGRAPHIC_QUOTE_PAIRS = {"«": "»", "“": "”"}
 #: What may sit before a straight quote that opens a quotation. A straight
 #: quote is the one mark that opens and closes with the same character, so it
 #: is read as an opening one only where an opening one can stand.
-_BEFORE_OPENING = ("", " ", "\t", "(", "[", "{")
+_BEFORE_OPENING = ("", " ", "\t", "\n", "(", "[", "{")
 #: A row of a pipe table.
 _TABLE_ROW = re.compile(r"^\s*\|.*\|")
 #: A dash that fills a whole cell, or a whole slash-separated item of one: the
@@ -282,6 +283,13 @@ _YAML_QUOTED_REST = {
     '"': re.compile(r'(?:[^"\\]|\\.)*"'),
     "'": re.compile(r"(?:[^']|'')*'"),
 }
+#: A backslash of a double-quoted YAML value and the character it escapes.
+_ESCAPED_YAML_CHARACTER = re.compile(r"\\(.)")
+
+
+def _shown_quote(escape: re.Match[str]) -> str:
+    """An escaped quote as the page shows it, its column kept; any other escape as written."""
+    return ' "' if escape.group(1) == '"' else escape.group()
 
 
 @dataclass
@@ -338,6 +346,19 @@ class _Frontmatter:
     blank_comments: bool = False
     #: Whether the quotes that delimit a value are blanked, its columns kept.
     blank_quotes: bool = False
+    #: The column of a key with nothing after it on its line: the value that
+    #: opens on the next line, deeper, wraps past that column.
+    under_key: int | None = None
+
+    def continues(self, line: str) -> bool:
+        """Whether *line* carries on the value the lines above it left open."""
+        if self.quote:
+            return True
+        indent = len(line) - len(line.lstrip(" "))
+        return any(
+            column is not None and (not line.strip() or indent > column)
+            for column in (self.block, self.plain)
+        )
 
     def decode(self, line: str) -> str:
         """The line with each escape of the em dash read where YAML decodes it.
@@ -370,6 +391,8 @@ class _Frontmatter:
         value = line[start:end]
         if found is not None and self.blank_quotes:
             value = value[:-1] + " "
+        if quote == '"' and self.blank_quotes:
+            value = _ESCAPED_YAML_CHARACTER.sub(_shown_quote, value)
         pieces.append(
             _decode_escapes(value, _YAML_EM_DASH_ESCAPE)
             if quote == '"' and self.decode_escapes
@@ -379,10 +402,13 @@ class _Frontmatter:
 
     def _nodes(self, line: str, at: int, indent: int, pieces: list[str]) -> None:
         """Read the line from ``at`` on, node by node, into ``pieces``."""
-        node = _Node(owner=indent)
+        key = self.under_key
+        node = _Node(owner=key if key is not None and indent > key else indent)
         while at < len(line) and not node.done:
             found = self._indicator(line, at, node, pieces)
             at = found if found is not None else self._plain(line, at, node, pieces)
+        ends_on_key = node.open and bool(node.key) and not self.flow
+        self.under_key = node.owner if ends_on_key else None
 
     def _indicator(
         self, line: str, at: int, node: _Node, pieces: list[str]
@@ -495,10 +521,13 @@ def _read_frontmatter(lines: list[str], reader: _Frontmatter) -> None:
 
 
 def _frontmatter_end(lines: list[str]) -> int:
-    """The index of the line that closes a page's frontmatter, 0 when it has none."""
-    if not lines or lines[0].strip() != "---":
+    """The index of the line that closes a page's frontmatter, 0 when it has none.
+
+    Its fences stand at the first column, as Astro reads them.
+    """
+    if not lines or lines[0].rstrip() != "---":
         return 0
-    return next((n for n in range(1, len(lines)) if lines[n].strip() == "---"), 0)
+    return next((n for n in range(1, len(lines)) if lines[n].rstrip() == "---"), 0)
 
 
 def _frontmatter_head(lines: list[str]) -> int:
@@ -544,7 +573,7 @@ def _opens_quotation(line: str, index: int) -> bool:
         return False
     return line[index - 1 : index] in _BEFORE_OPENING and line[
         index + 1 : index + 2
-    ] not in ("", " ", "\t")
+    ] not in ("", " ", "\t", "\n")
 
 
 def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | None]:
@@ -576,7 +605,9 @@ def _outside_closed_quotations(line: str, pairs: dict[str, str]) -> str:
     A string and a line of a plain-text file have no paragraph to carry an
     open quotation over, so a mark that does not close on its line quotes
     nothing. Reading from the left is what keeps the closing mark of one
-    quotation from opening another over the dash between them.
+    quotation from opening another over the dash between them. Handed the lines
+    of one value joined, it reads them as one text, and the line breaks a
+    quotation holds stay, so that each line is where it was.
 
     :param pairs: The mark that opens a quotation, and the one that closes it.
     """
@@ -586,6 +617,7 @@ def _outside_closed_quotations(line: str, pairs: dict[str, str]) -> str:
         closer = pairs.get(line[at])
         end = line.find(closer, at + 1) if closer and _opens_quotation(line, at) else -1
         if end >= 0:
+            kept.append("\n" * line.count("\n", at, end))
             at = end + 1
         else:
             kept.append(line[at])
@@ -704,23 +736,45 @@ class _PageReading:
         return _MATHS_DASH in shown or (EM_DASH in prose and not self.in_reference)
 
 
+def _lines_with_prose_dash(value: str) -> list[int]:
+    """The 0-based lines of a text whose dash is neither quoted nor before a part number.
+
+    As :func:`_holds_prose_dash`, over the lines of one text: a quotation and a
+    part number each read across a line break of it.
+    """
+    outside = _PART_AFTER_DASH.sub(
+        lambda part: "\n" * part.group().count("\n"),
+        _outside_closed_quotations(value, _QUOTE_PAIRS),
+    )
+    return [
+        offset for offset, line in enumerate(outside.split("\n")) if EM_DASH in line
+    ]
+
+
 def _frontmatter_hits(lines: list[str]) -> list[int]:
     """The 1-based lines of a page's frontmatter that carry a dash.
 
-    A value is plain text the site shows as written, marks and all, so it is
-    read as a line of a plain-text file is (:func:`_holds_prose_dash`): it
-    holds no span, no italics, no reference and no empty cell, and what it
-    leaves open stops at its line. The quotes that delimit a value are YAML's
-    and quote nothing. A ``title:`` value is the one place that word marks a
-    title.
+    A value is plain text the site shows as written, marks and all, so it holds
+    no span, no italics, no reference and no empty cell, and the lines it wraps
+    are one text (:func:`_lines_with_prose_dash`): what it leaves open stops
+    where the next value starts. The quotes that delimit a value are YAML's and
+    quote nothing. A ``title:`` value is the one place that word marks a title,
+    on every line of the value.
     """
-    head = lines[: _frontmatter_head(lines)]
-    plain = list(head)
-    _read_frontmatter(plain, _Frontmatter(decode_escapes=False, blank_quotes=True))
+    reader = _Frontmatter(decode_escapes=False, blank_quotes=True)
+    values: list[list[int]] = []
+    shown = list(lines)
+    for index in range(1, _frontmatter_end(lines)):
+        if values and reader.continues(lines[index]):
+            values[-1].append(index)
+        else:
+            values.append([index])
+        shown[index] = reader.decode(lines[index])
     return [
-        number
-        for number, (line, value) in enumerate(zip(head, plain, strict=True), start=1)
-        if not _TITLE_LINE.match(line) and _holds_prose_dash(value)
+        value[offset] + 1
+        for value in values
+        if not _TITLE_LINE.match(lines[value[0]])
+        for offset in _lines_with_prose_dash("\n".join(shown[i] for i in value))
     ]
 
 

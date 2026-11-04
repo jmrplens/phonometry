@@ -509,6 +509,94 @@ def test_a_frontmatter_value_hides_no_double_hyphen(text: str, hits: list[int]) 
     assert ced.markdown_double_hyphen_hits(text) == hits
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param(
+            '---\ndescription: "He read «A —\n  B» there"\n---\n', id="double-quoted"
+        ),
+        pytest.param(
+            "---\ndescription: 'He read «A —\n  B» there'\n---\n", id="single-quoted"
+        ),
+        pytest.param("---\ndescription: He read «A —\n  B» there\n---\n", id="plain"),
+        pytest.param(
+            "---\ndescription: |\n  He read «A —\n  B» there\n---\n", id="a block"
+        ),
+        pytest.param(
+            "---\ndescription: >\n  He read “A —\n  B” there\n---\n", id="a folded one"
+        ),
+        pytest.param(
+            '---\ndescription: He read "A —\n  B" there\n---\n', id="in straight quotes"
+        ),
+        pytest.param(
+            "---\ndescription:\n  He read «A —\n  B» there\n---\n", id="under its key"
+        ),
+        pytest.param(
+            "---\ndescription: A —\n  Part 3 there\n---\n", id="a part number"
+        ),
+    ],
+)
+def test_a_quotation_wraps_with_its_value(text: str) -> None:
+    """The lines of one value are one text: only the next value stops a quotation.
+
+    Each physical line was read alone, so a title quoted across the wrap of its
+    value was refused, though the same value on one line passed.
+    """
+    assert ced.markdown_hits(text) == []
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "---\ndescription: He read «A —\nnext: B» — x\n---\n",
+            [2, 3],
+            id="into the next value",
+        ),
+        pytest.param(
+            "---\ndescription: He read «A —\n  B there\nnext: C»\n---\n",
+            [2],
+            id="closed by the next value alone",
+        ),
+        pytest.param(
+            "---\ndescription: a —\n  b\n---\n", [2], id="no quotation at all"
+        ),
+        pytest.param(
+            "---\ndescription: A\n  b — c\n  d «e» — f\n---\n",
+            [3, 4],
+            id="a line of the value with its own dash",
+        ),
+    ],
+)
+def test_a_value_names_the_line_of_its_dash(text: str, hits: list[int]) -> None:
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("---\ntitle: Acoustics\n  — Rooms — x\n---\n", id="wrapped"),
+        pytest.param(
+            "---\ntitle: |\n  Acoustics — Rooms\n  — x\n---\n", id="in a block of text"
+        ),
+    ],
+)
+def test_a_title_is_a_title_on_every_line_of_its_value(text: str) -> None:
+    assert ced.markdown_hits(text) == []
+
+
+def test_a_value_that_quotes_with_an_escaped_quote_quotes() -> None:
+    """A double-quoted value decodes it, so the page shows a quotation."""
+    text = '---\ndescription: "He said \\"A — B\\" there"\n---\n'
+    assert ced.markdown_hits(text) == []
+    assert ced.markdown_hits('---\ndescription: "He said \\"A\\" — B"\n---\n') == [2]
+
+
+def test_an_indented_fence_opens_no_frontmatter() -> None:
+    """The site reads one only at the first column, and the rest is the page's."""
+    assert ced.markdown_hits("    ---\ntitle: a — b\n---\n") == [2]
+
+
 def test_a_frontmatter_value_is_no_list_item() -> None:
     """The site shows an entry of a YAML sequence as text, hyphen and all."""
     assert ced.markdown_bullet_hyphen_hits("---\na:\n  - `x` - text\n---\n") == []

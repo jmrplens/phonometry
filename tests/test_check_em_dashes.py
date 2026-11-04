@@ -22,10 +22,8 @@ from __future__ import annotations
 
 import pathlib
 import sys
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -349,6 +347,173 @@ def test_the_frontmatter_holds_no_span() -> None:
     assert ced.markdown_hits("---\ndescription: Uses `a — b` here\n---\n") == [2]
     assert ced.markdown_hits("---\ndescription: Costs $5 — or $6\n---\n") == [2]
     assert ced.markdown_hits("---\ntitle: A `page\n---\nCode` and — this.\n") == [4]
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            '---\ndescription: "Uses $a^*$ — for measurement."\n---\n',
+            [2],
+            id="a star in maths",
+        ),
+        pytest.param(
+            "---\ndescription: Uses a* — for measurement.\n---\n",
+            [2],
+            id="a star",
+        ),
+        pytest.param(
+            "---\ndescription: See *Acoustics — Rooms* here.\n---\n",
+            [2],
+            id="a pair of stars",
+        ),
+        pytest.param(
+            "---\nkeywords:\n  - Author (2001) a — b\n---\n",
+            [3],
+            id="an author and a year",
+        ),
+        pytest.param(
+            "---\nkeywords:\n  - Author (2001) a\n    wrapped — b\n---\n",
+            [4],
+            id="the line under an author and a year",
+        ),
+        pytest.param(
+            "---\nnote: |\n  | a | — | b |\n---\n",
+            [3],
+            id="an empty cell",
+        ),
+        pytest.param(
+            "---\ndescription: Uses “Acoustics — Rooms” here.\n---\n",
+            [],
+            id="a quotation stays one",
+        ),
+        pytest.param(
+            '---\ndescription: Uses "Acoustics — Rooms" here.\n---\n',
+            [],
+            id="a straight quotation stays one",
+        ),
+        pytest.param(
+            '---\nnote: "ISO 1 — Part 3: rooms"\n---\n',
+            [],
+            id="a part number stays one",
+        ),
+    ],
+)
+def test_a_frontmatter_value_holds_no_mark_of_markdown(
+    text: str, hits: list[int]
+) -> None:
+    """The site shows a value with its marks as written, so they exempt nothing.
+
+    Read as a line of a page, a star opened an italic span that hid the dash
+    after it, and an author and a year passed the line as a reference.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param('---\ndescription: "a — b"\n---\n', [2], id="a key's value"),
+        pytest.param('---\nkeywords:\n  - "a — b"\n---\n', [3], id="an entry"),
+        pytest.param('---\nkeywords: ["a — b", "c"]\n---\n', [2], id="a flow entry"),
+        pytest.param('---\nnote: "wrapped\n  a — b"\n---\n', [3], id="a wrapped value"),
+        pytest.param('---\nnote: "x “a — b” y"\n---\n', [], id="a quotation inside"),
+    ],
+)
+def test_the_quotes_of_a_frontmatter_value_are_no_quotation(
+    text: str, hits: list[int]
+) -> None:
+    """They are YAML's, gone from what the site shows, and quote nothing."""
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            '---\ndescription: "A *value"\n---\nBody — with a dash.\n',
+            [4],
+            id="a star into the body",
+        ),
+        pytest.param(
+            "---\ndescription: A *value\n---\nBody — with a dash.\n",
+            [4],
+            id="a plain star into the body",
+        ),
+        pytest.param(
+            "---\ndescription: A “value\n---\nBody — with a dash.\n",
+            [4],
+            id="a quotation into the body",
+        ),
+        pytest.param(
+            "---\ndescription: A *value\nsummary: a — b\n---\n",
+            [3],
+            id="a star into the next value",
+        ),
+        pytest.param(
+            "---\ndescription: A “value\nsummary: a — b\n---\n",
+            [3],
+            id="a quotation into the next value",
+        ),
+        pytest.param(
+            "---\nkeywords:\n  - Author (2001) a\n---\n  wrapped — b\n",
+            [5],
+            id="a reference into the body",
+        ),
+        pytest.param(
+            "---\ndescription: |\n  ```\n---\nThe level rises — and falls.\n",
+            [5],
+            id="a fence into the body",
+        ),
+        pytest.param(
+            '---\ndescription: |\n  $$\n---\nSee "Acoustics — Rooms" here.\n',
+            [],
+            id="a display block into the body",
+        ),
+        pytest.param(
+            "---\ndescription: Plain\n---\n*A caption — with a dash.*\n",
+            [4],
+            id="a caption right under it",
+        ),
+    ],
+)
+def test_what_a_frontmatter_value_leaves_open_stops_at_its_line(
+    text: str, hits: list[int]
+) -> None:
+    """Nothing a value opens carries to the next value or into the body."""
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("---\na: x `y\n---\nc -- d` e\n", [4], id="a backtick"),
+        pytest.param("---\na: x $y\n---\nc -- d$ e\n", [4], id="a dollar sign"),
+        pytest.param(
+            "---\na: x <!-- y\n---\nc -- d\n<!-- z -->\n", [2, 4], id="a comment"
+        ),
+        pytest.param(
+            '---\na: x href="y\n---\nc -- d "\n', [4], id="an attribute value"
+        ),
+        pytest.param("---\na: |\n  $$\n---\nc -- d\n", [5], id="a display block"),
+        pytest.param("---\na: |\n  ```\n---\nc -- d\n", [5], id="a fence"),
+        pytest.param("---\na: Uses `x -- y` here\n---\n", [2], id="a code span"),
+        pytest.param("---\na: Costs $x -- y$ here\n---\n", [2], id="a maths span"),
+        pytest.param(
+            "---\na: https://example.org/b--c\n---\n", [], id="an address stays one"
+        ),
+    ],
+)
+def test_a_frontmatter_value_hides_no_double_hyphen(text: str, hits: list[int]) -> None:
+    """A value holds no span, and what it leaves open stops at the frontmatter."""
+    assert ced.markdown_double_hyphen_hits(text) == hits
+
+
+def test_a_frontmatter_value_is_no_list_item() -> None:
+    """The site shows an entry of a YAML sequence as text, hyphen and all."""
+    assert ced.markdown_bullet_hyphen_hits("---\na:\n  - `x` - text\n---\n") == []
+    opened = "---\na: |\n  $$\n---\n- `x` - text\n"
+    assert ced.markdown_bullet_hyphen_hits(opened) == [5]
 
 
 def test_the_site_data_modules_are_read_by_default(

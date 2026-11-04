@@ -23,7 +23,11 @@ What is NOT prose keeps its dash, and every exemption below says why:
   the paragraph that carries it, opening on one line and closing two lines
   below, so the open quotation is carried from line to line within a
   paragraph exactly as the italic span is; in a string, whose lines are read
-  one by one, a quotation closes on its line or quotes nothing.
+  one by one, a quotation closes on its line or quotes nothing. A value of the
+  frontmatter is read as such a line too: the site shows it as plain text, so
+  it holds no span, no italics, no reference and no empty cell, the quotes
+  that delimit it are YAML's, and nothing it opens reaches the next value or
+  the body.
 - **Code.** A fenced block, an inline code span and a string a test compares
   with are data, not prose, and a dash that fills a whole table cell, or a
   whole slash-separated item of one, is the placeholder of an empty cell, not
@@ -306,7 +310,9 @@ class _Frontmatter:
     The readings of the hyphens read the frontmatter for its comments
     instead: they leave the escapes as written and blank a comment, which
     the page does not show (see :attr:`decode_escapes` and
-    :attr:`blank_comments`).
+    :attr:`blank_comments`). The reading of the em dash reads it once more
+    for the quotes that delimit a value, which are YAML's and quote nothing
+    (see :attr:`blank_quotes`).
     """
 
     #: The quote of a value still open at the end of the last line.
@@ -325,6 +331,8 @@ class _Frontmatter:
     decode_escapes: bool = True
     #: Whether a comment is blanked, its columns kept, or returned as written.
     blank_comments: bool = False
+    #: Whether the quotes that delimit a value are blanked, its columns kept.
+    blank_quotes: bool = False
 
     def decode(self, line: str) -> str:
         """The line with each escape of the em dash read where YAML decodes it.
@@ -355,6 +363,8 @@ class _Frontmatter:
         end = found.end() if found is not None else len(line)
         self.quote = "" if found is not None else quote
         value = line[start:end]
+        if found is not None and self.blank_quotes:
+            value = value[:-1] + " "
         pieces.append(
             _decode_escapes(value, _YAML_EM_DASH_ESCAPE)
             if quote == '"' and self.decode_escapes
@@ -397,7 +407,7 @@ class _Frontmatter:
         """Read what may open a node: a quote, a sequence entry or a block of text."""
         char = line[at]
         if char in "\"'":
-            pieces.append(char)
+            pieces.append(" " if self.blank_quotes else char)
             end = self._quoted(line, at + 1, char, pieces)
             node.open, node.done = False, bool(self.quote)
             return end
@@ -484,6 +494,12 @@ def _frontmatter_end(lines: list[str]) -> int:
     if not lines or lines[0].strip() != "---":
         return 0
     return next((n for n in range(1, len(lines)) if lines[n].strip() == "---"), 0)
+
+
+def _frontmatter_head(lines: list[str]) -> int:
+    """How many lines of a page its frontmatter takes, fences included, 0 with none."""
+    closing = _frontmatter_end(lines)
+    return closing + 1 if closing else 0
 
 
 def _outside_italics(line: str, *, italic_open: bool) -> tuple[str, bool]:
@@ -679,6 +695,26 @@ class _PageReading:
         return _MATHS_DASH in shown or (EM_DASH in prose and not self.in_reference)
 
 
+def _frontmatter_hits(lines: list[str]) -> list[int]:
+    """The 1-based lines of a page's frontmatter that carry a dash.
+
+    A value is plain text the site shows as written, marks and all, so it is
+    read as a line of a plain-text file is (:func:`_holds_prose_dash`): it
+    holds no span, no italics, no reference and no empty cell, and what it
+    leaves open stops at its line. The quotes that delimit a value are YAML's
+    and quote nothing. A ``title:`` value is the one place that word marks a
+    title.
+    """
+    head = lines[: _frontmatter_head(lines)]
+    plain = list(head)
+    _read_frontmatter(plain, _Frontmatter(decode_escapes=False, blank_quotes=True))
+    return [
+        number
+        for number, (line, value) in enumerate(zip(head, plain, strict=True), start=1)
+        if not _TITLE_LINE.match(line) and _holds_prose_dash(value)
+    ]
+
+
 def markdown_hits(text: str) -> list[int]:
     """The 1-based lines of a markdown or MDX page that carry a prose dash.
 
@@ -687,33 +723,31 @@ def markdown_hits(text: str) -> list[int]:
     nothing pairs across it, whatever its lines open with. An italic span and
     a quotation stop where a code span does, at the start of any block, and a
     line of a quotation is read through its marks. The frontmatter is plain
-    text, not markdown, so it holds no span at all, and its ``title:`` values
-    are the one place that word marks a title.
+    text, read apart (:func:`_frontmatter_hits`): nothing a value of it opens
+    reaches the body.
     """
     lines = _decode_page(text).splitlines()
-    code_flags = list(code_lines(lines))
-    math_flags = _math_lines(lines, code_flags)
-    closing = _frontmatter_end(lines)
-    head = closing + 1 if closing else 0
+    head = _frontmatter_head(lines)
+    written = lines[head:]
+    code_flags = list(code_lines(written))
+    math_flags = _math_lines(written, code_flags)
     body = [
         "" if code or math else line
-        for line, code, math in zip(lines, code_flags, math_flags, strict=True)
-    ][head:]
-    shown = lines[:head] + lines_read_whole(body, _drop_code_and_math)
+        for line, code, math in zip(written, code_flags, math_flags, strict=True)
+    ]
+    shown = lines_read_whole(body, _drop_code_and_math)
     reading = _PageReading()
-    hits: list[int] = []
-    for index, opens_block in enumerate(block_starts(lines[:head] + body)):
-        line = lines[index]
+    hits = _frontmatter_hits(lines)
+    for index, opens_block in enumerate(block_starts(body)):
+        line = written[index]
         if opens_block:
             reading.open_block(line)
-        if index < head:
-            found = not _TITLE_LINE.match(line) and reading.holds_dash(line, line)
-        elif body[index - head].strip():
+        if body[index].strip():
             found = reading.holds_dash(line, shown[index])
         else:
             found = math_flags[index] and EM_DASH in line
         if found:
-            hits.append(index + 1)
+            hits.append(head + index + 1)
     return hits
 
 
@@ -1047,17 +1081,24 @@ def _math_lines(lines: list[str], code: list[bool]) -> list[bool]:
 
 
 def _page_code_lines(lines: list[str]) -> list[bool]:
-    """Whether each line of a page is code or display math, not prose."""
-    code = list(code_lines(lines))
-    return [a or b for a, b in zip(code, _math_lines(lines, code), strict=True)]
+    """Whether each line of a page is code or display math, not prose.
+
+    The frontmatter holds neither: a value is plain text, and what it opens
+    stops there.
+    """
+    head = _frontmatter_head(lines)
+    code = list(code_lines(lines[head:]))
+    maths = _math_lines(lines[head:], code)
+    return [False] * head + [a or b for a, b in zip(code, maths, strict=True)]
 
 
-def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> str:
-    """The text of a page with its code, its display math and its comments blanked.
+def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> list[str]:
+    """The lines of a page with its code, its display math and its comments blanked.
 
-    The comments are the ones the page does not show: an HTML comment, an MDX
-    comment on an MDX page and a comment of the frontmatter. Every line keeps
-    its place, so that a line still counts as the one written.
+    The comments are the ones the page does not show: an HTML comment and an
+    MDX comment of the body, the second on an MDX page only, and a comment of
+    the frontmatter, whose values open neither. Every line keeps its place, so
+    that a line still counts as the one written.
 
     :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
     """
@@ -1066,8 +1107,20 @@ def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> str:
         for line, code in zip(written, _page_code_lines(written), strict=True)
     ]
     _read_frontmatter(lines, _Frontmatter(decode_escapes=False, blank_comments=True))
-    text = _HTML_COMMENT.sub(_blank_out, "\n".join(lines))
-    return _MDX_COMMENT.sub(_blank_out, text) if mdx else text
+
+    def without_comments(text: str) -> str:
+        text = _HTML_COMMENT.sub(_blank_out, text)
+        return _MDX_COMMENT.sub(_blank_out, text) if mdx else text
+
+    head = _frontmatter_head(lines)
+    return lines[:head] + lines_read_whole(lines[head:], without_comments)
+
+
+def _without_addresses(text: str) -> str:
+    """The text with its link destinations, URLs and address or style attributes blanked."""
+    for address in _ADDRESSES:
+        text = address.sub(_blank_out, text)
+    return _ADDRESS_ATTRIBUTE.sub(_blank_out, text)
 
 
 def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
@@ -1076,16 +1129,17 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     Smartypants converts any run of two hyphens in the text of a page, spaced
     or not, so any such run is looked for, once the code, the math, the
     addresses, the comments, the address and style attributes and the rules
-    are out.
+    are out. The frontmatter is read apart from the body, as plain text with
+    no span in it, so nothing a value of it opens reaches the body.
 
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
-    text = _page_without_code_or_comments(written, mdx=mdx)
-    for address in _ADDRESSES:
-        text = address.sub(_blank_out, text)
-    text = _ADDRESS_ATTRIBUTE.sub(_blank_out, text)
-    masked = _blank_page_spans(text).split("\n")
+    lines = _page_without_code_or_comments(written, mdx=mdx)
+    head = _frontmatter_head(written)
+    masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
+        lines[head:], lambda body: _blank_page_spans(_without_addresses(body))
+    )
     return [
         index + 1
         for index in _double_hyphen_lines(
@@ -1305,14 +1359,17 @@ def _joins_head_with_hyphen(line: str, heads: tuple[re.Pattern[str], ...]) -> bo
 def markdown_bullet_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     """The 1-based lines of a page whose list item joins its head to its text with ``-``.
 
-    A list item in code or in a comment the page does not show is not read.
+    A list item in code or in a comment the page does not show is not read,
+    and an entry of the frontmatter is no list item: the site shows it as text.
 
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
-    prose = _page_without_code_or_comments(text.split("\n"), mdx=mdx)
+    written = text.split("\n")
+    prose = _page_without_code_or_comments(written, mdx=mdx)
+    head = _frontmatter_head(written)
     return [
         number
-        for number, line in enumerate(prose.split("\n"), start=1)
+        for number, line in enumerate(prose[head:], start=head + 1)
         if _joins_head_with_hyphen(inside_quotation(line), _PAGE_HEADS)
     ]
 

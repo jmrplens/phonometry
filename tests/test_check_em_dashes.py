@@ -325,6 +325,14 @@ def test_the_exemptions_still_hold_for_the_prose_beside_maths() -> None:
     assert ced.markdown_hits("- Author (2001) Acoustics — Rooms, $a$.\n") == []
 
 
+def test_only_a_title_of_the_frontmatter_is_a_title() -> None:
+    """Under the frontmatter ``title:`` is a word of the page's own prose."""
+    assert ced.markdown_hits("---\ntitle: Acoustics — Rooms\n---\n") == []
+    assert ced.markdown_hits("---\nhead:\n  - title: A — B\n---\n") == []
+    assert ced.markdown_hits("---\na: b\n---\ntitle: A — B\n") == [4]
+    assert ced.markdown_hits("Text.\n\ntitle: The level rises — and falls.\n") == [3]
+
+
 def test_the_frontmatter_holds_no_span() -> None:
     """A value of the frontmatter is plain text, shown with its marks as written.
 

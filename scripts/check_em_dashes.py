@@ -597,8 +597,6 @@ def _strip_exempt_markdown(
     line: str, *, italic_open: bool, quote_closer: str | None, caption: bool = False
 ) -> tuple[str, bool, str | None]:
     """The line with every exempt use of the dash removed, and the carried state."""
-    if _TITLE_LINE.match(line):
-        return "", italic_open, quote_closer
     if _TABLE_ROW.match(line):
         line = "|".join(_PLACEHOLDER_ITEM.sub("", cell) for cell in line.split("|"))
     line, quote_closer = _outside_quotations(line, closer=quote_closer)
@@ -689,7 +687,8 @@ def markdown_hits(text: str) -> list[int]:
     nothing pairs across it, whatever its lines open with. An italic span and
     a quotation stop where a code span does, at the start of any block, and a
     line of a quotation is read through its marks. The frontmatter is plain
-    text, not markdown, so it holds no span at all.
+    text, not markdown, so it holds no span at all, and its ``title:`` values
+    are the one place that word marks a title.
     """
     lines = _decode_page(text).splitlines()
     code_flags = list(code_lines(lines))
@@ -708,7 +707,7 @@ def markdown_hits(text: str) -> list[int]:
         if opens_block:
             reading.open_block(line)
         if index < head:
-            found = reading.holds_dash(line, line)
+            found = not _TITLE_LINE.match(line) and reading.holds_dash(line, line)
         elif body[index - head].strip():
             found = reading.holds_dash(line, shown[index])
         else:

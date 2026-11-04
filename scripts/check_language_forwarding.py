@@ -90,7 +90,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ast_scan import global_bindings, live_bindings
+from ast_scan import global_bindings, live_bindings, own_names
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -613,9 +613,14 @@ class Tree:
         parent: Scope | None,
         owner: Class | None,
         prefix: str,
+        hidden: frozenset[str] = frozenset(),
     ) -> None:
+        """Index a definition; *hidden* holds the type parameters of the
+        generic classes it is written in, which it reads as theirs.
+        """
         qualname = prefix + node.name
         if isinstance(node, ast.ClassDef):
+            hidden |= own_names(node).type_parameters
             klass = Class(module, node, qualname, parent)
             klass.members = {d.name: d for d in _definitions(node.body)}
             klass.fields = {
@@ -625,10 +630,13 @@ class Tree:
             }
             self.classes[node] = klass
             for member in klass.members.values():
-                self._define(member, module, parent, klass, qualname + ".")
-            self._define_body(node.body, module, parent, None, qualname + ".<class>")
+                self._define(member, module, parent, klass, qualname + ".", hidden)
+            self._define_body(
+                node.body, module, parent, None, qualname + ".<class>", hidden
+            )
             return
         scope = _build_scope(module, node, parent, owner, qualname)
+        scope.locals |= hidden | own_names(node).type_parameters
         self.scopes.append(scope)
         self.functions[node] = scope
         if owner is not None:
@@ -643,6 +651,7 @@ class Tree:
         parent: Scope | None,
         owner: Class | None,
         qualname: str,
+        hidden: frozenset[str] = frozenset(),
     ) -> None:
         """Index the calls of a module body or a class body.
 
@@ -651,8 +660,9 @@ class Tree:
         language pass wherever its code sits, and a class body nested in a
         function that takes the language has it in scope like any other
         statement of that function. The pseudo-scope takes no parameters and
-        declares no locals, so ``speaks`` reads the enclosing function's, and
-        failing that the module's, exactly as a real scope does.
+        declares no locals but the type parameters of a generic class
+        (*hidden*), so ``speaks`` reads the enclosing function's, and failing
+        that the module's, exactly as a real scope does.
         """
         node = ast.FunctionDef(
             name=qualname,
@@ -670,7 +680,9 @@ class Tree:
             returns=None,
             type_params=[],
         )
-        self.scopes.append(_build_scope(module, node, parent, owner, qualname))
+        scope = _build_scope(module, node, parent, owner, qualname)
+        scope.locals |= hidden
+        self.scopes.append(scope)
 
     # -- names ------------------------------------------------------------
 

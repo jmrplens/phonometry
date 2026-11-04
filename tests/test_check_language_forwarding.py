@@ -57,6 +57,42 @@ def _dropped(tmp_path: pathlib.Path, **modules: str) -> list[clf.Finding]:
     return found
 
 
+def test_a_type_parameter_spelt_like_a_helper_is_not_the_helper(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A generic function's type parameter is its own name, and a generic
+    class's is its methods' and those of a class written in it, so a call of
+    one is no call of the helper of that spelling. The same call with no type
+    parameter still drops the language.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis
+
+
+            def by_function[axis](result, ax, language="en"):
+                axis(ax, 20.0, 20000.0)
+
+
+            class ByClass[axis]:
+                def draw(self, ax, language="en"):
+                    axis(ax, 20.0, 20000.0)
+
+                class Inner:
+                    def draw(self, ax, language="en"):
+                        axis(ax, 20.0, 20000.0)
+
+
+            def plain(result, ax, language="en"):
+                axis(ax, 20.0, 20000.0)
+            """
+        },
+    )
+    assert [f.caller for f in found] == ["plain"]
+
+
 def test_a_dropped_language_is_found(tmp_path: pathlib.Path) -> None:
     """The defect itself: the plot has the language and the axis never sees it."""
     found = _dropped(

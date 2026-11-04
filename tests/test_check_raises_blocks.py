@@ -217,6 +217,25 @@ def test_an_annotation_without_a_value_leaves_the_builtin(
     assert [f.calls for f in found] == []
 
 
+def test_a_type_parameter_spelt_like_a_builtin_is_not_the_builtin(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``def test_generic[format]()`` binds ``format`` for the function, so a
+    call of it there is no call of the builtin Sonar holds safe.
+    """
+    found = _findings(
+        tmp_path,
+        """
+        import pytest
+
+        def test_generic[format]():
+            with pytest.raises(ValueError, match="x"):
+                check(format(1))
+        """,
+    )
+    assert [f.calls for f in found] == [("check", "format")]
+
+
 def test_a_deferred_call_does_not_count(tmp_path: pathlib.Path) -> None:
     """A lambda or a nested function inside the block is defined, not called."""
     found = _findings(

@@ -169,7 +169,8 @@ def _aliases(tree: ast.AST) -> dict[str, str]:
 def _bound(tree: ast.AST) -> set[str]:
     """Every name the file binds itself, which then no longer means a builtin.
 
-    An annotation without a value (``format: Callable[..., str]``) binds
+    A type parameter of a generic function or class counts among them. An
+    annotation without a value (``format: Callable[..., str]``) binds
     nothing, and leaves the builtin where it was.
     """
     names: set[str] = set()
@@ -186,6 +187,8 @@ def _bound(tree: ast.AST) -> set[str]:
         ):
             names.add(node.id)
         elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            names.add(node.name)
+        elif isinstance(node, ast.TypeVar | ast.ParamSpec | ast.TypeVarTuple):
             names.add(node.name)
         elif isinstance(node, ast.arg):
             names.add(node.arg)

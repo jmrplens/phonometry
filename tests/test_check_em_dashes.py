@@ -544,6 +544,30 @@ def test_a_code_span_does_not_cross_into_the_next_item_of_a_quotation() -> None:
     assert ced.markdown_hits("> - Run `a\n> - b — c` here.\n") == [2]
 
 
+def test_a_line_of_a_quotation_is_read_through_its_marks() -> None:
+    """A quotation's marks are not its text, so every reading looks past them.
+
+    An asterisk bullet behind one opened an italic span that hid the item's
+    dash, a caption behind one passed for a citation, and an empty cell, a
+    reference, a table's separator row and a rule behind one were refused.
+    """
+    assert ced.markdown_hits("> The level rises — and falls.\n") == [1]
+    assert ced.markdown_hits("> * A list item — with a dash.\n") == [1]
+    assert ced.markdown_hits("> *A caption — with a dash.*\n") == [1]
+    assert ced.markdown_hits("> | a | — | b |\n") == []
+    assert ced.markdown_hits("> - Author (2001) Acoustics — Rooms\n") == []
+    assert (
+        ced.markdown_hits("> - Author (2001) Acoustics — Rooms,\n>   wrapped — title\n")
+        == []
+    )
+    assert ced.markdown_hits('>"Acoustics — Rooms"\n') == []
+    table = "> | a | b |\n> |---|---|\n> | x | -- |\n"
+    assert ced.markdown_double_hyphen_hits(table) == []
+    assert ced.markdown_double_hyphen_hits("> ---\n") == []
+    assert ced.markdown_double_hyphen_hits("> The level -- falls.\n") == [1]
+    assert ced.markdown_bullet_hyphen_hits("> - `x` - the text\n") == [1]
+
+
 def test_an_escaped_backtick_opens_no_code_span() -> None:
     r"""``\`x -- y\``` is prose a reader sees, backticks and all.
 

@@ -144,7 +144,7 @@ def _quote_depth(line: str) -> int:
     return marks.group().count(">") if marks else 0
 
 
-def _inside_quotation(line: str) -> str:
+def inside_quotation(line: str) -> str:
     """*line* without the quotation marks that open it."""
     marks = _QUOTE_MARKS.match(line)
     return line[marks.end() :] if marks else line
@@ -158,7 +158,7 @@ def _continues_quotation(line: str, block: list[str]) -> bool:
     quotation ends the paragraph inside the quotation as it would outside it.
     A line with fewer marks than the block opened with carries it on lazily.
     """
-    rest = _inside_quotation(line)
+    rest = inside_quotation(line)
     return (
         bool(block)
         and 0 < _quote_depth(line) <= _quote_depth(block[0])
@@ -197,7 +197,7 @@ def _blocks(lines: list[str], comments: str | None) -> list[list[str]]:
             blocks.append([line])
             continue
         current.append(line)
-        rest = _inside_quotation(line)
+        rest = inside_quotation(line)
         if not rest.strip() or _ONE_LINE_BLOCK.match(rest):
             blocks.append(current)
             current = []

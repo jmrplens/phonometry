@@ -126,6 +126,7 @@ from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans_by_block,
     block_starts,
+    inside_quotation,
     lines_read_whole,
     replace_inline_spans_by_block,
 )
@@ -646,20 +647,50 @@ def _drop_code_and_math(text: str) -> str:
     return replace_inline_spans_by_block(text, _span_remainder, "`$")
 
 
+@dataclass
+class _PageReading:
+    """What the reading of a page carries from one line to the next."""
+
+    italic_open: bool = False
+    quote_closer: str | None = None
+    in_reference: bool = False
+    caption: bool = False
+
+    def open_block(self, line: str) -> None:
+        """Start a block on ``line``: what the last one left open stays there."""
+        self.italic_open, self.quote_closer = False, None
+        self.caption = _is_caption(inside_quotation(line))
+
+    def holds_dash(self, line: str, shown: str) -> bool:
+        """Whether the line carries a dash no exemption covers, read through its marks.
+
+        :param line: The line as written.
+        :param shown: The same line with its code and maths spans out.
+        """
+        inner = inside_quotation(shown)
+        if _REFERENCE_ENTRY.match(inner):
+            self.in_reference = True
+        elif not inside_quotation(line).startswith((" ", "\t")):
+            self.in_reference = False
+        prose, self.italic_open, self.quote_closer = _strip_exempt_markdown(
+            inner,
+            italic_open=self.italic_open,
+            quote_closer=self.quote_closer,
+            caption=self.caption,
+        )
+        return _MATHS_DASH in shown or (EM_DASH in prose and not self.in_reference)
+
+
 def markdown_hits(text: str) -> list[int]:
     """The 1-based lines of a markdown or MDX page that carry a prose dash.
 
     A fenced block and a display-math block end the paragraph before them, as
     the site reads them, so each reaches the span reader as a blank line:
     nothing pairs across it, whatever its lines open with. An italic span and
-    a quotation stop where a code span does, at the start of any block. The
-    frontmatter is plain text, not markdown, so it holds no span at all.
+    a quotation stop where a code span does, at the start of any block, and a
+    line of a quotation is read through its marks. The frontmatter is plain
+    text, not markdown, so it holds no span at all.
     """
-    hits: list[int] = []
-    italic_open = False
-    quote_closer: str | None = None
-    in_reference = False
-    caption = False
     lines = _decode_page(text).splitlines()
     code_flags = list(code_lines(lines))
     math_flags = _math_lines(lines, code_flags)
@@ -670,27 +701,20 @@ def markdown_hits(text: str) -> list[int]:
         for line, code, math in zip(lines, code_flags, math_flags, strict=True)
     ][head:]
     shown = lines[:head] + lines_read_whole(body, _drop_code_and_math)
+    reading = _PageReading()
+    hits: list[int] = []
     for index, opens_block in enumerate(block_starts(lines[:head] + body)):
         line = lines[index]
         if opens_block:
-            italic_open, quote_closer = False, None
-            caption = _is_caption(line)
-        if index >= head and not body[index - head].strip():
-            in_reference = False
-            if math_flags[index] and EM_DASH in line:
-                hits.append(index + 1)
-            continue
-        if _REFERENCE_ENTRY.match(shown[index]):
-            in_reference = True
-        elif not line.startswith((" ", "\t")):
-            in_reference = False
-        prose, italic_open, quote_closer = _strip_exempt_markdown(
-            shown[index],
-            italic_open=italic_open,
-            quote_closer=quote_closer,
-            caption=caption,
-        )
-        if _MATHS_DASH in shown[index] or (EM_DASH in prose and not in_reference):
+            reading.open_block(line)
+        if index < head:
+            found = reading.holds_dash(line, line)
+        elif body[index - head].strip():
+            found = reading.holds_dash(line, shown[index])
+        else:
+            reading.in_reference = False
+            found = math_flags[index] and EM_DASH in line
+        if found:
             hits.append(index + 1)
     return hits
 
@@ -1064,7 +1088,13 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
         text = address.sub(_blank_out, text)
     text = _ADDRESS_ATTRIBUTE.sub(_blank_out, text)
     masked = _blank_page_spans(text).split("\n")
-    return [index + 1 for index in _double_hyphen_lines(written, masked)]
+    return [
+        index + 1
+        for index in _double_hyphen_lines(
+            [inside_quotation(line) for line in written],
+            [inside_quotation(line) for line in masked],
+        )
+    ]
 
 
 def _opens_code_block(line: str) -> bool:
@@ -1285,7 +1315,7 @@ def markdown_bullet_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     return [
         number
         for number, line in enumerate(prose.split("\n"), start=1)
-        if _joins_head_with_hyphen(line, _PAGE_HEADS)
+        if _joins_head_with_hyphen(inside_quotation(line), _PAGE_HEADS)
     ]
 
 

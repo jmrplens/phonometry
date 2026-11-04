@@ -644,6 +644,40 @@ def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     }
 
 
+def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument unpacks an unknown number of values, so it and every
+    argument after it may land in any place from its own on.
+
+    Each argument was bound to the parameter of its index, so with ``rest``
+    empty, ``keep(*rest, frequencies)`` handing the caller's array to ``a``,
+    which ``keep`` returns, read as handing it to ``b``, and the record that
+    keeps the result passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a, b=None):
+            return a
+
+        def rating(frequencies, levels):
+            rest = []
+            f = keep(*rest, frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def placed(frequencies, levels):
+            f = keep(np.array(frequencies), frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_helper_reads_a_sibling_written_after_it(tmp_path: pathlib.Path) -> None:
     """A helper written before the sibling it calls reads what that returns.
 

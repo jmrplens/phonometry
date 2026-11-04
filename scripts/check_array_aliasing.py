@@ -2158,8 +2158,16 @@ class Reader:
                     info, node, arguments, keywords, public=target in self.tree.public
                 )
             return _CLEAN
+        spread = next(
+            (
+                index
+                for index, argument in enumerate(node.args)
+                if isinstance(argument, ast.Starred)
+            ),
+            None,
+        )
         values = [
-            self._returned_by(function, arguments, keywords, bound=bound)
+            self._returned_by(function, arguments, keywords, bound=bound, spread=spread)
             for function in self.reached(target, node)
         ]
         return union(*values) if values else _CLEAN
@@ -2171,9 +2179,11 @@ class Reader:
         keywords: dict[str | None, Value],
         *,
         bound: bool,
+        spread: int | None = None,
     ) -> Value:
         """What one definition returns of the arguments given to it, bound
-        to its own parameters.
+        to its own parameters (:func:`bind`, *spread* the place of the first
+        ``*`` argument).
 
         A function defined in this one, or in one around it (a sibling
         helper), is read as it was where it is defined, so what it returns of
@@ -2186,12 +2196,14 @@ class Reader:
         if held is not None:
             returned, closure = held
             mapping: dict[str, Value] = {label: frozenset({label}) for label in closure}
-            mapping.update(bind(function, arguments, keywords, bound=bound))
+            mapping.update(
+                bind(function, arguments, keywords, bound=bound, spread=spread)
+            )
             return substitute(returned, mapping)
         summary = self.summaries.get(function.node)
         if summary is None or not flat(summary.value):
             return _CLEAN
-        mapping = bind(function, arguments, keywords, bound=bound)
+        mapping = bind(function, arguments, keywords, bound=bound, spread=spread)
         return substitute(summary.value, mapping)
 
     def reached(self, target: tuple[str, str], call: ast.AST) -> list[FunctionInfo]:
@@ -3268,21 +3280,32 @@ def bind(
     keywords: dict[str | None, Value],
     *,
     bound: bool,
+    spread: int | None = None,
 ) -> dict[str, Value]:
-    """What each parameter of *function* receives from one call."""
+    """What each parameter of *function* receives from one call.
+
+    From *spread*, the place of the first ``*`` argument, on, the number of
+    values the call hands is unknown: that argument and every one after it
+    may land in any place from its own on, or in ``*args``.
+    """
     spec = function.node.args
     positional = [a.arg for a in (*spec.posonlyargs, *spec.args)]
     if bound and function.kind in {"method", "classmethod"}:
         positional = positional[1:]
     mapping: dict[str, Value] = {}
     extra: list[Value] = []
+    beyond: list[Value] = []
     for index, value in enumerate(arguments):
-        if index < len(positional):
+        if spread is not None and index >= spread:
+            for name in positional[spread:]:
+                mapping[name] = union(mapping.get(name, _CLEAN), value)
+            beyond.append(value)
+        elif index < len(positional):
             mapping[positional[index]] = value
         else:
             extra.append(value)
     if spec.vararg is not None:
-        mapping[spec.vararg.arg] = union(_CLEAN, *extra)
+        mapping[spec.vararg.arg] = union(_CLEAN, *extra, *beyond)
     else:
         for value in extra:
             for name in positional:

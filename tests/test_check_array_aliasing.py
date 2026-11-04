@@ -570,6 +570,80 @@ def test_a_method_of_a_class_a_later_class_replaces_is_never_reached(
     assert found == set()
 
 
+def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function that declares a module name ``global`` and defines or
+    imports it there may have run before any call into the module, so a call
+    of the name may reach what it bound, as one in a branch of an ``if`` at
+    the top may.
+
+    The module's names were read from its top alone, so after ``swap()``
+    replaced the ``hand`` that copies with one that hands back its argument,
+    the record that keeps the result passed, in the module, through an
+    import of the name and through the module's attribute; and so did one
+    that keeps what the validation helper ``_swap_in`` imports under
+    ``global`` returns.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def hand(a):
+            return np.array(a)
+
+        def swap():
+            global hand
+            def hand(a):
+                return a
+
+        def rating(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def check(a):
+            return np.array(a, dtype=np.float64)
+
+        def _swap_in():
+            global check
+            from ._internal.validation import require_finite_array as check
+
+        def checked(frequencies, levels):
+            f = check(frequencies, "frequencies")
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def keep(a):
+            return np.array(a)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        caller="""
+        from . import rating as module
+        from .rating import hand
+        from .results import BandResult
+
+        def through_the_import(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_the_attribute(frequencies, levels):
+            f = module.hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("rating", "BandResult.frequencies", "frequencies"),
+        ("checked", "BandResult.frequencies", "frequencies"),
+        ("through_the_import", "BandResult.frequencies", "frequencies"),
+        ("through_the_attribute", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_a_helper_reads_a_sibling_written_after_it(tmp_path: pathlib.Path) -> None:
     """A helper written before the sibling it calls reads what that returns.
 

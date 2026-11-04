@@ -85,6 +85,7 @@ from ast_scan import (
     ROOT,
     bindings_by_name,
     exempted,
+    for_the_type_checker,
     global_bindings,
     live_bindings,
     live_class_members,
@@ -426,7 +427,8 @@ def _bound(
     name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) stands for what that name stands for, the
     assignments taken in the order of the source. What the functions and
-    classes in *scope* bind is theirs.
+    classes in *scope* bind is theirs, and what an ``if TYPE_CHECKING:``
+    block holds never runs, so it stands for nothing.
     """
     aliases = dict(outer)
     for name in own_names(scope).declared_global:
@@ -436,7 +438,10 @@ def _bound(
     for name in _parameters(scope) | _stored(scope):
         aliases.pop(name, None)
     assignments: list[tuple[str, list[str], tuple[int, int]]] = []
+    checker = for_the_type_checker(scope)
     for node in _own_nodes(scope):
+        if id(node) in checker:
+            continue
         if isinstance(node, ast.Import | ast.ImportFrom):
             aliases.update(_imported(node, package))
         elif (

@@ -74,6 +74,44 @@ def test_the_sniffer_opening_the_name_itself_is_refused(tmp_path: pathlib.Path) 
     ) == [("_sniff", _OWN)]
 
 
+def test_what_an_if_type_checking_block_imports_is_no_callee(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import under ``if TYPE_CHECKING:`` never runs, so ``open`` is still
+    the builtin. It was read as what the name stands for, at the top of a
+    module and under ``global`` in a function, so a whole read passed for a
+    call of ``pathlib.Path``.
+    """
+    assert _found(
+        tmp_path,
+        """
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from pathlib import Path as open
+
+        def at_the_top(path):
+            with open(path) as handle:
+                return handle.read()
+        """,
+    ) == [("at_the_top", _OWN)]
+    assert _found(
+        tmp_path,
+        """
+        from typing import TYPE_CHECKING
+
+        def swap():
+            global open
+            if TYPE_CHECKING:
+                from pathlib import Path as open
+
+        def under_global(path):
+            with open(path) as handle:
+                return handle.read()
+        """,
+    ) == [("under_global", _OWN)]
+
+
 def test_a_whole_file_read_is_refused(tmp_path: pathlib.Path) -> None:
     """The hosts file and the ANP tables were read so, a pipe there waited forever."""
     assert _found(

@@ -38,7 +38,9 @@ quotation mark there is a symbol, so neither opens an italic span or a
 quotation that would exempt the rest of the paragraph, and four digits in
 parentheses (``$L(1000)$``, or a code span holding ``band(2000)``) open
 no bibliographic entry. The code and maths spans are read together, a block
-of the page at a time, as the site reads them.
+of the page at a time, as the site reads them, and a ``$$`` block is read
+apart, as the site reads a fenced code block: a line of it that opens with
+``+ ``, ``|`` or ``>`` starts no block of markdown.
 
 The character has other spellings that publish it all the same, and each is
 read as the character where it is decoded on its way to a reader: the HTML
@@ -619,10 +621,18 @@ def markdown_hits(text: str) -> list[int]:
     opening = True
     lines = _decode_page(text).splitlines()
     code_flags = list(code_lines(lines))
+    math_flags = _math_lines(lines, code_flags)
     # The inline code and maths spans, read over the lines of their block:
-    # see _drop_code_and_math.
+    # see _drop_code_and_math. A display-math block is read apart first, as
+    # remark-math reads it, like a fenced code block: a line of it that opens
+    # with ``+ ``, ``|`` or ``>`` starts no block, so the inline reader is
+    # handed what a maths span leaves of each line, fences included, and not
+    # the line, which would part the fences into two blocks that never pair.
     shown = lines_read_whole(
-        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
+        [
+            "" if code else SPAN_MARK + EM_DASH * line.count(EM_DASH) if math else line
+            for line, code, math in zip(lines, code_flags, math_flags, strict=True)
+        ],
         _drop_code_and_math,
     )
     for number, (line, code) in enumerate(zip(lines, code_flags, strict=True), start=1):

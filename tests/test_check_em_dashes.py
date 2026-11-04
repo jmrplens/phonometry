@@ -196,6 +196,32 @@ def test_an_asterisk_in_a_display_math_block_opens_no_italic_span() -> None:
     assert ced.markdown_hits(text) == [4]
 
 
+def test_a_display_math_block_is_maths_whatever_its_lines_start_with() -> None:
+    """A line of a ``$$`` block that opens like a block of markdown is still maths.
+
+    remark-math reads the block as flow maths, as a fenced code block is
+    read, so a line of it that opens with ``+``, ``-``, ``|``, ``>``, a
+    heading mark or ``1.`` starts no list, table, quote or heading. The guard
+    read such a line as the start of a new block, the ``$$`` fences never
+    paired, and the asterisk or the quotation mark on the line opened a span
+    that hid the dash of the prose below.
+    """
+    for opening in ("+ ", "- ", "|", "> ", "# ", "1. "):
+        assert ced.markdown_hits(
+            f"$$\nL = a\n{opening}v^* b\n$$\nThe level rises — and falls.\n"
+        ) == [5], opening
+    modulus = "$$\n|v^*|^2 = 1\n$$\nThe level rises — and falls.\n"
+    assert ced.markdown_hits(modulus) == [4]
+    ditto = '$$\n+ \\text{"} b\n$$\nThe level rises — and falls.\n'
+    assert ced.markdown_hits(ditto) == [4]
+
+
+def test_a_dash_in_a_display_math_block_is_still_read() -> None:
+    """The site shows a dash written in maths, whatever the line opens with."""
+    assert ced.markdown_hits("$$\n+ a — b\n$$\n") == [2]
+    assert ced.markdown_hits("$$ —\nx\n$$\n") == [1]
+
+
 def test_a_quotation_mark_in_math_opens_no_quotation() -> None:
     text = 'The ditto $\\text{"}$ repeats the row, and the level rises — and falls.\n'
     assert ced.markdown_hits(text) == [1]

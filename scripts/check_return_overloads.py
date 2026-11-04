@@ -830,6 +830,8 @@ class Package:
         self._top: dict[str, dict[str, list[ast.stmt]]] = {}
         #: The key in :attr:`functions` of each definition, by its node.
         self.keys: dict[ast.AST, str] = {}
+        #: The type parameters of each generic class, by its dotted name.
+        self.class_types: dict[str, frozenset[str]] = {}
         #: What :meth:`_made_under_global` found, read once for each module.
         self._global: dict[str, dict[str, list[ast.stmt]]] = {}
         #: What :meth:`live_definitions` found, read once for each name.
@@ -976,6 +978,9 @@ class Package:
         for node in _statements(body):
             if isinstance(node, ast.ClassDef):
                 inner = f"{scope}.{node.name}" if scope else node.name
+                types = own_names(node).type_parameters
+                if types:
+                    self.class_types[f"{module}.{inner}"] = types
                 self._read_body(module, package, node.body, inner, inner, parent)
             elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 qualname = f"{scope}.{node.name}" if scope else node.name
@@ -1333,6 +1338,8 @@ class Package:
         name reaches it; one that binds the name otherwise, by a parameter or
         an assignment, or both defines and binds it, reaches no function of
         the package; one that declares it ``global`` sends it to the module.
+        A type parameter of a generic class around a method is the class's,
+        and reaches no function of the package either.
         """
         head = func
         while isinstance(head, ast.Attribute):
@@ -1350,6 +1357,8 @@ class Package:
             if names.binds(head.id):
                 at = call if scope is function else None
                 return self._bound_in(scope, node, func, head, at)
+            if head.id in self._type_parameters_around(scope):
+                return ()
         return self._at_top(function.module, func, head, call)
 
     def _at_top(
@@ -1514,6 +1523,18 @@ class Package:
         if self.paths[module].endswith("__init__.py"):
             return module
         return module.rpartition(".")[0]
+
+    def _type_parameters_around(self, function: Function) -> frozenset[str]:
+        """The type parameters of the generic classes *function* is written
+        in, between it and the function around them.
+        """
+        found: frozenset[str] = frozenset()
+        outer = function.parent.qualname if function.parent is not None else ""
+        qualname = function.qualname.rpartition(".")[0]
+        while qualname and qualname != outer:
+            found |= self.class_types.get(f"{function.module}.{qualname}", frozenset())
+            qualname = qualname.rpartition(".")[0]
+        return found
 
     def _scopes_around(
         self, function: Function

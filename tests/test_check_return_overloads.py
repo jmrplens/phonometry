@@ -998,6 +998,42 @@ def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     ]
 
 
+def test_a_generic_class_s_type_parameter_is_no_function_of_the_module(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A method reads a generic class's type parameter as the class's own, a
+    method of a class written inside it too, whatever the module binds of that
+    spelling.
+
+    The lookup went from the method to the module past the class, so a call
+    of ``T`` read as a call of the module's function ``T``, which makes polar
+    axes, and the plain ``plot`` was refused. The same call in a class that
+    declares no type parameter still reaches it.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def T():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class Plotter[T]:
+            def plot(self, result: object) -> Axes:
+                return T()
+
+            class Inner:
+                def plot(self, result: object) -> Axes:
+                    return T()
+
+        class Plain:
+            def plot(self, result: object) -> Axes:
+                return T()
+        """,
+    )
+    assert list(refused) == ["Plain.plot"]
+
+
 def test_each_branch_keeps_its_own_overload_heads(tmp_path: pathlib.Path) -> None:
     """Overloads written in each branch of an ``if`` belong to that branch's function.
 

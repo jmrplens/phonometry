@@ -16,11 +16,14 @@ What is NOT prose keeps its dash, and every exemption below says why:
   with the dash, and a citation reproduces its source. The guard exempts a
   dash that sits in a frontmatter ``title:`` value, in an italic span, in a
   bibliographic entry (author and year first, the title after), inside
-  quotation marks or guillemets, or on a line that reads ``— Part 3:``,
-  ``— Teil 3:``, ``— Partie 3:`` or ``— Parte 3:``. A quotation long enough
-  is wrapped by the paragraph that carries it, opening on one line and
-  closing two lines below, so the open quotation is carried from line to
-  line within a paragraph exactly as the italic span is.
+  quotation marks or guillemets, or right before a part number: ``— Part 3:``,
+  ``— Teil 3:``, ``— Partie 3:`` or ``— Parte 3:``. Each exempts the dash it
+  reads and no other on the line, so a title of several dashes is marked as
+  one, in italics or quotation marks. A quotation long enough is wrapped by
+  the paragraph that carries it, opening on one line and closing two lines
+  below, so the open quotation is carried from line to line within a
+  paragraph exactly as the italic span is; in a string, whose lines are read
+  one by one, a quotation closes on its line or quotes nothing.
 - **Code.** A fenced block, an inline code span and a string a test compares
   with are data, not prose, and a dash that fills a whole table cell, or a
   whole slash-separated item of one, is the placeholder of an empty cell, not
@@ -165,12 +168,9 @@ _BOLD = re.compile(r"\*\*")
 _BULLET = re.compile(r"^\s*\*(?=\s)")
 #: A part number after the dash, which only a standard's title prints.
 _PART_AFTER_DASH = re.compile(EM_DASH + r"\s*(?:Part|Teil|Partie|Parte)\s+\d")
-#: A dash inside quotation marks or guillemets: the text reproduces a source.
-#: Not an attribute value (``alt="..."``) nor a YAML value (``description:
-#: "..."``), which are prose of the page's own.
-_QUOTED = re.compile(r"(?<!=)(?<!: )[\"«“][^\"»”\n]*" + EM_DASH + r"[^\"»”\n]*[\"»”]")
-#: The delimiter that closes each opening one. A quotation is closed by its
-#: own mark, so a straight quote inside guillemets does not end them.
+#: The delimiter that closes each mark that opens a quotation. A quotation is
+#: closed by its own mark, so a straight quote inside guillemets does not end
+#: them.
 _QUOTE_PAIRS = {'"': '"', "«": "»", "“": "”"}
 #: What may sit before a straight quote that opens a quotation. A straight
 #: quote is the one mark that opens and closes with the same character, so it
@@ -548,6 +548,27 @@ def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | No
     return "".join(kept), closer
 
 
+def _outside_closed_quotations(line: str) -> str:
+    """The characters of the line outside each quotation it closes, read left to right.
+
+    A string and a line of a plain-text file have no paragraph to carry an
+    open quotation over, so a mark that does not close on its line quotes
+    nothing. Reading from the left is what keeps the closing mark of one
+    quotation from opening another over the dash between them.
+    """
+    kept: list[str] = []
+    at = 0
+    while at < len(line):
+        closer = _QUOTE_PAIRS.get(line[at])
+        end = line.find(closer, at + 1) if closer and _opens_quotation(line, at) else -1
+        if end >= 0:
+            at = end + 1
+        else:
+            kept.append(line[at])
+            at += 1
+    return "".join(kept)
+
+
 def _is_caption(line: str) -> bool:
     """Whether the paragraph this line opens is one italic span, end to end.
 
@@ -587,9 +608,7 @@ def _strip_exempt_markdown(
         _, italic_open = _outside_italics(line, italic_open=italic_open)
     else:
         line, italic_open = _outside_italics(line, italic_open=italic_open)
-    if _PART_AFTER_DASH.search(line):
-        return "", italic_open, quote_closer
-    return line, italic_open, quote_closer
+    return _PART_AFTER_DASH.sub("", line), italic_open, quote_closer
 
 
 def _span_remainder(span: str) -> str:
@@ -676,13 +695,27 @@ def markdown_hits(text: str) -> list[int]:
     return hits
 
 
+def _holds_prose_dash(line: str) -> bool:
+    """Whether a dash of the line is neither in a quotation nor before a part number.
+
+    Each exemption covers the dash it reads and nothing else on the line.
+    """
+    return EM_DASH in _PART_AFTER_DASH.sub("", _outside_closed_quotations(line))
+
+
 def _string_is_prose(value: str) -> bool:
-    """Whether a string literal with a dash is prose and not a placeholder."""
+    """Whether a string literal with a dash holds one that is prose.
+
+    A dash that fills the string is a placeholder and one in an inline literal
+    is code; otherwise each line of the value is read for itself, so that a
+    title reproduced on one exempts no other line.
+    """
     if value.strip() == EM_DASH:
         return False
-    if _PART_AFTER_DASH.search(value):
-        return False
-    return not _QUOTED.search(value)
+    return any(
+        _holds_prose_dash(line)
+        for line in _blank_docstring_code_spans(value).split("\n")
+    )
 
 
 def _string_token_hits(token: tokenize.TokenInfo) -> list[int]:
@@ -706,6 +739,7 @@ def _string_token_hits(token: tokenize.TokenInfo) -> list[int]:
         token.start[0] + offset
         for offset, line in enumerate(lines)
         if _spells_em_dash(line)
+        and _string_is_prose(_decode_spellings(line, _PYTHON_EM_DASH_ESCAPE))
     ]
     return found or [token.start[0]]
 
@@ -773,11 +807,10 @@ def data_hits(text: str) -> list[int]:
     hits: list[int] = []
     for number, written in enumerate(text.splitlines(), start=1):
         line = _decode_spellings(written, _JS_EM_DASH_ESCAPE)
-        if EM_DASH not in line or line.lstrip().startswith(("//", "*", "/*")):
+        if line.lstrip().startswith(("//", "*", "/*")):
             continue
-        if _PART_AFTER_DASH.search(line):
-            continue
-        hits.append(number)
+        if EM_DASH in _PART_AFTER_DASH.sub("", line):
+            hits.append(number)
     return hits
 
 

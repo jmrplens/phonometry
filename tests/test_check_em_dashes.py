@@ -395,6 +395,87 @@ def test_dash_in_a_plain_text_file_is_refused(tmp_path: pathlib.Path) -> None:
     assert ced.findings(robots) == [(1, "em dash")]
 
 
+def test_a_quotation_exempts_only_itself_in_a_plain_text_file() -> None:
+    """The whole line went when a quotation on it held a dash."""
+    assert ced.text_hits('# "ISO 1 — Scope" — additional guidance\n') == [1]
+    assert ced.text_hits("# «ISO 1 — Scope» — additional guidance\n") == [1]
+    assert ced.text_hits("# “ISO 1 — Scope” — additional guidance\n") == [1]
+    assert ced.text_hits('# "ISO 1 — Scope" and "ISO 2 — Rooms"\n') == []
+
+
+def test_the_dash_between_two_quotations_is_read() -> None:
+    """Quotations are read left to right, so a closing mark opens nothing."""
+    assert ced.text_hits('# "ISO 1" — "ISO 2"\n') == [1]
+    assert ced.python_hits('"""Cites "ISO 1" — "ISO 2"."""\n') == [1]
+
+
+def test_a_quotation_that_never_closes_on_its_line_quotes_nothing() -> None:
+    assert ced.text_hits('# "ISO 1 — Scope\n') == [1]
+    assert ced.text_hits("# «ISO 1 — Scope\n") == [1]
+
+
+def test_a_part_number_exempts_only_its_own_dash(tmp_path: pathlib.Path) -> None:
+    """The whole line, or the whole string, went when a part number stood on it."""
+    prose = "The level rises — and ISO 1 — Part 3: rooms falls."
+    assert ced.text_hits(f"# {prose}\n") == [1]
+    assert ced.markdown_hits(f"{prose}\n") == [1]
+    assert ced.python_hits(f'"""{prose}"""\n') == [1]
+    module = tmp_path / "home.ts"
+    module.write_text(f"export const NOTE = '{prose}';\n", encoding="utf-8")
+    assert ced.scan(module) == [1]
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(f'{{"note": "{prose}"}}\n', encoding="utf-8")
+    assert ced.scan(notes) == [1]
+    for title in ("ISO 1 — Part 3: rooms", "ISO 1 — Teil 3", "ISO 1 — Partie 3"):
+        assert ced.text_hits(f"# {title}\n") == []
+        assert ced.markdown_hits(f"{title}\n") == []
+        assert ced.python_hits(f'"""{title}"""\n') == []
+
+
+def test_a_title_of_several_dashes_is_marked_as_a_title() -> None:
+    """Only the dash before the part number says so; the marks say the rest."""
+    title = "Acoustics — Rooms — Part 3: halls"
+    assert ced.markdown_hits(f"{title}\n") == [1]
+    assert ced.markdown_hits(f"See *{title}* here.\n") == []
+    assert ced.markdown_hits(f'See "{title}" here.\n') == []
+    assert ced.python_hits(f'"""See "{title}" here."""\n') == []
+
+
+def test_an_exempt_dash_of_a_string_exempts_only_itself() -> None:
+    """One quotation or part number in a docstring passed every line of it."""
+    quoted = '"""Cites "Acoustics — Rooms".\n\nThe level rises — and falls.\n"""\n'
+    assert ced.python_hits(quoted) == [3]
+    part = '"""Cites ISO 1 — Part 3: rooms.\n\nThe level rises — and falls.\n"""\n'
+    assert ced.python_hits(part) == [3]
+    assert ced.python_hits('"""Cites "Acoustics — Rooms" — and more."""\n') == [1]
+    assert ced.python_hits('NOTE = """Cites "Acoustics — Rooms"."""\n') == []
+
+
+def test_an_exempt_dash_of_a_json_string_exempts_only_itself(
+    tmp_path: pathlib.Path,
+) -> None:
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(
+        "{\n"
+        '  "a": "“Acoustics — Rooms” — and more",\n'
+        '  "b": "“Acoustics — Rooms”"\n'
+        "}\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(notes) == [2]
+
+
+def test_an_inline_literal_of_a_string_is_code() -> None:
+    """The placeholder a fiche prints, named in its docstring, is data.
+
+    Three docstrings passed only because the quotation marks inside their
+    literal were read as a quotation.
+    """
+    assert ced.python_hits('"""Shown as ``"—"``, the empty cell."""\n') == []
+    assert ced.python_hits('"""Shown as ``a — b``, the empty cell."""\n') == []
+    assert ced.python_hits('"""Shown as ``a``, the empty cell — or not."""\n') == [1]
+
+
 def test_the_robots_file_is_read_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
     """The guard read no plain-text file, so the subpath robots.txt opened on a dash."""
     monkeypatch.chdir(pathlib.Path(__file__).resolve().parent.parent)

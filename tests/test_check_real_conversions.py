@@ -482,6 +482,68 @@ _PLANTED_UNCHECKED = {
         def f(reference, levels):
             return float(_helper(reference, levels))
     """,
+    "a_check_that_hands_back_what_a_starred_list_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(*[levels])
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_starred_name_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(scale, x, *rest):
+                nonlocal out
+                out = rest[0] if rest else x
+
+            arguments = (levels, levels)
+            inner(2.0, *arguments)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_mapping_literal_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(x):
+                nonlocal out
+                out = x
+
+            inner(**{"x": levels})
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_check_that_hands_back_what_a_mapping_name_hands_a_nested_function": """
+        def _helper(reference, levels):
+            real_array(reference, "reference")
+            out = 1.0
+
+            def inner(scale=1.0, **options):
+                nonlocal out
+                out = options["x"]
+
+            settings = {"x": levels}
+            inner(**settings)
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_check_that_hands_back_a_nested_function_s_default": """
         def _helper(reference, levels):
             real_array(reference, "reference")

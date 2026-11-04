@@ -1964,10 +1964,11 @@ class _Returns:
     writes into it, and into an item of a name none of them binds, is what
     the module's name stands for where one reads it. A parameter of a nested
     function stands for what each call of its name in the nest hands it, by
-    place or by keyword, read where the call is made, and for its default;
-    what reaches it otherwise (``map(inner, values)``) is not followed. A
-    value is handed back as the
-    caller gave it bare, in a tuple or a list, on either side of a
+    place or by keyword, unpacked by ``*`` or ``**`` into any place it may
+    reach, read where the call is made, and for its default; what reaches
+    it otherwise (``map(inner, values)``) is not followed. A value is handed
+    back as the caller gave it bare, in a tuple, a list or among the values
+    of a mapping, on either side of a
     conditional expression or of an ``and`` or an ``or``, by an item,
     transposed, in arithmetic with anything (its sign turned or kept, as
     :meth:`_Flow.state` reads it), as the element of a comprehension,
@@ -2069,23 +2070,41 @@ class _Returns:
     def _handed(self, call: ast.Call, local: _Local, caller: _Returns) -> None:
         """Bind this function's parameters to what *call*, made by *caller*
         where *local* holds, hands them.
+
+        An argument stands for the parameter in its place, or for ``*args``
+        past them; once a ``*`` argument unpacks an unknown number of
+        values, it and every argument after it may land in any place from
+        its own on, or in ``*args``. A keyword stands for the parameter of
+        its name, or for ``**kwargs``; a ``**`` mapping may hand its values
+        to any parameter that takes a keyword, or to ``**kwargs``.
         """
         arguments = self.function.args
         positional = [*arguments.posonlyargs, *arguments.args]
+        unpacked: int | None = None
         for index, value in enumerate(call.args):
-            if isinstance(value, ast.Starred):
-                break
-            if index < len(positional):
-                self._bind(positional[index].arg, value, local, reader=caller)
-            elif arguments.vararg is not None:
+            if isinstance(value, ast.Starred) and unpacked is None:
+                unpacked = index
+            places = (
+                positional[index : index + 1]
+                if unpacked is None
+                else (positional[unpacked:])
+            )
+            for parameter in places:
+                self._bind(parameter.arg, value, local, reader=caller)
+            if arguments.vararg is not None and (
+                unpacked is not None or index >= len(positional)
+            ):
                 self._bind(arguments.vararg.arg, value, local, reader=caller)
-        by_keyword = {
-            argument.arg for argument in [*arguments.args, *arguments.kwonlyargs]
-        }
+        by_keyword = [*arguments.args, *arguments.kwonlyargs]
         for keyword in call.keywords:
-            if keyword.arg in by_keyword:
+            if keyword.arg is None:
+                for parameter in by_keyword:
+                    self._bind(parameter.arg, keyword.value, local, reader=caller)
+                if arguments.kwarg is not None:
+                    self._bind(arguments.kwarg.arg, keyword.value, local, reader=caller)
+            elif any(parameter.arg == keyword.arg for parameter in by_keyword):
                 self._bind(keyword.arg, keyword.value, local, reader=caller)
-            elif keyword.arg is not None and arguments.kwarg is not None:
+            elif arguments.kwarg is not None:
                 self._bind(arguments.kwarg.arg, keyword.value, local, reader=caller)
 
     def _bind(
@@ -2215,6 +2234,10 @@ class _Returns:
         parts: list[ast.expr]
         if isinstance(node, ast.Tuple | ast.List | ast.Set):
             parts = list(node.elts)
+        elif isinstance(node, ast.Dict):
+            # A mapping hands on its values: one ``**`` hands to a parameter
+            # of a nested function, or one read back by its key.
+            parts = list(node.values)
         elif isinstance(node, ast.IfExp):
             parts = [node.body, node.orelse]
         elif isinstance(node, ast.BoolOp):

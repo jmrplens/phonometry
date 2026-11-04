@@ -1,4 +1,4 @@
-# phonometry documentation — robots.txt
+# phonometry documentation: robots.txt
 # All crawlers are welcome, including AI / generative-engine crawlers.
 #
 # NOTE: this is the subpath copy, served at /phonometry/robots.txt. Crawlers

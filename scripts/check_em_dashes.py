@@ -6,7 +6,8 @@ off one is a sentence of its own, a parenthesis, a colon or a comma, chosen by
 what the sentence needs. The rule covers everything a reader sees under the
 project's name, which is more than the pages of the site: the docs mirrors,
 the CHANGELOG, the README, the docstrings the API reference is generated from,
-and the titles, labels and annotations drawn into the figures.
+the titles, labels and annotations drawn into the figures, and the robots.txt
+the site serves, which a crawler and anyone who opens it read as written.
 
 What is NOT prose keeps its dash, and every exemption below says why:
 
@@ -77,6 +78,8 @@ the double hyphen it is. It is looked for where it is published:
   a double hyphen that stands between spaces (`` -- ``), the one form that is
   a dash there and not an option of a command line (``--keep``) or a
   decrement.
+- **A plain-text file** is served as written, so a double hyphen there stays
+  two hyphens and only the character is read.
 - **A comment** is published nowhere, neither on the site nor by ``help()``,
   and keeps its double hyphens, the section rules (``# -- names ---``) among
   them. So does the docstring of a figure or diagram generator, which
@@ -125,10 +128,11 @@ EM_DASH = "—"
 #: Where the published prose lives: the pages and their mirrors, the data
 #: modules the site's pages are built from (the glossary cards, the home page's
 #: text and examples, the Spanish catalogue notes), the package docstrings the
-#: API reference is generated from, and the text the figure and diagram
-#: generators draw. Tests are not published and keep their dashes, and the
-#: llms mirrors and the generated API pages are regenerated from what is listed
-#: here and need no scan of their own.
+#: API reference is generated from, the text the figure and diagram
+#: generators draw, and the one plain-text file of the site with prose of its
+#: own, the robots.txt it serves under its subpath. Tests are not published and
+#: keep their dashes, and the llms mirrors and the generated API pages are
+#: regenerated from what is listed here and need no scan of their own.
 DEFAULT_ROOTS = (
     "docs",
     "site/src/content/docs",
@@ -141,6 +145,7 @@ DEFAULT_ROOTS = (
     "README_PYPI.md",
     "CONTRIBUTING.md",
     "AGENTS.md",
+    "site/public/robots.txt",
 )
 
 #: Bold markers, which are not italics and are taken out before counting.
@@ -780,6 +785,23 @@ def json_hits(text: str) -> list[int]:
     return hits
 
 
+def text_hits(text: str) -> list[int]:
+    """The 1-based lines of a plain-text file the site serves whose text has a dash.
+
+    The file reaches a reader as written, so every line is read, a comment
+    among them: a crawler reads the ``#`` lines of robots.txt with the rules,
+    and so does anyone who opens it. Nothing in it is decoded, so an entity
+    or an escape is the characters it is. Each line is read as a string of a
+    module is (:func:`_string_is_prose`): a standard's title reproduced as
+    printed keeps its dash.
+    """
+    return [
+        number
+        for number, line in enumerate(text.splitlines(), start=1)
+        if EM_DASH in line and _string_is_prose(line)
+    ]
+
+
 #: The suffixes the guard reads, each with the reader that knows its kind.
 _READERS = {
     ".py": python_hits,
@@ -788,7 +810,16 @@ _READERS = {
     ".mjs": data_hits,
     ".ts": data_hits,
     ".json": json_hits,
+    ".txt": text_hits,
 }
+#: The suffixes a root that is a directory is walked for: all of them but plain
+#: text, which is read only where a root names the file. A ``.txt`` file under
+#: the roots that are directories would be a data table or a baseline, not
+#: prose, and the site's other plain-text files are no prose of their own: the
+#: llms files are generated from the pages read here, and reproduce the
+#: standards' titles, dashes and all, outside the markup that says they are
+#: titles, and the IndexNow key file holds a key.
+_WALKED = frozenset(_READERS) - {".txt"}
 
 
 def scan(path: pathlib.Path) -> list[int]:
@@ -1285,7 +1316,7 @@ def iter_files(roots: tuple[str, ...]) -> list[pathlib.Path]:
             files.extend(
                 p
                 for p in sorted(base.rglob("*"))
-                if p.suffix in _READERS
+                if p.suffix in _WALKED
                 and not any(str(p).startswith(u) for u in _UNPUBLISHED)
             )
     return files

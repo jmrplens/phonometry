@@ -269,6 +269,35 @@ def test_dash_in_a_json_string_is_refused_unless_it_quotes_a_source(
     assert ced.scan(notes) == [4]
 
 
+def test_dash_in_a_plain_text_file_is_refused(tmp_path: pathlib.Path) -> None:
+    """The site serves its robots.txt as written, comments and all.
+
+    Nothing converts a double hyphen there, so only the character is read.
+    """
+    robots = tmp_path / "robots.txt"
+    robots.write_text(
+        "# phonometry documentation — robots.txt\n# Two -- hyphens stay two.\n",
+        encoding="utf-8",
+    )
+    assert ced.findings(robots) == [(1, "em dash")]
+
+
+def test_the_robots_file_is_read_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The guard read no plain-text file, so the subpath robots.txt opened on a dash."""
+    monkeypatch.chdir(pathlib.Path(__file__).resolve().parent.parent)
+    read = {path.as_posix() for path in ced.iter_files(ced.DEFAULT_ROOTS)}
+    assert "site/public/robots.txt" in read
+
+
+def test_a_plain_text_file_is_read_only_where_a_root_names_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The llms shards beside robots.txt are generated from the pages read here."""
+    (tmp_path / "shard.txt").write_text("Acoustics — Part 2\n", encoding="utf-8")
+    (tmp_path / "page.md").write_text("The level rises.\n", encoding="utf-8")
+    assert [path.name for path in ced.iter_files((str(tmp_path),))] == ["page.md"]
+
+
 # The double hyphen: the ASCII spelling of the dash, which Astro's smartypants
 # publishes as the em dash itself. The first defect the reading was written
 # against is the docstring bullet ``* :func:`npd_level` -- the level``, which

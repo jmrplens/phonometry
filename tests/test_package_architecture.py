@@ -1150,6 +1150,7 @@ def _is_float_constant(node: ast.expr, names: _ScopeNames | None = None) -> bool
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id == "float"
+        and (names is None or names.reads_the_builtin("float"))
         and len(node.args) == 1
         and isinstance(node.args[0], ast.Constant)
         and isinstance(node.args[0].value, str)
@@ -1462,6 +1463,17 @@ class _ScopeNames:
         local = name in self.annotated and isinstance(self.scope, _FUNCTIONS)
         return not declared and (name in self.flow or name in self.entry or local)
 
+    def reads_the_builtin(self, name: str) -> bool:
+        """Whether *name*, read in this scope, may be the builtin of that
+        spelling: no scope Python looks it up in binds it.
+        """
+        names: _ScopeNames | None = self
+        while names is not None:
+            if names.binds(name):
+                return False
+            names = names._holder(name)
+        return True
+
     def _holder(self, name: str) -> _ScopeNames | None:
         """The scope a name this one does not bind is read from: the module for
         one declared ``global`` here, or annotated in a class body, which
@@ -1692,7 +1704,11 @@ def _is_bool_dtype(node: ast.expr, names: _ScopeNames | None = None) -> bool:
         given = [*node.args[:1], *(k.value for k in node.keywords if k.arg == "dtype")]
         return any(_is_bool_dtype(dtype, names) for dtype in given)
     if isinstance(node, ast.Name):
-        return node.id == "bool" or (names is not None and names.may_hold(node, "bool"))
+        if names is None:
+            return node.id == "bool"
+        return names.may_hold(node, "bool") or (
+            node.id == "bool" and names.reads_the_builtin("bool")
+        )
     if isinstance(node, ast.Attribute):
         return node.attr in _BOOL_DTYPE_NAMES
     return (
@@ -2128,6 +2144,66 @@ def test_the_float_equality_check_reads_an_annotation_without_a_value_as_no_bind
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "7", "10",
     ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_a_builtin_only_where_nothing_binds_it() -> None:
+    """``float("0")`` and ``astype(bool)`` read the builtin only where no scope
+    binds its name: a comprehension's variable, a lambda's or a function's
+    parameter, a local, an annotation in a function or a ``def`` of the module
+    is another name, which the reader took for the builtin of that spelling.
+    """
+    source = textwrap.dedent(
+        """\
+        def plain(x):
+            return x == float("0"), x.astype(bool)
+
+        def by_comprehension(x, kinds):
+            return [x == float("0") for float in kinds]
+
+        def by_comprehension_bool(x, kinds):
+            return [x.astype(bool) for bool in kinds]
+
+        def by_lambda(x):
+            return (lambda float: x == float("0"))(print)
+
+        def by_parameter(x, float):
+            return x == float("0")
+
+        def by_local(x):
+            bool = make()
+            return x.astype(bool)
+
+        def by_annotation(x):
+            float: object
+            return x == float("0")
+
+        def beside(x, kinds):
+            names = [float for float in kinds]
+            return x == float("0"), names
+
+        class Holder:
+            float = make()
+
+            def method(self, x):
+                return x == float("0")
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
+        "2",
+        "2",
+        "26",
+        "32",
+    ]
+    source = textwrap.dedent(
+        """\
+        def float(text):
+            return text
+
+        def by_module(x):
+            return x == float("0")
+        """
+    )
+    assert _float_equalities(ast.parse(source)) == []
 
 
 def test_the_float_equality_check_reads_nothing_an_if_type_checking_block_binds() -> (

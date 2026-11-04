@@ -656,6 +656,7 @@ class _PageReading:
     def open_block(self, line: str) -> None:
         """Start a block on ``line``: what the last one left open stays there."""
         self.italic_open, self.quote_closer = False, None
+        self.in_reference = False
         self.caption = _is_caption(inside_quotation(line))
 
     def holds_dash(self, line: str, shown: str) -> bool:
@@ -710,7 +711,6 @@ def markdown_hits(text: str) -> list[int]:
         elif body[index - head].strip():
             found = reading.holds_dash(line, shown[index])
         else:
-            reading.in_reference = False
             found = math_flags[index] and EM_DASH in line
         if found:
             hits.append(index + 1)

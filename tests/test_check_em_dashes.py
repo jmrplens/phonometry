@@ -582,6 +582,20 @@ def test_a_line_of_a_quotation_is_read_through_its_marks() -> None:
     assert ced.markdown_bullet_hyphen_hits("> - `x` - the text\n") == [1]
 
 
+def test_a_block_under_a_reference_is_read_for_itself() -> None:
+    """Only the wrapped lines of a bibliographic entry reproduce its title.
+
+    A heading, an item or a table row under the entry opens a block of its
+    own, and it kept the entry's exemption for as long as it stayed indented.
+    """
+    assert ced.markdown_hits("- Author (2001) x\n  ## Heading — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  - item — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  | a — b |\n") == [2]
+    assert ced.markdown_hits("> - Author (2001) x\n>   ## Heading — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  wrapped — title\n") == []
+    assert ced.markdown_hits("- Author (2001) x\n- Author (2002) a — b\n") == []
+
+
 def test_an_escaped_backtick_opens_no_code_span() -> None:
     r"""``\`x -- y\``` is prose a reader sees, backticks and all.
 

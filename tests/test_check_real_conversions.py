@@ -1215,6 +1215,38 @@ _PLANTED_ANSWERED = {
 
             return g(), real_array(T, "T")
     """,
+    "a_generic_class_s_type_parameter_is_its_methods_own": """
+        def f(T):
+            class Box[T]:
+                def get(self):
+                    return np.asarray(T, dtype=np.float64)
+
+            return Box().get(), real_array(T, "T")
+    """,
+    "a_generic_class_s_type_parameter_reaches_a_class_inside_it": """
+        def f(T):
+            class Box[T]:
+                class Inner:
+                    def get(self):
+                        return np.asarray(T, dtype=np.float64)
+
+            return Box.Inner().get(), real_array(T, "T")
+    """,
+    "a_generic_class_s_type_parameter_is_not_what_its_method_writes": """
+        def _helper(reference, T):
+            real_array(reference, "reference")
+            out = [0.0]
+
+            class Box[T]:
+                def fill(self):
+                    out[0] = T
+
+            Box().fill()
+            return out[0]
+
+        def f(reference, T):
+            return float(_helper(reference, T))
+    """,
     "a_name_a_nested_function_declares_global_is_the_module_s": """
         def _helper(reference, levels):
             real_array(reference, "reference")

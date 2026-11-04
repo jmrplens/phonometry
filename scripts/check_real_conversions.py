@@ -1985,10 +1985,14 @@ class _Returns:
         function: ast.FunctionDef | ast.AsyncFunctionDef,
         parameters: frozenset[str],
         outer: _Returns | None = None,
+        hidden: frozenset[str] = frozenset(),
     ) -> None:
         self.module = module
         self.function = function
         self.parameters = parameters
+        #: The type parameters of the generic classes a method is written
+        #: in, which it reads as theirs, not as names of the function around.
+        self.hidden = hidden
         #: The function this one is nested in, which binds the names it
         #: reads but does not bind.
         self.outer = outer
@@ -2123,38 +2127,43 @@ class _Returns:
         table.setdefault(name, []).append((value, local, reader or self))
 
     def binds(self, name: str) -> bool:
-        """Whether *name* is the function's own, as Python scopes it."""
-        return own_names(self.function).binds(name)
+        """Whether *name* is the function's own, as Python scopes it, a type
+        parameter of a generic class the method is written in among them.
+        """
+        return own_names(self.function).binds(name) or name in self.hidden
 
     def _nested(
         self,
         node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
         *,
         method: bool = False,
+        hidden: frozenset[str] = frozenset(),
     ) -> None:
         """Take in what a function nested in this one writes into a name of a
         function around it: a name it declares ``nonlocal``, rebound, added
         to or walked into, and an item it fills of a name it does not bind.
 
         Each value is read where it is written, with the nested function's
-        names. A class body binds nothing a method reads, and a method's
-        writes go to the function around the class. A name the nested
+        names. A class body binds nothing a method reads but the type
+        parameters of a generic class (:attr:`hidden`), and a method's writes
+        go to the function around the class. A name the nested
         function declares ``global`` is the module's, and its writes are
         already the module's (:meth:`_bind`); an item it fills of a name no
         function around it binds, or one that the function binding it first
         declares ``global``, is an item of the module's name.
         """
         if isinstance(node, ast.ClassDef):
+            inside = hidden | own_names(node).type_parameters
             pending: list[ast.stmt] = list(node.body)
             while pending:
                 statement = pending.pop()
                 if isinstance(
                     statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
                 ):
-                    self._nested(statement, method=True)
+                    self._nested(statement, method=True, hidden=inside)
                 pending.extend(block_statements(statement))
             return
-        inner = _Returns(self.module, node, frozenset(), outer=self)
+        inner = _Returns(self.module, node, frozenset(), outer=self, hidden=hidden)
         if not method:
             # A method is called through its object, which is not followed.
             self.defined.setdefault(node.name, []).append(inner)
@@ -2608,10 +2617,14 @@ class _Reading:
         for node, defined in flow.classes:
             # A method of a class written here reads the names it shares with
             # this function as they stand where the class is written, or at
-            # the end, whenever an instance's method is called.
+            # the end, whenever an instance's method is called; not the names
+            # of a generic class's type parameters, which are the class's.
             shared = _join_envs([defined, end], flow.default)
-            for method in _methods(node):
-                self.enclosed[id(method)] = (shared, False)
+            for method, hidden in _methods_and_type_parameters(node):
+                kept = {
+                    name: state for name, state in shared.items() if name not in hidden
+                }
+                self.enclosed[id(method)] = (kept, False)
 
     def _lambda(
         self, qualified: str, node: ast.Lambda, captured: Env, outer: _Flow
@@ -2654,21 +2667,27 @@ class _Reading:
             self._lambda(f"{qualified}.<lambda>", node, captured, flow)
 
 
-def _methods(
+def _methods_and_type_parameters(
     node: ast.ClassDef,
-) -> Iterator[ast.FunctionDef | ast.AsyncFunctionDef]:
-    """The methods of a class, through its compound statements and the
-    classes written in it, whose methods share the same enclosing names.
+) -> Iterator[tuple[ast.FunctionDef | ast.AsyncFunctionDef, frozenset[str]]]:
+    """Each method of a class, through its compound statements and the
+    classes written in it, whose methods share the same enclosing names, with
+    the type parameters of the generic classes it is written in, this one and
+    any between, which it reads as theirs and not as names of the function
+    around.
     """
-    pending: list[ast.stmt] = list(node.body)
+    pending: list[tuple[ast.stmt, frozenset[str]]] = [
+        (statement, own_names(node).type_parameters) for statement in node.body
+    ]
     while pending:
-        statement = pending.pop()
+        statement, hidden = pending.pop()
         if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef):
-            yield statement
+            yield statement, hidden
         elif isinstance(statement, ast.ClassDef):
-            pending.extend(statement.body)
+            inner = hidden | own_names(statement).type_parameters
+            pending.extend((child, inner) for child in statement.body)
         else:
-            pending.extend(block_statements(statement))
+            pending.extend((child, hidden) for child in block_statements(statement))
 
 
 def _scope_env(

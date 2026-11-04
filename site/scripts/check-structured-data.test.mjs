@@ -62,14 +62,14 @@ function page(slug, datePublished, dateModified) {
 	return `<!doctype html><html><head><script type="application/ld+json">${block}</script></head></html>`;
 }
 
-/** Build `pages` pages, the first `dated` of them with two different dates, and run the check on them. */
-function check(t, pages, dated) {
+/** Build `pages` pages, the first `dated` of them published on `published`, and run the check on them. */
+function check(t, pages, dated, published = '2026-07-01') {
 	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
 	t.after(() => rmSync(dist, { recursive: true, force: true }));
 	for (let i = 0; i < pages; i += 1) {
 		const dir = join(dist, `page-${i}`);
 		mkdirSync(dir);
-		writeFileSync(join(dir, 'index.html'), page(`page-${i}`, i < dated ? '2026-07-01' : '2026-10-01', '2026-10-01'));
+		writeFileSync(join(dir, 'index.html'), page(`page-${i}`, i < dated ? published : '2026-10-01', '2026-10-01'));
 	}
 	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };
@@ -87,6 +87,12 @@ test('a build where no page has two different dates fails, and says where to loo
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL 0 of the 10 articles were last edited after the day they were first published/);
 	assert.match(ran.err, /page-dates\.mjs/);
+});
+
+test('a page published after its last edit does not count as edited', (t) => {
+	const ran = check(t, 10, 10, '2026-11-01');
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL 0 of the 10 articles were last edited after the day they were first published/);
 });
 
 test('a tenth of the pages is the floor: one under it fails and one on it passes', (t) => {

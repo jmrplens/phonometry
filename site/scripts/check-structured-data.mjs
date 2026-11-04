@@ -302,7 +302,7 @@ for (const file of files) {
 		if (article[field] === undefined) fail(`${route}: the article node has no ${field}`);
 	}
 	seen.articles += 1;
-	if (article.datePublished && article.dateModified && article.datePublished !== article.dateModified) {
+	if (article.datePublished && article.dateModified && article.dateModified > article.datePublished) {
 		seen.edited += 1;
 	}
 	if (article['@id'] !== `${canonical}#article`) {

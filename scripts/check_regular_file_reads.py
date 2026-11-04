@@ -501,8 +501,15 @@ def _rebound_from_inside(
     A name such a scope only imports from one place, where the top of the
     module imports it from there too or binds it not at all, stands for
     that import; any other such name stands for nothing the guard can name.
+    What an ``if TYPE_CHECKING:`` block holds binds nothing at the top of the
+    module: an annotation's import beside a lazy one under ``global``.
     """
-    top = bindings_by_name(tree)
+    checker = for_the_type_checker(tree)
+    top = {
+        name
+        for name, nodes in bindings_by_name(tree).items()
+        if any(id(node) not in checker for node in nodes)
+    }
     for name, nodes in global_bindings(tree).items():
         targets = {
             _imported(node, package).get(name)

@@ -970,6 +970,73 @@ def test_an_import_a_function_rebinds_under_global_is_read_as_it_may_stand(
     assert _found(tmp_path, source) == found
 
 
+@pytest.mark.parametrize(
+    ("annotation", "lazy", "call"),
+    [
+        ("import soundfile as snd", "import soundfile as snd", "snd.read(path)"),
+        ("import numpy as snd", "import soundfile as snd", "snd.read(path)"),
+        (
+            "from soundfile import read as reader",
+            "from soundfile import read as reader",
+            "reader(path)",
+        ),
+        (
+            "import numpy as numpy_module",
+            "import numpy as numpy_module",
+            "numpy_module.fromfile(path)",
+        ),
+    ],
+    ids=["same-module", "another-module", "from-import", "numpy"],
+)
+def test_an_import_for_the_type_checker_leaves_a_lazy_global_import_its_name(
+    tmp_path: pathlib.Path, annotation: str, lazy: str, call: str
+) -> None:
+    """An annotation's import beside a function that imports the name under
+    ``global`` is the ordinary lazy import. The block never runs, so the
+    function's import is all the name can hold, and the read through it is
+    refused as it is with no block there. The block's import counted as the
+    module binding the name, which took the alias away and passed the read.
+    """
+    source = f"""
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            {annotation}
+
+        def _load():
+            global {lazy.rpartition(" as ")[2]}
+            {lazy}
+
+        def f(path):
+            return {call}
+        """
+    assert _found(tmp_path, source) == [("f", _FOREIGN)]
+
+
+def test_an_import_for_the_type_checker_is_no_second_reading_of_a_running_one(
+    tmp_path: pathlib.Path,
+) -> None:
+    """What runs at the top of the module still disagrees with a function's
+    import under ``global``: the name may hold either, and neither is read.
+    """
+    source = """
+        from typing import TYPE_CHECKING
+
+        import numpy as snd
+
+        if TYPE_CHECKING:
+            import soundfile as snd
+
+        def _load():
+            global snd
+            import soundfile as snd
+
+        def f(path):
+            return snd.read(path)
+        """
+    assert _found(tmp_path, source) == []
+
+
 #: A module that defines one reader in each branch of an ``if``, and one in
 #: each block of a ``try``, where only one of the two binds ``info`` itself.
 _TWO_BRANCHES = """

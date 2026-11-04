@@ -1726,10 +1726,16 @@ jobs:
           requirements.txt
           requirements-dev.txt
           requirements-torch.txt
+    # torch 2.15 asks the device for MTLGPUFamilyApple7, which the runners'
+    # paravirtual GPU does not report, and skips it as no MPS device
+    # (https://github.com/pytorch/pytorch/issues/202529); 2.14.1 still runs
+    # on it. This job alone keeps 2.14.1 until a release reads that GPU
+    # again; every other job takes the pin in requirements-torch.txt.
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt -r requirements-dev.txt -r requirements-torch.txt
+        grep -v '^torch==' requirements-torch.txt > requirements-torch-mps.txt
+        pip install -r requirements.txt -r requirements-dev.txt -r requirements-torch-mps.txt torch==2.14.1
         pip install -e .
     - name: Check MPS is usable, then run the tolerance and contour tests on it
       run: |

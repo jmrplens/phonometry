@@ -9,15 +9,15 @@
 # reportlab and svglib than the committed fiches were rendered with, so a
 # developer running `make reports` saw drift in fiches nobody had touched.
 # The versions here are the versions there; bump them together.
-ruff==0.17.2
-mypy==2.4.0
+ruff==0.17.3
+mypy==2.4.1
 bandit==1.9.4
 zizmor==1.31.1  # audits .github/: workflows (template injection, token permissions, persisted credentials) and Dependabot
 types-setuptools==84.0.0.20261006
-types-PyYAML==6.0.12.20260906  # the type checker reads the tests' yaml calls against real stubs rather than skipping the package
+types-PyYAML==6.0.12.20261030  # the type checker reads the tests' yaml calls against real stubs rather than skipping the package
 types-jsonschema==4.26.0.20261006  # the same for the catalogue schema test's jsonschema calls
 
-pytest==9.1.1
+pytest==9.2.0
 pytest-cov==7.1.0
 pytest-xdist==3.8.0  # parallel test execution (`pytest -n auto`); coverage is combined across workers by pytest-cov
 

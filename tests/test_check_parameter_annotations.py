@@ -530,7 +530,9 @@ def test_a_name_a_nested_scope_binds_for_itself_is_not_the_parameter(
     loops over the parameter under its own name takes one item at a time.
     A nested function that declares the name ``global`` reads the module's,
     and so does one nested in it; one that declares it ``nonlocal`` reads
-    the parameter.
+    the parameter. A generic function's type parameter of that spelling is
+    its own, and so is a generic class's, for its methods and for those of
+    a class written in it.
     """
     refused = _refused(
         tmp_path,
@@ -538,7 +540,7 @@ def test_a_name_a_nested_scope_binds_for_itself_is_not_the_parameter(
         __all__ = [
             "by_def", "by_lambda", "by_loop", "by_local", "by_class",
             "closure", "closure_copy", "items", "by_global", "below_a_global",
-            "by_nonlocal",
+            "by_nonlocal", "by_type", "by_class_type", "below_a_class_type",
         ]
 
         def by_def(levels: Sequence[float]) -> float:
@@ -601,6 +603,24 @@ def test_a_name_a_nested_scope_binds_for_itself_is_not_the_parameter(
                 nonlocal levels
                 return float(np.max(np.asarray(levels)))
             return peak()
+
+        def by_type(levels: Sequence[float]) -> float:
+            def peak[levels]() -> float:
+                return float(np.max(np.asarray(levels)))
+            return sum(levels) + peak()
+
+        def by_class_type(levels: Sequence[float]) -> float:
+            class Box[levels]:
+                def peak(self) -> float:
+                    return float(np.max(np.asarray(levels)))
+            return sum(levels) + Box().peak()
+
+        def below_a_class_type(levels: Sequence[float]) -> float:
+            class Box[levels]:
+                class Inner:
+                    def peak(self) -> float:
+                        return float(np.max(np.asarray(levels)))
+            return sum(levels) + Box.Inner().peak()
         """,
     )
     assert sorted(refused) == [

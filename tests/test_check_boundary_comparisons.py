@@ -963,6 +963,41 @@ def test_a_name_is_looked_up_in_the_scopes_the_call_runs_in(
     ]
 
 
+def test_what_an_if_type_checking_block_binds_is_no_value_of_the_name(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` or a value under ``if TYPE_CHECKING:`` never runs. It was read
+    as what a function writes under ``global``, and as either of two beside the
+    block's ``else``, so the difference it computes was compared against the
+    printed limit though the name only ever holds the constant.
+    """
+    source = """
+    _LIMIT_DB = 3.0
+    _spread = 0.0
+    def _width(levels):
+        return 0.0
+    def swap(levels):
+        global _spread, _width
+        if TYPE_CHECKING:
+            _spread = max(levels) - min(levels)
+            def _width(levels):
+                return max(levels) - min(levels)
+    if TYPE_CHECKING:
+        def _either(levels):
+            return max(levels) - min(levels)
+    else:
+        def _either(levels):
+            return 0.0
+    def judge():
+        return _spread <= _LIMIT_DB
+    def judge_width(levels):
+        return _width(levels) <= _LIMIT_DB
+    def judge_either(levels):
+        return _either(levels) <= _LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == []
+
+
 def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -130,6 +130,7 @@ from typing import TYPE_CHECKING
 
 from ast_scan import (
     binding_of,
+    for_the_type_checker,
     global_bindings,
     imported_names,
     live_bindings,
@@ -988,12 +989,16 @@ class Module:
         tuple unpacking or -1), ``"loop"`` for a ``for`` target (``node`` is
         the iterable), ``"opaque"`` for anything else. A comprehension's
         variables are its own (:func:`_comprehension_names`), and a ``:=``
-        inside it binds the function's name.
+        inside it binds the function's name. What an ``if TYPE_CHECKING:``
+        block holds never runs, and binds nothing.
         """
         if function in self.locals:
             return self.locals[function]
         bindings: dict[str, list[tuple[str, ast.AST, int]]] = {}
+        checker = for_the_type_checker(function)
         for node in _walk_own(function):
+            if id(node) in checker:
+                continue
             if isinstance(
                 node, ast.Assign | ast.AnnAssign | ast.AugAssign | ast.NamedExpr
             ):

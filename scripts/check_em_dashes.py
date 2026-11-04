@@ -32,7 +32,7 @@ What is NOT prose keeps its dash, and every exemption below says why:
   value or quotes nothing, and nothing it opens reaches the next value or the
   body.
 - **Code.** A fenced block, an inline code span and a string a test compares
-  with are data, not prose, and a dash that fills a whole table cell, or a
+  with are data, not prose, and a dash that fills a whole cell of a table, or a
   whole slash-separated item of one, is the placeholder of an empty cell, not
   a sentence. The glossary cards, the home page's text and the Spanish
   catalogue notes are prose in the site's data modules and are read as such.
@@ -49,7 +49,8 @@ quotation mark there is a symbol, so neither opens an italic span or a
 quotation that would exempt the rest of the paragraph, and four digits in
 parentheses (``$L(1000)$``, or a code span holding ``band(2000)``) open
 no bibliographic entry. The code and maths spans are read together, a block
-of the page at a time, as the site reads them, and a ``$$`` block is read
+of the page at a time, as the site reads them, by the walk of the page and by
+its kind (:func:`markdown_fences.page_lines`), and a ``$$`` block is read
 apart, as the site reads a fenced code block: a line of it that opens with
 ``+ ``, ``|`` or ``>`` starts no block of markdown, and the block ends the
 paragraph before it, so nothing pairs across it, behind the marks of a

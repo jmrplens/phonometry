@@ -923,6 +923,13 @@ def test_a_binding_for_the_type_checker_stands_beside_none_that_runs() -> None:
         )
     )
     assert ast_scan.global_bindings(tree) == {}
+    swap = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "swap"
+    )
+    either = ast_scan.bindings_by_name(tree)["either"]
+    assert [node.lineno for node in ast_scan.bindings_from(tree, either, swap)] == [12]
     standing = ast_scan.standing_bindings(tree)
     assert [node.lineno for node in standing["beside"]] == [2]
     assert [node.lineno for node in standing["alone"]] == [6]

@@ -15,6 +15,7 @@ import functools
 import re
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import Literal, NamedTuple, TypeGuard
 
@@ -26,7 +27,13 @@ if _SCRIPTS not in sys.path:
 
 import check_parameter_annotations as cpa
 import check_return_overloads as return_overloads
-from ast_scan import bindings_from, live_bindings, python_files, runs_before
+from ast_scan import (
+    bindings_from,
+    for_the_type_checker,
+    live_bindings,
+    python_files,
+    runs_before,
+)
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -1339,14 +1346,17 @@ class _Statements(NamedTuple):
     annotated: set[str]
 
 
-def _statement_bindings(own: list[ast.AST]) -> _Statements:
+def _statement_bindings(own: list[ast.AST], tree: ast.Module) -> _Statements:
     """Each name the statements among *own* bind, with every binding of it, the names declared ``global`` and ``nonlocal``, and those annotated without a value.
 
     An assignment, a ``del``, a loop, ``with``, ``except`` or ``match`` name,
     a ``def`` or a ``class``, an import, and a ``:=`` in a comprehension,
     which binds in the scope around the comprehension. An annotation without
-    a value binds nothing, and the name keeps what it held.
+    a value binds nothing, and the name keeps what it held. What an ``if
+    TYPE_CHECKING:`` block of *tree* holds never runs, and binds nothing.
     """
+    checker = for_the_type_checker(tree)
+    own = [node for node in own if id(node) not in checker]
     flow: dict[str, list[_Binding]] = {}
     declared_global: set[str] = set()
     declared_nonlocal: set[str] = set()
@@ -1574,7 +1584,7 @@ def _nested_names(
         entry = frozenset(_expression_names(scope, own)) | hidden
         empty: frozenset[str] = frozenset()
         return _ScopeNames(scope, tree, {}, entry, empty, empty, outer, at)
-    statements = _statement_bindings(own)
+    statements = _statement_bindings(own, tree)
     entry = frozenset(_type_parameters(scope)) | hidden
     if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
         entry |= {parameter.arg for parameter in _parameters(scope.args)}
@@ -1639,7 +1649,7 @@ def _alias_scopes(tree: ast.Module) -> list[tuple[list[ast.AST], _ScopeNames]]:
     assigned ``bool`` or a constant is not followed.
     """
     own, nested = _own_nodes(tree)
-    flow = _statement_bindings(own).flow
+    flow = _statement_bindings(own, tree).flow
     none: frozenset[str] = frozenset()
     module = _ScopeNames(tree, tree, flow, none, none, none, None, None)
     found = [(own, module)]
@@ -2118,6 +2128,45 @@ def test_the_float_equality_check_reads_an_annotation_without_a_value_as_no_bind
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
         "3", "7", "10",
     ]  # fmt: skip
+
+
+def test_the_float_equality_check_reads_nothing_an_if_type_checking_block_binds() -> (
+    None
+):
+    """An import under ``if TYPE_CHECKING:`` never runs, so ``flag`` is what the
+    block's ``else`` imports, and a function that declares it ``global`` and
+    imports it only there binds nothing. Each was read as the boolean it names.
+    """
+    source = textwrap.dedent(
+        """\
+        if TYPE_CHECKING:
+            from numpy import bool_ as flag
+        else:
+            from json import dumps as flag
+
+        def beside_else(x):
+            return x.astype(flag)
+
+        from json import loads as other
+
+        def swap():
+            global other
+            if TYPE_CHECKING:
+                from numpy import bool_ as other
+
+        def under_global(x):
+            return x.astype(other)
+
+        if TYPE_CHECKING:
+            from json import load as checked
+        else:
+            from numpy import bool_ as checked
+
+        def in_the_else(x):
+            return x.astype(checked)
+        """
+    )
+    assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == ["25"]
 
 
 def test_the_float_equality_check_reads_a_global_name_its_function_has_just_bound() -> (

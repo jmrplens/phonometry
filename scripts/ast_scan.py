@@ -1004,13 +1004,22 @@ def live_bindings[NodeT: ast.AST](
     beside no binding that does; a name nothing else binds keeps it, for what
     reads annotations through it (:func:`for_the_type_checker`).
     """
-    checker = for_the_type_checker(root)
-    bindings = [b for b in bindings if id(b) not in checker] or bindings
+    bindings = _running_first(root, bindings)
     if point is not None and bindings:
         point, deferred = _lifted(root, bindings[0], point)
         if deferred:
             return _met_from(root, bindings, point)
     return _held_at(root, bindings, point)
+
+
+def _running_first[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT]
+) -> Sequence[NodeT]:
+    """*bindings* without those an ``if TYPE_CHECKING:`` block holds, unless
+    that leaves none (:func:`for_the_type_checker`).
+    """
+    checker = for_the_type_checker(root)
+    return [binding for binding in bindings if id(binding) not in checker] or bindings
 
 
 def _held_at[NodeT: ast.AST](
@@ -1128,8 +1137,11 @@ def bindings_from[NodeT: ast.AST](
 
     What a function, a lambda or a generator expression written at *point*
     reads of the name: it reads it when it is called or consumed, which may
-    be at once, before a later binding, or once the scope has run.
+    be at once, before a later binding, or once the scope has run. A binding
+    an ``if TYPE_CHECKING:`` block holds stands beside none that runs, as in
+    :func:`live_bindings`.
     """
+    bindings = _running_first(root, bindings)
     if point is None or not bindings:
         return _held_at(root, bindings, None)
     point, _ = _lifted(root, bindings[0], point)

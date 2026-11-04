@@ -714,7 +714,7 @@ def _string_is_prose(value: str) -> bool:
         return False
     return any(
         _holds_prose_dash(line)
-        for line in _blank_docstring_code_spans(value).split("\n")
+        for line in _mask_paragraphs(value.split("\n"), _blank_docstring_code_spans)
     )
 
 
@@ -967,19 +967,16 @@ def _blank_docstring_code_spans(text: str) -> str:
 def _mask_paragraphs(lines: list[str], blank: Callable[[str], str]) -> list[str]:
     """The lines with every code span blanked, a span that wraps included.
 
-    A span wraps with the paragraph that carries it, so the lines are joined a
-    paragraph at a time, blank line to blank line, before the spans are
-    blanked; a line already blanked out (code) closes a paragraph too.
+    A span wraps with the block that carries it, so the lines are joined a
+    block at a time before the spans are blanked: a blank line and a line
+    already blanked out (code) close one, and a list item opens one whatever
+    its indentation, since a docstring keeps the indentation of its source.
     """
     masked = list(lines)
-    start = 0
-    for index in range(len(lines) + 1):
-        if index < len(lines) and lines[index].strip():
-            continue
-        if index > start:
-            joined = blank("\n".join(lines[start:index]))
-            masked[start:index] = joined.split("\n")
-        start = index + 1
+    starts = block_starts([line.lstrip() for line in lines])
+    opening = [index for index, opens in enumerate(starts) if opens]
+    for start, stop in zip(opening, [*opening[1:], len(lines)], strict=True):
+        masked[start:stop] = blank("\n".join(lines[start:stop])).split("\n")
     return masked
 
 

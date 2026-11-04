@@ -641,6 +641,27 @@ def test_a_docstring_keeps_the_double_hyphen_of_its_code() -> None:
     assert ced.python_double_hyphen_hits(text) == []
 
 
+def test_a_literal_of_a_docstring_stays_inside_its_block() -> None:
+    """A docstring's literal pairs as a page's code span does, a block at a time.
+
+    Read a paragraph at a time, the two marks of a literal left open paired
+    across list items, and the double hyphen between them passed as code
+    where the page generated from the docstring shows it.
+    """
+    item = '"""Summary.\n\n* ``open\n* a -- b`` shown.\n"""\n'
+    assert ced.python_double_hyphen_hits(item) == [4]
+    nested = '"""Summary.\n\n    * ``open\n    * a -- b`` shown.\n"""\n'
+    assert ced.python_double_hyphen_hits(nested) == [4]
+    wrapped = '"""Summary.\n\n* ``open\n  --b`` shown.\n"""\n'
+    assert ced.python_double_hyphen_hits(wrapped) == []
+
+
+def test_a_stray_backtick_of_a_string_hides_no_dash_of_a_later_paragraph() -> None:
+    text = '"""A stray ` here.\n\nThe level rises — and a ` there.\n"""\n'
+    assert ced.python_hits(text) == [3]
+    assert ced.python_hits('"""A ``wrapped —\nliteral`` here.\n"""\n') == []
+
+
 def test_a_note_is_prose() -> None:
     """A directive's body is code only for a code or math directive."""
     text = '"""Summary.\n\n.. note::\n    The level rises -- and falls.\n"""\n'

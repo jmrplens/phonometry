@@ -23,6 +23,13 @@
  * from another took that page's date. Reading the tree in one pass pairs each
  * deleted file with one added file, and a page copied from one that is still
  * there is an add of its own.
+ *
+ * A clone that holds no history, or no git to read it with, is an answer: every
+ * caller falls back to the last-updated date. A history that is there and cannot
+ * be read is not. One pass means one failure takes the date of every page at
+ * once, and `datePublished` falling back to `dateModified` everywhere is the
+ * false claim this module exists to remove, so it stops a CI build and warns
+ * anywhere else.
  */
 import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
@@ -37,9 +44,10 @@ const NO_HISTORY = { root: '', added: new Map() };
 function git(...args) {
   return execFileSync('git', args, {
     encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
+    // Piped so that a failure carries what git said on `error.stderr`.
+    stdio: ['ignore', 'pipe', 'pipe'],
     // The tree's history is about a megabyte today, the default limit, and past
-    // the limit this would throw and every page would lose its date in silence.
+    // the limit this would throw.
     maxBuffer: 1 << 28,
   });
 }
@@ -86,12 +94,38 @@ function addsIn(log) {
   return added;
 }
 
+/**
+ * What to do with a history that is there and could not be read: stop a CI
+ * build, which would otherwise publish every page with the wrong date and pass
+ * every check of its fields, and tell anyone else.
+ */
+function unreadable(error) {
+  const said = String(error.stderr || error.message).trim();
+  if (process.env.CI) {
+    throw new Error(`git could not read ${DOCS_TREE}, so no page would have a first-publication date: ${said}`, {
+      cause: error,
+    });
+  }
+  console.warn(`git could not read ${DOCS_TREE}, so no page has a first-publication date: ${said}`);
+  return NO_HISTORY;
+}
+
 /** The repository's root and the adds of the docs tree, or nothing to go on. */
 function readHistory() {
+  let root;
   try {
-    const [root, shallow] = git('rev-parse', '--show-toplevel', '--is-shallow-repository').split('\n');
+    // HEAD because a repository with no commits has nothing to read either, and
+    // `git log` would fail on it as it does on a history it cannot read.
+    const [top, shallow] = git('rev-parse', '--show-toplevel', '--is-shallow-repository', 'HEAD').split('\n');
     // A shallow clone's oldest commit seems to add every page it holds.
     if (shallow !== 'false') return NO_HISTORY;
+    root = top;
+  } catch {
+    // No git, or not a repository. The caller falls back to the last-updated
+    // date, which is the best available answer for a page with no history.
+    return NO_HISTORY;
+  }
+  try {
     // From the root, like the other readers of this tree, so that the paths come
     // out the same from wherever the build runs and whatever `diff.relative` says.
     // --no-show-signature because `log.showSignature` prints in front of each
@@ -120,10 +154,8 @@ function readHistory() {
       DOCS_TREE,
     );
     return { root: realpathSync(root), added: addsIn(log) };
-  } catch {
-    // No git, or not a repository. The caller falls back to the last-updated
-    // date, which is the best available answer for a page with no history.
-    return NO_HISTORY;
+  } catch (error) {
+    return unreadable(error);
   }
 }
 

@@ -26,7 +26,7 @@ const TEMP = realpathSync(tmpdir());
 process.env.GIT_CONFIG_GLOBAL = devNull;
 process.env.GIT_CONFIG_NOSYSTEM = '1';
 process.env.GIT_CEILING_DIRECTORIES = TEMP;
-for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_CONFIG_COUNT']) delete process.env[name];
+for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_CONFIG_COUNT', 'CI']) delete process.env[name];
 
 const DOCS = 'src/content/docs';
 
@@ -116,6 +116,29 @@ function countGit(t) {
 	chmodSync(shim, 0o755);
 	setEnv(t, 'PATH', `${dir}${delimiter}${process.env.PATH}`);
 	return () => readFileSync(calls, 'utf8').split('\n').filter(Boolean);
+}
+
+/**
+ * A blobless clone of a history that holds one rename with an edit, the shape
+ * that makes the pass ask the remote for an old blob. Returns the clone's site
+ * directory and what breaks its remote.
+ */
+function bloblessClone(t) {
+	const repo = repository(t);
+	repo.write('old.mdx', body('moved'));
+	repo.commit('2024-01-30');
+	rmSync(join(repo.docs, 'old.mdx'));
+	repo.write('new.mdx', `${body('moved')}and an edit\n`);
+	repo.commit('2024-02-28');
+	repo.git(['config', 'uploadpack.allowFilter', 'true']);
+	const clone = join(tempDir(t), 'clone');
+	const quiet = { stdio: ['ignore', 'ignore', 'ignore'] };
+	execFileSync('git', ['clone', '-q', '--filter=blob:none', `file://${repo.root}`, clone], quiet);
+	return {
+		repo,
+		site: join(clone, 'site'),
+		breakRemote: () => execFileSync('git', ['-C', clone, 'remote', 'set-url', 'origin', `file://${clone}-gone`], quiet),
+	};
 }
 
 test('a page is dated by the commit that added it, on the day its committer wrote', async (t) => {
@@ -351,6 +374,61 @@ test('a directory in no repository has no dates', async (t) => {
 });
 
 test('a shallow clone has no dates, because its oldest commit seems to add every page', async (t) => {
+	const { repo, site } = shallowClone(t);
+	chdir(t, site);
+	const firstPublished = await fresh();
+	assert.equal(firstPublished(repo.path('a.mdx')), undefined);
+});
+
+test('a repository with no commits has no dates', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', body('a'));
+	chdir(t, repo.site);
+	const warn = t.mock.method(console, 'warn', () => {});
+	const firstPublished = await fresh();
+	assert.equal(firstPublished(repo.path('a.mdx')), undefined);
+	assert.equal(warn.mock.callCount(), 0);
+});
+
+test('a blobless clone fetches the old blobs the pass asks for and has its dates', async (t) => {
+	const { repo, site } = bloblessClone(t);
+	chdir(t, site);
+	const firstPublished = await fresh();
+	assert.equal(firstPublished(repo.path('new.mdx')), '2024-01-30');
+});
+
+test('a history that cannot be read stops a CI build, and says what git said', async (t) => {
+	const { repo, site, breakRemote } = bloblessClone(t);
+	breakRemote();
+	chdir(t, site);
+	setEnv(t, 'CI', 'true');
+	const firstPublished = await fresh();
+	assert.throws(
+		() => firstPublished(repo.path('new.mdx')),
+		(error) => {
+			assert.match(error.message, /no page would have a first-publication date/);
+			assert.match(error.message, /fatal: /);
+			return true;
+		},
+	);
+});
+
+test('a history that cannot be read warns once outside CI, says what git said, and leaves no dates', async (t) => {
+	const { repo, site, breakRemote } = bloblessClone(t);
+	breakRemote();
+	chdir(t, site);
+	const warn = t.mock.method(console, 'warn', () => {});
+	const firstPublished = await fresh();
+	assert.equal(firstPublished(repo.path('new.mdx')), undefined);
+	assert.equal(firstPublished(repo.path('old.mdx')), undefined);
+	assert.equal(warn.mock.callCount(), 1);
+	const [message] = warn.mock.calls[0].arguments;
+	assert.match(message, /no page has a first-publication date/);
+	assert.match(message, /fatal: /);
+});
+
+/** The site directory of a shallow clone of a history of two commits, and the repository it came from. */
+function shallowClone(t) {
 	const repo = repository(t);
 	repo.write('a.mdx', body('a'));
 	repo.commit('2024-01-01');
@@ -360,10 +438,42 @@ test('a shallow clone has no dates, because its oldest commit seems to add every
 	execFileSync('git', ['clone', '-q', '--depth', '1', `file://${repo.root}`, clone], {
 		stdio: ['ignore', 'ignore', 'ignore'],
 	});
-	chdir(t, join(clone, 'site'));
-	const firstPublished = await fresh();
-	assert.equal(firstPublished(repo.path('a.mdx')), undefined);
-});
+	return { repo, site: join(clone, 'site') };
+}
+
+const NOTHING_TO_READ = {
+	'a directory in no repository': (t) => {
+		chdir(t, tempDir(t));
+		return `${DOCS}/a.mdx`;
+	},
+	'a repository with no commits': (t) => {
+		const repo = repository(t);
+		chdir(t, repo.site);
+		return repo.path('a.mdx');
+	},
+	'a shallow clone': (t) => {
+		const { repo, site } = shallowClone(t);
+		chdir(t, site);
+		return repo.path('a.mdx');
+	},
+	'no git to run': (t) => {
+		const repo = repository(t);
+		chdir(t, repo.site);
+		setEnv(t, 'PATH', tempDir(t));
+		return repo.path('a.mdx');
+	},
+};
+
+for (const [what, arrange] of Object.entries(NOTHING_TO_READ)) {
+	test(`${what} is no failure in CI either`, async (t) => {
+		setEnv(t, 'CI', 'true');
+		const warn = t.mock.method(console, 'warn', () => {});
+		const path = arrange(t);
+		const firstPublished = await fresh();
+		assert.equal(firstPublished(path), undefined);
+		assert.equal(warn.mock.callCount(), 0);
+	});
+}
 
 test('a history longer than the default limit of a child process is read whole', async (t) => {
 	const repo = repository(t);

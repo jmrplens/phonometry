@@ -102,7 +102,9 @@ jobs:
           # demands the historical blobs of the pages edited in the commit
           # that moved them, about 1 500 small text files and 6 MiB, fetched
           # once and on demand from the same remote, which is why this stays
-          # correct rather than merely fast.
+          # correct rather than merely fast. A fetch that fails stops the build
+          # in page-dates.mjs, and check:structured-data fails on a build where
+          # that history was missing.
           filter: blob:none
           # Cone mode: these directories plus every repository-root file.
           # docs/ and scripts/ feed the mirror, glossary and llms checks;
@@ -221,10 +223,11 @@ jobs:
         # character too many or compared two descriptions as written rather
         # than as read would stay green here for good. A check's tests hand it
         # builds of a few pages that have the defect, and the routes it skips,
-        # and assert its exit status; check-descriptions.mjs has them, and the
-        # first-publication dates and the check of a page's processes are tested
-        # the same way, on small repositories and small sites. Node's own test
-        # runner and no dependencies, so it runs before the install.
+        # and assert its exit status; check-descriptions.mjs and
+        # check-structured-data.mjs have them, and the first-publication dates
+        # and the check of a page's processes are tested the same way, on small
+        # repositories and small sites. Node's own test runner and no
+        # dependencies, so it runs before the install.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own

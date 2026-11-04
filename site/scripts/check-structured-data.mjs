@@ -146,6 +146,16 @@ const ARTICLE_FIELDS = [
 	'wordCount',
 ];
 
+/**
+ * The share of articles that have to have been edited since they were first
+ * published. A page added and never edited has the same two dates by right, so
+ * no page can be judged alone, and about four in five differ in a good build. None
+ * do where src/lib/page-dates.mjs had no history to read, because Head.astro falls
+ * back to `dateModified`: every field is present, and every page claims it was
+ * published on the day it was last edited.
+ */
+const EDITED_FLOOR = 0.1;
+
 /** The nodes astro.config.mjs puts on every page for the per-page ones to join. */
 const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode'];
 
@@ -156,7 +166,18 @@ const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
 // Tallies, so a check that silently stopped looking at anything says so.
-const seen = { pages: 0, redirects: 0, blocks: 0, sections: 0, guides: 0, api: 0, fallbacks: 0, unlisted: 0 };
+const seen = {
+	pages: 0,
+	redirects: 0,
+	blocks: 0,
+	sections: 0,
+	guides: 0,
+	api: 0,
+	fallbacks: 0,
+	unlisted: 0,
+	articles: 0,
+	edited: 0,
+};
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
 const LISTED = new Set(knownSlugs());
@@ -279,6 +300,10 @@ for (const file of files) {
 	}
 	for (const field of ARTICLE_FIELDS) {
 		if (article[field] === undefined) fail(`${route}: the article node has no ${field}`);
+	}
+	seen.articles += 1;
+	if (article.datePublished && article.dateModified && article.datePublished !== article.dateModified) {
+		seen.edited += 1;
 	}
 	if (article['@id'] !== `${canonical}#article`) {
 		fail(`${route}: article @id is ${article['@id']}, not ${canonical}#article`);
@@ -423,6 +448,13 @@ if (wrongSection.length > 0) {
 }
 if (missingSection.length === 0 && wrongSection.length === 0) {
 	ok(`every one of the ${seen.sections} pages under a topic names its section as topics.mjs does`);
+}
+
+const editedLine = `${seen.edited} of the ${seen.articles} articles were last edited after the day they were first published`;
+if (seen.edited < seen.articles * EDITED_FLOOR) {
+	fail(`${editedLine}: src/lib/page-dates.mjs read no history, from a shallow checkout or a failed git log`);
+} else {
+	ok(editedLine);
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

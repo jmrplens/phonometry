@@ -43,6 +43,7 @@ from typing import TYPE_CHECKING
 
 from ast_scan import (
     ROOT,
+    binding_of,
     exempted,
     forget_trees,
     own_names,
@@ -190,9 +191,9 @@ def _bound(tree: ast.AST) -> set[str]:
 
     A type parameter of a generic function or class counts among them. An
     annotation without a value (``format: Callable[..., str]``) stores
-    nothing: at the top of the module or in a class body it leaves the
-    builtin where it was, but in a function it makes the name local, which
-    a read there finds unbound and never takes for the builtin.
+    nothing, so it is none of them: at the top of the module or in a class
+    body it leaves the builtin where it was, and in a function it makes the
+    name local there alone (:meth:`_Resolver.unbound_local`).
     """
     names: set[str] = set()
     bare = {
@@ -209,8 +210,6 @@ def _bound(tree: ast.AST) -> set[str]:
             names.add(node.id)
         elif isinstance(node, _NAMED_BINDINGS):
             names.add(node.name)
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-                names |= own_names(node).annotated
         elif isinstance(node, ast.arg):
             names.add(node.arg)
         elif isinstance(node, ast.ExceptHandler) and node.name:
@@ -222,8 +221,20 @@ class _Resolver:
     """Resolves what a callee names, through the imports of one file."""
 
     def __init__(self, tree: ast.AST) -> None:
+        self._tree = tree
         self._aliases = _aliases(tree)
         self._bound = _bound(tree) - set(self._aliases)
+
+    def unbound_local(self, read: ast.Name) -> bool:
+        """Whether a function *read* looks its name up in annotates it without
+        a value, which makes the name local there and stores nothing: the read
+        raises ``UnboundLocalError``, and no builtin answers it.
+        """
+        _how, scope = binding_of(self._tree, read, read.id)
+        return (
+            isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef)
+            and read.id in own_names(scope).annotated
+        )
 
     def name(self, expression: ast.expr) -> str | None:
         """The dotted name a callee resolves to, or ``None`` when it is computed."""
@@ -238,7 +249,9 @@ class _Resolver:
             is_builtin = hasattr(builtins, expression.id)
             base = (
                 f"builtins.{expression.id}"
-                if is_builtin and expression.id not in self._bound
+                if is_builtin
+                and expression.id not in self._bound
+                and not self.unbound_local(expression)
                 else expression.id
             )
         return ".".join([base, *reversed(attributes)])
@@ -324,7 +337,6 @@ def findings(path: pathlib.Path) -> list[Finding]:
     """
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     resolver = _Resolver(tree)
-    forget_trees()
     found: list[Finding] = []
     for test, node in scoped(tree):
         block = _block(node, resolver)
@@ -343,6 +355,7 @@ def findings(path: pathlib.Path) -> list[Finding]:
                     statements=statements,
                 )
             )
+    forget_trees()
     return found
 
 

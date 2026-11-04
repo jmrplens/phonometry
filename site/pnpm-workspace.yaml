@@ -23,6 +23,14 @@ minimumReleaseAge: 0
 overrides:
   js-yaml@^4: ^4.3.1
   nanoid@^3: ^3.3.17
+  # @sentry/bundler-plugins 11 asks for glob ^13.0.6 (through @sentry/node, from
+  # lighthouse, a dev dependency), and nothing on that path floats past
+  # GHSA-3g3m-2fjr-6pw4 on glob or GHSA-g3hv-75wg-m249 on the minimatch 10.2.6 it
+  # brings, which glob 13 reaches at the optimisation level that advisory needs:
+  # the first fixed glob, 14.0.2, is outside the parent's range. The plugin's one
+  # call, `glob(patterns, { absolute, nodir })`, reads the same on glob 14. This
+  # goes once @sentry/bundler-plugins asks for glob 14.
+  glob@^13: ^14.0.2
   # Two copies of KaTeX decide how a formula looks: rehype-katex writes the
   # markup with the katex it depends on, and the site loads the stylesheet
   # from its own. rehype-katex 7, the current release, still asks for

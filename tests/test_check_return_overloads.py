@@ -969,6 +969,74 @@ def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
     assert refused == {}
 
 
+_POLAR = 'plt.subplots(subplot_kw={"projection": "polar"})[1]'
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            f"""
+        def plot_it(result: object) -> Axes:
+            if not TYPE_CHECKING:
+                return plt.subplots()[1]
+            else:
+                return {_POLAR}
+        """,
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            f"""
+        def plot_it(result: object) -> Axes:
+            return {_POLAR} if TYPE_CHECKING else plt.subplots()[1]
+        """,
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            f"""
+        if TYPE_CHECKING:
+            def plot_it(result: object) -> Axes:
+                return {_POLAR}
+        """,
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            f"""
+        class Plotter:
+            if TYPE_CHECKING:
+                def plot_it(self) -> Axes:
+                    return {_POLAR}
+        """,
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_what_a_test_on_type_checking_keeps_from_running_returns_nothing(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """Polar axes no run returns hide nothing, wherever the block is written."""
+    planted = "import matplotlib.pyplot as plt\n" + textwrap.dedent(source)
+    assert _refused(tmp_path, plots=planted) == {}
+
+
+def test_the_body_of_a_negated_test_returns_what_it_returns(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``if not TYPE_CHECKING:`` is what the program runs."""
+    refused = _refused(
+        tmp_path,
+        plots=f"""
+        import matplotlib.pyplot as plt
+
+        def plot_it(result: object) -> Axes:
+            if not TYPE_CHECKING:
+                return {_POLAR}
+            return plt.subplots()[1]
+        """,
+    )
+    assert set(refused) == {"plot_it"}
+
+
 def test_what_a_function_s_if_type_checking_block_returns_is_not_returned(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -731,6 +731,68 @@ def test_an_annotation_reads_the_type_checker_s_block_and_a_value_the_else(
     assert set(ccl.strings_of(ast.Name(id="KINDS"), constants)) == {"a", "b"}
 
 
+def test_a_comparison_a_test_on_type_checking_keeps_from_running_says_nothing(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A comparison no run reaches is no evidence of a closed choice: what only a
+    type checker reads of a function was read as what the function does.
+    """
+    source = """
+        from __future__ import annotations
+
+        from typing import TYPE_CHECKING
+
+        def in_the_block(levels, mode: str = 'fast'):
+            if TYPE_CHECKING:
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+            return levels
+
+        def in_the_negated_else(levels, mode: str = 'fast'):
+            if not TYPE_CHECKING:
+                return levels
+            else:
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+
+        def in_a_branch(levels, mode: str = 'fast'):
+            return (mode == 'fast' or mode == 'slow') if TYPE_CHECKING else levels
+
+        def runs_in_the_negated(levels, mode: str = 'fast'):
+            if not TYPE_CHECKING:
+                if mode == 'fast':
+                    return levels
+                if mode == 'slow':
+                    return -levels
+            return levels
+        """
+    _plant_modules(tmp_path, monkeypatch, {"_kept_from_running": source})
+    planted = sys.modules["phonometry._kept_from_running"]
+    names = (
+        "in_the_block",
+        "in_the_negated_else",
+        "in_a_branch",
+        "runs_in_the_negated",
+    )
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter(
+            [("phonometry._kept_from_running", n, getattr(planted, n)) for n in names]
+        ),
+    )
+    assert {choice.qualname: choice.evidence for choice in ccl.string_choices()} == {
+        "in_the_block": (),
+        "in_the_negated_else": (),
+        "in_a_branch": (),
+        "runs_in_the_negated": ("== 'fast'", "== 'slow'"),
+    }
+
+
 def test_a_table_imported_from_a_sibling_module_is_followed() -> None:
     """``from .fdtd import _SIDES`` gives the elastic engine the acoustic one's
     sides, read where they are written, and a set difference with them closes

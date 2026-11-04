@@ -1018,6 +1018,81 @@ def test_a_comparison_in_a_function_s_if_type_checking_block_is_not_judged(
     assert _texts(source, tmp_path) == ["max(levels) - min(levels) > _LIMIT_DB"]
 
 
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def never(levels):
+                if not TYPE_CHECKING:
+                    return 0
+                else:
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            def never(levels):
+                return (max(levels) - min(levels) > _LIMIT_DB) if TYPE_CHECKING else 0
+            """,
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+            if TYPE_CHECKING:
+                def never(levels):
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            """
+            class Record:
+                if TYPE_CHECKING:
+                    def never(self, levels):
+                        return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_a_comparison_a_test_on_type_checking_keeps_from_running_is_not_judged(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A comparison no run reaches decides nothing, wherever the block is written."""
+    planted = "_LIMIT_DB = 3.0\n" + textwrap.dedent(source)
+    assert _texts(planted, tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            def runs(levels):
+                if not TYPE_CHECKING:
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="the-body-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+            if not TYPE_CHECKING:
+                def runs(levels):
+                    return max(levels) - min(levels) > _LIMIT_DB
+            """,
+            id="a-function-in-the-body-of-a-negated-test",
+        ),
+    ],
+)
+def test_the_branch_of_a_test_on_type_checking_that_runs_is_judged(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    planted = "_LIMIT_DB = 3.0\n" + textwrap.dedent(source)
+    assert _texts(planted, tmp_path) == ["max(levels) - min(levels) > _LIMIT_DB"]
+
+
 def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
     tmp_path: pathlib.Path,
 ) -> None:

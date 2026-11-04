@@ -119,6 +119,7 @@ from ast_scan import (
     COMPOUND_STATEMENTS,
     binding_of,
     block_statements,
+    empty_type_checking_bodies,
     imported_names,
     live_bindings,
     own_names,
@@ -2313,8 +2314,13 @@ def _inherited_methods(cls: type) -> Iterator[tuple[type, str, object]]:
 
 
 def _parsed(obj: object) -> ast.AST | None:
+    """The source of *obj*, without what a function of it never runs
+    (:func:`ast_scan.empty_type_checking_bodies`): what it compares or hands on
+    there says nothing of what its caller may pass.
+    """
     try:
-        return ast.parse(textwrap.dedent(inspect.getsource(obj)))  # type: ignore[arg-type]
+        source = textwrap.dedent(inspect.getsource(obj))  # type: ignore[arg-type]
+        return empty_type_checking_bodies(ast.parse(source))
     except (OSError, TypeError, SyntaxError):
         return None
 
@@ -2534,7 +2540,7 @@ def _module_functions(
     if module is None:
         return ()
     try:
-        tree = ast.parse(inspect.getsource(module))
+        tree = empty_type_checking_bodies(ast.parse(inspect.getsource(module)))
     except (OSError, TypeError, SyntaxError):
         return ()
     found: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]] = []
@@ -3634,7 +3640,7 @@ def _construction_sites() -> MappingProxyType[
         if parts[-1] == "__init__":
             parts = parts[:-1]
         module_name = ".".join(parts)
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+        tree = empty_type_checking_bodies(ast.parse(path.read_text(encoding="utf-8")))
 
         def visit(
             node: ast.AST, function: ast.AST | None, module_name: str = module_name

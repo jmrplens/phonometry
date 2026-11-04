@@ -1666,11 +1666,14 @@ class Module:
         """The comparisons of the class in this file, one per comparison written.
 
         A chained comparison (``low <= x < high``) is one comparison: it is
-        refused once, for the first of its pairs that is.
+        refused once, for the first of its pairs that is. What a test on
+        ``TYPE_CHECKING`` keeps from running decides nothing, in a function
+        written in such a block at the top of the module or in a class too.
         """
         refused: set[ast.expr] = set()
+        never_runs = for_the_type_checker(self.tree)
         for node, left, right in self.comparisons():
-            if node in refused:
+            if node in refused or id(node) in never_runs:
                 continue
             reason = self.judge(left, right, Context(self.enclosing(node)))
             if reason is None:

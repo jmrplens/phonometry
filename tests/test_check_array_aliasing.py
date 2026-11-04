@@ -615,6 +615,83 @@ def test_what_an_if_type_checking_block_binds_is_no_function_a_call_reaches(
     assert found == set()
 
 
+_RATING_HEAD = """
+from typing import TYPE_CHECKING
+
+import numpy as np
+
+from .results import BandResult
+"""
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+def rating(frequencies, levels):
+    f = np.array(frequencies)
+    if not TYPE_CHECKING:
+        pass
+    else:
+        f = frequencies
+    return BandResult(frequencies=f, levels=f * 0.0)
+""",
+            id="the-else-of-a-negated-test",
+        ),
+        pytest.param(
+            """
+def rating(frequencies, levels):
+    f = np.array(frequencies)
+    held = frequencies if TYPE_CHECKING else f
+    return BandResult(frequencies=held, levels=f * 0.0)
+""",
+            id="a-branch-of-an-expression",
+        ),
+        pytest.param(
+            """
+if TYPE_CHECKING:
+    def rating(frequencies, levels):
+        return BandResult(frequencies=frequencies, levels=levels)
+""",
+            id="a-function-in-the-block-at-the-top",
+        ),
+        pytest.param(
+            """
+class Rater:
+    if TYPE_CHECKING:
+        def rating(self, frequencies, levels):
+            return BandResult(frequencies=frequencies, levels=levels)
+""",
+            id="a-method-in-the-block",
+        ),
+    ],
+)
+def test_what_a_test_on_type_checking_keeps_from_running_keeps_no_array(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A record no run builds keeps nothing, wherever the block is written."""
+    assert _findings(tmp_path, rating=_RATING_HEAD + source) == set()
+
+
+def test_the_body_of_a_negated_test_keeps_what_it_keeps(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``if not TYPE_CHECKING:`` is what the program runs."""
+    found = _findings(
+        tmp_path,
+        rating=_RATING_HEAD
+        + """
+def rating(frequencies, levels):
+    f = np.array(frequencies)
+    if not TYPE_CHECKING:
+        f = frequencies
+    return BandResult(frequencies=f, levels=f * 0.0)
+""",
+    )
+    assert {function for function, _sink, _parameters in found} == {"rating"}
+
+
 def test_what_a_function_s_if_type_checking_block_binds_is_not_kept(
     tmp_path: pathlib.Path,
 ) -> None:

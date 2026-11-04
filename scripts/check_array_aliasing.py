@@ -162,6 +162,7 @@ from ast_scan import (
     block_statements,
     empty_type_checking_bodies,
     exempted,
+    for_the_type_checker,
     global_bindings,
     imported_names,
     live_bindings,
@@ -3445,7 +3446,9 @@ def findings_in(
     tree.typed_cache.clear()
     found: list[Finding] = []
     for function in tree.every_definition():
-        if not function.nested:
+        # A function written where it never runs keeps nothing.
+        never_runs = for_the_type_checker(tree.modules[function.module])
+        if not function.nested and id(function.node) not in never_runs:
             Reader(tree, function, summaries, found).run()
     return sorted(set(found), key=lambda f: (f.path, f.line, f.sink))
 

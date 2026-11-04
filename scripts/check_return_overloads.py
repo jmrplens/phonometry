@@ -92,6 +92,7 @@ from ast_scan import (
     block_statements,
     empty_type_checking_bodies,
     exempted,
+    for_the_type_checker,
     global_bindings,
     imported_names,
     live_bindings,
@@ -1820,7 +1821,10 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                     f"returns {returns}, and no overload says which argument decides",
                 )
             )
-        if name not in polar:
+        # What a function written where it never runs returns reaches nothing;
+        # its annotation is still what a type checker reads, as a head's is.
+        never_runs = for_the_type_checker(package.trees[module])
+        if name not in polar or id(implementation) in never_runs:
             continue
         if function.heads:
             if not any(

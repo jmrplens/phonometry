@@ -592,6 +592,82 @@ def test_a_value_that_quotes_with_an_escaped_quote_quotes() -> None:
     assert ced.markdown_hits('---\ndescription: "He said \\"A\\" — B"\n---\n') == [2]
 
 
+_SCRIPT = "---\nhead:\n  - tag: script\n    content: "
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            _SCRIPT + '|\n      {"a": ["A — B"]}\n---\n', [5], id="an array in a block"
+        ),
+        pytest.param(
+            _SCRIPT + '\'{"a": ["A — B"]}\'\n---\n', [4], id="an array, single-quoted"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"name": "A — B"}\n---\n', [5], id="a value in a block"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      ["A", "B — C"]\n---\n', [5], id="after a comma"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"a": "x «A — B» y"}\n---\n',
+            [],
+            id="a title in guillemets",
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"a": "x \\"A — B\\" y"}\n---\n',
+            [],
+            id="a title in escaped quotes",
+        ),
+        pytest.param(
+            _SCRIPT + '\'{"a": "x\n      «A — B» y"}\'\n---\n',
+            [],
+            id="a title on a wrapped line",
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      He read "A — B" there\n---\n',
+            [],
+            id="a block that holds no JSON",
+        ),
+        pytest.param(
+            _SCRIPT + 'He read "A — B" there\n---\n', [], id="a value that holds none"
+        ),
+    ],
+)
+def test_the_quotes_of_a_json_string_are_no_quotation(
+    text: str, hits: list[int]
+) -> None:
+    """The JSON-LD a page's head carries is published, whatever opens a string.
+
+    A string after a bracket or a comma read as a quotation, so ``["A — B"]`` hid
+    a dash the JSON-LD publishes, where ``{"name": "A — B"}`` was refused.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            _SCRIPT + '\'{"a": "A \\u2014 B"}\'\n---\n', [4], id="single-quoted"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"a": "A \\u2014 B"}\n---\n', [5], id="a block"
+        ),
+        pytest.param(
+            _SCRIPT + "|\n      A \\u2014 B\n---\n", [], id="a block of no JSON"
+        ),
+        pytest.param(_SCRIPT + "'A \\u2014 B'\n---\n", [], id="a value of no JSON"),
+    ],
+)
+def test_an_escape_is_read_in_the_json_of_a_value_and_nowhere_else(
+    text: str, hits: list[int]
+) -> None:
+    """A single-quoted value hid one; a block of plain text took one for JSON's."""
+    assert ced.markdown_hits(text) == hits
+
+
 def test_an_indented_fence_opens_no_frontmatter() -> None:
     """The site reads one only at the first column, and the rest is the page's."""
     assert ced.markdown_hits("    ---\ntitle: a — b\n---\n") == [2]

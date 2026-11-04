@@ -63,10 +63,11 @@ module (whose value is what is read, so a raw string keeps its backslash),
 ``\u2014`` in a JSON string, ``\u2014`` and ``\u{2014}`` in a data module,
 and ``\u2014`` and ``\U00002014`` in a double-quoted value of a page's
 frontmatter, the one YAML value that decodes an escape, and in the JSON
-strings of the JSON-LD its head carries. A single-quoted or plain value, a
-block of text and a comment of the frontmatter show the escape as written,
-and so does the body of a page. A backslash escapes the character after it
-in each of these languages, so ``\\u2014`` is never the dash.
+strings of the JSON-LD its head carries, in a block of text or a single-quoted
+value under a ``content`` key that opens as JSON does. Any other single-quoted
+or plain value, block of text and comment of the frontmatter show the escape as
+written, and so does the body of a page. A backslash escapes the character
+after it in each of these languages, so ``\\u2014`` is never the dash.
 
 The dash also has an ASCII spelling, the double hyphen, and the guard refuses
 that too. Astro's smartypants turns ``--`` in the text of a page into an em
@@ -277,14 +278,32 @@ def _decode_json_strings(line: str) -> str:
     )
 
 
+def _blank_json_quotes(line: str) -> str:
+    """The line with the quotes that delimit its JSON strings blanked, its columns kept.
+
+    They are JSON's, so they quote nothing: whatever opens a string, a dash in it
+    is read. A quote escaped in a string is one the string shows, so it does quote.
+    """
+    return _JSON_STRING.sub(
+        lambda found: (
+            " " + _ESCAPED_YAML_CHARACTER.sub(_shown_quote, found.group()[1:-1]) + " "
+        ),
+        line,
+    )
+
+
 #: The rest of a double-quoted YAML value, up to its closing quote, and of a
 #: single-quoted one, whose only escape is a doubled quote.
 _YAML_QUOTED_REST = {
     '"': re.compile(r'(?:[^"\\]|\\.)*"'),
     "'": re.compile(r"(?:[^']|'')*'"),
 }
-#: A backslash of a double-quoted YAML value and the character it escapes.
+#: A backslash of a double-quoted YAML value or a JSON string, and the character
+#: it escapes.
 _ESCAPED_YAML_CHARACTER = re.compile(r"\\(.)")
+#: What JSON-LD opens with, which tells it from the plain text a ``content`` key
+#: of the head may hold as well.
+_JSON_OPENS = ("{", "[")
 
 
 def _shown_quote(escape: re.Match[str]) -> str:
@@ -324,17 +343,19 @@ class _Frontmatter:
     instead: they leave the escapes as written and blank a comment, which
     the page does not show (see :attr:`decode_escapes` and
     :attr:`blank_comments`). The reading of the em dash reads it once more
-    for the quotes that delimit a value, which are YAML's and quote nothing
-    (see :attr:`blank_quotes`).
+    for the quotes that delimit a value, which are YAML's and quote nothing,
+    and those that delimit a JSON string of the JSON-LD (see :attr:`blank_quotes`).
     """
 
     #: The quote of a value still open at the end of the last line.
     quote: str = ""
     #: The column a line of an open block of text is indented past.
     block: int | None = None
-    #: Whether that block is the JSON-LD of a ``content`` key, read with its
-    #: escapes decoded.
-    json_block: bool = False
+    #: Whether that block is the JSON-LD of a ``content`` key, which its first
+    #: line says: ``None`` until it is read.
+    json_block: bool | None = False
+    #: Whether the single-quoted value open is the JSON-LD of a ``content`` key.
+    json_value: bool = False
     #: The column a line that wraps an open plain value is indented past.
     plain: int | None = None
     #: How deep the line is inside a flow collection (``[...]``, ``{...}``).
@@ -344,7 +365,8 @@ class _Frontmatter:
     decode_escapes: bool = True
     #: Whether a comment is blanked, its columns kept, or returned as written.
     blank_comments: bool = False
-    #: Whether the quotes that delimit a value are blanked, its columns kept.
+    #: Whether the quotes that delimit a value or a JSON string of its JSON-LD are
+    #: blanked, its columns kept.
     blank_quotes: bool = False
     #: The column of a key with nothing after it on its line: the value that
     #: opens on the next line, deeper, wraps past that column.
@@ -369,7 +391,7 @@ class _Frontmatter:
         indent = len(line) - len(line.lstrip(" "))
         if self.block is not None:
             if not line.strip() or indent > self.block:
-                return _decode_json_strings(line) if self.json_block else line
+                return self._block_line(line)
             self.block = None
         if self.plain is not None:
             if not line.strip() or indent > self.plain:
@@ -383,6 +405,18 @@ class _Frontmatter:
             self._nodes(line, at, indent, pieces)
         return "".join(pieces)
 
+    def _block_line(self, line: str) -> str:
+        """A line of the open block of text, read as JSON if the block holds JSON."""
+        if self.json_block is None and line.strip():
+            self.json_block = line.lstrip().startswith(_JSON_OPENS)
+        return self._as_json(line) if self.json_block else line
+
+    def _as_json(self, text: str) -> str:
+        """JSON-LD as this reading wants it: its escapes decoded, or its quotes blanked."""
+        if self.decode_escapes:
+            return _decode_json_strings(text)
+        return _blank_json_quotes(text) if self.blank_quotes else text
+
     def _quoted(self, line: str, start: int, quote: str, pieces: list[str]) -> int:
         """Read a quoted value from ``start``, past its opening quote; return where it ends."""
         found = _YAML_QUOTED_REST[quote].match(line, start)
@@ -393,6 +427,8 @@ class _Frontmatter:
             value = value[:-1] + " "
         if quote == '"' and self.blank_quotes:
             value = _ESCAPED_YAML_CHARACTER.sub(_shown_quote, value)
+        if quote == "'" and self.json_value:
+            value = self._as_json(value)
         pieces.append(
             _decode_escapes(value, _YAML_EM_DASH_ESCAPE)
             if quote == '"' and self.decode_escapes
@@ -438,6 +474,11 @@ class _Frontmatter:
         """Read what may open a node: a quote, a sequence entry or a block of text."""
         char = line[at]
         if char in "\"'":
+            self.json_value = (
+                char == "'"
+                and node.key == "content"
+                and line[at + 1 :].lstrip().startswith(_JSON_OPENS)
+            )
             pieces.append(" " if self.blank_quotes else char)
             end = self._quoted(line, at + 1, char, pieces)
             node.open, node.done = False, bool(self.quote)
@@ -448,7 +489,7 @@ class _Frontmatter:
             return at + 1
         if char in "|>" and not self.flow:
             self.block = node.owner
-            self.json_block = node.key == "content" and self.decode_escapes
+            self.json_block = None if node.key == "content" else False
             pieces.append(line[at:])
             node.done = True
             return len(line)

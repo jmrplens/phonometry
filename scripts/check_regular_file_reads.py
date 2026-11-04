@@ -849,19 +849,21 @@ def _read_nearer(name: str, call: ast.Call, scope: _Scope) -> str | None:
     """What *name*, the first name of *call*, stands for when a nearer binding
     decides it; ``None`` when *scope*'s table of names does.
 
-    A comprehension's variable is its own (:data:`_BOUND_NEARER`). A lambda's
-    parameter reads as a function's: what its default names, or the module of
-    its spelling, handed in; ``open`` spells no module, so with neither it is
-    unknown too. And ``open``, wherever a scope binds it to what no table
-    holds: a table holds an alias, a default and an import in either branch of
-    a ``try``, which say what it is.
+    A comprehension's variable is its own (:data:`_BOUND_NEARER`), and so is what
+    a lambda stores with ``:=``. A lambda's parameter reads as a function's: what
+    its default names, or the module of its spelling, handed in; ``open`` spells
+    no module, so with neither it is unknown too. And ``open``, wherever a scope
+    binds it to what no table holds: a table holds an alias, a default and an
+    import in either branch of a ``try``, which say what it is.
     """
     binder = _own_to_an_expression(name, call, scope)
     if isinstance(binder, ast.Lambda):
         defaults = {
             parameter.arg: default for parameter, default in with_defaults(binder)
         }
-        held = _named_by(defaults.get(name), scope.aliases)
+        if name not in defaults:
+            return _BOUND_NEARER
+        held = _named_by(defaults[name], scope.aliases)
         if held is not None:
             return held
         spelt = None if name == "open" else _SPELLINGS.get(name)

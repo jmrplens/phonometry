@@ -452,6 +452,10 @@ def test_a_binding_that_holds_a_reader_is_still_read_as_it(
         def read(path):
             return (lambda sf=math: sf.read(path))()
         """,
+        """
+        def read(path):
+            return (lambda: [sf := make_reader(), sf.read(path)])()
+        """,
     ],
 )
 def test_a_default_that_names_no_reader_reads_nothing(

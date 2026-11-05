@@ -56,7 +56,7 @@ import os
 import pathlib
 import sys
 
-from ast_scan import forget_trees, own_names, scope_nodes
+from ast_scan import binding_of, forget_trees, own_names, scope_nodes
 from markdown_fences import python_fences
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -213,17 +213,26 @@ def _unbound_reads(tree: ast.AST) -> set[str]:
     for scope in ast.walk(tree):
         if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
             annotated = own_names(scope).annotated
-            found |= _read_by_the_body(scope) & annotated
+            found |= _read_by_the_body(tree, scope) & annotated
     forget_trees()
     return found
 
 
-def _read_by_the_body(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
-    """Every bare name the body of *function* reads, nested scopes included.
+def _read_by_the_body(
+    tree: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef
+) -> set[str]:
+    """Every bare name the body of *function* reads from *function*'s own
+    scope, nested scopes included.
 
     A function never evaluates an annotation of its own locals, so that reads
     nothing; a class body evaluates its own, so a class written there does.
+    A read in a nested scope counts only when it reaches *function*'s own
+    name (:func:`ast_scan.binding_of`): a nested function or class that
+    binds the name, or that declares it ``global``, or sits inside one that
+    does, reads a name of its own or the module's.
 
+    :param tree: The parsed fence *function* is written in.
+    :type tree: ast.AST
     :param function: A function of a fence.
     :type function: ast.FunctionDef | ast.AsyncFunctionDef
     :return: The names read.
@@ -244,6 +253,7 @@ def _read_by_the_body(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[s
         if isinstance(node, ast.Name)
         and isinstance(node.ctx, ast.Load)
         and id(node) not in never_evaluated
+        and binding_of(tree, node, node.id)[1] is function
     }
 
 

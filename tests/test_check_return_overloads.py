@@ -1244,10 +1244,10 @@ def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
 def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
     tmp_path: pathlib.Path,
 ) -> None:
-    """A lambda, a call's result, a loop's target or a ``class`` bound to the
-    name at the top of the module after an alias or a ``def`` of it leaves the
-    name holding what the guard cannot read, there and read from another
-    module, so a call of it reaches no helper.
+    """A lambda, a call's result or a ``class`` bound to the name at the top
+    of the module after an alias or a ``def`` of it leaves the name holding
+    what the guard cannot read, there and read from another module, so a
+    call of it reaches no helper.
 
     Only a ``def``, a ``class``, an import and an alias were read as bindings
     of the top, so the alias of the polar helper stood past the lambda, and
@@ -1264,10 +1264,6 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
         _lambda = _polar
         _lambda = lambda: plt.subplots()[1]
 
-        _looped = _polar
-        for _looped in [plt.gca]:
-            pass
-
         _made = _polar
         _made = make_plain()
 
@@ -1280,9 +1276,6 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
 
         def plot_lambda(result: object) -> Axes:
             return _lambda()
-
-        def plot_looped(result: object) -> Axes:
-            return _looped()
 
         def plot_made(result: object) -> Axes:
             return _made()
@@ -1305,6 +1298,63 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
         """,
     )
     assert sorted(refused) == ["plot_standing"]
+
+
+def test_a_loop_s_target_leaves_a_helper_at_the_top_standing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias or the ``def`` of the
+    polar helper before it, as after the branches of an ``if``, there and
+    read from another module.
+
+    The target was read as bound on every way past the loop, so it ended the
+    helper, and the plain ``plot`` that returns the polar axes passed.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        _no_turn = _polar
+        for _no_turn in ():
+            pass
+
+        _a_turn = _polar
+        for _a_turn in [plt.gca]:
+            pass
+
+        def _defined():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        for _defined in ():
+            pass
+
+        def plot_no_turn(result: object) -> Axes:
+            return _no_turn()
+
+        def plot_a_turn(result: object) -> Axes:
+            return _a_turn()
+
+        def plot_defined(result: object) -> Axes:
+            return _defined()
+        """,
+        importer="""
+        from .helpers import _no_turn
+
+        def plot_imported(result: object) -> Axes:
+            return _no_turn()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_a_turn",
+        "plot_defined",
+        "plot_imported",
+        "plot_no_turn",
+    ]
 
 
 def test_a_generic_class_s_type_parameter_is_no_function_of_the_module(

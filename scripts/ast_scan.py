@@ -1354,6 +1354,11 @@ def live_bindings[NodeT: ast.AST](
     A binding an ``if TYPE_CHECKING:`` block holds never runs, so it stands
     beside no binding that does; a name nothing else binds keeps it, for what
     reads annotations through it (:func:`for_the_type_checker`).
+
+    A loop's target is bound only on a turn the loop runs, and the loop may
+    run none (:func:`_loop_target`), so it replaces no binding before it:
+    after the loop either may be what the name holds, as after the branches
+    of an ``if``.
     """
     bindings = _running_first(root, bindings)
     if point is not None and bindings:
@@ -1379,6 +1384,7 @@ def _held_at[NodeT: ast.AST](
     """:func:`live_bindings` at a *point* written in the bindings' own scope."""
     frames = {binding: _frames(root, binding) for binding in bindings}
     target = _frames(root, point) if point is not None else None
+    sure = {binding for binding in bindings if not _loop_target(root, binding)}
     forward = [
         binding
         for binding in bindings
@@ -1388,13 +1394,27 @@ def _held_at[NodeT: ast.AST](
         binding
         for binding in forward
         if not any(
-            other is not binding and _replaces(frames[other], frames[binding], target)
+            other is not binding
+            and other in sure
+            and _replaces(frames[other], frames[binding], target)
             for other in forward
         )
     ]
     if target is not None:
-        live.extend(_back_from_a_turn(bindings, frames, target, forward))
+        live.extend(_back_from_a_turn(bindings, frames, target, forward, sure))
     return live or list(bindings)
+
+
+def _loop_target(root: ast.AST, node: ast.AST) -> bool:
+    """Whether *node*, under *root*, is a name a ``for`` statement's target
+    binds, alone or unpacked (``for name in ...``, ``for name, _ in ...``),
+    which it binds only on a turn the loop runs.
+    """
+    parents = _parents(root)
+    child, holder = node, parents.get(node)
+    while isinstance(holder, ast.Tuple | ast.List | ast.Starred):
+        child, holder = holder, parents.get(holder)
+    return isinstance(holder, ast.For | ast.AsyncFor) and holder.target is child
 
 
 def _back_from_a_turn[NodeT: ast.AST](
@@ -1402,13 +1422,15 @@ def _back_from_a_turn[NodeT: ast.AST](
     frames: Mapping[NodeT, tuple[Frame, ...]],
     target: Sequence[Frame],
     forward: Sequence[NodeT],
+    sure: Collection[NodeT],
 ) -> list[NodeT]:
     """Of *bindings* not in *forward*, those an earlier turn of a loop around
     *target* may leave in place there (:func:`_turns_back`).
 
     Not one that another binding of the same loop replaces before the turn
     ends (:func:`_replaces`), nor any when a binding runs before *target* on
-    every turn (:func:`_runs_each_turn`).
+    every turn (:func:`_runs_each_turn`); a binding not in *sure*, a loop's
+    target, does neither, since its loop may run no turn.
     """
     turns = {
         binding: loop
@@ -1419,9 +1441,13 @@ def _back_from_a_turn[NodeT: ast.AST](
     return [
         binding
         for binding, loop in turns.items()
-        if not any(_runs_each_turn(frames[other], target, loop) for other in bindings)
+        if not any(
+            other in sure and _runs_each_turn(frames[other], target, loop)
+            for other in bindings
+        )
         and not any(
             other is not binding
+            and other in sure
             and turns[other] == loop
             and _replaces(frames[other], frames[binding], None)
             for other in turns

@@ -939,8 +939,7 @@ def test_a_later_binding_of_another_kind_ends_an_alias(
 ) -> None:
     """``keep = handing_back`` then ``keep = lambda a: a.copy()`` leaves the
     name holding the lambda, which the guard cannot name, at the top of the
-    module and read from another; a loop's target or a call's result ends the
-    alias as well.
+    module and read from another; a call's result ends the alias as well.
 
     Only a ``def``, a ``class``, an import and an alias were read as bindings
     of the top, so the alias stood past the lambda, a call of the name reached
@@ -960,10 +959,6 @@ def test_a_later_binding_of_another_kind_ends_an_alias(
         lam = handing_back
         lam = lambda a: np.array(a)
 
-        looped = handing_back
-        for looped in [np.copy]:
-            pass
-
         made = handing_back
         made = np.vectorize(np.copy)
 
@@ -971,10 +966,6 @@ def test_a_later_binding_of_another_kind_ends_an_alias(
 
         def through_a_lambda(frequencies, levels):
             f = lam(frequencies)
-            return BandResult(frequencies=f, levels=f * 0.0)
-
-        def through_a_loop(frequencies, levels):
-            f = looped(frequencies)
             return BandResult(frequencies=f, levels=f * 0.0)
 
         def through_a_call(frequencies, levels):
@@ -1008,6 +999,65 @@ def test_a_later_binding_of_another_kind_ends_an_alias(
     )
     assert found == {
         ("through_a_standing_alias", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_loop_s_target_leaves_an_alias_standing(tmp_path: pathlib.Path) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias before it, as after the
+    branches of an ``if``, at the top of the module and read from another.
+
+    The target was read as bound on every way past the loop, so it ended
+    ``keep = handing_back``, and the record that keeps what the function
+    hands back passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        no_turn = handing_back
+        for no_turn in ():
+            pass
+
+        a_turn = handing_back
+        for a_turn in [np.copy]:
+            pass
+
+        def through_no_turn(frequencies, levels):
+            f = no_turn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_turn(frequencies, levels):
+            f = a_turn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        for keep in ():
+            pass
+        """,
+        importer="""
+        from .helpers import keep
+        from .results import BandResult
+
+        def through_an_import(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_no_turn", "BandResult.frequencies", "frequencies"),
+        ("through_a_turn", "BandResult.frequencies", "frequencies"),
+        ("through_an_import", "BandResult.frequencies", "frequencies"),
     }
 
 

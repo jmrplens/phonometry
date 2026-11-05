@@ -577,10 +577,10 @@ def test_an_import_a_function_makes_under_global_may_be_what_a_call_reaches(
 def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
     tmp_path: pathlib.Path,
 ) -> None:
-    """A lambda, a call's result or a loop's target bound to the name after
-    an alias, an import or a ``def`` of it leaves the name holding what the
-    guard cannot read, at the top of a module and in a function, and an
-    alias in the function replaces the import before it.
+    """A lambda or a call's result bound to the name after an alias, an
+    import or a ``def`` of it leaves the name holding what the guard cannot
+    read, at the top of a module and in a function, and an alias in the
+    function replaces the import before it.
 
     Only a ``def``, a ``class``, an import and an alias at the top were read
     as bindings, so the helper the name first stood for stood past the
@@ -599,10 +599,6 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
             by_call = axis
             by_call = make()
 
-            by_loop = axis
-            for by_loop in [print]:
-                pass
-
             from .helpers import axis as imported
             imported = lambda ax: None
 
@@ -615,10 +611,6 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
 
             def plot_call(result, ax, language="en"):
                 by_call(ax)
-
-
-            def plot_loop(result, ax, language="en"):
-                by_loop(ax)
 
 
             def plot_imported(result, ax, language="en"):
@@ -645,6 +637,63 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
     assert sorted((f.caller, f.helper) for f in found) == [
         ("plot_local_alias", "pkg.helpers.fmt"),
         ("plot_standing", "pkg.helpers.axis"),
+    ]
+
+
+def test_a_loop_s_target_leaves_what_the_name_stood_for_standing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias or the import before it,
+    as after the branches of an ``if``, at the top of a module and in a
+    function.
+
+    The target was read as bound on every way past the loop, so it ended
+    what the name stood for, and a call that drops its language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis, fmt as draw
+
+            no_turn = axis
+            for no_turn in ():
+                pass
+
+            a_turn = axis
+            for a_turn in [print]:
+                pass
+
+            for draw in ():
+                pass
+
+
+            def plot_no_turn(result, ax, language="en"):
+                no_turn(ax)
+
+
+            def plot_a_turn(result, ax, language="en"):
+                a_turn(ax)
+
+
+            def plot_imported(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_local(result, ax, language="en"):
+                from .helpers import fmt as local
+                for local in ():
+                    pass
+                local(ax)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_a_turn", "pkg.helpers.axis"),
+        ("plot_imported", "pkg.helpers.fmt"),
+        ("plot_local", "pkg.helpers.fmt"),
+        ("plot_no_turn", "pkg.helpers.axis"),
     ]
 
 

@@ -1239,19 +1239,18 @@ def test_a_keyword_fills_no_positional_only_parameter(
     [
         "fn = _range\nfn = lambda levels: 0.0\n",
         "fn = _range\nfn = make()\n",
-        "fn = _range\nfor fn in [print]:\n    pass\n",
         "def fn(levels):\n    return max(levels) - min(levels)\nfn = lambda levels: 0.0\n",
         "def fn(levels):\n    return max(levels) - min(levels)\nclass fn:\n    pass\n",
     ],
-    ids=["lambda", "call", "loop", "def-then-lambda", "def-then-class"],
+    ids=["lambda", "call", "def-then-lambda", "def-then-class"],
 )
 def test_a_later_binding_of_another_kind_ends_a_function_at_the_top(
     tmp_path: pathlib.Path, rebinding: str
 ) -> None:
-    """A lambda, a call's result, a loop's target or a ``class`` bound to the
-    name at the top of the module after an alias or a ``def`` of it leaves
-    the name holding what the guard cannot read, so a call of it reaches no
-    function of the module.
+    """A lambda, a call's result or a ``class`` bound to the name at the top
+    of the module after an alias or a ``def`` of it leaves the name holding
+    what the guard cannot read, so a call of it reaches no function of the
+    module.
 
     Only a ``def``, an import and an alias were read as bindings of the top,
     so the alias or the ``def`` stood past the lambda, and the comparison of
@@ -1271,6 +1270,34 @@ def test_a_later_binding_of_another_kind_ends_a_function_at_the_top(
         "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
     )
     assert _texts(standing, tmp_path) == ["fn(levels) <= _SPREAD_DB"]
+
+
+@pytest.mark.parametrize(
+    "binding",
+    [
+        "fn = _range\nfor fn in ():\n    pass\n",
+        "fn = _range\nfor fn in [print]:\n    pass\n",
+        "def fn(levels):\n    return max(levels) - min(levels)\nfor fn in ():\n    pass\n",
+    ],
+    ids=["no-turn", "a-turn", "def-then-no-turn"],
+)
+def test_a_loop_s_target_leaves_a_function_at_the_top_standing(
+    tmp_path: pathlib.Path, binding: str
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias or the ``def`` before it,
+    as after the branches of an ``if``.
+
+    The target was read as bound on every way past the loop, so it ended
+    the function, and the spread it returns passed its comparison.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        f"{binding}"
+        "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(source, tmp_path) == ["fn(levels) <= _SPREAD_DB"]
 
 
 def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(

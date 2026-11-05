@@ -346,9 +346,6 @@ def test_a_default_that_names_a_definition_of_the_module_reads_no_file(
         pytest.param("opener = io.open\nopener = lambda path: None\n", [], id="lambda"),
         pytest.param("opener = io.open\nopener = make()\n", [], id="call"),
         pytest.param(
-            "opener = io.open\nfor opener in [print]:\n    pass\n", [], id="loop"
-        ),
-        pytest.param(
             "from io import open as opener\nopener = lambda path: None\n",
             [],
             id="import-then-lambda",
@@ -363,9 +360,9 @@ def test_a_default_that_names_a_definition_of_the_module_reads_no_file(
 def test_a_later_binding_of_another_kind_ends_an_alias(
     tmp_path: pathlib.Path, binding: str, found: list[tuple[str, str]]
 ) -> None:
-    """A lambda, a call's result or a loop's target bound to a name after an
-    import or an alias of it leaves the name standing for nothing the guard
-    can name, and an import after an alias stands over it.
+    """A lambda or a call's result bound to a name after an import or an
+    alias of it leaves the name standing for nothing the guard can name, and
+    an import after an alias stands over it.
 
     A scope's table of names took its imports and then its assignments of a
     dotted name, whatever their order, and nothing else, so ``io.open`` stood
@@ -377,6 +374,35 @@ def test_a_later_binding_of_another_kind_ends_an_alias(
         "def read(path):\n    with opener(path) as fh:\n        return fh.read()\n"
     )
     assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    "loop",
+    [
+        pytest.param("for opener in ():\n    pass\n", id="no-turn"),
+        pytest.param("for opener in items:\n    break\n", id="left-at-once"),
+        pytest.param("for opener in [print]:\n    pass\n", id="a-turn"),
+    ],
+)
+@pytest.mark.parametrize("where", ["at-the-top", "in-the-function"])
+def test_a_loop_s_target_leaves_what_the_name_held_standing(
+    tmp_path: pathlib.Path, loop: str, where: str
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias before it, as after the
+    branches of an ``if``.
+
+    The target was read as bound on every way past the loop, so it ended
+    ``opener = io.open`` and the read through it passed.
+    """
+    alias = "opener = io.open\n" + loop
+    call = "    with opener(path) as fh:\n        return fh.read()\n"
+    if where == "at-the-top":
+        source = f"import io\n{alias}\ndef read(path):\n{call}"
+    else:
+        inner = textwrap.indent(alias, "    ")
+        source = f"import io\n\ndef read(path, items):\n{inner}{call}"
+    assert _found(tmp_path, source) == [("read", _OWN)]
 
 
 @pytest.mark.parametrize(

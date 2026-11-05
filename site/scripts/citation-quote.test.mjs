@@ -43,11 +43,21 @@ for (const kind of ['md', 'mdx']) {
     );
   });
 
-  test(`a block of code inside the quotation is no part of the reference (${kind})`, () => {
+  test(`a line the page does not show inside the quotation is no part of the reference (${kind})`, () => {
     // The lines of a fence in the quotation were read as the reference's, so
-    // an example could carry what the reference itself lacks.
+    // an example could carry what the reference itself lacks; so could a
+    // comment, which only code was left out for.
     const page = `APA:\n\n> Requena (2026).\n> \`\`\`\n> ${REFERENCE}\n> \`\`\`\n\nNext.\n`;
     assert.equal(quotedUnder(page, 'APA:', { kind }), 'Requena (2026).');
+    const doi = 'https://doi.org/10.5281/zenodo.1';
+    const comments =
+      kind === 'md'
+        ? [`> <!-- ${doi} -->`, `> <!--\n> ${doi}\n> -->`, `> <div hidden>${doi}</div>`]
+        : [`> {/* ${doi} */}`, `> {/*\n> ${doi}\n> */}`];
+    for (const comment of comments) {
+      const commented = `APA:\n\n> ${REFERENCE}\n${comment}\n\nNext.\n`;
+      assert.equal(quotedUnder(commented, 'APA:', { kind }), REFERENCE, comment);
+    }
   });
 
   test(`a label no quotation follows quotes nothing (${kind})`, () => {
@@ -74,6 +84,14 @@ test('a link the page does not show is no link of the page', () => {
   assert.equal(showsInProse(`Text.\n\n<!--\n${link}\n-->\n`, link, { kind: 'md' }), false);
   assert.equal(showsInProse(`Text.\n\n{/*\n${link}\n*/}\n`, link, { kind: 'mdx' }), false);
   assert.equal(showsInProse(`Text.\n\n\`\`\`\n${link}\n\`\`\`\n`, link, { kind: 'mdx' }), false);
+  assert.equal(showsInProse(`Text.\n\n{/*\n## ${link}\n*/}\n`, link, { kind: 'mdx' }), false);
+  // A row of a table and a heading show the link as the page's words, as a
+  // paragraph does; only a line of a paragraph was taken for one.
+  for (const kind of ['md', 'mdx']) {
+    const row = `| Record | Link |\n|---|---|\n| Zenodo | ${link} |\n`;
+    assert.equal(showsInProse(row, link, { kind }), true, kind);
+    assert.equal(showsInProse(`## ${link}\n`, link, { kind }), true, kind);
+  }
 });
 
 test('a label in a block of code quotes nothing', () => {

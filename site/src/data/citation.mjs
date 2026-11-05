@@ -31,13 +31,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-import {
-  codeLines,
-  fences,
-  pageLines,
-  quotationMarks,
-  splitLines,
-} from '../lib/markdown-fences.mjs';
+import { fences, pageLines, quotationMarks, splitLines } from '../lib/markdown-fences.mjs';
 
 /**
  * Paths are resolved by walking up from the working directory rather than from
@@ -360,18 +354,24 @@ const apaNames = cff.authors.map((author) => {
   return `${author['family-names']}, ${initials}`;
 });
 
-/** The roles of a line the page shows as prose, a label among them. */
-const PROSE_ROLES = new Set(['paragraph', 'text']);
+/**
+ * The roles of a line the page shows as its own words: one of a paragraph, a
+ * row of a table or a heading. Not one of code, of a raw HTML block, of a tag or
+ * an expression alone on an `.mdx` page (a comment among them), nor a thematic
+ * break or the fence of an aside.
+ */
+const SHOWN_ROLES = new Set(['paragraph', 'text', 'row', 'heading']);
 
 /**
  * The quotation that follows the line `label` of a page, its lines past their
  * marks and joined, or `null` when none does. A line spelt as the label counts
- * only where the page shows it as prose, never in code, a raw HTML block or a
- * comment, and each one is tried in turn until one has a quotation under it.
+ * only where the page shows it as its own words, never in code, a raw HTML block
+ * or a comment, and each one is tried in turn until one has a quotation under it.
  * Blank lines may stand between the label and the quotation, which carries on
  * through a lazy line the walk of the page reads as its paragraph's and ends
- * where neither a mark nor such a line goes on; a block of code inside it is
- * no part of it. The marks are read by their columns, as the walk of the page
+ * where neither a mark nor such a line goes on; a line of it the page does not
+ * show as its words, of a block of code, a comment or a raw HTML block, is no
+ * part of it. The marks are read by their columns, as the walk of the page
  * reads them (`quotationMarks`): a mark behind up to three spaces, or a second
  * one behind a tab, is a mark here as it is on the published page.
  *
@@ -383,19 +383,18 @@ const PROSE_ROLES = new Set(['paragraph', 'text']);
 export function quotedUnder(source, label, { kind = 'mdx' } = {}) {
   const lines = splitLines(source);
   const read = pageLines(lines, { kind });
-  const code = codeLines(lines, { kind });
   for (let at = 0; at < lines.length; at += 1) {
-    if (!PROSE_ROLES.has(read[at].role) || lines[at].trim() !== label) continue;
-    const quoted = quotationFrom(lines, read, code, at + 1, kind);
+    if (!SHOWN_ROLES.has(read[at].role) || lines[at].trim() !== label) continue;
+    const quoted = quotationFrom(lines, read, at + 1, kind);
     if (quoted !== null) return quoted;
   }
   return null;
 }
 
 /**
- * Whether a line the page shows as prose carries `text`: not one of a comment,
- * a raw HTML block or a block of code, which the published page does not show
- * as its own words.
+ * Whether a line the page shows as its own words carries `text`, one of a
+ * paragraph, a row of a table or a heading: not one of a comment, a raw HTML
+ * block or a block of code, which the published page does not show so.
  *
  * @param {string} source The page.
  * @param {string} text What a line should carry.
@@ -405,7 +404,7 @@ export function quotedUnder(source, label, { kind = 'mdx' } = {}) {
 export function showsInProse(source, text, { kind = 'mdx' } = {}) {
   const lines = splitLines(source);
   const read = pageLines(lines, { kind });
-  return lines.some((line, index) => PROSE_ROLES.has(read[index].role) && line.includes(text));
+  return lines.some((line, index) => SHOWN_ROLES.has(read[index].role) && line.includes(text));
 }
 
 /**
@@ -414,12 +413,11 @@ export function showsInProse(source, text, { kind = 'mdx' } = {}) {
  *
  * @param {string[]} lines The page's lines.
  * @param {{ role: string }[]} read The walk of the page, one entry per line.
- * @param {boolean[]} code Whether each line is code.
  * @param {number} start The line after the label.
  * @param {'md' | 'mdx'} kind The page's kind.
  * @returns {string | null}
  */
-function quotationFrom(lines, read, code, start, kind) {
+function quotationFrom(lines, read, start, kind) {
   let index = start;
   while (index < lines.length && lines[index].trim() === '') index += 1;
   const quoted = [];
@@ -427,7 +425,8 @@ function quotationFrom(lines, read, code, start, kind) {
     const [depth, rest] = quotationMarks(lines[index], { kind });
     const lazy = depth === 0 && quoted.length > 0 && read[index].role === 'text';
     if (depth === 0 && !lazy) break;
-    if (code[index]) continue;
+    const { role } = read[index];
+    if (role !== 'blank' && !SHOWN_ROLES.has(role)) continue;
     quoted.push(lazy ? lines[index].trim() : rest);
   }
   return quoted.length ? quoted.join('\n') : null;

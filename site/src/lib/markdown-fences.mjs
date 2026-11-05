@@ -263,10 +263,12 @@ function cellCount(row) {
  * @typedef {object} PageLine One line of a page, as the walk reads it.
  * @property {string} text The line as written.
  * @property {string} role Its part in the page: `blank`, `paragraph`, `text` (a line
- *   that carries a paragraph on, a lazy one among them), `single` (a block of its
- *   own), `underline`, `row`, `html` (it opens a raw HTML block), `raw` (it carries
- *   one on), `indented`, `open`, `body`, `close` (a line of a fence), `maths-open`
- *   and `maths` (any other line of a display block).
+ *   that carries a paragraph on, a lazy one among them), `heading` (a heading
+ *   written with its marks), `single` (any other block of its own: a thematic break,
+ *   an aside's fence, a tag or an expression alone), `underline`, `row`, `html` (it
+ *   opens a raw HTML block), `raw` (it carries one on), `indented`, `open`, `body`,
+ *   `close` (a line of a fence), `maths-open` and `maths` (any other line of a
+ *   display block).
  * @property {string} info The info string of a fence or the meta of a display block,
  *   on the line that opens it.
  * @property {number} indent The indentation of the opening marker, on every line of
@@ -517,7 +519,8 @@ class Walk {
   /** The role of a line that is a block by itself, or `null`. */
   oneLineRole(index, body, strict) {
     if (strict && UNDERLINE.test(body)) return 'underline';
-    if (ATX_HEADING.test(body) || THEMATIC_BREAK.test(body)) return 'single';
+    if (ATX_HEADING.test(body)) return 'heading';
+    if (THEMATIC_BREAK.test(body)) return 'single';
     if (LEAF_DIRECTIVE.test(body)) return 'single';
     if (!this.markdown && (body[0] === '<' || body[0] === '{')) {
       const taken = this.mdxFlow(index, body);

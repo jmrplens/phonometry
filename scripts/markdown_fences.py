@@ -255,13 +255,14 @@ class PageLine:
     :param text: The line as written.
     :param role: Its part in the page. ``"blank"``: nothing past its marks.
         ``"paragraph"``: it opens one; ``"text"``: it carries one on, a lazy line
-        among them. ``"single"``: a block of its own, a heading, a thematic break,
-        an aside's fence, a tag or an expression alone. ``"underline"``: the setext
-        underline of the paragraph above. ``"row"``: a row of a table, its delimiter
-        row among them. ``"html"``: it opens a raw HTML block; ``"raw"``: it carries
-        one on. ``"indented"``: indented code. ``"open"``, ``"body"``, ``"close"``:
-        a line of a fence. ``"maths-open"``, ``"maths"``: the line that opens a
-        display block, and any other of it, its closing fence among them.
+        among them. ``"heading"``: a heading written with its marks. ``"single"``:
+        any other block of its own, a thematic break, an aside's fence, a tag or an
+        expression alone. ``"underline"``: the setext underline of the paragraph
+        above. ``"row"``: a row of a table, its delimiter row among them.
+        ``"html"``: it opens a raw HTML block; ``"raw"``: it carries one on.
+        ``"indented"``: indented code. ``"open"``, ``"body"``, ``"close"``: a line
+        of a fence. ``"maths-open"``, ``"maths"``: the line that opens a display
+        block, and any other of it, its closing fence among them.
     :param info: The info string of a fence or the meta of a display block, on the
         line that opens it.
     :param indent: The indentation of the opening marker, on every line of a fence.
@@ -515,7 +516,9 @@ class _Walk:
         """The role of a line that is a block by itself, or ``None``."""
         if strict and _UNDERLINE.match(body):
             return "underline"
-        if _ATX_HEADING.match(body) or _THEMATIC_BREAK.match(body):
+        if _ATX_HEADING.match(body):
+            return "heading"
+        if _THEMATIC_BREAK.match(body):
             return "single"
         if _LEAF_DIRECTIVE.match(body):
             return "single"

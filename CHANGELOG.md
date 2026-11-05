@@ -2297,6 +2297,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A count given as a `Decimal`, a `Fraction` or a complex number is refused by
+  the kinds of number a count takes.** Every whole-number argument checked as
+  a count, an order, a number of storeys, stages or events among them, refused
+  `Decimal('2')` with `must be a whole number`, which 2 is. The `TypeError` now
+  says that a count is an `int`, a NumPy integer or a whole float and names the
+  kind it got; a bool, a text or an array keeps the message it had.
 - **A `Decimal` or a `Fraction` steps an FDTD run as the float it reads as.**
   A `Decimal` on a source of `simulation.FDTDRun` or `simulation.ElasticRun`
   (the `amplitude`, `half_width_s` or `t0` of a `GaussianPulse`, the

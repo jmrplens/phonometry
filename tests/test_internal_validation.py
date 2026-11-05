@@ -534,6 +534,27 @@ def test_a_count_is_a_whole_number_and_nothing_else() -> None:
             require_count(bad, "storeys")
 
 
+def test_a_count_given_as_another_kind_of_number_names_the_kinds_taken() -> None:
+    """A ``Decimal`` or a ``Fraction`` is refused even when it holds a whole
+    number, and the message says which kinds of number a count takes rather
+    than that the value is not whole.
+    """
+    for bad, kind in (
+        (Decimal(2), "Decimal"),
+        (Fraction(4, 2), "Fraction"),
+        (Decimal("2.5"), "Decimal"),
+        (2 + 0j, "complex"),
+    ):
+        with pytest.raises(TypeError) as raised:
+            require_count(bad, "storeys")
+        message = str(raised.value)
+        assert message.startswith(
+            "'storeys' must be an int, a NumPy integer or a whole float"
+        ), message
+        assert f"a {kind}" in message, message
+        assert "must be a whole number" not in message, message
+
+
 def test_an_integer_is_one_by_its_type() -> None:
     """``int()`` takes a fraction, a flag and a text as an integer; the test
     of one takes a Python or NumPy integer only.

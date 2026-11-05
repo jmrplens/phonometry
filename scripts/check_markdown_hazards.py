@@ -323,7 +323,7 @@ def _cut_maths_problems(
 
 
 def _wrapped_quote_problems(
-    where: str, line: str, before: str, *, kind: str
+    where: str, line: str, before: str, *, kind: str, opens_block: bool
 ) -> list[str]:
     """Rule 2: a ``>`` that wrapped to the start of a line of a paragraph.
 
@@ -331,12 +331,15 @@ def _wrapped_quote_problems(
     the walk of the page reads a quotation's mark (:func:`quotation_marks`):
     behind up to three columns of blanks, or any number on an ``.mdx`` page.
     It is a wrapped comparison operator, unless the paragraph deliberately
-    starts a quotation, which is always preceded by a blank line.
+    starts a quotation, which is always preceded by a blank line. A mark
+    that carries on the quotation of the paragraph above, behind a lazy line
+    of it, opens no block, and is that quotation's.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param opens_block: Whether the line opens a block, as the site reads it.
     """
     marks, rest = quotation_marks(line, kind=kind)
-    if not (marks and rest.strip(" \t") and _PROSE.match(before)):
+    if not (opens_block and marks and rest.strip(" \t") and _PROSE.match(before)):
         return []
     return [
         f"{where}: {line.strip()[:40]!r} continues the sentence above but "
@@ -449,7 +452,11 @@ def _markdown_problems(
                 where, line, index, open_math=open_math, opens_block=opens_block[index]
             )
         )
-        problems.extend(_wrapped_quote_problems(where, line.text, before, kind=kind))
+        problems.extend(
+            _wrapped_quote_problems(
+                where, line.text, before, kind=kind, opens_block=opens_block[index]
+            )
+        )
         problems.extend(_anchor_problems(where, line.text))
         problems.extend(_setext_problems(where, line))
         open_math = _maths_left_open(

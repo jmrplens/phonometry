@@ -455,6 +455,30 @@ def test_a_greater_than_sign_is_read_by_its_columns(
     assert len(problems) == refused
 
 
+@pytest.mark.parametrize("page", ["p.md", "p.mdx"])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Before.\n\n> A quotation opens here\nand a lazy line carries it\n> on to its end.\n",
+        "- An item.\n\n  > A quotation opens here\n  and a lazy line carries it\n  > on to its end.\n",
+    ],
+    ids=["at-the-top", "in-a-list-item"],
+)
+def test_a_mark_that_carries_a_quotation_on_is_no_wrapped_operator(
+    text: str, page: str
+) -> None:
+    """A ``>`` after a lazy line of a quotation's paragraph carries the same
+    quotation on, as the walk of the page reads it, and opens no block.
+
+    Only the line above was read, and a lazy line reads as prose, so the
+    mark was refused as a comparison that wrapped into a new quotation. One
+    that opens a quotation under a paragraph of prose still is.
+    """
+    assert cmh.check_text(text, page) == []
+    opened = "Prose above.\n> 5 dB above it.\n"
+    assert len(cmh.check_text(opened, page)) == 1
+
+
 def test_a_same_page_link_to_an_accented_heading_is_refused() -> None:
     problems = cmh.check_text("See [it](#la-medición).\n", "p.md")
     assert len(problems) == 1

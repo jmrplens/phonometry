@@ -47,7 +47,7 @@ Weightings and levels are class 1 per
 
 <a href="https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/CONFORMANCE.md"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/v4.0.0rc1/.github/badges/conformance-summary.svg" alt="All 1897 conformance checks pass, across 111 domains, against 227 normative designations and 125 further published sources"></a>
 
-<img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/d782463376d71a0d64fe99bc1c11e3c77839af4d/images/anim_fdtd_pillar_hall_poster.webp" alt="An 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%">
+<img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/cad1cb53655596654ca7b81ea4abf0a401898629/images/anim_fdtd_pillar_hall_poster.webp" alt="An 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%">
 
 *An 800 Hz wavefront threading a hall of columns, computed with the library's
 own [2D FDTD engine](https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/simulation/fdtd-simulation.md)

@@ -115,11 +115,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   are that device's arrays, `numpy_field(field)` gives a NumPy copy on any
   device, and a result holds NumPy arrays whatever stepped. After
   construction the engines touch their fields only with Array API standard
-  operations, and NumPy's numbers did not move: the NumPy path is held bit
-  for bit to SHA-256 digests of every number the engine scenarios give,
-  taken from the engines as they were (`engine-digests.json`, checked in
-  one CI job on Ubuntu 24.04 and its C library, glibc 2.39, with NumPy's
-  AVX-512 kernels switched off). On CuPy in float64
+  operations, and NumPy's numbers did not move: a frozen copy of the engines
+  as they were proved the new engines equal to it bit for bit on every
+  runner, and the NumPy path is held bit for bit to SHA-256 digests of
+  every number the engine scenarios give, taken from the new engines
+  (`engine-digests.json`, checked in one CI job on Ubuntu 24.04 and its C
+  library, glibc 2.39, with NumPy's AVX-512 kernels switched off). On CuPy in float64
   every field, snapshot and contour phasor came out bit-identical to NumPy's
   on an NVIDIA GeForce RTX 4060 with CuPy 14.2.0, and the energy within
   1.79e-16 relative; `gpu-parity.lock` records that proof with a fingerprint

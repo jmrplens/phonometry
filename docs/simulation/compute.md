@@ -11,7 +11,8 @@ through CuPy or on PyTorch (on a CPU, an NVIDIA GPU or Apple's MPS) when you
 ask. It is one stepping code for all of them: each engine builds its maps in
 NumPy float64, in this process, when it is constructed, hands them to the device
 once, and from then on touches its fields only with operations of the Python
-array API standard, which the three libraries implement.
+array API standard, which NumPy and CuPy offer in their own namespaces and
+torch through array-api-compat.
 
 This page says how to ask for a device, what each one needs installed, how a
 whole script or a worker picks its device, what happens when the device is
@@ -33,7 +34,7 @@ the run may fall back to NumPy:
 | `device` | `"cpu"` (NumPy), `"cupy"` (an NVIDIA GPU through CuPy), `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` (Apple silicon) | `"cpu"` |
 | `device_index` | which GPU, for `"cupy"` and `"torch:cuda"` | `0` |
 | `dtype` | `"float64"` or `"float32"` | `"float64"` |
-| `fallback` | step on NumPy with a warning when the device is not available, instead of raising | `False` |
+| `fallback` | step on NumPy here with a warning when the device is not available or, with a `host`, when the node or the connection fails, instead of raising | `False` |
 | `host` | the node the run goes to, by its name in the hosts file; see [Sending a simulation to a remote node](remote-node.md) | `None` (this machine) |
 | `timeout_s` | the longest a run on a node may take, in seconds; only with a `host` | the hosts file's, else no limit |
 
@@ -58,7 +59,8 @@ except ValueError as error:
     print(error)   # device 'torch:mps' needs dtype='float32': MPS has no float64
 ```
 
-Both engines, `ElasticFDTD2D.from_regions` and both simulation functions
+Both engines, `ElasticFDTD2D.from_regions`, both simulation functions and
+both video writers, `write_fdtd_animation` and `write_elastic_fdtd_animation`,
 take it as `compute=`:
 
 ```py
@@ -128,15 +130,16 @@ phonometry should do. A script or a notebook can name the device once
 instead, and the placement an engine gets is the first of these that says
 something:
 
-1. the `compute=` argument of the engine or of the simulation function;
+1. the `compute=` argument of the engine, of the simulation function or of
+   the video writer;
 2. the innermost `use()` block the call runs in;
 3. the `PHONOMETRY_COMPUTE` environment variable;
 4. NumPy in float64.
 
 The placement is resolved when an engine is built, by `FDTD2D(...)`,
-`ElasticFDTD2D(...)`, `ElasticFDTD2D.from_regions(...)` or one of the
-simulation functions, and the engine keeps the one it got: leaving a `use()`
-block does not move an engine built inside it.
+`ElasticFDTD2D(...)`, `ElasticFDTD2D.from_regions(...)`, one of the
+simulation functions or one of the video writers, and the engine keeps the
+one it got: leaving a `use()` block does not move an engine built inside it.
 
 ```python
 run = simulation.FDTDRun(
@@ -153,12 +156,13 @@ print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
 `PHONOMETRY_COMPUTE` writes a placement as text,
 `device[:index][@host][,option...]`, with the options `float32`, `float64`
 and `fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`,
-`torch:mps,float32`, `cpu,float32` or `cupy@nas`. Spaces around the parts are
-ignored. The variable is read each time a placement is resolved and never at
-import, so it can be set after `import phonometry`. A value the grammar does
-not describe, an option given twice, two dtypes, or a request `Compute`
-refuses (`torch:mps` without `float32`) raises `ValueError` naming the
-variable when the placement is resolved.
+`torch:mps,float32`, `cpu,float32` or `cupy@nas`. Spaces around a comma or
+the `@` are ignored; a device and its index are written together, with no
+space around the colon. The variable is read each time a placement is
+resolved and never at import, so it can be set after `import phonometry`. A
+value the grammar does not describe, an option given twice, two dtypes, or a
+request `Compute` refuses (`torch:mps` without `float32`) raises `ValueError`
+naming the variable when the placement is resolved.
 
 ```bash
 PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
@@ -225,9 +229,9 @@ With `fallback=True` none of them is raised. The run warns with
 `ComputeFallbackWarning`, a `PhonometryWarning` whose message carries the
 reason, and steps on NumPy on this machine, in the dtype that was asked for.
 The warning points at the line of your code that built the engine or called
-the simulation function, never at a line inside the library, and the
-result's provenance says `"cpu"`, with no host, so a run that fell back
-cannot pass for a GPU run or a run on a node later.
+the simulation function or the video writer, never at a line inside the
+library, and the result's provenance says `"cpu"`, with no host, so a run
+that fell back cannot pass for a GPU run or a run on a node later.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
@@ -271,6 +275,11 @@ engine reports the same record as `sim.provenance`:
 | `package_sha256` | the SHA-256 of the package that ran on the node, `None` for a run on this machine |
 
 ```python
+run = simulation.FDTDRun(
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+)
+light = simulation.fdtd_simulation(run, compute=simulation.Compute(dtype="float32"))
 print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
 # cpu float32 None
 ```
@@ -325,9 +334,11 @@ decimated snapshots in two of them.
 **NumPy, float64: bit-identical.** Identical inputs give bit-identical
 outputs on the same platform: no random numbers, and every operation in a
 fixed order. The NumPy path is also held to SHA-256 digests of every number
-those scenarios give, recorded from the two engines as they stood before they
-could step anywhere else (`engine-digests.json`, checked in CI), so the other
-devices cost the NumPy numbers nothing.
+those scenarios give (`engine-digests.json`, checked in CI). A frozen copy of
+the two engines as they stood before they could step anywhere else first
+proved the new engines equal to it bit for bit on every runner, and the
+digests were then taken from the new engines, so the other devices cost the
+NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
 4060 with NVIDIA driver 610.57.04, CuPy 14.2.0 (`cupy-cuda13x`, CUDA runtime
@@ -370,15 +381,16 @@ on `torch:cpu` alike.
 
 Each CPU bound is the worst value measured over every CPU kernel level the
 library dispatches (DEFAULT, AVX2 and AVX512 for torch; the baseline, AVX2
-and AVX512 for NumPy), at the library's floor and at its pinned release,
-rounded up to one significant figure, and it is raised only from a new
-measurement. Every CI job that runs the simulation tests holds NumPy in
-float32 to its bound, and the `array-api` job holds every run on `torch:cpu`
-to its two. The MPS bound was measured the same way by the `mps` job,
-on a macOS 15 runner with Apple silicon, and that job holds every run on MPS
-to it. `torch:cuda` steps the
-same code as `torch:cpu`, but no run on it has been measured, so it has no
-bound.
+and AVX512 for NumPy), at the library's floor and at the release pinned when
+it was measured, rounded up to one significant figure, and it is raised only
+from a new measurement. Every CI job that runs the whole test suite or the
+whole of `tests/simulation` holds NumPy in float32 to its bound, and every
+run on `torch:cpu` to its two where torch is installed: the `array-api` job,
+on the torch that `requirements-torch.txt` pins, and the `minimum-versions`
+job, on torch's floor. The MPS bound was measured the same way by the `mps`
+job, on a macOS 15 runner with Apple silicon, and that job holds every run on
+MPS to it. `torch:cuda` steps the same code as `torch:cpu`, but no run on it
+has been measured, so it has no bound.
 
 **CuPy in float32: not measured yet.** The proof on the GPU covers float64
 only, so a float32 run on CuPy has no published bound until a proof on the
@@ -386,18 +398,18 @@ GPU measures one. Like every float32 run, it rounds each step to float32,
 about seven significant digits.
 
 **The contour probe's sums.** The running DFT sums of a contour probe
-(section 2b of the acoustic guide) add one term per step for thousands of
-steps, and the rounding of a sum grows with its number of terms. They are
-accumulated in float64 on every device that has float64, also when the fields
-step in float32; on MPS, which has none, they are float32 with compensated
-(Neumaier) summation. The `mps` job runs a 3000-step float32 contour check on
+([section 4 of the acoustic guide](fdtd-simulation.md#4-from-the-near-field-to-the-far-field))
+add one term per step for thousands of steps, and the rounding of a sum grows
+with its number of terms. They are accumulated in float64 on every device
+that has float64, also when the fields step in float32; on MPS, which has
+none, they are float32 with compensated (Neumaier) summation. The `mps` job runs a 3000-step float32 contour check on
 MPS itself, so a compiler that reorders the compensated sum fails there.
 
 ## 7. Recording less: `snapshot_decimation`
 
 On a large grid the snapshots are most of what a run returns: one float64
-frame of a 400 by 600 cell grid takes 1.9 MB, and a run keeps one every
-`snapshot_every` steps.
+frame of a 400 by 600 cell grid takes 1.9 MB, and a run keeps one of the
+initial state, then one every `snapshot_every` steps.
 `snapshot_decimation=d` keeps every `d`-th cell along each axis, starting
 with the first, so a frame is $\lceil n_y/d \rceil$ by $\lceil n_x/d \rceil$:
 `d = 2` stores a quarter of the cells and `d = 4` a sixteenth. On a GPU the
@@ -434,8 +446,8 @@ chosen per call with `compute=`, per block with `use()` or per process with
 fallback to NumPy with `ComputeFallbackWarning`; the `RunProvenance` every
 result records; what is promised on each device, bit for bit on NumPy in
 float64, bit for bit as measured on CuPy in float64, and within a bound
-published over the scenario matrix on torch's CPU device and on NumPy in
-float32; and decimated snapshots.
+published over the scenario matrix on torch's CPU device, on torch's MPS
+device in float32 and on NumPy in float32; and decimated snapshots.
 
 **Not covered.** One engine steps on one device: a run is not split across
 GPUs, and `device_index` picks one of them. The other array libraries (JAX,
@@ -443,9 +455,9 @@ MLX, dpnp) are not backends, and the GPU runs the same sequence of standard
 operations as NumPy, with no fused or compiled kernels, which is what keeps
 the CuPy fields bit-identical. This page publishes no timing: a GPU pays a
 fixed cost for every operation it launches, so it helps only on grids large
-enough to spend it. CuPy in float32 and torch on CUDA have no measured bound
-yet, and no bound covers a run longer or larger than the scenario matrix.
-The rest of phonometry computes on NumPy only.
+enough to earn it back. CuPy in float32 and torch on CUDA have no measured
+bound yet, and no bound covers a run longer or larger than the scenario
+matrix. The rest of phonometry computes on NumPy only.
 
 ## See also
 
@@ -455,9 +467,12 @@ The rest of phonometry computes on NumPy only.
   the elastic engine, which takes the same `compute=`.
 - [Sending a simulation to a remote node](remote-node.md): the same run on
   another machine over SSH, with a `host` in the request.
+- [Writing animations and FDTD runs to video](../io/videos.md): the two
+  writers that take the same `compute=` and write a run straight to a video.
 - API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
   [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
+  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](https://docs.jmrp.io/phonometry/reference/api/simulation/video/).
 
 ## Quick answers
 

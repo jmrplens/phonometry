@@ -1,9 +1,10 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """On NumPy, the engines give the numbers recorded in engine-digests.json.
 
-The digests were taken from the engines as they stood before they could step
-on any other backend, after a frozen copy of those engines had proven the
-refactor bit for bit on every runner. The copy is gone; the digests stay.
+A frozen copy of the engines as they stood before they could step on any
+other backend first proved the refactored engines equal to it bit for bit on
+every runner, and the digests were then taken from the refactored engines.
+The copy is gone; the digests stay.
 Their bits depend on the C library's libm and on NumPy's SIMD dispatch, so
 they are compared where they were measured, the environment the file
 records: the ``engine-digests`` CI job, which also wrote the file. Elsewhere

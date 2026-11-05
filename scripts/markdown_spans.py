@@ -27,7 +27,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from markdown_fences import NOT_INLINE_ROLES, cell_spans, page_lines
+from markdown_fences import NOT_INLINE_ROLES, cell_spans, page_lines, quotation_marks
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -121,9 +121,6 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
     return "".join(pieces)
 
 
-#: The marks of a quotation that open a line, each with what may stand before
-#: it, and the one blank after the last of them (CommonMark 0.31.2, 5.1).
-_QUOTE_MARKS = re.compile(r"(?: {0,3}>)+ ?")
 #: A comment and the line that opens one, by the page's kind: an HTML comment
 #: on a ``.md`` page, which opening a line is an HTML block that ends at its
 #: ``-->``, and an MDX comment, an expression, beside it on a ``.mdx`` page.
@@ -137,16 +134,23 @@ _COMMENT_LINE = {
 }
 
 
-def quote_depth(line: str) -> int:
-    """How many quotation marks open *line*."""
-    marks = _QUOTE_MARKS.match(line)
-    return marks.group().count(">") if marks else 0
+def quote_depth(line: str, *, kind: str = "mdx") -> int:
+    """How many quotation marks open *line*, read by their columns
+    (:func:`markdown_fences.quotation_marks`).
+
+    :param kind: The page's kind, ``"md"`` or ``"mdx"``.
+    """
+    return quotation_marks(line, kind=kind)[0]
 
 
-def inside_quotation(line: str) -> str:
-    """*line* without the quotation marks that open it."""
-    marks = _QUOTE_MARKS.match(line)
-    return line[marks.end() :] if marks else line
+def inside_quotation(line: str, *, kind: str = "mdx") -> str:
+    """*line* without the quotation marks that open it and the blank each may
+    take, a tab after a mark leaving the rest of its columns as spaces
+    (:func:`markdown_fences.quotation_marks`).
+
+    :param kind: The page's kind, ``"md"`` or ``"mdx"``.
+    """
+    return quotation_marks(line, kind=kind)[1]
 
 
 @dataclass

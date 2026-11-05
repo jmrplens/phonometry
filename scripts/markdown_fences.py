@@ -187,6 +187,45 @@ def _past_columns(text: str, column: int, width: int) -> str:
     return " " * max(at - end, 0)
 
 
+def _quote_mark(rest: str, column: int, *, markdown: bool) -> tuple[str, int] | None:
+    """What a quotation's mark leaves of *rest*, and at which column, or ``None``.
+
+    Up to three columns of blanks may stand before the mark on a ``.md`` page,
+    where four open indented code, and any number on an ``.mdx`` one; one
+    column of blank after it is the mark's own, a tab there leaving the rest
+    of its columns as spaces (CommonMark 0.31.2, 2.2 and 5.1).
+
+    :param markdown: Whether the page is ``.md``, not ``.mdx``.
+    """
+    blanks = _blank_columns(rest, column)
+    body = rest.lstrip(" \t")
+    if not body.startswith(">") or (markdown and blanks >= _CODE_INDENT):
+        return None
+    at = column + blanks + 1
+    after = body[1:]
+    if after[:1] in (" ", "\t"):
+        return _past_columns(after, at, 1), at + 1
+    return after, at
+
+
+def quotation_marks(line: str, *, kind: str = "mdx") -> tuple[int, str]:
+    """How many quotation marks open *line*, and what they leave of it.
+
+    The marks are read as the walk of the page reads them, column by column,
+    a tab to its stop: a line read apart from its page, as a line a check has
+    already placed outside code.
+
+    :param kind: The page's kind (:func:`page_lines`).
+    :return: The number of marks, and the line past them and the blank each
+        may take.
+    """
+    depth, rest, column = 0, line, 0
+    while (mark := _quote_mark(rest, column, markdown=kind == "md")) is not None:
+        rest, column = mark
+        depth += 1
+    return depth, rest
+
+
 def cell_spans(row: str) -> list[tuple[int, int]]:
     """The ``(start, end)`` of each piece of a table's row, between its unescaped pipes."""
     spans: list[tuple[int, int]] = []
@@ -325,15 +364,7 @@ class _Walk:
 
     def _quote_mark(self, rest: str, column: int) -> tuple[str, int] | None:
         """What a quotation's mark leaves of *rest*, and at which column, or ``None``."""
-        blanks = _blank_columns(rest, column)
-        body = rest.lstrip(" \t")
-        if not body.startswith(">") or (self.markdown and blanks >= _CODE_INDENT):
-            return None
-        at = column + blanks + 1
-        after = body[1:]
-        if after[:1] in (" ", "\t"):
-            return _past_columns(after, at, 1), at + 1
-        return after, at
+        return _quote_mark(rest, column, markdown=self.markdown)
 
     def _closes_aside(self, text: str) -> str | None:
         """What is left of a line that closes the innermost aside, or ``None``."""

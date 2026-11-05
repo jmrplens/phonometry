@@ -846,6 +846,8 @@ def _drop_code_and_math(text: str, *, kind: str) -> str:
 class _PageReading:
     """What the reading of a page carries from one line to the next."""
 
+    #: The page's kind, ``"md"`` or ``"mdx"``, which reads its quotation marks.
+    kind: str = "md"
     italic_open: bool = False
     quote_closer: str | None = None
     in_reference: bool = False
@@ -864,7 +866,7 @@ class _PageReading:
         """
         unclosed = self.close_block()
         self.in_reference = False
-        self.caption = _is_caption(inside_quotation(line))
+        self.caption = _is_caption(inside_quotation(line, kind=self.kind))
         return unclosed
 
     def close_block(self) -> list[int]:
@@ -883,10 +885,10 @@ class _PageReading:
         :param number: Its number, kept if a mark still open is all that exempts it.
         :param role: Its role in the walk of the page.
         """
-        inner = inside_quotation(shown)
+        inner = inside_quotation(shown, kind=self.kind)
         if _REFERENCE_ENTRY.match(inner):
             self.in_reference = True
-        elif not inside_quotation(line).startswith((" ", "\t")):
+        elif not inside_quotation(line, kind=self.kind).startswith((" ", "\t")):
             self.in_reference = False
         (
             prose,
@@ -975,7 +977,7 @@ def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
     code_flags = list(code_lines(written, kind=kind))
     math_flags = _math_lines(written, kind=kind)
     shown = lines_read_whole(written, lambda page: _drop_code_and_math(page, kind=kind))
-    reading = _PageReading()
+    reading = _PageReading(kind=kind)
     hits = _frontmatter_hits(lines)
     for index, opens_block in enumerate(block_starts(written, kind=kind)):
         line = written[index]
@@ -1435,7 +1437,8 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     written = text.split("\n")
     lines = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
-    walked = list(page_lines(written[head:], kind="mdx" if mdx else "md"))
+    kind = "mdx" if mdx else "md"
+    walked = list(page_lines(written[head:], kind=kind))
     masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
         lines[head:],
         lambda body: _blank_page_spans(_without_addresses(body), walked=walked),
@@ -1443,8 +1446,8 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     return [
         index + 1
         for index in _double_hyphen_lines(
-            [inside_quotation(line) for line in written],
-            [inside_quotation(line) for line in masked],
+            [inside_quotation(line, kind=kind) for line in written],
+            [inside_quotation(line, kind=kind) for line in masked],
             {head + offset: read for offset, read in enumerate(walked)},
         )
     ]

@@ -53,9 +53,11 @@ a caller's value that no check has read on every path to it:
   decorates with. Its parameters hold what its calls across the package
   hand them, joined: a caller's value no check read where any call hands
   one, checked where every call hands a checked one, and none where only
-  values the library computed reach it. The modules are read again until no
-  call hands anything new. Any other function's parameters, a method's and
-  a nested function's included, are a caller's values.
+  values the library computed reach it; a ``*`` argument or a ``**``
+  mapping hands nothing to a parameter an argument of the call fills in its
+  place or by its name, since the call would raise. The modules are read
+  again until no call hands anything new. Any other function's parameters,
+  a method's and a nested function's included, are a caller's values.
 - **A check**: a call of one of :data:`CHECKS` with the value among its
   arguments, or of a function of the library that hands that parameter to
   one on every path that leaves it by its end or a ``return`` (found by
@@ -306,10 +308,6 @@ _KEEPING_ATTRIBUTES = frozenset({"T", "mT"})
 #: cannot tell, keyed by the file relative to the repository and the function
 #: that holds them, with the reason.
 EXEMPT: dict[tuple[str, str], str] = {
-    ("src/phonometry/_plot/common.py", "_plot_band_level_bars"): (
-        "the levels of a result being drawn, a field the result read when it "
-        "was built; the clips fingerprint this module's source"
-    ),
     ("src/phonometry/_internal/validation.py", "real_array"): (
         "the shared reader itself, whose quick path converts only an array of "
         "truth values, integers or floats, which holds no complex number"
@@ -1936,6 +1934,21 @@ def _private(name: str) -> bool:
     return name.startswith("_") and not name.startswith("__")
 
 
+def _filled_by_the_call(call: ast.Call, positional: Sequence[str]) -> frozenset[str]:
+    """The parameters *call* fills with an argument of its own: in its place,
+    before the first ``*`` argument, or by its name. A ``*`` argument or a
+    ``**`` mapping that filled one of them too would make the call raise, so
+    neither reaches it.
+    """
+    filled: set[str] = set()
+    for name, argument in zip(positional, call.args, strict=False):
+        if isinstance(argument, ast.Starred):
+            break
+        filled.add(name)
+    filled.update(keyword.arg for keyword in call.keywords if keyword.arg is not None)
+    return frozenset(filled)
+
+
 def _dotted(module: _Module, node: ast.AST) -> str | None:
     """The function of the package *node* names in *module*: a name, by what
     the module imports or defines, or an attribute of a module it imports;
@@ -1970,12 +1983,17 @@ class _Helper:
         self, call: ast.Call, state_of: Callable[[ast.expr], State]
     ) -> Iterator[tuple[str, State]]:
         """Each parameter *call* hands a value, with what the value holds; an
-        unpacked argument may reach any parameter from its place on.
+        unpacked argument may reach any parameter from its place on, and a
+        ``**`` mapping any that takes a keyword, but neither one a plain
+        argument of the call fills (:func:`_filled_by_the_call`).
         """
+        filled = _filled_by_the_call(call, self.positional)
         spread: tuple[str, ...] | None = None
         for place, argument in enumerate(call.args):
             if isinstance(argument, ast.Starred) and spread is None:
-                spread = self.positional[place:] + tuple(filter(None, [self.vararg]))
+                spread = tuple(
+                    name for name in self.positional[place:] if name not in filled
+                ) + tuple(filter(None, [self.vararg]))
             value = argument.value if isinstance(argument, ast.Starred) else argument
             if spread is not None:
                 yield from ((name, state_of(value)) for name in spread)
@@ -1984,13 +2002,14 @@ class _Helper:
             elif self.vararg is not None:
                 yield self.vararg, state_of(value)
         for keyword in call.keywords:
-            yield from self._keyword(keyword, state_of(keyword.value))
+            yield from self._keyword(keyword, state_of(keyword.value), filled)
 
     def _keyword(
-        self, keyword: ast.keyword, state: State
+        self, keyword: ast.keyword, state: State, filled: frozenset[str]
     ) -> Iterator[tuple[str, State]]:
         if keyword.arg is None:
-            for name in (*sorted(self.keywords), *filter(None, [self.kwarg])):
+            unfilled = sorted(self.keywords - filled)
+            for name in (*unfilled, *filter(None, [self.kwarg])):
                 yield name, state
         elif keyword.arg in self.keywords:
             yield keyword.arg, state
@@ -2287,10 +2306,13 @@ class _Returns:
         values, it and every argument after it may land in any place from
         its own on, or in ``*args``. A keyword stands for the parameter of
         its name, or for ``**kwargs``; a ``**`` mapping may hand its values
-        to any parameter that takes a keyword, or to ``**kwargs``.
+        to any parameter that takes a keyword, or to ``**kwargs``. Neither a
+        ``*`` argument nor a mapping reaches a parameter a plain argument of
+        the call fills (:func:`_filled_by_the_call`).
         """
         arguments = self.function.args
         positional = [*arguments.posonlyargs, *arguments.args]
+        filled = _filled_by_the_call(call, [p.arg for p in positional])
         unpacked: int | None = None
         for index, value in enumerate(call.args):
             if isinstance(value, ast.Starred) and unpacked is None:
@@ -2298,7 +2320,7 @@ class _Returns:
             places = (
                 positional[index : index + 1]
                 if unpacked is None
-                else (positional[unpacked:])
+                else [p for p in positional[unpacked:] if p.arg not in filled]
             )
             for parameter in places:
                 self._bind(parameter.arg, value, local, reader=caller)
@@ -2310,7 +2332,8 @@ class _Returns:
         for keyword in call.keywords:
             if keyword.arg is None:
                 for parameter in by_keyword:
-                    self._bind(parameter.arg, keyword.value, local, reader=caller)
+                    if parameter.arg not in filled:
+                        self._bind(parameter.arg, keyword.value, local, reader=caller)
                 if arguments.kwarg is not None:
                     self._bind(arguments.kwarg.arg, keyword.value, local, reader=caller)
             elif any(parameter.arg == keyword.arg for parameter in by_keyword):

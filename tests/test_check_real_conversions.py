@@ -1170,6 +1170,49 @@ _PLANTED_UNCHECKED = {
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_mapping_reaches_no_place_a_keyword_fills_in_a_nested_function": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, y=None):
+                nonlocal out
+                out = x
+
+            inner(x=real_array(reference, "reference"), **{"y": levels})
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_mapping_reaches_no_place_an_argument_fills_in_a_nested_function": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, y=None):
+                nonlocal out
+                out = x
+
+            inner(real_array(reference, "reference"), **{"y": levels})
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_starred_argument_reaches_no_place_a_keyword_fills_in_a_nested_function": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, y=None):
+                nonlocal out
+                out = x
+
+            extra = [levels] if reference is None else []
+            inner(*extra, x=real_array(reference, "reference"))
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_call_of_a_name_a_comprehension_binds_reaches_no_nested_function": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -1754,6 +1797,24 @@ _HANDED = {
     "an_unpacked_argument": (
         "def f(levels):\n    return _convert(*levels)\n",
         "unchecked",
+    ),
+    "a_mapping": (
+        "def f(options):\n    return _convert(**options)\n",
+        "unchecked",
+    ),
+    # A place an argument of the call fills is that argument's alone: a
+    # ``*`` argument or a ``**`` mapping that filled it too would raise.
+    "a_keyword_beside_an_unpacked_argument": (
+        "def f(rest):\n    return _convert(*rest, values=np.zeros(3))\n",
+        "computed",
+    ),
+    "a_keyword_beside_a_mapping": (
+        "def f(options):\n    return _convert(values=np.zeros(3), **options)\n",
+        "computed",
+    ),
+    "an_argument_in_its_place_beside_a_mapping": (
+        "def f(options):\n    return _convert(np.zeros(3), **options)\n",
+        "computed",
     ),
 }
 

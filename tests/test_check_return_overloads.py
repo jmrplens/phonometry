@@ -1199,12 +1199,38 @@ def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
 
         def plot_parameter(result: object, make=_plain_axes) -> Axes:
             return make()
+
+        _later = _polar
+
+        def _later():
+            return plt.subplots()[1]
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import _later, _plain
+
+        def plot_standing_alias(result: object) -> Axes:
+            return _plain()
+
+        def plot_standing_attribute(result: object) -> Axes:
+            return helpers._plain()
+
+        def plot_replaced_alias(result: object) -> Axes:
+            return _later()
+
+        def plot_replaced_attribute(result: object) -> Axes:
+            return helpers._later()
         """,
     )
+    # Another module reads the name once its module has run: what stands
+    # there at the end, an alias that replaced a ``def`` or a ``def`` that
+    # replaced an alias, is what its call reaches.
     assert sorted(refused) == [
         "plot_aliased",
         "plot_local",
         "plot_replaced",
+        "plot_standing_alias",
+        "plot_standing_attribute",
         "plot_swapped",
     ]
 

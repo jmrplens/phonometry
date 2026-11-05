@@ -1290,7 +1290,12 @@ class Package:
         the name at the call.
         """
         reached: list[str] = []
-        for target in self._targets(function, func, call):
+        targets = (
+            standing
+            for found in self._targets(function, func, call)
+            for standing in self._standing(found, function.module)
+        )
+        for target in targets:
             if target not in self.functions:
                 continue
             if self.functions[target].parent is None:
@@ -1298,6 +1303,31 @@ class Package:
             else:
                 reached.append(target)
         return list(dict.fromkeys(reached))
+
+    def _standing(self, dotted: str, module: str, depth: int = 0) -> list[str]:
+        """What *dotted*, a name a call of *module* reaches, stands for when it
+        is one another module of the package binds at its top: what the
+        bindings of that top that still stand at its end bind it to
+        (:meth:`_at_top`), since a call from elsewhere reads it once that
+        module has run. A ``def``, an import or an alias a later one replaces
+        there stands for nothing; anything else is *dotted* itself.
+        """
+        owner, _, name = dotted.rpartition(".")
+        if (
+            depth > _DEPTH
+            or owner == module
+            or owner not in self.trees
+            or name not in self._top_statements(owner)
+        ):
+            return [dotted]
+        head = ast.Name(id=name, ctx=ast.Load())
+        found: list[str] = []
+        for target in self._at_top(owner, head, head, None, depth + 1):
+            if target == dotted:
+                found.append(target)
+            else:
+                found.extend(self._standing(target, owner, depth + 1))
+        return found
 
     def _live_at(
         self, dotted: str, function: Function, call: ast.AST | None

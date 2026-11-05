@@ -4030,7 +4030,12 @@ def _callers_source(
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
         if getattr(_module_object(caller_module), function.name, None) is not defined:
             continue
-        handed = _handed_in(call, name, positional)
+        handed = _handed_in(
+            call,
+            name,
+            positional,
+            keyword=all(a.arg != name for a in function.args.posonlyargs),
+        )
         if not isinstance(handed, ast.expr):
             return _OPEN_SOURCE
         found.append(_source(handed, caller, caller_module, depth + 1))
@@ -4110,17 +4115,19 @@ def _argument_for(
 
 
 def _handed_in(
-    call: ast.Call, name: str, positional: list[str]
+    call: ast.Call, name: str, positional: list[str], *, keyword: bool = True
 ) -> ast.expr | None | str:
     """What *call* hands the parameter *name*: its keyword, wherever it is
     written, or the argument in its place before any ``*`` argument, which
     no ``*`` argument or ``**`` mapping may then fill too, since the call
     would raise; ``"**"`` when a ``*`` argument at or before its place, or a
-    mapping, may hand it anything; ``None`` when nothing does.
+    mapping, may hand it anything; ``None`` when nothing does. A parameter
+    that takes no keyword (*keyword*), a positional-only one, is filled by
+    neither a keyword nor a mapping: what they hand goes to ``**kwargs``.
     """
-    for keyword in call.keywords:
-        if keyword.arg == name:
-            return keyword.value
+    for item in call.keywords if keyword else ():
+        if item.arg == name:
+            return item.value
     if name in positional:
         index = positional.index(name)
         if any(
@@ -4129,7 +4136,7 @@ def _handed_in(
             return "**"
         if index < len(call.args):
             return call.args[index]
-    if any(keyword.arg is None for keyword in call.keywords):
+    if keyword and any(item.arg is None for item in call.keywords):
         return "**"
     return None
 

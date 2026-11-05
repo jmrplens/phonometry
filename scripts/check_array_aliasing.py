@@ -3452,7 +3452,11 @@ def bind(
         for value in extra:
             for name in positional:
                 mapping[name] = union(mapping.get(name, _CLEAN), value)
-    names = set(positional) | {a.arg for a in spec.kwonlyargs}
+    # A keyword, or a mapping, fills no positional-only parameter: what it
+    # hands under that name goes to ``**kwargs``.
+    names = (set(positional) - {a.arg for a in spec.posonlyargs}) | {
+        a.arg for a in spec.kwonlyargs
+    }
     spill: list[Value] = []
     unpacked: list[Value] = []
     for keyword, value in keywords.items():

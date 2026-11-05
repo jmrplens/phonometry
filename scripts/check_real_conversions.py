@@ -144,7 +144,14 @@ from ast_scan import (
 from ast_scan import parameters as with_defaults
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+    from collections.abc import (
+        Callable,
+        Collection,
+        Iterable,
+        Iterator,
+        Mapping,
+        Sequence,
+    )
 
 #: The library this reads, the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -1934,18 +1941,26 @@ def _private(name: str) -> bool:
     return name.startswith("_") and not name.startswith("__")
 
 
-def _filled_by_the_call(call: ast.Call, positional: Sequence[str]) -> frozenset[str]:
+def _filled_by_the_call(
+    call: ast.Call, positional: Sequence[str], keywords: Collection[str]
+) -> frozenset[str]:
     """The parameters *call* fills with an argument of its own: in its place,
-    before the first ``*`` argument, or by its name. A ``*`` argument or a
-    ``**`` mapping that filled one of them too would make the call raise, so
-    neither reaches it.
+    before the first ``*`` argument, or by its name, among the *keywords* a
+    keyword can fill. A ``*`` argument or a ``**`` mapping that filled one of
+    them too would make the call raise, so neither reaches it. A keyword
+    that names a positional-only parameter goes to ``**kwargs`` and leaves
+    the place to them.
     """
     filled: set[str] = set()
     for name, argument in zip(positional, call.args, strict=False):
         if isinstance(argument, ast.Starred):
             break
         filled.add(name)
-    filled.update(keyword.arg for keyword in call.keywords if keyword.arg is not None)
+    filled.update(
+        keyword.arg
+        for keyword in call.keywords
+        if keyword.arg is not None and keyword.arg in keywords
+    )
     return frozenset(filled)
 
 
@@ -1987,7 +2002,7 @@ class _Helper:
         ``**`` mapping any that takes a keyword, but neither one a plain
         argument of the call fills (:func:`_filled_by_the_call`).
         """
-        filled = _filled_by_the_call(call, self.positional)
+        filled = _filled_by_the_call(call, self.positional, self.keywords)
         spread: tuple[str, ...] | None = None
         for place, argument in enumerate(call.args):
             if isinstance(argument, ast.Starred) and spread is None:
@@ -2312,7 +2327,10 @@ class _Returns:
         """
         arguments = self.function.args
         positional = [*arguments.posonlyargs, *arguments.args]
-        filled = _filled_by_the_call(call, [p.arg for p in positional])
+        by_keyword = [*arguments.args, *arguments.kwonlyargs]
+        filled = _filled_by_the_call(
+            call, [p.arg for p in positional], {p.arg for p in by_keyword}
+        )
         unpacked: int | None = None
         for index, value in enumerate(call.args):
             if isinstance(value, ast.Starred) and unpacked is None:
@@ -2328,7 +2346,6 @@ class _Returns:
                 unpacked is not None or index >= len(positional)
             ):
                 self._bind(arguments.vararg.arg, value, local, reader=caller)
-        by_keyword = [*arguments.args, *arguments.kwonlyargs]
         for keyword in call.keywords:
             if keyword.arg is None:
                 for parameter in by_keyword:

@@ -126,6 +126,21 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
             id="open-handed",
         ),
         pytest.param("(lambda open=open: open(path))(*handlers)", [], id="starred"),
+        pytest.param(
+            "(lambda open=open, /, **kwargs: open(path))(open=print)",
+            [("read", _OWN)],
+            id="keyword-of-a-positional-only-name",
+        ),
+        pytest.param(
+            "(lambda open=open, /, **kwargs: open(path))(**{})",
+            [("read", _OWN)],
+            id="mapping-beside-a-positional-only-one",
+        ),
+        pytest.param(
+            "(lambda open=open, /, **kwargs: open(path))(print, **{})",
+            [],
+            id="positional-only-handed-in-its-place",
+        ),
     ],
 )
 def test_a_lambda_called_where_it_is_written_reads_what_the_call_hands(
@@ -137,7 +152,9 @@ def test_a_lambda_called_where_it_is_written_reads_what_the_call_hands(
 
     The parameter was read as its default whatever the call handed, so
     ``print`` handed in for ``open`` read as a read of ``open``, and ``open``
-    handed in for a parameter whose default is ``print`` passed.
+    handed in for a parameter whose default is ``print`` passed. A keyword,
+    or a ``**`` mapping, fills no positional-only parameter: what it hands
+    goes to ``**kwargs``, and the default stands.
     """
     source = f"def read(path, handlers=()):\n    return {call}\n"
     assert _found(tmp_path, source) == found

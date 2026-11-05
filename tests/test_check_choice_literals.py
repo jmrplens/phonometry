@@ -1013,6 +1013,47 @@ def test_a_mapping_hands_nothing_to_a_place_an_argument_fills(
     assert shown == handed
 
 
+@pytest.mark.parametrize(
+    ("call", "texts"),
+    [
+        ("_helper(text, kind='a')", None),
+        ("_helper('a', **{'kind': text})", frozenset({"a"})),
+    ],
+)
+def test_a_keyword_fills_no_positional_only_parameter(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    call: str,
+    texts: frozenset[str] | None,
+) -> None:
+    """A keyword, or a ``**`` mapping, that names a positional-only parameter
+    of a private helper goes to its ``**kw``; the place is the argument's.
+
+    The keyword was read as the parameter's, so ``_helper(text, kind='a')``
+    read as handing the helper the fixed text ``'a'`` where it hands the
+    caller's free one, and a mapping beside a fixed text read as handing
+    anything.
+    """
+    source = (
+        "def _helper(kind, /, **kw):\n    return kind\n\n"
+        f"def make(text):\n    return {call}\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_positional_only": source})
+    tree = ast.parse(source)
+    helper, make = tree.body
+    assert isinstance(helper, ast.FunctionDef)
+    assert isinstance(make, ast.FunctionDef)
+    assert isinstance(make.body[0], ast.Return)
+    site = make.body[0].value
+    assert isinstance(site, ast.Call)
+    module = "phonometry._positional_only"
+    monkeypatch.setattr(
+        ccl, "_construction_sites", lambda: {"_helper": ((module, make, site),)}
+    )
+    found = ccl._callers_source(helper, "kind", module, 0)
+    assert (found.texts if found.kind == "texts" else None) == texts
+
+
 def test_a_function_the_body_imports_is_followed() -> None:
     """A call to a name the body imports itself reaches the library function."""
     found = ccl.passed_on_evidence(_imports_inside, "mode")

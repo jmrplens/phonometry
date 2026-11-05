@@ -299,9 +299,13 @@ class Local:
 
 @dataclass(frozen=True)
 class Slot:
-    """Where a helper takes the language: a positional index, or keyword only."""
+    """Where a helper takes the language: a positional index, or keyword only,
+    and whether a keyword of its name fills it: a positional-only one takes
+    none, which goes to the helper's ``**kwargs`` instead.
+    """
 
     index: int | None
+    keyword: bool = True
 
 
 @dataclass(frozen=True)
@@ -1024,7 +1028,10 @@ class Tree:
             positional = positional[1:]
         found: Slot | None = None
         if PARAMETER in positional:
-            found = Slot(positional.index(PARAMETER))
+            found = Slot(
+                positional.index(PARAMETER),
+                keyword=all(a.arg != PARAMETER for a in args.posonlyargs),
+            )
         elif any(a.arg == PARAMETER for a in args.kwonlyargs):
             found = Slot(None)
         elif args.kwarg is not None:
@@ -1176,10 +1183,12 @@ class Tree:
         """
         if depth > _DEPTH or not self._is_partial(call.func, scope) or not call.args:
             return None
-        if any(k.arg in {PARAMETER, None} for k in call.keywords):
-            return None
         inner = self._expression_callee(call.args[0], scope, depth + 1)
         if inner is None:
+            return None
+        if any(k.arg in {PARAMETER, None} for k in call.keywords) and any(
+            slot.keyword for slot in inner.slots
+        ):
             return None
         bound = len(call.args) - 1
         slots: list[Slot] = []
@@ -1189,7 +1198,7 @@ class Tree:
                 continue
             if slot.index < bound:
                 return None  # the partial already fills the language slot
-            slots.append(Slot(slot.index - bound))
+            slots.append(Slot(slot.index - bound, slot.keyword))
         return Callee(inner.label, tuple(slots))
 
     def _expression_callee(
@@ -1280,9 +1289,14 @@ class Tree:
     # -- forwarding -------------------------------------------------------
 
     def forwards(self, call: ast.Call, callee: Callee, scope: Scope) -> bool:
-        """Whether *call* passes the caller's language on to *callee*."""
+        """Whether *call* passes the caller's language on to *callee*.
+
+        A keyword, or a ``**`` mapping, reaches only a slot that takes a
+        keyword: one of a positional-only language goes to ``**kwargs``.
+        """
+        by_name = any(slot.keyword for slot in callee.slots)
         for keyword in call.keywords:
-            if keyword.arg == PARAMETER:
+            if keyword.arg == PARAMETER and by_name:
                 return not isinstance(keyword.value, ast.Constant)
         for slot in callee.slots:
             if slot.index is None:
@@ -1294,7 +1308,7 @@ class Tree:
                 return True
             if slot.index < len(call.args):
                 return not isinstance(call.args[slot.index], ast.Constant)
-        return any(
+        return by_name and any(
             keyword.arg is None and self._may_carry(keyword.value, scope)
             for keyword in call.keywords
         )

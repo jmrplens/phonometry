@@ -1423,7 +1423,7 @@ class Module:
         starred = _has_star(call)
         bound: dict[str, Value] = {}
         for name in names:
-            argument = _argument(call, positional, name)
+            argument = _argument(call, positional, name, keyword=name not in by_place)
             if argument is not None:
                 bound[name] = self.value(argument, context)
                 continue
@@ -1561,9 +1561,10 @@ class Module:
         positional = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]][
             skip:
         ]
+        by_place = {arg.arg for arg in arguments.posonlyargs}
         owners: list[ast.ClassDef | None] = []
         for call, scope in sites:
-            argument = _argument(call, positional, name)
+            argument = _argument(call, positional, name, keyword=name not in by_place)
             if isinstance(argument, ast.Name) and argument.id == "self":
                 owners.append(self.owner_class(scope))
             elif argument is not None:
@@ -1594,7 +1595,7 @@ class Module:
             )
         values: list[Value] = []
         for call, scope in sites:
-            argument = _argument(call, fields, attr)
+            argument = _argument(call, fields, attr, keyword=True)
             unpacked = _unpacked_into(call, fields, attr, keyword=True)
             if argument is not None:
                 values.append(self.value(argument, Context(scope)))
@@ -2022,10 +2023,17 @@ def _default(function: Function, name: str) -> ast.expr | None:
     return None
 
 
-def _argument(call: ast.Call, positional: list[str], name: str) -> ast.expr | None:
-    for keyword in call.keywords:
-        if keyword.arg == name:
-            return keyword.value
+def _argument(
+    call: ast.Call, positional: list[str], name: str, *, keyword: bool
+) -> ast.expr | None:
+    """The argument *call* hands the parameter *name* of its own: the keyword
+    of its name, when the parameter takes a keyword (*keyword*), or the
+    argument in its place before the first ``*`` one. A keyword that names a
+    positional-only parameter goes to ``**kwargs``.
+    """
+    for item in call.keywords if keyword else ():
+        if item.arg == name:
+            return item.value
     if name in positional:
         # An argument before the first ``*`` keeps its place; one after it
         # may land anywhere from there on (:func:`_unpacked_into`).

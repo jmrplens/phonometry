@@ -294,6 +294,23 @@ def test_a_predicate_is_no_check(tmp_path: Path) -> None:
 #: Each shape a caller's value reaches a conversion in, one function each,
 #: that no check has read on every path to it: what the guard must report.
 _PLANTED_UNCHECKED = {
+    # A keyword of a positional-only parameter's name goes to ``**kw`` and
+    # leaves the place to what the ``*`` argument unpacks.
+    "a_starred_argument_reaches_a_positional_only_place_a_keyword_names": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, /, y=None, **kw):
+                nonlocal out
+                out = x
+
+            extra = [levels] if reference is None else []
+            inner(*extra, x=real_array(reference, "reference"))
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "python_s_float_of_a_parameter": """
         def f(value):
             return float(value)
@@ -1825,6 +1842,34 @@ def test_a_private_helper_reads_what_its_calls_hand_it(
 ) -> None:
     caller, verdict = _HANDED[shape]
     source = _PLANTED_HEADER + _HELPER + "\n" + caller
+    assert _verdicts(tmp_path, source)["_convert"] == verdict
+
+
+#: A helper whose place takes no keyword: a keyword of its name goes to
+#: ``**kwargs``, and leaves the place to what a ``*`` argument unpacks.
+_POSITIONAL_ONLY_HELPER = """
+def _convert(values, /, **kwargs):
+    return np.asarray(values, dtype=np.float64)
+"""
+
+
+@pytest.mark.parametrize(
+    ("caller", "verdict"),
+    [
+        (
+            "def f(rest):\n    return _convert(*rest, values=np.zeros(3))\n",
+            "unchecked",
+        ),
+        (
+            "def f(rest):\n    return _convert(np.zeros(3), values=rest)\n",
+            "computed",
+        ),
+    ],
+)
+def test_a_keyword_fills_no_positional_only_place(
+    tmp_path: Path, caller: str, verdict: str
+) -> None:
+    source = _PLANTED_HEADER + _POSITIONAL_ONLY_HELPER + "\n" + caller
     assert _verdicts(tmp_path, source)["_convert"] == verdict
 
 

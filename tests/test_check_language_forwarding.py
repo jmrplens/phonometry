@@ -1238,6 +1238,40 @@ def test_a_star_argument_cannot_reach_a_keyword_only_language(
     assert [f.helper for f in found] == ["pkg.helpers.axis"]
 
 
+def test_a_keyword_reaches_no_positional_only_language(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A keyword, or a ``**`` mapping, that names a positional-only language
+    goes to the helper's ``**kw``, and the helper draws in its default.
+
+    ``language=language`` was read as forwarding whatever the helper's
+    parameter was, so both calls passed; the language in its place
+    forwards it.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            def _label(value, language="en", /, **kw):
+                return value
+
+
+            def by_keyword(result, ax, language="en"):
+                _label(ax, language=language)
+
+
+            def by_mapping(result, ax, language="en"):
+                _label(ax, **{"language": language})
+
+
+            def by_place(result, ax, language="en"):
+                _label(ax, language)
+            """
+        },
+    )
+    assert sorted(f.caller for f in found) == ["by_keyword", "by_mapping"]
+
+
 _EXEMPTED = """
 from .helpers import axis
 

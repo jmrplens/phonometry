@@ -942,14 +942,17 @@ def _handed_to(lambda_: ast.Lambda, call: ast.Call, name: str) -> ast.expr | str
     """What *call*, which calls *lambda_* where it is written, hands its
     parameter *name*: the argument in its place or of its name; ``None`` when
     the call hands it nothing, so its default stands; :data:`_BOUND_NEARER`
-    when a ``*`` argument or a ``**`` mapping may hand it anything.
+    when a ``*`` argument or a ``**`` mapping may hand it anything. A keyword
+    or a mapping fills no positional-only parameter: what it hands goes to
+    ``**kwargs``.
     """
     arguments = lambda_.args
     positional = [
         parameter.arg for parameter in (*arguments.posonlyargs, *arguments.args)
     ]
+    by_name = name not in {parameter.arg for parameter in arguments.posonlyargs}
     for keyword in call.keywords:
-        if keyword.arg == name:
+        if by_name and keyword.arg == name:
             return keyword.value
     if name in positional:
         index = positional.index(name)
@@ -958,7 +961,7 @@ def _handed_to(lambda_: ast.Lambda, call: ast.Call, name: str) -> ast.expr | str
             return _BOUND_NEARER
         if index < len(call.args):
             return call.args[index]
-    if any(keyword.arg is None for keyword in call.keywords):
+    if by_name and any(keyword.arg is None for keyword in call.keywords):
         return _BOUND_NEARER
     return None
 

@@ -1202,6 +1202,38 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
     ]
 
 
+@pytest.mark.parametrize(
+    "call",
+    [
+        "_within(max(levels) - min(levels), spread=0.0)",
+        "_within(*[max(levels) - min(levels)], spread=0.0)",
+    ],
+)
+def test_a_keyword_fills_no_positional_only_parameter(
+    tmp_path: pathlib.Path, call: str
+) -> None:
+    """A keyword that names a positional-only parameter goes to ``**kw``;
+    the place is the argument's in it, or the ``*`` argument's.
+
+    The keyword was read as the parameter's, so a spread handed in its
+    place beside ``spread=0.0`` read as the constant, and the comparison
+    passed. A mapping already reached no positional-only parameter.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _within(spread, /, **kw):\n    return spread <= _SPREAD_DB\n"
+        f"def judge(levels):\n    return {call}\n"
+    )
+    assert _texts(source, tmp_path) == ["spread <= _SPREAD_DB"]
+    mapped = (
+        "_SPREAD_DB = 3.0\n"
+        "def _within(spread, /, **kw):\n    return spread <= _SPREAD_DB\n"
+        "def judge(levels):\n"
+        "    return _within(0.0, **{'spread': max(levels) - min(levels)})\n"
+    )
+    assert _texts(mapped, tmp_path) == []
+
+
 def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(
     tmp_path: pathlib.Path,
 ) -> None:

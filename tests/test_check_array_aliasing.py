@@ -1016,6 +1016,46 @@ def test_a_keyword_a_starred_argument_may_leave_to_it_reaches_its_place(
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
 
 
+def test_a_keyword_fills_no_positional_only_place(tmp_path: pathlib.Path) -> None:
+    """A keyword, or a ``**`` mapping, that names a positional-only parameter
+    goes to ``**kwargs``; the place is left to the arguments by place.
+
+    The keyword was read as filling the place, so ``kept(frequencies,
+    a=copy)`` and ``kept(*[frequencies], a=copy)``, which return the
+    caller's array, read as returning the copy, and the records that keep
+    the result passed; a mapping under the parameter's name read as
+    reaching it.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def kept(a, /, **kw):
+            return a
+
+        def placed(frequencies, levels):
+            f = kept(frequencies, a=np.array(levels))
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def starred(frequencies, levels):
+            f = kept(*[frequencies], a=np.array(levels))
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def mapped(frequencies, levels):
+            options = {"a": frequencies}
+            f = kept(np.array(levels), **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("placed", "BandResult.frequencies", "frequencies"),
+        ("starred", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_a_helper_s_type_parameter_is_not_what_its_closure_holds(
     tmp_path: pathlib.Path,
 ) -> None:

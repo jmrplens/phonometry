@@ -161,11 +161,16 @@ def test_a_keyword_written_beside_the_spread_is_refused(
 
     The caller who passes it gets ``TypeError: got multiple values for keyword
     argument 'zorder'`` and no figure, whatever the property, aliased or not.
+    A positional-only parameter does not take a keyword of its name, which
+    goes to ``**kwargs``, so ``f(ax, language='es')`` meets the ``language``
+    written beside them; it was read as a parameter that keeps the name out.
     """
     source = (
         "def f(ax, **kwargs):\n"
         "    ax.bar([1], [2], zorder=3, width=0.5, **kwargs)\n"
         "    Rectangle((0, 0), 1, 1, hatch='//', **kwargs)\n"
+        "def g(ax, language='en', /, **kwargs):\n"
+        "    ax.plot([1], language=language, **kwargs)\n"
     )
     assert gate._findings(_module(source, tmp_path)) == [
         (2, "'width' written beside **kwargs in ax.bar(), so a caller cannot pass it"),
@@ -173,6 +178,11 @@ def test_a_keyword_written_beside_the_spread_is_refused(
         (
             3,
             "'hatch' written beside **kwargs in Rectangle(), so a caller cannot "
+            "pass it",
+        ),
+        (
+            5,
+            "'language' written beside **kwargs in ax.plot(), so a caller cannot "
             "pass it",
         ),
     ]

@@ -22,10 +22,13 @@ import pytest
 
 pytest.importorskip("matplotlib")
 
+pytestmark = pytest.mark.pinned_stack
+
 _ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT / "scripts"))
 
-from figures import registry  # noqa: E402  (scripts/ goes on the path first)
+# scripts/ goes on the path first, so the import comes after it.
+from figures import registry  # noqa: E402
 
 _DOCS = _ROOT / "site" / "src" / "content" / "docs"
 #: How each language writes a count, capitalised when a sentence opens

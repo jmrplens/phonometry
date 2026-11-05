@@ -1143,6 +1143,72 @@ def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     ]
 
 
+def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_new_axes = _polar`` binds the name to the helper the value names,
+    at the top of the module, in a function under ``global`` and in the
+    function that calls it, as a ``def`` or an import of it would.
+
+    Only a ``def``, a ``class`` or an import bound a name, so a plain
+    ``plot`` that returns what such an alias makes passed, whether the alias
+    replaced a ``def`` that makes plain axes or stood alone.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _plain_axes():
+            return plt.subplots()[1]
+
+        def _new_axes():
+            return plt.subplots()[1]
+
+        def _go_polar():
+            global _new_axes
+            _new_axes = _polar
+
+        def plot_swapped(result: object) -> Axes:
+            return _new_axes()
+
+        def _plain():
+            return plt.subplots()[1]
+
+        _plain = _polar
+
+        def plot_replaced(result: object) -> Axes:
+            return _plain()
+
+        _alias = _polar
+
+        def plot_aliased(result: object) -> Axes:
+            return _alias()
+
+        def plot_local(result: object) -> Axes:
+            make = _polar
+            return make()
+
+        def plot_local_replaced(result: object) -> Axes:
+            make = _polar
+            make = _plain_axes
+            return make()
+
+        def plot_parameter(result: object, make=_plain_axes) -> Axes:
+            return make()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_aliased",
+        "plot_local",
+        "plot_replaced",
+        "plot_swapped",
+    ]
+
+
 def test_a_generic_class_s_type_parameter_is_no_function_of_the_module(
     tmp_path: pathlib.Path,
 ) -> None:

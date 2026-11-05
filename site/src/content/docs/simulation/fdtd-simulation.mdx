@@ -57,11 +57,13 @@ and the frequency-independent real-impedance boundary (Eqs. 4.33-4.35).
 
 The solver is **deterministic by design**: no random numbers and every
 operation in a fixed order, so on NumPy in float64 the same inputs produce
-bit-identical outputs on the same platform, and on CuPy the fields come out
-bit-identical to NumPy's on the GPU they were measured on. It is the engine
-behind the FDTD animations of this documentation, promoted to a public API
-with sources, pressure probes, rasterised obstacles, per-side boundary
-conditions and a frozen result object.
+bit-identical outputs on the same platform, and on CuPy in float64 the fields
+came out bit-identical to NumPy's over the scenarios measured on one GPU,
+driver and CuPy release
+([what is promised on each device](/phonometry/simulation/compute/#6-what-is-promised-on-each-device)).
+It is the engine behind the FDTD animations of this documentation, promoted
+to a public API with sources, pressure probes, rasterised obstacles,
+per-side boundary conditions and a frozen result object.
 
 Here is one of those animations, and it is a fair advertisement for what the
 rest of this page builds. Nothing in it is drawn: the colonnade is a boolean
@@ -191,8 +193,9 @@ contribution that does not scatter passing waves) at a grid cell:
 not splash a broadband transient) and `SignalSource` (an arbitrary sampled
 waveform, linearly interpolated onto the simulation time steps). Probes
 record the pressure at their cell every time step into the result. The
-probes and the snapshot cadence travel together as one `FDTDRecording`,
-passed as `recording=`; a run without one keeps only its time axis.
+probes, the snapshot cadence and the snapshot decimation travel together as
+one `FDTDRecording`, passed as `recording=`; a run without one keeps only its
+time axis.
 
 **Plane waves "from infinity".** Point sources in 2D are really line
 sources, so a diffuser or a barrier is often better interrogated with a
@@ -205,12 +208,15 @@ plane wavefront. Two tools cover it, each one-way through its own mechanism:
   is what makes it one-way, and behind the front the residual energy is
   at numerical noise level. This is what the QRD diffusion animation
   uses.
-- `PlaneWaveSource(direction=..., waveform=..., offset=...)` registered through
-  `add_source()` injects a sustained plane wave on a line of cells: the
-  incident pressure and the adjacent face velocity are driven together,
-  so the launched field is transversely plane to machine precision and
-  anything scattered back crosses the line untouched; with a sponge
-  configured behind the line it is then absorbed.
+- `PlaneWaveSource(direction=..., waveform=..., offset=...)`, registered
+  through `add_source()` or listed in an `FDTDRun`'s `sources`, injects a
+  sustained plane wave on a line of cells: the incident pressure and the
+  adjacent face velocity are driven together, so the launched field is
+  transversely plane to machine precision and anything scattered back
+  crosses the line untouched; with a sponge configured behind the line it
+  is then absorbed. `waveform` takes the time in seconds and returns the
+  incident pressure in pascals as one real number; an array or a text stops
+  the run with `TypeError` at the step that samples it.
 
 ```python
 from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
@@ -368,8 +374,26 @@ a virtual measurement rather than out of the value that went in.
 
 The stepping engine `FDTD2D` is public too: it exposes `step()`, `run()`,
 the field arrays and the energy, for callers that need frame-by-frame access
-(the documentation animations use it directly). A plane pulse launched down
-a duct against an impedance edge reproduces the textbook reflection
+(the documentation animations use it directly). It takes the same
+`compute=` as `fdtd_simulation`, and without one it follows `use()` and
+`PHONOMETRY_COMPUTE` ([Where a simulation runs](/phonometry/simulation/compute/));
+it steps in this process, so a placement that names a host raises
+`ValueError`. Off NumPy, `sim.p`, `sim.vx` and `sim.vy` are that device's own
+arrays. The blocks on this page step on NumPy and hand the fields to NumPy as
+they are; on another device, read a field through `sim.numpy_field("p")`, a
+NumPy copy on every device.
+
+The engine takes the boundaries as arguments of its own rather than as an
+`FDTDBoundaries`: `absorbing_layer_cells` (default 0, no sponge, where a
+run's record defaults to 20), `absorbing_sides` (all four sides once there is
+a sponge, unless they are named), `absorbing_layer_reflection` and
+`edge_impedance={side: Z}`. So
+`FDTDBoundaries(sides={"left": "absorbing", "top": 413.0}, absorbing_layer_cells=8)`
+reads
+`FDTD2D(..., absorbing_layer_cells=8, absorbing_sides=("left",), edge_impedance={"top": 413.0})`;
+left without `absorbing_sides`, the sponge would cover the impedance side
+too, and the engine refuses that with `ValueError`. A plane pulse launched
+down a duct against an impedance edge reproduces the textbook reflection
 coefficient:
 
 ```python
@@ -395,8 +419,9 @@ print(round(float(echo[np.abs(echo).argmax()] / incident), 2))  # 0.5
 # (Z - rho c)/(Z + rho c) = (3 - 1)/(3 + 1) = +0.5
 ```
 
-Before spending a single time step, `sim.plot_geometry()` draws the
-configured domain: edges, sponges, obstacles, sources and the probes you
+Before spending a single time step, the engine's `sim.plot_geometry()` draws
+the configured domain (an `FDTDRun` has none: build `FDTD2D` with the run's
+medium and these arguments): edges, sponges, obstacles, sources and the probes you
 intend to record, given as the `(ix, iy)` cells an `FDTDRecording` takes and
 refused in the words a run uses when one is off the grid or inside an
 obstacle. Catching a sponge on the wrong side or a probe in the
@@ -444,16 +469,20 @@ run that was *computed* wrongly, and every one of them is a line or two:
    domain the plateau is flat, and with a sponge or a `damping` map it
    decays. A total that climbs after the source is off is energy being
    created, and the run is not usable however plausible the snapshot looks.
-2. **`np.isfinite(sim.p).all()`** catches a blow-up before it silently
-   poisons an FFT: once a single cell is `inf`, every spectrum taken from
-   that record is `nan` and the plot is empty rather than wrong-looking.
-3. **No probe inside a sponge, an obstacle or a source cell.** All three
-   read something that is not the field: an obstacle cell holds exactly
-   0.0 for the whole run, a sponge cell reads the attenuated field on its
-   way out, and a soft-source cell reads mostly the injection. On the
-   barrier scene of section 5, a probe on the source cell peaks 6.7 times
-   higher than probe A, 0.4 m away, and a probe inside the barrier reads
-   exactly 0.0 for the whole run.
+2. **`np.isfinite(sim.numpy_field("p")).all()`** catches a blow-up before
+   it silently poisons an FFT: once a single cell is `inf`, every spectrum
+   taken from that record is `nan` and the plot is empty rather than
+   wrong-looking.
+3. **No probe inside a sponge or on a source cell.** A probe inside an
+   obstacle never gets that far: a run refuses it when it is built, in the
+   words `plot_geometry` uses
+   (`ValueError: probe (151, 100) lies inside an obstacle` for a cell of
+   the barrier of section 5). A sponge cell and a
+   source cell are accepted, and both read something that is not the field:
+   a sponge cell reads the attenuated field on its way out, and a
+   soft-source cell reads mostly the injection. On the barrier scene of
+   section 5, a probe on the source cell peaks 6.7 times higher than
+   probe A, 0.4 m away.
 4. **Apply the ten-cell rule with the *smallest* sound speed in the map**,
    at the highest frequency the analysis will actually use, not with the
    air value and not with the highest frequency the source happens to
@@ -517,21 +546,27 @@ quadratically from zero at its inner face to a peak at the outer edge. Because
 $\sigma$ decays pressure and velocity together, the characteristic impedance
 inside it stays $\rho c$ and a *uniform* lossy region would not reflect at
 all; everything that comes back is reflected by the *gradient*. That makes the
-rule a rule in **cells**, not in wavelengths, and it is worth seeing the
-measurement, taken at normal incidence on a plane-wave duct:
+rule a rule in **cells** more than in wavelengths, and it is worth seeing the
+measurement, taken at normal incidence on a plane-wave duct as the spectrum
+of a pulse's echo over the spectrum of the pulse:
 
 | `absorbing_layer_cells` | 5 | 10 | 20 | 40 | 60 |
 |---|---|---|---|---|---|
-| echo/incident at 1 kHz | −36 dB | −49 dB | −62 dB | −76 dB | −85 dB |
-| echo/incident at 125 Hz | — | — | −61 dB | — | — |
+| echo/incident at 125 Hz | −30 dB | −42 dB | −55 dB | −67 dB | −76 dB |
+| echo/incident at 1 kHz | −31 dB | −44 dB | −61 dB | −80 dB | −86 dB |
+| echo/incident at 2 kHz | −32 dB | −49 dB | −71 dB | −91 dB | −84 dB |
 
-A 20-cell layer returns −61 dB at 125 Hz, where it is 0.07 wavelengths
-thick, and −64 dB at 2 kHz, where it is 1.2 wavelengths thick: the residual
-is flat within 3 dB over a 16:1 frequency range. Twenty cells is a good
-floor, forty is generous. `absorbing_layer_reflection` (default $10^{-4}$) sets the
-round-trip amplitude the ramp is *designed* for, and it is not a promise:
-at 20 cells the measured residual is −51 dB for $10^{-2}$, −62 dB for
-$10^{-4}$ and −59 dB for $10^{-6}$, because a more aggressive target makes
+A 20-cell layer returns −55 dB at 125 Hz, where it is 0.07 wavelengths
+thick, and −71 dB at 2 kHz, where it is 1.2 wavelengths thick. Thicker in
+wavelengths it does reflect less, but the count of cells weighs more: those
+20 cells at 125 Hz do better than 10 cells at 2 kHz, which are 0.58
+wavelengths thick and return −49 dB. Twenty cells is a good floor, forty is
+generous. `absorbing_layer_reflection`, an argument of the
+engine `FDTD2D` (default $10^{-4}$; an `FDTDRun` takes no such argument and
+always designs its sponge for that default), sets the round-trip amplitude
+the ramp is *designed* for, and it is not a promise:
+at 20 cells the residual measured at 1 kHz is −45 dB for $10^{-2}$, −61 dB
+for $10^{-4}$ and −57 dB for $10^{-6}$, because a more aggressive target makes
 the ramp steeper and the steeper ramp reflects more. The default is close to
 the optimum, and the way to buy more is thickness.
 
@@ -541,8 +576,8 @@ cells of the ramp per wavelength travelled. Take the same 20-cell layer, put
 a pulse source 1 m above it, and measure what the layer adds to a probe at
 the same height by re-running with the layer 5 m away and subtracting: the
 addition is −30 dB relative to the direct arrival at 27° from the normal,
-−18 dB at 45°, −10 dB at 60° and −3 dB at 80°, against the −62 dB the same
-layer gives at normal incidence. A long shallow domain lined with sponges is
+−18 dB at 45°, −10 dB at 60° and −3 dB at 80°, against the −55 to −71 dB
+the same layer gives at normal incidence. A long shallow domain lined with sponges is
 therefore a duct, not a free field. The honest test is the one just
 described: move the boundary further out and confirm the probe trace does
 not change. Second, the sponge is not a place to stand: probes, sources and
@@ -621,6 +656,12 @@ whose NTFF polar response tracks the Fraunhofer prediction of
 `predict_diffuser_polar_response` (pattern correlation 0.94, ISO
 17497-2 directional diffusion coefficient within 0.08), and the deep
 subwavelength metadiffuser below.
+
+The transform reads the medium from its `fluid=` argument, by default
+`SIMULATION_AIR` (343 m/s and 1.2 kg/m³, the air every run on this page
+steps in), not from the run. A run whose medium at the contour has another
+`c` or `rho` passes a `Fluid` with those values, or the wavenumber and the
+velocity term of the integral are those of air.
 
 The far-field chain is what finally closes the metadiffuser loop end to
 end: the Table-1 panel of the paper (every slit, neck and cavity meshed
@@ -827,13 +868,19 @@ work grows **eightfold** for a fourfold reduction in dispersion error. The
 ten-cell rule is therefore a floor to sit on, not a target to beat.
 
 Memory follows the same arithmetic. The solver holds twelve `float64` maps
-(pressure, the two velocity components, the sound speed, the density, the
-bulk modulus, the face densities and the decay factors): about 96 bytes per
-cell, 113 with an obstacle mask. The metadiffuser scene thus lives in about
-39 MB. Stored snapshots are the knob nobody names: each one is another 8
-bytes per cell, so `snapshot_every=1` on that scene would ask for roughly
-38 GB. Choose the cadence from the number of frames you actually want; the
-animations in this documentation use a few hundred. Probe histories cost one
+(pressure, the two velocity components, the divergence buffer, the sound
+speed, the density, the bulk modulus, the face densities and the decay
+factors): about 96 bytes per cell, 113 with an obstacle mask. The
+metadiffuser scene thus lives in about 38 MB. Stored snapshots are the knob
+nobody names: each one is another 8 bytes per cell in float64, so
+`snapshot_every=1` on that scene would ask for roughly 38 GB. A float32 run
+halves that, and `snapshot_decimation=d`, the third field of an
+`FDTDRecording`, keeps one cell in $d^2$
+([Where a simulation runs](/phonometry/simulation/compute/), sections 1
+and 7). Choose the cadence from the number of frames you actually want; the
+animations in this documentation use a few hundred. For a video,
+`write_fdtd_animation` draws each frame as it is computed and stores none
+(see [Writing the run to a video](#writing-the-run-to-a-video)). Probe histories cost one
 float per probe per step, which is nothing. The practical order of work is
 to size the grid from $f_\text{max}$, estimate the step count from the
 duration, and try the whole thing once at double the cell size to check the
@@ -889,10 +936,10 @@ relation gives
 $v_\mathrm{g}/c = \cos\theta / \sqrt{1 - S^2\sin^2\theta}$ with
 $\theta = k\,\Delta x / 2$, whose expansion is
 $1 - (1 - S^2)(k\,\Delta x)^2/8$: the same law with 8 in place of 24. Thus a
-wavepacket arrives three times later than the phase rule suggests. At 10
+wavepacket's lag is three times what the phase rule suggests. At 10
 cells per wavelength and the default `cfl` that is 4.1 %, not 1.4 %. And
 because it is a speed error, it is paid **per metre travelled**: the same
-grid that is 4 % slow costs a centimetre over a metre and a metre over
+grid that is 4 % slow costs four centimetres over a metre and a metre over
 twenty-five.
 
 The clip below measures both statements. One 500 Hz tone burst is launched
@@ -1017,7 +1064,9 @@ solver has its own guide,
 
 ## Writing the run to a video
 
-The run record this guide builds goes to the video writer as it is:
+An `FDTDRun` goes to the video writer unchanged once its `FDTDRecording`
+sets `snapshot_every`, which is the frame cadence; a run without it, like the
+one of section 1, is refused with `ValueError`.
 `simulation.write_fdtd_animation` steps it and draws its pressure field into
 a WebM, an MP4 or a GIF as it is computed, a frame every `snapshot_every`
 steps, without storing the snapshots.
@@ -1047,14 +1096,15 @@ The staggered pressure-velocity FDTD scheme of Attenborough & Van Renterghem,
 chapter 4: the governing equations (Eqs. 4.3-4.4), the leapfrog update (Eqs.
 4.11-4.12), the Courant stability condition (Eqs. 4.13-4.14), the rigid
 boundary (Eq. 4.32) and the frequency-independent real-impedance boundary
-(Eqs. 4.33-4.35), exposed through `fdtd_simulation`/ `FDTD2D` with
-`GaussianPulse`, `CWSource` and `SignalSource` sources, pressure probes and a
-rasterised `obstacle_mask`, with `damping` as the only volumetric loss.
+(Eqs. 4.33-4.35), exposed through `fdtd_simulation`/`FDTD2D` with the point
+sources `GaussianPulse`, `CWSource` and `SignalSource`, the one-way
+plane-wave launchers `PlaneWaveSource` and `add_plane_wave`, pressure probes
+and a rasterised `obstacle_mask`, with `damping` as the only volumetric loss.
 Section 3 derives the four sizing rules the resolution rule does not cover:
 the source bandwidth, the run duration, the sponge thickness in cells, and the
 transient and DFT window of a steady-state measurement. Section 2 lists
 the six checks that say whether a run is usable. Validated against closed-form
-oracles: the rigid-room normal modes (Kuttruff §3), free-field arrival times
+oracles: the rigid-room normal modes (Kuttruff ch. 3), free-field arrival times
 and cylindrical 2D decay, the rigid-wall image echo, the impedance reflection
 coefficient and the dispersion relation of section 6, with the measured
 convergence order matching the scheme's second-order design. The
@@ -1095,10 +1145,15 @@ coupling](/phonometry/simulation/elastic-waves/).
 - [Where a simulation runs](/phonometry/simulation/compute/): the same run on
   an NVIDIA GPU through CuPy or on PyTorch, and what is promised about its
   numbers.
-- [Conformance report](/phonometry/reference/conformance/): two of the closed-form
-  validation anchors of section 6 run there.
+- [Writing animations and FDTD runs to video](/phonometry/io/videos/): the
+  frame, its colour scale and the encoder of `write_fdtd_animation`.
+- [Conformance report](/phonometry/reference/conformance/): the box mode and
+  the free-field arrival of section 6, and the ripple and level of the
+  near-to-far-field monopole of section 4, run there.
 - API reference: [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.ntff`](/phonometry/reference/api/simulation/ntff/).
+  [`simulation.ntff`](/phonometry/reference/api/simulation/ntff/),
+  [`simulation.compute`](/phonometry/reference/api/simulation/compute/),
+  [`simulation.video`](/phonometry/reference/api/simulation/video/).
 
 </SeeAlso>
 
@@ -1115,8 +1170,8 @@ number is then $S = \mathrm{cfl}/\sqrt{2} = 0.424$, so the $1 - S^2$ factor is
 0.82), and halving $\Delta x$
 quarters the error (the scheme is second order). With $\Delta x = 1$ cm the
 10-cell point in air sits at roughly 3.4 kHz. That bound is a *phase* speed
-error; a pulse travels at the group speed and is three times slower still:
-4.1 % at ten cells, and it pays this per metre travelled. See
+error; a pulse travels at the group speed, whose deficit is three times
+larger: 4.1 % at ten cells, and it pays this per metre travelled. See
 [section 6](#6-numerical-dispersion-and-accuracy) for the measurement on three grids.
 
 ### How wide should the source pulse and the sponge be?
@@ -1124,12 +1179,13 @@ error; a pulse travels at the group speed and is three times slower still:
 The spectrum of a `GaussianPulse` of half-width $w$ (`half_width_s`) is
 $\mathrm{e}^{-(\pi f\,w)^2}$, 20 dB down at
 $f = 0.483/w$, so $w \ge 0.5/f_\text{max}$ keeps the injected
-energy inside the band the grid resolves. The sponge is a rule in **cells**,
-not in wavelengths: because its absorption rate acts on pressure and velocity
+energy inside the band the grid resolves. The sponge is a rule in **cells**
+more than in wavelengths: because its absorption rate acts on pressure and velocity
 together, the layer keeps a real $\rho c$ impedance and only its *gradient*
-reflects. Twenty cells return about −61 dB at normal incidence, flat within
-3 dB from 125 Hz to 2 kHz; forty cells return about −76 dB. Tightening
-`absorbing_layer_reflection` past its 1e-4 default makes the ramp steeper and the
+reflects. At normal incidence twenty cells return −55 dB at 125 Hz and
+−71 dB at 2 kHz, forty cells −67 dB and −91 dB. Tightening the
+engine's `absorbing_layer_reflection` (an `FDTD2D` argument; a run always
+designs its sponge for the $10^{-4}$ default) makes the ramp steeper and the
 residual *worse*. Section 3 works all of this, and the run duration and DFT
 window with it.
 

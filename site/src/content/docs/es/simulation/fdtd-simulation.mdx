@@ -60,11 +60,13 @@ tiempo (Ecs. 4.11-4.12), la condición de estabilidad de Courant
 El esquema es **determinista por diseño**: sin números aleatorios y con
 todas las operaciones en un orden fijo, de modo que con NumPy en float64 las
 mismas entradas producen salidas idénticas bit a bit en la misma plataforma,
-y con CuPy los campos salen idénticos bit a bit a los de NumPy en la GPU en
-la que se midieron. Es el motor de
-las animaciones FDTD de esta documentación, elevado a API pública con
-fuentes, sondas de presión, obstáculos rasterizados, condiciones de contorno
-por lado y un objeto de resultado congelado.
+y con CuPy en float64 los campos salieron idénticos bit a bit a los de NumPy
+en los escenarios medidos en una GPU, un controlador y una versión de CuPy
+concretos ([lo que se promete en cada
+dispositivo](/phonometry/es/simulation/compute/#que-se-promete-en-cada-dispositivo)).
+Es el motor de las animaciones FDTD de esta documentación, elevado a API
+pública con fuentes, sondas de presión, obstáculos rasterizados, condiciones
+de contorno por lado y un objeto de resultado congelado.
 
 Aquí tienes una de esas animaciones, y es un anuncio honesto de lo que
 construye el resto de la página. En ella no hay nada dibujado: la columnata es
@@ -150,12 +152,12 @@ donde se escribe la ejecución; `fdtd_simulation(run)` la calcula, y
 ```python
 from phonometry import simulation
 
-# Un dominio de aire de 3.0 x 2.0 m: 300 x 200 celdas de 1 cm.
+# Un dominio de aire de 3,0 x 2,0 m: 300 x 200 celdas de 1 cm.
 run = simulation.FDTDRun(
     c=343.0,           # velocidad del sonido [m/s], escalar o mapa sobre la malla
     dx=0.01,           # tamaño de celda cuadrada [m]
     duration_s=2.0e-3, # tiempo simulado [s] (dt se deriva, no se da)
-    shape=(200, 300),  # (ny, nx) celdas -> un dominio de 2.0 x 3.0 m
+    shape=(200, 300),  # (ny, nx) celdas -> un dominio de 2,0 x 3,0 m
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -202,8 +204,8 @@ arranque no salpique el campo con un transitorio de banda ancha) y
 `SignalSource` (una forma de onda muestreada arbitraria, interpolada
 linealmente sobre los pasos temporales de la simulación). Las sondas
 registran la presión en su celda en cada paso temporal dentro del resultado.
-Las sondas y la cadencia de las instantáneas viajan juntas en un
-`FDTDRecording`, que se pasa como `recording=`; una ejecución sin él solo
+Las sondas, la cadencia y el diezmado de las instantáneas viajan juntos en
+un `FDTDRecording`, que se pasa como `recording=`; una ejecución sin él solo
 guarda su eje temporal.
 
 **Ondas planas «desde el infinito».** Una fuente puntual en 2D es en
@@ -218,13 +220,16 @@ unidireccional por su propio mecanismo:
   atrás es lo que la hace unidireccional, y tras el frente la energía
   residual queda al nivel del ruido numérico. Es lo que usa la animación
   de difusión del QRD.
-- `PlaneWaveSource(direction=..., waveform=..., offset=...)` registrada con
-  `add_source()` inyecta una onda plana sostenida sobre una línea de
-  celdas: la presión incidente y la velocidad de la cara adyacente se
-  excitan a la vez, de modo que el campo lanzado es plano en la
-  transversal a precisión de máquina y lo que se dispersa hacia atrás
-  cruza la línea intacto; con una esponja configurada detrás queda
-  absorbido.
+- `PlaneWaveSource(direction=..., waveform=..., offset=...)`, registrada
+  con `add_source()` o incluida en las `sources` de un `FDTDRun`, inyecta
+  una onda plana sostenida sobre una línea de celdas: la presión incidente
+  y la velocidad de la cara adyacente se excitan a la vez, de modo que el
+  campo lanzado es plano en la transversal a precisión de máquina y lo que
+  se dispersa hacia atrás cruza la línea intacto; con una esponja
+  configurada detrás queda absorbido. `waveform` recibe el tiempo en
+  segundos y devuelve la presión incidente en pascales como un único número
+  real; un array o un texto detienen la ejecución con `TypeError` en el paso
+  que la muestrea.
 
 ```python
 from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
@@ -241,7 +246,7 @@ Las dos afirmaciones cuantitativas de ese punto son medibles, y la figura de
 abajo las mide sobre exactamente esa escena. «Plano en la transversal a
 precisión de máquina» es literal: pasado el transitorio de llenado, cada
 columna del campo asentado lleva el *mismo* valor float64, así que la mayor
-diferencia a lo ancho de una fila es 0.0 y no simplemente pequeña.
+diferencia a lo ancho de una fila es 0,0 y no simplemente pequeña.
 «Unidireccional» no lo es: la línea de inyección deja escapar un poco hacia
 atrás, y lo que queda detrás solo es pequeño porque ahí está la esponja para
 comérselo: 1,4 × 10⁻⁴ de la energía del campo, es decir −38,4 dB, se queda
@@ -389,9 +394,28 @@ muestra modelada sale de una medición virtual y no del valor que entró.
 
 El motor de avance `FDTD2D` también es público: expone `step()`, `run()`,
 los arrays del campo y la energía, para quien necesite acceso fotograma a
-fotograma (las animaciones de la documentación lo usan directamente). Un
-pulso plano lanzado por un conducto contra un borde de impedancia reproduce
-el coeficiente de reflexión de libro:
+fotograma (las animaciones de la documentación lo usan directamente). Admite
+el mismo `compute=` que `fdtd_simulation` y, sin él, sigue a `use()` y a
+`PHONOMETRY_COMPUTE` ([Dónde se calcula una
+simulación](/phonometry/es/simulation/compute/)); avanza en este proceso, así
+que una ubicación que nombra un host lanza `ValueError`. Fuera de NumPy,
+`sim.p`, `sim.vx` y `sim.vy` son arrays propios de ese dispositivo. Los
+bloques de esta página avanzan con NumPy y pasan los campos a NumPy tal
+cual; en otro dispositivo, lee un campo con `sim.numpy_field("p")`, una
+copia en NumPy en cualquier dispositivo.
+
+El motor recibe los contornos como argumentos propios y no como un
+`FDTDBoundaries`: `absorbing_layer_cells` (por defecto 0, sin esponja, donde
+el registro de una ejecución toma 20), `absorbing_sides` (los cuatro lados
+en cuanto hay esponja, salvo que se nombren), `absorbing_layer_reflection` y
+`edge_impedance={lado: Z}`. Así,
+`FDTDBoundaries(sides={"left": "absorbing", "top": 413.0}, absorbing_layer_cells=8)`
+se escribe
+`FDTD2D(..., absorbing_layer_cells=8, absorbing_sides=("left",), edge_impedance={"top": 413.0})`;
+sin `absorbing_sides`, la esponja cubriría también el lado de impedancia, y
+el motor lo rechaza con `ValueError`. Un pulso plano lanzado por un conducto
+contra un borde de impedancia reproduce el coeficiente de reflexión de
+libro:
 
 ```python
 import numpy as np
@@ -416,8 +440,10 @@ print(round(float(echo[np.abs(echo).argmax()] / incident), 2))  # 0.5
 # (Z - rho c)/(Z + rho c) = (3 - 1)/(3 + 1) = +0.5
 ```
 
-Antes de gastar un solo paso de tiempo, `sim.plot_geometry()` dibuja el
-dominio configurado: bordes, esponjas, obstáculos, fuentes y las sondas que
+Antes de gastar un solo paso de tiempo, `sim.plot_geometry()`, que es del
+motor, dibuja el dominio configurado (un `FDTDRun` no lo tiene: se construye
+`FDTD2D` con el medio de la ejecución y estos argumentos): bordes, esponjas,
+obstáculos, fuentes y las sondas que
 piensas registrar, dadas como las celdas `(ix, iy)` que toma un
 `FDTDRecording` y rechazadas con las mismas palabras que una ejecución cuando
 alguna cae fuera de la malla o dentro de un obstáculo. Pillar una esponja en el lado equivocado o una sonda mal
@@ -466,18 +492,20 @@ ejecución mal *calculada*, y cada una de ellas es una línea o dos:
    una esponja o un mapa `damping` decae. Un total que sube después de apagar
    la fuente es energía que se está creando, y la ejecución no sirve por
    verosímil que parezca la instantánea.
-2. **`np.isfinite(sim.p).all()`** pilla una divergencia antes de que envenene
-   una FFT en silencio: en cuanto una sola celda es `inf`, todo espectro
-   sacado de ese registro es `nan` y el gráfico sale vacío en vez de salir
-   mal.
-3. **Ninguna sonda dentro de una esponja, de un obstáculo o de una celda de
-   fuente.** Las tres leen algo que no es el campo: una celda de obstáculo
-   vale exactamente 0.0 durante toda la ejecución, una celda de esponja lee
-   el campo ya atenuado camino de la salida, y una celda de fuente blanda lee
-   sobre todo la inyección; en la escena de la barrera de la sección 5, una
-   sonda sobre la celda de la fuente marca un pico 6,7 veces mayor que la
-   sonda A, a 0,4 m, y una sonda dentro de la barrera lee exactamente 0.0
-   durante toda la ejecución.
+2. **`np.isfinite(sim.numpy_field("p")).all()`** pilla una divergencia
+   antes de que envenene una FFT en silencio: en cuanto una sola celda es
+   `inf`, todo espectro sacado de ese registro es `nan` y el gráfico sale
+   vacío en vez de salir mal.
+3. **Ninguna sonda dentro de una esponja ni sobre una celda de fuente.** Una
+   sonda dentro de un obstáculo no llega tan lejos: una ejecución la rechaza
+   al construirse, con las mismas palabras que `plot_geometry`
+   (`ValueError: probe (151, 100) lies inside an obstacle` para una celda
+   de la barrera de la sección 5). Una celda de esponja y una celda de
+   fuente se aceptan, y las dos leen algo que no es el campo: una celda de
+   esponja lee el campo ya atenuado camino de la salida, y una celda de
+   fuente blanda lee sobre todo la inyección. En la escena de la barrera de
+   la sección 5, una sonda sobre la celda de la fuente marca un pico 6,7
+   veces mayor que la sonda A, a 0,4 m.
 4. **Aplica la regla de las diez celdas con la velocidad del sonido *más
    baja* del mapa**, a la frecuencia más alta que el análisis vaya a usar de
    verdad, no con el valor del aire ni con la frecuencia más alta que la
@@ -550,21 +578,27 @@ borde exterior. Como $\sigma$ hace decaer a la vez la presión y la
 velocidad, la impedancia característica dentro de ella se mantiene en
 $\rho c$ y una región con pérdidas *uniforme* no reflejaría nada; todo lo
 que vuelve lo refleja el *gradiente*. Eso convierte la regla en una regla en
-**celdas**, no en longitudes de onda, y merece la pena ver la medición,
-tomada a incidencia normal sobre un conducto de onda plana:
+**celdas** más que en longitudes de onda, y merece la pena ver la medición,
+tomada a incidencia normal sobre un conducto de onda plana como el espectro
+del eco de un pulso sobre el espectro del pulso:
 
 | `absorbing_layer_cells` | 5 | 10 | 20 | 40 | 60 |
 |---|---|---|---|---|---|
-| eco/incidente a 1 kHz | −36 dB | −49 dB | −62 dB | −76 dB | −85 dB |
-| eco/incidente a 125 Hz | — | — | −61 dB | — | — |
+| eco/incidente a 125 Hz | −30 dB | −42 dB | −55 dB | −67 dB | −76 dB |
+| eco/incidente a 1 kHz | −31 dB | −44 dB | −61 dB | −80 dB | −86 dB |
+| eco/incidente a 2 kHz | −32 dB | −49 dB | −71 dB | −91 dB | −84 dB |
 
-Una capa de 20 celdas devuelve −61 dB a 125 Hz, donde mide 0,07 longitudes
-de onda de grosor, y −64 dB a 2 kHz, donde mide 1,2 longitudes de onda: el
-residuo es plano dentro de 3 dB sobre un margen de frecuencias de 16:1.
-Veinte celdas son un buen suelo; cuarenta, generosas. `absorbing_layer_reflection`
-(por defecto $10^{-4}$) fija la amplitud de ida y vuelta para la que la
-rampa está *diseñada*, y no es una promesa: con 20 celdas el residuo medido
-es de −51 dB para $10^{-2}$, −62 dB para $10^{-4}$ y −59 dB para $10^{-6}$,
+Una capa de 20 celdas devuelve −55 dB a 125 Hz, donde mide 0,07 longitudes
+de onda de grosor, y −71 dB a 2 kHz, donde mide 1,2 longitudes de onda. Más
+gruesa en longitudes de onda refleja menos, pero pesa más el número de
+celdas: esas 20 celdas a 125 Hz lo hacen mejor que 10 celdas a 2 kHz, que
+miden 0,58 longitudes de onda y devuelven −49 dB. Veinte celdas son un buen
+suelo; cuarenta, generosas.
+`absorbing_layer_reflection`, argumento del motor `FDTD2D` (por defecto
+$10^{-4}$; un `FDTDRun` no lo admite y diseña siempre su esponja para ese
+valor), fija la amplitud de ida y vuelta para la que la rampa está
+*diseñada*, y no es una promesa: con 20 celdas el residuo medido a 1 kHz
+es de −45 dB para $10^{-2}$, −61 dB para $10^{-4}$ y −57 dB para $10^{-6}$,
 porque un objetivo más agresivo hace la rampa más abrupta y una rampa más
 abrupta refleja más. El valor por defecto está cerca del óptimo, y la manera
 de comprar más es el grosor.
@@ -576,7 +610,7 @@ Toma esa misma capa de 20 celdas, pon una fuente de pulso 1 m por encima y
 mide lo que la capa añade a una sonda a la misma altura volviendo a ejecutar
 con la capa a 5 m y restando: lo que añade es −30 dB respecto a la llegada
 directa a 27° de la normal, −18 dB a 45°, −10 dB a 60° y −3 dB a 80°, frente
-a los −62 dB que esa misma capa da a incidencia normal. Un dominio largo y
+a los −55 a −71 dB que esa misma capa da a incidencia normal. Un dominio largo y
 poco profundo forrado de esponjas es, por tanto, un conducto y no un campo
 libre. La prueba honesta es la que se acaba de describir: aleja el contorno
 y confirma que la traza de la sonda no cambia. La segunda, la esponja no es
@@ -590,9 +624,9 @@ se descarta es el tiempo de llenado del dominio $\sqrt{L_x^2+L_y^2}/c$, más
 una travesía por cada reflexión que todavía importe, más el arranque de la
 fuente (`ramp_cycles / frequency`, tres periodos por defecto), más el tiempo
 que tarde en excitarse cualquier geometría resonante, del orden de $Q$
-periodos, que es toda la razón por la que la ejecución del metadifusor de
-abajo espera 8 ms donde el monopolo desnudo espera 4,5 ms: sus cuellos y
-cavidades son resonadores y tienen que llenarse. La ventana que viene
+periodos. Por eso la ejecución del metadifusor de abajo espera 8 ms donde el
+monopolo desnudo espera 4,5 ms: sus cuellos y cavidades son resonadores y
+tienen que llenarse. La ventana que viene
 después debería abarcar un número entero de periodos de la fuente, para que
 la DFT al vuelo no vea truncamiento; con diez periodos sobra.
 
@@ -662,6 +696,13 @@ pozos de hasta 27,4 cm, cuya respuesta polar NTFF sigue la predicción de
 Fraunhofer de `predict_diffuser_polar_response` (correlación de patrones
 de 0,94, coeficiente de difusión direccional ISO 17497-2 dentro de
 0,08), y el metadifusor en sublongitud de onda profunda de abajo.
+
+La transformación toma el medio de su argumento `fluid=`, por defecto
+`SIMULATION_AIR` (343 m/s y 1,2 kg/m³, el aire en el que avanzan todas las
+ejecuciones de esta página), y no de la ejecución. Una ejecución cuyo medio
+en el contorno tiene otra `c` u otra `rho` pasa un `Fluid` con esos valores,
+o el número de onda y el término de velocidad de la integral serán los del
+aire.
 
 La cadena de campo lejano es la que por fin cierra de extremo a extremo el
 círculo del metadifusor: el panel de la Tabla 1 del artículo, con cada
@@ -828,7 +869,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from phonometry import simulation
 
-# Un campo libre de 3.0 x 2.0 m (bordes absorbentes) con una barrera
+# Un campo libre de 3,0 x 2,0 m (bordes absorbentes) con una barrera
 # rígida delgada: la sonda A ve el pulso directo más la reflexión de la
 # barrera, la sonda B queda en sombra y solo recibe la onda difractada.
 mask = np.zeros((200, 300), dtype=bool)
@@ -876,15 +917,21 @@ dispersión. La regla de las diez celdas es, por tanto, un suelo en el que
 asentarse y no un objetivo que batir.
 
 La memoria sigue la misma aritmética. El esquema guarda doce mapas
-`float64` (la presión, las dos componentes de la velocidad, la velocidad del
-sonido, la densidad, el módulo de compresibilidad, las densidades en las
-caras y los factores de caída): unos 96 bytes por celda, 113 con una máscara
-de obstáculos, así que la escena del metadifusor vive en unos 39 MB. Las
-instantáneas almacenadas son el mando que nadie nombra: cada una son otros 8
-bytes por celda, así que `snapshot_every=1` sobre esa escena pediría del
-orden de 38 GB. Elige la cadencia a partir del número de fotogramas que
+`float64` (la presión, las dos componentes de la velocidad, el búfer de la
+divergencia, la velocidad del sonido, la densidad, el módulo de
+compresibilidad, las densidades en las caras y los factores de caída): unos
+96 bytes por celda, 113 con una máscara de obstáculos, así que la escena del
+metadifusor vive en unos 38 MB. Las instantáneas almacenadas son el mando
+que nadie nombra: cada una son otros 8 bytes por celda en float64, así que
+`snapshot_every=1` sobre esa escena pediría del orden de 38 GB. Una
+ejecución en float32 lo reduce a la mitad, y `snapshot_decimation=d`, el
+tercer campo de un `FDTDRecording`, guarda una celda de cada $d^2$
+([Dónde se calcula una simulación](/phonometry/es/simulation/compute/),
+secciones 1 y 7). Elige la cadencia a partir del número de fotogramas que
 quieres de verdad; las animaciones de esta documentación usan unos
-centenares. Las historias de sonda cuestan un float por sonda y por paso,
+centenares. Para un vídeo, `write_fdtd_animation` dibuja cada fotograma a
+medida que se calcula y no guarda ninguno (véase [Escribir la simulación en
+un vídeo](#escribir-la-simulacion-en-un-video)). Las historias de sonda cuestan un float por sonda y por paso,
 que no es nada. El orden práctico de trabajo es dimensionar la malla a
 partir de $f_\text{max}$, estimar el número de pasos a partir de la
 duración, y probar el conjunto una vez con el doble de tamaño de celda para
@@ -948,11 +995,11 @@ relación de dispersión da
 $v_\mathrm{g}/c = \cos\theta / \sqrt{1 - S^2\sin^2\theta}$ con
 $\theta = k\,\Delta x / 2$, cuyo desarrollo es
 $1 - (1 - S^2)(k\,\Delta x)^2/8$: la misma ley con un 8 en lugar de un 24,
-así que un paquete de ondas llega tres veces más tarde de lo que sugiere la
+así que el retraso de un paquete de ondas es el triple del que sugiere la
 regla de la fase. Con 10 celdas por longitud de onda y el `cfl` por defecto
 eso es el 4,1 %, no el 1,4 %. Y como es un error de velocidad, se paga **por
-metro recorrido**: la misma malla que va un 4 % lenta cuesta un centímetro
-en un metro y un metro en veinticinco.
+metro recorrido**: la misma malla que va un 4 % lenta cuesta cuatro
+centímetros en un metro y un metro en veinticinco.
 
 El clip de abajo mide las dos afirmaciones. Se lanza una sola ráfaga tonal
 de 500 Hz por tres tubos planos idénticos en todo salvo en $\Delta x$
@@ -1011,7 +1058,7 @@ print(round(float(freqs[sel][np.argmax(spec[sel])]), 1))        # 298.9  medido
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_room_modes.svg" alt="Espectro de la presión en la sonda de una caja FDTD rígida de 1,0 por 0,7 metros entre 100 y 450 Hz: cinco picos agudos que caen sobre las frecuencias modales analíticas punteadas de los modos (1,0), (0,1), (1,1), (2,0) y (2,1)" width="88%" />
 
-*El espectro en la sonda del ensayo de caja rígida presenta sus picos sobre
+*El espectro en la sonda de la ejecución en caja rígida presenta sus picos sobre
 las frecuencias modales analíticas
 $f = (c/2)\sqrt{(n_x/L_x)^2 + (n_y/L_y)^2}$ (Kuttruff 6.ª ed., cap. 3). El
 pico (1,1) cae un 0,05 % por debajo y la cota de arriba predice un 0,04 %,
@@ -1081,13 +1128,16 @@ Scholte y transmisión de placas sumergidas. Ese esquema tiene su
 propia guía,
 [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/).
 
+<span id="escribir-la-simulacion-en-un-video"></span>
+
 ## Escribir la simulación en un vídeo
 
-El registro de la ejecución que construye esta guía pasa tal cual a la
-función que escribe el vídeo: `simulation.write_fdtd_animation` hace avanzar
-esa ejecución y dibuja su campo de presión en un WebM, un MP4 o un GIF a
-medida que se calcula, un fotograma cada `snapshot_every` pasos, sin guardar
-las instantáneas.
+Un `FDTDRun` pasa sin cambios a la función que escribe el vídeo en cuanto su
+`FDTDRecording` fija `snapshot_every`, que es la cadencia de fotogramas; una
+ejecución sin él, como la de la sección 1, se rechaza con `ValueError`.
+`simulation.write_fdtd_animation` hace avanzar esa ejecución y dibuja su
+campo de presión en un WebM, un MP4 o un GIF a medida que se calcula, un
+fotograma cada `snapshot_every` pasos, sin guardar las instantáneas.
 [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/)
 explica cómo se dibuja un fotograma y se encuentra su escala de color, qué
 codificador escribe el archivo y cómo la misma llamada avanza en una GPU o va
@@ -1116,9 +1166,10 @@ capítulo 4: las ecuaciones de gobierno (Ecs. 4.3-4.4), la actualización
 leapfrog (Ecs. 4.11-4.12), la condición de estabilidad de Courant (Ecs.
 4.13-4.14), el contorno rígido (Ec. 4.32) y el contorno de impedancia real
 independiente de la frecuencia (Ecs. 4.33-4.35), expuestos a través de
-`fdtd_simulation`/`FDTD2D` con las fuentes `GaussianPulse`, `CWSource` y
-`SignalSource`, sondas de presión y una `obstacle_mask` rasterizada, con
-`damping` como única pérdida volumétrica. La sección 3 deduce las cuatro
+`fdtd_simulation`/`FDTD2D` con las fuentes puntuales `GaussianPulse`,
+`CWSource` y `SignalSource`, los lanzadores unidireccionales de onda plana
+`PlaneWaveSource` y `add_plane_wave`, sondas de presión y una
+`obstacle_mask` rasterizada, con `damping` como única pérdida volumétrica. La sección 3 deduce las cuatro
 reglas de dimensionado que la regla de resolución no cubre (el ancho de banda
 de la fuente, la duración de la ejecución, el grosor de la esponja en celdas,
 y el transitorio y la ventana DFT de una medición en régimen estacionario), y
@@ -1166,10 +1217,17 @@ fluido-sólido](/phonometry/es/simulation/elastic-waves/).
 - [Dónde se calcula una simulación](/phonometry/es/simulation/compute/): la
   misma ejecución en una GPU de NVIDIA con CuPy o con PyTorch, y lo que se
   promete sobre sus números.
-- [Informe de conformidad](/phonometry/es/reference/conformance/): dos de los anclajes
-  de validación en forma cerrada de la sección 6 se ejecutan ahí.
+- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+  el fotograma, su escala de color y el codificador de
+  `write_fdtd_animation`.
+- [Informe de conformidad](/phonometry/es/reference/conformance/): ahí se
+  ejecutan el modo de la caja y la llegada en campo libre de la sección 6, y
+  el rizado y el nivel del monopolo de campo cercano a lejano de la
+  sección 4.
 - Referencia de la API: [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
-  [`simulation.ntff`](/phonometry/es/reference/api/simulation/ntff/).
+  [`simulation.ntff`](/phonometry/es/reference/api/simulation/ntff/),
+  [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
+  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
 
 </SeeAlso>
 
@@ -1187,8 +1245,8 @@ $S = \mathrm{cfl}/\sqrt{2} = 0{,}424$, así que el factor $1 - S^2$ vale 0,82), 
 reducir $\Delta x$ a la mitad divide el error entre
 cuatro (el esquema es de segundo orden). Con $\Delta x = 1$ cm el punto de 10
 celdas en aire queda hacia los 3,4 kHz. Esa cota es un error de velocidad de
-*fase*; un pulso viaja a la velocidad de grupo y va tres veces más lento
-todavía, el 4,1 % con diez celdas, y lo paga por metro recorrido, que es lo
+*fase*; un pulso viaja a la velocidad de grupo, cuyo déficit es el triple:
+el 4,1 % con diez celdas, y lo paga por metro recorrido, que es lo
 que [la sección 6 mide en tres mallas](#dispersion-numerica-y-precision).
 
 ### ¿Qué anchura deben tener el pulso de fuente y la esponja?
@@ -1197,15 +1255,16 @@ El espectro de un `GaussianPulse` de semianchura $w$ (`half_width_s`) es
 $\mathrm{e}^{-(\pi f\,w)^2}$, 20 dB por
 debajo en $f = 0{,}483/w$, así que con
 $w \ge 0{,}5/f_\text{max}$ la energía inyectada se mantiene dentro de
-la banda que la malla resuelve. La esponja es una regla en **celdas**, no en
-longitudes de onda: como su tasa de absorción actúa a la vez sobre la
+la banda que la malla resuelve. La esponja es una regla en **celdas** más que
+en longitudes de onda: como su tasa de absorción actúa a la vez sobre la
 presión y sobre la velocidad, la capa conserva una impedancia real $\rho c$
-y solo refleja su *gradiente*. Veinte celdas devuelven unos −61 dB a
-incidencia normal, planos dentro de 3 dB de 125 Hz a 2 kHz; cuarenta celdas
-devuelven unos −76 dB. Apretar `absorbing_layer_reflection` más allá de su valor por
-defecto de 1e-4 hace la rampa más abrupta y empeora el residuo. La sección 3
-desarrolla todo esto, y con ello la duración de la ejecución y la ventana
-DFT.
+y solo refleja su *gradiente*. A incidencia normal, veinte celdas devuelven
+−55 dB a 125 Hz y −71 dB a 2 kHz; cuarenta celdas, −67 dB y −91 dB. Apretar
+el `absorbing_layer_reflection` del motor
+(argumento de `FDTD2D`; una ejecución diseña siempre su esponja para el valor
+por defecto de $10^{-4}$) hace la rampa más abrupta y empeora el residuo. La
+sección 3 desarrolla todo esto, y con ello la duración de la ejecución y la
+ventana DFT.
 
 ### ¿Qué número de Courant mantiene estable una simulación FDTD?
 

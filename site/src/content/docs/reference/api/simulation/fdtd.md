@@ -143,7 +143,7 @@ The accumulated contour phasors at one tracked frequency.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the frequency is not tracked or nothing has been accumulated yet. |
+| ValueError | If the frequency is past a float's range, is not tracked, or nothing has been accumulated yet. |
 | TypeError | If `frequency` is not one real number: an array, a text or a complex number, which a lookup through `float` would read as the number it spells or as its real part. |
 
 ### ContourProbe.reset()

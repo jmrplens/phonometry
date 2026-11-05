@@ -248,8 +248,9 @@ def _checked_host(host: object) -> str | None:
         raise TypeError(msg)
     if _HOST_NAME.fullmatch(host) is None:
         msg = (
-            "'host' must be a name from the hosts file: letters, digits, '.', "
-            f"'_' and '-', starting with a letter or a digit; got {host!r}."
+            "'host' must be a name from the hosts file: up to 64 characters, "
+            "each a letter, a digit, '.', '_' or '-', starting with a letter "
+            f"or a digit; got {host!r}."
         )
         raise ValueError(msg)
     return host

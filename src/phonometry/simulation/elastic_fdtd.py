@@ -103,6 +103,7 @@ from .._internal.frozen import (
 )
 from .._internal.validation import (
     is_text,
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -243,15 +244,18 @@ class ExplosionSource(RichDisplay):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold whole cell indices and reject a non-finite ``amplitude`` gain.
+        """Hold whole cell indices and the ``amplitude`` gain as a float, refused when not finite.
+
+        The gain is held as the float it reads as, a ``Decimal`` or a
+        ``Fraction`` included, so it steps and travels to a node.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
             ``amplitude`` is not one real number.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, or ``amplitude``
-            is not finite.
+            is not finite or is past a float's range.
         """
         _hold_cells(self, "ix", "iy")
-        _finite("amplitude", self.amplitude)
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -298,16 +302,20 @@ class ForceSource(RichDisplay):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold the cell indices as ints and check the gain and the direction.
+        """Hold the cell indices as ints and the gain as a float, and check the direction.
+
+        The gain is held as the float it reads as, a ``Decimal`` or a
+        ``Fraction`` included, so it steps and travels to a node.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number,
             ``direction`` is not a text, or ``amplitude`` is not one real
             number.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, ``amplitude`` is
-            not finite, or ``direction`` is not ``"x"`` or ``"y"``.
+            not finite or is past a float's range, or ``direction`` is not
+            ``"x"`` or ``"y"``.
         """
         _hold_cells(self, "ix", "iy")
-        _finite("amplitude", self.amplitude)
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
         require_choice(self.direction, "direction", _DIRECTIONS)
 
 
@@ -578,9 +586,9 @@ def _resolve_speed_map(name: str, value: ArrayLike, shape: GridShape | None) -> 
         if shape is None:
             msg = f"shape is required when {name} is a scalar"
             raise ValueError(msg)
-        out = np.full(shape, float(np.real(value)), dtype=np.float64)
+        out = np.full(shape, real_array(value, name), dtype=np.float64)
     else:
-        out = np.asarray(value, dtype=np.float64)
+        out = real_array(value, name)
     # The number is a count of array axes, not a quantity.
     if out.ndim != 2:  # noqa: PLR2004
         msg = f"{name} must be a 2D (ny, nx) map"
@@ -611,7 +619,7 @@ def _elastic_grid(
 
     :return: ``(cp_map, dx, dt)``; the step is bounded by ``c_p`` alone.
     """
-    _require_courant(cfl)
+    courant = _require_courant(cfl)
     # A shape is read whenever it is given: it spreads a scalar c_p over the
     # grid it names, and beside a map it must name the map's grid.
     grid = _given_grid(shape)
@@ -623,7 +631,7 @@ def _elastic_grid(
         msg = "the grid must be at least 2 x 2 cells"
         raise ValueError(msg)
     dx = _positive_finite("dx", dx)
-    return cp_map, dx, _time_step(cfl, dx, float(cp_map.max()))
+    return cp_map, dx, _time_step(courant, dx, float(cp_map.max()))
 
 
 def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
@@ -656,9 +664,9 @@ def _checked_density(rho: ArrayLike, ny: int, nx: int) -> Field2D:
     """
     _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
-        np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
+        np.full((ny, nx), real_array(rho, "rho"), dtype=np.float64)
         if np.isscalar(rho)
-        else np.asarray(rho, dtype=np.float64)
+        else real_array(rho, "rho")
     )
     if rho_map.shape != (ny, nx):
         msg = "rho map must match the shape of c_p"
@@ -682,6 +690,7 @@ class _ElasticMedium:
     dx: float
     dt: float
     absorbing_layer_cells: int
+    absorbing_layer_reflection: float
     sides: tuple[Side, ...]
     absorbing_sides: tuple[Side, ...]
     damping_map: NDArray[np.float64]
@@ -715,7 +724,7 @@ def _elastic_medium(
     ny, nx = cp_map.shape
     cs_map = _checked_shear_speed(c_s, cp_map)
     rho_map = _checked_density(rho, ny, nx)
-    cells, damping_map = _validate_sponge_damping(
+    cells, reflection, damping_map = _validate_sponge_damping(
         absorbing_layer_cells, absorbing_layer_reflection, damping, ny, nx
     )
     sides = _resolve_sponge_sides(absorbing_sides)
@@ -733,6 +742,7 @@ def _elastic_medium(
         dx=dx,
         dt=dt,
         absorbing_layer_cells=cells,
+        absorbing_layer_reflection=reflection,
         sides=sides,
         absorbing_sides=used,
         damping_map=damping_map,
@@ -992,7 +1002,7 @@ class ElasticFDTD2D:
         self._init_decay(
             medium.sides,
             medium.absorbing_layer_cells,
-            absorbing_layer_reflection,
+            medium.absorbing_layer_reflection,
             medium.damping_map,
             c_max,
         )

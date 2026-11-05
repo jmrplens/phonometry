@@ -55,6 +55,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from decimal import Decimal
 from functools import cached_property
 from numbers import Real
 from types import MappingProxyType
@@ -77,6 +78,8 @@ from .._internal.validation import (
     holds_complex,
     holds_text,
     is_text,
+    real_array,
+    real_number,
     refuse_complex,
     refuse_text,
     require_choice,
@@ -148,6 +151,9 @@ _REAL_KINDS = "iuf"
 #: The target reflection of a sponge layer when the caller names none: the
 #: default of both engines, which a run keeps.
 _DEFAULT_SPONGE_REFLECTION = 1e-4
+#: The most steps a run takes: its record holds one sample per step and the
+#: initial one, and an array holds no more than the largest index.
+_MOST_STEPS = float(np.iinfo(np.intp).max)
 
 
 def _real_numbers(name: str, value: object, complex_refusal: str | None = None) -> None:
@@ -169,24 +175,56 @@ def _real_numbers(name: str, value: object, complex_refusal: str | None = None) 
     refuse_text(value, f"{name} must be numbers, not text")
 
 
+def _one_number(name: str, value: object, too_large: str) -> float:
+    """*value* as the float :func:`real_number` reads, refused in the words of its bound past a float's range.
+
+    ``float`` refused a Python integer or a ``Fraction`` past a float's
+    largest with Python's own ``OverflowError``, which names nothing, and
+    read a ``Decimal`` or a long double past it as an infinity. A ``Decimal``
+    or a ``Fraction`` within range is the float it reads as, so the engines
+    step it and a source that holds that float travels to a node, where the
+    number as given stopped the arithmetic of a step (``Decimal * float``) or
+    a NumPy check (``np.isfinite``) with words of Python's or NumPy's. A run
+    keeps its own numbers as given, so one that holds a ``Decimal`` or a
+    ``Fraction`` (its ``dx``, its ``duration_s`` or its ``cfl``) still does
+    not travel.
+
+    :param too_large: The refusal of a number no float holds: the words of
+        the bound the input has, which such a number breaks.
+    :raises TypeError: for anything but one real number, as
+        :func:`real_number` refuses it.
+    :raises ValueError: with *too_large*, for a number no float holds.
+    """
+    try:
+        return real_number(value, name)
+    except ValueError:
+        raise ValueError(too_large) from None
+
+
 def _positive_finite(name: str, value: float) -> float:
-    """Validate that *value* is a strictly positive finite scalar."""
-    require_scalar(value, name)
-    refuse_complex(value, f"{name} must be real, not complex")
-    out = float(value)
+    """*value* as a float, refused unless it is one strictly positive finite real number.
+
+    :raises TypeError: for anything but one real number.
+    :raises ValueError: for a number that is not positive, not finite or
+        past a float's range.
+    """
+    msg = f"{name} must be positive and finite"
+    out = _one_number(name, value, msg)
     if not np.isfinite(out) or out <= 0.0:
-        msg = f"{name} must be positive and finite"
         raise ValueError(msg)
     return out
 
 
 def _finite(name: str, value: float) -> float:
-    """Validate that *value* is a finite scalar."""
-    require_scalar(value, name)
-    refuse_complex(value, f"{name} must be real, not complex")
-    out = float(value)
+    """*value* as a float, refused unless it is one finite real number.
+
+    :raises TypeError: for anything but one real number.
+    :raises ValueError: for a number that is not finite or past a float's
+        range.
+    """
+    msg = f"{name} must be finite"
+    out = _one_number(name, value, msg)
     if not np.isfinite(out):
-        msg = f"{name} must be finite"
         raise ValueError(msg)
     return out
 
@@ -358,20 +396,27 @@ class GaussianPulse(RichDisplay):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold the cell indices as ints and check the pulse parameters.
+        """Hold the cell indices as ints and the pulse parameters as floats, checked.
 
-        ``half_width_s`` is positive, ``amplitude`` and ``t0`` finite.
+        ``half_width_s`` is positive, ``amplitude`` and ``t0`` finite, each
+        held as the float it reads as (a ``Decimal`` or a ``Fraction``
+        included).
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
             ``amplitude``, ``half_width_s`` or ``t0`` is not a single real
             number (a text or a complex number among them).
-        :raises ValueError: if ``ix`` or ``iy`` is not whole.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole, or a number is
+            out of its range or past a float's.
         """
         _hold_cells(self, "ix", "iy")
-        _positive_finite("half_width_s", self.half_width_s)
-        _finite("amplitude", self.amplitude)
+        # Each number is held as the float its check read, so a Decimal or
+        # a Fraction steps and travels to a node, which rebuilds neither.
+        object.__setattr__(
+            self, "half_width_s", _positive_finite("half_width_s", self.half_width_s)
+        )
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
         if self.t0 is not None:
-            _finite("t0", self.t0)
+            object.__setattr__(self, "t0", _finite("t0", self.t0))
 
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds).
@@ -418,23 +463,30 @@ class CWSource(RichDisplay):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold the cell indices as ints and check the drive parameters.
+        """Hold the cell indices as ints and the drive parameters as floats, checked.
 
-        ``frequency`` is positive and ``ramp_cycles`` non-negative.
+        ``frequency`` is positive and ``ramp_cycles`` non-negative, each
+        number held as the float it reads as (a ``Decimal`` or a
+        ``Fraction`` included).
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
             ``amplitude``, ``frequency`` or ``ramp_cycles`` is not a single
             real number (a text or a complex number among them).
-        :raises ValueError: if ``ix`` or ``iy`` is not whole.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole, or a number is
+            out of its range or past a float's.
         """
         _hold_cells(self, "ix", "iy")
-        require_scalar(self.ramp_cycles, "ramp_cycles")
-        refuse_complex(self.ramp_cycles, "ramp_cycles must be real, not complex")
-        _positive_finite("frequency", self.frequency)
-        _finite("amplitude", self.amplitude)
-        if not np.isfinite(self.ramp_cycles) or self.ramp_cycles < 0.0:
-            msg = "ramp_cycles must be non-negative and finite"
-            raise ValueError(msg)
+        ramp_refusal = "ramp_cycles must be non-negative and finite"
+        ramp_cycles = _one_number("ramp_cycles", self.ramp_cycles, ramp_refusal)
+        frequency = _positive_finite("frequency", self.frequency)
+        amplitude = _finite("amplitude", self.amplitude)
+        if not np.isfinite(ramp_cycles) or ramp_cycles < 0.0:
+            raise ValueError(ramp_refusal)
+        # Each number is held as the float its check read, so a Decimal or
+        # a Fraction steps and travels to a node, which rebuilds neither.
+        object.__setattr__(self, "frequency", frequency)
+        object.__setattr__(self, "amplitude", amplitude)
+        object.__setattr__(self, "ramp_cycles", ramp_cycles)
 
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds).
@@ -491,20 +543,23 @@ class SignalSource(OwnsArrays):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold the cell indices as ints, check ``fs`` and freeze the ``samples``.
+        """Hold the cell indices as ints and ``fs`` and ``amplitude`` as floats, checked, and freeze the ``samples``.
 
         ``fs`` is positive and ``samples`` a finite, non-empty 1D array.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number,
             ``amplitude`` or ``fs`` is not a single real number, or
             ``samples`` holds a complex number or a text.
-        :raises ValueError: if ``ix`` or ``iy`` is not whole.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole, or a number is
+            out of its range or past a float's.
         """
         _hold_cells(self, "ix", "iy")
-        _positive_finite("fs", self.fs)
-        _finite("amplitude", self.amplitude)
+        # Each number is held as the float its check read, so a Decimal or
+        # a Fraction steps and travels to a node, which rebuilds neither.
+        object.__setattr__(self, "fs", _positive_finite("fs", self.fs))
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
         _real_numbers("samples", self.samples)
-        arr = np.asarray(self.samples, dtype=np.float64)
+        arr = real_array(self.samples, "samples")
         if arr.ndim != 1:
             msg = "samples must be a 1D array"
             raise ValueError(msg)
@@ -579,6 +634,8 @@ class PlaneWaveSource(RichDisplay):
     def __post_init__(self) -> None:
         """Require a known ``direction``, a callable ``waveform`` and a finite ``amplitude``.
 
+        ``amplitude`` is held as the float it reads as, a ``Decimal`` or a
+        ``Fraction`` included, so it steps and travels to a node.
         ``offset`` is held as the whole number of cells it names here, and
         checked against the grid in :meth:`FDTD2D.add_source`, which is the
         first place a grid exists.
@@ -595,7 +652,7 @@ class PlaneWaveSource(RichDisplay):
         if not callable(self.waveform):
             msg = "waveform must be callable"
             raise TypeError(msg)
-        _finite("amplitude", self.amplitude)
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
 
 
 Source = GaussianPulse | CWSource | SignalSource
@@ -656,12 +713,16 @@ def _validate_sponge_damping(
     damping: ArrayLike,
     ny: int,
     nx: int,
-) -> tuple[int, NDArray[np.float64]]:
-    """Validate the sponge/damping spec into ``(cells, damping map)``."""
-    require_scalar(absorbing_layer_reflection, "absorbing_layer_reflection")
-    refuse_complex(
-        absorbing_layer_reflection,
-        "absorbing_layer_reflection must be real, not complex",
+) -> tuple[int, float, NDArray[np.float64]]:
+    """Validate the sponge/damping spec into ``(cells, reflection, damping map)``.
+
+    The reflection is the float it reads as, a ``Decimal`` or a
+    ``Fraction`` included, which the sponge's logarithm takes; NumPy's
+    ``log`` refused either one in words of its own.
+    """
+    reflection_refusal = "absorbing_layer_reflection must lie strictly between 0 and 1"
+    reflection = _one_number(
+        "absorbing_layer_reflection", absorbing_layer_reflection, reflection_refusal
     )
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
     cells = _integer("absorbing_layer_cells", absorbing_layer_cells)
@@ -674,11 +735,10 @@ def _validate_sponge_damping(
             "shortest grid side"
         )
         raise ValueError(msg)
-    if not 0.0 < absorbing_layer_reflection < 1.0:
-        msg = "absorbing_layer_reflection must lie strictly between 0 and 1"
-        raise ValueError(msg)
+    if not 0.0 < reflection < 1.0:
+        raise ValueError(reflection_refusal)
     _real_numbers("damping", damping)
-    damping_map = np.asarray(damping, dtype=np.float64)
+    damping_map = real_array(damping, "damping")
     if damping_map.ndim not in (0, 2):
         msg = "damping must be a scalar or an (ny, nx) map"
         raise ValueError(msg)
@@ -691,7 +751,7 @@ def _validate_sponge_damping(
             f"damping map shape {damping_map.shape} does not match the grid {(ny, nx)}"
         )
         raise ValueError(msg)
-    return cells, damping_map
+    return cells, reflection, damping_map
 
 
 class _PressureEngine(Protocol):
@@ -854,9 +914,9 @@ def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
         if grid is None:
             msg = "shape is required when c is a scalar"
             raise ValueError(msg)
-        c_map = np.full(grid, float(np.real(c)), dtype=np.float64)
+        c_map = np.full(grid, real_array(c, "c"), dtype=np.float64)
     else:
-        c_map = np.asarray(c, dtype=np.float64)
+        c_map = real_array(c, "c")
     # The number is a count of array axes, not a quantity.
     if c_map.ndim != 2:  # noqa: PLR2004
         msg = "c must be a 2D (ny, nx) map"
@@ -870,9 +930,9 @@ def _resolve_rho_map(rho: ArrayLike, ny: int, nx: int) -> Field2D:
     """Broadcast/validate the density spec into a positive ``(ny, nx)`` map."""
     _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
-        np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
+        np.full((ny, nx), real_array(rho, "rho"), dtype=np.float64)
         if np.isscalar(rho)
-        else np.asarray(rho, dtype=np.float64)
+        else real_array(rho, "rho")
     )
     if rho_map.shape != (ny, nx):
         msg = "rho map must match the shape of c"
@@ -903,8 +963,9 @@ def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
     Read as NumPy reads it, so no number moves; only what is no real number
     is refused here, where ``np.asarray(value, float)`` would read a flag as
     an impedance of 1 Pa s/m and ``None`` as NaN. Real numbers NumPy keeps
-    as objects (an int too large for 64 bits, a ``Fraction``) are read as
-    floats, and one too large for a float is no finite impedance.
+    as objects (an int too large for 64 bits, a ``Fraction``, a ``Decimal``)
+    are read as floats, and one too large for a float is no finite
+    impedance.
 
     :raises TypeError: for a flag, ``None``, a text, a complex number or
         anything else that is not a real number or an array of them.
@@ -948,10 +1009,14 @@ def _holds_a_flag(value: object, read: NDArray[Any]) -> bool:
 def _real_objects(side: str, read: NDArray[np.object_]) -> NDArray[np.float64] | None:
     """Real numbers NumPy holds as objects, as floats, or ``None`` when one is no real number.
 
+    A ``Decimal`` is a real number here as everywhere else the engines read
+    one, though :class:`numbers.Real` leaves it out: an impedance written as
+    one is the float it holds, as one written as a ``Fraction`` is.
+
     :raises ValueError: for a number too large for a float.
     """
     if not all(
-        isinstance(item, Real) and not isinstance(item, bool | np.bool_)
+        isinstance(item, Real | Decimal) and not isinstance(item, bool | np.bool_)
         for item in read.ravel().tolist()
     ):
         return None
@@ -1016,19 +1081,24 @@ def _validated_impedances(
     return profiles
 
 
-def _require_courant(cfl: float) -> None:
-    """Refuse a Courant number outside ``(0, 1)``, where the leapfrog is unstable.
+def _require_courant(cfl: float) -> float:
+    """The Courant number as a float, refused outside ``(0, 1)``, where the leapfrog is unstable.
+
+    A ``Decimal`` or a ``Fraction`` is the float it reads as, which the time
+    step is computed from; NumPy's ``isfinite`` refused either one in words
+    of its own.
 
     :raises TypeError: if ``cfl`` is not a single real number.
+    :raises ValueError: for a number outside ``(0, 1)``.
     """
-    require_scalar(cfl, "cfl")
-    refuse_complex(cfl, "cfl must be real, not complex")
-    if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
-        msg = (
-            "cfl must lie in (0, 1): the leapfrog scheme "
-            "is unstable beyond the Courant bound CN = 1"
-        )
+    msg = (
+        "cfl must lie in (0, 1): the leapfrog scheme "
+        "is unstable beyond the Courant bound CN = 1"
+    )
+    courant = _one_number("cfl", cfl, msg)
+    if not np.isfinite(courant) or not 0.0 < courant < 1.0:
         raise ValueError(msg)
+    return courant
 
 
 def _time_step(cfl: float, dx: float, c_max: float) -> float:
@@ -1047,10 +1117,10 @@ def _acoustic_grid(
 
     :return: ``(c_map, dx, dt)``.
     """
-    _require_courant(cfl)
+    courant = _require_courant(cfl)
     c_map = _resolve_c_map(c, shape)
     dx = _positive_finite("dx", dx)
-    return c_map, dx, _time_step(cfl, dx, float(c_map.max()))
+    return c_map, dx, _time_step(courant, dx, float(c_map.max()))
 
 
 @dataclass(frozen=True)
@@ -1067,6 +1137,7 @@ class _AcousticMedium:
     dx: float
     dt: float
     absorbing_layer_cells: int
+    absorbing_layer_reflection: float
     sides: tuple[Side, ...]
     absorbing_sides: tuple[Side, ...]
     damping_map: NDArray[np.float64]
@@ -1097,7 +1168,7 @@ def _acoustic_medium(
     c_map, dx, dt = _acoustic_grid(c, shape, cfl, dx)
     ny, nx = c_map.shape
     rho_map = _resolve_rho_map(rho, ny, nx)
-    cells, damping_map = _validate_sponge_damping(
+    cells, reflection, damping_map = _validate_sponge_damping(
         absorbing_layer_cells, absorbing_layer_reflection, damping, ny, nx
     )
     sides = _resolve_sponge_sides(absorbing_sides)
@@ -1109,6 +1180,7 @@ def _acoustic_medium(
         dx=dx,
         dt=dt,
         absorbing_layer_cells=cells,
+        absorbing_layer_reflection=reflection,
         sides=sides,
         absorbing_sides=used,
         damping_map=damping_map,
@@ -1118,8 +1190,21 @@ def _acoustic_medium(
 
 
 def _step_count(duration_s: float, dt: float) -> int:
-    """The number of steps of *dt* that cover *duration_s*, at least one."""
-    steps = round(duration_s / dt)
+    """The number of steps of *dt* that cover *duration_s*, at least one.
+
+    At most one fewer than an array holds, since the record keeps one sample
+    per step and the initial one: a step count past that (a speed of 2**70
+    m/s makes a step of about 1e-23 s) raised NumPy's ``Maximum allowed
+    dimension exceeded`` from inside the function, naming nothing.
+    """
+    ratio = duration_s / dt
+    if ratio >= _MOST_STEPS:
+        msg = (
+            f"duration_s covers {ratio:.3e} time steps of dt = {dt:.3e} s (from "
+            "dx, cfl and the fastest speed), more than an array can hold"
+        )
+        raise ValueError(msg)
+    steps = round(ratio)
     if steps < 1:
         msg = f"duration_s must cover at least one time step (dt = {dt:.3e} s)"
         raise ValueError(msg)
@@ -1334,7 +1419,7 @@ class ContourProbe:
             )
             raise ValueError(msg)
         _real_numbers("frequencies", frequencies)
-        freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+        freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
         if (
             freqs.ndim != 1
             or freqs.size == 0
@@ -1494,8 +1579,8 @@ class ContourProbe:
         :return: A :class:`~phonometry.simulation.ntff.ContourPhasors`
             ready for
             :func:`~phonometry.simulation.ntff.far_field_from_contour`.
-        :raises ValueError: If the frequency is not tracked or nothing has
-            been accumulated yet.
+        :raises ValueError: If the frequency is past a float's range, is not
+            tracked, or nothing has been accumulated yet.
         :raises TypeError: If ``frequency`` is not one real number: an
             array, a text or a complex number, which a lookup through
             :func:`float` would read as the number it spells or as its real
@@ -1503,9 +1588,8 @@ class ContourProbe:
         """
         require_scalar(frequency, "frequency")
         refuse_complex(frequency, "frequency must be real, not complex")
-        matches = [
-            i for i, f in enumerate(self.frequencies) if np.isclose(f, float(frequency))
-        ]
+        wanted = real_number(frequency, "frequency")
+        matches = [i for i, f in enumerate(self.frequencies) if np.isclose(f, wanted)]
         if not matches:
             msg = (
                 f"frequency {frequency!r} Hz is not tracked by this probe "
@@ -1693,7 +1777,7 @@ class FDTD2D:
         self._init_decay(
             medium.sides,
             medium.absorbing_layer_cells,
-            absorbing_layer_reflection,
+            medium.absorbing_layer_reflection,
             medium.damping_map,
             c_max,
         )
@@ -2632,14 +2716,16 @@ def _held_map(
     A run copies the arrays it is given, not the lists: one built from
     ``[[343.0, ...], ...]`` would keep the caller's list, and an edit to it
     afterwards would change what the run steps here and what a node
-    rebuilds. The list is read as the checks read it, so no number moves. A
-    number, a text, an array or ``None`` is left as it is. So is a value the
-    conversion refuses (an int too large for a float, a number whose float
-    divides by zero), which the checks then refuse in their own words and in
-    their own order, and a map that holds a complex number or a text, which
-    every check of a medium refuses with ``TypeError`` (``c``, ``rho``,
-    ``c_p``, ``c_s``, ``damping``): read here as float64, NumPy would keep
-    only the real part of a complex number, with no more than a
+    rebuilds. The list is read as the checks read it, through
+    :func:`real_array` for a medium, so no number moves. A number, a text,
+    an array or ``None`` is left as it is. So is a value the conversion
+    refuses (a number too large for a float, a Python integer, a
+    ``Fraction``, a ``Decimal`` or a long double among them, or a number
+    whose float divides by zero), which the checks then refuse in their own
+    words and in their own order, and a map that holds a complex number or a
+    text, which every check of a medium refuses with ``TypeError`` (``c``,
+    ``rho``, ``c_p``, ``c_s``, ``damping``): read here as float64, NumPy
+    would keep only the real part of a complex number, with no more than a
     ``ComplexWarning``, and the number a text spells. So only a real-valued
     map is held.
 
@@ -2650,11 +2736,15 @@ def _held_map(
         return value
     try:
         objects = np.asarray(value, dtype=object)
-        held = (
-            None
-            if holds_complex(objects) or holds_text(objects)
-            else np.array(value, dtype=dtype)
-        )
+        held: np.ndarray | None
+        if holds_complex(objects) or holds_text(objects):
+            held = None
+        elif dtype is np.float64:
+            # A copy of its own: a sequence NumPy reads through the buffer
+            # it exposes would otherwise lend the run the caller's numbers.
+            held = real_array(value, "map").copy()
+        else:
+            held = np.array(value, dtype=dtype)
     except (TypeError, ValueError, ArithmeticError):
         held = None
     return value if held is None else read_only(held)

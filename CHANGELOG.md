@@ -2296,6 +2296,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A `Decimal` or a `Fraction` steps an FDTD run as the float it reads as.**
+  A `Decimal` on a source of `simulation.FDTDRun` or `simulation.ElasticRun`
+  (the `amplitude`, `half_width_s` or `t0` of a `GaussianPulse`, the
+  `frequency` or `amplitude` of a `CWSource`, the `fs` or `amplitude` of a
+  `SignalSource`, the `amplitude` of a `PlaneWaveSource`, an `ExplosionSource`
+  or a `ForceSource`) built the run and then stopped its first step with
+  Python's `unsupported operand type(s)`, and a `Decimal` or a `Fraction` as a
+  `cfl`, an `absorbing_layer_reflection` or a `ramp_cycles` stopped the run or
+  the engine where it was built with NumPy's `ufunc 'isfinite' not supported`
+  or its `log`, none of which names the input. A source now holds each number
+  as the float its check read, so the run steps as the one given that float
+  and travels to a node, which refused a `Decimal` or a `Fraction` on a source;
+  the Courant number and the sponge's reflection are read the same way, and an
+  edge impedance written as a `Decimal` steps as one written as a `Fraction`,
+  where it was refused as no real number. The `frequency` and the `segment`
+  of a hand-built `simulation.ContourPhasors` are read the same way too, where
+  a `Decimal` or a `Fraction` was refused with NumPy's `isfinite` message. A
+  Python integer or a `Fraction` too large for a float, which `float()`
+  refused with Python's own `OverflowError` wherever a run, a source, a
+  material or an engine read one number or a map, now raises `ValueError`
+  naming the input, and so does a long double that large as a `ramp_cycles`,
+  which passed as finite. A NumPy `float32` given as
+  a `cfl`, as the `absorbing_layer_reflection` of an engine or as a number of
+  a source is now read as the float it holds as well. It was kept as given, so
+  the time step, the sponge and the source's waveform were computed in
+  `float32`: with `c=343.0` and `dx=0.01`, `cfl=np.float32(0.6)` gave a step
+  of 1.2369215255603194e-05 s where the float it holds gives
+  1.2369215322759996e-05 s. A run given one steps differently from before, by
+  1.3e-07 relative at the probe of a 40-step acoustic run on a 16 by 16 cell
+  grid driven by a Gaussian pulse, and by 1.0e-06 at that of a 24-step
+  elastic run on the same grid.
+
+- **A run longer than an array can record is refused where it is built.** An
+  `FDTDRun` or an `ElasticRun` whose `duration_s` covers more time steps than
+  an array holds, as a sound speed of `2**70` m/s or a `duration_s` of
+  `1e300` s gives, built and then stopped `fdtd_simulation` or
+  `elastic_fdtd_simulation` with NumPy's `Maximum allowed dimension exceeded`,
+  which names no input. It now raises `ValueError` when the run is built,
+  naming `duration_s` and the time step.
+
 - **One number a function reads is read by name.** A function that turned one
   of its caller's numbers into a float with `float()`, or into a complex number
   with `complex()`, parsed a text and kept the real part of a NumPy complex

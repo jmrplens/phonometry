@@ -166,6 +166,20 @@ def _elastic(**changes: Any) -> ElasticRun:
             ValueError,
             "duration_s must cover at least one time step",
         ),
+        # More steps than the record's arrays can hold, which NumPy refused
+        # from inside the function as "Maximum allowed dimension exceeded".
+        (
+            _acoustic,
+            {"duration_s": 1e300},
+            ValueError,
+            r"duration_s covers .* time steps .* more than an array can hold",
+        ),
+        (
+            _elastic,
+            {"duration_s": 1e300},
+            ValueError,
+            r"duration_s covers .* time steps .* more than an array can hold",
+        ),
     ],
 )
 def test_a_run_refuses_a_bad_argument_when_it_is_built(

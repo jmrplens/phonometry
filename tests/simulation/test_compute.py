@@ -318,7 +318,11 @@ def test_a_numpy_run_may_fall_back_from_a_node() -> None:
             ValueError,
             "'host' must be a name from the hosts file",
         ),
-        ({"host": "a" * 65}, ValueError, "'host' must be a name from the hosts file"),
+        (
+            {"host": "a" * 65},
+            ValueError,
+            "'host' must be a name from the hosts file: up to 64 characters",
+        ),
         ({"host": 7}, TypeError, "'host' must be a name from the hosts file or None"),
         ({"timeout_s": 60.0}, ValueError, "'timeout_s' bounds a remote run"),
         ({"host": "nas", "timeout_s": 0.0}, ValueError, "'timeout_s' must be positive"),

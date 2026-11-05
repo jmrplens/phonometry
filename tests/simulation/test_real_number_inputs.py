@@ -15,6 +15,15 @@ real part of a NumPy complex number: a run that steps a medium nobody gave.
 Each case here hands one input a complex value or a text, in each spelling a
 caller writes it, and the input refuses it by name, as the wrong type
 ([A42](docs/contributing/api.md#a42)).
+
+A ``Decimal`` or a ``Fraction`` is a real number of another type, and is
+read as the float it holds wherever a real number belongs
+([A61](docs/contributing/api.md#a61)): a run, a source or an engine given
+one steps as the one given that float, a source holds that float and so
+travels to a node, and a number of any type past a float's range is refused
+naming the input it was given to. A NumPy ``float32`` is read the same way,
+as the float it holds, so no step, sponge or waveform is computed in
+``float32`` for it.
 """
 
 from __future__ import annotations
@@ -23,7 +32,8 @@ import inspect
 import re
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from fractions import Fraction
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -33,17 +43,22 @@ from phonometry.simulation import (
     STEEL,
     CWSource,
     ElasticFDTD2D,
+    ElasticRecording,
     ElasticRun,
     ExplosionSource,
     FDTDBoundaries,
+    FDTDRecording,
     FDTDRun,
     ForceSource,
     GaussianPulse,
     Material,
     PlaneWaveSource,
     SignalSource,
+    elastic_fdtd_simulation,
+    fdtd_simulation,
     scholte_speed,
 )
+from phonometry.simulation._remote.wire import encode_arguments
 from phonometry.simulation.fdtd import ContourProbe
 from phonometry.simulation.ntff import ContourPhasors, far_field_from_contour
 
@@ -1026,3 +1041,569 @@ def test_a_plane_wave_added_while_a_step_runs_enters_on_the_next_step(
         for name in stepped
         if not np.array_equal(stepped[name], added_between[name])
     ] == []
+
+
+#: A ``Decimal`` and a ``Fraction`` of a number written in decimal, each the
+#: same number as the float literal: both read back as the float nearest to
+#: the digits, as the literal does.
+_EXACT_SPELLINGS: dict[str, Callable[[float], object]] = {
+    "Decimal": lambda real: Decimal(repr(real)),
+    "Fraction": lambda real: Fraction(repr(real)),
+}
+
+#: The samples of a :class:`SignalSource` in the cases below.
+_SAMPLES = np.hanning(8)
+
+
+def _drive() -> GaussianPulse:
+    """The pulse whose ``value`` drives a plane wave or an elastic source here."""
+    return GaussianPulse(ix=0, iy=0, half_width_s=4e-5)
+
+
+def _acoustic_run(**fields: object) -> FDTDRun:
+    """A small acoustic run with one probe, *fields* written over its own."""
+    given: dict[str, object] = {
+        "c": 343.0,
+        "dx": 0.01,
+        "shape": (_NY, _NX),
+        "duration_s": 2e-4,
+        "sources": [_pulse()],
+        "recording": FDTDRecording(probes=[(4, 4)]),
+        **fields,
+    }
+    return FDTDRun(**given)  # type: ignore[arg-type]
+
+
+def _elastic_run(**fields: object) -> ElasticRun:
+    """A small elastic run with one probe, *fields* written over its own."""
+    given: dict[str, object] = {
+        "c_p": 2000.0,
+        "c_s": 1000.0,
+        "rho": 1000.0,
+        "dx": 0.01,
+        "shape": (_NY, _NX),
+        "duration_s": 5e-5,
+        "sources": [ExplosionSource(ix=8, iy=8, waveform=_drive().value)],
+        "recording": ElasticRecording(probes=[(4, 4)]),
+        **fields,
+    }
+    return ElasticRun(**given)  # type: ignore[arg-type]
+
+
+#: Each real input of a run and of a source, by ``owner(input)``: the float
+#: it is written as when it is right, and the run built around it.
+_RUN_INPUTS: dict[str, tuple[float, Callable[[object], FDTDRun | ElasticRun]]] = {
+    "FDTDRun(c)": (343.0, lambda v: _acoustic_run(c=v)),
+    "FDTDRun(dx)": (0.01, lambda v: _acoustic_run(dx=v)),
+    "FDTDRun(duration_s)": (2e-4, lambda v: _acoustic_run(duration_s=v)),
+    "FDTDRun(rho)": (1.2, lambda v: _acoustic_run(rho=v)),
+    "FDTDRun(cfl)": (0.5, lambda v: _acoustic_run(cfl=v)),
+    "FDTDRun(damping)": (10.0, lambda v: _acoustic_run(damping=v)),
+    "FDTDBoundaries(sides)": (
+        415.0,
+        lambda v: _acoustic_run(boundaries=FDTDBoundaries(sides={"left": v})),  # type: ignore[dict-item]
+    ),
+    "GaussianPulse(half_width_s)": (
+        1e-4,
+        lambda v: _acoustic_run(sources=[GaussianPulse(ix=8, iy=8, half_width_s=v)]),  # type: ignore[arg-type]
+    ),
+    "GaussianPulse(t0)": (
+        3e-4,
+        lambda v: _acoustic_run(
+            sources=[GaussianPulse(ix=8, iy=8, half_width_s=1e-4, t0=v)]  # type: ignore[arg-type]
+        ),
+    ),
+    "GaussianPulse(amplitude)": (
+        0.5,
+        lambda v: _acoustic_run(
+            sources=[GaussianPulse(ix=8, iy=8, half_width_s=1e-4, amplitude=v)]  # type: ignore[arg-type]
+        ),
+    ),
+    "CWSource(frequency)": (
+        2000.0,
+        lambda v: _acoustic_run(sources=[CWSource(ix=8, iy=8, frequency=v)]),  # type: ignore[arg-type]
+    ),
+    "CWSource(amplitude)": (
+        0.5,
+        lambda v: _acoustic_run(
+            sources=[CWSource(ix=8, iy=8, frequency=2000.0, amplitude=v)]  # type: ignore[arg-type]
+        ),
+    ),
+    "CWSource(ramp_cycles)": (
+        2.0,
+        lambda v: _acoustic_run(
+            sources=[CWSource(ix=8, iy=8, frequency=2000.0, ramp_cycles=v)]  # type: ignore[arg-type]
+        ),
+    ),
+    "SignalSource(fs)": (
+        48000.0,
+        lambda v: _acoustic_run(
+            sources=[SignalSource(ix=8, iy=8, samples=_SAMPLES, fs=v)]  # type: ignore[arg-type]
+        ),
+    ),
+    "SignalSource(amplitude)": (
+        0.5,
+        lambda v: _acoustic_run(
+            sources=[
+                SignalSource(ix=8, iy=8, samples=_SAMPLES, fs=48000.0, amplitude=v)  # type: ignore[arg-type]
+            ]
+        ),
+    ),
+    "PlaneWaveSource(amplitude)": (
+        0.5,
+        lambda v: _acoustic_run(
+            sources=[
+                PlaneWaveSource(direction="right", waveform=_drive().value, amplitude=v)  # type: ignore[arg-type]
+            ]
+        ),
+    ),
+    "ElasticRun(c_p)": (2000.0, lambda v: _elastic_run(c_p=v)),
+    "ElasticRun(c_s)": (1000.0, lambda v: _elastic_run(c_s=v)),
+    "ElasticRun(rho)": (1000.0, lambda v: _elastic_run(rho=v)),
+    "ElasticRun(dx)": (0.01, lambda v: _elastic_run(dx=v)),
+    "ElasticRun(duration_s)": (5e-5, lambda v: _elastic_run(duration_s=v)),
+    "ElasticRun(cfl)": (0.5, lambda v: _elastic_run(cfl=v)),
+    "ElasticRun(damping)": (10.0, lambda v: _elastic_run(damping=v)),
+    "ExplosionSource(amplitude)": (
+        0.5,
+        lambda v: _elastic_run(
+            sources=[ExplosionSource(ix=8, iy=8, waveform=_drive().value, amplitude=v)]  # type: ignore[arg-type]
+        ),
+    ),
+    "ForceSource(amplitude)": (
+        0.5,
+        lambda v: _elastic_run(
+            sources=[
+                ForceSource(
+                    ix=8,
+                    iy=8,
+                    direction="y",
+                    waveform=_drive().value,
+                    amplitude=v,  # type: ignore[arg-type]
+                )
+            ]
+        ),
+    ),
+}
+
+
+def _probe_histories(run: FDTDRun | ElasticRun) -> np.ndarray:
+    """What *run* records at its probe, stepped on this machine."""
+    if isinstance(run, FDTDRun):
+        return fdtd_simulation(run).pressures
+    return elastic_fdtd_simulation(run).signals
+
+
+@pytest.mark.parametrize("spelling", sorted(_EXACT_SPELLINGS))
+@pytest.mark.parametrize("case", sorted(_RUN_INPUTS))
+def test_a_decimal_or_a_fraction_steps_as_the_float_it_reads_as(
+    case: str, spelling: str
+) -> None:
+    """A run given a ``Decimal`` or a ``Fraction`` steps as the run given its float.
+
+    A run checked such a number through ``float`` and built, then a
+    ``Decimal`` on a source failed at the first step with Python's own
+    ``unsupported operand type(s)``, and a ``Decimal`` or a ``Fraction``
+    ``cfl`` or ``ramp_cycles`` failed when the run was built with NumPy's
+    ``ufunc 'isfinite' not supported``, neither of which names the input.
+    """
+    real, build = _RUN_INPUTS[case]
+    expected = _probe_histories(build(real))
+    given = build(_EXACT_SPELLINGS[spelling](real))
+    np.testing.assert_array_equal(_probe_histories(given), expected)
+
+
+def _acoustic_engine(**options: object) -> FDTD2D:
+    """A small acoustic engine with a sponge and one pulse, *options* over its own."""
+    sim = FDTD2D(
+        **{  # type: ignore[arg-type]
+            "c": 343.0,
+            "dx": 0.01,
+            "shape": (_NY, _NX),
+            "absorbing_layer_cells": 4,
+            **options,
+        }
+    )
+    sim.add_source(_pulse())
+    return sim
+
+
+def _elastic_engine(**options: object) -> ElasticFDTD2D:
+    """A small elastic engine with a sponge and one explosion, *options* over its own."""
+    sim = ElasticFDTD2D(
+        **{  # type: ignore[arg-type]
+            "c_p": 2000.0,
+            "c_s": 1000.0,
+            "rho": 1000.0,
+            "dx": 0.01,
+            "shape": (_NY, _NX),
+            "absorbing_layer_cells": 4,
+            **options,
+        }
+    )
+    sim.add_source(ExplosionSource(ix=8, iy=8, waveform=_drive().value))
+    return sim
+
+
+def _plane_wave(**options: object) -> FDTD2D:
+    """A small acoustic engine driven by :meth:`FDTD2D.add_plane_wave`."""
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    given: dict[str, Any] = {"center_m": 0.08, "half_width_m": 0.03, **options}
+    sim.add_plane_wave("right", **given)
+    return sim
+
+
+#: Each real input of an engine, by ``owner(input)``: the float it is
+#: written as when it is right, and the engine built around it.
+_ENGINE_INPUTS: dict[str, tuple[float, Callable[[object], FDTD2D | ElasticFDTD2D]]] = {
+    "FDTD2D(c)": (343.0, lambda v: _acoustic_engine(c=v)),
+    "FDTD2D(dx)": (0.01, lambda v: _acoustic_engine(dx=v)),
+    "FDTD2D(rho)": (1.2, lambda v: _acoustic_engine(rho=v)),
+    "FDTD2D(cfl)": (0.5, lambda v: _acoustic_engine(cfl=v)),
+    "FDTD2D(absorbing_layer_reflection)": (
+        1e-3,
+        lambda v: _acoustic_engine(absorbing_layer_reflection=v),
+    ),
+    "FDTD2D(damping)": (10.0, lambda v: _acoustic_engine(damping=v)),
+    "FDTD2D(edge_impedance)": (
+        415.0,
+        lambda v: _acoustic_engine(
+            absorbing_layer_cells=0, edge_impedance={"left": v, "right": v}
+        ),
+    ),
+    "add_plane_wave(center_m)": (0.08, lambda v: _plane_wave(center_m=v)),
+    "add_plane_wave(half_width_m)": (0.03, lambda v: _plane_wave(half_width_m=v)),
+    "add_plane_wave(amplitude)": (0.5, lambda v: _plane_wave(amplitude=v)),
+    "add_plane_wave(wavelength_m)": (0.04, lambda v: _plane_wave(wavelength_m=v)),
+    "ElasticFDTD2D(c_p)": (2000.0, lambda v: _elastic_engine(c_p=v)),
+    "ElasticFDTD2D(c_s)": (1000.0, lambda v: _elastic_engine(c_s=v)),
+    "ElasticFDTD2D(rho)": (1000.0, lambda v: _elastic_engine(rho=v)),
+    "ElasticFDTD2D(dx)": (0.01, lambda v: _elastic_engine(dx=v)),
+    "ElasticFDTD2D(cfl)": (0.5, lambda v: _elastic_engine(cfl=v)),
+    "ElasticFDTD2D(absorbing_layer_reflection)": (
+        1e-3,
+        lambda v: _elastic_engine(absorbing_layer_reflection=v),
+    ),
+    "ElasticFDTD2D(damping)": (10.0, lambda v: _elastic_engine(damping=v)),
+}
+
+
+def _stepped_fields(sim: FDTD2D | ElasticFDTD2D) -> dict[str, np.ndarray]:
+    """Every field of *sim* after ten steps, by name."""
+    sim.run(10)
+    return _fields(sim)
+
+
+@pytest.mark.parametrize("spelling", sorted(_EXACT_SPELLINGS))
+@pytest.mark.parametrize("case", sorted(_ENGINE_INPUTS))
+def test_an_engine_steps_a_decimal_or_a_fraction_as_the_float_it_reads_as(
+    case: str, spelling: str
+) -> None:
+    """An engine given a ``Decimal`` or a ``Fraction`` steps as the engine given its float.
+
+    Both engines failed when they were built with NumPy's own words for a
+    ``Decimal`` or a ``Fraction`` ``cfl`` (``ufunc 'isfinite' not
+    supported``) or ``absorbing_layer_reflection`` (``loop of ufunc does not
+    support argument 0``), and the acoustic one refused a ``Decimal`` edge
+    impedance as no real number, though it took a ``Fraction``.
+    """
+    real, build = _ENGINE_INPUTS[case]
+    expected = _stepped_fields(build(real))
+    stepped = _stepped_fields(build(_EXACT_SPELLINGS[spelling](real)))
+    assert [
+        name for name in expected if not np.array_equal(stepped[name], expected[name])
+    ] == []
+
+
+def _stepped_with(case: str, value: object) -> dict[str, np.ndarray]:
+    """What the run or the engine of *case* records once stepped, given *value*."""
+    if case in _RUN_INPUTS:
+        return {"probe": _probe_histories(_RUN_INPUTS[case][1](value))}
+    return _stepped_fields(_ENGINE_INPUTS[case][1](value))
+
+
+@pytest.mark.parametrize("case", sorted([*_RUN_INPUTS, *_ENGINE_INPUTS]))
+def test_a_numpy_float32_steps_as_the_float_it_holds(case: str) -> None:
+    """A run, a source or an engine given a NumPy ``float32`` steps as the one given its float.
+
+    A ``float32`` Courant number, sponge reflection or number of a source
+    was kept as given, so the time step, the sponge and the source's waveform
+    were computed in ``float32``: ``cfl=np.float32(0.5)``, which holds 0.5
+    exactly, stepped by another time step than ``cfl=0.5``.
+    """
+    narrow = np.float32(
+        _RUN_INPUTS[case][0] if case in _RUN_INPUTS else _ENGINE_INPUTS[case][0]
+    )
+    expected = _stepped_with(case, float(narrow))
+    stepped = _stepped_with(case, narrow)
+    assert [
+        name for name in expected if not np.array_equal(stepped[name], expected[name])
+    ] == []
+
+
+#: The owners whose every real input a ``Decimal`` and a ``Fraction`` case
+#: above covers, and the table that holds the cases.
+_DECIMAL_OWNERS: dict[str, dict[str, Any]] = {
+    "FDTDRun": _RUN_INPUTS,
+    "ElasticRun": _RUN_INPUTS,
+    "FDTDBoundaries": _RUN_INPUTS,
+    "GaussianPulse": _RUN_INPUTS,
+    "CWSource": _RUN_INPUTS,
+    "SignalSource": _RUN_INPUTS,
+    "PlaneWaveSource": _RUN_INPUTS,
+    "ExplosionSource": _RUN_INPUTS,
+    "ForceSource": _RUN_INPUTS,
+    "FDTD2D": _ENGINE_INPUTS,
+    "ElasticFDTD2D": _ENGINE_INPUTS,
+    "add_plane_wave": _ENGINE_INPUTS,
+}
+
+#: Real inputs the tables above leave out, with the reason.
+_NOT_A_DECIMAL_CASE = {
+    # Samples are an array, read as the float64 array it holds whatever
+    # numbers it is given, and checked as one where a source holds them.
+    ("SignalSource", "samples"): "an array, held as float64",
+}
+
+
+def test_every_real_input_of_a_run_a_source_and_an_engine_has_a_decimal_case() -> None:
+    """A real input added to a run, a source or an engine without its case fails here."""
+    missing = [
+        f"{owner}({name})"
+        for owner, table in _DECIMAL_OWNERS.items()
+        for name in _real_parameters(owner)
+        if f"{owner}({name})" not in table and (owner, name) not in _NOT_A_DECIMAL_CASE
+    ]
+    assert missing == []
+
+
+#: Each real input a source holds, by ``source(input)``: the float it is
+#: written as when it is right, and the source built around it.
+_SOURCE_INPUTS: dict[str, tuple[float, Callable[[object], object]]] = {
+    "GaussianPulse(half_width_s)": (
+        1e-4,
+        lambda v: GaussianPulse(ix=8, iy=8, half_width_s=v),  # type: ignore[arg-type]
+    ),
+    "GaussianPulse(t0)": (
+        3e-4,
+        lambda v: GaussianPulse(ix=8, iy=8, half_width_s=1e-4, t0=v),  # type: ignore[arg-type]
+    ),
+    "GaussianPulse(amplitude)": (
+        0.5,
+        lambda v: GaussianPulse(ix=8, iy=8, half_width_s=1e-4, amplitude=v),  # type: ignore[arg-type]
+    ),
+    "CWSource(frequency)": (
+        2000.0,
+        lambda v: CWSource(ix=8, iy=8, frequency=v),  # type: ignore[arg-type]
+    ),
+    "CWSource(amplitude)": (
+        0.5,
+        lambda v: CWSource(ix=8, iy=8, frequency=2000.0, amplitude=v),  # type: ignore[arg-type]
+    ),
+    "CWSource(ramp_cycles)": (
+        2.0,
+        lambda v: CWSource(ix=8, iy=8, frequency=2000.0, ramp_cycles=v),  # type: ignore[arg-type]
+    ),
+    "SignalSource(fs)": (
+        48000.0,
+        lambda v: SignalSource(ix=8, iy=8, samples=_SAMPLES, fs=v),  # type: ignore[arg-type]
+    ),
+    "SignalSource(amplitude)": (
+        0.5,
+        lambda v: SignalSource(ix=8, iy=8, samples=_SAMPLES, fs=48000.0, amplitude=v),  # type: ignore[arg-type]
+    ),
+    "PlaneWaveSource(amplitude)": (
+        0.5,
+        lambda v: PlaneWaveSource(
+            direction="right",
+            waveform=_drive().value,
+            amplitude=v,  # type: ignore[arg-type]
+        ),
+    ),
+    "ExplosionSource(amplitude)": (
+        0.5,
+        lambda v: ExplosionSource(ix=8, iy=8, waveform=_drive().value, amplitude=v),  # type: ignore[arg-type]
+    ),
+    "ForceSource(amplitude)": (
+        0.5,
+        lambda v: ForceSource(
+            ix=8,
+            iy=8,
+            direction="y",
+            waveform=_drive().value,
+            amplitude=v,  # type: ignore[arg-type]
+        ),
+    ),
+}
+
+
+@pytest.mark.parametrize("spelling", sorted(_EXACT_SPELLINGS))
+@pytest.mark.parametrize("case", sorted(_SOURCE_INPUTS))
+def test_a_source_holds_a_decimal_or_a_fraction_as_the_float_it_reads_as(
+    case: str, spelling: str
+) -> None:
+    """A source holds the float a ``Decimal`` or a ``Fraction`` reads as, and travels.
+
+    A source held the number as it was given: a ``Decimal`` failed at the
+    first step, and either one, a ``Fraction`` that stepped here among them,
+    was refused when the run was sent to a node, which rebuilds no
+    ``Decimal`` and no ``Fraction``.
+    """
+    real, build = _SOURCE_INPUTS[case]
+    name = case.split("(")[1].rstrip(")")
+    source = build(_EXACT_SPELLINGS[spelling](real))
+    held = getattr(source, name)
+    assert type(held) is float
+    assert held == real
+    run = (
+        _elastic_run(sources=[source])
+        if isinstance(source, ExplosionSource | ForceSource)
+        else _acoustic_run(sources=[source])
+    )
+    encode_arguments({"run": run})
+
+
+#: The two numbers of a contour's phasors, by name, and the float each is
+#: written as when it is right.
+_CONTOUR_NUMBERS = {"frequency": 1000.0, "segment": 0.1}
+
+
+@pytest.mark.parametrize("spelling", [*sorted(_EXACT_SPELLINGS), "float32"])
+@pytest.mark.parametrize("name", sorted(_CONTOUR_NUMBERS))
+def test_contour_phasors_hold_the_float_a_number_of_another_type_reads_as(
+    name: str, spelling: str
+) -> None:
+    """The phasors of a contour hold the float a ``Decimal``, a ``Fraction`` or a ``float32`` reads as.
+
+    A ``Decimal`` or a ``Fraction`` as the ``frequency`` or the ``segment``
+    of a :class:`ContourPhasors` was refused with NumPy's ``ufunc
+    'isfinite' not supported``, which names neither, and a ``float32`` was
+    kept as given.
+    """
+    real = _CONTOUR_NUMBERS[name]
+    given = (
+        np.float32(real) if spelling == "float32" else _EXACT_SPELLINGS[spelling](real)
+    )
+    held = getattr(_contour(**{name: given}), name)
+    assert type(held) is float
+    assert held == float(given)
+
+
+#: Finite numbers no float holds, by how a caller writes them, each built
+#: when it is used; a long double is one only where it is wider than a float.
+_BEYOND_A_FLOAT: dict[str, Callable[[], object]] = {
+    "python integer": lambda: 10**400,
+    "Fraction": lambda: Fraction(10**400),
+    "Decimal": lambda: Decimal("1e400"),
+    "long double": lambda: np.longdouble("1e400"),
+}
+
+_BEYOND_A_FLOAT_SPELLINGS = [
+    pytest.param(
+        spelling,
+        marks=_ONLY_WITH_A_WIDE_LONG_DOUBLE if spelling == "long double" else (),
+    )
+    for spelling in sorted(_BEYOND_A_FLOAT)
+]
+
+
+def _probe_for(frequency: object) -> object:
+    """The phasors of a stepped contour probe at *frequency*."""
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX))
+    sim.add_source(_pulse())
+    probe = sim.add_contour_probe(3, 10, 3, 10, frequencies=[1000.0])
+    sim.run(2)
+    return probe.phasors(frequency)  # type: ignore[arg-type]
+
+
+def _number_in(build: Callable[..., object], name: str) -> Callable[[object], object]:
+    """The call that hands *build* a number as its input *name*."""
+    return lambda number: build(**{name: number})
+
+
+def _map_in(build: Callable[..., object], name: str) -> Callable[[object], object]:
+    """The call that hands *build* a map, written as lists, of one number as *name*."""
+    return lambda number: build(**{name: [[number] * _NX] * _NY})
+
+
+def _material(**fields: object) -> Material:
+    """A material with *fields* written over a solid's speeds and density."""
+    given: dict[str, Any] = {"c_p": 2000.0, "c_s": 1000.0, "rho": 1000.0, **fields}
+    return Material(**given)
+
+
+#: Each real input of a run, a source, a material and an engine that a
+#: number no float holds can reach, by ``owner(input)``: the input's name,
+#: and the call that hands it the number.
+_TOO_LARGE_INPUTS: dict[str, tuple[str, Callable[[object], object]]] = {
+    **{
+        f"FDTDRun({name})": (name, _number_in(_acoustic_run, name))
+        for name in ("c", "dx", "duration_s", "rho", "cfl", "damping")
+    },
+    **{
+        f"FDTDRun({name} map)": (name, _map_in(_acoustic_run, name))
+        for name in ("c", "rho", "damping")
+    },
+    **{
+        f"ElasticRun({name})": (name, _number_in(_elastic_run, name))
+        for name in ("c_p", "c_s", "rho", "dx", "duration_s", "cfl", "damping")
+    },
+    **{
+        f"ElasticRun({name} map)": (name, _map_in(_elastic_run, name))
+        for name in ("c_p", "c_s", "rho", "damping")
+    },
+    **{
+        case: (case.split("(")[1].rstrip(")"), build)
+        for case, (_, build) in _SOURCE_INPUTS.items()
+    },
+    "SignalSource(samples)": (
+        "samples",
+        lambda v: SignalSource(
+            ix=8, iy=8, samples=np.array([0.0, v, 0.0], dtype=object), fs=48000.0
+        ),
+    ),
+    **{
+        f"Material({name})": (name, _number_in(_material, name))
+        for name in ("c_p", "c_s", "rho")
+    },
+    "FDTD2D(absorbing_layer_reflection)": (
+        "absorbing_layer_reflection",
+        lambda v: _acoustic_engine(absorbing_layer_reflection=v),
+    ),
+    "ElasticFDTD2D(absorbing_layer_reflection)": (
+        "absorbing_layer_reflection",
+        lambda v: _elastic_engine(absorbing_layer_reflection=v),
+    ),
+    **{
+        f"add_plane_wave({name})": (name, _number_in(_plane_wave, name))
+        for name in ("center_m", "half_width_m", "amplitude", "wavelength_m")
+    },
+    "add_contour_probe(frequencies)": (
+        "frequencies",
+        lambda v: FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX)).add_contour_probe(
+            3, 10, 3, 10, frequencies=np.array([v], dtype=object)
+        ),
+    ),
+    "phasors(frequency)": ("frequency", _probe_for),
+    **{
+        f"ContourPhasors({name})": (name, lambda v, name=name: _contour(**{name: v}))
+        for name in ("frequency", "segment")
+    },
+}
+
+
+@pytest.mark.parametrize("spelling", _BEYOND_A_FLOAT_SPELLINGS)
+@pytest.mark.parametrize("case", sorted(_TOO_LARGE_INPUTS))
+def test_a_number_no_float_holds_is_refused_by_name(case: str, spelling: str) -> None:
+    """A finite number past a float's largest is refused naming the input it was given to.
+
+    The checks read one number through ``float``, which refused a Python
+    integer or a ``Fraction`` that large with Python's ``OverflowError``
+    (``int too large to convert to float``), naming nothing, and a map
+    through ``np.asarray`` the same way; a long double ``ramp_cycles`` that
+    large passed as a finite number.
+    """
+    name, build = _TOO_LARGE_INPUTS[case]
+    number = _BEYOND_A_FLOAT[spelling]()
+    with pytest.raises(ValueError, match=rf"(?<!\w)'?{name}'? (?:must|holds)"):
+        build(number)

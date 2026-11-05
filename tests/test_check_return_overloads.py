@@ -1251,7 +1251,9 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
 
     Only a ``def``, a ``class``, an import and an alias were read as bindings
     of the top, so the alias of the polar helper stood past the lambda, and
-    the plain ``plot`` that returns what the lambda makes was refused.
+    the plain ``plot`` that returns what the lambda makes was refused; a
+    ``class`` read by its name reached the ``def`` it replaced, which still
+    held the name in the table of functions.
     """
     refused = _refused(
         tmp_path,
@@ -1272,6 +1274,12 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
 
         _defined = lambda: plt.subplots()[1]
 
+        def _classed():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class _classed:
+            pass
+
         _standing = _polar
 
         def plot_lambda(result: object) -> Axes:
@@ -1283,18 +1291,24 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
         def plot_defined(result: object) -> Axes:
             return _defined()
 
+        def plot_classed(result: object) -> Axes:
+            return _classed()
+
         def plot_standing(result: object) -> Axes:
             return _standing()
         """,
         importer="""
         from . import helpers
-        from .helpers import _lambda
+        from .helpers import _classed, _lambda
 
         def plot_imported(result: object) -> Axes:
             return _lambda()
 
         def plot_attribute(result: object) -> Axes:
             return helpers._lambda()
+
+        def plot_imported_class(result: object) -> Axes:
+            return _classed()
         """,
     )
     assert sorted(refused) == ["plot_standing"]

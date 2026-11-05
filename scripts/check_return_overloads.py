@@ -1360,38 +1360,65 @@ class Package:
         every definition from the ``def`` on, since the function may be
         called during the import. A method, or a function of another module,
         is what its name holds once its module has run
-        (:meth:`live_definitions`).
+        (:meth:`live_definitions`). A ``class`` of the name there is read
+        beside the definitions (:meth:`_namesake_classes`): where it is what
+        the name holds, the call makes an instance of it and reaches no
+        definition.
         """
         first = self.functions[dotted]
         if call is None or first.owner is not None or first.module != function.module:
             return self.live_definitions(dotted)
         keys = self.every_definition(dotted)
-        last = {
+        last: dict[ast.AST, str] = {
             self.functions[key].definitions[-1]: key
             for key in keys
             if self.functions[key].definitions
         }
-        live = live_bindings(self.trees[first.module], list(last), call)
-        return [last[node] for node in live] or list(keys)
+        classes = self._namesake_classes(dotted)
+        live = live_bindings(self.trees[first.module], [*last, *classes], call)
+        found = [last[node] for node in live if node in last]
+        return found if classes and live else found or list(keys)
 
     def live_definitions(self, dotted: str) -> list[str]:
         """The key of each definition of a function of a module, or of a
         method, the name may hold once the module has run
         (:func:`ast_scan.live_class_members`): one in each branch of an ``if``
-        is either, a later one replaces an earlier one it always follows, and
-        a method of a class a later ``class`` of its name replaces is none.
+        is either, a later one replaces an earlier one it always follows, a
+        method of a class a later ``class`` of its name replaces is none, and
+        so is a function a later ``class`` of its name replaces
+        (:meth:`_namesake_classes`).
         """
         if dotted not in self._live:
             keys = self.every_definition(dotted)
-            last = {
+            last: dict[ast.AST, str] = {
                 self.functions[key].definitions[-1]: key
                 for key in keys
                 if self.functions[key].definitions
             }
             tree = self.trees[self.functions[keys[0]].module]
-            live = live_class_members(tree, list(last))
-            self._live[dotted] = [last[node] for node in live] or list(keys)
+            classes = self._namesake_classes(dotted)
+            live = live_class_members(tree, [*last, *classes])
+            found = [last[node] for node in live if node in last]
+            self._live[dotted] = found if classes and live else found or list(keys)
         return self._live[dotted]
+
+    def _namesake_classes(self, dotted: str) -> list[ast.ClassDef]:
+        """The ``class`` statements at the top of the module of *dotted*, a
+        function there, that bind its name too.
+
+        A function and a class of one name share the dotted name the table
+        of functions keys the function by, so a call that reads the name
+        where the class stands reached the function the class replaced.
+        """
+        first = self.functions[dotted]
+        if first.parent is not None or first.owner is not None:
+            return []
+        name = dotted.rpartition(".")[2]
+        return [
+            node
+            for node in self._top_statements(first.module).get(name, [])
+            if isinstance(node, ast.ClassDef)
+        ]
 
     def _targets(
         self, function: Function, func: ast.expr, call: ast.AST | None = None

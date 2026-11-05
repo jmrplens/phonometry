@@ -545,8 +545,9 @@ def _held_where(
     The bindings *holder* makes of its first name that may stand where it is
     read (:func:`ast_scan.live_bindings`) say: an import what it imports, an
     assignment of a dotted name what that name stands for where it is
-    assigned, a ``def`` or a ``class`` the name itself; two that disagree, or
-    any other binding, stand for nothing the guard can name. A class body
+    assigned; a ``def`` or a ``class``, a function or a class of the module
+    that opens no file the guard can name, two that disagree, or any other
+    binding, stand for nothing the guard can name. A class body
     that binds the name not at all reads it in the nearest scope around it
     that is no class body, *around* holding the scopes around *holder*, the
     module first: there it is read where the class statement runs, which is
@@ -580,8 +581,6 @@ def _held_where(
                 if assigned is None or _dotted(assigned) is None
                 else _held_where(assigned, holder, package, table, depth + 1, around)
             )
-        elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-            held.add(_resolved([head], table))
         else:
             held.add(None)
     if len(held) != 1 or None in held:

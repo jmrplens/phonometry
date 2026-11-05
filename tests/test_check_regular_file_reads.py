@@ -283,6 +283,63 @@ def test_a_default_is_what_its_name_holds_where_the_def_runs(
 
 
 @pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            import io
+
+            def open(path):
+                return None
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+
+            open = io.open
+            """,
+            id="a-later-alias",
+        ),
+        pytest.param(
+            """
+            def open(path):
+                return None
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="spelt-like-the-builtin",
+        ),
+        pytest.param(
+            """
+            class open:
+                def __init__(self, path):
+                    self.path = path
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="a-class",
+        ),
+    ],
+)
+def test_a_default_that_names_a_definition_of_the_module_reads_no_file(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A default that names a ``def`` or a ``class`` of the module holds that
+    function or class, which opens no file the guard can name.
+
+    The name was read through the module's table of names and its spelling,
+    so a later ``open = io.open``, or the spelling of the builtin itself,
+    made the default stand for an ``open``, and a call of it was refused as
+    a read.
+    """
+    assert _found(tmp_path, source) == []
+
+
+@pytest.mark.parametrize(
     ("binding", "found"),
     [
         pytest.param("opener = io.open\n", [("read", _OWN)], id="standing-alias"),

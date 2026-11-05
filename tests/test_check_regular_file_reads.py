@@ -113,6 +113,67 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
 
 
 @pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        pytest.param(
+            """
+            import io
+            open = io.open
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+
+            open = print
+            """,
+            [("read", _OWN)],
+            id="rebound-after-the-def",
+        ),
+        pytest.param(
+            """
+            import io
+            open = print
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+
+            open = io.open
+            """,
+            [],
+            id="rebound-before-the-def",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def outer(path):
+                source = io.open
+                def read(path, opener=source):
+                    with opener(path) as fh:
+                        return fh.read()
+                source = print
+                return read(path)
+            """,
+            [("outer.read", _OWN)],
+            id="in-a-function",
+        ),
+    ],
+)
+def test_a_default_is_what_its_name_holds_where_the_def_runs(
+    tmp_path: pathlib.Path, source: str, found: list[tuple[str, str]]
+) -> None:
+    """A parameter's default runs once, where the ``def`` does, so it is what
+    the name holds there, not what the scope binds it to by its end.
+
+    The default was read through the scope's last binding of the name, so an
+    ``open`` rebound to ``print`` after the ``def`` hid the read the default
+    makes, and one rebound to ``io.open`` after it made a read of ``print``.
+    """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
     "prelude",
     [
         "TYPE_CHECKING = True",

@@ -88,6 +88,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ast_scan import (
     ROOT,
+    assigned_value,
     binding_of,
     bindings_by_name,
     empty_type_checking_bodies,
@@ -430,6 +431,7 @@ def _bound(
     outer: Mapping[str, str],
     top: Mapping[str, str] | None = None,
     written_in: Mapping[str, str] | None = None,
+    holder: ast.AST | None = None,
 ) -> dict[str, str]:
     """What each name stands for inside *scope*, given what it stands for around it.
 
@@ -437,8 +439,11 @@ def _bound(
     stores anything in (:func:`_stored`); a name the scope declares
     ``global`` and stores nothing in stands for what it stands for at the
     top of the module, *top*; a parameter whose default is a dotted name
-    stands for what that name stands for where the ``def`` runs, *written_in*
-    (*outer* unless a class body lies between them); then the imports of the
+    stands for what that name stands for where the ``def`` runs: what the
+    bindings of *holder*, the scope the ``def`` is written in, that may
+    stand there make it (:func:`_held_where`), or what it stands for in
+    *written_in* (*outer* unless a class body lies between them) when
+    *holder* binds it not at all; then the imports of the
     scope as :func:`_imported` reads them, the relative ones from *package*;
     then a name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) stands for what that name stands for, the
@@ -454,8 +459,13 @@ def _bound(
     for name in _parameters(scope) | _stored(scope):
         aliases.pop(name, None)
     if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef):
+        table = outer if written_in is None else written_in
         for parameter, default in with_defaults(scope):
-            held = _named_by(default, outer if written_in is None else written_in)
+            held = (
+                _named_by(default, table)
+                if holder is None or default is None
+                else _held_where(default, holder, package, table)
+            )
             if held is not None:
                 aliases[parameter.arg] = held
     assignments: list[tuple[str, list[str], tuple[int, int]]] = []
@@ -483,6 +493,56 @@ def _named_by(default: ast.expr | None, aliases: Mapping[str, str]) -> str | Non
     return None if parts is None else _resolved(parts, aliases)
 
 
+#: How many assignments of one name to another a name is followed through.
+_DEPTH = 8
+
+
+def _held_where(
+    value: ast.expr,
+    holder: ast.AST,
+    package: str,
+    table: Mapping[str, str],
+    depth: int = 0,
+) -> str | None:
+    """What the dotted name *value*, read in the scope *holder* where it is
+    written, stands for there.
+
+    The bindings *holder* makes of its first name that may stand where it is
+    read (:func:`ast_scan.live_bindings`) say: an import what it imports, an
+    assignment of a dotted name what that name stands for where it is
+    assigned, a ``def`` or a ``class`` the name itself; two that disagree, or
+    any other binding, stand for nothing the guard can name. A name *holder*
+    binds not at all, or one a function binds in the module under
+    ``global``, stands for what *table* says, the scope's table of names.
+    """
+    parts = _dotted(value)
+    if parts is None:
+        return None
+    head = parts[0]
+    nodes = bindings_by_name(holder).get(head, [])
+    swapped = isinstance(holder, ast.Module) and head in global_bindings(holder)
+    if not nodes or swapped or depth > _DEPTH:
+        return _resolved(parts, table)
+    held: set[str | None] = set()
+    for node in live_bindings(holder, nodes, value):
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            held.add(_imported(node, package).get(head))
+        elif isinstance(node, ast.Name):
+            assigned = assigned_value(holder, node)
+            held.add(
+                None
+                if assigned is None or _dotted(assigned) is None
+                else _held_where(assigned, holder, package, table, depth + 1)
+            )
+        elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            held.add(_resolved([head], table))
+        else:
+            held.add(None)
+    if len(held) != 1 or None in held:
+        return _BOUND_NEARER
+    return ".".join([str(held.pop()), *parts[1:]])
+
+
 def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]]:
     """What the names stand for in each scope of a module, as Python looks them up.
 
@@ -499,18 +559,18 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
     if isinstance(tree, ast.Module):
         _rebound_from_inside(tree, package, module)
     found: dict[ast.AST, dict[str, str]] = {tree: module}
-    pending: list[tuple[ast.AST, dict[str, str], dict[str, str]]] = [
-        (tree, module, module)
+    pending: list[tuple[ast.AST, dict[str, str], dict[str, str], ast.AST]] = [
+        (tree, module, module, tree)
     ]
     while pending:
-        node, outer, here = pending.pop()
+        node, outer, here, holder = pending.pop()
         for child in ast.iter_child_nodes(node):
             if not isinstance(child, _SCOPES):
-                pending.append((child, outer, here))
+                pending.append((child, outer, here, holder))
                 continue
-            found[child] = _bound(child, package, outer, module, here)
+            found[child] = _bound(child, package, outer, module, here, holder)
             inner = outer if isinstance(child, ast.ClassDef) else found[child]
-            pending.append((child, inner, found[child]))
+            pending.append((child, inner, found[child], child))
     return found
 
 

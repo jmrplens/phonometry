@@ -38,6 +38,7 @@ from markdown_fences import (
     page_kind,
     page_lines,
     python_fences,
+    quotation_marks,
 )
 
 
@@ -568,3 +569,61 @@ def test_only_the_end_the_markdown_parser_reads_ends_a_comment() -> None:
     lines = ["<!-- a --!>", "b", "c -->", "d"]
     roles = [line.role for line in page_lines(lines, kind="md")]
     assert roles == ["html", "raw", "raw", "paragraph"]
+
+
+#: Lines whose quotation marks the two languages have to read alike: marks
+#: parted by a tab or by nothing, behind blanks, and the four columns that make
+#: indented code on a ``.md`` page.
+_MARKED = (
+    "",
+    ">",
+    "> a",
+    ">a",
+    ">\t> a",
+    " > a",
+    "   > a",
+    "    > a",
+    "\t> a",
+    ">\t\ta",
+    "> > > a",
+    ">>a",
+    " >\t>\ta",
+    "a > b",
+)
+
+
+@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.parametrize("kind", ["md", "mdx"])
+def test_the_site_reads_the_marks_of_a_quotation_as_the_scripts_do(kind: str) -> None:
+    """How many quotation marks open a line, and what they leave of it, read
+    by ``quotationMarks`` of the site and :func:`quotation_marks` alike, on
+    every line of every page and on the lines above.
+    """
+    lines = [
+        *_MARKED,
+        *(line for text in _pages() for line in _split_as_the_site_does(text)),
+    ]
+    script = (
+        "import {quotationMarks} from "
+        f"{json.dumps(_SITE_READER.as_uri())};"
+        "let input = '';"
+        "for await (const chunk of process.stdin) input += chunk;"
+        "process.stdout.write(JSON.stringify(JSON.parse(input).map((line) => "
+        f"  quotationMarks(line, {{kind: {json.dumps(kind)}}}))));"
+    )
+    ran = subprocess.run(
+        [str(_NODE), "--input-type=module", "-e", script],
+        input=json.dumps(lines),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=120,
+        check=True,
+    )
+    python = [list(quotation_marks(line, kind=kind)) for line in lines]
+    differ = [
+        line
+        for line, one, other in zip(lines, python, json.loads(ran.stdout), strict=True)
+        if one != other
+    ]
+    assert differ == []

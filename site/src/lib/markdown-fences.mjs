@@ -187,6 +187,51 @@ function pastColumns(text, column, width) {
 }
 
 /**
+ * What a quotation's mark leaves of `rest`, standing at `column`, and the column
+ * past it, or `null`: up to three columns of blanks may stand before the mark on a
+ * `.md` page, where four open indented code, and any number on an `.mdx` one; one
+ * column of blank after it is the mark's own, a tab there leaving the rest of its
+ * columns as spaces (CommonMark 0.31.2, 2.2 and 5.1).
+ *
+ * @param {string} rest
+ * @param {number} column
+ * @param {boolean} markdown Whether the page is `.md`, not `.mdx`.
+ * @returns {[string, number] | null}
+ */
+function quoteMarkAt(rest, column, markdown) {
+  const blanks = blankColumns(rest, column);
+  const body = pastBlanks(rest);
+  if (!body.startsWith('>') || (markdown && blanks >= CODE_INDENT)) return null;
+  const at = column + blanks + 1;
+  const after = body.slice(1);
+  if (after[0] === ' ' || after[0] === '\t') return [pastColumns(after, at, 1), at + 1];
+  return [after, at];
+}
+
+/**
+ * How many quotation marks open `line`, and what they leave of it, read column by
+ * column as the walk of the page reads them, a tab to its stop: a line read apart
+ * from its page, as one a reader has already placed outside code. The twin of
+ * `quotation_marks` in `scripts/markdown_fences.py`.
+ *
+ * @param {string} line
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {[number, string]} The number of marks, and the line past them and the
+ *   blank each may take.
+ */
+export function quotationMarks(line, { kind = 'mdx' } = {}) {
+  let depth = 0;
+  let rest = line;
+  let column = 0;
+  for (;;) {
+    const mark = quoteMarkAt(rest, column, kind === 'md');
+    if (mark === null) return [depth, rest];
+    [rest, column] = mark;
+    depth += 1;
+  }
+}
+
+/**
  * The `[start, end]` of each piece of a table's row, between its unescaped pipes.
  *
  * @param {string} row
@@ -318,13 +363,7 @@ class Walk {
 
   /** What a quotation's mark leaves of `rest`, and at which column, or `null`. */
   quoteMark(rest, column) {
-    const blanks = blankColumns(rest, column);
-    const body = pastBlanks(rest);
-    if (!body.startsWith('>') || (this.markdown && blanks >= CODE_INDENT)) return null;
-    const at = column + blanks + 1;
-    const after = body.slice(1);
-    if (after[0] === ' ' || after[0] === '\t') return [pastColumns(after, at, 1), at + 1];
-    return [after, at];
+    return quoteMarkAt(rest, column, this.markdown);
   }
 
   /** What is left of a line that closes the innermost aside, or `null`. */

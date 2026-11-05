@@ -31,7 +31,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-import { fences } from '../lib/markdown-fences.mjs';
+import { codeLines, fences, quotationMarks, splitLines } from '../lib/markdown-fences.mjs';
 
 /**
  * Paths are resolved by walking up from the working directory rather than from
@@ -355,6 +355,35 @@ const apaNames = cff.authors.map((author) => {
 });
 
 /**
+ * The quotation that follows the line `label` of a page, its lines past their
+ * marks and joined, or `null` when none does. Blank lines may stand between the
+ * label and the quotation, which ends at its first line no mark opens. The marks
+ * are read by their columns, as the walk of the page reads them
+ * (`quotationMarks`): a mark behind up to three spaces, or a second one behind a
+ * tab, is a mark here as it is on the published page.
+ *
+ * @param {string} source The page.
+ * @param {string} label The line the quotation is quoted under.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {string | null}
+ */
+export function quotedUnder(source, label, { kind = 'mdx' } = {}) {
+  const lines = splitLines(source);
+  const code = codeLines(lines, { kind });
+  const at = lines.findIndex((line, index) => !code[index] && line.trim() === label);
+  if (at < 0) return null;
+  let index = at + 1;
+  while (index < lines.length && lines[index].trim() === '') index += 1;
+  const quoted = [];
+  for (; index < lines.length; index += 1) {
+    const [depth, rest] = quotationMarks(lines[index], { kind });
+    if (depth === 0) break;
+    quoted.push(rest);
+  }
+  return quoted.length ? quoted.join('\n') : null;
+}
+
+/**
  * The pages that restate the citation, as repository-relative paths.
  *
  * The two Starlight pages are the ones the site renders. `docs/start/about.md`
@@ -396,9 +425,9 @@ for (const path of citingPages) {
   if (!source.includes(doiLink)) fail(`the link to the archived record should read ${doiLink}`);
 
   // The APA reference, quoted under its own label.
-  const quoted = source.match(/\nAPA:\n+((?:>.*\n)+)/);
-  if (!quoted) fail('no APA reference, quoted under an "APA:" label, to check.');
-  const apa = collapse(quoted[1].replace(/^>\s?/gm, ''));
+  const quoted = quotedUnder(source, 'APA:', { kind });
+  if (quoted === null) fail('no APA reference, quoted under an "APA:" label, to check.');
+  const apa = collapse(quoted);
 
   for (const name of apaNames) {
     if (!apa.includes(name)) fail(`the APA reference should name ${name}: ${apa}`);

@@ -31,7 +31,13 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-import { codeLines, fences, quotationMarks, splitLines } from '../lib/markdown-fences.mjs';
+import {
+  codeLines,
+  fences,
+  pageLines,
+  quotationMarks,
+  splitLines,
+} from '../lib/markdown-fences.mjs';
 
 /**
  * Paths are resolved by walking up from the working directory rather than from
@@ -354,13 +360,20 @@ const apaNames = cff.authors.map((author) => {
   return `${author['family-names']}, ${initials}`;
 });
 
+/** The roles of a line the page shows as prose, a label among them. */
+const PROSE_ROLES = new Set(['paragraph', 'text']);
+
 /**
  * The quotation that follows the line `label` of a page, its lines past their
- * marks and joined, or `null` when none does. Blank lines may stand between the
- * label and the quotation, which ends at its first line no mark opens. The marks
- * are read by their columns, as the walk of the page reads them
- * (`quotationMarks`): a mark behind up to three spaces, or a second one behind a
- * tab, is a mark here as it is on the published page.
+ * marks and joined, or `null` when none does. A line spelt as the label counts
+ * only where the page shows it as prose, never in code, a raw HTML block or a
+ * comment, and each one is tried in turn until one has a quotation under it.
+ * Blank lines may stand between the label and the quotation, which carries on
+ * through a lazy line the walk of the page reads as its paragraph's and ends
+ * where neither a mark nor such a line goes on; a block of code inside it is
+ * no part of it. The marks are read by their columns, as the walk of the page
+ * reads them (`quotationMarks`): a mark behind up to three spaces, or a second
+ * one behind a tab, is a mark here as it is on the published page.
  *
  * @param {string} source The page.
  * @param {string} label The line the quotation is quoted under.
@@ -369,16 +382,53 @@ const apaNames = cff.authors.map((author) => {
  */
 export function quotedUnder(source, label, { kind = 'mdx' } = {}) {
   const lines = splitLines(source);
+  const read = pageLines(lines, { kind });
   const code = codeLines(lines, { kind });
-  const at = lines.findIndex((line, index) => !code[index] && line.trim() === label);
-  if (at < 0) return null;
-  let index = at + 1;
+  for (let at = 0; at < lines.length; at += 1) {
+    if (!PROSE_ROLES.has(read[at].role) || lines[at].trim() !== label) continue;
+    const quoted = quotationFrom(lines, read, code, at + 1, kind);
+    if (quoted !== null) return quoted;
+  }
+  return null;
+}
+
+/**
+ * Whether a line the page shows as prose carries `text`: not one of a comment,
+ * a raw HTML block or a block of code, which the published page does not show
+ * as its own words.
+ *
+ * @param {string} source The page.
+ * @param {string} text What a line should carry.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {boolean}
+ */
+export function showsInProse(source, text, { kind = 'mdx' } = {}) {
+  const lines = splitLines(source);
+  const read = pageLines(lines, { kind });
+  return lines.some((line, index) => PROSE_ROLES.has(read[index].role) && line.includes(text));
+}
+
+/**
+ * The quotation that opens at the first line from `start` that is not blank,
+ * read as `quotedUnder` reads it, or `null` when none opens there.
+ *
+ * @param {string[]} lines The page's lines.
+ * @param {{ role: string }[]} read The walk of the page, one entry per line.
+ * @param {boolean[]} code Whether each line is code.
+ * @param {number} start The line after the label.
+ * @param {'md' | 'mdx'} kind The page's kind.
+ * @returns {string | null}
+ */
+function quotationFrom(lines, read, code, start, kind) {
+  let index = start;
   while (index < lines.length && lines[index].trim() === '') index += 1;
   const quoted = [];
   for (; index < lines.length; index += 1) {
     const [depth, rest] = quotationMarks(lines[index], { kind });
-    if (depth === 0) break;
-    quoted.push(rest);
+    const lazy = depth === 0 && quoted.length > 0 && read[index].role === 'text';
+    if (depth === 0 && !lazy) break;
+    if (code[index]) continue;
+    quoted.push(lazy ? lines[index].trim() : rest);
   }
   return quoted.length ? quoted.join('\n') : null;
 }
@@ -422,7 +472,9 @@ for (const path of citingPages) {
   // The bold link to the archived record. Both halves of it are the DOI, so
   // one edited in CITATION.cff has to reach both or neither.
   const doiLink = `**[doi.org/${doi}](${doiUrl})**`;
-  if (!source.includes(doiLink)) fail(`the link to the archived record should read ${doiLink}`);
+  if (!showsInProse(source, doiLink, { kind })) {
+    fail(`the link to the archived record should read ${doiLink}`);
+  }
 
   // The APA reference, quoted under its own label.
   const quoted = quotedUnder(source, 'APA:', { kind });

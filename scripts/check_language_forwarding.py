@@ -91,12 +91,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ast_scan import (
+    assigned_value,
     binding_of,
     empty_type_checking_bodies,
     global_bindings,
     is_type_checking_block,
     live_bindings,
     own_names,
+    scope_nodes,
     what_never_runs,
 )
 from ast_scan import parameters as with_defaults
@@ -202,6 +204,10 @@ class Module:
     names: dict[str, list[_Written]] = field(default_factory=dict)
     #: Every function and class its top level defines, two of one name alike.
     definitions: list[_DefinitionNode] = field(default_factory=list)
+    #: The names an assignment of a name or a dotted one alone binds at its
+    #: top or under ``global`` (``draw = axis``), by the name each binds
+    #: (:func:`_module_aliases`).
+    aliases: dict[str, list[ast.Name]] = field(default_factory=dict)
     speaks: bool = False
 
 
@@ -576,6 +582,27 @@ def _add_global_bindings(module: Module) -> None:
                 module.names.setdefault(name, []).append((node, node))
 
 
+def _module_aliases(tree: ast.Module) -> dict[str, list[ast.Name]]:
+    """Each name an assignment of a name or a dotted one alone binds at the
+    top of *tree*, or in a function, a method or a class body inside it under
+    ``global`` (:func:`ast_scan.global_bindings`), with every such target.
+    """
+    found: dict[str, list[ast.Name]] = {}
+    candidates = [
+        *scope_nodes(tree),
+        *(node for nodes in global_bindings(tree).values() for node in nodes),
+    ]
+    for node in candidates:
+        if not isinstance(node, ast.Name):
+            continue
+        value = assigned_value(tree, node)
+        while isinstance(value, ast.Attribute):
+            value = value.value
+        if isinstance(value, ast.Name):
+            found.setdefault(node.id, []).append(node)
+    return found
+
+
 def _one_import(bound: list[_Bound]) -> Binding | None:
     """The import every binding of a name that may stand is, or None."""
     first = bound[0] if bound else None
@@ -595,9 +622,11 @@ class Tree:
         self.classes: dict[ast.AST, Class] = {}
         self.methods: dict[str, list[Scope]] = {}
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
+        self._aliasing: set[int] = set()
         for module in modules.values():
             module.names, module.definitions = _scope_names(module, module.node.body)
             _add_global_bindings(module)
+            module.aliases = _module_aliases(module.node)
             module.speaks = any(
                 module.name == name or module.name.startswith(f"{name}.")
                 for name in LANGUAGE_PASSES
@@ -736,6 +765,7 @@ class Tree:
             for bound in _standing(module, module.names.get(attr, []), None)
             for target in self._targets(bound, inner)
         ]
+        found.extend(self._aliased(module, attr))
         return found or fallback
 
     def attribute(self, module_name: str, attr: str) -> _Target:
@@ -785,7 +815,33 @@ class Tree:
                 return [Local(current, name)]
             current = current.parent
         bound = _standing(module, module.names.get(name, []), point)
-        return [target for b in bound for target in self._targets(b)]
+        return [
+            *(target for b in bound for target in self._targets(b)),
+            *self._aliased(module, name),
+        ]
+
+    def _aliased(self, module: Module, name: str) -> list[_Target]:
+        """What each assignment of a name or a dotted one alone that binds the
+        module's *name* (:attr:`Module.aliases`) binds it to: what the value
+        stands for where the assignment reads it, when that is the module's
+        name; nothing for a name of a function's own.
+        """
+        found: list[_Target] = []
+        for target in module.aliases.get(name, []):
+            value = assigned_value(module.node, target)
+            if value is None or id(target) in self._aliasing:
+                continue
+            self._aliasing.add(id(target))
+            try:
+                if isinstance(value, ast.Name):
+                    how, scope = binding_of(module.node, value, value.id)
+                    if how == "global" or scope is None or scope is module.node:
+                        found.extend(self.lookups(value.id, None, module, value))
+                else:
+                    found.append(self.resolve(value, None, module))
+            finally:
+                self._aliasing.discard(id(target))
+        return [target for target in found if target is not None]
 
     def lookup(self, name: str, scope: Scope | None, module: Module) -> _Target:
         """Resolve a bare name the way Python would inside *scope*.

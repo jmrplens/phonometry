@@ -572,6 +572,51 @@ def test_an_import_a_function_makes_under_global_may_be_what_a_call_reaches(
     ]
 
 
+def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``draw = axis`` at the top of a module, or under ``global`` in a
+    function, binds the name to the helper, as an import of it would.
+
+    Only a ``def``, a ``class`` or an import bound a module name, so a call
+    through such an alias reached nothing and dropped the language unread.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis
+            from . import helpers
+
+            draw = axis
+            label = helpers.axis
+
+
+            def _localized():
+                global swapped
+                swapped = axis
+
+
+            def plot_top(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_attribute(result, ax, language="en"):
+                label(ax)
+
+
+            def plot_global(result, ax, language="en"):
+                swapped(ax)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_attribute", "pkg.helpers.axis"),
+        ("plot_global", "pkg.helpers.axis"),
+        ("plot_top", "pkg.helpers.axis"),
+    ]
+
+
 def test_each_of_two_definitions_of_one_name_is_read(tmp_path: pathlib.Path) -> None:
     """A function defined in each branch of an ``if`` has its calls read in both.
 

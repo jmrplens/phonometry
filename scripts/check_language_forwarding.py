@@ -889,41 +889,65 @@ class Tree:
         return [target for b in bound for target in self._targets(b)]
 
     def _aliased(self, alias: Alias) -> list[_Target]:
-        """What an assignment of a name or a dotted one alone binds the
-        module's name to: what the value stands for where the assignment
-        reads it, when that is the module's name; nothing for a name of a
-        function's own.
+        """What an assignment of a name or a dotted one alone binds its name
+        to: what the value stands for where the assignment reads it, in the
+        scope that binds the value's first name, the module's or that of the
+        function the assignment is written in (an import there, under
+        ``global`` too), and as that name stands at the assignment; nothing
+        for a name a class body, a lambda or a comprehension binds.
         """
         module, target = alias.module, alias.target
         value = assigned_value(module.node, target)
-        if value is None or id(target) in self._aliasing:
+        head = value
+        while isinstance(head, ast.Attribute):
+            head = head.value
+        if not isinstance(head, ast.Name) or id(target) in self._aliasing:
             return []
+        how, binder = binding_of(module.node, head, head.id)
+        scope: Scope | None = None
+        if how != "global" and binder is not None and binder is not module.node:
+            scope = self.functions.get(binder)
+            if scope is None:
+                return []
         found: list[_Target] = []
         self._aliasing.add(id(target))
         try:
             if isinstance(value, ast.Name):
-                how, scope = binding_of(module.node, value, value.id)
-                if how == "global" or scope is None or scope is module.node:
-                    found.extend(self.lookups(value.id, None, module, value))
-            else:
-                found.append(self.resolve(value, None, module))
+                found.extend(self.lookups(value.id, scope, module, value))
+            elif value is not None:
+                found.append(self.resolve(value, scope, module, value))
         finally:
             self._aliasing.discard(id(target))
         return [target for target in found if target is not None]
 
-    def lookup(self, name: str, scope: Scope | None, module: Module) -> _Target:
-        """Resolve a bare name the way Python would inside *scope*.
+    def lookup(
+        self,
+        name: str,
+        scope: Scope | None,
+        module: Module,
+        point: ast.AST | None = None,
+    ) -> _Target:
+        """Resolve a bare name the way Python would inside *scope*, where
+        *point* reads it, or once the scope has run when it is None.
 
         None when the bindings it may hold disagree (:meth:`lookups`).
         """
-        return _one(self.lookups(name, scope, module))
+        return _one(self.lookups(name, scope, module, point))
 
-    def resolve(self, expr: ast.expr, scope: Scope | None, module: Module) -> _Target:
-        """Resolve a name or a dotted module path to what it refers to."""
+    def resolve(
+        self,
+        expr: ast.expr,
+        scope: Scope | None,
+        module: Module,
+        point: ast.AST | None = None,
+    ) -> _Target:
+        """Resolve a name or a dotted module path to what it refers to, its
+        first name read where *point* reads it (:meth:`lookup`).
+        """
         if isinstance(expr, ast.Name):
-            return self.lookup(expr.id, scope, module)
+            return self.lookup(expr.id, scope, module, point)
         if isinstance(expr, ast.Attribute):
-            base = self.resolve(expr.value, scope, module)
+            base = self.resolve(expr.value, scope, module, point)
             if isinstance(base, ModuleRef):
                 return self.attribute(base.name, expr.attr)
             if isinstance(base, Class):

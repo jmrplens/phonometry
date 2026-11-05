@@ -648,6 +648,54 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
     ]
 
 
+def test_an_alias_reads_its_value_where_the_assignment_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``draw = axis`` written under ``global`` in a function that imports
+    ``axis`` itself reads the import of that function, and ``draw =
+    helpers.axis`` reads ``helpers`` as it stands at the assignment, not as
+    the module binds it once it has run.
+
+    The value was read at the top of the module once it had run, so the
+    first alias reached nothing, and the second reached the ``axis`` of the
+    module a later import bound ``helpers`` to.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax, language="en"):
+                return ax
+            """,
+            "pkg.plots": """
+            from . import helpers
+
+
+            def _setup():
+                global draw
+                from .helpers import axis
+                draw = axis
+
+
+            label = helpers.fmt
+            from . import other as helpers
+
+
+            def plot_global(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_dotted(result, ax, language="en"):
+                label(ax)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_dotted", "pkg.helpers.fmt"),
+        ("plot_global", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

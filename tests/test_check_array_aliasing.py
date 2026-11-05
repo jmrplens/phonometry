@@ -916,6 +916,10 @@ def test_a_keyword_a_starred_argument_may_leave_to_it_reaches_its_place(
     it, so ``keep(*rest, **options)`` with ``rest`` empty and the caller's
     array under ``"a"`` in ``options`` handed nothing of it to ``a``, which
     ``keep`` returns, and the record that keeps the result passed.
+
+    A place an explicit keyword fills is that keyword's alone: were the
+    ``*`` argument or the mapping to fill it too, the call would raise, so
+    ``a=`` beside ``*rest`` and ``**options`` hands ``a`` the copy only.
     """
     found = _findings(
         tmp_path,
@@ -927,6 +931,9 @@ def test_a_keyword_a_starred_argument_may_leave_to_it_reaches_its_place(
         def keep(a):
             return a
 
+        def kept(a, b=None):
+            return a
+
         def rating(frequencies, levels):
             rest = []
             options = {"a": frequencies}
@@ -936,6 +943,11 @@ def test_a_keyword_a_starred_argument_may_leave_to_it_reaches_its_place(
         def placed(frequencies, levels):
             options = {"a": frequencies}
             f = keep(np.array(levels), **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def named(frequencies, levels, rest):
+            options = {"b": frequencies}
+            f = kept(*rest, a=np.array(levels), **options)
             return BandResult(frequencies=f, levels=f * 0.0)
         """,
     )

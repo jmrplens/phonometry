@@ -3415,7 +3415,8 @@ def bind(
     From *spread*, the place of the first ``*`` argument, on, the number of
     values the call hands is unknown: that argument and every one after it
     may land in any place from its own on, or in ``*args``, and a place they
-    may leave unfilled is one a keyword or ``**options`` may fill.
+    may leave unfilled is one a keyword or ``**options`` may fill. A place an
+    explicit keyword fills is that keyword's alone.
     """
     spec = function.node.args
     positional = [a.arg for a in (*spec.posonlyargs, *spec.args)]
@@ -3448,7 +3449,10 @@ def bind(
         if keyword is None:
             unpacked.append(value)
         elif keyword in names:
+            # The place is the keyword's alone: a ``*`` argument or a
+            # mapping that filled it too would make the call raise.
             mapping[keyword] = value
+            maybe.discard(keyword)
         else:
             spill.append(value)
     # ``**options`` can only reach the parameters nothing else has filled,

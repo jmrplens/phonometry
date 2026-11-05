@@ -89,6 +89,7 @@ from ast_scan import (
     COMPOUND_STATEMENTS,
     ROOT,
     assigned_value,
+    assignment_target,
     binding_of,
     bindings_by_name,
     block_statements,
@@ -560,11 +561,14 @@ def _imports(
 _DEPTH = 8
 
 
-def _aliases_a_name(node: ast.AST, root: ast.AST) -> TypeGuard[ast.Name]:
+def _aliases_a_name(
+    node: ast.AST, root: ast.AST
+) -> TypeGuard[ast.Name | ast.NamedExpr]:
     """Whether *node*, under *root*, is a name an assignment binds to a dotted
-    name alone (``axes = _polar_axes``, ``axes = helpers.polar_axes``).
+    name alone (``axes = _polar_axes``, ``axes = helpers.polar_axes``), or an
+    assignment expression that does (``(axes := _polar_axes)``).
     """
-    if not isinstance(node, ast.Name):
+    if assignment_target(node) is None:
         return False
     value = assigned_value(root, node)
     while isinstance(value, ast.Attribute):
@@ -1443,7 +1447,7 @@ class Package:
         package = self._package_of(module)
         targets: list[str] = []
         for statement in live_bindings(self.trees[module], statements, call):
-            if isinstance(statement, ast.Name):
+            if assignment_target(statement) is not None:
                 heads = self._aliased(module, statement, depth + 1)
             elif isinstance(statement, ast.Import | ast.ImportFrom):
                 heads = (_imports([statement], package, into={})[head.id],)
@@ -1472,11 +1476,10 @@ class Package:
             targets.extend(self._swapped(_spelled(func, dotted), depth))
         return targets
 
-    def _aliased(
-        self, module: str, target: ast.Name, depth: int = 0
-    ) -> tuple[str, ...]:
+    def _aliased(self, module: str, target: ast.AST, depth: int = 0) -> tuple[str, ...]:
         """What an assignment in *module* of a dotted name alone (``axes =
-        _polar_axes``) binds *target* to: what the call of that name reaches
+        _polar_axes``, ``(axes := _polar_axes)``) binds *target*, its target or
+        the assignment expression, to: what the call of that name reaches
         where the assignment reads it, looked up as Python looks it up
         (:func:`ast_scan.binding_of`).
         """
@@ -1541,7 +1544,7 @@ class Package:
                     target = _imports([statement], package, into={})[name]
                     found.append(self.canonical(target))
                     found.extend(self._swapped(target, depth + 1))
-                elif isinstance(statement, ast.Name):
+                elif assignment_target(statement) is not None:
                     found.extend(self._aliased(module, statement, depth + 1))
                 elif statement in self.keys:
                     found.append(self.keys[statement])
@@ -1567,8 +1570,10 @@ class Package:
                     node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
                 ):
                     names = {node.name}
-                elif _aliases_a_name(node, tree):
-                    names = {node.id}
+                elif (target := assignment_target(node)) is not None and (
+                    _aliases_a_name(node, tree)
+                ):
+                    names = {target.id}
                 else:
                     continue
                 for name in names:
@@ -1613,7 +1618,6 @@ class Package:
         heads = (
             dotted
             for found in nodes
-            if isinstance(found, ast.Name)
             for dotted in self._aliased(scope.module, found, depth + 1)
         )
         return tuple(

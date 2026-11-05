@@ -159,6 +159,7 @@ from ast_scan import (
     COMPOUND_STATEMENTS,
     ROOT,
     assigned_value,
+    assignment_target,
     binding_of,
     bindings_by_name,
     block_statements,
@@ -988,7 +989,7 @@ class Tree:
         ``global``, what an import reads (:meth:`imported`), or what the
         dotted name an assignment binds it to names (:meth:`aliased`).
         """
-        if isinstance(statement, ast.Name):
+        if assignment_target(statement) is not None:
             return self.aliased(module, statement, depth)
         if isinstance(statement, ast.Import | ast.ImportFrom):
             return self.imported(module, statement, name, depth)
@@ -997,11 +998,12 @@ class Tree:
         return (key,) if key is not None and known else ()
 
     def aliased(
-        self, module: str, target: ast.Name, depth: int = 0
+        self, module: str, target: ast.AST, depth: int = 0
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package an assignment in *module* of
         a dotted name alone (``alias = handing_back``, ``check =
-        validation.require_finite_array``) binds *target* to: what that name
+        validation.require_finite_array``, ``(fn := handing_back)``) binds
+        *target*, its target or the assignment expression, to: what that name
         stands for where the assignment reads it (:meth:`named_at`).
         """
         value = assigned_value(self.modules[module], target)
@@ -1055,7 +1057,7 @@ class Tree:
             nodes = live_bindings(scope, nodes, point)
         found: list[tuple[str, str]] = []
         for node in nodes:
-            if isinstance(node, ast.Name):
+            if assignment_target(node) is not None:
                 if not _aliases_a_name(node, self.modules[module]):
                     return ()
                 found.extend(self.aliased(module, node, depth))
@@ -3294,11 +3296,14 @@ _TOP_BINDINGS = (
 _DEPTH = 8
 
 
-def _aliases_a_name(node: ast.AST, root: ast.AST) -> TypeGuard[ast.Name]:
+def _aliases_a_name(
+    node: ast.AST, root: ast.AST
+) -> TypeGuard[ast.Name | ast.NamedExpr]:
     """Whether *node*, under *root*, is a name an assignment binds to a dotted
-    name alone (``alias = handing_back``, ``check = validation.check``).
+    name alone (``alias = handing_back``, ``check = validation.check``), or
+    an assignment expression that does (``(fn := handing_back)``).
     """
-    if not isinstance(node, ast.Name):
+    if assignment_target(node) is None:
         return False
     value = assigned_value(root, node)
     while isinstance(value, ast.Attribute):
@@ -3315,8 +3320,8 @@ def _bound_by(statement: ast.AST) -> set[str]:
     """The names a ``def``, a ``class``, an import or the name an assignment
     stores in binds.
     """
-    if isinstance(statement, ast.Name):
-        return {statement.id}
+    if (target := assignment_target(statement)) is not None:
+        return {target.id}
     if isinstance(statement, ast.Import | ast.ImportFrom):
         return imported_names(statement)
     if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):

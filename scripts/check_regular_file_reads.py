@@ -89,6 +89,7 @@ from typing import TYPE_CHECKING, NamedTuple
 from ast_scan import (
     ROOT,
     assigned_value,
+    assignment_target,
     binding_of,
     bindings_by_name,
     empty_type_checking_bodies,
@@ -478,15 +479,23 @@ def _bound(
         if isinstance(node, ast.Import | ast.ImportFrom):
             aliases.update(_imported(node, package))
         elif (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(target := node.targets[0], ast.Name)
+            isinstance(node, ast.Assign | ast.NamedExpr)
+            and (target := _one_target(node)) is not None
             and (parts := _dotted(node.value)) is not None
         ):
             assignments.append((target.id, parts, (node.lineno, node.col_offset)))
     for name, parts, _place in sorted(assignments, key=lambda bound: bound[2]):
         aliases[name] = _resolved(parts, aliases)
     return aliases
+
+
+def _one_target(node: ast.Assign | ast.NamedExpr) -> ast.Name | None:
+    """The one name an assignment, a statement or an expression, stores in."""
+    if isinstance(node, ast.NamedExpr):
+        return assignment_target(node)
+    if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        return node.targets[0]
+    return None
 
 
 def _named_by(default: ast.expr | None, aliases: Mapping[str, str]) -> str | None:
@@ -541,7 +550,7 @@ def _held_where(
     for node in live_bindings(holder, nodes, value):
         if isinstance(node, ast.Import | ast.ImportFrom):
             held.add(_imported(node, package).get(head))
-        elif isinstance(node, ast.Name):
+        elif assignment_target(node) is not None:
             assigned = assigned_value(holder, node)
             held.add(
                 None

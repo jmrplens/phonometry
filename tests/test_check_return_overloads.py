@@ -1197,6 +1197,11 @@ def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
             make = _plain_axes
             return make()
 
+        def plot_walrus(result: object) -> Axes:
+            if (make := _polar) is not None:
+                pass
+            return make()
+
         def plot_parameter(result: object, make=_plain_axes) -> Axes:
             return make()
 
@@ -1232,6 +1237,7 @@ def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
         "plot_standing_alias",
         "plot_standing_attribute",
         "plot_swapped",
+        "plot_walrus",
     ]
 
 

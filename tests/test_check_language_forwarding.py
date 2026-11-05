@@ -578,7 +578,8 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:
     """``draw = axis`` at the top of a module, or under ``global`` in a
-    function, binds the name to the helper, as an import of it would.
+    function, binds the name to the helper, as an import of it would, and so
+    does ``(draw := axis)``, there or in the function that calls it.
 
     Only a ``def``, a ``class`` or an import bound a module name, so a call
     through such an alias reached nothing and dropped the language unread.
@@ -609,6 +610,20 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
 
             def plot_global(result, ax, language="en"):
                 swapped(ax)
+
+
+            if (walked := axis) is not None:
+                pass
+
+
+            def plot_walrus(result, ax, language="en"):
+                walked(ax)
+
+
+            def plot_local_walrus(result, ax, language="en"):
+                if (drawn := axis) is not None:
+                    pass
+                drawn(ax)
             """,
             # An alias a later ``def`` or import replaces stands for nothing
             # at a call that runs once the module has.
@@ -638,7 +653,9 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
     assert sorted((f.caller, f.helper) for f in found) == [
         ("plot_attribute", "pkg.helpers.axis"),
         ("plot_global", "pkg.helpers.axis"),
+        ("plot_local_walrus", "pkg.helpers.axis"),
         ("plot_top", "pkg.helpers.axis"),
+        ("plot_walrus", "pkg.helpers.axis"),
     ]
 
 

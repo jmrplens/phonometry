@@ -266,6 +266,48 @@ def test_a_default_is_what_its_name_holds_where_the_def_runs(
 
 
 @pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            import io
+
+            def read(path):
+                if (opener := io.open) is not None:
+                    pass
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="in-the-function",
+        ),
+        pytest.param(
+            """
+            import io
+
+            if (open := io.open) is not None:
+                pass
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="at-the-top-read-by-a-default",
+        ),
+    ],
+)
+def test_a_name_a_walrus_binds_is_read_as_an_assignment_would_be(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """``(opener := io.open)`` binds the name to what the value names, as
+    ``opener = io.open`` does.
+
+    Only an assignment statement was read as one, so a read through a name
+    bound by ``:=`` passed as a call of nothing the guard could name.
+    """
+    assert _found(tmp_path, source) == [("read", _OWN)]
+
+
+@pytest.mark.parametrize(
     "prelude",
     [
         "TYPE_CHECKING = True",

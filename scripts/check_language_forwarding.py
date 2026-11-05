@@ -92,6 +92,7 @@ from typing import TYPE_CHECKING
 
 from ast_scan import (
     assigned_value,
+    assignment_target,
     binding_of,
     empty_type_checking_bodies,
     global_bindings,
@@ -186,12 +187,13 @@ class Binding:
 @dataclass(frozen=True, eq=False)
 class Alias:
     """What an assignment of a name or a dotted one alone at the top of a
-    module, or under ``global`` (``draw = axis``), binds its *target* to:
-    what the value stands for where the assignment reads it.
+    module, or under ``global`` (``draw = axis``, ``(draw := axis)``), binds
+    its *target*, the name or the assignment expression, to: what the value
+    stands for where the assignment reads it.
     """
 
     module: Module
-    target: ast.Name
+    target: ast.Name | ast.NamedExpr
 
 
 #: What a statement binds a name to: a function or a class it defines, what
@@ -199,7 +201,7 @@ class Alias:
 _Bound = _DefinitionNode | Binding | Alias
 
 #: A statement, or the name an assignment binds, with what it binds the name to.
-_Written = tuple[ast.stmt | ast.Name, _Bound]
+_Written = tuple[ast.stmt | ast.Name | ast.NamedExpr, _Bound]
 
 
 @dataclass(eq=False)
@@ -548,6 +550,8 @@ def _build_scope(
             scope.annotations[child.target.id] = child.annotation
             if child.value is not None:
                 scope.values.setdefault(child.target.id, []).append(child.value)
+        elif isinstance(child, ast.NamedExpr) and isinstance(child.target, ast.Name):
+            scope.values.setdefault(child.target.id, []).append(child.value)
         inserted = _inserts_language(child)
         if inserted is not None:
             scope.inserts.add(inserted)
@@ -591,24 +595,25 @@ def _add_global_bindings(module: Module) -> None:
                 module.names.setdefault(name, []).append((node, node))
 
 
-def _module_aliases(tree: ast.Module) -> dict[str, list[ast.Name]]:
+def _module_aliases(tree: ast.Module) -> dict[str, list[ast.Name | ast.NamedExpr]]:
     """Each name an assignment of a name or a dotted one alone binds at the
     top of *tree*, or in a function, a method or a class body inside it under
     ``global`` (:func:`ast_scan.global_bindings`), with every such target.
     """
-    found: dict[str, list[ast.Name]] = {}
+    found: dict[str, list[ast.Name | ast.NamedExpr]] = {}
     candidates = [
         *scope_nodes(tree),
         *(node for nodes in global_bindings(tree).values() for node in nodes),
     ]
     for node in candidates:
-        if not isinstance(node, ast.Name):
+        target = assignment_target(node)
+        if target is None or not isinstance(node, ast.Name | ast.NamedExpr):
             continue
         value = assigned_value(tree, node)
         while isinstance(value, ast.Attribute):
             value = value.value
         if isinstance(value, ast.Name):
-            found.setdefault(node.id, []).append(node)
+            found.setdefault(target.id, []).append(node)
     return found
 
 

@@ -130,6 +130,7 @@ from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
     assigned_value,
+    assignment_target,
     binding_of,
     bindings_by_name,
     empty_type_checking_bodies,
@@ -706,10 +707,10 @@ class Module:
         #: The names an assignment of another name alone binds (``_spread =
         #: _range``), at the top of the module and under ``global`` in a
         #: function, by the name each binds (:meth:`_aliased`).
-        self.top_aliases: dict[str, list[ast.Name]] = {}
+        self.top_aliases: dict[str, list[ast.Name | ast.NamedExpr]] = {}
         for node in scope_nodes(self.tree):
-            if _aliases_a_name(node, self.tree):
-                self.top_aliases.setdefault(node.id, []).append(node)
+            if _aliases_a_name(node, self.tree) and (stored := assignment_target(node)):
+                self.top_aliases.setdefault(stored.id, []).append(node)
         for targets in self.top_aliases.values():
             targets.sort(key=lambda target: (target.lineno, target.col_offset))
         self.global_aliases = {
@@ -945,10 +946,10 @@ class Module:
             dict.fromkeys(found for alias in aliases for found in self._aliased(alias))
         )
 
-    def _aliased(self, target: ast.Name) -> tuple[Function, ...]:
+    def _aliased(self, target: ast.Name | ast.NamedExpr) -> tuple[Function, ...]:
         """The functions of this file an assignment of another name alone
-        binds *target* to: those that name stands for where the assignment
-        reads it (:meth:`lookup`).
+        binds *target*, its target or the assignment expression, to: those
+        that name stands for where the assignment reads it (:meth:`lookup`).
         """
         value = assigned_value(self.tree, target)
         if not isinstance(value, ast.Name) or id(target) in self._aliasing:
@@ -2119,11 +2120,14 @@ def _live_by_name(
     }
 
 
-def _aliases_a_name(node: ast.AST, root: ast.AST) -> TypeGuard[ast.Name]:
+def _aliases_a_name(
+    node: ast.AST, root: ast.AST
+) -> TypeGuard[ast.Name | ast.NamedExpr]:
     """Whether *node*, under *root*, is a name an assignment binds to another
-    name alone (``_spread = _range``).
+    name alone (``_spread = _range``), or an assignment expression that does
+    (``(_spread := _range)``).
     """
-    return isinstance(node, ast.Name) and isinstance(
+    return assignment_target(node) is not None and isinstance(
         assigned_value(root, node), ast.Name
     )
 

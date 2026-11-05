@@ -464,14 +464,31 @@ def values_bound(root: ast.AST, scope: ast.AST, name: str) -> list[ast.expr | No
     return found
 
 
+def assignment_target(node: ast.AST) -> ast.Name | None:
+    """The name a binding node an assignment of one name makes stores in: the
+    target itself, or that of an assignment expression (``(fn := helper)``),
+    which :func:`bindings_by_name` gives as the expression; None for any
+    other node.
+    """
+    if isinstance(node, ast.Name):
+        return node
+    if isinstance(node, ast.NamedExpr) and isinstance(node.target, ast.Name):
+        return node.target
+    return None
+
+
 def assigned_value(root: ast.AST, node: ast.AST) -> ast.expr | None:
     """The value an assignment to one name alone stores at *node*, its target,
-    under *root*; None for any other binding, whose value is not written there.
+    under *root*, an assignment expression (``(fn := helper)``) among them,
+    given by its target or by itself; None for any other binding, whose value
+    is not written there.
     """
+    if isinstance(node, ast.NamedExpr):
+        return node.value if isinstance(node.target, ast.Name) else None
     held = _parents(root).get(node)
     if isinstance(held, ast.Assign) and held.targets == [node]:
         return held.value
-    if isinstance(held, ast.AnnAssign) and held.target is node:
+    if isinstance(held, ast.AnnAssign | ast.NamedExpr) and held.target is node:
         return held.value
     return None
 

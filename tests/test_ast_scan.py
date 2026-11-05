@@ -1386,3 +1386,27 @@ def test_block_statements_reads_every_block_of_every_compound_statement() -> Non
         node for node in tree.body if isinstance(node, ast.AsyncFunctionDef)
     )
     assert ast_scan.block_statements(function) == []
+
+
+def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
+    """``(fn := helper)`` stores ``helper`` in ``fn`` as ``fn = helper`` does.
+
+    :func:`ast_scan.bindings_by_name` gives such a binding as the expression,
+    and its value was read only from an assignment statement, so a name an
+    assignment expression binds stood for nothing the guards could follow.
+    """
+    tree = ast.parse("def f():\n    if (fn := helper) is not None:\n        pass\n")
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    (binding,) = ast_scan.bindings_by_name(function)["fn"]
+    assert isinstance(binding, ast.NamedExpr)
+    target = ast_scan.assignment_target(binding)
+    assert target is binding.target
+    for node in (binding, binding.target):
+        value = ast_scan.assigned_value(tree, node)
+        assert isinstance(value, ast.Name)
+        assert value.id == "helper"
+    statement = ast.parse("fn = helper").body[0]
+    assert isinstance(statement, ast.Assign)
+    assert ast_scan.assignment_target(statement.targets[0]) is statement.targets[0]
+    assert ast_scan.assignment_target(statement) is None

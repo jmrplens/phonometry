@@ -1191,10 +1191,14 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
         "def _zero(levels):\n    return 0.0\n"
         "def replaced(levels):\n"
         "    fn = _range\n    fn = _zero\n    return fn(levels) <= _SPREAD_DB\n"
+        "def walrus(levels):\n"
+        "    if (named := _range) is not None:\n        pass\n"
+        "    return named(levels) <= _SPREAD_DB\n"
     )
     assert _texts(alone, tmp_path) == [
         "_alias(levels) <= _SPREAD_DB",
         "fn(levels) <= _SPREAD_DB",
+        "named(levels) <= _SPREAD_DB",
     ]
 
 

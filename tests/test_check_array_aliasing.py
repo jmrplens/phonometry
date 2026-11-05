@@ -796,7 +796,8 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
 ) -> None:
     """``alias = handing_back`` binds the name to the function the value
     names, at the top of the module, in a function under ``global`` and in
-    the function that calls it, as a ``def`` or an import of it would.
+    the function that calls it, as a ``def`` or an import of it would, and
+    so does ``(fn := handing_back)``.
 
     Only a ``def``, a ``class`` or an import was read as a binding, so a call
     of the name reached the ``def`` the assignment replaced, or nothing at
@@ -846,6 +847,12 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
 
         def through_a_local(frequencies, levels):
             fn = handing_back
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_walrus(frequencies, levels):
+            if (fn := handing_back) is not None:
+                pass
             f = fn(frequencies)
             return BandResult(frequencies=f, levels=f * 0.0)
 
@@ -921,6 +928,7 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
         ("through_an_alias", "BandResult.frequencies", "frequencies"),
         ("through_a_module", "BandResult.frequencies", "frequencies"),
         ("through_a_local", "BandResult.frequencies", "frequencies"),
+        ("through_a_walrus", "BandResult.frequencies", "frequencies"),
         ("through_a_standing_alias", "BandResult.frequencies", "frequencies"),
         ("through_a_standing_attribute", "BandResult.frequencies", "frequencies"),
     }

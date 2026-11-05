@@ -821,7 +821,7 @@ def generate_elastic_probe_traces(output_dir: str) -> None:
         trace,
         color=COLOR_PRIMARY,
         linewidth=1.6,
-        label="probe pressure, 7.5 m below the source",
+        label="probe pressure, 1.5 m below the source",
     )
     ax.axhline(0.0, color=COLOR_GRID, linewidth=1.0)
     # The echo's note stands to the left of its line: to the right, with the

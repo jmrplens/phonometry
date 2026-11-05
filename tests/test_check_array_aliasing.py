@@ -862,13 +862,67 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
             f = fn(frequencies)
             return BandResult(frequencies=f, levels=f * 0.0)
         """,
+        helpers="""
+        import numpy as np
+
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+
+        def keep(a):
+            return np.array(a)
+
+        def kept(a):
+            return np.array(a)
+
+        kept = handing_back
+
+        def copying(a):
+            return np.array(a)
+
+        def held(a):
+            return a
+
+        held = copying
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import held, keep, kept
+        from .results import BandResult
+
+        def through_a_replaced_def(frequencies, levels):
+            f = held(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_replaced_alias(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_replaced_attribute(frequencies, levels):
+            f = helpers.keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_standing_alias(frequencies, levels):
+            f = kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_standing_attribute(frequencies, levels):
+            f = helpers.kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
     )
+    # Another module reads the name once the module has run: an alias a
+    # later ``def`` replaces, or a ``def`` a later alias replaces, stands
+    # for nothing there.
     assert found == {
         ("through_global", "BandResult.frequencies", "frequencies"),
         ("through_the_top", "BandResult.frequencies", "frequencies"),
         ("through_an_alias", "BandResult.frequencies", "frequencies"),
         ("through_a_module", "BandResult.frequencies", "frequencies"),
         ("through_a_local", "BandResult.frequencies", "frequencies"),
+        ("through_a_standing_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_standing_attribute", "BandResult.frequencies", "frequencies"),
     }
 
 

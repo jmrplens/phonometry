@@ -649,6 +649,8 @@ class Tree:
         #: What :meth:`resolve_top` and :meth:`live_definitions` found, read
         #: once for each name, as every pass of the fixed point asks again.
         self.top_cache: dict[tuple[str, str], tuple[tuple[str, str], ...]] = {}
+        #: What :meth:`resolve_all` found, read once for each name.
+        self.all_cache: dict[tuple[str, str], tuple[tuple[str, str], ...]] = {}
         self.live_cache: dict[tuple[str, str], list[FunctionInfo]] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
@@ -1084,21 +1086,24 @@ class Tree:
     ) -> tuple[tuple[str, str], ...]:
         """Each ``(module, qualname)`` a bare name of *module* may stand for
         once it has run, read from another module or as the module's
-        attribute: what :meth:`resolve` finds, and every function or class a
-        function of a module on the way binds the name to under ``global``
-        (:meth:`made_under_global`).
+        attribute: what the bindings of its top that still stand at its end
+        bind it to (:meth:`resolve_top`), so a ``def``, an import or an
+        alias a later one replaces stands for nothing, and every function or
+        class a function of a module on the way binds the name to under
+        ``global`` (:meth:`made_under_global`). A name its top never binds is
+        what :meth:`resolve` finds.
         """
         if depth > _DEPTH:
             return ()
-        swapped = (
-            *self.made_under_global(module, name, depth + 1),
-            *(
-                target
-                for node in self.top_bindings.get(module, {}).get(name, [])
-                if isinstance(node, ast.Name)
-                for target in self.aliased(module, node, depth + 1)
-            ),
-        )
+        if self.top_bindings.get(module, {}).get(name):
+            key = (module, name)
+            if depth == 0 and key in self.all_cache:
+                return self.all_cache[key]
+            found = self.resolve_top(module, name, None, depth + 1)
+            if depth == 0:
+                self.all_cache[key] = found
+            return found
+        swapped = self.made_under_global(module, name, depth + 1)
         if (module, name) in self.functions or (module, name) in self.classes:
             return tuple(dict.fromkeys(((module, name), *swapped)))
         target = self.imports.get(module, {}).get(name)

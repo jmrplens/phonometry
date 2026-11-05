@@ -213,6 +213,9 @@ _TABLE_ROW = re.compile(r"^\s*\|.*\|")
 _PLACEHOLDER_ITEM = re.compile(r"(?:^|(?<=/))\s*" + EM_DASH + r"\s*(?=/|$)")
 #: A frontmatter title, which reproduces the document's own title.
 _TITLE_LINE = re.compile(r"^\s*(?:-\s*)?title:\s")
+#: The header of a block of text, with the indentation indicator it may carry
+#: before or after its chomping indicator (``|2``, ``>-1``, ``|+2``).
+_BLOCK_INDENT = re.compile(r"[|>](?:([1-9])[+-]?|[+-]([1-9]))?")
 #: The first line of a bibliographic entry, author and year: the lines of the
 #: entry reproduce a title as printed, dashes and all.
 _REFERENCE_ENTRY = re.compile(r"^\s*(?:-|\d+\.)\s.*\(\d{4}[a-z]?\)")
@@ -365,6 +368,10 @@ class _Frontmatter:
     quote: str = ""
     #: The column a line of an open block of text is indented past.
     block: int | None = None
+    #: The column the lines of that block are indented to: the one its
+    #: indicator sets (``|2``), or that of its first line that is not blank.
+    #: A line short of it ends the block, a comment YAML reads apart.
+    block_content: int | None = None
     #: Whether that block is the JSON-LD of a ``content`` key, which its first
     #: line says: ``None`` until it is read.
     json_block: bool | None = False
@@ -391,9 +398,21 @@ class _Frontmatter:
         if self.quote:
             return True
         indent = len(line) - len(line.lstrip(" "))
-        return any(
-            column is not None and (not line.strip() or indent > column)
-            for column in (self.block, self.plain)
+        if self.block is not None:
+            return self._in_block(line, indent)
+        return self.plain is not None and (not line.strip() or indent > self.plain)
+
+    def _in_block(self, line: str, indent: int) -> bool:
+        """Whether *line* is a line of the open block of text: blank, or
+        indented past its key and as far as its content.
+        """
+        if not line.strip():
+            return True
+        content = self.block_content
+        return (
+            self.block is not None
+            and indent > self.block
+            and (content is None or indent >= content)
         )
 
     def decode(self, line: str) -> str:
@@ -404,9 +423,11 @@ class _Frontmatter:
         """
         indent = len(line) - len(line.lstrip(" "))
         if self.block is not None:
-            if not line.strip() or indent > self.block:
+            if self._in_block(line, indent):
+                if self.block_content is None and line.strip():
+                    self.block_content = indent
                 return self._block_line(line)
-            self.block = None
+            self.block = self.block_content = None
         if self.plain is not None:
             if not line.strip() or indent > self.plain:
                 return line
@@ -503,6 +524,12 @@ class _Frontmatter:
             return at + 1
         if char in "|>" and not self.flow:
             self.block = node.owner
+            indicator = _BLOCK_INDENT.match(line, at)
+            self.block_content = (
+                node.owner + int(indicator[1] or indicator[2])
+                if indicator is not None and (indicator[1] or indicator[2])
+                else None
+            )
             self.json_block = None if node.key == "content" else False
             pieces.append(line[at:])
             node.done = True

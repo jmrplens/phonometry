@@ -672,6 +672,39 @@ def test_a_title_is_a_title_on_every_line_of_its_value(text: str) -> None:
     assert ced.markdown_hits(text) == []
 
 
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "---\ntitle: |\n    Acoustics — Rooms\n  # a note — here\n---\n",
+            [4],
+            id="a comment short of the content",
+        ),
+        pytest.param(
+            "---\ntitle: |2\n    Acoustics — Rooms\n  # Still — title\n---\n",
+            [],
+            id="at the column the indicator sets",
+        ),
+        pytest.param(
+            "---\ntitle: |\n    Acoustics — Rooms\n    # Still — title\n---\n",
+            [],
+            id="at the content column",
+        ),
+    ],
+)
+def test_a_title_block_ends_at_a_line_short_of_its_content(
+    text: str, hits: list[int]
+) -> None:
+    """A block of text holds the lines indented as far as its first line, or
+    as its indicator says; a ``#`` line short of that column, deeper than the
+    key, is a comment YAML ends the block on, and its dash is the comment's.
+
+    The block was read as every line deeper than the key, so the comment was
+    a line of the title and its dash passed as one of the title.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
 def test_a_value_that_quotes_with_an_escaped_quote_quotes() -> None:
     """A double-quoted value decodes it, so the page shows a quotation."""
     text = '---\ndescription: "He said \\"A — B\\" there"\n---\n'

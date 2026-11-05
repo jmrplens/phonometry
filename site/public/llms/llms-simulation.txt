@@ -755,7 +755,10 @@ injection) and `ForceSource` (a directional body force) as sources, probes
 that record ``p``, ``vx`` or ``vy``, the same sponge and obstacle
 machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
-their fields, the snapshot cadence and its field) and how the domain ends
+their fields, the snapshot cadence, the snapshot's field and its
+`snapshot_decimation=d`, which keeps one cell in `d` along each axis, as
+section 7 of [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) explains) and how the
+domain ends
 as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
 acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
 count when it is built. The Courant bound depends only on the fastest
@@ -803,9 +806,13 @@ The run stepped on NumPy in float64, as `res.provenance` records. The
 elastic solver takes the same `compute=` as the acoustic one, and so does
 `ElasticFDTD2D.from_regions`: the block above steps on an NVIDIA GPU through
 CuPy with one more argument. On such a device the engine's own fields,
-`sim.p` and `sim.collocated(field)` included, are that device's arrays, and
-`sim.numpy_field(field)` gives a NumPy copy; a result holds NumPy arrays
-whatever device stepped. [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) covers the devices, what each needs
+`sim.p` and `sim.collocated(field)` included, are that device's arrays.
+`sim.numpy_field(field)` gives a NumPy copy of a stored field, `"txx"`,
+`"tyy"`, `"txy"`, `"vx"` or `"vy"`, and refuses `"p"`, which this engine
+computes from the two normal stresses:
+`-(sim.numpy_field("txx") + sim.numpy_field("tyy")) / 2` is the pressure in
+NumPy. `sim.run(...)` returns its frames as NumPy arrays, and a result holds
+NumPy arrays whatever device stepped. [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) covers the devices, what each needs
 installed and what is promised about the numbers on each.
 
 ```py
@@ -844,7 +851,7 @@ zero on the surface plane and the shear stress above it is its
 antisymmetric image. That single boundary condition is what makes surfaces
 wave-bearing: strike the free surface of an aluminium block vertically
 (Lamb's problem) and, besides the P and S body fronts, a **Rayleigh wave**
-rolls along the surface at $c_\mathrm{R} \approx 0.93\,c_\mathrm{S}$, the root of the exact
+rolls along the surface at $c_\mathrm{R} \approx 0.935\,c_\mathrm{S}$, the root of the exact
 Rayleigh characteristic equation (Cremer, Heckl & Petersson Eq. 3.149).
 The tests pin the measured Rayleigh speed to that root within 2 % and the
 flexural wave of a thin free-free strip to the Kirchhoff plate dispersion
@@ -855,7 +862,8 @@ second-order imaging surface being the most dispersive part of the scheme.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_halfspace_waves_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_halfspace_waves.webp" alt="Snapshot of the vertical particle velocity in a 0.6 by 0.3 metre aluminium block a few hundredths of a millisecond after a vertical hit on its free upper surface: the compressional P front is the outer arc, the shear S front the inner arc at about half its radius, and the strongest lobes hug the surface just behind the S front, labelled as the Rayleigh wave; dotted arcs mark the exact P and S radii" width="96%"></picture>
 
 *One snapshot, three speeds: the P front has covered twice the distance of
-the S front (dotted arcs at the exact $c_\mathrm{P} t$ and $c_\mathrm{S} t$ radii), and the
+the S front (dotted arcs at the exact radii $c_\mathrm{P}(t - t_0)$ and
+$c_\mathrm{S}(t - t_0)$, $t_0 = 32$ µs being the peak of the pulse), and the
 strongest motion travels along the free surface as the Rayleigh wave, a
 whisker slower than S.*
 
@@ -890,13 +898,14 @@ plt.show()
 </details>
 
 One frame is enough for the two body speeds: the dotted arcs are drawn at
-the exact $c_\mathrm{P} t$ and $c_\mathrm{S} t$ radii, so they measure rather than label. It is
+the exact $c_\mathrm{P}(t - t_0)$ and $c_\mathrm{S}(t - t_0)$ radii, so they
+measure rather than label. It is
 not enough for the third wave, whose speed differs from the shear front's by
-7 % and whose defining property is that it stays on the surface while the
-body fronts leave. Run the same hit for 163 µs, with sponges on the other
+6.5 % and whose defining property is that it stays on the surface while the
+body fronts leave. Run the same hit for 164 µs, with sponges on the other
 three sides and the corner between a sponge and the free surface pushed
 outside the frame, and run it twice: top declared `"free"`, then top left at
-the solver default, the clamped rigid wall. Same aluminium, same hit, same
+the solver default, the shear-free rigid wall. Same aluminium, same hit, same
 two body fronts, no surface train at all in the second.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.gif" alt="Animation: a vertical hit on an aluminium half-space, with dotted analytic arcs tracking the compressional and shear fronts as they expand and leave the frame, a train of surface lobes staying behind on the free-surface panel, and no surface train on the rigid-surface panel" width="640" height="360" loading="lazy"></picture>
@@ -907,11 +916,11 @@ Both body arcs run out of the frame and keep going. The surface lobes do not
 go anywhere but along the surface, and they are still there when the body
 waves have left, which is the whole of "a Rayleigh wave". The inset traces
 two surface probes 0.15 m apart, and the delay between their peaks is the
-measurement: the simulated $c_\mathrm{R}$ against 2921 m/s, the root of the exact
+measurement: the simulated $c_\mathrm{R}$ against 2897 m/s, the root of the exact
 characteristic equation, which the tests pin to within 2 %.
 
 The two field panels carry their own colour scales, and say so: a vertical
-force applied *on* a clamped surface nearly cancels against its own image, so
+force applied *on* a rigid wall nearly cancels against its own image, so
 that run radiates far less than the free one. The probe traces share a single
 scale, which is where the comparison stays quantitative. The missing surface
 arrival is a missing peak, not a rescaled one.
@@ -927,8 +936,8 @@ transmitted bending waves the closed form prices at $\tau_{12}(0°) = 0.5$,
 plus the fast in-plane precursor that races ahead down the receiving plate.
 This mode conversion the pinned-junction model deliberately leaves out is
 the reason this page needs an elastic solver rather than a flexural one. The
-[bending-wave transmission guide](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/) takes
-the same run apart against the EN 12354 vibration reduction index.
+[bending-wave transmission guide](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/) reads
+the same run against the transmission coefficient $\tau_{12}(0°)$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction.gif" alt="Animation: a 4 kHz bending-wave packet running along a 10 mm steel plate, passing straight through on the control panel and splitting at an L-junction into a reflected wave, a transmitted wave descending the perpendicular plate and a faster in-plane precursor" width="640" height="360" loading="lazy"></picture>
 
@@ -947,7 +956,7 @@ painted regions.
 import numpy as np
 from phonometry.simulation import ElasticFDTD2D, STEEL, WATER
 
-# A 12 m water column over a steel half-space, as a 1D-like strip.
+# A 6 m water column over 6 m of steel, as a 1D-like strip.
 dx = 0.005
 sim = ElasticFDTD2D.from_regions(
     (2400, 3), dx, background=WATER, regions=[(np.s_[1200:, :], STEEL)])
@@ -966,8 +975,8 @@ trace = np.asarray(trace)
 t = (np.arange(trace.size) + 1) * sim.dt
 incident = trace[t < 1.8e-3].max()
 echo = trace[t > 2.6e-3]
-print(round(float(echo[np.abs(echo).argmax()] / incident), 3))   # 0.938
-# (Z2 - Z1)/(Z2 + Z1) = 0.938: at normal incidence no shear is excited
+print(round(float(echo[np.abs(echo).argmax()] / incident), 3))   # 0.939
+# (Z2 - Z1)/(Z2 + Z1) = 0.939: at normal incidence no shear is excited
 # and the steel behaves as a liquid of its rho and c_P (B&G Eq. 4.2.27)
 ```
 
@@ -1007,7 +1016,7 @@ except ValueError as error:
 Away from normal incidence the solid stops being a liquid. The incident
 sound refracts into **two** transmitted waves, P and SV (**mode
 conversion**), each with its own critical angle: for water over steel,
-14.5° (P) and 27.5° (S). Between them the transmitted P is evanescent and
+14.4° (P) and 27.7° (S). Between them the transmitted P is evanescent and
 the shear wave carries the transmitted power, so the reflection dips to
 $|V| = 0.918$ at 20° instead of reflecting totally as a fluid bottom of the
 same $c_\mathrm{P}$ would; beyond the S critical angle the reflection is total,
@@ -1031,8 +1040,8 @@ validation suite, which has the room to do it properly.
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion.webm)
 
 At 10° two beams leave along the dashed Snell directions, at different angles
-because they travel at different speeds: the slower shear wave at 22.1° from
-the normal, the faster compressional wave bent much further out, to 43.8°. At
+because they travel at different speeds: the slower shear wave at 21.9° from
+the normal, the faster compressional wave bent much further out, to 44.4°. At
 20° nothing departs at the compressional angle; a skin clings to the contact
 instead, and the shear beam alone carries what crosses. At 35° both are
 evanescent and nothing propagates *away* into the steel. What fills the solid
@@ -1135,44 +1144,47 @@ exactly the three-media fluid layer of B&G §2.4: its transmission follows
 the closed form of Eq. 2.4.14, which reduces to the familiar mass law for
 thin plates and low frequencies and predicts **total transmission** at the
 half-wave thickness resonances $f_n = n c_\mathrm{P} / (2 h)$ (Eq. 2.4.19). For a
-10 mm steel plate that first resonance sits at 295 kHz, and one broadband
+10 mm steel plate that first resonance sits at 297.9 kHz, and one broadband
 FDTD run reproduces the whole curve: 5.8 dB at 10 kHz (where
 `mass_law_transmission_loss` with water as the ambient fluid agrees with
 the exact form to 0.02 dB), 18.1 dB at 50 kHz, and a transmission-loss
-dip within 0.1 % of the 295 kHz resonance. The same suite stress-tests the
+dip within 0.1 % of the 297.9 kHz resonance. The same suite stress-tests the
 extreme contrast of an air-steel contact (impedance ratio ~$10^5$:1): stable
 over 10 000 steps with the reflected amplitude conserved to 0.5 %.
 
 At oblique incidence the plate physics gets richer, and the clip below is
 this solver driving the same 10 mm steel plate, now lying in air, with a
 sustained 45° plane wave arriving on it. The two panels differ in **one
-number only**: the drive frequency, $f_\mathrm{c}/2 = 603$ Hz on the left and
-$2 f_\mathrm{c} = 2413$ Hz on the right, either side of the 1206 Hz coincidence
-frequency the library computes from the same $m''$ and $B'$ used above.
+number only**: the drive frequency, $f_\mathrm{c}/2 = 602$ Hz on the left and
+$2 f_\mathrm{c} = 2410$ Hz on the right, either side of the 1205 Hz coincidence
+frequency `vibration.coincidence_frequency` returns for this plate.
 Everything else, the plate, the angle, the mesh and the colour scale, is
 held fixed. Below $f_\mathrm{c}$ the plate reflects almost everything and the
 transmitted level lands on the oblique mass law; above it the acoustic trace
 wavelength matches the free bending wavelength, the plate re-radiates a 45°
 beam that grows along the lit span, and the transmitted level holds at the
 low-frequency figure where the mass law demanded 12 dB more blocking. The
-air below the plate is drawn on both panels with the display gain measured
+air below the plate is drawn on both panels with one display gain, measured
 off the settled field of the two runs together (×150, that is +44 dB) and
 printed on the canvas: read the *annotations* for levels, not the
 brightness. The
-[panel sound insulation guide](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) takes the
-same run apart against the plateau method and the mass law.
+[panel sound insulation guide](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) reads the
+same run against the oblique mass law.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.gif" alt="Animation: two elastic FDTD panels of the same 10 mm steel plate in air under a 45-degree plane wave, at 603 Hz where the plate blocks almost everything and at 2413 Hz where a transmitted beam grows below it" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.gif" alt="Animation: two elastic FDTD panels of the same 10 mm steel plate in air under a 45-degree plane wave, at 602 Hz where the plate blocks almost everything and at 2410 Hz where a transmitted beam grows below it" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.webm)
 
 ## Writing the run to a video
 
-The run record this guide builds goes to the video writer as it is:
-`simulation.write_elastic_fdtd_animation` steps it and draws the field its
-recording's `snapshot_field` names, the pressure or a velocity component,
-into a WebM, an MP4 or a GIF as it is computed, a frame every
-`snapshot_every` steps, without storing the snapshots.
+A run of this guide goes to the video writer as it is once its recording
+sets `snapshot_every`; the probe-only run of section 1 does not, and the
+writer refuses it with a `ValueError`.
+`simulation.write_elastic_fdtd_animation` takes the run, not a result: it
+steps the run and draws the field its recording's `snapshot_field` names,
+the pressure or a velocity component, into a WebM, an MP4 or a GIF as it is
+computed, one frame at t = 0 and one every `snapshot_every` steps. It stores
+no snapshots, so the result it returns holds the probes and the times only.
 [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/) says how a
 frame is drawn and its colour scale found, which encoder writes the file, and
 how the same call steps on a GPU or goes to a node.

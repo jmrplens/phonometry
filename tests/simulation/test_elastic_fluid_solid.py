@@ -376,13 +376,13 @@ def test_immersed_plate_transmission_and_thickness_resonance() -> None:
     # a 1.5 mm Gaussian plane pulse carries usable energy up to ~340 kHz.
     # The incident spectrum is time-gated at a probe above the plate
     # (compact pulse, exact gating) and the transmitted spectrum recorded
-    # below it; TL(f) = 20 lg |I/T|. Oracles (B&G 2.4.14): TL = 18.06 dB
-    # at 50 kHz (measured +0.01 dB), the mass law 5.77 dB at 10 kHz in
+    # below it; TL(f) = 20 lg |I/T|. Oracles (B&G 2.4.14): TL = 18.07 dB
+    # at 50 kHz (measured +0.02 dB), the mass law 5.77 dB at 10 kHz in
     # its thin-plate band (measured -0.04 dB,
     # mass_law_transmission_loss with water as the ambient fluid), and
     # total transmission at the first thickness resonance
-    # f_1 = c_P / (2 h) = 295.0 kHz (measured 294.7 kHz, -0.09 %, with
-    # TL 0.005 dB at the dip).
+    # f_1 = c_P / (2 h) = 297.9 kHz (measured 297.6 kHz, -0.09 %, with
+    # TL 0.004 dB at the dip).
     dx = 0.5e-3
     h = 0.010
     ny, nx = round(0.75 / dx), 3

@@ -1155,6 +1155,49 @@ def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
     ]
 
 
+@pytest.mark.parametrize(
+    "binding",
+    [
+        "def swap():\n    global _spread\n    _spread = _range\n",
+        "_spread = _range\n",
+    ],
+    ids=["under-global", "at-the-top"],
+)
+def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
+    tmp_path: pathlib.Path, binding: str
+) -> None:
+    """``_spread = _range`` binds the name to the function the value names,
+    at the top of the module, in a function under ``global`` and in the
+    function that calls it, as a ``def`` would.
+
+    Only a ``def`` or an import bound a name, so a call of ``_spread`` was
+    read as the constant the first ``def`` returns, and a call through a
+    local alias as nothing of the module.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _spread(levels):\n    return 0.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        f"{binding}"
+        "def judge(levels):\n    return _spread(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(source, tmp_path) == ["_spread(levels) <= _SPREAD_DB"]
+    alone = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        "_alias = _range\n"
+        "def judge(levels):\n    return _alias(levels) <= _SPREAD_DB\n"
+        "def local(levels):\n    fn = _range\n    return fn(levels) <= _SPREAD_DB\n"
+        "def _zero(levels):\n    return 0.0\n"
+        "def replaced(levels):\n"
+        "    fn = _range\n    fn = _zero\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(alone, tmp_path) == [
+        "_alias(levels) <= _SPREAD_DB",
+        "fn(levels) <= _SPREAD_DB",
+    ]
+
+
 def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -126,10 +126,12 @@ import itertools
 import pathlib
 import re
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
+    assigned_value,
     binding_of,
+    bindings_by_name,
     empty_type_checking_bodies,
     for_the_type_checker,
     global_bindings,
@@ -701,6 +703,21 @@ class Module:
         #: Every ``def`` and every import at the top of the module, by name,
         #: which a function reads from its own ``def`` on (:meth:`top_at`).
         self.top_defined, self.top_imported = _top_names(self.tree)
+        #: The names an assignment of another name alone binds (``_spread =
+        #: _range``), at the top of the module and under ``global`` in a
+        #: function, by the name each binds (:meth:`_aliased`).
+        self.top_aliases: dict[str, list[ast.Name]] = {}
+        for node in scope_nodes(self.tree):
+            if _aliases_a_name(node, self.tree):
+                self.top_aliases.setdefault(node.id, []).append(node)
+        for targets in self.top_aliases.values():
+            targets.sort(key=lambda target: (target.lineno, target.col_offset))
+        self.global_aliases = {
+            name: found
+            for name, nodes in global_bindings(self.tree).items()
+            if (found := [node for node in nodes if _aliases_a_name(node, self.tree)])
+        }
+        self._aliasing: set[int] = set()
         self.locals: dict[Function, dict[str, list[tuple[str, ast.AST, int]]]] = {}
         self.comprehended: dict[
             Function, dict[int, list[tuple[str, ast.AST, int]]]
@@ -718,6 +735,12 @@ class Module:
         self._busy: set[object] = set()
         self._provisional: dict[object, Value] = {}
         self._cut = False
+        for name in {*self.top_aliases, *self.global_aliases}:
+            functions = self.top_at(name, None)[0]
+            if functions:
+                self.top_functions[name] = functions
+            else:
+                self.top_functions.pop(name, None)
 
     # -- structure -----------------------------------------------------
 
@@ -910,7 +933,31 @@ class Module:
             return tuple(live_bindings(function, list(defined), node))
         if how == "import":
             return ()
-        return None
+        if how != "binding" or name in own_names(function).parameters:
+            return None
+        nodes = bindings_by_name(function).get(name, [])
+        if node is not None:
+            nodes = live_bindings(function, nodes, node)
+        aliases = [found for found in nodes if _aliases_a_name(found, self.tree)]
+        if not nodes or len(aliases) < len(nodes):
+            return None
+        return tuple(
+            dict.fromkeys(found for alias in aliases for found in self._aliased(alias))
+        )
+
+    def _aliased(self, target: ast.Name) -> tuple[Function, ...]:
+        """The functions of this file an assignment of another name alone
+        binds *target* to: those that name stands for where the assignment
+        reads it (:meth:`lookup`).
+        """
+        value = assigned_value(self.tree, target)
+        if not isinstance(value, ast.Name) or id(target) in self._aliasing:
+            return ()
+        self._aliasing.add(id(target))
+        try:
+            return self.lookup(value.id, self.enclosing(value), value) or ()
+        finally:
+            self._aliasing.discard(id(target))
 
     def imports_at(
         self, name: str, scope: Function | None, node: ast.AST
@@ -949,10 +996,49 @@ class Module:
         A read in a function meets every one that may stand from the
         function's ``def`` on, since it may be called during the import.
         """
+        if name in self.top_aliases or name in self.global_aliases:
+            return self._top_with_aliases(name, node)
         if node is None:
             return self.top_functions.get(name, ()), self.top_live_imports.get(name, [])
         return _top_live(
             self.tree, self.top_defined, self.top_imported, self.top_imports, name, node
+        )
+
+    def _top_with_aliases(
+        self, name: str, node: ast.AST | None
+    ) -> tuple[tuple[Function, ...], list[ast.ImportFrom]]:
+        """:meth:`top_at` for a name an assignment of another name binds at
+        the top of the module or under ``global`` (:attr:`top_aliases`): its
+        ``def`` statements, its imports and those assignments are read in
+        one order (:func:`ast_scan.live_bindings`), and each assignment that
+        may stand for it stands for the functions its value names
+        (:meth:`_aliased`), as one a function makes under ``global`` may.
+        """
+        defined = self.top_defined.get(name, ())
+        aliases = self.top_aliases.get(name, [])
+        live = live_bindings(
+            self.tree, [*defined, *self.top_imported.get(name, []), *aliases], node
+        )
+        inside_defined, inside_imported = _made_under_global(self.tree)
+        functions = (
+            *(found for found in defined if found in live),
+            *(
+                found
+                for alias in aliases
+                if alias in live
+                for found in self._aliased(alias)
+            ),
+            *inside_defined.get(name, ()),
+            *(
+                found
+                for alias in self.global_aliases.get(name, [])
+                for found in self._aliased(alias)
+            ),
+        )
+        imports = [found for found in self.top_imports.get(name, []) if found in live]
+        return (
+            tuple(dict.fromkeys(functions)),
+            [*imports, *inside_imported.get(name, [])],
         )
 
     def top_import_targets(self, name: str) -> list[tuple[pathlib.Path, str]]:
@@ -2031,6 +2117,15 @@ def _live_by_name(
         name: tuple(live_bindings(scope, list(defined)))
         for name, defined in _by_name(functions).items()
     }
+
+
+def _aliases_a_name(node: ast.AST, root: ast.AST) -> TypeGuard[ast.Name]:
+    """Whether *node*, under *root*, is a name an assignment binds to another
+    name alone (``_spread = _range``).
+    """
+    return isinstance(node, ast.Name) and isinstance(
+        assigned_value(root, node), ast.Name
+    )
 
 
 def _top_names(

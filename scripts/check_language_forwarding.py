@@ -183,12 +183,23 @@ class Binding:
     name: str | None = None
 
 
-#: What a statement binds a name to: a function or a class it defines, or
-#: what it imports.
-_Bound = _DefinitionNode | Binding
+@dataclass(frozen=True, eq=False)
+class Alias:
+    """What an assignment of a name or a dotted one alone at the top of a
+    module, or under ``global`` (``draw = axis``), binds its *target* to:
+    what the value stands for where the assignment reads it.
+    """
 
-#: A statement that binds a name, with what it binds it to.
-_Written = tuple[ast.stmt, _Bound]
+    module: Module
+    target: ast.Name
+
+
+#: What a statement binds a name to: a function or a class it defines, what
+#: it imports, or what an assignment of a name binds it to.
+_Bound = _DefinitionNode | Binding | Alias
+
+#: A statement, or the name an assignment binds, with what it binds the name to.
+_Written = tuple[ast.stmt | ast.Name, _Bound]
 
 
 @dataclass(eq=False)
@@ -199,15 +210,13 @@ class Module:
     path: Path
     package: bool
     node: ast.Module
-    #: Every ``def``, class and import of each name its top level binds, in
-    #: the order of the source (:func:`_scope_names`).
+    #: Every ``def``, class, import and assignment of a name or a dotted one
+    #: alone (:class:`Alias`) of each name its top level binds, in the order
+    #: of the source (:func:`_scope_names`, :func:`_module_aliases`), and
+    #: those a function makes of a module name under ``global``.
     names: dict[str, list[_Written]] = field(default_factory=dict)
     #: Every function and class its top level defines, two of one name alike.
     definitions: list[_DefinitionNode] = field(default_factory=list)
-    #: The names an assignment of a name or a dotted one alone binds at its
-    #: top or under ``global`` (``draw = axis``), by the name each binds
-    #: (:func:`_module_aliases`).
-    aliases: dict[str, list[ast.Name]] = field(default_factory=dict)
     speaks: bool = False
 
 
@@ -626,7 +635,10 @@ class Tree:
         for module in modules.values():
             module.names, module.definitions = _scope_names(module, module.node.body)
             _add_global_bindings(module)
-            module.aliases = _module_aliases(module.node)
+            for name, targets in _module_aliases(module.node).items():
+                written = module.names.setdefault(name, [])
+                written.extend((target, Alias(module, target)) for target in targets)
+                written.sort(key=lambda pair: (pair[0].lineno, pair[0].col_offset))
             module.speaks = any(
                 module.name == name or module.name.startswith(f"{name}.")
                 for name in LANGUAGE_PASSES
@@ -737,9 +749,13 @@ class Tree:
     def _targets(
         self, bound: _Bound, seen: frozenset[tuple[str, str]] = frozenset()
     ) -> list[_Target]:
-        """What one binding of a name refers to: a definition, or an import's."""
+        """What one binding of a name refers to: a definition, an import's, or
+        what an assignment of a name binds it to (:meth:`_aliased`).
+        """
         if isinstance(bound, Binding):
             return self.bounds(bound, seen)
+        if isinstance(bound, Alias):
+            return self._aliased(bound)
         found = self._definition(bound)
         return [found] if found is not None else []
 
@@ -765,7 +781,6 @@ class Tree:
             for bound in _standing(module, module.names.get(attr, []), None)
             for target in self._targets(bound, inner)
         ]
-        found.extend(self._aliased(module, attr))
         return found or fallback
 
     def attribute(self, module_name: str, attr: str) -> _Target:
@@ -815,32 +830,29 @@ class Tree:
                 return [Local(current, name)]
             current = current.parent
         bound = _standing(module, module.names.get(name, []), point)
-        return [
-            *(target for b in bound for target in self._targets(b)),
-            *self._aliased(module, name),
-        ]
+        return [target for b in bound for target in self._targets(b)]
 
-    def _aliased(self, module: Module, name: str) -> list[_Target]:
-        """What each assignment of a name or a dotted one alone that binds the
-        module's *name* (:attr:`Module.aliases`) binds it to: what the value
-        stands for where the assignment reads it, when that is the module's
-        name; nothing for a name of a function's own.
+    def _aliased(self, alias: Alias) -> list[_Target]:
+        """What an assignment of a name or a dotted one alone binds the
+        module's name to: what the value stands for where the assignment
+        reads it, when that is the module's name; nothing for a name of a
+        function's own.
         """
+        module, target = alias.module, alias.target
+        value = assigned_value(module.node, target)
+        if value is None or id(target) in self._aliasing:
+            return []
         found: list[_Target] = []
-        for target in module.aliases.get(name, []):
-            value = assigned_value(module.node, target)
-            if value is None or id(target) in self._aliasing:
-                continue
-            self._aliasing.add(id(target))
-            try:
-                if isinstance(value, ast.Name):
-                    how, scope = binding_of(module.node, value, value.id)
-                    if how == "global" or scope is None or scope is module.node:
-                        found.extend(self.lookups(value.id, None, module, value))
-                else:
-                    found.append(self.resolve(value, None, module))
-            finally:
-                self._aliasing.discard(id(target))
+        self._aliasing.add(id(target))
+        try:
+            if isinstance(value, ast.Name):
+                how, scope = binding_of(module.node, value, value.id)
+                if how == "global" or scope is None or scope is module.node:
+                    found.extend(self.lookups(value.id, None, module, value))
+            else:
+                found.append(self.resolve(value, None, module))
+        finally:
+            self._aliasing.discard(id(target))
         return [target for target in found if target is not None]
 
     def lookup(self, name: str, scope: Scope | None, module: Module) -> _Target:

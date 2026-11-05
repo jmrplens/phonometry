@@ -610,6 +610,29 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
             def plot_global(result, ax, language="en"):
                 swapped(ax)
             """,
+            # An alias a later ``def`` or import replaces stands for nothing
+            # at a call that runs once the module has.
+            "pkg.replaced": """
+            from .helpers import fmt
+
+            draw = fmt
+
+
+            def draw(ax):
+                return ax
+
+
+            label = fmt
+            from math import floor as label
+
+
+            def plot_replaced_by_a_def(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_replaced_by_an_import(result, ax, language="en"):
+                label(ax)
+            """,
         },
     )
     assert sorted((f.caller, f.helper) for f in found) == [
@@ -651,6 +674,33 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
             """,
             [],
             id="rebound-before-the-def",
+        ),
+        pytest.param(
+            """
+            from .helpers import axis, fmt
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+
+
+            axis = fmt
+            """,
+            [("plot_thing", "pkg.helpers.axis")],
+            id="aliased-after-the-def",
+        ),
+        pytest.param(
+            """
+            from .helpers import axis, fmt
+
+            axis = fmt
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+            """,
+            [("plot_thing", "pkg.helpers.fmt")],
+            id="aliased-before-the-def",
         ),
     ],
 )

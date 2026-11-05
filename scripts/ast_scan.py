@@ -541,30 +541,187 @@ def _position(node: ast.AST) -> tuple[int, int]:
     return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
 
 
-def _names_type_checking(test: ast.AST) -> bool:
-    """Whether *test* is ``TYPE_CHECKING``, however it was imported."""
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+#: The modules that define ``TYPE_CHECKING``, the flag a type checker alone
+#: holds true.
+_TYPING_MODULES = frozenset({"typing", "typing_extensions"})
+
+
+@dataclass(frozen=True)
+class _Flags:
+    """The names that hold ``TYPE_CHECKING`` wherever a module reads them."""
+
+    #: The bare names that hold the flag itself: ``TYPE_CHECKING``, or what an
+    #: import of it from :data:`_TYPING_MODULES` names it.
+    names: frozenset[str]
+    #: The names that hold a module that defines it (``typing``, ``t`` after
+    #: ``import typing as t``), read as ``typing.TYPE_CHECKING``.
+    modules: frozenset[str]
+
+
+#: Each scope of a module whose flags were read, by its id, with the scope
+#: itself and the module, so that a guard that reads a function, a class or a
+#: comprehension as a tree of its own reads the flags of the module it is
+#: written in (:func:`_flags`).
+_MODULE_OF: dict[int, tuple[ast.AST, ast.Module]] = {}
+
+
+def _import_kinds(node: ast.Import | ast.ImportFrom) -> list[tuple[str, str]]:
+    """Each name an import binds, with how (:func:`_binding_kinds`)."""
+    if isinstance(node, ast.Import):
+        found: list[tuple[str, str]] = []
+        for alias in node.names:
+            held = alias.name if alias.asname else alias.name.partition(".")[0]
+            kind = "module" if held in _TYPING_MODULES else "other"
+            found.append((alias.asname or held, kind))
+        return found
+    typing = node.level == 0 and node.module in _TYPING_MODULES
+    return [
+        ("*", "none" if typing else "other")
+        if alias.name == "*"
+        else (
+            alias.asname or alias.name,
+            "flag" if typing and alias.name == "TYPE_CHECKING" else "other",
+        )
+        for alias in node.names
+    ]
+
+
+def _named_binding(node: ast.AST) -> str | None:
+    """The name a ``def``, a ``class``, a parameter, ``except ... as``, a type
+    parameter or a ``match`` capture binds; None for any other node.
+    """
+    if isinstance(node, (*_DEFINITIONS, ast.TypeVar, ast.ParamSpec, ast.TypeVarTuple)):
+        return node.name
+    if isinstance(node, ast.arg):
+        return node.arg
+    if isinstance(node, ast.ExceptHandler):
+        return node.name
+    return _captured(node)
+
+
+def _binding_kinds(tree: ast.AST) -> dict[str, set[str]]:
+    """Each name a binding anywhere under *tree* makes, in any scope, with how.
+
+    ``"flag"`` for an import of ``TYPE_CHECKING`` from a module that defines
+    it, ``"false"`` for the constant ``False`` assigned to the name alone
+    (the fallback of a ``try`` that imports it), ``"module"`` for an import
+    of such a module, and ``"other"`` for any other binding: an assignment,
+    a parameter, a ``def`` or a ``class``, any other import, a loop target,
+    ``except ... as``, a ``match`` capture, a type parameter, ``del``. A
+    ``*`` import from any other module may bind any name, and is ``"other"``
+    under ``"*"``. An annotation without a value binds nothing.
+    """
+    nodes = list(ast.walk(tree))
+    bare = _annotated_only(nodes)
+    held_false = {
+        id(target)
+        for node in nodes
+        if isinstance(node, ast.Assign | ast.AnnAssign)
+        and isinstance(node.value, ast.Constant)
+        and node.value.value is False
+        for target in (node.targets if isinstance(node, ast.Assign) else [node.target])
+    }
+    kinds: dict[str, set[str]] = {}
+    for node in nodes:
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            found = _import_kinds(node)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+            kind = "false" if id(node) in held_false else "other"
+            found = [] if id(node) in bare else [(node.id, kind)]
+        else:
+            name = _named_binding(node)
+            found = [] if name is None else [(name, "other")]
+        for name, kind in found:
+            kinds.setdefault(name, set()).add(kind)
+    return kinds
+
+
+@functools.cache
+def _flags_of(tree: ast.AST) -> _Flags:
+    """:func:`_flags`, read from the bindings under *tree* alone."""
+    if isinstance(tree, ast.Module):
+        for node in ast.walk(tree):
+            if isinstance(node, SCOPES):
+                _MODULE_OF[id(node)] = (node, tree)
+    kinds = _binding_kinds(tree)
+    if "other" in kinds.get("*", ()):
+        return _Flags(frozenset(), frozenset())
+    flags = {"TYPE_CHECKING", *(name for name, how in kinds.items() if "flag" in how)}
+    modules = {
+        *_TYPING_MODULES,
+        *(name for name, how in kinds.items() if "module" in how),
+    }
+    return _Flags(
+        frozenset(
+            name for name in flags if kinds.get(name, set()) <= {"flag", "false"}
+        ),
+        frozenset(name for name in modules if kinds.get(name, set()) <= {"module"}),
     )
 
 
-def _negates_type_checking(test: ast.AST) -> bool:
-    """Whether *test* is ``not TYPE_CHECKING``, however it was imported."""
+def _flags(tree: ast.AST) -> _Flags:
+    """The names that hold ``TYPE_CHECKING`` wherever *tree* reads them.
+
+    A name holds the flag when every binding of it, in any scope of the
+    module, is an import of the flag from ``typing`` or
+    ``typing_extensions``, or the constant ``False``; the name
+    ``TYPE_CHECKING`` holds it when nothing binds it, as a fragment reads
+    it. A module that rebinds the name to anything else, in any of its
+    scopes, holds no flag under that name: a test on it may run either
+    branch. So for ``typing.TYPE_CHECKING``, whose head must hold the module
+    wherever it is bound. A scope of a module whose flags were read takes the
+    module's; a tree read alone, its own.
+    """
+    owner = _MODULE_OF.get(id(tree))
+    if owner is not None and owner[0] is tree:
+        return _flags_of(owner[1])
+    return _flags_of(tree)
+
+
+def reads_type_checking(root: ast.AST, test: ast.AST) -> bool:
+    """Whether *test*, read under *root*, is ``TYPE_CHECKING``: a name that
+    holds it, or the attribute of a name that holds ``typing`` or
+    ``typing_extensions`` (:func:`_flags`). Not its negation.
+    """
+    flags = _flags(root)
+    if isinstance(test, ast.Name):
+        return test.id in flags.names
     return (
-        isinstance(test, ast.UnaryOp)
-        and isinstance(test.op, ast.Not)
-        and _names_type_checking(test.operand)
+        isinstance(test, ast.Attribute)
+        and test.attr == "TYPE_CHECKING"
+        and isinstance(test.value, ast.Name)
+        and test.value.id in flags.modules
     )
 
 
-def is_type_checking_block(statement: ast.AST) -> bool:
-    """Whether *statement* is an ``if TYPE_CHECKING:`` or an ``if not
-    TYPE_CHECKING:``, however it was imported: one of its branches runs whenever
-    the program does and the other never does. Any other test on the name decides
-    no branch: ``if TYPE_CHECKING or enabled:`` runs whenever ``enabled`` is true.
+def _negates(test: ast.AST) -> bool:
+    """Whether *test* is a ``not``."""
+    return isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not)
+
+
+def _negates_type_checking(root: ast.AST, test: ast.AST) -> bool:
+    """Whether *test*, read under *root*, is ``not TYPE_CHECKING``
+    (:func:`reads_type_checking`).
+    """
+    return (
+        _negates(test)
+        and isinstance(test, ast.UnaryOp)
+        and reads_type_checking(root, test.operand)
+    )
+
+
+def is_type_checking_block(statement: ast.AST, root: ast.AST) -> bool:
+    """Whether *statement*, under *root*, is an ``if TYPE_CHECKING:`` or an
+    ``if not TYPE_CHECKING:`` on the name that holds the flag of ``typing``
+    (:func:`reads_type_checking`): one of its branches runs whenever the
+    program does and the other never does. Any other test on the name
+    decides no branch: ``if TYPE_CHECKING or enabled:`` runs whenever
+    ``enabled`` is true. Nor does a test on a name the module binds to
+    anything else: ``TYPE_CHECKING = True`` runs the body.
     """
     return isinstance(statement, ast.If) and (
-        _names_type_checking(statement.test) or _negates_type_checking(statement.test)
+        reads_type_checking(root, statement.test)
+        or _negates_type_checking(root, statement.test)
     )
 
 
@@ -572,31 +729,29 @@ def what_runs(statement: ast.If) -> list[ast.stmt]:
     """What a program runs of an ``if`` on ``TYPE_CHECKING``
     (:func:`is_type_checking_block`): its ``else``, or the body when it negates it.
     """
-    return (
-        statement.body if _negates_type_checking(statement.test) else statement.orelse
-    )
+    return statement.body if _negates(statement.test) else statement.orelse
 
 
 def what_never_runs(statement: ast.If) -> list[ast.stmt]:
     """What only a type checker reads of an ``if`` on ``TYPE_CHECKING``
     (:func:`is_type_checking_block`): its body, or the ``else`` when it negates it.
     """
-    return (
-        statement.orelse if _negates_type_checking(statement.test) else statement.body
-    )
+    return statement.orelse if _negates(statement.test) else statement.body
 
 
-def _branches(node: ast.AST) -> tuple[list[ast.AST], list[ast.AST]] | None:
+def _branches(
+    root: ast.AST, node: ast.AST
+) -> tuple[list[ast.AST], list[ast.AST]] | None:
     """What never runs and what runs of an ``if`` or a conditional expression on
-    ``TYPE_CHECKING``; None for any other node.
+    ``TYPE_CHECKING`` under *root*; None for any other node.
     """
     if isinstance(node, ast.If):
-        if is_type_checking_block(node):
+        if is_type_checking_block(node, root):
             return [*what_never_runs(node)], [*what_runs(node)]
     elif isinstance(node, ast.IfExp):
-        if _names_type_checking(node.test):
+        if reads_type_checking(root, node.test):
             return [node.body], [node.orelse]
-        if _negates_type_checking(node.test):
+        if _negates_type_checking(root, node.test):
             return [node.orelse], [node.body]
     return None
 
@@ -610,7 +765,7 @@ def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
     return frozenset(
         id(node)
         for statement in ast.walk(tree)
-        if (branches := _branches(statement)) is not None
+        if (branches := _branches(tree, statement)) is not None
         for child in branches[0]
         for node in ast.walk(child)
     )
@@ -625,7 +780,7 @@ def for_the_program(tree: ast.AST) -> frozenset[int]:
     return frozenset(
         id(node)
         for statement in ast.walk(tree)
-        if (branches := _branches(statement)) is not None
+        if (branches := _branches(tree, statement)) is not None
         for child in branches[1]
         for node in ast.walk(child)
     )
@@ -636,7 +791,9 @@ def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
     emptied in place and the branch that runs kept, for a guard that reads what a
     function does: the body of an ``if TYPE_CHECKING:``, the ``else`` of an ``if
     not TYPE_CHECKING:``, and that branch of a conditional expression, which reads
-    ``None`` instead, in a lambda or a comprehension of the function too.
+    ``None`` instead, in a lambda or a comprehension of the function too. A test
+    on a name the module binds to anything but the flag empties nothing
+    (:func:`reads_type_checking`).
 
     The blocks at the top of a module and in a class body stay, where a guard
     reads the imports of annotations and a constructor declared for the type
@@ -646,17 +803,17 @@ def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
         if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
             continue
         for node in scope_nodes(function):
-            if isinstance(node, ast.If) and is_type_checking_block(node):
-                if _negates_type_checking(node.test):
+            if isinstance(node, ast.If) and is_type_checking_block(node, tree):
+                if _negates(node.test):
                     node.orelse = []
                 else:
                     node.body = [ast.Pass()]
         for node in ast.walk(function):
             if isinstance(node, ast.IfExp):
                 blank = ast.copy_location(ast.Constant(value=None), node)
-                if _names_type_checking(node.test):
+                if reads_type_checking(tree, node.test):
                     node.body = blank
-                elif _negates_type_checking(node.test):
+                elif _negates_type_checking(tree, node.test):
                     node.orelse = blank
     return tree
 
@@ -841,8 +998,10 @@ def forget_trees() -> None:
         for_the_type_checker,
         for_the_program,
         global_bindings,
+        _flags_of,
     ):
         cached.cache_clear()
+    _MODULE_OF.clear()
 
 
 def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:

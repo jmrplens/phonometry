@@ -343,8 +343,9 @@ def _own_nodes(roots: Iterable[ast.AST]) -> Iterator[ast.AST]:
         stack.extend(children[::-1])
 
 
-def _definitions(body: Iterable[ast.AST]) -> Iterator[_DefinitionNode]:
-    """The functions and classes a body defines, however deep in its blocks.
+def _definitions(body: Iterable[ast.AST], root: ast.AST) -> Iterator[_DefinitionNode]:
+    """The functions and classes a body of the tree *root* defines, however
+    deep in its blocks.
 
     One defined where a test on ``TYPE_CHECKING`` keeps it from running is
     never defined when the code runs (the constructor a record declares for
@@ -353,7 +354,7 @@ def _definitions(body: Iterable[ast.AST]) -> Iterator[_DefinitionNode]:
     skipped = {
         id(child)
         for node in _own_nodes(body)
-        if isinstance(node, ast.If) and is_type_checking_block(node)
+        if isinstance(node, ast.If) and is_type_checking_block(node, root)
         for child in what_never_runs(node)
     }
     for node in _own_nodes(body):
@@ -397,7 +398,7 @@ def _scope_names(
     Which of them a call reaches is read where the call runs
     (:func:`_standing`).
     """
-    definitions = list(_definitions(body))
+    definitions = list(_definitions(body, module.node))
     written: dict[str, list[_Written]] = {}
     for definition in definitions:
         written.setdefault(definition.name, []).append((definition, definition))
@@ -637,7 +638,7 @@ class Tree:
         if isinstance(node, ast.ClassDef):
             hidden |= own_names(node).type_parameters
             klass = Class(module, node, qualname, parent)
-            klass.members = {d.name: d for d in _definitions(node.body)}
+            klass.members = {d.name: d for d in _definitions(node.body, module.node)}
             klass.fields = {
                 s.target.id: s.annotation
                 for s in node.body

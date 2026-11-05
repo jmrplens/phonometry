@@ -1028,7 +1028,7 @@ def test_a_test_on_type_checking_says_which_branch_runs(
     tree = ast.parse(f"if {test}:\n    first = 1\nelse:\n    second = 2\n")
     statement = tree.body[0]
     assert isinstance(statement, ast.If)
-    assert ast_scan.is_type_checking_block(statement)
+    assert ast_scan.is_type_checking_block(statement, tree)
     written = {name.id: name for name in ast.walk(tree) if isinstance(name, ast.Name)}
     assert id(written[never]) in ast_scan.for_the_type_checker(tree)
     assert id(written[runs]) not in ast_scan.for_the_type_checker(tree)
@@ -1055,9 +1055,107 @@ def test_any_other_test_says_nothing_of_either_branch(test: str) -> None:
     enabled`` runs whenever ``enabled`` is true.
     """
     tree = ast.parse(f"if {test}:\n    first = 1\nelse:\n    second = 2\n")
-    assert not ast_scan.is_type_checking_block(tree.body[0])
+    assert not ast_scan.is_type_checking_block(tree.body[0], tree)
     assert ast_scan.for_the_type_checker(tree) == frozenset()
     assert ast_scan.for_the_program(tree) == frozenset()
+
+
+_BRANCHES_TESTED = (
+    "if {test}:\n    first = 1\nelse:\n    second = 2\n\n"
+    "def f():\n    if {test}:\n        third = 3\n    return 4 if {test} else 5\n"
+)
+
+
+@pytest.mark.parametrize(
+    ("prelude", "test"),
+    [
+        ("TYPE_CHECKING = True\n", "TYPE_CHECKING"),
+        ("from settings import TYPE_CHECKING\n", "TYPE_CHECKING"),
+        ("from settings import *\n", "TYPE_CHECKING"),
+        ("import os as typing\n", "typing.TYPE_CHECKING"),
+        (
+            "import typing\n\ndef load(typing):\n    return typing\n",
+            "typing.TYPE_CHECKING",
+        ),
+        (
+            "from typing import TYPE_CHECKING\n\ndef f(TYPE_CHECKING=True): ...\n",
+            "TYPE_CHECKING",
+        ),
+        (
+            "from typing import TYPE_CHECKING\n\n"
+            "def switch():\n    global TYPE_CHECKING\n    TYPE_CHECKING = True\n",
+            "TYPE_CHECKING",
+        ),
+        ("settings = load()\n", "settings.TYPE_CHECKING"),
+    ],
+)
+def test_a_name_the_module_binds_to_anything_else_decides_no_branch(
+    prelude: str, test: str
+) -> None:
+    """``TYPE_CHECKING`` is the flag only where every binding of the name, in
+    any scope of the module, is an import of it from ``typing`` (or the
+    constant ``False``): a module that binds it to anything else, to ``True``
+    above all, may run either branch, and so may one whose ``typing`` is not
+    the module. Neither branch is taken for what never runs, and no body of a
+    function is emptied.
+    """
+    tree = ast.parse(prelude + _BRANCHES_TESTED.format(test=test))
+    assert ast_scan.for_the_type_checker(tree) == frozenset()
+    assert ast_scan.for_the_program(tree) == frozenset()
+    source = ast.unparse(ast_scan.empty_type_checking_bodies(tree))
+    assert "third = 3" in source
+    assert f"4 if {test} else 5" in source
+    ast_scan.forget_trees()
+
+
+@pytest.mark.parametrize(
+    ("prelude", "test"),
+    [
+        ("from typing import TYPE_CHECKING\n", "TYPE_CHECKING"),
+        ("from typing import TYPE_CHECKING as CHECKING\n", "CHECKING"),
+        ("from typing_extensions import TYPE_CHECKING\n", "TYPE_CHECKING"),
+        ("import typing as t\n", "t.TYPE_CHECKING"),
+        ("import typing_extensions\n", "typing_extensions.TYPE_CHECKING"),
+        (
+            "try:\n    from typing import TYPE_CHECKING\n"
+            "except ImportError:\n    TYPE_CHECKING = False\n",
+            "TYPE_CHECKING",
+        ),
+    ],
+)
+def test_the_flag_of_typing_decides_its_branches_under_any_name(
+    prelude: str, test: str
+) -> None:
+    """An import of the flag under another name, of ``typing`` under another
+    name, or of ``typing_extensions``, holds the flag all the same, and so does
+    the fallback that assigns ``False`` to it: what the block holds never runs.
+    """
+    tree = ast.parse(prelude + _BRANCHES_TESTED.format(test=test))
+    written = {
+        name.id: name
+        for name in ast.walk(tree)
+        if isinstance(name, ast.Name) and isinstance(name.ctx, ast.Store)
+    }
+    assert id(written["first"]) in ast_scan.for_the_type_checker(tree)
+    assert id(written["second"]) in ast_scan.for_the_program(tree)
+    source = ast.unparse(ast_scan.empty_type_checking_bodies(tree))
+    assert "third = 3" not in source
+    assert "4 if" not in source
+    ast_scan.forget_trees()
+
+
+def test_a_scope_read_as_a_tree_of_its_own_reads_the_flag_of_its_module() -> None:
+    """A guard that hands a function as the tree to read reads what the
+    module binds the flag to, once the module has been read: a module that
+    rebinds it leaves the function's block running.
+    """
+    tree = ast.parse(
+        "TYPE_CHECKING = True\n" + _BRANCHES_TESTED.format(test="TYPE_CHECKING")
+    )
+    function = next(node for node in tree.body if isinstance(node, ast.FunctionDef))
+    assert ast_scan.for_the_type_checker(tree) == frozenset()
+    assert ast_scan.for_the_type_checker(function) == frozenset()
+    ast_scan.forget_trees()
 
 
 def test_what_a_function_never_runs_is_emptied_in_every_form() -> None:

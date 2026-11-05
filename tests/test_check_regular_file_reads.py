@@ -113,6 +113,31 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
 
 
 @pytest.mark.parametrize(
+    "prelude",
+    [
+        "TYPE_CHECKING = True",
+        "from settings import TYPE_CHECKING",
+        "import os as typing\nTYPE_CHECKING = typing.environ",
+    ],
+)
+def test_a_block_on_a_name_the_module_rebinds_runs(
+    tmp_path: pathlib.Path, prelude: str
+) -> None:
+    """``if TYPE_CHECKING:`` keeps its body from running only where the name
+    holds the flag of ``typing``. A module that binds the name to anything
+    else runs the body, and a read there is refused: the body was emptied
+    for its spelling alone, so the read passed.
+    """
+    source = (
+        prelude
+        + "\n\ndef _sniff(path):\n    if TYPE_CHECKING:\n"
+        + "        with Path(path).open('rb') as fh:\n"
+        + "            return fh.read(12)\n    return None\n"
+    )
+    assert _found(tmp_path, source) == [("_sniff", _OWN)]
+
+
+@pytest.mark.parametrize(
     "source",
     [
         pytest.param(

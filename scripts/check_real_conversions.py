@@ -859,6 +859,9 @@ class _Flow:
     checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
     names: _Names
     fields: bool
+    #: The module the function is written in, which says what a test on
+    #: ``TYPE_CHECKING`` reads (:func:`ast_scan.is_type_checking_block`).
+    root: ast.AST
     #: What a call of a check of the library hands back: the arguments it
     #: returns, each with what the check refused in it (:func:`_checker`);
     #: ``None`` for a call of anything else.
@@ -1290,7 +1293,7 @@ class _Flow:
             env[f"self.{target.attr}"] = state
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
-        if is_type_checking_block(node):
+        if is_type_checking_block(node, self.root):
             # One branch never runs, and the other always does.
             return self.block(what_runs(node), env)
         self.expression(node.test, env)
@@ -1710,7 +1713,7 @@ class _Sure:
             sure = sure and not _returns(statement)
 
     def statement(self, node: ast.stmt, *, sure: bool) -> None:
-        if isinstance(node, ast.If) and is_type_checking_block(node):
+        if isinstance(node, ast.If) and is_type_checking_block(node, self.reader.root):
             # One branch never runs, and the other always does.
             self.block(what_runs(node), sure=sure)
         elif isinstance(node, ast.If):
@@ -1895,7 +1898,7 @@ def _signatures(module: _Module) -> list[_Signature]:
     and is not in the body of a ``try`` a handler of which goes on, makes it
     one, of a parameter the call reads before anything rebinds it.
     """
-    reader = _Flow(lambda _: [], module.numpy, fields=False)
+    reader = _Flow(lambda _: [], module.numpy, fields=False, root=module.tree)
     found = []
     for node in module.tree.body:
         if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
@@ -2240,7 +2243,8 @@ class _Returns:
                 self._walruses(child, _FUNCTION_SCOPE)
             pending.extend(
                 what_runs(node)
-                if isinstance(node, ast.If) and is_type_checking_block(node)
+                if isinstance(node, ast.If)
+                and is_type_checking_block(node, self.module.tree)
                 else block_statements(node)
             )
         if outer is None:
@@ -2815,6 +2819,7 @@ class _Reading:
             self.checks,
             _function_names(self.module, function),
             fields=fields or function.name == "__post_init__",
+            root=self.module.tree,
             handed=self.handed,
             calling=self._calling,
         )
@@ -2848,6 +2853,7 @@ class _Reading:
             self.checks,
             outer.names,
             fields=outer.fields,
+            root=outer.root,
             handed=self.handed,
             calling=self._calling,
         )

@@ -996,7 +996,7 @@ class Module:
         if function in self.locals:
             return self.locals[function]
         bindings: dict[str, list[tuple[str, ast.AST, int]]] = {}
-        checker = for_the_type_checker(function)
+        checker = for_the_type_checker(self.tree)
         for node in _walk_own(function):
             if id(node) in checker:
                 continue

@@ -195,7 +195,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import check_return_overloads as overloads
-from ast_scan import ROOT, own_names, python_files
+from ast_scan import (
+    ROOT,
+    is_type_checking_block,
+    own_names,
+    python_files,
+    what_never_runs,
+)
 
 if TYPE_CHECKING:
     from collections.abc import (
@@ -4885,10 +4891,11 @@ def _declared_constructor(
     found = annotations.classes.get(record)
     if found is None:
         return None
+    tree = annotations.package.trees[found[0]]
     for child in found[1].body:
-        if not (isinstance(child, ast.If) and _is_type_checking(child.test)):
+        if not (isinstance(child, ast.If) and is_type_checking_block(child, tree)):
             continue
-        for inner in child.body:
+        for inner in what_never_runs(child):
             if (
                 isinstance(inner, ast.FunctionDef | ast.AsyncFunctionDef)
                 and inner.name == "__init__"
@@ -5083,13 +5090,6 @@ def _keyword_problems(
                 f"to {default}"
             )
     return problems
-
-
-def _is_type_checking(node: ast.expr) -> bool:
-    """Whether a test reads ``TYPE_CHECKING``, as a name or as ``typing.TYPE_CHECKING``."""
-    return (isinstance(node, ast.Name) and node.id == "TYPE_CHECKING") or (
-        isinstance(node, ast.Attribute) and node.attr == "TYPE_CHECKING"
-    )
 
 
 # ---------------------------------------------------------------------------

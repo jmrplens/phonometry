@@ -523,16 +523,20 @@ def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
     names = own_names(scope)
     sent_out = names.declared_global | names.declared_nonlocal
     return {
-        name: nodes
+        name: list(nodes)
         for name, nodes in _binding_nodes(scope).items()
         if name not in sent_out
     }
 
 
-def _binding_nodes(scope: ast.AST) -> dict[str, list[ast.AST]]:
+@functools.cache
+def _binding_nodes(scope: ast.AST) -> dict[str, tuple[ast.AST, ...]]:
     """Each name a statement of *scope* binds, its ``global`` and
     ``nonlocal`` names among them, with every node that binds it, in the
     order of the source (:func:`bindings_by_name`).
+
+    Read once for each scope, as :func:`own_names` is: a guard asks it of
+    every scope of the package on each pass of its fixed point.
     """
     comprehension = isinstance(scope, _COMPREHENSIONS)
     found: dict[str, list[ast.AST]] = {}
@@ -548,9 +552,7 @@ def _binding_nodes(scope: ast.AST) -> dict[str, list[ast.AST]]:
             bound = declared[1] if declared[0] in {"defined", "imported"} else set()
         for name in bound:
             found.setdefault(name, []).append(node)
-    for nodes in found.values():
-        nodes.sort(key=_position)
-    return found
+    return {name: tuple(sorted(nodes, key=_position)) for name, nodes in found.items()}
 
 
 def _position(node: ast.AST) -> tuple[int, int]:
@@ -853,12 +855,14 @@ def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
         if not isinstance(scope, _DEFINITIONS):
             continue
         sent = own_names(scope).declared_global
+        if not sent:
+            continue
         for name, nodes in _binding_nodes(scope).items():
             running = [node for node in nodes if id(node) not in checker]
             if name in sent and running:
                 found.setdefault(name, []).extend(running)
-    for nodes in found.values():
-        nodes.sort(key=_position)
+    for written in found.values():
+        written.sort(key=_position)
     return found
 
 
@@ -1009,6 +1013,7 @@ def forget_trees() -> None:
     """
     for cached in (
         own_names,
+        _binding_nodes,
         _parents,
         _blocks,
         _class_is_live,

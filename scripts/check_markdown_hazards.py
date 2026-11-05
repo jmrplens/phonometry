@@ -128,7 +128,7 @@ import pathlib
 import re
 import sys
 
-from markdown_fences import NOT_INLINE_ROLES, PageLine, page_lines
+from markdown_fences import NOT_INLINE_ROLES, PageLine, page_lines, quotation_marks
 from markdown_spans import (
     block_starts,
     drop_inline_spans,
@@ -151,11 +151,6 @@ _SKIP = ("reference/api/", "superpowers/")
 #: block, so that nothing in a paragraph crosses it. A private-use character,
 #: which no line of a page holds.
 _BLOCK_OPENS = "\ue001"
-
-#: ``>`` opening a line with content after it: a wrapped comparison operator,
-#: unless the paragraph deliberately starts a quotation, which is always
-#: preceded by a blank line.
-_QUOTE = re.compile(r"^>\s*\S")
 
 #: Text that continues a paragraph rather than starting a block of its own.
 _PROSE = re.compile(r"^\s{0,3}[^\s\-*+>#|<:0-9]")
@@ -327,9 +322,21 @@ def _cut_maths_problems(
     ]
 
 
-def _wrapped_quote_problems(where: str, line: str, before: str) -> list[str]:
-    """Rule 2: a ``>`` that wrapped to the start of a line of a paragraph."""
-    if not (_QUOTE.match(line) and _PROSE.match(before)):
+def _wrapped_quote_problems(
+    where: str, line: str, before: str, *, kind: str
+) -> list[str]:
+    """Rule 2: a ``>`` that wrapped to the start of a line of a paragraph.
+
+    A ``>`` that opens the line with content after it, read by its columns as
+    the walk of the page reads a quotation's mark (:func:`quotation_marks`):
+    behind up to three columns of blanks, or any number on an ``.mdx`` page.
+    It is a wrapped comparison operator, unless the paragraph deliberately
+    starts a quotation, which is always preceded by a blank line.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    """
+    marks, rest = quotation_marks(line, kind=kind)
+    if not (marks and rest.strip(" \t") and _PROSE.match(before)):
         return []
     return [
         f"{where}: {line.strip()[:40]!r} continues the sentence above but "
@@ -442,7 +449,7 @@ def _markdown_problems(
                 where, line, index, open_math=open_math, opens_block=opens_block[index]
             )
         )
-        problems.extend(_wrapped_quote_problems(where, line.text, before))
+        problems.extend(_wrapped_quote_problems(where, line.text, before, kind=kind))
         problems.extend(_anchor_problems(where, line.text))
         problems.extend(_setext_problems(where, line))
         open_math = _maths_left_open(

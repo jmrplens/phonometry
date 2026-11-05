@@ -10787,8 +10787,8 @@ in the same order.
   requirement, which is what 7.4.3 asks of them, and a band whose spectrum is
   flat across it reads about 0,6 dB low. The same filter run forward once
   would be 3,01 dB down at the edges, with $\Delta B$ from $+0{,}15$ dB to
-  $+0{,}20$ dB, inside class 1. A comment of the same section, "used later for fsc(q)<50 ie lambda
-  >0.02", disagrees with the test the code makes, `if fsc(q)>=20` and
+  $+0{,}20$ dB, inside class 1. A comment of the same section, "used later for fsc(q)<50 ie
+  lambda >0.02", disagrees with the test the code makes, `if fsc(q)>=20` and
   `elseif fsc(q)<20`, which sends the bands longer than 0,05 m to the
   decimated record.
 - **Evidence:** the listing read on PDF page 27 (printed p. 25), B.6 on PDF

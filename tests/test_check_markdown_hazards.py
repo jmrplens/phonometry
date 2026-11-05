@@ -428,6 +428,33 @@ def test_a_wrapped_greater_than_sign_is_refused() -> None:
     assert "starts a block quote" in problems[0]
 
 
+@pytest.mark.parametrize(
+    ("line", "page", "refused"),
+    [
+        (" > 5 dB above it.", "p.md", 1),
+        (" > 5 dB above it.", "p.mdx", 1),
+        ("   >5 dB above it.", "p.md", 1),
+        ("\t> 5 dB above it.", "p.mdx", 1),
+        # Four columns carry the paragraph on, on a page that has indented code.
+        ("\t> 5 dB above it.", "p.md", 0),
+        ("    > 5 dB above it.", "p.md", 0),
+    ],
+)
+def test_a_greater_than_sign_is_read_by_its_columns(
+    line: str, page: str, refused: int
+) -> None:
+    """A mark behind up to three columns of blanks opens a quotation, and
+    behind any number on an ``.mdx`` page, as the walk of the page reads it.
+
+    Only a ``>`` at the very start of the line was read as one, so a
+    greater-than sign that wrapped behind a space turned the tail of the
+    sentence into a quotation unreported.
+    """
+    problems = cmh.check_text(f"The level is always\n{line}\n", page)
+    assert sum("starts a block quote" in problem for problem in problems) == refused
+    assert len(problems) == refused
+
+
 def test_a_same_page_link_to_an_accented_heading_is_refused() -> None:
     problems = cmh.check_text("See [it](#la-medición).\n", "p.md")
     assert len(problems) == 1

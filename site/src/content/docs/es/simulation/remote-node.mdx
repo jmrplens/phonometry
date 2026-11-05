@@ -13,19 +13,21 @@ debajo de la mesa. El registro de la ejecución, `FDTDRun` o `ElasticRun`, es
 el mismo que toma una ejecución aquí, construido y comprobado aquí; la llamada
 es la misma, `fdtd_simulation(run, compute=...)` o
 `elastic_fdtd_simulation(run, compute=...)`, y también lo es el registro que
-devuelve. Solo esas dos funciones, y las dos que escriben un vídeo a partir
-de las mismas ejecuciones, van a un nodo. Un motor construido directamente,
-`FDTD2D` o `ElasticFDTD2D`, avanza en este proceso, donde puedes leer y
-escribir sus campos entre un paso y el siguiente, y rechaza una petición que
-nombre un host.
+devuelve. Solo esas dos funciones, y las dos que escriben un vídeo a partir de
+las mismas ejecuciones, `write_fdtd_animation` y
+`write_elastic_fdtd_animation`, van a un nodo. Un motor construido
+directamente, `FDTD2D` o `ElasticFDTD2D`, avanza en este proceso, donde puedes
+leer y escribir sus campos entre un paso y el siguiente, y rechaza una
+petición que nombre un host.
 
 Esta página explica qué pasa cuando una ejecución va a un nodo, cómo
 nombrarlo, cómo preparar un nodo Docker o un nodo Python, qué puede fallar y
 qué dice cada error, cómo seguir una ejecución, de qué se fía cada lado del
 otro y cuándo una ejecución allí da los números que da una ejecución aquí. El
 dispositivo en sí, NumPy, CuPy o torch, se elige como explica
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/), y todo
-eso vale también en un nodo.
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/), y eso
+vale también en un nodo que tenga esa biblioteca: la sección 3 dice qué lleva
+la imagen, y la sección 4, qué necesita un nodo Python.
 [Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
@@ -40,11 +42,15 @@ dice cuál), y el fichero de hosts tiene que nombrar el nodo.
 
 A partir de ahí, un solo proceso `ssh` lleva toda la ejecución. No hay que
 instalar ni mantener en marcha ningún servidor en el nodo: le basta con su
-servidor ssh. La ejecución viaja como datos, campo a campo, nunca como
-código, y el nodo la vuelve a construir con los constructores de la
+servidor ssh. Esta máquina necesita phonometry y un cliente OpenSSH, pero no
+CuPy, torch, ffmpeg ni matplotlib: una ejecución que vuelve a NumPy avanza
+aquí sin ellos, y solo una función que escribe vídeo y vuelve a NumPy necesita
+aquí ffmpeg y matplotlib. La ejecución viaja como datos, campo a campo, nunca
+como código, y el nodo la vuelve a construir con los constructores de la
 biblioteca, así que allí se comprueba otra vez. Las funciones que escriben
-vídeo también viajan, con su ejecución, su fotograma y sus opciones de vídeo
-como registros: véase
+vídeo también viajan, llamadas como
+`write_fdtd_animation(path, run, compute=...)`, con su ejecución, su fotograma
+y sus opciones de vídeo como registros: véase la sección 5 de
 [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/).
 
 El nodo ejecuta tu propio phonometry, el que tienes instalado aquí, sea cual
@@ -58,15 +64,26 @@ retenga, así que una ejecución larga conserva su paquete por muchos otros que
 vayan y vengan.
 
 El nodo ejecuta la función en el dispositivo pedido, sin ninguna vuelta a
-NumPy por su cuenta, y devuelve las historias de las sondas y las
-instantáneas, que se leen aquí en arrays dimensionados a partir de tu
-petición; una función que escribe vídeo envía los bytes de su vídeo en lugar
-de las instantáneas. `result.provenance.host` nombra el nodo y
+NumPy por su cuenta, y devuelve las historias de las sondas y, cuando la
+ejecución las registra (`snapshot_every` de su `FDTDRecording` o
+`ElasticRecording`), las instantáneas, que se leen aquí en arrays
+dimensionados a partir de tu petición y reservados antes de que se abra la
+conexión. En una malla grande, las instantáneas son la mayor parte de lo que
+cruza el enlace y de la memoria que necesita esta máquina: las reducen
+`snapshot_decimation`, sección 7 de
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/), y
+`dtype="float32"`, mientras que las historias de las sondas siguen en float64.
+Una función que escribe vídeo envía los bytes de su vídeo en lugar de las
+instantáneas.
+
+`result.provenance.host` nombra el nodo y
 `result.provenance.package_sha256`, el paquete que se ejecutó, y
 `result.provenance.phonometry_version` es tu propia versión, que viaja con el
-trabajo: desde su caché el nodo no puede nombrar el paquete que ejecuta. El
-resto de la procedencia es la del nodo: su NumPy, su biblioteca de arrays, su
-GPU.
+trabajo: desde su caché el nodo no puede nombrar el paquete que ejecuta.
+`device_index` es el que pediste, y el resto de la procedencia es la del nodo:
+su NumPy, su biblioteca de arrays, su CUDA, su GPU. La sección 5 de
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) recoge
+todos los campos.
 
 ## 2. Nombrar un nodo: el fichero de hosts
 
@@ -108,17 +125,17 @@ python = "venvs/node/bin/python"    # relativo al directorio personal de allí
 | `label` | cómo nombran el nodo los mensajes y el log | su nombre |
 | `timeout_s` | lo máximo que puede durar una ejecución allí, en segundos | sin límite |
 
-Un nombre lleva letras, dígitos, `.`, `_` y `-`, y empieza por una letra o un
-dígito. Un nombre con un punto va entre comillas en la cabecera de su tabla,
-porque TOML lee un punto suelto como una tabla dentro de otra:
-`[hosts."nas.local"]` nombra el nodo `nas.local`, el que pide
-`Compute(host="nas.local")`, mientras que `[hosts.nas.local]` sería una tabla
-`local` dentro de un nodo `nas`. Una clave que la tabla no recoge, una `image` en un nodo Python o un
-`python` en uno Docker, o una ruta de `python` que empieza por `~` lanzan
-`ValueError` nombrando el fichero: el cliente entrecomilla la ruta en la
-orden que envía, así que el shell del nodo nunca expandiría la `~`. Un
-fichero guardado con marca de orden de bytes, como guarda UTF-8 el Bloc de
-notas de Windows, se lee como cualquier otro.
+Un nombre tiene hasta 64 caracteres, cada uno una letra, un dígito, `.`, `_` o
+`-`, y empieza por una letra o un dígito. Un nombre con un punto va entre
+comillas en la cabecera de su tabla, porque TOML lee un punto suelto como una
+tabla dentro de otra: `[hosts."nas.local"]` nombra el nodo `nas.local`, el que
+pide `Compute(host="nas.local")`, mientras que `[hosts.nas.local]` sería una
+tabla `local` dentro de un nodo `nas`. Una clave que la tabla no recoge, una
+`image` en un nodo Python o un `python` en uno Docker, o una ruta de `python`
+que empieza por `~` lanzan `ValueError` nombrando el fichero: el cliente
+entrecomilla la ruta en la orden que envía, así que el shell del nodo nunca
+expandiría la `~`. Un fichero guardado con marca de orden de bytes, como
+guarda UTF-8 el Bloc de notas de Windows, se lee como cualquier otro.
 
 **Qué necesita ssh.** El cliente ejecuta el `ssh` de tu máquina, OpenSSH 7.6
 o posterior, y una ejecución nunca pregunta nada: ssh trabaja en modo por
@@ -171,8 +188,20 @@ print(res.provenance.host, res.provenance.gpu)   # nas, y el nombre de la tarjet
 
 `elastic_fdtd_simulation(ElasticRun(...), compute=request)` va al nodo del
 mismo modo. Un script entero puede nombrar el nodo una sola vez, con un
-bloque `use()` o con la variable de entorno `PHONOMETRY_COMPUTE`, cuya
-gramática es `device[:index][@host][,option...]`:
+bloque `simulation.use()` o con la variable de entorno `PHONOMETRY_COMPUTE`;
+la sección 3 de
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) dice
+cuál manda cuando más de uno nombra una ubicación. Un bloque `use()` aplica
+su petición a cada llamada hecha dentro de él que no pase `compute=`:
+
+```py
+with simulation.use(request):
+    res = simulation.fdtd_simulation(run)
+```
+
+La gramática de la variable es `device[:index][@host][,option...]`. No tiene
+una opción `timeout_s`, así que una ejecución que envía a un nodo toma el
+`timeout_s` del fichero de hosts, cuando el fichero lo da:
 
 ```bash
 PHONOMETRY_COMPUTE=cupy@nas python study.py
@@ -223,7 +252,9 @@ con las que se dibujan las figuras, y ffmpeg, una compilación estática que el
 Dockerfile fija por URL y SHA-256, con SVT-AV1, NVENC, VP9 y dav1d, así que un
 nodo no necesita un ffmpeg propio. La imagen para GPU añade el runtime de
 CUDA y CuPy 14.2.0, la versión con la que se hizo la prueba en GPU de
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/). Cada
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/).
+Ninguna de las dos imágenes lleva torch, y la imagen para CPU no lleva CuPy:
+un dispositivo de torch necesita un nodo Python o una imagen propia. Cada
 imagen base está fijada por digest.
 
 Cada ejecución tiene un contenedor propio, que se borra cuando termina la
@@ -277,16 +308,18 @@ antes, así que el entorno tiene que funcionar sin él.
 
 Un nodo que escribe vídeos
 ([Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/))
-necesita dos cosas más: matplotlib en ese entorno, en la versión que pide el
-extra `plot` de la biblioteca, y ffmpeg en el `PATH` que ve la orden que ssh
-ejecuta allí. La imagen de Docker de la sección 3 lleva las dos.
+necesita dos cosas más: matplotlib en ese entorno, la 3.10.7 o posterior,
+como pide el extra `plot` de la biblioteca
+(`~/venvs/node/bin/pip install "matplotlib>=3.10.7"`), y ffmpeg en el `PATH`
+que ve la orden que ssh ejecuta allí. La imagen de Docker de la sección 3
+lleva las dos.
 
 ## 5. Cuando algo sale mal
 
 | Qué salió mal | Qué se lanza | Cuándo |
 |---|---|---|
 | un argumento de la ejecución | `TypeError` o `ValueError` | al construir la ejecución, igual que para una ejecución aquí |
-| una ejecución que no puede viajar: una fuente cuya forma de onda es un invocable distinto del `.value` de un `GaussianPulse`, `CWSource` o `SignalSource`, o un número entero fuera del rango de un int64 | `TypeError`, nombrando la fuente o el campo | al llamar a la función, antes de leer el fichero de hosts |
+| una ejecución que no puede viajar: una fuente cuya forma de onda es un invocable distinto del `.value` de un `GaussianPulse`, `CWSource` o `SignalSource`, una subclase de uno de los registros de la biblioteca, un número entero fuera del rango de un int64, un número o un array en coma flotante de más de 64 bits (un `longdouble`), o un `Fraction` o un `Decimal` que la ejecución guarda tal cual, como `dx=Fraction(1, 100)` | `TypeError`, nombrando la fuente o el campo | al llamar a la función, antes de leer el fichero de hosts |
 | un host que el fichero no nombra, o ningún fichero de hosts | `KeyError` | antes de que arranque ssh |
 | un fichero de hosts que es una tubería con nombre, un dispositivo o un directorio, ocupa más de 1 MiB, no se puede leer o no es TOML, o una entrada mal formada | `ValueError`, nombrando el fichero | antes de que arranque ssh |
 | ningún cliente ssh en el `PATH`, aunque en Windows haya uno en el directorio de trabajo, Pyodide, un paquete que no se puede leer del disco o que contiene un fichero que ningún nodo escribiría, o un trabajo demasiado largo para la cabecera que lee un nodo (una ejecución de varios miles de fuentes puntuales) | `ComputeRemoteError` | antes de que arranque ssh |
@@ -309,10 +342,13 @@ líneas que el nodo escribió en su salida de error estándar.
 Con `fallback=True`, un `ComputeRemoteError` se convierte en un
 `ComputeFallbackWarning`, cuyo mensaje lleva el error, y la ejecución avanza
 aquí con NumPy, en el `dtype` pedido; su procedencia lo dice, sin host y con
-el dispositivo `"cpu"`. Todo `ComputeRemoteError` vuelve a NumPy, también los
-que se lanzan aquí antes de que arranque ssh; un argumento erróneo, un host
-desconocido o un fichero de hosts mal formado lanzan su error con
-`fallback=True` o sin él.
+el dispositivo `"cpu"`. Una función que escribe vídeo y vuelve a NumPy
+también dibuja y codifica aquí, así que necesita ffmpeg y matplotlib en esta
+máquina: sin matplotlib lanza `ImportError`, y sin ffmpeg,
+`io.FFmpegNotFoundError`. Todo `ComputeRemoteError` vuelve a NumPy, también
+los que se lanzan aquí antes de que arranque ssh; un argumento erróneo, una
+ejecución que no puede viajar, un host desconocido o un fichero de hosts mal
+formado lanzan su error con `fallback=True` o sin él.
 
 Los avisos que lanza la ejecución en el nodo se lanzan aquí, en la línea de
 tu código que llamó a la función, con su propia clase: los de phonometry tal
@@ -436,15 +472,16 @@ listos para publicar.
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-Ejecutar `fdtd_simulation` y `elastic_fdtd_simulation` en otra máquina por
-SSH, en un nodo Docker construido con la imagen del repositorio o en un
-entorno de Python, con GPU o sin ella; el fichero de hosts que nombra un
-nodo, y el `host` de `Compute` y de `PHONOMETRY_COMPUTE`; lo que comprueban
-el cliente y el nodo, cada uno de lo que le envía el otro; los errores que
-lanza una ejecución remota, la vuelta a NumPy aquí, los avisos que lanza el
-nodo, el progreso en el logger `phonometry.simulation`, los tiempos límite y
-las interrupciones; y cuándo una ejecución remota da los números de una
-ejecución aquí.
+Ejecutar `fdtd_simulation`, `elastic_fdtd_simulation` y las dos funciones que
+escriben vídeo, `write_fdtd_animation` y `write_elastic_fdtd_animation`, en
+otra máquina por SSH, en un nodo Docker que ejecuta la imagen construida con
+el Dockerfile del repositorio o en un entorno de Python, con GPU o sin ella;
+el fichero de hosts que nombra un nodo, y el `host` de `Compute` y de
+`PHONOMETRY_COMPUTE`; lo que comprueban el cliente y el nodo, cada uno de lo
+que le envía el otro; los errores que lanza una ejecución remota, la vuelta a
+NumPy aquí, los avisos que lanza el nodo, el progreso en el logger
+`phonometry.simulation`, los tiempos límite y las interrupciones; y cuándo una
+ejecución remota da los números de una ejecución aquí.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -467,13 +504,19 @@ ejecuta en esta máquina.
 - [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
   los dispositivos en los que avanza una ejecución, aquí o en un nodo, y lo
   que se promete sobre los números en cada uno.
+- [Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo](/phonometry/es/simulation/where-it-runs/):
+  los dispositivos, los nodos y los codificadores en un sitio.
 - [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
   la ejecución acústica, sus fuentes, sondas y contornos.
 - [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
   la ejecución elástica, que va a un nodo del mismo modo.
+- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+  las dos funciones que escriben vídeo, y en la sección 5 el vídeo de una
+  ejecución hecho en un nodo.
 - Referencia de la API: [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
   [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/).
+  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
 
 </SeeAlso>
 
@@ -482,9 +525,10 @@ ejecuta en esta máquina.
 ### ¿Cómo calculo una simulación en otra máquina?
 
 Nombra la máquina en un fichero de hosts, dale la imagen del nodo
-(`make node-image HOST=nas`) o un entorno de Python con NumPy y SciPy, y pasa
-`compute=simulation.Compute(device="cupy", host="nas")` a `fdtd_simulation`
-o a `elastic_fdtd_simulation`, o fija `PHONOMETRY_COMPUTE=cupy@nas`. La
+(`make node-image HOST=nas`) o un entorno de Python con NumPy, SciPy y, para
+esta petición de GPU, CuPy, y pasa
+`compute=simulation.Compute(device="cupy", host="nas")` a `fdtd_simulation` o
+a `elastic_fdtd_simulation`, o fija `PHONOMETRY_COMPUTE=cupy@nas`. La
 ejecución, la llamada y el resultado son los de una ejecución aquí, y
 `result.provenance.host` nombra el nodo.
 
@@ -503,7 +547,10 @@ Un servidor ssh en el que puedas iniciar sesión con una clave, en Linux o
 macOS con un shell POSIX de inicio de sesión, y o bien Docker con la imagen
 del nodo (y, para una GPU, el controlador de NVIDIA y el NVIDIA Container
 Toolkit), o bien un Python 3.12 o posterior con NumPy y SciPy en los mínimos
-de la biblioteca (y CuPy o torch para una GPU). Para escribir vídeos, un
-nodo Python necesita además matplotlib, y ffmpeg en su `PATH`; la imagen
-de Docker lleva los dos. No hace falta que phonometry esté instalado allí: el
-cliente envía el suyo.
+de la biblioteca (y CuPy o torch para una GPU). Para escribir vídeos, un nodo
+Python necesita además matplotlib, y ffmpeg en su `PATH`; la imagen de Docker
+lleva los dos. No hace falta que phonometry esté instalado allí: el cliente
+envía el suyo. Esta máquina necesita phonometry y un cliente OpenSSH, pero no
+CuPy, torch, ffmpeg ni matplotlib: una ejecución que vuelve a NumPy avanza
+aquí sin ellos, y solo una función que escribe vídeo y vuelve a NumPy necesita
+aquí ffmpeg y matplotlib.

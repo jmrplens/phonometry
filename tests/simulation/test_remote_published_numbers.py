@@ -5,8 +5,9 @@ The guide says how many packages a node keeps and for how long one is never
 pruned, how soon a dead connection is noticed on either side, how long ssh
 tries to connect, how long a run may go on once its client has closed the
 connection, the keep-alive a node's ssh server should use, the CuPy and
-Python of the GPU image, and the Python, NumPy and SciPy a node needs, in
-English, in Spanish and in its docs/ mirror. Each phrase is built here from
+Python of the GPU image, the Python, NumPy and SciPy a node needs, and the
+matplotlib a Python node that writes videos needs, the floor of the
+package's ``plot`` extra, in English, in Spanish and in its docs/ mirror. Each phrase is built here from
 the constant or the lock entry that decides it, so a change to one leaves
 the pages failing until they say the new number.
 
@@ -14,8 +15,8 @@ A phrase found once is not enough: a page may print the same number twice,
 and a copy left behind would still read as the guide's word, or satisfy a
 check meant for another number. So every copy is held too. A duration or a
 count written in words appears only inside the phrases built here; every
-version a page prints after "Python", "NumPy", "SciPy" or "CuPy", every
-requirement of an install line and every keep-alive setting is the one the
+version a page prints after "Python", "NumPy", "SciPy" or "CuPy", the
+version of matplotlib a page asks for, every requirement of an install line and every keep-alive setting is the one the
 code or the lock sets. A Python version followed by the language's "or
 later" is the package's floor, and any other is the image's.
 
@@ -28,6 +29,7 @@ from __future__ import annotations
 
 import json
 import re
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -37,6 +39,15 @@ from phonometry.simulation._remote.package import FLOORS, PYTHON_FLOOR
 
 _ROOT = Path(__file__).resolve().parents[2]
 _LOCK = json.loads((_ROOT / "gpu-parity.lock").read_text(encoding="utf-8"))
+#: The matplotlib a Python node that writes videos needs: the floor the
+#: package's ``plot`` extra asks for, which the node's own check does not read.
+_MATPLOTLIB_FLOOR = next(
+    requirement.removeprefix("matplotlib>=")
+    for requirement in tomllib.loads(
+        (_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    )["project"]["optional-dependencies"]["plot"]
+    if requirement.startswith("matplotlib>=")
+)
 #: How each language writes the numbers the phrases quote. A constant moved
 #: to a number a table does not hold raises KeyError: add its words to both
 #: tables and to the pages.
@@ -145,11 +156,19 @@ def _wrong_versions(text: str, language: str) -> list[str]:
         "ClientAliveInterval": {str(interval)},
         "ClientAliveCountMax": {str(count)},
     }
+    for name, floor in {**FLOORS, "matplotlib": _MATPLOTLIB_FLOOR}.items():
+        printed[f"{name} install line"] = set(re.findall(rf'"{name}>=([^"\s]+)"', text))
+        expected[f"{name} install line"] = {floor}
     for name, floor in FLOORS.items():
         shown = _DEPENDENCIES[name]
         printed[shown] = set(re.findall(rf"\b{shown} (\d+(?:\.\d+)+)", text))
-        printed[f"{name} install line"] = set(re.findall(rf'"{name}>=([^"\s]+)"', text))
-        expected[shown] = expected[f"{name} install line"] = {floor}
+        expected[shown] = {floor}
+    # "matplotlib in that environment, 3.10.7 or later": the version is the
+    # first number after the name, a few words on, before "or later".
+    printed["matplotlib"] = set(
+        re.findall(rf"\bmatplotlib\b\D{{0,40}}?(\d+(?:\.\d+)+) {later}", text)
+    )
+    expected["matplotlib"] = {_MATPLOTLIB_FLOOR}
     return [
         f"{kind}: {sorted(printed[kind])}, not {sorted(want)}"
         for kind, want in expected.items()

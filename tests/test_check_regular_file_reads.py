@@ -189,6 +189,67 @@ def test_a_lambda_called_where_it_is_written_reads_what_the_call_hands(
             [("outer.read", _OWN)],
             id="in-a-function",
         ),
+        pytest.param(
+            """
+            import io
+            open = io.open
+
+            class R:
+                def read(self, path, opener=open):
+                    with opener(path) as fh:
+                        return fh.read()
+
+            open = print
+            """,
+            [("R.read", _OWN)],
+            id="a-method-rebound-after-the-class",
+        ),
+        pytest.param(
+            """
+            import io
+            open = print
+
+            class R:
+                def read(self, path, opener=open):
+                    with opener(path) as fh:
+                        return fh.read()
+
+            open = io.open
+            """,
+            [],
+            id="a-method-rebound-before-the-class",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def outer(path):
+                source = io.open
+
+                class R:
+                    def read(self, path, opener=source):
+                        with opener(path) as fh:
+                            return fh.read()
+
+                source = print
+                return R().read(path)
+            """,
+            [("outer.R.read", _OWN)],
+            id="a-method-of-a-class-in-a-function",
+        ),
+        pytest.param(
+            """
+            import io
+            open = io.open
+
+            class R:
+                reader = lambda path, opener=open: opener(path).read()
+
+            open = print
+            """,
+            [("R", _OWN)],
+            id="a-lambda-in-a-class-body",
+        ),
     ],
 )
 def test_a_default_is_what_its_name_holds_where_the_def_runs(

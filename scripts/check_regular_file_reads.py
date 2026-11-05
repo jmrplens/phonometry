@@ -432,6 +432,7 @@ def _bound(
     top: Mapping[str, str] | None = None,
     written_in: Mapping[str, str] | None = None,
     holder: ast.AST | None = None,
+    around: Sequence[ast.AST] = (),
 ) -> dict[str, str]:
     """What each name stands for inside *scope*, given what it stands for around it.
 
@@ -441,9 +442,10 @@ def _bound(
     top of the module, *top*; a parameter whose default is a dotted name
     stands for what that name stands for where the ``def`` runs: what the
     bindings of *holder*, the scope the ``def`` is written in, that may
-    stand there make it (:func:`_held_where`), or what it stands for in
+    stand there make it (:func:`_held_where`, *around* holding the scopes
+    around *holder*), or what it stands for in
     *written_in* (*outer* unless a class body lies between them) when
-    *holder* binds it not at all; then the imports of the
+    no scope it is read in binds it; then the imports of the
     scope as :func:`_imported` reads them, the relative ones from *package*;
     then a name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) stands for what that name stands for, the
@@ -464,7 +466,7 @@ def _bound(
             held = (
                 _named_by(default, table)
                 if holder is None or default is None
-                else _held_where(default, holder, package, table)
+                else _held_where(default, holder, package, table, around=around)
             )
             if held is not None:
                 aliases[parameter.arg] = held
@@ -503,6 +505,7 @@ def _held_where(
     package: str,
     table: Mapping[str, str],
     depth: int = 0,
+    around: Sequence[ast.AST] = (),
 ) -> str | None:
     """What the dotted name *value*, read in the scope *holder* where it is
     written, stands for there.
@@ -511,15 +514,26 @@ def _held_where(
     read (:func:`ast_scan.live_bindings`) say: an import what it imports, an
     assignment of a dotted name what that name stands for where it is
     assigned, a ``def`` or a ``class`` the name itself; two that disagree, or
-    any other binding, stand for nothing the guard can name. A name *holder*
-    binds not at all, or one a function binds in the module under
-    ``global``, stands for what *table* says, the scope's table of names.
+    any other binding, stand for nothing the guard can name. A class body
+    that binds the name not at all reads it in the nearest scope around it
+    that is no class body, *around* holding the scopes around *holder*, the
+    module first: there it is read where the class statement runs, which is
+    where its body does. A name no such scope binds, or one a function binds
+    in the module under ``global``, stands for what *table* says, the
+    scope's table of names.
     """
     parts = _dotted(value)
     if parts is None:
         return None
     head = parts[0]
     nodes = bindings_by_name(holder).get(head, [])
+    if not nodes and isinstance(holder, ast.ClassDef) and depth <= _DEPTH:
+        outer = [i for i, s in enumerate(around) if not isinstance(s, ast.ClassDef)]
+        if outer:
+            nearest = outer[-1]
+            return _held_where(
+                value, around[nearest], package, table, depth + 1, around[:nearest]
+            )
     swapped = isinstance(holder, ast.Module) and head in global_bindings(holder)
     if not nodes or swapped or depth > _DEPTH:
         return _resolved(parts, table)
@@ -532,7 +546,7 @@ def _held_where(
             held.add(
                 None
                 if assigned is None or _dotted(assigned) is None
-                else _held_where(assigned, holder, package, table, depth + 1)
+                else _held_where(assigned, holder, package, table, depth + 1, around)
             )
         elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
             held.add(_resolved([head], table))
@@ -559,18 +573,20 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
     if isinstance(tree, ast.Module):
         _rebound_from_inside(tree, package, module)
     found: dict[ast.AST, dict[str, str]] = {tree: module}
-    pending: list[tuple[ast.AST, dict[str, str], dict[str, str], ast.AST]] = [
-        (tree, module, module, tree)
-    ]
+    # Each node to read, with the table around it, the table of the scope it
+    # is written in, that scope, and the scopes around that one.
+    pending: list[
+        tuple[ast.AST, dict[str, str], dict[str, str], ast.AST, tuple[ast.AST, ...]]
+    ] = [(tree, module, module, tree, ())]
     while pending:
-        node, outer, here, holder = pending.pop()
+        node, outer, here, holder, around = pending.pop()
         for child in ast.iter_child_nodes(node):
             if not isinstance(child, _SCOPES):
-                pending.append((child, outer, here, holder))
+                pending.append((child, outer, here, holder, around))
                 continue
-            found[child] = _bound(child, package, outer, module, here, holder)
+            found[child] = _bound(child, package, outer, module, here, holder, around)
             inner = outer if isinstance(child, ast.ClassDef) else found[child]
-            pending.append((child, inner, found[child], child))
+            pending.append((child, inner, found[child], child, (*around, holder)))
     return found
 
 
@@ -968,7 +984,9 @@ def _read_nearer(name: str, call: ast.Call, scope: _Scope) -> str | None:
         held = (
             None
             if value is None
-            else _held_where(value, scope.node, package, scope.aliases)
+            else _held_where(
+                value, scope.node, package, scope.aliases, around=scope.around[:-1]
+            )
         )
         if held is not None:
             return held

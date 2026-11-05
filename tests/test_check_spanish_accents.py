@@ -445,6 +445,29 @@ def test_a_code_span_across_a_line_break_hides_its_word_from_a_page() -> None:
     assert _departures("Un `seno\nx` de 1 kHz", page=True) == []
 
 
+@pytest.mark.parametrize(
+    ("suffix", "found"),
+    [(".md", [("decimación", "diezmado", 6)]), (".mdx", [])],
+)
+def test_a_page_is_read_as_its_own_kind(
+    tmp_path: pathlib.Path, suffix: str, found: list[tuple[str, str, int]]
+) -> None:
+    """A ``.md`` page shows a block of raw HTML as written, backticks and
+    all, so a term between two of them is prose there; an ``.mdx`` page reads
+    the same lines as a code span.
+
+    Every page was read as MDX, so the term in the raw HTML of a ``.md`` page
+    passed as code.
+    """
+    page = tmp_path / f"page{suffix}"
+    page.write_text(
+        "---\ntitle: Prueba\n---\n\n<div>\nLa `decimación` previa\n</div>\n",
+        encoding="utf-8",
+    )
+    offences, _ = csa.check(csa.page_values(page))
+    assert [(o.word, o.spelling, o.line) for o in offences] == found
+
+
 def test_a_value_reads_its_code_spans_as_the_site_reads_them() -> None:
     """A span of two backticks holds a backtick, and an escaped backtick opens
     no span, in a value of a translation table as in a page.

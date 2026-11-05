@@ -765,6 +765,9 @@ class Value(NamedTuple):
     text: str
     page: bool = False
     script: bool = False
+    #: The kind of the page a *page* value is read from, ``"md"`` or ``"mdx"``,
+    #: which says what of it is code and what raw HTML shown as written.
+    kind: str = "mdx"
 
 
 class Offence(NamedTuple):
@@ -824,7 +827,7 @@ def words_needing_marks(text: str) -> list[tuple[str, str]]:
     return found
 
 
-def page_prose(text: str, *, script: bool = False) -> str:
+def page_prose(text: str, *, script: bool = False, kind: str = "mdx") -> str:
     """A page paragraph with its mathematics and its inline code blanked.
 
     The spans are read as the site reads them (:mod:`markdown_spans`): a
@@ -839,13 +842,15 @@ def page_prose(text: str, *, script: bool = False) -> str:
     :param text: The paragraph as written.
     :param script: The page is not Markdown (see :data:`_MARKDOWN`), and
         *text* comes back as written.
+    :param kind: The page's kind, ``"md"`` or ``"mdx"``: a ``.md`` page shows a
+        block of raw HTML as written, its backticks too, and has indented code.
     """
     if script:
         return text
     lines = text.split("\n")
-    code = list(code_lines(lines))
+    code = list(code_lines(lines, kind=kind))
     shown = lines_read_whole(
-        lines, lambda page: blank_inline_spans_by_block(page, kind="mdx")
+        lines, lambda page: blank_inline_spans_by_block(page, kind=kind)
     )
     kept = [
         line if fenced else spoken
@@ -864,6 +869,7 @@ def glossary_departures(
     *,
     page: bool = False,
     script: bool = False,
+    kind: str = "mdx",
     contexts: dict[str, str] | None = None,
     used: set[str] | None = None,
 ) -> list[tuple[str, str, int]]:
@@ -875,6 +881,8 @@ def glossary_departures(
         they come with the accents, from :func:`words_needing_marks`.
     :param script: With *page*, the page is not Markdown and nothing of it
         is blanked (see :data:`_MARKDOWN`).
+    :param kind: With *page*, the page's kind, ``"md"`` or ``"mdx"``
+        (:func:`page_prose`).
     :param contexts: The contexts in which a term of :data:`SENSES` keeps
         its other sense, read for every term the way its own table is read.
         By default each term reads its own table (the trigonometric «seno»,
@@ -884,7 +892,7 @@ def glossary_departures(
     :param used: A set that receives every context that exempted a term.
     :return: ``(as written, glossary term, offset in text)`` in text order.
     """
-    readable = page_prose(text, script=script) if page else prose(text)
+    readable = page_prose(text, script=script, kind=kind) if page else prose(text)
     found: list[tuple[str, str, int]] = []
     for pattern, right in GLOSSARY_PHRASES.items():
         for match in re.finditer(pattern, readable, re.IGNORECASE):
@@ -1092,8 +1100,9 @@ def page_values(path: pathlib.Path) -> list[Value]:
     text = path.read_text(encoding="utf-8")
     name = _named(path)
     script = path.suffix not in _MARKDOWN
+    kind = "md" if path.suffix == ".md" else "mdx"
     return [
-        Value(name, line, match.group(0), page=True, script=script)
+        Value(name, line, match.group(0), page=True, script=script, kind=kind)
         for line, match in _numbered(text, _PARAGRAPH)
         if match.group(0).strip()
     ]
@@ -1214,7 +1223,11 @@ def check(
             for word, right in ([] if value.page else words_needing_marks(value.text))
         ]
         for word, right, offset in glossary_departures(
-            value.text, page=value.page, script=value.script, contexts=contexts
+            value.text,
+            page=value.page,
+            script=value.script,
+            kind=value.kind,
+            contexts=contexts,
         ):
             line = value.line
             if value.page:
@@ -1246,6 +1259,7 @@ def unused_contexts(
             value.text,
             page=value.page,
             script=value.script,
+            kind=value.kind,
             contexts=contexts,
             used=used,
         )

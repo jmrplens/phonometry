@@ -4030,19 +4030,8 @@ def _callers_source(
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
         if getattr(_module_object(caller_module), function.name, None) is not defined:
             continue
-        handed: ast.expr | None = None
-        for keyword in call.keywords:
-            if keyword.arg is None:
-                return _OPEN_SOURCE
-            if keyword.arg == name:
-                handed = keyword.value
-        if handed is None and name in positional:
-            index = positional.index(name)
-            if index < len(call.args) and not any(
-                isinstance(argument, ast.Starred) for argument in call.args[: index + 1]
-            ):
-                handed = call.args[index]
-        if handed is None:
+        handed = _handed_in(call, name, positional)
+        if not isinstance(handed, ast.expr):
             return _OPEN_SOURCE
         found.append(_source(handed, caller, caller_module, depth + 1))
     return _merged(found) if found else _OPEN_SOURCE
@@ -4115,21 +4104,33 @@ def _argument_for(
 ) -> ast.expr | None | str:
     """What a call to a record's constructor hands *field*: the expression,
     ``None`` when the field keeps its default, or ``"**"`` when a spread of
-    keywords may.
+    keywords may (:func:`_handed_in`).
+    """
+    return _handed_in(call, field.name, positional)
+
+
+def _handed_in(
+    call: ast.Call, name: str, positional: list[str]
+) -> ast.expr | None | str:
+    """What *call* hands the parameter *name*: its keyword, wherever it is
+    written, or the argument in its place before any ``*`` argument, which
+    no ``*`` argument or ``**`` mapping may then fill too, since the call
+    would raise; ``"**"`` when a ``*`` argument at or before its place, or a
+    mapping, may hand it anything; ``None`` when nothing does.
     """
     for keyword in call.keywords:
-        if keyword.arg == field.name:
+        if keyword.arg == name:
             return keyword.value
-        if keyword.arg is None:
-            return "**"
-    if field.name in positional:
-        index = positional.index(field.name)
+    if name in positional:
+        index = positional.index(name)
         if any(
             isinstance(argument, ast.Starred) for argument in call.args[: index + 1]
         ):
             return "**"
         if index < len(call.args):
             return call.args[index]
+    if any(keyword.arg is None for keyword in call.keywords):
+        return "**"
     return None
 
 

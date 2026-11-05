@@ -15,6 +15,7 @@ holds.
 from __future__ import annotations
 
 import ast
+import dataclasses
 import enum
 import importlib.util
 import inspect
@@ -972,6 +973,44 @@ def test_a_parameter_spread_from_a_dict_is_followed() -> None:
     """``f(**options)`` hands each key of the dict to the parameter it names."""
     found = ccl.passed_on_evidence(_spreads, "mode")
     assert found == ["handed to time_weighting(mode)"]
+
+
+@dataclass
+class _Built:
+    kind: str
+    other: int = 0
+
+
+@pytest.mark.parametrize(
+    ("call", "handed"),
+    [
+        ("R(**options, kind='a')", "'a'"),
+        ("R(kind='a', **options)", "'a'"),
+        ("R('a', **options)", "'a'"),
+        ("R(*rest, kind='a')", "'a'"),
+        ("R(**options)", "**"),
+        ("R(*rest)", "**"),
+        ("R(other=1)", None),
+    ],
+)
+def test_a_mapping_hands_nothing_to_a_place_an_argument_fills(
+    call: str, handed: str | None
+) -> None:
+    """A place the call fills by its keyword, or in its place before any
+    ``*`` argument, is that argument's alone: a ``**`` mapping that filled it
+    too would make the call raise. Only a place nothing fills is one the
+    mapping, or a ``*`` argument at or before it, may fill.
+
+    The keyword was looked for only until the first mapping, and a mapping
+    anywhere opened the place an argument filled, so a record built with
+    ``kind='a'`` beside ``**options`` read as built with anything.
+    """
+    node = ast.parse(call, mode="eval").body
+    assert isinstance(node, ast.Call)
+    kind = next(f for f in dataclasses.fields(_Built) if f.name == "kind")
+    found = ccl._argument_for(node, kind, ["kind", "other"])
+    shown = ast.unparse(found) if isinstance(found, ast.expr) else found
+    assert shown == handed
 
 
 def test_a_function_the_body_imports_is_followed() -> None:

@@ -19,7 +19,7 @@ para los modelos en forma cerrada de las demás secciones. Los dos calculan
 también en una GPU de NVIDIA con CuPy o con PyTorch cuando se les pide, con
 el mismo código, y cada resultado registra dónde se calculó.
 
-El dominio 2D es una **sección**, y eso tiene una consecuencia que conviene
+El dominio 2D es una **sección transversal**, y eso tiene una consecuencia que conviene
 zanjar antes de que salga ningún número de la simulación: un punto del plano es
 físicamente una fuente lineal infinita, así que las amplitudes caen como la
 raíz cuadrada inversa de la distancia, unos 3 dB por duplicación en lugar de 6.
@@ -49,28 +49,32 @@ directamente a un vídeo.
 reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 Una buena forma de leerla es junto a las páginas de forma cerrada que
-contrasta: las frecuencias modales de
-[acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) reaparecen como
-picos en el espectro simulado de una sala, la pérdida por inserción de
+contrasta: las frecuencias modales que lista la
+[escalera de modos](/phonometry/es/buildings/rooms/room-image-sources/#3-modos-de-una-sala-rectangular)
+de la guía de fuentes imagen reaparecen como picos en el espectro simulado de
+una sala, la pérdida por inserción de
 [efecto del suelo y barreras](/phonometry/es/environment/propagation/ground-barriers/) puede
 rederivarse colocando un obstáculo en el dominio, y la curvatura de rayos de
 [refracción atmosférica](/phonometry/es/environment/propagation/atmospheric-refraction/)
 emerge de un perfil de velocidad del sonido dependiente de la altura. Cuando
 una geometría es demasiado irregular para esos modelos (salas de forma
 extraña, barreras múltiples, suelo de impedancia mixta), la simulación es el
-recurso que aún da una respuesta cuantitativa; cuando existe una forma
-cerrada, prefiérela, y usa la simulación para verificar las hipótesis en
-las que se apoya.
+recurso que queda, y lo que da vale para su sección transversal: patrones de
+interferencia y difracción, tiempos de llegada y frecuencias modales, no
+niveles 3D. Cuando existe una forma cerrada, prefiérela, y usa la simulación
+para verificar las hipótesis en las que se apoya.
 
-Esos contrastes no son solo argumentos: quince de las animaciones de esta
-documentación son salida de estos dos esquemas, y están archivadas en las
-guías cuya física zanjan y no aquí. Los modos de sala creciendo en resonancia y
-fuera de ella aparecen en
+Esos contrastes no son solo argumentos: veinticuatro de las animaciones de
+esta documentación son salida de estos dos esquemas, diecinueve del acústico y
+cinco del elástico, y veintiuna de ellas están archivadas en las guías cuya
+física zanjan y no aquí. Los modos de sala creciendo en resonancia y fuera de
+ella aparecen en
 [acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/) y en
 [predicción de la
 reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/),
 que además lleva la sala de columnas que convierte un solo frente de onda en un
-campo mezclado; la difracción por barrera a dos longitudes de onda, en
+campo mezclado y la misma absorción colocada de dos maneras; la difracción por
+barrera a dos longitudes de onda, en
 [propagación en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/)
 y en [efecto del suelo y
 barreras](/phonometry/es/environment/propagation/ground-barriers/);
@@ -80,37 +84,46 @@ atmosférica](/phonometry/es/environment/propagation/atmospheric-refraction/);
 el patrón de lóbulos del efecto del suelo, en propagación en exteriores y en
 [ruido de aeropuerto](/phonometry/es/aircraft/airport-noise/); los tubos de onda
 estacionaria y de transmisión, en
-[el tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/); los
-paneles QRD y de metadifusor, en
+[el tubo de impedancia](/phonometry/es/materials/absorbers/impedance-tube/); la
+boca de un conducto radiando a dos frecuencias, en
+[medir un silenciador](/phonometry/es/devices/noise-control/silencer-measurement/);
+un conducto excitado por debajo y por encima de su primera frecuencia de
+corte, en [ruido por conductos](/phonometry/es/devices/noise-control/duct-path/);
+los paneles QRD y de metadifusor, en
 [difusores](/phonometry/es/materials/diffusers/diffusers/) y
 [metadifusores](/phonometry/es/materials/diffusers/metadiffusers/); el absorbente
-de ranura, en [absorbentes
-metamateriales](/phonometry/es/materials/absorbers/metamaterial-absorbers/);
-la cámara de expansión, en
+de ranura, en
+[metaabsorbentes](/phonometry/es/materials/absorbers/metamaterial-absorbers/);
+la cámara de expansión y la rama lateral de cuarto de onda, en
 [silenciadores](/phonometry/es/devices/noise-control/silencers/);
 la abertura en la pared, en
 [aislamiento acústico de
 paneles](/phonometry/es/buildings/design/panel-sound-insulation/);
-y el canal SOFAR, en
-[propagación submarina](/phonometry/es/underwater/underwater-propagation/). El
-esquema elástico aporta dos más: el paquete de flexión que entra en una
-unión en L, en
+y el canal SOFAR y el ángulo rasante crítico sobre dos fondos marinos, en
+[propagación submarina](/phonometry/es/underwater/underwater-propagation/).
+Tres de las cinco del esquema elástico están también en guías: el paquete de
+flexión que entra en una unión en L, en
 [transmisión en uniones](/phonometry/es/vibration/structural/junction-transmission/),
-y la placa en coincidencia, en aislamiento acústico de paneles. Las dos aparecen
-también en la página elástica de más abajo, donde se explica el esquema que
-las produjo.
+la placa en coincidencia, en aislamiento acústico de paneles, y una placa
+excitada por debajo y por encima de la coincidencia, en
+[potencia acústica a partir de la vibración](/phonometry/es/devices/emission/vibration-sound-power/).
+Las dos primeras aparecen también en la página elástica de más abajo, donde se
+explica el esquema que las produjo.
 
-Varias de esas guías hacen algo más que ilustrar: ejecutan una **medición
-normalizada entera dentro del dominio**. La guía del tubo de impedancia realiza
-las reducciones de la ISO 10534-2 y la ASTM E2611 sobre un tubo simulado y
-recupera la absorción y la pérdida por transmisión analíticas de la probeta;
-las guías de difusores y metadifusores excitan paneles mallados con una onda
-plana y transforman el campo cercano en una respuesta polar; las guías de
-aislamiento de paneles y de unión entre placas lanzan ondas de flexión en una
-placa y observan cómo suceden la coincidencia y el reparto en la unión. En cada
-caso la simulación hace las veces de laboratorio, que es lo que convierte la
-comparación con la forma cerrada en un ensayo de verdad y no en una
-demostración.
+Varias de esas guías hacen algo más que ilustrar. La guía del tubo de
+impedancia ejecuta una **medición normalizada entera dentro del dominio**: las
+reducciones de la ISO 10534-2 y la ASTM E2611 sobre un tubo simulado recuperan
+la absorción y la pérdida por transmisión analíticas de la probeta, así que ahí
+la simulación hace las veces de laboratorio y la comparación con la forma
+cerrada es un ensayo de verdad y no una demostración. La guía de difusores
+envía una onda plana sobre un panel plano y un difusor de Schroeder mallado y
+lee la energía dispersada en un arco de receptores en campo cercano; la guía de
+metadifusores hace incidir un frente de onda de 2 kHz sobre el metadifusor
+mallado y el QRD al que imita; y la página acústica de más abajo transforma el
+campo cercano del metadifusor mallado en una respuesta polar de campo lejano y
+la superpone a la predicción de la propia biblioteca. Las guías de aislamiento
+de paneles y de unión entre placas lanzan ondas de flexión en una placa y
+observan cómo suceden la coincidencia y el reparto en la unión.
 
 Preparar una ejecución es una cadena, y cada eslabón fija el siguiente. La
 frecuencia más alta que necesitas y la velocidad del sonido **más lenta** de
@@ -118,8 +131,9 @@ cualquier punto del dominio fijan el tamaño de celda, a través de la regla de
 celdas por longitud de onda que impone la dispersión numérica. El tamaño de
 celda y la velocidad **más rápida** fijan después el paso temporal, a través del
 límite de estabilidad de Courant. El dominio tiene que albergar la geometría más
-el margen para las capas absorbentes, que a su vez se dimensionan por la
-frecuencia **más baja**. La ejecución debe durar lo suficiente para que el campo
+el margen para las capas absorbentes, que se dimensionan en **celdas** y no en
+longitudes de onda: veinte celdas son un buen suelo. La ejecución debe durar
+lo suficiente para que el campo
 atraviese el dominio, y para una respuesta en régimen permanente lo suficiente
 para que el transitorio se haya ido antes de que se abra la ventana de análisis.
 El coste es celdas por pasos, así que partir por la mitad el tamaño de celda
@@ -150,13 +164,15 @@ dice en su propia apertura.
   de CuPy, las cotas publicadas de torch y las instantáneas diezmadas.
 - [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
   la ejecución de cualquiera de los dos esquemas en otra máquina por SSH, en
-  un nodo Docker construido con la imagen del repositorio o en un entorno de
-  Python, con GPU o sin ella: el fichero de hosts que nombra un nodo, lo que
+  un nodo Docker que ejecuta la imagen construida con el Dockerfile del
+  repositorio o en un entorno de Python, con GPU o sin ella: el fichero de
+  hosts que nombra un nodo, lo que
   comprueba cada lado, los errores y la vuelta a NumPy, el progreso y los
   tiempos límite, la seguridad en los dos sentidos y cuándo una ejecución
   allí da los números de una ejecución aquí.
-- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
-  la ejecución de cualquiera de los dos esquemas escrita directamente en un
+- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/)
+  (en la sección de archivos): la ejecución de cualquiera de los dos
+  esquemas escrita directamente en un
   WebM, un MP4 o un GIF a medida que se calcula, aquí o en un nodo, sin
   guardar sus instantáneas.
 - [Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo](/phonometry/es/simulation/where-it-runs/):
@@ -168,8 +184,8 @@ dice en su propia apertura.
 
 <Scope>
 <ScopeClaim status="not-covered">
-**Dos dimensiones, y no hay forma de esquivarlo.** Todo lo que una sección 2D
-no puede decir de una sala 3D, no lo dice ninguno de los dos esquemas, y la
+**Dos dimensiones, y no hay forma de esquivarlo.** Todo lo que una sección
+transversal 2D no puede decir de una sala 3D, no lo dice ninguno de los dos esquemas, y la
 divergencia cilíndrica de más arriba es solo la consecuencia más visible. El
 contorno abierto es una capa absorbente de rampa cuadrática (el precursor
 sencillo de una capa perfectamente adaptada, no una PML), así que la
@@ -187,9 +203,12 @@ así que no se puede introducir un factor de pérdidas del material.
 
 <ScopeClaim status="not-covered">
 Y aquí no hay ningún paquete de acústica de salas. No hay importador de
-geometría, ni biblioteca de materiales, ni trazador de rayos, ni auralización,
-ni cálculo 3D: los obstáculos se rasterizan sobre la malla a partir de formas
-que defines tú, y la salida es un campo que analizas tú.
+geometría, ni trazador de rayos, ni auralización, ni cálculo 3D: los obstáculos
+se rasterizan sobre la malla a partir de formas que defines tú, un medio son
+los números o mapas que le das (el esquema elástico admite además uno de los
+materiales que distribuye o la
+[fila de catálogo](/phonometry/es/simulation/elastic-waves/#un-solido-de-un-catalogo) de un sólido), y
+la salida es un campo que analizas tú.
 </ScopeClaim>
 </Scope>
 
@@ -201,8 +220,8 @@ nivel de [Análisis de señal](/phonometry/es/signals/), con [Construye un
 sonómetro](/phonometry/es/signals/sound-level-meter/) recorriendo esa cadena de
 principio a fin en una sola página ejecutable. No hay página de referencia de
 teoría para los dos esquemas; las derivaciones, las condiciones de
-estabilidad y los oráculos analíticos se quedan dentro de las dos guías de
-arriba.
+estabilidad y los oráculos analíticos se quedan dentro de las guías acústica
+y elástica de arriba.
 
 Si has llegado aquí desde una búsqueda y quieres la forma de la biblioteca
 entera, [¿Qué necesitas medir?](/phonometry/es/start/tasks/) la indexa por el

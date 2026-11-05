@@ -57,7 +57,8 @@ source that looks right and renders wrong.
    centred display equation ships as a small one in the run of text.
 
 Only that opening form is a hazard: a ``$$`` alone on its line is exactly what
-the convention wants, opening and closing.
+the convention wants, opening and closing, and a formula with text after its
+closing run is a paragraph that holds inline maths, which swallows nothing.
 
 5. **A less-than sign glued to what follows it, in MDX.** MDX reads ``<`` as
    the start of a JSX tag, and a tag name has to start with a letter. So a
@@ -100,6 +101,15 @@ rule but the fourth reads the opening line, and none reads what follows it
 until the block closes: like code, it is not markdown. Fenced code is not
 read at all, a ``math`` fence included.
 
+The marks of a quotation and the marker of a list item are not the text of a
+line. Every rule reads a line by the walk of its page
+(:func:`markdown_fences.page_lines`), which keeps what stands open at it: inline
+maths a quotation wraps is not cut off, a line that cannot interrupt a paragraph
+cuts nothing, and an underline is one only in the paragraph's own containers. In
+a shallower one a line of ``=`` or two hyphens is a line of the paragraph, and a
+line of three hyphens a rule. The page's kind decides what indentation and a tag
+mean, so an ``.mdx`` page and a ``.md`` one are each read as the site reads them.
+
 The YAML frontmatter at the top of a page is not markdown: it is read as
 data, and Astro blanks it before MDX compiles the body. No rule reads it, so
 a ``description`` may say "<0,02 dB".
@@ -118,10 +128,12 @@ import pathlib
 import re
 import sys
 
-from markdown_fences import code_lines
+from markdown_fences import NOT_INLINE_ROLES, PageLine, page_lines
 from markdown_spans import (
+    block_starts,
     drop_inline_spans,
     drop_inline_spans_by_block,
+    inline_spans,
     lines_read_whole,
 )
 
@@ -135,11 +147,10 @@ _ROOTS = (
 )
 _SKIP = ("reference/api/", "superpowers/")
 
-#: The markers that open a new CommonMark block at the start of a line.
-_BLOCK_MARKER = r"[-*+]\s|>|#{1,6}\s|\d{1,9}[.)]\s|\||```|~~~"
-
-#: A line that opens a new CommonMark block rather than continuing a paragraph.
-_BLOCK = re.compile(rf"^\s{{0,3}}(?:{_BLOCK_MARKER})")
+#: What the reading of an MDX page leaves at the start of a line that opens a
+#: block, so that nothing in a paragraph crosses it. A private-use character,
+#: which no line of a page holds.
+_BLOCK_OPENS = "\ue001"
 
 #: ``>`` opening a line with content after it: a wrapped comparison operator,
 #: unless the paragraph deliberately starts a quotation, which is always
@@ -157,24 +168,9 @@ _ANCHOR = re.compile(r"\]\(([^)\s#]*)#([^)\s]+)\)")
 #: An address with a scheme: a link off this site, whose ids are not ours.
 _EXTERNAL = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
-#: An opening display-maths fence with the formula on the same line. The tail
-#: is the fence's meta, so the block does not end where the author thinks.
-_MATH_META = re.compile(r"^[ \t]*\$\$\s*\S")
-
-#: A line of nothing but ``=`` or ``-``: a setext underline when text is above it.
-_SETEXT = re.compile(r"^[ \t]*(?:=+|-+)[ \t]*$")
-
-#: A line that opens display maths, as remark-math reads it: a run of two
-#: ``$`` or more and a meta with no ``$`` in it. A line with another ``$``
-#: after the run opens nothing: it is a paragraph that holds inline maths.
-_DISPLAY_OPEN = re.compile(r"^[ \t]*(\${2,})[^$]*$")
-
-#: A line that may close display maths: a run of ``$`` and nothing after it
-#: but blanks. It closes the block when the run is as long as the opening one.
-_DISPLAY_CLOSE = re.compile(r"^[ \t]*(\${2,})[ \t]*$")
-
 #: The line that opens and closes the YAML frontmatter, and nothing else.
 _FRONTMATTER = "---"
+
 
 #: In MDX prose, a ``<`` followed by a character no JSX tag can start with:
 #: MDX still reads it as a tag and the build fails. An escaped ``\<`` never
@@ -182,8 +178,8 @@ _FRONTMATTER = "---"
 _MDX_LESS_THAN = re.compile(r"<(?=[^A-Za-z/!_$>\s])")
 
 #: One character of a paragraph: anything but a line break, or a line break
-#: that neither leaves a blank line nor starts a line that opens a block.
-_IN_PARAGRAPH = rf"(?:[^\n]|\n(?![ \t]*\n)(?![ \t]{{0,3}}(?:{_BLOCK_MARKER})))"
+#: that does not start a line that opens a block, as the walk of the page says.
+_IN_PARAGRAPH = rf"(?:[^\n]|\n(?!{_BLOCK_OPENS}))"
 
 
 def _span(name: str, delimiter: str) -> str:
@@ -216,7 +212,7 @@ def _jsx_tag(char: str) -> str:
 #: quoted values, and a run of backticks or dollars that nothing closes is
 #: plain text.
 _MDX_READING = re.compile(
-    rf"(?P<tag>^[ \t]*{_jsx_tag(r'[\s\S]')}(?=[ \t]*$)|{_jsx_tag(_IN_PARAGRAPH)})"
+    rf"(?P<tag>^{_BLOCK_OPENS}?[ \t]*{_jsx_tag(r'[\s\S]')}(?=[ \t]*$)|{_jsx_tag(_IN_PARAGRAPH)})"
     rf"|(?P<literal>\\[!-/:-@\[-`{{-~]|{_span('code', '`')}|{_span('maths', '$')})"
     r"|`+|\$+",
     re.MULTILINE,
@@ -271,31 +267,6 @@ def _body_start(lines: list[str]) -> int:
     return 0
 
 
-def _display_maths(lines: list[str], code: list[bool]) -> list[str]:
-    """Each line's part in display maths: ``"open"``, ``"maths"`` or ``"prose"``.
-
-    ``"maths"`` is a line of the formula or the line that closes it. A line of
-    code opens nothing, and a block never closed runs to the end of the page,
-    as remark-math has it.
-    """
-    parts: list[str] = []
-    opening = ""
-    for line, is_code in zip(lines, code, strict=True):
-        if opening:
-            closing = _DISPLAY_CLOSE.match(line)
-            if closing and len(closing.group(1)) >= len(opening):
-                opening = ""
-            parts.append("maths")
-            continue
-        found = None if is_code else _DISPLAY_OPEN.match(line)
-        if found is None:
-            parts.append("prose")
-        else:
-            opening = found.group(1)
-            parts.append("open")
-    return parts
-
-
 def _mdx_prose(lines: list[str], start: int) -> list[str]:
     """The lines as MDX reads their prose, everything else blanked.
 
@@ -306,14 +277,21 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
     dropping keeps every character on its line and column.
     """
     body = lines[start:]
-    code = list(code_lines(body))
     kept = [""] * start + [
-        line if not is_code and part == "prose" else ""
-        for line, is_code, part in zip(
-            body, code, _display_maths(body, code), strict=True
+        "" if line.role in NOT_INLINE_ROLES else line.text
+        for line in page_lines(body, kind="mdx")
+    ]
+    opens = block_starts([""] * start + body, kind="mdx")
+    marked = [
+        _BLOCK_OPENS + line if opening else line
+        for line, opening in zip(kept, opens, strict=True)
+    ]
+    return [
+        line.replace(_BLOCK_OPENS, "")
+        for line in lines_read_whole(
+            marked, lambda text: _MDX_READING.sub(_as_mdx_reads_it, text)
         )
     ]
-    return lines_read_whole(kept, lambda text: _MDX_READING.sub(_as_mdx_reads_it, text))
 
 
 def _less_than_problems(rel: str, lines: list[str], start: int) -> list[str]:
@@ -329,15 +307,23 @@ def _less_than_problems(rel: str, lines: list[str], start: int) -> list[str]:
 
 
 def _cut_maths_problems(
-    where: str, line: str, line_before: int, *, open_math: bool
+    where: str, line: PageLine, line_before: int, *, open_math: bool, opens_block: bool
 ) -> list[str]:
-    """Rule 1: inline maths still open when a block marker ends the paragraph."""
-    if not (open_math and _BLOCK.match(line)):
+    """Rule 1: inline maths still open when a block marker ends the paragraph.
+
+    A setext underline has a rule of its own, the sixth.
+
+    :param opens_block: Whether the line opens a block, as the site reads it, a
+        later line of a quotation's paragraph not being one.
+    """
+    if not (open_math and opens_block and line.text.strip()):
+        return []
+    if line.role == "underline":
         return []
     return [
         f"{where}: inline maths opened on line {line_before} is cut off by a "
         f"block marker; rewrap so the line does not start with "
-        f"{line.lstrip()[:2]!r}"
+        f"{line.text.lstrip()[:2]!r}"
     ]
 
 
@@ -365,89 +351,103 @@ def _anchor_problems(where: str, line: str) -> list[str]:
     ]
 
 
-def _math_meta_problems(where: str, line: str) -> list[str]:
-    """Rule 4: an opening ``$$`` with the formula on the same line."""
-    if not _MATH_META.match(line):
-        return []
-    if line.rstrip().endswith("$$"):
+def _closes_on_its_line(rest: str) -> bool:
+    """Whether a line past its marks is one display formula, ``$$x$$`` and no more."""
+    shape = rest.strip()
+    return shape.startswith("$$") and inline_spans(shape, "$")[:1] == [(0, len(shape))]
+
+
+def _math_meta_problems(where: str, line: PageLine) -> list[str]:
+    """Rule 4: a formula on the line of an opening ``$$``, past any marks.
+
+    Only two lines are that: one the walk reads as opening a block with a meta,
+    and a formula closed at the line's end. Text after the closing run makes the
+    line a paragraph that holds inline maths, which swallows nothing.
+    """
+    if line.role == "maths-open" and line.info:
+        consequence = (
+            "Nothing closes it until a line that is exactly '$$', so it "
+            "swallows the prose in between and breaks the build far from here."
+        )
+    elif line.role in ("paragraph", "text") and _closes_on_its_line(line.rest):
         consequence = (
             "It closes on this line, so it ships as inline maths instead of a "
             "centred display block."
         )
     else:
-        consequence = (
-            "Nothing closes it until a line that is exactly '$$', so it "
-            "swallows the prose in between and breaks the build far from here."
-        )
+        return []
     return [
-        f"{where}: {line.strip()[:40]!r} puts the formula on the opening "
+        f"{where}: {line.text.strip()[:40]!r} puts the formula on the opening "
         f"'$$', where it is read as the fence's meta, not as maths. "
         f"{consequence} Put '$$' alone on its own line, above and below."
     ]
 
 
-def _setext_problems(where: str, line: str, before: str) -> list[str]:
-    """Rule 6: a line of ``=`` or ``-`` that turns the text above into a heading."""
-    if not (_SETEXT.match(line) and before.strip()):
+def _setext_problems(where: str, line: PageLine) -> list[str]:
+    """Rule 6: a line of ``=`` or ``-`` that turns the text above into a heading.
+
+    The walk of the page says which line is one: it stands in the paragraph's own
+    containers, since an underline is never lazy. In a shallower one a line of
+    ``=`` or two hyphens is a line of the paragraph, and a line of three hyphens
+    a rule of its own.
+    """
+    if line.role != "underline":
         return []
-    # A fence line above is code, and the caller does not ask about it; what is
-    # left to tell apart is a heading, a table row, a tag and a rule of its own.
-    if before.lstrip().startswith(("#", "|", "<")) or _SETEXT.match(before):
-        return []
-    level = "an h1" if "=" in line else "an h2"
+    mark = line.rest.strip()[0]
+    level = "an h1" if mark == "=" else "an h2"
     return [
-        f"{where}: a line of only {line.strip()[0]!r} under text is a setext "
+        f"{where}: a line of only {mark!r} under text is a setext "
         f"underline, so the text above becomes {level}; rewrap so the line "
         f"carries text, or leave a blank line before a thematic break"
     ]
 
 
-def _maths_left_open(line: str, *, open_math: bool) -> bool:
+def _maths_left_open(line: str, *, open_math: bool, opens_block: bool) -> bool:
     """Whether an inline ``$`` is still open once this line is read."""
-    if not line.strip() or _BLOCK.match(line):
+    if opens_block:
         open_math = False
     if _unescaped_dollars(line) % 2 == 1:
         open_math = not open_math
     return open_math
 
 
-def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
+def _markdown_problems(
+    rel: str, lines: list[str], start: int, *, kind: str
+) -> list[str]:
     """Rules 1 to 4 and 6, which read the page line by line as CommonMark does.
 
     Code and display maths are not markdown, so no rule reads them, but the
     fourth reads the line that opens a display block, which is its business.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
     problems: list[str] = []
     open_math = False
-    body = lines[start:]
-    code = list(code_lines(body))
-    parts = [""] * start + [
-        "code" if is_code else part
-        for is_code, part in zip(code, _display_maths(body, code), strict=True)
-    ]
+    read = list(page_lines(lines[start:], kind=kind))
+    page = [""] * start + lines[start:]
     shown = lines_read_whole(
-        [
-            line if part == "prose" else ""
-            for line, part in zip(lines, parts, strict=True)
-        ],
-        drop_inline_spans_by_block,
+        page, lambda text: drop_inline_spans_by_block(text, kind=kind)
     )
-    for index in range(start, len(lines)):
-        line = lines[index]
+    opens_block = block_starts(page, kind=kind)
+    for offset, line in enumerate(read):
+        index = start + offset
         where = f"{rel}:{index + 1}"
-        if parts[index] == "open":
-            problems.extend(_math_meta_problems(where, line))
-        if parts[index] != "prose":
+        problems.extend(_math_meta_problems(where, line))
+        if line.role in NOT_INLINE_ROLES:
             open_math = False
             continue
         before = lines[index - 1] if index else ""
-        problems.extend(_cut_maths_problems(where, line, index, open_math=open_math))
-        problems.extend(_wrapped_quote_problems(where, line, before))
-        problems.extend(_anchor_problems(where, line))
-        problems.extend(_math_meta_problems(where, line))
-        if index > start and parts[index - 1] == "prose":
-            problems.extend(_setext_problems(where, line, before))
-        open_math = _maths_left_open(shown[index], open_math=open_math)
+        problems.extend(
+            _cut_maths_problems(
+                where, line, index, open_math=open_math, opens_block=opens_block[index]
+            )
+        )
+        problems.extend(_wrapped_quote_problems(where, line.text, before))
+        problems.extend(_anchor_problems(where, line.text))
+        problems.extend(_setext_problems(where, line))
+        open_math = _maths_left_open(
+            shown[index], open_math=open_math, opens_block=opens_block[index]
+        )
     return problems
 
 
@@ -455,8 +455,9 @@ def check_text(text: str, rel: str) -> list[str]:
     """Every hazard of one page; ``rel`` names it, and an ``.mdx`` one is MDX."""
     lines = text.splitlines()
     start = _body_start(lines)
-    problems = _markdown_problems(rel, lines, start)
-    if rel.endswith(".mdx"):
+    mdx = rel.endswith(".mdx")
+    problems = _markdown_problems(rel, lines, start, kind="mdx" if mdx else "md")
+    if mdx:
         problems.extend(_less_than_problems(rel, lines, start))
     return problems
 

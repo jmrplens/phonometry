@@ -500,7 +500,7 @@ result = octave_filter(signal, sample_rate)  # runs, and fails the gate
 <a id="f23"></a>
 ### F23. Read a page's fences through `scripts/markdown_fences.py`, never by hand
 
-**Why.** Each script that worked out fences its own way (a flag flipped on any line starting with three backticks, a three-character slice, a regex running to the next backticks) read a page with a fence inside another inside out, and one never saw a tilde fence. A fence closes only on its own marker, at least as long as the opener, with nothing after it (CommonMark 0.31.2, 4.5).
+**Why.** Each script that worked out fences its own way (a flag flipped on any line starting with three backticks, a three-character slice, a regex running to the next backticks) read a page with a fence inside another inside out, and one never saw a tilde fence. A fence closes only on its own marker, at least as long as the opener, with nothing after it (CommonMark 0.31.2, 4.5). Whether a line opens a block depends on the lines above it, so the module walks the page once (`page_lines`), keeping the quotations, the list items and the paragraph open at each line; a reader that knows the page's kind says it (`kind="md"`), since four columns of indentation and a tag mean something else on an `.mdx` page.
 
 **Do**
 

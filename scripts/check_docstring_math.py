@@ -260,13 +260,13 @@ def _page_bare_scripts(path: Path) -> list[tuple[int, str, str]]:
     """Every refused bare script in the prose of one page: line, command, passage."""
     found: list[tuple[int, str, str]] = []
     lines = path.read_text(encoding="utf-8").splitlines()
-    code_flags = list(code_lines(lines))
+    kind = "mdx" if path.suffix == ".mdx" else "md"
+    code_flags = list(code_lines(lines, kind=kind))
     # The inline code spans, read by markdown_spans over the lines of their
     # paragraph: a backtick behind a backslash opens none, and a span may
     # cross a line break.
     shown = lines_read_whole(
-        ["" if code else line for line, code in zip(lines, code_flags, strict=True)],
-        drop_inline_spans_by_block,
+        lines, lambda page: drop_inline_spans_by_block(page, kind=kind)
     )
     for number, (prose, code) in enumerate(
         zip(shown, code_flags, strict=True), start=1

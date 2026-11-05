@@ -14,18 +14,16 @@ the quoted title in between, where a line-scoped match sees an opening mark
 and no closing one and calls the dash prose. The tests below fix that reading
 together with the readings that must not move: an attribute value and a YAML
 value are the page's own prose and are scanned, a quotation that never closes
-stops at the end of its paragraph, and everything the gate caught before it
-learned about wrapping it still catches.
+in its paragraph quotes nothing, and everything the gate caught before it learned
+about wrapping it still catches.
 """
 
 from __future__ import annotations
 
 import pathlib
 import sys
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -114,13 +112,13 @@ def test_dash_after_a_fence_shown_inside_another_is_prose() -> None:
 
 
 def test_dash_alone_in_a_table_cell_is_an_empty_cell() -> None:
-    assert ced.markdown_hits("| a | — | b |\n") == []
+    assert ced.markdown_hits("| a | — | b |\n|---|---|---|\n") == []
 
 
-def test_an_unclosed_quotation_stops_at_the_end_of_its_paragraph() -> None:
-    """A quotation mark with no partner must not silence the whole page."""
+def test_an_unclosed_quotation_quotes_nothing() -> None:
+    """A quotation mark with no partner silences neither the page nor its paragraph."""
     text = 'He said "Table 1 — Maximum\n\nThe level rises — and falls.\n'
-    assert ced.markdown_hits(text) == [3]
+    assert ced.markdown_hits(text) == [1, 3]
 
 
 def test_dash_in_a_docstring_is_refused() -> None:
@@ -163,6 +161,610 @@ def test_a_citation_inside_a_caption_still_carries_its_own_dash() -> None:
     """
     text = '*Read against "Acoustics — Part 2: rooms", the curve is flat.*\n'
     assert ced.markdown_hits(text) == []
+
+
+# Maths: what sits between dollar signs is read by remark-math, not as prose, so
+# an asterisk there is a superscript star and a quotation mark a symbol. The
+# guard toggled its italic state on every asterisk of the paragraph, and the
+# star of $DI_i^*$ and of $F v^*$ opened a span that ran on to the paragraph's
+# end, where three dashes of the published guides passed as titles in italics.
+
+
+def test_an_asterisk_in_math_opens_no_italic_span() -> None:
+    """The apparent directivity index, as the sound power guide writes it."""
+    text = (
+        "$DI_i^*$ is the apparent directivity index, per position\n"
+        "*and* per band. A machine does not have a broken array — it has a\n"
+        "directivity the positions cannot resolve.\n"
+    )
+    assert ced.markdown_hits(text) == [2]
+
+
+def test_an_asterisk_in_math_does_not_run_on_through_a_list() -> None:
+    """A list with no blank line between its items is one paragraph to the guard."""
+    text = (
+        "- Form $\\tfrac{1}{2}\\operatorname{Re}\\{F v^*\\}$ at the drive point.\n"
+        "- The band must hold enough modes — which is what the densities are for.\n"
+    )
+    assert ced.markdown_hits(text) == [2]
+
+
+def test_an_asterisk_in_a_display_math_block_opens_no_italic_span() -> None:
+    text = "$$\nv^* = v_x - i v_y\n$$\nThe level rises — and falls.\n"
+    assert ced.markdown_hits(text) == [4]
+
+
+def test_a_display_math_block_is_maths_whatever_its_lines_start_with() -> None:
+    """A line of a ``$$`` block that opens like a block of markdown is still maths.
+
+    remark-math reads the block as flow maths, as a fenced code block is
+    read, so a line of it that opens with ``+``, ``-``, ``|``, ``>``, a
+    heading mark or ``1.`` starts no list, table, quote or heading. The guard
+    read such a line as the start of a new block, the ``$$`` fences never
+    paired, and the asterisk or the quotation mark on the line opened a span
+    that hid the dash of the prose below.
+    """
+    for opening in ("+ ", "- ", "|", "> ", "# ", "1. "):
+        assert ced.markdown_hits(
+            f"$$\nL = a\n{opening}v^* b\n$$\nThe level rises — and falls.\n"
+        ) == [5], opening
+    modulus = "$$\n|v^*|^2 = 1\n$$\nThe level rises — and falls.\n"
+    assert ced.markdown_hits(modulus) == [4]
+    ditto = '$$\n+ \\text{"} b\n$$\nThe level rises — and falls.\n'
+    assert ced.markdown_hits(ditto) == [4]
+
+
+def test_a_dash_in_a_display_math_block_is_still_read() -> None:
+    """The site shows a dash written in maths, whatever the line opens with."""
+    assert ced.markdown_hits("$$\n+ a — b\n$$\n") == [2]
+    assert ced.markdown_hits("$$ —\nx\n$$\n") == [1]
+
+
+def test_nothing_pairs_across_a_display_math_block() -> None:
+    """A ``$$`` fence ends the paragraph before it, as a code fence does.
+
+    The block was read as a mark on the lines of the paragraph, so a backtick,
+    an asterisk or a quotation mark on one side paired with its partner on
+    the other, and the dash between them was taken for code or for a title.
+    """
+    assert ced.markdown_hits("First `a — b\n$$\nx\n$$\nc` after.\n") == [1]
+    assert ced.markdown_hits("An *open\n$$\nx\n$$\nprose — here* end.\n") == [5]
+    assert ced.markdown_hits('A "quote\n$$\nx\n$$\nprose — here" end.\n') == [5]
+
+
+def test_nothing_is_carried_across_a_fenced_block() -> None:
+    """The same for a code fence: the reader stepped over it with its state open."""
+    assert ced.markdown_hits("An *open\n```\nx\n```\nprose — here* end.\n") == [5]
+    assert ced.markdown_hits('A "quote\n```\nx\n```\nprose — here" end.\n') == [5]
+
+
+def test_the_paragraph_after_a_block_is_read_afresh() -> None:
+    """A caption right under a block opens a paragraph, so it is a caption."""
+    assert ced.markdown_hits("$$\nx\n$$\n*A caption — with a dash.*\n") == [4]
+    assert ced.markdown_hits("Text.\n```\nx\n```\n*A caption — with a dash.*\n") == [5]
+
+
+def test_nothing_is_carried_from_one_block_to_the_next() -> None:
+    """A list item, a heading and a table row are blocks to the site.
+
+    An italic span or a quotation left open in one does not close in the
+    next, so the marks there are shown as written and the dash after them is
+    the page's own.
+    """
+    assert ced.markdown_hits("- An *open\n- prose — here* end.\n") == [2]
+    assert ced.markdown_hits('- A "quote\n- prose — here" end.\n') == [2]
+    assert ced.markdown_hits("# A *heading\nprose — here* end.\n") == [2]
+    assert ced.markdown_hits("| a *b |\n|---|\n| prose — here* |\n") == [3]
+    assert ced.markdown_hits("> - An *open\n> - prose — here* end.\n") == [2]
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("a * b — c * d\n", [1], id="a star between blanks"),
+        pytest.param("2 * 3 — x\n", [1], id="a multiplication"),
+        pytest.param("a ***\nb — c\n", [2], id="three stars at a line's end"),
+        pytest.param("a *\nb — c* d\n", [2], id="a star a line break follows"),
+        pytest.param("a *b — c * d\n", [1], id="a star nothing closes"),
+        pytest.param("a *b — c\nd — e\n", [1, 2], id="over the lines of the paragraph"),
+        pytest.param("a *b — c\n\nd — e* f\n", [1, 3], id="and across a blank line"),
+        pytest.param('a "b — c\nd — e\n', [1, 2], id="a quote nothing closes"),
+        pytest.param("a «b — c\n\nd» e\n", [1], id="guillemets nothing closes"),
+        pytest.param("- a “b — c\n- d\n", [1], id="curly quotes on an item"),
+        pytest.param("a *b — c\n", [1], id="to the end of the page"),
+        pytest.param("a *b — c* d\n", [], id="a span"),
+        pytest.param("x *a\nb — c* d\n", [], id="a span over two lines"),
+        pytest.param("a*b — c*d\n", [], id="a span inside a word"),
+        pytest.param("a ***b — c*** d\n", [], id="a span in bold"),
+        pytest.param('a "b\nc — d" e\n', [], id="a quotation over two lines"),
+        pytest.param("a *b — c* d *e — f\n", [1], id="a span, then a star left open"),
+        pytest.param("<div>\nx *a — b* c\n</div>\n", [2], id="a raw block's stars"),
+        pytest.param("a *b — c *d e* f\n", [1], id="a closing star takes the nearest"),
+        pytest.param("a *b — c\nd *e f* g\n", [1], id="and over a line"),
+    ],
+)
+def test_a_mark_that_closes_nothing_exempts_nothing(text: str, hits: list[int]) -> None:
+    """The site shows a star or a quote left open as written, and the dash after it.
+
+    The reader took any star for a mark and carried it open to the end of the
+    block, so a multiplication hid the rest of its paragraph.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("| a | — |\nb\n", [1], id="a pipe line with no table"),
+        pytest.param("| a | — |\n", [1], id="alone"),
+        pytest.param("| a | — |\n|---|---|\n", [], id="a cell of a table"),
+        pytest.param("a | —\n--|--\n", [], id="a cell with no outer pipes"),
+        pytest.param("> | a | — |\n> |---|---|\n", [], id="in a quotation"),
+        pytest.param("- | a | — |\n  |---|---|\n", [], id="in an item"),
+        pytest.param("| a |\n|---|\n— / h\n", [], id="a row with no pipes"),
+    ],
+)
+def test_an_empty_cell_is_one_only_in_a_table(text: str, hits: list[int]) -> None:
+    """A pipe with no delimiter row under it is text, and so is what it fills."""
+    assert ced.markdown_hits(text) == hits
+    assert ced.markdown_double_hyphen_hits(text.replace("—", "--")) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("a\n--\n", [], id="under a paragraph"),
+        pytest.param("- a\n  --\n", [], id="in its item"),
+        pytest.param("> a\n--\nb\n", [2], id="a lazy line of the paragraph"),
+        pytest.param("- a\n--\nb\n", [2], id="out of the item"),
+    ],
+)
+def test_a_double_hyphen_that_underlines_is_published_by_nothing(
+    text: str, hits: list[int]
+) -> None:
+    assert ced.markdown_double_hyphen_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("- `x` - y\n", [1], id="an item"),
+        pytest.param("a\n1. `x` - y\n", [2], id="a marker that can interrupt"),
+        pytest.param("a\n2. `x` - y\n", [], id="a marker that cannot"),
+        pytest.param("- a\n  2. `x` - y\n", [], id="and in an item"),
+        pytest.param("> a\n2. `x` - y\n", [2], id="where the container has ended"),
+        pytest.param("- - `x` - y\n", [1], id="a nested item"),
+        pytest.param("> - - `x` - y\n", [1], id="and in a quotation"),
+        pytest.param("- > `x` - y\n", [], id="a quotation, no item's head"),
+        pytest.param("    - `x` - y\n", [], id="indented code"),
+    ],
+)
+def test_an_item_head_is_read_where_the_walk_says_an_item_opens(
+    text: str, hits: list[int]
+) -> None:
+    assert ced.markdown_bullet_hyphen_hits(text) == hits
+
+
+def test_a_title_stays_exempt_over_the_lines_of_its_own_block() -> None:
+    """What wraps inside one block is still read whole."""
+    assert (
+        ced.markdown_hits("- See *Acoustics — Rooms,\n  wrapped — here* now.\n") == []
+    )
+    assert (
+        ced.markdown_hits("> See *Acoustics — Rooms,\n> wrapped — here* now.\n") == []
+    )
+    assert (
+        ced.markdown_hits('> See "Acoustics — Rooms,\n> wrapped — here" now.\n') == []
+    )
+
+
+def test_a_quotation_mark_in_math_opens_no_quotation() -> None:
+    text = 'The ditto $\\text{"}$ repeats the row, and the level rises — and falls.\n'
+    assert ced.markdown_hits(text) == [1]
+
+
+def test_a_year_in_math_or_code_opens_no_bibliographic_entry() -> None:
+    """A level at 1000 Hz in parentheses is not an author's year.
+
+    The guard took a list item with four digits in parentheses for the first
+    line of a reference, and exempted every dash of the item as a reproduced
+    title, wherever the digits stood.
+    """
+    assert ced.markdown_hits("- At $L(1000)$ the level rises — and falls.\n") == [1]
+    assert ced.markdown_hits(
+        "- The call `band(2000)` returns — wrongly — a list.\n"
+    ) == [1]
+
+
+def test_a_dash_written_inside_math_is_still_read() -> None:
+    """The site shows a dash between dollar signs, so the guard reads it there.
+
+    Two dollar signs are maths to the site even where they were meant as
+    money, so taking maths out of the reading whole would hide the sentence
+    between them.
+    """
+    assert ced.markdown_hits("It costs $5 — or $6 with the case.\n") == [1]
+
+
+def test_no_title_exemption_covers_a_dash_in_maths() -> None:
+    """A dash in maths is shown whatever stands around it, so it is always read.
+
+    What a maths span left in the text was the dash itself, which the exempt
+    readings could not tell from a dash of the prose: a quotation took it
+    out, and a part number in the prose after it read as a standard's title.
+    """
+    assert ced.markdown_hits('"A $a — b$"\n') == [1]
+    assert ced.markdown_hits("«A $a — b$»\n") == [1]
+    assert ced.markdown_hits('A "wrapped $a\n— b$ quotation"\n') == [2]
+    assert ced.markdown_hits("A level $a — b$ Part 3 of it.\n") == [1]
+    assert ced.markdown_hits("A level $a —$Part 3 of it.\n") == [1]
+    assert ced.markdown_hits("A *title $a — b$* here.\n") == [1]
+    assert ced.markdown_hits("- Author (2001) $a — b$\n") == [1]
+    assert ced.markdown_hits("- Author (2001) x\n  $a — b$ y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  $$\n  a — b\n  $$\n") == [3]
+    assert ced.markdown_hits("title: $a — b$\n") == [1]
+
+
+def test_a_dash_in_maths_inside_a_caption_is_read() -> None:
+    assert ced.markdown_hits("*The ratio $a — b$ holds across the band.*\n") == [1]
+
+
+def test_the_exemptions_still_hold_for_the_prose_beside_maths() -> None:
+    assert ced.markdown_hits('"Acoustics — Rooms" and $a$ here.\n') == []
+    assert ced.markdown_hits("See *Acoustics — Rooms* and $a$ here.\n") == []
+    assert ced.markdown_hits("ISO 1 — Part 3: rooms, and $a$ here.\n") == []
+    assert ced.markdown_hits("- Author (2001) Acoustics — Rooms, $a$.\n") == []
+
+
+def test_only_a_title_of_the_frontmatter_is_a_title() -> None:
+    """Under the frontmatter ``title:`` is a word of the page's own prose."""
+    assert ced.markdown_hits("---\ntitle: Acoustics — Rooms\n---\n") == []
+    assert ced.markdown_hits("---\nhead:\n  - title: A — B\n---\n") == []
+    assert ced.markdown_hits("---\na: b\n---\ntitle: A — B\n") == [4]
+    assert ced.markdown_hits("Text.\n\ntitle: The level rises — and falls.\n") == [3]
+
+
+def test_the_frontmatter_holds_no_span() -> None:
+    """A value of the frontmatter is plain text, shown with its marks as written.
+
+    Two dollar signs in a title are no maths, so its dash stays the title's,
+    and a pair of backticks in a description is no code, so its dash is shown.
+    """
+    assert ced.markdown_hits("---\ntitle: Costs $5 — or $6\n---\n") == []
+    assert ced.markdown_hits("---\ndescription: Uses `a — b` here\n---\n") == [2]
+    assert ced.markdown_hits("---\ndescription: Costs $5 — or $6\n---\n") == [2]
+    assert ced.markdown_hits("---\ntitle: A `page\n---\nCode` and — this.\n") == [4]
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            '---\ndescription: "Uses $a^*$ — for measurement."\n---\n',
+            [2],
+            id="a star in maths",
+        ),
+        pytest.param(
+            "---\ndescription: Uses a* — for measurement.\n---\n",
+            [2],
+            id="a star",
+        ),
+        pytest.param(
+            "---\ndescription: See *Acoustics — Rooms* here.\n---\n",
+            [2],
+            id="a pair of stars",
+        ),
+        pytest.param(
+            "---\nkeywords:\n  - Author (2001) a — b\n---\n",
+            [3],
+            id="an author and a year",
+        ),
+        pytest.param(
+            "---\nkeywords:\n  - Author (2001) a\n    wrapped — b\n---\n",
+            [4],
+            id="the line under an author and a year",
+        ),
+        pytest.param(
+            "---\nnote: |\n  | a | — | b |\n---\n",
+            [3],
+            id="an empty cell",
+        ),
+        pytest.param(
+            "---\ndescription: Uses “Acoustics — Rooms” here.\n---\n",
+            [],
+            id="a quotation stays one",
+        ),
+        pytest.param(
+            '---\ndescription: Uses "Acoustics — Rooms" here.\n---\n',
+            [],
+            id="a straight quotation stays one",
+        ),
+        pytest.param(
+            '---\nnote: "ISO 1 — Part 3: rooms"\n---\n',
+            [],
+            id="a part number stays one",
+        ),
+    ],
+)
+def test_a_frontmatter_value_holds_no_mark_of_markdown(
+    text: str, hits: list[int]
+) -> None:
+    """The site shows a value with its marks as written, so they exempt nothing.
+
+    Read as a line of a page, a star opened an italic span that hid the dash
+    after it, and an author and a year passed the line as a reference.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param('---\ndescription: "a — b"\n---\n', [2], id="a key's value"),
+        pytest.param('---\nkeywords:\n  - "a — b"\n---\n', [3], id="an entry"),
+        pytest.param('---\nkeywords: ["a — b", "c"]\n---\n', [2], id="a flow entry"),
+        pytest.param('---\nnote: "wrapped\n  a — b"\n---\n', [3], id="a wrapped value"),
+        pytest.param('---\nnote: "x “a — b” y"\n---\n', [], id="a quotation inside"),
+    ],
+)
+def test_the_quotes_of_a_frontmatter_value_are_no_quotation(
+    text: str, hits: list[int]
+) -> None:
+    """They are YAML's, gone from what the site shows, and quote nothing."""
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            '---\ndescription: "A *value"\n---\nBody — with a dash.\n',
+            [4],
+            id="a star into the body",
+        ),
+        pytest.param(
+            "---\ndescription: A *value\n---\nBody — with a dash.\n",
+            [4],
+            id="a plain star into the body",
+        ),
+        pytest.param(
+            "---\ndescription: A “value\n---\nBody — with a dash.\n",
+            [4],
+            id="a quotation into the body",
+        ),
+        pytest.param(
+            "---\ndescription: A *value\nsummary: a — b\n---\n",
+            [3],
+            id="a star into the next value",
+        ),
+        pytest.param(
+            "---\ndescription: A “value\nsummary: a — b\n---\n",
+            [3],
+            id="a quotation into the next value",
+        ),
+        pytest.param(
+            "---\nkeywords:\n  - Author (2001) a\n---\n  wrapped — b\n",
+            [5],
+            id="a reference into the body",
+        ),
+        pytest.param(
+            "---\ndescription: |\n  ```\n---\nThe level rises — and falls.\n",
+            [5],
+            id="a fence into the body",
+        ),
+        pytest.param(
+            '---\ndescription: |\n  $$\n---\nSee "Acoustics — Rooms" here.\n',
+            [],
+            id="a display block into the body",
+        ),
+        pytest.param(
+            "---\ndescription: Plain\n---\n*A caption — with a dash.*\n",
+            [4],
+            id="a caption right under it",
+        ),
+    ],
+)
+def test_what_a_frontmatter_value_leaves_open_stops_at_its_line(
+    text: str, hits: list[int]
+) -> None:
+    """Nothing a value opens carries to the next value or into the body."""
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param("---\na: x `y\n---\nc -- d` e\n", [4], id="a backtick"),
+        pytest.param("---\na: x $y\n---\nc -- d$ e\n", [4], id="a dollar sign"),
+        pytest.param(
+            "---\na: x <!-- y\n---\nc -- d\n<!-- z -->\n", [2, 4], id="a comment"
+        ),
+        pytest.param(
+            '---\na: x href="y\n---\nc -- d "\n', [4], id="an attribute value"
+        ),
+        pytest.param("---\na: |\n  $$\n---\nc -- d\n", [5], id="a display block"),
+        pytest.param("---\na: |\n  ```\n---\nc -- d\n", [5], id="a fence"),
+        pytest.param("---\na: Uses `x -- y` here\n---\n", [2], id="a code span"),
+        pytest.param("---\na: Costs $x -- y$ here\n---\n", [2], id="a maths span"),
+        pytest.param(
+            "---\na: https://example.org/b--c\n---\n", [], id="an address stays one"
+        ),
+    ],
+)
+def test_a_frontmatter_value_hides_no_double_hyphen(text: str, hits: list[int]) -> None:
+    """A value holds no span, and what it leaves open stops at the frontmatter."""
+    assert ced.markdown_double_hyphen_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param(
+            '---\ndescription: "He read «A —\n  B» there"\n---\n', id="double-quoted"
+        ),
+        pytest.param(
+            "---\ndescription: 'He read «A —\n  B» there'\n---\n", id="single-quoted"
+        ),
+        pytest.param("---\ndescription: He read «A —\n  B» there\n---\n", id="plain"),
+        pytest.param(
+            "---\ndescription: |\n  He read «A —\n  B» there\n---\n", id="a block"
+        ),
+        pytest.param(
+            "---\ndescription: >\n  He read “A —\n  B” there\n---\n", id="a folded one"
+        ),
+        pytest.param(
+            '---\ndescription: He read "A —\n  B" there\n---\n', id="in straight quotes"
+        ),
+        pytest.param(
+            "---\ndescription:\n  He read «A —\n  B» there\n---\n", id="under its key"
+        ),
+        pytest.param(
+            "---\ndescription: A —\n  Part 3 there\n---\n", id="a part number"
+        ),
+    ],
+)
+def test_a_quotation_wraps_with_its_value(text: str) -> None:
+    """The lines of one value are one text: only the next value stops a quotation.
+
+    Each physical line was read alone, so a title quoted across the wrap of its
+    value was refused, though the same value on one line passed.
+    """
+    assert ced.markdown_hits(text) == []
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "---\ndescription: He read «A —\nnext: B» — x\n---\n",
+            [2, 3],
+            id="into the next value",
+        ),
+        pytest.param(
+            "---\ndescription: He read «A —\n  B there\nnext: C»\n---\n",
+            [2],
+            id="closed by the next value alone",
+        ),
+        pytest.param(
+            "---\ndescription: a —\n  b\n---\n", [2], id="no quotation at all"
+        ),
+        pytest.param(
+            "---\ndescription: A\n  b — c\n  d «e» — f\n---\n",
+            [3, 4],
+            id="a line of the value with its own dash",
+        ),
+    ],
+)
+def test_a_value_names_the_line_of_its_dash(text: str, hits: list[int]) -> None:
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("---\ntitle: Acoustics\n  — Rooms — x\n---\n", id="wrapped"),
+        pytest.param(
+            "---\ntitle: |\n  Acoustics — Rooms\n  — x\n---\n", id="in a block of text"
+        ),
+    ],
+)
+def test_a_title_is_a_title_on_every_line_of_its_value(text: str) -> None:
+    assert ced.markdown_hits(text) == []
+
+
+def test_a_value_that_quotes_with_an_escaped_quote_quotes() -> None:
+    """A double-quoted value decodes it, so the page shows a quotation."""
+    text = '---\ndescription: "He said \\"A — B\\" there"\n---\n'
+    assert ced.markdown_hits(text) == []
+    assert ced.markdown_hits('---\ndescription: "He said \\"A\\" — B"\n---\n') == [2]
+
+
+_SCRIPT = "---\nhead:\n  - tag: script\n    content: "
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            _SCRIPT + '|\n      {"a": ["A — B"]}\n---\n', [5], id="an array in a block"
+        ),
+        pytest.param(
+            _SCRIPT + '\'{"a": ["A — B"]}\'\n---\n', [4], id="an array, single-quoted"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"name": "A — B"}\n---\n', [5], id="a value in a block"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      ["A", "B — C"]\n---\n', [5], id="after a comma"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"a": "x «A — B» y"}\n---\n',
+            [],
+            id="a title in guillemets",
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"a": "x \\"A — B\\" y"}\n---\n',
+            [],
+            id="a title in escaped quotes",
+        ),
+        pytest.param(
+            _SCRIPT + '\'{"a": "x\n      «A — B» y"}\'\n---\n',
+            [],
+            id="a title on a wrapped line",
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      He read "A — B" there\n---\n',
+            [],
+            id="a block that holds no JSON",
+        ),
+        pytest.param(
+            _SCRIPT + 'He read "A — B" there\n---\n', [], id="a value that holds none"
+        ),
+    ],
+)
+def test_the_quotes_of_a_json_string_are_no_quotation(
+    text: str, hits: list[int]
+) -> None:
+    """The JSON-LD a page's head carries is published, whatever opens a string.
+
+    A string after a bracket or a comma read as a quotation, so ``["A — B"]`` hid
+    a dash the JSON-LD publishes, where ``{"name": "A — B"}`` was refused.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            _SCRIPT + '\'{"a": "A \\u2014 B"}\'\n---\n', [4], id="single-quoted"
+        ),
+        pytest.param(
+            _SCRIPT + '|\n      {"a": "A \\u2014 B"}\n---\n', [5], id="a block"
+        ),
+        pytest.param(
+            _SCRIPT + "|\n      A \\u2014 B\n---\n", [], id="a block of no JSON"
+        ),
+        pytest.param(_SCRIPT + "'A \\u2014 B'\n---\n", [], id="a value of no JSON"),
+    ],
+)
+def test_an_escape_is_read_in_the_json_of_a_value_and_nowhere_else(
+    text: str, hits: list[int]
+) -> None:
+    """A single-quoted value hid one; a block of plain text took one for JSON's."""
+    assert ced.markdown_hits(text) == hits
+
+
+def test_an_indented_fence_opens_no_frontmatter() -> None:
+    """The site reads one only at the first column, and the rest is the page's."""
+    assert ced.markdown_hits("    ---\ntitle: a — b\n---\n") == [2]
+
+
+def test_a_frontmatter_value_is_no_list_item() -> None:
+    """The site shows an entry of a YAML sequence as text, hyphen and all."""
+    assert ced.markdown_bullet_hyphen_hits("---\na:\n  - `x` - text\n---\n") == []
+    opened = "---\na: |\n  $$\n---\n- `x` - text\n"
+    assert ced.markdown_bullet_hyphen_hits(opened) == [5]
 
 
 def test_the_site_data_modules_are_read_by_default(
@@ -210,6 +812,229 @@ def test_dash_in_a_json_string_is_refused_unless_it_quotes_a_source(
     assert ced.scan(notes) == [4]
 
 
+def test_dash_in_a_plain_text_file_is_refused(tmp_path: pathlib.Path) -> None:
+    """The site serves its robots.txt as written, comments and all.
+
+    Nothing converts a double hyphen there, so only the character is read.
+    """
+    robots = tmp_path / "robots.txt"
+    robots.write_text(
+        "# phonometry documentation — robots.txt\n# Two -- hyphens stay two.\n",
+        encoding="utf-8",
+    )
+    assert ced.findings(robots) == [(1, "em dash")]
+
+
+def test_a_quotation_exempts_only_itself_in_a_plain_text_file() -> None:
+    """The whole line went when a quotation on it held a dash."""
+    assert ced.text_hits('# "ISO 1 — Scope" — additional guidance\n') == [1]
+    assert ced.text_hits("# «ISO 1 — Scope» — additional guidance\n") == [1]
+    assert ced.text_hits("# “ISO 1 — Scope” — additional guidance\n") == [1]
+    assert ced.text_hits('# "ISO 1 — Scope" and "ISO 2 — Rooms"\n') == []
+
+
+def test_the_dash_between_two_quotations_is_read() -> None:
+    """Quotations are read left to right, so a closing mark opens nothing."""
+    assert ced.text_hits('# "ISO 1" — "ISO 2"\n') == [1]
+    assert ced.python_hits('"""Cites "ISO 1" — "ISO 2"."""\n') == [1]
+
+
+def test_a_quotation_that_never_closes_on_its_line_quotes_nothing() -> None:
+    assert ced.text_hits('# "ISO 1 — Scope\n') == [1]
+    assert ced.text_hits("# «ISO 1 — Scope\n") == [1]
+
+
+def test_a_part_number_exempts_only_its_own_dash(tmp_path: pathlib.Path) -> None:
+    """The whole line, or the whole string, went when a part number stood on it."""
+    prose = "The level rises — and ISO 1 — Part 3: rooms falls."
+    assert ced.text_hits(f"# {prose}\n") == [1]
+    assert ced.markdown_hits(f"{prose}\n") == [1]
+    assert ced.python_hits(f'"""{prose}"""\n') == [1]
+    module = tmp_path / "home.ts"
+    module.write_text(f"export const NOTE = '{prose}';\n", encoding="utf-8")
+    assert ced.scan(module) == [1]
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(f'{{"note": "{prose}"}}\n', encoding="utf-8")
+    assert ced.scan(notes) == [1]
+    for title in ("ISO 1 — Part 3: rooms", "ISO 1 — Teil 3", "ISO 1 — Partie 3"):
+        assert ced.text_hits(f"# {title}\n") == []
+        assert ced.markdown_hits(f"{title}\n") == []
+        assert ced.python_hits(f'"""{title}"""\n') == []
+
+
+@pytest.mark.parametrize(
+    ("line", "hits"),
+    [
+        pytest.param(
+            "A = 'ISO 1 — Part 3: “Acoustics — Rooms”';", [], id="both titles"
+        ),
+        pytest.param("A = '“Acoustics — Rooms”';", [], id="a curly quotation"),
+        pytest.param("A = '«Acoustics — Rooms»';", [], id="guillemets"),
+        pytest.param('A = "“Acoustics — Rooms”";', [], id="inside a double-quoted one"),
+        pytest.param("A = '“Acoustics — Rooms” — and more';", [1], id="beside one"),
+        pytest.param("A = 'ISO 1 — Part 3: a — b';", [1], id="beside a part number"),
+        pytest.param("A = '“Acoustics — Rooms';", [1], id="never closed"),
+        pytest.param('A = "The level rises — and falls";', [1], id="a string's quotes"),
+        pytest.param('A = "ISO 1 — Part 3: a — b";', [1], id="a string's quotes too"),
+    ],
+)
+def test_a_data_module_reads_a_quotation_by_the_marks_that_say_which_end(
+    line: str, hits: list[int]
+) -> None:
+    """A curly quote and a guillemet quote; a straight one delimits the string.
+
+    The module's strings are read as written, so a straight quote there is
+    the language's, and the prose between two of them quotes nothing. The
+    other marks can only be a quotation, and it exempts its own dash as it
+    does everywhere else.
+    """
+    assert ced.data_hits(f"{line}\n") == hits
+
+
+@pytest.mark.parametrize(
+    ("line", "hits"),
+    [
+        pytest.param('A = f"ISO 1 — Part 3: {x}"', [], id="a part number"),
+        pytest.param('A = f"“Acoustics — Rooms” {x}"', [], id="a quotation"),
+        pytest.param('A = f"``a — b`` {x}"', [], id="an inline literal"),
+        pytest.param('A = f"{x} — {y}"', [1], id="a dash alone between two fields"),
+        pytest.param('A = f"The level — {x}"', [1], id="prose"),
+        pytest.param('A = f"“Acoustics — Rooms” — {x}"', [1], id="beside a quotation"),
+    ],
+)
+def test_an_f_string_exempts_what_any_other_string_does(
+    line: str, hits: list[int]
+) -> None:
+    """The text between its fields is read as the lines of a string are."""
+    assert ced.python_hits(f"{line}\n") == hits
+
+
+@pytest.mark.parametrize(
+    ("source", "hits"),
+    [
+        pytest.param(
+            'x = f"\\"A — B\\" {y}"\n', [], id="a quotation in escaped quotes"
+        ),
+        pytest.param('x = f"\\"A {y} — B\\""\n', [], id="and a field inside it"),
+        pytest.param('x = f"“A {y} — B”"\n', [], id="a field inside curly quotes"),
+        pytest.param('x = f"—"\n', [], id="a dash that fills it"),
+        pytest.param(
+            'x = fr"\\"A — B\\" {y}"\n', [1], id="raw, where it escapes nothing"
+        ),
+        pytest.param('x = f"a — b {y}"\n', [1], id="prose before a field"),
+        pytest.param('x = f"{y} a — b"\n', [1], id="prose after a field"),
+        pytest.param('x = f"{{a — b}}"\n', [1], id="prose in doubled braces"),
+        pytest.param('x = f"{y:—>3}"\n', [1], id="a dash that fills a field"),
+        pytest.param("x = f\"{f'a — b'}\"\n", [1], id="an f-string in a field"),
+        pytest.param('x = f"\\u2014 {y}"\n', [1], id="an escape of the dash"),
+        pytest.param('x = rf"\\u2014 {y}"\n', [], id="and a raw one, which is none"),
+        pytest.param('x = f"""a {y}\nb\nc — d\n"""\n', [3], id="its own line"),
+        pytest.param('x = f"""a {y}\nb {z}\nc — d\n"""\n', [3], id="past two fields"),
+        pytest.param('x = f"a {\n  y\n} b — c"\n', [3], id="past a field of lines"),
+        pytest.param('x = f"""\n{y}\nA — Part 3\n"""\n', [], id="a part number"),
+    ],
+)
+def test_an_f_string_is_read_whole_as_any_other_string(
+    source: str, hits: list[int]
+) -> None:
+    """Its value is what is read, each field a mark, and each dash names its line.
+
+    Each piece between two fields was read alone with its escapes as written, so a
+    quote escaped in it quoted nothing and a field in a quotation split it, and
+    every dash was reported on the line the piece began on.
+    """
+    assert ced.python_hits(source) == hits
+
+
+@pytest.mark.parametrize(
+    ("source", "hits"),
+    [
+        pytest.param('x = f"{y} -- {z}"\n', [1], id="between two fields"),
+        pytest.param('x = f"a -- {y}"\n', [1], id="before one"),
+        pytest.param('x = f"--{y}"\n', [], id="an option of a command line"),
+        pytest.param('x = f"-- {y}"\n', [], id="at its start, as in any other string"),
+        pytest.param('x = f"`a {y} -- b`"\n', [], id="in a literal a field splits"),
+        pytest.param('x = f"""a {y}\nb\nc -- d\n"""\n', [3], id="its own line"),
+    ],
+)
+def test_an_f_string_reads_whole_for_a_double_hyphen_too(
+    source: str, hits: list[int]
+) -> None:
+    assert ced.python_double_hyphen_hits(source) == hits
+
+
+def test_a_title_of_several_dashes_is_marked_as_a_title() -> None:
+    """Only the dash before the part number says so; the marks say the rest."""
+    title = "Acoustics — Rooms — Part 3: halls"
+    assert ced.markdown_hits(f"{title}\n") == [1]
+    assert ced.markdown_hits(f"See *{title}* here.\n") == []
+    assert ced.markdown_hits(f'See "{title}" here.\n') == []
+    assert ced.python_hits(f'"""See "{title}" here."""\n') == []
+
+
+def test_an_exempt_dash_of_a_string_exempts_only_itself() -> None:
+    """One quotation or part number in a docstring passed every line of it."""
+    quoted = '"""Cites "Acoustics — Rooms".\n\nThe level rises — and falls.\n"""\n'
+    assert ced.python_hits(quoted) == [3]
+    part = '"""Cites ISO 1 — Part 3: rooms.\n\nThe level rises — and falls.\n"""\n'
+    assert ced.python_hits(part) == [3]
+    assert ced.python_hits('"""Cites "Acoustics — Rooms" — and more."""\n') == [1]
+    assert ced.python_hits('NOTE = """Cites "Acoustics — Rooms"."""\n') == []
+
+
+def test_an_exempt_dash_of_a_json_string_exempts_only_itself(
+    tmp_path: pathlib.Path,
+) -> None:
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(
+        "{\n"
+        '  "a": "“Acoustics — Rooms” — and more",\n'
+        '  "b": "“Acoustics — Rooms”"\n'
+        "}\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(notes) == [2]
+
+
+def test_an_inline_literal_of_a_string_is_code() -> None:
+    """The placeholder a fiche prints, named in its docstring, is data.
+
+    Three docstrings passed only because the quotation marks inside their
+    literal were read as a quotation.
+    """
+    assert ced.python_hits('"""Shown as ``"—"``, the empty cell."""\n') == []
+    assert ced.python_hits('"""Shown as ``a — b``, the empty cell."""\n') == []
+    assert ced.python_hits('"""Shown as ``a``, the empty cell — or not."""\n') == [1]
+
+
+def test_a_plain_text_file_has_no_empty_cell_and_no_code() -> None:
+    """A line of robots.txt is no table cell and no string, whatever it holds.
+
+    The file was read as a string of a module, which took a line of nothing
+    but a dash for a placeholder and a pair of backticks for code, and rule
+    P6 grants neither outside a table and a page.
+    """
+    assert ced.text_hits("—\n") == [1]
+    assert ced.text_hits("  —  \n") == [1]
+    assert ced.text_hits("# `a — b`\n") == [1]
+
+
+def test_the_robots_file_is_read_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The guard read no plain-text file, so the subpath robots.txt opened on a dash."""
+    monkeypatch.chdir(pathlib.Path(__file__).resolve().parent.parent)
+    read = {path.as_posix() for path in ced.iter_files(ced.DEFAULT_ROOTS)}
+    assert "site/public/robots.txt" in read
+
+
+def test_a_plain_text_file_is_read_only_where_a_root_names_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The llms shards beside robots.txt are generated from the pages read here."""
+    (tmp_path / "shard.txt").write_text("Acoustics — Part 2\n", encoding="utf-8")
+    (tmp_path / "page.md").write_text("The level rises.\n", encoding="utf-8")
+    assert [path.name for path in ced.iter_files((str(tmp_path),))] == ["page.md"]
+
+
 # The double hyphen: the ASCII spelling of the dash, which Astro's smartypants
 # publishes as the em dash itself. The first defect the reading was written
 # against is the docstring bullet ``* :func:`npd_level` -- the level``, which
@@ -235,6 +1060,289 @@ def test_a_code_span_that_wraps_keeps_its_option() -> None:
     """A code span the paragraph wraps puts the option at the start of a line."""
     text = "Run `python scripts/generate_graphs.py --animations\n--audit-only` once.\n"
     assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_a_code_span_that_wraps_in_a_quotation_keeps_its_option() -> None:
+    """A quotation's marks are not its text, so its paragraph reads as one."""
+    text = "> Run `python\n> --version` here.\n"
+    assert ced.markdown_double_hyphen_hits(text) == []
+    assert ced.markdown_hits("> Run `a —\n> b` here.\n") == []
+    assert ced.markdown_hits("> Run `a\n> b` here — and stop.\n") == [2]
+
+
+def test_a_code_span_does_not_cross_into_the_next_item_of_a_quotation() -> None:
+    assert ced.markdown_double_hyphen_hits("> - Run `a\n> - b -- c` here.\n") == [2]
+    assert ced.markdown_hits("> - Run `a\n> - b — c` here.\n") == [2]
+
+
+def test_a_line_of_a_quotation_is_read_through_its_marks() -> None:
+    """A quotation's marks are not its text, so every reading looks past them.
+
+    An asterisk bullet behind one opened an italic span that hid the item's
+    dash, a caption behind one passed for a citation, and an empty cell, a
+    reference, a table's separator row and a rule behind one were refused.
+    """
+    assert ced.markdown_hits("> The level rises — and falls.\n") == [1]
+    assert ced.markdown_hits("> * A list item — with a dash.\n") == [1]
+    assert ced.markdown_hits("> *A caption — with a dash.*\n") == [1]
+    assert ced.markdown_hits("> | a | — | b |\n> |---|---|---|\n") == []
+    assert ced.markdown_hits("> - Author (2001) Acoustics — Rooms\n") == []
+    assert (
+        ced.markdown_hits("> - Author (2001) Acoustics — Rooms,\n>   wrapped — title\n")
+        == []
+    )
+    assert ced.markdown_hits('>"Acoustics — Rooms"\n') == []
+    table = "> | a | b |\n> |---|---|\n> | x | -- |\n"
+    assert ced.markdown_double_hyphen_hits(table) == []
+    assert ced.markdown_double_hyphen_hits("> ---\n") == []
+    assert ced.markdown_double_hyphen_hits("> The level -- falls.\n") == [1]
+    assert ced.markdown_bullet_hyphen_hits("> - `x` - the text\n") == [1]
+
+
+#: Pages the walk of the page decides, with the lines where the site's parser
+#: shows a dash, each measured on it: ``markdown_hits`` of each with an em dash,
+#: and ``markdown_double_hyphen_hits`` of each with a double hyphen in its place.
+_WALKED_PAGES = (
+    pytest.param("- > ```\n> text — y\n", [2], id="behind a quotation in an item"),
+    pytest.param("- > $$\n> text — y\n", [2], id="maths behind a quotation in an item"),
+    pytest.param("1. > ```\n> text — y\n", [2], id="behind a quotation in a numbered"),
+    pytest.param("> - > ```\n> > text — y\n", [2], id="and in a quotation"),
+    pytest.param("a\n2. ```\n   b — y\n", [3], id="a marker that cannot interrupt"),
+    pytest.param("a\n2. ~~~\n   b — y\n", [3], id="a marker on a tilde fence"),
+    pytest.param("a\n2. $$\n   b — y\n   $$\n", [3], id="a marker on a display block"),
+    pytest.param("> a `b — x\n===\nc` d\n", [], id="a lazy line of ==="),
+    pytest.param("> a `b — x\n=\nc` d\n", [], id="a lazy line of ="),
+    pytest.param("- a `b — x\n===\nc` d\n", [], id="a line of === out of an item"),
+    pytest.param("1. a `b — x\n===\nc` d\n", [], id="and out of a numbered one"),
+    pytest.param("> > a `b — x\n> ===\n> c` d\n", [], id="a shallower quotation"),
+    pytest.param("- > a `b — x\n  ===\n  c` d\n", [], id="an item's own column"),
+    pytest.param("- a `b — x\n    2. c` d\n", [], id="an ordered marker in an item"),
+    pytest.param("- a `b — x\n    | c` d\n", [], id="a pipe in an item"),
+    pytest.param("a `b — x\n2. c` d\n", [], id="an ordered marker in a paragraph"),
+    pytest.param("- # h `b\nc — x` d\n", [2], id="a heading on an item's line"),
+    pytest.param("- ## h `b\n  c — x` d\n", [2], id="and the item goes on"),
+    pytest.param("1. # h `b\n   c — x` d\n", [2], id="on a numbered item's line"),
+    pytest.param("> - # h `b\n> c — x` d\n", [2], id="and in a quotation"),
+    pytest.param("- ***\n  c — x\n", [2], id="a rule on an item's line"),
+    pytest.param("> - ***\n> c — x\n", [2], id="and in a quotation"),
+    pytest.param(
+        "- <!-- y --> `b\n  c — x` d\n", [2], id="a comment on an item's line"
+    ),
+    pytest.param("a `b — x\n<div>\nc` d\n", [1], id="a block tag"),
+    pytest.param("a `b — x\n</div>\nc` d\n", [1], id="a closing block tag"),
+    pytest.param("a `b — x\n<details>\nc` d\n", [1], id="a details tag"),
+    pytest.param("a `b — x\n<script>\nc` d\n", [1], id="a script tag"),
+    pytest.param("a `b — x\n<?php\nc` d\n", [1], id="a processing instruction"),
+    pytest.param("<div>\n`x — y`\n</div>\n", [2], id="a raw block holds no code span"),
+    pytest.param("a `b — x\n<span>\nc` d\n", [], id="an inline tag"),
+    pytest.param("- a\n  ```\n  x\nprose — y\n", [4], id="a fence ends with its item"),
+    pytest.param("- a\n  ~~~\n  x\nprose — y\n", [4], id="and a tilde fence"),
+    pytest.param("- a\n  $$\n  x\nprose — y\n", [4], id="and a display block"),
+    pytest.param("* a `b —\n  ```\n- item —\n", [1, 3], id="an item after the fence"),
+    pytest.param("-\ta `b — x\n    - c` d\n", [1], id="an item marked with a tab"),
+    pytest.param("$$\n```\n$$\nprose — y\n", [4], id="a fence in a display block"),
+    pytest.param("a `b — x\n:::note\nc` d\n:::\n", [1], id="an aside"),
+    pytest.param(":::note\na `b — x\n:::\nc` d\n", [2], id="the end of an aside"),
+    pytest.param("| `a | b — x` |\n|---|---|\n", [1], id="two cells of a row"),
+    pytest.param("| a `b — x\nc` d\n", [], id="a pipe with no table"),
+    pytest.param("    a `b\nc — x` d\n", [2], id="indented code"),
+)
+
+
+@pytest.mark.parametrize(("page", "hits"), _WALKED_PAGES)
+def test_a_dash_is_read_where_the_walk_of_the_page_says_it_stands(
+    page: str, hits: list[int]
+) -> None:
+    """Each of these read otherwise, hiding prose or refusing a code span.
+
+    A reader of each line by itself cannot say which of them opens a block: that
+    takes the quotations and the items open at it and the paragraph above it.
+    """
+    assert ced.markdown_hits(page) == hits
+    assert ced.markdown_double_hyphen_hits(page.replace("—", "--")) == hits
+
+
+@pytest.mark.parametrize(
+    ("page", "md", "mdx"),
+    [
+        pytest.param("a `b — x\n    - c` d\n", [], [1], id="an item four columns in"),
+        pytest.param("a `b — x\n<A />\nc` d\n", [], [1], id="a tag alone"),
+        pytest.param("<A />\n`x — y`\n", [2], [], id="a line under a lone tag"),
+        pytest.param("    a — b\n", [], [1], id="indented code"),
+        pytest.param(
+            "a\n    ```\n    b — y\n", [3], [], id="a fence under a paragraph"
+        ),
+    ],
+)
+def test_the_kind_of_a_page_says_what_a_line_opens(
+    page: str, md: list[int], mdx: list[int]
+) -> None:
+    """On an MDX page any indentation opens a block, and there is no raw HTML."""
+    assert ced.markdown_hits(page) == md
+    assert ced.markdown_hits(page, mdx=True) == mdx
+    assert ced.markdown_double_hyphen_hits(page.replace("—", "--")) == md
+    assert ced.markdown_double_hyphen_hits(page.replace("—", "--"), mdx=True) == mdx
+
+
+def test_the_guard_reads_a_page_by_its_kind(tmp_path: pathlib.Path) -> None:
+    """The suffix says which: both spellings of the dash go by it."""
+    page = "a `b — x\n    - c` d\n"
+    (tmp_path / "page.md").write_text(page, encoding="utf-8")
+    (tmp_path / "page.mdx").write_text(page, encoding="utf-8")
+    assert ced.scan(tmp_path / "page.md") == []
+    assert ced.scan(tmp_path / "page.mdx") == [1]
+
+
+def test_a_block_under_a_reference_is_read_for_itself() -> None:
+    """Only the wrapped lines of a bibliographic entry reproduce its title.
+
+    A heading, an item or a table row under the entry opens a block of its
+    own, and it kept the entry's exemption for as long as it stayed indented.
+    """
+    assert ced.markdown_hits("- Author (2001) x\n  ## Heading — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  - item — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  | a — b |\n  |---|\n") == [2]
+    assert ced.markdown_hits("> - Author (2001) x\n>   ## Heading — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n  wrapped — title\n") == []
+    assert ced.markdown_hits("- Author (2001) x\n- Author (2002) a — b\n") == []
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "> First `a — b\n> $$\n> x\n> $$\n> c` after.\n",
+            [1],
+            id="a code span across quoted maths",
+        ),
+        pytest.param(
+            "> First `a — b\n> ```\n> x\n> ```\n> c` after.\n",
+            [1],
+            id="a code span across a quoted fence",
+        ),
+        pytest.param(
+            "> First `a — b\n> ~~~\n> x\n> ~~~\n> c` after.\n",
+            [1],
+            id="a code span across a quoted tilde fence",
+        ),
+        pytest.param(
+            "> a *b\n> $$\n> x\n> $$\n> c — d* after.\n",
+            [5],
+            id="an italic span across quoted maths",
+        ),
+        pytest.param(
+            '> a "b\n> $$\n> x\n> $$\n> c — d" after.\n',
+            [5],
+            id="a quotation across quoted maths",
+        ),
+        pytest.param("> $$\n> a — b\n> $$\n", [2], id="a dash in quoted maths"),
+        pytest.param("> ```\n> a — b\n> ```\n", [], id="a dash in a quoted fence"),
+        pytest.param("> $$\n> *a\n> $$\n> c — d\n", [4], id="a star in quoted maths"),
+        pytest.param(
+            "> $$\n> x\nc — d\n", [3], id="quoted maths ends with its quotation"
+        ),
+        pytest.param(
+            "- First `a — b\n  $$\n  x\n  $$\n  c` after.\n",
+            [1],
+            id="a code span across an item's maths",
+        ),
+        pytest.param(
+            "- $$\n  a\n  $$\nSee *Acoustics — Rooms* here.\n",
+            [],
+            id="a title after maths on an item's first line",
+        ),
+        pytest.param(
+            "- $$\n  a — b\n  $$\n", [2], id="a dash in maths on an item's first line"
+        ),
+        pytest.param(
+            "- ```\n  a\n  ```\n*The level — rises.*\n",
+            [4],
+            id="a caption after a fence on an item's first line",
+        ),
+        pytest.param(
+            "- ```\n  a — b\n  ```\n",
+            [],
+            id="a dash in a fence on an item's first line",
+        ),
+    ],
+)
+def test_a_block_behind_marks_ends_the_paragraph_as_any_other(
+    text: str, hits: list[int]
+) -> None:
+    """The site ends the paragraph there, so nothing pairs across such a block.
+
+    The fence readers saw no fence behind a mark, so to them the block was part
+    of the paragraph, and the block a list item opened ran to the end of the
+    page, refusing every dash after it, a title's among them.
+    """
+    assert ced.markdown_hits(text) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "> First `a -- b\n> $$\n> x\n> $$\n> c` after.\n",
+            [1],
+            id="a code span across quoted maths",
+        ),
+        pytest.param(
+            "> First `a -- b\n> ```\n> x\n> ```\n> c` after.\n",
+            [1],
+            id="a code span across a quoted fence",
+        ),
+        pytest.param(
+            "> ```\n> a\n>\n> b -- c\n> ```\n", [], id="a bare mark in a quoted fence"
+        ),
+        pytest.param(
+            "> $$\n> a\n>\n> b -- c\n> $$\n", [], id="a bare mark in quoted maths"
+        ),
+        pytest.param(
+            "- $$\n  a\n  $$\nafter -- prose\n",
+            [4],
+            id="after maths on an item's first line",
+        ),
+        pytest.param(
+            "- ```\n  a\n  ```\nafter -- prose\n",
+            [4],
+            id="after a fence on an item's first line",
+        ),
+    ],
+)
+def test_a_block_behind_marks_hides_no_double_hyphen_after_it(
+    text: str, hits: list[int]
+) -> None:
+    assert ced.markdown_double_hyphen_hits(text) == hits
+
+
+def test_a_block_behind_marks_is_no_list_item() -> None:
+    assert ced.markdown_bullet_hyphen_hits("> ```\n> - `x` - text\n> ```\n") == []
+    assert ced.markdown_bullet_hyphen_hits("> $$\n> - `x` - text\n> $$\n") == []
+    after = "- $$\n  a\n  $$\n- `x` - text\n"
+    assert ced.markdown_bullet_hyphen_hits(after) == [4]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param("a `b {dash} c\n---\nd` e\n", id="a rule"),
+        pytest.param("a `b {dash} c\n***\nd` e\n", id="a rule of asterisks"),
+        pytest.param("a `b {dash} c\n===\nd` e\n", id="a setext underline"),
+        pytest.param("> a `b {dash} c\n> ---\n> d` e\n", id="a rule of a quotation"),
+        pytest.param("a `b {dash} c\n<!-- x -->\nd` e\n", id="a comment"),
+        pytest.param("- a `b {dash} c\n    - d` e\n", id="a nested item"),
+    ],
+)
+def test_nothing_pairs_across_a_line_that_ends_the_paragraph(text: str) -> None:
+    """Each of them ends the paragraph, so the backticks are text and the dash prose."""
+    assert ced.markdown_hits(text.format(dash="—")) == [1]
+    assert ced.markdown_double_hyphen_hits(text.format(dash="--")) == [1]
+
+
+def test_an_item_nested_under_a_reference_is_read_for_itself() -> None:
+    assert ced.markdown_hits("- Author (2001) x\n    - item — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n    ## Heading — y\n") == [2]
+    assert ced.markdown_hits("- Author (2001) x\n      - wrapped — y\n") == []
 
 
 def test_an_escaped_backtick_opens_no_code_span() -> None:
@@ -332,6 +1440,27 @@ def test_a_docstring_keeps_the_double_hyphen_of_its_code() -> None:
         '"""\n'
     )
     assert ced.python_double_hyphen_hits(text) == []
+
+
+def test_a_literal_of_a_docstring_stays_inside_its_block() -> None:
+    """A docstring's literal pairs as a page's code span does, a block at a time.
+
+    Read a paragraph at a time, the two marks of a literal left open paired
+    across list items, and the double hyphen between them passed as code
+    where the page generated from the docstring shows it.
+    """
+    item = '"""Summary.\n\n* ``open\n* a -- b`` shown.\n"""\n'
+    assert ced.python_double_hyphen_hits(item) == [4]
+    nested = '"""Summary.\n\n    * ``open\n    * a -- b`` shown.\n"""\n'
+    assert ced.python_double_hyphen_hits(nested) == [4]
+    wrapped = '"""Summary.\n\n* ``open\n  --b`` shown.\n"""\n'
+    assert ced.python_double_hyphen_hits(wrapped) == []
+
+
+def test_a_stray_backtick_of_a_string_hides_no_dash_of_a_later_paragraph() -> None:
+    text = '"""A stray ` here.\n\nThe level rises — and a ` there.\n"""\n'
+    assert ced.python_hits(text) == [3]
+    assert ced.python_hits('"""A ``wrapped —\nliteral`` here.\n"""\n') == []
 
 
 def test_a_note_is_prose() -> None:
@@ -530,6 +1659,43 @@ def test_math_on_a_page_keeps_its_double_hyphen() -> None:
         "It costs \\$5 -- or \\$6, which is prose.\n"
     )
     assert ced.markdown_double_hyphen_hits(text) == [7]
+
+
+def test_a_display_math_fence_opens_inside_a_code_span_left_open() -> None:
+    """The structure of the blocks comes before the spans inside them.
+
+    remark-math opens the block on the ``$$`` line and shows the rest as
+    maths, so the backtick on the far side of it closes nothing and the dash
+    there is shown, as a fenced code block does in the same place.
+    """
+    assert ced.markdown_hits("Write `a\n$$\nb — c` here.\n") == [3]
+    assert ced.markdown_double_hyphen_hits("Write `a\n$$\nb -- c` here.\n") == []
+
+
+def test_a_display_math_block_closes_only_on_a_fence_of_its_own() -> None:
+    """Only a run as long as the opening one, with nothing after it, closes a block.
+
+    The reader closed on any line of two dollar signs, as remark-math does
+    not, so a line of the block was read as prose and the true closing fence
+    opened a block that hid the rest of the page.
+    """
+    text = "$$\na\n$$ b\nc -- d\n$$\nThe level rises -- and falls.\n"
+    assert ced.markdown_double_hyphen_hits(text) == [6]
+    longer = "$$$\na\n$$\nc -- d\n$$$\nThe level rises -- and falls.\n"
+    assert ced.markdown_double_hyphen_hits(longer) == [6]
+    shut = "$$\na\n$$$  \nThe level rises -- and falls.\n"
+    assert ced.markdown_double_hyphen_hits(shut) == [4]
+
+
+def test_a_math_span_does_not_cross_into_the_next_list_item() -> None:
+    """The site reads a span within one block, and a list item is a block.
+
+    Read a paragraph at a time, the dollar sign of one item paired with the
+    one of the next, and the double hyphen between them was taken for maths
+    where the site publishes it as an em dash.
+    """
+    text = "- The kit costs $5 -- the case included.\n- The spare costs $6.\n"
+    assert ced.markdown_double_hyphen_hits(text) == [1]
 
 
 def test_a_docstring_and_its_page_read_the_same() -> None:

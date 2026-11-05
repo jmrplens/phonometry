@@ -11,6 +11,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { codeLines, pageLines, splitLines } from '../../src/lib/markdown-fences.mjs';
 import { authorsFigure, shownLines, strayDelimiter } from './page-prose.mjs';
 
 test('a figure is found as the Spanish figure check reads a page', () => {
@@ -47,6 +48,36 @@ test('a stray display delimiter is found as the maths check reads a line', () =>
   assert.equal(strayDelimiter('Coste \\\\$$ x'), 'Coste \\\\$$ x');
 });
 
+test('a display delimiter behind the marks of its containers is read as one', () => {
+  // The marks are not the line's text: the site renders a display block in a
+  // quotation or on a list item's first line, and the check called both stray.
+  assert.equal(strayDelimiter('> $$'), null);
+  assert.equal(strayDelimiter('>$$'), null);
+  assert.equal(strayDelimiter('> > $$'), null);
+  assert.equal(strayDelimiter('- $$'), null);
+  assert.equal(strayDelimiter('1. $$'), null);
+  assert.equal(strayDelimiter('> - $$'), null);
+  assert.equal(strayDelimiter('> $$x$$'), null);
+  assert.equal(strayDelimiter('> $$ x = 1'), '> $$ x = 1');
+  assert.equal(strayDelimiter('- $$ x = 1'), '- $$ x = 1');
+});
+
+test('a marker that cannot interrupt a paragraph is the text of the paragraph', () => {
+  // The walk of the page says which marks are marks: `2. ` under a paragraph is
+  // the paragraph's text, so what stands after it opens nothing.
+  const read = (page) => {
+    const lines = splitLines(page);
+    const shown = shownLines(lines, codeLines(lines, { kind: 'md' }));
+    return [shown, pageLines(shown, { kind: 'md' })];
+  };
+  const [cut, cutRead] = read('Texto\n2. $$');
+  assert.equal(strayDelimiter(cut[1], cutRead[1].rest), '2. $$');
+  const [opens, opensRead] = read('Texto\n1. $$');
+  assert.equal(strayDelimiter(opens[1], opensRead[1].rest), null);
+  const [out, outRead] = read('> Texto\n2. $$');
+  assert.equal(strayDelimiter(out[1], outRead[1].rest), null);
+});
+
 test('a code span read over the lines of its paragraph hides what it holds', () => {
   // The renderer reads a code span across the line breaks of its paragraph;
   // read line by line, a `![`, a `<img` or a `$$` inside one was prose.
@@ -54,11 +85,16 @@ test('a code span read over the lines of its paragraph hides what it holds', () 
   assert.ok(!authorsFigure('Texto `a\n<img src="x.png">\nb` fin.'));
   // A blank line ends the paragraph, and a span never crosses it.
   assert.ok(authorsFigure('Texto `a\n\n![alt](x.png) `b'));
-  const lines = ['Un `ejemplo', '$$ x', 'aquí` y fin.'];
+  const lines = ['Un `ejemplo', 'con $$ x', 'aquí` y fin.'];
   const shown = shownLines(lines, [false, false, false]);
   assert.equal(shown.length, 3);
   assert.equal(strayDelimiter(shown[1]), null);
   assert.equal(strayDelimiter(shownLines(['Un', '$$ x'], [false, false])[1]), '$$ x');
+  // A line that opens a display block ends the paragraph before any span is
+  // read, so a backtick on either side of it closes nothing and the block is
+  // seen: the site opens one there and takes the next lines for its formula.
+  const fenced = shownLines(['Un `ejemplo', '$$ x', 'aquí` y fin.'], [false, false, false]);
+  assert.equal(strayDelimiter(fenced[1]), '$$ x');
 });
 
 test('a comment shows no figure, and a figure after one is still one', () => {
@@ -127,10 +163,24 @@ test('two inline displays on a line pair, and a third delimiter does not', () =>
   assert.equal(strayDelimiter('$$ x'), '$$ x');
 });
 
+test('a raw block of a page holds no code span and no escape', () => {
+  // The page shows it as written: the backticks and the image are text to the
+  // parser on a `.md` page, and markdown to it on an `.mdx` one.
+  const lines = ['<div>', '`$$`', '</div>'];
+  assert.equal(shownLines(lines, [false, false, false])[1], '`$$`');
+  assert.notEqual(shownLines(lines, [false, false, false], { mdx: true })[1], '`$$`');
+});
+
 test('a tag with text after it opens no raw block unless it is a block tag', () => {
   // CommonMark 4.6: any tag but a block tag opens a raw block (type 7) only
   // alone on its line, so the backslash here escapes the `<` of the image.
   assert.equal(authorsFigure('<span>\\<img src="x.png"></span>\n'), false);
   assert.equal(authorsFigure('<div>\\<img src="x.png"></div>\n'), true);
   assert.equal(authorsFigure('Prose.\n<section>\\<img src="x.png"></section>\n'), true);
+});
+
+test('only the end the Markdown parser reads ends a comment', () => {
+  const lines = ['<!-- a --!>', 'b', 'c -->', 'd'];
+  const roles = pageLines(lines, { kind: 'md' }).map((line) => line.role);
+  assert.deepEqual(roles, ['html', 'raw', 'raw', 'paragraph']);
 });

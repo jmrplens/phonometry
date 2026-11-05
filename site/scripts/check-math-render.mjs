@@ -24,7 +24,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { codeLines, splitLines } from '../src/lib/markdown-fences.mjs';
+import { codeLines, pageLines, splitLines } from '../src/lib/markdown-fences.mjs';
 import { shownLines, strayDelimiter } from './shared/page-prose.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -83,14 +83,17 @@ function delimiterProblems(sourceDirs) {
   for (const dir of sourceDirs) {
     for (const file of walk(dir, ['.md', '.mdx'])) {
       const lines = splitLines(readFileSync(file, 'utf8'));
+      const mdx = file.endsWith('.mdx');
+      const kind = mdx ? 'mdx' : 'md';
       // A formula shown inside a code block is a sample, not a formula.
-      const code = codeLines(lines);
+      const code = codeLines(lines, { kind });
       // Prose that talks *about* `$$` writes it inside a code span, read as
       // the site reads one, over the lines of its block (shared/page-prose.mjs).
-      const shown = shownLines(lines, code, { mdx: file.endsWith('.mdx') });
+      const shown = shownLines(lines, code, { mdx });
+      const read = pageLines(shown, { kind });
       lines.forEach((line, index) => {
         if (code[index]) return;
-        const trimmed = strayDelimiter(shown[index]);
+        const trimmed = strayDelimiter(shown[index], read[index].rest);
         if (trimmed === null) return;
         problems.push({
           file: relative(REPO, file),

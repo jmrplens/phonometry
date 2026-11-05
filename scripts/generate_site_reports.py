@@ -932,7 +932,9 @@ def _mdx_safe(text: str, *, where: str) -> str:
     no span, so a brace after it is refused.
     """
     lines = text.splitlines()
-    shown = lines_read_whole(lines, drop_inline_spans_by_block)
+    shown = lines_read_whole(
+        lines, lambda page: drop_inline_spans_by_block(page, kind="mdx")
+    )
     for line_number, (line, prose) in enumerate(
         zip(lines, shown, strict=True), start=1
     ):

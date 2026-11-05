@@ -17,6 +17,8 @@
 // behind a backslash. A reader that took an escaped backtick for an opening
 // one hid the prose up to the next backtick from its check.
 
+import { cellSpans, NOT_INLINE_ROLES, pageLines } from '../../src/lib/markdown-fences.mjs';
+
 /** A run of backticks or of dollar signs. */
 const RUN = /`+|\$+/g;
 
@@ -98,15 +100,6 @@ export function dropInlineSpans(text, markers = '`') {
 }
 
 /**
- * Whether a line opens a block of its own: a heading, a row of a table, an
- * item of a list or a quotation, which a code span never crosses into.
- */
-const BLOCK_START = /^ {0,3}(?:#{1,6}(?:\s|$)|\||[-*+]\s|\d{1,9}[.)]\s|>)/;
-
-/** Whether a line is a block on its own line only: a heading or a table row. */
-const ONE_LINE_BLOCK = /^ {0,3}(?:#{1,6}(?:\s|$)|\|)/;
-
-/**
  * A comment, by the page's kind: an HTML comment on a `.md` page, which
  * opening a line is an HTML block (CommonMark 4.6, type 2) that runs to its
  * `-->` and may interrupt a paragraph, and an MDX comment, an expression,
@@ -122,7 +115,8 @@ const COMMENT_LINE = { md: /^ {0,3}<!--/, mdx: /^ {0,3}(?:<!--|\{\/\*)/ };
  * whole: a code span may run over the lines of its paragraph, as the page
  * reads it, but never past a blank line or into another block. Each span
  * leaves {@link SPAN_MARK} and the line breaks it held, so the text keeps its
- * lines, each where it was.
+ * lines, each where it was. A line of code or display maths is not read, and a
+ * line of a raw HTML block holds no span.
  *
  * With `comments` set to the page's kind, its comments go too, read with
  * the spans in one pass left to right, whichever opens first winning: a
@@ -130,41 +124,62 @@ const COMMENT_LINE = { md: /^ {0,3}<!--/, mdx: /^ {0,3}(?:<!--|\{\/\*)/ };
  * the comment's. A line that opens a comment opens a block that runs to the
  * comment's end, blank lines included.
  *
- * @param {string} text Prose, its fenced code already out (left as blank lines).
+ * @param {string} text The lines of a page, joined by a line feed.
  * @param {string} markers "`" for the code spans, "`$" for code and maths.
- * @param {{ comments?: 'md' | 'mdx' }} [options] The page's kind, to read its
- *   comments with its spans.
+ * @param {{ comments?: 'md' | 'mdx', kind?: 'md' | 'mdx' }} [options] The page's
+ *   kind, `comments` to read its comments with its spans, `kind` if not said by
+ *   `comments`; a `.md` page if neither says.
  * @returns {string} The text, its spans out, with as many lines as it had.
  */
-export function dropInlineSpansByBlock(text, markers = '`', { comments } = {}) {
-  return blocksOf(text.split('\n'), comments)
-    .map((block) => dropBlockSpans(block.join('\n'), markers, comments))
+export function dropInlineSpansByBlock(text, markers = '`', { comments, kind } = {}) {
+  return blocksOf(text.split('\n'), comments, kind ?? comments ?? 'md')
+    .map((block) => dropBlockSpans(block, markers, comments))
     .join('\n');
 }
 
-/** The lines of a page in the blocks a code span stays inside, every line in one. */
-function blocksOf(lines, comments) {
+/**
+ * The lines of a page in the blocks a code span stays inside, every line in one.
+ * The walk of the page says what each line is (`pageLines`): only the lines of a
+ * paragraph, and those of a raw HTML block, stay together. A blank line is a block
+ * of its own, a line that holds only the marks of a quotation among them, and so is
+ * a heading, a row of a table, a thematic break, a setext underline, an aside's
+ * fence, a line of a fence or of a display block.
+ *
+ * Each block says how it `reads`: `text`, spans read over its lines; `raw`, a raw
+ * HTML block, where no span opens; `row`, a row of a table, whose cells each bound
+ * what opens in them; `code`, a line of code or display maths, which nothing reads.
+ */
+function blocksOf(lines, comments, kind) {
   const opener = comments ? COMMENT_LINE[comments] : null;
   const blocks = [];
-  let current = [];
+  let current = null;
   const close = () => {
-    if (current.length) blocks.push(current);
-    current = [];
+    if (current !== null) blocks.push(current);
+    current = null;
   };
-  for (const line of lines) {
-    if (current.length && opener && unclosed(current, comments)) {
-      current.push(line);
-      continue;
+  pageLines(lines, { kind }).forEach((read, index) => {
+    const line = lines[index];
+    if (current !== null && opener && unclosed(current.lines, comments)) {
+      current.lines.push(line);
+      return;
     }
-    if (!line.trim()) {
-      close();
-      blocks.push([line]);
-      continue;
+    if (current !== null && (read.role === 'text' || read.role === 'raw')) {
+      current.lines.push(line);
+      return;
     }
-    if (BLOCK_START.test(line) || opener?.test(line)) close();
-    current.push(line);
-    if (ONE_LINE_BLOCK.test(line)) close();
-  }
+    close();
+    if (NOT_INLINE_ROLES.has(read.role)) {
+      blocks.push({ lines: [line], reads: 'code' });
+    } else if (opener?.test(line)) {
+      current = { lines: [line], reads: 'text' };
+    } else if (read.role === 'paragraph' || read.role === 'text') {
+      current = { lines: [line], reads: 'text' };
+    } else if (read.role === 'html' || read.role === 'raw') {
+      current = { lines: [line], reads: 'raw' };
+    } else {
+      blocks.push({ lines: [line], reads: read.role === 'row' ? 'row' : 'text' });
+    }
+  });
   close();
   return blocks;
 }
@@ -176,7 +191,7 @@ function unclosed(block, comments) {
   return !pattern.test(block.join('\n').trimStart());
 }
 
-/** The spans of one block, and its comments with `comments`, left to right. */
+/** The spans of a piece of a block, and its comments with `comments`, left to right. */
 function spansAndComments(block, markers, comments) {
   if (!comments) return inlineSpans(block, markers);
   const found = [];
@@ -196,14 +211,28 @@ function spansAndComments(block, markers, comments) {
   }
 }
 
+/** The spans and comments of one block, whose lines are joined in `text`. */
+function blockSpans(block, text, markers, comments) {
+  if (block.reads === 'code') return [];
+  if (block.reads === 'raw') return spansAndComments(text, '', comments);
+  if (block.reads === 'text') return spansAndComments(text, markers, comments);
+  return cellSpans(text).flatMap(([start, end]) =>
+    spansAndComments(text.slice(start, end), markers, comments).map(([first, last]) => [
+      first + start,
+      last + start,
+    ]),
+  );
+}
+
 /** One block with its spans out, each leaving its mark and its line breaks. */
 function dropBlockSpans(block, markers, comments) {
+  const text = block.lines.join('\n');
   let kept = '';
   let done = 0;
-  for (const [start, end] of spansAndComments(block, markers, comments)) {
-    const breaks = block.slice(start, end).split('\n').length - 1;
-    kept += block.slice(done, start) + SPAN_MARK + '\n'.repeat(breaks);
+  for (const [start, end] of blockSpans(block, text, markers, comments)) {
+    const breaks = text.slice(start, end).split('\n').length - 1;
+    kept += text.slice(done, start) + SPAN_MARK + '\n'.repeat(breaks);
     done = end;
   }
-  return kept + block.slice(done);
+  return kept + text.slice(done);
 }

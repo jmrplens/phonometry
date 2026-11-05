@@ -905,16 +905,51 @@ def _own_to_an_expression(name: str, call: ast.Call, scope: _Scope) -> ast.AST |
     return binder if isinstance(binder, (ast.Lambda, *_COMPREHENSIONS)) else None
 
 
+def _invoked_where_written(lambda_: ast.Lambda, root: ast.AST) -> ast.Call | None:
+    """The call that calls *lambda_* where it is written, under *root*, if one does."""
+    for node in ast.walk(root):
+        if isinstance(node, ast.Call) and node.func is lambda_:
+            return node
+    return None
+
+
+def _handed_to(lambda_: ast.Lambda, call: ast.Call, name: str) -> ast.expr | str | None:
+    """What *call*, which calls *lambda_* where it is written, hands its
+    parameter *name*: the argument in its place or of its name; ``None`` when
+    the call hands it nothing, so its default stands; :data:`_BOUND_NEARER`
+    when a ``*`` argument or a ``**`` mapping may hand it anything.
+    """
+    arguments = lambda_.args
+    positional = [
+        parameter.arg for parameter in (*arguments.posonlyargs, *arguments.args)
+    ]
+    for keyword in call.keywords:
+        if keyword.arg == name:
+            return keyword.value
+    if name in positional:
+        index = positional.index(name)
+        before = call.args[: index + 1]
+        if any(isinstance(argument, ast.Starred) for argument in before):
+            return _BOUND_NEARER
+        if index < len(call.args):
+            return call.args[index]
+    if any(keyword.arg is None for keyword in call.keywords):
+        return _BOUND_NEARER
+    return None
+
+
 def _read_nearer(name: str, call: ast.Call, scope: _Scope) -> str | None:
     """What *name*, the first name of *call*, stands for when a nearer binding
     decides it; ``None`` when *scope*'s table of names does.
 
     A comprehension's variable is its own (:data:`_BOUND_NEARER`), and so is what
     a lambda stores with ``:=``. A lambda's parameter reads as a function's: what
-    its default names, or the module of its spelling, handed in; ``open`` spells
-    no module, so with neither it is unknown too. And ``open``, wherever a scope
-    binds it to what no table holds: a table holds an alias, a default and an
-    import in either branch of a ``try``, which say what it is.
+    its default names where the lambda is written (:func:`_held_where`), or the
+    module of its spelling, handed in; ``open`` spells no module, so with
+    neither it is unknown too. A lambda called where it is written holds what
+    the call hands it instead (:func:`_handed_to`). And ``open``, wherever a
+    scope binds it to what no table holds: a table holds an alias, a default
+    and an import in either branch of a ``try``, which say what it is.
     """
     binder = _own_to_an_expression(name, call, scope)
     if isinstance(binder, ast.Lambda):
@@ -923,7 +958,18 @@ def _read_nearer(name: str, call: ast.Call, scope: _Scope) -> str | None:
         }
         if name not in defaults:
             return _BOUND_NEARER
-        held = _named_by(defaults[name], scope.aliases)
+        value: ast.expr | None | str = defaults[name]
+        invoked = _invoked_where_written(binder, scope.node)
+        if invoked is not None:
+            value = _handed_to(binder, invoked, name) or value
+        if isinstance(value, str):
+            return _BOUND_NEARER
+        package = _package_of(scope.path, scope.module)
+        held = (
+            None
+            if value is None
+            else _held_where(value, scope.node, package, scope.aliases)
+        )
         if held is not None:
             return held
         spelt = None if name == "open" else _SPELLINGS.get(name)

@@ -113,6 +113,37 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
 
 
 @pytest.mark.parametrize(
+    ("call", "found"),
+    [
+        pytest.param(
+            "(lambda open=open: open(path))()", [("read", _OWN)], id="default"
+        ),
+        pytest.param("(lambda open=open: open(path))(print)", [], id="positional"),
+        pytest.param("(lambda open=open: open(path))(open=print)", [], id="keyword"),
+        pytest.param(
+            "(lambda opener=print: opener(path))(open)",
+            [("read", _OWN)],
+            id="open-handed",
+        ),
+        pytest.param("(lambda open=open: open(path))(*handlers)", [], id="starred"),
+    ],
+)
+def test_a_lambda_called_where_it_is_written_reads_what_the_call_hands(
+    tmp_path: pathlib.Path, call: str, found: list[tuple[str, str]]
+) -> None:
+    """A lambda called where it is written holds in each parameter what the
+    call hands it, and its default only where the call hands nothing; a
+    ``*`` argument may hand it anything.
+
+    The parameter was read as its default whatever the call handed, so
+    ``print`` handed in for ``open`` read as a read of ``open``, and ``open``
+    handed in for a parameter whose default is ``print`` passed.
+    """
+    source = f"def read(path, handlers=()):\n    return {call}\n"
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
     ("source", "found"),
     [
         pytest.param(

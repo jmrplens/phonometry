@@ -906,6 +906,42 @@ def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
 
 
+def test_a_keyword_a_starred_argument_may_leave_to_it_reaches_its_place(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument may unpack nothing, so a parameter it may fill is one
+    ``**options`` may fill too.
+
+    The parameters from the ``*`` argument's place on were read as filled by
+    it, so ``keep(*rest, **options)`` with ``rest`` empty and the caller's
+    array under ``"a"`` in ``options`` handed nothing of it to ``a``, which
+    ``keep`` returns, and the record that keeps the result passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return a
+
+        def rating(frequencies, levels):
+            rest = []
+            options = {"a": frequencies}
+            f = keep(*rest, **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def placed(frequencies, levels):
+            options = {"a": frequencies}
+            f = keep(np.array(levels), **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_helper_s_type_parameter_is_not_what_its_closure_holds(
     tmp_path: pathlib.Path,
 ) -> None:

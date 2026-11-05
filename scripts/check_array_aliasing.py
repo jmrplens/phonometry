@@ -3414,7 +3414,8 @@ def bind(
 
     From *spread*, the place of the first ``*`` argument, on, the number of
     values the call hands is unknown: that argument and every one after it
-    may land in any place from its own on, or in ``*args``.
+    may land in any place from its own on, or in ``*args``, and a place they
+    may leave unfilled is one a keyword or ``**options`` may fill.
     """
     spec = function.node.args
     positional = [a.arg for a in (*spec.posonlyargs, *spec.args)]
@@ -3423,10 +3424,12 @@ def bind(
     mapping: dict[str, Value] = {}
     extra: list[Value] = []
     beyond: list[Value] = []
+    maybe: set[str] = set()
     for index, value in enumerate(arguments):
         if spread is not None and index >= spread:
             for name in positional[spread:]:
                 mapping[name] = union(mapping.get(name, _CLEAN), value)
+            maybe.update(positional[spread:])
             beyond.append(value)
         elif index < len(positional):
             mapping[positional[index]] = value
@@ -3448,10 +3451,11 @@ def bind(
             mapping[keyword] = value
         else:
             spill.append(value)
-    # ``**options`` can only reach the parameters nothing else has filled.
+    # ``**options`` can only reach the parameters nothing else has filled,
+    # or that only a ``*`` argument, which may unpack nothing, may fill.
     for value in unpacked:
-        for parameter in names - set(mapping):
-            mapping[parameter] = flat(value)
+        for parameter in names - (set(mapping) - maybe):
+            mapping[parameter] = union(mapping.get(parameter, _CLEAN), flat(value))
         spill.append(value)
     if spec.kwarg is not None:
         mapping[spec.kwarg.arg] = union(_CLEAN, *spill)

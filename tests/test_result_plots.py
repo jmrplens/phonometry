@@ -48,7 +48,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from ast_scan import reads_type_checking
+from ast_scan import for_the_type_checker
 from result_factories import (
     FS,
     _acoustic_centre,
@@ -302,23 +302,23 @@ if TYPE_CHECKING:
 def _runtime_matplotlib_imports(tree: ast.Module) -> list[ast.AST]:
     """The imports of matplotlib in *tree* that run when the module is imported.
 
-    Imports inside a function body are lazy; imports under an ``if
-    TYPE_CHECKING:`` guard never run at import time, where the name holds the
-    flag of ``typing`` (:func:`ast_scan.reads_type_checking`). Both are
-    allowed; a plain module-scope runtime import of matplotlib is not.
+    Imports inside a function body are lazy; imports in the branch of a test
+    on ``TYPE_CHECKING`` that never runs, the body of ``if TYPE_CHECKING:`` or
+    the ``else`` of ``if not TYPE_CHECKING:``, never run at import time, where
+    the name holds the flag of ``typing`` (:func:`ast_scan.for_the_type_checker`).
+    Both are allowed; a plain module-scope runtime import of matplotlib, the
+    other branch's among them, is not.
     """
-    allowed: set[ast.AST] = set()
+    allowed: set[int] = set(for_the_type_checker(tree))
     for node in ast.walk(tree):
-        is_func = isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        is_typecheck = isinstance(node, ast.If) and reads_type_checking(tree, node.test)
-        if is_func or is_typecheck:
-            allowed.update(ast.walk(node))
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            allowed.update(id(inner) for inner in ast.walk(node))
     found: list[ast.AST] = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             module = getattr(node, "module", None) or ""
             names = [module, *[a.name for a in node.names]]
-            if any("matplotlib" in n for n in names) and node not in allowed:
+            if any("matplotlib" in n for n in names) and id(node) not in allowed:
                 found.append(node)
     return found
 
@@ -342,6 +342,22 @@ def test_plotting_module_has_no_toplevel_matplotlib_import() -> None:
         ("def f():\n    import matplotlib\n", False),
         ("TYPE_CHECKING = True\nif TYPE_CHECKING:\n    import matplotlib\n", True),
         ("import matplotlib\n", True),
+        # The branch the program runs is read as running: the ``else`` of the
+        # guard, and the body of a negated one.
+        (
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n    pass\nelse:\n    import matplotlib\n",
+            True,
+        ),
+        (
+            "from typing import TYPE_CHECKING\nif not TYPE_CHECKING:\n    import matplotlib\n",
+            True,
+        ),
+        (
+            "from typing import TYPE_CHECKING\n"
+            "if not TYPE_CHECKING:\n    pass\nelse:\n    import matplotlib\n",
+            False,
+        ),
     ],
 )
 def test_the_runtime_import_reader_runs_a_block_on_a_rebound_name(
@@ -350,6 +366,11 @@ def test_the_runtime_import_reader_runs_a_block_on_a_rebound_name(
     """The reader behind the check above takes an ``if TYPE_CHECKING:`` block
     for one that never runs only where the name holds the flag of ``typing``:
     a module that binds it to ``True`` runs the import.
+
+    Of a test on the flag, only the branch that never runs is exempt: every
+    node under the ``if`` was, its ``else`` too, so an import there that runs
+    at import time passed, and the ``else`` of ``if not TYPE_CHECKING:``,
+    which never runs, was refused.
     """
     assert bool(_runtime_matplotlib_imports(ast.parse(source))) is runs
 

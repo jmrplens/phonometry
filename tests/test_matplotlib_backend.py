@@ -25,7 +25,7 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from ast_scan import reads_type_checking
+from ast_scan import is_type_checking_block, what_never_runs, what_runs
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -81,7 +81,7 @@ def _eager_matplotlib_imports(
     ``if not TYPE_CHECKING:`` runs exactly when the guard does not, ``if
     TYPE_CHECKING or enabled:`` runs whenever ``enabled`` is true, and a module
     that binds ``TYPE_CHECKING`` to anything else may run the block
-    (:func:`ast_scan.reads_type_checking`). Everything else at module
+    (:func:`ast_scan.is_type_checking_block`). Everything else at module
     scope runs the moment the package is imported, including a class body and
     the branches of a runtime ``if``, a ``try``, a ``with``, a loop or a
     ``match`` -- so this descends into those rather than assuming a bare
@@ -97,10 +97,15 @@ def _eager_matplotlib_imports(
         if _imports_matplotlib(node):
             if not guarded:
                 eager.append(node.lineno)
+        elif isinstance(node, ast.If) and is_type_checking_block(node, tree):
+            # Only the branch a type checker alone reads is deferred: the body
+            # of the guard, or the ``else`` of a negated one.
+            eager += _eager_matplotlib_imports(
+                what_never_runs(node), tree, guarded=True
+            )
+            eager += _eager_matplotlib_imports(what_runs(node), tree, guarded=guarded)
         elif isinstance(node, ast.If):
-            # ``else`` is the runtime branch of a TYPE_CHECKING guard.
-            deferred = guarded or reads_type_checking(tree, node.test)
-            eager += _eager_matplotlib_imports(node.body, tree, guarded=deferred)
+            eager += _eager_matplotlib_imports(node.body, tree, guarded=guarded)
             eager += _eager_matplotlib_imports(node.orelse, tree, guarded=guarded)
         elif isinstance(node, ast.Try):
             for block in (
@@ -159,6 +164,11 @@ _PLACEMENTS = [
         "guard's else",
         "if TYPE_CHECKING:\n    pass\nelse:\n    import matplotlib\n",
         True,
+    ),
+    (
+        "negated guard's else",
+        "if not TYPE_CHECKING:\n    pass\nelse:\n    import matplotlib\n",
+        False,
     ),
     ("for body", "for i in x:\n    import matplotlib\n", True),
     ("for else", "for i in x:\n    pass\nelse:\n    import matplotlib\n", True),

@@ -88,12 +88,13 @@ import ast
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
     assigned_value,
     assignment_target,
     binding_of,
+    bindings_by_name,
     empty_type_checking_bodies,
     global_bindings,
     is_type_checking_block,
@@ -196,12 +197,22 @@ class Alias:
     target: ast.Name | ast.NamedExpr
 
 
-#: What a statement binds a name to: a function or a class it defines, what
-#: it imports, or what an assignment of a name binds it to.
-_Bound = _DefinitionNode | Binding | Alias
+@dataclass(frozen=True, eq=False)
+class Opaque:
+    """What any other binding of a name binds it to (a lambda, a call's
+    result, a loop's target): nothing the tree defines, which ends whatever
+    the name stood for before it.
+    """
 
-#: A statement, or the name an assignment binds, with what it binds the name to.
-_Written = tuple[ast.stmt | ast.Name | ast.NamedExpr, _Bound]
+
+#: What a statement binds a name to: a function or a class it defines, what
+#: it imports, what an assignment of a name binds it to, or nothing the tree
+#: defines.
+_Bound = _DefinitionNode | Binding | Alias | Opaque
+
+#: A statement, or the node of another binding of a name (an assignment's
+#: target, a loop's), with what it binds the name to.
+_Written = tuple[ast.AST, _Bound]
 
 
 @dataclass(eq=False)
@@ -411,25 +422,65 @@ def _import_bindings(module: Module, node: ast.AST) -> dict[str, Binding]:
 
 
 def _scope_names(
-    module: Module, body: list[ast.stmt]
+    module: Module, scope: ast.Module | _FunctionNode
 ) -> tuple[dict[str, list[_Written]], list[_DefinitionNode]]:
-    """Every ``def``, ``class`` and import of each name *body* binds, in the
+    """Every ``def``, ``class`` and import of each name *scope* binds, in the
     order of the source, and every function and class it defines.
 
-    Which of them a call reaches is read where the call runs
+    Such a name is read with every other binding of it in *scope*
+    (:func:`ast_scan.bindings_by_name`), and so is one an assignment of a
+    name or a dotted one alone binds at the top of the module: an alias in
+    a function stands for what its value names (:class:`Alias`), as one at
+    the top does (:func:`_module_aliases`), and any other binding for
+    nothing the tree defines (:class:`Opaque`), so a lambda after an import
+    ends it. Which of them a call reaches is read where the call runs
     (:func:`_standing`).
     """
-    definitions = list(_definitions(body, module.node))
+    top = isinstance(scope, ast.Module)
+    definitions = list(_definitions(scope.body, module.node))
     written: dict[str, list[_Written]] = {}
     for definition in definitions:
         written.setdefault(definition.name, []).append((definition, definition))
-    for node in _own_nodes(body):
+    for node in _own_nodes(scope.body):
         if isinstance(node, ast.Import | ast.ImportFrom):
             for name, binding in _import_bindings(module, node).items():
                 written.setdefault(name, []).append((node, binding))
+    for name, nodes in bindings_by_name(scope).items():
+        aliases = [node for node in nodes if _aliases_a_name(node, module.node)]
+        if name not in written and not (top and aliases):
+            continue
+        for node in nodes:
+            if isinstance(node, _DefinitionNode | ast.Import | ast.ImportFrom):
+                continue
+            if node not in aliases:
+                written.setdefault(name, []).append((node, Opaque()))
+            elif not top:
+                written[name].append((node, Alias(module, node)))
     for pairs in written.values():
-        pairs.sort(key=lambda pair: (pair[0].lineno, pair[0].col_offset))
+        pairs.sort(key=lambda pair: _position(pair[0]))
     return written, definitions
+
+
+def _position(node: ast.AST) -> tuple[int, int]:
+    """Where *node* is written: its line and its column."""
+    return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
+
+
+def _aliases_a_name(
+    node: ast.AST, root: ast.AST
+) -> TypeGuard[ast.Name | ast.NamedExpr]:
+    """Whether *node*, under *root*, is a name an assignment binds to a name
+    or a dotted one alone (``draw = axis``, ``label = helpers.axis``), or an
+    assignment expression that does (``(draw := axis)``).
+    """
+    if assignment_target(node) is None or not isinstance(
+        node, ast.Name | ast.NamedExpr
+    ):
+        return False
+    value = assigned_value(root, node)
+    while isinstance(value, ast.Attribute):
+        value = value.value
+    return isinstance(value, ast.Name)
 
 
 def _standing(
@@ -538,7 +589,7 @@ def _build_scope(
             a.arg: default for a, default in with_defaults(node) if default is not None
         },
     )
-    scope.names, scope.definitions = _scope_names(module, node.body)
+    scope.names, scope.definitions = _scope_names(module, node)
     # As Python scopes them: a comprehension's variable and a lambda's
     # parameter are not the function's (:func:`_bound_inside`).
     names = own_names(node)
@@ -610,13 +661,7 @@ def _module_aliases(tree: ast.Module) -> dict[str, list[ast.Name | ast.NamedExpr
         *(node for nodes in global_bindings(tree).values() for node in nodes),
     ]
     for node in candidates:
-        target = assignment_target(node)
-        if target is None or not isinstance(node, ast.Name | ast.NamedExpr):
-            continue
-        value = assigned_value(tree, node)
-        while isinstance(value, ast.Attribute):
-            value = value.value
-        if isinstance(value, ast.Name):
+        if _aliases_a_name(node, tree) and (target := assignment_target(node)):
             found.setdefault(target.id, []).append(node)
     return found
 
@@ -642,12 +687,12 @@ class Tree:
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
         self._aliasing: set[int] = set()
         for module in modules.values():
-            module.names, module.definitions = _scope_names(module, module.node.body)
+            module.names, module.definitions = _scope_names(module, module.node)
             _add_global_bindings(module)
             for name, targets in _module_aliases(module.node).items():
                 written = module.names.setdefault(name, [])
                 written.extend((target, Alias(module, target)) for target in targets)
-                written.sort(key=lambda pair: (pair[0].lineno, pair[0].col_offset))
+                written.sort(key=lambda pair: _position(pair[0]))
             module.speaks = any(
                 module.name == name or module.name.startswith(f"{name}.")
                 for name in LANGUAGE_PASSES
@@ -765,6 +810,8 @@ class Tree:
             return self.bounds(bound, seen)
         if isinstance(bound, Alias):
             return self._aliased(bound)
+        if isinstance(bound, Opaque):
+            return []
         found = self._definition(bound)
         return [found] if found is not None else []
 

@@ -576,6 +576,22 @@ def _aliases_a_name(
     return isinstance(value, ast.Name)
 
 
+def _names_a_helper(node: ast.AST, root: ast.AST) -> bool:
+    """Whether *node*, a binding under *root*, may bind its name to a helper:
+    a ``def``, a ``class``, an import, or an assignment of a dotted name
+    alone (:func:`_aliases_a_name`). Any other binding, a lambda, a call's
+    result or a loop's target, binds it to what the guard cannot name.
+    """
+    return isinstance(
+        node,
+        ast.FunctionDef
+        | ast.AsyncFunctionDef
+        | ast.ClassDef
+        | ast.Import
+        | ast.ImportFrom,
+    ) or _aliases_a_name(node, root)
+
+
 def _spelled(func: ast.expr, head: str) -> str:
     """The dotted path a name or an attribute chain is written as, with its
     first name read as *head*.
@@ -1447,6 +1463,8 @@ class Package:
         package = self._package_of(module)
         targets: list[str] = []
         for statement in live_bindings(self.trees[module], statements, call):
+            if not _names_a_helper(statement, self.trees[module]):
+                continue
             if assignment_target(statement) is not None:
                 heads = self._aliased(module, statement, depth + 1)
             elif isinstance(statement, ast.Import | ast.ImportFrom):
@@ -1555,30 +1573,20 @@ class Package:
         return tuple(dict.fromkeys(found))
 
     def _top_statements(self, module: str) -> dict[str, list[ast.AST]]:
-        """The ``def``, ``class`` and import statements of a module that bind
-        a name at its top, through its compound statements, and the names an
-        assignment of a dotted name binds there (:meth:`_aliased`), by that
-        name, in the order of the source.
+        """Each name a ``def``, a ``class``, an import or an assignment of a
+        dotted name (:meth:`_aliased`) binds at the top of a module, through
+        its compound statements, with every binding of it there
+        (:func:`ast_scan.bindings_by_name`), in the order of the source: one
+        of another kind, a lambda or a loop's target, stands for no helper,
+        and ends what came before it.
         """
         if module not in self._top:
-            found: dict[str, list[ast.AST]] = {}
             tree = self.trees[module]
-            for node in scope_nodes(tree):
-                if isinstance(node, ast.Import | ast.ImportFrom):
-                    names = imported_names(node)
-                elif isinstance(
-                    node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
-                ):
-                    names = {node.name}
-                elif (target := assignment_target(node)) is not None and (
-                    _aliases_a_name(node, tree)
-                ):
-                    names = {target.id}
-                else:
-                    continue
-                for name in names:
-                    found.setdefault(name, []).append(node)
-            self._top[module] = found
+            self._top[module] = {
+                name: list(nodes)
+                for name, nodes in bindings_by_name(tree).items()
+                if any(_names_a_helper(node, tree) for node in nodes)
+            }
         return self._top[module]
 
     def _bound_in(

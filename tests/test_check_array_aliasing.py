@@ -934,6 +934,83 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
     }
 
 
+def test_a_later_binding_of_another_kind_ends_an_alias(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``keep = handing_back`` then ``keep = lambda a: a.copy()`` leaves the
+    name holding the lambda, which the guard cannot name, at the top of the
+    module and read from another; a loop's target or a call's result ends the
+    alias as well.
+
+    Only a ``def``, a ``class``, an import and an alias were read as bindings
+    of the top, so the alias stood past the lambda, a call of the name reached
+    the function that hands its argument back, and the record that keeps the
+    copy was refused.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        lam = handing_back
+        lam = lambda a: np.array(a)
+
+        looped = handing_back
+        for looped in [np.copy]:
+            pass
+
+        made = handing_back
+        made = np.vectorize(np.copy)
+
+        standing = handing_back
+
+        def through_a_lambda(frequencies, levels):
+            f = lam(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_loop(frequencies, levels):
+            f = looped(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_call(frequencies, levels):
+            f = made(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_standing_alias(frequencies, levels):
+            f = standing(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        keep = lambda a: a.copy()
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import keep
+        from .results import BandResult
+
+        def through_an_import(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_attribute(frequencies, levels):
+            f = helpers.keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_a_standing_alias", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     tmp_path: pathlib.Path,
 ) -> None:

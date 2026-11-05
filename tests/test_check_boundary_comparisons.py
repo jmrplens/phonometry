@@ -1234,6 +1234,45 @@ def test_a_keyword_fills_no_positional_only_parameter(
     assert _texts(mapped, tmp_path) == []
 
 
+@pytest.mark.parametrize(
+    "rebinding",
+    [
+        "fn = _range\nfn = lambda levels: 0.0\n",
+        "fn = _range\nfn = make()\n",
+        "fn = _range\nfor fn in [print]:\n    pass\n",
+        "def fn(levels):\n    return max(levels) - min(levels)\nfn = lambda levels: 0.0\n",
+        "def fn(levels):\n    return max(levels) - min(levels)\nclass fn:\n    pass\n",
+    ],
+    ids=["lambda", "call", "loop", "def-then-lambda", "def-then-class"],
+)
+def test_a_later_binding_of_another_kind_ends_a_function_at_the_top(
+    tmp_path: pathlib.Path, rebinding: str
+) -> None:
+    """A lambda, a call's result, a loop's target or a ``class`` bound to the
+    name at the top of the module after an alias or a ``def`` of it leaves
+    the name holding what the guard cannot read, so a call of it reaches no
+    function of the module.
+
+    Only a ``def``, an import and an alias were read as bindings of the top,
+    so the alias or the ``def`` stood past the lambda, and the comparison of
+    what the lambda returns was refused as the spread's.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        f"{rebinding}"
+        "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(source, tmp_path) == []
+    standing = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        "fn = lambda levels: 0.0\nfn = _range\n"
+        "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(standing, tmp_path) == ["fn(levels) <= _SPREAD_DB"]
+
+
 def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(
     tmp_path: pathlib.Path,
 ) -> None:

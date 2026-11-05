@@ -1241,6 +1241,72 @@ def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
     ]
 
 
+def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A lambda, a call's result, a loop's target or a ``class`` bound to the
+    name at the top of the module after an alias or a ``def`` of it leaves the
+    name holding what the guard cannot read, there and read from another
+    module, so a call of it reaches no helper.
+
+    Only a ``def``, a ``class``, an import and an alias were read as bindings
+    of the top, so the alias of the polar helper stood past the lambda, and
+    the plain ``plot`` that returns what the lambda makes was refused.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        _lambda = _polar
+        _lambda = lambda: plt.subplots()[1]
+
+        _looped = _polar
+        for _looped in [plt.gca]:
+            pass
+
+        _made = _polar
+        _made = make_plain()
+
+        def _defined():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        _defined = lambda: plt.subplots()[1]
+
+        _standing = _polar
+
+        def plot_lambda(result: object) -> Axes:
+            return _lambda()
+
+        def plot_looped(result: object) -> Axes:
+            return _looped()
+
+        def plot_made(result: object) -> Axes:
+            return _made()
+
+        def plot_defined(result: object) -> Axes:
+            return _defined()
+
+        def plot_standing(result: object) -> Axes:
+            return _standing()
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import _lambda
+
+        def plot_imported(result: object) -> Axes:
+            return _lambda()
+
+        def plot_attribute(result: object) -> Axes:
+            return helpers._lambda()
+        """,
+    )
+    assert sorted(refused) == ["plot_standing"]
+
+
 def test_a_generic_class_s_type_parameter_is_no_function_of_the_module(
     tmp_path: pathlib.Path,
 ) -> None:

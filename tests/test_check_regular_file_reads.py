@@ -283,6 +283,46 @@ def test_a_default_is_what_its_name_holds_where_the_def_runs(
 
 
 @pytest.mark.parametrize(
+    ("binding", "found"),
+    [
+        pytest.param("opener = io.open\n", [("read", _OWN)], id="standing-alias"),
+        pytest.param("opener = io.open\nopener = lambda path: None\n", [], id="lambda"),
+        pytest.param("opener = io.open\nopener = make()\n", [], id="call"),
+        pytest.param(
+            "opener = io.open\nfor opener in [print]:\n    pass\n", [], id="loop"
+        ),
+        pytest.param(
+            "from io import open as opener\nopener = lambda path: None\n",
+            [],
+            id="import-then-lambda",
+        ),
+        pytest.param(
+            "opener = print\nfrom io import open as opener\n",
+            [("read", _OWN)],
+            id="alias-then-import",
+        ),
+    ],
+)
+def test_a_later_binding_of_another_kind_ends_an_alias(
+    tmp_path: pathlib.Path, binding: str, found: list[tuple[str, str]]
+) -> None:
+    """A lambda, a call's result or a loop's target bound to a name after an
+    import or an alias of it leaves the name standing for nothing the guard
+    can name, and an import after an alias stands over it.
+
+    A scope's table of names took its imports and then its assignments of a
+    dotted name, whatever their order, and nothing else, so ``io.open`` stood
+    past the lambda and a call of it was refused as a read, and an alias
+    stood over the import after it.
+    """
+    source = (
+        f"import io\n{binding}\n"
+        "def read(path):\n    with opener(path) as fh:\n        return fh.read()\n"
+    )
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
     "source",
     [
         pytest.param(

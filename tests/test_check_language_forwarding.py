@@ -574,6 +574,80 @@ def test_an_import_a_function_makes_under_global_may_be_what_a_call_reaches(
     ]
 
 
+def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A lambda, a call's result or a loop's target bound to the name after
+    an alias, an import or a ``def`` of it leaves the name holding what the
+    guard cannot read, at the top of a module and in a function, and an
+    alias in the function replaces the import before it.
+
+    Only a ``def``, a ``class``, an import and an alias at the top were read
+    as bindings, so the helper the name first stood for stood past the
+    lambda, and a call that draws nothing of it was refused for dropping its
+    language, or for dropping the language of a helper the alias replaced.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis, fmt
+
+            by_lambda = axis
+            by_lambda = lambda ax: None
+
+            by_call = axis
+            by_call = make()
+
+            by_loop = axis
+            for by_loop in [print]:
+                pass
+
+            from .helpers import axis as imported
+            imported = lambda ax: None
+
+            standing = axis
+
+
+            def plot_lambda(result, ax, language="en"):
+                by_lambda(ax)
+
+
+            def plot_call(result, ax, language="en"):
+                by_call(ax)
+
+
+            def plot_loop(result, ax, language="en"):
+                by_loop(ax)
+
+
+            def plot_imported(result, ax, language="en"):
+                imported(ax)
+
+
+            def plot_standing(result, ax, language="en"):
+                standing(ax)
+
+
+            def plot_local_lambda(result, ax, language="en"):
+                from .helpers import axis as draw
+                draw = lambda ax: None
+                draw(ax)
+
+
+            def plot_local_alias(result, ax, language="en"):
+                from .helpers import axis as draw
+                draw = fmt
+                draw(ax)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_local_alias", "pkg.helpers.fmt"),
+        ("plot_standing", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

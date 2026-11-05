@@ -709,17 +709,18 @@ class Tree:
         self.imports[module] = imports
         # Read again, in the order of the source, from the module's own
         # statements alone: an import inside a function, read last by the
-        # walk above, binds the name for that function.
-        top: dict[str, list[ast.AST]] = {}
-        own = [
-            n
-            for n in scope_nodes(tree)
-            if isinstance(n, _TOP_BINDINGS) or _aliases_a_name(n, tree)
-        ]
-        for node in sorted(own, key=_written_at):
-            for name in _bound_by(node):
-                top.setdefault(name, []).append(node)
-        self.top_bindings[module] = top
+        # walk above, binds the name for that function. A name the top binds
+        # to a function, a class, an import or an alias keeps every binding
+        # of it there, so one of another kind (a lambda, a loop's target, a
+        # call's result) ends what came before it and stands for nothing.
+        self.top_bindings[module] = {
+            name: list(nodes)
+            for name, nodes in bindings_by_name(tree).items()
+            if any(
+                isinstance(node, _TOP_BINDINGS) or _aliases_a_name(node, tree)
+                for node in nodes
+            )
+        }
         made: dict[str, list[ast.AST]] = {}
         for name, nodes in global_bindings(tree).items():
             statements: list[ast.AST] = [
@@ -3309,24 +3310,6 @@ def _aliases_a_name(
     while isinstance(value, ast.Attribute):
         value = value.value
     return isinstance(value, ast.Name)
-
-
-def _written_at(node: ast.AST) -> tuple[int, int]:
-    """Where *node* is written: its line and its column."""
-    return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
-
-
-def _bound_by(statement: ast.AST) -> set[str]:
-    """The names a ``def``, a ``class``, an import or the name an assignment
-    stores in binds.
-    """
-    if (target := assignment_target(statement)) is not None:
-        return {target.id}
-    if isinstance(statement, ast.Import | ast.ImportFrom):
-        return imported_names(statement)
-    if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-        return {statement.name}
-    return set()
 
 
 def _live(

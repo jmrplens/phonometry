@@ -447,12 +447,14 @@ def _bound(
     around *holder*), or what it stands for in
     *written_in* (*outer* unless a class body lies between them) when
     no scope it is read in binds it; then the imports of the
-    scope as :func:`_imported` reads them, the relative ones from *package*;
-    then a name bound by an assignment to a dotted name (``snd = soundfile``,
-    ``reader = sf.read``) stands for what that name stands for, the
-    assignments taken in the order of the source. What the functions and
-    classes in *scope* bind is theirs, and what an ``if TYPE_CHECKING:``
-    block holds never runs, so it stands for nothing.
+    scope as :func:`_imported` reads them, the relative ones from *package*,
+    a name bound by an assignment to a dotted name (``snd = soundfile``,
+    ``reader = sf.read``) what that name stands for there, and a name any
+    other binding stores in (a lambda, a call's result, a loop's target)
+    nothing the guard can name, each binding taken in the order of the
+    source, so the last one written stands. What the functions and classes
+    in *scope* bind is theirs, and what an ``if TYPE_CHECKING:`` block holds
+    never runs, so it stands for nothing.
     """
     aliases = dict(outer)
     for name in own_names(scope).declared_global:
@@ -471,22 +473,43 @@ def _bound(
             )
             if held is not None:
                 aliases[parameter.arg] = held
-    assignments: list[tuple[str, list[str], tuple[int, int]]] = []
     checker = for_the_type_checker(scope)
+    written: list[tuple[tuple[int, int], ast.Import | ast.ImportFrom | _Alias]] = []
+    naming: set[int] = set()
     for node in _own_nodes(scope):
         if id(node) in checker:
             continue
         if isinstance(node, ast.Import | ast.ImportFrom):
-            aliases.update(_imported(node, package))
+            written.append(((node.lineno, node.col_offset), node))
+            naming.add(id(node))
         elif (
             isinstance(node, ast.Assign | ast.NamedExpr)
             and (target := _one_target(node)) is not None
             and (parts := _dotted(node.value)) is not None
         ):
-            assignments.append((target.id, parts, (node.lineno, node.col_offset)))
-    for name, parts, _place in sorted(assignments, key=lambda bound: bound[2]):
-        aliases[name] = _resolved(parts, aliases)
+            written.append(((node.lineno, node.col_offset), (target.id, parts)))
+            naming |= {id(node), id(target)}
+    for _place, bound in sorted(written, key=lambda entry: entry[0]):
+        if isinstance(bound, tuple):
+            aliases[bound[0]] = _resolved(bound[1], aliases)
+        else:
+            aliases.update(_imported(bound, package))
+    # A name an import or an alias binds, of whose bindings none that may
+    # stand once the scope has run is either (a lambda, a call's result, a
+    # loop's target or a ``del`` after it), stands for nothing.
+    for name, nodes in bindings_by_name(scope).items():
+        running = [node for node in nodes if id(node) not in checker]
+        named = [node for node in running if id(node) in naming]
+        if named and len(named) < len(running):
+            live = live_bindings(scope, running)
+            if not any(id(node) in naming for node in live):
+                aliases.pop(name, None)
     return aliases
+
+
+#: An assignment of a dotted name alone: the name it binds, and the dotted
+#: name's parts.
+_Alias = tuple[str, list[str]]
 
 
 def _one_target(node: ast.Assign | ast.NamedExpr) -> ast.Name | None:

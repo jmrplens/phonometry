@@ -136,7 +136,6 @@ from ast_scan import (
     empty_type_checking_bodies,
     for_the_type_checker,
     global_bindings,
-    imported_names,
     live_bindings,
     own_names,
     scope_nodes,
@@ -701,9 +700,11 @@ class Module:
         self.top_functions, self.top_live_imports = _top_bindings(
             self.tree, self.top_imports
         )
-        #: Every ``def`` and every import at the top of the module, by name,
-        #: which a function reads from its own ``def`` on (:meth:`top_at`).
-        self.top_defined, self.top_imported = _top_names(self.tree)
+        #: Every ``def`` at the top of the module, by name, which a function
+        #: reads from its own ``def`` on (:meth:`top_at`), and every other
+        #: binding of a name there that is no alias: an import, and what
+        #: stands for no function (:func:`_top_names`).
+        self.top_defined, self.top_others = _top_names(self.tree)
         #: The names an assignment of another name alone binds (``_spread =
         #: _range``), at the top of the module and under ``global`` in a
         #: function, by the name each binds (:meth:`_aliased`).
@@ -1002,7 +1003,7 @@ class Module:
         if node is None:
             return self.top_functions.get(name, ()), self.top_live_imports.get(name, [])
         return _top_live(
-            self.tree, self.top_defined, self.top_imported, self.top_imports, name, node
+            self.tree, self.top_defined, self.top_others, self.top_imports, name, node
         )
 
     def _top_with_aliases(
@@ -1010,15 +1011,15 @@ class Module:
     ) -> tuple[tuple[Function, ...], list[ast.ImportFrom]]:
         """:meth:`top_at` for a name an assignment of another name binds at
         the top of the module or under ``global`` (:attr:`top_aliases`): its
-        ``def`` statements, its imports and those assignments are read in
-        one order (:func:`ast_scan.live_bindings`), and each assignment that
-        may stand for it stands for the functions its value names
+        ``def`` statements, its other bindings and those assignments are read
+        in one order (:func:`ast_scan.live_bindings`), and each assignment
+        that may stand for it stands for the functions its value names
         (:meth:`_aliased`), as one a function makes under ``global`` may.
         """
         defined = self.top_defined.get(name, ())
         aliases = self.top_aliases.get(name, [])
         live = live_bindings(
-            self.tree, [*defined, *self.top_imported.get(name, []), *aliases], node
+            self.tree, [*defined, *self.top_others.get(name, []), *aliases], node
         )
         inside_defined, inside_imported = _made_under_global(self.tree)
         functions = (
@@ -2142,20 +2143,31 @@ def _aliases_a_name(
 
 def _top_names(
     tree: ast.Module,
-) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.stmt]]]:
-    """Every ``def`` and every import at the top of *tree*, by the name each binds."""
-    imported: dict[str, list[ast.stmt]] = {}
-    for node in scope_nodes(tree):
-        if isinstance(node, ast.Import | ast.ImportFrom):
-            for name in imported_names(node):
-                imported.setdefault(name, []).append(node)
-    return _by_name(_own_definitions(tree)), imported
+) -> tuple[dict[str, tuple[Function, ...]], dict[str, list[ast.AST]]]:
+    """Every ``def`` at the top of *tree*, by the name each binds, and every
+    other binding of a name there that is no alias of another name
+    (:func:`ast_scan.bindings_by_name`): an import, a ``class``, an
+    assignment of anything else, a loop's target. Each is read beside the
+    ``def`` statements and the aliases of its name, and one that is no
+    import stands for no function, so it ends what came before it.
+    """
+    others: dict[str, list[ast.AST]] = {}
+    for name, nodes in bindings_by_name(tree).items():
+        rest = [
+            node
+            for node in nodes
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+            and not _aliases_a_name(node, tree)
+        ]
+        if rest:
+            others[name] = rest
+    return _by_name(_own_definitions(tree)), others
 
 
 def _top_live(
     tree: ast.Module,
     defined: Mapping[str, tuple[Function, ...]],
-    imported: Mapping[str, list[ast.stmt]],
+    others: Mapping[str, list[ast.AST]],
     relative: Mapping[str, list[ast.ImportFrom]],
     name: str,
     point: ast.AST | None,
@@ -2163,15 +2175,17 @@ def _top_live(
     """The functions and the relative imports at the top of *tree* that
     *name* may hold at *point*, or once the module has run when it is None.
 
-    Its ``def`` statements and its imports of the name are read in one order
-    (:func:`ast_scan.live_bindings`): an import after a ``def`` replaces it,
-    a ``def`` after an import replaces that, one in each branch of an ``if``
-    is either, and a read in a function meets every one from its ``def`` on.
+    Its ``def`` statements and its other bindings (:func:`_top_names`) are
+    read in one order (:func:`ast_scan.live_bindings`): an import after a
+    ``def`` replaces it, a ``def`` after an import replaces that, a lambda
+    or a ``class`` after either leaves no function, one in each branch of
+    an ``if`` is either, and a read in a function meets every one from its
+    ``def`` on.
     A ``def`` or a relative import that a function makes of the name under
     ``global`` (:func:`_made_under_global`) may stand at any point, since
     that function may have run before it.
     """
-    live = live_bindings(tree, [*defined.get(name, ()), *imported.get(name, [])], point)
+    live = live_bindings(tree, [*defined.get(name, ()), *others.get(name, [])], point)
     kept = tuple(node for node in defined.get(name, ()) if node in live)
     imports = [node for node in relative.get(name, []) if node in live]
     inside_defined, inside_imported = _made_under_global(tree)
@@ -2215,13 +2229,13 @@ def _top_bindings(
     A name none of whose functions is live has no entry among the functions,
     so a re-export is followed through its import.
     """
-    defined, imported = _top_names(tree)
+    defined, others = _top_names(tree)
     functions: dict[str, tuple[Function, ...]] = {}
     imports: dict[str, list[ast.ImportFrom]] = {}
     inside_defined, inside_imported = _made_under_global(tree)
     names = defined.keys() | relative.keys() | inside_defined.keys()
     for name in names | inside_imported.keys():
-        kept, live_imports = _top_live(tree, defined, imported, relative, name, None)
+        kept, live_imports = _top_live(tree, defined, others, relative, name, None)
         if kept:
             functions[name] = kept
         imports[name] = live_imports

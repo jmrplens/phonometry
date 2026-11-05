@@ -198,17 +198,31 @@ class Alias:
 
 
 @dataclass(frozen=True, eq=False)
+class Computed:
+    """What an assignment of a call's result alone (``draw = partial(axis)``,
+    ``(draw := partial(axis))``) binds its *target*, the name or the
+    assignment expression, to, in *scope*, the module or the function it is
+    written in: what the call makes, read where the assignment runs
+    (:meth:`Tree._computed_callee`).
+    """
+
+    module: Module
+    target: ast.Name | ast.NamedExpr
+    scope: ast.AST
+
+
+@dataclass(frozen=True, eq=False)
 class Opaque:
-    """What any other binding of a name binds it to (a lambda, a call's
-    result, a loop's target): nothing the tree defines, which ends whatever
-    the name stood for before it.
+    """What any other binding of a name binds it to (a lambda, a loop's
+    target, a ``del``): nothing the tree defines, which ends whatever the
+    name stood for before it.
     """
 
 
 #: What a statement binds a name to: a function or a class it defines, what
-#: it imports, what an assignment of a name binds it to, or nothing the tree
-#: defines.
-_Bound = _DefinitionNode | Binding | Alias | Opaque
+#: it imports, what an assignment of a name or of a call's result binds it
+#: to, or nothing the tree defines.
+_Bound = _DefinitionNode | Binding | Alias | Computed | Opaque
 
 #: A statement, or the node of another binding of a name (an assignment's
 #: target, a loop's), with what it binds the name to.
@@ -347,7 +361,7 @@ class Finding:
         return f"{self.path}:{self.line}::{self.caller} -> {self.helper}"
 
 
-_Target = Scope | Class | ModuleRef | Local | None
+_Target = Scope | Class | ModuleRef | Local | Computed | None
 
 
 def _own_nodes(roots: Iterable[ast.AST]) -> Iterator[ast.AST]:
@@ -422,16 +436,22 @@ def _import_bindings(module: Module, node: ast.AST) -> dict[str, Binding]:
 
 
 def _scope_names(
-    module: Module, scope: ast.Module | _FunctionNode
+    module: Module,
+    scope: ast.Module | _FunctionNode,
+    holder: ast.AST | None = None,
 ) -> tuple[dict[str, list[_Written]], list[_DefinitionNode]]:
     """Every ``def``, ``class`` and import of each name *scope* binds, in the
-    order of the source, and every function and class it defines.
+    order of the source, and every function and class it defines; *holder*
+    is the module or the class whose body a scope made to read that body
+    holds (:meth:`Tree._define_body`), whose bindings are its own.
 
     Such a name is read with every other binding of it in *scope*
     (:func:`ast_scan.bindings_by_name`), and so is one an assignment of a
     name or a dotted one alone binds at the top of the module: an alias in
     a function stands for what its value names (:class:`Alias`), as one at
-    the top does (:func:`_module_aliases`), and any other binding for
+    the top does (:func:`_module_aliases`), an assignment of a call's result
+    for what the call makes (:class:`Computed`), so a ``functools.partial``
+    of the helper the name held still reaches it, and any other binding for
     nothing the tree defines (:class:`Opaque`), so a lambda after an import
     ends it. Which of them a call reaches is read where the call runs
     (:func:`_standing`).
@@ -445,14 +465,25 @@ def _scope_names(
         if isinstance(node, ast.Import | ast.ImportFrom):
             for name, binding in _import_bindings(module, node).items():
                 written.setdefault(name, []).append((node, binding))
-    for name, nodes in bindings_by_name(scope).items():
+    every = bindings_by_name(holder or scope) if top or written else {}
+    for name, nodes in every.items():
+        if name not in written and not top:
+            continue
         aliases = [node for node in nodes if _aliases_a_name(node, module.node)]
-        if name not in written and not (top and aliases):
+        if (
+            name not in written
+            and not aliases
+            and not any(_computes(node, module.node) for node in nodes)
+        ):
             continue
         for node in nodes:
             if isinstance(node, _DefinitionNode | ast.Import | ast.ImportFrom):
                 continue
-            if node not in aliases:
+            if _computes(node, module.node):
+                written.setdefault(name, []).append(
+                    (node, Computed(module, node, scope))
+                )
+            elif node not in aliases:
                 written.setdefault(name, []).append((node, Opaque()))
             elif not top:
                 written[name].append((node, Alias(module, node)))
@@ -481,6 +512,18 @@ def _aliases_a_name(
     while isinstance(value, ast.Attribute):
         value = value.value
     return isinstance(value, ast.Name)
+
+
+def _computes(node: ast.AST, root: ast.AST) -> TypeGuard[ast.Name | ast.NamedExpr]:
+    """Whether *node*, under *root*, is a name an assignment binds to a
+    call's result alone (``draw = partial(axis)``), or an assignment
+    expression that does.
+    """
+    return (
+        isinstance(node, ast.Name | ast.NamedExpr)
+        and assignment_target(node) is not None
+        and isinstance(assigned_value(root, node), ast.Call)
+    )
 
 
 def _standing(
@@ -572,8 +615,12 @@ def _build_scope(
     parent: Scope | None,
     owner: Class | None,
     qualname: str,
+    holder: ast.AST | None = None,
 ) -> Scope:
-    """Read one function's parameters, locals, imports, calls and nested defs."""
+    """Read one function's parameters, locals, imports, calls and nested defs;
+    *holder* is the module or the class a scope made of its body stands for
+    (:func:`_scope_names`).
+    """
     args = node.args
     every = [*args.posonlyargs, *args.args, *args.kwonlyargs]
     every += [a for a in (args.vararg, args.kwarg) if a is not None]
@@ -589,7 +636,7 @@ def _build_scope(
             a.arg: default for a, default in with_defaults(node) if default is not None
         },
     )
-    scope.names, scope.definitions = _scope_names(module, node)
+    scope.names, scope.definitions = _scope_names(module, node, holder)
     # As Python scopes them: a comprehension's variable and a lambda's
     # parameter are not the function's (:func:`_bound_inside`).
     names = own_names(node)
@@ -686,6 +733,10 @@ class Tree:
         self.methods: dict[str, list[Scope]] = {}
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
         self._aliasing: set[int] = set()
+        self._computing: set[int] = set()
+        #: The scope of each module body and class body read as a function
+        #: of its own (:meth:`_define_body`), by the node that stands for it.
+        self._bodies: dict[ast.AST, Scope] = {}
         for module in modules.values():
             module.names, module.definitions = _scope_names(module, module.node)
             _add_global_bindings(module)
@@ -699,7 +750,7 @@ class Tree:
             )
             for definition in module.definitions:
                 self._define(definition, module, None, None, "")
-            self._define_body(module.node.body, module, None, None, "<module>")
+            self._define_body(module.node, module, None, None, "<module>")
 
     @classmethod
     def load(
@@ -742,9 +793,7 @@ class Tree:
             self.classes[node] = klass
             for member in klass.members.values():
                 self._define(member, module, parent, klass, qualname + ".", hidden)
-            self._define_body(
-                node.body, module, parent, None, qualname + ".<class>", hidden
-            )
+            self._define_body(node, module, parent, None, qualname + ".<class>", hidden)
             return
         scope = _build_scope(module, node, parent, owner, qualname)
         scope.locals |= hidden | own_names(node).type_parameters
@@ -757,7 +806,7 @@ class Tree:
 
     def _define_body(
         self,
-        body: list[ast.stmt],
+        holder: ast.Module | ast.ClassDef,
         module: Module,
         parent: Scope | None,
         owner: Class | None,
@@ -786,14 +835,15 @@ class Tree:
                 kwarg=None,
                 defaults=[],
             ),
-            body=list(body),
+            body=list(holder.body),
             decorator_list=[],
             returns=None,
             type_params=[],
         )
-        scope = _build_scope(module, node, parent, owner, qualname)
+        scope = _build_scope(module, node, parent, owner, qualname, holder)
         scope.locals |= hidden
         self.scopes.append(scope)
+        self._bodies[node] = scope
 
     # -- names ------------------------------------------------------------
 
@@ -810,6 +860,8 @@ class Tree:
             return self.bounds(bound, seen)
         if isinstance(bound, Alias):
             return self._aliased(bound)
+        if isinstance(bound, Computed):
+            return [bound]
         if isinstance(bound, Opaque):
             return []
         found = self._definition(bound)
@@ -1137,7 +1189,7 @@ class Tree:
             ]
         elif isinstance(func, ast.Call):
             # ``functools.partial(helper, ax)(...)``, called where it is built.
-            found = [self._partial_callee(func, scope)]
+            found = [self._partial_callee(func, scope, module)]
         elif isinstance(func, ast.Attribute):
             found = self._attribute_callees(call, func, scope)
         unique: list[Callee] = []
@@ -1155,6 +1207,8 @@ class Tree:
         if isinstance(target, Class):
             init = self.member(target, "__init__")
             return self._callee(init, bound=True) if init else None
+        if isinstance(target, Computed):
+            return self._computed_callee(target)
         if isinstance(target, Local):
             typed = self.type_of(func, scope)
             method = self.member(typed, "__call__") if typed else None
@@ -1177,6 +1231,8 @@ class Tree:
             for target in self.attributes(base.name, func.attr):
                 if isinstance(target, Scope):
                     found.append(self._callee(target, bound=False))
+                elif isinstance(target, Computed):
+                    found.append(self._computed_callee(target))
                 elif isinstance(target, Class):
                     init = self.member(target, "__init__")
                     found.append(self._callee(init, bound=True) if init else None)
@@ -1209,10 +1265,13 @@ class Tree:
         slot = self.slot(function, bound=bound)
         return Callee(function.label, (slot,)) if slot is not None else None
 
-    def _binding(self, name: str, scope: Scope) -> Binding | None:
-        """The import *name* is bound by, whether or not it is of this tree."""
-        current: Scope | None = scope
-        module = scope.module
+    def _binding(
+        self, name: str, scope: Scope | None, module: Module
+    ) -> Binding | None:
+        """The import *name* is bound by, whether or not it is of this tree,
+        in *scope*, or at the top of *module* when it is None.
+        """
+        current = scope
         while current is not None:
             written = current.names.get(name)
             if written:
@@ -1222,10 +1281,10 @@ class Tree:
             current = current.parent
         return _one_import(_standing(module, module.names.get(name, []), None))
 
-    def _is_partial(self, func: ast.expr, scope: Scope) -> bool:
+    def _is_partial(self, func: ast.expr, scope: Scope | None, module: Module) -> bool:
         """Whether *func* names ``functools.partial``, imported either way."""
         if isinstance(func, ast.Name):
-            binding = self._binding(func.id, scope)
+            binding = self._binding(func.id, scope, module)
             return (
                 binding is not None
                 and binding.module == "functools"
@@ -1234,7 +1293,7 @@ class Tree:
         if isinstance(func, ast.Attribute) and func.attr == "partial":
             if not isinstance(func.value, ast.Name):
                 return False
-            binding = self._binding(func.value.id, scope)
+            binding = self._binding(func.value.id, scope, module)
             return (
                 binding is not None
                 and binding.module == "functools"
@@ -1243,18 +1302,29 @@ class Tree:
         return False
 
     def _partial_callee(
-        self, call: ast.Call, scope: Scope, depth: int = 0
+        self,
+        call: ast.Call,
+        scope: Scope | None,
+        module: Module,
+        depth: int = 0,
+        point: ast.AST | None = None,
     ) -> Callee | None:
-        """``functools.partial(helper, ...)`` reduced to the helper it wraps.
+        """``functools.partial(helper, ...)`` reduced to the helper it wraps,
+        written in *scope*, or at the top of *module* when it is None, and
+        read where *point* reads it.
 
         The bound arguments shift the slot: ``partial(plot_x, result)`` leaves
         the language one place earlier than ``plot_x`` takes it. A partial that
         binds the language itself, or that spreads a mapping that may hold it,
         forwards it already and is not a call to report.
         """
-        if depth > _DEPTH or not self._is_partial(call.func, scope) or not call.args:
+        if (
+            depth > _DEPTH
+            or not self._is_partial(call.func, scope, module)
+            or not call.args
+        ):
             return None
-        inner = self._expression_callee(call.args[0], scope, depth + 1)
+        inner = self._expression_callee(call.args[0], scope, module, depth + 1, point)
         if inner is None:
             return None
         if any(k.arg in {PARAMETER, None} for k in call.keywords) and any(
@@ -1273,21 +1343,54 @@ class Tree:
         return Callee(inner.label, tuple(slots))
 
     def _expression_callee(
-        self, expr: ast.expr, scope: Scope, depth: int = 0
+        self,
+        expr: ast.expr,
+        scope: Scope | None,
+        module: Module,
+        depth: int = 0,
+        point: ast.AST | None = None,
     ) -> Callee | None:
-        """The helper an expression evaluates to, where it can be read."""
+        """The helper an expression evaluates to, where it can be read: in
+        *scope*, or at the top of *module* when it is None, its names as they
+        stand where *point* reads them, or once the scope has run.
+        """
         if depth > _DEPTH:
             return None
         if isinstance(expr, ast.Name | ast.Attribute):
-            target = self.resolve(expr, scope, scope.module)
+            target = self.resolve(expr, scope, module, point)
             if isinstance(target, Scope):
                 return self._callee(target, bound=False)
             if isinstance(target, Local):
                 return self._value_callee(target, depth + 1)
+            if isinstance(target, Computed):
+                return self._computed_callee(target, depth + 1)
             return None
         if isinstance(expr, ast.Call):
-            return self._partial_callee(expr, scope, depth)
+            return self._partial_callee(expr, scope, module, depth, point)
         return None
+
+    def _computed_callee(self, computed: Computed, depth: int = 0) -> Callee | None:
+        """The helper the call an assignment binds a name to makes: what a
+        ``functools.partial`` of a helper wraps (:meth:`_partial_callee`),
+        its names read in the scope the assignment is written in, as they
+        stand there; None for any other call.
+        """
+        module, target = computed.module, computed.target
+        value = assigned_value(module.node, target)
+        if not isinstance(value, ast.Call) or id(target) in self._computing:
+            return None
+        scope: Scope | None = None
+        if computed.scope is not module.node:
+            scope = self.functions.get(computed.scope) or self._bodies.get(
+                computed.scope
+            )
+            if scope is None:
+                return None
+        self._computing.add(id(target))
+        try:
+            return self._partial_callee(value, scope, module, depth, value)
+        finally:
+            self._computing.discard(id(target))
 
     def _value_callee(self, local: Local, depth: int = 0) -> Callee | None:
         """The helper a local name holds: an alias, a ``partial`` of one, or a
@@ -1296,7 +1399,9 @@ class Tree:
         if depth > _DEPTH:
             return None
         for value in local.scope.values.get(local.name, ()):
-            found = self._expression_callee(value, local.scope, depth + 1)
+            found = self._expression_callee(
+                value, local.scope, local.scope.module, depth + 1
+            )
             if found is not None:
                 return found
         default = local.scope.defaults.get(local.name)
@@ -1310,11 +1415,15 @@ class Tree:
                     )
                 )
             else:
-                target = self.resolve(default, local.scope.parent, local.scope.module)
+                target = self.resolve(
+                    default, local.scope.parent, local.scope.module, default
+                )
             if isinstance(target, Scope):
                 return self._callee(target, bound=False)
             if isinstance(target, Local):
                 return self._value_callee(target, depth + 1)
+            if isinstance(target, Computed):
+                return self._computed_callee(target, depth + 1)
         return None
 
     def _by_name(self, call: ast.Call, name: str) -> Callee | None:

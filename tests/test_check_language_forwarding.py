@@ -580,17 +580,22 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
     """A lambda or a call's result bound to the name after an alias, an
     import or a ``def`` of it leaves the name holding what the guard cannot
     read, at the top of a module and in a function, and an alias in the
-    function replaces the import before it.
+    function replaces the import before it; a ``functools.partial`` of what
+    the name held is that helper still, with its arguments bound.
 
     Only a ``def``, a ``class``, an import and an alias at the top were read
     as bindings, so the helper the name first stood for stood past the
     lambda, and a call that draws nothing of it was refused for dropping its
     language, or for dropping the language of a helper the alias replaced.
+    Read so, a partial ended the helper it wraps, and a call of it that
+    drops the language passed.
     """
     found = _dropped(
         tmp_path,
         **{
             "pkg.plots": """
+            import functools
+
             from .helpers import axis, fmt
 
             by_lambda = axis
@@ -603,6 +608,16 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
             imported = lambda ax: None
 
             standing = axis
+
+            from .helpers import fmt as wrapped
+            wrapped = functools.partial(wrapped)
+
+
+            def _label(value, language="en"):
+                return str(value)
+
+
+            _label = functools.partial(_label)
 
 
             def plot_lambda(result, ax, language="en"):
@@ -631,12 +646,29 @@ def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
                 from .helpers import axis as draw
                 draw = fmt
                 draw(ax)
+
+
+            def plot_wrapped(result, ax, language="en"):
+                wrapped(ax)
+
+
+            def plot_label(result, ax, language="en"):
+                _label(ax)
+
+
+            def plot_local_partial(result, ax, language="en"):
+                from .helpers import fmt as draw
+                draw = functools.partial(draw)
+                draw(ax)
             """
         },
     )
     assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_label", "pkg.plots._label"),
         ("plot_local_alias", "pkg.helpers.fmt"),
+        ("plot_local_partial", "pkg.helpers.fmt"),
         ("plot_standing", "pkg.helpers.axis"),
+        ("plot_wrapped", "pkg.helpers.fmt"),
     ]
 
 
@@ -890,6 +922,20 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
             [("plot_thing", "pkg.helpers.fmt")],
             id="aliased-before-the-def",
         ),
+        pytest.param(
+            """
+            from . import helpers
+
+
+            def plot_thing(result, ax, language="en", draw=helpers.fmt):
+                draw(ax)
+
+
+            from . import other as helpers
+            """,
+            [("plot_thing", "pkg.helpers.fmt")],
+            id="dotted-rebound-after-the-def",
+        ),
     ],
 )
 def test_a_default_is_the_helper_its_name_holds_where_the_def_runs(
@@ -897,7 +943,7 @@ def test_a_default_is_the_helper_its_name_holds_where_the_def_runs(
 ) -> None:
     """A parameter's default runs once, where the ``def`` does, so it is the
     helper the name holds there, not the one the module binds it to by its
-    end.
+    end, the first name of a dotted one alike.
     """
     dropped = _dropped(tmp_path, **{"pkg.plots": plots})
     assert [(f.caller, f.helper) for f in dropped] == found
@@ -1117,7 +1163,9 @@ def test_a_helper_is_followed_through_an_alias_and_a_partial(
 
     ``functools.partial`` binds the result and hands the rest on, which is how
     the ISO 17497 fiches pass their drawings to the layout. The bound arguments
-    shift the slot the language is taken at. A callable pulled out of a mapping
+    shift the slot the language is taken at. A partial bound at the top of the
+    module is read as one bound in a function is; it was no binding the guard
+    read there, so a call of it passed. A callable pulled out of a mapping
     stays out of reach, which the module docstring says rather than claims.
     """
     found = _dropped(
@@ -1129,6 +1177,8 @@ def test_a_helper_is_followed_through_an_alias_and_a_partial(
             from .helpers import axis
 
             _TABLE = {"axis": axis}
+
+            _DRAW = functools.partial(axis)
 
 
             def via_alias(ax, language="en"):
@@ -1148,10 +1198,18 @@ def test_a_helper_is_followed_through_an_alias_and_a_partial(
 
             def via_mapping(ax, language="en"):
                 _TABLE["axis"](ax)
+
+
+            def via_a_partial_at_the_top(ax, language="en"):
+                _DRAW(ax)
             """
         },
     )
-    assert [f.caller for f in found] == ["via_alias", "via_partial"]
+    assert [f.caller for f in found] == [
+        "via_alias",
+        "via_partial",
+        "via_a_partial_at_the_top",
+    ]
 
 
 def test_a_name_only_some_of_whose_methods_take_the_language_is_reported(

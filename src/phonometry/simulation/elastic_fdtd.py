@@ -47,15 +47,16 @@ proof (``gpu-parity.lock``) found every field, snapshot and contour phasor
 bit-identical to NumPy's over the scenarios of both engines, and the energy
 within 1.79e-16 relative over them, because the GPU sums it in another
 order; the guide on where a simulation runs names the hardware it was
-measured on. Runs on torch's CPU device, and float32 runs on NumPy, agree
-with NumPy in float64 within the tolerance that guide publishes for each
-device and dtype. Each of these bounds is the worst over that scenario
-matrix (grids of up to 64 by 48 cells, up to 120 steps), not a promise about
-any run: float32 rounding grows with the number of steps. An acoustic run
-of 8085 steps on a 200 by 300 cell grid, driven by a 1 kHz ``CWSource``,
-differed by 8.0e-06 relative at its probe (4.0e-06 with a Gaussian pulse),
-on NumPy and on torch's CPU device alike. A float32 run on CuPy, and any run
-on torch's CUDA device, is not measured yet.
+measured on. Runs on torch's CPU device, runs on torch's MPS device (float32
+only), and float32 runs on NumPy, agree with NumPy in float64 within the
+tolerance that guide publishes for each device and dtype. Each of these
+bounds is the worst over that scenario matrix (grids of up to 64 by 48
+cells, up to 120 steps), not a promise about any run: float32 rounding grows
+with the number of steps. An acoustic run of 8085 steps on a 200 by 300 cell
+grid, driven by a 1 kHz ``CWSource``, differed by 8.0e-06 relative at its
+probe (4.0e-06 with a Gaussian pulse), on NumPy and on torch's CPU device
+alike. A float32 run on CuPy, and any run on torch's CUDA device, is not
+measured yet.
 
 Validated against analytic oracles: P- and S-wave times of flight
 :math:`c_\mathrm{P} = \sqrt{(\lambda + 2\mu) / \rho}` and
@@ -2391,9 +2392,12 @@ def elastic_fdtd_simulation(
         a callable other than the ``value`` of a
         :class:`~phonometry.simulation.GaussianPulse`,
         :class:`~phonometry.simulation.CWSource` or
-        :class:`~phonometry.simulation.SignalSource`, or a whole number
-        outside the range of an int64; and, as the run steps, for a waveform
-        that returns anything but one real number.
+        :class:`~phonometry.simulation.SignalSource`, a subclass of one of
+        the library's records, a whole number outside the range of an int64,
+        a number or an array of floats wider than 64 bits (a ``longdouble``),
+        or a ``Fraction`` or a ``Decimal`` the run keeps as given, such as
+        ``dx=Fraction(1, 100)``; and, as the run steps, for a waveform that
+        returns anything but one real number.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
         a hosts file that cannot be read or is malformed; and, as the run
         steps, for a waveform that returns a number too large for a float.

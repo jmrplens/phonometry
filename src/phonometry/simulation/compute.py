@@ -99,7 +99,7 @@ class ComputeDeviceError(RuntimeError):
 
 
 class ComputeFallbackWarning(PhonometryWarning):
-    """A requested device was not available and the run went to NumPy."""
+    """A requested device or node could not be used and the run went to NumPy here."""
 
 
 class ComputeRemoteError(RuntimeError):
@@ -167,8 +167,10 @@ class Compute(RichDisplay):
         ``"torch:cuda"`` or ``"torch:mps"`` (Apple silicon, float32 only).
     :param device_index: Which GPU, for ``"cupy"`` and ``"torch:cuda"``.
     :param dtype: ``"float64"`` (default) or ``"float32"``.
-    :param fallback: Run on NumPy, with a :class:`ComputeFallbackWarning`,
-        when the device is not available, instead of raising.
+    :param fallback: Run on NumPy here, with a
+        :class:`ComputeFallbackWarning`, when the device is not available or,
+        for a run with a ``host``, when the node or the connection fails,
+        instead of raising.
     :param host: The node the run goes to, by its name in the hosts file, or
         ``None`` (default) to run on this machine. Only
         :func:`~phonometry.simulation.fdtd_simulation`,

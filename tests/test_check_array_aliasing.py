@@ -791,6 +791,87 @@ def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     }
 
 
+def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``alias = handing_back`` binds the name to the function the value
+    names, at the top of the module, in a function under ``global`` and in
+    the function that calls it, as a ``def`` or an import of it would.
+
+    Only a ``def``, a ``class`` or an import was read as a binding, so a call
+    of the name reached the ``def`` the assignment replaced, or nothing at
+    all, and a record that keeps what the function hands back passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from ._internal import validation
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        def hand(a):
+            return np.array(a)
+
+        def swap():
+            global hand
+            hand = handing_back
+
+        def through_global(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def keep(a):
+            return np.array(a)
+
+        keep = handing_back
+
+        def through_the_top(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        alias = handing_back
+        checked = validation.require_finite_array
+
+        def through_an_alias(frequencies, levels):
+            f = alias(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_module(frequencies, levels):
+            f = checked(frequencies, "frequencies")
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_local(frequencies, levels):
+            fn = handing_back
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copy(a):
+            return np.array(a)
+
+        def replaced(frequencies, levels):
+            fn = handing_back
+            fn = copy
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def unknown(frequencies, levels, fn=copy):
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_global", "BandResult.frequencies", "frequencies"),
+        ("through_the_top", "BandResult.frequencies", "frequencies"),
+        ("through_an_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_module", "BandResult.frequencies", "frequencies"),
+        ("through_a_local", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     tmp_path: pathlib.Path,
 ) -> None:

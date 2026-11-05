@@ -644,16 +644,19 @@ class Fence:
         return words[0] if words else ""
 
 
-def fences(text: str) -> Iterator[Fence]:
+def fences(text: str, *, kind: str = "mdx") -> Iterator[Fence]:
     """Every fenced block of a page, in reading order.
 
     :param text: The page.
+    :param kind: The page's kind (:func:`page_lines`): a ``.md`` page shows a
+        fence indented four columns as code, written out.
     :return: One :class:`Fence` per block, closed or running to the end.
     """
     start = 0
     info = ""
     body: list[str] = []
-    for number, line in enumerate(page_lines(text.splitlines(keepends=True)), start=1):
+    walk = page_lines(text.splitlines(keepends=True), kind=kind)
+    for number, line in enumerate(walk, start=1):
         if line.role == "body":
             body.append(_dedent(line.inner, line.indent))
             continue
@@ -685,10 +688,21 @@ def display_math_parts(lines: Iterable[str], *, kind: str = "mdx") -> list[str]:
     ]
 
 
-def python_fences(text: str) -> list[str]:
+def python_fences(text: str, *, kind: str = "mdx") -> list[str]:
     """The bodies of a page's Python fences, in reading order.
 
     A fence is Python when the first word of its info string is ``python``,
     whatever attributes follow it.
+
+    :param kind: The page's kind (:func:`fences`).
     """
-    return [fence.body for fence in fences(text) if fence.language == "python"]
+    return [
+        fence.body for fence in fences(text, kind=kind) if fence.language == "python"
+    ]
+
+
+def page_kind(name: str) -> str:
+    """The kind of the page of file name *name*: ``"md"`` for a ``.md`` page,
+    ``"mdx"`` for any other, an ``.mdx`` page among them.
+    """
+    return "md" if name.endswith(".md") else "mdx"

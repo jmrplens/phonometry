@@ -196,6 +196,25 @@ def test_a_nested_scope_that_reaches_the_name_still_meets_the_unbound_local(
     assert "fence 1 uses format" in problems[0]
 
 
+@pytest.mark.parametrize(("suffix", "count"), [(".md", 0), (".mdx", 1)])
+def test_a_page_is_read_as_its_own_kind(
+    tmp_path: pathlib.Path, suffix: str, count: int
+) -> None:
+    """A ``.md`` page shows a block indented four columns as code, written
+    out, so a fence written there is no fence of Python; an ``.mdx`` page
+    has no indented code, and the same lines open one.
+
+    Every page was read as MDX, so the shown example of a ``.md`` page was
+    held to the reading order and its names reported.
+    """
+    page = tmp_path / f"example{suffix}"
+    page.write_text(
+        "Text.\n\n    ```python\n    print(undefined_name)\n    ```\n",
+        encoding="utf8",
+    )
+    assert len(check_fence_names.check_page(page)) == count
+
+
 def test_a_registered_placeholder_is_accepted(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

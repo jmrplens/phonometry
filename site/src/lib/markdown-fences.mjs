@@ -674,9 +674,11 @@ function fence(line, info, body) {
  * Every fenced block of a page, in reading order.
  *
  * @param {string} text The page.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind (`pageLines`): a
+ *   `.md` page shows a fence indented four columns as code, written out.
  * @returns {Fence[]} One entry per block, closed or running to the end.
  */
-export function fences(text) {
+export function fences(text, { kind = 'mdx' } = {}) {
   const found = [];
   let start = 0;
   let info = '';
@@ -684,7 +686,7 @@ export function fences(text) {
   let body = [];
   const lines = withEnds(text);
   let number = 0;
-  for (const line of pageLines(splitLines(text))) {
+  for (const line of pageLines(splitLines(text), { kind })) {
     const end = lines[number].slice(line.text.length);
     number += 1;
     if (line.role === 'body') {

@@ -35,6 +35,7 @@ from markdown_fences import (
     code_lines,
     display_math_parts,
     fences,
+    page_kind,
     page_lines,
     python_fences,
 )
@@ -124,6 +125,18 @@ def test_an_indented_fence_loses_the_indentation_of_its_marker() -> None:
 
 def test_a_python_fence_never_closed_is_read_to_the_end_of_the_page() -> None:
     assert python_fences("prose\n```python\nx = 1\n") == ["x = 1\n"]
+
+
+def test_a_fence_indented_as_code_is_no_fence_of_a_markdown_page() -> None:
+    """A ``.md`` page reads a block indented four columns as code, written
+    out, so the fence written in it is shown, not run; an ``.mdx`` page has
+    no indented code, and the same lines open a fence.
+    """
+    page = "Text.\n\n    ```python\n    x = 1\n    ```\n"
+    assert python_fences(page, kind="md") == []
+    assert python_fences(page, kind="mdx") == ["x = 1\n"]
+    assert page_kind("guide.md") == "md"
+    assert page_kind("guide.mdx") == "mdx"
 
 
 #: Pages whose fences stand behind the marks of a quotation or a list item, with
@@ -470,17 +483,21 @@ def _pages() -> list[str]:
 
 
 @pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
-def test_the_site_reads_every_page_as_the_scripts_do() -> None:
-    """Which lines are code, and every block with its line, info string and body."""
+@pytest.mark.parametrize("kind", ["md", "mdx"])
+def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
+    """Which lines are code, and every block with its line, info string and
+    body, on each kind of page.
+    """
     pages = _pages()
+    options = json.dumps({"kind": kind})
     script = (
         "import {codeLines, fences, splitLines} from "
         f"{json.dumps(_SITE_READER.as_uri())};"
         "let input = '';"
         "for await (const chunk of process.stdin) input += chunk;"
         "process.stdout.write(JSON.stringify(JSON.parse(input).map((text) => ["
-        "  codeLines(splitLines(text)),"
-        "  fences(text).map((f) => [f.line, f.info, f.body, f.language]),"
+        f"  codeLines(splitLines(text), {options}),"
+        f"  fences(text, {options}).map((f) => [f.line, f.info, f.body, f.language]),"
         "])));"
     )
     ran = subprocess.run(
@@ -494,8 +511,8 @@ def test_the_site_reads_every_page_as_the_scripts_do() -> None:
     )
     python = [
         [
-            list(code_lines(text.splitlines())),
-            [[f.line, f.info, f.body, f.language] for f in fences(text)],
+            list(code_lines(text.splitlines(), kind=kind)),
+            [[f.line, f.info, f.body, f.language] for f in fences(text, kind=kind)],
         ]
         for text in pages
     ]

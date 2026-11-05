@@ -380,7 +380,8 @@ for (const path of citingPages) {
     throw new Error(`${path}: ${problem}`);
   };
 
-  const block = fences(source).find((fence) => fence.language === 'bibtex');
+  const kind = path.endsWith('.md') ? 'md' : 'mdx';
+  const block = fences(source, { kind }).find((fence) => fence.language === 'bibtex');
   if (!block) fail('no bibtex block to check.');
   if (collapse(block.body) !== collapse(bibtex)) {
     fail(

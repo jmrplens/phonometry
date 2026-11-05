@@ -97,12 +97,14 @@ class IndexRow:
 
 
 def _prose_lines(text: str) -> list[tuple[int, str]]:
-    """``(lineno, line)`` for every line outside a fence."""
+    """``(lineno, line)`` for every line outside a fence, read as the ``.md``
+    page every page of the guide is.
+    """
     lines = text.splitlines()
     return [
         (n, line)
         for n, (line, code) in enumerate(
-            zip(lines, markdown_fences.code_lines(lines), strict=True), 1
+            zip(lines, markdown_fences.code_lines(lines, kind="md"), strict=True), 1
         )
         if not code
     ]

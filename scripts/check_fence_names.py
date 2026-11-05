@@ -57,7 +57,7 @@ import pathlib
 import sys
 
 from ast_scan import binding_of, forget_trees, own_names, scope_nodes
-from markdown_fences import python_fences
+from markdown_fences import page_kind, python_fences
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -280,7 +280,7 @@ def check_page(path: pathlib.Path) -> list[str]:
         order.
     :rtype: list[str]
     """
-    blocks = python_fences(path.read_text(encoding="utf8"))
+    blocks = python_fences(path.read_text(encoding="utf8"), kind=page_kind(path.name))
     if not blocks:
         return []
     trees: list[ast.AST | None] = []
@@ -357,7 +357,10 @@ def main() -> int:
         print(f"::error file={target}::{message}" if in_ci else problem)
     if not problems:
         pages = _pages()
-        fences = sum(len(python_fences(p.read_text(encoding="utf8"))) for p in pages)
+        fences = sum(
+            len(python_fences(p.read_text(encoding="utf8"), kind=page_kind(p.name)))
+            for p in pages
+        )
         print(
             f"{fences} fences on {len(pages)} pages read in order; "
             f"{len(PLACEHOLDERS)} pages carry declared placeholders."

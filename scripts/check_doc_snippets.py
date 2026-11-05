@@ -51,7 +51,7 @@ import subprocess
 import sys
 import tempfile
 
-from markdown_fences import python_fences
+from markdown_fences import page_kind, python_fences
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _DOCS = _ROOT / "docs"
@@ -133,7 +133,7 @@ def _blocks(path: pathlib.Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     if path.suffix == ".ts":
         return [_template_literal(m.group(1)) for m in _TEMPLATE_CODE.finditer(text)]
-    return python_fences(text)
+    return python_fences(text, kind=page_kind(path.name))
 
 
 def _imported_names(code: str) -> list[str]:

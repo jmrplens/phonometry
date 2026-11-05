@@ -62,7 +62,7 @@ from ast_scan import (
     standing_bindings,
     what_never_runs,
 )
-from markdown_fences import code_lines
+from markdown_fences import code_lines, page_kind
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -2485,13 +2485,15 @@ def leaked_tables(relpath: str, rendered: str) -> list[str]:
     one run-on paragraph. A table written under a field (``:param x:``)
     cannot be read at all: the field's body is joined into one line of its
     cell, borders and rows together, and that line is reported too. A border
-    inside fenced code is an example and is left alone.
+    inside code is an example and is left alone: the page is ``.md``, read as
+    one, its indented blocks code too.
     """
     lines = rendered.splitlines()
     return [
         f"{relpath}:{number}: {line.strip()}"
         for number, (line, code) in enumerate(
-            zip(lines, code_lines(lines), strict=True), start=1
+            zip(lines, code_lines(lines, kind=page_kind(relpath)), strict=True),
+            start=1,
         )
         if not code and _holds_table_rule(line)
     ]

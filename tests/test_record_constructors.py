@@ -43,7 +43,7 @@ if _SCRIPTS not in sys.path:
 import check_parameter_annotations as cpa
 import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
-from markdown_fences import python_fences
+from markdown_fences import page_kind, python_fences
 
 _SOURCE = ROOT / "src" / "phonometry"
 
@@ -158,7 +158,8 @@ def guide_built_records() -> dict[str, list[str]]:
     found: dict[str, list[str]] = {}
     for page in _guide_pages():
         names: dict[str, str] = {}
-        for code in python_fences(page.read_text(encoding="utf-8")):
+        text = page.read_text(encoding="utf-8")
+        for code in python_fences(text, kind=page_kind(page.name)):
             try:
                 tree = ast.parse(code)
             except SyntaxError:

@@ -23,6 +23,8 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -615,6 +617,52 @@ def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
         ("plot_global", "pkg.helpers.axis"),
         ("plot_top", "pkg.helpers.axis"),
     ]
+
+
+@pytest.mark.parametrize(
+    ("plots", "found"),
+    [
+        pytest.param(
+            """
+            from .helpers import axis
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+
+
+            def axis(ax):
+                return ax
+            """,
+            [("plot_thing", "pkg.helpers.axis")],
+            id="rebound-after-the-def",
+        ),
+        pytest.param(
+            """
+            def axis(ax):
+                return ax
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+
+
+            from .helpers import axis
+            """,
+            [],
+            id="rebound-before-the-def",
+        ),
+    ],
+)
+def test_a_default_is_the_helper_its_name_holds_where_the_def_runs(
+    tmp_path: pathlib.Path, plots: str, found: list[tuple[str, str]]
+) -> None:
+    """A parameter's default runs once, where the ``def`` does, so it is the
+    helper the name holds there, not the one the module binds it to by its
+    end.
+    """
+    dropped = _dropped(tmp_path, **{"pkg.plots": plots})
+    assert [(f.caller, f.helper) for f in dropped] == found
 
 
 def test_each_of_two_definitions_of_one_name_is_read(tmp_path: pathlib.Path) -> None:

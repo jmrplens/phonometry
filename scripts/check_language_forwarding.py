@@ -1204,7 +1204,16 @@ class Tree:
                 return found
         default = local.scope.defaults.get(local.name)
         if isinstance(default, ast.Name | ast.Attribute):
-            target = self.resolve(default, local.scope.parent, local.scope.module)
+            # The default runs once, where the ``def`` does: its name holds
+            # what the bindings that may stand there make it.
+            if isinstance(default, ast.Name):
+                target = _one(
+                    self.lookups(
+                        default.id, local.scope.parent, local.scope.module, default
+                    )
+                )
+            else:
+                target = self.resolve(default, local.scope.parent, local.scope.module)
             if isinstance(target, Scope):
                 return self._callee(target, bound=False)
             if isinstance(target, Local):

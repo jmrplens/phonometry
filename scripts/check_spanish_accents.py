@@ -139,7 +139,7 @@ from markdown_spans import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -768,6 +768,10 @@ class Value(NamedTuple):
     #: The kind of the page a *page* value is read from, ``"md"`` or ``"mdx"``,
     #: which says what of it is code and what raw HTML shown as written.
     kind: str = "mdx"
+    #: For a *page* value, its lines as the whole page reads them
+    #: (:func:`page_read`): a line of code as written, any other with its code
+    #: spans blanked. None reads the paragraph as a page of its own.
+    read: str | None = None
 
 
 class Offence(NamedTuple):
@@ -827,7 +831,31 @@ def words_needing_marks(text: str) -> list[tuple[str, str]]:
     return found
 
 
-def page_prose(text: str, *, script: bool = False, kind: str = "mdx") -> str:
+def page_read(lines: Sequence[str], *, kind: str = "mdx") -> list[str]:
+    """Each line of a page as a reader of its prose meets it: a line of code,
+    fenced or indented, as written, any other with its code spans blanked.
+
+    Read over the whole page, as the site reads it: what opens a block of
+    code, and where a list item's paragraph goes on, is decided by the lines
+    before, so a paragraph read alone may read as code what the page reads
+    as prose, or the other way.
+
+    :param lines: The page, a line each.
+    :param kind: The page's kind, ``"md"`` or ``"mdx"`` (:func:`page_prose`).
+    """
+    code = list(code_lines(lines, kind=kind))
+    shown = lines_read_whole(
+        lines, lambda page: blank_inline_spans_by_block(page, kind=kind)
+    )
+    return [
+        line if fenced else spoken
+        for line, spoken, fenced in zip(lines, shown, code, strict=True)
+    ]
+
+
+def page_prose(
+    text: str, *, script: bool = False, kind: str = "mdx", read: str | None = None
+) -> str:
     """A page paragraph with its mathematics and its inline code blanked.
 
     The spans are read as the site reads them (:mod:`markdown_spans`): a
@@ -844,19 +872,15 @@ def page_prose(text: str, *, script: bool = False, kind: str = "mdx") -> str:
         *text* comes back as written.
     :param kind: The page's kind, ``"md"`` or ``"mdx"``: a ``.md`` page shows a
         block of raw HTML as written, its backticks too, and has indented code.
+    :param read: The paragraph as its whole page reads it (:func:`page_read`),
+        when it was read there; by default it is read as a page of its own.
     """
     if script:
         return text
-    lines = text.split("\n")
-    code = list(code_lines(lines, kind=kind))
-    shown = lines_read_whole(
-        lines, lambda page: blank_inline_spans_by_block(page, kind=kind)
+    kept = (
+        read if read is not None else "\n".join(page_read(text.split("\n"), kind=kind))
     )
-    kept = [
-        line if fenced else spoken
-        for line, spoken, fenced in zip(lines, shown, code, strict=True)
-    ]
-    return blank_inline_spans("\n".join(kept), "$")
+    return blank_inline_spans(kept, "$")
 
 
 def _cased(word: str, right: str) -> str:
@@ -870,6 +894,7 @@ def glossary_departures(
     page: bool = False,
     script: bool = False,
     kind: str = "mdx",
+    read: str | None = None,
     contexts: dict[str, str] | None = None,
     used: set[str] | None = None,
 ) -> list[tuple[str, str, int]]:
@@ -883,6 +908,8 @@ def glossary_departures(
         is blanked (see :data:`_MARKDOWN`).
     :param kind: With *page*, the page's kind, ``"md"`` or ``"mdx"``
         (:func:`page_prose`).
+    :param read: With *page*, the paragraph as its whole page reads it
+        (:func:`page_read`).
     :param contexts: The contexts in which a term of :data:`SENSES` keeps
         its other sense, read for every term the way its own table is read.
         By default each term reads its own table (the trigonometric «seno»,
@@ -892,7 +919,9 @@ def glossary_departures(
     :param used: A set that receives every context that exempted a term.
     :return: ``(as written, glossary term, offset in text)`` in text order.
     """
-    readable = page_prose(text, script=script, kind=kind) if page else prose(text)
+    readable = (
+        page_prose(text, script=script, kind=kind, read=read) if page else prose(text)
+    )
     found: list[tuple[str, str, int]] = []
     for pattern, right in GLOSSARY_PHRASES.items():
         for match in re.finditer(pattern, readable, re.IGNORECASE):
@@ -1101,8 +1130,19 @@ def page_values(path: pathlib.Path) -> list[Value]:
     name = _named(path)
     script = path.suffix not in _MARKDOWN
     kind = "md" if path.suffix == ".md" else "mdx"
+    read = None if script else page_read(text.split("\n"), kind=kind)
     return [
-        Value(name, line, match.group(0), page=True, script=script, kind=kind)
+        Value(
+            name,
+            line,
+            match.group(0),
+            page=True,
+            script=script,
+            kind=kind,
+            read=None
+            if read is None
+            else "\n".join(read[line - 1 : line + match.group(0).count("\n")]),
+        )
         for line, match in _numbered(text, _PARAGRAPH)
         if match.group(0).strip()
     ]
@@ -1227,6 +1267,7 @@ def check(
             page=value.page,
             script=value.script,
             kind=value.kind,
+            read=value.read,
             contexts=contexts,
         ):
             line = value.line
@@ -1260,6 +1301,7 @@ def unused_contexts(
             page=value.page,
             script=value.script,
             kind=value.kind,
+            read=value.read,
             contexts=contexts,
             used=used,
         )

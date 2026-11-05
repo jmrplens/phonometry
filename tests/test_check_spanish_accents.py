@@ -468,6 +468,28 @@ def test_a_page_is_read_as_its_own_kind(
     assert [(o.word, o.spelling, o.line) for o in offences] == found
 
 
+@pytest.mark.parametrize("suffix", [".md", ".mdx"])
+@pytest.mark.parametrize("marker", ["1.", "-  "])
+def test_a_paragraph_is_read_where_its_page_puts_it(
+    tmp_path: pathlib.Path, suffix: str, marker: str
+) -> None:
+    """A paragraph indented four columns under a list item continues the
+    item, and its code span is code on a page of either kind.
+
+    Each paragraph was read on its own, so on a ``.md`` page the indented
+    one read as indented code, which a page shows as written, and the term
+    in its code span was refused.
+    """
+    page = tmp_path / f"page{suffix}"
+    page.write_text(
+        f"---\ntitle: Prueba\n---\n\n{marker} Primer paso.\n\n"
+        "    Se aplica la `decimación` previa.\n",
+        encoding="utf-8",
+    )
+    offences, _ = csa.check(csa.page_values(page))
+    assert offences == []
+
+
 def test_a_value_reads_its_code_spans_as_the_site_reads_them() -> None:
     """A span of two backticks holds a backtick, and an escaped backtick opens
     no span, in a value of a translation table as in a page.

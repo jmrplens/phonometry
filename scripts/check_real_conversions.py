@@ -131,6 +131,7 @@ from ast_scan import (
     empty_type_checking_bodies,
     exempted,
     for_the_type_checker,
+    forget_trees,
     imported_names,
     is_type_checking_block,
     own_names,
@@ -2999,39 +3000,44 @@ def census(
     The checks are found across the files read and, with *source*, across
     every module of the library there, so that a file read alone still knows
     the checks its package defines; another copy of the library is read with
-    its own checks only. Each module is parsed twice, once for the checks it
-    defines and once for its conversions, and one at a time, so that no more
-    than one tree is held at once.
+    its own checks only. Each module is parsed once, and its tree serves the
+    checks it defines and every reading of its conversions until the census
+    returns; then the trees are let go, with what the scanner kept of them
+    (:func:`ast_scan.forget_trees`), so that a census holds no tree once it
+    is done.
     """
     read = [path.resolve() for path in paths]
     sources = set(read)
     if source is not None:
         sources |= {path.resolve() for path in source.rglob("*.py")}
-    signatures: list[_Signature] = []
-    helpers: dict[str, _Helper] = {}
-    named: set[str] = set()
-    for path in sorted(sources):
-        module = _module(path)
-        signatures.extend(_signatures(module))
-        defined, names = _helpers(module)
-        helpers.update(defined)
-        named |= names
-    helpers = {name: h for name, h in helpers.items() if name not in named}
-    checks = package_checks(signatures)
-    returned = returned_parameters(signatures)
-    found = _through_callers(read, sources, source, (checks, returned), helpers)
-    return [c for path in read for c in found[path]]
+    try:
+        modules = {path: _module(path) for path in sorted(sources)}
+        signatures: list[_Signature] = []
+        helpers: dict[str, _Helper] = {}
+        named: set[str] = set()
+        for module in modules.values():
+            signatures.extend(_signatures(module))
+            defined, names = _helpers(module)
+            helpers.update(defined)
+            named |= names
+        helpers = {name: h for name, h in helpers.items() if name not in named}
+        checks = package_checks(signatures)
+        returned = returned_parameters(signatures)
+        found = _through_callers(read, modules, source, (checks, returned), helpers)
+        return [c for path in read for c in found[path]]
+    finally:
+        forget_trees()
 
 
 def _through_callers(
     read: Sequence[pathlib.Path],
-    sources: set[pathlib.Path],
+    modules: Mapping[pathlib.Path, _Module],
     source: pathlib.Path | None,
     package: tuple[Mapping[str, Check], Mapping[str, Provenance]],
     helpers: Mapping[str, _Helper],
 ) -> dict[pathlib.Path, list[Conversion]]:
     """The conversions of each module of *read*, every helper's parameters
-    holding what its calls across *sources* hand it.
+    holding what its calls across *modules*, parsed, by their paths, hand it.
 
     Every module is read once with the helpers handed nothing, and then each
     module that defines a helper whose calls hand it something new is read
@@ -3043,11 +3049,11 @@ def _through_callers(
     seeds: Seeds = {}
     handing: dict[pathlib.Path, Seeds] = {}
     found: dict[pathlib.Path, list[Conversion]] = {}
-    pending = sorted(sources)
+    pending = sorted(modules)
     while pending:
         for path in pending:
             conversions, handing[path] = _read_module(
-                _module(path), checks, _spelled(path, source), returned, helpers, seeds
+                modules[path], checks, _spelled(path, source), returned, helpers, seeds
             )
             if path in wanted:
                 found[path] = conversions

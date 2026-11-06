@@ -142,6 +142,25 @@ def _close_figures() -> Iterator[None]:
         pyplot.close("all")
 
 
+@pytest.fixture(autouse=True)
+def _forget_scanned_trees() -> Iterator[None]:
+    """Let go of the trees the guards' shared reader kept for a test.
+
+    ``scripts/ast_scan.py`` keeps what it reads of a tree (its scopes, their
+    bindings, its blocks) in caches keyed by the tree, for as long as the
+    process runs, so a guard that reads the whole package would leave every
+    module it parsed in the worker to the end of the session, and the next
+    guard's trees beside them. A test keeps all it reads while it runs; once
+    it is done, ``forget_trees`` lets the trees go. The reader is looked up
+    rather than imported, so a test that never reads code does not pay for
+    importing it.
+    """
+    yield
+    ast_scan = sys.modules.get("ast_scan")
+    if ast_scan is not None:
+        ast_scan.forget_trees()
+
+
 # The modules whose tests dominate the wall clock (steady-state FDTD runs,
 # the conformance registry, ECMA-418-2 chains, report generation). Collection
 # order is dispatch order under pytest-xdist, so fronting them lets the long

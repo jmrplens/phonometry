@@ -97,6 +97,7 @@ from ast_scan import (
     bindings_by_name,
     empty_type_checking_bodies,
     global_bindings,
+    held_before,
     is_type_checking_block,
     live_bindings,
     own_names,
@@ -283,6 +284,9 @@ class Scope:
     inserts: set[str] = field(default_factory=set)
     removes: set[str] = field(default_factory=set)
     calls: list[ast.Call] = field(default_factory=list)
+    #: The class whose body this scope reads, for a scope made of one
+    #: (:meth:`Tree._define_body`).
+    holder: ast.ClassDef | None = None
 
     @property
     def static(self) -> bool:
@@ -637,6 +641,8 @@ def _build_scope(
         },
     )
     scope.names, scope.definitions = _scope_names(module, node, holder)
+    if isinstance(holder, ast.ClassDef):
+        scope.holder = holder
     # As Python scopes them: a comprehension's variable and a lambda's
     # parameter are not the function's (:func:`_bound_inside`).
     names = own_names(node)
@@ -663,6 +669,19 @@ def _build_scope(
     # Calls are read in the order of their position in the source.
     scope.calls.sort(key=lambda call: (call.lineno, call.col_offset))
     return scope
+
+
+def _unbound_in_class(
+    module: Module, holder: ast.ClassDef, name: str, point: ast.AST
+) -> bool:
+    """Whether the class body *holder* binds *name* and none of its bindings
+    of it may have run where *point*, in the body, reads it
+    (:func:`ast_scan.held_before`): Python then reads the module's name, not
+    the body's, since a class body that binds a name looks it up in its own
+    namespace and then the module's.
+    """
+    nodes = bindings_by_name(holder).get(name)
+    return bool(nodes) and not held_before(module.node, nodes, point)
 
 
 def _bound_inside(scope: Scope, point: ast.AST, name: str) -> bool:
@@ -737,6 +756,8 @@ class Tree:
         #: The scope of each module body and class body read as a function
         #: of its own (:meth:`_define_body`), by the node that stands for it.
         self._bodies: dict[ast.AST, Scope] = {}
+        #: The scope of each class body, by its ``class`` statement.
+        self._class_bodies: dict[ast.AST, Scope] = {}
         for module in modules.values():
             module.names, module.definitions = _scope_names(module, module.node)
             _add_global_bindings(module)
@@ -844,6 +865,8 @@ class Tree:
         scope.locals |= hidden
         self.scopes.append(scope)
         self._bodies[node] = scope
+        if isinstance(holder, ast.ClassDef):
+            self._class_bodies[holder] = scope
 
     # -- names ------------------------------------------------------------
 
@@ -920,7 +943,9 @@ class Tree:
         classes and imports that may stand where *point* reads it, or once it
         has run when no point is given (:func:`_standing`), or its parameters
         and locals. A comprehension or a lambda around *point* that binds the
-        name holds nothing the tree defines (:func:`_bound_inside`).
+        name holds nothing the tree defines (:func:`_bound_inside`). A class
+        body read at *point* before any binding it makes of the name has run
+        reads the module's, as Python does (:func:`_unbound_in_class`).
         """
         if (
             scope is not None
@@ -931,6 +956,12 @@ class Tree:
         current = scope
         while current is not None:
             written = current.names.get(name)
+            if (
+                point is not None
+                and current.holder is not None
+                and _unbound_in_class(module, current.holder, name, point)
+            ):
+                break
             if written:
                 bound = _standing(module, written, point)
                 return [target for b in bound for target in self._targets(b)]
@@ -945,8 +976,8 @@ class Tree:
         to: what the value stands for where the assignment reads it, in the
         scope that binds the value's first name, the module's or that of the
         function the assignment is written in (an import there, under
-        ``global`` too), and as that name stands at the assignment; nothing
-        for a name a class body, a lambda or a comprehension binds.
+        ``global`` too) or of the class body, and as that name stands at the
+        assignment; nothing for a name a lambda or a comprehension binds.
         """
         module, target = alias.module, alias.target
         value = assigned_value(module.node, target)
@@ -958,7 +989,7 @@ class Tree:
         how, binder = binding_of(module.node, head, head.id)
         scope: Scope | None = None
         if how != "global" and binder is not None and binder is not module.node:
-            scope = self.functions.get(binder)
+            scope = self.functions.get(binder) or self._class_bodies.get(binder)
             if scope is None:
                 return []
         found: list[_Target] = []

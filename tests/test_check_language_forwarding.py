@@ -871,6 +871,59 @@ def test_a_local_alias_reads_its_value_where_the_assignment_runs(
     ]
 
 
+def test_a_class_body_reads_a_name_it_binds_later_in_its_module(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class body that reads ``axis`` before any binding it makes of the
+    name has run reads the module's ``axis``, as it stands where the class
+    statement runs, whatever the body binds ``axis`` to after: in an alias's
+    value, a call and an alias of a name the body imports too. Once the
+    body has bound the name, it reads the body's binding.
+
+    The body's name was read as the body held it once it had run, so a later
+    ``axis = None`` hid the helper and the call that drops the language
+    passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "figures.__init__": "",
+            "figures.devices": """
+            from pkg.helpers import axis
+
+
+            class _Alias:
+                kept = axis
+                axis = None
+                kept(None)
+
+
+            class _Call:
+                axis(None)
+                axis = None
+
+
+            class _Imported:
+                from pkg.helpers import fmt as shown
+                shown = axis
+                axis = None
+                shown(None)
+
+
+            class _Bound:
+                axis = None
+                kept = axis
+                kept(None)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("_Alias.<class>", "pkg.helpers.axis"),
+        ("_Call.<class>", "pkg.helpers.axis"),
+        ("_Imported.<class>", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_partial_reads_its_names_where_it_is_built(
     tmp_path: pathlib.Path,
 ) -> None:

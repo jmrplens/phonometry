@@ -166,10 +166,10 @@ on import is an error whatever mark it carries. Which modules carry the mark is
 
 `--without-whole-tree` leaves out the tests that read the repository whole,
 the guards, censuses and generators run over the package, the scripts, the
-documentation and the site: what they judge is source text, which no
-dependency floor changes, and the test matrix runs them. The numba job leaves
-them out for the same reason. Which tests carry the `whole_tree` mark, and how
-the suite holds a new one to it, is
+documentation, the site and the committed figures: what they judge is the
+repository's own text, which no dependency floor changes, and the test matrix
+runs them. The numba job leaves them out for the same reason. Which tests
+carry the `whole_tree` mark, and how the suite holds a new one to it, is
 [T26](docs/contributing/tests.md#t26).
 
 The NumPy floor is also why a guard asks a value its rank before it reads it

@@ -1534,11 +1534,12 @@ jobs:
       # that takes about twenty minutes to run one test at a time.
       # --without-whole-tree leaves out the tests that read the repository
       # whole (tests/whole_tree.py): the guards, censuses and generators run
-      # over the package, the scripts, the documentation and the site. They
-      # read source text, which the jitted kernel does not change, and the
-      # nine jobs of the test matrix run them. With them this step took 38:57
-      # on 2026-11-06; they were 39 % of the summed test time of the Linux
-      # 3.14 matrix job of that run, which puts this step near 25 minutes.
+      # over the package, the scripts, the documentation, the site and the
+      # committed figures. They read the repository's own text, which the
+      # jitted kernel does not change, and the nine jobs of the test matrix
+      # run them. With them this step took 38:57 on 2026-11-06; they were
+      # 39 % of the summed test time of the Linux 3.14 matrix job of that
+      # run, which puts this step near 25 minutes.
       run: pytest -q -n auto --without-whole-tree
 
   # The FDTD engines step on any Array API backend. array-api-strict refuses
@@ -1910,8 +1911,9 @@ jobs:
   #
   # Nor does it run the tests that read the repository whole: the guards,
   # censuses and generators run over the package, the scripts, the
-  # documentation and the site read source text, which no dependency floor
-  # changes, and the nine jobs of the test matrix run them.
+  # documentation, the site and the committed figures read the repository's
+  # own text, which no dependency floor changes, and the nine jobs of the
+  # test matrix run them.
   # --without-whole-tree (tests/whole_tree.py) deselects them. With them the
   # test step took 38:55 on 2026-11-06; they were 37 % of the summed test
   # time of the Linux 3.12 matrix job of that run, which puts the step near

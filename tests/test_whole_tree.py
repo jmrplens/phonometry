@@ -99,6 +99,34 @@ def test_an_unmarked_test_that_reads_the_package_fails(tmp_path: Path) -> None:
     assert "carries no whole_tree mark" in done.stdout
 
 
+def test_an_unmarked_test_that_reads_the_committed_figures_fails(
+    tmp_path: Path,
+) -> None:
+    """The figures under ``.github/`` count: a guard over them reads them whole."""
+    images = _ROOT / ".github" / "images"
+    (tmp_path / "test_figures.py").write_text(
+        textwrap.dedent(
+            f"""
+            from pathlib import Path
+
+
+            def test_the_committed_figures_pass():
+                figures = sorted(Path({str(images)!r}).rglob("*.svg"))
+                figures = figures[:{whole_tree.LIMIT}]
+                assert len(figures) == {whole_tree.LIMIT}
+                assert all(path.read_bytes() for path in figures)
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    done = _run(tmp_path)
+
+    assert done.returncode == pytest.ExitCode.TESTS_FAILED, done.stdout + done.stderr
+    assert f"({whole_tree.LIMIT} in .github/)" in done.stdout
+    assert "carries no whole_tree mark" in done.stdout
+
+
 def test_a_test_that_reads_fewer_files_than_the_limit_passes(tmp_path: Path) -> None:
     _plant(
         tmp_path,

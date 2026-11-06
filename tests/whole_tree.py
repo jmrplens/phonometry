@@ -2,14 +2,14 @@
 """The tests that read the whole repository, and the count that tells one.
 
 Some tests read the repository's own files and assert on all of them: a
-guard run over the package, the scripts, the documentation or the site, a
-census of every public function or record, a generator run over the package.
-What they judge is source text, which neither the numba-jitted kernel nor the
-dependency floors change, so the two CI jobs that exist for those, "tests
-(numba-jitted kernel)" and "Library tests at the dependency floors", run
-``pytest --without-whole-tree``, and the nine jobs of the test matrix run
-these tests. Such a test carries the mark, on itself or, for a module of
-them, as the module's ``pytestmark``::
+guard run over the package, the scripts, the documentation, the site or the
+committed figures, a census of every public function or record, a generator
+run over the package. What they judge is the repository's own text, which
+neither the numba-jitted kernel nor the dependency floors change, so the two
+CI jobs that exist for those, "tests (numba-jitted kernel)" and "Library
+tests at the dependency floors", run ``pytest --without-whole-tree``, and the
+nine jobs of the test matrix run these tests. Such a test carries the mark,
+on itself or, for a module of them, as the module's ``pytestmark``::
 
     @pytest.mark.whole_tree
 
@@ -66,22 +66,30 @@ ROOT = Path(__file__).resolve().parent.parent
 
 #: The trees whose files a test that reads the repository opens, each with the
 #: ending a file of it has to count (``""``: any file): the package's modules,
-#: the scripts, the documentation, the site and the suite's own modules. The
-#: package's data and the suite's oracle data are what library tests read
-#: through the library; they do not count.
-TREES = {"src": ".py", "scripts": "", "docs": "", "site": "", "tests": ".py"}
+#: the scripts, the documentation, the site, the suite's own modules and
+#: ``.github/``, where the committed figures are. The package's data and the
+#: suite's oracle data are what library tests read through the library; they
+#: do not count.
+TREES = {
+    "src": ".py",
+    "scripts": "",
+    "docs": "",
+    "site": "",
+    "tests": ".py",
+    ".github": "",
+}
 
 #: Directories of those trees that hold nothing the repository wrote.
 UNWRITTEN = frozenset({"__pycache__", "node_modules", "dist", ".astro"})
 
 #: How many files of :data:`TREES` a test opens from which it reads the
 #: repository whole. On 2026-11-06 the package held 469 modules, the scripts
-#: 275 files, the documentation 236, the site 1,182 and the suite 767
-#: modules, so a test that reads one of them whole opens hundreds of files. A
-#: test that reads a smaller part whole opens fewer (the 85 rows of the
-#: conformance package) and is marked by review; the most a test that judges
-#: no part of the repository opened was 50, the figure modules a clip test
-#: copies.
+#: 275 files, the documentation 236, the site 1,182, the suite 767 modules
+#: and ``.github/`` 3,542 files, 3,332 of them figures, so a test that reads
+#: one of them whole opens hundreds of files. A test that reads a smaller
+#: part whole opens fewer (the 85 rows of the conformance package) and is
+#: marked by review; the most a test that judges no part of the repository
+#: opened was 50, the figure modules a clip test copies.
 LIMIT = 100
 
 #: The tests that open :data:`LIMIT` files of the trees or more and stay in

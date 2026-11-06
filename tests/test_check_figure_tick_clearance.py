@@ -293,6 +293,7 @@ def test_the_command_line_fails_on_a_cover_and_passes_without(
     assert gate.main(["--report", str(covered)]) == 0
 
 
+@pytest.mark.whole_tree
 def test_the_committed_figures_pass() -> None:
     """The corpus itself, which is what the gate protects."""
     assert gate.main([]) == 0

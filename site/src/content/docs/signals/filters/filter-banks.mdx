@@ -321,7 +321,7 @@ the one-shot function, `OctaveFilterBank(...)` is the constructor, and
 | `fs` | function, constructor | int | Hz | > 0; required by the constructor, and taken from the `Signal` by `octave_filter()` and `bank.filter()` | |
 | `fraction` | function, constructor | int | — | default `1`; common `3`; any $b \ge 1$ | Bands per octave = $b$ |
 | `order` | function, constructor | int | — | default `6` | SOS order per band |
-| `limits` | function, constructor | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
+| `limits` | function, constructor | list `[lo, hi]` | Hz | default `[12, 20000]`, trimmed to the bands $f_\mathrm{s}$ holds | Analysis range; limits past $f_\mathrm{s}/2$ lose their top bands with a `FilterBankWarning`, and a rate that holds none of the bands is refused |
 | `design.filter_type` | function, constructor | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/) |
 | `design.ripple` / `design.attenuation` | function, constructor | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation` $\ge 70$ for class 1, since scipy pins its equiripple floor at exactly this value |
 | `design.resample` | function, constructor | bool | — | default `True` | Filter each band on a decimated rate (multirate) |

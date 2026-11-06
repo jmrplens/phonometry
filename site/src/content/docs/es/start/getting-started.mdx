@@ -415,8 +415,10 @@ hacen deciden lo que valen los niveles:
   de presión acústica. Una recortada tampoco.
 - **Graba a 48 kHz o más.** A 44,1 kHz se descartan las bandas por encima de
   $f_\mathrm{s}/2$: el banco devuelve 32 bandas que terminan en 15 848,9 Hz en lugar de
-  las 33 que terminan en 19 952,6 Hz de arriba, y lo avisa con un
-  `filters.FilterBankWarning`.
+  las 33 que terminan en 19 952,6 Hz de arriba. Recorta así su intervalo por
+  defecto sin decir nada; los límites que des y pasen de $f_\mathrm{s}/2$ se
+  recortan igual, y un `filters.FilterBankWarning` nombra las bandas que se
+  quedan fuera.
 - **Repite la comprobación del calibrador al final.** La diferencia entre antes
   y después es la cota de deriva de todo lo capturado en medio, y un criterio
   habitual invalida la serie cuando supera 0,5 dB.

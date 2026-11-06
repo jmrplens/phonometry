@@ -55394,7 +55394,7 @@ documents, one page per module.
 | `ComputeFallbackWarning` | `warning class` | **A requested device or node could not be used and the run went to NumPy here**, as `Compute(fallback=True)` allows. Subclass of `PhonometryWarning` | `warnings.simplefilter('error', simulation.ComputeFallbackWarning)` |
 | `ComputeRemoteError` | `exception` | **A run sent to a node failed in the connection or on the node.** Subclass of `RuntimeError`<br>• `host`: the node's name / `node_traceback`: the node's traceback as text, also attached as a note<br>• with `fallback=True` the run warns with `ComputeFallbackWarning` and steps on NumPy here instead | `except simulation.ComputeRemoteError as error: print(error.node_traceback)` |
 | `PhonometryWarning` | `warning class` | **Base class for all phonometry warnings.**<br>Emitted by every module through the subclass of its own domain, so catching this one catches every library advisory at once | `warnings.simplefilter('error', PhonometryWarning)` |
-| `FilterBankWarning` | `warning class` | **A fractional-octave filter bank asked for something it cannot honour.** Subclass of `PhonometryWarning`<br>• emitted when a band above the Nyquist frequency is dropped (`Low sampling rate`)<br>• when a stateful bank is asked to detrend its blocks | `warnings.simplefilter('error', filters.FilterBankWarning)` |
+| `FilterBankWarning` | `warning class` | **A fractional-octave filter bank asked for something it cannot honour.** Subclass of `PhonometryWarning`<br>• emitted when limits the caller gave hold a band above the Nyquist frequency, which is dropped (`Low sampling rate`, naming the bands)<br>• when a stateful bank is asked to detrend its blocks | `warnings.simplefilter('error', filters.FilterBankWarning)` |
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
@@ -60291,7 +60291,7 @@ everyday arguments stay first: `FilterDesign` (`design`), `LevelCalibration`
 | `fs` | int | Hz | > 0; required by the constructor, and taken from the `Signal` by `octave_filter()` and `bank.filter()` | |
 | `fraction` | int | — | default `1`; common `3`; any $b \ge 1$ | Bands per octave = $b$ |
 | `order` | int | — | default `6` | SOS order per band |
-| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
+| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]`, trimmed to the bands $f_\mathrm{s}$ holds | Analysis range; limits past $f_\mathrm{s}/2$ lose their top bands with a `FilterBankWarning`, and a rate that holds none of the bands is refused |
 | `design.filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/) |
 | `design.ripple` / `design.attenuation` | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation` $\ge 70$ for class 1, since scipy pins its equiripple floor at exactly this value |
 | `design.resample` | bool | — | default `True` | Filter each band on a decimated rate (multirate) |
@@ -77697,6 +77697,9 @@ a filter by module reads your module:
 | the file and line a warning is shown at | the line its `stacklevel` counted to, a line of the library for 33 of them, such as `filters/core.py:698` for every filter bank that dropped a band | the line of your code that made the call |
 | `warnings.filterwarnings("ignore", module="phonometry")` | silenced the warnings shown at a line of the library, and no other | silences none; filter by class, `warnings.filterwarnings("ignore", category=phonometry.PhonometryWarning)`, or by topic |
 | `warnings.filterwarnings("error", module="my_analysis")` | missed the warnings shown at a line of the library | reaches every warning a call in `my_analysis` causes |
+| `filters.OctaveFilterBank(44100)`, `filters.octave_filter(x, 44100)` and the other banks on the default span, at a rate that cannot hold its top bands (44.1, 32, 22.05, 16 or 8 kHz) | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed` | no warning, and the same bands: the default span is trimmed to what `fs` holds |
+| a bank on `limits` you gave that reach past fs/2 | the same warning, at the first call only, since the design is cached | `FilterBankWarning: Low sampling rate: fs = 44100 Hz cannot hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz; it was left out of the bank.`, at every call; a filter on the message `Low sampling rate` still matches |
+| a bank at a rate that holds no band of its span, the default one or yours, such as `filters.OctaveFilterBank(20, fraction=3)` | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed`, and a bank of no band whose analysis came back empty | `ValueError: fs = 20 Hz cannot hold any band from 12.5 Hz to 20 kHz: the upper edge of the lowest, 14.13 Hz, is above fs/2 = 10 Hz.` |
 
 ## A choice is matched as it is written
 

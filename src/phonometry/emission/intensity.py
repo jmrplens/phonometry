@@ -611,6 +611,8 @@ def _band_integrals(
     fraction: int,
     band_limits: list[float],
     fs: float,
+    *,
+    limits_given: bool,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Integrate the two spectral densities over the ANSI S1.11/IEC 61260-1 bands.
 
@@ -618,7 +620,7 @@ def _band_integrals(
     pressures); bands with no spectral bin of their own are dropped, so the
     arrays can be shorter than the nominal band list.
     """
-    bands = _genfreqs(band_limits, fraction, fs)
+    bands = _genfreqs(band_limits, fraction, fs, warn=limits_given)
     centers: list[float] = []
     band_i: list[float] = []
     band_msp: list[float] = []
@@ -749,7 +751,8 @@ def sound_intensity(
         3 (one-third octave bands).
     :param limits: [f_min, f_max] band limits in Hz, a sequence or an array
         of the two (default [12, 20000], as in
-        :func:`phonometry.filters.nominal_frequencies`).
+        :func:`phonometry.filters.nominal_frequencies`, trimmed to the bands
+        ``fs`` holds).
     :param bias_correct: If True, apply the per-bin finite-difference
         correction :math:`(k \Delta r)/\sin(k \Delta r)` (IEC 61043:1993,
         7.3) to the
@@ -766,10 +769,14 @@ def sound_intensity(
         per-band ``bias_correction`` factor (same clamped definition) is
         reported either way.
     :return: :class:`IntensityResult`.
-    :raises ValueError: for a ``fraction`` other than 1 and 3, or ``limits``
-        that are not two ascending positive frequencies.
+    :raises ValueError: for a ``fraction`` other than 1 and 3, ``limits``
+        that are not two ascending positive frequencies, or an ``fs`` that
+        holds no band of the span, the default one or ``limits``: the upper
+        edge of the lowest band above fs/2.
     :raises TypeError: if ``density``, ``fs``, ``spacing_m`` or ``speed_of_sound`` is
         not a single number, or ``fraction`` is not an integer.
+    :warns phonometry.filters.FilterBankWarning: when ``limits`` asks for a
+        band whose upper edge lies above fs/2, naming the bands left out.
     """
     fs = resolve_pair_fs(p1, p2, fs, names=("p1", "p2"))
     x1 = apply_calibration(p1, _typesignal(p1, name="p1"))
@@ -827,7 +834,14 @@ def sound_intensity(
             else [12.0, 20000.0]
         )
         frequency, intensity, band_msp = _band_integrals(
-            fpos, i_density, p_density, df, fraction, band_limits, fs
+            fpos,
+            i_density,
+            p_density,
+            df,
+            fraction,
+            band_limits,
+            fs,
+            limits_given=limits is not None,
         )
         intensity_level = _level_array(np.abs(intensity), _I0)
         pressure_level = _level_array(band_msp, _P0**2)

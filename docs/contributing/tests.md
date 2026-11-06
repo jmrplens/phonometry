@@ -628,7 +628,7 @@ reader.join()  # waits as long as the thread does
 ```toml
 [tool.pytest.ini_options]
 filterwarnings = [
-    "ignore:Low sampling rate:UserWarning",
+    "error:.*is deprecated since phonometry.*:DeprecationWarning",
 ]
 ```
 

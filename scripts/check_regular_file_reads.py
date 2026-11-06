@@ -96,6 +96,7 @@ from ast_scan import (
     exempted,
     for_the_type_checker,
     global_bindings,
+    held_before,
     live_bindings,
     live_class_members,
     own_names,
@@ -546,48 +547,44 @@ def _held_where(
     written, stands for there.
 
     The bindings *holder* makes of its first name that may stand where it is
-    read (:func:`ast_scan.live_bindings`) say: an import what it imports, an
+    read (:func:`ast_scan.held_before`) say: an import what it imports, an
     assignment of a dotted name what that name stands for where it is
     assigned; a ``def`` or a ``class``, a function or a class of the module
     that opens no file the guard can name, two that disagree, or any other
-    binding, stand for nothing the guard can name. A class body
-    that binds the name not at all reads it in the nearest scope around it
-    that is no class body, *around* holding the scopes around *holder*, the
-    module first: there it is read where the class statement runs, which is
-    where its body does. A name no such scope binds, or one a function binds
-    in the module under ``global``, stands for what *table* says, the
-    scope's table of names. *within* holds the assignments
-    whose values are being read already: one of them that stands again where
-    its own value is read (``node = node.parent`` in a loop) stands there for
-    what it held a turn before, which is nothing the guard can name.
+    binding, stand for nothing the guard can name. When none of them has run
+    yet, or *holder* binds the name not at all, the name is read around
+    *holder* (:func:`_held_around`): the builtin at the top of a module, and
+    for a class body the scope around it, *around* holding the scopes around
+    *holder*, the module first, where the class statement runs, which is
+    where its body does. A name a function binds in the module under
+    ``global``, or one read in a function before any binding of it there,
+    stands for what *table* says, the scope's table of names. *within* holds
+    the assignments whose values are being read already: one of them that
+    stands again where its own value is read (``node = node.parent`` in a
+    loop) stands there for what it held a turn before, which is nothing the
+    guard can name.
     """
     parts = _dotted(value)
     if parts is None:
         return None
     head = parts[0]
     nodes = bindings_by_name(holder).get(head, [])
-    if not nodes and isinstance(holder, ast.ClassDef) and depth <= _DEPTH:
-        outer = [i for i, s in enumerate(around) if not isinstance(s, ast.ClassDef)]
-        if outer:
-            nearest = outer[-1]
-            return _held_where(
-                value,
-                around[nearest],
-                package,
-                table,
-                depth + 1,
-                around[:nearest],
-                within,
-            )
     swapped = isinstance(holder, ast.Module) and head in global_bindings(holder)
-    if not nodes or swapped or depth > _DEPTH:
+    if swapped or depth > _DEPTH:
         return _resolved(parts, table)
-    if not any(_may_name(holder, node) for node in nodes):
+    # Of the scope's bindings of the name, those that may stand where it is
+    # read; none when none of them has run yet, and the name is read where
+    # the scope reads a name it has not bound: the builtin at the top of a
+    # module, the module around a class body.
+    live = held_before(holder, nodes, value) if nodes else []
+    if not live:
+        return _held_around(value, parts, holder, package, table, depth, around, within)
+    if not any(_may_name(holder, node) for node in live):
         # Whichever of them stands where the name is read, it stands for
         # nothing the guard can name: no need to ask which it is.
         return _BOUND_NEARER
     held: set[str | None] = set()
-    for node in live_bindings(holder, nodes, value):
+    for node in live:
         if isinstance(node, ast.Import | ast.ImportFrom):
             held.add(_imported(node, package).get(head))
         elif assignment_target(node) is not None and id(node) not in within:
@@ -614,6 +611,51 @@ def _held_where(
     if len(held) != 1 or None in held:
         return _BOUND_NEARER
     return ".".join([str(held.pop()), *parts[1:]])
+
+
+def _held_around(
+    value: ast.expr,
+    parts: Sequence[str],
+    holder: ast.AST,
+    package: str,
+    table: Mapping[str, str],
+    depth: int,
+    around: Sequence[ast.AST],
+    within: frozenset[int],
+) -> str | None:
+    """What *value* stands for where *holder* reads its first name before any
+    binding *holder* makes of it has run (:func:`_held_where`).
+
+    At the top of a module, the builtin of the name. In a class body, the
+    scope around it, where the class statement runs: the module when the
+    body binds the name, since Python reads such a name in the class's
+    namespace and then the module's, and otherwise the nearest scope around
+    it that is no class body, *around* holding the scopes around *holder*,
+    the module first. Anywhere else, or with no such scope at hand, what
+    *table*, the scope's table of names, says.
+    """
+    if isinstance(holder, ast.Module):
+        return _resolved(parts, {})
+    if isinstance(holder, ast.ClassDef):
+        bound = parts[0] in bindings_by_name(holder)
+        outer = [
+            i
+            for i, scope in enumerate(around)
+            if not isinstance(scope, ast.ClassDef)
+            and (not bound or isinstance(scope, ast.Module))
+        ]
+        if outer:
+            nearest = outer[-1]
+            return _held_where(
+                value,
+                around[nearest],
+                package,
+                table,
+                depth + 1,
+                around[:nearest],
+                within,
+            )
+    return _resolved(parts, table)
 
 
 def _may_name(holder: ast.AST, node: ast.AST) -> bool:

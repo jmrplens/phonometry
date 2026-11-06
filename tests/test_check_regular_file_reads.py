@@ -421,6 +421,101 @@ def test_an_alias_reads_its_value_where_the_assignment_runs(
 
 
 @pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        pytest.param(
+            """
+            _builtin_open = open
+
+            def open(path):
+                return _builtin_open(path, "rb")
+
+            def read(path):
+                with _builtin_open(path) as fh:
+                    return fh.read()
+            """,
+            [("open", _OWN), ("read", _OWN)],
+            id="a-wrapper-def",
+        ),
+        pytest.param(
+            """
+            reader = open
+            open = make()
+
+            def read(path):
+                with reader(path) as fh:
+                    return fh.read()
+            """,
+            [("read", _OWN)],
+            id="a-later-call-s-result",
+        ),
+        pytest.param(
+            """
+            reader = open
+            open = lambda path: None
+
+            def read(path):
+                with reader(path) as fh:
+                    return fh.read()
+            """,
+            [("read", _OWN)],
+            id="a-later-lambda",
+        ),
+        pytest.param(
+            """
+            def read(path, reader=open):
+                with reader(path) as fh:
+                    return fh.read()
+
+            open = make()
+            """,
+            [("read", _OWN)],
+            id="a-default",
+        ),
+        pytest.param(
+            """
+            class R:
+                def read(self, path, reader=open):
+                    with reader(path) as fh:
+                        return fh.read()
+
+                open = None
+            """,
+            [("R.read", _OWN)],
+            id="a-method-s-default-before-the-class-binds-it",
+        ),
+        pytest.param(
+            """
+            open = make()
+            reader = open
+
+            def read(path):
+                with reader(path) as fh:
+                    return fh.read()
+            """,
+            [],
+            id="rebound-before-the-alias",
+        ),
+    ],
+)
+def test_an_alias_of_a_builtin_holds_it_before_its_scope_binds_the_name(
+    tmp_path: pathlib.Path, source: str, found: list[tuple[str, str]]
+) -> None:
+    """``_builtin_open = open`` before any binding of ``open`` in the module
+    has run holds the builtin, whatever the module binds ``open`` to after
+    it: a ``def open`` that wraps it, a call's result or a lambda. So does a
+    default written before such a binding, and a method's default written
+    before its class body binds the name.
+
+    The alias was read through every binding of the name in its scope when
+    none had run before it, and none of them names anything the guard
+    knows, so it stood for nothing and the reads through it passed; a
+    default written before such a binding was read the same way.
+    """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
     "loop",
     [
         pytest.param("for opener in ():\n    pass\n", id="no-turn"),

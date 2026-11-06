@@ -1267,6 +1267,62 @@ def test_an_alias_of_a_def_holds_it_whatever_a_later_class_binds_the_name_to(
     }
 
 
+def test_a_call_that_may_reach_a_def_or_the_class_of_its_name_reads_both(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``make`` bound to a saved ``def BandRecord`` in one branch and to the
+    record class of that name in the other builds the record on one of the
+    two paths, at the top of a module and read from another module.
+
+    A function and a class of one name share one key, and the ``def`` an
+    alias pinned there made the call a call of the ``def`` alone, so the
+    record the other branch builds kept the caller's arrays and passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        def BandRecord(frequencies, levels):
+            return np.array(frequencies)
+
+        saved = BandRecord
+
+        @dataclass(frozen=True)
+        class BandRecord:
+            frequencies: NDArray[np.float64]
+            levels: NDArray[np.float64]
+
+        if os.environ.get("RATING"):
+            make = saved
+        else:
+            make = BandRecord
+
+        def through_either(frequencies, levels):
+            return make(frequencies, levels)
+
+        def through_the_saved_def(frequencies, levels):
+            return saved(frequencies, levels)
+        """,
+        importer="""
+        from . import rating
+
+        def through_an_attribute(frequencies, levels):
+            return rating.make(frequencies, levels)
+        """,
+    )
+    assert found == {
+        ("through_either", "BandRecord.frequencies", "frequencies"),
+        ("through_either", "BandRecord.levels", "levels"),
+        ("through_an_attribute", "BandRecord.frequencies", "frequencies"),
+        ("through_an_attribute", "BandRecord.levels", "levels"),
+    }
+
+
 def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -3076,6 +3132,107 @@ def test_the_handover_named_outside_a_function_is_refused(
     """
     found = _handovers(tmp_path, body)
     assert {sink for _, sink in found} == {"handed_over(...): " + reason}
+
+
+#: A ``def`` and a class of one name, each standing where a call reaches the
+#: name: the class a record that keeps what it is given, saved beside the
+#: ``def`` that writes into its array, and a record that copies, replaced by
+#: a ``def`` that keeps the array; and a name bound to that record in one
+#: branch and to a function that keeps the array in the other.
+_RECORD_OR_DEF = """
+import os
+from dataclasses import dataclass
+
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+def fill(frames, n):
+    frames[0] = 1.0
+
+saved = fill
+
+@dataclass(frozen=True)
+class fill:
+    frames: NDArray[np.float64]
+    n: int
+
+if os.environ.get("RUN"):
+    writer = saved
+else:
+    writer = fill
+
+@dataclass(frozen=True)
+class Box(OwnsArrays):
+    frames: NDArray[np.float64]
+    times: NDArray[np.float64]
+
+_KEPT = []
+
+def keep_it(frames, times):
+    _KEPT.append(frames)
+    return frames
+
+if os.environ.get("RUN"):
+    make = Box
+else:
+    make = keep_it
+
+def Box(frames, times):
+    _KEPT.append(frames)
+    return frames
+"""
+
+
+@pytest.mark.parametrize(
+    ("body", "reason"),
+    [
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                writer(frames, n)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return Box(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "it is not an argument of a record that inherits OwnsArrays",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return make(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "it is not an argument of a record that inherits OwnsArrays",
+        ),
+    ],
+    ids=["class-beside-a-saved-def", "def-after-the-record", "record-or-a-function"],
+)
+def test_a_handover_reads_every_def_and_class_a_call_may_reach(
+    tmp_path: pathlib.Path, body: str, reason: str
+) -> None:
+    """A call that may build the class a saved ``def`` shares its name with
+    may keep the array; a call of the name a later ``def`` took from a record
+    that copies runs the ``def``, which builds no record; and a call of a
+    name bound to that record in one branch and to a function in the other
+    may run the function.
+
+    Each was read as one of the two: the saved ``def`` alone wrote into the
+    array, and the record class was what the other two built, whatever the
+    name held where it was read, so all three handovers passed.
+    """
+    found = _handovers(tmp_path, _RECORD_OR_DEF + textwrap.dedent(body))
+    assert len(found) == 1, found
+    ((function, sink),) = found
+    assert function == "run"
+    assert sink.startswith("handed_over(...): " + reason), sink
 
 
 def test_a_record_exemption_silences_its_class_and_goes_stale_without_it(

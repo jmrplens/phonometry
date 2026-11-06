@@ -595,8 +595,10 @@ class FunctionInfo:
 
 #: What a function of a module, read by its name at the top of the module
 #: where a ``def`` or a ``class`` of it stands, stood for there, by its key:
-#: each ``def`` that stood, none for a ``class`` (:meth:`Tree._bound_at_top`).
-_Pins = dict[tuple[str, str], list[FunctionInfo]]
+#: each ``def`` that stood, and the class for a ``class`` that did
+#: (:meth:`Tree._bound_at_top`). A function and a class of one name share a
+#: key, so a name read in two places may hold both.
+_Pins = dict[tuple[str, str], list[FunctionInfo | ClassInfo]]
 
 
 def _merge_pins(into: _Pins | None, found: _Pins) -> None:
@@ -610,6 +612,14 @@ def _merge_pins(into: _Pins | None, found: _Pins) -> None:
             for definition in definitions
             if all(definition is not other for other in held)
         )
+
+
+def _pinned_functions(
+    pins: _Pins | None, target: tuple[str, str]
+) -> list[FunctionInfo]:
+    """The definitions of *target* that stood where its name was read (*pins*)."""
+    held = pins.get(target, []) if pins is not None else []
+    return [found for found in held if isinstance(found, FunctionInfo)]
 
 
 def _is_record_decorator(node: ast.expr) -> bool:
@@ -1038,8 +1048,10 @@ class Tree:
 
         A ``def`` of a function at the top of the module goes into *pins*
         under its key, as the definition the name stands for where it was
-        read; a ``class`` there of a function's name adds none, since a call
-        of it makes an instance.
+        read, and a ``class`` there goes in as its class, which a call of
+        it makes an instance of: a name read in two places, an alias bound
+        to a ``def`` in one branch and to the ``class`` of its name in the
+        other, holds both.
         """
         if assignment_target(statement) is not None:
             return self.aliased(module, statement, depth, pins=pins)
@@ -1054,10 +1066,12 @@ class Tree:
             definition.parent is None and definition.owner is None
             for definition in definitions
         ):
-            _merge_pins(
-                pins,
-                {key: [found for found in definitions if found.node is statement]},
-            )
+            stood: list[FunctionInfo | ClassInfo] = [
+                found for found in definitions if found.node is statement
+            ]
+            if isinstance(statement, ast.ClassDef) and key in self.classes:
+                stood.append(self.classes[key])
+            _merge_pins(pins, {key: stood})
         return (key,)
 
     def aliased(
@@ -1858,18 +1872,42 @@ class Reader:
         return True
 
     def built_record(self, node: ast.expr | None) -> ClassInfo | None:
-        """The record class a call builds, if *node* is such a call."""
+        """The record class a call builds, if *node* is such a call.
+
+        Every function or class the call may name is that one record, with
+        no ``def`` of its name standing where the name was read (*pins*,
+        :meth:`Tree.resolve_top`): a call that may run a function instead,
+        one bound to the name in another branch or a ``def`` that took the
+        name from the class, builds no record the guard can vouch for.
+        """
         if not isinstance(node, ast.Call):
             return None
         func = node.func
         owner = self.function.owner
         if isinstance(func, ast.Name) and func.id == "cls":
             return owner if owner is not None and owner.record else None
-        for key in self.callees(func):
+        pins: _Pins = {}
+        built: list[ClassInfo] = []
+        for key in self.callees(func, pins=pins):
             info = self.tree.classes.get(key)
-            if info is not None and info.record:
-                return info
-        return None
+            if info is None or not info.record or _pinned_functions(pins, key):
+                return None
+            built.append(info)
+        if not built or any(info is not built[0] for info in built):
+            return None
+        return built[0]
+
+    def builds_class(self, target: tuple[str, str], pins: _Pins | None) -> bool:
+        """Whether a call that reaches *target* may make an instance of the
+        class of that key: there is one, and what stood where the name was
+        read (*pins*) holds no ``def`` of it, or holds the class beside them.
+        """
+        if target not in self.tree.classes:
+            return False
+        held = pins.get(target, []) if pins is not None else []
+        return not _pinned_functions(pins, target) or any(
+            isinstance(found, ClassInfo) for found in held
+        )
 
     def resolve_name(
         self, name: str, node: ast.AST | None = None, *, pins: _Pins | None = None
@@ -1961,11 +1999,17 @@ class Reader:
 
     def reached_by(self, func: ast.expr, call: ast.AST) -> list[FunctionInfo]:
         """Every definition a call can reach (:meth:`reached`), when each
-        function it may name is a function of the package; none otherwise.
+        function it may name is a function of the package; none otherwise,
+        nor when it may make an instance of a class of a function's name
+        (:meth:`builds_class`).
         """
         pins: _Pins = {}
         targets = self.callees(func, pins=pins)
-        if any(target not in self.tree.functions for target in targets):
+        if any(
+            target not in self.tree.functions
+            or (target in self.tree.classes and self.builds_class(target, pins))
+            for target in targets
+        ):
             return []
         return [
             found
@@ -2357,15 +2401,23 @@ class Reader:
 
         A function and a class of one name share a key: the class is what
         the call reaches unless *pins* holds a ``def`` of the key, which an
-        alias bound before the class keeps.
+        alias bound before the class keeps, and both are when *pins* holds
+        the class beside it (:meth:`builds_class`), an alias bound to the
+        ``def`` in one branch and to the class in another.
         """
-        if target in self.tree.classes and not (pins and pins.get(target)):
+        values: list[Value] = []
+        if target in self.tree.classes and self.builds_class(target, pins):
             info = self.tree.classes[target]
-            if info.record:
-                return self.constructor_sink(
+            built = (
+                self.constructor_sink(
                     info, node, arguments, keywords, public=target in self.tree.public
                 )
-            return _CLEAN
+                if info.record
+                else _CLEAN
+            )
+            if not _pinned_functions(pins, target):
+                return built
+            values.append(built)
         spread = next(
             (
                 index
@@ -2374,10 +2426,10 @@ class Reader:
             ),
             None,
         )
-        values = [
+        values.extend(
             self._returned_by(function, arguments, keywords, bound=bound, spread=spread)
             for function in self.reached(target, node, pins=pins)
-        ]
+        )
         return union(*values) if values else _CLEAN
 
     def _returned_by(
@@ -2440,7 +2492,7 @@ class Reader:
             return [found] if found is not None else []
         if all(definition.parent is None for definition in definitions):
             if pins is not None and target in pins:
-                return pins[target]
+                return _pinned_functions(pins, target)
             if target[0] == self.module and all(d.owner is None for d in definitions):
                 return _live(self.tree.modules[self.module], definitions, call)
             return self.tree.live_definitions(target)

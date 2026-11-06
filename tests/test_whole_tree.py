@@ -86,6 +86,17 @@ def _plant(directory: Path, name: str, body: str) -> None:
     (directory / name).write_text(source, encoding="utf-8")
 
 
+def _refused(done: subprocess.CompletedProcess[str], count: int) -> int:
+    """How many tests of the run failed for opening *count* files.
+
+    The refusal opens the report of each test that failed for it; the short
+    summary of ``-rA`` repeats it after the test's name, cut to the terminal
+    width but whole when ``CI`` is set, so only the line it opens counts.
+    """
+    opening = f"the test opened {count} files of the repository "
+    return sum(line.startswith(opening) for line in done.stdout.splitlines())
+
+
 def test_an_unmarked_test_that_reads_the_package_fails(tmp_path: Path) -> None:
     """The class the mark closes: a guard run over the tree, written without it."""
     _plant(
@@ -214,7 +225,88 @@ def test_a_fixture_set_up_again_counts_what_that_setup_opened(tmp_path: Path) ->
     assert "2 failed, 2 passed" in done.stdout
     assert "PASSED test_parameters.py::test_few[0]" in done.stdout
     assert "PASSED test_parameters.py::test_few[1]" in done.stdout
-    assert done.stdout.count(f"the test opened {at} files of the repository") == 2
+    assert _refused(done, at) == 2
+
+
+def test_a_fixture_a_parametrization_caches_past_its_test_counts_for_each_test(
+    tmp_path: Path,
+) -> None:
+    """A function fixture that ``indirect=True, scope="module"`` caches for
+    the module counts for each test given its setup, and a later setup of it
+    for one test alone counts what that setup opened, not the module's.
+
+    The count skipped every fixture declared for a function, so the second
+    test, which takes the fixture from its cache, counted none of its files.
+    """
+    _plant(
+        tmp_path,
+        "test_cached.py",
+        f"""
+        CALLS = []
+
+        @pytest.fixture
+        def tree(request):
+            CALLS.append(request.param)
+            return _read(request.param)
+
+        @pytest.mark.parametrize("tree", [{whole_tree.LIMIT}], indirect=True, scope="module")
+        def test_first(tree):
+            assert tree
+
+        @pytest.mark.parametrize("tree", [{whole_tree.LIMIT}], indirect=True, scope="module")
+        def test_second(tree):
+            assert CALLS == [{whole_tree.LIMIT}]
+
+        @pytest.mark.parametrize("tree", [1], indirect=True)
+        def test_one_file(tree):
+            assert CALLS == [{whole_tree.LIMIT}, 1]
+        """,
+    )
+
+    done = _run(tmp_path, "-rA")
+
+    assert done.returncode == pytest.ExitCode.TESTS_FAILED, done.stdout + done.stderr
+    assert "2 failed, 1 passed" in done.stdout, done.stdout
+    assert "PASSED test_cached.py::test_one_file[1]" in done.stdout
+    assert _refused(done, whole_tree.LIMIT) == 2
+
+
+def test_a_fixture_of_a_test_s_own_counts_only_what_it_opened(tmp_path: Path) -> None:
+    """A function fixture that overrides a module fixture of its name, and
+    does not ask for it, counts what its own setup opens, in the test's own
+    count, and not what the module fixture opened.
+
+    The count took each name for the narrowest fixture of it that had been
+    cached past a test, so it charged the class's tests with the module
+    fixture's files and failed one that opened a single file.
+    """
+    _plant(
+        tmp_path,
+        "test_own.py",
+        f"""
+        @pytest.fixture(scope="module")
+        def tree():
+            return _read({whole_tree.LIMIT})
+
+        def test_plain(tree):
+            assert tree
+
+        class TestOwn:
+            @pytest.fixture
+            def tree(self):
+                return _read(1)
+
+            def test_one_file(self, tree):
+                assert tree
+        """,
+    )
+
+    done = _run(tmp_path, "-rA")
+
+    assert done.returncode == pytest.ExitCode.TESTS_FAILED, done.stdout + done.stderr
+    assert "1 failed, 1 passed" in done.stdout, done.stdout
+    assert "PASSED test_own.py::TestOwn::test_one_file" in done.stdout
+    assert _refused(done, whole_tree.LIMIT) == 1
 
 
 def test_a_fixture_asked_for_by_name_or_set_up_inside_another_counts(
@@ -223,14 +315,16 @@ def test_a_fixture_asked_for_by_name_or_set_up_inside_another_counts(
     """A module fixture a test asks for with ``request.getfixturevalue``,
     once it is set up and again from its cache, or through a fixture that
     asks for it, counts for the test; so does one a module fixture asks for
-    in its own setup, for each test that takes that one, and the one a class
-    fixture overrides and asks for under its own name, for each test of the
-    class.
+    in its own setup, set up there or taken from its cache, for each test
+    that takes that one, and the one a class fixture overrides and asks for
+    under its own name, as a parameter, by name or through another fixture,
+    for each test of the class.
 
     The count read the fixtures the test was collected with, each name the
-    fixture of the narrowest scope, and a fixture set up inside another's
-    setup added what it opened to its own count alone, so each of these
-    tests counted none of the files and passed.
+    fixture of the narrowest scope, a fixture set up inside another's setup
+    added what it opened to its own count alone, and the count followed a
+    fixture to the ones it takes as parameters and to no other, so each of
+    these tests counted none of the files and passed.
     """
     _plant(
         tmp_path,
@@ -267,6 +361,23 @@ def test_a_fixture_asked_for_by_name_or_set_up_inside_another_counts(
         def test_holds_again(held):
             assert held
 
+        @pytest.fixture(scope="module")
+        def first():
+            return _read({whole_tree.LIMIT})
+
+        def test_first_alone(first):
+            assert first
+
+        @pytest.fixture(scope="module")
+        def kept(request):
+            return request.getfixturevalue("first")
+
+        def test_keeps(kept):
+            assert kept
+
+        def test_keeps_again(kept):
+            assert kept
+
         class TestOverridden:
             @pytest.fixture(scope="class")
             @classmethod
@@ -278,14 +389,40 @@ def test_a_fixture_asked_for_by_name_or_set_up_inside_another_counts(
 
             def test_second(self, tree):
                 assert tree
+
+        class TestOverriddenByName:
+            @pytest.fixture(scope="class")
+            @classmethod
+            def tree(cls, request):
+                return request.getfixturevalue("tree")
+
+            def test_first(self, tree):
+                assert tree
+
+            def test_second(self, tree):
+                assert tree
+
+        class TestOverriddenThroughAFixture:
+            @pytest.fixture(scope="class")
+            @classmethod
+            def helper(cls, request):
+                return request.getfixturevalue("tree")
+
+            @pytest.fixture(scope="class")
+            @classmethod
+            def tree(cls, helper):
+                return helper
+
+            def test_first(self, tree):
+                assert tree
         """,
     )
 
     done = _run(tmp_path)
 
     assert done.returncode == pytest.ExitCode.TESTS_FAILED, done.stdout + done.stderr
-    assert "7 failed" in done.stdout
-    assert done.stdout.count("carries no whole_tree mark") == 7
+    assert "13 failed in " in done.stdout, done.stdout
+    assert _refused(done, whole_tree.LIMIT) == 13
 
 
 def test_a_marked_test_passes_and_the_option_leaves_it_out(tmp_path: Path) -> None:

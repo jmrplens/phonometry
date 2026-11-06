@@ -181,15 +181,14 @@ def export_commit(target: pathlib.Path, root: pathlib.Path = _ROOT) -> None:
 
     The sdist is built from these files rather than from the checkout.
     setuptools packs every module and data file it finds under the package,
-    the top-level ``tests/test*.py``, whatever a ``setup.cfg`` or a
-    ``MANIFEST.in`` names, and the whole ``.egg-info`` directory it finds, so
-    a file a checkout holds beside the commit's would be packed, and ``git
-    status`` does not report one that an ignore rule covers, the repository's
-    own (``*.egg-info/``) or the builder's (``.git/info/exclude``,
-    ``core.excludesFile``). ``git archive`` writes each file of the commit as
-    a checkout of it would, with the line endings the commit's
-    ``.gitattributes`` sets and no other: an attribute file the checkout holds
-    beside the commit's changes nothing.
+    the readme, whatever a ``setup.cfg`` or a ``MANIFEST.in`` names, and the
+    whole ``.egg-info`` directory it finds, so a file a checkout holds beside
+    the commit's would be packed, and ``git status`` does not report one that
+    an ignore rule covers, the repository's own (``*.egg-info/``) or the
+    builder's (``.git/info/exclude``, ``core.excludesFile``). ``git archive``
+    writes each file of the commit as a checkout of it would, with the line
+    endings the commit's ``.gitattributes`` sets and no other: an attribute
+    file the checkout holds beside the commit's changes nothing.
 
     :param target: Where the files go; it must not exist yet.
     :param root: The repository checkout.

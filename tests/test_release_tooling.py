@@ -313,6 +313,40 @@ def test_a_file_git_does_not_track_is_reported_in_the_sdist(
     ]
 
 
+def test_a_test_module_setuptools_packs_by_default_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """setuptools packs the top-level ``tests/test*.py`` into an sdist by default.
+
+    Without the conftest and the helpers they import, an unpacked sdist could
+    not even collect them. A tracked test module is no file git does not
+    track, so only this check stops it; so does it a ``setup.py`` setuptools
+    would pack the same way.
+    """
+    dist = _good_dist(tmp_path)
+    sdist = dist / "phonometry-2.0.0.tar.gz"
+    _sdist(
+        sdist,
+        "2.0.0",
+        [
+            "PKG-INFO",
+            *artifacts.SDIST_SUPPORT,
+            *artifacts.LICENSE_FILES,
+            *(f"src/{path}" for path in _TRACKED),
+            "README.md",
+            "tests/test_packaging.py",
+        ],
+    )
+    assert artifacts.stray_sdist_problems(sdist, "2.0.0") == [
+        "the sdist carries tests/test_packaging.py, which is neither the package "
+        "nor a file building it needs"
+    ]
+    assert (
+        "the sdist carries tests/test_packaging.py, which is neither the package "
+        "nor a file building it needs"
+    ) in artifacts.dist_problems(dist, "2.0.0", _TRACKED)
+
+
 def test_a_wheel_of_another_version_is_reported(tmp_path: pathlib.Path) -> None:
     wheel = tmp_path / "phonometry-2.0.0-py3-none-any.whl"
     _wheel(wheel, "2.0.0", _TRACKED, metadata_version="2.0.0rc1")
@@ -624,25 +658,23 @@ def test_a_tracked_file_a_checkout_could_write_with_crlf_is_reported(
 def test_what_setuptools_packs_beside_the_package_is_checked_out_with_lf(
     tmp_path: pathlib.Path,
 ) -> None:
-    """setuptools adds the readme and the top-level tests to the sdist by default.
+    """setuptools adds the readme and ``MANIFEST.in`` to the sdist by default.
 
     A clone made with ``core.autocrlf`` on, which writes CRLF on Linux and
     macOS too, would give each of them CRLF, and a rebuild from it would pack
     bytes PyPI does not hold, unless the repository's ``.gitattributes`` pins
-    them to LF as it pins the package.
+    them to LF as it pins the package. Every file the sdist may carry beside
+    the package is asked about.
     """
-    tests = sorted(f"tests/{path.name}" for path in (_ROOT / "tests").glob("test*.py"))
     carried = [
         "PKG-INFO",
-        "README.md",
+        *artifacts.SDIST_BESIDE,
         *artifacts.SDIST_SUPPORT,
         *artifacts.LICENSE_FILES,
-        *tests,
         *(f"src/{path}" for path in artifacts.tracked_package_files()),
     ]
     sdist = tmp_path / "phonometry-2.0.0.tar.gz"
     _sdist(sdist, "2.0.0", carried)
-    assert len(tests) > 100
     assert artifacts.line_ending_problems(sdist, "2.0.0") == []
 
 

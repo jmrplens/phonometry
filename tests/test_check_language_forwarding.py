@@ -871,6 +871,96 @@ def test_a_local_alias_reads_its_value_where_the_assignment_runs(
     ]
 
 
+def test_a_partial_reads_its_names_where_it_is_built(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``functools.partial(axis)`` reads ``partial`` and ``axis`` where it is
+    built: in an assignment, at the top of a module and in a function, and
+    where it is called at once, so a later binding of either name leaves the
+    partial wrapping the helper.
+
+    Both names were read as they stood once the scope had run, so a later
+    ``partial = None`` made the call no partial at all, and a later lambda
+    bound to ``axis`` hid the helper the partial wraps, and the call that
+    drops the language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            import functools
+            from functools import partial
+
+            from .helpers import axis
+
+            _DRAW = partial(axis)
+            partial = None
+
+
+            def plot_top(result, ax, language="en"):
+                _DRAW(ax)
+
+
+            def plot_local(result, ax, language="en"):
+                from functools import partial
+                draw = partial(axis)
+                partial = None
+                draw(ax)
+
+
+            def plot_at_once(result, ax, language="en"):
+                from .helpers import axis
+                functools.partial(axis)(ax)
+                axis = lambda ax: None
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_at_once", "pkg.helpers.axis"),
+        ("plot_local", "pkg.helpers.axis"),
+        ("plot_top", "pkg.helpers.axis"),
+    ]
+
+
+def test_a_local_s_class_is_read_where_its_value_is_made(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``panel = Panel()`` holds an instance of the class ``Panel`` names
+    where the assignment runs, so a later binding of ``Panel`` leaves a call
+    of ``panel.draw`` reaching that class's method.
+
+    The value was read as its names stood once the function had run, so
+    ``Panel = None`` after it left the receiver untyped, the method was read
+    by its name alone, which two classes write with and without the
+    language, and the call that drops it passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.panels": """
+            class Panel:
+                def draw(self, ax, language="en"):
+                    return ax
+
+
+            class Other:
+                def draw(self, ax):
+                    return ax
+            """,
+            "pkg.plots": """
+            def plot_typed(result, ax, language="en"):
+                from .panels import Panel
+                panel = Panel()
+                Panel = None
+                panel.draw(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_typed", "pkg.panels.Panel.draw"),
+    ]
+
+
 def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

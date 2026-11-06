@@ -1090,12 +1090,23 @@ class Tree:
             annotation, function.parent, function.module, receiver or function.owner
         )
 
-    def type_of(self, expr: ast.expr, scope: Scope, depth: int = 0) -> Class | None:
-        """The class of the tree an expression evaluates to, where it can be read."""
+    def type_of(
+        self,
+        expr: ast.expr,
+        scope: Scope,
+        depth: int = 0,
+        point: ast.AST | None = None,
+    ) -> Class | None:
+        """The class of the tree an expression evaluates to, where it can be
+        read: its names as they stand where *point* reads them, or once the
+        scope has run when it is None. A local's value is read where its
+        assignment runs, so a later binding of a name the value reads leaves
+        the class the local holds as it was.
+        """
         if depth > _DEPTH:
             return None
         if isinstance(expr, ast.Name):
-            found = self.lookup(expr.id, scope, scope.module)
+            found = self.lookup(expr.id, scope, scope.module, point)
             if not isinstance(found, Local):
                 return None
             where = found.scope
@@ -1106,24 +1117,24 @@ class Tree:
                     where.annotations[expr.id], where.parent, where.module
                 )
             for value in where.values.get(expr.id, ()):
-                typed = self.type_of(value, where, depth + 1)
+                typed = self.type_of(value, where, depth + 1, value)
                 if typed is not None:
                     return typed
             return None
         if isinstance(expr, ast.Call):
-            target = self.resolve(expr.func, scope, scope.module)
+            target = self.resolve(expr.func, scope, scope.module, point)
             if isinstance(target, Class):
                 return target
             if isinstance(target, Scope):
                 return self.returns(target)
             if isinstance(expr.func, ast.Attribute):
-                owner = self.type_of(expr.func.value, scope, depth + 1)
+                owner = self.type_of(expr.func.value, scope, depth + 1, point)
                 method = self.member(owner, expr.func.attr) if owner else None
                 if method is not None:
                     return self.returns(method, owner)
             return None
         if isinstance(expr, ast.Attribute):
-            owner = self.type_of(expr.value, scope, depth + 1)
+            owner = self.type_of(expr.value, scope, depth + 1, point)
             if owner is not None:
                 return self._field_type(owner, expr.attr, depth)
         return None
@@ -1188,8 +1199,9 @@ class Tree:
                 for target in self.lookups(func.id, scope, module, call)
             ]
         elif isinstance(func, ast.Call):
-            # ``functools.partial(helper, ax)(...)``, called where it is built.
-            found = [self._partial_callee(func, scope, module)]
+            # ``functools.partial(helper, ax)(...)``, called where it is built,
+            # its names read there.
+            found = [self._partial_callee(func, scope, module, point=func)]
         elif isinstance(func, ast.Attribute):
             found = self._attribute_callees(call, func, scope)
         unique: list[Callee] = []
@@ -1266,25 +1278,39 @@ class Tree:
         return Callee(function.label, (slot,)) if slot is not None else None
 
     def _binding(
-        self, name: str, scope: Scope | None, module: Module
+        self,
+        name: str,
+        scope: Scope | None,
+        module: Module,
+        point: ast.AST | None = None,
     ) -> Binding | None:
         """The import *name* is bound by, whether or not it is of this tree,
-        in *scope*, or at the top of *module* when it is None.
+        in *scope*, or at the top of *module* when it is None, where *point*
+        reads it, or once the scope has run when it is None
+        (:func:`_standing`).
         """
         current = scope
         while current is not None:
             written = current.names.get(name)
             if written:
-                return _one_import(_standing(module, written, None))
+                return _one_import(_standing(module, written, point))
             if name in current.params or name in current.locals:
                 return None
             current = current.parent
-        return _one_import(_standing(module, module.names.get(name, []), None))
+        return _one_import(_standing(module, module.names.get(name, []), point))
 
-    def _is_partial(self, func: ast.expr, scope: Scope | None, module: Module) -> bool:
-        """Whether *func* names ``functools.partial``, imported either way."""
+    def _is_partial(
+        self,
+        func: ast.expr,
+        scope: Scope | None,
+        module: Module,
+        point: ast.AST | None = None,
+    ) -> bool:
+        """Whether *func* names ``functools.partial``, imported either way,
+        where *point* reads it (:meth:`_binding`).
+        """
         if isinstance(func, ast.Name):
-            binding = self._binding(func.id, scope, module)
+            binding = self._binding(func.id, scope, module, point)
             return (
                 binding is not None
                 and binding.module == "functools"
@@ -1293,7 +1319,7 @@ class Tree:
         if isinstance(func, ast.Attribute) and func.attr == "partial":
             if not isinstance(func.value, ast.Name):
                 return False
-            binding = self._binding(func.value.id, scope, module)
+            binding = self._binding(func.value.id, scope, module, point)
             return (
                 binding is not None
                 and binding.module == "functools"
@@ -1320,7 +1346,7 @@ class Tree:
         """
         if (
             depth > _DEPTH
-            or not self._is_partial(call.func, scope, module)
+            or not self._is_partial(call.func, scope, module, point)
             or not call.args
         ):
             return None

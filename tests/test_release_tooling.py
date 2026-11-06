@@ -313,15 +313,17 @@ def test_a_file_git_does_not_track_is_reported_in_the_sdist(
     ]
 
 
-def test_a_test_module_setuptools_packs_by_default_is_reported(
-    tmp_path: pathlib.Path,
+@pytest.mark.parametrize("member", ["tests/test_packaging.py", "setup.py"])
+def test_a_file_setuptools_packs_by_default_is_reported(
+    tmp_path: pathlib.Path, member: str
 ) -> None:
-    """setuptools packs the top-level ``tests/test*.py`` into an sdist by default.
+    """setuptools packs the top-level ``tests/test*.py`` and ``setup.py`` by default.
 
     Without the conftest and the helpers they import, an unpacked sdist could
-    not even collect them. A tracked test module is no file git does not
-    track, so only this check stops it; so does it a ``setup.py`` setuptools
-    would pack the same way.
+    not even collect the test modules, and a ``setup.py`` would change how the
+    wheel is built without ``SDIST_SUPPORT`` naming it. Either one is a file
+    git tracks, so ``untracked_sdist_problems`` does not see it and only this
+    check stops it.
     """
     dist = _good_dist(tmp_path)
     sdist = dist / "phonometry-2.0.0.tar.gz"
@@ -334,17 +336,15 @@ def test_a_test_module_setuptools_packs_by_default_is_reported(
             *artifacts.LICENSE_FILES,
             *(f"src/{path}" for path in _TRACKED),
             "README.md",
-            "tests/test_packaging.py",
+            member,
         ],
     )
-    assert artifacts.stray_sdist_problems(sdist, "2.0.0") == [
-        "the sdist carries tests/test_packaging.py, which is neither the package "
-        "nor a file building it needs"
-    ]
-    assert (
-        "the sdist carries tests/test_packaging.py, which is neither the package "
-        "nor a file building it needs"
-    ) in artifacts.dist_problems(dist, "2.0.0", _TRACKED)
+    problem = (
+        f"the sdist carries {member}, which is neither the package nor a file "
+        "building it needs"
+    )
+    assert artifacts.stray_sdist_problems(sdist, "2.0.0") == [problem]
+    assert problem in artifacts.dist_problems(dist, "2.0.0", _TRACKED)
 
 
 def test_a_wheel_of_another_version_is_reported(tmp_path: pathlib.Path) -> None:

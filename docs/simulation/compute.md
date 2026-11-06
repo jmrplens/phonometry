@@ -387,7 +387,7 @@ from a new measurement. Every CI job that runs the whole test suite or the
 whole of `tests/simulation` holds NumPy in float32 to its bound, and every
 run on `torch:cpu` to its two where torch is installed: the `array-api` job,
 on the torch that `requirements-torch.txt` pins, and the `minimum-versions`
-job, on torch's floor. The MPS bound was measured the same way by the `mps`
+job, on torch's floor on each Python. The MPS bound was measured the same way by the `mps`
 job, on a macOS 15 runner with Apple silicon, and that job holds every run on
 MPS to it. `torch:cuda` steps the same code as `torch:cpu`, but no run on it
 has been measured, so it has no bound.

@@ -45,7 +45,11 @@ PACKAGE_DATA: tuple[str, ...] = (
 )
 #: The oldest Python the package runs on (``requires-python``).
 PYTHON_FLOOR = "3.12"
-#: The oldest release of each dependency the package runs with.
+#: The oldest release of each dependency the package runs with, on the oldest
+#: Python it supports. A newer Python has floors of its own, at or above these:
+#: the oldest releases with a wheel for it. A node checks these whatever its
+#: Python, before it imports anything of the package, so what it refuses the
+#: package runs with on no Python.
 FLOORS: Mapping[str, str] = MappingProxyType({"numpy": "2.0.2", "scipy": "1.14.0"})
 
 #: The one package a node runs, and the first part of every path it writes.

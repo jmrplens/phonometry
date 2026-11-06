@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import itertools
 import os
 import re
 import subprocess  # nosec B404 - runs this interpreter's pytest
@@ -18,6 +19,9 @@ import conftest
 import pinned_stack
 import pytest
 import yaml
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
+from packaging.version import Version
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -51,16 +55,39 @@ def _project(**fields: object) -> dict[str, object]:
 
 
 def test_every_declared_requirement_is_pinned_at_its_floor() -> None:
+    """On each supported Python, as pip reads the requirements and their markers."""
     project = _pyproject()["project"]
     assert isinstance(project, dict)
     declared = list(project["dependencies"])
     for extra in project["optional-dependencies"].values():
         declared += extra
-    pinned = _MODULE.floors(_pyproject())
-    for spec in declared:
-        name, clauses = re.split(r"\s*>=\s*", spec)
-        floor = clauses.split(",", 1)[0].strip()
-        assert pinned[_MODULE._normalise(name)] == floor
+    for python in _classified_pythons():
+        expected = {}
+        for spec in map(Requirement, declared):
+            if spec.marker is not None and not spec.marker.evaluate(
+                {"python_version": python}
+            ):
+                continue
+            expected[canonicalize_name(spec.name)] = next(
+                clause.version for clause in spec.specifier if clause.operator == ">="
+            )
+        assert _MODULE.floors(_pyproject(), python) == expected, python
+
+
+def test_a_newer_python_never_has_an_older_floor() -> None:
+    """A floor never falls from one Python to the next.
+
+    The first wheel for a newer Python comes later, so two markers swapped by
+    mistake fail here. And a release a newer Python happens to tolerate is no
+    promise for the Pythons its open marker covers, which nobody has measured.
+    """
+    pythons = _classified_pythons()
+    for older, newer in itertools.pairwise(pythons):
+        low = _MODULE.floors(_pyproject(), older)
+        high = _MODULE.floors(_pyproject(), newer)
+        assert list(low) == list(high)
+        lowered = [name for name in low if Version(high[name]) < Version(low[name])]
+        assert lowered == [], f"Python {newer} below {older}"
 
 
 #: Extras ``full`` leaves out, with the reason. torch pulls gigabytes of CUDA
@@ -157,6 +184,141 @@ def test_two_floors_for_one_distribution_are_refused() -> None:
         _MODULE.floors(project)
 
 
+#: numpy's floors as the package declares them per Python: the oldest release
+#: with a wheel for each one.
+_NUMPY_PER_PYTHON = [
+    "numpy>=2.0.2; python_version<'3.13'",
+    "numpy>=2.1.0; python_version=='3.13'",
+    "numpy>=2.3.2; python_version>='3.14'",
+]
+
+
+@pytest.mark.parametrize(
+    ("python", "floor"),
+    [("3.12", "2.0.2"), ("3.13", "2.1.0"), ("3.14", "2.3.2"), ("3.15", "2.3.2")],
+)
+def test_a_python_version_marker_gives_each_python_its_own_floor(
+    python: str, floor: str
+) -> None:
+    """The last marker is open above, so a newer Python takes the newest floor."""
+    project = _project(**{"requires-python": ">=3.12"}, dependencies=_NUMPY_PER_PYTHON)
+    assert _MODULE.floors(project, python) == {"numpy": floor}
+
+
+def test_a_marker_is_read_however_pep_508_lets_it_be_spaced_and_quoted() -> None:
+    project = _project(
+        **{
+            "requires-python": ">=3.12",
+            "optional-dependencies": {
+                "report": [
+                    'svglib >= 0.9.1, != 1.4.0 ; python_version < "3.13"',
+                    "svglib>=1.0.0,!=1.4.0;python_version>='3.13'",
+                ]
+            },
+        },
+    )
+    assert _MODULE.floors(project, "3.12") == {"svglib": "0.9.1"}
+    assert _MODULE.floors(project, "3.13") == {"svglib": "1.0.0"}
+
+
+def test_without_a_python_the_floors_are_the_running_interpreter_s() -> None:
+    """What the job installs is what the Python it runs on needs."""
+    running = f"{sys.version_info.major}.{sys.version_info.minor}"
+    project = _project(**{"requires-python": ">=3.12"}, dependencies=_NUMPY_PER_PYTHON)
+    assert _MODULE.floors(project) == _MODULE.floors(project, running)
+
+
+def test_two_floors_one_python_meets_are_refused() -> None:
+    """An unmarked floor and a marked one both hold on 3.13: which one is pinned?"""
+    project = _project(
+        **{"requires-python": ">=3.12"},
+        dependencies=["numpy>=2.0.2", "numpy>=2.1.0; python_version>='3.13'"],
+    )
+    with pytest.raises(ValueError, match=r"numpy has two floors on Python 3\.13"):
+        _MODULE.floors(project, "3.12")
+
+
+def test_markers_that_leave_a_supported_python_out_are_refused() -> None:
+    """On 3.13 the package would ask for no numpy at all."""
+    project = _project(
+        **{"requires-python": ">=3.12"},
+        dependencies=[
+            "numpy>=2.0.2; python_version<'3.13'",
+            "numpy>=2.3.2; python_version>='3.14'",
+        ],
+    )
+    with pytest.raises(ValueError, match=r"numpy has no floor on Python 3\.13"):
+        _MODULE.floors(project, "3.12")
+
+
+def test_markers_that_leave_out_only_pythons_below_requires_python_are_kept() -> None:
+    project = _project(
+        **{"requires-python": ">=3.13"},
+        dependencies=["numpy>=2.1.0; python_version>='3.13'"],
+    )
+    assert _MODULE.floors(project, "3.13") == {"numpy": "2.1.0"}
+
+
+def test_the_newest_marker_has_to_stay_open_above() -> None:
+    """A Python newer than every marker names would get no floor."""
+    project = _project(
+        **{"requires-python": ">=3.12"},
+        dependencies=[
+            "numpy>=2.0.2; python_version<'3.13'",
+            "numpy>=2.1.0; python_version=='3.13'",
+        ],
+    )
+    with pytest.raises(ValueError, match=r"numpy has no floor on Python 3\.14"):
+        _MODULE.floors(project, "3.13")
+
+
+def test_a_python_older_than_requires_python_has_no_floors() -> None:
+    project = _project(**{"requires-python": ">=3.12"}, dependencies=_NUMPY_PER_PYTHON)
+    with pytest.raises(ValueError, match=r"Python 3\.11 is older than the 3\.12"):
+        _MODULE.floors(project, "3.11")
+
+
+@pytest.mark.parametrize(
+    "spec",
+    [
+        "numpy>=2.0.2; sys_platform == 'linux'",
+        "numpy>=2.0.2; python_version<'3.13' and sys_platform=='linux'",
+        "numpy>=2.0.2; python_version<'3.13' or python_version>='3.14'",
+        "numpy>=2.0.2; python_full_version>='3.13.1'",
+        "numpy>=2.0.2; python_version>'3.13'",
+        "numpy>=2.0.2; python_version>='3.13.1'",
+        "numpy>=2.0.2; python_version>='3.13",
+        "numpy>=2.0.2;",
+    ],
+)
+def test_any_marker_but_one_python_version_comparison_is_refused(spec: str) -> None:
+    """Only a floor per Python is something the job can pin on each Python."""
+    project = _project(**{"requires-python": ">=3.12"}, dependencies=[spec])
+    with pytest.raises(ValueError, match="is not a floor"):
+        _MODULE.floors(project, "3.13")
+
+
+def test_the_markers_of_two_lists_have_to_give_one_floor_per_python() -> None:
+    """``perf`` and ``full`` both name numba, and each Python reads one floor."""
+    project = _project(
+        **{
+            "requires-python": ">=3.12",
+            "optional-dependencies": {
+                "perf": [
+                    "numba>=0.60.0; python_version<'3.13'",
+                    "numba>=0.61.0; python_version>='3.13'",
+                ],
+                "full": [
+                    "numba>=0.60.0; python_version<'3.14'",
+                    "numba>=0.63.0; python_version>='3.14'",
+                ],
+            },
+        },
+    )
+    with pytest.raises(ValueError, match=r"numba has two floors on Python 3\.13"):
+        _MODULE.floors(project, "3.12")
+
+
 def test_an_environment_off_its_floors_is_reported() -> None:
     problems = _MODULE.mismatches({"pytest": "0.0.1", "no-such-distribution": "1.0"})
     assert any(line.startswith("pytest: ") for line in problems)
@@ -192,6 +354,33 @@ def test_check_passes_a_cpu_wheel_at_its_floor(
     assert capsys.readouterr().out == "OK: 1 distributions at their floors\n"
 
 
+def test_check_reads_the_floors_of_the_running_python(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """``--check`` and the printed pins follow the marker of the interpreter."""
+    major, minor = sys.version_info[:2]
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        "[project]\n"
+        'name = "x"\n'
+        'requires-python = ">=3.12"\n'
+        "dependencies = [\n"
+        f"    \"torch>=1.0.0; python_version<'{major}.{minor}'\",\n"
+        f"    \"torch>=2.6.0; python_version=='{major}.{minor}'\",\n"
+        f"    \"torch>=9.9.0; python_version>='{major}.{minor + 1}'\",\n"
+        "]\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(_MODULE.metadata, "version", {"torch": "2.6.0+cpu"}.__getitem__)
+
+    assert _MODULE.main(["--pyproject", str(pyproject)]) == 0
+    assert capsys.readouterr().out == "torch==2.6.0\n"
+    assert _MODULE.main(["--pyproject", str(pyproject), "--check"]) == 0
+    assert capsys.readouterr().out == "OK: 1 distributions at their floors\n"
+
+
 def test_dependabot_moves_the_pins_and_leaves_the_floors() -> None:
     """``increase`` would rewrite every floor to the release it bumps to.
 
@@ -207,17 +396,23 @@ def test_dependabot_moves_the_pins_and_leaves_the_floors() -> None:
     assert {u.get("versioning-strategy") for u in pip} == {"increase-if-necessary"}
 
 
-def test_the_minimum_job_runs_the_oldest_supported_python() -> None:
-    """The job pins the interpreter requires-python names, not another one."""
-    floor = _MODULE.python_floor(_pyproject())
-    jobs = yaml.safe_load(_WORKFLOW.read_text(encoding="utf-8"))["jobs"]
-    steps = jobs["minimum-versions"]["steps"]
+def test_the_minimum_job_runs_every_supported_python() -> None:
+    """Each Python has floors of its own, and the job installs them on that Python.
+
+    The oldest wheel of numpy, scipy, numba and torch differs from one Python
+    to the next, so the floors measured on one prove nothing about another.
+    """
+    job = yaml.safe_load(_WORKFLOW.read_text(encoding="utf-8"))["jobs"][
+        "minimum-versions"
+    ]
+    matrix = job["strategy"]["matrix"]["python-version"]
+    assert sorted(map(str, matrix), key=_minor) == _classified_pythons()
     versions = {
         str(step["with"]["python-version"])
-        for step in steps
+        for step in job["steps"]
         if "setup-python" in str(step.get("uses", ""))
     }
-    assert versions == {floor}
+    assert versions == {"${{ matrix.python-version }}"}
 
 
 def _minor(version: str) -> int:
@@ -572,14 +767,23 @@ def test_every_floored_distribution_has_a_display_name() -> None:
 
 @pytest.mark.parametrize("name", _FLOOR_STATEMENTS)
 def test_the_installation_instructions_name_every_floor(name: str) -> None:
-    """Each floor stands next to the name of its distribution, not just anywhere."""
+    """Each floor of each Python stands next to the name of its distribution.
+
+    The version may end a sentence, but not run on into a longer one: "torch
+    2.9.0." names 2.9.0, "torch 2.9.0.1" does not.
+    """
     text = (_ROOT / name).read_text(encoding="utf-8")
+    floors = {
+        (distribution, version)
+        for python in _classified_pythons()
+        for distribution, version in _MODULE.floors(_pyproject(), python).items()
+    }
     missing = [
         f"{_DISPLAY_NAMES[distribution]} {version}"
-        for distribution, version in _MODULE.floors(_pyproject()).items()
+        for distribution, version in sorted(floors)
         if not re.search(
             rf"(?<![\w-]){re.escape(_DISPLAY_NAMES[distribution])}\s+"
-            rf"{re.escape(version)}(?![\w.])",
+            rf"{re.escape(version)}(?!\w|\.\w)",
             text,
         )
     ]

@@ -265,7 +265,8 @@ Docker. Windows works as the client, not as a node: its OpenSSH server runs
 the command through `cmd.exe`, which reads the quoting another way.
 
 The environment needs Python 3.12 or later, with NumPy 2.0.2 or later and
-SciPy 1.14.0 or later, the library's floors, and CuPy or torch for a GPU,
+SciPy 1.14.0 or later, the library's floors on its oldest Python, which the
+node checks whatever its own, and CuPy or torch for a GPU,
 installed as [Where a simulation runs](/phonometry/simulation/compute/) says.
 phonometry need not be installed there, and an installed one is not used: the
 interpreter runs isolated (`-I`), on the package the client sent, and the node

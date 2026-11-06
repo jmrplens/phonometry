@@ -254,6 +254,7 @@ def test_a_stale_registry_line_is_reported(
     assert "no/such/page" in check_fence_names._stale_placeholder_routes()
 
 
+@pytest.mark.whole_tree
 def test_the_shipped_tree_reads_in_order() -> None:
     """Every committed page passes the gate CI runs."""
     assert check_fence_names.main() == 0

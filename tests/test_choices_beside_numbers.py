@@ -575,6 +575,7 @@ def test_every_choice_beside_numbers_is_walked() -> None:
     assert sorted(CALLS.keys() - found) == [], "a call names no choice beside numbers"
 
 
+@pytest.mark.whole_tree
 def test_no_body_reads_a_choice_its_annotation_does_not_state() -> None:
     """A ``str`` read as a choice beside numbers is stated in the annotation."""
     assert unstated_choices() == []

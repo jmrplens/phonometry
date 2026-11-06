@@ -146,6 +146,7 @@ def test_the_committed_files_are_what_the_generator_renders() -> None:
         assert _committed(name) == source, f"{name} is stale; run `make conformance`"
 
 
+@pytest.mark.whole_tree
 def test_every_reference_to_a_badge_resolves_to_a_generated_file() -> None:
     """No document may point at a badge this module does not write.
 

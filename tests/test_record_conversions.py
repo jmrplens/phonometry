@@ -530,6 +530,7 @@ def _dotted(record: object) -> str:
     return f"{type(record).__module__}.{type(record).__qualname__}"
 
 
+@pytest.mark.whole_tree
 def test_every_record_a_caller_builds_that_converts_is_built_here(
     reader: cpa.Reader, records: list[object]
 ) -> None:
@@ -571,6 +572,7 @@ def _published_records() -> dict[str, type]:
     }
 
 
+@pytest.mark.whole_tree
 def test_every_record_holding_a_mapping_is_built_here(
     reader: cpa.Reader, records: list[object]
 ) -> None:

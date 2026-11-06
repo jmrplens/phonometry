@@ -13,8 +13,10 @@ import pytest
 # matplotlib's settings, which a test must leave as it found them and which
 # are put back after each test module is imported; and the fixtures of the
 # simulation engine tests, which live in a module of their own name because a
-# second `conftest.py` would share this one's module name.
-pytest_plugins = ("engine_fixtures", "hang_guard", "matplotlib_guard")
+# second `conftest.py` would share this one's module name; and the count of
+# the repository's files each test opens, with --without-whole-tree, which
+# leaves out the tests that read the repository whole (tests/whole_tree.py).
+pytest_plugins = ("engine_fixtures", "hang_guard", "matplotlib_guard", "whole_tree")
 
 # Select a non-interactive matplotlib backend for the headless test suite.
 # The library no longer forces a backend (see issue #52), so the test harness

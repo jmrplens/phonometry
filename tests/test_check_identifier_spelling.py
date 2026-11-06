@@ -224,6 +224,7 @@ def test_a_word_a_stem_names_is_not_reported_twice() -> None:
     assert [stem.british for stem in spelling.british_forms("centres")] == ["centre"]
 
 
+@pytest.mark.whole_tree
 def test_the_tree_spells_every_identifier_the_american_way() -> None:
     found, stale = spelling.misspelled()
     assert found == []
@@ -244,6 +245,7 @@ def _reported(
     return {(entry.qualname, entry.name, entry.kind) for entry, _ in found}
 
 
+@pytest.mark.whole_tree
 def test_a_british_parameter_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -258,6 +260,7 @@ def test_a_british_parameter_put_back_is_reported(
     assert _reported(found) == {("band_again", "centre_frequency", "name")}
 
 
+@pytest.mark.whole_tree
 def test_a_british_value_a_caller_types_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -277,6 +280,7 @@ def test_a_british_value_a_caller_types_is_reported(
     }
 
 
+@pytest.mark.whole_tree
 def test_an_enum_value_and_a_table_key_are_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -297,6 +301,7 @@ def test_an_enum_value_and_a_table_key_are_reported(
     }
 
 
+@pytest.mark.whole_tree
 def test_a_published_choice_list_and_a_spaced_key_are_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -340,6 +345,7 @@ def test_a_module_path_is_held_to_the_spelling(monkeypatch: pytest.MonkeyPatch) 
     assert _reported(found) == {("", stub.__name__, "module")}
 
 
+@pytest.mark.whole_tree
 def test_an_exemption_nothing_needs_is_stale(monkeypatch: pytest.MonkeyPatch) -> None:
     """An exemption kept for a value that is gone, and a sanctioned word nobody
     writes, are both reported.

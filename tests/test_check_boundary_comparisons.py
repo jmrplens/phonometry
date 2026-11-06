@@ -242,6 +242,7 @@ def _refused_scopes(module: cbc.Module | None) -> set[str]:
     return {finding.scope.rsplit(".", 1)[-1] for finding in module.findings()}
 
 
+@pytest.mark.whole_tree
 def test_the_tree_passes(capsys: pytest.CaptureFixture[str]) -> None:
     status = cbc.main([])
     assert status == 0, capsys.readouterr().out

@@ -127,6 +127,7 @@ def _eager_matplotlib_imports(
     return eager
 
 
+@pytest.mark.whole_tree
 def test_no_module_scope_matplotlib_import_anywhere() -> None:
     """No module in the package may import matplotlib at import time.
 

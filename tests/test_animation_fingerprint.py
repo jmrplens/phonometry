@@ -481,6 +481,7 @@ def test_the_encode_path_is_followed_and_the_presets_are_not(
     assert {clip for clip in before if before[clip] != after[clip]} == moves
 
 
+@pytest.mark.whole_tree
 def test_every_ignored_symbol_is_in_the_tree() -> None:
     sources = fp.Sources(pathlib.Path(__file__).resolve().parent.parent)
     assert [symbol for symbol in fp._IGNORED if sources.node(symbol) is None] == []
@@ -1266,6 +1267,7 @@ def test_the_digest_file_named_here_is_the_one_the_digests_are_written_to() -> N
     assert fp.ENGINE_DIGESTS == engine_digests.DIGESTS_FILE.name
 
 
+@pytest.mark.whole_tree
 def test_the_engine_clips_of_the_repository_are_the_field_clips(
     registry: ModuleType,
 ) -> None:

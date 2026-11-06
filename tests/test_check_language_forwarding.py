@@ -1770,6 +1770,7 @@ def test_every_exemption_carries_a_reason() -> None:
     assert all(reason.strip() for reason in clf.EXEMPT.values())
 
 
+@pytest.mark.whole_tree
 def test_the_tree_passes_its_language_on() -> None:
     """The corpus itself, which is what the gate protects."""
     assert clf.main([]) == 0

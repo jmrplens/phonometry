@@ -260,6 +260,7 @@ def test_an_exemption_covers_only_its_own_word() -> None:
     assert [o.word for o in offences] == ["medicion"]
 
 
+@pytest.mark.whole_tree
 def test_the_published_tables_carry_every_accent() -> None:
     """The tables as committed: every source found, nothing flagged, nothing stale."""
     values, empty = csa.read_sources()
@@ -1172,6 +1173,7 @@ def test_a_generated_module_of_the_site_is_read(tmp_path: pathlib.Path) -> None:
     ]
 
 
+@pytest.mark.whole_tree
 def test_the_generated_api_sidebar_is_among_the_pages() -> None:
     """The committed sidebar is read, so its Spanish labels hold the glossary."""
     assert "site/src/generated/*.mjs" in csa.PAGES

@@ -723,6 +723,7 @@ def test_a_fence_shown_inside_another_closes_nothing() -> None:
     assert "starts a block quote" in problems[0]
 
 
+@pytest.mark.whole_tree
 def test_the_shipped_pages_pass(capsys: pytest.CaptureFixture[str]) -> None:
     assert cmh.main() == 0
     assert "Markdown renders the way it reads" in capsys.readouterr().out

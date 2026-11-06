@@ -24,6 +24,8 @@ from __future__ import annotations
 import pathlib
 import sys
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -203,6 +205,7 @@ def test_a_fence_closes_only_on_its_own_marker(tmp_path: pathlib.Path) -> None:
     assert [(line, command) for line, command, _ in found] == [(5, "max")]
 
 
+@pytest.mark.whole_tree
 def test_the_package_is_clean() -> None:
     """The corpus itself, docstrings and pages, which is what the gate protects."""
     assert cdm.main() == 0

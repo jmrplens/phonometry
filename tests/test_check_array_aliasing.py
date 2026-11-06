@@ -3121,6 +3121,7 @@ def test_an_exemption_silences_its_function_and_goes_stale_without_it(
     assert stale == [key]
 
 
+@pytest.mark.whole_tree
 def test_the_tree_passes(capsys: pytest.CaptureFixture[str]) -> None:
     status = caa.main([])
     assert status == 0, capsys.readouterr().out

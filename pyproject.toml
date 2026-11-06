@@ -461,6 +461,11 @@ markers = [
     # tooling is tied to the pinned stack its committed artefacts are drawn
     # with (tests/pinned_stack.py).
     "pinned_stack: tests the figure, diagram or badge tooling, which runs on the pinned figure stack only",
+    # The numba and dependency-floors CI jobs leave the tests carrying this
+    # mark out with --without-whole-tree: they read the repository's source
+    # text, which neither the jitted kernel nor a dependency floor changes,
+    # and the test matrix runs them (tests/whole_tree.py).
+    "whole_tree: reads the repository whole, a guard, a census or a generator run over the package, the scripts, the documentation or the site",
 ]
 filterwarnings = [
     # The filter bank's warning on a band above the Nyquist frequency, named

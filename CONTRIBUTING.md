@@ -154,7 +154,7 @@ python scripts/minimum_requirements.py > minimum-requirements.txt
 pip install -r minimum-requirements.txt pytest pytest-xdist pypdf pypdfium2 pystoi pyyaml jsonschema
 pip install --no-deps -e .
 python scripts/minimum_requirements.py --check
-NUMBA_DISABLE_JIT=0 pytest -n auto --without-pinned-stack
+NUMBA_DISABLE_JIT=0 pytest -n auto --without-pinned-stack --without-whole-tree
 ```
 
 The figure, diagram and badge tooling is tied to the pinned stack its
@@ -163,6 +163,14 @@ test module marked `pinned_stack` out of the run before importing it: some of
 them import names the floor matplotlib does not have, and a module that fails
 on import is an error whatever mark it carries. Which modules carry the mark is
 [T18](docs/contributing/tests.md#t18).
+
+`--without-whole-tree` leaves out the tests that read the repository whole,
+the guards, censuses and generators run over the package, the scripts, the
+documentation and the site: what they judge is source text, which no
+dependency floor changes, and the test matrix runs them. The numba job leaves
+them out for the same reason. Which tests carry the `whole_tree` mark, and how
+the suite holds a new one to it, is
+[T26](docs/contributing/tests.md#t26).
 
 The NumPy floor is also why a guard asks a value its rank before it reads it
 as one number: `float()`, `int()` and `math` take a one-element array as its

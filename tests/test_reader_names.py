@@ -201,6 +201,7 @@ def _misnamed_in(source: str) -> list[str]:
     return reader.found
 
 
+@pytest.mark.whole_tree
 def test_the_library_hands_every_reader_a_parameter_s_name() -> None:
     assert misnamed_readings(_SOURCE) == []
 
@@ -699,6 +700,7 @@ def test_a_reading_in_a_module_the_caller_imports_from_is_found() -> None:
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_helper_names_a_value_as_the_public_caller_does() -> None:
     """A private helper read a value its public caller handed on under its own
     name: ``weighted_absorption({250: "x", ...})`` was refused as ``'values'``,

@@ -14,6 +14,8 @@ import ast
 import pathlib
 import re
 
+import pytest
+
 import phonometry
 
 _SOURCE = pathlib.Path(phonometry.__file__).parent
@@ -53,5 +55,6 @@ def _hyphenated_ranges() -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_no_message_writes_a_frequency_range_with_a_hyphen() -> None:
     assert _hyphenated_ranges() == []

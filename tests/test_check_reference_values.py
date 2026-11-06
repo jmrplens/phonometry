@@ -469,6 +469,7 @@ def test_main_fails_on_a_tree_with_a_copy(package: pathlib.Path) -> None:
     assert crv.main(["--root", str(package)]) == 1
 
 
+@pytest.mark.whole_tree
 def test_the_package_is_clean() -> None:
     """The gate itself: every reference in src points at the table or cites."""
     findings, stale = crv.check_tree()

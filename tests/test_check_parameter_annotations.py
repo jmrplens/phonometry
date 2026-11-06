@@ -751,6 +751,7 @@ def test_the_script_reports_and_fails(
     assert "level(x): holds list[float]" in out
 
 
+@pytest.mark.whole_tree
 def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""
     every = cpa.findings_in(ast_scan.python_files([], cpa.SOURCE), cpa.SOURCE)
@@ -3090,6 +3091,7 @@ def test_a_generic_alias_is_read_with_the_arguments_it_is_given(
     )
 
 
+@pytest.mark.whole_tree
 def test_the_array_like_of_numbers_is_read_as_one(tmp_path: pathlib.Path) -> None:
     """The package's array-like of numbers converts, as ``ArrayLike`` does.
 

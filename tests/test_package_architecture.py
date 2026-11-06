@@ -290,6 +290,7 @@ def _family_edges() -> set[tuple[str, str, str, str]]:
     return out
 
 
+@pytest.mark.whole_tree
 def test_family_edges_are_whitelisted() -> None:
     """A subgroup reaching into another one is a decision, not an accident."""
     violations = [
@@ -374,12 +375,14 @@ def test_a_relative_import_reaches_the_package_its_dots_climb_to(
     assert _reached_packages(SRC / rel, node) == reached
 
 
+@pytest.mark.whole_tree
 def test_internal_imports_no_domain_code() -> None:
     for frm, to, where in _edges():
         if frm == "_internal":
             assert to == "_internal", f"_internal must stay leaf-level: {where}"
 
 
+@pytest.mark.whole_tree
 def test_cross_package_edges_are_whitelisted() -> None:
     violations = []
     for frm, to, where in _edges():
@@ -405,6 +408,7 @@ def test_cross_package_edges_are_whitelisted() -> None:
     assert not violations, "unlisted cross-package imports:\n" + "\n".join(violations)
 
 
+@pytest.mark.whole_tree
 def test_render_modules_only_type_check_domain_imports() -> None:
     """A rendering leaf must not reach domain code at module level.
 
@@ -642,6 +646,7 @@ def test_every_public_name_is_reachable_from_its_domain() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_no_docstring_documents_a_parameter_that_is_gone() -> None:
     """A `:param` for an argument the signature no longer has is a lie.
 
@@ -774,6 +779,7 @@ def test_no_curated_row_offers_a_fluid_float_that_is_gone() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_no_docstring_breaks_its_own_field_list() -> None:
     """Prose between two `:param:` lines ends the field list where it sits.
 
@@ -857,6 +863,7 @@ def _split_fields(source: str) -> list[str]:
     ]
 
 
+@pytest.mark.whole_tree
 def test_no_docstring_field_is_cut_in_two() -> None:
     """A field written into the middle of another field's sentence cuts it.
 
@@ -2459,6 +2466,7 @@ def test_the_float_equality_check_reads_a_global_name_its_function_has_just_boun
     ]  # fmt: skip
 
 
+@pytest.mark.whole_tree
 def test_no_source_compares_a_float_for_equality() -> None:
     """Floating point does not answer `==`, and the tree had stopped asking.
 
@@ -2532,6 +2540,7 @@ def _is_bool_literal(annotation: ast.expr | None) -> bool:
     )
 
 
+@pytest.mark.whole_tree
 def test_an_overload_on_a_true_or_false_literal_also_takes_a_bool() -> None:
     """A flag held in a variable is a ``bool``, and mypy has to accept it.
 
@@ -2587,6 +2596,7 @@ def test_an_overload_on_a_true_or_false_literal_also_takes_a_bool() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_no_suppression_comment_hides_its_reason_from_the_parser() -> None:
     """A `# noqa` directive ends at its codes, and the reason goes above it.
 
@@ -2633,6 +2643,7 @@ def test_no_suppression_comment_hides_its_reason_from_the_parser() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_no_error_message_carries_a_comma_decimal() -> None:
     """Error messages are English prose, and English prose takes a point.
 
@@ -2957,6 +2968,7 @@ def warnings_without_a_topic(path: Path) -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_every_warning_names_a_published_topic() -> None:
     """A warning is filtered by its topic, so each one is emitted as one.
 
@@ -3052,6 +3064,7 @@ def broad_warning_filters(path: Path) -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_warning_filter_in_the_library_names_its_topic() -> None:
     """The library silences the one advisory it means, never a whole family.
 
@@ -3070,6 +3083,7 @@ def test_a_warning_filter_in_the_library_names_its_topic() -> None:
     assert not found, "warning filters that name no topic:\n  " + "\n  ".join(found)
 
 
+@pytest.mark.whole_tree
 def test_a_docstring_lists_a_warning_under_warns() -> None:
     """A warning is emitted, not raised, so its docstring field is ``:warns``.
 
@@ -3165,6 +3179,7 @@ def raises_fields_naming_a_warning(source: str, where: str) -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_raises_field_never_names_a_warning() -> None:
     """A warning a call may emit has its own ``:warns`` field, never a clause of a ``:raises`` one.
 
@@ -3587,6 +3602,7 @@ def _top_level_names(
     return [target.id for target in targets if isinstance(target, ast.Name)]
 
 
+@pytest.mark.whole_tree
 def test_the_library_logs_quietly_to_loggers_of_its_own() -> None:
     sources = {
         path.relative_to(SRC).as_posix(): path.read_text(encoding="utf-8")
@@ -3783,6 +3799,7 @@ def _fields_naming(wanted: frozenset[str]) -> dict[tuple[str, str], list[str]]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_no_published_field_is_typed_any() -> None:
     """A field typed ``Any`` tells a reader, and a type checker, nothing (rule A31).
 
@@ -3795,6 +3812,7 @@ def test_no_published_field_is_typed_any() -> None:
     assert set(ANY_FIELD_EXEMPT) - found == set(), "stale ANY_FIELD_EXEMPT entries"
 
 
+@pytest.mark.whole_tree
 def test_no_published_field_is_typed_dict() -> None:
     """A ``dict`` field is invariant and editable: ``Mapping`` says what it holds.
 
@@ -3929,6 +3947,7 @@ def _stores_a_read_only_mapping(cls: type) -> bool:
     return False
 
 
+@pytest.mark.whole_tree
 def test_a_record_holding_a_read_only_mapping_travels() -> None:
     """A record that wraps a mapping read-only says how to pickle and copy itself.
 
@@ -3973,6 +3992,7 @@ def _protocols() -> list[tuple[str, ast.ClassDef]]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_protocol_declares_its_data_members_as_properties() -> None:
     """A frozen record satisfies a protocol whose members it can only be read for.
 
@@ -4016,6 +4036,7 @@ def _module_getattrs(tree: ast.Module) -> list[tuple[ast.FunctionDef, bool]]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_module_getattr_is_hidden_from_the_type_checker() -> None:
     """A module ``__getattr__`` sits under ``if not TYPE_CHECKING:``.
 
@@ -4265,6 +4286,7 @@ def _annotations_leaving_numbers_out(
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_numpy_number_taken_alone_is_taken_in_a_sequence_too() -> None:
     """An annotation that takes ``np.int64`` alone takes a list of them beside it.
 

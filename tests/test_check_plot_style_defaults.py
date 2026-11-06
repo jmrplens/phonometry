@@ -13,10 +13,8 @@ from __future__ import annotations
 
 import pathlib
 import sys
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -149,6 +147,7 @@ def test_a_table_that_is_not_a_literal_fails_closed(
     assert "could not be read" in drift
 
 
+@pytest.mark.whole_tree
 def test_the_package_is_clean() -> None:
     """The corpus itself, which is what the gate protects."""
     assert gate.main() == 0

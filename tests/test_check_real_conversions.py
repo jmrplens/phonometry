@@ -2764,6 +2764,7 @@ def test_every_exemption_names_a_function_that_exists() -> None:
         assert reason
 
 
+@pytest.mark.whole_tree
 def test_the_package_keeps_the_rule(tree_census: list[guard.Conversion]) -> None:
     unchecked = [c for c in tree_census if c.verdict == "unchecked"]
     left, stale = guard.exempted(unchecked, guard.EXEMPT)
@@ -2771,6 +2772,7 @@ def test_the_package_keeps_the_rule(tree_census: list[guard.Conversion]) -> None
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_the_census_lists_the_whole_class(
     tree_census: list[guard.Conversion],
 ) -> None:

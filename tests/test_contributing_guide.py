@@ -560,10 +560,12 @@ def test_every_enforcer_exists() -> None:
     assert problems == []
 
 
+@pytest.mark.whole_tree
 def test_every_link_into_the_guide_resolves() -> None:
     assert link_problems(_ROOT) == []
 
 
+@pytest.mark.whole_tree
 def test_no_reference_to_a_moved_section() -> None:
     headings = (_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
     still = [

@@ -544,6 +544,7 @@ def test_an_exemption_silences_one_function_and_goes_stale(
     assert (found, stale) == ([], [key])
 
 
+@pytest.mark.whole_tree
 def test_the_scripts_read_every_fence_through_the_shared_reader() -> None:
     """The tree itself, the Python scripts and the site's code."""
     assert cfr.main([]) == 0

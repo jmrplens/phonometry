@@ -1954,6 +1954,7 @@ def test_heads_overloaded_on_something_else_still_need_both_cases(
     }
 
 
+@pytest.mark.whole_tree
 def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""
     found, stale = ast_scan.exempted(
@@ -1966,6 +1967,7 @@ def test_the_package_keeps_the_rule() -> None:
     assert not stale
 
 
+@pytest.mark.whole_tree
 def test_the_script_reports_and_fails(
     tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

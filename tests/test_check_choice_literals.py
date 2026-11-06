@@ -1135,6 +1135,7 @@ def test_two_quoted_options_in_the_docstring_are_a_choice() -> None:
     assert ccl.documented_options(_documented.__doc__, "mode") == ("fast", "slow")
 
 
+@pytest.mark.whole_tree
 def test_a_stale_open_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     """An exemption that names nothing the walk finds cannot outlive its reason."""
     key = ("phonometry.nowhere", "gone", "mode")
@@ -1167,6 +1168,7 @@ def test_a_class_written_into_between_two_methods_is_still_read_whole() -> None:
     assert names == ["first", "second"]
 
 
+@pytest.mark.whole_tree
 def test_every_public_choice_of_the_package_is_a_literal() -> None:
     """The package passes: no closed choice is typed ``str``, no entry is stale."""
     found, stale = ccl.offenders()
@@ -1570,6 +1572,7 @@ def test_a_record_field_is_read_where_its_module_uses_it() -> None:
     assert unchecked == [".lower() in _reads_unchecked()"]
 
 
+@pytest.mark.whole_tree
 def test_every_literal_choice_is_checked_as_written() -> None:
     """The package passes: no public choice typed ``Literal`` is cleaned up
     before its check, here or in a function it is handed to (rule A45).
@@ -3067,6 +3070,7 @@ def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
     assert gone in stale
 
 
+@pytest.mark.whole_tree
 def test_every_literal_choice_is_checked_on_every_path() -> None:
     """The package passes: every public ``Literal`` choice and every one a
     record a caller builds holds reaches a shared validator on every path,
@@ -3228,6 +3232,7 @@ def test_a_stale_open_table_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None
     assert needed not in stale
 
 
+@pytest.mark.whole_tree
 def test_every_published_table_of_a_vocabulary_is_keyed_by_it() -> None:
     """The package passes: no published table keyed by any text holds the
     options of a vocabulary, and no entry of ``OPEN_TABLES`` is stale (rule A21).

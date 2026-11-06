@@ -755,6 +755,7 @@ _STATED_FLAGS = {
 }
 
 
+@pytest.mark.whole_tree
 def test_no_result_stores_a_verdict_flag() -> None:
     unexpected = sorted(_flag_fields() - set(_STATED_FLAGS))
     assert not unexpected, (
@@ -770,6 +771,7 @@ def test_no_result_stores_a_verdict_flag() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_every_stated_flag_is_still_a_field() -> None:
     stale = sorted(set(_STATED_FLAGS) - _flag_fields())
     assert not stale, f"_STATED_FLAGS names fields that are gone: {stale}"

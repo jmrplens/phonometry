@@ -1809,6 +1809,7 @@ def _choices_covered(function: Callable[..., object], name: str) -> None:
             raise AssertionError(msg)
 
 
+@pytest.mark.whole_tree
 def test_every_decided_plot_has_a_built_result() -> None:
     """A new plot whose return an argument decides gets a result here, or fails.
 

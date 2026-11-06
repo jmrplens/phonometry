@@ -1532,7 +1532,14 @@ jobs:
       # to stay serial: the step above compiles it once and the workers that
       # reach it read the cache in a fraction of a second, against a suite
       # that takes about twenty minutes to run one test at a time.
-      run: pytest -q -n auto
+      # --without-whole-tree leaves out the tests that read the repository
+      # whole (tests/whole_tree.py): the guards, censuses and generators run
+      # over the package, the scripts, the documentation and the site. They
+      # read source text, which the jitted kernel does not change, and the
+      # nine jobs of the test matrix run them. With them this step took 38:57
+      # on 2026-11-06; they were 38 % of the summed test time of the Linux
+      # 3.14 matrix job of that run, which puts this step near 26 minutes.
+      run: pytest -q -n auto --without-whole-tree
 
   # The FDTD engines step on any Array API backend. array-api-strict refuses
   # every call outside the standard and every mix of host and device arrays,
@@ -1900,6 +1907,15 @@ jobs:
   # those modules out before importing them, since some import names the floor
   # matplotlib does not have. The jitted kernels are on, so the numba floor is
   # compiled and exercised too.
+  #
+  # Nor does it run the tests that read the repository whole: the guards,
+  # censuses and generators run over the package, the scripts, the
+  # documentation and the site read source text, which no dependency floor
+  # changes, and the nine jobs of the test matrix run them.
+  # --without-whole-tree (tests/whole_tree.py) deselects them. With them the
+  # test step took 38:55 on 2026-11-06; they were 36 % of the summed test
+  # time of the Linux 3.12 matrix job of that run, which puts the step near
+  # 26 minutes.
   minimum-versions:
     name: Library tests at the dependency floors
     runs-on: ubuntu-latest
@@ -1940,7 +1956,7 @@ jobs:
     - name: Check the jitted kernels compile at the numba floor
       run: python scripts/check_jit_kernel.py
     - name: Run the library tests at the floors
-      run: pytest -q -n auto --without-pinned-stack
+      run: pytest -q -n auto --without-pinned-stack --without-whole-tree
 
   # The suite calls _repr_html_ and _repr_pretty_ itself; a notebook goes
   # through IPython, which picks the method, runs matplotlib on its inline

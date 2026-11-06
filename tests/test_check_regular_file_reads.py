@@ -2492,6 +2492,7 @@ def test_an_exemption_covers_its_function_and_one_that_covers_nothing_is_reporte
     assert stale == [(crf.relative(reader), "gone")]
 
 
+@pytest.mark.whole_tree
 def test_the_library_reads_every_name_through_the_check() -> None:
     """The gate passes on the library as it stands, and every exemption is used."""
     files = crf.python_files([], crf.SOURCE)

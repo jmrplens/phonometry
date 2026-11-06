@@ -19,6 +19,8 @@ from __future__ import annotations
 import pathlib
 import sys
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -94,6 +96,7 @@ def test_a_three_decimal_number_is_left_alone(tmp_path: pathlib.Path) -> None:
     assert gate._findings(_file("a of 0,005 and 0.125 alike\n", tmp_path)) == []
 
 
+@pytest.mark.whole_tree
 def test_the_corpus_is_clean() -> None:
     """The published prose itself, which is what the gate protects."""
     assert gate.main() == 0

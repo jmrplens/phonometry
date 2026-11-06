@@ -398,6 +398,7 @@ class TestTheCensus:
 class TestTheRatchet:
     """The registry and its allowlist, in both directions."""
 
+    @pytest.mark.whole_tree
     def test_the_real_tree_is_green(self) -> None:
         assert gate.registry_problems() == []
         assert gate.record_problems() == []

@@ -459,6 +459,7 @@ def test_an_exemption_silences_one_test_and_goes_stale(
     assert (found, stale) == ([], [key])
 
 
+@pytest.mark.whole_tree
 def test_the_suite_holds_no_such_block() -> None:
     """The tree itself: every exception and warning test waits on one call."""
     assert crb.main([]) == 0

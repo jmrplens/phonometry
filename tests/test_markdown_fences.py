@@ -483,6 +483,7 @@ def _pages() -> list[str]:
     return [*(path.read_text(encoding="utf-8") for path in paths), *_CASES]
 
 
+@pytest.mark.whole_tree
 @pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
@@ -526,6 +527,7 @@ def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
     assert (len(pages) > len(_CASES), differ) == (True, [])
 
 
+@pytest.mark.whole_tree
 @pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
@@ -592,6 +594,7 @@ _MARKED = (
 )
 
 
+@pytest.mark.whole_tree
 @pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_reads_the_marks_of_a_quotation_as_the_scripts_do(kind: str) -> None:

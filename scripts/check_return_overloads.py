@@ -563,8 +563,23 @@ _DEPTH = 8
 #: What a name of a module, read at its top where a ``def`` or a ``class``
 #: of it stands, stood for there, by the dotted name a call reaches through
 #: it: the key of each ``def`` that stood, none for a ``class``
-#: (:meth:`Package._at_top`).
+#: (:meth:`Package._at_top`), and :data:`_AT_THE_CALL` for a way to it that
+#: read no ``def`` there, an import (:func:`_read_at_the_call`).
 _Reads = dict[str, list[str]]
+#: What :data:`_Reads` holds for a dotted name an import reaches: the
+#: definitions it stands for are read where the call runs
+#: (:meth:`Package._live_at`).
+_AT_THE_CALL = "<read where the call runs>"
+
+
+def _read_at_the_call(reads: _Reads | None, target: str) -> None:
+    """Mark in *reads* that *target*, a dotted name an import reaches, is read
+    where the call runs (:data:`_AT_THE_CALL`): the import records no
+    definition, and one of the caller's own module may stand beside an alias
+    that recorded another (:meth:`Package.reached`).
+    """
+    if reads is not None and _AT_THE_CALL not in reads.get(target, []):
+        reads.setdefault(target, []).append(_AT_THE_CALL)
 
 
 def _aliases_a_name(
@@ -1312,10 +1327,12 @@ class Package:
         A function written in a function around the call is each of its
         definitions there; one of a module is each definition of it that
         stood where its name was read at the top of its module, at the call
-        or at an alias of it that the call reaches (:meth:`_at_top`), or
-        else each that may stand where the call runs (:meth:`_live_at`), one
-        in each branch of an ``if`` being either, whether one import or
-        several may stand for the name at the call.
+        or at an alias of it that the call reaches (:meth:`_at_top`), and
+        for a name reached another way, an import of the caller's own module
+        among them, which may stand beside such an alias, each that may
+        stand where the call runs (:meth:`_live_at`), one in each branch of
+        an ``if`` being either, whether one import or several may stand for
+        the name at the call.
         """
         reads: _Reads = {}
         targets = [
@@ -1329,10 +1346,12 @@ class Package:
                 continue
             if self.functions[target].parent is not None:
                 reached.append(target)
-            elif target in reads:
-                reached.extend(reads[target])
-            else:
-                reached.extend(self._live_at(target, function, call))
+                continue
+            for key in reads.get(target, [_AT_THE_CALL]):
+                if key == _AT_THE_CALL:
+                    reached.extend(self._live_at(target, function, call))
+                else:
+                    reached.append(key)
         return list(dict.fromkeys(reached))
 
     def _standing(
@@ -1538,7 +1557,12 @@ class Package:
                 if reads is not None and func is head:
                     key = self.keys.get(statement)
                     reads.setdefault(heads[0], []).extend([] if key is None else [key])
-            targets.extend(self._through(module, func, head, heads, depth, reads=reads))
+            imported = isinstance(statement, ast.Import | ast.ImportFrom)
+            targets.extend(
+                self._through(
+                    module, func, head, heads, depth, reads=reads, imported=imported
+                )
+            )
         return tuple(dict.fromkeys((*targets, *swapped)))
 
     def _through(
@@ -1550,16 +1574,21 @@ class Package:
         depth: int = 0,
         *,
         reads: _Reads | None = None,
+        imported: bool = False,
     ) -> list[str]:
         """What a call of *module* reaches when its first name stands for each
         of *heads*: the target read through it, and what a function may have
-        swapped in for it under ``global`` (:meth:`_swapped`).
+        swapped in for it under ``global`` (:meth:`_swapped`). A target an
+        import reaches, *imported*, is read where the call runs
+        (:func:`_read_at_the_call`).
         """
         targets: list[str] = []
         for dotted in heads:
             target = self.resolve(module, func, {head.id: dotted})
             if target is not None:
                 targets.append(target)
+                if imported:
+                    _read_at_the_call(reads, target)
             targets.extend(self._swapped(_spelled(func, dotted), depth, reads=reads))
         return targets
 
@@ -1639,6 +1668,7 @@ class Package:
                 if isinstance(statement, ast.Import | ast.ImportFrom):
                     target = _imports([statement], package, into={})[name]
                     found.append(self.canonical(target))
+                    _read_at_the_call(reads, found[-1])
                     found.extend(self._swapped(target, depth + 1, reads=reads))
                 elif assignment_target(statement) is not None:
                     found.extend(
@@ -1747,6 +1777,7 @@ class Package:
             target = self.resolve(module, func, local)
             if target is not None:
                 targets.append(target)
+                _read_at_the_call(reads, target)
             targets.extend(self._swapped(_spelled(func, local[head.id]), reads=reads))
         return tuple(dict.fromkeys(targets))
 

@@ -1324,13 +1324,19 @@ def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
     """``saved = _polar`` holds the function ``_polar`` names where the
     assignment runs, whatever a later ``def`` or ``class`` binds that name
     to, at the top of a module, in an assignment expression, under
-    ``global`` and read from another module.
+    ``global`` and read from another module. An import of the module's own
+    name that may stand beside the alias, under ``global`` or in a branch,
+    still reaches what the name holds where the call runs, the later polar
+    ``def`` among them.
 
     The definitions of ``_polar`` were chosen again where ``saved()`` runs,
     so a later ``class _polar`` left the call reaching nothing and a later
     plain ``def _polar`` reached that one, and a plain ``plot`` that returns
     the polar axes passed; an alias of a plain helper a later polar ``def``
     replaced, or of a class a later polar ``def`` replaced, was refused.
+    Then the import, which recorded nothing, was read through what the
+    alias had recorded for the same name, so it reached only the plain
+    ``def`` and a plain ``plot`` passed.
     """
     refused = _refused(
         tmp_path,
@@ -1391,6 +1397,35 @@ def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
 
         def plot_made(result: object) -> Axes:
             return made()
+
+        def _held():
+            return plt.subplots()[1]
+
+        held = _held
+
+        def _setup_held():
+            global held
+            from .helpers import _held as held
+
+        def _kept():
+            return plt.subplots()[1]
+
+        kept = _kept
+
+        def _held():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _kept():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        if FLAG:
+            from .helpers import _kept as kept
+
+        def plot_held(result: object) -> Axes:
+            return held()
+
+        def plot_kept(result: object) -> Axes:
+            return kept()
         """,
         importer="""
         from . import helpers
@@ -1405,7 +1440,9 @@ def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
     )
     assert sorted(refused) == [
         "plot_attribute",
+        "plot_held",
         "plot_imported",
+        "plot_kept",
         "plot_replaced",
         "plot_saved",
         "plot_swapped",

@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
+from phonometry.simulation.elastic_fdtd import (
+    ElasticFDTD2D,
+    ElasticRun,
+    ExplosionSource,
+)
 from phonometry.simulation.fdtd import (
     FDTD2D,
     CWSource,
@@ -601,6 +606,33 @@ def test_unstable_or_invalid_cfl_is_rejected(cfl: float) -> None:
         FDTDRun(
             c=C0, dx=0.05, duration_s=1e-3, shape=(20, 20), cfl=cfl, sources=sources
         )
+
+
+@pytest.mark.parametrize("cfl", [0.1, 0.5, 0.99])
+def test_the_time_step_follows_the_requested_cfl(cfl: float) -> None:
+    # Eq. (4.13) solved for dt at the fastest speed of the map, for the
+    # engine and for the run alike: dt = cfl dx / (c_max sqrt(2)). The
+    # golden digests step at the default 0.6 only.
+    dx = 0.01
+    c = np.full((12, 16), C0)
+    c[3, 4] = 2.0 * C0
+    expected = cfl * dx / (2.0 * C0 * np.sqrt(2.0))
+    pulse = GaussianPulse(ix=5, iy=5, half_width_s=1e-4)
+    assert FDTD2D(c=c, dx=dx, cfl=cfl).dt == pytest.approx(expected, rel=1e-15)
+    run = FDTDRun(c=c, dx=dx, cfl=cfl, duration_s=1e-3, sources=[pulse])
+    assert fdtd_simulation(run).dt == pytest.approx(expected, rel=1e-15)
+    elastic = ElasticFDTD2D(c_p=c, c_s=0.5 * C0, dx=dx, rho=RHO0, cfl=cfl)
+    assert elastic.dt == pytest.approx(expected, rel=1e-15)
+    elastic_run = ElasticRun(
+        c_p=c,
+        c_s=0.5 * C0,
+        dx=dx,
+        rho=RHO0,
+        cfl=cfl,
+        duration_s=1e-3,
+        sources=[ExplosionSource(ix=5, iy=5, waveform=pulse.value)],
+    )
+    assert elastic_run._checked.dt == pytest.approx(expected, rel=1e-15)
 
 
 def test_stable_cfl_values_are_accepted() -> None:

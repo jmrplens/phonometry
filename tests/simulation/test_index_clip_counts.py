@@ -7,9 +7,11 @@ many of them sit on the guides whose physics they settle rather than in the
 simulation section, and how many of the elastic solver's are among those.
 Each count is taken here from where it is decided: a clip of the acoustic
 solver is one ``scripts/figures/registry.py`` names ``anim_fdtd_*``, one of
-the elastic solver ``anim_elastic_*``, and a clip is on a guide when an
-English page outside the simulation section embeds it. A clip added, dropped
-or moved leaves the overview failing until it says the new count.
+the elastic solver ``anim_elastic_*``, and a clip is on a guide when a page
+of the overview's language outside the simulation section embeds it. A clip
+added, dropped or moved leaves the overview failing until it says the new
+count, and a Spanish page that embeds other clips than its English twin
+fails on its own.
 """
 
 from __future__ import annotations
@@ -57,18 +59,31 @@ _PAGES = [
 ]
 #: A clip a page embeds: the ``name`` of its ``Video`` component.
 _EMBEDDED = re.compile(r"\bname=\"(anim_(?:fdtd|elastic)_[a-z0-9_]+)\"")
+#: Any clip a page embeds, the solvers' or not.
+_VIDEO = re.compile(r"<Video\b[^>]*?\bname=\"([^\"]+)\"", re.DOTALL)
 
 
 def _clips(prefix: str) -> set[str]:
     return {clip for clip in registry._ANIMATIONS if clip.startswith(prefix)}
 
 
-def _on_guides() -> set[str]:
-    """Every solver clip an English page outside the simulation section embeds."""
+def _pages(language: str) -> list[tuple[pathlib.Path, pathlib.Path]]:
+    """Each page of *language* and its path below the language's root."""
+    root = _DOCS / "es" if language == "es" else _DOCS
+    pages = []
+    for page in sorted(root.rglob("*.mdx")):
+        relative = page.relative_to(root)
+        if language == "en" and relative.parts[0] == "es":
+            continue
+        pages.append((page, relative))
+    return pages
+
+
+def _on_guides(language: str) -> set[str]:
+    """Every solver clip a page of *language* outside the simulation section embeds."""
     found: set[str] = set()
-    for page in _DOCS.rglob("*.mdx"):
-        parts = page.relative_to(_DOCS).parts
-        if parts[0] in {"es", "simulation"}:
+    for page, relative in _pages(language):
+        if relative.parts[0] == "simulation":
             continue
         found.update(_EMBEDDED.findall(page.read_text(encoding="utf-8")))
     return found
@@ -76,7 +91,7 @@ def _on_guides() -> set[str]:
 
 def _phrases(language: str) -> list[str]:
     acoustic, elastic = _clips("anim_fdtd_"), _clips("anim_elastic_")
-    guides = _on_guides()
+    guides = _on_guides(language)
     words = _WORDS[language]
     total = words[len(acoustic) + len(elastic)]
     n_acoustic, n_elastic = words[len(acoustic)], words[len(elastic)]
@@ -98,10 +113,29 @@ def _phrases(language: str) -> list[str]:
     ]
 
 
-def test_every_clip_on_a_guide_is_one_the_registry_lists() -> None:
-    unknown = _on_guides() - _clips("anim_fdtd_") - _clips("anim_elastic_")
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_every_clip_on_a_guide_is_one_the_registry_lists(language: str) -> None:
+    unknown = _on_guides(language) - _clips("anim_fdtd_") - _clips("anim_elastic_")
     assert not unknown, (
         f"pages embed clips the registry does not list: {sorted(unknown)}"
+    )
+
+
+def test_each_spanish_page_embeds_the_clips_of_its_english_twin() -> None:
+    """Each Spanish page embeds its English twin's clips, which the counts take as read."""
+    differ = []
+    for page, relative in _pages("en"):
+        english = _VIDEO.findall(page.read_text(encoding="utf-8"))
+        twin = _DOCS / "es" / relative
+        spanish = (
+            _VIDEO.findall(twin.read_text(encoding="utf-8")) if twin.is_file() else []
+        )
+        if sorted(english) != sorted(spanish):
+            differ.append(
+                f"{relative}: {sorted(english)} in English, {sorted(spanish)} in Spanish"
+            )
+    assert not differ, (
+        "a Spanish page embeds other clips than its English twin:\n" + "\n".join(differ)
     )
 
 

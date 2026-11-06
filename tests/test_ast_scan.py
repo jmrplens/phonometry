@@ -63,6 +63,12 @@ def _outer() -> ast.FunctionDef:
     return function
 
 
+def _line(node: ast.AST) -> int:
+    """The line a binding node the scanner hands back is written on."""
+    assert isinstance(node, ast.stmt | ast.expr)
+    return node.lineno
+
+
 def _calls(root: ast.AST, name: str) -> list[ast.Call]:
     calls = [
         node
@@ -418,11 +424,12 @@ def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
             if isinstance(node, ast.Call) and getattr(node.func, "id", "") == name
         )
     live = ast_scan.live_bindings(tree, bindings, point)
-    values = []
+    values: list[int] = []
     for binding in live:
         returned = binding.body[0]
         assert isinstance(returned, ast.Return)
         assert isinstance(returned.value, ast.Constant)
+        assert isinstance(returned.value.value, int)
         values.append(returned.value.value)
     return values
 
@@ -925,7 +932,7 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
     assert sorted(inside) == ["extra", "read"]
     assert [type(node).__name__ for node in inside["read"]] == ["Name", "FunctionDef"]
     standing = ast_scan.standing_bindings(tree)
-    assert [(type(node).__name__, node.lineno) for node in standing["read"]] == [
+    assert [(type(node).__name__, _line(node)) for node in standing["read"]] == [
         ("Name", 3), ("Name", 7), ("FunctionDef", 13),
     ]  # fmt: skip
     assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
@@ -985,9 +992,9 @@ def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None
         for node in ast.walk(child)
     }
     standing = ast_scan.standing_bindings(tree, left_out)
-    assert [node.lineno for node in standing["read"]] == [2, 12]
+    assert [_line(node) for node in standing["read"]] == [2, 12]
     assert standing["extra"] == []
-    assert [node.lineno for node in ast_scan.standing_bindings(tree)["read"]] == [
+    assert [_line(node) for node in ast_scan.standing_bindings(tree)["read"]] == [
         2, 5, 10, 12,
     ]  # fmt: skip
 
@@ -1030,11 +1037,11 @@ def test_a_binding_for_the_type_checker_stands_beside_none_that_runs() -> None:
         if isinstance(node, ast.FunctionDef) and node.name == "swap"
     )
     either = ast_scan.bindings_by_name(tree)["either"]
-    assert [node.lineno for node in ast_scan.bindings_from(tree, either, swap)] == [12]
+    assert [_line(node) for node in ast_scan.bindings_from(tree, either, swap)] == [12]
     standing = ast_scan.standing_bindings(tree)
-    assert [node.lineno for node in standing["beside"]] == [2]
-    assert [node.lineno for node in standing["alone"]] == [6]
-    assert [node.lineno for node in standing["either"]] == [12]
+    assert [_line(node) for node in standing["beside"]] == [2]
+    assert [_line(node) for node in standing["alone"]] == [6]
+    assert [_line(node) for node in standing["either"]] == [12]
     assert "inside" not in standing
     left_out = ast_scan.for_the_type_checker(tree)
     assert ast_scan.standing_bindings(tree, left_out)["alone"] == []
@@ -1066,13 +1073,13 @@ def test_a_reader_of_annotations_reads_the_block_and_not_its_else() -> None:
         )
     )
     program = ast_scan.standing_bindings(tree)
-    assert [node.lineno for node in program["Mode"]] == [5]
-    assert [node.lineno for node in program["lazy"]] == [13]
-    assert [node.lineno for node in program["swapped"]] == [14]
+    assert [_line(node) for node in program["Mode"]] == [5]
+    assert [_line(node) for node in program["lazy"]] == [13]
+    assert [_line(node) for node in program["swapped"]] == [14]
     read = ast_scan.standing_bindings(tree, annotations=True)
-    assert [node.lineno for node in read["Mode"]] == [3]
-    assert [node.lineno for node in read["lazy"]] == [8, 13]
-    assert [node.lineno for node in read["swapped"]] == [9, 14]
+    assert [_line(node) for node in read["Mode"]] == [3]
+    assert [_line(node) for node in read["lazy"]] == [8, 13]
+    assert [_line(node) for node in read["swapped"]] == [9, 14]
 
 
 def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
@@ -1175,7 +1182,14 @@ def test_a_test_on_type_checking_says_which_branch_runs(
     assert id(written[runs]) not in ast_scan.for_the_type_checker(tree)
     assert id(written[runs]) in ast_scan.for_the_program(tree)
     assert id(written[never]) not in ast_scan.for_the_program(tree)
-    assert [line.targets[0].id for line in ast_scan.what_runs(statement)] == [runs]
+    running = ast_scan.what_runs(statement)
+    names = [
+        line.targets[0].id
+        for line in running
+        if isinstance(line, ast.Assign) and isinstance(line.targets[0], ast.Name)
+    ]
+    assert len(running) == 1
+    assert names == [runs]
 
     tree = ast.parse(f"held = first if {test} else second\n")
     read = {
@@ -1428,6 +1442,7 @@ def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:
         )
     )
     first, box = tree.body[1], tree.body[2]
+    assert isinstance(box, ast.ClassDef)
     in_first, in_body, in_method, in_own, in_plain = _calls(tree, "T")
     assert ast_scan.binding_of(tree, in_first, "T") == ("binding", first)
     assert ast_scan.binding_of(tree, in_body, "T") == ("binding", box)

@@ -33,6 +33,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
+import ast_scan
 import check_regular_file_reads as crf
 import pytest
 
@@ -2510,24 +2511,24 @@ def test_an_exemption_covers_its_function_and_one_that_covers_nothing_is_reporte
 ) -> None:
     reader = tmp_path / "reader.py"
     reader.write_text("def own():\n    return VERSION.read_text()\n", encoding="utf-8")
-    key = (crf.relative(reader), "own")
+    key = (ast_scan.relative(reader), "own")
     saved = dict(crf.EXEMPT)
     try:
         crf.EXEMPT.clear()
         crf.EXEMPT[key] = "the library's own file"
-        crf.EXEMPT[(crf.relative(reader), "gone")] = "a read that was removed"
+        crf.EXEMPT[(ast_scan.relative(reader), "gone")] = "a read that was removed"
         findings, stale = crf.check([reader])
     finally:
         crf.EXEMPT.clear()
         crf.EXEMPT.update(saved)
     assert findings == []
-    assert stale == [(crf.relative(reader), "gone")]
+    assert stale == [(ast_scan.relative(reader), "gone")]
 
 
 @pytest.mark.whole_tree
 def test_the_library_reads_every_name_through_the_check() -> None:
     """The gate passes on the library as it stands, and every exemption is used."""
-    files = crf.python_files([], crf.SOURCE)
+    files = ast_scan.python_files([], crf.SOURCE)
     findings, stale = crf.check(files)
     assert [finding.describe() for finding in findings] == []
     assert stale == []

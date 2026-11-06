@@ -452,7 +452,9 @@ def _bound(
     a name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) what that name stands for where the assignment
     runs, as the bindings the scope makes of its first name that may stand
-    there say (:func:`_held_where`), and a name any
+    there say (:func:`_held_where`), a class body's read in the scopes
+    around it where the class statement runs when none of them has run,
+    and a name any
     other binding stores in (a lambda, a call's result, a loop's target)
     nothing the guard can name, each binding taken in the order of the
     source, so the last one written stands. What the functions and classes
@@ -494,12 +496,15 @@ def _bound(
         ):
             written.append(((node.lineno, node.col_offset), node))
             naming |= {id(node), id(target)}
+    # The scopes around *scope*, the module first, which a class body reads
+    # a name in before it binds it (:func:`_held_around`).
+    outside = () if holder is None else (*around, holder)
     for _place, bound in sorted(written, key=lambda entry: entry[0]):
         if isinstance(bound, ast.Import | ast.ImportFrom):
             aliases.update(_imported(bound, package))
             continue
         target = _one_target(bound)
-        held = _held_where(bound.value, scope, package, aliases)
+        held = _held_where(bound.value, scope, package, aliases, around=outside)
         if target is not None and held is not None:
             aliases[target.id] = held
     # A name an import or an alias binds, of whose bindings none that may

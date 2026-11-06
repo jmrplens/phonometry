@@ -516,6 +516,79 @@ def test_an_alias_of_a_builtin_holds_it_before_its_scope_binds_the_name(
 
 
 @pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        pytest.param(
+            """
+            import io as x
+
+            class R:
+                opener = x.open
+                data = opener(PATH).read()
+
+            x = make()
+            """,
+            [("R", _OWN)],
+            id="the-module-rebinds-the-name-after-the-class",
+        ),
+        pytest.param(
+            """
+            import io as x
+
+            class R:
+                opener = x.open
+                data = opener(PATH).read()
+                x = None
+            """,
+            [("R", _OWN)],
+            id="the-class-body-binds-the-name-after",
+        ),
+        pytest.param(
+            """
+            def build():
+                import io as x
+
+                class R:
+                    opener = x.open
+                    data = opener(PATH).read()
+
+                x = make()
+                return R
+            """,
+            [("build.R", _OWN)],
+            id="a-class-in-a-function",
+        ),
+        pytest.param(
+            """
+            import io as x
+            x = make()
+
+            class R:
+                opener = x.open
+                data = opener(PATH).read()
+            """,
+            [],
+            id="the-module-rebinds-the-name-before-the-class",
+        ),
+    ],
+)
+def test_a_class_body_reads_an_alias_where_its_statement_runs(
+    tmp_path: pathlib.Path, source: str, found: list[tuple[str, str]]
+) -> None:
+    """``opener = x.open`` in a class body holds what ``x`` stands for where
+    the class statement runs, in the scope around it, or in the module when
+    the body binds ``x`` itself after the alias; a later binding of ``x``
+    changes nothing.
+
+    The body's alias read ``x`` in the table of the scope around as it stood
+    once that scope had run, and in the body's own bindings whether they
+    had run or not, so a later binding of ``x`` left the alias holding
+    nothing the guard can name and the read through it passed.
+    """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
     "loop",
     [
         pytest.param("for opener in ():\n    pass\n", id="no-turn"),

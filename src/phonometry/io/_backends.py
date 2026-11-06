@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING, NamedTuple
 import numpy as np
 
 from .._internal.json_input import escaped
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
     _WAVE_FORM_TYPE,
@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     from ._chunks import BroadcastMetadata, WavChunks
 
 
+@published_by("phonometry.io")
 class LossyCompressionWarning(PhonometryWarning):
     """Warns that samples came through a lossy codec: levels are not defensible."""
 

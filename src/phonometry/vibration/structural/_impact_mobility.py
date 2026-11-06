@@ -111,7 +111,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning, warn_caller
+from ..._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_samples
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
@@ -208,6 +208,7 @@ _PULSE_END_RATIO = 0.01
 _PERCENT = 100.0
 
 
+@published_by("phonometry.vibration")
 class ImpactExcitationWarning(PhonometryWarning):
     """Advisory when an ISO 7626-5 record breaks a rule of the part."""
 

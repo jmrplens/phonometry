@@ -2274,7 +2274,8 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 Every warning of the library is now shown at the first line of the caller's
 code, whichever functions of the library it was reached through. Python's
 `default` action then shows it once for each line of yours that causes it, and
-a filter by module reads your module:
+a filter by module reads your module. A traceback names the warning by the
+package that exports it:
 
 | What | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- | --- |
@@ -2285,6 +2286,7 @@ a filter by module reads your module:
 | a bank on `limits` you gave that reach past fs/2 | the same warning, at the first call only, since the design is cached | `FilterBankWarning: Low sampling rate: fs = 44100 Hz cannot hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz; it was left out of the bank.`, at every call; a filter on the message `Low sampling rate` still matches |
 | a bank at a rate that holds no band of its span, the default one or yours, such as `filters.OctaveFilterBank(20, fraction=3)` | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed`, and a bank of no band whose analysis came back empty | `ValueError: fs = 20 Hz cannot hold any band from 12.5 Hz to 20 kHz: the upper edge of the lowest, 14.13 Hz, is above fs/2 = 10 Hz.` |
 | `vibration.transfer_stiffness_indirect` with a transmissibility that holds `inf` or `nan` | an array holding `-inf+nanj` | `ValueError: 'transmissibility' must contain only finite values.` |
+| the name a traceback, a repr or pickle gives the 14 warnings written in private modules, `PhonometryWarning` among them | the private module, `phonometry.fluids._state.FluidAssumptionWarning` | the package that exports it, `phonometry.fluids.FluidAssumptionWarning`; the class is the same, and `inspect.getsource` of it raises `OSError` |
 
 ## A choice is matched as it is written
 

@@ -66,7 +66,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ..io._resolve import (
     apply_calibration,
     like_input,
@@ -94,6 +94,7 @@ __all__ = [
 ]
 
 
+@published_by("phonometry.signals")
 class ToneBurstWarning(PhonometryWarning):
     """A tone burst whose gate cannot close on the tone's zero crossing.
 

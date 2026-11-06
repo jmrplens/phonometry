@@ -2824,6 +2824,89 @@ def test_every_published_warning_is_a_phonometry_warning() -> None:
     )
 
 
+def test_every_published_warning_is_named_by_the_package_that_publishes_it() -> None:
+    """A traceback names a warning by its module, so that module is one a caller imports.
+
+    Under ``python -W error`` a warning is raised and its traceback ends with
+    the class's ``__module__``: ``phonometry.fluids._state.FluidAssumptionWarning``
+    for the advisory of ``fluids.air()``, a path the reference never documents
+    and a private module a caller should not import. Thirteen published
+    warnings and the root were written in private modules. Each now carries
+    the public package that publishes it, which still finds the same class,
+    so a pickled warning comes back as itself.
+    """
+    import importlib
+    import pickle
+
+    from phonometry import PhonometryWarning
+
+    warnings = {
+        name: obj
+        for name, obj in _published_classes().items()
+        if issubclass(obj, Warning)
+    }
+    warnings["PhonometryWarning"] = PhonometryWarning
+    misnamed = [
+        f"{name} is named {cls.__module__}.{cls.__qualname__}"
+        for name, cls in sorted(warnings.items())
+        if any(part.startswith("_") for part in cls.__module__.split("."))
+        or getattr(importlib.import_module(cls.__module__), cls.__qualname__, None)
+        is not cls
+    ]
+    assert not misnamed, (
+        "warnings named by a module that does not publish them:\n  "
+        + ("\n  ".join(misnamed))
+    )
+    for cls in warnings.values():
+        assert type(pickle.loads(pickle.dumps(cls("x")))) is cls  # noqa: S301
+
+
+@pytest.mark.whole_tree
+@pytest.mark.skipif(
+    sys.version_info < (3, 13), reason="Python records __firstlineno__ from 3.13"
+)
+def test_inspect_reads_each_published_class_from_the_file_that_writes_it() -> None:
+    """``inspect`` opens a class's ``__module__`` at the line Python recorded.
+
+    A ``__module__`` assigned in the class body keeps the ``__firstlineno__``
+    the compiler recorded, so ``inspect.getsource(FilterBankWarning)`` read
+    ``phonometry/filters/__init__.py`` at the line ``filters/_warnings.py``
+    wrote the class on and printed a name of an import list, and the guards
+    that say where a public name is defined stopped on a ``TokenError``.
+    ``published_by`` names the class once it exists, which drops the line, so
+    ``inspect`` says it has no source. Every line kept opens the class's own
+    statement, decorators first; a class that keeps none is a warning named
+    so, with no annotation to read against the publisher's globals.
+    """
+    import inspect
+    import linecache
+
+    misread, unnamed = [], []
+    for name, cls in sorted(_published_classes().items()):
+        first = vars(cls).get("__firstlineno__")
+        if first is None:
+            if not issubclass(cls, Warning) or inspect.get_annotations(cls):
+                unnamed.append(name)
+            continue
+        path = inspect.getsourcefile(cls) or ""
+        lines = linecache.getlines(path)[first - 1 :]
+        # The recorded line is the first decorator's, or the statement's.
+        opening = lines[0].strip() if lines else ""
+        statement = next(
+            (ln.strip() for ln in lines if ln.lstrip()[:6] == "class "), ""
+        )
+        if not (
+            opening.startswith(("@", "class "))
+            and re.match(rf"class {cls.__name__}\b", statement)
+        ):
+            misread.append(f"{name}: {path}:{first} reads {opening!r}")
+    assert not misread, (
+        "inspect reads these classes from a line that does not write them:\n  "
+        + "\n  ".join(misread)
+    )
+    assert not unnamed, f"classes inspect cannot read that are no warnings: {unnamed}"
+
+
 def test_every_published_exception_is_named_an_error() -> None:
     """An exception reads as one: ``<Topic>Error``, as PEP 8 asks.
 

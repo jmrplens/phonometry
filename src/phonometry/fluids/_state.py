@@ -20,16 +20,18 @@ from typing import TYPE_CHECKING, Any
 from .._internal.display import RichDisplay
 from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import require_positive
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, published_by
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 
+@published_by("phonometry.fluids")
 class FluidWarning(PhonometryWarning):
     """A fluid state outside the domain its model states for itself."""
 
 
+@published_by("phonometry.fluids")
 class FluidAssumptionWarning(PhonometryWarning):
     """A fluid was built from a default the caller did not supply.
 

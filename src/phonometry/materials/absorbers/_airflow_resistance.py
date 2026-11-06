@@ -81,7 +81,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning, warn_caller
+from ..._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ...fluids import Fluid
 
 if TYPE_CHECKING:
@@ -183,6 +183,7 @@ _AREA_POSITIVE_MSG = "'area' must be positive."
 _FREQUENCY_POSITIVE_MSG = "'frequency' must be positive."
 
 
+@published_by("phonometry.materials")
 class AirflowResistanceWarning(PhonometryWarning):
     """Advisory for out-of-range or non-conforming ISO 9053 airflow inputs."""
 

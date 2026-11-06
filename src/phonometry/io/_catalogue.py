@@ -131,7 +131,7 @@ from .._internal.json_input import (
     write_beside,
 )
 from .._internal.validation import real_number, require_scalar
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._sidecar import _SIDECAR_TAIL
 
 if TYPE_CHECKING:
@@ -264,6 +264,7 @@ _HEDGE_WORDS: Mapping[str, frozenset[str]] = MappingProxyType(
 )
 
 
+@published_by("phonometry.io")
 class CatalogueWarning(PhonometryWarning):
     """A catalogue file was read, and some of its cells are worth a second look.
 

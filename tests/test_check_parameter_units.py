@@ -1984,3 +1984,21 @@ def test_a_decorated_function_is_found_where_its_source_is() -> None:
     where = cpu._where(_placed)
     line = inspect.getsourcelines(_placed.__wrapped__)[1]
     assert where == f"tests/test_check_parameter_units.py:{line}"
+
+
+def test_a_warning_named_by_its_publisher_is_found_where_it_is_written() -> None:
+    """A warning named by the public package that exports it keeps no source line.
+
+    ``published_by`` names ``FilterBankWarning`` ``phonometry.filters``, which
+    does not write it, and drops the line Python recorded, so :mod:`inspect`
+    has no source for it. The walk reported every public name there with an
+    empty location; it finds the module of the package that binds the class
+    and writes its ``class`` statement, ``filters/_warnings.py``.
+    """
+    from phonometry.filters import FilterBankWarning
+
+    path, _, line = cpu._where(FilterBankWarning).partition(":")
+    assert path == "src/phonometry/filters/_warnings.py"
+    written = (cpu.ROOT / path).read_text(encoding="utf-8").splitlines()
+    assert written[int(line) - 1].startswith("@published_by(")
+    assert written[int(line)].startswith("class FilterBankWarning(")

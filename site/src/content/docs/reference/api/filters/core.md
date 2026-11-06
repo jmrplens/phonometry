@@ -28,9 +28,10 @@ How the bank carries its filter state from one block to the next.
 
 A fractional-octave filter bank asked for something it cannot honour.
 
-Emitted when a band lies above the Nyquist frequency of the sample rate
-and is dropped from the bank, and when a stateful bank is asked to detrend
-its blocks, which introduces a step between them.
+Emitted when limits the caller gave hold a band above the Nyquist
+frequency of the sample rate, which is dropped from the bank, and when a
+stateful bank is asked to detrend its blocks, which introduces a step
+between them.
 
 ## FilterDesign
 

@@ -2345,7 +2345,8 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 Cada aviso de la biblioteca se muestra ahora en la primera línea del código de
 quien llama, sean cuales sean las funciones de la biblioteca por las que se
 llegó a él. La acción `default` de Python lo muestra entonces una vez por cada
-línea tuya que lo causa, y un filtro por módulo lee tu módulo:
+línea tuya que lo causa, y un filtro por módulo lee tu módulo. Una traza nombra
+el aviso por el paquete que lo exporta:
 
 | Qué | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- | --- |
@@ -2356,6 +2357,7 @@ línea tuya que lo causa, y un filtro por módulo lee tu módulo:
 | un banco sobre unos `limits` que das y pasan de fs/2 | el mismo aviso, sólo en la primera llamada, porque el diseño se guarda en caché | `FilterBankWarning: Low sampling rate: fs = 44100 Hz cannot hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz; it was left out of the bank.`, en cada llamada; un filtro sobre el mensaje `Low sampling rate` sigue casando |
 | un banco a una frecuencia de muestreo que no admite ninguna banda de su intervalo, el de por defecto o el tuyo, como `filters.OctaveFilterBank(20, fraction=3)` | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed`, y un banco sin bandas cuyo análisis volvía vacío | `ValueError: fs = 20 Hz cannot hold any band from 12.5 Hz to 20 kHz: the upper edge of the lowest, 14.13 Hz, is above fs/2 = 10 Hz.` |
 | `vibration.transfer_stiffness_indirect` con una transmisibilidad que contiene `inf` o `nan` | un array con `-inf+nanj` | `ValueError: 'transmissibility' must contain only finite values.` |
+| el nombre que dan una traza, un repr o pickle a los 14 avisos escritos en módulos privados, `PhonometryWarning` entre ellos | el módulo privado, `phonometry.fluids._state.FluidAssumptionWarning` | el paquete que lo exporta, `phonometry.fluids.FluidAssumptionWarning`; la clase es la misma, e `inspect.getsource` sobre ella lanza `OSError` |
 
 ## Una opción se compara tal como se escribe
 

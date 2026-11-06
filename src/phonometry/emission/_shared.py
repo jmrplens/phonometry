@@ -68,7 +68,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -124,6 +124,7 @@ def _validate_event_count(n_events: object, owner: str) -> int | None:
 Grade = Literal["engineering", "survey"]
 
 
+@published_by("phonometry.emission")
 class SoundPowerWarning(PhonometryWarning):
     """Non-fatal qualification issue in any of the sound-power methods.
 

@@ -83,7 +83,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ..io._resolve import (
     apply_calibration,
     resolve_optional_pair_fs,
@@ -95,6 +95,7 @@ from ..io._resolve import (
 ExcitationMethod = Literal["spectral", "farina", "mls", "golay"]
 
 
+@published_by("phonometry.room")
 class ImpulseResponseWarning(PhonometryWarning):
     """Warns about suspect recovered impulse responses (e.g. MLS aliasing)."""
 

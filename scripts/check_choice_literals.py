@@ -1244,9 +1244,14 @@ def _constants_of(
     an alias.
 
     A name of the module an assignment's value reads is what it held where
-    the assignment runs (:func:`_held_where_written`): ``ALLOWED = KINDS``
-    holds the table ``KINDS`` names there, whatever a later assignment binds
-    ``KINDS`` to.
+    the assignment runs: those of its bindings at the top of the module that
+    may stand there (:func:`ast_scan.held_before`), and each a function makes
+    under ``global``, which may have run at any time; what an
+    ``if TYPE_CHECKING:`` block holds never runs, and is none of them.
+    ``ALLOWED = KINDS`` holds the table ``KINDS`` names there, whatever a
+    later assignment binds ``KINDS`` to. A name the module binds once, or not
+    at all, holds there what it holds once the module has run, and is read as
+    it was.
     """
     read = _read_module(module_name, annotations=annotations)
     if read is None:
@@ -1254,6 +1259,9 @@ def _constants_of(
     module, tree, package, standing = read
     assignments = _assignments(tree)
     imported: dict[ast.AST, dict[str, ast.expr]] = {}
+    checker = for_the_type_checker(tree)
+    top = bindings_by_name(tree)
+    inside = global_bindings(tree)
 
     def value(
         node: ast.AST, name: str, seen: frozenset[str] = frozenset()
@@ -1283,10 +1291,15 @@ def _constants_of(
                 or not isinstance(read.ctx, ast.Load)
                 or read.id in seen
                 or read.id not in standing
-                or binding_of(tree, read, read.id)[1] not in {None, tree}
             ):
                 continue
-            here = _held_where_written(tree, read)
+            own = [n for n in top.get(read.id, ()) if id(n) not in checker]
+            sent = [n for n in inside.get(read.id, ()) if id(n) not in checker]
+            if len(own) + len(sent) < 2:
+                continue
+            if binding_of(tree, read, read.id)[1] not in {None, tree}:
+                continue
+            here = [*held_before(tree, own, read), *sent]
             if not here or {id(node) for node in here} == {
                 id(node) for node in standing[read.id]
             }:
@@ -1302,31 +1315,6 @@ def _constants_of(
             found[name] = agreed
     _read_frozen_tables(found, vars(module))
     return MappingProxyType(found)
-
-
-def _held_where_written(tree: ast.Module, read: ast.Name) -> list[ast.AST]:
-    """The bindings at the top of *tree* of the name *read*, a name a value
-    reads where it is written, that may stand there
-    (:func:`ast_scan.held_before`), and each a function makes under
-    ``global``, which may have run at any time; none when a single binding,
-    or none, binds the name, which then holds the one that stands once the
-    module has run, or none. What an ``if TYPE_CHECKING:`` block holds never
-    runs, and is none of them.
-    """
-    checker = for_the_type_checker(tree)
-    own = [
-        node
-        for node in bindings_by_name(tree).get(read.id, ())
-        if id(node) not in checker
-    ]
-    inside = [
-        node
-        for node in global_bindings(tree).get(read.id, ())
-        if id(node) not in checker
-    ]
-    if len(own) + len(inside) < 2:
-        return []
-    return [*held_before(tree, own, read), *inside]
 
 
 def _replaced(node: ast.AST, by: Mapping[int, ast.expr]) -> ast.AST:

@@ -540,6 +540,7 @@ def _held_where(
     table: Mapping[str, str],
     depth: int = 0,
     around: Sequence[ast.AST] = (),
+    within: frozenset[int] = frozenset(),
 ) -> str | None:
     """What the dotted name *value*, read in the scope *holder* where it is
     written, stands for there.
@@ -555,7 +556,10 @@ def _held_where(
     module first: there it is read where the class statement runs, which is
     where its body does. A name no such scope binds, or one a function binds
     in the module under ``global``, stands for what *table* says, the
-    scope's table of names.
+    scope's table of names. *within* holds the assignments
+    whose values are being read already: one of them that stands again where
+    its own value is read (``node = node.parent`` in a loop) stands there for
+    what it held a turn before, which is nothing the guard can name.
     """
     parts = _dotted(value)
     if parts is None:
@@ -567,27 +571,61 @@ def _held_where(
         if outer:
             nearest = outer[-1]
             return _held_where(
-                value, around[nearest], package, table, depth + 1, around[:nearest]
+                value,
+                around[nearest],
+                package,
+                table,
+                depth + 1,
+                around[:nearest],
+                within,
             )
     swapped = isinstance(holder, ast.Module) and head in global_bindings(holder)
     if not nodes or swapped or depth > _DEPTH:
         return _resolved(parts, table)
+    if not any(_may_name(holder, node) for node in nodes):
+        # Whichever of them stands where the name is read, it stands for
+        # nothing the guard can name: no need to ask which it is.
+        return _BOUND_NEARER
     held: set[str | None] = set()
     for node in live_bindings(holder, nodes, value):
         if isinstance(node, ast.Import | ast.ImportFrom):
             held.add(_imported(node, package).get(head))
-        elif assignment_target(node) is not None:
+        elif assignment_target(node) is not None and id(node) not in within:
             assigned = assigned_value(holder, node)
             held.add(
                 None
                 if assigned is None or _dotted(assigned) is None
-                else _held_where(assigned, holder, package, table, depth + 1, around)
+                else _held_where(
+                    assigned,
+                    holder,
+                    package,
+                    table,
+                    depth + 1,
+                    around,
+                    within | {id(node)},
+                )
             )
         else:
             held.add(None)
+        if len(held) != 1 or None in held:
+            # One that stands for nothing, or two that disagree, and no
+            # other can make the name stand for something again.
+            return _BOUND_NEARER
     if len(held) != 1 or None in held:
         return _BOUND_NEARER
     return ".".join([str(held.pop()), *parts[1:]])
+
+
+def _may_name(holder: ast.AST, node: ast.AST) -> bool:
+    """Whether the binding *node* in *holder* can make its name stand for
+    something the guard can name: an import, or an assignment of a dotted name.
+    """
+    if isinstance(node, ast.Import | ast.ImportFrom):
+        return True
+    if assignment_target(node) is None:
+        return False
+    assigned = assigned_value(holder, node)
+    return assigned is not None and _dotted(assigned) is not None
 
 
 def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]]:

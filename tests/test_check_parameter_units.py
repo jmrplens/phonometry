@@ -353,12 +353,14 @@ def test_a_lone_number_without_its_unit_put_back_is_reported(
     assert [entry.name for entry in found] == ["TAPPING_IMPACT_RATE"]
 
 
+@pytest.mark.whole_tree
 def test_every_public_function_is_named_for_what_it_returns() -> None:
     found, stale = cpu.unit_named_functions()
     assert found == []
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_level_function_named_with_its_decibels_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -396,6 +398,7 @@ def test_a_level_function_named_with_its_decibels_put_back_is_reported(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_method_named_with_its_decibels_is_reported_and_a_property_is_not(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -434,6 +437,7 @@ def test_a_method_named_with_its_decibels_is_reported_and_a_property_is_not(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_method_inherited_from_a_base_no_module_exports_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -485,6 +489,7 @@ def test_a_property_inherited_from_a_base_no_module_exports_is_reported(
     assert read == [("_DrawableLayer", "insertion_loss_db")]
 
 
+@pytest.mark.whole_tree
 def test_a_parameter_of_an_inherited_method_is_read(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -506,6 +511,7 @@ def test_a_parameter_of_an_inherited_method_is_read(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_function_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1361,6 +1367,7 @@ def test_a_value_name_is_not_an_axis(name: str) -> None:
     assert not cpu.is_axis(name)
 
 
+@pytest.mark.whole_tree
 def test_a_function_axis_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1370,6 +1377,7 @@ def test_a_function_axis_exemption_nothing_needs_is_stale(
     assert key in stale
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_function_axis_by_name() -> None:
     assert cpu.positional_function_axes() == ([], [])
 
@@ -1525,6 +1533,7 @@ def test_a_fixed_tuple_is_read_off_the_return_annotation(
     assert cpu.fixed_tuple_items(annotation) == items
 
 
+@pytest.mark.whole_tree
 def test_the_tree_answers_several_quantities_as_records() -> None:
     assert cpu.tuple_returns() == ([], [])
 
@@ -1700,6 +1709,7 @@ def test_a_unit_named_default_is_passed_by_name(
     assert {(p.qualname, p.name) for p in loose} == {("wave", "duration_s")}
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_input_record_by_name() -> None:
     """The real tree passes the input-record rule, and its exemption is live."""
     assert cpu.positional_records() == ([], [])
@@ -1772,6 +1782,7 @@ def test_a_record_held_by_an_input_record_takes_its_axis_by_name(
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_record_axis_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1781,10 +1792,12 @@ def test_a_record_axis_exemption_nothing_needs_is_stale(
     assert key in stale
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_input_record_axis_by_name() -> None:
     assert cpu.positional_record_axes() == ([], [])
 
 
+@pytest.mark.whole_tree
 def test_a_handed_on_result_no_function_takes_or_returns_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1796,6 +1809,7 @@ def test_a_handed_on_result_no_function_takes_or_returns_is_stale(
     assert cpu.stale_handed_on_results() == [gone, returned_only]
 
 
+@pytest.mark.whole_tree
 def test_every_handed_on_result_is_taken_and_returned() -> None:
     assert cpu.stale_handed_on_results() == []
 
@@ -1822,6 +1836,7 @@ def test_an_input_record_built_by_position_is_refused(
         build()
 
 
+@pytest.mark.whole_tree
 def test_every_condition_on_the_tree_is_written_by_name() -> None:
     _, loose, _ = cpu.offenders()
     assert loose == []

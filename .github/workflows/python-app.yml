@@ -1537,8 +1537,8 @@ jobs:
       # over the package, the scripts, the documentation and the site. They
       # read source text, which the jitted kernel does not change, and the
       # nine jobs of the test matrix run them. With them this step took 38:57
-      # on 2026-11-06; they were 38 % of the summed test time of the Linux
-      # 3.14 matrix job of that run, which puts this step near 26 minutes.
+      # on 2026-11-06; they were 39 % of the summed test time of the Linux
+      # 3.14 matrix job of that run, which puts this step near 25 minutes.
       run: pytest -q -n auto --without-whole-tree
 
   # The FDTD engines step on any Array API backend. array-api-strict refuses
@@ -1913,9 +1913,9 @@ jobs:
   # documentation and the site read source text, which no dependency floor
   # changes, and the nine jobs of the test matrix run them.
   # --without-whole-tree (tests/whole_tree.py) deselects them. With them the
-  # test step took 38:55 on 2026-11-06; they were 36 % of the summed test
+  # test step took 38:55 on 2026-11-06; they were 37 % of the summed test
   # time of the Linux 3.12 matrix job of that run, which puts the step near
-  # 26 minutes.
+  # 25 minutes.
   minimum-versions:
     name: Library tests at the dependency floors
     runs-on: ubuntu-latest

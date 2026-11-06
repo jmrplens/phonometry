@@ -22,6 +22,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from ..filters.core import OctaveFilterBank
+from ..filters.frequencies import nominal_frequencies
 from ..io._resolve import apply_calibration
 
 if TYPE_CHECKING:
@@ -136,6 +137,12 @@ def split_bands(
         msg = f"'{name}' must be a (f_min, f_max) pair or None."
         raise ValueError(msg)
     require_finite_array(limits, name)
+    if not holds_a_band(fs, fraction, (float(limits[0]), float(limits[1]))):
+        msg = (
+            f"'{name}' {tuple(limits)} leaves no band below the Nyquist "
+            f"frequency at fs={fs} Hz."
+        )
+        raise ValueError(msg)
     bank = OctaveFilterBank(
         fs=fs, fraction=fraction, order=6, limits=[limits[0], limits[1]]
     )
@@ -157,6 +164,25 @@ def split_bands(
         )
         raise ValueError(msg)
     return np.asarray(freqs, dtype=np.float64), band_signals
+
+
+def holds_a_band(
+    fs: float, fraction: float | np.integer[Any], limits: tuple[float, float]
+) -> bool:
+    """Whether a bank at ``fs`` keeps a band of ``limits``, asked before it is built.
+
+    The bank's own test: a band stays when its upper edge is at or below
+    fs/2. Asked first, so that limits no band survives are refused by name
+    rather than after the bank has warned about the bands it dropped. Limits
+    the bank would refuse anyway (not positive, not ascending) are left to it.
+    """
+    if isinstance(fraction, np.integer):
+        fraction = int(fraction)
+    lower, upper = limits
+    if not 0.0 < lower < upper:
+        return True
+    bands = nominal_frequencies(fraction, [lower, upper])
+    return bool(np.any(bands.upper_edges <= fs / 2.0))
 
 
 #: Moving-average window (seconds) used to smooth the squared IR before

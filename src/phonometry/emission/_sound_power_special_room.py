@@ -1231,12 +1231,6 @@ def special_room_source_locations(
     if n_positions < 2:  # noqa: PLR2004
         msg = "'levels' must hold at least two microphone positions for Formula (4)."
         raise ValueError(msg)
-    if n_positions != _SURVEY_MICROPHONES:
-        warn_caller(
-            f"{n_positions} microphone position(s) were surveyed; step 1 of 9.4 "
-            f"uses {_SURVEY_MICROPHONES} ({_STANDARD}).",
-            SoundPowerWarning,
-        )
     if n_microphone_positions not in _TABLE3_MICROPHONES:
         msg = (
             "'n_microphone_positions' must be one of the columns of Table 3, "
@@ -1265,7 +1259,7 @@ def special_room_source_locations(
         s_a = float(_survey_deviation(a_levels[:, None])[0])
         class_a = _sm_class(s_a)
         n_a = _TABLE3[class_a]["A"][column]
-    return SourceLocationPlan(
+    plan = SourceLocationPlan(
         standard=_STANDARD,
         frequencies=freqs,
         standard_deviation_db=np.asarray(s_m, dtype=np.float64),
@@ -1277,6 +1271,14 @@ def special_room_source_locations(
         a_weighted_standard_deviation_db=s_a,
         n_a_weighted_source_locations=n_a,
     )
+    # Advised once the plan stands, so a refusal above comes first under -W error.
+    if n_positions != _SURVEY_MICROPHONES:
+        warn_caller(
+            f"{n_positions} microphone position(s) were surveyed; step 1 of 9.4 "
+            f"uses {_SURVEY_MICROPHONES} ({_STANDARD}).",
+            SoundPowerWarning,
+        )
+    return plan
 
 
 @dataclass(frozen=True)
@@ -1744,8 +1746,6 @@ def sound_power_special_room(
     )
     omc = _check_uncertainty_inputs(sigma_omc_db, coverage_factor)
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    _microphone_advisory(n_positions, traverse=traverse)
-    _room_advisories(volume, nominal, freqs)
     background = (
         None
         if background_levels is None
@@ -1754,7 +1754,6 @@ def sound_power_special_room(
         )
     )
     mean, shift, margin = _corrected_mean(grid, background)
-    _background_advisory(_margin_met(margin), measured=background is not None)
     room_term = (
         -10.0 * math.log10(nominal / _T0_S)
         + 10.0 * math.log10(volume / _V0_M3)
@@ -1770,7 +1769,7 @@ def sound_power_special_room(
         )
         level_a_direct = mean_a + room_term
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
-    return SpecialRoomSoundPowerResult(
+    result = SpecialRoomSoundPowerResult(
         frequencies=freqs,
         sound_power_level=level,
         mean_pressure_level=mean,
@@ -1794,6 +1793,13 @@ def sound_power_special_room(
         n_microphone_positions=n_positions,
         n_source_positions=n_sources,
     )
+    # The advisories come once the result stands: a refusal of any argument,
+    # the A-weighted levels' among them, is never replaced by one under -W
+    # error.
+    _microphone_advisory(n_positions, traverse=traverse)
+    _room_advisories(volume, nominal, freqs)
+    _background_advisory(_margin_met(margin), measured=background is not None)
+    return result
 
 
 def sound_power_special_room_comparison(
@@ -1862,7 +1868,6 @@ def sound_power_special_room_comparison(
     freqs = _octave_frequencies(frequencies, n_bands, _TABLE_F1)
     omc = _check_uncertainty_inputs(sigma_omc_db, coverage_factor)
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    _microphone_advisory(n_positions, traverse=traverse)
     ref_grid, ref_traverse = _measurement_grid(reference_levels, "reference_levels")
     if ref_grid.shape[0] != 1 or ref_grid.shape[2] != n_bands:
         msg = (
@@ -1871,12 +1876,6 @@ def sound_power_special_room_comparison(
         )
         raise ValueError(msg)
     n_ref_positions = ref_grid.shape[1]
-    if not ref_traverse and n_ref_positions < _SURVEY_MICROPHONES:
-        warn_caller(
-            f"The reference source was measured at {n_ref_positions} position(s); "
-            f"10.3 asks for no fewer than {_SURVEY_MICROPHONES} ({_STANDARD}).",
-            SoundPowerWarning,
-        )
     # Formula (10) gives the level under the conditions of the test (Annex E),
     # so a calibration is read there, less its own C2.
     power = _finite(
@@ -1919,11 +1918,8 @@ def sound_power_special_room_comparison(
     )
     mean, shift, margin = _corrected_mean(grid, background)
     mean_ref, _, margin_ref = _corrected_mean(ref_grid, ref_background)
-    _background_advisory(
-        _margin_met(margin) & _margin_met(margin_ref), measured=background is not None
-    )
     level = np.asarray(mean + (power - mean_ref), dtype=np.float64)
-    return SpecialRoomSoundPowerResult(
+    result = SpecialRoomSoundPowerResult(
         frequencies=freqs,
         sound_power_level=level,
         mean_pressure_level=mean,
@@ -1947,3 +1943,15 @@ def sound_power_special_room_comparison(
         n_microphone_positions=n_positions,
         n_source_positions=n_sources,
     )
+    # As in the direct method, every advisory waits for the result to stand.
+    _microphone_advisory(n_positions, traverse=traverse)
+    if not ref_traverse and n_ref_positions < _SURVEY_MICROPHONES:
+        warn_caller(
+            f"The reference source was measured at {n_ref_positions} position(s); "
+            f"10.3 asks for no fewer than {_SURVEY_MICROPHONES} ({_STANDARD}).",
+            SoundPowerWarning,
+        )
+    _background_advisory(
+        _margin_met(margin) & _margin_met(margin_ref), measured=background is not None
+    )
+    return result

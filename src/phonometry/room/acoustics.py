@@ -59,6 +59,7 @@ from ..io._resolve import resolve_fs
 from ._shared import (
     MIN_LINE_FIT_POINTS,
     TRUST_MARGIN_DB,
+    holds_a_band,
     noise_power,
     onset_index,
     split_bands,
@@ -534,6 +535,12 @@ def decay_curve(
             msg = "Bandwidth 'fraction' must be positive."
             raise ValueError(msg)
         half_width = 2.0 ** (1.0 / (4.0 * fraction))
+        if not holds_a_band(fs, fraction, (band / half_width, band * half_width)):
+            msg = (
+                f"'band' ({band:g} Hz) has no filter at fs={fs} Hz; "
+                "its upper edge exceeds the Nyquist frequency."
+            )
+            raise ValueError(msg)
         bank = OctaveFilterBank(
             fs=fs,
             fraction=fraction,

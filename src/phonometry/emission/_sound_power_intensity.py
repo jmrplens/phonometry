@@ -672,7 +672,22 @@ def sound_power_intensity(
             real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
         )
 
-    # --- warnings ------------------------------------------------------------
+    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
+    # The per-band grade (clause 8.4), the A-weighted screening (10.6 b) and
+    # the A-weighted total are read by the result from these fields.
+    result = SoundPowerIntensityResult(
+        frequencies=freqs,
+        partial_power=np.asarray(partial_power, dtype=np.float64),
+        surface_pressure_intensity_index=fpi,
+        repeatability=repeatability,
+        pressure_residual_index=dpi0_arr,
+        surface_area=s_total,
+        fraction=require_band_fraction(fraction, "fraction"),
+        grade=grade,
+        repeatability_limit_db=s_arr,
+    )
+
+    # --- warnings, once the result stands, so no refusal comes after one -----
     if np.any(negative_band):
         warn_caller(
             "Total sound power is negative in one or more bands; ISO 9614-2:1996 "
@@ -692,21 +707,6 @@ def sound_power_intensity(
             "engineering grade is not achieved there (ISO 9614-2:1996, B.1.2).",
             SoundPowerWarning,
         )
-
-    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
-    # The per-band grade (clause 8.4), the A-weighted screening (10.6 b) and
-    # the A-weighted total are read by the result from these fields.
-    result = SoundPowerIntensityResult(
-        frequencies=freqs,
-        partial_power=np.asarray(partial_power, dtype=np.float64),
-        surface_pressure_intensity_index=fpi,
-        repeatability=repeatability,
-        pressure_residual_index=dpi0_arr,
-        surface_area=s_total,
-        fraction=require_band_fraction(fraction, "fraction"),
-        grade=grade,
-        repeatability_limit_db=s_arr,
-    )
     if freqs is not None and (fpi is None or dpi0_arr is None) and n_bands > 1:
         warn_caller(
             "The A-weighted total sums every determinable band without "
@@ -1731,21 +1731,22 @@ def sound_power_intensity_precision(
         raise ValueError(_FREQUENCIES_BAND_COUNT_MSG)
 
     partial_power = intensity * seg[:, None]  # Eq. 5
-    # Judged on the settled share of the gross power, as in ISO 9614-2.
-    if np.any(settled_net_share(partial_power, axis=0) <= 0.0):
-        warn_caller(
-            "Net sound power is non-positive in one or more bands; ISO "
-            "9614-3:2002 is not applicable to those bands (clause 9.2).",
-            SoundPowerWarning,
-        )
-
     # The levels, LW0 (Eq. 10) and the A-weighted total over the applicable
     # bands (clause 9.2 / 4.3) are read by the result from these fields.
     freqs = None if frequencies is None else real_array(frequencies, "frequencies")
-    return PrecisionIntensityResult(
+    result = PrecisionIntensityResult(
         frequencies=freqs,
         partial_power=np.asarray(partial_power, dtype=np.float64),
         surface_area=float(np.sum(seg)),
         temperature_c=float(temperature_c),
         static_pressure_pa=float(static_pressure_pa),
     )
+    # Judged on the settled share of the gross power, as in ISO 9614-2, and
+    # said once the result stands, so no refusal comes after the advisory.
+    if np.any(settled_net_share(partial_power, axis=0) <= 0.0):
+        warn_caller(
+            "Net sound power is non-positive in one or more bands; ISO "
+            "9614-3:2002 is not applicable to those bands (clause 9.2).",
+            SoundPowerWarning,
+        )
+    return result

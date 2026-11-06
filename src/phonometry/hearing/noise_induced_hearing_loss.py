@@ -36,6 +36,7 @@ from .._internal.types import Sex  # noqa: TC001
 from .._internal.validation import (
     check_engine,
     real_array,
+    require_finite,
     require_finite_fields,
     require_ranks,
     require_same_length,
@@ -559,8 +560,9 @@ def nipts(
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all six (500 Hz to 6000 Hz).
     :return: A :class:`NIPTSResult` with the distribution and ``.plot()``.
-    :raises ValueError: for a non-positive duration, a fractile outside (0, 1),
-        or an unknown frequency.
+    :raises ValueError: for a level or a duration that is not finite, a
+        non-positive duration, a fractile outside (0, 1), or an unknown
+        frequency.
     :raises TypeError: if ``exposure_duration_years``, ``fractile`` or ``l_ex`` is not a
         single number, or ``frequencies`` holds a text or a value that is not a real
         number.
@@ -570,8 +572,10 @@ def nipts(
     runs but a :class:`NoiseInducedHearingLossWarning` marks the result as an
     extrapolation, and the ``.report()`` fiche prints the matching caveat.
     """
-    require_scalar(l_ex, "l_ex")
-    require_scalar(exposure_duration_years, "exposure_duration_years")
+    # Finite before the domain advisory below, which a NaN would otherwise
+    # trigger first and, under -W error, raise in place of this refusal.
+    require_finite(l_ex, "l_ex")
+    require_finite(exposure_duration_years, "exposure_duration_years")
     if exposure_duration_years <= 0.0:
         msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."
         raise ValueError(msg)

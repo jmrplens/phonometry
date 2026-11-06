@@ -1327,7 +1327,7 @@ $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive frequency or blocking mass. |
+| ValueError | for a non-positive frequency or blocking mass, or a `transmissibility` that is not finite. |
 | TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequency` holds a text or a value that is not a real number, or `transmissibility` holds a text or a value that is not a number. |
 
 **Warns**

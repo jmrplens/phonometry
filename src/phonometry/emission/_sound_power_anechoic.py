@@ -784,13 +784,8 @@ def _precision_uncertainty_bands(
     )
 
 
-def _room_qualification_warnings(
-    check: FreeFieldCheck,
-    surface: PrecisionSurface,
-    radius: float,
-    frequencies: ArrayLike | None,
-) -> None:
-    """Warn where the measurement leaves the room qualification (Annex A)."""
+def _check_qualified_room(check: FreeFieldCheck, surface: PrecisionSurface) -> None:
+    """Refuse a room qualification of the other room type (ISO 3745:2012, 5.1)."""
     room = "anechoic" if surface == "sphere" else "hemi-anechoic"
     if check.room != room:
         msg = (
@@ -798,6 +793,16 @@ def _room_qualification_warnings(
             f"is measured in a {room} one (ISO 3745:2012, 5.1)."
         )
         raise ValueError(msg)
+
+
+def _room_qualification_warnings(
+    check: FreeFieldCheck,
+    surface: PrecisionSurface,
+    radius: float,
+    frequencies: ArrayLike | None,
+) -> None:
+    """Warn where the measurement leaves the room qualification (Annex A)."""
+    _check_qualified_room(check, surface)
     if check.passes:
         qualified_radius = check.max_qualified_radius_m
         low, high = float(check.frequencies[0]), float(check.frequencies[-1])
@@ -935,7 +940,7 @@ def sound_power_anechoic(
         msg = "A positive 'radius' is required."
         raise ValueError(msg)
     if room_qualification is not None:
-        _room_qualification_warnings(room_qualification, surface, radius, frequencies)
+        _check_qualified_room(room_qualification, surface)
     levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
     # The number is a count of array axes, not a quantity.
     if levels.ndim != 2:  # noqa: PLR2004
@@ -990,7 +995,7 @@ def sound_power_anechoic(
         freqs, n_bands, room, sigma_omc_db, coverage_factor
     )
 
-    return PrecisionSoundPowerResult(
+    result = PrecisionSoundPowerResult(
         frequencies=freqs,
         sound_power_level=np.asarray(lw, dtype=np.float64),
         surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
@@ -1008,3 +1013,8 @@ def sound_power_anechoic(
         uncertainty_bands=u_bands,
         coverage_factor=float(coverage_factor),
     )
+    # The qualification is advised on once the result stands, so a refusal of
+    # any argument above comes first, even under -W error.
+    if room_qualification is not None:
+        _room_qualification_warnings(room_qualification, surface, radius, frequencies)
+    return result

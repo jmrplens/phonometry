@@ -1803,17 +1803,6 @@ def stage_conditions(
             f"p_2 = {outlet_pressure_pa!r} Pa and p_v = {vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
-    shares = float(np.sum((capacity / stages) ** 2))
-    if abs(shares - 1.0) > _SERIES_LAW_TOLERANCE:
-        warn_caller(
-            "The stage coefficients account for "
-            f"{shares:.0%} of the valve's own resistance, where the series "
-            "law 1/C^2 = sum(1/C_i^2) asks for 100 %. Equation (24b) fixes "
-            "the last stage's outlet at the valve outlet, so that stage "
-            "absorbs the whole of the difference and its pressure ratio is "
-            "what moves.",
-            ValveNoiseWarning,
-        )
     total = p1 - p2
     inlets = [p1]
     for previous in stages[:-1]:
@@ -1826,6 +1815,19 @@ def stage_conditions(
             "1/C^2 = sum(1/C_i^2) says each C_i is larger than C."
         )
         raise ValueError(msg)
+    # Advised only once the stages are known to make a result: a warning that
+    # describes a result never returned would run ahead of the refusal.
+    shares = float(np.sum((capacity / stages) ** 2))
+    if abs(shares - 1.0) > _SERIES_LAW_TOLERANCE:
+        warn_caller(
+            "The stage coefficients account for "
+            f"{shares:.0%} of the valve's own resistance, where the series "
+            "law 1/C^2 = sum(1/C_i^2) asks for 100 %. Equation (24b) fixes "
+            "the last stage's outlet at the valve outlet, so that stage "
+            "absorbs the whole of the difference and its pressure ratio is "
+            "what moves.",
+            ValveNoiseWarning,
+        )
     outlets = [*inlets[1:], p2]
     return tuple(
         StageConditions(

@@ -2304,6 +2304,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A documented refusal comes before any warning, under `python -W error`
+  too.** Five refusals were preceded by an advisory that, made an error,
+  took their place: `room.decay_curve` and `room.room_parameters` built the
+  filter bank, which warned about the band it dropped, before refusing a
+  band or limits no bank at that rate holds; `speech.stipa` warned that the
+  recording was short before refusing ambient levels without speech levels;
+  `noise_control.stage_conditions` gave its series-law advisory about a
+  result it then refused to return; and the railway passage analysis
+  silenced the bank's warning with a `catch_warnings` block, which is not
+  safe across threads, before raising its own error. Each now checks first.
+  The sound power determinations of `emission` did the same with their
+  advisories on the microphone positions, the background, the room, the
+  survey and the band range: `sound_power_in_situ` and
+  `sound_energy_in_situ`, the four reverberation-room methods, the four of
+  the hard-walled room, the special room and its comparison and survey,
+  `sound_power_anechoic`, the surface methods `sound_power_pressure` and
+  `sound_energy_pressure`, the discrete-point and precision intensity
+  methods, the high-frequency methods and their room constant, and
+  `turbine_sound_power`. So did
+  `speech.stipa`, which said a clip was short before refusing one shorter
+  than a modulation period or `levels` of the wrong length, `fluids.air`,
+  which gave its domain advisory before refusing a pressure and a humidity
+  that cannot hold together, `hearing.nipts`, which warned about a NaN
+  duration before its record refused it, and
+  `environment.binaural_indicators`, which warned about the length of a
+  recording before refusing the loudness ratio a silent one leaves
+  undefined. Each checks every argument first and advises once the result
+  stands, and a pytest plugin, `tests/refusal_order.py`, fails any test
+  whose awaited refusal came after a warning of the library (style rule
+  A63).
+  NumPy's `RuntimeWarning` no longer runs ahead of the library either:
+  `signals.comb_filter_response` refuses an order that overflows by name
+  instead of first warning "overflow encountered in multiply", and the
+  four-microphone transfer-matrix solves divide by the near-singular
+  denominator their `ImpedanceTubeWarning` has already named without four
+  "invalid value encountered in divide" after it.
+  `vibration.transfer_stiffness_indirect` refuses a transmissibility that is
+  not finite with a `ValueError` naming `transmissibility`, where it
+  returned `-inf+nanj`, and `indirect_transfer_stiffness_result` names the
+  same parameter instead of the derived `transfer_stiffness`.
+
 - **A filter bank on its default span says nothing at 44.1 kHz.** The default
   span runs from 12 Hz to 20 kHz, and the 20 kHz third octave reaches
   22.4 kHz, past fs/2 at the CD rate, so every `OctaveFilterBank(44100)` and

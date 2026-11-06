@@ -683,7 +683,6 @@ def binaural_indicators(
         require_choice(name, "parameters", tuple(BINAURAL_PARAMETERS))
     pressure, rate = _two_channels(x, fs, calibration_factor)
     duration = pressure.shape[1] / rate
-    _check_recording(duration, rate)
     computed: dict[str, BinauralMetric] = {}
     missing: dict[str, str] = {}
     for name in BINAURAL_PARAMETERS:
@@ -705,7 +704,7 @@ def binaural_indicators(
         else:
             found = _fluctuation(pressure, rate, field)
         computed.update({metric.symbol: metric for metric in found})
-    return BinauralIndicators(
+    indicators = BinauralIndicators(
         metrics=computed,
         not_implemented=missing,
         parameters=rows,
@@ -713,3 +712,8 @@ def binaural_indicators(
         duration_s=duration,
         field=field,
     )
+    # Advised once the metrics stand: a recording whose loudness ratio is
+    # undefined is refused, and under -W error this advisory would otherwise
+    # stand in for that refusal.
+    _check_recording(duration, rate)
+    return indicators

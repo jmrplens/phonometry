@@ -1752,3 +1752,47 @@ def _warn_wide_bands(n_bands, stacklevel):
 **Enforced by:** `tests/test_package_architecture.py::test_the_library_warns_only_through_warn_caller`, `tests/test_package_architecture.py::test_the_warning_rule_reads_every_way_to_reach_warnings_warn`, `tests/test_internal_warnings.py`, `tests/test_warning_attribution.py`
 
 **Exceptions.** `src/phonometry/_internal/warnings.py` itself, which holds the one call of `warnings.warn`. The guard refuses a call of `warnings.warn` or `warnings.warn_explicit`, a reference to either handed on, an import of either from `warnings` or `_warnings`, a `getattr` of either, and either reached through `__import__`, `importlib.import_module` or `sys.modules`; it does not follow a name bound to the function inside an expression it cannot read, which review catches.
+
+<a id="a63"></a>
+### A63. Check every argument before the first advisory, and advise once the result stands
+
+**Why.** Under `python -W error` a warning raised ahead of a refusal takes its place: the caller who wrote `except ValueError` meets the advisory instead and never learns which argument was wrong. The in situ and reverberation-room sound power determinations warned that no background was given, or that there were too few microphone positions, before they checked the temperature, the bands or the background's shape; `speech.stipa` warned that a clip was short before refusing one too short to hold a single modulation period; `fluids.air` warned that a pressure lay outside its formula's domain before refusing a pressure and a humidity that cannot hold together. A refusal may also come from the result itself, as the loudness ratio a silent recording leaves undefined; the advisory then waits for the result, not the other way round.
+
+**Do**
+
+```python
+import numpy as np
+
+from phonometry import emission
+from phonometry._internal.validation import require_finite, require_finite_array
+from phonometry._internal.warnings import warn_caller
+
+
+def determine(levels, *, background_levels=None, temperature_c=23.0):
+    grid = require_finite_array(levels, "levels")
+    if background_levels is not None and np.shape(background_levels) != grid.shape:
+        raise ValueError("'background_levels' must match 'levels' band for band.")
+    require_finite(temperature_c, "temperature_c")
+    total = 10.0 * np.log10(np.sum(10.0 ** (grid / 10.0)))
+    if background_levels is None:
+        warn_caller(
+            "No background levels were supplied ...", emission.SoundPowerWarning
+        )
+    return total
+```
+
+**Don't**
+
+```py
+def determine(levels, *, background_levels=None, temperature_c=23.0):
+    grid = require_finite_array(levels, "levels")
+    if background_levels is None:
+        warn_caller(
+            "No background levels were supplied ...", emission.SoundPowerWarning
+        )
+    require_finite(temperature_c, "temperature_c")  # under -W error the advisory wins
+```
+
+**Enforced by:** `tests/refusal_order.py`, `tests/test_refusal_order.py`, `tests/test_refusals_before_advisories.py`
+
+**Exceptions.** None. NumPy's warnings count too when they are shown at a line of the package; silence the operation with `np.errstate` once the library has said what it has to say.

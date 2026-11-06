@@ -1087,7 +1087,8 @@ def _surface_environmental_correction(
     :param n_bands: Number of frequency bands.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :param room: Room data behind ``K2`` (:class:`RoomEnvironment`).
-    :return: ``K2`` per band, in decibels.
+    :return: ``K2`` per band, in decibels; :func:`_k2_advisory` says when it
+        exceeds the limit of the grade, once every argument has been checked.
     :raises ValueError: If a per-band room input does not match the bands.
     """
     k2_value = environmental_correction(
@@ -1105,42 +1106,58 @@ def _surface_environmental_correction(
             " / mean_absorption_coefficient) must match the number of bands."
         )
         raise ValueError(msg)
-    if np.any(k2_arr > _K2_LIMIT[grade]):
+    return np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
+
+
+def _k2_advisory(k2: np.ndarray, grade: Grade) -> None:
+    """Warn when ``K2`` exceeds the validity limit of the grade (4.3.2).
+
+    Called once the determination has checked every argument, so that under
+    ``python -W error`` a refusal is never replaced by this advisory.
+    """
+    if np.any(k2 > _K2_LIMIT[grade]):
         warn_caller(
-            f"K2 up to {float(np.max(k2_arr)):.1f} dB exceeds the {grade} "
+            f"K2 up to {float(np.max(k2)):.1f} dB exceeds the {grade} "
             f"validity limit of {_K2_LIMIT[grade]:g} dB. ISO 3744:2010 clause "
             "4.3.2 states this limit for the A-weighted K2A, so this per-band "
             "check is conservative; the acoustic environment may not qualify "
             "for this method.",
             SoundPowerWarning,
         )
-    return np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
 
 
-def _a_weighted_total(
-    lw: np.ndarray, frequencies: ArrayLike | None, n_bands: int
-) -> tuple[np.ndarray | None, float]:
-    """Band frequencies and the A-weighted total ``LWA`` (ISO 3744 Annex E).
+def _band_frequencies(frequencies: ArrayLike | None, n_bands: int) -> np.ndarray | None:
+    """The band mid-band frequencies as an array, ``None`` when not given.
 
-    :param lw: Band sound power levels, in decibels.
     :param frequencies: Band mid-band frequencies, in hertz, or ``None``.
     :param n_bands: Number of frequency bands.
-    :return: ``(frequencies as an array or None, LWA)``.
     :raises ValueError: If the frequencies do not match the number of bands.
     """
     require_scalar(n_bands, "n_bands")
     if frequencies is None:
-        # A-weighting needs the band centre frequencies; with several bands and
-        # none supplied the A-weighted total is undefined (NaN). A single band
-        # carries no weighting, so LWA = LW.
-        return None, (real_number(lw[0], "lw") if n_bands == 1 else float("nan"))
+        return None
     # A scalar is one band's centre frequency, not a shape mistake: accept it
     # for a single band (as 1-D) and reject it, by name, for several.
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.shape[0] != n_bands:
         msg = "'frequencies' length must match the number of bands."
         raise ValueError(msg)
-    return freqs, energy_sum(lw + _a_weighting_corrections(freqs))
+    return freqs
+
+
+def _a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> float:
+    """The A-weighted total ``LWA`` of checked bands (ISO 3744 Annex E).
+
+    :param lw: Band sound power levels, in decibels.
+    :param freqs: The bands from :func:`_band_frequencies`, or ``None``.
+    :return: ``LWA``.
+    """
+    if freqs is None:
+        # A-weighting needs the band centre frequencies; with several bands and
+        # none supplied the A-weighted total is undefined (NaN). A single band
+        # carries no weighting, so LWA = LW.
+        return real_number(lw[0], "lw") if lw.shape[0] == 1 else float("nan")
+    return energy_sum(lw + _a_weighting_corrections(freqs))
 
 
 def sound_power_pressure(
@@ -1228,20 +1245,24 @@ def sound_power_pressure(
         )
         raise ValueError(msg)
 
-    # --- energy average and background correction K1 ----------------------
+    # --- environmental correction K2 (scalar or per band) and the bands ---
+    # Checked before K1, whose correction may advise on a short margin: under
+    # -W error an advisory raised first would stand in for these refusals.
     mean_level = energy_mean(levels, axis=0)
     n_bands = mean_level.shape[0]
-    k1 = _surface_background_correction(background_levels, levels, mean_level, grade)
-
-    # --- environmental correction K2 (scalar or per band) -----------------
     k2 = _surface_environmental_correction(
         area, n_bands, grade, RoomEnvironment() if room is None else room
     )
+    freqs = _band_frequencies(frequencies, n_bands)
+
+    # --- background correction K1 ------------------------------------------
+    k1 = _surface_background_correction(background_levels, levels, mean_level, grade)
 
     # --- surface SPL, sound power level and A-weighted total ---------------
     surface_spl = mean_level - k1 - k2
     lw = surface_spl + 10.0 * np.log10(area / _S0)
-    freqs, lwa = _a_weighted_total(lw, frequencies, n_bands)
+    lwa = _a_weighted_total(lw, freqs)
+    _k2_advisory(k2, grade)
 
     # --- apparent directivity index per position AND band (Eq. 7) ---------
     # ISO 3744:2010 clause 8.4 requires the apparent directivity indices to be
@@ -1718,24 +1739,29 @@ def sound_energy_pressure(
         )
         raise ValueError(msg)
 
-    # --- mean over the surface (8.3.3, as Eq. 12) and K1 (Eq. 21) ---------
+    # --- mean over the surface (8.3.3, as Eq. 12), K2 and the bands -------
+    # Checked before K1, whose correction may advise on a short margin, as in
+    # sound_power_pressure.
     mean_level = energy_mean(levels, axis=0)
     n_bands = mean_level.shape[0]
-    if background_levels is None:
-        k1 = np.zeros(n_bands, dtype=np.float64)
-    else:
-        exposure = _background_exposure(background_levels, integration_time)
-        k1 = _surface_background_correction(exposure, levels, mean_level, grade)
-
-    # --- environmental correction K2 (Annex A, as for LW) -----------------
+    exposure = (
+        None
+        if background_levels is None
+        else _background_exposure(background_levels, integration_time)
+    )
     k2 = _surface_environmental_correction(
         area, n_bands, grade, RoomEnvironment() if room is None else room
     )
+    freqs = _band_frequencies(frequencies, n_bands)
+
+    # --- K1 (Eq. 21) -------------------------------------------------------
+    k1 = _surface_background_correction(exposure, levels, mean_level, grade)
 
     # --- surface single event level (Eq. 22), LJ (Eq. 23), LJA (Eq. E.2) --
     surface_level = mean_level - k1 - k2
     lj = surface_level + 10.0 * np.log10(area / _S0)
-    freqs, lja = _a_weighted_total(lj, frequencies, n_bands)
+    lja = _a_weighted_total(lj, freqs)
+    _k2_advisory(k2, grade)
 
     # The same per-band K1 corrects the position level and the surface mean,
     # so the apparent directivity index reduces to the raw difference exactly

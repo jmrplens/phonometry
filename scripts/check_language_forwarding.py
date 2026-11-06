@@ -680,7 +680,7 @@ def _unbound_in_class(
     the body's, since a class body that binds a name looks it up in its own
     namespace and then the module's.
     """
-    nodes = bindings_by_name(holder).get(name)
+    nodes = bindings_by_name(holder).get(name, [])
     return bool(nodes) and not held_before(module.node, nodes, point)
 
 

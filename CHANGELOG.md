@@ -6632,12 +6632,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the newest releases, which turned away environments a release or two
   behind for no reason anyone had found. NumPy 2.0.2, SciPy 1.14.0, numba
   0.60.0 and torch 2.3.0 have no wheel for Python 3.13 or 3.14, where a
-  resolver held at them built NumPy and SciPy from source, failing without a
-  compiler, and stopped at numba, which refuses those Pythons: there the
-  floor is the oldest release with a wheel that the tests pass with, behind a
-  `python_version` marker, NumPy 2.1.0, SciPy 1.14.1, numba 0.61.0 and torch
-  2.5.0 on 3.13 and NumPy 2.3.2, SciPy 1.16.1, numba 0.63.0 and torch 2.9.0
-  on 3.14. The `[report]` floors are the oldest releases that
+  resolver held at them would build NumPy and SciPy from source, which fails
+  without a compiler, and find no numba or torch it can install, since the
+  sources of numba 0.60.0 refuse those Pythons and torch publishes none:
+  there the floor is the oldest release with a wheel that the tests pass
+  with, behind a `python_version` marker, NumPy 2.1.0, SciPy 1.14.1, numba
+  0.61.0 and torch 2.5.0 on 3.13 and NumPy 2.3.2, SciPy 1.16.1, numba 0.63.0
+  and torch 2.9.0 on 3.14. The `[report]` floors are the oldest releases that
   render a fiche in a fresh interpreter under `-W error`: reportlab 4.0.4 to
   4.2.5 warn when they are imported, through importlib's `load_module` and
   `ast.NameConstant`, both deprecated, and svglib 0.9.0 raises a

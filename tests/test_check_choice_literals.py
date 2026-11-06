@@ -626,6 +626,46 @@ def test_two_imports_in_branches_that_disagree_give_no_value(
     assert ccl.expanded("Names", f"phonometry.{stem}") == "Names"
 
 
+def test_an_alias_of_a_constant_holds_what_its_value_named_where_it_was_bound(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``ALLOWED = KINDS`` holds the table ``KINDS`` names where the
+    assignment runs, whatever a later assignment binds ``KINDS`` to, in its
+    module and read through an import of it; one written after the last
+    binding of ``KINDS`` holds that one.
+
+    The alias's value was read as the module held ``KINDS`` once it had run,
+    so its options were those of the table a later assignment bound.
+    """
+    _plant_modules(
+        tmp_path,
+        monkeypatch,
+        {
+            "_alias_point": """
+                KINDS = ("fast", "slow")
+                ALLOWED = KINDS
+                KINDS = ("other",)
+
+                TABLE = {"a": 1, "b": 2}
+                KEYS = TABLE
+                TABLE = {"z": 0}
+
+                STANDING = KINDS
+                """,
+            "_alias_point_user": """
+                from ._alias_point import ALLOWED
+                """,
+        },
+    )
+    assert sys.modules["phonometry._alias_point"].ALLOWED == ("fast", "slow")
+    constants = ccl._constants_of("phonometry._alias_point")
+    assert ccl.strings_of(ast.Name(id="ALLOWED"), constants) == ("fast", "slow")
+    assert ccl.strings_of(ast.Name(id="KEYS"), constants) == ("a", "b")
+    assert ccl.strings_of(ast.Name(id="STANDING"), constants) == ("other",)
+    imported = ccl._constants_of("phonometry._alias_point_user")
+    assert ccl.strings_of(ast.Name(id="ALLOWED"), imported) == ("fast", "slow")
+
+
 def test_two_imports_in_branches_that_agree_give_their_value(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

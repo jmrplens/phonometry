@@ -100,6 +100,7 @@ import ast
 import builtins
 import collections
 import collections.abc
+import copy
 import dataclasses
 import enum
 import functools
@@ -118,8 +119,12 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 from ast_scan import (
     COMPOUND_STATEMENTS,
     binding_of,
+    bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
+    for_the_type_checker,
+    global_bindings,
+    held_before,
     imported_names,
     live_bindings,
     own_names,
@@ -1237,6 +1242,11 @@ def _constants_of(
     stand, in the branches of a ``try`` or an ``if``, give the name a value
     only when they agree. *annotations* reads what a type checker reads, for
     an alias.
+
+    A name of the module an assignment's value reads is what it held where
+    the assignment runs (:func:`_held_where_written`): ``ALLOWED = KINDS``
+    holds the table ``KINDS`` names there, whatever a later assignment binds
+    ``KINDS`` to.
     """
     read = _read_module(module_name, annotations=annotations)
     if read is None:
@@ -1245,7 +1255,9 @@ def _constants_of(
     assignments = _assignments(tree)
     imported: dict[ast.AST, dict[str, ast.expr]] = {}
 
-    def value(node: ast.AST, name: str) -> ast.expr | None:
+    def value(
+        node: ast.AST, name: str, seen: frozenset[str] = frozenset()
+    ) -> ast.expr | None:
         if isinstance(node, ast.ImportFrom) and depth < _IMPORT_DEPTH:
             if node not in imported:
                 imported[node] = dict(
@@ -1253,7 +1265,35 @@ def _constants_of(
                 )
             return imported[node].get(name)
         statement = assignments.get(node)
-        return dict(_assigned(statement)).get(name) if statement else None
+        assigned = dict(_assigned(statement)).get(name) if statement else None
+        if assigned is None or annotations:
+            return assigned
+        return as_written(assigned, seen | {name})
+
+    def as_written(expr: ast.expr, seen: frozenset[str]) -> ast.expr:
+        """*expr* with each name of the module it reads that held another
+        binding where *expr* is written than once the module has run
+        replaced by what it held there; by nothing the guard reads when the
+        bindings there disagree.
+        """
+        by: dict[int, ast.expr] = {}
+        for read in ast.walk(expr):
+            if (
+                not isinstance(read, ast.Name)
+                or not isinstance(read.ctx, ast.Load)
+                or read.id in seen
+                or read.id not in standing
+                or binding_of(tree, read, read.id)[1] not in {None, tree}
+            ):
+                continue
+            here = _held_where_written(tree, read)
+            if not here or {id(node) for node in here} == {
+                id(node) for node in standing[read.id]
+            }:
+                continue
+            held = _agreed([value(node, read.id, seen) for node in here])
+            by[id(read)] = held if held is not None else ast.Constant(value=None)
+        return typing.cast("ast.expr", _replaced(expr, by)) if by else expr
 
     found: dict[str, ast.expr] = {}
     for name, nodes in standing.items():
@@ -1262,6 +1302,56 @@ def _constants_of(
             found[name] = agreed
     _read_frozen_tables(found, vars(module))
     return MappingProxyType(found)
+
+
+def _held_where_written(tree: ast.Module, read: ast.Name) -> list[ast.AST]:
+    """The bindings at the top of *tree* of the name *read*, a name a value
+    reads where it is written, that may stand there
+    (:func:`ast_scan.held_before`), and each a function makes under
+    ``global``, which may have run at any time; none when a single binding,
+    or none, binds the name, which then holds the one that stands once the
+    module has run, or none. What an ``if TYPE_CHECKING:`` block holds never
+    runs, and is none of them.
+    """
+    checker = for_the_type_checker(tree)
+    own = [
+        node
+        for node in bindings_by_name(tree).get(read.id, ())
+        if id(node) not in checker
+    ]
+    inside = [
+        node
+        for node in global_bindings(tree).get(read.id, ())
+        if id(node) not in checker
+    ]
+    if len(own) + len(inside) < 2:
+        return []
+    return [*held_before(tree, own, read), *inside]
+
+
+def _replaced(node: ast.AST, by: Mapping[int, ast.expr]) -> ast.AST:
+    """A copy of *node* with each node under it whose id *by* holds replaced
+    by the expression it gives; *node* itself, shared, when it holds none of
+    them, so the module's own tree is never written into.
+    """
+    if id(node) in by:
+        return by[id(node)]
+    if not any(id(child) in by for child in ast.walk(node)):
+        return node
+    copied = copy.copy(node)
+    for name, field in ast.iter_fields(node):
+        if isinstance(field, ast.AST):
+            setattr(copied, name, _replaced(field, by))
+        elif isinstance(field, list):
+            setattr(
+                copied,
+                name,
+                [
+                    _replaced(item, by) if isinstance(item, ast.AST) else item
+                    for item in field
+                ],
+            )
+    return copied
 
 
 def _read_frozen_tables(

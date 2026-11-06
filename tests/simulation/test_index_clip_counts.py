@@ -22,7 +22,12 @@ import pytest
 
 pytest.importorskip("matplotlib")
 
-pytestmark = pytest.mark.pinned_stack
+pytestmark = [
+    # The registry imports the figure stack.
+    pytest.mark.pinned_stack,
+    # Each test reads every guide of the site to find the clips it embeds.
+    pytest.mark.whole_tree,
+]
 
 _ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT / "scripts"))

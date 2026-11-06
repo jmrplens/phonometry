@@ -2209,6 +2209,86 @@ def test_a_helper_that_returns_positions_selects_a_copy(
 
 
 @pytest.mark.parametrize(
+    ("helpers", "call"),
+    [
+        (
+            """
+            def _head(n):
+                return np.arange(n)
+
+            class _head:
+                def __init__(self, n):
+                    self.row = 0
+
+                def __index__(self):
+                    return self.row
+            """,
+            "_head(3)",
+        ),
+        (
+            """
+            def _head(n):
+                return np.arange(n)
+
+            if os.environ.get("ROW"):
+                class _head:
+                    def __init__(self, n):
+                        self.row = 0
+
+                    def __index__(self):
+                        return self.row
+            """,
+            "_head(3)",
+        ),
+        (
+            """
+            from . import rows
+            """,
+            "rows._head(3)",
+        ),
+    ],
+    ids=["class-replaces-it", "class-in-a-branch", "from-another-module"],
+)
+def test_a_helper_a_class_of_its_name_may_stand_for_selects_a_view(
+    tmp_path: pathlib.Path, helpers: str, call: str
+) -> None:
+    """A call of a helper that returns positions, where a ``class`` of its
+    name that indexes as one number may stand instead, may select a row,
+    which is a view.
+
+    The call was read as the helper alone, so the record kept the caller's
+    array with no finding.
+    """
+    found = _findings(
+        tmp_path,
+        rows="""
+        import numpy as np
+
+        def _head(n):
+            return np.arange(n)
+
+        class _head:
+            def __init__(self, n):
+                self.row = 0
+
+            def __index__(self):
+                return self.row
+        """,
+        head=f"""
+        import os
+
+        import numpy as np
+
+        from .results import BandResult
+        {textwrap.indent(textwrap.dedent(helpers), " " * 8)}
+        def head(frequencies):
+            return BandResult(frequencies=frequencies[{call}], levels=None)
+        """,
+    )
+    assert found == {("head", "BandResult.frequencies", "frequencies")}
+
+
+@pytest.mark.parametrize(
     "body",
     [
         "kept = dict(bands).copy()['a']",

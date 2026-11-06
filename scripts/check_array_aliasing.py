@@ -2019,10 +2019,17 @@ class Reader:
 
     def selects_positions(self, func: ast.expr) -> bool:
         """Whether every function of the package a call may name returns a
-        mask or positions on every return of its own.
+        mask or positions on every return of its own, and none of them is a
+        class of a function's name the call may make an instance of
+        (:meth:`builds_class`), which may index as one number.
         """
-        targets = self.callees(func)
-        return bool(targets) and all(key in self.tree.positions for key in targets)
+        pins: _Pins = {}
+        targets = self.callees(func, pins=pins)
+        return bool(targets) and all(
+            key in self.tree.positions
+            and not (key in self.tree.classes and self.builds_class(key, pins))
+            for key in targets
+        )
 
     # -- what kind of thing a name holds ----------------------------------
     def indexes(self, node: ast.expr) -> bool:

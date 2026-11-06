@@ -1473,8 +1473,10 @@ jobs:
   tests-perf:
     name: tests (numba-jitted kernel)
     runs-on: ubuntu-latest
-    # At most 23 min in its last 72 passing runs, and a hung test ends the
-    # run fifteen minutes after it started (pyproject.toml).
+    # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
+    # 2026-11-05, all but a minute or two of it in the test step, and the run of
+    # 2026-11-04 reached this limit and was stopped. A hung test ends the run
+    # fifteen minutes after it started (pyproject.toml).
     timeout-minutes: 50
     permissions:
       contents: read
@@ -1901,8 +1903,9 @@ jobs:
   minimum-versions:
     name: Library tests at the dependency floors
     runs-on: ubuntu-latest
-    # Under 25 min in its last 72 passing runs, and a hung test ends the
-    # run fifteen minutes after it started (pyproject.toml).
+    # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
+    # 2026-11-05, all but a minute or two of it in the test step. A hung test
+    # ends the run fifteen minutes after it started (pyproject.toml).
     timeout-minutes: 50
     permissions:
       contents: read

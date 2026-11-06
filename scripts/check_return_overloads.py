@@ -560,6 +560,12 @@ def _imports(
 #: reaches, past which it reaches nothing the guard can name.
 _DEPTH = 8
 
+#: What a name of a module, read at its top where a ``def`` or a ``class``
+#: of it stands, stood for there, by the dotted name a call reaches through
+#: it: the key of each ``def`` that stood, none for a ``class``
+#: (:meth:`Package._at_top`).
+_Reads = dict[str, list[str]]
+
 
 def _aliases_a_name(
     node: ast.AST, root: ast.AST
@@ -1304,33 +1310,46 @@ class Package:
         """The key in :attr:`functions` of every definition a call can reach.
 
         A function written in a function around the call is each of its
-        definitions there; one of a module is each definition of it that may
-        stand where the call runs (:meth:`_live_at`), one in each branch of
-        an ``if`` being either, whether one import or several may stand for
-        the name at the call.
+        definitions there; one of a module is each definition of it that
+        stood where its name was read at the top of its module, at the call
+        or at an alias of it that the call reaches (:meth:`_at_top`), or
+        else each that may stand where the call runs (:meth:`_live_at`), one
+        in each branch of an ``if`` being either, whether one import or
+        several may stand for the name at the call.
         """
-        reached: list[str] = []
-        targets = (
+        reads: _Reads = {}
+        targets = [
             standing
-            for found in self._targets(function, func, call)
-            for standing in self._standing(found, function.module)
-        )
+            for found in self._targets(function, func, call, reads=reads)
+            for standing in self._standing(found, function.module, reads=reads)
+        ]
+        reached: list[str] = []
         for target in targets:
             if target not in self.functions:
                 continue
-            if self.functions[target].parent is None:
-                reached.extend(self._live_at(target, function, call))
-            else:
+            if self.functions[target].parent is not None:
                 reached.append(target)
+            elif target in reads:
+                reached.extend(reads[target])
+            else:
+                reached.extend(self._live_at(target, function, call))
         return list(dict.fromkeys(reached))
 
-    def _standing(self, dotted: str, module: str, depth: int = 0) -> list[str]:
+    def _standing(
+        self,
+        dotted: str,
+        module: str,
+        depth: int = 0,
+        *,
+        reads: _Reads | None = None,
+    ) -> list[str]:
         """What *dotted*, a name a call of *module* reaches, stands for when it
         is one another module of the package binds at its top: what the
         bindings of that top that still stand at its end bind it to
         (:meth:`_at_top`), since a call from elsewhere reads it once that
         module has run. A ``def``, an import or an alias a later one replaces
-        there stands for nothing; anything else is *dotted* itself.
+        there stands for nothing; anything else is *dotted* itself. What a
+        name of that module stood for where it was read goes into *reads*.
         """
         owner, _, name = dotted.rpartition(".")
         if (
@@ -1342,11 +1361,11 @@ class Package:
             return [dotted]
         head = ast.Name(id=name, ctx=ast.Load())
         found: list[str] = []
-        for target in self._at_top(owner, head, head, None, depth + 1):
+        for target in self._at_top(owner, head, head, None, depth + 1, reads=reads):
             if target == dotted:
                 found.append(target)
             else:
-                found.extend(self._standing(target, owner, depth + 1))
+                found.extend(self._standing(target, owner, depth + 1, reads=reads))
         return found
 
     def _live_at(
@@ -1421,7 +1440,12 @@ class Package:
         ]
 
     def _targets(
-        self, function: Function, func: ast.expr, call: ast.AST | None = None
+        self,
+        function: Function,
+        func: ast.expr,
+        call: ast.AST | None = None,
+        *,
+        reads: _Reads | None = None,
     ) -> tuple[str, ...]:
         """What a call written in *function* reaches: one dotted name, or the
         keys of the functions of a scope around it of the name it calls.
@@ -1437,7 +1461,9 @@ class Package:
         an assignment, or both defines and binds it, reaches no function of
         the package; one that declares it ``global`` sends it to the module.
         A type parameter of a generic class around a method is the class's,
-        and reaches no function of the package either.
+        and reaches no function of the package either. What a name of a
+        module stood for where it was read goes into *reads*
+        (:meth:`_at_top`).
         """
         head = func
         while isinstance(head, ast.Attribute):
@@ -1454,10 +1480,10 @@ class Package:
                 break
             if names.binds(head.id):
                 at = call if scope is function else None
-                return self._bound_in(scope, node, func, head, at)
+                return self._bound_in(scope, node, func, head, at, reads=reads)
             if head.id in self._type_parameters_around(scope):
                 return ()
-        return self._at_top(function.module, func, head, call)
+        return self._at_top(function.module, func, head, call, reads=reads)
 
     def _at_top(
         self,
@@ -1466,6 +1492,8 @@ class Package:
         head: ast.Name,
         call: ast.AST | None,
         depth: int = 0,
+        *,
+        reads: _Reads | None = None,
     ) -> tuple[str, ...]:
         """What a call reaches through a name the module binds at its top.
 
@@ -1478,10 +1506,19 @@ class Package:
         may be called during the import. A name no such statement binds is
         read from the module's table of names (:meth:`resolve`), a builtin
         among them.
+
+        A ``def`` or a ``class`` of the name called bare is read here, where
+        the name is: the key of each ``def`` that stands at *call* goes into
+        *reads* under the dotted name, a ``class``, which a call makes an
+        instance of, adding none. An alias holds the function its value
+        names where the assignment runs, so a later ``def`` or ``class`` of
+        that name leaves what a call through the alias reaches as it was.
         """
         if depth > _DEPTH:
             return ()
-        swapped = self._swapped(_spelled(func, f"{module}.{head.id}"), depth)
+        swapped = self._swapped(
+            _spelled(func, f"{module}.{head.id}"), depth, reads=reads
+        )
         statements = self._top_statements(module).get(head.id)
         if not statements:
             resolved = self.resolve(module, func)
@@ -1493,12 +1530,15 @@ class Package:
             if not _names_a_helper(statement, self.trees[module]):
                 continue
             if assignment_target(statement) is not None:
-                heads = self._aliased(module, statement, depth + 1)
+                heads = self._aliased(module, statement, depth + 1, reads=reads)
             elif isinstance(statement, ast.Import | ast.ImportFrom):
                 heads = (_imports([statement], package, into={})[head.id],)
             else:
                 heads = (f"{module}.{head.id}",)
-            targets.extend(self._through(module, func, head, heads, depth))
+                if reads is not None and func is head:
+                    key = self.keys.get(statement)
+                    reads.setdefault(heads[0], []).extend([] if key is None else [key])
+            targets.extend(self._through(module, func, head, heads, depth, reads=reads))
         return tuple(dict.fromkeys((*targets, *swapped)))
 
     def _through(
@@ -1508,6 +1548,8 @@ class Package:
         head: ast.Name,
         heads: Iterable[str],
         depth: int = 0,
+        *,
+        reads: _Reads | None = None,
     ) -> list[str]:
         """What a call of *module* reaches when its first name stands for each
         of *heads*: the target read through it, and what a function may have
@@ -1518,10 +1560,17 @@ class Package:
             target = self.resolve(module, func, {head.id: dotted})
             if target is not None:
                 targets.append(target)
-            targets.extend(self._swapped(_spelled(func, dotted), depth))
+            targets.extend(self._swapped(_spelled(func, dotted), depth, reads=reads))
         return targets
 
-    def _aliased(self, module: str, target: ast.AST, depth: int = 0) -> tuple[str, ...]:
+    def _aliased(
+        self,
+        module: str,
+        target: ast.AST,
+        depth: int = 0,
+        *,
+        reads: _Reads | None = None,
+    ) -> tuple[str, ...]:
         """What an assignment in *module* of a dotted name alone (``axes =
         _polar_axes``, ``(axes := _polar_axes)``) binds *target*, its target or
         the assignment expression, to: what the call of that name reaches
@@ -1538,12 +1587,12 @@ class Package:
         how, scope = binding_of(tree, head, head.id)
         function = self.by_node.get(scope) if scope is not None else None
         if how == "global" or scope is None or scope is tree:
-            return self._at_top(module, value, head, value, depth)
+            return self._at_top(module, value, head, value, depth, reads=reads)
         if function is None or not isinstance(
             scope, ast.FunctionDef | ast.AsyncFunctionDef
         ):
             return ()
-        return self._bound_in(function, scope, value, head, value, depth)
+        return self._bound_in(function, scope, value, head, value, depth, reads=reads)
 
     def _made_under_global(self, module: str) -> dict[str, list[ast.AST]]:
         """The ``def`` and import statements, and the names an assignment of
@@ -1573,7 +1622,9 @@ class Package:
             self._global[module] = found
         return self._global[module]
 
-    def _swapped(self, dotted: str, depth: int = 0) -> tuple[str, ...]:
+    def _swapped(
+        self, dotted: str, depth: int = 0, *, reads: _Reads | None = None
+    ) -> tuple[str, ...]:
         """What a function may have swapped in under ``global`` for a module
         name the call reaches as *dotted*, spelt as the import or the module
         writes it: the key of each ``def`` and the target of each import
@@ -1588,9 +1639,11 @@ class Package:
                 if isinstance(statement, ast.Import | ast.ImportFrom):
                     target = _imports([statement], package, into={})[name]
                     found.append(self.canonical(target))
-                    found.extend(self._swapped(target, depth + 1))
+                    found.extend(self._swapped(target, depth + 1, reads=reads))
                 elif assignment_target(statement) is not None:
-                    found.extend(self._aliased(module, statement, depth + 1))
+                    found.extend(
+                        self._aliased(module, statement, depth + 1, reads=reads)
+                    )
                 elif statement in self.keys:
                     found.append(self.keys[statement])
             if name in self.defined[module] or name not in self.imports[module]:
@@ -1624,6 +1677,8 @@ class Package:
         head: ast.Name,
         call: ast.AST | None,
         depth: int = 0,
+        *,
+        reads: _Reads | None = None,
     ) -> tuple[str, ...]:
         """What a call reaches through a name the scope *node* binds itself.
 
@@ -1639,7 +1694,9 @@ class Package:
         """
         how = own_names(node).how(head.id)
         if how == "import":
-            return self._through_imports(scope.module, node, func, head, call)
+            return self._through_imports(
+                scope.module, node, func, head, call, reads=reads
+            )
         if how == "definition" and func is head:
             return tuple(scope.nested.get(head.id, ()))
         if how != "binding" or head.id in own_names(node).parameters:
@@ -1653,10 +1710,12 @@ class Package:
         heads = (
             dotted
             for found in nodes
-            for dotted in self._aliased(scope.module, found, depth + 1)
+            for dotted in self._aliased(scope.module, found, depth + 1, reads=reads)
         )
         return tuple(
-            dict.fromkeys(self._through(scope.module, func, head, heads, depth))
+            dict.fromkeys(
+                self._through(scope.module, func, head, heads, depth, reads=reads)
+            )
         )
 
     def _through_imports(
@@ -1666,6 +1725,8 @@ class Package:
         func: ast.expr,
         head: ast.Name,
         call: ast.AST | None,
+        *,
+        reads: _Reads | None = None,
     ) -> tuple[str, ...]:
         """What a call reaches through the imports of the name *node* makes:
         each one, or those that may stand for it at *call*.
@@ -1686,7 +1747,7 @@ class Package:
             target = self.resolve(module, func, local)
             if target is not None:
                 targets.append(target)
-            targets.extend(self._swapped(_spelled(func, local[head.id])))
+            targets.extend(self._swapped(_spelled(func, local[head.id]), reads=reads))
         return tuple(dict.fromkeys(targets))
 
     def _package_of(self, module: str) -> str:

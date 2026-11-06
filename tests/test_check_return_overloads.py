@@ -1318,6 +1318,101 @@ def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
     assert sorted(refused) == ["plot_standing"]
 
 
+def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``saved = _polar`` holds the function ``_polar`` names where the
+    assignment runs, whatever a later ``def`` or ``class`` binds that name
+    to, at the top of a module, in an assignment expression, under
+    ``global`` and read from another module.
+
+    The definitions of ``_polar`` were chosen again where ``saved()`` runs,
+    so a later ``class _polar`` left the call reaching nothing and a later
+    plain ``def _polar`` reached that one, and a plain ``plot`` that returns
+    the polar axes passed; an alias of a plain helper a later polar ``def``
+    replaced, or of a class a later polar ``def`` replaced, was refused.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _setup():
+            global swapped
+            swapped = _polar
+
+        saved = _polar
+        (walrus := _polar)
+
+        class _polar:
+            pass
+
+        def _replaced():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        replaced = _replaced
+
+        def _replaced():
+            return plt.subplots()[1]
+
+        def _plain():
+            return plt.subplots()[1]
+
+        plain = _plain
+
+        def _plain():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class _Made:
+            pass
+
+        made = _Made
+
+        def _Made():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_saved(result: object) -> Axes:
+            return saved()
+
+        def plot_walrus(result: object) -> Axes:
+            return walrus()
+
+        def plot_swapped(result: object) -> Axes:
+            return swapped()
+
+        def plot_replaced(result: object) -> Axes:
+            return replaced()
+
+        def plot_plain(result: object) -> Axes:
+            return plain()
+
+        def plot_made(result: object) -> Axes:
+            return made()
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import saved
+
+        def plot_imported(result: object) -> Axes:
+            return saved()
+
+        def plot_attribute(result: object) -> Axes:
+            return helpers.replaced()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_attribute",
+        "plot_imported",
+        "plot_replaced",
+        "plot_saved",
+        "plot_swapped",
+        "plot_walrus",
+    ]
+
+
 def test_a_loop_s_target_leaves_a_helper_at_the_top_standing(
     tmp_path: pathlib.Path,
 ) -> None:

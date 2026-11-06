@@ -45,6 +45,11 @@ import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
 from markdown_fences import page_kind, python_fences
 
+#: The tests that read the package share it, the module fixture ``reader``, so
+#: they run on one worker (rule T19): the package is read once, and let go
+#: with the fixture once they are done.
+pytestmark = pytest.mark.xdist_group("record-constructors")
+
 _SOURCE = ROOT / "src" / "phonometry"
 
 _IMPORTS = """

@@ -31,6 +31,10 @@ if _SCRIPTS not in sys.path:
 
 import check_language_forwarding as clf
 
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("language-forwarding")
+
 #: The helper every synthetic package draws its axis with, keyword-only like
 #: ``format_frequency_axis``, and a formatter that takes it positionally.
 _HELPERS = """

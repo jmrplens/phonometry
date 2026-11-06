@@ -33,6 +33,10 @@ if _SCRIPTS not in sys.path:
 import ast_scan
 import check_return_overloads as cro
 
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("return-overloads")
+
 _IMPORTS = """
 from __future__ import annotations
 

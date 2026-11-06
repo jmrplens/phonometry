@@ -21,10 +21,8 @@ from __future__ import annotations
 import pathlib
 import sys
 import textwrap
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -33,6 +31,10 @@ if _SCRIPTS not in sys.path:
 import ast_scan
 import check_parameter_annotations as cpa
 import check_return_overloads as overloads
+
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("parameter-annotations")
 
 _IMPORTS = """
 from __future__ import annotations

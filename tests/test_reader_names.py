@@ -44,6 +44,11 @@ from ast_scan import binding_of
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
+
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("reader-names")
+
 _SOURCE = pathlib.Path(phonometry.__file__).parent
 
 

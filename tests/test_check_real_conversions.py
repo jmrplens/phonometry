@@ -30,6 +30,10 @@ import check_real_conversions as guard  # noqa: E402
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+#: The two tests that read the census of the package share it, a module fixture,
+#: so they run on one worker (rule T19): the census is taken once.
+pytestmark = pytest.mark.xdist_group("real-conversions")
+
 
 def _verdicts(tmp_path: Path, source: str) -> dict[str, str]:
     """``{function: verdict}`` for each conversion of *source*, one module of the package."""

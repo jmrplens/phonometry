@@ -54,6 +54,11 @@ import check_parameter_annotations as cpa
 import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
 
+#: The tests that read the package share it, the module fixture ``reader``, so
+#: they run on one worker (rule T19): the package is read once, and let go
+#: with the fixture once they are done.
+pytestmark = pytest.mark.xdist_group("record-conversions")
+
 _SOURCE = ROOT / "src" / "phonometry"
 
 _BANDS = [100.0, 125.0, 160.0]

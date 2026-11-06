@@ -17,8 +17,9 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import Literal, NamedTuple, TypeGuard
+from typing import TYPE_CHECKING, Literal, NamedTuple, TypeGuard
 
+import guard_caches
 import pytest
 
 _SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
@@ -36,6 +37,21 @@ from ast_scan import (
     spells,
     values_bound,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+#: The tests that read the whole package share what the guards and this module
+#: keep of it, so they run on one worker (rule T19), and it is let go after them.
+pytestmark = pytest.mark.xdist_group("package-architecture")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _forget_the_guard() -> Iterator[None]:
+    """Let go of what the guards and this module read once its tests are done."""
+    yield
+    guard_caches.forget(cpa, return_overloads, sys.modules[__name__])
+
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 

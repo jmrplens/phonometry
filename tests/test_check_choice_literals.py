@@ -23,7 +23,7 @@ import pathlib
 import sys
 import textwrap
 import typing
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Literal
@@ -33,11 +33,23 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_choice_literals as ccl
+import guard_caches
 import pytest
 
 from phonometry._internal.frozen import OwnsArrays
 from phonometry._internal.validation import require_choice
 from phonometry.filters.weighting import time_weighting
+
+#: The tests that read the whole package share what the guard keeps of it, so
+#: they run on one worker (rule T19), and the guard lets it go after them.
+pytestmark = pytest.mark.xdist_group("choice-literals")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _forget_the_guard() -> Iterator[None]:
+    """Let go of what the guard read once this module's tests are done."""
+    yield
+    guard_caches.forget(ccl)
 
 
 def _tree(function: object) -> ast.AST:

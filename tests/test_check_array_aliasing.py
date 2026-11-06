@@ -18,7 +18,9 @@ from __future__ import annotations
 import pathlib
 import sys
 import textwrap
+from typing import TYPE_CHECKING
 
+import guard_caches
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -27,6 +29,22 @@ if _SCRIPTS not in sys.path:
 
 import ast_scan
 import check_array_aliasing as caa
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+
+#: The tests that read the whole package share what the guard keeps of it, so
+#: they run on one worker (rule T19), and the guard lets it go after them.
+pytestmark = pytest.mark.xdist_group("array-aliasing")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _forget_the_guard() -> Iterator[None]:
+    """Let go of what the guard read once this module's tests are done."""
+    yield
+    guard_caches.forget(caa)
+
 
 #: The helpers every package below imports, as the real one spells them.
 _FROZEN = """

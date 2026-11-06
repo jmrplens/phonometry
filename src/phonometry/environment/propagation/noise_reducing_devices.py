@@ -73,7 +73,6 @@ does not convert into :math:`DL_\alpha` either.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -88,7 +87,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -378,7 +377,7 @@ def sound_absorption_rating(
             f"rating is that limit rather than the measurement; the ratio "
             f"was {ratio!r}"
         )
-        warnings.warn(msg, RoadDeviceWarning, stacklevel=2)
+        warn_caller(msg, RoadDeviceWarning)
         ratio = ABSORPTION_RATIO_LIMIT
     rating = -10.0 * float(np.log10(abs(1.0 - ratio)))
     reported = _round_half_up(rating)
@@ -499,7 +498,7 @@ def sound_reflection_rating(
             f"rating is that limit rather than the measurement; the ratio was "
             f"{ratio!r}"
         )
-        warnings.warn(msg, RoadDeviceWarning, stacklevel=2)
+        warn_caller(msg, RoadDeviceWarning)
         ratio = ABSORPTION_RATIO_LIMIT
     if ratio <= 0.0:
         msg = "the weighted reflection ratio is zero, so DL_RI has no finite value"

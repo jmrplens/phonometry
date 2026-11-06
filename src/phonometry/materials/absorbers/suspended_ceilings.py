@@ -46,7 +46,6 @@ Read from BS EN 16487:2014.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
@@ -62,7 +61,7 @@ from ..._internal.validation import (
     require_positive,
     require_positive_array,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -403,7 +402,7 @@ def air_absorption_correction(
             "room to be measured again rather than for the result to be "
             "reported."
         )
-        warnings.warn(msg, SuspendedCeilingWarning, stacklevel=2)
+        warn_caller(msg, SuspendedCeilingWarning)
     return correction
 
 
@@ -519,7 +518,7 @@ def _warn_about(*, check: CeilingSpecimenCheck) -> None:
             "the data CE marking is compiled from."
         )
     if sentences:
-        warnings.warn(" ".join(sentences), SuspendedCeilingWarning, stacklevel=3)
+        warn_caller(" ".join(sentences), SuspendedCeilingWarning)
 
 
 def check_ceiling_specimen(

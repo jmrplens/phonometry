@@ -102,7 +102,6 @@ national foreword).
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -120,7 +119,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_positive_array,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -605,29 +604,29 @@ def _fit(
     )
 
 
-def _warn_regression(regression: PassByRegression, stacklevel: int) -> None:
+def _warn_regression(
+    regression: PassByRegression,
+) -> None:
     """Emit the 7.3 and 9.3 warnings a regression earns."""
     category = regression.vehicle_category
     if not regression.meets_min_count:
-        warnings.warn(
+        warn_caller(
             f"ISO 11819-1 7.3 asks for at least "
             f"{SPB_MIN_VEHICLE_COUNTS[category]} vehicles of category "
             f"{category!r} for surface classification; "
             f"{regression.n_vehicles} were measured.",
             StatisticalPassByWarning,
-            stacklevel=stacklevel,
         )
     if not regression.reference_speed_in_window:
         low, high = regression.speed_window_kmh
         k = SPB_SPEED_WINDOW_STANDARD_DEVIATIONS[category]
-        warnings.warn(
+        warn_caller(
             f"ISO 11819-1 9.3: the reference speed "
             f"{regression.reference_speed_kmh:g} km/h of category {category!r} "
             f"lies outside {k:g} standard deviation(s) of the measured mean speed, "
             f"{low:.1f} km/h to {high:.1f} km/h, so the regression should not be "
             "used to normalize to it.",
             StatisticalPassByWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -671,7 +670,7 @@ def pass_by_regression(
     road = _road_category(road_speed_category)
     category = _vehicle_category(vehicle_category)
     regression = _fit(speeds_kmh, max_levels, category, road)
-    _warn_regression(regression, stacklevel=3)
+    _warn_regression(regression)
     return regression
 
 
@@ -933,15 +932,14 @@ def statistical_pass_by(
     for category in SPB_VEHICLE_CATEGORIES:
         rows = keys == category
         regressions[category] = _fit(speeds[rows], levels[rows], category, road)
-        _warn_regression(regressions[category], stacklevel=3)
+        _warn_regression(regressions[category])
     heavy = sum(regressions[key].n_vehicles for key in _HEAVY_CATEGORIES)
     if heavy < SPB_MIN_VEHICLE_COUNTS["2"]:
-        warnings.warn(
+        warn_caller(
             f"ISO 11819-1 7.3 asks for at least {SPB_MIN_VEHICLE_COUNTS['2']} "
             f"heavy vehicles (2a and 2b together) for surface classification; "
             f"{heavy} were measured.",
             StatisticalPassByWarning,
-            stacklevel=2,
         )
     vehicle_levels: dict[VehicleCategory, float] = {
         key: regressions[key].vehicle_sound_level for key in SPB_VEHICLE_CATEGORIES

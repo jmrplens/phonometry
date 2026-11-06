@@ -11,6 +11,7 @@ that passes and the ones it must refuse, and a notebook that lacks a tag.
 from __future__ import annotations
 
 import base64
+import os
 import pathlib
 import sys
 from typing import Any
@@ -59,7 +60,10 @@ _GOOD: dict[str, list[dict[str, Any]]] = {
     ],
     "report": [_result(**{"text/plain": "b'%PDF-'"})],
     "warning": [
-        _stderr("phonometry/filters/core.py:1: FilterBankWarning: Low sampling rate\n"),
+        _stderr(
+            f"{os.sep}tmp{os.sep}ipykernel_1{os.sep}2.py:2: FilterBankWarning: "
+            "Low sampling rate\n"
+        ),
         _result(**{"text/plain": "41.0"}),
     ],
 }
@@ -166,6 +170,16 @@ def test_a_notebook_that_showed_everything_passes_every_check() -> None:
             "warning",
             [_stderr("phonometry/x.py:1: PhonometryWarning: below the floor\n")],
             "no FilterBankWarning",
+        ),
+        (
+            "warning",
+            [
+                _stderr(
+                    f"{pathlib.Path(os.sep, 'venv', 'phonometry', 'filters', 'core.py')}"
+                    ":698: FilterBankWarning: Low sampling rate\n"
+                )
+            ],
+            "a line of the package",
         ),
     ],
 )

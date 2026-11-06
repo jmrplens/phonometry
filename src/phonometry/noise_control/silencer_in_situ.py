@@ -71,7 +71,6 @@ for a different standard.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
@@ -91,7 +90,7 @@ from .._internal.validation import (
     require_positive_array,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -578,7 +577,7 @@ def extraneous_corrected_mean_level(
             "level is not determined and only the inequality of clause 4 may be "
             "stated."
         )
-        warnings.warn(msg, SilencerInSituWarning, stacklevel=2)
+        warn_caller(msg, SilencerInSituWarning)
     return result
 
 
@@ -715,7 +714,7 @@ def silencer_sound_power_level(
             "the areas of 3.3 and 3.4 are chosen; the largest here is "
             f"{float(np.max(np.abs(correction))):.1f} dB."
         )
-        warnings.warn(msg, SilencerInSituWarning, stacklevel=2)
+        warn_caller(msg, SilencerInSituWarning)
     return np.asarray(levels + 10.0 * np.log10(area) + correction, dtype=np.float64)
 
 
@@ -1184,7 +1183,7 @@ def measurement_distance_downstream_m(
             f"{distance:.2f} m for this free area, which is no distance at "
             "all; 8.3.1 sends that case to agreement between the parties."
         )
-        warnings.warn(msg, SilencerInSituWarning, stacklevel=2)
+        warn_caller(msg, SilencerInSituWarning)
     return distance
 
 

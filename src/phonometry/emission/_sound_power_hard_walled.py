@@ -99,7 +99,6 @@ deviation decides how many source locations the determination needs
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from itertools import pairwise
 from types import MappingProxyType
@@ -134,6 +133,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     _CK_OCTAVE,
     SoundPowerWarning,
@@ -614,19 +614,25 @@ def _position_mean(
     return np.asarray(energy_mean(arr, axis=0), dtype=np.float64)
 
 
-def _position_advisory(n_positions: int, *, traverse: bool, stacklevel: int) -> None:
+def _position_advisory(
+    n_positions: int,
+    *,
+    traverse: bool,
+) -> None:
     """Warn when fewer fixed microphone positions were used than 7.3 asks."""
     if not traverse and n_positions < _MIN_MICROPHONES:
-        warnings.warn(
+        warn_caller(
             f"{n_positions} microphone position(s) were supplied; the "
             f"determination uses at least {_MIN_MICROPHONES} ({_STANDARD}, 7.3).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
 
 
 def _background_advisory(
-    met: np.ndarray, met_ref: np.ndarray, *, measured: bool, stacklevel: int
+    met: np.ndarray,
+    met_ref: np.ndarray,
+    *,
+    measured: bool,
 ) -> None:
     """Warn when a band cannot be reported as meeting the criterion of 4.5.
 
@@ -636,30 +642,27 @@ def _background_advisory(
     correction enters Eq. (14) with a plus sign and lowers the level.
     """
     if not measured:
-        warnings.warn(
+        warn_caller(
             "No background levels were supplied; the procedure measures them at "
             f"each microphone position ({_STANDARD}, 7.5), so no band can be "
             "reported as meeting 4.5.",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
         return
     if not np.all(met):
-        warnings.warn(
+        warn_caller(
             "The margin of the source under test over the background is below "
             "6 dB in one or more bands; K1 is 1,3 dB there and those levels are "
             f"upper bounds ({_STANDARD}, 4.5 and 8.1.3).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     if not np.all(met_ref):
-        warnings.warn(
+        warn_caller(
             "The margin of the reference sound source over the background is "
             "below 6 dB in one or more bands; K1(RSS) is 1,3 dB there, which "
             "lowers those levels, so they do not meet 4.5 and are not upper "
             f"bounds ({_STANDARD}, 4.5 and 8.1.4).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -764,7 +767,7 @@ def _determine(
         )
         margin_ref = np.asarray(mean_ref - mean_bg_ref, dtype=np.float64)
         k1_ref, met_ref = _k1_eq13(margin_ref)
-    _background_advisory(met, met_ref, measured=measured, stacklevel=4)
+    _background_advisory(met, met_ref, measured=measured)
 
     level = np.asarray(power - mean_ref + mean_source + k1_ref - k1, dtype=np.float64)
     total = energy_sum(level + _a_weighting_corrections(freqs))  # Eq. (B.1) / (B.2)
@@ -874,7 +877,7 @@ def sound_power_hard_walled(
     arr = _finite(levels, "levels", (1, 2, 3))
     grid, traverse = _source_grid(arr)
     n_sources, n_positions, _ = grid.shape
-    _position_advisory(n_positions, traverse=traverse, stacklevel=3)
+    _position_advisory(n_positions, traverse=traverse)
     per_position = energy_mean(grid, axis=0)  # Eq. (9)
     mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
     return _determine(
@@ -921,7 +924,7 @@ def _event_grid(
             raise ValueError(msg)
         count = int(arr.shape[0])
         one_event = _single_event_mean(
-            arr, None, name="event_levels", stacklevel=5, clause=f"{_STANDARD} 7.6"
+            arr, None, name="event_levels", clause=f"{_STANDARD} 7.6"
         )
     else:
         if arr.ndim not in (1, 2, 3):
@@ -931,7 +934,7 @@ def _event_grid(
             )
             raise ValueError(msg)
         one_event = _single_event_mean(
-            arr, n_events, name="event_levels", stacklevel=5, clause=f"{_STANDARD} 7.6"
+            arr, n_events, name="event_levels", clause=f"{_STANDARD} 7.6"
         )
         count = require_count(n_events, "n_events", at_least=None)
     grid, traverse = _source_grid(one_event)
@@ -1022,7 +1025,7 @@ def sound_energy_hard_walled(
         raise ValueError(msg)
     grid, traverse, _ = _event_grid(arr, n_events)
     n_sources, n_positions, n_bands = grid.shape
-    _position_advisory(n_positions, traverse=traverse, stacklevel=3)
+    _position_advisory(n_positions, traverse=traverse)
     per_position = energy_mean(grid, axis=0)  # Eq. (17)
     mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
     if integration_time is not None:
@@ -1108,11 +1111,10 @@ def reproducibility_from_round_robin(sigma_tot_db: float, sigma_omc_db: float) -
         )
         raise ValueError(msg)
     if operating > total / math.sqrt(2.0):
-        warnings.warn(
+        warn_caller(
             "sigma_omc_db exceeds sigma_tot/sqrt(2); the reproducibility extracted "
             f"from this round robin is of low accuracy ({_STANDARD}, 9.3.2).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return math.sqrt(total * total - operating * operating)
 
@@ -1353,11 +1355,10 @@ def check_hard_walled_room(
         )
         raise ValueError(msg)
     if n_orientations != _ORIENTATIONS:
-        warnings.warn(
+        warn_caller(
             f"{n_orientations} orientations were supplied; the procedure of 4.4 "
             f"uses {_ORIENTATIONS}, four horizontal and four vertical ({_STANDARD}).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     volume = require_positive(volume, "volume")
     box = real_array(reference_box_m, "reference_box_m")
@@ -1544,11 +1545,10 @@ def hard_walled_source_locations(
         msg = "'levels' must hold at least two microphone positions for Eq. (7)."
         raise ValueError(msg)
     if n_positions < _MIN_PRELIMINARY_MICROPHONES:
-        warnings.warn(
+        warn_caller(
             f"{n_positions} microphone position(s) were supplied; the preliminary "
             f"survey uses at least {_MIN_PRELIMINARY_MICROPHONES} ({_STANDARD}, 7.4).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     freqs = _octave_frequencies(frequencies, n_bands)
     s_m = np.asarray(np.std(arr, axis=0, ddof=1), dtype=np.float64)  # Eq. (7), (8)

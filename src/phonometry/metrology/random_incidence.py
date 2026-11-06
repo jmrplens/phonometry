@@ -123,7 +123,6 @@ and 282,15°, and the two are recorded in ``docs/ERRATA.md``.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, overload
@@ -142,7 +141,7 @@ from .._internal.validation import (
     require_positive_array,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from .comparison_calibration import _compared_level_db, _output_level_difference_db
 
 if TYPE_CHECKING:
@@ -382,14 +381,15 @@ def _largest_element(half_steps: int, planes: int) -> float:
     return max(float(np.max(ring[1:half_steps])), cap)
 
 
-def _warn_if_coarse(largest: float, stacklevel: int) -> None:
+def _warn_if_coarse(
+    largest: float,
+) -> None:
     if largest > _LARGEST_ELEMENT_LIMIT:
-        warnings.warn(
+        warn_caller(
             f"The largest element of the sphere is {100.0 * largest:.2f} % of "
             "its surface, above the 3 % IEC 61183 A.1.6 sets for one reading to "
             "stand for the directions around it; measure at a finer angular step.",
             SphereDivisionWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -441,7 +441,7 @@ def adjustment_factors(
     """
     half_steps = _half_circle_steps(step_deg)
     count = require_count(n_planes, "n_planes")
-    _warn_if_coarse(_largest_element(half_steps, count), stacklevel=3)
+    _warn_if_coarse(_largest_element(half_steps, count))
     return read_only(_weights(half_steps, count))
 
 
@@ -735,7 +735,7 @@ def _from_planes(
     planes = levels.shape[0]
     half_steps = _plane_count(levels.shape[1], "levels")
     largest = _largest_element(half_steps, planes)
-    _warn_if_coarse(largest, stacklevel=4)
+    _warn_if_coarse(largest)
     angles, plane_angles, flat, weights = _plane_readings(
         levels, _weights(half_steps, planes)
     )

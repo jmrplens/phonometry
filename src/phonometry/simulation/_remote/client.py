@@ -40,7 +40,6 @@ import re
 import subprocess  # nosec B404 - ssh is the transport: a remote run is ssh without a server
 import sys
 import threading
-import warnings
 from collections import deque
 from dataclasses import dataclass
 from functools import partial
@@ -51,7 +50,7 @@ from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from ..._internal.json_input import LONE_SURROGATE, UNSAFE, escaped
-from .._backends import _PACKAGE_PREFIX
+from ..._internal.warnings import warn_caller
 from ..compute import (
     ComputeFallbackWarning,
     ComputeRemoteError,
@@ -841,7 +840,7 @@ def _warnings_of(session: Session, header: Mapping[str, object]) -> list[Warning
 def _relay(caught: Sequence[Warning]) -> None:
     """Raise again here, at the caller's line, each warning the node raised."""
     for warning in caught:
-        warnings.warn(warning, skip_file_prefixes=(_PACKAGE_PREFIX,))
+        warn_caller(warning)
 
 
 def _fill(session: Session, spec: ArraySpec, target: NDArray[Any]) -> None:
@@ -1040,10 +1039,9 @@ def run_remote(
     except ComputeRemoteError as exc:
         if not request.fallback:
             raise
-        warnings.warn(
+        warn_caller(
             f"{exc}; running on NumPy here instead (fallback=True)",
             ComputeFallbackWarning,
-            skip_file_prefixes=(_PACKAGE_PREFIX,),
         )
         return None
     _LOG.info("%s: %s done", entry.label, function)

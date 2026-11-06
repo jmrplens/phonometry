@@ -53,7 +53,6 @@ correction); a caller holding ISO 9613-1 ``alpha`` values can convert them with
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -70,7 +69,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import os
@@ -112,7 +111,9 @@ class AbsorptionWarning(PhonometryWarning):
     """Advisory for out-of-range or non-physical ISO 354 absorption inputs."""
 
 
-def _warn_small_room(volume: float, *, stacklevel: int) -> None:
+def _warn_small_room(
+    volume: float,
+) -> None:
     r"""Advise when the room is below the ISO 354 clause 6.1.1 minimum volume.
 
     Clause 6.1.1 requires :math:`V \ge 150` m3 (new rooms are recommended to
@@ -121,16 +122,18 @@ def _warn_small_room(volume: float, *, stacklevel: int) -> None:
     field; the result is still returned.
     """
     if volume < _MIN_ROOM_VOLUME:
-        warnings.warn(
+        warn_caller(
             f"Room volume {volume:g} m3 is below the {_MIN_ROOM_VOLUME:g} m3 "
             "minimum of ISO 354:2003 clause 6.1.1 (new rooms recommended "
             ">= 200 m3); the result is advisory.",
             AbsorptionWarning,
-            stacklevel=stacklevel,
         )
 
 
-def _warn_sample_area(sample_area: float, volume: float, *, stacklevel: int) -> None:
+def _warn_sample_area(
+    sample_area: float,
+    volume: float,
+) -> None:
     r"""Advise when ``S`` is outside the ISO 354 clause 6.2.1.1 range.
 
     Clause 6.2.1.1 requires a plane-absorber area :math:`10 \le S \le 12` m2;
@@ -142,12 +145,11 @@ def _warn_sample_area(sample_area: float, volume: float, *, stacklevel: int) -> 
     if volume > _SAMPLE_AREA_REF_VOLUME:
         upper *= (volume / _SAMPLE_AREA_REF_VOLUME) ** (2.0 / 3.0)
     if not _SAMPLE_AREA_MIN <= sample_area <= upper:
-        warnings.warn(
+        warn_caller(
             f"Sample area {sample_area:g} m2 is outside the ISO 354:2003 clause "
             f"6.2.1.1 range [{_SAMPLE_AREA_MIN:g}, {upper:g}] m2; the result is "
             "advisory.",
             AbsorptionWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -191,11 +193,10 @@ def _resolve_speed(
     require_above_absolute_zero(temperature_c, temperature_name)
     lo, hi = _EQ6_TEMPERATURE_RANGE
     if not lo <= temperature_c <= hi:
-        warnings.warn(
+        warn_caller(
             f"Temperature {temperature_c} degC is outside the 15..30 degC validity "
             "range of ISO 354:2003 Eq. (6); speed of sound may be inaccurate.",
             AbsorptionWarning,
-            stacklevel=3,
         )
     return _speed_of_sound(temperature_c)
 
@@ -340,7 +341,7 @@ def absorption_area(
     area = _absorption_area(
         t60, volume, temperature_c=temperature_c, speed_of_sound=speed_of_sound, m=m
     )
-    _warn_small_room(volume, stacklevel=3)
+    _warn_small_room(volume)
     return area
 
 
@@ -423,8 +424,8 @@ def absorption_coefficient(
     # Advisory setup checks (result still returned). Volume is advised here once
     # via the module-private core helper (which does not warn) to avoid
     # duplicate volume advisories from the two area evaluations.
-    _warn_small_room(volume, stacklevel=2)
-    _warn_sample_area(sample_area, volume, stacklevel=2)
+    _warn_small_room(volume)
+    _warn_sample_area(sample_area, volume)
     a1 = _absorption_area(
         t1,
         volume,
@@ -448,11 +449,10 @@ def absorption_coefficient(
     area_specimen = a2 - a1
     alpha_s = area_specimen / sample_area
     if np.any(alpha_s <= 0.0):
-        warnings.warn(
+        warn_caller(
             "alpha_s <= 0 (T2 >= T1): adding the specimen did not reduce the "
             "reverberation time; check the measurement (ISO 354:2003, 8.1.2/8.1.3).",
             AbsorptionWarning,
-            stacklevel=2,
         )
     return alpha_s
 

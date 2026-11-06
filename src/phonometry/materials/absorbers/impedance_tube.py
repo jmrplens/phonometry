@@ -30,7 +30,6 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -51,7 +50,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -545,17 +544,14 @@ def _warn_frequency_range(
     frequency: NDArray[np.float64],
     f_lower: float,
     f_upper: float,
-    *,
-    stacklevel: int,
 ) -> None:
     """Advise when any frequency falls outside the plane-wave range."""
     if np.any(frequency < f_lower) or np.any(frequency > f_upper):
-        warnings.warn(
+        warn_caller(
             f"Frequencies outside the plane-wave range "
             f"[{f_lower:.1f}, {f_upper:.1f}] Hz (ISO 10534-2:2001, Eqs. (1)-(4)); "
             "results there are advisory.",
             ImpedanceTubeWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -796,7 +792,7 @@ def two_microphone_impedance(
         f_lower, f_upper = plane_wave_frequency_range(
             spacing_m, speed_of_sound, diameter_m=diameter_m, shape=canonical
         )
-        _warn_frequency_range(f, f_lower, f_upper, stacklevel=2)
+        _warn_frequency_range(f, f_lower, f_upper)
     return ImpedanceTubeResult(
         frequencies=f,
         reflection=r,

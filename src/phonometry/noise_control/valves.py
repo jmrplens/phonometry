@@ -57,7 +57,6 @@ The hydrodynamic case of IEC 60534-8-4, where the fluid is a liquid, is
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
@@ -76,7 +75,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -1700,13 +1699,12 @@ def valve_aerodynamic_noise(
             (band_internal, outlet_noise.band_internal_level)
         )
     elif outlet_mach > MACH_LIMIT_STANDARD_TRIM:
-        warnings.warn(
+        warn_caller(
             f"The valve outlet is at Mach {outlet_mach:.2g} and NOTE 1 to "
             f"Equation (15) holds Clause 5 to {MACH_LIMIT_STANDARD_TRIM:g}, "
             "so the flow leaving the outlet is a second source this result "
             "does not carry. Pass an 'expander' to add the Clause 7 term.",
             ValveNoiseWarning,
-            stacklevel=2,
         )
     band_loss = pipe_transmission_loss(
         bands,

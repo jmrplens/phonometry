@@ -7,77 +7,6 @@ Part of https://docs.jmrp.io/phonometry/llms.txt. One page in 2 parts, cut at it
 <!-- source: docs/start/upgrading.md | canonical: https://docs.jmrp.io/phonometry/start/upgrading/ -->
 Source: https://docs.jmrp.io/phonometry/start/upgrading/
 
-## A result keeps its own copy of the arrays it was given
-
-In 3.3.0 and in 4.0.0rc1 a result kept the very array it was handed whenever
-that array was already of the type the function reads, `float64` for levels
-and frequencies, because `np.asarray` hands its argument back unchanged in
-that case. Changing the caller's array afterwards, `levels[0] = 0.0` or
-`frequencies *= 2`, changed a result already computed and perhaps already
-printed. In 4.0 every array that a function or a method of the library
-keeps from the arguments it was given is a copy of its own, made read-only
-like the published tables, and the caller's array is left as it was. That
-holds for the objects that keep arrays to hand out later as well: the
-frequency grid of a `noise_control.SilencerChain`, the axes and flight paths
-an `aircraft.ANPDatabase` is built from, and the medium maps of
-`simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
-and `c_s` now stay the ones the time step was computed from. The maps the
-engines derive from them, `FDTD2D.kappa` and `ElasticFDTD2D.mu` and `.lam`,
-are read-only NumPy copies too: in 4.0.0rc1 an edit to one reached part of the
-step and not the time step, and now it raises `ValueError`, so a different
-medium is a new engine built from edited maps. A `Signal`
-keeps a copy of its own samples too, which stays writeable for processing in
-place, as the samples of a file read with `io.read` always were. A result
-record built by hand, by calling its class directly, makes the same copy:
-every public record that can hold an array copies the arrays it is handed
-when it is built, whoever builds it, also inside a tuple, a list or any
-mapping. A record held inside another one is kept whole and answers for its
-own arrays, and a `Signal` is no exception: the seven results that hand a
-waveform back as a `Signal` (`filters.OctaveFilterResult`,
-`signals.EnvelopeResult`, `signals.ResampledSignalResult`,
-`signals.AlignedImpulseResponseResult`, `signals.SynchronousAverageResult`,
-`environment.DirectSoundSubtraction` and `underwater.PileStrikeResult`) hold
-one of their own when the library builds them, whose samples stay writeable
-like any `Signal`'s, and hold the caller's own when built by hand around it.
-Every other array a result holds refuses in-place writes, the ones it
-computed as well as the ones it was given, where in 3.3.0 most computed
-arrays took them. Writing into one now raises `ValueError`, so code that
-edited one in place has to copy it first:
-
-```python
-import numpy as np
-
-from phonometry import io, room
-
-levels = np.array([60.0, 58.0, 55.0, 52.0, 50.0, 48.0, 45.0, 42.0, 40.0, 38.0])
-nc = room.noise_criterion(levels)
-levels[0] = 0.0
-samples = np.zeros(4)
-signal = io.Signal(samples, fs=48_000)
-samples[0] = 1.0
-measured = np.array([1.0, 0.5, 0.25, 0.125])
-response = room.ImpulseResponseResult(ir=measured, fs=48_000, method="farina")
-measured[0] = 0.0
-edited = nc.levels.copy()
-edited[0] = 62.0
-print(nc.levels[0], nc.levels.flags.writeable, response.ir[0], response.ir.flags.writeable)
-print(signal.data[0, 0], signal.data.flags.writeable)
-# 60.0 False 1.0 False
-# 0.0 True
-```
-
-The window a spectral result was computed with is held the same way.
-`signals.power_spectral_density`, `signals.cross_spectral_density`,
-`signals.coherent_output_spectrum`, `signals.miso_coherence`,
-`signals.spectrogram`, `signals.zoom_fft`, `signals.envelope_spectrum` and
-`signals.window_metrics` store the `window` they were given, and a window
-given with its parameters keeps parameters of its own: the weights of
-`("general_cosine", weights)` given as a list are held as a tuple of the
-same numbers, where 3.3.0 held the caller's list, so
-`result.window == ("general_cosine", (0.5, 0.5))`; given as an array they
-are a read-only copy, as every array a result holds is. A result built by
-hand, or anew by `dataclasses.replace`, holds its window the same way.
-
 ## A catalogue row says what its source claims for each cell
 
 The published catalogues of materials are new in 4.0: neither 3.3.0 nor
@@ -646,6 +575,19 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # ValueError
 # True
 ```
+
+## A warning names the line of your code that caused it
+
+Every warning of the library is now shown at the first line of the caller's
+code, whichever functions of the library it was reached through. Python's
+`default` action then shows it once for each line of yours that causes it, and
+a filter by module reads your module:
+
+| What | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| the file and line a warning is shown at | the line its `stacklevel` counted to, a line of the library for 33 of them, such as `filters/core.py:698` for every filter bank that dropped a band | the line of your code that made the call |
+| `warnings.filterwarnings("ignore", module="phonometry")` | silenced the warnings shown at a line of the library, and no other | silences none; filter by class, `warnings.filterwarnings("ignore", category=phonometry.PhonometryWarning)`, or by topic |
+| `warnings.filterwarnings("error", module="my_analysis")` | missed the warnings shown at a line of the library | reaches every warning a call in `my_analysis` causes |
 
 ## A choice is matched as it is written
 

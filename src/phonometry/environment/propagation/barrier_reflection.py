@@ -98,7 +98,6 @@ caller.
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -122,7 +121,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...io._resolve import (
     SignalInput,
     apply_calibration,
@@ -722,7 +721,7 @@ def _require_fs(fs: float) -> float:
             f"the subtraction can align the records to a fraction of a sample; "
             f"got {rate:g} Hz."
         )
-        warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
+        warn_caller(msg, BarrierReflectionWarning)
     return rate
 
 
@@ -799,7 +798,7 @@ def _warn_reduction(reduction: float, where: str) -> None:
             f"{reduction:.1f} dB{where}, below the 10 dB under which EN 1793-5 "
             f"5.5.4 warns that the direct sound was not fully removed."
         )
-        warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
+        warn_caller(msg, BarrierReflectionWarning)
 
 
 def subtract_direct_sound(
@@ -1662,7 +1661,7 @@ def _warn_gain(gain: float, where: str) -> None:
             f"between the free-field and the in-front records, and asks to "
             f"recheck the data."
         )
-        warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
+        warn_caller(msg, BarrierReflectionWarning)
 
 
 # --------------------------------------------------------------------------- #

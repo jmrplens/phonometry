@@ -27,7 +27,6 @@ that module.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
@@ -44,6 +43,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
+from ..._internal.warnings import warn_caller
 from .impedance_tube import (
     _DIAMETER_POSITIVE,
     ImpedanceTubeWarning,
@@ -208,7 +208,6 @@ def _warn_astm_plane_wave(
     s2: float,
     diameter_m: float,
     shape: str,
-    stacklevel: int,
 ) -> None:
     r"""Advise when wavenumbers leave the ASTM E2611-19 plane-wave range.
 
@@ -236,13 +235,12 @@ def _warn_astm_plane_wave(
     )
     k_lower = two_pi / (_ASTM_LOWER_WAVELENGTH_FRACTION * min(s1, s2))
     if np.any(k < k_lower) or np.any(k > k_upper):
-        warnings.warn(
+        warn_caller(
             "Wavenumbers outside the ASTM E2611-19 plane-wave working range "
             "(6.2.3-6.2.5, 6.5.4) for the given microphone spacings and tube "
             "cross-section; results there are advisory. See "
             "plane_wave_frequency_range_astm_e2611() for the limits in hertz.",
             ImpedanceTubeWarning,
-            stacklevel=stacklevel + 1,
         )
 
 
@@ -360,12 +358,7 @@ def wave_decomposition(
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
         _warn_astm_plane_wave(
-            wavenumber,
-            s1=s1,
-            s2=s2,
-            diameter_m=diameter_m,
-            shape=canonical,
-            stacklevel=2,
+            wavenumber, s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
         )
     ha = complex_array(h1, "h1")
     hb = complex_array(h2, "h2")
@@ -787,20 +780,17 @@ def _warn_ill_conditioned(
     den: NDArray[np.complex128],
     scale: NDArray[np.float64],
     context: str,
-    *,
-    stacklevel: int,
 ) -> None:
     """Flag a near-singular transfer-matrix solve (poor conditioning)."""
     den_mag = np.abs(complex_array(den, "den"))
     bad = den_mag < _MATRIX_COND_EPS * real_array(scale, "scale")
     n = int(np.count_nonzero(bad))
     if n:
-        warnings.warn(
+        warn_caller(
             f"{context}: the solve denominator is near-singular at {n} "
             "frequency point(s) (the loads are insufficiently different or the "
             "geometry is near a resonance); results there are unreliable.",
             ImpedanceTubeWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -889,12 +879,7 @@ def transfer_matrix_two_load(
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
         _warn_astm_plane_wave(
-            wavenumber,
-            s1=s1,
-            s2=s2,
-            diameter_m=diameter_m,
-            shape=canonical,
-            stacklevel=2,
+            wavenumber, s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
         )
     p0a, pda, u0a, uda = _face_from_loads(
         load_a,
@@ -923,7 +908,6 @@ def transfer_matrix_two_load(
         np.asarray(den, dtype=np.complex128),
         np.abs(pda * udb) + np.abs(pdb * uda),
         "transfer_matrix_two_load",
-        stacklevel=2,
     )
     return TransferMatrix(
         t11=np.asarray((p0a * udb - p0b * uda) / den, dtype=np.complex128),
@@ -998,12 +982,7 @@ def transfer_matrix_one_load(
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
         _warn_astm_plane_wave(
-            wavenumber,
-            s1=s1,
-            s2=s2,
-            diameter_m=diameter_m,
-            shape=canonical,
-            stacklevel=2,
+            wavenumber, s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
         )
     p0, pd, u0, ud = _face_from_loads(
         load,
@@ -1021,7 +1000,6 @@ def transfer_matrix_one_load(
         np.asarray(den, dtype=np.complex128),
         np.abs(p0 * ud) + np.abs(pd * u0),
         "transfer_matrix_one_load",
-        stacklevel=2,
     )
     t_diag = np.asarray((pd * ud + p0 * u0) / den, dtype=np.complex128)
     return TransferMatrix(

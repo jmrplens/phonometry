@@ -55,7 +55,6 @@ import another method to get them.
 
 from __future__ import annotations
 
-import warnings
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, cast
 
@@ -69,7 +68,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -254,7 +253,6 @@ def _single_event_mean(
     n_events: int | np.integer[Any] | None,
     *,
     name: str,
-    stacklevel: int,
     clause: str = "ISO 3744:2010 8.3.1, ISO 3741:2010 8.5.1",
 ) -> np.ndarray:
     r"""Mean single event time-integrated level of one event, per position.
@@ -289,7 +287,6 @@ def _single_event_mean(
     :param n_events: ``None`` for one event per entry of the first axis, else
         the number of events one measurement encompasses.
     :param name: The caller's parameter name, for the error messages.
-    :param stacklevel: Where the warning is reported.
     :param clause: The clauses the warning cites for the five-event minimum,
         which each caller names for its own standard (ISO 3743-1:2010 prints
         it in 7.6).
@@ -312,11 +309,10 @@ def _single_event_mean(
         count = require_count(n_events, "n_events")
         mean = arr - 10.0 * np.log10(count)
     if count < _MIN_EVENTS:
-        warnings.warn(
+        warn_caller(
             f"Only {count} single event(s); the sound energy determination "
             f"requires at least {_MIN_EVENTS} ({clause}).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     return np.asarray(mean, dtype=np.float64)
 

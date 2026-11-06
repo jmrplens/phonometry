@@ -74,7 +74,6 @@ supplied.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, overload
 
@@ -94,6 +93,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from ..._internal.warnings import warn_caller
 from .insulation import _as_band_levels
 from .laboratory_insulation import LaboratoryInsulationWarning
 from .ratings import WeightedRatingResult, weighted_rating
@@ -854,13 +854,12 @@ def intensity_element_normalized_difference(
     sm = _positive_area(measurement_area, "measurement_area")
     n = require_count(n, "n")
     if n > 1:
-        warnings.warn(
+        warn_caller(
             "ISO 15186-1:2000 Formula (8) as printed subtracts 10 lg(N); "
             "that sign is physically inconsistent (see docs/ERRATA.md). The "
             "per-unit DI,n,e is returned with the corrected +10 lg(N) term, "
             "consistent with ISO 10140-2:2010 Formula (6).",
             LaboratoryInsulationWarning,
-            stacklevel=2,
         )
 
     d_i_n_e = (

@@ -55,14 +55,13 @@ Clause citations refer to EN 12354-1:2000 (airborne) or EN 12354-2:2000 (impact)
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from math import isfinite, log10
 from typing import TYPE_CHECKING, Any, Literal
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import check_engine, require_choice, require_scalar
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -1039,12 +1038,11 @@ def equivalent_impact_level(mass_per_area: float) -> float:
         msg = "'mass_per_area' must be positive."
         raise ValueError(msg)
     if not (_LN_EQ_MASS_MIN <= m <= _LN_EQ_MASS_MAX):
-        warnings.warn(
+        warn_caller(
             f"mass_per_area = {m:g} kg/m² lies outside the 100-600 kg/m² "
             "envelope of the EN 12354-2 Annex B relation "
             "Ln,w,eq = 164 - 35 lg(m'); the result is an extrapolation.",
             BuildingPredictionWarning,
-            stacklevel=2,
         )
     return _LN_EQ_A - _LN_EQ_B * log10(m / _M0)
 

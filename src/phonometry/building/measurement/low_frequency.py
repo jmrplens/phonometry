@@ -92,7 +92,6 @@ checks that stand in for one.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final, Literal
 
@@ -106,7 +105,7 @@ from ..._internal.validation import (
     require_choice,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -352,7 +351,7 @@ def _warn_when_the_procedure_is_required(
             "range of Clause 5 out and report 100 Hz to 3150 Hz alone."
         )
     )
-    warnings.warn(
+    warn_caller(
         f"{owner}: the receiving room is {value:g} m³, which rounds to "
         f"{rounded} m³, and 'frequencies' names the {named_text} {plural}, "
         "so ISO 16283 requires the low-frequency procedure there "
@@ -363,9 +362,6 @@ def _warn_when_the_procedure_is_required(
         "8.4 in ISO 16283-3) puts the 63 Hz octave reverberation time in place "
         f"of the three one-third-octave ones. {remedy}",
         LowFrequencyWarning,
-        # Three frames out: this helper, the entry point that called it, and
-        # the caller's own line, which is the one worth pointing at.
-        stacklevel=3,
     )
 
 
@@ -421,12 +417,11 @@ def corner_level(corner_levels: ArrayLike) -> np.ndarray:
         raise ValueError(msg)
     corners = data.shape[_CORNER_AXIS]
     if corners < _MIN_CORNERS:
-        warnings.warn(
+        warn_caller(
             f"Only {corners} corner(s) per source position; ISO 16283 requires "
             f"a minimum of {_MIN_CORNERS} (and recommends two of them at "
             "ground level and two at ceiling level).",
             LowFrequencyWarning,
-            stacklevel=2,
         )
     highest = np.max(data, axis=_CORNER_AXIS)
     return np.asarray(energy_mean(highest, axis=_POSITION_AXIS), dtype=np.float64)

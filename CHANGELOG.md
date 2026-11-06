@@ -2304,6 +2304,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Every warning of the library is shown at the line of the caller's code
+  that made the call.** Of its 178 warnings, 175 passed a `stacklevel`
+  counted by hand for one route to it, the other three already skipping the
+  package's files, and 33 of the 175, reached by another route, were shown at
+  a line of the library instead: every `OctaveFilterBank` and
+  `octave_filter` that dropped a band warned at `filters/core.py:698`, the
+  room-volume and sample-area advisories of the absorption measurement
+  inside `sound_absorption.py`, the
+  atmospheric absorption reached from the aircraft and emission domains, the
+  fluid conditions reached from the reciprocity calibration, and the tone
+  burst the broadcast meter builds. Python's `default` action shows a warning
+  once for each line it is attributed to, so the same call in a later
+  notebook cell said nothing, and a filter by the caller's module missed it.
+  Every warning now goes through one helper, `warn_caller` in
+  `_internal/warnings.py`, which skips the package's own frames
+  (`skip_file_prefixes`, new in Python 3.12) and counts the frames that run
+  the package's code from elsewhere: the `__init__` a dataclass generates for
+  a record, which calls its `__post_init__`, a `functools.cached_property`,
+  the exit of a `contextlib.contextmanager` and `dataclasses.replace`. The
+  `stacklevel` parameters 18 private helpers took to forward are gone. A
+  filter written as `module="phonometry"` now reaches none of them; filter by
+  `category=phonometry.PhonometryWarning` or by topic.
+  `tests/test_warning_attribution.py` provokes each published warning through
+  a public call and wants the caller's file, and
+  `tests/test_package_architecture.py` refuses a `warnings.warn` anywhere else
+  in the package, however it is reached (style rule A62). The notebook job
+  fails when the warning its smoke notebook provokes is shown at a line of
+  the package rather than at the cell's.
+
 - **`import pyoctaveband` type-checks.** The PyOctaveBand 2.2.1 bridge now
   ships the PEP 561 marker, `py.typed`, and re-exports `__version__` and
   `__all__` as themselves. Without the marker, `mypy --strict` refused

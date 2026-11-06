@@ -83,7 +83,6 @@ which a duct stops carrying plane waves alone is in
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -99,7 +98,7 @@ from .._internal.validation import (
     require_positive_array,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -689,7 +688,7 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
             f"arrangement is at {ratio:.2f}, so the joints reflect more than "
             "the survey method allows for."
         )
-        warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+        warn_caller(msg, SilencerMeasurementWarning)
     return float(ratio)
 
 
@@ -1173,7 +1172,7 @@ def pressure_loss_coefficient(
             f"Pa, so that the smallest number in the fit is still a "
             f"measurement; this point is {loss!r} Pa."
         )
-        warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+        warn_caller(msg, SilencerMeasurementWarning)
     return float(loss / head)
 
 
@@ -1249,7 +1248,7 @@ def average_pressure_loss_coefficient(
                 f"rates in each series; the {name} series has {size}, so the "
                 "average is over fewer points than the standard allows for."
             )
-            warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+            warn_caller(msg, SilencerMeasurementWarning)
     return float(np.mean(first / first_head) - np.mean(second / second_head))
 
 
@@ -1386,7 +1385,7 @@ class OperatingLine(OwnsArrays):
                 f"{low:.4g} and {high:.4g}; got {duty!r}, which is an "
                 "extrapolation the standard does not offer."
             )
-            warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+            warn_caller(msg, SilencerMeasurementWarning)
         return float(self.slope * math.log10(point) + self.intercept)
 
     def plot(
@@ -1451,7 +1450,7 @@ def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
             "not a straight line in this variable and reading the line off "
             "outside the points would not mean anything."
         )
-        warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+        warn_caller(msg, SilencerMeasurementWarning)
     return OperatingLine(
         slope=float(slope),
         intercept=float(intercept),

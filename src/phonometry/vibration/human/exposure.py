@@ -57,7 +57,6 @@ by applying the exact analog response of ISO 8041-1 in the frequency domain.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, get_args
@@ -80,7 +79,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import REFERENCE_VALUES
 
@@ -1016,12 +1015,11 @@ def crest_factor(x: SignalInput) -> float:
         return 0.0
     cf = float(np.max(np.abs(x)) / rms)
     if cf > _BASIC_METHOD_MAX_CREST_FACTOR:
-        warnings.warn(
+        warn_caller(
             f"Crest factor {cf:.1f} exceeds 9; the basic r.m.s. method may be "
             "inadequate (ISO 2631-1, 6.2.2) - consider the VDV or running "
             "r.m.s. dose measures.",
             HumanVibrationWarning,
-            stacklevel=2,
         )
     return cf
 

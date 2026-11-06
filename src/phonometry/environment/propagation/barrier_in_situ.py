@@ -60,7 +60,6 @@ they are three separate implementations here and share nothing.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -77,7 +76,7 @@ from ..._internal.validation import (
     require_positive,
     require_positive_array,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -570,7 +569,7 @@ def reference_microphone_height_m(
             "reaches it; the microphone keeps the "
             f"{REFERENCE_MICROPHONE_CLEARANCE_M:g} m clearance of 7.2.2."
         )
-        warnings.warn(msg, BarrierInSituWarning, stacklevel=2)
+        warn_caller(msg, BarrierInSituWarning)
         return clearance
     return max(clearance, distance * math.tan(elevation))
 
@@ -829,7 +828,7 @@ def measured_insertion_loss_indirect(
             f"{abs(correction_after - correction_before):g} dB, which moves "
             "the answer by that much."
         )
-        warnings.warn(msg, BarrierInSituWarning, stacklevel=2)
+        warn_caller(msg, BarrierInSituWarning)
     delta_before = ref_b - (rec_b - correction_before)
     delta_after = ref_a - (rec_a - correction_after)
     return MeasuredBarrierInsertionLoss(

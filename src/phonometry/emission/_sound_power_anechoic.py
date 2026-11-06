@@ -38,7 +38,6 @@ reproducibility standard deviation from Table 3 (anechoic) or Table 2
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -57,6 +56,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
 
 if TYPE_CHECKING:
@@ -541,12 +541,11 @@ def precision_background_correction(
     judged = settled(delta)
     k1 = np.where(judged >= _K1_UPPER_3745, 0.0, k1)
     if np.any(judged < low):
-        warnings.warn(
+        warn_caller(
             "Background margin below the frequency-dependent criterion (6 dB "
             "edge bands / 10 dB mid bands) in one or more positions; K1 clamped "
             "and levels are upper bounds (ISO 3745:2012, 9.4.2).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return np.asarray(k1, dtype=np.float64)
 
@@ -806,19 +805,17 @@ def _room_qualification_warnings(
         qualified_radius = check.conforming_radius_m
         low, high = check.conforming_range_hz
     else:
-        warnings.warn(
+        warn_caller(
             "The room is not qualified by ISO 3745:2012 Annex A as amended in "
             "2017; the determination is not in conformity with ISO 3745.",
             SoundPowerWarning,
-            stacklevel=3,
         )
         return
     if radius > qualified_radius:
-        warnings.warn(
+        warn_caller(
             f"The measurement radius {radius:g} m lies beyond the qualified "
             f"radius {qualified_radius:.3g} m (ISO 3745:2012/Amd.1:2017, A.2.4).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     if frequencies is not None:
         freqs = real_array(frequencies, "frequencies")
@@ -827,11 +824,10 @@ def _room_qualification_warnings(
         edge = 10.0 ** (1.0 / 20.0)
         outside = (freqs < low / edge) | (freqs > high * edge)
         if np.any(outside):
-            warnings.warn(
+            warn_caller(
                 f"Bands outside the qualified frequency range {low:g} Hz to "
                 f"{high:g} Hz (ISO 3745:2012/Amd.1:2017, A.2.3).",
                 SoundPowerWarning,
-                stacklevel=3,
             )
 
 

@@ -68,7 +68,6 @@ Neither part defines a temperature/atmospheric normalisation of the result.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -82,7 +81,7 @@ from ..._internal.validation import (
     require_equal_shapes,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...fluids import Fluid
 
 if TYPE_CHECKING:
@@ -457,17 +456,16 @@ def airflow_resistivity(specific_resistance: float, thickness_m: float) -> float
 
 
 def _warn_static_velocity_range(
-    velocities: NDArray[np.float64], stacklevel: int
+    velocities: NDArray[np.float64],
 ) -> None:
     """Advise when a stepwise velocity exceeds the ISO 9053-1 clause 7.5 limit."""
     top = float(np.max(velocities))
     if top > _STATIC_MAX_VELOCITY:
-        warnings.warn(
+        warn_caller(
             f"Highest linear airflow velocity {top:g} m/s exceeds the "
             f"{_STATIC_MAX_VELOCITY:g} m/s limit of ISO 9053-1:2018 clause 7.5; "
             "the flow may be non-linear and the result is advisory.",
             AirflowResistanceWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -535,7 +533,7 @@ def static_airflow_resistance(
         msg = "'evaluation_velocity' must be positive."
         raise ValueError(msg)
 
-    _warn_static_velocity_range(u, stacklevel=2)
+    _warn_static_velocity_range(u)
 
     # Through-origin second-order fit: dp = a*u + b*u**2 (no constant term).
     design = np.stack([u, u**2], axis=1)
@@ -681,27 +679,24 @@ def _warn_alternating_validity(
     ratio_term: float,
     level_specimen: float,
     background_level: float | None,
-    stacklevel: int,
 ) -> None:
     """Check the ISO 9053-2:2020 Formula (3)/(4) validity criteria."""
     if ratio_term >= _ALT_VALIDITY_LIMIT:
-        warnings.warn(
+        warn_caller(
             f"Validity term (h_t/h_s)*10**((L_ps-L_pt)/20) = {ratio_term:g} is not "
             f"below {_ALT_VALIDITY_LIMIT:g} (ISO 9053-2:2020 Formula (3)); adjust "
             "specimen size, cavity volume, piston frequency or stroke length.",
             AirflowResistanceWarning,
-            stacklevel=stacklevel,
         )
     if (
         background_level is not None
         and float(settled(level_specimen - background_level)) <= _ALT_BACKGROUND_MARGIN
     ):
-        warnings.warn(
+        warn_caller(
             f"Specimen-to-background margin {level_specimen - background_level:g} dB "
             f"is not above {_ALT_BACKGROUND_MARGIN:g} dB (ISO 9053-2:2020 "
             "Formula (4)); background noise may bias the result.",
             AirflowResistanceWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -783,19 +778,16 @@ def alternating_airflow_resistance(
 
     low, high = _ALT_FREQUENCY_RANGE
     if not low <= frequency <= high:
-        warnings.warn(
+        warn_caller(
             f"Piston frequency {frequency:g} Hz is outside the ISO 9053-2:2020 "
             f"clause 6.2 range [{low:g}, {high:g}] Hz; the result is advisory.",
             AirflowResistanceWarning,
-            stacklevel=2,
         )
 
     stroke_ratio = piston_stroke_termination / piston_stroke_specimen
     level_factor = float(10.0 ** ((level_specimen - level_termination) / 20.0))
     ratio_term = stroke_ratio * level_factor
-    _warn_alternating_validity(
-        ratio_term, level_specimen, background_level, stacklevel=2
-    )
+    _warn_alternating_validity(ratio_term, level_specimen, background_level)
 
     prefactor = (
         kappa_prime * static_pressure_pa / (2.0 * math.pi * frequency * cavity_volume)

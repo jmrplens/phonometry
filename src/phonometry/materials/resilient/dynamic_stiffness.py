@@ -66,7 +66,6 @@ are explicitly excluded there.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, overload
@@ -97,7 +96,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 __all__ = [
     "PUBLISHED_RESILIENT_LAYERS",
@@ -339,21 +338,19 @@ def installed_dynamic_stiffness(
     # Judged on the settled ratio: stiffnesses run to 1e8 N/m3, where nine
     # decimals sit below the last bit, and a tenth in decimal is a tenth.
     if settled(gas_stiffness_n_m3 / apparent_stiffness_n_m3) > _NEGLIGIBLE_GAS_SHARE:
-        warnings.warn(
+        warn_caller(
             "for airflow resistivity below 10 kPa.s/m2 with a non-negligible "
             "enclosed-gas stiffness, EN 29052-1 cannot resolve s' (clause 8.2); "
             "returning nan.",
             DynamicStiffnessWarning,
-            stacklevel=2,
         )
         return float("nan")
-    warnings.warn(
+    warn_caller(
         "airflow resistivity below 10 kPa.s/m2: s' is taken as s't with the "
         "enclosed-gas term disregarded; EN 29052-1 requires the reason and "
         "the estimated error caused by disregarding s'a to be stated in the "
         "test report (clause 8.2).",
         DynamicStiffnessWarning,
-        stacklevel=2,
     )
     return apparent_stiffness_n_m3
 

@@ -51,7 +51,6 @@ frequencies in Hz. The water column has a pressure-release surface at z = 0.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, get_args
 
@@ -72,7 +71,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ._seabed_reflection import reflection_coefficient
 from .closed_form import (
     _ABSORPTION_MODELS,
@@ -511,12 +510,11 @@ def _propagating_band(
     fd_floor = k2_max**2 * dz**2 / 12.0
     prop = eigvals > fd_floor
     if np.any(prop & (eigvals <= 10.0 * fd_floor)):
-        warnings.warn(
+        warn_caller(
             "normal_modes: retained near-cutoff mode(s) lie within 10x the"
             " finite-difference error band; increase 'n_depth_points' to"
             " resolve them accurately.",
             NumericalPropagationWarning,
-            stacklevel=3,
         )
     kr = np.sqrt(eigvals[prop])
     order = np.argsort(kr)[::-1]  # descending kr (mode 1 first)
@@ -1389,12 +1387,11 @@ def _earliest_arrivals(
     order = np.argsort(times, kind="stable")
     cap = require_count(max_n_arrivals, "max_n_arrivals", at_least=None)
     if order.size > cap:
-        warnings.warn(
+        warn_caller(
             f"eigenrays: {order.size} eigenrays connect the receiver within"
             f" the traced fan; keeping the {cap} earliest."
             " Raise 'max_n_arrivals' to keep them all.",
             NumericalPropagationWarning,
-            stacklevel=3,
         )
         order = order[:cap]
     return order
@@ -2791,23 +2788,14 @@ def _beam_influence(
     return field
 
 
-def _warn_beams(
-    message: str,
-    *,
-    nested: int = 0,
-) -> None:
+def _warn_beams(message: str) -> None:
     """Emit a :class:`NumericalPropagationWarning` at the caller's call site.
 
-    The frame the warning is reported against is the one that called
+    The line the warning is reported against is the one that called
     :func:`gaussian_beams`, which is where the input that provoked it was
-    written. ``nested`` counts the frames between this one and
-    :func:`gaussian_beams` for a check that lives in a helper of its own.
+    written.
     """
-    warnings.warn(
-        f"gaussian_beams: {message}",
-        NumericalPropagationWarning,
-        stacklevel=3 + nested,
-    )
+    warn_caller(f"gaussian_beams: {message}", NumericalPropagationWarning)
 
 
 def _check_source_on_kink(
@@ -2836,8 +2824,7 @@ def _check_source_on_kink(
         _warn_beams(
             "'source_depth' sits on a gradient discontinuity of the profile,"
             " which concentrates the near-horizontal beams into a spurious jet;"
-            " offset the source or smooth the profile there.",
-            nested=1,
+            " offset the source or smooth the profile there."
         )
 
 

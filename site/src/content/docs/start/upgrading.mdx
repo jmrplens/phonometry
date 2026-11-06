@@ -2270,6 +2270,19 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # True
 ```
 
+## A warning names the line of your code that caused it
+
+Every warning of the library is now shown at the first line of the caller's
+code, whichever functions of the library it was reached through. Python's
+`default` action then shows it once for each line of yours that causes it, and
+a filter by module reads your module:
+
+| What | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| the file and line a warning is shown at | the line its `stacklevel` counted to, a line of the library for 33 of them, such as `filters/core.py:698` for every filter bank that dropped a band | the line of your code that made the call |
+| `warnings.filterwarnings("ignore", module="phonometry")` | silenced the warnings shown at a line of the library, and no other | silences none; filter by class, `warnings.filterwarnings("ignore", category=phonometry.PhonometryWarning)`, or by topic |
+| `warnings.filterwarnings("error", module="my_analysis")` | missed the warnings shown at a line of the library | reaches every warning a call in `my_analysis` causes |
+
 ## A choice is matched as it is written
 
 A parameter or a record field typed with a `Literal` of its options, whose

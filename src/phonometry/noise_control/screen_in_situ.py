@@ -59,7 +59,6 @@ number the standard forbids.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -76,7 +75,7 @@ from .._internal.validation import (
     require_positive,
     require_positive_array,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -287,7 +286,7 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
             f"{MIN_SCREEN_DIMENSION_M:g} m high and long, and a smaller "
             f"one only by agreement; this one is {height:g} m."
         )
-        warnings.warn(msg, ScreenInSituWarning, stacklevel=2)
+        warn_caller(msg, ScreenInSituWarning)
     factors = np.asarray(SCREEN_DISTANCE_FACTORS, dtype=np.float64)
     return np.maximum(factors * height, MIN_MICROPHONE_DISTANCE_M)
 
@@ -333,7 +332,7 @@ def impulse_mean_level(repeat_levels: ArrayLike) -> float:
             f"{IMPULSE_REPEAT_DEVIATION_DB:g} dB deviation; this set spreads "
             f"{spread:.1f} dB."
         )
-        warnings.warn(msg, ScreenInSituWarning, stacklevel=2)
+        warn_caller(msg, ScreenInSituWarning)
     return float(np.mean(levels))
 
 

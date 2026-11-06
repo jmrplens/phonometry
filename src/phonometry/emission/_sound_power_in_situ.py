@@ -82,7 +82,6 @@ evaluated.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from itertools import pairwise
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
@@ -111,6 +110,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     _CK_OCTAVE,
     _PS0,
@@ -773,12 +773,11 @@ def _position_advisory(n_positions: int) -> None:
     procedure uses (7.4.1 bounds the count on both sides).
     """
     if not _MIN_POSITIONS <= n_positions <= _MAX_POSITIONS:
-        warnings.warn(
+        warn_caller(
             f"{n_positions} microphone position(s) were supplied; the "
             "procedure uses three or four, distributed as evenly as possible "
             "around the source (ISO 3747:2010, 7.4.1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
 
 
@@ -791,13 +790,12 @@ def _background_advisory(background_levels: ArrayLike | None) -> None:
     requirement, so ``background_requirement_met`` is ``False`` throughout.
     """
     if background_levels is None:
-        warnings.warn(
+        warn_caller(
             "No background levels were supplied; the procedure obtains them "
             "once at each microphone position (ISO 3747:2010, 7.5), so no "
             "band can be reported as meeting the background requirement of "
             "8.1.",
             SoundPowerWarning,
-            stacklevel=3,
         )
 
 
@@ -1191,11 +1189,10 @@ def sound_energy_in_situ(
     one_at_a_time, n_positions, n_events, n_bands = _event_shape(arr, n_events)
     _position_advisory(n_positions)
     if n_events < _MIN_EVENTS:
-        warnings.warn(
+        warn_caller(
             f"Only {n_events} single event(s) were measured; the procedure asks "
             f"for at least {_MIN_EVENTS} (ISO 3747:2010, 7.6).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     _background_advisory(background_levels)
     bg = _background_grid(background_levels, "background_levels", n_positions, n_bands)

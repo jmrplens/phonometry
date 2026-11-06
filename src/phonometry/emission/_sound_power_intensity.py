@@ -86,7 +86,6 @@ state alike (clause 9.2).
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -120,6 +119,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import Grade, SoundPowerWarning, _a_weighting_corrections, _check_grade
 from .intensity import dynamic_capability_index
@@ -545,11 +545,10 @@ def _validate_scan(
         msg = "All segment 'areas' must be positive."
         raise ValueError(msg)
     if n_seg < _MIN_SEGMENTS:
-        warnings.warn(
+        warn_caller(
             f"Only {n_seg} segment(s); ISO 9614-2:1996 clause 8.2 requires at "
             "least 4 measurement segments.",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return intensity, seg
 
@@ -675,11 +674,10 @@ def sound_power_intensity(
 
     # --- warnings ------------------------------------------------------------
     if np.any(negative_band):
-        warnings.warn(
+        warn_caller(
             "Total sound power is negative in one or more bands; ISO 9614-2:1996 "
             "is not applicable to those bands (clause 9.2).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     # Criterion 2 (F+/- <= 3 dB) is mandatory only for the engineering grade;
     # for a survey run it is optional (ISO 9614-2:1996, B.1.2), so exceeding
@@ -688,12 +686,11 @@ def sound_power_intensity(
     if grade == "engineering" and np.any(
         f_plus_minus[~negative_band] > _F_PLUS_MINUS_LIMIT
     ):
-        warnings.warn(
+        warn_caller(
             f"Negative-partial-power indicator F+/- exceeds {_F_PLUS_MINUS_LIMIT:g} "
             "dB in one or more bands; criterion 2 is not satisfied and the "
             "engineering grade is not achieved there (ISO 9614-2:1996, B.1.2).",
             SoundPowerWarning,
-            stacklevel=2,
         )
 
     freqs = None if frequencies is None else real_array(frequencies, "frequencies")
@@ -711,14 +708,13 @@ def sound_power_intensity(
         repeatability_limit_db=s_arr,
     )
     if freqs is not None and (fpi is None or dpi0_arr is None) and n_bands > 1:
-        warnings.warn(
+        warn_caller(
             "The A-weighted total sums every determinable band without "
             "the ISO 9614-2:1996 clause 10.6 b screening (bands failing "
             "criteria 1 and/or 2 must be omitted); supply "
             "'pressure_levels' and 'pressure_residual_index' to "
             "evaluate the criteria.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return result
 
@@ -1737,11 +1733,10 @@ def sound_power_intensity_precision(
     partial_power = intensity * seg[:, None]  # Eq. 5
     # Judged on the settled share of the gross power, as in ISO 9614-2.
     if np.any(settled_net_share(partial_power, axis=0) <= 0.0):
-        warnings.warn(
+        warn_caller(
             "Net sound power is non-positive in one or more bands; ISO "
             "9614-3:2002 is not applicable to those bands (clause 9.2).",
             SoundPowerWarning,
-            stacklevel=2,
         )
 
     # The levels, LW0 (Eq. 10) and the A-weighted total over the applicable

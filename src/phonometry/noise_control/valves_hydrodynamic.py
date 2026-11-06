@@ -63,7 +63,6 @@ areas, only the last stage is calculated at all.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -81,6 +80,7 @@ from .._internal.validation import (
     require_positive_array,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from .valves import (
     AIR_SPEED_OF_SOUND_M_S,
     PIPE_SPEED_OF_SOUND_M_S,
@@ -1805,7 +1805,7 @@ def stage_conditions(
         raise ValueError(msg)
     shares = float(np.sum((capacity / stages) ** 2))
     if abs(shares - 1.0) > _SERIES_LAW_TOLERANCE:
-        warnings.warn(
+        warn_caller(
             "The stage coefficients account for "
             f"{shares:.0%} of the valve's own resistance, where the series "
             "law 1/C^2 = sum(1/C_i^2) asks for 100 %. Equation (24b) fixes "
@@ -1813,7 +1813,6 @@ def stage_conditions(
             "absorbs the whole of the difference and its pressure ratio is "
             "what moves.",
             ValveNoiseWarning,
-            stacklevel=2,
         )
     total = p1 - p2
     inlets = [p1]

@@ -60,7 +60,7 @@ from ..._internal.validation import (
     require_equal_counts,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -536,8 +536,6 @@ def residual_sound_correction(
     :raises TypeError: if ``measured_level`` or ``residual_level`` is not a single
         number.
     """
-    import warnings
-
     lp = _finite(measured_level, "measured_level")
     lres = _finite(residual_level, "residual_level")
     margin = lp - lres
@@ -547,13 +545,12 @@ def residual_sound_correction(
     corrected = 10.0 * np.log10(10.0 ** (lp / 10.0) - 10.0 ** (lres / 10.0))
     reliable = bool(settled(margin) > _MIN_CORRECTION_MARGIN_DB)
     if not reliable:
-        warnings.warn(
+        warn_caller(
             "Residual is within 3 dB of the measured level; no correction is "
             "allowed and only the uncorrected measured level may be reported, "
             "as an upper bound (ISO 1996-2:2017, 10.4). Use "
             "reportable_upper_bound, not corrected_level.",
             EnvironmentalMeasurementWarning,
-            stacklevel=2,
         )
     return ResidualCorrectionResult(
         corrected_level=float(corrected),
@@ -752,8 +749,6 @@ def uncertainty_from_repeated_measurements(
     :raises ValueError: If fewer than two finite levels are given.
     :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    import warnings
-
     lev = real_array(levels, "levels")
     if lev.ndim != 1 or lev.size < _MIN_REPEATED_LEVELS:
         msg = "'levels' must be a 1-D array of at least two values."
@@ -769,13 +764,12 @@ def uncertainty_from_repeated_measurements(
     uk = 10.0 * np.log10(mean_energy + sk) - mean_level
     uk_approx = float(np.sqrt(np.sum((lev - mean_level) ** 2) / (n - 1)))
     if float(settled(np.max(lev) - np.min(lev))) > _LEVEL_SPREAD_WARNING_DB:
-        warnings.warn(
+        warn_caller(
             "The repeated levels spread by more than 3 dB: the Formula (20) "
             "approximation (approximate_uncertainty) is unreliable there; "
             "use the primary Formulae (17)+(19) standard_uncertainty "
             "(ISO 1996-2:2017, 10.5 Note 2).",
             EnvironmentalMeasurementWarning,
-            stacklevel=2,
         )
     return RepeatedMeasurementResult(
         mean_level=float(mean_level),

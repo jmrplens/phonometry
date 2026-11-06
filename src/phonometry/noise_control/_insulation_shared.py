@@ -16,13 +16,13 @@ document, publishes them, and that is where a reader looks for them.
 
 from __future__ import annotations
 
-import warnings
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
 
 from .._internal.validation import require_positive
+from .._internal.warnings import warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -90,7 +90,6 @@ def _check_band_range(
     *,
     standard: str,
     category: type[PhonometryWarning],
-    stacklevel: int = 4,
 ) -> None:
     """Warn when the bands given do not cover what the standard requires."""
     if frequencies is None or frequencies.size == 0:
@@ -103,7 +102,7 @@ def _check_band_range(
             f"{standard} requires the bands from {low:g} Hz to {high:g} Hz; the "
             f"spectrum runs from {lowest:g} Hz to {highest:g} Hz."
         )
-        warnings.warn(msg, category, stacklevel=stacklevel)
+        warn_caller(msg, category)
 
 
 def _rating_bands(fraction: int) -> NDArray[np.float64]:

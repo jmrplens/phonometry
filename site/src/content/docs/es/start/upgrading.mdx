@@ -2340,6 +2340,19 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # True
 ```
 
+## Un aviso nombra la línea de tu código que lo causó
+
+Cada aviso de la biblioteca se muestra ahora en la primera línea del código de
+quien llama, sean cuales sean las funciones de la biblioteca por las que se
+llegó a él. La acción `default` de Python lo muestra entonces una vez por cada
+línea tuya que lo causa, y un filtro por módulo lee tu módulo:
+
+| Qué | 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| el fichero y la línea en que se muestra un aviso | la línea hasta la que contaba su `stacklevel`, una línea de la biblioteca en 33 de ellos, como `filters/core.py:698` para cada banco de filtros que descartaba una banda | la línea de tu código que hizo la llamada |
+| `warnings.filterwarnings("ignore", module="phonometry")` | silenciaba los avisos mostrados en una línea de la biblioteca, y ningún otro | no silencia ninguno; filtra por clase, `warnings.filterwarnings("ignore", category=phonometry.PhonometryWarning)`, o por tema |
+| `warnings.filterwarnings("error", module="my_analysis")` | no alcanzaba los avisos mostrados en una línea de la biblioteca | alcanza cada aviso que causa una llamada de `my_analysis` |
+
 ## Una opción se compara tal como se escribe
 
 Un parámetro o un campo de registro tipado con un `Literal` de sus opciones,

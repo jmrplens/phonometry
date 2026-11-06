@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Literal, cast
@@ -29,6 +28,7 @@ from .._internal.validation import (
     require_real,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ..io._resolve import (
     like_input,
     refuse_foreign_rate,
@@ -878,11 +878,10 @@ class OctaveFilterBank:
 
         if detrend:
             if self.stateful:
-                warnings.warn(
+                warn_caller(
                     "Detrending is not recommended during block processing "
                     "as it can introduce discontinuities between blocks.",
                     FilterBankWarning,
-                    stacklevel=3,
                 )
             # Axis -1 handles both 1D and 2D arrays correctly
             x_proc = signal.detrend(x_proc, axis=-1, type="constant")

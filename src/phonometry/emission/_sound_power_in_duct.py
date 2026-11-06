@@ -88,7 +88,6 @@ module.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -109,6 +108,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import _S0, SoundPowerWarning
 from ._sound_power_reverberation import _speed_of_sound
 
@@ -917,14 +917,13 @@ def _warn_reconstructed_coefficient(duct_diameter_m: float, freqs: np.ndarray) -
         freqs == _RECONSTRUCTED_BAND_HZ
     ):
         return
-    warnings.warn(
+    warn_caller(
         f"The {_RECONSTRUCTED_BAND_HZ:g} Hz coefficient a3 of Table A.5 "
         "(0,8 m <= d < 1,25 m) is printed without its leading digit and is "
         "read as -1,24e-05, the value Tables A.4 and A.6 bracket; the "
         "correction returned for that band is that reading, not a "
         "transcription (see docs/ERRATA.md).",
         SoundPowerWarning,
-        stacklevel=3,
     )
 
 
@@ -1099,12 +1098,11 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
         raise ValueError(msg)
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 2 and arr.shape[0] < _MIN_POSITIONS:  # noqa: PLR2004
-        warnings.warn(
+        warn_caller(
             f"Only {arr.shape[0]} microphone position(s) were supplied; "
             f"ISO 5136 averages at least {_MIN_POSITIONS} circumferential "
             "positions (clauses 6.2.2 and 8.1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return arr
 
@@ -1207,14 +1205,13 @@ def sound_power_in_duct(
 
     sigma_r = in_duct_reproducibility(freqs)
     if shield != "sampling-tube":
-        warnings.warn(
+        warn_caller(
             f"The reproducibility reported for a {shield} is the one Table 2 "
             "tabulates, which clause 4 NOTE 5 states refers to the sampling "
             "tube only and 'can be expected to increase for other shields'; "
             "the standard puts no number on the increase, so sigma_R and the "
             "expanded uncertainty are a lower bound here.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     # Annex C, Eq. (C.1): the energy sum with the C_j of Table C.1.
     cj = np.asarray([_TABLE_C1[band] for band in _band_keys(freqs)], dtype=np.float64)

@@ -32,7 +32,6 @@ standard defers to external references) are not implemented here.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -51,7 +50,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -791,13 +790,12 @@ def room_criterion(
     required = aligned[_RC_REQUIRED_BANDS]
     if np.isnan(required).any():
         missing = NC_OCTAVE_BANDS_HZ[_RC_REQUIRED_BANDS][np.isnan(required)]
-        warnings.warn(
+        warn_caller(
             "ANSI/ASA S12.2-2019, clause D.4 rates a spectrum that includes "
             "at least the 31.5 Hz to 4000 Hz octave bands; the missing bands "
             f"({', '.join(f'{f:g}' for f in missing)} Hz) are skipped by the "
             "spectral-tag deviation tests.",
             NoiseCriterionWarning,
-            stacklevel=2,
         )
     lmf = float(np.mean(mid))
     rating = int(round_half_even(lmf))

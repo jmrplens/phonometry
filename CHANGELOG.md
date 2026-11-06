@@ -2297,6 +2297,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A build from source prints no setuptools warning, and passes under
+  `PYTHONWARNINGS=error`.** Every build of the sdist or the tree,
+  `python -m build`, `pip install -v` of the sdist and, with pip 26.3,
+  `pip install .` and `pip install -e .`, printed nine "Package would be
+  ignored" blocks, one per data directory (`aircraft/data/anp`,
+  `building/data` and seven more), and under `PYTHONWARNINGS=error` each of
+  them exited 1 on the first. The package now ships exactly the data files
+  its `package-data` globs name (`include-package-data = false`), which are
+  all of them: the wheel is byte for byte the one built before, and an
+  editable install reads the same 94 data files.
+
 - **A count given as a `Decimal`, a `Fraction` or a complex number is refused by
   the kinds of number a count takes.** Every whole-number argument checked as
   a count, an order, a number of storeys, stages or events among them, refused

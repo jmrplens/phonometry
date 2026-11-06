@@ -27,10 +27,12 @@ def test_the_package_data_is_the_wheel_s() -> None:
 def test_the_wheel_is_built_by_the_rules_the_client_follows() -> None:
     # package_from repeats how setuptools fills the wheel: a package is a
     # directory with an __init__.py, and phonometry's package data is all the
-    # data there is. A setting that changes either, or a MANIFEST.in that adds
-    # files to the package, changes the wheel without changing what ships.
+    # data there is. A setting that changes either changes the wheel without
+    # changing what ships. With include-package-data off, a MANIFEST.in adds
+    # files to the sdist alone, never to the wheel.
     setuptools = _PYPROJECT["tool"]["setuptools"]
     assert setuptools["packages"]["find"] == {"where": ["src"], "namespaces": False}
+    assert setuptools["include-package-data"] is False
     assert set(setuptools["package-data"]) == {"phonometry"}
     assert "exclude-package-data" not in setuptools
     assert not (_ROOT / "MANIFEST.in").exists()

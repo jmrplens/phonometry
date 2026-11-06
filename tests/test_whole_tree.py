@@ -43,7 +43,12 @@ def _read(count):
 
 
 def _run(directory: Path, *options: str) -> subprocess.CompletedProcess[str]:
-    """Run pytest on *directory* with this suite's conftest, and its plugins, loaded."""
+    """Run pytest on *directory* with this suite's conftest, and its plugins, loaded.
+
+    The short test summary is left out (``-rN``): pytest cuts its lines to the
+    terminal width, but prints them whole when ``CI`` is set, so a message the
+    tests count would appear once here and twice on CI.
+    """
     (directory / "pytest.ini").write_text("[pytest]\n", encoding="utf-8")
     path = [str(_ROOT / "tests"), *filter(None, [os.environ.get("PYTHONPATH")])]
     return subprocess.run(  # nosec B603 - this interpreter, fixed arguments
@@ -52,6 +57,7 @@ def _run(directory: Path, *options: str) -> subprocess.CompletedProcess[str]:
             "-m",
             "pytest",
             "-q",
+            "-rN",
             "-n",
             "0",
             "-p",

@@ -360,6 +360,49 @@ def test_a_default_holds_no_binding_of_its_scope_before_any_has_run() -> None:
     assert ast_scan.live_bindings(tree, [first, second], early) == [first, second]
 
 
+def test_a_default_holds_no_binding_only_the_type_checker_makes() -> None:
+    """A binding an ``if TYPE_CHECKING:`` block holds never runs, so a default
+    read after it holds none of the scope's bindings, at the top of a module
+    and in a class body, even where nothing else binds the name; what reads
+    annotations through :func:`ast_scan.live_bindings` still finds it.
+
+    :func:`ast_scan.held_before` kept the block's binding whenever it was the
+    only one, as :func:`ast_scan.live_bindings` does, so a caller that handed
+    it every binding of the name read ``open`` as the import the type
+    checker reads instead of the builtin.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                from os.path import exists as open
+
+            def read(path, opener=open):
+                return opener(path)
+
+            class Reader:
+                if TYPE_CHECKING:
+                    from os.path import exists as open
+
+                def read(self, path, opener=open):
+                    return opener(path)
+            """
+        )
+    )
+    reader = next(node for node in tree.body if isinstance(node, ast.ClassDef))
+    for scope in (tree, reader):
+        (binding,) = ast_scan.bindings_by_name(scope)["open"]
+        function = next(
+            node for node in scope.body if isinstance(node, ast.FunctionDef)
+        )
+        default = function.args.defaults[0]
+        assert ast_scan.held_before(tree, [binding], default) == []
+        assert ast_scan.live_bindings(tree, [binding], default) == [binding]
+    ast_scan.forget_trees()
+
+
 def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
     """The ``def``s of *name* in *source* the name may hold, by the number
     each returns: at the call stored in *call* (the one call of *name* when

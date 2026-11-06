@@ -924,6 +924,48 @@ def test_a_class_body_reads_a_name_it_binds_later_in_its_module(
     ]
 
 
+def test_a_class_body_reads_the_module_s_name_past_a_type_checker_s_binding(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class body whose only binding of ``axis`` is under ``if
+    TYPE_CHECKING:`` never binds it, so a call of ``axis`` there, and an
+    alias of it, reach the module's helper, and the calls that drop the
+    language are refused.
+
+    The block's binding was taken for one that may have run, the only one of
+    the name in the body, so the body's ``axis`` stood for ``None`` and both
+    calls passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "figures.__init__": "",
+            "figures.devices": """
+            from typing import TYPE_CHECKING
+
+            from pkg.helpers import axis
+
+
+            class _Called:
+                if TYPE_CHECKING:
+                    axis = None
+                axis(None)
+
+
+            class _Aliased:
+                if TYPE_CHECKING:
+                    axis = None
+                kept = axis
+                kept(None)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("_Aliased.<class>", "pkg.helpers.axis"),
+        ("_Called.<class>", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_partial_reads_its_names_where_it_is_built(
     tmp_path: pathlib.Path,
 ) -> None:

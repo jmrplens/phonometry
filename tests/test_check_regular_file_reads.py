@@ -1953,6 +1953,38 @@ def test_an_import_for_the_type_checker_is_no_second_reading_of_a_running_one(
     assert _found(tmp_path, source) == []
 
 
+def test_a_default_reads_the_builtin_a_type_checker_s_import_leaves_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A default that reads ``open`` where the ``def`` runs, at the top of the
+    module and in a class body, reads the builtin when the only binding of
+    the name there is an import under ``if TYPE_CHECKING:``, which never runs,
+    and the read through it is refused.
+
+    The default was read as the block's import, the one binding of the name
+    there, so the parameter stood for ``os.path.exists`` and the read passed.
+    """
+    source = """
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from os.path import exists as open
+
+        def f(path, opener=open):
+            with opener(path) as handle:
+                return handle.read()
+
+        class Reader:
+            if TYPE_CHECKING:
+                from os.path import exists as open
+
+            def read(self, path, opener=open):
+                with opener(path) as handle:
+                    return handle.read()
+        """
+    assert _found(tmp_path, source) == [("f", _OWN), ("Reader.read", _OWN)]
+
+
 #: A module that defines one reader in each branch of an ``if``, and one in
 #: each block of a ``try``, where only one of the two binds ``info`` itself.
 _TWO_BRANCHES = """

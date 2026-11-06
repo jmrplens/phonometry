@@ -1416,9 +1416,13 @@ def held_before[NodeT: ast.AST](
     among them: before any binding of its scope has run, the name is none of
     that scope's, but a builtin's or what a scope around it holds, where
     :func:`live_bindings` takes every one for what a call read before them
-    may meet.
+    may meet. A binding an ``if TYPE_CHECKING:`` block holds never runs, so
+    it is none of them even where nothing else binds the name, which
+    :func:`live_bindings` keeps it for, for what reads annotations
+    (:func:`for_the_type_checker`).
     """
-    bindings = _running_first(root, bindings)
+    checker = for_the_type_checker(root)
+    bindings = [binding for binding in bindings if id(binding) not in checker]
     if not bindings:
         return []
     point, deferred = _lifted(root, bindings[0], point)

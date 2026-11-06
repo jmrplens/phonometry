@@ -821,7 +821,9 @@ def _span_remainder(span: str) -> str:
     return SPAN_MARK + "\n" * span.count("\n")
 
 
-def _drop_code_and_math(text: str, *, kind: str) -> str:
+def _drop_code_and_math(
+    text: str, *, kind: str, walked: Iterable[PageLine] | None = None
+) -> str:
     """The text of a page with its code and maths spans taken out, as the site reads them.
 
     Code and maths are read together, left to right and a block of the page
@@ -838,8 +840,11 @@ def _drop_code_and_math(text: str, *, kind: str) -> str:
     number stands around it.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of the page, made once for all its readers.
     """
-    return replace_inline_spans_by_block(text, _span_remainder, "`$", kind=kind)
+    return replace_inline_spans_by_block(
+        text, _span_remainder, "`$", kind=kind, walked=walked
+    )
 
 
 @dataclass
@@ -974,12 +979,15 @@ def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
     head = _frontmatter_head(lines)
     written = lines[head:]
     read = list(page_lines(written, kind=kind))
-    code_flags = list(code_lines(written, kind=kind))
-    math_flags = _math_lines(written, kind=kind)
-    shown = lines_read_whole(written, lambda page: _drop_code_and_math(page, kind=kind))
+    code_flags = list(code_lines(written, kind=kind, walked=read))
+    math_flags = _math_lines(written, kind=kind, walked=read)
+    shown = lines_read_whole(
+        written, lambda page: _drop_code_and_math(page, kind=kind, walked=read)
+    )
     reading = _PageReading(kind=kind)
     hits = _frontmatter_hits(lines)
-    for index, opens_block in enumerate(block_starts(written, kind=kind)):
+    opens = block_starts(written, kind=kind, walked=read)
+    for index, opens_block in enumerate(opens):
         line = written[index]
         number = head + index + 1
         if opens_block:
@@ -1363,7 +1371,9 @@ def _double_hyphen_lines(
     return hits
 
 
-def _math_lines(lines: list[str], *, kind: str) -> list[bool]:
+def _math_lines(
+    lines: list[str], *, kind: str, walked: Iterable[PageLine] | None = None
+) -> list[bool]:
     """Whether each line of a page is in a display-math block, its fences included.
 
     The block is read as the site reads it (:func:`display_math_parts`): behind
@@ -1371,25 +1381,35 @@ def _math_lines(lines: list[str], *, kind: str) -> list[bool]:
     stands, so the backtick on the other side of its fence closes nothing.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of *lines*, made once for all the readers of the page.
     """
-    return [part != "prose" for part in display_math_parts(lines, kind=kind)]
+    parts = display_math_parts(lines, kind=kind, walked=walked)
+    return [part != "prose" for part in parts]
 
 
-def _page_code_lines(lines: list[str], *, kind: str) -> list[bool]:
+def _page_code_lines(
+    lines: list[str], *, kind: str, walked: list[PageLine] | None = None
+) -> list[bool]:
     """Whether each line of a page is code or display math, not prose.
 
     The frontmatter holds neither: a value is plain text, and what it opens
     stops there.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of the lines past the frontmatter, made once for all
+        the readers of the page; walked here when not handed.
     """
     head = _frontmatter_head(lines)
-    code = code_lines(lines[head:], kind=kind)
-    maths = _math_lines(lines[head:], kind=kind)
+    body = lines[head:]
+    read = list(page_lines(body, kind=kind)) if walked is None else walked
+    code = code_lines(body, kind=kind, walked=read)
+    maths = _math_lines(body, kind=kind, walked=read)
     return [False] * head + [a or b for a, b in zip(code, maths, strict=True)]
 
 
-def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> list[str]:
+def _page_without_code_or_comments(
+    written: list[str], *, mdx: bool, walked: list[PageLine] | None = None
+) -> list[str]:
     """The lines of a page with its code, its display math and its comments blanked.
 
     The comments are the ones the page does not show: an HTML comment and an
@@ -1398,12 +1418,13 @@ def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> list[str
     that a line still counts as the one written.
 
     :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
+    :param walked: The walk of the lines past the frontmatter (:func:`_page_code_lines`).
     """
     kind = "mdx" if mdx else "md"
     lines = [
         "" if code else line
         for line, code in zip(
-            written, _page_code_lines(written, kind=kind), strict=True
+            written, _page_code_lines(written, kind=kind, walked=walked), strict=True
         )
     ]
     _read_frontmatter(lines, _Frontmatter(decode_escapes=False, blank_comments=True))
@@ -1435,10 +1456,10 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
-    lines = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
     kind = "mdx" if mdx else "md"
     walked = list(page_lines(written[head:], kind=kind))
+    lines = _page_without_code_or_comments(written, mdx=mdx, walked=walked)
     masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
         lines[head:],
         lambda body: _blank_page_spans(_without_addresses(body), walked=walked),
@@ -1677,9 +1698,9 @@ def markdown_bullet_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
-    prose = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
-    walked = page_lines(written[head:], kind="mdx" if mdx else "md")
+    walked = list(page_lines(written[head:], kind="mdx" if mdx else "md"))
+    prose = _page_without_code_or_comments(written, mdx=mdx, walked=walked)
     return [
         number
         for number, (line, read) in enumerate(

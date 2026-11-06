@@ -131,7 +131,7 @@ import re
 import sys
 from typing import TYPE_CHECKING, NamedTuple
 
-from markdown_fences import code_lines
+from markdown_fences import code_lines, page_lines
 from markdown_spans import (
     blank_inline_spans,
     blank_inline_spans_by_block,
@@ -843,9 +843,10 @@ def page_read(lines: Sequence[str], *, kind: str = "mdx") -> list[str]:
     :param lines: The page, a line each.
     :param kind: The page's kind, ``"md"`` or ``"mdx"`` (:func:`page_prose`).
     """
-    code = list(code_lines(lines, kind=kind))
+    walked = list(page_lines(lines, kind=kind))
+    code = list(code_lines(lines, kind=kind, walked=walked))
     shown = lines_read_whole(
-        lines, lambda page: blank_inline_spans_by_block(page, kind=kind)
+        lines, lambda page: blank_inline_spans_by_block(page, kind=kind, walked=walked)
     )
     return [
         line if fenced else spoken

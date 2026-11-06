@@ -638,15 +638,23 @@ def page_lines(lines: Iterable[str], *, kind: str = "mdx") -> Iterator[PageLine]
         yield walk.read(index)
 
 
-def code_lines(lines: Iterable[str], *, kind: str = "mdx") -> Iterator[bool]:
+def code_lines(
+    lines: Iterable[str],
+    *,
+    kind: str = "mdx",
+    walked: Iterable[PageLine] | None = None,
+) -> Iterator[bool]:
     """Whether each line is code: a fence's opening line, its body or its closing line.
 
     Indented code is code too, on the one kind of page that has it. A fence never
     closed runs to the end of the page or of what holds it, as CommonMark has it.
 
     :param kind: The page's kind (:func:`page_lines`).
+    :param walked: The walk of *lines* (:func:`page_lines`), for a reader that
+        holds it already and hands it to each reader of the page, so that the
+        page is walked once.
     """
-    for line in page_lines(lines, kind=kind):
+    for line in page_lines(lines, kind=kind) if walked is None else walked:
         yield line.role in _CODE_ROLES
 
 
@@ -703,7 +711,12 @@ def fences(text: str, *, kind: str = "mdx") -> Iterator[Fence]:
         yield Fence(start, info, "".join(body))
 
 
-def display_math_parts(lines: Iterable[str], *, kind: str = "mdx") -> list[str]:
+def display_math_parts(
+    lines: Iterable[str],
+    *,
+    kind: str = "mdx",
+    walked: Iterable[PageLine] | None = None,
+) -> list[str]:
     """Each line's part in display maths: ``"open"``, ``"maths"`` or ``"prose"``.
 
     ``"maths"`` is a line of the formula or the line that closes it: a run of
@@ -716,10 +729,10 @@ def display_math_parts(lines: Iterable[str], *, kind: str = "mdx") -> list[str]:
 
     :param lines: The lines of a page, its frontmatter out.
     :param kind: The page's kind (:func:`page_lines`).
+    :param walked: The walk of *lines*, as :func:`code_lines` takes it.
     """
-    return [
-        _MATHS_ROLES.get(line.role, "prose") for line in page_lines(lines, kind=kind)
-    ]
+    read = page_lines(lines, kind=kind) if walked is None else walked
+    return [_MATHS_ROLES.get(line.role, "prose") for line in read]
 
 
 def python_fences(text: str, *, kind: str = "mdx") -> list[str]:

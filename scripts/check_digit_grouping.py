@@ -43,7 +43,7 @@ import sys
 import tokenize
 from pathlib import Path
 
-from markdown_fences import code_lines
+from markdown_fences import code_lines, page_lines
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 #: The repository, for paths a reader can click.
@@ -100,9 +100,10 @@ def _markdown_prose(text: str, *, kind: str = "md") -> list[tuple[int, str]]:
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
     lines = text.splitlines()
-    code_flags = list(code_lines(lines, kind=kind))
+    walked = list(page_lines(lines, kind=kind))
+    code_flags = list(code_lines(lines, kind=kind, walked=walked))
     shown = lines_read_whole(
-        lines, lambda page: drop_inline_spans_by_block(page, kind=kind)
+        lines, lambda page: drop_inline_spans_by_block(page, kind=kind, walked=walked)
     )
     return [
         (number, "" if code else prose)

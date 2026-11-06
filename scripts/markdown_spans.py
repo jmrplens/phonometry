@@ -219,7 +219,12 @@ def _blocks(
     return blocks
 
 
-def block_starts(lines: Sequence[str], *, kind: str = "md") -> list[bool]:
+def block_starts(
+    lines: Sequence[str],
+    *,
+    kind: str = "md",
+    walked: Iterable[PageLine] | None = None,
+) -> list[bool]:
     """Whether each of *lines* opens a block of the page, a blank line among them.
 
     For a reader that carries a state of its own down a paragraph, such as an
@@ -227,10 +232,12 @@ def block_starts(lines: Sequence[str], *, kind: str = "md") -> list[bool]:
     of a raw HTML block counts as one: nothing there is markup to carry.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of *lines* (:func:`markdown_fences.page_lines`), for a
+        reader that holds it already, so that the page is walked once.
     """
     return [
         index == 0 or block.reads == "raw"
-        for block in _blocks(list(lines), None, kind)
+        for block in _blocks(list(lines), None, kind, walked)
         for index in range(len(block.lines))
     ]
 
@@ -343,7 +350,12 @@ def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[s
 
 
 def drop_inline_spans_by_block(
-    text: str, markers: str = "`", comments: str | None = None, *, kind: str = ""
+    text: str,
+    markers: str = "`",
+    comments: str | None = None,
+    *,
+    kind: str = "",
+    walked: Iterable[PageLine] | None = None,
 ) -> str:
     """*text* with its spans taken out, each block of a page read whole.
 
@@ -351,6 +363,8 @@ def drop_inline_spans_by_block(
     :data:`SPAN_MARK` and the line breaks it held, as
     ``dropInlineSpansByBlock`` of the site leaves them: every line is where
     it was, its columns past a span are not.
+
+    :param walked: The walk of the page (:func:`_blocks`).
     """
     return replace_inline_spans_by_block(
         text,
@@ -358,6 +372,7 @@ def drop_inline_spans_by_block(
         markers,
         comments,
         kind=kind,
+        walked=walked,
     )
 
 

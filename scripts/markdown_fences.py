@@ -187,6 +187,45 @@ def _past_columns(text: str, column: int, width: int) -> str:
     return " " * max(at - end, 0)
 
 
+def _quote_mark(rest: str, column: int, *, markdown: bool) -> tuple[str, int] | None:
+    """What a quotation's mark leaves of *rest*, and at which column, or ``None``.
+
+    Up to three columns of blanks may stand before the mark on a ``.md`` page,
+    where four open indented code, and any number on an ``.mdx`` one; one
+    column of blank after it is the mark's own, a tab there leaving the rest
+    of its columns as spaces (CommonMark 0.31.2, 2.2 and 5.1).
+
+    :param markdown: Whether the page is ``.md``, not ``.mdx``.
+    """
+    blanks = _blank_columns(rest, column)
+    body = rest.lstrip(" \t")
+    if not body.startswith(">") or (markdown and blanks >= _CODE_INDENT):
+        return None
+    at = column + blanks + 1
+    after = body[1:]
+    if after[:1] in (" ", "\t"):
+        return _past_columns(after, at, 1), at + 1
+    return after, at
+
+
+def quotation_marks(line: str, *, kind: str = "mdx") -> tuple[int, str]:
+    """How many quotation marks open *line*, and what they leave of it.
+
+    The marks are read as the walk of the page reads them, column by column,
+    a tab to its stop: a line read apart from its page, as a line a check has
+    already placed outside code.
+
+    :param kind: The page's kind (:func:`page_lines`).
+    :return: The number of marks, and the line past them and the blank each
+        may take.
+    """
+    depth, rest, column = 0, line, 0
+    while (mark := _quote_mark(rest, column, markdown=kind == "md")) is not None:
+        rest, column = mark
+        depth += 1
+    return depth, rest
+
+
 def cell_spans(row: str) -> list[tuple[int, int]]:
     """The ``(start, end)`` of each piece of a table's row, between its unescaped pipes."""
     spans: list[tuple[int, int]] = []
@@ -216,13 +255,14 @@ class PageLine:
     :param text: The line as written.
     :param role: Its part in the page. ``"blank"``: nothing past its marks.
         ``"paragraph"``: it opens one; ``"text"``: it carries one on, a lazy line
-        among them. ``"single"``: a block of its own, a heading, a thematic break,
-        an aside's fence, a tag or an expression alone. ``"underline"``: the setext
-        underline of the paragraph above. ``"row"``: a row of a table, its delimiter
-        row among them. ``"html"``: it opens a raw HTML block; ``"raw"``: it carries
-        one on. ``"indented"``: indented code. ``"open"``, ``"body"``, ``"close"``:
-        a line of a fence. ``"maths-open"``, ``"maths"``: the line that opens a
-        display block, and any other of it, its closing fence among them.
+        among them. ``"heading"``: a heading written with its marks. ``"single"``:
+        any other block of its own, a thematic break, an aside's fence, a tag or an
+        expression alone. ``"underline"``: the setext underline of the paragraph
+        above. ``"row"``: a row of a table, its delimiter row among them.
+        ``"html"``: it opens a raw HTML block; ``"raw"``: it carries one on.
+        ``"indented"``: indented code. ``"open"``, ``"body"``, ``"close"``: a line
+        of a fence. ``"maths-open"``, ``"maths"``: the line that opens a display
+        block, and any other of it, its closing fence among them.
     :param info: The info string of a fence or the meta of a display block, on the
         line that opens it.
     :param indent: The indentation of the opening marker, on every line of a fence.
@@ -325,15 +365,7 @@ class _Walk:
 
     def _quote_mark(self, rest: str, column: int) -> tuple[str, int] | None:
         """What a quotation's mark leaves of *rest*, and at which column, or ``None``."""
-        blanks = _blank_columns(rest, column)
-        body = rest.lstrip(" \t")
-        if not body.startswith(">") or (self.markdown and blanks >= _CODE_INDENT):
-            return None
-        at = column + blanks + 1
-        after = body[1:]
-        if after[:1] in (" ", "\t"):
-            return _past_columns(after, at, 1), at + 1
-        return after, at
+        return _quote_mark(rest, column, markdown=self.markdown)
 
     def _closes_aside(self, text: str) -> str | None:
         """What is left of a line that closes the innermost aside, or ``None``."""
@@ -484,7 +516,9 @@ class _Walk:
         """The role of a line that is a block by itself, or ``None``."""
         if strict and _UNDERLINE.match(body):
             return "underline"
-        if _ATX_HEADING.match(body) or _THEMATIC_BREAK.match(body):
+        if _ATX_HEADING.match(body):
+            return "heading"
+        if _THEMATIC_BREAK.match(body):
             return "single"
         if _LEAF_DIRECTIVE.match(body):
             return "single"
@@ -604,15 +638,23 @@ def page_lines(lines: Iterable[str], *, kind: str = "mdx") -> Iterator[PageLine]
         yield walk.read(index)
 
 
-def code_lines(lines: Iterable[str], *, kind: str = "mdx") -> Iterator[bool]:
+def code_lines(
+    lines: Iterable[str],
+    *,
+    kind: str = "mdx",
+    walked: Iterable[PageLine] | None = None,
+) -> Iterator[bool]:
     """Whether each line is code: a fence's opening line, its body or its closing line.
 
     Indented code is code too, on the one kind of page that has it. A fence never
     closed runs to the end of the page or of what holds it, as CommonMark has it.
 
     :param kind: The page's kind (:func:`page_lines`).
+    :param walked: The walk of *lines* (:func:`page_lines`), for a reader that
+        holds it already and hands it to each reader of the page, so that the
+        page is walked once.
     """
-    for line in page_lines(lines, kind=kind):
+    for line in page_lines(lines, kind=kind) if walked is None else walked:
         yield line.role in _CODE_ROLES
 
 
@@ -644,16 +686,19 @@ class Fence:
         return words[0] if words else ""
 
 
-def fences(text: str) -> Iterator[Fence]:
+def fences(text: str, *, kind: str = "mdx") -> Iterator[Fence]:
     """Every fenced block of a page, in reading order.
 
     :param text: The page.
+    :param kind: The page's kind (:func:`page_lines`): a ``.md`` page shows a
+        fence indented four columns as code, written out.
     :return: One :class:`Fence` per block, closed or running to the end.
     """
     start = 0
     info = ""
     body: list[str] = []
-    for number, line in enumerate(page_lines(text.splitlines(keepends=True)), start=1):
+    walk = page_lines(text.splitlines(keepends=True), kind=kind)
+    for number, line in enumerate(walk, start=1):
         if line.role == "body":
             body.append(_dedent(line.inner, line.indent))
             continue
@@ -666,7 +711,12 @@ def fences(text: str) -> Iterator[Fence]:
         yield Fence(start, info, "".join(body))
 
 
-def display_math_parts(lines: Iterable[str], *, kind: str = "mdx") -> list[str]:
+def display_math_parts(
+    lines: Iterable[str],
+    *,
+    kind: str = "mdx",
+    walked: Iterable[PageLine] | None = None,
+) -> list[str]:
     """Each line's part in display maths: ``"open"``, ``"maths"`` or ``"prose"``.
 
     ``"maths"`` is a line of the formula or the line that closes it: a run of
@@ -679,16 +729,27 @@ def display_math_parts(lines: Iterable[str], *, kind: str = "mdx") -> list[str]:
 
     :param lines: The lines of a page, its frontmatter out.
     :param kind: The page's kind (:func:`page_lines`).
+    :param walked: The walk of *lines*, as :func:`code_lines` takes it.
     """
-    return [
-        _MATHS_ROLES.get(line.role, "prose") for line in page_lines(lines, kind=kind)
-    ]
+    read = page_lines(lines, kind=kind) if walked is None else walked
+    return [_MATHS_ROLES.get(line.role, "prose") for line in read]
 
 
-def python_fences(text: str) -> list[str]:
+def python_fences(text: str, *, kind: str = "mdx") -> list[str]:
     """The bodies of a page's Python fences, in reading order.
 
     A fence is Python when the first word of its info string is ``python``,
     whatever attributes follow it.
+
+    :param kind: The page's kind (:func:`fences`).
     """
-    return [fence.body for fence in fences(text) if fence.language == "python"]
+    return [
+        fence.body for fence in fences(text, kind=kind) if fence.language == "python"
+    ]
+
+
+def page_kind(name: str) -> str:
+    """The kind of the page of file name *name*: ``"md"`` for a ``.md`` page,
+    ``"mdx"`` for any other, an ``.mdx`` page among them.
+    """
+    return "md" if name.endswith(".md") else "mdx"

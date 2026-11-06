@@ -21,6 +21,12 @@ from types import ModuleType
 
 import pytest
 
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from ast_scan import is_type_checking_block, what_never_runs, what_runs
+
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
 
@@ -63,29 +69,19 @@ def _imports_matplotlib(node: ast.stmt) -> bool:
     return any(name == "matplotlib" or name.startswith("matplotlib.") for name in names)
 
 
-def _is_type_checking_guard(test: ast.expr) -> bool:
-    """Whether ``test`` is the one condition that never runs.
-
-    Only a bare ``TYPE_CHECKING`` or ``typing.TYPE_CHECKING`` qualifies. This
-    used to ask whether the unparsed test *contained* the name, which is the
-    same question with the wrong answer for the two conditions that matter:
-    ``if not TYPE_CHECKING:`` runs exactly when the guard does not, and
-    ``if TYPE_CHECKING or enabled:`` runs whenever ``enabled`` is true. Both
-    read as guarded to a substring search, so an import placed in either would
-    have been waved through by the gate meant to catch it.
-    """
-    if isinstance(test, ast.Name):
-        return test.id == "TYPE_CHECKING"
-    return isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-
-
 def _eager_matplotlib_imports(
-    body: list[ast.stmt], *, guarded: bool = False
+    body: list[ast.stmt], tree: ast.Module, *, guarded: bool = False
 ) -> list[int]:
-    """Line numbers of the matplotlib imports that run at import time.
+    """Line numbers of the matplotlib imports of the module *tree* that run at
+    import time.
 
     Only two placements are lazy: inside a function body, and under
-    ``if TYPE_CHECKING:``, which never executes. Everything else at module
+    ``if TYPE_CHECKING:``, which never executes. The test is the flag of
+    ``typing`` whatever name the module imports it under, and only that:
+    ``if not TYPE_CHECKING:`` runs exactly when the guard does not, ``if
+    TYPE_CHECKING or enabled:`` runs whenever ``enabled`` is true, and a module
+    that binds ``TYPE_CHECKING`` to anything else may run the block
+    (:func:`ast_scan.is_type_checking_block`). Everything else at module
     scope runs the moment the package is imported, including a class body and
     the branches of a runtime ``if``, a ``try``, a ``with``, a loop or a
     ``match`` -- so this descends into those rather than assuming a bare
@@ -101,11 +97,16 @@ def _eager_matplotlib_imports(
         if _imports_matplotlib(node):
             if not guarded:
                 eager.append(node.lineno)
+        elif isinstance(node, ast.If) and is_type_checking_block(node, tree):
+            # Only the branch a type checker alone reads is deferred: the body
+            # of the guard, or the ``else`` of a negated one.
+            eager += _eager_matplotlib_imports(
+                what_never_runs(node), tree, guarded=True
+            )
+            eager += _eager_matplotlib_imports(what_runs(node), tree, guarded=guarded)
         elif isinstance(node, ast.If):
-            # ``else`` is the runtime branch of a TYPE_CHECKING guard.
-            deferred = guarded or _is_type_checking_guard(node.test)
-            eager += _eager_matplotlib_imports(node.body, guarded=deferred)
-            eager += _eager_matplotlib_imports(node.orelse, guarded=guarded)
+            eager += _eager_matplotlib_imports(node.body, tree, guarded=guarded)
+            eager += _eager_matplotlib_imports(node.orelse, tree, guarded=guarded)
         elif isinstance(node, ast.Try):
             for block in (
                 node.body,
@@ -113,19 +114,20 @@ def _eager_matplotlib_imports(
                 node.finalbody,
                 *(handler.body for handler in node.handlers),
             ):
-                eager += _eager_matplotlib_imports(block, guarded=guarded)
+                eager += _eager_matplotlib_imports(block, tree, guarded=guarded)
         elif isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
             # A loop that never iterates still executes its ``else``.
             for block in (node.body, node.orelse):
-                eager += _eager_matplotlib_imports(block, guarded=guarded)
+                eager += _eager_matplotlib_imports(block, tree, guarded=guarded)
         elif isinstance(node, ast.Match):
             for case in node.cases:
-                eager += _eager_matplotlib_imports(case.body, guarded=guarded)
+                eager += _eager_matplotlib_imports(case.body, tree, guarded=guarded)
         elif isinstance(node, (ast.With, ast.AsyncWith, ast.ClassDef)):
-            eager += _eager_matplotlib_imports(node.body, guarded=guarded)
+            eager += _eager_matplotlib_imports(node.body, tree, guarded=guarded)
     return eager
 
 
+@pytest.mark.whole_tree
 def test_no_module_scope_matplotlib_import_anywhere() -> None:
     """No module in the package may import matplotlib at import time.
 
@@ -137,9 +139,8 @@ def test_no_module_scope_matplotlib_import_anywhere() -> None:
     offenders = [
         f"{path.relative_to(SRC)}:{lineno}"
         for path in sorted(SRC.rglob("*.py"))
-        for lineno in _eager_matplotlib_imports(
-            ast.parse(path.read_text(encoding="utf-8")).body
-        )
+        for tree in [ast.parse(path.read_text(encoding="utf-8"))]
+        for lineno in _eager_matplotlib_imports(tree.body, tree)
     ]
     assert not offenders, (
         "matplotlib imported at module scope (import it inside the function "
@@ -165,6 +166,11 @@ _PLACEMENTS = [
         "if TYPE_CHECKING:\n    pass\nelse:\n    import matplotlib\n",
         True,
     ),
+    (
+        "negated guard's else",
+        "if not TYPE_CHECKING:\n    pass\nelse:\n    import matplotlib\n",
+        False,
+    ),
     ("for body", "for i in x:\n    import matplotlib\n", True),
     ("for else", "for i in x:\n    pass\nelse:\n    import matplotlib\n", True),
     ("while body", "while x:\n    import matplotlib\n", True),
@@ -172,6 +178,22 @@ _PLACEMENTS = [
     ("with body", "with ctx():\n    import matplotlib\n", True),
     ("class body", "class C:\n    import matplotlib\n", True),
     ("try body", "try:\n    import matplotlib\nexcept ImportError:\n    pass\n", True),
+    (
+        "guard on a rebound name",
+        "TYPE_CHECKING = True\nif TYPE_CHECKING:\n    import matplotlib\n",
+        True,
+    ),
+    (
+        "guard on a module that is not typing",
+        "import os as typing\nif typing.TYPE_CHECKING:\n    import matplotlib\n",
+        True,
+    ),
+    (
+        "guard imported under another name",
+        "from typing import TYPE_CHECKING as CHECKING\n"
+        "if CHECKING:\n    import matplotlib\n",
+        False,
+    ),
 ]
 
 
@@ -182,7 +204,8 @@ _PLACEMENTS = [
 )
 def test_eager_import_classifier(label: str, source: str, *, eager: bool) -> None:
     """The classifier behind the gate reports exactly the eager placements."""
-    found = _eager_matplotlib_imports(ast.parse(source).body)
+    tree = ast.parse(source)
+    found = _eager_matplotlib_imports(tree.body, tree)
     assert bool(found) is eager, (
         f"{label}: expected {'an eager' if eager else 'no'} import, got {found}"
     )

@@ -463,6 +463,7 @@ def test_counts_that_are_not_an_object_are_an_error(
     assert "counts is not an object" in capsys.readouterr().err
 
 
+@pytest.mark.whole_tree
 def test_the_real_corpus_needs_no_rewriting() -> None:
     """The committed tree is already consistent, so the writer is a no-op.
 
@@ -736,6 +737,7 @@ def test_a_claim_wrapped_away_from_its_noun_is_reported(
     assert f"'{DESIGNATIONS} normative designations' wraps a count" in errors
 
 
+@pytest.mark.whole_tree
 def test_the_real_corpus_counts_no_standards() -> None:
     """Nothing the project publishes states a count of standards, or wraps one."""
     assert ccc.refusals(ccc.ROOT, ccc.expected_counts()) == []
@@ -802,6 +804,7 @@ def test_a_count_wrapped_at_a_windows_line_end_is_found() -> None:
 RETIRED_FIGURE = 523
 
 
+@pytest.mark.whole_tree
 def test_the_retired_figure_is_published_nowhere() -> None:
     """The release gate: no tracked file states the figure as a count of standards.
 

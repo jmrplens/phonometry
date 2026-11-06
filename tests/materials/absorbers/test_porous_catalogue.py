@@ -552,6 +552,7 @@ def _uses(source: str, name: str) -> bool:
     )
 
 
+@pytest.mark.whole_tree
 def test_nothing_in_the_library_reads_the_published_tables() -> None:
     """No module of ``src`` reads the catalogue except where it is defined."""
     root = pathlib.Path(phonometry.__file__).parent

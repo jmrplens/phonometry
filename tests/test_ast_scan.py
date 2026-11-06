@@ -328,6 +328,38 @@ def test_a_call_reaches_the_defs_that_may_run_before_it() -> None:
         assert ast_scan.live_bindings(tree, bindings, call) == reached, target
 
 
+def test_a_default_holds_no_binding_of_its_scope_before_any_has_run() -> None:
+    """A ``def``'s default runs where it is written: before any binding of
+    the name at the top of the module, it holds none of them (the builtin),
+    after one it holds that one, and a later one replaces neither.
+
+    :func:`ast_scan.live_bindings` takes every binding for what a read before
+    them may meet, which a call inside a function may; a default never does.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def early(levels, float=float):
+                return float(levels)
+
+            float = print
+
+            def late(levels, float=float):
+                return float(levels)
+
+            float = str
+            """
+        )
+    )
+    first, second = ast_scan.bindings_by_name(tree)["float"]
+    early, late = (
+        node.args.defaults[0] for node in tree.body if isinstance(node, ast.FunctionDef)
+    )
+    assert ast_scan.held_before(tree, [first, second], early) == []
+    assert ast_scan.held_before(tree, [first, second], late) == [first]
+    assert ast_scan.live_bindings(tree, [first, second], early) == [first, second]
+
+
 def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
     """The ``def``s of *name* in *source* the name may hold, by the number
     each returns: at the call stored in *call* (the one call of *name* when
@@ -856,6 +888,30 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
     assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
 
 
+def test_a_module_without_a_global_statement_is_not_read_for_one() -> None:
+    """With no ``global`` anywhere in the module no scope sends a name to it,
+    and no scope is read to find one.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def outer():
+                read = 1
+                def inner():
+                    nonlocal read
+                    read = 2
+                return inner
+
+            class Holder:
+                read = 3
+            """
+        )
+    )
+    read_before = ast_scan.own_names.cache_info().misses
+    assert ast_scan.global_bindings(tree) == {}
+    assert ast_scan.own_names.cache_info().misses == read_before
+
+
 def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None:
     """What a caller leaves out of a module's bindings is left out wherever it
     is written: of what the top of the module binds, and of what a function
@@ -1009,6 +1065,48 @@ def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
     assert "y = 2" in source
 
 
+def test_a_tree_whose_functions_test_no_flag_comes_back_as_it_was(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A tree whose functions hold no test on ``TYPE_CHECKING`` is handed back
+    untouched, its blocks at the top and in a class body with it, and no function
+    of it is walked on its own; a conditional expression on the flag in a
+    function's default is still emptied.
+    """
+    walked: list[ast.AST] = []
+    scope_nodes = ast_scan.scope_nodes
+
+    def counted(scope: ast.AST) -> list[ast.AST]:
+        walked.append(scope)
+        return scope_nodes(scope)
+
+    monkeypatch.setattr(ast_scan, "scope_nodes", counted)
+    source = textwrap.dedent(
+        """
+        if TYPE_CHECKING:
+            from a import b
+
+        class Record:
+            if TYPE_CHECKING:
+                def __init__(self, x): ...
+
+        def f(x, y=1 if enabled else 2):
+            if x:
+                return y
+            return lambda: x if y else None
+        """
+    )
+    tree = ast.parse(source)
+    written = ast.dump(tree)
+    assert ast_scan.empty_type_checking_bodies(tree) is tree
+    assert ast.dump(tree) == written
+    assert walked == []
+
+    tree = ast.parse("def f(x=b if TYPE_CHECKING else c):\n    return x\n")
+    ast_scan.empty_type_checking_bodies(tree)
+    assert ast.unparse(tree).startswith("def f(x=None if TYPE_CHECKING else c)")
+
+
 @pytest.mark.parametrize(
     ("test", "never", "runs"),
     [
@@ -1028,7 +1126,7 @@ def test_a_test_on_type_checking_says_which_branch_runs(
     tree = ast.parse(f"if {test}:\n    first = 1\nelse:\n    second = 2\n")
     statement = tree.body[0]
     assert isinstance(statement, ast.If)
-    assert ast_scan.is_type_checking_block(statement)
+    assert ast_scan.is_type_checking_block(statement, tree)
     written = {name.id: name for name in ast.walk(tree) if isinstance(name, ast.Name)}
     assert id(written[never]) in ast_scan.for_the_type_checker(tree)
     assert id(written[runs]) not in ast_scan.for_the_type_checker(tree)
@@ -1055,9 +1153,107 @@ def test_any_other_test_says_nothing_of_either_branch(test: str) -> None:
     enabled`` runs whenever ``enabled`` is true.
     """
     tree = ast.parse(f"if {test}:\n    first = 1\nelse:\n    second = 2\n")
-    assert not ast_scan.is_type_checking_block(tree.body[0])
+    assert not ast_scan.is_type_checking_block(tree.body[0], tree)
     assert ast_scan.for_the_type_checker(tree) == frozenset()
     assert ast_scan.for_the_program(tree) == frozenset()
+
+
+_BRANCHES_TESTED = (
+    "if {test}:\n    first = 1\nelse:\n    second = 2\n\n"
+    "def f():\n    if {test}:\n        third = 3\n    return 4 if {test} else 5\n"
+)
+
+
+@pytest.mark.parametrize(
+    ("prelude", "test"),
+    [
+        ("TYPE_CHECKING = True\n", "TYPE_CHECKING"),
+        ("from settings import TYPE_CHECKING\n", "TYPE_CHECKING"),
+        ("from settings import *\n", "TYPE_CHECKING"),
+        ("import os as typing\n", "typing.TYPE_CHECKING"),
+        (
+            "import typing\n\ndef load(typing):\n    return typing\n",
+            "typing.TYPE_CHECKING",
+        ),
+        (
+            "from typing import TYPE_CHECKING\n\ndef f(TYPE_CHECKING=True): ...\n",
+            "TYPE_CHECKING",
+        ),
+        (
+            "from typing import TYPE_CHECKING\n\n"
+            "def switch():\n    global TYPE_CHECKING\n    TYPE_CHECKING = True\n",
+            "TYPE_CHECKING",
+        ),
+        ("settings = load()\n", "settings.TYPE_CHECKING"),
+    ],
+)
+def test_a_name_the_module_binds_to_anything_else_decides_no_branch(
+    prelude: str, test: str
+) -> None:
+    """``TYPE_CHECKING`` is the flag only where every binding of the name, in
+    any scope of the module, is an import of it from ``typing`` (or the
+    constant ``False``): a module that binds it to anything else, to ``True``
+    above all, may run either branch, and so may one whose ``typing`` is not
+    the module. Neither branch is taken for what never runs, and no body of a
+    function is emptied.
+    """
+    tree = ast.parse(prelude + _BRANCHES_TESTED.format(test=test))
+    assert ast_scan.for_the_type_checker(tree) == frozenset()
+    assert ast_scan.for_the_program(tree) == frozenset()
+    source = ast.unparse(ast_scan.empty_type_checking_bodies(tree))
+    assert "third = 3" in source
+    assert f"4 if {test} else 5" in source
+    ast_scan.forget_trees()
+
+
+@pytest.mark.parametrize(
+    ("prelude", "test"),
+    [
+        ("from typing import TYPE_CHECKING\n", "TYPE_CHECKING"),
+        ("from typing import TYPE_CHECKING as CHECKING\n", "CHECKING"),
+        ("from typing_extensions import TYPE_CHECKING\n", "TYPE_CHECKING"),
+        ("import typing as t\n", "t.TYPE_CHECKING"),
+        ("import typing_extensions\n", "typing_extensions.TYPE_CHECKING"),
+        (
+            "try:\n    from typing import TYPE_CHECKING\n"
+            "except ImportError:\n    TYPE_CHECKING = False\n",
+            "TYPE_CHECKING",
+        ),
+    ],
+)
+def test_the_flag_of_typing_decides_its_branches_under_any_name(
+    prelude: str, test: str
+) -> None:
+    """An import of the flag under another name, of ``typing`` under another
+    name, or of ``typing_extensions``, holds the flag all the same, and so does
+    the fallback that assigns ``False`` to it: what the block holds never runs.
+    """
+    tree = ast.parse(prelude + _BRANCHES_TESTED.format(test=test))
+    written = {
+        name.id: name
+        for name in ast.walk(tree)
+        if isinstance(name, ast.Name) and isinstance(name.ctx, ast.Store)
+    }
+    assert id(written["first"]) in ast_scan.for_the_type_checker(tree)
+    assert id(written["second"]) in ast_scan.for_the_program(tree)
+    source = ast.unparse(ast_scan.empty_type_checking_bodies(tree))
+    assert "third = 3" not in source
+    assert "4 if" not in source
+    ast_scan.forget_trees()
+
+
+def test_a_scope_read_as_a_tree_of_its_own_reads_the_flag_of_its_module() -> None:
+    """A guard that hands a function as the tree to read reads what the
+    module binds the flag to, once the module has been read: a module that
+    rebinds it leaves the function's block running.
+    """
+    tree = ast.parse(
+        "TYPE_CHECKING = True\n" + _BRANCHES_TESTED.format(test="TYPE_CHECKING")
+    )
+    function = next(node for node in tree.body if isinstance(node, ast.FunctionDef))
+    assert ast_scan.for_the_type_checker(tree) == frozenset()
+    assert ast_scan.for_the_type_checker(function) == frozenset()
+    ast_scan.forget_trees()
 
 
 def test_what_a_function_never_runs_is_emptied_in_every_form() -> None:
@@ -1288,3 +1484,27 @@ def test_block_statements_reads_every_block_of_every_compound_statement() -> Non
         node for node in tree.body if isinstance(node, ast.AsyncFunctionDef)
     )
     assert ast_scan.block_statements(function) == []
+
+
+def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
+    """``(fn := helper)`` stores ``helper`` in ``fn`` as ``fn = helper`` does.
+
+    :func:`ast_scan.bindings_by_name` gives such a binding as the expression,
+    and its value was read only from an assignment statement, so a name an
+    assignment expression binds stood for nothing the guards could follow.
+    """
+    tree = ast.parse("def f():\n    if (fn := helper) is not None:\n        pass\n")
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    (binding,) = ast_scan.bindings_by_name(function)["fn"]
+    assert isinstance(binding, ast.NamedExpr)
+    target = ast_scan.assignment_target(binding)
+    assert target is binding.target
+    for node in (binding, binding.target):
+        value = ast_scan.assigned_value(tree, node)
+        assert isinstance(value, ast.Name)
+        assert value.id == "helper"
+    statement = ast.parse("fn = helper").body[0]
+    assert isinstance(statement, ast.Assign)
+    assert ast_scan.assignment_target(statement.targets[0]) is statement.targets[0]
+    assert ast_scan.assignment_target(statement) is None

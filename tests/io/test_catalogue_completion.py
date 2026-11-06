@@ -763,6 +763,7 @@ def _loader_calls() -> list[tuple[str, ast.Call]]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_every_packaged_loader_builds_its_rows_through_from_printed() -> None:
     """No loader builds a row literally, so none can skip the completion.
 

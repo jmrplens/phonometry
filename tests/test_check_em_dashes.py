@@ -147,6 +147,33 @@ def test_a_caption_carries_its_state_to_the_end_of_the_paragraph() -> None:
     assert ced.markdown_hits(text) == [2]
 
 
+@pytest.mark.parametrize("marks", [">\t> ", "> \t> ", " >\t>\t", ">\t"])
+def test_a_caption_behind_marks_parted_by_a_tab_is_a_caption(marks: str) -> None:
+    """A tab after a quotation mark is the blank the mark may take, its
+    columns past the first left as spaces, and up to three of those columns
+    may stand before the next mark (CommonMark 0.31.2, 2.2 and 5.1). The
+    caption behind a mark, a tab and a mark is one, and its dash is refused.
+
+    The marks were read with spaces alone between them, so the second mark
+    stayed on the line, the line did not open with the caption's ``*`` and
+    the caption's dash passed as one of a citation.
+    """
+    text = f"{marks}*A caption, with a dash \u2014 in it.*\n"
+    assert ced.markdown_hits(text) == [1]
+    assert ced.markdown_hits(text, mdx=True) == [1]
+
+
+def test_a_mark_deeper_than_three_columns_is_code_on_a_markdown_page() -> None:
+    """On a ``.md`` page, a ``>`` four columns past the blank of the mark
+    before it opens indented code inside the quotation, not a quotation, and
+    the line is code; an ``.mdx`` page has no indented code, and the same
+    ``>`` opens a quotation whose caption's dash is refused.
+    """
+    text = ">\t\t> *A caption, with a dash \u2014 in it.*\n"
+    assert ced.markdown_hits(text) == []
+    assert ced.markdown_hits(text, mdx=True) == [1]
+
+
 def test_bold_and_a_list_bullet_are_not_a_caption() -> None:
     """``**`` opens bold and ``* `` a list item; neither opens an italic span."""
     assert ced.markdown_hits("**Bold** text — and a dash.\n") == [1]
@@ -670,6 +697,39 @@ def test_a_value_names_the_line_of_its_dash(text: str, hits: list[int]) -> None:
 )
 def test_a_title_is_a_title_on_every_line_of_its_value(text: str) -> None:
     assert ced.markdown_hits(text) == []
+
+
+@pytest.mark.parametrize(
+    ("text", "hits"),
+    [
+        pytest.param(
+            "---\ntitle: |\n    Acoustics — Rooms\n  # a note — here\n---\n",
+            [4],
+            id="a comment short of the content",
+        ),
+        pytest.param(
+            "---\ntitle: |2\n    Acoustics — Rooms\n  # Still — title\n---\n",
+            [],
+            id="at the column the indicator sets",
+        ),
+        pytest.param(
+            "---\ntitle: |\n    Acoustics — Rooms\n    # Still — title\n---\n",
+            [],
+            id="at the content column",
+        ),
+    ],
+)
+def test_a_title_block_ends_at_a_line_short_of_its_content(
+    text: str, hits: list[int]
+) -> None:
+    """A block of text holds the lines indented as far as its first line, or
+    as its indicator says; a ``#`` line short of that column, deeper than the
+    key, is a comment YAML ends the block on, and its dash is the comment's.
+
+    The block was read as every line deeper than the key, so the comment was
+    a line of the title and its dash passed as one of the title.
+    """
+    assert ced.markdown_hits(text) == hits
 
 
 def test_a_value_that_quotes_with_an_escaped_quote_quotes() -> None:

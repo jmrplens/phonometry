@@ -213,6 +213,9 @@ _TABLE_ROW = re.compile(r"^\s*\|.*\|")
 _PLACEHOLDER_ITEM = re.compile(r"(?:^|(?<=/))\s*" + EM_DASH + r"\s*(?=/|$)")
 #: A frontmatter title, which reproduces the document's own title.
 _TITLE_LINE = re.compile(r"^\s*(?:-\s*)?title:\s")
+#: The header of a block of text, with the indentation indicator it may carry
+#: before or after its chomping indicator (``|2``, ``>-1``, ``|+2``).
+_BLOCK_INDENT = re.compile(r"[|>](?:([1-9])[+-]?|[+-]([1-9]))?")
 #: The first line of a bibliographic entry, author and year: the lines of the
 #: entry reproduce a title as printed, dashes and all.
 _REFERENCE_ENTRY = re.compile(r"^\s*(?:-|\d+\.)\s.*\(\d{4}[a-z]?\)")
@@ -365,6 +368,10 @@ class _Frontmatter:
     quote: str = ""
     #: The column a line of an open block of text is indented past.
     block: int | None = None
+    #: The column the lines of that block are indented to: the one its
+    #: indicator sets (``|2``), or that of its first line that is not blank.
+    #: A line short of it ends the block, a comment YAML reads apart.
+    block_content: int | None = None
     #: Whether that block is the JSON-LD of a ``content`` key, which its first
     #: line says: ``None`` until it is read.
     json_block: bool | None = False
@@ -391,9 +398,21 @@ class _Frontmatter:
         if self.quote:
             return True
         indent = len(line) - len(line.lstrip(" "))
-        return any(
-            column is not None and (not line.strip() or indent > column)
-            for column in (self.block, self.plain)
+        if self.block is not None:
+            return self._in_block(line, indent)
+        return self.plain is not None and (not line.strip() or indent > self.plain)
+
+    def _in_block(self, line: str, indent: int) -> bool:
+        """Whether *line* is a line of the open block of text: blank, or
+        indented past its key and as far as its content.
+        """
+        if not line.strip():
+            return True
+        content = self.block_content
+        return (
+            self.block is not None
+            and indent > self.block
+            and (content is None or indent >= content)
         )
 
     def decode(self, line: str) -> str:
@@ -404,9 +423,11 @@ class _Frontmatter:
         """
         indent = len(line) - len(line.lstrip(" "))
         if self.block is not None:
-            if not line.strip() or indent > self.block:
+            if self._in_block(line, indent):
+                if self.block_content is None and line.strip():
+                    self.block_content = indent
                 return self._block_line(line)
-            self.block = None
+            self.block = self.block_content = None
         if self.plain is not None:
             if not line.strip() or indent > self.plain:
                 return line
@@ -503,6 +524,12 @@ class _Frontmatter:
             return at + 1
         if char in "|>" and not self.flow:
             self.block = node.owner
+            indicator = _BLOCK_INDENT.match(line, at)
+            self.block_content = (
+                node.owner + int(indicator[1] or indicator[2])
+                if indicator is not None and (indicator[1] or indicator[2])
+                else None
+            )
             self.json_block = None if node.key == "content" else False
             pieces.append(line[at:])
             node.done = True
@@ -794,7 +821,9 @@ def _span_remainder(span: str) -> str:
     return SPAN_MARK + "\n" * span.count("\n")
 
 
-def _drop_code_and_math(text: str, *, kind: str) -> str:
+def _drop_code_and_math(
+    text: str, *, kind: str, walked: Iterable[PageLine] | None = None
+) -> str:
     """The text of a page with its code and maths spans taken out, as the site reads them.
 
     Code and maths are read together, left to right and a block of the page
@@ -811,14 +840,19 @@ def _drop_code_and_math(text: str, *, kind: str) -> str:
     number stands around it.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of the page, made once for all its readers.
     """
-    return replace_inline_spans_by_block(text, _span_remainder, "`$", kind=kind)
+    return replace_inline_spans_by_block(
+        text, _span_remainder, "`$", kind=kind, walked=walked
+    )
 
 
 @dataclass
 class _PageReading:
     """What the reading of a page carries from one line to the next."""
 
+    #: The page's kind, ``"md"`` or ``"mdx"``, which reads its quotation marks.
+    kind: str = "md"
     italic_open: bool = False
     quote_closer: str | None = None
     in_reference: bool = False
@@ -837,7 +871,7 @@ class _PageReading:
         """
         unclosed = self.close_block()
         self.in_reference = False
-        self.caption = _is_caption(inside_quotation(line))
+        self.caption = _is_caption(inside_quotation(line, kind=self.kind))
         return unclosed
 
     def close_block(self) -> list[int]:
@@ -856,10 +890,10 @@ class _PageReading:
         :param number: Its number, kept if a mark still open is all that exempts it.
         :param role: Its role in the walk of the page.
         """
-        inner = inside_quotation(shown)
+        inner = inside_quotation(shown, kind=self.kind)
         if _REFERENCE_ENTRY.match(inner):
             self.in_reference = True
-        elif not inside_quotation(line).startswith((" ", "\t")):
+        elif not inside_quotation(line, kind=self.kind).startswith((" ", "\t")):
             self.in_reference = False
         (
             prose,
@@ -945,12 +979,15 @@ def markdown_hits(text: str, *, mdx: bool = False) -> list[int]:
     head = _frontmatter_head(lines)
     written = lines[head:]
     read = list(page_lines(written, kind=kind))
-    code_flags = list(code_lines(written, kind=kind))
-    math_flags = _math_lines(written, kind=kind)
-    shown = lines_read_whole(written, lambda page: _drop_code_and_math(page, kind=kind))
-    reading = _PageReading()
+    code_flags = list(code_lines(written, kind=kind, walked=read))
+    math_flags = _math_lines(written, kind=kind, walked=read)
+    shown = lines_read_whole(
+        written, lambda page: _drop_code_and_math(page, kind=kind, walked=read)
+    )
+    reading = _PageReading(kind=kind)
     hits = _frontmatter_hits(lines)
-    for index, opens_block in enumerate(block_starts(written, kind=kind)):
+    opens = block_starts(written, kind=kind, walked=read)
+    for index, opens_block in enumerate(opens):
         line = written[index]
         number = head + index + 1
         if opens_block:
@@ -1334,7 +1371,9 @@ def _double_hyphen_lines(
     return hits
 
 
-def _math_lines(lines: list[str], *, kind: str) -> list[bool]:
+def _math_lines(
+    lines: list[str], *, kind: str, walked: Iterable[PageLine] | None = None
+) -> list[bool]:
     """Whether each line of a page is in a display-math block, its fences included.
 
     The block is read as the site reads it (:func:`display_math_parts`): behind
@@ -1342,25 +1381,35 @@ def _math_lines(lines: list[str], *, kind: str) -> list[bool]:
     stands, so the backtick on the other side of its fence closes nothing.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of *lines*, made once for all the readers of the page.
     """
-    return [part != "prose" for part in display_math_parts(lines, kind=kind)]
+    parts = display_math_parts(lines, kind=kind, walked=walked)
+    return [part != "prose" for part in parts]
 
 
-def _page_code_lines(lines: list[str], *, kind: str) -> list[bool]:
+def _page_code_lines(
+    lines: list[str], *, kind: str, walked: list[PageLine] | None = None
+) -> list[bool]:
     """Whether each line of a page is code or display math, not prose.
 
     The frontmatter holds neither: a value is plain text, and what it opens
     stops there.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of the lines past the frontmatter, made once for all
+        the readers of the page; walked here when not handed.
     """
     head = _frontmatter_head(lines)
-    code = code_lines(lines[head:], kind=kind)
-    maths = _math_lines(lines[head:], kind=kind)
+    body = lines[head:]
+    read = list(page_lines(body, kind=kind)) if walked is None else walked
+    code = code_lines(body, kind=kind, walked=read)
+    maths = _math_lines(body, kind=kind, walked=read)
     return [False] * head + [a or b for a, b in zip(code, maths, strict=True)]
 
 
-def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> list[str]:
+def _page_without_code_or_comments(
+    written: list[str], *, mdx: bool, walked: list[PageLine] | None = None
+) -> list[str]:
     """The lines of a page with its code, its display math and its comments blanked.
 
     The comments are the ones the page does not show: an HTML comment and an
@@ -1369,12 +1418,13 @@ def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> list[str
     that a line still counts as the one written.
 
     :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
+    :param walked: The walk of the lines past the frontmatter (:func:`_page_code_lines`).
     """
     kind = "mdx" if mdx else "md"
     lines = [
         "" if code else line
         for line, code in zip(
-            written, _page_code_lines(written, kind=kind), strict=True
+            written, _page_code_lines(written, kind=kind, walked=walked), strict=True
         )
     ]
     _read_frontmatter(lines, _Frontmatter(decode_escapes=False, blank_comments=True))
@@ -1406,9 +1456,10 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
-    lines = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
-    walked = list(page_lines(written[head:], kind="mdx" if mdx else "md"))
+    kind = "mdx" if mdx else "md"
+    walked = list(page_lines(written[head:], kind=kind))
+    lines = _page_without_code_or_comments(written, mdx=mdx, walked=walked)
     masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
         lines[head:],
         lambda body: _blank_page_spans(_without_addresses(body), walked=walked),
@@ -1416,8 +1467,8 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     return [
         index + 1
         for index in _double_hyphen_lines(
-            [inside_quotation(line) for line in written],
-            [inside_quotation(line) for line in masked],
+            [inside_quotation(line, kind=kind) for line in written],
+            [inside_quotation(line, kind=kind) for line in masked],
             {head + offset: read for offset, read in enumerate(walked)},
         )
     ]
@@ -1647,9 +1698,9 @@ def markdown_bullet_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
-    prose = _page_without_code_or_comments(written, mdx=mdx)
     head = _frontmatter_head(written)
-    walked = page_lines(written[head:], kind="mdx" if mdx else "md")
+    walked = list(page_lines(written[head:], kind="mdx" if mdx else "md"))
+    prose = _page_without_code_or_comments(written, mdx=mdx, walked=walked)
     return [
         number
         for number, (line, read) in enumerate(

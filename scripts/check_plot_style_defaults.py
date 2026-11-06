@@ -202,12 +202,13 @@ def _written_beside(
     helper a renderer hands them on to, in a parameter named ``kwargs`` (or
     ``..._kwargs``). They travel on in every mapping the function builds from
     them (``options = dict(kwargs)``). A keyword that names a parameter of a
-    function with ``**kwargs`` cannot be in them. Nor can one the function
-    takes out (``kwargs.pop("zorder", 3)``, ``del kwargs["zorder"]``,
-    :func:`style_pop`) or refuses by name (:func:`refuse_fixed_keywords`),
-    provided it does so before the call, on the very mapping the call spreads
-    or on one that mapping was copied from afterwards. None of those can
-    collide, and they are left alone.
+    function with ``**kwargs`` cannot be in them, unless the parameter is
+    positional-only: a keyword of its name goes to ``**kwargs``. Nor can one
+    the function takes out (``kwargs.pop("zorder", 3)``, ``del
+    kwargs["zorder"]``, :func:`style_pop`) or refuses by name
+    (:func:`refuse_fixed_keywords`), provided it does so before the call, on
+    the very mapping the call spreads or on one that mapping was copied from
+    afterwards. None of those can collide, and they are left alone.
     """
     seeds = _seeds(function)
     if not seeds:
@@ -216,10 +217,7 @@ def _written_beside(
     arguments = function.args
     bound: set[str] = set()
     if arguments.kwarg is not None:
-        bound = {
-            arg.arg
-            for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
-        }
+        bound = {arg.arg for arg in (*arguments.args, *arguments.kwonlyargs)}
     removals = _removals(function, lineage)
     for call in ast.walk(function):
         if not isinstance(call, ast.Call) or _call_root(call.func) in own:

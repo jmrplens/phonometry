@@ -365,6 +365,7 @@ def generated(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path:
     return root
 
 
+@pytest.mark.whole_tree
 def test_generation_is_deterministic(
     generated: pathlib.Path, tmp_path: pathlib.Path
 ) -> None:
@@ -384,6 +385,7 @@ def test_generation_is_deterministic(
         assert second[relpath] == first_content, f"{relpath} is not deterministic"
 
 
+@pytest.mark.whole_tree
 def test_every_public_name_on_exactly_one_page(
     generated: pathlib.Path,
 ) -> None:
@@ -397,6 +399,7 @@ def test_every_public_name_on_exactly_one_page(
     assert not duplicated
 
 
+@pytest.mark.whole_tree
 def test_no_docstring_parse_failures() -> None:
     """The whole corpus renders without degrading to verbatim blocks."""
     pages, xref, _ = gad.build_model()
@@ -442,6 +445,7 @@ def test_leaked_roles_finds_a_directive_folded_into_a_field() -> None:
     assert gad.leaked_roles("x.md", "a path like ../docs.md:: or a.. b") == []
 
 
+@pytest.mark.whole_tree
 def test_no_role_reaches_a_published_page() -> None:
     """``:doc:`` and ``:sup:`` once shipped verbatim, and two ``.. note::``
     blocks folded into a ``:raises:`` field; nothing may again.
@@ -573,6 +577,7 @@ def test_a_table_inside_fenced_code_is_an_example() -> None:
     assert gad.leaked_tables("io/io.md", rendered) == []
 
 
+@pytest.mark.whole_tree
 def test_no_simple_table_reaches_a_published_page_as_text() -> None:
     pages, xref, _ = gad.build_model()
     stats = gad.RoleStats()
@@ -585,6 +590,7 @@ def test_no_simple_table_reaches_a_published_page_as_text() -> None:
     assert leaks == []
 
 
+@pytest.mark.whole_tree
 def test_generated_pages_have_valid_frontmatter(
     generated: pathlib.Path,
 ) -> None:
@@ -603,6 +609,7 @@ def test_generated_pages_have_valid_frontmatter(
         assert "Auto-generated" in banner, path
 
 
+@pytest.mark.whole_tree
 def test_xref_anchors_point_to_emitted_headings(
     generated: pathlib.Path,
 ) -> None:
@@ -617,6 +624,7 @@ def test_xref_anchors_point_to_emitted_headings(
             assert heading in text or plain in text, (page.module, member.name)
 
 
+@pytest.mark.whole_tree
 def test_sidebar_fragment_lists_every_page(generated: pathlib.Path) -> None:
     """One group per section, every page in it, and nothing else.
 
@@ -939,6 +947,7 @@ def _unpacked_keywords(
     return keys
 
 
+@pytest.mark.whole_tree
 def test_a_record_built_by_hand_is_published_with_what_its_constructor_takes() -> None:
     """A record that converts what it is given shows the declared constructor.
 
@@ -1136,6 +1145,7 @@ def test_an_alias_a_package_published_would_stay_a_name(
     assert gad.expand_unpublished_aliases("Surface", module).startswith("Literal[")
 
 
+@pytest.mark.whole_tree
 def test_the_api_index_shows_the_4_0_call_and_no_root_import() -> None:
     """The filter bank returns a result, and the root exports twenty-five names."""
     pages, xref, _ = gad.build_model()
@@ -1145,6 +1155,7 @@ def test_the_api_index_shows_the_4_0_call_and_no_root_import() -> None:
     assert "from phonometry import leq" not in index
 
 
+@pytest.mark.whole_tree
 def test_the_top_level_page_does_not_name_the_site_twice() -> None:
     """Starlight would title it "phonometry | phonometry"; the head says what it is."""
     pages, xref, _ = gad.build_model()
@@ -1164,6 +1175,7 @@ def test_the_top_level_page_does_not_name_the_site_twice() -> None:
             assert "\nhead:" not in rendered.split("\n---\n", 1)[0], page.module
 
 
+@pytest.mark.whole_tree
 def test_the_top_level_page_says_where_each_of_its_objects_is_documented() -> None:
     """``Signal`` is a top-level name documented with ``io``, not on that page."""
     pages, _, _ = gad.build_model()
@@ -1183,6 +1195,7 @@ def test_the_top_level_page_says_where_each_of_its_objects_is_documented() -> No
     assert "can also be imported directly" not in top.intro
 
 
+@pytest.mark.whole_tree
 def test_no_page_claims_a_module_address_that_does_not_import() -> None:
     """A public page's title is an address that imports; a private one's is not.
 
@@ -1215,6 +1228,7 @@ def test_no_page_claims_a_module_address_that_does_not_import() -> None:
         assert getattr(importlib.import_module(parent), leaf) is module, address
 
 
+@pytest.mark.whole_tree
 def test_no_page_title_carries_a_number() -> None:
     """A title is a module address or a subject in words, never a designation.
 
@@ -1230,6 +1244,7 @@ def test_no_page_title_carries_a_number() -> None:
     assert not numbered, numbered
 
 
+@pytest.mark.whole_tree
 def test_every_page_title_fits_the_browser_title() -> None:
     """The site prints ``<title> | phonometry``, and html-validate allows 70."""
     pages, _, _ = gad.build_model()
@@ -1244,6 +1259,7 @@ def _page_with_lead(lead: str) -> gad.ModuleDoc:
     return dataclasses.replace(page, intro=f"{lead}\n\nThe rest of the docstring.")
 
 
+@pytest.mark.whole_tree
 def test_a_lead_that_fits_is_the_description_whole() -> None:
     lead = "Sound power level of a source over an enveloping surface (ISO 3744:2010)."
     page = _page_with_lead(lead)
@@ -1251,6 +1267,7 @@ def test_a_lead_that_fits_is_the_description_whole() -> None:
     assert gad._description_problem(page) is None
 
 
+@pytest.mark.whole_tree
 def test_a_long_lead_gives_way_to_its_opening_sentence_never_a_cut() -> None:
     """The index's sentence rule: no stop inside brackets or before a small word."""
     opening = (
@@ -1264,6 +1281,7 @@ def test_a_long_lead_gives_way_to_its_opening_sentence_never_a_cut() -> None:
     assert gad._description_problem(page) is None
 
 
+@pytest.mark.whole_tree
 @pytest.mark.parametrize(
     "lead",
     [
@@ -1288,6 +1306,7 @@ def test_a_lead_with_no_opening_sentence_that_fits_fails_the_run(lead: str) -> N
     assert problem.startswith("phonometry.emission.sound_power: ")
 
 
+@pytest.mark.whole_tree
 def test_a_page_whose_lead_is_the_placeholder_fails_the_run() -> None:
     """A lead that only says where to look is no description, at any length."""
     page = _page_with_lead("emission domain of phonometry (see module docstrings).")
@@ -1313,6 +1332,7 @@ def test_a_package_with_no_page_is_read_for_the_placeholder_too(
     assert any(problem.startswith("phonometry.speech: ") for problem in problems)
 
 
+@pytest.mark.whole_tree
 def test_no_module_opens_with_the_placeholder() -> None:
     pages, _, _ = gad.build_model()
     assert gad.placeholder_leads(pages) == []
@@ -1347,6 +1367,7 @@ def test_every_public_package_lead_is_what_help_shows_first() -> None:
     assert split == []
 
 
+@pytest.mark.whole_tree
 def test_every_api_page_has_a_description_short_enough_to_show_whole() -> None:
     """site/scripts/check-descriptions.mjs holds the built pages to 160 characters."""
     pages, _, _ = gad.build_model()
@@ -1360,6 +1381,7 @@ def test_every_api_page_has_a_description_short_enough_to_show_whole() -> None:
     assert repeated == []
 
 
+@pytest.mark.whole_tree
 def test_a_private_page_is_indexed_by_its_domain() -> None:
     """The index row names the domain in code and the subject in words."""
     pages, xref, _ = gad.build_model()
@@ -1374,6 +1396,7 @@ def test_a_private_page_is_indexed_by_its_domain() -> None:
     assert f"| [`signals`: correlation]({page.url}) |" in index
 
 
+@pytest.mark.whole_tree
 def test_a_private_page_names_the_package_of_every_name_on_it() -> None:
     """The opening holds for each name: its package, or the one named for it.
 

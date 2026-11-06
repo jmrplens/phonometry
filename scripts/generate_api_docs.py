@@ -58,9 +58,11 @@ from api_taxonomy import (
 from ast_scan import (
     COMPOUND_STATEMENTS,
     block_statements,
+    is_type_checking_block,
     standing_bindings,
+    what_never_runs,
 )
-from markdown_fences import code_lines
+from markdown_fences import code_lines, page_kind
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -1243,13 +1245,6 @@ def _class_definition(cls: type) -> ast.ClassDef | None:
     return node
 
 
-def _reads_type_checking(test: ast.expr) -> bool:
-    """Whether an ``if`` test is ``TYPE_CHECKING``, bare or as ``typing.TYPE_CHECKING``."""
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
-    )
-
-
 def constructor_stub(cls: type) -> ast.FunctionDef | None:
     """The ``__init__`` *cls* declares for the type checker, if it declares one.
 
@@ -1261,12 +1256,13 @@ def constructor_stub(cls: type) -> ast.FunctionDef | None:
     the type checker reads and the running class never defines.
     """
     node = _class_definition(cls)
-    if node is None:
+    tree = _module_tree(cls.__module__)
+    if node is None or tree is None:
         return None
     for child in node.body:
-        if not (isinstance(child, ast.If) and _reads_type_checking(child.test)):
+        if not (isinstance(child, ast.If) and is_type_checking_block(child, tree)):
             continue
-        for inner in child.body:
+        for inner in what_never_runs(child):
             if isinstance(inner, ast.FunctionDef) and inner.name == "__init__":
                 return inner
     return None
@@ -2489,13 +2485,15 @@ def leaked_tables(relpath: str, rendered: str) -> list[str]:
     one run-on paragraph. A table written under a field (``:param x:``)
     cannot be read at all: the field's body is joined into one line of its
     cell, borders and rows together, and that line is reported too. A border
-    inside fenced code is an example and is left alone.
+    inside code is an example and is left alone: the page is ``.md``, read as
+    one, its indented blocks code too.
     """
     lines = rendered.splitlines()
     return [
         f"{relpath}:{number}: {line.strip()}"
         for number, (line, code) in enumerate(
-            zip(lines, code_lines(lines), strict=True), start=1
+            zip(lines, code_lines(lines, kind=page_kind(relpath)), strict=True),
+            start=1,
         )
         if not code and _holds_table_rule(line)
     ]

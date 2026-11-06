@@ -485,6 +485,7 @@ def _tells_a_value_from_an_array(function: Callable[..., object]) -> bool:
     return read is not None and cro.tells_a_value_from_an_array(package, read)
 
 
+@pytest.mark.whole_tree
 def test_every_function_of_a_number_or_an_array_has_a_case() -> None:
     """A new overloaded function cannot ship without its runtime being called."""
     named = {case.name for case in CASES} | _KEYED
@@ -724,6 +725,7 @@ def _return_blocks(source: str) -> list[tuple[int, str]]:
     return blocks
 
 
+@pytest.mark.whole_tree
 def test_a_return_description_says_its_rule_once() -> None:
     """A ``:return:`` field states what the function returns once.
 

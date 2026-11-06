@@ -339,6 +339,7 @@ def test_a_wait_with_a_bound_or_no_wait_at_all_passes(source: str) -> None:
     assert _unbounded(call, frozenset({"subprocess"})) is None
 
 
+@pytest.mark.whole_tree
 def test_every_wait_in_the_suite_has_a_bound() -> None:
     """A wait on another process or thread names how long it waits.
 

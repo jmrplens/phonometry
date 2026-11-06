@@ -16,6 +16,7 @@ import pathlib
 import sys
 
 import child_process
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -120,6 +121,7 @@ def _is_binary(path: pathlib.Path) -> bool:
     return False
 
 
+@pytest.mark.whole_tree
 def test_nothing_the_scan_skips_is_text() -> None:
     """The partition has to be total, and its skipped half has to be earned.
 

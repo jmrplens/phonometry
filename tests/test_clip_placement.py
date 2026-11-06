@@ -147,6 +147,7 @@ def test_every_field_clip_has_a_device_and_nothing_else_does() -> None:
     assert set(registry._ANIM_DEVICES.values()) <= {"cpu", "gpu", "gpu-whole"}
 
 
+@pytest.mark.whole_tree
 def test_the_device_and_memory_tables_are_in_no_fingerprint() -> None:
     """Where a field is computed, and the memory it needs, are measured, not hashed."""
     sources = fp.Sources(_ROOT)

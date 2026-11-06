@@ -187,6 +187,51 @@ function pastColumns(text, column, width) {
 }
 
 /**
+ * What a quotation's mark leaves of `rest`, standing at `column`, and the column
+ * past it, or `null`: up to three columns of blanks may stand before the mark on a
+ * `.md` page, where four open indented code, and any number on an `.mdx` one; one
+ * column of blank after it is the mark's own, a tab there leaving the rest of its
+ * columns as spaces (CommonMark 0.31.2, 2.2 and 5.1).
+ *
+ * @param {string} rest
+ * @param {number} column
+ * @param {boolean} markdown Whether the page is `.md`, not `.mdx`.
+ * @returns {[string, number] | null}
+ */
+function quoteMarkAt(rest, column, markdown) {
+  const blanks = blankColumns(rest, column);
+  const body = pastBlanks(rest);
+  if (!body.startsWith('>') || (markdown && blanks >= CODE_INDENT)) return null;
+  const at = column + blanks + 1;
+  const after = body.slice(1);
+  if (after[0] === ' ' || after[0] === '\t') return [pastColumns(after, at, 1), at + 1];
+  return [after, at];
+}
+
+/**
+ * How many quotation marks open `line`, and what they leave of it, read column by
+ * column as the walk of the page reads them, a tab to its stop: a line read apart
+ * from its page, as one a reader has already placed outside code. The twin of
+ * `quotation_marks` in `scripts/markdown_fences.py`.
+ *
+ * @param {string} line
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {[number, string]} The number of marks, and the line past them and the
+ *   blank each may take.
+ */
+export function quotationMarks(line, { kind = 'mdx' } = {}) {
+  let depth = 0;
+  let rest = line;
+  let column = 0;
+  for (;;) {
+    const mark = quoteMarkAt(rest, column, kind === 'md');
+    if (mark === null) return [depth, rest];
+    [rest, column] = mark;
+    depth += 1;
+  }
+}
+
+/**
  * The `[start, end]` of each piece of a table's row, between its unescaped pipes.
  *
  * @param {string} row
@@ -218,10 +263,12 @@ function cellCount(row) {
  * @typedef {object} PageLine One line of a page, as the walk reads it.
  * @property {string} text The line as written.
  * @property {string} role Its part in the page: `blank`, `paragraph`, `text` (a line
- *   that carries a paragraph on, a lazy one among them), `single` (a block of its
- *   own), `underline`, `row`, `html` (it opens a raw HTML block), `raw` (it carries
- *   one on), `indented`, `open`, `body`, `close` (a line of a fence), `maths-open`
- *   and `maths` (any other line of a display block).
+ *   that carries a paragraph on, a lazy one among them), `heading` (a heading
+ *   written with its marks), `single` (any other block of its own: a thematic break,
+ *   an aside's fence, a tag or an expression alone), `underline`, `row`, `html` (it
+ *   opens a raw HTML block), `raw` (it carries one on), `indented`, `open`, `body`,
+ *   `close` (a line of a fence), `maths-open` and `maths` (any other line of a
+ *   display block).
  * @property {string} info The info string of a fence or the meta of a display block,
  *   on the line that opens it.
  * @property {number} indent The indentation of the opening marker, on every line of
@@ -318,13 +365,7 @@ class Walk {
 
   /** What a quotation's mark leaves of `rest`, and at which column, or `null`. */
   quoteMark(rest, column) {
-    const blanks = blankColumns(rest, column);
-    const body = pastBlanks(rest);
-    if (!body.startsWith('>') || (this.markdown && blanks >= CODE_INDENT)) return null;
-    const at = column + blanks + 1;
-    const after = body.slice(1);
-    if (after[0] === ' ' || after[0] === '\t') return [pastColumns(after, at, 1), at + 1];
-    return [after, at];
+    return quoteMarkAt(rest, column, this.markdown);
   }
 
   /** What is left of a line that closes the innermost aside, or `null`. */
@@ -478,7 +519,8 @@ class Walk {
   /** The role of a line that is a block by itself, or `null`. */
   oneLineRole(index, body, strict) {
     if (strict && UNDERLINE.test(body)) return 'underline';
-    if (ATX_HEADING.test(body) || THEMATIC_BREAK.test(body)) return 'single';
+    if (ATX_HEADING.test(body)) return 'heading';
+    if (THEMATIC_BREAK.test(body)) return 'single';
     if (LEAF_DIRECTIVE.test(body)) return 'single';
     if (!this.markdown && (body[0] === '<' || body[0] === '{')) {
       const taken = this.mdxFlow(index, body);
@@ -674,9 +716,11 @@ function fence(line, info, body) {
  * Every fenced block of a page, in reading order.
  *
  * @param {string} text The page.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind (`pageLines`): a
+ *   `.md` page shows a fence indented four columns as code, written out.
  * @returns {Fence[]} One entry per block, closed or running to the end.
  */
-export function fences(text) {
+export function fences(text, { kind = 'mdx' } = {}) {
   const found = [];
   let start = 0;
   let info = '';
@@ -684,7 +728,7 @@ export function fences(text) {
   let body = [];
   const lines = withEnds(text);
   let number = 0;
-  for (const line of pageLines(splitLines(text))) {
+  for (const line of pageLines(splitLines(text), { kind })) {
     const end = lines[number].slice(line.text.length);
     number += 1;
     if (line.role === 'body') {

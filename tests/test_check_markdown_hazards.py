@@ -428,6 +428,57 @@ def test_a_wrapped_greater_than_sign_is_refused() -> None:
     assert "starts a block quote" in problems[0]
 
 
+@pytest.mark.parametrize(
+    ("line", "page", "refused"),
+    [
+        (" > 5 dB above it.", "p.md", 1),
+        (" > 5 dB above it.", "p.mdx", 1),
+        ("   >5 dB above it.", "p.md", 1),
+        ("\t> 5 dB above it.", "p.mdx", 1),
+        # Four columns carry the paragraph on, on a page that has indented code.
+        ("\t> 5 dB above it.", "p.md", 0),
+        ("    > 5 dB above it.", "p.md", 0),
+    ],
+)
+def test_a_greater_than_sign_is_read_by_its_columns(
+    line: str, page: str, refused: int
+) -> None:
+    """A mark behind up to three columns of blanks opens a quotation, and
+    behind any number on an ``.mdx`` page, as the walk of the page reads it.
+
+    Only a ``>`` at the very start of the line was read as one, so a
+    greater-than sign that wrapped behind a space turned the tail of the
+    sentence into a quotation unreported.
+    """
+    problems = cmh.check_text(f"The level is always\n{line}\n", page)
+    assert sum("starts a block quote" in problem for problem in problems) == refused
+    assert len(problems) == refused
+
+
+@pytest.mark.parametrize("page", ["p.md", "p.mdx"])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Before.\n\n> A quotation opens here\nand a lazy line carries it\n> on to its end.\n",
+        "- An item.\n\n  > A quotation opens here\n  and a lazy line carries it\n  > on to its end.\n",
+    ],
+    ids=["at-the-top", "in-a-list-item"],
+)
+def test_a_mark_that_carries_a_quotation_on_is_no_wrapped_operator(
+    text: str, page: str
+) -> None:
+    """A ``>`` after a lazy line of a quotation's paragraph carries the same
+    quotation on, as the walk of the page reads it, and opens no block.
+
+    Only the line above was read, and a lazy line reads as prose, so the
+    mark was refused as a comparison that wrapped into a new quotation. One
+    that opens a quotation under a paragraph of prose still is.
+    """
+    assert cmh.check_text(text, page) == []
+    opened = "Prose above.\n> 5 dB above it.\n"
+    assert len(cmh.check_text(opened, page)) == 1
+
+
 def test_a_same_page_link_to_an_accented_heading_is_refused() -> None:
     problems = cmh.check_text("See [it](#la-medición).\n", "p.md")
     assert len(problems) == 1
@@ -672,6 +723,7 @@ def test_a_fence_shown_inside_another_closes_nothing() -> None:
     assert "starts a block quote" in problems[0]
 
 
+@pytest.mark.whole_tree
 def test_the_shipped_pages_pass(capsys: pytest.CaptureFixture[str]) -> None:
     assert cmh.main() == 0
     assert "Markdown renders the way it reads" in capsys.readouterr().out

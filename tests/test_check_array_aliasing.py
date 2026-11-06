@@ -18,7 +18,9 @@ from __future__ import annotations
 import pathlib
 import sys
 import textwrap
+from typing import TYPE_CHECKING
 
+import guard_caches
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -27,6 +29,22 @@ if _SCRIPTS not in sys.path:
 
 import ast_scan
 import check_array_aliasing as caa
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+
+#: The tests that read the whole package share what the guard keeps of it, so
+#: they run on one worker (rule T19), and the guard lets it go after them.
+pytestmark = pytest.mark.xdist_group("array-aliasing")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _forget_the_guard() -> Iterator[None]:
+    """Let go of what the guard read once this module's tests are done."""
+    yield
+    guard_caches.forget(caa)
+
 
 #: The helpers every package below imports, as the real one spells them.
 _FROZEN = """
@@ -791,6 +809,464 @@ def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     }
 
 
+def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``alias = handing_back`` binds the name to the function the value
+    names, at the top of the module, in a function under ``global`` and in
+    the function that calls it, as a ``def`` or an import of it would, and
+    so does ``(fn := handing_back)``.
+
+    Only a ``def``, a ``class`` or an import was read as a binding, so a call
+    of the name reached the ``def`` the assignment replaced, or nothing at
+    all, and a record that keeps what the function hands back passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from ._internal import validation
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        def hand(a):
+            return np.array(a)
+
+        def swap():
+            global hand
+            hand = handing_back
+
+        def through_global(frequencies, levels):
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def keep(a):
+            return np.array(a)
+
+        keep = handing_back
+
+        def through_the_top(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        alias = handing_back
+        checked = validation.require_finite_array
+
+        def through_an_alias(frequencies, levels):
+            f = alias(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_module(frequencies, levels):
+            f = checked(frequencies, "frequencies")
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_local(frequencies, levels):
+            fn = handing_back
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_walrus(frequencies, levels):
+            if (fn := handing_back) is not None:
+                pass
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copy(a):
+            return np.array(a)
+
+        def replaced(frequencies, levels):
+            fn = handing_back
+            fn = copy
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def unknown(frequencies, levels, fn=copy):
+            f = fn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        import numpy as np
+
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+
+        def keep(a):
+            return np.array(a)
+
+        def kept(a):
+            return np.array(a)
+
+        kept = handing_back
+
+        def copying(a):
+            return np.array(a)
+
+        def held(a):
+            return a
+
+        held = copying
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import held, keep, kept
+        from .results import BandResult
+
+        def through_a_replaced_def(frequencies, levels):
+            f = held(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_replaced_alias(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_replaced_attribute(frequencies, levels):
+            f = helpers.keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_standing_alias(frequencies, levels):
+            f = kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_standing_attribute(frequencies, levels):
+            f = helpers.kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    # Another module reads the name once the module has run: an alias a
+    # later ``def`` replaces, or a ``def`` a later alias replaces, stands
+    # for nothing there.
+    assert found == {
+        ("through_global", "BandResult.frequencies", "frequencies"),
+        ("through_the_top", "BandResult.frequencies", "frequencies"),
+        ("through_an_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_module", "BandResult.frequencies", "frequencies"),
+        ("through_a_local", "BandResult.frequencies", "frequencies"),
+        ("through_a_walrus", "BandResult.frequencies", "frequencies"),
+        ("through_a_standing_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_standing_attribute", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_later_binding_of_another_kind_ends_an_alias(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``keep = handing_back`` then ``keep = lambda a: a.copy()`` leaves the
+    name holding the lambda, which the guard cannot name, at the top of the
+    module and read from another; a call's result ends the alias as well.
+
+    Only a ``def``, a ``class``, an import and an alias were read as bindings
+    of the top, so the alias stood past the lambda, a call of the name reached
+    the function that hands its argument back, and the record that keeps the
+    copy was refused.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        lam = handing_back
+        lam = lambda a: np.array(a)
+
+        made = handing_back
+        made = np.vectorize(np.copy)
+
+        standing = handing_back
+
+        def through_a_lambda(frequencies, levels):
+            f = lam(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_call(frequencies, levels):
+            f = made(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_standing_alias(frequencies, levels):
+            f = standing(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        keep = lambda a: a.copy()
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import keep
+        from .results import BandResult
+
+        def through_an_import(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_attribute(frequencies, levels):
+            f = helpers.keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_a_standing_alias", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_loop_s_target_leaves_an_alias_standing(tmp_path: pathlib.Path) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias before it, as after the
+    branches of an ``if``, at the top of the module and read from another.
+
+    The target was read as bound on every way past the loop, so it ended
+    ``keep = handing_back``, and the record that keeps what the function
+    hands back passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        no_turn = handing_back
+        for no_turn in ():
+            pass
+
+        a_turn = handing_back
+        for a_turn in [np.copy]:
+            pass
+
+        def through_no_turn(frequencies, levels):
+            f = no_turn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_turn(frequencies, levels):
+            f = a_turn(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        for keep in ():
+            pass
+        """,
+        importer="""
+        from .helpers import keep
+        from .results import BandResult
+
+        def through_an_import(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_no_turn", "BandResult.frequencies", "frequencies"),
+        ("through_a_turn", "BandResult.frequencies", "frequencies"),
+        ("through_an_import", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``keep = handing_back`` holds the function ``handing_back`` names
+    where the assignment runs, whatever a later ``def`` or ``class`` binds
+    that name to, at the top of a module, in an assignment expression and
+    read from another module.
+
+    The definitions of ``handing_back`` were chosen again where ``keep(...)``
+    runs, or once the module had run, so a later copying ``def`` of the name
+    stood for the alias and the record that keeps the caller's array passed,
+    and an alias of a copying ``def`` a later one replaced with one that
+    hands its argument back was refused.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        (walrus := handing_back)
+
+        def handing_back(a):
+            return np.array(a)
+
+        def copying(a):
+            return np.array(a)
+
+        copied = copying
+
+        def copying(a):
+            return a
+
+        def through_an_alias(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_walrus(frequencies, levels):
+            f = walrus(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_copying_alias(frequencies, levels):
+            f = copied(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        import numpy as np
+
+        def handing_back(a):
+            return a
+
+        kept = handing_back
+
+        def handing_back(a):
+            return np.array(a)
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import kept
+        from .results import BandResult
+
+        def through_an_import(frequencies, levels):
+            f = kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_attribute(frequencies, levels):
+            f = helpers.kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_an_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_walrus", "BandResult.frequencies", "frequencies"),
+        ("through_an_import", "BandResult.frequencies", "frequencies"),
+        ("through_an_attribute", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_an_alias_of_a_def_holds_it_whatever_a_later_class_binds_the_name_to(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``keep = handing_back`` followed by ``class handing_back`` still holds
+    the ``def``, at the top of a module, in an assignment expression and read
+    from another module, while an alias of a ``class`` a later ``def``
+    replaces holds the class; and a call of a name whose ``class`` a later
+    ``def`` replaces reaches the ``def``, in its module and through an
+    import.
+
+    A function and a class of one name share one key, and a call that
+    reached the key was read as a call of the class whenever the class was
+    there, whatever the alias had held where it was bound or the name held
+    where the call ran, so a record that keeps the caller's array through
+    the alias or the replacing ``def`` passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        (walrus := handing_back)
+
+        class handing_back:
+            pass
+
+        class made:
+            pass
+
+        held = made
+
+        def made(a):
+            return a
+
+        class direct:
+            pass
+
+        def direct(a):
+            return a
+
+        def through_an_alias(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_walrus(frequencies, levels):
+            f = walrus(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_alias_of_a_class(frequencies, levels):
+            f = held(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_the_name(frequencies, levels):
+            f = direct(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        def handing_back(a):
+            return a
+
+        kept = handing_back
+
+        class handing_back:
+            pass
+
+        class replaced:
+            pass
+
+        def replaced(a):
+            return a
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import kept, replaced
+        from .results import BandResult
+
+        def through_an_imported_def(frequencies, levels):
+            f = replaced(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_import(frequencies, levels):
+            f = kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_attribute(frequencies, levels):
+            f = helpers.kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_an_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_walrus", "BandResult.frequencies", "frequencies"),
+        ("through_an_import", "BandResult.frequencies", "frequencies"),
+        ("through_an_attribute", "BandResult.frequencies", "frequencies"),
+        ("through_the_name", "BandResult.frequencies", "frequencies"),
+        ("through_an_imported_def", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -823,6 +1299,94 @@ def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
         """,
     )
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_keyword_a_starred_argument_may_leave_to_it_reaches_its_place(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument may unpack nothing, so a parameter it may fill is one
+    ``**options`` may fill too.
+
+    The parameters from the ``*`` argument's place on were read as filled by
+    it, so ``keep(*rest, **options)`` with ``rest`` empty and the caller's
+    array under ``"a"`` in ``options`` handed nothing of it to ``a``, which
+    ``keep`` returns, and the record that keeps the result passed.
+
+    A place an explicit keyword fills is that keyword's alone: were the
+    ``*`` argument or the mapping to fill it too, the call would raise, so
+    ``a=`` beside ``*rest`` and ``**options`` hands ``a`` the copy only.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return a
+
+        def kept(a, b=None):
+            return a
+
+        def rating(frequencies, levels):
+            rest = []
+            options = {"a": frequencies}
+            f = keep(*rest, **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def placed(frequencies, levels):
+            options = {"a": frequencies}
+            f = keep(np.array(levels), **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def named(frequencies, levels, rest):
+            options = {"b": frequencies}
+            f = kept(*rest, a=np.array(levels), **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_keyword_fills_no_positional_only_place(tmp_path: pathlib.Path) -> None:
+    """A keyword, or a ``**`` mapping, that names a positional-only parameter
+    goes to ``**kwargs``; the place is left to the arguments by place.
+
+    The keyword was read as filling the place, so ``kept(frequencies,
+    a=copy)`` and ``kept(*[frequencies], a=copy)``, which return the
+    caller's array, read as returning the copy, and the records that keep
+    the result passed; a mapping under the parameter's name read as
+    reaching it.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def kept(a, /, **kw):
+            return a
+
+        def placed(frequencies, levels):
+            f = kept(frequencies, a=np.array(levels))
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def starred(frequencies, levels):
+            f = kept(*[frequencies], a=np.array(levels))
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def mapped(frequencies, levels):
+            options = {"a": frequencies}
+            f = kept(np.array(levels), **options)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("placed", "BandResult.frequencies", "frequencies"),
+        ("starred", "BandResult.frequencies", "frequencies"),
+    }
 
 
 def test_a_helper_s_type_parameter_is_not_what_its_closure_holds(
@@ -2557,6 +3121,7 @@ def test_an_exemption_silences_its_function_and_goes_stale_without_it(
     assert stale == [key]
 
 
+@pytest.mark.whole_tree
 def test_the_tree_passes(capsys: pytest.CaptureFixture[str]) -> None:
     status = caa.main([])
     assert status == 0, capsys.readouterr().out

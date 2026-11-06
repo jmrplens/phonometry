@@ -27,6 +27,8 @@ import re
 import typing
 import warnings
 
+import pytest
+
 import phonometry
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -141,6 +143,7 @@ def stale_examples(pages: list[pathlib.Path]) -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_no_inline_example_builds_a_record_by_position_or_unpacks_one() -> None:
     """Every inline example of the API table and the guides runs as written."""
     assert stale_examples(_pages()) == []

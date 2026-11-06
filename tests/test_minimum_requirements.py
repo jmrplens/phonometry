@@ -264,6 +264,7 @@ def _imported_tooling(tree: ast.Module) -> set[str]:
     }
 
 
+@pytest.mark.whole_tree
 def test_every_module_testing_the_figure_tooling_is_kept_off_the_floors() -> None:
     """A test of the figure or diagram tooling carries the ``pinned_stack`` mark.
 
@@ -289,6 +290,7 @@ def _marks_pinned_stack(tree: ast.Module) -> bool:
     )
 
 
+@pytest.mark.whole_tree
 def test_only_a_module_testing_the_figure_tooling_is_kept_off_the_floors() -> None:
     """The converse: the mark leaves a test out of the minimum-versions job.
 
@@ -473,6 +475,7 @@ def _tracked_text() -> list[Path]:
     ]
 
 
+@pytest.mark.whole_tree
 def test_every_statement_of_the_oldest_python_names_requires_python() -> None:
     """Wherever the tree says "Python 3.N or newer", N is the requires-python floor.
 

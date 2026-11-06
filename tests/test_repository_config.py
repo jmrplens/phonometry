@@ -827,6 +827,7 @@ def _mypypath_settings_in(name: str, text: str) -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_every_stated_type_check_is_bare_mypy() -> None:
     """CI, ``make lint`` and every page run the type check as plain ``mypy``.
 
@@ -854,6 +855,7 @@ def test_every_stated_type_check_is_bare_mypy() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_no_stated_place_sets_a_search_path_for_mypy() -> None:
     """``MYPYPATH`` is ``mypy_path`` by another name, and mypy searches it first.
 

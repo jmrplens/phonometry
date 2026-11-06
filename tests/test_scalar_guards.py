@@ -1173,6 +1173,7 @@ def _offences(rule: Callable[[str], list[str]]) -> list[str]:
     ]
 
 
+@pytest.mark.whole_tree
 @pytest.mark.parametrize("rule", list(_RULES), ids=list(_RULES))
 def test_no_guard_in_the_tree_leaves_the_rank_to_numpy(rule: str) -> None:
     assert _offences(_RULES[rule]) == []

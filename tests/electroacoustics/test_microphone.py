@@ -852,6 +852,7 @@ def test_every_weighting_name_the_api_takes_is_a_curve_the_filter_knows() -> Non
     assert accepted <= curves, sorted(accepted - curves)
 
 
+@pytest.mark.whole_tree
 def test_no_code_in_the_library_spells_the_curve_ccir() -> None:
     """The legacy name survives only in prose that explains it, never as a value.
 

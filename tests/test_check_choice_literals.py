@@ -15,6 +15,7 @@ holds.
 from __future__ import annotations
 
 import ast
+import dataclasses
 import enum
 import importlib.util
 import inspect
@@ -22,7 +23,7 @@ import pathlib
 import sys
 import textwrap
 import typing
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Literal
@@ -32,11 +33,23 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_choice_literals as ccl
+import guard_caches
 import pytest
 
 from phonometry._internal.frozen import OwnsArrays
 from phonometry._internal.validation import require_choice
 from phonometry.filters.weighting import time_weighting
+
+#: The tests that read the whole package share what the guard keeps of it, so
+#: they run on one worker (rule T19), and the guard lets it go after them.
+pytestmark = pytest.mark.xdist_group("choice-literals")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _forget_the_guard() -> Iterator[None]:
+    """Let go of what the guard read once this module's tests are done."""
+    yield
+    guard_caches.forget(ccl)
 
 
 def _tree(function: object) -> ast.AST:
@@ -613,6 +626,46 @@ def test_two_imports_in_branches_that_disagree_give_no_value(
     assert ccl.expanded("Names", f"phonometry.{stem}") == "Names"
 
 
+def test_an_alias_of_a_constant_holds_what_its_value_named_where_it_was_bound(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``ALLOWED = KINDS`` holds the table ``KINDS`` names where the
+    assignment runs, whatever a later assignment binds ``KINDS`` to, in its
+    module and read through an import of it; one written after the last
+    binding of ``KINDS`` holds that one.
+
+    The alias's value was read as the module held ``KINDS`` once it had run,
+    so its options were those of the table a later assignment bound.
+    """
+    _plant_modules(
+        tmp_path,
+        monkeypatch,
+        {
+            "_alias_point": """
+                KINDS = ("fast", "slow")
+                ALLOWED = KINDS
+                KINDS = ("other",)
+
+                TABLE = {"a": 1, "b": 2}
+                KEYS = TABLE
+                TABLE = {"z": 0}
+
+                STANDING = KINDS
+                """,
+            "_alias_point_user": """
+                from ._alias_point import ALLOWED
+                """,
+        },
+    )
+    assert sys.modules["phonometry._alias_point"].ALLOWED == ("fast", "slow")
+    constants = ccl._constants_of("phonometry._alias_point")
+    assert ccl.strings_of(ast.Name(id="ALLOWED"), constants) == ("fast", "slow")
+    assert ccl.strings_of(ast.Name(id="KEYS"), constants) == ("a", "b")
+    assert ccl.strings_of(ast.Name(id="STANDING"), constants) == ("other",)
+    imported = ccl._constants_of("phonometry._alias_point_user")
+    assert ccl.strings_of(ast.Name(id="ALLOWED"), imported) == ("fast", "slow")
+
+
 def test_two_imports_in_branches_that_agree_give_their_value(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -974,6 +1027,85 @@ def test_a_parameter_spread_from_a_dict_is_followed() -> None:
     assert found == ["handed to time_weighting(mode)"]
 
 
+@dataclass
+class _Built:
+    kind: str
+    other: int = 0
+
+
+@pytest.mark.parametrize(
+    ("call", "handed"),
+    [
+        ("R(**options, kind='a')", "'a'"),
+        ("R(kind='a', **options)", "'a'"),
+        ("R('a', **options)", "'a'"),
+        ("R(*rest, kind='a')", "'a'"),
+        ("R(**options)", "**"),
+        ("R(*rest)", "**"),
+        ("R(other=1)", None),
+    ],
+)
+def test_a_mapping_hands_nothing_to_a_place_an_argument_fills(
+    call: str, handed: str | None
+) -> None:
+    """A place the call fills by its keyword, or in its place before any
+    ``*`` argument, is that argument's alone: a ``**`` mapping that filled it
+    too would make the call raise. Only a place nothing fills is one the
+    mapping, or a ``*`` argument at or before it, may fill.
+
+    The keyword was looked for only until the first mapping, and a mapping
+    anywhere opened the place an argument filled, so a record built with
+    ``kind='a'`` beside ``**options`` read as built with anything.
+    """
+    node = ast.parse(call, mode="eval").body
+    assert isinstance(node, ast.Call)
+    kind = next(f for f in dataclasses.fields(_Built) if f.name == "kind")
+    found = ccl._argument_for(node, kind, ["kind", "other"])
+    shown = ast.unparse(found) if isinstance(found, ast.expr) else found
+    assert shown == handed
+
+
+@pytest.mark.parametrize(
+    ("call", "texts"),
+    [
+        ("_helper(text, kind='a')", None),
+        ("_helper('a', **{'kind': text})", frozenset({"a"})),
+    ],
+)
+def test_a_keyword_fills_no_positional_only_parameter(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    call: str,
+    texts: frozenset[str] | None,
+) -> None:
+    """A keyword, or a ``**`` mapping, that names a positional-only parameter
+    of a private helper goes to its ``**kw``; the place is the argument's.
+
+    The keyword was read as the parameter's, so ``_helper(text, kind='a')``
+    read as handing the helper the fixed text ``'a'`` where it hands the
+    caller's free one, and a mapping beside a fixed text read as handing
+    anything.
+    """
+    source = (
+        "def _helper(kind, /, **kw):\n    return kind\n\n"
+        f"def make(text):\n    return {call}\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_positional_only": source})
+    tree = ast.parse(source)
+    helper, make = tree.body
+    assert isinstance(helper, ast.FunctionDef)
+    assert isinstance(make, ast.FunctionDef)
+    assert isinstance(make.body[0], ast.Return)
+    site = make.body[0].value
+    assert isinstance(site, ast.Call)
+    module = "phonometry._positional_only"
+    monkeypatch.setattr(
+        ccl, "_construction_sites", lambda: {"_helper": ((module, make, site),)}
+    )
+    found = ccl._callers_source(helper, "kind", module, 0)
+    assert (found.texts if found.kind == "texts" else None) == texts
+
+
 def test_a_function_the_body_imports_is_followed() -> None:
     """A call to a name the body imports itself reaches the library function."""
     found = ccl.passed_on_evidence(_imports_inside, "mode")
@@ -1003,6 +1135,7 @@ def test_two_quoted_options_in_the_docstring_are_a_choice() -> None:
     assert ccl.documented_options(_documented.__doc__, "mode") == ("fast", "slow")
 
 
+@pytest.mark.whole_tree
 def test_a_stale_open_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     """An exemption that names nothing the walk finds cannot outlive its reason."""
     key = ("phonometry.nowhere", "gone", "mode")
@@ -1035,6 +1168,7 @@ def test_a_class_written_into_between_two_methods_is_still_read_whole() -> None:
     assert names == ["first", "second"]
 
 
+@pytest.mark.whole_tree
 def test_every_public_choice_of_the_package_is_a_literal() -> None:
     """The package passes: no closed choice is typed ``str``, no entry is stale."""
     found, stale = ccl.offenders()
@@ -1438,6 +1572,7 @@ def test_a_record_field_is_read_where_its_module_uses_it() -> None:
     assert unchecked == [".lower() in _reads_unchecked()"]
 
 
+@pytest.mark.whole_tree
 def test_every_literal_choice_is_checked_as_written() -> None:
     """The package passes: no public choice typed ``Literal`` is cleaned up
     before its check, here or in a function it is handed to (rule A45).
@@ -2935,6 +3070,7 @@ def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
     assert gone in stale
 
 
+@pytest.mark.whole_tree
 def test_every_literal_choice_is_checked_on_every_path() -> None:
     """The package passes: every public ``Literal`` choice and every one a
     record a caller builds holds reaches a shared validator on every path,
@@ -3096,6 +3232,7 @@ def test_a_stale_open_table_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None
     assert needed not in stale
 
 
+@pytest.mark.whole_tree
 def test_every_published_table_of_a_vocabulary_is_keyed_by_it() -> None:
     """The package passes: no published table keyed by any text holds the
     options of a vocabulary, and no entry of ``OPEN_TABLES`` is stale (rule A21).

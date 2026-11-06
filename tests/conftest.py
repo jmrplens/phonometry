@@ -13,8 +13,10 @@ import pytest
 # matplotlib's settings, which a test must leave as it found them and which
 # are put back after each test module is imported; and the fixtures of the
 # simulation engine tests, which live in a module of their own name because a
-# second `conftest.py` would share this one's module name.
-pytest_plugins = ("engine_fixtures", "hang_guard", "matplotlib_guard")
+# second `conftest.py` would share this one's module name; and the count of
+# the repository's files each test opens, with --without-whole-tree, which
+# leaves out the tests that read the repository whole (tests/whole_tree.py).
+pytest_plugins = ("engine_fixtures", "hang_guard", "matplotlib_guard", "whole_tree")
 
 # Select a non-interactive matplotlib backend for the headless test suite.
 # The library no longer forces a backend (see issue #52), so the test harness
@@ -140,6 +142,25 @@ def _close_figures() -> Iterator[None]:
     pyplot = sys.modules.get("matplotlib.pyplot")
     if pyplot is not None:
         pyplot.close("all")
+
+
+@pytest.fixture(autouse=True)
+def _forget_scanned_trees() -> Iterator[None]:
+    """Let go of the trees the guards' shared reader kept for a test.
+
+    ``scripts/ast_scan.py`` keeps what it reads of a tree (its scopes, their
+    bindings, its blocks) in caches keyed by the tree, for as long as the
+    process runs, so a guard that reads the whole package would leave every
+    module it parsed in the worker to the end of the session, and the next
+    guard's trees beside them. A test keeps all it reads while it runs; once
+    it is done, ``forget_trees`` lets the trees go. The reader is looked up
+    rather than imported, so a test that never reads code does not pay for
+    importing it.
+    """
+    yield
+    ast_scan = sys.modules.get("ast_scan")
+    if ast_scan is not None:
+        ast_scan.forget_trees()
 
 
 # The modules whose tests dominate the wall clock (steady-state FDTD runs,

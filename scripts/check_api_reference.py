@@ -646,7 +646,7 @@ def defined_names(module: ModuleType) -> list[str]:
     statements = list(tree.body)
     while statements:
         statement = statements.pop(0)
-        if isinstance(statement, ast.If) and is_type_checking_block(statement):
+        if isinstance(statement, ast.If) and is_type_checking_block(statement, tree):
             statements[:0] = what_runs(statement)
         elif isinstance(statement, COMPOUND_STATEMENTS):
             statements[:0] = block_statements(statement)

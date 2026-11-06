@@ -54,6 +54,11 @@ import check_parameter_annotations as cpa
 import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
 
+#: The tests that read the package share it, the module fixture ``reader``, so
+#: they run on one worker (rule T19): the package is read once, and let go
+#: with the fixture once they are done.
+pytestmark = pytest.mark.xdist_group("record-conversions")
+
 _SOURCE = ROOT / "src" / "phonometry"
 
 _BANDS = [100.0, 125.0, 160.0]
@@ -525,6 +530,7 @@ def _dotted(record: object) -> str:
     return f"{type(record).__module__}.{type(record).__qualname__}"
 
 
+@pytest.mark.whole_tree
 def test_every_record_a_caller_builds_that_converts_is_built_here(
     reader: cpa.Reader, records: list[object]
 ) -> None:
@@ -566,6 +572,7 @@ def _published_records() -> dict[str, type]:
     }
 
 
+@pytest.mark.whole_tree
 def test_every_record_holding_a_mapping_is_built_here(
     reader: cpa.Reader, records: list[object]
 ) -> None:

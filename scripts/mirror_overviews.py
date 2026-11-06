@@ -34,7 +34,7 @@ import re
 import sys
 from pathlib import Path
 
-from markdown_fences import code_lines
+from markdown_fences import code_lines, page_kind
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site" / "src" / "content" / "docs"
@@ -270,7 +270,7 @@ def _slug(heading: str) -> str:
     return text.replace(" ", "-")
 
 
-def _unfenced_lines(text: str) -> list[tuple[int, str]]:
+def _unfenced_lines(text: str, kind: str = "md") -> list[tuple[int, str]]:
     """The ``(lineno, line)`` pairs of ``text`` outside fenced code blocks.
 
     A fence can hold anything that merely looks like markdown: a Python
@@ -278,13 +278,14 @@ def _unfenced_lines(text: str) -> list[tuple[int, str]]:
     or a snippet demonstrating link syntax a guide is teaching rather than
     using. Shared by the heading scan and the anchor scan so both agree on
     what counts as fenced, and read through ``markdown_fences`` so that both
-    agree with every other check on where a fence closes.
+    agree with every other check on where a fence closes. *kind* is the
+    page's, ``"md"`` or ``"mdx"`` (:func:`markdown_fences.page_kind`).
     """
     lines = text.splitlines()
     return [
         (lineno, line)
         for lineno, (line, code) in enumerate(
-            zip(lines, code_lines(lines), strict=True), start=1
+            zip(lines, code_lines(lines, kind=kind), strict=True), start=1
         )
         if not code
     ]
@@ -298,7 +299,9 @@ def _headings(path: Path) -> list[str]:
     for one.
     """
     headings: list[str] = []
-    for _, line in _unfenced_lines(path.read_text(encoding="utf-8")):
+    for _, line in _unfenced_lines(
+        path.read_text(encoding="utf-8"), page_kind(path.name)
+    ):
         match = _ATX_HEADING.match(line)
         if match and match.group(1):
             headings.append(match.group(1))
@@ -325,7 +328,9 @@ def _fragments(path: Path) -> set[str]:
         n = seen.get(slug, 0)
         seen[slug] = n + 1
         fragments.add(slug if n == 0 else f"{slug}-{n}")
-    for _lineno, line in _unfenced_lines(path.read_text(encoding="utf-8")):
+    for _lineno, line in _unfenced_lines(
+        path.read_text(encoding="utf-8"), page_kind(path.name)
+    ):
         fragments.update(_EXPLICIT_ANCHOR.findall(line))
     return fragments
 

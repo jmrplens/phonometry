@@ -128,7 +128,7 @@ import pathlib
 import re
 import sys
 
-from markdown_fences import NOT_INLINE_ROLES, PageLine, page_lines
+from markdown_fences import NOT_INLINE_ROLES, PageLine, page_lines, quotation_marks
 from markdown_spans import (
     block_starts,
     drop_inline_spans,
@@ -151,11 +151,6 @@ _SKIP = ("reference/api/", "superpowers/")
 #: block, so that nothing in a paragraph crosses it. A private-use character,
 #: which no line of a page holds.
 _BLOCK_OPENS = "\ue001"
-
-#: ``>`` opening a line with content after it: a wrapped comparison operator,
-#: unless the paragraph deliberately starts a quotation, which is always
-#: preceded by a blank line.
-_QUOTE = re.compile(r"^>\s*\S")
 
 #: Text that continues a paragraph rather than starting a block of its own.
 _PROSE = re.compile(r"^\s{0,3}[^\s\-*+>#|<:0-9]")
@@ -267,7 +262,7 @@ def _body_start(lines: list[str]) -> int:
     return 0
 
 
-def _mdx_prose(lines: list[str], start: int) -> list[str]:
+def _mdx_prose(walked: list[PageLine]) -> list[str]:
     """The lines as MDX reads their prose, everything else blanked.
 
     The frontmatter, the code fences and the display maths go whole, line by
@@ -275,13 +270,12 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
     of a JSX tag go where they stand, read from left to right over the whole
     page, since each can run over several lines. Blanking rather than
     dropping keeps every character on its line and column.
+
+    :param walked: The walk of the page as an MDX page, its frontmatter read
+        as blank lines (:func:`_walk`).
     """
-    body = lines[start:]
-    kept = [""] * start + [
-        "" if line.role in NOT_INLINE_ROLES else line.text
-        for line in page_lines(body, kind="mdx")
-    ]
-    opens = block_starts([""] * start + body, kind="mdx")
+    kept = ["" if line.role in NOT_INLINE_ROLES else line.text for line in walked]
+    opens = block_starts([line.text for line in walked], kind="mdx", walked=walked)
     marked = [
         _BLOCK_OPENS + line if opening else line
         for line, opening in zip(kept, opens, strict=True)
@@ -294,14 +288,14 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
     ]
 
 
-def _less_than_problems(rel: str, lines: list[str], start: int) -> list[str]:
+def _less_than_problems(rel: str, walked: list[PageLine]) -> list[str]:
     """Rule 5: a ``<`` in MDX prose that MDX reads as the start of a tag."""
     return [
         f"{rel}:{number}: {prose[glued.start() : glued.start() + 12]!r} "
         f"puts a '<' before a character no tag name starts with, and MDX "
         f"reads it as a tag: the site build fails. Write it in words, put "
         f"a space after '<', or escape it as '\\<'."
-        for number, prose in enumerate(_mdx_prose(lines, start), start=1)
+        for number, prose in enumerate(_mdx_prose(walked), start=1)
         for glued in _MDX_LESS_THAN.finditer(prose)
     ]
 
@@ -327,9 +321,24 @@ def _cut_maths_problems(
     ]
 
 
-def _wrapped_quote_problems(where: str, line: str, before: str) -> list[str]:
-    """Rule 2: a ``>`` that wrapped to the start of a line of a paragraph."""
-    if not (_QUOTE.match(line) and _PROSE.match(before)):
+def _wrapped_quote_problems(
+    where: str, line: str, before: str, *, kind: str, opens_block: bool
+) -> list[str]:
+    """Rule 2: a ``>`` that wrapped to the start of a line of a paragraph.
+
+    A ``>`` that opens the line with content after it, read by its columns as
+    the walk of the page reads a quotation's mark (:func:`quotation_marks`):
+    behind up to three columns of blanks, or any number on an ``.mdx`` page.
+    It is a wrapped comparison operator, unless the paragraph deliberately
+    starts a quotation, which is always preceded by a blank line. A mark
+    that carries on the quotation of the paragraph above, behind a lazy line
+    of it, opens no block, and is that quotation's.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param opens_block: Whether the line opens a block, as the site reads it.
+    """
+    marks, rest = quotation_marks(line, kind=kind)
+    if not (opens_block and marks and rest.strip(" \t") and _PROSE.match(before)):
         return []
     return [
         f"{where}: {line.strip()[:40]!r} continues the sentence above but "
@@ -411,25 +420,35 @@ def _maths_left_open(line: str, *, open_math: bool, opens_block: bool) -> bool:
     return open_math
 
 
+def _walk(lines: list[str], start: int, *, kind: str) -> list[PageLine]:
+    """The walk of a page (:func:`markdown_fences.page_lines`), made once and handed
+    to every reader of it: the lines from *start* on, the frontmatter above them
+    read as blank lines, which open nothing and leave nothing open.
+
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    """
+    return list(page_lines([""] * start + lines[start:], kind=kind))
+
+
 def _markdown_problems(
-    rel: str, lines: list[str], start: int, *, kind: str
+    rel: str, lines: list[str], start: int, walked: list[PageLine], *, kind: str
 ) -> list[str]:
     """Rules 1 to 4 and 6, which read the page line by line as CommonMark does.
 
     Code and display maths are not markdown, so no rule reads them, but the
     fourth reads the line that opens a display block, which is its business.
 
+    :param walked: The walk of the page (:func:`_walk`).
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     """
     problems: list[str] = []
     open_math = False
-    read = list(page_lines(lines[start:], kind=kind))
-    page = [""] * start + lines[start:]
+    page = [line.text for line in walked]
     shown = lines_read_whole(
-        page, lambda text: drop_inline_spans_by_block(text, kind=kind)
+        page, lambda text: drop_inline_spans_by_block(text, kind=kind, walked=walked)
     )
-    opens_block = block_starts(page, kind=kind)
-    for offset, line in enumerate(read):
+    opens_block = block_starts(page, kind=kind, walked=walked)
+    for offset, line in enumerate(walked[start:]):
         index = start + offset
         where = f"{rel}:{index + 1}"
         problems.extend(_math_meta_problems(where, line))
@@ -442,7 +461,11 @@ def _markdown_problems(
                 where, line, index, open_math=open_math, opens_block=opens_block[index]
             )
         )
-        problems.extend(_wrapped_quote_problems(where, line.text, before))
+        problems.extend(
+            _wrapped_quote_problems(
+                where, line.text, before, kind=kind, opens_block=opens_block[index]
+            )
+        )
         problems.extend(_anchor_problems(where, line.text))
         problems.extend(_setext_problems(where, line))
         open_math = _maths_left_open(
@@ -455,10 +478,11 @@ def check_text(text: str, rel: str) -> list[str]:
     """Every hazard of one page; ``rel`` names it, and an ``.mdx`` one is MDX."""
     lines = text.splitlines()
     start = _body_start(lines)
-    mdx = rel.endswith(".mdx")
-    problems = _markdown_problems(rel, lines, start, kind="mdx" if mdx else "md")
-    if mdx:
-        problems.extend(_less_than_problems(rel, lines, start))
+    kind = "mdx" if rel.endswith(".mdx") else "md"
+    walked = _walk(lines, start, kind=kind)
+    problems = _markdown_problems(rel, lines, start, walked, kind=kind)
+    if kind == "mdx":
+        problems.extend(_less_than_problems(rel, walked))
     return problems
 
 

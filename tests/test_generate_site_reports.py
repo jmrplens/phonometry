@@ -371,6 +371,7 @@ def test_every_entry_lands_on_exactly_one_page_in_both_languages() -> None:
         assert sorted(published) == sorted(heading for heading, _ in registry.entries)
 
 
+@pytest.mark.whole_tree
 def test_the_committed_pages_are_up_to_date() -> None:
     """The pages in the tree are what the generator writes now, none stale."""
     assert generate_site_reports.main(["--check"]) == 0

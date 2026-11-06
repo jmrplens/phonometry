@@ -88,12 +88,15 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from ast_scan import (
     ROOT,
+    assigned_value,
+    assignment_target,
     binding_of,
     bindings_by_name,
     empty_type_checking_bodies,
     exempted,
     for_the_type_checker,
     global_bindings,
+    held_before,
     live_bindings,
     live_class_members,
     own_names,
@@ -430,6 +433,8 @@ def _bound(
     outer: Mapping[str, str],
     top: Mapping[str, str] | None = None,
     written_in: Mapping[str, str] | None = None,
+    holder: ast.AST | None = None,
+    around: Sequence[ast.AST] = (),
 ) -> dict[str, str]:
     """What each name stands for inside *scope*, given what it stands for around it.
 
@@ -437,14 +442,24 @@ def _bound(
     stores anything in (:func:`_stored`); a name the scope declares
     ``global`` and stores nothing in stands for what it stands for at the
     top of the module, *top*; a parameter whose default is a dotted name
-    stands for what that name stands for where the ``def`` runs, *written_in*
-    (*outer* unless a class body lies between them); then the imports of the
-    scope as :func:`_imported` reads them, the relative ones from *package*;
-    then a name bound by an assignment to a dotted name (``snd = soundfile``,
-    ``reader = sf.read``) stands for what that name stands for, the
-    assignments taken in the order of the source. What the functions and
-    classes in *scope* bind is theirs, and what an ``if TYPE_CHECKING:``
-    block holds never runs, so it stands for nothing.
+    stands for what that name stands for where the ``def`` runs: what the
+    bindings of *holder*, the scope the ``def`` is written in, that may
+    stand there make it (:func:`_held_where`, *around* holding the scopes
+    around *holder*), or what it stands for in
+    *written_in* (*outer* unless a class body lies between them) when
+    no scope it is read in binds it; then the imports of the
+    scope as :func:`_imported` reads them, the relative ones from *package*,
+    a name bound by an assignment to a dotted name (``snd = soundfile``,
+    ``reader = sf.read``) what that name stands for where the assignment
+    runs, as the bindings the scope makes of its first name that may stand
+    there say (:func:`_held_where`), a class body's read in the scopes
+    around it where the class statement runs when none of them has run,
+    and a name any
+    other binding stores in (a lambda, a call's result, a loop's target)
+    nothing the guard can name, each binding taken in the order of the
+    source, so the last one written stands. What the functions and classes
+    in *scope* bind is theirs, and what an ``if TYPE_CHECKING:`` block holds
+    never runs, so it stands for nothing.
     """
     aliases = dict(outer)
     for name in own_names(scope).declared_global:
@@ -454,33 +469,210 @@ def _bound(
     for name in _parameters(scope) | _stored(scope):
         aliases.pop(name, None)
     if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef):
+        table = outer if written_in is None else written_in
         for parameter, default in with_defaults(scope):
-            held = _named_by(default, outer if written_in is None else written_in)
+            held = (
+                _named_by(default, table)
+                if holder is None or default is None
+                else _held_where(default, holder, package, table, around=around)
+            )
             if held is not None:
                 aliases[parameter.arg] = held
-    assignments: list[tuple[str, list[str], tuple[int, int]]] = []
     checker = for_the_type_checker(scope)
+    written: list[
+        tuple[tuple[int, int], ast.Import | ast.ImportFrom | ast.Assign | ast.NamedExpr]
+    ] = []
+    naming: set[int] = set()
     for node in _own_nodes(scope):
         if id(node) in checker:
             continue
         if isinstance(node, ast.Import | ast.ImportFrom):
-            aliases.update(_imported(node, package))
+            written.append(((node.lineno, node.col_offset), node))
+            naming.add(id(node))
         elif (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(target := node.targets[0], ast.Name)
-            and (parts := _dotted(node.value)) is not None
+            isinstance(node, ast.Assign | ast.NamedExpr)
+            and (target := _one_target(node)) is not None
+            and _dotted(node.value) is not None
         ):
-            assignments.append((target.id, parts, (node.lineno, node.col_offset)))
-    for name, parts, _place in sorted(assignments, key=lambda bound: bound[2]):
-        aliases[name] = _resolved(parts, aliases)
+            written.append(((node.lineno, node.col_offset), node))
+            naming |= {id(node), id(target)}
+    # The scopes around *scope*, the module first, which a class body reads
+    # a name in before it binds it (:func:`_held_around`).
+    outside = () if holder is None else (*around, holder)
+    for _place, bound in sorted(written, key=lambda entry: entry[0]):
+        if isinstance(bound, ast.Import | ast.ImportFrom):
+            aliases.update(_imported(bound, package))
+            continue
+        target = _one_target(bound)
+        held = _held_where(bound.value, scope, package, aliases, around=outside)
+        if target is not None and held is not None:
+            aliases[target.id] = held
+    # A name an import or an alias binds, of whose bindings none that may
+    # stand once the scope has run is either (a lambda, a call's result, a
+    # loop's target or a ``del`` after it), stands for nothing.
+    for name, nodes in bindings_by_name(scope).items():
+        running = [node for node in nodes if id(node) not in checker]
+        named = [node for node in running if id(node) in naming]
+        if named and len(named) < len(running):
+            live = live_bindings(scope, running)
+            if not any(id(node) in naming for node in live):
+                aliases.pop(name, None)
     return aliases
+
+
+def _one_target(node: ast.Assign | ast.NamedExpr) -> ast.Name | None:
+    """The one name an assignment, a statement or an expression, stores in."""
+    if isinstance(node, ast.NamedExpr):
+        return assignment_target(node)
+    if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        return node.targets[0]
+    return None
 
 
 def _named_by(default: ast.expr | None, aliases: Mapping[str, str]) -> str | None:
     """What a parameter's *default* stands for, when it is a dotted name."""
     parts = None if default is None else _dotted(default)
     return None if parts is None else _resolved(parts, aliases)
+
+
+#: How many assignments of one name to another a name is followed through.
+_DEPTH = 8
+
+
+def _held_where(
+    value: ast.expr,
+    holder: ast.AST,
+    package: str,
+    table: Mapping[str, str],
+    depth: int = 0,
+    around: Sequence[ast.AST] = (),
+    within: frozenset[int] = frozenset(),
+) -> str | None:
+    """What the dotted name *value*, read in the scope *holder* where it is
+    written, stands for there.
+
+    The bindings *holder* makes of its first name that may stand where it is
+    read (:func:`ast_scan.held_before`) say: an import what it imports, an
+    assignment of a dotted name what that name stands for where it is
+    assigned; a ``def`` or a ``class``, a function or a class of the module
+    that opens no file the guard can name, two that disagree, or any other
+    binding, stand for nothing the guard can name. When none of them has run
+    yet, or *holder* binds the name not at all, the name is read around
+    *holder* (:func:`_held_around`): the builtin at the top of a module, and
+    for a class body the scope around it, *around* holding the scopes around
+    *holder*, the module first, where the class statement runs, which is
+    where its body does. A name a function binds in the module under
+    ``global``, or one read in a function before any binding of it there,
+    stands for what *table* says, the scope's table of names. *within* holds
+    the assignments whose values are being read already: one of them that
+    stands again where its own value is read (``node = node.parent`` in a
+    loop) stands there for what it held a turn before, which is nothing the
+    guard can name.
+    """
+    parts = _dotted(value)
+    if parts is None:
+        return None
+    head = parts[0]
+    nodes = bindings_by_name(holder).get(head, [])
+    swapped = isinstance(holder, ast.Module) and head in global_bindings(holder)
+    if swapped or depth > _DEPTH:
+        return _resolved(parts, table)
+    # Of the scope's bindings of the name, those that may stand where it is
+    # read; none when none of them has run yet, and the name is read where
+    # the scope reads a name it has not bound: the builtin at the top of a
+    # module, the module around a class body.
+    live = held_before(holder, nodes, value) if nodes else []
+    if not live:
+        return _held_around(value, parts, holder, package, table, depth, around, within)
+    if not any(_may_name(holder, node) for node in live):
+        # Whichever of them stands where the name is read, it stands for
+        # nothing the guard can name: no need to ask which it is.
+        return _BOUND_NEARER
+    held: set[str | None] = set()
+    for node in live:
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            held.add(_imported(node, package).get(head))
+        elif assignment_target(node) is not None and id(node) not in within:
+            assigned = assigned_value(holder, node)
+            held.add(
+                None
+                if assigned is None or _dotted(assigned) is None
+                else _held_where(
+                    assigned,
+                    holder,
+                    package,
+                    table,
+                    depth + 1,
+                    around,
+                    within | {id(node)},
+                )
+            )
+        else:
+            held.add(None)
+        if len(held) != 1 or None in held:
+            # One that stands for nothing, or two that disagree, and no
+            # other can make the name stand for something again.
+            return _BOUND_NEARER
+    if len(held) != 1 or None in held:
+        return _BOUND_NEARER
+    return ".".join([str(held.pop()), *parts[1:]])
+
+
+def _held_around(
+    value: ast.expr,
+    parts: Sequence[str],
+    holder: ast.AST,
+    package: str,
+    table: Mapping[str, str],
+    depth: int,
+    around: Sequence[ast.AST],
+    within: frozenset[int],
+) -> str | None:
+    """What *value* stands for where *holder* reads its first name before any
+    binding *holder* makes of it has run (:func:`_held_where`).
+
+    At the top of a module, the builtin of the name. In a class body, the
+    scope around it, where the class statement runs: the module when the
+    body binds the name, since Python reads such a name in the class's
+    namespace and then the module's, and otherwise the nearest scope around
+    it that is no class body, *around* holding the scopes around *holder*,
+    the module first. Anywhere else, or with no such scope at hand, what
+    *table*, the scope's table of names, says.
+    """
+    if isinstance(holder, ast.Module):
+        return _resolved(parts, {})
+    if isinstance(holder, ast.ClassDef):
+        bound = parts[0] in bindings_by_name(holder)
+        outer = [
+            i
+            for i, scope in enumerate(around)
+            if not isinstance(scope, ast.ClassDef)
+            and (not bound or isinstance(scope, ast.Module))
+        ]
+        if outer:
+            nearest = outer[-1]
+            return _held_where(
+                value,
+                around[nearest],
+                package,
+                table,
+                depth + 1,
+                around[:nearest],
+                within,
+            )
+    return _resolved(parts, table)
+
+
+def _may_name(holder: ast.AST, node: ast.AST) -> bool:
+    """Whether the binding *node* in *holder* can make its name stand for
+    something the guard can name: an import, or an assignment of a dotted name.
+    """
+    if isinstance(node, ast.Import | ast.ImportFrom):
+        return True
+    if assignment_target(node) is None:
+        return False
+    assigned = assigned_value(holder, node)
+    return assigned is not None and _dotted(assigned) is not None
 
 
 def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]]:
@@ -499,18 +691,20 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
     if isinstance(tree, ast.Module):
         _rebound_from_inside(tree, package, module)
     found: dict[ast.AST, dict[str, str]] = {tree: module}
-    pending: list[tuple[ast.AST, dict[str, str], dict[str, str]]] = [
-        (tree, module, module)
-    ]
+    # Each node to read, with the table around it, the table of the scope it
+    # is written in, that scope, and the scopes around that one.
+    pending: list[
+        tuple[ast.AST, dict[str, str], dict[str, str], ast.AST, tuple[ast.AST, ...]]
+    ] = [(tree, module, module, tree, ())]
     while pending:
-        node, outer, here = pending.pop()
+        node, outer, here, holder, around = pending.pop()
         for child in ast.iter_child_nodes(node):
             if not isinstance(child, _SCOPES):
-                pending.append((child, outer, here))
+                pending.append((child, outer, here, holder, around))
                 continue
-            found[child] = _bound(child, package, outer, module, here)
+            found[child] = _bound(child, package, outer, module, here, holder, around)
             inner = outer if isinstance(child, ast.ClassDef) else found[child]
-            pending.append((child, inner, found[child]))
+            pending.append((child, inner, found[child], child, (*around, holder)))
     return found
 
 
@@ -845,16 +1039,54 @@ def _own_to_an_expression(name: str, call: ast.Call, scope: _Scope) -> ast.AST |
     return binder if isinstance(binder, (ast.Lambda, *_COMPREHENSIONS)) else None
 
 
+def _invoked_where_written(lambda_: ast.Lambda, root: ast.AST) -> ast.Call | None:
+    """The call that calls *lambda_* where it is written, under *root*, if one does."""
+    for node in ast.walk(root):
+        if isinstance(node, ast.Call) and node.func is lambda_:
+            return node
+    return None
+
+
+def _handed_to(lambda_: ast.Lambda, call: ast.Call, name: str) -> ast.expr | str | None:
+    """What *call*, which calls *lambda_* where it is written, hands its
+    parameter *name*: the argument in its place or of its name; ``None`` when
+    the call hands it nothing, so its default stands; :data:`_BOUND_NEARER`
+    when a ``*`` argument or a ``**`` mapping may hand it anything. A keyword
+    or a mapping fills no positional-only parameter: what it hands goes to
+    ``**kwargs``.
+    """
+    arguments = lambda_.args
+    positional = [
+        parameter.arg for parameter in (*arguments.posonlyargs, *arguments.args)
+    ]
+    by_name = name not in {parameter.arg for parameter in arguments.posonlyargs}
+    for keyword in call.keywords:
+        if by_name and keyword.arg == name:
+            return keyword.value
+    if name in positional:
+        index = positional.index(name)
+        before = call.args[: index + 1]
+        if any(isinstance(argument, ast.Starred) for argument in before):
+            return _BOUND_NEARER
+        if index < len(call.args):
+            return call.args[index]
+    if by_name and any(keyword.arg is None for keyword in call.keywords):
+        return _BOUND_NEARER
+    return None
+
+
 def _read_nearer(name: str, call: ast.Call, scope: _Scope) -> str | None:
     """What *name*, the first name of *call*, stands for when a nearer binding
     decides it; ``None`` when *scope*'s table of names does.
 
     A comprehension's variable is its own (:data:`_BOUND_NEARER`), and so is what
     a lambda stores with ``:=``. A lambda's parameter reads as a function's: what
-    its default names, or the module of its spelling, handed in; ``open`` spells
-    no module, so with neither it is unknown too. And ``open``, wherever a scope
-    binds it to what no table holds: a table holds an alias, a default and an
-    import in either branch of a ``try``, which say what it is.
+    its default names where the lambda is written (:func:`_held_where`), or the
+    module of its spelling, handed in; ``open`` spells no module, so with
+    neither it is unknown too. A lambda called where it is written holds what
+    the call hands it instead (:func:`_handed_to`). And ``open``, wherever a
+    scope binds it to what no table holds: a table holds an alias, a default
+    and an import in either branch of a ``try``, which say what it is.
     """
     binder = _own_to_an_expression(name, call, scope)
     if isinstance(binder, ast.Lambda):
@@ -863,7 +1095,20 @@ def _read_nearer(name: str, call: ast.Call, scope: _Scope) -> str | None:
         }
         if name not in defaults:
             return _BOUND_NEARER
-        held = _named_by(defaults[name], scope.aliases)
+        value: ast.expr | None | str = defaults[name]
+        invoked = _invoked_where_written(binder, scope.node)
+        if invoked is not None:
+            value = _handed_to(binder, invoked, name) or value
+        if isinstance(value, str):
+            return _BOUND_NEARER
+        package = _package_of(scope.path, scope.module)
+        held = (
+            None
+            if value is None
+            else _held_where(
+                value, scope.node, package, scope.aliases, around=scope.around[:-1]
+            )
+        )
         if held is not None:
             return held
         spelt = None if name == "open" else _SPELLINGS.get(name)

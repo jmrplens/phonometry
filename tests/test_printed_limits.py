@@ -66,8 +66,10 @@ import functools
 import importlib
 import pkgutil
 import re
+import sys
 from typing import TYPE_CHECKING
 
+import guard_caches
 import pytest
 import stored_verdicts
 
@@ -76,6 +78,19 @@ import phonometry
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
+
+#: The tests that trace the verdicts of the whole package share what the tracer
+#: and this module keep of it, so they run on one worker (rule T19), and it is
+#: let go after them.
+pytestmark = pytest.mark.xdist_group("printed-limits")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _forget_the_guard() -> Iterator[None]:
+    """Let go of what the tracer and this module read once its tests are done."""
+    yield
+    guard_caches.forget(stored_verdicts, sys.modules[__name__])
+
 
 #: A field name that holds a limit, a tolerance, a criterion or a requirement.
 _LIMIT_NAME = re.compile(
@@ -740,6 +755,7 @@ _STATED_FLAGS = {
 }
 
 
+@pytest.mark.whole_tree
 def test_no_result_stores_a_verdict_flag() -> None:
     unexpected = sorted(_flag_fields() - set(_STATED_FLAGS))
     assert not unexpected, (
@@ -755,6 +771,7 @@ def test_no_result_stores_a_verdict_flag() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_every_stated_flag_is_still_a_field() -> None:
     stale = sorted(set(_STATED_FLAGS) - _flag_fields())
     assert not stale, f"_STATED_FLAGS names fields that are gone: {stale}"

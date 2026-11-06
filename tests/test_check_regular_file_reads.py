@@ -113,6 +113,578 @@ def test_what_an_if_type_checking_block_imports_is_no_callee(
 
 
 @pytest.mark.parametrize(
+    ("call", "found"),
+    [
+        pytest.param(
+            "(lambda open=open: open(path))()", [("read", _OWN)], id="default"
+        ),
+        pytest.param("(lambda open=open: open(path))(print)", [], id="positional"),
+        pytest.param("(lambda open=open: open(path))(open=print)", [], id="keyword"),
+        pytest.param(
+            "(lambda opener=print: opener(path))(open)",
+            [("read", _OWN)],
+            id="open-handed",
+        ),
+        pytest.param("(lambda open=open: open(path))(*handlers)", [], id="starred"),
+        pytest.param(
+            "(lambda open=open, /, **kwargs: open(path))(open=print)",
+            [("read", _OWN)],
+            id="keyword-of-a-positional-only-name",
+        ),
+        pytest.param(
+            "(lambda open=open, /, **kwargs: open(path))(**{})",
+            [("read", _OWN)],
+            id="mapping-beside-a-positional-only-one",
+        ),
+        pytest.param(
+            "(lambda open=open, /, **kwargs: open(path))(print, **{})",
+            [],
+            id="positional-only-handed-in-its-place",
+        ),
+    ],
+)
+def test_a_lambda_called_where_it_is_written_reads_what_the_call_hands(
+    tmp_path: pathlib.Path, call: str, found: list[tuple[str, str]]
+) -> None:
+    """A lambda called where it is written holds in each parameter what the
+    call hands it, and its default only where the call hands nothing; a
+    ``*`` argument may hand it anything.
+
+    The parameter was read as its default whatever the call handed, so
+    ``print`` handed in for ``open`` read as a read of ``open``, and ``open``
+    handed in for a parameter whose default is ``print`` passed. A keyword,
+    or a ``**`` mapping, fills no positional-only parameter: what it hands
+    goes to ``**kwargs``, and the default stands.
+    """
+    source = f"def read(path, handlers=()):\n    return {call}\n"
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        pytest.param(
+            """
+            import io
+            open = io.open
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+
+            open = print
+            """,
+            [("read", _OWN)],
+            id="rebound-after-the-def",
+        ),
+        pytest.param(
+            """
+            import io
+            open = print
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+
+            open = io.open
+            """,
+            [],
+            id="rebound-before-the-def",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def outer(path):
+                source = io.open
+                def read(path, opener=source):
+                    with opener(path) as fh:
+                        return fh.read()
+                source = print
+                return read(path)
+            """,
+            [("outer.read", _OWN)],
+            id="in-a-function",
+        ),
+        pytest.param(
+            """
+            import io
+            open = io.open
+
+            class R:
+                def read(self, path, opener=open):
+                    with opener(path) as fh:
+                        return fh.read()
+
+            open = print
+            """,
+            [("R.read", _OWN)],
+            id="a-method-rebound-after-the-class",
+        ),
+        pytest.param(
+            """
+            import io
+            open = print
+
+            class R:
+                def read(self, path, opener=open):
+                    with opener(path) as fh:
+                        return fh.read()
+
+            open = io.open
+            """,
+            [],
+            id="a-method-rebound-before-the-class",
+        ),
+        pytest.param(
+            """
+            import io
+
+            def outer(path):
+                source = io.open
+
+                class R:
+                    def read(self, path, opener=source):
+                        with opener(path) as fh:
+                            return fh.read()
+
+                source = print
+                return R().read(path)
+            """,
+            [("outer.R.read", _OWN)],
+            id="a-method-of-a-class-in-a-function",
+        ),
+        pytest.param(
+            """
+            import io
+            open = io.open
+
+            class R:
+                reader = lambda path, opener=open: opener(path).read()
+
+            open = print
+            """,
+            [("R", _OWN)],
+            id="a-lambda-in-a-class-body",
+        ),
+    ],
+)
+def test_a_default_is_what_its_name_holds_where_the_def_runs(
+    tmp_path: pathlib.Path, source: str, found: list[tuple[str, str]]
+) -> None:
+    """A parameter's default runs once, where the ``def`` does, so it is what
+    the name holds there, not what the scope binds it to by its end.
+
+    The default was read through the scope's last binding of the name, so an
+    ``open`` rebound to ``print`` after the ``def`` hid the read the default
+    makes, and one rebound to ``io.open`` after it made a read of ``print``.
+    """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            import io
+
+            def open(path):
+                return None
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+
+            open = io.open
+            """,
+            id="a-later-alias",
+        ),
+        pytest.param(
+            """
+            def open(path):
+                return None
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="spelt-like-the-builtin",
+        ),
+        pytest.param(
+            """
+            class open:
+                def __init__(self, path):
+                    self.path = path
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="a-class",
+        ),
+    ],
+)
+def test_a_default_that_names_a_definition_of_the_module_reads_no_file(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """A default that names a ``def`` or a ``class`` of the module holds that
+    function or class, which opens no file the guard can name.
+
+    The name was read through the module's table of names and its spelling,
+    so a later ``open = io.open``, or the spelling of the builtin itself,
+    made the default stand for an ``open``, and a call of it was refused as
+    a read.
+    """
+    assert _found(tmp_path, source) == []
+
+
+@pytest.mark.parametrize(
+    ("binding", "found"),
+    [
+        pytest.param("opener = io.open\n", [("read", _OWN)], id="standing-alias"),
+        pytest.param("opener = io.open\nopener = lambda path: None\n", [], id="lambda"),
+        pytest.param("opener = io.open\nopener = make()\n", [], id="call"),
+        pytest.param(
+            "from io import open as opener\nopener = lambda path: None\n",
+            [],
+            id="import-then-lambda",
+        ),
+        pytest.param(
+            "opener = print\nfrom io import open as opener\n",
+            [("read", _OWN)],
+            id="alias-then-import",
+        ),
+    ],
+)
+def test_a_later_binding_of_another_kind_ends_an_alias(
+    tmp_path: pathlib.Path, binding: str, found: list[tuple[str, str]]
+) -> None:
+    """A lambda or a call's result bound to a name after an import or an
+    alias of it leaves the name standing for nothing the guard can name, and
+    an import after an alias stands over it.
+
+    A scope's table of names took its imports and then its assignments of a
+    dotted name, whatever their order, and nothing else, so ``io.open`` stood
+    past the lambda and a call of it was refused as a read, and an alias
+    stood over the import after it.
+    """
+    source = (
+        f"import io\n{binding}\n"
+        "def read(path):\n    with opener(path) as fh:\n        return fh.read()\n"
+    )
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    ("binding", "found"),
+    [
+        pytest.param("io = make()\nopener = io.open\n", [], id="head-rebound-before"),
+        pytest.param(
+            "opener = io.open\nio = make()\n",
+            [("read", _OWN)],
+            id="head-rebound-after",
+        ),
+        pytest.param(
+            "from io import open as held\nheld = lambda path: None\nopener = held\n",
+            [],
+            id="name-rebound-before",
+        ),
+        pytest.param(
+            "held = print\nopener = held\nfrom io import open as held\n",
+            [],
+            id="name-imported-after",
+        ),
+    ],
+)
+@pytest.mark.parametrize("where", ["at-the-top", "in-the-function"])
+def test_an_alias_reads_its_value_where_the_assignment_runs(
+    tmp_path: pathlib.Path, binding: str, found: list[tuple[str, str]], where: str
+) -> None:
+    """``opener = io.open`` holds what ``io`` stands for where the assignment
+    runs: a call's result or a lambda bound to the name before the alias
+    leaves the alias holding what the guard cannot name, and a binding after
+    it changes nothing, at the top of the module and in the function.
+
+    A scope's table of names took its imports and its aliases in the order
+    of the source and nothing else, so the alias read ``io`` as the import
+    before a call's result replaced it, and the read through it was refused;
+    and an import after an alias of ``print`` made the alias a read.
+    """
+    call = "    with opener(path) as fh:\n        return fh.read()\n"
+    if where == "at-the-top":
+        source = f"import io\n{binding}\ndef read(path):\n{call}"
+    else:
+        inner = textwrap.indent(f"import io\n{binding}", "    ")
+        source = f"def read(path):\n{inner}{call}"
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        pytest.param(
+            """
+            _builtin_open = open
+
+            def open(path):
+                return _builtin_open(path, "rb")
+
+            def read(path):
+                with _builtin_open(path) as fh:
+                    return fh.read()
+            """,
+            [("open", _OWN), ("read", _OWN)],
+            id="a-wrapper-def",
+        ),
+        pytest.param(
+            """
+            reader = open
+            open = make()
+
+            def read(path):
+                with reader(path) as fh:
+                    return fh.read()
+            """,
+            [("read", _OWN)],
+            id="a-later-call-s-result",
+        ),
+        pytest.param(
+            """
+            reader = open
+            open = lambda path: None
+
+            def read(path):
+                with reader(path) as fh:
+                    return fh.read()
+            """,
+            [("read", _OWN)],
+            id="a-later-lambda",
+        ),
+        pytest.param(
+            """
+            def read(path, reader=open):
+                with reader(path) as fh:
+                    return fh.read()
+
+            open = make()
+            """,
+            [("read", _OWN)],
+            id="a-default",
+        ),
+        pytest.param(
+            """
+            class R:
+                def read(self, path, reader=open):
+                    with reader(path) as fh:
+                        return fh.read()
+
+                open = None
+            """,
+            [("R.read", _OWN)],
+            id="a-method-s-default-before-the-class-binds-it",
+        ),
+        pytest.param(
+            """
+            open = make()
+            reader = open
+
+            def read(path):
+                with reader(path) as fh:
+                    return fh.read()
+            """,
+            [],
+            id="rebound-before-the-alias",
+        ),
+    ],
+)
+def test_an_alias_of_a_builtin_holds_it_before_its_scope_binds_the_name(
+    tmp_path: pathlib.Path, source: str, found: list[tuple[str, str]]
+) -> None:
+    """``_builtin_open = open`` before any binding of ``open`` in the module
+    has run holds the builtin, whatever the module binds ``open`` to after
+    it: a ``def open`` that wraps it, a call's result or a lambda. So does a
+    default written before such a binding, and a method's default written
+    before its class body binds the name.
+
+    The alias was read through every binding of the name in its scope when
+    none had run before it, and none of them names anything the guard
+    knows, so it stood for nothing and the reads through it passed; a
+    default written before such a binding was read the same way.
+    """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        pytest.param(
+            """
+            import io as x
+
+            class R:
+                opener = x.open
+                data = opener(PATH).read()
+
+            x = make()
+            """,
+            [("R", _OWN)],
+            id="the-module-rebinds-the-name-after-the-class",
+        ),
+        pytest.param(
+            """
+            import io as x
+
+            class R:
+                opener = x.open
+                data = opener(PATH).read()
+                x = None
+            """,
+            [("R", _OWN)],
+            id="the-class-body-binds-the-name-after",
+        ),
+        pytest.param(
+            """
+            def build():
+                import io as x
+
+                class R:
+                    opener = x.open
+                    data = opener(PATH).read()
+
+                x = make()
+                return R
+            """,
+            [("build.R", _OWN)],
+            id="a-class-in-a-function",
+        ),
+        pytest.param(
+            """
+            import io as x
+            x = make()
+
+            class R:
+                opener = x.open
+                data = opener(PATH).read()
+            """,
+            [],
+            id="the-module-rebinds-the-name-before-the-class",
+        ),
+    ],
+)
+def test_a_class_body_reads_an_alias_where_its_statement_runs(
+    tmp_path: pathlib.Path, source: str, found: list[tuple[str, str]]
+) -> None:
+    """``opener = x.open`` in a class body holds what ``x`` stands for where
+    the class statement runs, in the scope around it, or in the module when
+    the body binds ``x`` itself after the alias; a later binding of ``x``
+    changes nothing.
+
+    The body's alias read ``x`` in the table of the scope around as it stood
+    once that scope had run, and in the body's own bindings whether they
+    had run or not, so a later binding of ``x`` left the alias holding
+    nothing the guard can name and the read through it passed.
+    """
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
+    "loop",
+    [
+        pytest.param("for opener in ():\n    pass\n", id="no-turn"),
+        pytest.param("for opener in items:\n    break\n", id="left-at-once"),
+        pytest.param("for opener in [print]:\n    pass\n", id="a-turn"),
+    ],
+)
+@pytest.mark.parametrize("where", ["at-the-top", "in-the-function"])
+def test_a_loop_s_target_leaves_what_the_name_held_standing(
+    tmp_path: pathlib.Path, loop: str, where: str
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias before it, as after the
+    branches of an ``if``.
+
+    The target was read as bound on every way past the loop, so it ended
+    ``opener = io.open`` and the read through it passed.
+    """
+    alias = "opener = io.open\n" + loop
+    call = "    with opener(path) as fh:\n        return fh.read()\n"
+    if where == "at-the-top":
+        source = f"import io\n{alias}\ndef read(path):\n{call}"
+    else:
+        inner = textwrap.indent(alias, "    ")
+        source = f"import io\n\ndef read(path, items):\n{inner}{call}"
+    assert _found(tmp_path, source) == [("read", _OWN)]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        pytest.param(
+            """
+            import io
+
+            def read(path):
+                if (opener := io.open) is not None:
+                    pass
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="in-the-function",
+        ),
+        pytest.param(
+            """
+            import io
+
+            if (open := io.open) is not None:
+                pass
+
+            def read(path, opener=open):
+                with opener(path) as fh:
+                    return fh.read()
+            """,
+            id="at-the-top-read-by-a-default",
+        ),
+    ],
+)
+def test_a_name_a_walrus_binds_is_read_as_an_assignment_would_be(
+    tmp_path: pathlib.Path, source: str
+) -> None:
+    """``(opener := io.open)`` binds the name to what the value names, as
+    ``opener = io.open`` does.
+
+    Only an assignment statement was read as one, so a read through a name
+    bound by ``:=`` passed as a call of nothing the guard could name.
+    """
+    assert _found(tmp_path, source) == [("read", _OWN)]
+
+
+@pytest.mark.parametrize(
+    "prelude",
+    [
+        "TYPE_CHECKING = True",
+        "from settings import TYPE_CHECKING",
+        "import os as typing\nTYPE_CHECKING = typing.environ",
+    ],
+)
+def test_a_block_on_a_name_the_module_rebinds_runs(
+    tmp_path: pathlib.Path, prelude: str
+) -> None:
+    """``if TYPE_CHECKING:`` keeps its body from running only where the name
+    holds the flag of ``typing``. A module that binds the name to anything
+    else runs the body, and a read there is refused: the body was emptied
+    for its spelling alone, so the read passed.
+    """
+    source = (
+        prelude
+        + "\n\ndef _sniff(path):\n    if TYPE_CHECKING:\n"
+        + "        with Path(path).open('rb') as fh:\n"
+        + "            return fh.read(12)\n    return None\n"
+    )
+    assert _found(tmp_path, source) == [("_sniff", _OWN)]
+
+
+@pytest.mark.parametrize(
     "source",
     [
         pytest.param(
@@ -1920,6 +2492,7 @@ def test_an_exemption_covers_its_function_and_one_that_covers_nothing_is_reporte
     assert stale == [(crf.relative(reader), "gone")]
 
 
+@pytest.mark.whole_tree
 def test_the_library_reads_every_name_through_the_check() -> None:
     """The gate passes on the library as it stands, and every exemption is used."""
     files = crf.python_files([], crf.SOURCE)

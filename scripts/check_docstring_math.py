@@ -60,7 +60,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from markdown_fences import code_lines
+from markdown_fences import code_lines, page_lines
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 if TYPE_CHECKING:
@@ -261,12 +261,13 @@ def _page_bare_scripts(path: Path) -> list[tuple[int, str, str]]:
     found: list[tuple[int, str, str]] = []
     lines = path.read_text(encoding="utf-8").splitlines()
     kind = "mdx" if path.suffix == ".mdx" else "md"
-    code_flags = list(code_lines(lines, kind=kind))
+    walked = list(page_lines(lines, kind=kind))
+    code_flags = list(code_lines(lines, kind=kind, walked=walked))
     # The inline code spans, read by markdown_spans over the lines of their
     # paragraph: a backtick behind a backslash opens none, and a span may
     # cross a line break.
     shown = lines_read_whole(
-        lines, lambda page: drop_inline_spans_by_block(page, kind=kind)
+        lines, lambda page: drop_inline_spans_by_block(page, kind=kind, walked=walked)
     )
     for number, (prose, code) in enumerate(
         zip(shown, code_flags, strict=True), start=1

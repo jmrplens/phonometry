@@ -231,6 +231,7 @@ Each rule on a page has the same parts:
 | [T23](tests.md#t23) | Pin every action to a release tag, never a branch or a commit SHA | `tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag`, `CI: Audit the workflows with zizmor` |
 | [T24](tests.md#t24) | Bound every wait a test makes on another process or thread | `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review |
 | [T25](tests.md#t25) | Filter a warning in the pytest configuration by a builtin class, never an imported one | `tests/test_repository_config.py::test_the_pytest_configuration_filters_warnings_by_builtin_class` |
+| [T26](tests.md#t26) | Mark a test that reads the repository whole `whole_tree` | `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests (numba-jitted kernel)`, `CI: Library tests at the dependency floors` |
 
 ### Documentation and figures
 

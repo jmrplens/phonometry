@@ -702,6 +702,7 @@ def test_no_clause_opens_with_a_sheet_or_a_corrigendum(committed: dict) -> None:
     assert dropped == []
 
 
+@pytest.mark.whole_tree
 def test_a_dated_edition_is_the_edition_the_guides_cite(committed: dict) -> None:
     """For the bodies that date an edition to the month, the report and the
     guides name the same document.
@@ -728,6 +729,7 @@ def test_a_dated_edition_is_the_edition_the_guides_cite(committed: dict) -> None
     assert drifted == []
 
 
+@pytest.mark.whole_tree
 def test_every_dated_edition_in_the_guides_carries_its_month() -> None:
     """The half the cross-check above cannot see.
 

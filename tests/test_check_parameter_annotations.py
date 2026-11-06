@@ -21,10 +21,8 @@ from __future__ import annotations
 import pathlib
 import sys
 import textwrap
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -33,6 +31,10 @@ if _SCRIPTS not in sys.path:
 import ast_scan
 import check_parameter_annotations as cpa
 import check_return_overloads as overloads
+
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("parameter-annotations")
 
 _IMPORTS = """
 from __future__ import annotations
@@ -749,6 +751,7 @@ def test_the_script_reports_and_fails(
     assert "level(x): holds list[float]" in out
 
 
+@pytest.mark.whole_tree
 def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""
     every = cpa.findings_in(ast_scan.python_files([], cpa.SOURCE), cpa.SOURCE)
@@ -3088,6 +3091,7 @@ def test_a_generic_alias_is_read_with_the_arguments_it_is_given(
     )
 
 
+@pytest.mark.whole_tree
 def test_the_array_like_of_numbers_is_read_as_one(tmp_path: pathlib.Path) -> None:
     """The package's array-like of numbers converts, as ``ArrayLike`` does.
 

@@ -15,6 +15,8 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -296,6 +298,7 @@ def test_an_exemption_silences_its_class_and_goes_stale_without_it(
     assert stale == [key]
 
 
+@pytest.mark.whole_tree
 def test_the_package_shows_every_public_record_as_a_table() -> None:
     files = sorted(crd.SOURCE.rglob("*.py"))
     assert crd.records_without_display(files, crd.SOURCE) == []

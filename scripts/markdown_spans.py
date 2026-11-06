@@ -27,7 +27,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from markdown_fences import NOT_INLINE_ROLES, cell_spans, page_lines
+from markdown_fences import NOT_INLINE_ROLES, cell_spans, page_lines, quotation_marks
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -121,9 +121,6 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
     return "".join(pieces)
 
 
-#: The marks of a quotation that open a line, each with what may stand before
-#: it, and the one blank after the last of them (CommonMark 0.31.2, 5.1).
-_QUOTE_MARKS = re.compile(r"(?: {0,3}>)+ ?")
 #: A comment and the line that opens one, by the page's kind: an HTML comment
 #: on a ``.md`` page, which opening a line is an HTML block that ends at its
 #: ``-->``, and an MDX comment, an expression, beside it on a ``.mdx`` page.
@@ -137,16 +134,23 @@ _COMMENT_LINE = {
 }
 
 
-def quote_depth(line: str) -> int:
-    """How many quotation marks open *line*."""
-    marks = _QUOTE_MARKS.match(line)
-    return marks.group().count(">") if marks else 0
+def quote_depth(line: str, *, kind: str = "mdx") -> int:
+    """How many quotation marks open *line*, read by their columns
+    (:func:`markdown_fences.quotation_marks`).
+
+    :param kind: The page's kind, ``"md"`` or ``"mdx"``.
+    """
+    return quotation_marks(line, kind=kind)[0]
 
 
-def inside_quotation(line: str) -> str:
-    """*line* without the quotation marks that open it."""
-    marks = _QUOTE_MARKS.match(line)
-    return line[marks.end() :] if marks else line
+def inside_quotation(line: str, *, kind: str = "mdx") -> str:
+    """*line* without the quotation marks that open it and the blank each may
+    take, a tab after a mark leaving the rest of its columns as spaces
+    (:func:`markdown_fences.quotation_marks`).
+
+    :param kind: The page's kind, ``"md"`` or ``"mdx"``.
+    """
+    return quotation_marks(line, kind=kind)[1]
 
 
 @dataclass
@@ -215,7 +219,12 @@ def _blocks(
     return blocks
 
 
-def block_starts(lines: Sequence[str], *, kind: str = "md") -> list[bool]:
+def block_starts(
+    lines: Sequence[str],
+    *,
+    kind: str = "md",
+    walked: Iterable[PageLine] | None = None,
+) -> list[bool]:
     """Whether each of *lines* opens a block of the page, a blank line among them.
 
     For a reader that carries a state of its own down a paragraph, such as an
@@ -223,10 +232,12 @@ def block_starts(lines: Sequence[str], *, kind: str = "md") -> list[bool]:
     of a raw HTML block counts as one: nothing there is markup to carry.
 
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of *lines* (:func:`markdown_fences.page_lines`), for a
+        reader that holds it already, so that the page is walked once.
     """
     return [
         index == 0 or block.reads == "raw"
-        for block in _blocks(list(lines), None, kind)
+        for block in _blocks(list(lines), None, kind, walked)
         for index in range(len(block.lines))
     ]
 
@@ -339,7 +350,12 @@ def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[s
 
 
 def drop_inline_spans_by_block(
-    text: str, markers: str = "`", comments: str | None = None, *, kind: str = ""
+    text: str,
+    markers: str = "`",
+    comments: str | None = None,
+    *,
+    kind: str = "",
+    walked: Iterable[PageLine] | None = None,
 ) -> str:
     """*text* with its spans taken out, each block of a page read whole.
 
@@ -347,6 +363,8 @@ def drop_inline_spans_by_block(
     :data:`SPAN_MARK` and the line breaks it held, as
     ``dropInlineSpansByBlock`` of the site leaves them: every line is where
     it was, its columns past a span are not.
+
+    :param walked: The walk of the page (:func:`_blocks`).
     """
     return replace_inline_spans_by_block(
         text,
@@ -354,6 +372,7 @@ def drop_inline_spans_by_block(
         markers,
         comments,
         kind=kind,
+        walked=walked,
     )
 
 

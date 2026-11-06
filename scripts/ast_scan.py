@@ -464,14 +464,31 @@ def values_bound(root: ast.AST, scope: ast.AST, name: str) -> list[ast.expr | No
     return found
 
 
+def assignment_target(node: ast.AST) -> ast.Name | None:
+    """The name a binding node an assignment of one name makes stores in: the
+    target itself, or that of an assignment expression (``(fn := helper)``),
+    which :func:`bindings_by_name` gives as the expression; None for any
+    other node.
+    """
+    if isinstance(node, ast.Name):
+        return node
+    if isinstance(node, ast.NamedExpr) and isinstance(node.target, ast.Name):
+        return node.target
+    return None
+
+
 def assigned_value(root: ast.AST, node: ast.AST) -> ast.expr | None:
     """The value an assignment to one name alone stores at *node*, its target,
-    under *root*; None for any other binding, whose value is not written there.
+    under *root*, an assignment expression (``(fn := helper)``) among them,
+    given by its target or by itself; None for any other binding, whose value
+    is not written there.
     """
+    if isinstance(node, ast.NamedExpr):
+        return node.value if isinstance(node.target, ast.Name) else None
     held = _parents(root).get(node)
     if isinstance(held, ast.Assign) and held.targets == [node]:
         return held.value
-    if isinstance(held, ast.AnnAssign) and held.target is node:
+    if isinstance(held, ast.AnnAssign | ast.NamedExpr) and held.target is node:
         return held.value
     return None
 
@@ -506,16 +523,20 @@ def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
     names = own_names(scope)
     sent_out = names.declared_global | names.declared_nonlocal
     return {
-        name: nodes
+        name: list(nodes)
         for name, nodes in _binding_nodes(scope).items()
         if name not in sent_out
     }
 
 
-def _binding_nodes(scope: ast.AST) -> dict[str, list[ast.AST]]:
+@functools.cache
+def _binding_nodes(scope: ast.AST) -> dict[str, tuple[ast.AST, ...]]:
     """Each name a statement of *scope* binds, its ``global`` and
     ``nonlocal`` names among them, with every node that binds it, in the
     order of the source (:func:`bindings_by_name`).
+
+    Read once for each scope, as :func:`own_names` is: a guard asks it of
+    every scope of the package on each pass of its fixed point.
     """
     comprehension = isinstance(scope, _COMPREHENSIONS)
     found: dict[str, list[ast.AST]] = {}
@@ -531,9 +552,7 @@ def _binding_nodes(scope: ast.AST) -> dict[str, list[ast.AST]]:
             bound = declared[1] if declared[0] in {"defined", "imported"} else set()
         for name in bound:
             found.setdefault(name, []).append(node)
-    for nodes in found.values():
-        nodes.sort(key=_position)
-    return found
+    return {name: tuple(sorted(nodes, key=_position)) for name, nodes in found.items()}
 
 
 def _position(node: ast.AST) -> tuple[int, int]:
@@ -541,30 +560,187 @@ def _position(node: ast.AST) -> tuple[int, int]:
     return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
 
 
-def _names_type_checking(test: ast.AST) -> bool:
-    """Whether *test* is ``TYPE_CHECKING``, however it was imported."""
-    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
-        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+#: The modules that define ``TYPE_CHECKING``, the flag a type checker alone
+#: holds true.
+_TYPING_MODULES = frozenset({"typing", "typing_extensions"})
+
+
+@dataclass(frozen=True)
+class _Flags:
+    """The names that hold ``TYPE_CHECKING`` wherever a module reads them."""
+
+    #: The bare names that hold the flag itself: ``TYPE_CHECKING``, or what an
+    #: import of it from :data:`_TYPING_MODULES` names it.
+    names: frozenset[str]
+    #: The names that hold a module that defines it (``typing``, ``t`` after
+    #: ``import typing as t``), read as ``typing.TYPE_CHECKING``.
+    modules: frozenset[str]
+
+
+#: Each scope of a module whose flags were read, by its id, with the scope
+#: itself and the module, so that a guard that reads a function, a class or a
+#: comprehension as a tree of its own reads the flags of the module it is
+#: written in (:func:`_flags`).
+_MODULE_OF: dict[int, tuple[ast.AST, ast.Module]] = {}
+
+
+def _import_kinds(node: ast.Import | ast.ImportFrom) -> list[tuple[str, str]]:
+    """Each name an import binds, with how (:func:`_binding_kinds`)."""
+    if isinstance(node, ast.Import):
+        found: list[tuple[str, str]] = []
+        for alias in node.names:
+            held = alias.name if alias.asname else alias.name.partition(".")[0]
+            kind = "module" if held in _TYPING_MODULES else "other"
+            found.append((alias.asname or held, kind))
+        return found
+    typing = node.level == 0 and node.module in _TYPING_MODULES
+    return [
+        ("*", "none" if typing else "other")
+        if alias.name == "*"
+        else (
+            alias.asname or alias.name,
+            "flag" if typing and alias.name == "TYPE_CHECKING" else "other",
+        )
+        for alias in node.names
+    ]
+
+
+def _named_binding(node: ast.AST) -> str | None:
+    """The name a ``def``, a ``class``, a parameter, ``except ... as``, a type
+    parameter or a ``match`` capture binds; None for any other node.
+    """
+    if isinstance(node, (*_DEFINITIONS, ast.TypeVar, ast.ParamSpec, ast.TypeVarTuple)):
+        return node.name
+    if isinstance(node, ast.arg):
+        return node.arg
+    if isinstance(node, ast.ExceptHandler):
+        return node.name
+    return _captured(node)
+
+
+def _binding_kinds(tree: ast.AST) -> dict[str, set[str]]:
+    """Each name a binding anywhere under *tree* makes, in any scope, with how.
+
+    ``"flag"`` for an import of ``TYPE_CHECKING`` from a module that defines
+    it, ``"false"`` for the constant ``False`` assigned to the name alone
+    (the fallback of a ``try`` that imports it), ``"module"`` for an import
+    of such a module, and ``"other"`` for any other binding: an assignment,
+    a parameter, a ``def`` or a ``class``, any other import, a loop target,
+    ``except ... as``, a ``match`` capture, a type parameter, ``del``. A
+    ``*`` import from any other module may bind any name, and is ``"other"``
+    under ``"*"``. An annotation without a value binds nothing.
+    """
+    nodes = list(ast.walk(tree))
+    bare = _annotated_only(nodes)
+    held_false = {
+        id(target)
+        for node in nodes
+        if isinstance(node, ast.Assign | ast.AnnAssign)
+        and isinstance(node.value, ast.Constant)
+        and node.value.value is False
+        for target in (node.targets if isinstance(node, ast.Assign) else [node.target])
+    }
+    kinds: dict[str, set[str]] = {}
+    for node in nodes:
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            found = _import_kinds(node)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+            kind = "false" if id(node) in held_false else "other"
+            found = [] if id(node) in bare else [(node.id, kind)]
+        else:
+            name = _named_binding(node)
+            found = [] if name is None else [(name, "other")]
+        for name, kind in found:
+            kinds.setdefault(name, set()).add(kind)
+    return kinds
+
+
+@functools.cache
+def _flags_of(tree: ast.AST) -> _Flags:
+    """:func:`_flags`, read from the bindings under *tree* alone."""
+    if isinstance(tree, ast.Module):
+        for node in ast.walk(tree):
+            if isinstance(node, SCOPES):
+                _MODULE_OF[id(node)] = (node, tree)
+    kinds = _binding_kinds(tree)
+    if "other" in kinds.get("*", ()):
+        return _Flags(frozenset(), frozenset())
+    flags = {"TYPE_CHECKING", *(name for name, how in kinds.items() if "flag" in how)}
+    modules = {
+        *_TYPING_MODULES,
+        *(name for name, how in kinds.items() if "module" in how),
+    }
+    return _Flags(
+        frozenset(
+            name for name in flags if kinds.get(name, set()) <= {"flag", "false"}
+        ),
+        frozenset(name for name in modules if kinds.get(name, set()) <= {"module"}),
     )
 
 
-def _negates_type_checking(test: ast.AST) -> bool:
-    """Whether *test* is ``not TYPE_CHECKING``, however it was imported."""
+def _flags(tree: ast.AST) -> _Flags:
+    """The names that hold ``TYPE_CHECKING`` wherever *tree* reads them.
+
+    A name holds the flag when every binding of it, in any scope of the
+    module, is an import of the flag from ``typing`` or
+    ``typing_extensions``, or the constant ``False``; the name
+    ``TYPE_CHECKING`` holds it when nothing binds it, as a fragment reads
+    it. A module that rebinds the name to anything else, in any of its
+    scopes, holds no flag under that name: a test on it may run either
+    branch. So for ``typing.TYPE_CHECKING``, whose head must hold the module
+    wherever it is bound. A scope of a module whose flags were read takes the
+    module's; a tree read alone, its own.
+    """
+    owner = _MODULE_OF.get(id(tree))
+    if owner is not None and owner[0] is tree:
+        return _flags_of(owner[1])
+    return _flags_of(tree)
+
+
+def reads_type_checking(root: ast.AST, test: ast.AST) -> bool:
+    """Whether *test*, read under *root*, is ``TYPE_CHECKING``: a name that
+    holds it, or the attribute of a name that holds ``typing`` or
+    ``typing_extensions`` (:func:`_flags`). Not its negation.
+    """
+    flags = _flags(root)
+    if isinstance(test, ast.Name):
+        return test.id in flags.names
     return (
-        isinstance(test, ast.UnaryOp)
-        and isinstance(test.op, ast.Not)
-        and _names_type_checking(test.operand)
+        isinstance(test, ast.Attribute)
+        and test.attr == "TYPE_CHECKING"
+        and isinstance(test.value, ast.Name)
+        and test.value.id in flags.modules
     )
 
 
-def is_type_checking_block(statement: ast.AST) -> bool:
-    """Whether *statement* is an ``if TYPE_CHECKING:`` or an ``if not
-    TYPE_CHECKING:``, however it was imported: one of its branches runs whenever
-    the program does and the other never does. Any other test on the name decides
-    no branch: ``if TYPE_CHECKING or enabled:`` runs whenever ``enabled`` is true.
+def _negates(test: ast.AST) -> bool:
+    """Whether *test* is a ``not``."""
+    return isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not)
+
+
+def _negates_type_checking(root: ast.AST, test: ast.AST) -> bool:
+    """Whether *test*, read under *root*, is ``not TYPE_CHECKING``
+    (:func:`reads_type_checking`).
+    """
+    return (
+        _negates(test)
+        and isinstance(test, ast.UnaryOp)
+        and reads_type_checking(root, test.operand)
+    )
+
+
+def is_type_checking_block(statement: ast.AST, root: ast.AST) -> bool:
+    """Whether *statement*, under *root*, is an ``if TYPE_CHECKING:`` or an
+    ``if not TYPE_CHECKING:`` on the name that holds the flag of ``typing``
+    (:func:`reads_type_checking`): one of its branches runs whenever the
+    program does and the other never does. Any other test on the name
+    decides no branch: ``if TYPE_CHECKING or enabled:`` runs whenever
+    ``enabled`` is true. Nor does a test on a name the module binds to
+    anything else: ``TYPE_CHECKING = True`` runs the body.
     """
     return isinstance(statement, ast.If) and (
-        _names_type_checking(statement.test) or _negates_type_checking(statement.test)
+        reads_type_checking(root, statement.test)
+        or _negates_type_checking(root, statement.test)
     )
 
 
@@ -572,31 +748,29 @@ def what_runs(statement: ast.If) -> list[ast.stmt]:
     """What a program runs of an ``if`` on ``TYPE_CHECKING``
     (:func:`is_type_checking_block`): its ``else``, or the body when it negates it.
     """
-    return (
-        statement.body if _negates_type_checking(statement.test) else statement.orelse
-    )
+    return statement.body if _negates(statement.test) else statement.orelse
 
 
 def what_never_runs(statement: ast.If) -> list[ast.stmt]:
     """What only a type checker reads of an ``if`` on ``TYPE_CHECKING``
     (:func:`is_type_checking_block`): its body, or the ``else`` when it negates it.
     """
-    return (
-        statement.orelse if _negates_type_checking(statement.test) else statement.body
-    )
+    return statement.orelse if _negates(statement.test) else statement.body
 
 
-def _branches(node: ast.AST) -> tuple[list[ast.AST], list[ast.AST]] | None:
+def _branches(
+    root: ast.AST, node: ast.AST
+) -> tuple[list[ast.AST], list[ast.AST]] | None:
     """What never runs and what runs of an ``if`` or a conditional expression on
-    ``TYPE_CHECKING``; None for any other node.
+    ``TYPE_CHECKING`` under *root*; None for any other node.
     """
     if isinstance(node, ast.If):
-        if is_type_checking_block(node):
+        if is_type_checking_block(node, root):
             return [*what_never_runs(node)], [*what_runs(node)]
     elif isinstance(node, ast.IfExp):
-        if _names_type_checking(node.test):
+        if reads_type_checking(root, node.test):
             return [node.body], [node.orelse]
-        if _negates_type_checking(node.test):
+        if _negates_type_checking(root, node.test):
             return [node.orelse], [node.body]
     return None
 
@@ -610,7 +784,7 @@ def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
     return frozenset(
         id(node)
         for statement in ast.walk(tree)
-        if (branches := _branches(statement)) is not None
+        if (branches := _branches(tree, statement)) is not None
         for child in branches[0]
         for node in ast.walk(child)
     )
@@ -625,7 +799,7 @@ def for_the_program(tree: ast.AST) -> frozenset[int]:
     return frozenset(
         id(node)
         for statement in ast.walk(tree)
-        if (branches := _branches(statement)) is not None
+        if (branches := _branches(tree, statement)) is not None
         for child in branches[1]
         for node in ast.walk(child)
     )
@@ -636,29 +810,55 @@ def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
     emptied in place and the branch that runs kept, for a guard that reads what a
     function does: the body of an ``if TYPE_CHECKING:``, the ``else`` of an ``if
     not TYPE_CHECKING:``, and that branch of a conditional expression, which reads
-    ``None`` instead, in a lambda or a comprehension of the function too.
+    ``None`` instead, in a lambda or a comprehension of the function too. A test
+    on a name the module binds to anything but the flag empties nothing
+    (:func:`reads_type_checking`).
 
     The blocks at the top of a module and in a class body stay, where a guard
     reads the imports of annotations and a constructor declared for the type
     checker. Call it on a tree just parsed, before anything has read its scopes.
+    A tree with no such test under a function is handed back as it is, read in
+    one walk (:func:`_tests_the_flag_in_a_function`), not in one for each of its
+    functions.
     """
+    if not _tests_the_flag_in_a_function(tree):
+        return tree
     for function in ast.walk(tree):
         if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
             continue
         for node in scope_nodes(function):
-            if isinstance(node, ast.If) and is_type_checking_block(node):
-                if _negates_type_checking(node.test):
+            if isinstance(node, ast.If) and is_type_checking_block(node, tree):
+                if _negates(node.test):
                     node.orelse = []
                 else:
                     node.body = [ast.Pass()]
         for node in ast.walk(function):
             if isinstance(node, ast.IfExp):
                 blank = ast.copy_location(ast.Constant(value=None), node)
-                if _names_type_checking(node.test):
+                if reads_type_checking(tree, node.test):
                     node.body = blank
-                elif _negates_type_checking(node.test):
+                elif _negates_type_checking(tree, node.test):
                     node.orelse = blank
     return tree
+
+
+def _tests_the_flag_in_a_function(tree: ast.AST) -> bool:
+    """Whether an ``if`` or a conditional expression anywhere under a function of
+    *tree* tests ``TYPE_CHECKING`` (:func:`_branches`), its decorators and defaults
+    included: what :func:`empty_type_checking_bodies` would empty, and more.
+    """
+    pending: list[tuple[ast.AST, bool]] = [(tree, False)]
+    while pending:
+        node, inside = pending.pop()
+        if (
+            inside
+            and isinstance(node, ast.If | ast.IfExp)
+            and _branches(tree, node) is not None
+        ):
+            return True
+        inside = inside or isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        pending.extend((child, inside) for child in ast.iter_child_nodes(node))
+    return False
 
 
 @functools.cache
@@ -671,20 +871,25 @@ def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
     the module or after it has run, so each of these may be what the
     module's name holds then (:func:`standing_bindings`). What an ``if
     TYPE_CHECKING:`` block holds never runs, and is none of them
-    (:func:`for_the_type_checker`).
+    (:func:`for_the_type_checker`). A module with no ``global`` statement has
+    none, and is read no further than the walk that finds none.
     """
+    if not any(isinstance(node, ast.Global) for node in ast.walk(module)):
+        return {}
     checker = for_the_type_checker(module)
     found: dict[str, list[ast.AST]] = {}
     for scope in ast.walk(module):
         if not isinstance(scope, _DEFINITIONS):
             continue
         sent = own_names(scope).declared_global
+        if not sent:
+            continue
         for name, nodes in _binding_nodes(scope).items():
             running = [node for node in nodes if id(node) not in checker]
             if name in sent and running:
                 found.setdefault(name, []).extend(running)
-    for nodes in found.values():
-        nodes.sort(key=_position)
+    for written in found.values():
+        written.sort(key=_position)
     return found
 
 
@@ -835,14 +1040,17 @@ def forget_trees() -> None:
     """
     for cached in (
         own_names,
+        _binding_nodes,
         _parents,
         _blocks,
         _class_is_live,
         for_the_type_checker,
         for_the_program,
         global_bindings,
+        _flags_of,
     ):
         cached.cache_clear()
+    _MODULE_OF.clear()
 
 
 def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:
@@ -1173,6 +1381,11 @@ def live_bindings[NodeT: ast.AST](
     A binding an ``if TYPE_CHECKING:`` block holds never runs, so it stands
     beside no binding that does; a name nothing else binds keeps it, for what
     reads annotations through it (:func:`for_the_type_checker`).
+
+    A loop's target is bound only on a turn the loop runs, and the loop may
+    run none (:func:`_loop_target`), so it replaces no binding before it:
+    after the loop either may be what the name holds, as after the branches
+    of an ``if``.
     """
     bindings = _running_first(root, bindings)
     if point is not None and bindings:
@@ -1192,12 +1405,42 @@ def _running_first[NodeT: ast.AST](
     return [binding for binding in bindings if id(binding) not in checker] or bindings
 
 
-def _held_at[NodeT: ast.AST](
-    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
+def held_before[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST
 ) -> list[NodeT]:
-    """:func:`live_bindings` at a *point* written in the bindings' own scope."""
+    """Of *bindings*, statements of one scope under *root* that bind one name,
+    those the name may hold at *point*, as :func:`live_bindings` reads them,
+    but none when none may have run before it.
+
+    What a read that runs where it is written finds, a ``def``'s default
+    among them: before any binding of its scope has run, the name is none of
+    that scope's, but a builtin's or what a scope around it holds, where
+    :func:`live_bindings` takes every one for what a call read before them
+    may meet.
+    """
+    bindings = _running_first(root, bindings)
+    if not bindings:
+        return []
+    point, deferred = _lifted(root, bindings[0], point)
+    if deferred:
+        return _met_from(root, bindings, point)
+    return _held_at(root, bindings, point, every_when_none=False)
+
+
+def _held_at[NodeT: ast.AST](
+    root: ast.AST,
+    bindings: Sequence[NodeT],
+    point: ast.AST | None,
+    *,
+    every_when_none: bool = True,
+) -> list[NodeT]:
+    """:func:`live_bindings` at a *point* written in the bindings' own scope;
+    when none may have run before it, every one, or none without
+    *every_when_none* (:func:`held_before`).
+    """
     frames = {binding: _frames(root, binding) for binding in bindings}
     target = _frames(root, point) if point is not None else None
+    sure = {binding for binding in bindings if not _loop_target(root, binding)}
     forward = [
         binding
         for binding in bindings
@@ -1207,13 +1450,27 @@ def _held_at[NodeT: ast.AST](
         binding
         for binding in forward
         if not any(
-            other is not binding and _replaces(frames[other], frames[binding], target)
+            other is not binding
+            and other in sure
+            and _replaces(frames[other], frames[binding], target)
             for other in forward
         )
     ]
     if target is not None:
-        live.extend(_back_from_a_turn(bindings, frames, target, forward))
-    return live or list(bindings)
+        live.extend(_back_from_a_turn(bindings, frames, target, forward, sure))
+    return live if live or not every_when_none else list(bindings)
+
+
+def _loop_target(root: ast.AST, node: ast.AST) -> bool:
+    """Whether *node*, under *root*, is a name a ``for`` statement's target
+    binds, alone or unpacked (``for name in ...``, ``for name, _ in ...``),
+    which it binds only on a turn the loop runs.
+    """
+    parents = _parents(root)
+    child, holder = node, parents.get(node)
+    while isinstance(holder, ast.Tuple | ast.List | ast.Starred):
+        child, holder = holder, parents.get(holder)
+    return isinstance(holder, ast.For | ast.AsyncFor) and holder.target is child
 
 
 def _back_from_a_turn[NodeT: ast.AST](
@@ -1221,13 +1478,15 @@ def _back_from_a_turn[NodeT: ast.AST](
     frames: Mapping[NodeT, tuple[Frame, ...]],
     target: Sequence[Frame],
     forward: Sequence[NodeT],
+    sure: Collection[NodeT],
 ) -> list[NodeT]:
     """Of *bindings* not in *forward*, those an earlier turn of a loop around
     *target* may leave in place there (:func:`_turns_back`).
 
     Not one that another binding of the same loop replaces before the turn
     ends (:func:`_replaces`), nor any when a binding runs before *target* on
-    every turn (:func:`_runs_each_turn`).
+    every turn (:func:`_runs_each_turn`); a binding not in *sure*, a loop's
+    target, does neither, since its loop may run no turn.
     """
     turns = {
         binding: loop
@@ -1238,9 +1497,13 @@ def _back_from_a_turn[NodeT: ast.AST](
     return [
         binding
         for binding, loop in turns.items()
-        if not any(_runs_each_turn(frames[other], target, loop) for other in bindings)
+        if not any(
+            other in sure and _runs_each_turn(frames[other], target, loop)
+            for other in bindings
+        )
         and not any(
             other is not binding
+            and other in sure
             and turns[other] == loop
             and _replaces(frames[other], frames[binding], None)
             for other in turns

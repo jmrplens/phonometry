@@ -4223,6 +4223,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The report extra needs reportlab 4.3.0 and svglib 0.9.1, and refuses
+  svglib 1.4.0.** reportlab 4.0.4 to 4.2.5 warn when they are imported,
+  through importlib's `load_module` and `ast.NameConstant`, both deprecated,
+  so a `.report()` failed under `-W error` and printed both warnings under
+  `-W default`. svglib 0.9.0 raised a SyntaxWarning (`invalid escape sequence
+  '\d'`), which Python shows under its default filters, on the first import
+  after an install that did not precompile it, as uv installs. svglib 1.4.0
+  stops a `.report()` at a debugger prompt, or fails it without a terminal.
+  `[report]` and `[full]` now ask for `reportlab>=4.3.0` and
+  `svglib>=0.9.1,!=1.4.0`: each floor is the oldest release that renders a
+  fiche in a fresh interpreter under `-W error`, which a new test checks in
+  the job that installs the floors. `scripts/minimum_requirements.py` reads a
+  floor followed by `!=` exclusions of releases above it, and still pins the
+  floor.
+
 - **The weighting design takes every transcendental from routines that
   return the same bits on every platform, so the macOS and Windows
   coefficients move to the Linux bytes.** `filters.WeightingFilter` and

@@ -142,11 +142,16 @@ The rule: keep the pins at the latest releases, keep the floors measured, and
 a newer release, the `minimum-versions` job is what says so; raise that floor
 to the oldest release that passes, and write the failure beside it. A floor
 raised on a guess turns away every user whose environment would have worked.
+A release above the floor that is broken while the ones around it work is
+excluded beside the floor rather than raising the floor past it, and the
+comment says why: `svglib>=0.9.1,!=1.4.0`, since 1.4.0 stops `.report()` at a
+debugger prompt.
 
 The job reads the floors with
 [`scripts/minimum_requirements.py`](scripts/minimum_requirements.py), which
-also refuses a requirement that is not a single `>=` floor and, with
-`--check`, an environment where pip settled on anything else. To run it as the
+also refuses a requirement that is anything but one `>=` floor and `!=`
+exclusions of releases above it, and, with `--check`, an environment where
+pip settled on anything else. To run it as the
 job does, in a fresh Python 3.12 environment:
 
 ```bash

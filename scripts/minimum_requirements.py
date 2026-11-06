@@ -3,7 +3,10 @@
 
 Each requirement of the package is a floor, ``name>=version``, and the floor is
 measured: it is the oldest release the library's suite passes with on the
-oldest Python the package supports. The minimum-versions job in
+oldest Python the package supports. A floor may be followed by releases above
+it that the package refuses, ``name>=version,!=bad``, when one release between
+the floor and the newest is broken (svglib 1.4.0 stops at a pdb prompt); the
+job still pins the floor. The minimum-versions job in
 ``.github/workflows/python-app.yml`` installs what this script prints and runs
 that suite, so a floor nobody tested cannot sit in the metadata. The pins the
 repository develops on (``requirements*.txt``) are a different thing and stay
@@ -32,11 +35,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-#: A requirement the job can pin: a name and one lower bound, nothing else. An
-#: upper bound, a marker or a second clause would leave the floor ambiguous.
+#: A requirement the job can pin: a name and one lower bound, then any number of
+#: single releases above it the package refuses, nothing else. An upper bound,
+#: a marker, a wildcard or any other clause would leave the floor ambiguous.
 _FLOOR = re.compile(
-    r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)\s*>=\s*(?P<version>\d[0-9A-Za-z.]*)$"
+    r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)\s*>=\s*(?P<version>\d[0-9A-Za-z.]*)"
+    r"(?P<excluded>(?:\s*,\s*!=\s*\d+(?:\.\d+)*)*)$"
 )
+
+#: One excluded release in the tail of :data:`_FLOOR`.
+_EXCLUDED = re.compile(r"!=\s*(?P<version>\d+(?:\.\d+)*)")
 
 #: The Python floor, as requires-python spells it.
 _PYTHON_FLOOR = re.compile(r"^>=\s*(?P<version>\d+\.\d+)$")
@@ -47,13 +55,60 @@ def _normalise(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
+def _release(version: str, spec: str) -> tuple[int, ...]:
+    """*version* as the numbers PEP 440 compares, trailing zeros dropped.
+
+    :raises ValueError: when *version* is not a plain release, which an
+        exclusion beside it could not be ordered against.
+    """
+    if not re.fullmatch(r"\d+(?:\.\d+)*", version):
+        msg = (
+            f"{spec!r} excludes a release beside the floor {version}, which is "
+            "not a plain release number the exclusion can be ordered against."
+        )
+        raise ValueError(msg)
+    numbers = [int(part) for part in version.split(".")]
+    while len(numbers) > 1 and numbers[-1] == 0:
+        numbers.pop()
+    return tuple(numbers)
+
+
+def _exclusions(spec: str, floor: str, tail: str) -> tuple[str, ...]:
+    """The releases *spec* excludes beside its *floor*, each one above it.
+
+    :raises ValueError: for an exclusion of the floor itself, which the job
+        would install all the same, or of a release below it, which the floor
+        already refuses.
+    """
+    excluded = tuple(found["version"] for found in _EXCLUDED.finditer(tail))
+    if not excluded:
+        return excluded
+    lowest = _release(floor, spec)
+    for version in excluded:
+        if _release(version, spec) == lowest:
+            msg = (
+                f"{spec!r} excludes its own floor: the minimum-versions job "
+                "would install a release the requirement refuses."
+            )
+            raise ValueError(msg)
+        if _release(version, spec) < lowest:
+            msg = (
+                f"{spec!r} excludes {version}, below the floor: it excludes "
+                "nothing the floor admits."
+            )
+            raise ValueError(msg)
+    return excluded
+
+
 def floors(pyproject: dict[str, object]) -> dict[str, str]:
     """Every dependency and extra of the project, as ``{name: floor}``.
 
     :param pyproject: The parsed pyproject.toml.
     :return: One floor per distribution, in the order first declared.
-    :raises ValueError: for a requirement that is not one ``>=`` floor, or a
-        distribution whose floor two lists spell differently.
+    :raises ValueError: for a requirement that is not one ``>=`` floor with
+        nothing beside it but releases above it it excludes (``!=``), for an
+        exclusion of the floor or of a release below it, or for a
+        distribution whose floor or exclusions two lists spell differently.
     """
     project = pyproject["project"]
     if not isinstance(project, dict):
@@ -63,19 +118,29 @@ def floors(pyproject: dict[str, object]) -> dict[str, str]:
     for extra in project.get("optional-dependencies", {}).values():
         specs += extra
     found: dict[str, str] = {}
+    excluded: dict[str, tuple[str, ...]] = {}
     for spec in specs:
         match = _FLOOR.match(spec.strip())
         if match is None:
             msg = (
                 f"{spec!r} is not a floor the minimum-versions job can pin: "
-                "write one lower bound, 'name>=version', and nothing else."
+                "write one lower bound, 'name>=version', and nothing else but "
+                "the releases above it the package refuses, ',!=version'."
             )
             raise ValueError(msg)
         name, version = _normalise(match["name"]), match["version"]
+        refused = _exclusions(spec, version, match["excluded"])
         if found.setdefault(name, version) != version:
             msg = (
                 f"{name} has two floors, {found[name]} and {version}: every list "
                 "that names it has to name the same one."
+            )
+            raise ValueError(msg)
+        if excluded.setdefault(name, refused) != refused:
+            msg = (
+                f"{name} excludes {list(excluded[name])} in one list and "
+                f"{list(refused)} in another: every list that names it has to "
+                "exclude the same releases."
             )
             raise ValueError(msg)
     return found

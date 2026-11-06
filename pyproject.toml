@@ -105,9 +105,18 @@ classifiers = [
 #   numba 0.60.0  the first release that installs beside numpy 2
 #   matplotlib 3.10.7  3.10.0 and 3.10.1 drop `lw` in hist(), and 3.10.3 to
 #                 3.10.6 warn through pyparsing 3.3 when they parse mathtext
-#   reportlab 4.0.4    4.0.0 requires pycairo, a C build; 4.0.1 to 4.0.3 were
-#                 never published
-#   svglib 0.9.0  0.8 is Python 2 code
+#   reportlab 4.3.0    4.0.4 to 4.2.5 warn when they are imported, through
+#                 importlib's load_module and ast.NameConstant, both
+#                 deprecated, so a .report() under -W error failed; 4.0.0
+#                 requires pycairo, a C build
+#   svglib 0.9.1  0.9.0 raises a SyntaxWarning (invalid escape sequence '\d'
+#                 in svglib/utils.py) when it is compiled, which Python shows
+#                 under its default filters on the first import after an
+#                 install that did not precompile it, as uv installs: a
+#                 warning a plain user sees, as matplotlib's above was. 1.4.0
+#                 is excluded: it calls pdb.set_trace() where it styles each
+#                 shape it converts, so a .report() stops at a debugger
+#                 prompt, or fails without a terminal; 1.4.1 removed it
 #   soundfile 0.12.0   the first wheel that carries its own libsndfile; 0.11
 #                 needs one installed on the system
 #   torch 2.3.0   2.2.0 to 2.2.2 are built against NumPy 1 and cannot read
@@ -122,7 +131,7 @@ dependencies = [
 [project.optional-dependencies]
 perf = ["numba>=0.60.0"]
 plot = ["matplotlib>=3.10.7"]
-report = ["reportlab>=4.0.4", "svglib>=0.9.0"]
+report = ["reportlab>=4.3.0", "svglib>=0.9.1,!=1.4.0"]
 # The base install already reads the whole linear WAV family (PCM, float,
 # EXTENSIBLE, BWF, RF64) through scipy; the extra adds the remaining
 # containers and codecs (FLAC, AIFF, Ogg/Opus, MP3, compressed WAV) via
@@ -134,7 +143,7 @@ audio = ["soundfile>=0.12.0"]
 # version, and no CI job can measure a floor for it; the guide names the
 # version the GPU proof ran on.
 torch = ["torch>=2.3.0", "array-api-compat>=1.5.1"]
-full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.0", "soundfile>=0.12.0"]
+full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.3.0", "svglib>=0.9.1,!=1.4.0", "soundfile>=0.12.0"]
 
 [project.urls]
 "Homepage" = "https://docs.jmrp.io/phonometry/"

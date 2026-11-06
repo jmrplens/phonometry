@@ -593,6 +593,25 @@ class FunctionInfo:
     parent: FunctionInfo | None = None
 
 
+#: What a function of a module, read by its name at the top of the module
+#: where a ``def`` or a ``class`` of it stands, stood for there, by its key:
+#: each ``def`` that stood, none for a ``class`` (:meth:`Tree._bound_at_top`).
+_Pins = dict[tuple[str, str], list[FunctionInfo]]
+
+
+def _merge_pins(into: _Pins | None, found: _Pins) -> None:
+    """Add what *found* pins to *into*, each definition once."""
+    if into is None:
+        return
+    for key, definitions in found.items():
+        held = into.setdefault(key, [])
+        held.extend(
+            definition
+            for definition in definitions
+            if all(definition is not other for other in held)
+        )
+
+
 def _is_record_decorator(node: ast.expr) -> bool:
     target = node.func if isinstance(node, ast.Call) else node
     if isinstance(target, ast.Name):
@@ -649,9 +668,13 @@ class Tree:
         self.qualnames: dict[ast.AST, tuple[str, str]] = {}
         #: What :meth:`resolve_top` and :meth:`live_definitions` found, read
         #: once for each name, as every pass of the fixed point asks again.
-        self.top_cache: dict[tuple[str, str], tuple[tuple[str, str], ...]] = {}
+        self.top_cache: dict[
+            tuple[str, str], tuple[tuple[tuple[str, str], ...], _Pins]
+        ] = {}
         #: What :meth:`resolve_all` found, read once for each name.
-        self.all_cache: dict[tuple[str, str], tuple[tuple[str, str], ...]] = {}
+        self.all_cache: dict[
+            tuple[str, str], tuple[tuple[tuple[str, str], ...], _Pins]
+        ] = {}
         self.live_cache: dict[tuple[str, str], list[FunctionInfo]] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
@@ -897,7 +920,13 @@ class Tree:
         return ".".join([*base, node.module] if node.module else base)
 
     def imported(
-        self, module: str, node: ast.AST, name: str, depth: int = 0
+        self,
+        module: str,
+        node: ast.AST,
+        name: str,
+        depth: int = 0,
+        *,
+        pins: _Pins | None = None,
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package an import in *module* may
         bind *name* to, when *node* is a ``from ... import`` that binds it
@@ -911,7 +940,7 @@ class Tree:
                 continue
             if f"{source}.{alias.name}" in self.modules:
                 return ()
-            return self.resolve_all(source, alias.name, depth)
+            return self.resolve_all(source, alias.name, depth, pins=pins)
         return ()
 
     def every_definition(self) -> Iterator[FunctionInfo]:
@@ -920,7 +949,13 @@ class Tree:
             yield from found
 
     def resolve_top(
-        self, module: str, name: str, point: ast.AST | None = None, depth: int = 0
+        self,
+        module: str,
+        name: str,
+        point: ast.AST | None = None,
+        depth: int = 0,
+        *,
+        pins: _Pins | None = None,
     ) -> tuple[tuple[str, str], ...]:
         """Each ``(module, qualname)`` a bare name may stand for at the top of *module*.
 
@@ -932,28 +967,33 @@ class Tree:
         clause, is either, and a read inside a function meets every one from
         the ``def`` on, since the function may be called during the import.
         An import written inside one of its functions binds the name for that
-        function alone.
+        function alone. Each ``def`` that stands there is pinned in *pins*
+        (:meth:`_bound_at_top`), so an alias holds the definition its value
+        named where it was bound.
         """
         if depth > _DEPTH:
             return ()
         key = (module, name)
         if point is None and depth == 0 and key in self.top_cache:
-            return self.top_cache[key]
+            cached, pinned = self.top_cache[key]
+            _merge_pins(pins, pinned)
+            return cached
+        held: _Pins = {}
         statements = self.top_bindings.get(module, {}).get(name, [])
-        found = (
+        found = [
             target
             for statement in live_bindings(self.modules[module], statements, point)
-            for target in self._bound_at_top(module, statement, name, depth)
-        )
-        resolved = tuple(
-            dict.fromkeys((*found, *self.made_under_global(module, name, depth)))
-        )
+            for target in self._bound_at_top(module, statement, name, depth, pins=held)
+        ]
+        swapped = self.made_under_global(module, name, depth, pins=held)
+        resolved = tuple(dict.fromkeys((*found, *swapped)))
+        _merge_pins(pins, held)
         if point is None and depth == 0:
-            self.top_cache[key] = resolved
+            self.top_cache[key] = (resolved, held)
         return resolved
 
     def made_under_global(
-        self, module: str, name: str, depth: int = 0
+        self, module: str, name: str, depth: int = 0, *, pins: _Pins | None = None
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package that a function, a method or
         a class body of *module* binds the module's *name* to under
@@ -962,7 +1002,7 @@ class Tree:
         found = (
             target
             for statement in self.global_top.get(module, {}).get(name, [])
-            for target in self._bound_at_top(module, statement, name, depth)
+            for target in self._bound_at_top(module, statement, name, depth, pins=pins)
         )
         return tuple(dict.fromkeys(found))
 
@@ -982,24 +1022,46 @@ class Tree:
         return self.live_cache[target]
 
     def _bound_at_top(
-        self, module: str, statement: ast.AST, name: str, depth: int = 0
+        self,
+        module: str,
+        statement: ast.AST,
+        name: str,
+        depth: int = 0,
+        *,
+        pins: _Pins | None = None,
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package one statement of *module*
         that binds the module's *name* may bind it to: its own ``def`` or
         ``class``, at the top or inside a function that declares the name
         ``global``, what an import reads (:meth:`imported`), or what the
         dotted name an assignment binds it to names (:meth:`aliased`).
+
+        A ``def`` of a function at the top of the module goes into *pins*
+        under its key, as the definition the name stands for where it was
+        read; a ``class`` there of a function's name adds none, since a call
+        of it makes an instance.
         """
         if assignment_target(statement) is not None:
-            return self.aliased(module, statement, depth)
+            return self.aliased(module, statement, depth, pins=pins)
         if isinstance(statement, ast.Import | ast.ImportFrom):
-            return self.imported(module, statement, name, depth)
+            return self.imported(module, statement, name, depth, pins=pins)
         key = self.qualnames.get(statement)
         known = key is not None and (key in self.functions or key in self.classes)
-        return (key,) if key is not None and known else ()
+        if key is None or not known:
+            return ()
+        definitions = self.definitions.get(key, [])
+        if pins is not None and all(
+            definition.parent is None and definition.owner is None
+            for definition in definitions
+        ):
+            _merge_pins(
+                pins,
+                {key: [found for found in definitions if found.node is statement]},
+            )
+        return (key,)
 
     def aliased(
-        self, module: str, target: ast.AST, depth: int = 0
+        self, module: str, target: ast.AST, depth: int = 0, *, pins: _Pins | None = None
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package an assignment in *module* of
         a dotted name alone (``alias = handing_back``, ``check =
@@ -1010,10 +1072,10 @@ class Tree:
         value = assigned_value(self.modules[module], target)
         if value is None or depth > _DEPTH:
             return ()
-        return self.named_at(module, value, depth + 1)
+        return self.named_at(module, value, depth + 1, pins=pins)
 
     def named_at(
-        self, module: str, value: ast.expr, depth: int = 0
+        self, module: str, value: ast.expr, depth: int = 0, *, pins: _Pins | None = None
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package a dotted name read in
         *module* stands for where it is read.
@@ -1026,14 +1088,16 @@ class Tree:
         """
         if isinstance(value, ast.Attribute) and isinstance(value.value, ast.Name):
             source = self.resolve_module(module, value.value.id)
-            return self.resolve_all(source, value.attr, depth) if source else ()
+            if source is None:
+                return ()
+            return self.resolve_all(source, value.attr, depth, pins=pins)
         if not isinstance(value, ast.Name):
             return ()
         root = self.modules[module]
         how, scope = binding_of(root, value, value.id)
         if how == "global" or scope is None or scope is root:
-            return self.resolve_top(module, value.id, value, depth)
-        return self.bound_in(module, scope, value.id, value, depth)
+            return self.resolve_top(module, value.id, value, depth, pins=pins)
+        return self.bound_in(module, scope, value.id, value, depth, pins=pins)
 
     def bound_in(
         self,
@@ -1042,6 +1106,8 @@ class Tree:
         name: str,
         point: ast.AST | None,
         depth: int = 0,
+        *,
+        pins: _Pins | None = None,
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package *name* stands for in *scope*
         of *module*, which binds it itself, where *point* reads it, or
@@ -1061,9 +1127,9 @@ class Tree:
             if assignment_target(node) is not None:
                 if not _aliases_a_name(node, self.modules[module]):
                     return ()
-                found.extend(self.aliased(module, node, depth))
+                found.extend(self.aliased(module, node, depth, pins=pins))
             elif isinstance(node, ast.Import | ast.ImportFrom):
-                found.extend(self.imported(module, node, name, depth))
+                found.extend(self.imported(module, node, name, depth, pins=pins))
             elif (key := self.qualnames.get(node)) is not None and (
                 key in self.functions or key in self.classes
             ):
@@ -1085,7 +1151,7 @@ class Tree:
         return self.resolve(source, attribute, depth + 1)
 
     def resolve_all(
-        self, module: str, name: str, depth: int = 0
+        self, module: str, name: str, depth: int = 0, *, pins: _Pins | None = None
     ) -> tuple[tuple[str, str], ...]:
         """Each ``(module, qualname)`` a bare name of *module* may stand for
         once it has run, read from another module or as the module's
@@ -1101,18 +1167,22 @@ class Tree:
         if self.top_bindings.get(module, {}).get(name):
             key = (module, name)
             if depth == 0 and key in self.all_cache:
-                return self.all_cache[key]
-            found = self.resolve_top(module, name, None, depth + 1)
+                cached, pinned = self.all_cache[key]
+                _merge_pins(pins, pinned)
+                return cached
+            held: _Pins = {}
+            found = self.resolve_top(module, name, None, depth + 1, pins=held)
+            _merge_pins(pins, held)
             if depth == 0:
-                self.all_cache[key] = found
+                self.all_cache[key] = (found, held)
             return found
-        swapped = self.made_under_global(module, name, depth + 1)
+        swapped = self.made_under_global(module, name, depth + 1, pins=pins)
         if (module, name) in self.functions or (module, name) in self.classes:
             return tuple(dict.fromkeys(((module, name), *swapped)))
         target = self.imports.get(module, {}).get(name)
         if target is None or target[1] is None:
             return swapped
-        found = self.resolve_all(target[0], target[1], depth + 1)
+        found = self.resolve_all(target[0], target[1], depth + 1, pins=pins)
         return tuple(dict.fromkeys((*found, *swapped)))
 
     def functions_named(self, module: str) -> set[str]:
@@ -1802,7 +1872,7 @@ class Reader:
         return None
 
     def resolve_name(
-        self, name: str, node: ast.AST | None = None
+        self, name: str, node: ast.AST | None = None, *, pins: _Pins | None = None
     ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package a bare name may stand for, here.
 
@@ -1813,14 +1883,16 @@ class Reader:
         the nearest that binds the name says what it is (:meth:`_bound_to`),
         and one that declares it ``global`` sends it to the module, as one
         that binds it nowhere does; one that declares it ``nonlocal`` passes
-        it on. At the module, what it defines or imports at its top.
+        it on. At the module, what it defines or imports at its top. What a
+        function of a module stood for where its name was read goes into
+        *pins* (:meth:`Tree.resolve_top`).
         """
         if node is not None:
             how, binder = binding_of(self.function.node, node, name)
             if binder is not None and binder is not self.function.node:
                 return ()
             if how == "global":
-                return self.tree.resolve_top(self.module, name, node)
+                return self.tree.resolve_top(self.module, name, node, pins=pins)
         scope: FunctionInfo | None = self.function
         while scope is not None:
             names = own_names(scope.node)
@@ -1829,12 +1901,17 @@ class Reader:
             if name in names.declared_global:
                 break
             if names.binds(name):
-                return self._bound_to(scope, name, node)
+                return self._bound_to(scope, name, node, pins=pins)
             scope = scope.parent
-        return self.tree.resolve_top(self.module, name, node)
+        return self.tree.resolve_top(self.module, name, node, pins=pins)
 
     def _bound_to(
-        self, scope: FunctionInfo, name: str, node: ast.AST | None
+        self,
+        scope: FunctionInfo,
+        name: str,
+        node: ast.AST | None,
+        *,
+        pins: _Pins | None = None,
     ) -> tuple[tuple[str, str], ...]:
         """What *name* may stand for in *scope*, which binds it itself.
 
@@ -1854,7 +1931,7 @@ class Reader:
             return (own,) if known else ()
         if how == "binding":
             point = node if scope is self.function else None
-            return self.tree.bound_in(self.module, scope.node, name, point)
+            return self.tree.bound_in(self.module, scope.node, name, point, pins=pins)
         if how != "import":
             return ()
         imports = list(_imports_of(scope.node).get(name, ()))
@@ -1863,31 +1940,38 @@ class Reader:
         found = (
             key
             for binding in imports
-            for key in self.tree.imported(self.module, binding, name)
+            for key in self.tree.imported(self.module, binding, name, pins=pins)
         )
         return tuple(dict.fromkeys(found))
 
-    def callees(self, func: ast.expr) -> tuple[tuple[str, str], ...]:
+    def callees(
+        self, func: ast.expr, *, pins: _Pins | None = None
+    ) -> tuple[tuple[str, str], ...]:
         """Each function or class of the package a call may name."""
         if isinstance(func, ast.Name):
-            return self.resolve_name(func.id, func)
+            return self.resolve_name(func.id, func, pins=pins)
         if isinstance(func, ast.Attribute):
             target = self.method_target(func)
             if target is not None:
                 return (target,)
             module = self.module_of(func.value)
             if module is not None:
-                return self.tree.resolve_all(module, func.attr)
+                return self.tree.resolve_all(module, func.attr, pins=pins)
         return ()
 
     def reached_by(self, func: ast.expr, call: ast.AST) -> list[FunctionInfo]:
         """Every definition a call can reach (:meth:`reached`), when each
         function it may name is a function of the package; none otherwise.
         """
-        targets = self.callees(func)
+        pins: _Pins = {}
+        targets = self.callees(func, pins=pins)
         if any(target not in self.tree.functions for target in targets):
             return []
-        return [found for target in targets for found in self.reached(target, call)]
+        return [
+            found
+            for target in targets
+            for found in self.reached(target, call, pins=pins)
+        ]
 
     def selects_positions(self, func: ast.expr) -> bool:
         """Whether every function of the package a call may name returns a
@@ -2129,11 +2213,14 @@ class Reader:
                 return self.apply(target, node, arguments, keywords, bound=True)
             module = self.module_of(func.value)
             if module is not None:
-                resolved = self.tree.resolve_all(module, func.attr)
+                pins: _Pins = {}
+                resolved = self.tree.resolve_all(module, func.attr, pins=pins)
                 if resolved:
                     return union(
                         *(
-                            self.apply(key, node, arguments, keywords, bound=False)
+                            self.apply(
+                                key, node, arguments, keywords, bound=False, pins=pins
+                            )
                             for key in resolved
                         )
                     )
@@ -2178,14 +2265,17 @@ class Reader:
                 )
             if name == "replace" and name not in self.tree.functions_named(self.module):
                 return self.replace_sink(node, arguments, keywords)
-            targets = self.resolve_name(name, node.func)
+            named: _Pins = {}
+            targets = self.resolve_name(name, node.func, pins=named)
             if targets:
                 if name == "read_only" or any(key[1] == "read_only" for key in targets):
                     self.flag(node, "read_only(...)", first)
                     return flat(first)
                 return union(
                     *(
-                        self.apply(key, node, arguments, keywords, bound=False)
+                        self.apply(
+                            key, node, arguments, keywords, bound=False, pins=named
+                        )
                         for key in targets
                     )
                 )
@@ -2259,8 +2349,12 @@ class Reader:
         keywords: dict[str | None, Value],
         *,
         bound: bool,
+        pins: _Pins | None = None,
     ) -> Value:
-        """What a call to a function or a class of the package returns."""
+        """What a call to a function or a class of the package returns, each
+        definition it reaches read (:meth:`reached`, *pins* what its name
+        stood for where it was read).
+        """
         if target in self.tree.classes:
             info = self.tree.classes[target]
             if info.record:
@@ -2278,7 +2372,7 @@ class Reader:
         )
         values = [
             self._returned_by(function, arguments, keywords, bound=bound, spread=spread)
-            for function in self.reached(target, node)
+            for function in self.reached(target, node, pins=pins)
         ]
         return union(*values) if values else _CLEAN
 
@@ -2316,15 +2410,22 @@ class Reader:
         mapping = bind(function, arguments, keywords, bound=bound, spread=spread)
         return substitute(summary.value, mapping)
 
-    def reached(self, target: tuple[str, str], call: ast.AST) -> list[FunctionInfo]:
+    def reached(
+        self, target: tuple[str, str], call: ast.AST, *, pins: _Pins | None = None
+    ) -> list[FunctionInfo]:
         """Every definition of *target* a call of it written here can reach.
 
-        One of a module, or of a class, is each definition the name may hold
-        once the module has run (:func:`ast_scan.live_bindings`): one in each
-        branch of an ``if`` is either, and a later one in a block that holds
-        an earlier one replaces it; a function at the top of this module is
-        read where the call runs instead, so a call inside a function meets
-        every definition from the ``def`` on. One written inside a function is each
+        A function at the top of a module whose name was read at the top of
+        its module on the way to the call, by the call itself or by an alias
+        the call reaches, is each definition that stood where it was read
+        (*pins*, :meth:`Tree.resolve_top`), so an alias holds what its value
+        named where it was bound. Otherwise one of a module, or of a class,
+        is each definition the name may hold once the module has run
+        (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
+        either, and a later one in a block that holds an earlier one
+        replaces it; a function at the top of this module is read where the
+        call runs instead, so a call inside a function meets every
+        definition from the ``def`` on. One written inside a function is each
         written in the nearest of this function and those around it that
         holds any; in this function itself, each that may have run before
         the call and that no later one replaced on the way to it.
@@ -2334,6 +2435,8 @@ class Reader:
             found = self.tree.functions.get(target)
             return [found] if found is not None else []
         if all(definition.parent is None for definition in definitions):
+            if pins is not None and target in pins:
+                return pins[target]
             if target[0] == self.module and all(d.owner is None for d in definitions):
                 return _live(self.tree.modules[self.module], definitions, call)
             return self.tree.live_definitions(target)

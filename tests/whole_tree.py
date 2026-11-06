@@ -21,7 +21,10 @@ as any other, and the mark works on one test as it does on a module.
 What makes a test one is what it reads, so that is what this plugin checks.
 While a test sets up and runs, it counts the files of the repository's own
 trees (:data:`TREES`) the test opens, the files the higher-scoped fixtures it
-uses opened when they were set up included, and an unmarked test that opened
+uses opened when the setup it was given ran included: those it asks for by
+name with ``request.getfixturevalue``, one a fixture asks for in its own
+setup, and the one a fixture of a narrower scope overrides and asks for
+under its own name among them. An unmarked test that opened
 :data:`LIMIT` of them or more fails, saying how many and from which trees. A
 test that reads the tree to find what it then runs through the library, so
 that the kernel or a floor dependency decides its verdict, stays in those
@@ -31,9 +34,11 @@ The count leaves out a file the import system opens, so that importing a
 module of the package for the first time is no read of it, and a file the
 package opens itself (the remote runner ships its own modules), which is the
 library at work. It cannot see a file a child process reads, a test that
-lists the tree's names without opening its files, or a test that takes what
+lists the tree's names without opening its files, a test that takes what
 a guard's own cache kept from an earlier test of its worker without opening
-anything. ``linecache``, which :func:`inspect.getsource` reads through, is
+anything, or what a fixture another fixture asks for by name in its setup
+opened when that one had been set up before, for a test that takes the
+second from its cache. ``linecache``, which :func:`inspect.getsource` reads through, is
 emptied before each test, so a source read that way is seen. In the two jobs
 that pass the option no marked test runs, so what a guard's cache holds there
 an unmarked test read, and the first one to read it fails.
@@ -53,7 +58,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterator
+    from collections.abc import Generator, Iterable, Iterator
     from types import FrameType
 
 #: The mark a test that reads the whole repository carries, and the option
@@ -116,7 +121,9 @@ class TreeReads:
 
     :meth:`audit` is an audit hook (:func:`sys.addaudithook`): the ``open``
     event comes with the path of every file the process opens, whichever
-    way it is opened. A file counts while :meth:`counting` holds a set for it.
+    way it is opened. A file counts for every set :meth:`counting` holds
+    while it is opened: the test's, and each fixture's being set up, so a
+    fixture set up inside another's setup counts for that one too.
     """
 
     def __init__(self, root: Path) -> None:
@@ -124,8 +131,13 @@ class TreeReads:
         self._package = root / "src" / "phonometry"
         self._sets: list[set[str]] = []
         self._library: dict[str, bool] = {}
-        #: What each higher-scoped fixture opened, by ``(baseid, name)``.
+        #: What each higher-scoped fixture opened, by ``(baseid, name)``, in
+        #: the last setup of it, which is the one a test that uses it is given.
         self.fixtures: dict[tuple[str, str], set[str]] = {}
+        #: The names each of them takes as parameters, by the same key: its
+        #: own among them when it overrides a fixture of a wider scope and
+        #: asks for that one.
+        self.arguments: dict[tuple[str, str], tuple[str, ...]] = {}
 
     @contextlib.contextmanager
     def counting(self, opened: set[str]) -> Iterator[None]:
@@ -161,7 +173,8 @@ class TreeReads:
             or self._opened_by_the_import_system_or_the_package(sys._getframe(1))
         ):
             return
-        self._sets[-1].add(relative.as_posix())
+        for opened in self._sets:
+            opened.add(relative.as_posix())
 
     def _opened_by_the_import_system_or_the_package(
         self, frame: FrameType | None
@@ -182,18 +195,36 @@ class TreeReads:
         return False
 
     def read_by(self, item: pytest.Item) -> set[str]:
-        """The files *item* opened, and those its higher-scoped fixtures opened."""
+        """The files *item* opened, and those its higher-scoped fixtures opened.
+
+        The fixtures are those its request reached (``request.fixturenames``):
+        the ones it names, and the ones it or a fixture asked for by name with
+        ``request.getfixturevalue``, which the names it was collected with
+        leave out. Each name is the fixture of the narrowest scope that
+        reaches the test, and the one of a wider scope it overrides when it
+        takes its own name as a parameter, as far down as they go.
+        """
         nothing: set[str] = set()
         own = item.stash.get(_OPENED, nothing)
         opened = set(own)
-        for name in getattr(item, "fixturenames", ()):
-            mine = [
-                baseid
-                for baseid, argname in self.fixtures
-                if argname == name and _within(item.nodeid, baseid)
-            ]
-            if mine:
-                opened |= self.fixtures[(max(mine, key=len), name)]
+        request = getattr(item, "_request", None)
+        names: Iterable[str] = (
+            request.fixturenames if request else getattr(item, "fixturenames", ())
+        )
+        for name in names:
+            mine = sorted(
+                (
+                    baseid
+                    for baseid, argname in self.fixtures
+                    if argname == name and _within(item.nodeid, baseid)
+                ),
+                key=len,
+                reverse=True,
+            )
+            for baseid in mine:
+                opened |= self.fixtures[(baseid, name)]
+                if name not in self.arguments.get((baseid, name), ()):
+                    break
         return opened
 
 
@@ -287,7 +318,12 @@ def pytest_fixture_setup(
     del request
     if fixturedef.scope == "function":
         return (yield)
-    opened = _READS.fixtures.setdefault((fixturedef.baseid, fixturedef.argname), set())
+    # Each setup counts afresh: a fixture with parameters is set up once for
+    # each, and the test given one setup reads that one alone.
+    opened: set[str] = set()
+    key = (fixturedef.baseid, fixturedef.argname)
+    _READS.fixtures[key] = opened
+    _READS.arguments[key] = tuple(fixturedef.argnames)
     with _READS.counting(opened):
         return (yield)
 

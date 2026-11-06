@@ -2308,6 +2308,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   all of them: the wheel is byte for byte the one built before, and an
   editable install reads the same 94 data files.
 
+- **`import pyoctaveband` type-checks.** The PyOctaveBand 2.2.1 bridge now
+  ships the PEP 561 marker, `py.typed`, and re-exports `__version__` and
+  `__all__` as themselves. Without the marker, `mypy --strict` refused
+  `import pyoctaveband` with `import-untyped` and pyright strict asked for a
+  stub file; with the marker alone, pyright read the plain
+  `from phonometry import __version__` as a private import and refused
+  `pyoctaveband.__version__` in every mode. mypy, pyright in its basic,
+  standard and strict modes and `pyright --verifytypes pyoctaveband` (100 %)
+  now pass on a script that imports the old name.
+  `scripts/check_stub_metadata.py` refuses a built stub without the marker.
+
 - **The sdist carries no test module it cannot run.** setuptools packed the
   top-level `tests/test*.py` into the sdist by default, without the
   `conftest.py` and the helpers they import, so `pytest` in an unpacked sdist

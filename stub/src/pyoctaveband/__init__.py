@@ -8,7 +8,12 @@ name so existing code keeps working. New code should ``import phonometry``.
 import warnings
 
 from phonometry import *
-from phonometry import __all__, __version__  # noqa: F401
+
+# Each name the shim takes by name is re-exported as itself, the form a type
+# checker reads as a re-export of a typed package: pyright refused a plain
+# `from phonometry import __version__` as a private import.
+from phonometry import __all__ as __all__
+from phonometry import __version__ as __version__
 
 # FutureWarning (not DeprecationWarning): visible by default, so users of
 # the old name actually see the migration notice.

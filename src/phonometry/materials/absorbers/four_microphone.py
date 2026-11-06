@@ -909,11 +909,19 @@ def transfer_matrix_two_load(
         np.abs(pda * udb) + np.abs(pdb * uda),
         "transfer_matrix_two_load",
     )
+    # The warning above has named a near-singular denominator; the division
+    # carries it into the matrix as inf or nan without a second, anonymous
+    # RuntimeWarning from NumPy.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t11 = np.asarray((p0a * udb - p0b * uda) / den, dtype=np.complex128)
+        t12 = np.asarray((p0b * pda - p0a * pdb) / den, dtype=np.complex128)
+        t21 = np.asarray((u0a * udb - u0b * uda) / den, dtype=np.complex128)
+        t22 = np.asarray((pda * u0b - pdb * u0a) / den, dtype=np.complex128)
     return TransferMatrix(
-        t11=np.asarray((p0a * udb - p0b * uda) / den, dtype=np.complex128),
-        t12=np.asarray((p0b * pda - p0a * pdb) / den, dtype=np.complex128),
-        t21=np.asarray((u0a * udb - u0b * uda) / den, dtype=np.complex128),
-        t22=np.asarray((pda * u0b - pdb * u0a) / den, dtype=np.complex128),
+        t11=t11,
+        t12=t12,
+        t21=t21,
+        t22=t22,
         **_measurement_context(
             l1=l1,
             s1=s1,
@@ -1001,11 +1009,15 @@ def transfer_matrix_one_load(
         np.abs(p0 * ud) + np.abs(pd * u0),
         "transfer_matrix_one_load",
     )
-    t_diag = np.asarray((pd * ud + p0 * u0) / den, dtype=np.complex128)
+    # As in the two-load solve: the warning above has named the denominator.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t_diag = np.asarray((pd * ud + p0 * u0) / den, dtype=np.complex128)
+        t12 = np.asarray((p0**2 - pd**2) / den, dtype=np.complex128)
+        t21 = np.asarray((u0**2 - ud**2) / den, dtype=np.complex128)
     return TransferMatrix(
         t11=t_diag,
-        t12=np.asarray((p0**2 - pd**2) / den, dtype=np.complex128),
-        t21=np.asarray((u0**2 - ud**2) / den, dtype=np.complex128),
+        t12=t12,
+        t21=t21,
         t22=t_diag,
         **_measurement_context(
             l1=l1,

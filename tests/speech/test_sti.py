@@ -66,6 +66,7 @@ from phonometry.speech.sti import (
     _RATING_LETTERS,
     STIResult,
     STIWarning,
+    _empty_band_advisory,
     _level_correction,
     _LevelCorrection,
     _masking_amdb,
@@ -380,8 +381,10 @@ def test_a_dead_band_reads_zero_modulation_with_a_warning() -> None:
     """
     envelopes = np.ones((7, 4 * FS))
     envelopes[2] = 0.0
+    depths, empty_bands = _stipa_modulation_depths(envelopes, FS)
+    assert empty_bands == [2]
     with pytest.warns(STIWarning, match=r"No energy in octave band\(s\) \[2\]"):
-        depths = _stipa_modulation_depths(envelopes, FS)
+        _empty_band_advisory(empty_bands)
     assert np.all(depths[2] == 0.0)
     # A steady envelope carries no modulation either, but it has energy.
     assert np.all(np.abs(np.delete(depths, 2, axis=0)) < 1e-9)

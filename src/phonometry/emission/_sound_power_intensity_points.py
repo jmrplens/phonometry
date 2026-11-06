@@ -2017,25 +2017,7 @@ def sound_power_intensity_points(
     applicable = settled_net_share(partial_power, axis=0) > 0.0
     surface_area = float(np.sum(seg))
 
-    if np.any(~applicable):
-        warn_caller(
-            "The total sound power is not positive in one or more bands; ISO "
-            "9614-1:1993 is not applicable to those bands (clause 9.2).",
-            SoundPowerWarning,
-        )
     conditions_met = _test_conditions_met(intensity)
-    if not np.all(conditions_met):
-        warn_caller(
-            "The algebraic mean normal intensity is not positive in one or "
-            "more bands; the test conditions do not satisfy ISO 9614-1:1993 in "
-            "those bands (A.2.3) and their Annex A field indicators are "
-            "undefined. This is not the refusal of clause 9.2: a band whose "
-            "area-weighted sum of partial powers is still positive keeps a "
-            "finite sound power level and is not flagged inapplicable.",
-            SoundPowerWarning,
-        )
-    _sampling_warnings(n_positions, surface_area)
-
     f1 = _temporal_indicator(temporal_intensity, n_bands)
     f2, f3, f4 = _band_indicators(intensity, levels, conditions_met)
 
@@ -2051,6 +2033,26 @@ def sound_power_intensity_points(
         fraction=fraction,
         grade=grade,
     )
+    # The advisories come once the result stands: a refusal of any argument
+    # above, the temporal indicator's among them, is never replaced by one
+    # under -W error.
+    if np.any(~applicable):
+        warn_caller(
+            "The total sound power is not positive in one or more bands; ISO "
+            "9614-1:1993 is not applicable to those bands (clause 9.2).",
+            SoundPowerWarning,
+        )
+    if not np.all(conditions_met):
+        warn_caller(
+            "The algebraic mean normal intensity is not positive in one or "
+            "more bands; the test conditions do not satisfy ISO 9614-1:1993 in "
+            "those bands (A.2.3) and their Annex A field indicators are "
+            "undefined. This is not the refusal of clause 9.2: a band whose "
+            "area-weighted sum of partial powers is still positive keeps a "
+            "finite sound power level and is not flagged inapplicable.",
+            SoundPowerWarning,
+        )
+    _sampling_warnings(n_positions, surface_area)
     if result.a_weighting_omitted_bands is None and freqs is not None and n_bands > 1:
         warn_caller(
             "The A-weighted total sums every applicable band without the ISO "

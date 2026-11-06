@@ -45,7 +45,6 @@ test an analyser, which this module is not.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, overload
@@ -883,22 +882,9 @@ def _band_running_rms(
     x: NDArray[np.float64], fs: float, upper_band_hz: float
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The third octaves of Clause 7.2 and the running r.m.s. in each."""
-    from ...filters import FilterBankWarning, OctaveFilterBank
+    from ...filters import OctaveFilterBank
 
-    with warnings.catch_warnings():
-        # A band the rate cannot carry is dropped by the bank with a warning,
-        # and the check below turns that into the error it is here.
-        warnings.simplefilter("ignore", FilterBankWarning)
-        bank = OctaveFilterBank(
-            fs, fraction=3, limits=[PASSAGE_BANDS_HZ[0], upper_band_hz]
-        )
-    if not math.isclose(float(bank.labels[-1]), upper_band_hz):
-        msg = (
-            f"a sampling frequency of {fs:g} Hz cannot carry the "
-            f"{upper_band_hz:g} Hz third octave; raise it above twice the "
-            "band's upper edge."
-        )
-        raise ValueError(msg)
+    bank = OctaveFilterBank(fs, fraction=3, limits=[PASSAGE_BANDS_HZ[0], upper_band_hz])
     bands = bank.filter(
         x, sigbands=True, calculate_level=False, detrend=False
     ).require_bands()
@@ -975,10 +961,11 @@ def evaluate_train_passage(
         cannot take, a stretch outside the record, stretches that do not nest
         or a :math:`T_1` longer than :math:`T_2`, or an upper band that is not
         a nominal centre from 80 Hz to 315 Hz.
-    :raises TypeError: if ``upper_band_hz`` is not a single number.
+    :raises TypeError: if ``fs`` or ``upper_band_hz`` is not a single number.
         An element of ``t1_s`` or ``t2_s`` is refused the same way when it is not one real number.
     """
     raw = _record(velocity_mm_s)
+    require_scalar(fs, "fs")
     fs = _sample_rate(fs, "railway")
     require_scalar(upper_band_hz, "upper_band_hz")
     upper = float(upper_band_hz)
@@ -991,6 +978,18 @@ def evaluate_train_passage(
         msg = (
             "'upper_band_hz' must be a nominal third-octave centre from 80 Hz "
             f"to 315 Hz; got {upper_band_hz!r}."
+        )
+        raise ValueError(msg)
+    from ...filters import nominal_frequencies
+
+    # Refused before the bank is built: the bank would drop a band the rate
+    # cannot carry with a warning, ahead of the error it is here.
+    bands = nominal_frequencies(3, [PASSAGE_BANDS_HZ[0], upper])
+    if np.any(bands.upper_edges > fs / 2.0):
+        msg = (
+            f"a sampling frequency of {fs:g} Hz cannot carry the "
+            f"{upper:g} Hz third octave; raise it above twice the "
+            "band's upper edge."
         )
         raise ValueError(msg)
     x = np.asarray(

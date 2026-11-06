@@ -1565,13 +1565,6 @@ def turbine_sound_power(
             )
             raise ValueError(msg)
         corrections = np.asarray(turbine_background_correction(levels - background))
-        if np.any(_below_criterion(levels - background)):
-            warn_caller(
-                "The background is less than 3 dB below the level with the turbine "
-                "set operating at one or more positions; no valid measurement can "
-                "be made and the result is only an upper limit (IEC 61063, 4.2).",
-                SoundPowerWarning,
-            )
     mask: np.ndarray | None = None
     if overhead_mask is not None:
         mask = np.asarray(overhead_mask, dtype=bool)
@@ -1581,6 +1574,14 @@ def turbine_sound_power(
                 f"position ({levels.size}); got shape {mask.shape}."
             )
             raise ValueError(msg)
+    # The advisories come after every refusal, so -W error raises the refusal.
+    if background is not None and np.any(_below_criterion(levels - background)):
+        warn_caller(
+            "The background is less than 3 dB below the level with the turbine "
+            "set operating at one or more positions; no valid measurement can "
+            "be made and the result is only an upper limit (IEC 61063, 4.2).",
+            SoundPowerWarning,
+        )
     if not _within_k_limit(k):
         warn_caller(
             f"An environmental correction of {k:.1f} dB exceeds the 7 dB "

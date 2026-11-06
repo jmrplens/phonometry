@@ -3257,10 +3257,11 @@ def broad_warning_filters(path: Path) -> list[str]:
 def test_a_warning_filter_in_the_library_names_its_topic() -> None:
     """The library silences the one advisory it means, never a whole family.
 
-    The railway passage bank silenced ``UserWarning`` around the filter bank
-    it builds, to drop the band the rate cannot carry; inside that block every
-    advisory the bank raised for any other reason went unseen as well. It now
-    silences ``FilterBankWarning``, the topic the bank warns with.
+    The railway passage analysis silenced ``UserWarning`` around the filter
+    bank it builds, to drop the band the rate cannot carry; inside that block
+    every advisory the bank raised for any other reason went unseen as well.
+    It now checks the band against the rate before it builds the bank, and
+    silences nothing.
     """
     found = [
         offence

@@ -377,7 +377,8 @@ def transfer_stiffness_indirect(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
-    :raises ValueError: for a non-positive frequency or blocking mass.
+    :raises ValueError: for a non-positive frequency or blocking mass, or a
+        ``transmissibility`` that is not finite.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number, or
         ``transmissibility`` holds a text or a value that is not a number.
@@ -401,6 +402,9 @@ def _indirect_stiffness(
     flange_mass = require_non_negative(flange_mass, "flange_mass")
     omega = _omega(frequency, name)
     t = complex_array(transmissibility, "transmissibility")
+    if not np.all(np.isfinite(t)):
+        msg = "'transmissibility' must contain only finite values."
+        raise ValueError(msg)
     magnitude = np.abs(t)
     if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
         worst = float(np.max(magnitude))

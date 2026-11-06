@@ -767,6 +767,9 @@ def _determine(
         )
         margin_ref = np.asarray(mean_ref - mean_bg_ref, dtype=np.float64)
         k1_ref, met_ref = _k1_eq13(margin_ref)
+    # The advisories come after every refusal above: under -W error one
+    # raised first would stand in for the ValueError the docstring names.
+    _position_advisory(n_positions, traverse=traverse)
     _background_advisory(met, met_ref, measured=measured)
 
     level = np.asarray(power - mean_ref + mean_source + k1_ref - k1, dtype=np.float64)
@@ -877,7 +880,6 @@ def sound_power_hard_walled(
     arr = _finite(levels, "levels", (1, 2, 3))
     grid, traverse = _source_grid(arr)
     n_sources, n_positions, _ = grid.shape
-    _position_advisory(n_positions, traverse=traverse)
     per_position = energy_mean(grid, axis=0)  # Eq. (9)
     mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
     return _determine(
@@ -1025,7 +1027,6 @@ def sound_energy_hard_walled(
         raise ValueError(msg)
     grid, traverse, _ = _event_grid(arr, n_events)
     n_sources, n_positions, n_bands = grid.shape
-    _position_advisory(n_positions, traverse=traverse)
     per_position = energy_mean(grid, axis=0)  # Eq. (17)
     mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
     if integration_time is not None:
@@ -1354,12 +1355,6 @@ def check_hard_walled_room(
             f"against Table 3 ({_STANDARD})."
         )
         raise ValueError(msg)
-    if n_orientations != _ORIENTATIONS:
-        warn_caller(
-            f"{n_orientations} orientations were supplied; the procedure of 4.4 "
-            f"uses {_ORIENTATIONS}, four horizontal and four vertical ({_STANDARD}).",
-            SoundPowerWarning,
-        )
     volume = require_positive(volume, "volume")
     box = real_array(reference_box_m, "reference_box_m")
     if box.shape != (3,) or not np.all(np.isfinite(box)) or np.any(box <= 0.0):
@@ -1378,6 +1373,14 @@ def check_hard_walled_room(
             msg = "'absorption_coefficients' must be finite values in [0, 1]."
             raise ValueError(msg)
         alpha_max = float(np.max(alpha))
+    # Advised once every argument has been checked, so a refusal is never
+    # replaced by it under -W error.
+    if n_orientations != _ORIENTATIONS:
+        warn_caller(
+            f"{n_orientations} orientations were supplied; the procedure of 4.4 "
+            f"uses {_ORIENTATIONS}, four horizontal and four vertical ({_STANDARD}).",
+            SoundPowerWarning,
+        )
     return HardWalledRoomCheck(
         frequencies=freqs,
         level_range_db=np.asarray(np.ptp(levels, axis=0), dtype=np.float64),
@@ -1544,13 +1547,13 @@ def hard_walled_source_locations(
     if n_positions < 2:  # noqa: PLR2004
         msg = "'levels' must hold at least two microphone positions for Eq. (7)."
         raise ValueError(msg)
+    freqs = _octave_frequencies(frequencies, n_bands)
     if n_positions < _MIN_PRELIMINARY_MICROPHONES:
         warn_caller(
             f"{n_positions} microphone position(s) were supplied; the preliminary "
             f"survey uses at least {_MIN_PRELIMINARY_MICROPHONES} ({_STANDARD}, 7.4).",
             SoundPowerWarning,
         )
-    freqs = _octave_frequencies(frequencies, n_bands)
     s_m = np.asarray(np.std(arr, axis=0, ddof=1), dtype=np.float64)  # Eq. (7), (8)
     row = settled(s_m)
     locations = np.asarray(

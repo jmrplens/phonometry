@@ -988,11 +988,10 @@ def reference_source_calibration(
         intensity_sound_power_level,
     )
     directivity = _calibration_directivity(precision, max_levels)
-    _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
     uncertainty = k * reference_source_reproducibility(
         freqs, environment="hemi-anechoic", arrangement=arrangement
     )
-    return ReferenceSourceCalibration(
+    calibration = ReferenceSourceCalibration(
         frequencies=freqs,
         surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
         directivity_index=np.asarray(directivity, dtype=np.float64),
@@ -1015,6 +1014,10 @@ def reference_source_calibration(
         ),
         room_qualification=room_qualification,
     )
+    # The room is advised on once the calibration stands, so a refusal of any
+    # argument above comes first, even under -W error.
+    _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
+    return calibration
 
 
 @dataclass(frozen=True)

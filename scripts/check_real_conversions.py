@@ -127,11 +127,14 @@ from ast_scan import (
     ROOT,
     assigned_value,
     binding_of,
+    bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
     exempted,
     for_the_type_checker,
     forget_trees,
+    global_bindings,
+    held_before,
     imported_names,
     is_type_checking_block,
     own_names,
@@ -1599,13 +1602,17 @@ def _reach(
     name: str,
     standing: Mapping[str, Sequence[ast.AST]],
     imports: Mapping[str, str],
+    *,
+    where_written: bool = False,
 ) -> Literal["nearer", "replaced", "spelt"]:
     """What *name*, read at *read*, reaches.
 
     ``"nearer"`` when a scope inside the module binds it to anything but what the
     spelling names; a parameter defaulting to that and a local assigned from it
     (``float=float``, ``asarray = np.asarray``) hide nothing, and a default of the
-    name itself is read where the ``def`` runs its defaults. ``"nearer"`` too when
+    name itself is read where the ``def`` runs its defaults, as the module's
+    bindings of it stand there (:func:`_bound_where_written`), whatever the module
+    binds the name to after it. ``"nearer"`` too when
     the read finds a binding of the module that replaces its imports, while
     *imports* holds a function's own import of the name, which this read does not
     reach. ``"replaced"`` when the module's own bindings of a name read by its
@@ -1614,7 +1621,11 @@ def _reach(
     """
     how, binder = binding_of(tree, read, name)
     if binder is None or binder is tree:
-        live = standing.get(name, ())
+        live = (
+            _bound_where_written(tree, read, name)
+            if where_written
+            else standing.get(name, ())
+        )
         if name in imports and not all(
             isinstance(node, ast.ImportFrom) for node in live
         ):
@@ -1635,10 +1646,28 @@ def _reach(
             isinstance(value, ast.Name)
             and binding_of(tree, value, name)[1] is not binder
         ):
-            reached = _reach(tree, value, name, standing, imports)
+            reached = _reach(tree, value, name, standing, imports, where_written=True)
             if reached != "spelt":
                 return reached
     return "spelt"
+
+
+def _bound_where_written(tree: ast.Module, read: ast.expr, name: str) -> list[ast.AST]:
+    """The bindings of the module's *name* that may stand where *read*, a
+    name a default or a value reads where it is written, reads it: those at
+    the top of the module that may have run before it (:func:`ast_scan.held_before`),
+    none when none has, so the name is then the builtin, and each a function
+    makes under ``global``, which may have run at any time. What an ``if
+    TYPE_CHECKING:`` block holds never runs, and is none of them.
+    """
+    checker = for_the_type_checker(tree)
+    own = [
+        node for node in bindings_by_name(tree).get(name, ()) if id(node) not in checker
+    ]
+    inside = [
+        node for node in global_bindings(tree).get(name, ()) if id(node) not in checker
+    ]
+    return [*held_before(tree, own, read), *inside]
 
 
 def _replaces_the_spelling(tree: ast.Module, node: ast.AST, name: str) -> bool:

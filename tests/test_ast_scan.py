@@ -328,6 +328,38 @@ def test_a_call_reaches_the_defs_that_may_run_before_it() -> None:
         assert ast_scan.live_bindings(tree, bindings, call) == reached, target
 
 
+def test_a_default_holds_no_binding_of_its_scope_before_any_has_run() -> None:
+    """A ``def``'s default runs where it is written: before any binding of
+    the name at the top of the module, it holds none of them (the builtin),
+    after one it holds that one, and a later one replaces neither.
+
+    :func:`ast_scan.live_bindings` takes every binding for what a read before
+    them may meet, which a call inside a function may; a default never does.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def early(levels, float=float):
+                return float(levels)
+
+            float = print
+
+            def late(levels, float=float):
+                return float(levels)
+
+            float = str
+            """
+        )
+    )
+    first, second = ast_scan.bindings_by_name(tree)["float"]
+    early, late = (
+        node.args.defaults[0] for node in tree.body if isinstance(node, ast.FunctionDef)
+    )
+    assert ast_scan.held_before(tree, [first, second], early) == []
+    assert ast_scan.held_before(tree, [first, second], late) == [first]
+    assert ast_scan.live_bindings(tree, [first, second], early) == [first, second]
+
+
 def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
     """The ``def``s of *name* in *source* the name may hold, by the number
     each returns: at the call stored in *call* (the one call of *name* when

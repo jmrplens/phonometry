@@ -1405,10 +1405,39 @@ def _running_first[NodeT: ast.AST](
     return [binding for binding in bindings if id(binding) not in checker] or bindings
 
 
-def _held_at[NodeT: ast.AST](
-    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None
+def held_before[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST
 ) -> list[NodeT]:
-    """:func:`live_bindings` at a *point* written in the bindings' own scope."""
+    """Of *bindings*, statements of one scope under *root* that bind one name,
+    those the name may hold at *point*, as :func:`live_bindings` reads them,
+    but none when none may have run before it.
+
+    What a read that runs where it is written finds, a ``def``'s default
+    among them: before any binding of its scope has run, the name is none of
+    that scope's, but a builtin's or what a scope around it holds, where
+    :func:`live_bindings` takes every one for what a call read before them
+    may meet.
+    """
+    bindings = _running_first(root, bindings)
+    if not bindings:
+        return []
+    point, deferred = _lifted(root, bindings[0], point)
+    if deferred:
+        return _met_from(root, bindings, point)
+    return _held_at(root, bindings, point, every_when_none=False)
+
+
+def _held_at[NodeT: ast.AST](
+    root: ast.AST,
+    bindings: Sequence[NodeT],
+    point: ast.AST | None,
+    *,
+    every_when_none: bool = True,
+) -> list[NodeT]:
+    """:func:`live_bindings` at a *point* written in the bindings' own scope;
+    when none may have run before it, every one, or none without
+    *every_when_none* (:func:`held_before`).
+    """
     frames = {binding: _frames(root, binding) for binding in bindings}
     target = _frames(root, point) if point is not None else None
     sure = {binding for binding in bindings if not _loop_target(root, binding)}
@@ -1429,7 +1458,7 @@ def _held_at[NodeT: ast.AST](
     ]
     if target is not None:
         live.extend(_back_from_a_turn(bindings, frames, target, forward, sure))
-    return live or list(bindings)
+    return live if live or not every_when_none else list(bindings)
 
 
 def _loop_target(root: ast.AST, node: ast.AST) -> bool:

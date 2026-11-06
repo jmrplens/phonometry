@@ -2327,6 +2327,58 @@ def test_a_binding_of_the_module_is_no_conversion_of_that_spelling(
 
 
 @pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        pytest.param(
+            """
+            def f(levels, float=float):
+                return float(levels)
+
+            float = print
+            """,
+            {"f": "unchecked"},
+            id="the-builtin-a-later-assignment-replaces",
+        ),
+        pytest.param(
+            """
+            def f(levels, complex=complex):
+                return complex(levels)
+
+            def complex(x):
+                return x
+            """,
+            {"f": "unchecked"},
+            id="the-builtin-a-later-def-replaces",
+        ),
+        pytest.param(
+            """
+            float = print
+
+            def f(levels, float=float):
+                return float(levels)
+
+            from builtins import float
+            """,
+            {},
+            id="an-assignment-a-later-import-of-the-builtin-replaces",
+        ),
+    ],
+)
+def test_a_default_is_read_where_the_def_runs(
+    tmp_path: Path, source: str, expected: dict[str, str]
+) -> None:
+    """``float=float`` holds what the module's ``float`` is where the ``def``
+    runs its defaults, whatever the module binds the name to after it.
+
+    The default was read as the module held the name once it had run, so a
+    later ``float = print`` or ``def complex`` hid the conversion the default
+    makes, and a later import of the builtin made a conversion of the
+    ``print`` the default holds.
+    """
+    assert _verdicts(tmp_path, source) == expected
+
+
+@pytest.mark.parametrize(
     "source",
     [
         pytest.param(

@@ -71272,7 +71272,7 @@ was: each sample is cast once on its way off the device.
 | Device | What to install | Notes |
 |---|---|---|
 | `"cpu"` | nothing: NumPy is a dependency of phonometry | the reference every other device is compared with |
-| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install "phonometry[torch]"` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
+| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install "phonometry[torch]"` | on Python 3.12 torch 2.3.0 or later, on 3.13 torch 2.5.0 or later and on 3.14 torch 2.9.0 or later, with array-api-compat 1.5.1 or later on each; `[full]` leaves it out |
 | `"cupy"` | the CuPy wheel for your CUDA version, such as `pip install cupy-cuda12x` or `pip install cupy-cuda13x` | not an extra of phonometry, because the wheel has to match the CUDA your driver supports |
 
 `[full]` leaves torch out on purpose: the torch wheels PyPI serves for Linux

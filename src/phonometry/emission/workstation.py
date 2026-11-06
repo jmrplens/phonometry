@@ -103,7 +103,6 @@ ISO 11202:2010 and its Amendment 1:2020, ISO 11203:1995 and its Amendment
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, overload
@@ -119,6 +118,7 @@ from .._internal.validation import (
     require_positive,
     require_positive_array,
 )
+from .._internal.warnings import warn_caller
 from ._shared import Grade, SoundPowerWarning, _check_grade
 
 if TYPE_CHECKING:
@@ -352,13 +352,12 @@ def background_noise_correction_at_workstation(
     )
     if result.upper_bound:
         floor = MIN_BACKGROUND_MARGIN_DB[checked]
-        warnings.warn(
+        warn_caller(
             f"the background is within {floor:g} dB of the source in at least "
             f"one band, so K1 is held at its value there and the emission "
             "level is an upper bound, not a determination "
             "(ISO 11202:2010, 6.4.1).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return result
 

@@ -33,14 +33,13 @@ and the EXTENSIBLE channel labels ride along on the returned signal.
 from __future__ import annotations
 
 import os
-import warnings
 from dataclasses import replace
 from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 
 from .._internal.json_input import escaped
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
     _WAVE_FORM_TYPE,
@@ -162,13 +161,12 @@ def _import_soundfile(format_name: str) -> ModuleType:
 
 def _warn_lossy(format_name: str, path: str | os.PathLike[str]) -> None:
     """Emit the metrology warning for a lossy source."""
-    warnings.warn(
+    warn_caller(
         f"{escaped(os.fspath(path))}: {format_name} is a lossy format; the decoder reconstructs "
         "an approximation of the recorded waveform, so levels computed from "
         "it are not metrologically defensible. Use the linear PCM recording "
         "for analysis; lossy copies are for listening.",
         LossyCompressionWarning,
-        stacklevel=3,
     )
 
 

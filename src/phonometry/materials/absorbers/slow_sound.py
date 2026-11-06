@@ -66,7 +66,6 @@ phonometry (a passive medium has :math:`\operatorname{Im}(k) < 0`):
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -84,7 +83,7 @@ from ..._internal.validation import (
     require_present,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from .porous import ABSORBER_AIR, Complex
 
 if TYPE_CHECKING:
@@ -396,13 +395,12 @@ def _slit_resonator_ducts(
     dl = 0.0
     if end_correction:
         if wn > h:
-            warnings.warn(
+            warn_caller(
                 "The resonator neck is wider than the slit "
                 f"({wn:g} m > {h:g} m); the Dubos neck-to-slit end "
                 "correction is outside its fitted domain and turns "
                 "negative, which effectively decouples the resonator.",
                 SlowSoundAbsorberWarning,
-                stacklevel=3,
             )
         dl = _neck_cavity_correction_2d(wn, wc)
         dl += _neck_slit_correction_2d(wn, h)
@@ -1008,12 +1006,11 @@ def critical_coupling_design(
         and _reaches_perfect_absorption(alpha)
     )
     if not converged:
-        warnings.warn(
+        warn_caller(
             "critical_coupling_design did not reach perfect absorption within "
             f"tolerance (alpha = {alpha:.4f}); try different bounds or base "
             "geometry.",
             SlowSoundAbsorberWarning,
-            stacklevel=2,
         )
     return CriticalCouplingResult(
         target_frequency=f0,

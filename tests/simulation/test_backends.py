@@ -272,59 +272,6 @@ def test_the_fallback_warning_points_at_the_callers_line(
     assert caught[0].filename == __file__
 
 
-def test_the_skipped_prefix_is_the_package_directory_as_imported() -> None:
-    import phonometry
-    from phonometry.simulation import fdtd
-
-    prefix = bk._PACKAGE_PREFIX
-    assert phonometry.__file__ == f"{prefix}__init__.py"
-    assert fdtd.__file__.startswith(prefix)
-    # The trailing separator keeps a sibling named like the package outside.
-    assert not f"{prefix[:-1]}_extra{os.sep}module.py".startswith(prefix)
-
-
-def _warns(prefix: str) -> None:
-    warnings.warn("fell back", UserWarning, skip_file_prefixes=(prefix,))
-
-
-def _hands_on(call: Callable[..., None], *args: object) -> None:
-    call(*args)
-
-
-def _read_from(function: Callable[..., None], filename: str) -> Callable[..., None]:
-    """*function* as if the interpreter had read it from *filename*."""
-    code = function.__code__.replace(co_filename=filename)
-    return types.FunctionType(code, function.__globals__)
-
-
-def test_a_dot_in_the_import_path_still_skips_the_whole_package() -> None:
-    """A ``/./`` in a ``sys.path`` entry stays in every frame's file name.
-
-    The warning is raised two frames deep in the package, as the fallback is
-    (the backend, called from an engine), so the frame it skips by its file
-    name is the outer one: a prefix normalised through ``Path`` loses the
-    ``/./`` and leaves the warning on that library line.
-    """
-    root = f"{os.sep}site{os.sep}.{os.sep}"
-    package = f"{root}phonometry{os.sep}simulation{os.sep}"
-    backends, engine, script = (
-        f"{package}_backends.py",
-        f"{package}fdtd.py",
-        f"{root}script.py",
-    )
-    prefix = bk._package_prefix(backends)
-    assert prefix == f"{root}phonometry{os.sep}"
-    warns = _read_from(_warns, backends)
-    library = _read_from(_hands_on, engine)
-    caller = _read_from(_hands_on, script)
-    normalised = f"{Path(backends).parent.parent}{os.sep}"
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        caller(library, warns, prefix)
-        caller(library, warns, normalised)
-    assert [w.filename for w in caught] == [script, engine]
-
-
 def test_pyodide_refuses_every_device_but_numpy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

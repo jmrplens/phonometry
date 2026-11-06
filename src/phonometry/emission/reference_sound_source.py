@@ -80,7 +80,6 @@ are.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -96,6 +95,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     _PS0,
     _S0,
@@ -873,11 +873,10 @@ def _calibration_room_qualified(
         return None
     qualified = _room_qualified(room_qualification, freqs)
     if not qualified:
-        warnings.warn(
+        warn_caller(
             "The room qualification does not cover these bands at 2 m in a "
             "hemi-anechoic room (ISO 6926:2016, 8.1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return qualified
 

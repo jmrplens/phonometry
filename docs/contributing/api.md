@@ -351,12 +351,12 @@ rename in src, and leave docs/ and the Spanish site page for later
 <a id="a16"></a>
 ### A16. After 4.0.0, keep a renamed shipped name working for one release with a `DeprecationWarning`
 
-**Why.** A caller's code keeps running for a release and is told what to use instead; a deprecated name goes only in a major release. The message follows NEP 23 (the version that deprecates, the version that removes, the replacement) and says "deprecated since phonometry", which the suite's `filterwarnings` turns into an error, so every deprecation is met on purpose by a `pytest.warns(DeprecationWarning)` test. `stacklevel` is 2 from the deprecated function itself and 3 through a shared helper; a renamed module keeps a PEP 562 module `__getattr__` shim (SciPy's pattern), and a renamed keyword accepts the old one through a `"deprecated"` string sentinel and forwards it (scikit-learn's).
+**Why.** A caller's code keeps running for a release and is told what to use instead; a deprecated name goes only in a major release. The message follows NEP 23 (the version that deprecates, the version that removes, the replacement) and says "deprecated since phonometry", which the suite's `filterwarnings` turns into an error, so every deprecation is met on purpose by a `pytest.warns(DeprecationWarning)` test. The warning goes through `warn_caller` ([A62](#a62)), which names the caller's line however many frames of the library stand between; a renamed module keeps a PEP 562 module `__getattr__` shim (SciPy's pattern), and a renamed keyword accepts the old one through a `"deprecated"` string sentinel and forwards it (scikit-learn's).
 
 **Do**
 
 ```python
-import warnings
+from phonometry._internal.warnings import warn_caller
 
 
 def new_name(value: float) -> float:
@@ -364,10 +364,9 @@ def new_name(value: float) -> float:
 
 
 def old_name(value: float) -> float:
-    warnings.warn(
+    warn_caller(
         "old_name is deprecated since phonometry 4.1.0 and will be removed in 5.0.0; use new_name instead.",
         DeprecationWarning,
-        stacklevel=2,
     )
     return new_name(value)
 ```
@@ -375,7 +374,7 @@ def old_name(value: float) -> float:
 **Don't**
 
 ```py
-warnings.warn("old_name is deprecated", DeprecationWarning)  # no versions, no replacement, stacklevel 1
+warnings.warn("old_name is deprecated", DeprecationWarning)  # no versions, no replacement, the library's own line
 ```
 
 **Enforced by:** review
@@ -1251,21 +1250,20 @@ class RoadDeviceWarning(UserWarning): ...
 **Do**
 
 ```python
-import warnings
-
 from phonometry import filters
+from phonometry._internal.warnings import warn_caller
 
 
 def warn_low_rate(fs: int) -> None:
     if fs < 8000:
-        warnings.warn(f"Low sampling rate: {fs} Hz", filters.FilterBankWarning, stacklevel=2)
+        warn_caller(f"Low sampling rate: {fs} Hz", filters.FilterBankWarning)
 ```
 
 **Don't**
 
 ```py
-warnings.warn("low sampling rate")
-warnings.warn(msg, UserWarning)
+warn_caller("low sampling rate", UserWarning)
+warn_caller(msg, PhonometryWarning)
 ```
 
 **Enforced by:** `tests/test_package_architecture.py::test_every_warning_names_a_published_topic`
@@ -1280,6 +1278,8 @@ warnings.warn(msg, UserWarning)
 **Do**
 
 ```python
+import warnings
+
 from phonometry import fluids
 
 with warnings.catch_warnings():
@@ -1308,7 +1308,7 @@ with warnings.catch_warnings():
 ```python
 def warn_long_duct(length_m: float) -> None:
     if length_m > 10.0:
-        warnings.warn(f"a {length_m} m duct is past the validated range", DuctWarning, stacklevel=2)
+        warn_caller(f"a {length_m} m duct is past the validated range", DuctWarning)
 ```
 
 **Don't**
@@ -1725,3 +1725,30 @@ def scale_values(marked_fraction):
 **Enforced by:** `scripts/check_real_conversions.py`, `make real-conversions`, `CI: Every conversion of a caller's numbers goes through a check`, `tests/test_check_real_conversions.py::test_the_package_keeps_the_rule`, `tests/test_check_real_conversions.py::test_each_shape_of_a_caller_s_value_is_found`, `tests/test_check_real_conversions.py::test_a_caller_s_value_no_check_reads_on_every_path_is_found`, `tests/test_check_real_conversions.py::test_every_check_said_to_refuse_a_complex_value_does`, `tests/test_check_real_conversions.py::test_every_check_said_to_refuse_a_text_does`, `tests/test_check_real_conversions.py::test_a_private_helper_reads_what_its_calls_hand_it`, `tests/test_real_numbers_read_by_name.py`, `tests/test_reader_names.py`, `tests/test_numbers_read_before_arithmetic.py`, `tests/test_scalar_guards.py::test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name`
 
 **Exceptions.** The check reads every function of `src/phonometry`, private and nested ones included, since a public function hands its caller's value on to the helper that converts it. A function no caller of the library reaches, one at the top of a module whose name opens with an underscore or that sits in a private module, which no `__all__` publishes and which the package only calls (never hands on, keeps in a table or decorates with), is read through its calls: each parameter holds what the calls across the package hand it, joined, a caller's value no check read where any call hands one, and the modules are read again until no call hands anything new. Any other function's parameters, a method's and a nested function's included, are a caller's values; a nested function's count as much as those of the function around it, and a nested function or a `lambda` reads the names it shares with the function around it as that function holds them where it uses the nested one (calls it, hands it on or returns it), or, used nowhere there, where it defines it. A conversion is one to floats or to complex numbers: `np.asarray`, `np.array` and their kin with the dtype given by keyword or in second place, as a type, as a text with its byte order such as `"<f8"`, as `np.dtype(...)` or through a name bound to one; the fill value of `np.full`; `.astype()`; `np.float64()` or `np.complex128()` of a value; and Python's `float()` and `complex()` of one value. A caller's value is a parameter of the function that converts it, read bare, through an item, through a call or an attribute that keeps its values (`np.atleast_1d`, `list`, `.ravel()`, `np.concatenate`, `.T`), through `getattr(x, name, x)`, through a tuple or a list that holds it, or through a loop or a comprehension over it, and in a record's `__post_init__` a field, which the caller set; an item assigned to it (`x[0] = v`) holds `v` from there on, and the whole value holds it among its items, so a check of the whole holds only as far as `v` was checked; arithmetic on it (`x * 2`, `-x`, `x += y`) keeps it the caller's value, since a complex value stays complex through it and a list or a text repeats or joins, checked only as far as every operand it is made of was; and a field a method reads outside `__post_init__` was read when the record was built. A closure handed out may run after its function rebinds what it reads, so it is read where it is used and at the end of its function, joined, and a method of a class written in a function reads the names it shares with that function where the class is written and at the end. A check is a call of one of the shared checks the script lists with what each refuses, a complex value, a text or both, which `tests/test_check_real_conversions.py` calls one by one, or of a function of the package that hands that parameter to one on every path that leaves it by its end or a `return`: a check after an earlier `return`, in the body of a `try` a handler of which goes on, or of a parameter the function has rebound to another value first, makes no check of it, and a check handed what NumPy made of the value first (`np.asarray(x)`, `np.atleast_1d(x)` and the other NumPy calls that keep its values, given no floating dtype, or a name bound to it on any path that reaches the check), in which a `bytearray` is already the codes of its characters, is reported as a conversion no check precedes, and so is a name a `with` binds or a `match` captures from that reading. What a call of a check of the package hands back is what it returns of its parameters, checked as far as it checked them on the way; a parameter it returns unchecked comes back the caller's value, whether it returns it bare or through what keeps it (arithmetic, `.T`, a loop or a comprehension over it, a name it added it to with `+=` or an array it set an item of to it, a name a `:=` binds to it or a `case` captures of it), and a value it computes is computed; a comprehension's own variable stands for the items it walks only inside the comprehension, and what a nested function or a lambda binds is its own, as Python scopes them, but a name it declares `nonlocal` is the function's, and so is an item it fills of a name of the function; a name a function declares `global` is the module's, in it and in the functions nested in it, whatever a function around binds of that spelling; and a nested function's parameter stands for what each call of it by name hands it, and for its default. A `*` argument or a `**` mapping may hand its values to any parameter from its place on, or to any that takes a keyword, but not to one an argument of the call fills in its place or by its name, since the call would raise. An `isinstance` test that finds the value a real number refuses a text and a complex value where it holds, and one that finds it a number of any kind a text; a check handed `x or 0.0` checks `x`. A conversion to floats needs both refused, one to complex numbers a text, and only a check on every path to the conversion counts: one in a single branch of an `if`, in a loop's body, on the right of `and` or `or`, in a later link of a chained comparison, in an `assert` (which `python -O` leaves out), handed one branch of a conditional expression (`x if flag else [1.0]`; `d if x is None else x` checks `x`) or the default of `getattr`, or of an item (`x[0]`) rather than the whole value does not. A conversion of a value that is no caller's number but that the rule cannot tell from one (an array of objects an `isinstance` test has read item by item, the text a catalogue prints, the quick path of the readers themselves, a stage or an equation handed to another function or a root finder, which calls it with values of its own, a function held in a table, and a private method, whose calls are not followed) is listed in `EXEMPT` of the script, keyed by file and function with the reason; an entry that covers nothing fails. A parameter written as one number reads it through a shared scalar guard ([A43](#a43)), which refuses a complex number of either kind the same way. A function that reads a value a public function hands it, however many calls down, private or public, in its module or one it imports from, names it as that public function's parameter: the caller's name is handed on with the value where callers name it differently (`_coerce(alpha_p, centers, "alpha_p")`), or the public function reads the value under its own name first, on every path to the call, before handing it to another public function that would name it after its own parameter (`ra` reads `reduction_index` before the index function would read it as `band_values`); a reading on one side of a conditional expression, after an `and`, an `or` or the first link of a chained comparison, in a lambda, a comprehension, a generator or an `assert` may be skipped, so it reads nothing first. A name of the parameter's spelling that a comprehension, a lambda or a nested function binds for itself is another name, as Python scopes it. A field read off a record is named after the field. `tests/test_reader_names.py` follows the chains of calls across the package and fails on such a reading.
+
+<a id="a62"></a>
+### A62. Warn through `warn_caller`, which names the caller's line, never through `warnings.warn`
+
+**Why.** A warning is shown at a file and a line, a filter by module reads that file, and Python's `default` action keys its memory of what it has shown on that line. Of the library's 178 warnings, 175 passed a `stacklevel` counted by hand for one route to it, the other three already skipping the package's files, and the same advisory is reached through several: a public function, a method, a record's `__post_init__`, another domain that calls it. Where the route was deeper or shallower than the count the warning landed on a library line, 33 of them in the suite: `OctaveFilterBank(44100)` and `octave_filter(x, 44100)` both warned at `filters/core.py:698`, inside the bank, so a notebook showed the warning for its first bank and never again, whatever line made the next one, and `filterwarnings("error", module="my_analysis")` let it through. `warn_caller(message, category)`, in `src/phonometry/_internal/warnings.py`, passes `skip_file_prefixes` with the package's own directory, which Python 3.12 added, and counts the frames that run the package's code from elsewhere (the `__init__` a dataclass compiles from a string, `functools.cached_property`, the exit of a `contextlib.contextmanager`, `dataclasses.replace`), so the warning lands on the first line of the caller's code however deep the route is, and a forwarded `stacklevel` parameter has nothing left to count. A warning instance relayed from a node is raised again through it with its own class.
+
+**Do**
+
+```python
+from phonometry._internal.warnings import warn_caller
+
+
+def warn_wide_bands(n_bands: int) -> None:
+    if n_bands > 40:
+        warn_caller(f"{n_bands} bands is past the validated range", DuctWarning)
+```
+
+**Don't**
+
+```py
+def _warn_wide_bands(n_bands, stacklevel):
+    warnings.warn(f"{n_bands} bands", DuctWarning, stacklevel=stacklevel)  # counted for one route
+```
+
+**Enforced by:** `tests/test_package_architecture.py::test_the_library_warns_only_through_warn_caller`, `tests/test_package_architecture.py::test_the_warning_rule_reads_every_way_to_reach_warnings_warn`, `tests/test_internal_warnings.py`, `tests/test_warning_attribution.py`
+
+**Exceptions.** `src/phonometry/_internal/warnings.py` itself, which holds the one call of `warnings.warn`. The guard refuses a call of `warnings.warn` or `warnings.warn_explicit`, a reference to either handed on, an import of either from `warnings` or `_warnings`, a `getattr` of either, and either reached through `__import__`, `importlib.import_module` or `sys.modules`; it does not follow a name bound to the function inside an expression it cannot read, which review catches.

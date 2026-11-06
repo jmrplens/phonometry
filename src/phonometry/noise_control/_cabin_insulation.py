@@ -67,7 +67,6 @@ inputs.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -88,7 +87,7 @@ from .._internal.validation import (
     require_finite_matrix,
     require_positive,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..emission._shared import _a_weighting_corrections
 from ..emission._sound_power_reverberation import reverberation_background_correction
 from ._insulation_shared import (
@@ -329,7 +328,7 @@ def _corrected(
             f"{ISO11957_PREFERRED_BACKGROUND_MARGIN_DB:g} dB; the smallest margin is "
             f"{float(np.min(margin)):.1f} dB."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=3)
+        warn_caller(msg, CabinInsulationWarning)
     return levels - reverberation_background_correction(
         levels, background, frequencies=frequencies
     )
@@ -990,7 +989,7 @@ def internal_noise_level(
             f"{ISO11957_PREFERRED_BACKGROUND_MARGIN_DB:g} dB; the margin is "
             f"{margin:.1f} dB, so L_pA is an upper bound."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
+        warn_caller(msg, CabinInsulationWarning)
         return mean
     if judged > upper:
         return mean
@@ -1145,7 +1144,7 @@ def min_cabin_clearance_m(
             f"ISO 11957 6.2 covers {preferred_low:g} Hz to {preferred_high:g} Hz; "
             f"{frequency:g} Hz is outside it."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
+        warn_caller(msg, CabinInsulationWarning)
     if low <= frequency <= high:
         return LOW_BAND_CLEARANCE_M
     return WALL_CLEARANCE_FACTOR * celerity / frequency
@@ -1191,5 +1190,5 @@ def uncertainty_conditions(
             f"{MIN_ROOM_TO_CABIN_VOLUME_RATIO:g} times the volume of the cabin; "
             f"the ratio is {ratio:.1f}."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
+        warn_caller(msg, CabinInsulationWarning)
     return statement

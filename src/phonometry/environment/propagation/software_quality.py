@@ -151,7 +151,6 @@ from __future__ import annotations
 
 import math
 import numbers
-import warnings
 from dataclasses import dataclass
 from fractions import Fraction
 from itertools import pairwise
@@ -166,7 +165,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_finite_matrix,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -561,12 +560,11 @@ def uniform_sample_indices(
         )
         raise ValueError(msg)
     if size < RECOMMENDED_SAMPLE_RATIO * remaining:
-        warnings.warn(
+        warn_caller(
             f"A sample of {size} from {remaining} single points is thinner "
             "than the ratio of at least 1:100 that C.2 of ISO 17534-1 "
             "recommends.",
             SoftwareQualityWarning,
-            stacklevel=2,
         )
     i = np.arange(1, size + 1, dtype=np.int64)
     ordinals = ((2 * i - 1) * remaining) // (2 * size)

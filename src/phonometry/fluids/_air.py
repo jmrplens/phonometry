@@ -20,9 +20,9 @@ in closed form rather than against a printed number.
 from __future__ import annotations
 
 import math
-import warnings
 
 from .._internal.validation import real_number, require_scalar
+from .._internal.warnings import warn_caller
 from ._state import Fluid, FluidAssumptionWarning, FluidWarning
 
 __all__ = [
@@ -179,7 +179,7 @@ def _warn_assumptions(
         f"of humidity, 0 % to 100 %, is worth about 1 % of the density. Pass "
         f"the conditions to silence this."
     )
-    warnings.warn(msg, FluidAssumptionWarning, stacklevel=3)
+    warn_caller(msg, FluidAssumptionWarning)
 
 
 def _warn_outside_domain(
@@ -207,7 +207,7 @@ def _warn_outside_domain(
         f"extrapolation of a fit, not a refusal: the annex states where it was "
         f"validated, not what air can be."
     )
-    warnings.warn(msg, FluidWarning, stacklevel=3)
+    warn_caller(msg, FluidWarning)
 
 
 def air(

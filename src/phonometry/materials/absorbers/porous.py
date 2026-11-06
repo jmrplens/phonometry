@@ -67,7 +67,6 @@ stack of them and solving it with the transfer matrix is the subject of
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -88,7 +87,7 @@ from ..._internal.validation import (
     require_positive,
     require_positive_array,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...fluids import Fluid
 
 if TYPE_CHECKING:
@@ -341,11 +340,10 @@ def _warn_fit_range(
     """Warn once when *x* leaves the published fit range of *model*."""
     lo, hi = limits
     if bool(np.any(x < lo)) or bool(np.any(x > hi)):
-        warnings.warn(
+        warn_caller(
             f"{model}: {variable} outside the published fit range "
             f"[{lo:g}, {hi:g}]; the regression is an extrapolation there.",
             PorousAbsorberWarning,
-            stacklevel=3,
         )
 
 
@@ -925,7 +923,7 @@ def airflow_resistivity_from_bulk_density(
             "relation is a regression through measured points and says nothing "
             "beyond them"
         )
-        warnings.warn(msg, PorousAbsorberWarning, stacklevel=2)
+        warn_caller(msg, PorousAbsorberWarning)
     resistivity = fit.k1 * density ** (1.0 + fit.k2) / fit.fiber_diameter_um**2
     return float(resistivity)
 

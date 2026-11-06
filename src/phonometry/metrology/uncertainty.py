@@ -62,7 +62,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 __all__ = [
     "MonteCarloResult",
@@ -438,8 +438,6 @@ def _sensitivity(
     and silently zero the sensitivity (e.g. :math:`x_i = 10^9`,
     :math:`u = 10^{-6}`).
     """
-    import warnings
-
     n = values.size
     coeffs = np.empty(n)
     sqrt_eps = math.sqrt(float(np.finfo(np.float64).eps))
@@ -459,14 +457,13 @@ def _sensitivity(
         f_up = float(model(*up))
         f_down = float(model(*down))
         if f_up == f_down and uncertainties[i] > 0.0:
-            warnings.warn(
+            warn_caller(
                 f"The model output does not change when input {i + 1} is "
                 f"perturbed by its evaluation step ({step:.3g}): its "
                 "sensitivity evaluates to exactly zero and its uncertainty "
                 "does not propagate. This is legitimate for genuinely flat "
                 "directions (e.g. GUM H.1) but worth verifying.",
                 UncertaintyWarning,
-                stacklevel=3,
             )
         coeffs[i] = (f_up - f_down) / (2.0 * step)
     return coeffs
@@ -519,16 +516,13 @@ def _effective_dof(
     """
     finite = np.isfinite(dofs)
     if correlated and np.any(finite):
-        import warnings
-
-        warnings.warn(
+        warn_caller(
             "Welch-Satterthwaite (GUM G.4.1) is defined for independent "
             "inputs only and the GUM defines no correlated form: the "
             "effective degrees of freedom are undefined (NaN) for this "
             "budget, and expanded() requires an explicit "
             "coverage_factor_override.",
             UncertaintyWarning,
-            stacklevel=3,
         )
         return math.nan
     if correlated:

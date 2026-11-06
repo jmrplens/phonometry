@@ -48,7 +48,6 @@ per-band values are supplied.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -64,7 +63,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from .insulation import _as_band_levels
 from .ratings import (
     ImpactRatingResult,
@@ -509,12 +508,11 @@ def background_correction(
     limited = judged <= _BACKGROUND_LOW
     corrected = np.where(limited, lsb - _BACKGROUND_CAP, corrected)
     if bool(np.any(limited)):
-        warnings.warn(
+        warn_caller(
             "Signal-to-background margin at or below 6 dB in one or more "
             "bands; the fixed 1,3 dB correction was applied and those levels "
             "are the limit of measurement (ISO 10140-4:2010, Clause 4.3).",
             LaboratoryInsulationWarning,
-            stacklevel=2,
         )
     return np.asarray(corrected, dtype=np.float64)
 

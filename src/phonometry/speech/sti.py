@@ -25,7 +25,6 @@ what those pages add beside this procedure is unknown here.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -53,7 +52,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..filters.core import OctaveFilterBank
 from ..filters.frequencies import nominal_frequencies
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
@@ -382,14 +381,11 @@ def _validate_band_vector(values: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _truncated_mtf(mtf: ArrayLike, *, stacklevel: int = 4) -> np.ndarray:
+def _truncated_mtf(mtf: ArrayLike) -> np.ndarray:
     """Validate the modulation transfer matrix and truncate it to 1,0.
 
     Ed.4 A.5.3 NOTE 1 (= Ed.5): a value above 1,3 means the measurement is
     invalid, and every value is truncated to 1,0 before the chain runs.
-    ``stacklevel`` points the warning at the caller's caller: the default 4
-    fits the public functions that route through :func:`_sti_from_mtf`, and
-    :func:`sti_adjusted_for_levels`, which calls here directly, passes 3.
     """
     m = real_array(mtf, "mtf", copy=True)
     # The number is a count of array axes, not a quantity.
@@ -403,11 +399,10 @@ def _truncated_mtf(mtf: ArrayLike, *, stacklevel: int = 4) -> np.ndarray:
         msg = "Modulation transfer values must be finite and >= 0."
         raise ValueError(msg)
     if np.any(m > _MTF_INVALID_ABOVE):
-        warnings.warn(
+        warn_caller(
             "Modulation transfer values above 1.3 detected: the measurement "
             "is likely invalid (IEC 60268-16 A.5.3). Values truncated to 1.0.",
             STIWarning,
-            stacklevel=stacklevel,
         )
     return np.minimum(m, 1.0)
 
@@ -700,8 +695,8 @@ def sti_adjusted_for_levels(
     )
     # Step 2 leaves the channel alone and may exceed 1,0; step 3 puts the
     # operational condition back, and only then is the matrix truncated.
-    source = _truncated_mtf(mtf, stacklevel=3) / measured.factor[:, np.newaxis]
-    adjusted = _truncated_mtf(source * operational.factor[:, np.newaxis], stacklevel=3)
+    source = _truncated_mtf(mtf) / measured.factor[:, np.newaxis]
+    adjusted = _truncated_mtf(source * operational.factor[:, np.newaxis])
     return _index_from_corrected_mtf(
         adjusted, operational.speech_level, operational.ambient_level
     )
@@ -904,12 +899,11 @@ def _stipa_modulation_depths(env: np.ndarray, fs: float) -> np.ndarray:
             c = float(np.dot(seg, np.cos(2.0 * np.pi * fm * t)))
             mdr[k, j] = 2.0 * float(np.hypot(s, c)) / total
     if empty_bands:
-        warnings.warn(
+        warn_caller(
             f"No energy in octave band(s) {empty_bands} (125 Hz to 8 kHz, "
             "index 0-6): modulation depths set to 0 (TI = 0) there. A full "
             "STIPA measurement needs all seven carriers of the test signal.",
             STIWarning,
-            stacklevel=3,
         )
     return mdr
 
@@ -1024,13 +1018,12 @@ def stipa(
         raise ValueError(msg)
 
     if x_proc.size / fs < _STIPA_MIN_SECONDS:
-        warnings.warn(
+        warn_caller(
             f"STIPA recording is {x_proc.size / fs:.1f} s, shorter than the "
             f"recommended {_STIPA_MIN_SECONDS:.0f} s (IEC 60268-16 STIPA "
             "practice, 15 s to 25 s): the recovered modulation depths, and "
             "hence the STI, are biased low.",
             STIWarning,
-            stacklevel=2,
         )
 
     mdr = _stipa_modulation_depths(_intensity_envelopes(x_proc, fs), fs)

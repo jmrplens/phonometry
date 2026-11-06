@@ -23,7 +23,6 @@ Formulae 4/5, Table 2), clamped at zero. The HTLAN combines the age component
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -42,7 +41,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from .threshold import age_threshold
 
 if TYPE_CHECKING:
@@ -144,29 +143,26 @@ def _warn_outside_domain(
     outside (0, 1) are rejected outright).
     """
     if not _VALIDATED_YEARS[0] <= exposure_duration_years <= _VALIDATED_YEARS[1]:
-        warnings.warn(
+        warn_caller(
             f"exposure duration {exposure_duration_years:g} years is outside the 1-40 year "
             f"range ISO 1999:2013 validates (clause 6.3.1); the result is an "
             f"extrapolation.",
             NoiseInducedHearingLossWarning,
-            stacklevel=3,
         )
     if not _VALIDATED_FRACTILES[0] <= fractile <= _VALIDATED_FRACTILES[1]:
-        warnings.warn(
+        warn_caller(
             f"fractile {fractile:g} lies in the distribution tails "
             f"(Q < 5 % or Q > 95 %) that ISO 1999:2013 calls unreliable and "
             f"says should not be estimated (clause 6.3.2).",
             NoiseInducedHearingLossWarning,
-            stacklevel=3,
         )
     if l_ex > _VALIDATED_L_EX_MAX:
-        warnings.warn(
+        warn_caller(
             f"L_EX,8h = {l_ex:g} dB exceeds the 100 dB covered by "
             f"ISO 1999:2013 (Annex D; Scope NOTE 4 restricts validity to the "
             f"stated exposure levels), so the quadratic Formula (2) is used "
             f"outside its supporting data; the result is an extrapolation.",
             NoiseInducedHearingLossWarning,
-            stacklevel=3,
         )
 
 

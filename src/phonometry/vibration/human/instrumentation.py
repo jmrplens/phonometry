@@ -71,7 +71,6 @@ figures as Part 1 on a shorter list of clauses:
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -90,6 +89,7 @@ from ..._internal.validation import (
     require_positive_array,
     require_scalar,
 )
+from ..._internal.warnings import warn_caller
 from .exposure import (
     WEIGHTING_NAMES,
     HumanVibrationWarning,
@@ -895,13 +895,12 @@ def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> flo
         )
         raise ValueError(msg)
     if worst >= _PEAK_APPROXIMATION_LIMIT_DEG:
-        warnings.warn(
+        warn_caller(
             f"Formula (H.4) is an approximation for characteristic phase "
             f"deviations below {_PEAK_APPROXIMATION_LIMIT_DEG:g} degrees "
             f"(ISO 8041-1:2017, H.2.1, NOTE 2); the largest supplied is "
             f"{worst:.4g} degrees.",
             HumanVibrationWarning,
-            stacklevel=2,
         )
     peak = np.max(np.sin(np.radians(deviations)))
     return float(_PEAK_DEVIATION_COEFFICIENT * peak * 100.0)
@@ -958,13 +957,12 @@ def _warn_if_inverted(deviation_deg: NDArray[np.float64]) -> None:
     if np.allclose(
         np.abs(deviation_deg), 180.0, atol=_INVERSION_TOLERANCE_DEG, rtol=0.0
     ):
-        warnings.warn(
+        warn_caller(
             "Every phase error is half a turn, which is signal inversion: "
             "ISO 8041-1:2017 H.2.3.4 k) says the characteristic phase "
             "deviation criterion is not applicable to it and that polarity "
             "has its own test.",
             HumanVibrationWarning,
-            stacklevel=3,
         )
 
 

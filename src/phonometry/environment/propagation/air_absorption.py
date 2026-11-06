@@ -66,7 +66,6 @@ the ISO 9613-1 ``alpha`` via :math:`m = \alpha / (10 \log_{10} e)`.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -80,7 +79,7 @@ from ..._internal.validation import (
     require_same_shape,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...materials.absorbers.sound_absorption import power_attenuation_from_alpha
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -194,20 +193,18 @@ def _validate(
 
     lo_t, hi_t = _TEMPERATURE_RANGE
     if not lo_t <= temperature_c <= hi_t:
-        warnings.warn(
+        warn_caller(
             f"Temperature {temperature_c:g} degC is outside the {lo_t:g}..{hi_t:g} "
             "degC tabulated range of ISO 9613-1:1993; the result is advisory.",
             AtmosphericAbsorptionWarning,
-            stacklevel=3,
         )
     lo_h, hi_h = _HUMIDITY_RANGE
     if not lo_h <= relative_humidity_percent <= hi_h:
-        warnings.warn(
+        warn_caller(
             f"Relative humidity {relative_humidity_percent:g} % is outside the "
             f"{lo_h:g}..{hi_h:g} % tabulated range of ISO 9613-1:1993; the "
             "result is advisory.",
             AtmosphericAbsorptionWarning,
-            stacklevel=3,
         )
     lo_f, hi_f, scope = (
         (*_FREQ_RANGE, "tabulated range of ISO 9613-1:1993")
@@ -215,19 +212,17 @@ def _validate(
         else frequency_scope
     )
     if np.any(freqs < lo_f) or np.any(freqs > hi_f):
-        warnings.warn(
+        warn_caller(
             f"One or more frequencies are outside the {lo_f:g}..{hi_f:g} Hz "
             f"{scope}; the result is advisory.",
             AtmosphericAbsorptionWarning,
-            stacklevel=3,
         )
     if static_pressure_kpa > _PRESSURE_MAX:
-        warnings.warn(
+        warn_caller(
             f"Pressure {static_pressure_kpa:g} kPa exceeds the {_PRESSURE_MAX:g} kPa "
             "validity envelope of ISO 9613-1:1993 (clause 7); the result is "
             "advisory.",
             AtmosphericAbsorptionWarning,
-            stacklevel=3,
         )
 
 

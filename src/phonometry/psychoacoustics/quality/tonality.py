@@ -16,7 +16,6 @@ caller's responsibility.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -25,7 +24,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.utils import _typesignal
 from ..._internal.validation import real_number, require_choice, require_scalar
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...io._resolve import apply_calibration, resolve_fs
 from ...signals.spectra import _welch_autospectrum
 
@@ -58,12 +57,11 @@ def _warn_coarse_resolution(dfc: float, df: float, ft: float) -> None:
     """
     bins = 0.075 * dfc / df
     if bins < _MIN_TONE_HALF_WIDTH_BINS:
-        warnings.warn(
+        warn_caller(
             f"Frequency resolution {df:.3g} Hz is coarse for the tone at "
             f"{ft:.0f} Hz: the tone band spans only {bins:.1f} bins (< 3), "
             "which biases TNR/PR. Use a finer resolution_hz.",
             TonalityWarning,
-            stacklevel=3,
         )
 
 
@@ -127,20 +125,18 @@ def _warn_degenerate(ft: float, band_power: float, df: float) -> None:
       produces a meaningless ratio.
     """
     if abs(ft - _F_MIN) <= df or abs(ft - _F_MAX) <= df:
-        warnings.warn(
+        warn_caller(
             f"The assessed peak at {ft:.1f} Hz lies within one bin of the "
             "89.1 Hz to 11.2 kHz range-of-interest edge; the prominence "
             "verdict can flip with the bin snapping. Use a finer "
             "resolution_hz or check the tone frequency.",
             TonalityWarning,
-            stacklevel=3,
         )
     if band_power < _NOISE_FLOOR_POWER:
-        warnings.warn(
+        warn_caller(
             "The critical-band power is at numeric-noise level (silence or "
             "DC input); the TNR/PR value is meaningless.",
             TonalityWarning,
-            stacklevel=3,
         )
 
 

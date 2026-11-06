@@ -87,7 +87,6 @@ modification.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -103,7 +102,7 @@ from .._internal.validation import (
     require_positive,
     require_positive_array,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -413,14 +412,13 @@ def check_background_margin(
                 "before the levels are used"
             )
         )
-        warnings.warn(
+        warn_caller(
             f"ISO 14257 5.1.4 asks for {ISO14257_PREFERRED_BACKGROUND_MARGIN_DB:g} dB over the "
             f"background at every position and in every octave band; "
             f"{int(np.count_nonzero(judged < ISO14257_PREFERRED_BACKGROUND_MARGIN_DB))} of "
             f"{margins.size} clear less than that and the worst is "
             f"{worst:.1f} dB, {detail}.",
             SpatialDecayWarning,
-            stacklevel=2,
         )
     return check
 
@@ -817,14 +815,13 @@ def spatial_decay_rate(distribution_levels: ArrayLike, distances: ArrayLike) -> 
         # position that was misread carries straight into it. The recommended
         # distributions of 5.3.2 put many more than two in a region, and the
         # clause calls the count they give a minimum.
-        warnings.warn(
+        warn_caller(
             "Equation (5) over two positions is the line through them, not a "
             "regression with anything to spare: the rate returned is the slope "
             "between the two and no position can be checked against the rest. "
             "5.3.2 of ISO 14257 calls the positions of its recommended "
             "distributions a minimum number.",
             SpatialDecayWarning,
-            stacklevel=2,
         )
     return -DECADE_TO_DOUBLING * slope
 
@@ -943,13 +940,12 @@ def level_excess_at(
         # region is where this happens: its conventional distance is 30 m and
         # 6.2 recommends the path reach 24 m, so a path that stops there
         # answers the far region by extrapolation or not at all.
-        warnings.warn(
+        warn_caller(
             f"Equation (8) reads the regression line at {target:g} m, outside "
             f"the {nearest:g} m to {farthest:g} m the positions given cover, "
             "so the value is an extrapolation of the fit rather than a "
             "reading of the measurement.",
             SpatialDecayWarning,
-            stacklevel=2,
         )
     decay = spatial_decay_rate(values, radii)
     log_target = math.log10(target / ISO14257_REFERENCE_DISTANCE_M)

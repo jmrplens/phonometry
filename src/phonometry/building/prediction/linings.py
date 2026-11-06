@@ -31,7 +31,6 @@ Performance" says which pieces have an oracle and which do not.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -44,6 +43,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
+from ..._internal.warnings import warn_caller
 from .simplified_model import BuildingPredictionWarning
 
 if TYPE_CHECKING:
@@ -314,13 +314,12 @@ def weighted_lining_improvement(
         raise ValueError(msg)
     rw_low, rw_high = _TABLE_D1_RW_RANGE
     if not rw_low <= rw <= rw_high:
-        warnings.warn(
+        warn_caller(
             f"base_rating = {rw:g} dB lies outside the "
             f"{rw_low:g} dB <= Rw <= {rw_high:g} dB range Clause D.2.2 states "
             "Table D.1 for; the result is an extrapolation of "
             "74,4 - 20 lg(fo) - Rw/2 and is not covered by the standard.",
             BuildingPredictionWarning,
-            stacklevel=2,
         )
     nominal = _round_to_third_octave(f0)
     if nominal <= _TABLE_D1_LOW_MAX:
@@ -438,13 +437,12 @@ def lining_improvement(
     require_choice(system, "system", tuple(_ANNEX_D_SYSTEMS))
     low, high = _TABLE_D1_RANGE
     if not low <= f0 <= high:
-        warnings.warn(
+        warn_caller(
             f"resonance_frequency = {f0:g} Hz lies outside the "
             f"{low:g} Hz to {high:g} Hz range Annex D puts lining resonances "
             "on; the fits are monotonic in lg(fo) and unbounded below it, so "
             "the result is an extrapolation.",
             BuildingPredictionWarning,
-            stacklevel=2,
         )
     ratings = [
         max(floor, slope * float(np.log10(f0)) + intercept)

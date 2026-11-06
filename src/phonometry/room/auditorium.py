@@ -50,7 +50,6 @@ hall, and this module does not make them follow the weather.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
@@ -67,7 +66,7 @@ from .._internal.validation import (
     require_finite_array,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..io._resolve import resolve_fs
 from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import (
@@ -293,25 +292,23 @@ def _warn_short_ring_down(name: str, short: list[tuple[float, float]]) -> None:
     if not short:
         return
     needed, held = max(short)
-    warnings.warn(
+    warn_caller(
         f"'{name}' holds {held * 1e3:.0f} ms after its direct sound and "
         f"a band of it needs about {needed * 1e3:.0f} ms for its filter "
         "to ring down, so that band's exposure level is short of the "
         "energy the response actually carries.",
         AuditoriumWarning,
-        stacklevel=4,
     )
 
 
 def _warn_cut_short(name: str) -> None:
     """Warn about a room response that never reaches 30 dB of decay."""
-    warnings.warn(
+    warn_caller(
         f"'{name}' has a band whose noise floor is less than "
         f"{_MINIMUM_DECAY_RANGE_DB:g} dB below its peak, so the room "
         "response was cut short of the point ISO 3382-1:2009, A.2.1 asks "
         "the integral to reach.",
         AuditoriumWarning,
-        stacklevel=4,
     )
 
 
@@ -476,13 +473,12 @@ def free_field_reference_level(
         msg = f"'distance' must be a positive, finite length in m, got {distance!r}."
         raise ValueError(msg)
     if distance < MIN_REFERENCE_DISTANCE_M:
-        warnings.warn(
+        warn_caller(
             f"ISO 3382-1:2009, Equations (A.4) and (A.8) are printed for a "
             f"distance of at least {MIN_REFERENCE_DISTANCE_M:g} m; "
             f"{distance:g} m is inside that, where the inverse-square law "
             "need not hold.",
             AuditoriumWarning,
-            stacklevel=2,
         )
     corrected = values + 20.0 * np.log10(distance / REFERENCE_DISTANCE_M)
     return as_float_or_array(corrected, like=(level,))

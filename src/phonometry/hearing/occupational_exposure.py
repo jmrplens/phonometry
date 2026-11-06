@@ -44,7 +44,6 @@ refer to ISO 9612:2009(E).
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass, field, replace
 from math import isfinite, log10, sqrt
 from types import MappingProxyType
@@ -66,7 +65,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -778,12 +777,11 @@ def _task_contribution(
 
     label = task.label if task.label is not None else f"task {index + 1}"
     if spread and options.warn:
-        warnings.warn(
+        warn_caller(
             f"Task '{label}': the {n} measurements span {sample_range:.1f} dB "
             "(>= 3 dB); ISO 9612 Clause 9.3 recommends additional measurements, "
             "subdivision, or longer measurement durations.",
             OccupationalExposureWarning,
-            stacklevel=3,
         )
     return TaskContribution(
         label=label,
@@ -908,12 +906,11 @@ def _sampled_exposure(
     # decimal read the 3,5 dB of Table C.4 itself, which is not above it.
     over = float(settled(c1u1)) > _C4_ADVISORY_THRESHOLD
     if warn and over:
-        warnings.warn(
+        warn_caller(
             f"Job/full-day sampling contribution c1*u1 = {c1u1:.1f} dB exceeds "
             "3.5 dB (ISO 9612 Table C.4 / Clause 10.4); revise the exposure group "
             "or increase the number of measurements.",
             OccupationalExposureWarning,
-            stacklevel=3,
         )
     return ExposureResult(
         lex_8h=lex_8h,
@@ -988,11 +985,10 @@ def job_based_exposure(
         required = min_cumulative_duration_hours(n_workers)
         cumulative = np.asarray(samples).size * sample_duration_hours
         if cumulative < required - 1e-9 and warn:
-            warnings.warn(
+            warn_caller(
                 f"Cumulative measurement duration {cumulative:.2f} h is below the "
                 f"Table 1 minimum of {required:.2f} h for {n_workers} workers.",
                 OccupationalExposureWarning,
-                stacklevel=2,
             )
         result = replace(
             result, n_workers=n_workers, sample_duration_hours=sample_duration_hours
@@ -1034,11 +1030,10 @@ def full_day_exposure(
         and float(settled(arr.max() - arr.min())) >= _SPREAD_ADVISORY_THRESHOLD
     )
     if spread and warn:
-        warnings.warn(
+        warn_caller(
             f"Only three full-day measurements spanning {float(arr.max() - arr.min()):.1f} dB "
             "(>= 3 dB); ISO 9612 Clause 11.3 requires at least two additional measurements.",
             OccupationalExposureWarning,
-            stacklevel=2,
         )
     return _sampled_exposure(
         samples=samples,

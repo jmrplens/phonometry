@@ -69,7 +69,6 @@ asking.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, overload
@@ -88,7 +87,7 @@ from ..._internal.validation import (
     require_non_negative,
     require_positive,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from .._choices import _BUILDING_CLASSES, BuildingClass
 
 if TYPE_CHECKING:
@@ -598,13 +597,12 @@ def story_fundamental_frequency(n_stories: int | np.integer[Any]) -> float:
         # A warning and not a refusal: 6.4 says "about five storeys", and a
         # four-storey building is not on the far side of a line the standard
         # drew. What it is not is covered, and silence would say it was.
-        warnings.warn(
+        warn_caller(
             f"DIN 4150-3 6.4 offers f_i ~ 10/n from about "
             f"{STORY_FREQUENCY_MIN_STORIES} storeys up; got {n}, so the "
             f"{STORY_FREQUENCY_NUMERATOR_HZ / n:.3g} Hz returned is an "
             "extrapolation of the rule rather than the rule.",
             BuildingDamageWarning,
-            stacklevel=2,
         )
     return STORY_FREQUENCY_NUMERATOR_HZ / n
 

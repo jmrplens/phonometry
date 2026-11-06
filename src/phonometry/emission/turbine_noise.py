@@ -110,7 +110,6 @@ of 8.3.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal, overload
@@ -133,6 +132,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import _S0, SoundPowerWarning
 
 if TYPE_CHECKING:
@@ -859,12 +859,11 @@ def turbine_microphone_positions(
     )
     if not array.every_box_sampled:
         empty = [str(i + 1) for i, n in enumerate(per_box) if n == 0]
-        warnings.warn(
+        warn_caller(
             f"A spacing of {spacing:g} m leaves parallelepiped(s) {', '.join(empty)} "
             "with no position on their long sides; IEC 61063 7.2.2 asks for at "
             "least one measurement section at each casing of the set.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return array
 
@@ -1567,12 +1566,11 @@ def turbine_sound_power(
             raise ValueError(msg)
         corrections = np.asarray(turbine_background_correction(levels - background))
         if np.any(_below_criterion(levels - background)):
-            warnings.warn(
+            warn_caller(
                 "The background is less than 3 dB below the level with the turbine "
                 "set operating at one or more positions; no valid measurement can "
                 "be made and the result is only an upper limit (IEC 61063, 4.2).",
                 SoundPowerWarning,
-                stacklevel=2,
             )
     mask: np.ndarray | None = None
     if overhead_mask is not None:
@@ -1584,12 +1582,11 @@ def turbine_sound_power(
             )
             raise ValueError(msg)
     if not _within_k_limit(k):
-        warnings.warn(
+        warn_caller(
             f"An environmental correction of {k:.1f} dB exceeds the 7 dB "
             "IEC 61063 allows (8.3, A.3.3); the room cannot be used for "
             "measurements to the standard.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     corrected = levels - corrections
     surface_level = energy_mean(corrected) - k

@@ -117,7 +117,6 @@ chain, classified against IEC 61043:1993 Table 2 by
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Literal, cast
@@ -148,6 +147,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections
 from .intensity import (
@@ -1481,19 +1481,17 @@ def _sampling_warnings(n_positions: int, area: float) -> None:
     undersampled.
     """
     if n_positions < _MIN_POSITIONS:
-        warnings.warn(
+        warn_caller(
             f"Only {n_positions} measurement position(s); ISO 9614-1:1993 "
             "clause 8.2 requires at least 10.",
             SoundPowerWarning,
-            stacklevel=3,
         )
     if n_positions < area and n_positions < _RELAXED_POSITIONS:
-        warnings.warn(
+        warn_caller(
             f"{n_positions} position(s) over {area:g} m^2 is below the one "
             "position per square metre of ISO 9614-1:1993 clause 8.2, and the "
             "relaxations of that clause need at least 50 positions.",
             SoundPowerWarning,
-            stacklevel=3,
         )
 
 
@@ -2020,15 +2018,14 @@ def sound_power_intensity_points(
     surface_area = float(np.sum(seg))
 
     if np.any(~applicable):
-        warnings.warn(
+        warn_caller(
             "The total sound power is not positive in one or more bands; ISO "
             "9614-1:1993 is not applicable to those bands (clause 9.2).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     conditions_met = _test_conditions_met(intensity)
     if not np.all(conditions_met):
-        warnings.warn(
+        warn_caller(
             "The algebraic mean normal intensity is not positive in one or "
             "more bands; the test conditions do not satisfy ISO 9614-1:1993 in "
             "those bands (A.2.3) and their Annex A field indicators are "
@@ -2036,7 +2033,6 @@ def sound_power_intensity_points(
             "area-weighted sum of partial powers is still positive keeps a "
             "finite sound power level and is not flagged inapplicable.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     _sampling_warnings(n_positions, surface_area)
 
@@ -2056,13 +2052,12 @@ def sound_power_intensity_points(
         grade=grade,
     )
     if result.a_weighting_omitted_bands is None and freqs is not None and n_bands > 1:
-        warnings.warn(
+        warn_caller(
             "The A-weighted total sums every applicable band without the ISO "
             "9614-1:1993 clause 10.5 b) screening (the bands failing criteria "
             "1 and/or 2 must be omitted and the omission stated); supply "
             "'pressure_levels' and 'pressure_residual_index' to evaluate the "
             "criteria.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return result

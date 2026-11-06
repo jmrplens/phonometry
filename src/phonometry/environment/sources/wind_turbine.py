@@ -25,7 +25,6 @@ uncertainty budgets) is out of scope; these are the underlying closed forms.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -43,7 +42,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -609,13 +608,12 @@ def wind_turbine_tonality(
         raise ValueError(msg)
     lo, hi = _critical_band_edges(fc)
     if fr[0] > lo + 1e-9 or fr[-1] < hi - 1e-9:
-        warnings.warn(
+        warn_caller(
             "The spectrum does not cover the whole critical band "
             f"[{lo:.1f}, {hi:.1f}] Hz: the masking level is averaged over the "
             "surviving lines while Formula 31 scales to the full bandwidth, "
             "biasing the tonal audibility.",
             WindTurbineNoiseWarning,
-            stacklevel=2,
         )
     chain = _tonality_chain(lv, fr, df, peak)
     return WindTurbineTonalityResult(

@@ -74,7 +74,6 @@ source and building prediction standards (ISO 9611, EN 15657, EN 12354-5).
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -109,7 +108,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...filters.frequencies import _nominal_freq_for_band
 from ...metrology.reference_values import REFERENCE_VALUES
 from ...metrology.uncertainty import (
@@ -405,14 +404,13 @@ def _indirect_stiffness(
     magnitude = np.abs(t)
     if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
         worst = float(np.max(magnitude))
-        warnings.warn(
+        warn_caller(
             f"|T| up to {worst:.3g} exceeds {TRANSMISSIBILITY_LIMIT:g} "
             "(DeltaL1,2 < 20 dB): ISO 10846-3 Inequality (2) is violated and "
             "the T << 1 approximation of Formula (1) is no longer accurate "
             "within 1 dB (12 %); those bands lie outside the valid frequency "
             "range of the indirect method.",
             TransferStiffnessWarning,
-            stacklevel=3,
         )
     return np.asarray(
         -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
@@ -1044,9 +1042,9 @@ def _band_average(
 ) -> BandAveragedStiffness:
     """The body of :func:`band_averaged_stiffness`.
 
-    The public function and the two ``band_average`` methods reach it at the
-    same depth, so the warning below points at the caller's own line from all
-    three. ``quiet_up_to_hz`` spares the bands centred at or below it the
+    The public function and the two ``band_average`` methods reach it, and the
+    warning below names the caller's own line from all three.
+    ``quiet_up_to_hz`` spares the bands centred at or below it the
     warning: ISO 10846-5 7.5 asks for five lines per band only above 20 Hz,
     its 0,2 Hz spacing below leaves the lowest bands short of five, and the
     NOTE to clause 9 m) accepts narrow-band data there instead.
@@ -1095,12 +1093,11 @@ def _band_average(
             f"{f:g} Hz ({n})"
             for f, n in zip(nominal[short], counts[short], strict=True)
         )
-        warnings.warn(
+        warn_caller(
             f"ISO 10846 takes a band average over at least "
             f"{MIN_FREQUENCIES_PER_BAND} frequencies; these bands hold fewer "
             f"valid lines and are left undetermined: {listed}.",
             TransferStiffnessWarning,
-            stacklevel=3,
         )
     return BandAveragedStiffness(
         nominal_frequencies=nominal,
@@ -1254,14 +1251,13 @@ def _warn_level_difference(
     holds = check.holds
     difference = np.asarray(check.difference, dtype=np.float64)
     worst = int(np.argmin(difference))
-    warnings.warn(
+    warn_caller(
         f"{np.count_nonzero(~holds)} of {holds.size} frequencies fall short of "
         f"the {check.limit_db:g} dB of {clauses}, down to "
         f"{difference[worst]:.1f} dB at {float(check.frequencies[worst]):g} Hz: "
         f"{meaning} The measurements are valid only where it holds, and the "
         "parts exclude the rest from the evaluation.",
         TransferStiffnessWarning,
-        stacklevel=3,
     )
 
 
@@ -1600,7 +1596,7 @@ def check_output_mass(
     limit = check.mass_limit_kg
     if not check.passes:
         worst = int(np.argmin(limit))
-        warnings.warn(
+        warn_caller(
             f"m0 = {output_mass_kg:g} kg exceeds the limit of ISO 10846-4 "
             f"Inequality (3) (ISO 10846-2 Inequality (2)) at "
             f"{np.count_nonzero(~check.holds)} of {freq.size} frequencies, "
@@ -1608,7 +1604,6 @@ def check_output_mass(
             "force may miss the blocking force by more than 0.5 dB there; use a "
             "lighter m0 or stiffer force transducers (NOTE 2).",
             TransferStiffnessWarning,
-            stacklevel=2,
         )
     return check
 

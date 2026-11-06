@@ -17,7 +17,9 @@ then checks, cell by cell, by the tag on each cell:
 * ``report``: ``.report()`` writes a PDF to a temporary path;
 * ``warning``: the :class:`~phonometry.filters.FilterBankWarning` the cell
   provokes, a topic class under :class:`~phonometry.PhonometryWarning`,
-  reaches the cell's stderr by its own name.
+  reaches the cell's stderr by its own name, at the cell's own line rather
+  than at a line of the package, where Python shows a warning only once per
+  kernel.
 
 A cell that raises fails the run before any of this is read. The notebook is
 committed without outputs; this never writes it back. It needs nbclient,
@@ -29,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import os
 import pathlib
 import sys
 from typing import TYPE_CHECKING, Any
@@ -131,10 +134,20 @@ def _warning(outputs: Outputs) -> str:
         for output in outputs
         if output["output_type"] == "stream" and output["name"] == "stderr"
     )
-    if f"{WARNING}: " not in stderr:
+    shown = [line for line in stderr.splitlines() if f": {WARNING}: " in line]
+    if not shown:
         msg = f"no {WARNING} on stderr: {stderr[:200]!r}"
         raise NotebookError(msg)
-    return f"a {WARNING} reaches the cell's stderr"
+    where = shown[0].partition(f": {WARNING}: ")[0]
+    if f"{os.sep}phonometry{os.sep}" in where or where.startswith(
+        f"phonometry{os.sep}"
+    ):
+        msg = (
+            f"the {WARNING} is shown at {where}, a line of the package, where "
+            "Python shows it once per kernel, not at the cell's line"
+        )
+        raise NotebookError(msg)
+    return f"a {WARNING} reaches the cell's stderr at the cell's line"
 
 
 #: What each tagged cell must have put out, and how it is read.

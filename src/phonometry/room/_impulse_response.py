@@ -63,7 +63,6 @@ decay curves; that step belongs to downstream room-acoustics modules.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -84,7 +83,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..io._resolve import (
     apply_calibration,
     resolve_optional_pair_fs,
@@ -715,14 +714,13 @@ def _warn_alias_tail(ir: np.ndarray, period: int, excitation: str, remedy: str) 
     tail = ir[int(0.9 * period) :]
     tail_rms = float(np.sqrt(np.mean(tail**2)))
     if tail_rms > peak * 10.0 ** (_MLS_ALIAS_TAIL_DB / 20.0):
-        warnings.warn(
+        warn_caller(
             f"Recovered {excitation} impulse response still has energy near "
             f"the end of the {period}-sample period "
             f"({20 * np.log10(tail_rms / peak):.0f} dB re peak, above "
             f"{_MLS_ALIAS_TAIL_DB:.0f} dB): the impulse response is likely "
             f"longer than one period and aliases circularly. {remedy}",
             ImpulseResponseWarning,
-            stacklevel=3,
         )
 
 

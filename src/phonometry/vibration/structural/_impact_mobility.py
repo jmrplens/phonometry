@@ -87,7 +87,6 @@ after exponential windowing and the Annex A correction.
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Iterable
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
@@ -112,7 +111,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_samples
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
@@ -1015,13 +1014,12 @@ def _warn_masked_impacts(
         peaks = _impact_peaks(record, 0.1)
         masked = [int(p) for p in peaks if window[p] < 1.0]
         if masked:
-            warnings.warn(
+            warn_caller(
                 f"impact record {row}: the force window removes an impact at "
                 f"{masked[0] / fs:g} s. ISO 7626-5 6.4 forbids using a force "
                 "window to eliminate secondary impacts: the response still "
                 "carries them, so the estimate is wrong. Discard the record.",
                 ImpactExcitationWarning,
-                stacklevel=3,
             )
 
 

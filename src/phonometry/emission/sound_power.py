@@ -74,7 +74,6 @@ altitude or below 10 degrees C (clauses 8.2.5 and 8.3.6).
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, overload
@@ -100,6 +99,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     _S0,
     Grade,
@@ -654,12 +654,11 @@ def background_noise_correction(
     judged = settled(delta)
     k1 = np.where(judged > high, 0.0, k1)
     if np.any(judged < low):
-        warnings.warn(
+        warn_caller(
             f"Background margin below {low:g} dB in one or more bands; K1 "
             "clamped to the criterion value and levels are upper bounds "
             "(ISO 3744:2010, 8.2.3).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return np.asarray(k1, dtype=np.float64)
 
@@ -1107,14 +1106,13 @@ def _surface_environmental_correction(
         )
         raise ValueError(msg)
     if np.any(k2_arr > _K2_LIMIT[grade]):
-        warnings.warn(
+        warn_caller(
             f"K2 up to {float(np.max(k2_arr)):.1f} dB exceeds the {grade} "
             f"validity limit of {_K2_LIMIT[grade]:g} dB. ISO 3744:2010 clause "
             "4.3.2 states this limit for the A-weighted K2A, so this per-band "
             "check is conservative; the acoustic environment may not qualify "
             "for this method.",
             SoundPowerWarning,
-            stacklevel=3,  # report at the caller of sound_power_pressure
         )
     return np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
 
@@ -1460,7 +1458,7 @@ def mean_single_event_level(
     :raises ValueError: for non-finite levels, an empty first axis or a
         non-positive ``n_events``.
     """
-    return _single_event_mean(levels, n_events, name="levels", stacklevel=3)
+    return _single_event_mean(levels, n_events, name="levels")
 
 
 def _static_pressure_at_altitude(altitude: float) -> float:
@@ -1586,7 +1584,7 @@ def _event_position_levels(
             )
             raise ValueError(msg)
         count = int(arr.shape[0])
-        arr = _single_event_mean(arr, None, name="levels_positions", stacklevel=4)
+        arr = _single_event_mean(arr, None, name="levels_positions")
         return arr, count
     # The number is a count of array axes, not a quantity.
     if arr.ndim != 2:  # noqa: PLR2004
@@ -1600,7 +1598,7 @@ def _event_position_levels(
             msg = "'levels_positions' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    arr = _single_event_mean(arr, n_events, name="levels_positions", stacklevel=4)
+    arr = _single_event_mean(arr, n_events, name="levels_positions")
     return arr, require_count(n_events, "n_events", at_least=None)
 
 

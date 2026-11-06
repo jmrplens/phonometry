@@ -73,7 +73,6 @@ thresholds and tables.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
@@ -92,7 +91,7 @@ from .._internal.validation import (
     require_finite_matrix,
     require_positive,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..emission._shared import ROOM_ABSORPTION_ESTIMATES, _a_weighting_corrections
 from ._insulation_shared import (
     MANDATORY_BAND_RANGE_HZ,
@@ -555,7 +554,7 @@ def _insulation(
             f"{base_standard} determines an A-weighted value only (Table 1 of "
             "ISO 11546), so a band spectrum cannot be declared from it."
         )
-        warnings.warn(msg, EnclosureInsulationWarning, stacklevel=3)
+        warn_caller(msg, EnclosureInsulationWarning)
     insulation = without - with_
     weighted: float | None = None
     if (a_weighted_without is None) != (a_weighted_with is None):

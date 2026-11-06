@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
@@ -18,6 +17,7 @@ from .._internal.validation import (
     require_count,
     require_positive,
 )
+from .._internal.warnings import warn_caller
 from ._warnings import FilterBankWarning
 
 if TYPE_CHECKING:
@@ -231,11 +231,7 @@ def _deleteouters(bands: FractionalOctaveBands, fs: float) -> FractionalOctaveBa
     keep = bands.upper_edges <= fs / 2
     if np.all(keep):
         return bands
-    warnings.warn(
-        "Low sampling rate: frequencies above fs/2 removed",
-        FilterBankWarning,
-        stacklevel=3,
-    )
+    warn_caller("Low sampling rate: frequencies above fs/2 removed", FilterBankWarning)
     return _band_set(
         bands.frequencies[keep],
         bands.lower_edges[keep],

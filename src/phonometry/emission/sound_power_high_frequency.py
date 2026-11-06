@@ -112,7 +112,6 @@ in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -130,6 +129,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from .._internal.warnings import warn_caller
 from ..environment.propagation.air_absorption import (
     _EIGHT_686,
     _KELVIN,
@@ -361,13 +361,12 @@ def room_constant_from_air_absorption(
         static_pressure_kpa=static_pressure_kpa,
     )
     if np.any(freqs < _AIR_ABSORPTION_FLOOR_HZ):
-        warnings.warn(
+        warn_caller(
             "One or more frequencies are below 10 kHz, where ISO 9295:2015 "
             "clause 7.2 no longer takes the air to hold practically all of the "
             "room absorption; the measured reverberation time of clause 6 is "
             "the method there.",
             SoundPowerWarning,
-            stacklevel=2,
         )
     area = _AIR_ABSORPTION_FACTOR * alpha * volume
     mean_absorption = area / surface
@@ -614,12 +613,11 @@ def _band_frequencies(frequencies: ArrayLike, n_bands: int) -> NDArray[np.float6
         )
         raise ValueError(msg)
     if np.any(freqs < _OCTAVE_LOW_HZ) or np.any(freqs > _OCTAVE_HIGH_HZ):
-        warnings.warn(
+        warn_caller(
             "One or more frequencies are outside the 16 kHz octave band "
             "(11.2 kHz to 22.4 kHz) that ISO 9295:2015 covers; the methods of "
             "ISO 3741 and ISO 3744 are the ones below it.",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return freqs
 
@@ -804,11 +802,10 @@ def high_frequency_sound_power_comparison(
     if noise_bandwidth_hz is not None:
         bandwidth = require_positive(noise_bandwidth_hz, "noise_bandwidth_hz")
         if bandwidth > _MAX_FFT_BANDWIDTH_HZ:
-            warnings.warn(
+            warn_caller(
                 f"A noise bandwidth of {bandwidth:g} Hz is wider than the 112 Hz "
                 "ISO 9295:2015 clause 8.5.2 allows an FFT analyser.",
                 SoundPowerWarning,
-                stacklevel=2,
             )
         bandwidth_term = 10.0 * np.log10(bandwidth)
     c2 = _c2_correction(temperature_c, static_pressure_kpa)

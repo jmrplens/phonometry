@@ -77,7 +77,6 @@ alike for the two quantities.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -110,6 +109,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     SoundPowerWarning,
     _a_weighting_corrections,
@@ -465,22 +465,20 @@ def _background_corrected_mean(
     if clamped and reference:
         # The reference source's corrected level is subtracted in Eq. (21), so
         # its clamped K1 lowers the result: no upper bound comes of it.
-        warnings.warn(
+        warn_caller(
             "Background margin of the reference sound source below the ISO 3741 "
             "criterion (6 dB / 10 dB) in one or more bands; K1 clamped to the "
             "criterion value, which lowers the comparison result there, so it "
             "does not meet the criterion and is not an upper bound "
             "(ISO 3741:2010, 9.1.2).",
             SoundPowerWarning,
-            stacklevel=4,
         )
     elif clamped:
-        warnings.warn(
+        warn_caller(
             "Background margin below the ISO 3741 criterion (6 dB / 10 dB) in "
             "one or more bands; K1 clamped to the criterion value and the "
             "levels are upper bounds (ISO 3741:2010, 9.1.2).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return np.asarray(corrected, dtype=np.float64), np.asarray(
         raw_mean - corrected, dtype=np.float64
@@ -524,28 +522,28 @@ def _room_qualification_warnings(
     lowest = float(np.min(frequencies))
     vmin = _min_room_volume(lowest)
     if volume < vmin:
-        warnings.warn(
+        warn_caller(
             f"Room volume {volume:g} m^3 is below the ISO 3741 Table 1 minimum "
             f"({vmin:g} m^3) for the lowest band of interest ({lowest:g} Hz); "
             "the room must be qualified per Annex C/D (ISO 3741:2010, 5.2, "
             "Table 1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     floor = volume / surface_area
     below_6k3 = frequencies < _ABSORPTION_CRITERION_MAX_HZ
     if np.any(below_6k3 & (settled(t60 - floor) <= 0.0)):
-        warnings.warn(
+        warn_caller(
             f"Reverberation time falls to or below the V/S floor ({floor:g} s) "
             "in one or more bands below 6,3 kHz; the room is too absorptive and "
             "must be qualified per Annex C (ISO 3741:2010, 5.3, Eq. 7).",
             SoundPowerWarning,
-            stacklevel=3,
         )
-    _position_sampling_warnings(levels, stacklevel=4)
+    _position_sampling_warnings(levels)
 
 
-def _position_sampling_warnings(levels: ArrayLike, stacklevel: int) -> None:
+def _position_sampling_warnings(
+    levels: ArrayLike,
+) -> None:
     """Emit the microphone-sampling advisories for a per-position level array.
 
     Flags fewer than 6 positions (ISO 3741:2010, 8.3, 8.4.1) and an
@@ -560,24 +558,22 @@ def _position_sampling_warnings(levels: ArrayLike, stacklevel: int) -> None:
         return
     n_positions = arr.shape[0]
     if n_positions < _MIN_MIC_POSITIONS:
-        warnings.warn(
+        warn_caller(
             f"Only {n_positions} microphone position(s) were supplied; an "
             f"unqualified reverberation room requires at least {_MIN_MIC_POSITIONS} "
             "(ISO 3741:2010, 8.3, 8.4.1).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     if n_positions >= _MIN_POSITIONS_FOR_SM:
         s_m = np.std(arr, axis=0, ddof=1)
         if np.any(settled(s_m) > _SM_CRITERION_DB):
-            warnings.warn(
+            warn_caller(
                 "Inter-position standard deviation exceeds the ISO 3741 sM "
                 "criterion (1,5 dB) in one or more bands; the source may radiate "
                 "significant discrete tones, requiring more microphone/source "
                 "positions or room qualification per Annex D (ISO 3741:2010, "
                 "8.4.2.2, Eq. 10).",
                 SoundPowerWarning,
-                stacklevel=stacklevel,
             )
 
 
@@ -895,7 +891,7 @@ def sound_power_comparison(
     # per-position measurement of the source under test, exactly as in the
     # direct method; there is no room geometry here, so no V/S check. Emitted
     # only after the shape validations so malformed input raises cleanly first.
-    _position_sampling_warnings(levels, stacklevel=2)
+    _position_sampling_warnings(levels)
 
     k1_st = np.zeros(n_bands, dtype=np.float64)
     if background_levels is not None:
@@ -1080,7 +1076,7 @@ def _room_event_levels(
             )
             raise ValueError(msg)
         count = int(arr.shape[0])
-        return _single_event_mean(arr, None, name="levels", stacklevel=4), count
+        return _single_event_mean(arr, None, name="levels"), count
     if arr.ndim not in (1, 2):
         msg = (
             "'levels' must be a 1D spectrum, a 2D (positions, bands) array or a "
@@ -1092,9 +1088,9 @@ def _room_event_levels(
             msg = "'levels' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    return _single_event_mean(
-        arr, n_events, name="levels", stacklevel=4
-    ), require_count(n_events, "n_events", at_least=None)
+    return _single_event_mean(arr, n_events, name="levels"), require_count(
+        n_events, "n_events", at_least=None
+    )
 
 
 def sound_energy_reverberation(
@@ -1289,7 +1285,7 @@ def sound_energy_comparison(
         static_pressure_kpa=static_pressure_kpa,
     )
 
-    _position_sampling_warnings(event_levels, stacklevel=2)
+    _position_sampling_warnings(event_levels)
 
     k1_st = np.zeros(n_bands, dtype=np.float64)
     if background_levels is not None:

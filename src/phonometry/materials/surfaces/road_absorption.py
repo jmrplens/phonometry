@@ -62,7 +62,6 @@ hard-coded as if normative.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -80,7 +79,7 @@ from ..._internal.validation import (
     require_present,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...io._resolve import (
     SignalInput,
     apply_calibration,
@@ -1050,12 +1049,11 @@ def spot_microphone_spacing_bounds(
     s_max = _SPOT_SMAX_FACTOR * speed_of_sound / f_max
     s_min = _SPOT_SMIN_FACTOR * speed_of_sound / f_min
     if s_min >= s_max:
-        warnings.warn(
+        warn_caller(
             f"No valid microphone spacing exists for {f_min:g}-{f_max:g} Hz: "
             f"s_min ({s_min:.4f} m) >= s_max ({s_max:.4f} m). Narrow the "
             "frequency range (the spot method's narrow band is 220-1800 Hz).",
             RoadAbsorptionWarning,
-            stacklevel=2,
         )
     return s_min, s_max
 
@@ -1078,11 +1076,10 @@ def check_spot_frequency_range(frequency: ArrayLike) -> None:
         raise ValueError(msg)
     lo, hi = SPOT_FREQUENCY_RANGE_HZ
     if np.any(freq < lo) or np.any(freq > hi):
-        warnings.warn(
+        warn_caller(
             f"Frequencies outside the ISO 13472-2 spot range "
             f"[{lo:.0f}, {hi:.0f}] Hz; results there are advisory.",
             RoadAbsorptionWarning,
-            stacklevel=2,
         )
 
 

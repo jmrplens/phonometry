@@ -37,7 +37,6 @@ that frequency, and the silencer and duct-path results raise
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -53,7 +52,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -380,7 +379,9 @@ def plane_wave_limit(
 
 
 def _warn_above_plane_wave_limit(
-    frequencies: ArrayLike, limit: float, context: str, *, stacklevel: int = 3
+    frequencies: ArrayLike,
+    limit: float,
+    context: str,
 ) -> NDArray[np.bool_]:
     """Warn when analysis frequencies exceed a duct's first cut-on frequency.
 
@@ -388,19 +389,16 @@ def _warn_above_plane_wave_limit(
     :param limit: The first cut-on frequency of the duct, Hz (from
         :func:`plane_wave_limit`).
     :param context: What the warning is about, e.g. ``"expansion chamber"``.
-    :param stacklevel: Passed to :func:`warnings.warn` so the warning points at
-        the caller of the public function rather than at this helper.
     :return: A boolean mask of the frequencies that are above the limit.
     """
     f = np.atleast_1d(real_array(frequencies, "frequencies"))
     above = np.asarray(f > limit, dtype=np.bool_)
     if bool(np.any(above)):
-        warnings.warn(
+        warn_caller(
             f"{context}: {int(np.count_nonzero(above))} of {f.size} frequencies "
             f"are above the first duct cut-on frequency ({limit:.0f} Hz), where "
             "higher-order modes propagate and the plane-wave result describes "
             "the plane-wave mode only.",
             PlaneWaveWarning,
-            stacklevel=stacklevel,
         )
     return above

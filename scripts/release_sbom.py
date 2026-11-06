@@ -37,15 +37,20 @@ def declared_dependencies(
 ) -> list[str]:
     """The names of the runtime dependencies ``pyproject.toml`` declares.
 
+    A dependency whose floor differs from one Python to another is declared
+    once per Python, behind a marker, and is one dependency all the same.
+
     :param pyproject: The project file.
-    :return: The distribution names, lower-cased, without version specifiers.
+    :return: The distribution names, lower-cased, without version specifiers,
+        each once, in the order first declared.
     """
     with pyproject.open("rb") as handle:
         project = tomllib.load(handle)["project"]
-    return [
+    names = (
         re.split(r"[\s<>=!~;\[]", spec, maxsplit=1)[0].lower()
         for spec in project["dependencies"]
-    ]
+    )
+    return list(dict.fromkeys(names))
 
 
 def finish(sbom: dict[str, Any], version: str, dependencies: list[str]) -> list[str]:

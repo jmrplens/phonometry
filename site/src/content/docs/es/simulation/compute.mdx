@@ -420,7 +420,7 @@ CI que ejecuta la suite de tests entera o todo `tests/simulation` exige su
 cota a NumPy en float32, y las suyas a toda ejecución en `torch:cpu` allí
 donde está instalado torch: el trabajo `array-api`, con el torch que fija
 `requirements-torch.txt`, y el trabajo `minimum-versions`, con la versión
-mínima de torch. La cota de MPS la midió del mismo modo el trabajo `mps`, en
+mínima de torch en cada Python. La cota de MPS la midió del mismo modo el trabajo `mps`, en
 un runner de macOS 15 con Apple silicon, y ese trabajo le exige esa cota a
 toda ejecución en MPS. `torch:cuda` avanza con el mismo código que
 `torch:cpu`, pero no se ha medido ninguna ejecución en él, así que no tiene

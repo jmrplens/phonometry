@@ -1529,10 +1529,9 @@ jobs:
     # The newest Python the package supports. This job used to sit on 3.13
     # because numba trails a new interpreter by a release or two, and while it
     # did, the jitted kernel was never built against the newest Python we ship
-    # for. numba publishes cp314 wheels from 0.63.0 on, and the floor in
-    # pyproject.toml (numba>=0.60.0) predates them, so on 3.14 pip resolves a
-    # release that has them; the floor itself is built on 3.12 by the
-    # minimum-versions job.
+    # for. numba publishes cp314 wheels from 0.63.0 on, the floor pyproject.toml
+    # gives 3.14 (numba>=0.63.0 behind its python_version marker), and the
+    # minimum-versions job builds each Python's floor on that Python.
     # Tracking the newest version is the strictest single choice for this job:
     # a compiled extension meeting a new interpreter is the thing most likely
     # to break, and the pure-Python kernel is covered on both versions by the
@@ -1970,13 +1969,19 @@ jobs:
         fi
 
   # The floors in pyproject.toml are measured: each is the oldest release the
-  # library's suite passes with on the oldest Python the package supports.
-  # Every other job installs the pinned, newest stack, so without this one a
-  # floor would be a promise nobody checks, and the day the code started to
-  # need something newer it would go on claiming the old release. Here the
-  # floors are installed exactly, read from pyproject.toml by
+  # library's suite passes with, on each Python the package supports. Every
+  # other job installs the pinned, newest stack, so without this one a floor
+  # would be a promise nobody checks, and the day the code started to need
+  # something newer it would go on claiming the old release. Here the floors
+  # are installed exactly, read from pyproject.toml by
   # scripts/minimum_requirements.py so that raising one is an edit in one
   # place, and --check fails the job if pip settled on anything else.
+  #
+  # It runs on every supported Python, since the floors differ between them:
+  # the oldest numpy, scipy, numba and torch have no wheel for 3.13 or 3.14,
+  # so pyproject.toml gives those Pythons newer floors behind python_version
+  # markers, and the script prints the floors of the Python it runs on. A
+  # floor measured on one Python says nothing about another.
   #
   # It runs the library's tests, not the figure and documentation tooling:
   # the generators and their checkers compare against artefacts drawn on the
@@ -2004,6 +2009,12 @@ jobs:
     timeout-minutes: 50
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every Python the classifiers name, as in the test matrix;
+        # tests/test_minimum_requirements.py holds the list to pyproject.toml.
+        python-version: ["3.12", "3.13", "3.14"]
     env:
       NUMBA_DISABLE_JIT: "0"
       OMP_NUM_THREADS: "1"
@@ -2015,11 +2026,11 @@ jobs:
     - uses: actions/checkout@v7
       with:
         persist-credentials: false
-    - name: Set up Python 3.12
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v7
       with:
-        python-version: "3.12"
-    - name: Install the floors pyproject.toml declares, exactly
+        python-version: ${{ matrix.python-version }}
+    - name: Install the floors pyproject.toml declares for this Python, exactly
       run: |
         python -m pip install --upgrade pip
         python scripts/minimum_requirements.py > minimum-requirements.txt

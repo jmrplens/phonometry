@@ -255,9 +255,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **`pip install "phonometry[torch]"` installs the torch backend of the
   FDTD engines.** It brings torch 2.3.0 or later and array-api-compat 1.5.1 or
   later, the oldest releases the backend's tests pass with, which the
-  minimum-versions CI job installs. `[full]` leaves it out on purpose,
-  because the torch wheels PyPI serves on Linux bring gigabytes of CUDA
-  libraries; on a Linux machine without an NVIDIA GPU, running
+  minimum-versions CI job installs; on Python 3.13 torch 2.5.0 or later and on
+  3.14 torch 2.9.0 or later, its first releases with a wheel for each.
+  `[full]` leaves it out on purpose, because the torch wheels PyPI serves on
+  Linux bring gigabytes of CUDA libraries; on a Linux machine without an
+  NVIDIA GPU, running
   `pip install torch --index-url https://download.pytorch.org/whl/cpu` before
   `pip install "phonometry[torch]"` takes the CPU wheels instead. The install
   pages, the README and llms.txt say so in English and Spanish, and so does
@@ -6621,14 +6623,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   3.3.0 or 4.0.0rc1 to its new spelling.
 
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
-  extras it really works with.** `requires-python` drops from 3.13 to 3.12,
-  and every floor in the package metadata is now the oldest release the
-  library's tests pass with on Python 3.12, measured beside every other
-  floor: NumPy 2.0.2, SciPy 1.14.0, matplotlib 3.10.7 for `[plot]`, numba
-  0.60.0 for `[perf]`, reportlab 4.3.0 and svglib 0.9.1 for `[report]` and
-  python-soundfile 0.12.0 for `[audio]`. They used to repeat the newest
-  releases, which turned away environments a release or two behind for no
-  reason anyone had found. The `[report]` floors are the oldest releases that
+  extras it really works with, on each Python it supports.** `requires-python`
+  drops from 3.13 to 3.12, and every floor in the package metadata is now the
+  oldest release the library's tests pass with, measured beside every other
+  floor: on Python 3.12 NumPy 2.0.2, SciPy 1.14.0, matplotlib 3.10.7 for
+  `[plot]`, numba 0.60.0 for `[perf]`, reportlab 4.3.0 and svglib 0.9.1 for
+  `[report]` and python-soundfile 0.12.0 for `[audio]`. They used to repeat
+  the newest releases, which turned away environments a release or two
+  behind for no reason anyone had found. NumPy 2.0.2, SciPy 1.14.0, numba
+  0.60.0 and torch 2.3.0 have no wheel for Python 3.13 or 3.14, where a
+  resolver held at them built NumPy and SciPy from source, failing without a
+  compiler, and stopped at numba, which refuses those Pythons: there the
+  floor is the oldest release with a wheel that the tests pass with, behind a
+  `python_version` marker, NumPy 2.1.0, SciPy 1.14.1, numba 0.61.0 and torch
+  2.5.0 on 3.13 and NumPy 2.3.2, SciPy 1.16.1, numba 0.63.0 and torch 2.9.0
+  on 3.14. The `[report]` floors are the oldest releases that
   render a fiche in a fresh interpreter under `-W error`: reportlab 4.0.4 to
   4.2.5 warn when they are imported, through importlib's `load_module` and
   `ast.NameConstant`, both deprecated, and svglib 0.9.0 raises a
@@ -6637,13 +6646,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   precompile it, as uv installs. `[report]` and `[full]` also refuse svglib
   1.4.0, which stops a `.report()` at a debugger prompt, or fails it without
   a terminal, so they ask for `svglib>=0.9.1,!=1.4.0`. A CI job installs
-  exactly those floors on Python 3.12 and runs the library's tests, a fiche
-  rendered under `-W error` among them, so a floor cannot stop being true
-  without a pull request failing, and Python 3.12 joins the test matrix.
-  `scripts/minimum_requirements.py`, which reads the floors for that job,
-  takes a floor followed by `!=` exclusions of releases above it and still
-  pins the floor. A floor rises only with a failure measured at it;
-  CONTRIBUTING.md states the rule.
+  exactly the floors of each of Python 3.12, 3.13 and 3.14 on that Python and
+  runs the library's tests, a fiche rendered under `-W error` among them, so
+  a floor cannot stop being true without a pull request failing, and Python
+  3.12 joins the test matrix. `scripts/minimum_requirements.py`, which reads
+  the floors for that job, prints those of the Python it runs on, takes a
+  floor followed by `!=` exclusions of releases above it and a marker on
+  `python_version`, still pins the floor, and refuses markers that leave a
+  supported Python with no floor or with two. A floor rises only with a
+  failure measured at it; CONTRIBUTING.md states the rule.
 
 - **The railway rolling stock guide says what EN 15610 7.5 asks of longer
   wavelengths, and why the library computes none of it.** The guide listed the

@@ -66,7 +66,11 @@ release the library's tests pass with, and a CI job installs exactly those
 releases on Python 3.12 to keep it so: matplotlib 3.10.7 for `[plot]`,
 reportlab 4.3.0 and svglib 0.9.1 (but not 1.4.0) for `[report]`, numba
 0.60.0 for `[perf]`, python-soundfile 0.12.0 for `[audio]` and torch 2.3.0
-with array-api-compat 1.5.1 for `[torch]`.
+with array-api-compat 1.5.1 for `[torch]`. Python 3.13 and 3.14 have floors
+of their own for NumPy, SciPy, numba and torch, whose oldest releases have no
+wheel for them: the oldest releases that do, which the same job installs on
+each, on Python 3.13 NumPy 2.1.0, SciPy 1.14.1, numba 0.61.0 and torch 2.5.0,
+and on Python 3.14 NumPy 2.3.2, SciPy 1.16.1, numba 0.63.0 and torch 2.9.0.
 
 Optional extras: `phonometry[plot]` (matplotlib for response plots and result
 `.plot()` methods), `phonometry[perf]` (numba for faster impulse ballistics),

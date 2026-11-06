@@ -286,8 +286,9 @@ servidor OpenSSH ejecuta la orden a través de `cmd.exe`, que lee el
 entrecomillado de otra manera.
 
 El entorno necesita Python 3.12 o posterior, con NumPy 2.0.2 o posterior y
-SciPy 1.14.0 o posterior, los mínimos de la biblioteca, y CuPy o torch para
-una GPU, instalados como dice
+SciPy 1.14.0 o posterior, los mínimos de la biblioteca en su Python más
+antiguo, que el nodo comprueba sea cual sea el suyo, y CuPy o torch para una
+GPU, instalados como dice
 [Dónde se calcula una simulación](/phonometry/es/simulation/compute/). No hace
 falta que phonometry esté instalado allí, y si lo está no se usa: el
 intérprete se ejecuta aislado (`-I`), sobre el paquete que envió el cliente,

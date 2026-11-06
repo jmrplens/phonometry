@@ -2308,6 +2308,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   all of them: the wheel is byte for byte the one built before, and an
   editable install reads the same 94 data files.
 
+- **The sdist carries no test module it cannot run.** setuptools packed the
+  top-level `tests/test*.py` into the sdist by default, without the
+  `conftest.py` and the helpers they import, so `pytest` in an unpacked sdist
+  stopped at 119 collection errors. A `MANIFEST.in` now prunes `tests/`,
+  which reads `scripts/`, `docs/` and `.github/` as well and so runs from the
+  repository; the sdist is a megabyte smaller and the wheel is unchanged.
+  `scripts/check_release_artifacts.py` refuses an sdist that carries
+  anything beside the package but what building the wheel needs, the
+  licence, the readme and `MANIFEST.in`.
+
 - **A count given as a `Decimal`, a `Fraction` or a complex number is refused by
   the kinds of number a count takes.** Every whole-number argument checked as
   a count, an order, a number of storeys, stages or events among them, refused

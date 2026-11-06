@@ -35,7 +35,6 @@ def test_the_wheel_is_built_by_the_rules_the_client_follows() -> None:
     assert setuptools["include-package-data"] is False
     assert set(setuptools["package-data"]) == {"phonometry"}
     assert "exclude-package-data" not in setuptools
-    assert not (_ROOT / "MANIFEST.in").exists()
 
 
 def test_the_floors_a_node_checks_are_the_package_s() -> None:

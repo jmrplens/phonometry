@@ -20,6 +20,11 @@ published:
   no test, no second top-level package;
 - the sdist carries what building the wheel from it needs: ``pyproject.toml``,
   ``VERSION`` (the version is read from it) and the PyPI readme;
+- the sdist carries nothing beside the package but those, the licence, the
+  repository's readme and ``MANIFEST.in``: setuptools packs the top-level
+  ``tests/test*.py`` by default, without the ``conftest.py`` and the helpers
+  they import, and an unpacked sdist stopped at 119 errors collecting them,
+  so ``MANIFEST.in`` prunes them and a test module that comes back is refused;
 - the sdist holds nothing git does not track but what setuptools writes into
   it itself (``PKG-INFO``, ``setup.cfg`` and the ``.egg-info`` directory):
   setuptools packs a module or a test file that an ignore rule hides from
@@ -58,6 +63,10 @@ SDIST_SUPPORT = ("pyproject.toml", "VERSION", "README_PYPI.md")
 #: The files setuptools writes into the sdist itself rather than taking from a
 #: checkout, beside the ``.egg-info`` directory next to the package.
 SDIST_WRITTEN = ("PKG-INFO", "setup.cfg")
+#: What else the sdist may carry beside the package: the repository's readme,
+#: which setuptools packs by default, and the ``MANIFEST.in`` that keeps the
+#: tests out.
+SDIST_BESIDE = ("README.md", "MANIFEST.in")
 #: The SPDX expression phonometry declares.
 LICENSE_EXPRESSION = "MIT"
 #: The licence files it declares, by the path PEP 639 records. Each carries the
@@ -124,6 +133,25 @@ def untracked_sdist_problems(
         if path not in tracked
         and path not in SDIST_WRITTEN
         and not path.startswith(egg_info)
+    ]
+
+
+def stray_sdist_problems(sdist: pathlib.Path, version: str) -> list[str]:
+    """The files of the sdist that are neither the package nor what building it needs.
+
+    :param sdist: The built source distribution.
+    :param version: The version being released.
+    :return: One sentence per such file; empty when the sdist holds only
+        ``src/phonometry``, its ``.egg-info`` directory, :data:`SDIST_SUPPORT`,
+        :data:`LICENSE_FILES`, :data:`SDIST_WRITTEN` and :data:`SDIST_BESIDE`.
+    """
+    beside = {*SDIST_SUPPORT, *LICENSE_FILES, *SDIST_WRITTEN, *SDIST_BESIDE}
+    package = (f"src/{_PACKAGE}/", f"src/{_PACKAGE}.egg-info/")
+    return [
+        f"the sdist carries {path}, which is neither the package nor a file "
+        "building it needs"
+        for path in _carried(sdist, version)
+        if path not in beside and not path.startswith(package)
     ]
 
 
@@ -293,6 +321,7 @@ def dist_problems(
         problems += wheel_problems(wheel, version, tracked)
     if sdist.is_file():
         problems += sdist_problems(sdist, version, tracked)
+        problems += stray_sdist_problems(sdist, version)
         problems += untracked_sdist_problems(sdist, version, root)
         problems += line_ending_problems(sdist, version, root)
     return problems
@@ -316,7 +345,7 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         return 1
     print(
-        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, the wheel nothing else and the sdist nothing git does not track but what setuptools writes, declare and carry the {LICENSE_EXPRESSION} licence, and every tracked file of the sdist is checked out with LF everywhere."
+        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, the wheel nothing else and the sdist nothing beside them but what building the wheel needs, the licence, the readme and MANIFEST.in, and nothing git does not track but what setuptools writes, declare and carry the {LICENSE_EXPRESSION} licence, and every tracked file of the sdist is checked out with LF everywhere."
     )
     return 0
 

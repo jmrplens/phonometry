@@ -2306,7 +2306,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   them exited 1 on the first. The package now ships exactly the data files
   its `package-data` globs name (`include-package-data = false`), which are
   all of them: the wheel is byte for byte the one built before, and an
-  editable install reads the same 94 data files.
+  editable install reads the same 94 data files. Every build CI makes of the
+  package and of the PyOctaveBand bridge, on a pull request and in the
+  release, now runs under `PYTHONWARNINGS=error`, so a warning the build
+  prints fails it; only the SBOM step is left out, since cyclonedx-bom warns
+  about itself. The bridge's wheel is built at its commit's time
+  (`SOURCE_DATE_EPOCH`), and CI builds it twice and compares the two and
+  reads it with `check-wheel-contents`.
 
 - **`import pyoctaveband` type-checks.** The PyOctaveBand 2.2.1 bridge now
   ships the PEP 561 marker, `py.typed`, and re-exports `__version__` and

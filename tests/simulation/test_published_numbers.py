@@ -237,7 +237,10 @@ _TEXT_NUMBER = re.compile(r"(?<![\w.])\d+(?:\.\d+)?e-\d+\b")
 
 #: Each wording that names a version, as ``(what it names, pattern)``; the
 #: pattern's group is the value. The general ``CUDA x.y`` stands for either
-#: CUDA version; the wordings around it say which one.
+#: CUDA version; the wordings around it say which one. A Python that a
+#: distribution and its release follow, "on Python 3.12 torch 2.3.0", names
+#: the Python a floor is for, which tests/test_minimum_requirements.py holds
+#: to pyproject.toml, not the one the proof ran on.
 _VERSION_WORDINGS: tuple[tuple[str, str], ...] = (
     ("CUDA runtime", r"CUDA runtime (\d+\.\d+)"),
     ("CUDA runtime", r"runtime de CUDA (\d+\.\d+)"),
@@ -251,7 +254,7 @@ _VERSION_WORDINGS: tuple[tuple[str, str], ...] = (
     ("CuPy", r"(?:CuPy|cupy|`cupy-cuda\d+x`) (\d+\.\d+\.\d+)"),
     ("NVIDIA driver", r"(?<![\d.])(\d{3}\.\d+\.\d+)(?![\d.])"),
     ("GPU", r"\b((?:RTX|GTX) \d{3,4})\b"),
-    ("Python", r"Python (\d+\.\d+)"),
+    ("Python", r"Python (\d+\.\d+)(?!\d)(?!\s+[\w-]+\s+\d+\.\d+\.\d+)"),
 )
 
 
@@ -528,6 +531,17 @@ def test_each_wording_reads_the_version_it_names() -> None:
     } <= found
     assert "CUDA driver API: 13.2" not in found
     assert "CUDA runtime: 13.3" not in found
+
+
+def test_a_python_a_floor_follows_is_not_the_one_the_proof_ran_on() -> None:
+    """The install table names each Python's torch floor; the proof's stays read."""
+    text = (
+        "on Python 3.12 torch 2.3.0 or later, en Python 3.12 torch 2.3.0 o "
+        "posterior; NVIDIA driver 590.48.01 and Python 3.11, every field"
+    )
+    assert [v for v in _versions_quoted(text) if v.startswith("Python")] == [
+        "Python: 3.11"
+    ]
 
 
 def test_the_table_reader_finds_every_row_of_the_guide() -> None:

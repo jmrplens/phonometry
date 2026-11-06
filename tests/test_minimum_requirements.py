@@ -24,6 +24,7 @@ from packaging.utils import canonicalize_name
 from packaging.version import Version
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
     from types import ModuleType
 
 _ROOT = Path(__file__).resolve().parent.parent
@@ -765,20 +766,20 @@ def test_every_floored_distribution_has_a_display_name() -> None:
     assert set(_MODULE.floors(_pyproject())) == set(_DISPLAY_NAMES)
 
 
-@pytest.mark.parametrize("name", _FLOOR_STATEMENTS)
-def test_the_installation_instructions_name_every_floor(name: str) -> None:
-    """Each floor of each Python stands next to the name of its distribution.
+def _unnamed_floors(text: str, distributions: Collection[str]) -> list[str]:
+    """The floors of ``distributions``, on each Python, that ``text`` leaves out.
 
-    The version may end a sentence, but not run on into a longer one: "torch
-    2.9.0." names 2.9.0, "torch 2.9.0.1" does not.
+    A floor is named when its version stands next to the name of its
+    distribution. The version may end a sentence, but not run on into a
+    longer one: "torch 2.9.0." names 2.9.0, "torch 2.9.0.1" does not.
     """
-    text = (_ROOT / name).read_text(encoding="utf-8")
     floors = {
         (distribution, version)
         for python in _classified_pythons()
         for distribution, version in _MODULE.floors(_pyproject(), python).items()
+        if distribution in distributions
     }
-    missing = [
+    return [
         f"{_DISPLAY_NAMES[distribution]} {version}"
         for distribution, version in sorted(floors)
         if not re.search(
@@ -787,7 +788,77 @@ def test_the_installation_instructions_name_every_floor(name: str) -> None:
             text,
         )
     ]
-    assert missing == []
+
+
+@pytest.mark.parametrize("name", _FLOOR_STATEMENTS)
+def test_the_installation_instructions_name_every_floor(name: str) -> None:
+    """Each floor of each Python stands next to the name of its distribution."""
+    text = (_ROOT / name).read_text(encoding="utf-8")
+    assert _unnamed_floors(text, _DISPLAY_NAMES) == []
+
+
+#: Where the documentation pages are written: the mirror GitHub serves and the
+#: site's sources, in both languages.
+_DOC_TREES = ("docs", "site/src/content/docs")
+
+#: A table row that says how to install an extra, which group 1 names.
+_EXTRA_ROW = re.compile(r'^\|.*`pip install "phonometry\[([\w-]+)\]"`')
+
+#: The rows the test below must find, so that it cannot pass on finding none.
+_KNOWN_EXTRA_ROWS = {
+    "docs/simulation/compute.md",
+    "site/src/content/docs/simulation/compute.mdx",
+    "site/src/content/docs/es/simulation/compute.mdx",
+}
+
+
+def _extra_rows_that_name_a_version() -> list[tuple[str, str, set[str]]]:
+    """Each table row installing an extra that gives a version of what it brings.
+
+    Each comes as the page, the row and the distributions the extra brings.
+    """
+    extras = _pyproject()["project"]["optional-dependencies"]  # type: ignore[index]
+    brings: dict[str, set[str]] = {
+        extra: {canonicalize_name(Requirement(spec).name) for spec in specs}
+        for extra, specs in extras.items()
+    }
+    found: list[tuple[str, str, set[str]]] = []
+    for tree in _DOC_TREES:
+        for path in sorted((_ROOT / tree).rglob("*.md*")):
+            if path.suffix not in {".md", ".mdx"}:
+                continue
+            for row in path.read_text(encoding="utf-8").splitlines():
+                match = _EXTRA_ROW.match(row)
+                if match is None or match[1] not in brings:
+                    continue
+                brought = brings[match[1]]
+                if any(
+                    re.search(
+                        rf"(?<![\w-]){re.escape(_DISPLAY_NAMES[name])}\s+\d+\.\d",
+                        row,
+                    )
+                    for name in brought
+                ):
+                    found.append((path.relative_to(_ROOT).as_posix(), row, brought))
+    return found
+
+
+@pytest.mark.whole_tree
+def test_a_row_that_installs_an_extra_names_its_floors_on_each_python() -> None:
+    """A row of ``pip install "phonometry[<extra>]"`` with versions names every floor.
+
+    A row that gives a version of what the extra brings states its floors, so
+    it names the floor of each distribution on each Python. Only the row is
+    read: the rest of a page can name the releases a bound was measured at.
+    """
+    rows = _extra_rows_that_name_a_version()
+    assert {name for name, _, _ in rows} >= _KNOWN_EXTRA_ROWS
+    wrong = [
+        f"{name}: {missing}"
+        for name, row, brought in rows
+        if (missing := _unnamed_floors(row, brought))
+    ]
+    assert wrong == []
 
 
 # --------------------------------------------------------------------------

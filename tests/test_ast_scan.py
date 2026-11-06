@@ -856,6 +856,30 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
     assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
 
 
+def test_a_module_without_a_global_statement_is_not_read_for_one() -> None:
+    """With no ``global`` anywhere in the module no scope sends a name to it,
+    and no scope is read to find one.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def outer():
+                read = 1
+                def inner():
+                    nonlocal read
+                    read = 2
+                return inner
+
+            class Holder:
+                read = 3
+            """
+        )
+    )
+    read_before = ast_scan.own_names.cache_info().misses
+    assert ast_scan.global_bindings(tree) == {}
+    assert ast_scan.own_names.cache_info().misses == read_before
+
+
 def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None:
     """What a caller leaves out of a module's bindings is left out wherever it
     is written: of what the top of the module binds, and of what a function
@@ -1007,6 +1031,48 @@ def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
     assert "def __init__" in source
     assert "y = 1" not in source
     assert "y = 2" in source
+
+
+def test_a_tree_whose_functions_test_no_flag_comes_back_as_it_was(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A tree whose functions hold no test on ``TYPE_CHECKING`` is handed back
+    untouched, its blocks at the top and in a class body with it, and no function
+    of it is walked on its own; a conditional expression on the flag in a
+    function's default is still emptied.
+    """
+    walked: list[ast.AST] = []
+    scope_nodes = ast_scan.scope_nodes
+
+    def counted(scope: ast.AST) -> list[ast.AST]:
+        walked.append(scope)
+        return scope_nodes(scope)
+
+    monkeypatch.setattr(ast_scan, "scope_nodes", counted)
+    source = textwrap.dedent(
+        """
+        if TYPE_CHECKING:
+            from a import b
+
+        class Record:
+            if TYPE_CHECKING:
+                def __init__(self, x): ...
+
+        def f(x, y=1 if enabled else 2):
+            if x:
+                return y
+            return lambda: x if y else None
+        """
+    )
+    tree = ast.parse(source)
+    written = ast.dump(tree)
+    assert ast_scan.empty_type_checking_bodies(tree) is tree
+    assert ast.dump(tree) == written
+    assert walked == []
+
+    tree = ast.parse("def f(x=b if TYPE_CHECKING else c):\n    return x\n")
+    ast_scan.empty_type_checking_bodies(tree)
+    assert ast.unparse(tree).startswith("def f(x=None if TYPE_CHECKING else c)")
 
 
 @pytest.mark.parametrize(

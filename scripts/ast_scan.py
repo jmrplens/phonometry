@@ -817,7 +817,12 @@ def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
     The blocks at the top of a module and in a class body stay, where a guard
     reads the imports of annotations and a constructor declared for the type
     checker. Call it on a tree just parsed, before anything has read its scopes.
+    A tree with no such test under a function is handed back as it is, read in
+    one walk (:func:`_tests_the_flag_in_a_function`), not in one for each of its
+    functions.
     """
+    if not _tests_the_flag_in_a_function(tree):
+        return tree
     for function in ast.walk(tree):
         if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
             continue
@@ -837,6 +842,25 @@ def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
     return tree
 
 
+def _tests_the_flag_in_a_function(tree: ast.AST) -> bool:
+    """Whether an ``if`` or a conditional expression anywhere under a function of
+    *tree* tests ``TYPE_CHECKING`` (:func:`_branches`), its decorators and defaults
+    included: what :func:`empty_type_checking_bodies` would empty, and more.
+    """
+    pending: list[tuple[ast.AST, bool]] = [(tree, False)]
+    while pending:
+        node, inside = pending.pop()
+        if (
+            inside
+            and isinstance(node, ast.If | ast.IfExp)
+            and _branches(tree, node) is not None
+        ):
+            return True
+        inside = inside or isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        pending.extend((child, inside) for child in ast.iter_child_nodes(node))
+    return False
+
+
 @functools.cache
 def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
     """Each name of *module* that a function, a method or a class body inside
@@ -847,8 +871,11 @@ def global_bindings(module: ast.Module) -> dict[str, list[ast.AST]]:
     the module or after it has run, so each of these may be what the
     module's name holds then (:func:`standing_bindings`). What an ``if
     TYPE_CHECKING:`` block holds never runs, and is none of them
-    (:func:`for_the_type_checker`).
+    (:func:`for_the_type_checker`). A module with no ``global`` statement has
+    none, and is read no further than the walk that finds none.
     """
+    if not any(isinstance(node, ast.Global) for node in ast.walk(module)):
+        return {}
     checker = for_the_type_checker(module)
     found: dict[str, list[ast.AST]] = {}
     for scope in ast.walk(module):

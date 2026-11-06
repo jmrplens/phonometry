@@ -1113,13 +1113,16 @@ def _import_source(node: ast.ImportFrom, package: str) -> str | None:
     return source if source.startswith("phonometry") else None
 
 
+@functools.cache
 def _parsed_module(module_name: str) -> tuple[ModuleType, ast.Module, str] | None:
     """The imported module *module_name*, its parsed source and its package,
     or None when it cannot be imported or its source cannot be read.
 
     A module of the package imported only under ``TYPE_CHECKING`` is not
     loaded yet: it is imported here, or the readers cached on this keep it
-    empty whatever runs later.
+    empty whatever runs later. Parsed once, whatever reads it: the program's
+    bindings and the type checker's are read from the one tree
+    (:func:`_read_module`).
     """
     module = sys.modules.get(module_name)
     if module is None and module_name.startswith("phonometry"):

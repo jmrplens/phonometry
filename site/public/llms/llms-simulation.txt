@@ -47,10 +47,11 @@ a video. [Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/wher
 the devices, the nodes and the encoders in one place.
 
 A good way to read it is alongside the closed-form pages it cross-checks:
-the modal frequencies that the
+the in-plane modal frequencies of the
 [mode ladder](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room)
-of the image-sources guide lists reappear as peaks in a simulated room
-spectrum, the barrier insertion loss of
+of the image-sources guide, those of zero order along the dimension the
+cross-section leaves out, reappear as peaks in a simulated room spectrum,
+the barrier insertion loss of
 [ground effect and barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) can be
 re-derived by placing an obstacle in the domain, and the ray bending of
 [atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/) emerges
@@ -1627,8 +1628,12 @@ impedance; anything drawn in `obstacle_mask` is perfectly rigid by
 construction. A room modelled as interior walls inside a larger domain
 therefore has hard walls whatever the edges do, and there is no way to hand
 an interior surface an absorption coefficient. Two routes soften a surface:
-put it on a domain edge and give that edge an impedance, or back it with a
-lossy region through the `damping` map below. When an edge will do, the
+put it on a domain edge and give that edge an impedance, or make the absorber
+a lossy region of open cells, which the wave enters, through the `damping`
+map below. Those cells stay out of `obstacle_mask`: a masked cell closes its
+faces, so no wave reaches a lossy region behind a masked surface, and only a
+rigid backing behind the lossy region belongs in the mask. When an edge will
+do, the
 conversion from a target normal-incidence absorption coefficient is two
 steps: the reflection magnitude is $|R| = \sqrt{1-\alpha}$, and for a real
 impedance $Z = \rho c\,(1+R)/(1-R)$, so $\alpha = 0.5$ needs
@@ -1855,10 +1860,14 @@ run below is 0.35 s long and the barrier run is 9 ms.
 quadratically from zero at its inner face to a peak at the outer edge. Because
 $\sigma$ decays pressure and velocity together, the characteristic impedance
 inside it stays $\rho c$ and a *uniform* lossy region would not reflect at
-all; everything that comes back is reflected by the *gradient*. That makes the
-rule a rule in **cells** more than in wavelengths, and it is worth seeing the
-measurement, taken at normal incidence on a plane-wave duct as the spectrum
-of a pulse's echo over the spectrum of the pulse:
+all. What comes back has two sources: the rigid domain edge behind the
+layer, whose echo the ramp attenuates on the way in and again on the way
+out, and the *gradient* of the ramp, which reflects where $\sigma$ changes
+from one cell to the next. How much returns depends on the count of cells
+more than on the thickness in wavelengths, so the rule is a rule in
+**cells**, and it is worth seeing the measurement, taken at normal incidence
+on a plane-wave duct as the spectrum of a pulse's echo over the spectrum of
+the pulse:
 
 | `absorbing_layer_cells` | 5 | 10 | 20 | 40 | 60 |
 |---|---|---|---|---|---|
@@ -2421,8 +2430,10 @@ TMM far-field models.
 
 **Not covered.** Interior geometry is rigid by construction: only the four
 domain sides accept an impedance or a sponge, so an interior surface can be softened only by
-backing it with a lossy `damping` region, and that region is a
-frequency-independent equivalent fluid rather than a porous model. The solver
+making the absorber a lossy `damping` region of cells left out of
+`obstacle_mask` (a masked surface closes its faces, and no wave reaches a
+lossy region behind it), and that region is a frequency-independent
+equivalent fluid rather than a porous model. The solver
 is two-dimensional only: it models a line source in cross-section (cylindrical
 $1/\sqrt{r}$ spreading), not the spherical $1/r$ spreading of a 3D point
 source, so absolute levels and decay rates are not those of a 3D room. The
@@ -2475,9 +2486,11 @@ The spectrum of a `GaussianPulse` of half-width $w$ (`half_width_s`) is
 $\mathrm{e}^{-(\pi f\,w)^2}$, 20 dB down at
 $f = 0.483/w$, so $w \ge 0.5/f_\text{max}$ keeps the injected
 energy inside the band the grid resolves. The sponge is a rule in **cells**
-more than in wavelengths: because its absorption rate acts on pressure and velocity
-together, the layer keeps a real $\rho c$ impedance and only its *gradient*
-reflects. At normal incidence twenty cells return −55 dB at 125 Hz and
+more than in wavelengths. Its absorption rate acts on pressure and velocity
+together, so the layer keeps a real $\rho c$ impedance, and what comes back
+is the echo of the rigid edge behind it, attenuated through the ramp on the
+way in and out, and the reflection of the ramp's *gradient*. At normal
+incidence twenty cells return −55 dB at 125 Hz and
 −71 dB at 2 kHz, forty cells −67 dB and −91 dB. Tightening the
 engine's `absorbing_layer_reflection` (an `FDTD2D` argument; a run always
 designs its sponge for the $10^{-4}$ default) makes the ramp steeper and the

@@ -333,8 +333,12 @@ perfectamente rígido por construcción. Una sala modelada como paredes
 interiores dentro de un dominio mayor tiene, por tanto, paredes duras hagan
 lo que hagan los bordes, y no hay forma de darle a una superficie interior un
 coeficiente de absorción. Dos vías ablandan una superficie: ponerla en un
-borde del dominio y darle a ese borde una impedancia, o respaldarla con una
-región con pérdidas mediante el mapa `damping` de más abajo. Cuando basta con
+borde del dominio y darle a ese borde una impedancia, o hacer del absorbente
+una región de celdas abiertas con pérdidas, en la que la onda entra, mediante
+el mapa `damping` de más abajo. Esas celdas quedan fuera de `obstacle_mask`:
+una celda de la máscara cierra sus caras, así que ninguna onda llega a una
+región con pérdidas detrás de una superficie enmascarada, y en la máscara
+solo va un respaldo rígido detrás de la región con pérdidas. Cuando basta con
 un borde, la conversión desde un coeficiente de absorción objetivo a
 incidencia normal son dos pasos: la magnitud de la reflexión es
 $|R| = \sqrt{1-\alpha}$, y para una impedancia real
@@ -576,9 +580,13 @@ dura 0,35 s y la de la barrera 9 ms.
 absorción $\sigma$ desde cero en su cara interior hasta un máximo en el
 borde exterior. Como $\sigma$ hace decaer a la vez la presión y la
 velocidad, la impedancia característica dentro de ella se mantiene en
-$\rho c$ y una región con pérdidas *uniforme* no reflejaría nada; todo lo
-que vuelve lo refleja el *gradiente*. Eso convierte la regla en una regla en
-**celdas** más que en longitudes de onda, y merece la pena ver la medición,
+$\rho c$ y una región con pérdidas *uniforme* no reflejaría nada. Lo que
+vuelve tiene dos orígenes: el borde rígido del dominio detrás de la capa,
+cuyo eco la rampa atenúa a la ida y otra vez a la vuelta, y el *gradiente*
+de la rampa, que refleja donde $\sigma$ cambia de una celda a la siguiente.
+Cuánto vuelve depende del número de celdas más que del grosor en longitudes
+de onda, así que la regla es una regla en **celdas**, y merece la pena ver la
+medición,
 tomada a incidencia normal sobre un conducto de onda plana como el espectro
 del eco de un pulso sobre el espectro del pulso:
 
@@ -1190,7 +1198,9 @@ propios modelos de campo lejano Fraunhofer y TMM de la biblioteca.
 <ScopeClaim status="not-covered" label="No cubierto">
 La geometría interior es rígida por construcción: solo los cuatro lados del
 dominio aceptan una impedancia o una esponja, así que una superficie interior
-solo puede ablandarse respaldándola con una región `damping` con pérdidas, y
+solo puede ablandarse haciendo del absorbente una región `damping` con
+pérdidas de celdas fuera de `obstacle_mask` (una superficie enmascarada cierra
+sus caras y ninguna onda llega a una región con pérdidas detrás de ella), y
 esa región es un fluido equivalente independiente de la frecuencia y no un
 modelo poroso. El esquema es solo bidimensional: modela una fuente lineal en
 sección transversal (propagación cilíndrica $1/\sqrt{r}$), no la propagación
@@ -1256,9 +1266,11 @@ $\mathrm{e}^{-(\pi f\,w)^2}$, 20 dB por
 debajo en $f = 0{,}483/w$, así que con
 $w \ge 0{,}5/f_\text{max}$ la energía inyectada se mantiene dentro de
 la banda que la malla resuelve. La esponja es una regla en **celdas** más que
-en longitudes de onda: como su tasa de absorción actúa a la vez sobre la
-presión y sobre la velocidad, la capa conserva una impedancia real $\rho c$
-y solo refleja su *gradiente*. A incidencia normal, veinte celdas devuelven
+en longitudes de onda. Su tasa de absorción actúa a la vez sobre la presión y
+sobre la velocidad, así que la capa conserva una impedancia real $\rho c$, y
+lo que vuelve es el eco del borde rígido que tiene detrás, atenuado por la
+rampa a la ida y a la vuelta, y la reflexión del *gradiente* de la rampa. A
+incidencia normal, veinte celdas devuelven
 −55 dB a 125 Hz y −71 dB a 2 kHz; cuarenta celdas, −67 dB y −91 dB. Apretar
 el `absorbing_layer_reflection` del motor
 (argumento de `FDTD2D`; una ejecución diseña siempre su esponja para el valor

@@ -40,10 +40,11 @@ a video. [Where heavy work runs](where-it-runs.md) maps
 the devices, the nodes and the encoders in one place.
 
 A good way to read it is alongside the closed-form pages it cross-checks:
-the modal frequencies that the
+the in-plane modal frequencies of the
 [mode ladder](../buildings/rooms/room-image-sources.md#3-modes-of-a-rectangular-room)
-of the image-sources guide lists reappear as peaks in a simulated room
-spectrum, the barrier insertion loss of
+of the image-sources guide, those of zero order along the dimension the
+cross-section leaves out, reappear as peaks in a simulated room spectrum,
+the barrier insertion loss of
 [ground effect and barriers](../environment/propagation/ground-barriers.md) can be
 re-derived by placing an obstacle in the domain, and the ray bending of
 [atmospheric refraction](../environment/propagation/atmospheric-refraction.md) emerges

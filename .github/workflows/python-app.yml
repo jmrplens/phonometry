@@ -143,12 +143,27 @@ jobs:
     # With the setuptools requirements-release.txt pins, used in place
     # (--no-isolation), as publish-stub.yml builds the stub it uploads: a
     # Dependabot bump of that pin, or of build, that breaks the build of the
-    # stub fails here rather than the day it is published.
-    - name: Build the stub and check its long description
+    # stub fails here rather than the day it is published. The build fails on
+    # a warning (PYTHONWARNINGS=error), and is stamped with the commit's time
+    # (SOURCE_DATE_EPOCH), which setuptools writes into every member of the
+    # wheel in place of the time of the build. check-wheel-contents reads
+    # the wheel for stray or duplicated files, as the release does for
+    # phonometry's.
+    - name: Build the stub and check its long description and contents
       run: |
         python -m pip install -r requirements-release.txt
-        python -m build --no-isolation stub/
+        SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation stub/
         python -m twine check --strict stub/dist/*
+        check-wheel-contents stub/dist/*.whl
+    # A second build of the wheel from the same commit gives the same bytes,
+    # so the wheel publish-stub.yml uploads is the one anyone rebuilds from
+    # the tag. The sdist is not compared: setuptools writes the builder's
+    # clock, user and modes into it, which only build_release.py's rewrite
+    # of phonometry's sdist takes out.
+    - name: Build the stub's wheel again and compare it with the first
+      run: |
+        SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation --wheel stub/ --outdir "$RUNNER_TEMP/stub-rebuild"
+        cmp stub/dist/*.whl "$RUNNER_TEMP"/stub-rebuild/*.whl
     # The resolver reads the built metadata, not stub/pyproject.toml, so the
     # cap that keeps `pip install -U PyOctaveBand` on the line whose API the
     # shim re-exports is asserted where it will actually be enforced. The
@@ -170,7 +185,10 @@ jobs:
   # macOS and holds that build to the same checksum file, so a difference
   # between the two operating systems shows here and not after publishing.
   # The checksum file is written under the runner's temporary directory: the
-  # build refuses a checkout holding a file its commit does not.
+  # build refuses a checkout holding a file its commit does not. Both builds
+  # fail on a warning (PYTHONWARNINGS=error): setuptools printed nine
+  # "Package would be ignored" blocks on every build, which only a strict
+  # build turned into the failure it was for anyone who built from source.
   release-build:
     name: The release build gives the same bytes twice
     runs-on: ubuntu-latest
@@ -188,6 +206,8 @@ jobs:
     - name: Install the release tooling
       run: python -m pip install -r requirements-release.txt
     - name: Build the sdist and the wheel
+      env:
+        PYTHONWARNINGS: error
       run: python scripts/build_release.py --outdir dist
     - name: Write the checksum file
       run: |
@@ -196,6 +216,8 @@ jobs:
         (cd dist && sha256sum -- *) > "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
         cat "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
     - name: Build both again and compare them with the checksum file
+      env:
+        PYTHONWARNINGS: error
       run: |
         VERSION=$(tr -d ' \n' < VERSION)
         python scripts/build_release.py --outdir "$RUNNER_TEMP/rebuild" --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
@@ -240,6 +262,8 @@ jobs:
         name: release-checksums
         path: ${{ runner.temp }}/extras
     - name: Rebuild and compare with the build on Linux
+      env:
+        PYTHONWARNINGS: error
       run: |
         VERSION=$(tr -d ' \n' < VERSION)
         "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
@@ -2074,7 +2098,7 @@ jobs:
     - name: Build the wheel
       run: |
         python -m pip install -r requirements-release.txt
-        python scripts/build_release.py --outdir dist
+        PYTHONWARNINGS=error python scripts/build_release.py --outdir dist
     - uses: actions/setup-node@v7
       with:
         node-version: 24

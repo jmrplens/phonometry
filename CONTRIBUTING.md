@@ -680,11 +680,12 @@ Releases are fully automated from the repository-root `VERSION` file:
    hand on the PR's branch (Actions, Release, Run workflow). A manual run is
    always a rehearsal and no input turns it into a release. It reads the
    version and its CHANGELOG section, waits for the PR's CI, builds the sdist
-   and the wheel with `scripts/build_release.py`, builds them again and
-   refuses the run if a byte differs, checks both against git and checks the
-   licence each declares and carries, installs the wheel with every extra
-   on Linux, macOS and Windows with each supported Python and runs the
-   conformance report on it, writes the checksum file, the SBOM and the
+   and the wheel with `scripts/build_release.py` under
+   `PYTHONWARNINGS=error`, so a warning the build prints fails it, builds
+   them again and refuses the run if a byte differs, checks both against git
+   and checks the licence each declares and carries, installs the wheel with
+   every extra on Linux, macOS and Windows with each supported Python and
+   runs the conformance report on it, writes the checksum file, the SBOM and the
    release notes, asks PyPI for an upload token with this workflow's
    identity, which proves the trusted publisher is configured, without
    uploading anything, and rebuilds the commit on macOS and compares the
@@ -717,8 +718,12 @@ from `publish-stub.yml` (Actions, Publish PyOctaveBand transition stub, Run
 workflow on `main`), through its own trusted publisher, which names that
 workflow. It waits for Python CI on the commit as the release does, builds
 with the setuptools `requirements-release.txt` pins as the release does,
-checks the pin and the licence of the built files with
-`scripts/check_stub_metadata.py`, and only then uploads.
+under `PYTHONWARNINGS=error` and at the commit's time (`SOURCE_DATE_EPOCH`),
+so its wheel is the one a rebuild of the commit gives, which Python CI checks
+on every pull request by building it twice, checks the wheel with
+`check-wheel-contents` and the pin, the licence and the `py.typed` marker of
+the built files with `scripts/check_stub_metadata.py`, and only then
+uploads.
 
 ## 🚀 How to Contribute
 

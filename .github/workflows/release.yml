@@ -217,8 +217,12 @@ jobs:
       # is the recipe SECURITY.md gives anyone who rebuilds a release: the
       # setuptools requirements-release.txt pins, the commit's files as git
       # archive exports them, the commit's time on every file, and an sdist
-      # written again without the builder's clock, user or umask in it.
+      # written again without the builder's clock, user or umask in it. A
+      # warning the build prints fails it (PYTHONWARNINGS=error), as on every
+      # pull request.
       - name: Build the sdist and the wheel
+        env:
+          PYTHONWARNINGS: error
         run: python scripts/build_release.py --outdir dist
 
       # Named for the version, so a download beside another release's never
@@ -236,6 +240,8 @@ jobs:
       # machine into the files fails here, before a byte is published, rather
       # than in the rebuild on macOS after it.
       - name: Build both again and compare them with the checksum file
+        env:
+          PYTHONWARNINGS: error
         run: python scripts/build_release.py --outdir "$RUNNER_TEMP/rebuild" --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
 
       - name: Check the metadata, the long description and the contents
@@ -244,6 +250,9 @@ jobs:
           check-wheel-contents dist/*.whl
           python scripts/check_release_artifacts.py dist --version "$VERSION"
 
+      # Without PYTHONWARNINGS=error, unlike the builds: cyclonedx-bom raises
+      # DeprecationWarnings and a ResourceWarning of its own and exits 1 under
+      # it, which says nothing about the package.
       - name: Write the SBOM of what pip installs with the wheel
         run: |
           python -m venv --without-pip "$RUNNER_TEMP/sbom-env"
@@ -533,6 +542,8 @@ jobs:
       - name: Rebuild and compare with this run's files
         if: env.REHEARSAL == 'true'
         working-directory: source
+        env:
+          PYTHONWARNINGS: error
         run: |
           "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
             --check "$GITHUB_WORKSPACE/extras/phonometry-$VERSION.sha256"
@@ -540,6 +551,8 @@ jobs:
       - name: Rebuild and compare with the files on PyPI
         if: env.REHEARSAL != 'true'
         working-directory: source
+        env:
+          PYTHONWARNINGS: error
         run: |
           "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
             --check-pypi

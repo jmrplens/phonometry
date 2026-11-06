@@ -21,8 +21,10 @@ any run failing until the day of a release:
   checksum file is named for its version, as SECURITY.md says;
 - every build of either package, the ones uploaded to PyPI and the ones CI
   makes on a pull request, uses the setuptools ``requirements-release.txt``
-  pins, and the release builds twice and holds the second build to the
-  checksum file of the first;
+  pins and fails on a warning, the SBOM step alone left out, and the release
+  builds twice and holds the second build to the checksum file of the first;
+- the bridge is built at its commit's time, its wheel is checked for stray
+  files, and CI builds that wheel twice and compares the two;
 - every pull request builds the release the same way, twice on Linux, and
   once more on macOS against the checksum file of the Linux build, so a
   bump of the pins or a difference between the two systems shows before a
@@ -456,6 +458,95 @@ def test_every_build_uses_the_pinned_back_end(name: str) -> None:
         assert not re.search(r"\bpip wheel\b", runs), f"{name}: {job} runs pip wheel"
         commands = re.findall(r"-m build\b[^\n]*", runs)
         assert all("--no-isolation" in command for command in commands), commands
+
+
+#: A build command run with warnings as errors, set on its own line.
+_STRICT_ON_THE_LINE = re.compile(r"(?:^|\s)PYTHONWARNINGS=error\s")
+
+
+def _strict_env(env: object) -> bool:
+    return isinstance(env, dict) and env.get("PYTHONWARNINGS") == "error"
+
+
+@pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml", "python-app.yml"])
+def test_every_build_fails_on_a_warning(name: str) -> None:
+    """``PYTHONWARNINGS=error`` on every build of either package.
+
+    setuptools printed nine "Package would be ignored" blocks on every build
+    of the release, one per data directory, and nothing failed: the warnings
+    sat in the job log, and the first build that met them under strict
+    warnings was a user's. Each build runs with the variable in its step's
+    ``env`` or on its own command line, so a warning the pinned back end
+    prints fails the pull request that brings it.
+    """
+    workflow = _load(name)
+    lax = []
+    for job, step in _steps(workflow):
+        if _strict_env(step.get("env")):
+            continue
+        lax += [
+            f"{job}: {line.strip()}"
+            for line in step.get("run", "").splitlines()
+            if (found := _BUILDS.search(line))
+            and not _STRICT_ON_THE_LINE.search(line[: found.start()])
+        ]
+    assert lax == []
+
+
+def test_the_sbom_is_written_without_strict_warnings() -> None:
+    """cyclonedx-bom 7.6.0 and 8.0.1 warn about themselves and exit 1 under it.
+
+    They raise DeprecationWarnings and a ResourceWarning of their own, which
+    say nothing about the package, so the variable stays off the step, its
+    job and its workflow.
+    """
+    workflow = _load("release.yml")
+    assert not _strict_env(workflow.get("env"))
+    sbom = [
+        (job, step)
+        for job, step in _steps(workflow)
+        if "cyclonedx" in step.get("run", "")
+    ]
+    assert sbom, "release.yml writes no SBOM; update this test"
+    for job, step in sbom:
+        assert not _strict_env(workflow["jobs"][job].get("env")), job
+        assert not _strict_env(step.get("env")), job
+        assert "PYTHONWARNINGS" not in step["run"], job
+
+
+#: The commit's time, which setuptools writes into every member of the wheel.
+_COMMIT_TIME = "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)"
+
+
+@pytest.mark.parametrize(
+    ("name", "job"),
+    [("python-app.yml", "transition-stub"), ("publish-stub.yml", "build")],
+)
+def test_the_bridge_is_built_at_its_commit_time_and_its_wheel_checked(
+    name: str, job: str
+) -> None:
+    """The stub's wheel gives the same bytes from one commit, and no stray file.
+
+    Without ``SOURCE_DATE_EPOCH`` setuptools stamps every member with the time
+    of the build, so two builds of one commit a second apart differ; with it
+    the wheel is the commit's alone. ``check-wheel-contents`` reads it for
+    stray or duplicated files, as the release reads phonometry's wheel.
+    """
+    runs = _job_runs(_load(name), job)
+    builds = [line.strip() for line in runs.splitlines() if "-m build" in line]
+    assert builds
+    assert all(_COMMIT_TIME in line for line in builds), builds
+    assert "check-wheel-contents stub/dist/*.whl" in runs
+
+
+def test_ci_builds_the_bridge_wheel_twice_and_compares_the_two() -> None:
+    """A second wheel of the commit, byte for byte the first."""
+    runs = _job_runs(_load("python-app.yml"), "transition-stub")
+    wheels = [
+        line for line in runs.splitlines() if "-m build" in line and "--wheel" in line
+    ]
+    assert len(wheels) == 1, wheels
+    assert re.search(r'cmp stub/dist/\*\.whl "\$RUNNER_TEMP"/\S+/\*\.whl', runs)
 
 
 def test_the_pinned_back_end_satisfies_both_packages() -> None:

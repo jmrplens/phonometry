@@ -1395,12 +1395,16 @@ class Tree:
     def _value_callee(self, local: Local, depth: int = 0) -> Callee | None:
         """The helper a local name holds: an alias, a ``partial`` of one, or a
         parameter's default that names one.
+
+        Each value is read where its assignment runs, its names as they
+        stand there, so a later binding of a name the value reads leaves
+        what the local holds as it was.
         """
         if depth > _DEPTH:
             return None
         for value in local.scope.values.get(local.name, ()):
             found = self._expression_callee(
-                value, local.scope, local.scope.module, depth + 1
+                value, local.scope, local.scope.module, depth + 1, value
             )
             if found is not None:
                 return found

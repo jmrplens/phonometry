@@ -781,6 +781,96 @@ def test_an_alias_reads_its_value_where_the_assignment_runs(
     ]
 
 
+def test_a_local_alias_reads_its_value_where_the_assignment_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``saved = axis`` in a function, a module body or a class body holds
+    what ``axis`` stands for where the assignment runs, so a later binding
+    of ``axis`` leaves what a call of ``saved`` reaches as it was, through an
+    assignment expression, an annotated assignment, a dotted name and a
+    function written in the function alike.
+
+    The value was read as its names stand once the scope has run, so a
+    lambda bound to ``axis`` after the alias hid the helper the alias holds,
+    and a call of it that drops the language passed, while a helper
+    imported under the value's name after the alias was reported for a call
+    that never reaches it.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            def plot_saved(result, ax, language="en"):
+                from .helpers import axis
+                saved = axis
+                axis = lambda ax: None
+                saved(ax)
+
+
+            def plot_walrus(result, ax, language="en"):
+                from .helpers import axis
+                if (saved := axis) is not None:
+                    pass
+                axis = lambda ax: None
+                saved(ax)
+
+
+            def plot_annotated(result, ax, language="en"):
+                from .helpers import axis
+                saved: object = axis
+                axis = lambda ax: None
+                saved(ax)
+
+
+            def plot_dotted(result, ax, language="en"):
+                from . import helpers
+                saved = helpers.axis
+                helpers = None
+                saved(ax)
+
+
+            def plot_defined(result, ax, language="en"):
+                def inner(ax, language="en"):
+                    return ax
+                saved = inner
+                inner = lambda ax: None
+                saved(ax)
+
+
+            def plot_lambda(result, ax, language="en"):
+                draw = lambda ax: None
+                saved = draw
+                from .helpers import axis as draw
+                saved(ax)
+            """,
+            "figures.__init__": "",
+            "figures.devices": """
+            from pkg.helpers import axis
+
+            saved = axis
+            axis = lambda ax: None
+            saved(None)
+
+
+            class _Panel:
+                from pkg.helpers import axis as draw
+                kept = draw
+                draw = None
+                kept(None)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("<module>", "pkg.helpers.axis"),
+        ("_Panel.<class>", "pkg.helpers.axis"),
+        ("plot_annotated", "pkg.helpers.axis"),
+        ("plot_defined", "pkg.plots.plot_defined.<locals>.inner"),
+        ("plot_dotted", "pkg.helpers.axis"),
+        ("plot_saved", "pkg.helpers.axis"),
+        ("plot_walrus", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
     tmp_path: pathlib.Path,
 ) -> None:

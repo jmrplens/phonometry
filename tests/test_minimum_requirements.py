@@ -58,8 +58,9 @@ def test_every_declared_requirement_is_pinned_at_its_floor() -> None:
         declared += extra
     pinned = _MODULE.floors(_pyproject())
     for spec in declared:
-        name, version = re.split(r"\s*>=\s*", spec)
-        assert pinned[_MODULE._normalise(name)] == version
+        name, clauses = re.split(r"\s*>=\s*", spec)
+        floor = clauses.split(",", 1)[0].strip()
+        assert pinned[_MODULE._normalise(name)] == floor
 
 
 #: Extras ``full`` leaves out, with the reason. torch pulls gigabytes of CUDA
@@ -96,6 +97,51 @@ def test_a_requirement_without_a_floor_is_refused() -> None:
 def test_an_upper_bound_is_refused() -> None:
     project = _project(dependencies=["numpy>=2.0.2,<3"])
     with pytest.raises(ValueError, match="is not a floor"):
+        _MODULE.floors(project)
+
+
+def test_a_release_excluded_above_the_floor_leaves_the_floor_to_pin() -> None:
+    """svglib 1.4.0 stops at a pdb prompt: ``!=1.4.0`` keeps 0.9.1 the floor."""
+    project = _project(
+        dependencies=["svglib>=0.9.1,!=1.4.0", "lxml >= 5.0, != 5.1 , != 5.2.1"]
+    )
+    assert _MODULE.floors(project) == {"svglib": "0.9.1", "lxml": "5.0"}
+
+
+@pytest.mark.parametrize(
+    "spec",
+    ["svglib>=1.4.0,!=1.4.0", "svglib>=1.4,!=1.4.0", "svglib>=1.4.0,!=1.4"],
+)
+def test_an_exclusion_of_the_floor_itself_is_refused(spec: str) -> None:
+    """The job would install a release the requirement refuses."""
+    with pytest.raises(ValueError, match="excludes its own floor"):
+        _MODULE.floors(_project(dependencies=[spec]))
+
+
+def test_an_exclusion_below_the_floor_is_refused() -> None:
+    """It excludes a release the floor already refuses, so it says nothing."""
+    with pytest.raises(ValueError, match="excludes nothing the floor admits"):
+        _MODULE.floors(_project(dependencies=["svglib>=0.9.1,!=0.9.0"]))
+
+
+@pytest.mark.parametrize(
+    "spec", ["svglib>=0.9.1,!=1.4.*", "svglib>=0.9.1,<2,!=1.4.0", "svglib!=1.4.0"]
+)
+def test_any_other_clause_beside_the_floor_is_still_refused(spec: str) -> None:
+    with pytest.raises(ValueError, match="is not a floor"):
+        _MODULE.floors(_project(dependencies=[spec]))
+
+
+def test_two_lists_that_exclude_differently_are_refused() -> None:
+    project = _project(
+        **{
+            "optional-dependencies": {
+                "report": ["svglib>=0.9.1,!=1.4.0"],
+                "full": ["svglib>=0.9.1"],
+            }
+        },
+    )
+    with pytest.raises(ValueError, match="svglib excludes"):
         _MODULE.floors(project)
 
 
@@ -535,3 +581,69 @@ def test_the_installation_instructions_name_every_floor(name: str) -> None:
         )
     ]
     assert missing == []
+
+
+# --------------------------------------------------------------------------
+# What a user gets at the floors.
+
+#: A fiche with its figure panel, the path through matplotlib, svglib and
+#: reportlab that ``.report()`` takes: the notebook smoke test's ISO 717-1
+#: rating.
+_FICHE = """
+import pathlib
+import sys
+
+from phonometry import building
+
+rating = building.weighted_rating(
+    [30, 34, 38, 41, 45, 49, 50, 53, 54, 55, 56, 57, 58, 58, 58, 58]
+)
+written = pathlib.Path(rating.report(sys.argv[1]))
+assert written.read_bytes()[:5] == b"%PDF-", written
+"""
+
+#: What rendering the fiche needs beside the package.
+_REPORT_STACK = ("matplotlib", "reportlab", "svglib")
+
+
+@pytest.mark.skipif(
+    any(importlib.util.find_spec(name) is None for name in _REPORT_STACK),
+    reason="the report and plot extras are not installed",
+)
+def test_a_fiche_renders_in_a_fresh_interpreter_without_a_warning(
+    tmp_path: Path,
+) -> None:
+    r"""``.report()`` warns nothing, in an interpreter that compiles every module.
+
+    The fiche is rendered under ``-W error`` with a bytecode cache of its own,
+    empty, so every module is compiled from its source as on the first import
+    after an install that did not precompile, as uv installs. A dependency
+    that warns there fails the test: a SyntaxWarning while a module compiles
+    (svglib 0.9.0, ``invalid escape sequence '\d'``) as much as a
+    DeprecationWarning while one imports (reportlab 4.0.4 to 4.2.5, through
+    ``load_module`` and ``ast.NameConstant``). The minimum-versions job runs it
+    at the floors of the report extra, so a floor that warns cannot stand.
+    """
+    done = subprocess.run(  # nosec B603 - this interpreter, fixed arguments
+        [
+            sys.executable,
+            "-W",
+            "error",
+            "-X",
+            f"pycache_prefix={tmp_path / 'pycache'}",
+            "-c",
+            _FICHE,
+            str(tmp_path / "iso717.pdf"),
+        ],
+        cwd=tmp_path,
+        env={**os.environ, "MPLBACKEND": "Agg"},
+        # svglib 1.4.0 stops at a pdb prompt, which reads its input here and
+        # ends at once rather than waiting on a terminal.
+        stdin=subprocess.DEVNULL,
+        # Six seconds here, most of it compiling NumPy, SciPy and matplotlib.
+        timeout=300,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert done.returncode == 0, done.stderr

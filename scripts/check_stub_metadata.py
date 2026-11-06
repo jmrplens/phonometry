@@ -12,7 +12,10 @@ the requirement has to be capped below the next major.
 The same files carry the licence: ``License-Expression`` and ``License-File``
 in the metadata, and the text where PEP 639 puts it. PyOctaveBand 2.2.0
 shipped neither, only a licence classifier. ``built_license.py`` reads the
-files and checks the licence, as it does for phonometry's own release.
+files and checks the licence, as it does for phonometry's own release. They
+also carry the PEP 561 marker, ``pyoctaveband/py.typed``, without which mypy
+--strict refuses ``import pyoctaveband`` as an untyped module and pyright
+strict asks for a stub file.
 
 ``tests/test_transition_stub.py`` asserts the cap in ``stub/pyproject.toml`` and
 that ``stub/LICENSE`` is the repository's ``LICENSE``. This asserts both in the
@@ -35,6 +38,8 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
+import tarfile
+import zipfile
 from typing import TYPE_CHECKING
 
 from built_license import Built, license_problems
@@ -68,6 +73,9 @@ _LICENSE_EXPRESSION = "MIT"
 #: The licence files the stub declares, by the path PEP 639 records. Each has
 #: to carry the text of the repository's file of the same name.
 _LICENSE_FILES = ("LICENSE",)
+
+#: The PEP 561 marker, where the wheel installs it.
+_MARKER = "pyoctaveband/py.typed"
 
 
 def _phonometry_requirement(metadata: Message, label: str) -> Requirement:
@@ -113,6 +121,29 @@ def _problems(requirement: Requirement, label: str) -> list[str]:
     return found
 
 
+def _marker_problems(artifact: pathlib.Path, label: str) -> list[str]:
+    """Whether *artifact* carries :data:`_MARKER`: at the top of a wheel, under
+    ``src/`` in an sdist, below the directory the sdist unpacks into.
+    """
+    if artifact.suffix == ".whl":
+        member = _MARKER
+        with zipfile.ZipFile(artifact) as archive:
+            present = member in archive.namelist()
+    else:
+        member = f"src/{_MARKER}"
+        with tarfile.open(artifact) as archive:
+            present = any(
+                name.partition("/")[2] == member for name in archive.getnames()
+            )
+    if present:
+        return []
+    return [
+        f"{label}: {member} is missing, so mypy --strict refuses 'import "
+        "pyoctaveband' as an untyped module and pyright strict asks for a stub "
+        "file. Name it in [tool.setuptools.package-data] of stub/pyproject.toml."
+    ]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     parser.add_argument(
@@ -150,6 +181,7 @@ def main(argv: list[str] | None = None) -> int:
                 config="stub/pyproject.toml",
             )
         )
+        problems.extend(_marker_problems(artifact, built.label))
 
     for problem in problems:
         print(f"::error::{problem}", file=sys.stderr)

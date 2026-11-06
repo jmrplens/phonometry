@@ -53,22 +53,34 @@ def _metadata(headers: tuple[str, ...]) -> bytes:
 
 
 def _write_wheel(
-    dist: pathlib.Path, headers: tuple[str, ...], licence: bytes | None
+    dist: pathlib.Path,
+    headers: tuple[str, ...],
+    licence: bytes | None,
+    *,
+    marker: bool = True,
 ) -> None:
     with zipfile.ZipFile(dist / f"{_NAME}-py3-none-any.whl", "w") as archive:
         archive.writestr("pyoctaveband/__init__.py", "")
+        if marker:
+            archive.writestr("pyoctaveband/py.typed", "")
         archive.writestr(f"{_NAME}.dist-info/METADATA", _metadata(headers))
         if licence is not None:
             archive.writestr(f"{_NAME}.dist-info/licenses/LICENSE", licence)
 
 
 def _write_sdist(
-    dist: pathlib.Path, headers: tuple[str, ...], licence: bytes | None
+    dist: pathlib.Path,
+    headers: tuple[str, ...],
+    licence: bytes | None,
+    *,
+    marker: bool = True,
 ) -> None:
     members = {
         "PKG-INFO": _metadata(headers),
         "src/pyoctaveband/__init__.py": b"",
     }
+    if marker:
+        members["src/pyoctaveband/py.typed"] = b""
     if licence is not None:
         members["LICENSE"] = licence
     with tarfile.open(dist / f"{_NAME}.tar.gz", "w:gz") as archive:
@@ -190,6 +202,36 @@ def test_an_uncapped_pin_is_still_refused(
     code, errors = _check(tmp_path, wheel=(headers, _LICENSE), capsys=capsys)
     assert code == 1
     assert "admits phonometry 4.0.0 (the next major)" in errors
+
+
+@pytest.mark.parametrize(
+    ("artifact", "member"),
+    [
+        ("wheel", "pyoctaveband/py.typed"),
+        ("sdist", "src/pyoctaveband/py.typed"),
+    ],
+)
+def test_a_stub_without_its_typing_marker_is_refused(
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+    artifact: str,
+    member: str,
+) -> None:
+    """Without ``py.typed`` a type checker takes the shim for an untyped module.
+
+    mypy --strict refused ``import pyoctaveband`` with ``import-untyped`` and
+    pyright strict asked for a stub file, though the shim is three lines that
+    re-export a typed package.
+    """
+    write = _write_wheel if artifact == "wheel" else _write_sdist
+    other = _write_sdist if artifact == "wheel" else _write_wheel
+    write(tmp_path, _GOOD_HEADERS, _LICENSE, marker=False)
+    other(tmp_path, _GOOD_HEADERS, _LICENSE)
+    code = check_stub_metadata.main(["--dist", str(tmp_path)])
+    errors = capsys.readouterr().err
+    assert code == 1
+    assert f"{member} is missing" in errors
+    assert errors.count("is missing") == 1
 
 
 def test_an_empty_build_directory_is_refused(tmp_path: pathlib.Path) -> None:

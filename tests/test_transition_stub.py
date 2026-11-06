@@ -24,6 +24,7 @@ is the way out rather than the promise it used to make.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import pathlib
 import re
@@ -220,6 +221,38 @@ def test_shim_reexports_every_name_phonometry_publishes() -> None:
     missing = [name for name in phonometry.__all__ if not hasattr(module, name)]
     assert not missing, f"the shim does not re-export {missing}"
     assert module.__version__ == phonometry.__version__
+
+
+def test_every_name_the_shim_imports_by_name_is_reexported_explicitly() -> None:
+    """``from phonometry import X as X``: the form a type checker reads as a re-export.
+
+    The wheel carries ``py.typed``, and in a typed package pyright reads a
+    plain ``from phonometry import __version__`` as a private import: it
+    refused ``pyoctaveband.__version__`` with reportPrivateImportUsage in its
+    basic, standard and strict modes. The star import re-exports the rest.
+    """
+    tree = ast.parse(_SHIM.read_text(encoding="utf-8"))
+    plain = [
+        alias.name
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module == "phonometry"
+        for alias in node.names
+        if alias.name != "*" and alias.asname != alias.name
+    ]
+    assert plain == []
+
+
+def test_the_shim_ships_its_typing_marker() -> None:
+    """``py.typed`` beside the shim and named in the stub's package data.
+
+    Without it mypy --strict refused ``import pyoctaveband`` as an untyped
+    module and pyright strict asked for a stub file. The built wheel is held
+    to it as well, by ``scripts/check_stub_metadata.py``.
+    """
+    assert (_SHIM.parent / "py.typed").is_file()
+    with _PYPROJECT.open("rb") as handle:
+        setuptools = tomllib.load(handle)["tool"]["setuptools"]
+    assert "py.typed" in setuptools["package-data"]["pyoctaveband"]
 
 
 def test_stub_pin_excludes_the_major_that_may_break_its_promise() -> None:

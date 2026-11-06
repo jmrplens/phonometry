@@ -40,3 +40,10 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# The PEP 561 marker: without it mypy --strict refuses `import pyoctaveband`
+# as an untyped module and pyright strict asks for a stub file, though the
+# shim only re-exports a typed package. scripts/check_stub_metadata.py fails a
+# built wheel or sdist that lacks it.
+[tool.setuptools.package-data]
+pyoctaveband = ["py.typed"]

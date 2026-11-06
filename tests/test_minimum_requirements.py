@@ -114,22 +114,25 @@ def test_a_release_excluded_above_the_floor_leaves_the_floor_to_pin() -> None:
 )
 def test_an_exclusion_of_the_floor_itself_is_refused(spec: str) -> None:
     """The job would install a release the requirement refuses."""
+    project = _project(dependencies=[spec])
     with pytest.raises(ValueError, match="excludes its own floor"):
-        _MODULE.floors(_project(dependencies=[spec]))
+        _MODULE.floors(project)
 
 
 def test_an_exclusion_below_the_floor_is_refused() -> None:
     """It excludes a release the floor already refuses, so it says nothing."""
+    project = _project(dependencies=["svglib>=0.9.1,!=0.9.0"])
     with pytest.raises(ValueError, match="excludes nothing the floor admits"):
-        _MODULE.floors(_project(dependencies=["svglib>=0.9.1,!=0.9.0"]))
+        _MODULE.floors(project)
 
 
 @pytest.mark.parametrize(
     "spec", ["svglib>=0.9.1,!=1.4.*", "svglib>=0.9.1,<2,!=1.4.0", "svglib!=1.4.0"]
 )
 def test_any_other_clause_beside_the_floor_is_still_refused(spec: str) -> None:
+    project = _project(dependencies=[spec])
     with pytest.raises(ValueError, match="is not a floor"):
-        _MODULE.floors(_project(dependencies=[spec]))
+        _MODULE.floors(project)
 
 
 def test_two_lists_that_exclude_differently_are_refused() -> None:

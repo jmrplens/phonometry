@@ -82,9 +82,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on writes CRLF on Linux and macOS too, and `check_release_artifacts.py`
   refuses a release whose sdist carries a file it does not cover, or one
   git does not track that setuptools did not write. The
-  PyOctaveBand bridge is built with the same pinned setuptools, and neither
-  package lists `wheel` among its build requirements any more, since
-  setuptools builds wheels itself.
+  PyOctaveBand bridge is built with the same pinned setuptools, at its
+  commit's time (`SOURCE_DATE_EPOCH`), and every pull request builds its
+  wheel twice, compares the two and reads it with `check-wheel-contents`.
+  Neither package lists `wheel` among its build requirements any more, since
+  setuptools builds wheels itself. Every build CI makes of either package, on
+  a pull request and in the release, runs under `PYTHONWARNINGS=error`, so a
+  warning the build prints fails it; only the SBOM step is left out, since
+  cyclonedx-bom warns about itself.
 
 ### Added
 
@@ -2297,23 +2302,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- **A build from source prints no setuptools warning, and passes under
-  `PYTHONWARNINGS=error`.** Every build of the sdist or the tree,
-  `python -m build`, `pip install -v` of the sdist and, with pip 26.3,
-  `pip install .` and `pip install -e .`, printed nine "Package would be
-  ignored" blocks, one per data directory (`aircraft/data/anp`,
-  `building/data` and seven more), and under `PYTHONWARNINGS=error` each of
-  them exited 1 on the first. The package now ships exactly the data files
-  its `package-data` globs name (`include-package-data = false`), which are
-  all of them: the wheel is byte for byte the one built before, and an
-  editable install reads the same 94 data files. Every build CI makes of the
-  package and of the PyOctaveBand bridge, on a pull request and in the
-  release, now runs under `PYTHONWARNINGS=error`, so a warning the build
-  prints fails it; only the SBOM step is left out, since cyclonedx-bom warns
-  about itself. The bridge's wheel is built at its commit's time
-  (`SOURCE_DATE_EPOCH`), and CI builds it twice and compares the two and
-  reads it with `check-wheel-contents`.
-
 - **`import pyoctaveband` type-checks.** The PyOctaveBand 2.2.1 bridge now
   ships the PEP 561 marker, `py.typed`, and re-exports `__version__` and
   `__all__` as themselves. Without the marker, `mypy --strict` refused
@@ -4239,21 +4227,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   honest rewrite satisfies.
 
 ### Changed
-
-- **The report extra needs reportlab 4.3.0 and svglib 0.9.1, and refuses
-  svglib 1.4.0.** reportlab 4.0.4 to 4.2.5 warn when they are imported,
-  through importlib's `load_module` and `ast.NameConstant`, both deprecated,
-  so a `.report()` failed under `-W error` and printed both warnings under
-  `-W default`. svglib 0.9.0 raised a SyntaxWarning (`invalid escape sequence
-  '\d'`), which Python shows under its default filters, on the first import
-  after an install that did not precompile it, as uv installs. svglib 1.4.0
-  stops a `.report()` at a debugger prompt, or fails it without a terminal.
-  `[report]` and `[full]` now ask for `reportlab>=4.3.0` and
-  `svglib>=0.9.1,!=1.4.0`: each floor is the oldest release that renders a
-  fiche in a fresh interpreter under `-W error`, which a new test checks in
-  the job that installs the floors. `scripts/minimum_requirements.py` reads a
-  floor followed by `!=` exclusions of releases above it, and still pins the
-  floor.
 
 - **The weighting design takes every transcendental from routines that
   return the same bits on every platform, so the macOS and Windows
@@ -6652,13 +6625,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and every floor in the package metadata is now the oldest release the
   library's tests pass with on Python 3.12, measured beside every other
   floor: NumPy 2.0.2, SciPy 1.14.0, matplotlib 3.10.7 for `[plot]`, numba
-  0.60.0 for `[perf]`, reportlab 4.0.4 and svglib 0.9.0 for `[report]` and
+  0.60.0 for `[perf]`, reportlab 4.3.0 and svglib 0.9.1 for `[report]` and
   python-soundfile 0.12.0 for `[audio]`. They used to repeat the newest
   releases, which turned away environments a release or two behind for no
-  reason anyone had found. A CI job installs exactly those floors on Python
-  3.12 and runs the library's tests, so a floor cannot stop being true without
-  a pull request failing, and Python 3.12 joins the test matrix. A floor rises
-  only with a failure measured at it; CONTRIBUTING.md states the rule.
+  reason anyone had found. The `[report]` floors are the oldest releases that
+  render a fiche in a fresh interpreter under `-W error`: reportlab 4.0.4 to
+  4.2.5 warn when they are imported, through importlib's `load_module` and
+  `ast.NameConstant`, both deprecated, and svglib 0.9.0 raises a
+  SyntaxWarning (`invalid escape sequence '\d'`), which Python shows under
+  its default filters, on the first import after an install that did not
+  precompile it, as uv installs. `[report]` and `[full]` also refuse svglib
+  1.4.0, which stops a `.report()` at a debugger prompt, or fails it without
+  a terminal, so they ask for `svglib>=0.9.1,!=1.4.0`. A CI job installs
+  exactly those floors on Python 3.12 and runs the library's tests, a fiche
+  rendered under `-W error` among them, so a floor cannot stop being true
+  without a pull request failing, and Python 3.12 joins the test matrix.
+  `scripts/minimum_requirements.py`, which reads the floors for that job,
+  takes a floor followed by `!=` exclusions of releases above it and still
+  pins the floor. A floor rises only with a failure measured at it;
+  CONTRIBUTING.md states the rule.
 
 - **The railway rolling stock guide says what EN 15610 7.5 asks of longer
   wavelengths, and why the library computes none of it.** The guide listed the

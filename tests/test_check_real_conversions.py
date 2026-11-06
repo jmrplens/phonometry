@@ -2379,6 +2379,61 @@ def test_a_default_is_read_where_the_def_runs(
 
 
 @pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        pytest.param(
+            """
+            class K:
+                def f(self, levels, float=float):
+                    return float(levels)
+
+                float = print
+            """,
+            {"K.f": "unchecked"},
+            id="the-builtin-the-class-body-binds-later",
+        ),
+        pytest.param(
+            """
+            float = print
+
+            class K:
+                def f(self, levels, float=float):
+                    return float(levels)
+
+                float = None
+            """,
+            {},
+            id="the-module-s-binding-where-the-class-runs",
+        ),
+        pytest.param(
+            """
+            class K:
+                float = print
+
+                def f(self, levels, float=float):
+                    return float(levels)
+            """,
+            {},
+            id="the-class-body-s-binding-before-the-def",
+        ),
+    ],
+)
+def test_a_method_s_default_is_read_where_its_class_body_runs_it(
+    tmp_path: Path, source: str, expected: dict[str, str]
+) -> None:
+    """A method's ``float=float`` runs where the ``def`` stands in its class
+    body: before the body binds ``float`` the name is the module's, as it
+    stands where the class statement runs, the builtin when nothing has bound
+    it; after, it is what the body bound.
+
+    The default was read through every binding the class body makes of the
+    name, whether it had run or not, so a later ``float = print`` in the body
+    hid the conversion the default makes.
+    """
+    assert _verdicts(tmp_path, source) == expected
+
+
+@pytest.mark.parametrize(
     "source",
     [
         pytest.param(

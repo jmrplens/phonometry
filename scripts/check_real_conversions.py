@@ -1612,7 +1612,9 @@ def _reach(
     (``float=float``, ``asarray = np.asarray``) hide nothing, and a default of the
     name itself is read where the ``def`` runs its defaults, as the module's
     bindings of it stand there (:func:`_bound_where_written`), whatever the module
-    binds the name to after it. ``"nearer"`` too when
+    binds the name to after it; a method's, as its class body's bindings of it
+    stand there (:func:`_held_in_class`), or, before any of them has run, as the
+    module's stand where the class statement runs. ``"nearer"`` too when
     the read finds a binding of the module that replaces its imports, while
     *imports* holds a function's own import of the name, which this read does not
     reach. ``"replaced"`` when the module's own bindings of a name read by its
@@ -1620,6 +1622,13 @@ def _reach(
     ``"spelt"`` otherwise.
     """
     how, binder = binding_of(tree, read, name)
+    held: list[ast.AST] | None = None
+    if where_written and isinstance(binder, ast.ClassDef):
+        held = _held_in_class(tree, binder, read, name)
+        if not held:
+            # None of the class body's bindings has run yet: Python reads
+            # the name in the module, as it stands where the class runs.
+            binder = None
     if binder is None or binder is tree:
         live = (
             _bound_where_written(tree, read, name)
@@ -1636,9 +1645,14 @@ def _reach(
             and all(_replaces_the_spelling(tree, node, name) for node in live)
         )
         return "replaced" if replaced else "spelt"
-    if how == "import":
+    if held is not None:
+        if any(isinstance(node, ast.Import | ast.ImportFrom) for node in held):
+            return "spelt"
+        values: list[ast.expr | None] = [assigned_value(tree, node) for node in held]
+    elif how == "import":
         return "spelt"
-    values = values_bound(tree, binder, name)
+    else:
+        values = values_bound(tree, binder, name)
     if not values or not all(spells(value, name) for value in values):
         return "nearer"
     for value in values:
@@ -1650,6 +1664,23 @@ def _reach(
             if reached != "spelt":
                 return reached
     return "spelt"
+
+
+def _held_in_class(
+    tree: ast.Module, holder: ast.ClassDef, read: ast.expr, name: str
+) -> list[ast.AST]:
+    """The bindings the class body *holder* makes of *name* that may stand
+    where *read*, a name a default or a value of the body reads where it is
+    written, reads it (:func:`ast_scan.held_before`): none when none has run
+    yet. What an ``if TYPE_CHECKING:`` block holds never runs.
+    """
+    checker = for_the_type_checker(tree)
+    own = [
+        node
+        for node in bindings_by_name(holder).get(name, ())
+        if id(node) not in checker
+    ]
+    return held_before(tree, own, read)
 
 
 def _bound_where_written(tree: ast.Module, read: ast.expr, name: str) -> list[ast.AST]:

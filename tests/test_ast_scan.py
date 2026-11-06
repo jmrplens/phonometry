@@ -1299,6 +1299,75 @@ def test_a_scope_read_as_a_tree_of_its_own_reads_the_flag_of_its_module() -> Non
     ast_scan.forget_trees()
 
 
+@pytest.mark.parametrize(
+    ("prelude", "test", "alone", "in_its_module"),
+    [
+        ("TYPE_CHECKING = True\n", "TYPE_CHECKING", True, False),
+        ("import typing as t\n", "t.TYPE_CHECKING", False, True),
+    ],
+    ids=["module-rebinds-the-flag", "module-names-typing-otherwise"],
+)
+def test_a_scope_read_before_its_module_reads_the_module_s_flag_once_it_is_read(
+    prelude: str, test: str, *, alone: bool, in_its_module: bool
+) -> None:
+    """A function read as a tree of its own before its module reads its own
+    bindings, as a fragment does; once the module is read, the function reads
+    what the module binds the flag to, whatever it was asked before.
+
+    What the function's blocks never run, and which of its two classes of
+    one name stands, were kept from the first reading, so a guard that read
+    a function before its module took the block of a module that binds
+    ``TYPE_CHECKING = True`` for one that never runs, and ran the block of
+    one that imports ``typing as t``, for as long as it ran.
+    """
+    tree = ast.parse(
+        prelude
+        + textwrap.dedent(
+            f"""
+            def f():
+                held = 1
+                if {test}:
+                    held = 2
+                class Box:
+                    def size(self):
+                        return 1
+                if {test}:
+                    class Box:
+                        def size(self):
+                            return 2
+                return held, 3 if {test} else 4
+            """
+        )
+    )
+    function = next(node for node in tree.body if isinstance(node, ast.FunctionDef))
+    first, second = ast_scan.bindings_by_name(function)["held"]
+    returned = function.body[-1]
+    assert isinstance(returned, ast.Return)
+    assert isinstance(returned.value, ast.Tuple)
+    read, chosen = returned.value.elts
+    assert isinstance(chosen, ast.IfExp)
+    sizes = [
+        node
+        for node in ast.walk(function)
+        if isinstance(node, ast.FunctionDef) and node.name == "size"
+    ]
+
+    def reads_the_flag() -> bool:
+        never = id(second) in ast_scan.for_the_type_checker(function)
+        runs = id(chosen.orelse) in ast_scan.for_the_program(function)
+        held = ast_scan.live_bindings(function, [first, second], read)
+        standing = ast_scan.live_class_members(function, sizes)
+        assert runs is never
+        assert held == ([first] if never else [first, second])
+        assert standing == (sizes[:1] if never else sizes)
+        return never
+
+    assert reads_the_flag() is alone
+    ast_scan.for_the_type_checker(tree)
+    assert reads_the_flag() is in_its_module
+    ast_scan.forget_trees()
+
+
 def test_what_a_function_never_runs_is_emptied_in_every_form() -> None:
     """The negated test keeps its body and loses its ``else``, and a conditional
     expression loses the branch that never runs, in a lambda or a comprehension of

@@ -583,6 +583,13 @@ class _Flags:
 #: written in (:func:`_flags`).
 _MODULE_OF: dict[int, tuple[ast.AST, ast.Module]] = {}
 
+#: Each scope whose flags were read as a tree of its own, its own bindings
+#: alone, before the flags of the module it is written in, by its id: reading
+#: that module's lets go of every answer the flags decided
+#: (:func:`_forget_what_the_flags_decided`), so the scope is read again with
+#: the module's.
+_READ_ALONE: dict[int, ast.AST] = {}
+
 
 def _import_kinds(node: ast.Import | ast.ImportFrom) -> list[tuple[str, str]]:
     """Each name an import binds, with how (:func:`_binding_kinds`)."""
@@ -657,11 +664,20 @@ def _binding_kinds(tree: ast.AST) -> dict[str, set[str]]:
 
 @functools.cache
 def _flags_of(tree: ast.AST) -> _Flags:
-    """:func:`_flags`, read from the bindings under *tree* alone."""
+    """:func:`_flags`, read from the bindings under *tree* alone.
+
+    Reading a module's registers each of its scopes with it
+    (:data:`_MODULE_OF`), and lets go of what the flags decided when one of
+    them was read before it (:data:`_READ_ALONE`).
+    """
     if isinstance(tree, ast.Module):
+        read_alone = False
         for node in ast.walk(tree):
             if isinstance(node, SCOPES):
                 _MODULE_OF[id(node)] = (node, tree)
+                read_alone = read_alone or _READ_ALONE.get(id(node)) is node
+        if read_alone:
+            _forget_what_the_flags_decided()
     kinds = _binding_kinds(tree)
     if "other" in kinds.get("*", ()):
         return _Flags(frozenset(), frozenset())
@@ -689,11 +705,14 @@ def _flags(tree: ast.AST) -> _Flags:
     scopes, holds no flag under that name: a test on it may run either
     branch. So for ``typing.TYPE_CHECKING``, whose head must hold the module
     wherever it is bound. A scope of a module whose flags were read takes the
-    module's; a tree read alone, its own.
+    module's; a tree read alone, its own, until its module is read
+    (:data:`_READ_ALONE`).
     """
     owner = _MODULE_OF.get(id(tree))
     if owner is not None and owner[0] is tree:
         return _flags_of(owner[1])
+    if not isinstance(tree, ast.Module):
+        _READ_ALONE[id(tree)] = tree
     return _flags_of(tree)
 
 
@@ -780,6 +799,10 @@ def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
     """Every node the branch of an ``if`` or a conditional expression on
     ``TYPE_CHECKING`` that never runs holds, by its id, at any depth, under
     *tree*: what no run of the program reaches (:func:`what_never_runs`).
+
+    Read with the names that hold the flag where *tree* is read
+    (:func:`_flags`): a scope read before its module reads its own bindings,
+    and is read again with the module's once the module is read.
     """
     return frozenset(
         id(node)
@@ -794,7 +817,8 @@ def for_the_type_checker(tree: ast.AST) -> frozenset[int]:
 def for_the_program(tree: ast.AST) -> frozenset[int]:
     """Every node the branch of an ``if`` or a conditional expression on
     ``TYPE_CHECKING`` that runs holds, by its id, at any depth, under *tree*:
-    what the program runs and no type checker reads (:func:`what_runs`).
+    what the program runs and no type checker reads (:func:`what_runs`),
+    read with the flag as :func:`for_the_type_checker` reads it.
     """
     return frozenset(
         id(node)
@@ -803,6 +827,17 @@ def for_the_program(tree: ast.AST) -> frozenset[int]:
         for child in branches[1]
         for node in ast.walk(child)
     )
+
+
+def _forget_what_the_flags_decided() -> None:
+    """Let go of every answer read with the names that hold the flag
+    (:func:`for_the_type_checker`, :func:`for_the_program`,
+    :func:`_class_is_live`), when a scope read before its module
+    (:data:`_READ_ALONE`) is to read the module's from now on.
+    """
+    for cached in (for_the_type_checker, for_the_program, _class_is_live):
+        cached.cache_clear()
+    _READ_ALONE.clear()
 
 
 def empty_type_checking_bodies[TreeT: ast.AST](tree: TreeT) -> TreeT:
@@ -1051,6 +1086,7 @@ def forget_trees() -> None:
     ):
         cached.cache_clear()
     _MODULE_OF.clear()
+    _READ_ALONE.clear()
 
 
 def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:
@@ -1664,7 +1700,9 @@ def _class_is_live(root: ast.AST, node: ast.AST) -> bool:
 
     Of two ``class`` statements of one name in one scope, one in each branch
     of an ``if`` is either and a later one replaces an earlier one it always
-    follows (:func:`live_bindings`). Any other node is live.
+    follows (:func:`live_bindings`), and one an ``if TYPE_CHECKING:`` block
+    holds stands beside none that runs, as the names that hold the flag
+    where *root* is read say (:func:`_flags`). Any other node is live.
     """
     if not isinstance(node, ast.ClassDef):
         return True

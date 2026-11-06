@@ -145,6 +145,19 @@ full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.
 "Bug Tracker" = "https://github.com/jmrplens/phonometry/issues"
 "DOI" = "https://doi.org/10.5281/zenodo.21215280"
 
+# The data files the package ships are the ones [tool.setuptools.package-data]
+# names, glob by glob, and nothing else. With setuptools' default,
+# include-package-data = true, the build also took each data directory the
+# sdist carries (aircraft/data/anp, building/data and seven more) for a
+# package that namespaces = false leaves out, and printed a "Package would be
+# ignored" warning for each of the nine on every build; under
+# PYTHONWARNINGS=error the build failed on the first. The globs name every
+# data file, so the wheel is byte for byte the one the default built, and
+# scripts/check_release_artifacts.py fails a build whose wheel lacks a file
+# git tracks under src/phonometry.
+[tool.setuptools]
+include-package-data = false
+
 [tool.setuptools.packages.find]
 where = ["src"]
 # A package is a directory with an __init__.py, which every code directory

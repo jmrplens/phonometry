@@ -19,8 +19,10 @@ def test_nyquist_frequency_content() -> None:
     # Signal at fs/2: alternating [1, -1, 1, -1]
     x = np.cos(np.pi * fs * t)
 
-    # Request analysis up to Nyquist
-    spl = filters.octave_filter(x, fs, limits=[100, 23000]).levels
+    # Request analysis up to Nyquist: the 20 kHz octave reaches past fs/2,
+    # and limits the caller gave say which band they lose.
+    with pytest.warns(filters.FilterBankWarning, match="Low sampling rate"):
+        spl = filters.octave_filter(x, fs, limits=[100, 23000]).levels
     assert not np.isnan(spl).any()
 
 
@@ -37,7 +39,10 @@ def test_aliasing_behavior() -> None:
 
     # Analyze. 250Hz is a standard band for 1/1 octave?
     # Mid bands: ..., 125, 250, 500
-    filtered = filters.octave_filter(x, fs, fraction=1, limits=[100, 400])
+    # The 500 Hz octave of these limits reaches past fs/2, and the caller who
+    # asked for it is told.
+    with pytest.warns(filters.FilterBankWarning, match="Low sampling rate"):
+        filtered = filters.octave_filter(x, fs, fraction=1, limits=[100, 400])
     spl, freq = filtered.levels, filtered.frequencies
 
     # Find 250Hz band

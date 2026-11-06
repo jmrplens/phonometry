@@ -588,6 +588,9 @@ a filter by module reads your module:
 | the file and line a warning is shown at | the line its `stacklevel` counted to, a line of the library for 33 of them, such as `filters/core.py:698` for every filter bank that dropped a band | the line of your code that made the call |
 | `warnings.filterwarnings("ignore", module="phonometry")` | silenced the warnings shown at a line of the library, and no other | silences none; filter by class, `warnings.filterwarnings("ignore", category=phonometry.PhonometryWarning)`, or by topic |
 | `warnings.filterwarnings("error", module="my_analysis")` | missed the warnings shown at a line of the library | reaches every warning a call in `my_analysis` causes |
+| `filters.OctaveFilterBank(44100)`, `filters.octave_filter(x, 44100)` and the other banks on the default span, at a rate that cannot hold its top bands (44.1, 32, 22.05, 16 or 8 kHz) | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed` | no warning, and the same bands: the default span is trimmed to what `fs` holds |
+| a bank on `limits` you gave that reach past fs/2 | the same warning, at the first call only, since the design is cached | `FilterBankWarning: Low sampling rate: fs = 44100 Hz cannot hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz; it was left out of the bank.`, at every call; a filter on the message `Low sampling rate` still matches |
+| a bank at a rate that holds no band of its span, the default one or yours, such as `filters.OctaveFilterBank(20, fraction=3)` | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed`, and a bank of no band whose analysis came back empty | `ValueError: fs = 20 Hz cannot hold any band from 12.5 Hz to 20 kHz: the upper edge of the lowest, 14.13 Hz, is above fs/2 = 10 Hz.` |
 
 ## A choice is matched as it is written
 

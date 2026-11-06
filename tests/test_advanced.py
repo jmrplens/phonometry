@@ -202,7 +202,7 @@ def test_nyquist_limit() -> None:
 
     # Request up to 1000Hz
     # _deleteouters should warn and remove high bands
-    with pytest.warns(FilterBankWarning, match="frequencies above fs/2 removed"):
+    with pytest.warns(FilterBankWarning, match="Low sampling rate.*left out"):
         freq = filters.octave_filter(x, fs, limits=[10.0, 1000.0]).frequencies
 
     assert np.all(np.array(freq) < fs / 2)

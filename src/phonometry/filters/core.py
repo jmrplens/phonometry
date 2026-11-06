@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 import numpy as np
 from scipy import signal
@@ -626,6 +626,11 @@ class OctaveFilterBank:
     Allows for pre-calculating and reusing filter coefficients.
     """
 
+    #: Whether the constructor names the bands of the caller's limits that the
+    #: rate leaves out. A bank :func:`octave_filter` keeps in its design cache
+    #: leaves that to the call, which names them every time.
+    _names_left_out: ClassVar[bool] = True
+
     def __init__(
         self,
         fs: float,
@@ -662,13 +667,23 @@ class OctaveFilterBank:
         :param response_plot: Whether to show or save the filter response plot
             drawn while designing the bank (:class:`ResponsePlot`).
         :raises ValueError: for a sample rate or a bandwidth that is not
-            positive, an ``order`` that is not a whole number from 1, or
-            frequency limits or a design the bank cannot be built with.
+            positive, an ``order`` that is not a whole number from 1,
+            frequency limits or a design the bank cannot be built with, or a
+            sample rate that holds no band of the span, the default one or
+            ``limits``: the upper edge of the lowest band above fs/2.
         :raises TypeError: if ``fraction`` or ``fs`` is not a single number, or
             ``order`` is a flag, a text or an array where a count goes.
             An element of ``limits`` is refused the same way when it is not one real number.
+        :warns FilterBankWarning: when ``limits`` asks for a band whose upper
+            edge lies above fs/2, naming the bands left out. The default span,
+            12 Hz to 20 kHz, is trimmed to the bands ``fs`` holds without a
+            warning: at 44.1 kHz the 20 kHz third octave, whose upper edge is
+            22.4 kHz, is left out.
         """
         order = require_count(order, "order")
+        # Asked before the default fills it in: only limits the caller gave are
+        # worth a warning when the rate cannot hold their top bands.
+        limits_given = limits is not None
         limits = _validate_bank_design(fs, fraction, limits, design, block_processing)
         # A NumPy integer is read as the int it holds, so the bank keeps the
         # plain number an int argument leaves there.
@@ -695,7 +710,9 @@ class OctaveFilterBank:
 
         # The band set the bank is designed on, held as one immutable record
         # and read through the properties below.
-        self._bands = _genfreqs(limits, fraction, fs)
+        self._bands = _genfreqs(
+            limits, fraction, fs, warn=limits_given and self._names_left_out
+        )
 
         # Calculate factors and design SOS
         if design.resample:
@@ -1133,6 +1150,16 @@ def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
     )
 
 
+class _CachedBank(OctaveFilterBank):
+    """A bank :func:`octave_filter` designs once and reuses.
+
+    Designed once, it would warn once: the call that asks for limits the rate
+    cannot hold names the bands left out itself, at every call.
+    """
+
+    _names_left_out = False
+
+
 @lru_cache(maxsize=32)
 def _cached_filter_bank(
     fs: float,
@@ -1143,7 +1170,7 @@ def _cached_filter_bank(
     calibration: LevelCalibration,
 ) -> OctaveFilterBank:
     """Design (or reuse) a stateless filter bank for octave_filter()."""
-    return OctaveFilterBank(
+    return _CachedBank(
         fs=fs,
         fraction=fraction,
         order=order,
@@ -1184,7 +1211,8 @@ def octave_filter(
     :param fraction: Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1.
     :param order: Order of the filter. Default: 6.
     :param limits: Minimum and maximum limit frequencies [f_min, f_max], a
-        sequence or an array of the two. Default [12, 20000].
+        sequence or an array of the two. Default [12, 20000], trimmed to the
+        bands ``fs`` holds: at 44.1 kHz the third octaves stop at 16 kHz.
     :param sigbands: If True, also return the signal in the time domain divided into bands.
     :param detrend: If True, remove DC offset before filtering. Default: True.
     :param mode: 'rms' or 'peak'. Default: 'rms'.
@@ -1215,8 +1243,12 @@ def octave_filter(
         ``limits`` is not a pair of numbers, or ``mode`` is not a text.
     :raises ValueError: for a bare array with no ``fs``, a sample rate or a
         bandwidth that is not positive, an ``order`` that is not a whole
-        number from 1, or frequency limits or a design the bank cannot be
-        built with.
+        number from 1, frequency limits or a design the bank cannot be built
+        with, or a sample rate that holds no band of the span, the default one
+        or ``limits``: the upper edge of the lowest band above fs/2.
+    :warns FilterBankWarning: when ``limits`` asks for a band whose upper
+        edge lies above fs/2, naming the bands left out, at every call; the
+        default span is trimmed without one.
     """
     require_choice(mode, "mode", ("rms", "peak"))
     fs = resolve_fs(x, fs)
@@ -1250,6 +1282,10 @@ def octave_filter(
         filter_bank = _cached_filter_bank(
             fs, fraction, order, limits_key, design, calibration
         )
+        if limits is not None:
+            # The cached design said nothing: name what these limits lose here,
+            # at every call, and at the caller's line.
+            _genfreqs(limits, filter_bank.fraction, filter_bank.fs, warn=True)
 
     return filter_bank.filter(
         x, sigbands=sigbands, mode=mode, detrend=detrend, nominal=nominal

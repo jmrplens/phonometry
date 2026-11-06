@@ -265,7 +265,7 @@ everyday arguments stay first: `FilterDesign` (`design`), `LevelCalibration`
 | `fs` | int | Hz | > 0; required by the constructor, and taken from the `Signal` by `octave_filter()` and `bank.filter()` | |
 | `fraction` | int | — | default `1`; common `3`; any $b \ge 1$ | Bands per octave = $b$ |
 | `order` | int | — | default `6` | SOS order per band |
-| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
+| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]`, trimmed to the bands $f_\mathrm{s}$ holds | Analysis range; limits past $f_\mathrm{s}/2$ lose their top bands with a `FilterBankWarning`, and a rate that holds none of the bands is refused |
 | `design.filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/) |
 | `design.ripple` / `design.attenuation` | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation` $\ge 70$ for class 1, since scipy pins its equiripple floor at exactly this value |
 | `design.resample` | bool | — | default `True` | Filter each band on a decimated rate (multirate) |

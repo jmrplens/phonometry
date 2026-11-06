@@ -2304,6 +2304,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A filter bank on its default span says nothing at 44.1 kHz.** The default
+  span runs from 12 Hz to 20 kHz, and the 20 kHz third octave reaches
+  22.4 kHz, past fs/2 at the CD rate, so every `OctaveFilterBank(44100)` and
+  `octave_filter(x, 44100)`, and every default bank at 32, 22.05, 16 and
+  8 kHz, warned "Low sampling rate: frequencies above fs/2 removed", which
+  reads like an error at the most common rate there is, about a band nobody
+  asked for. The default span is now trimmed to the bands `fs` holds without
+  a warning; the bands are the ones the bank kept before. Limits the caller
+  gives still warn when the rate cannot hold their top bands, and the message
+  keeps its prefix and names them: "Low sampling rate: fs = 44100 Hz cannot
+  hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz;
+  it was left out of the bank." `octave_filter` says so at every call, where
+  its design cache made it say so at the first only, and `sound_intensity`
+  follows the same rule for its own `limits`. A rate that holds no band of
+  the span at all, the default one or the caller's, is refused with a
+  `ValueError` that names fs and the lowest band, where the bank came back
+  with no band and the analysis empty: below 28.25 Hz for third octaves and
+  44.77 Hz for octaves on the default span. The pytest configuration no longer
+  ignores the warning; the tests that ask for such limits wait for it.
+
 - **Every warning of the library is shown at the line of the caller's code
   that made the call.** Of its 178 warnings, 175 passed a `stacklevel`
   counted by hand for one route to it, the other three already skipping the

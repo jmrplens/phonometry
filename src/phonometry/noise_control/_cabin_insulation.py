@@ -87,7 +87,7 @@ from .._internal.validation import (
     require_finite_matrix,
     require_positive,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ..emission._shared import _a_weighting_corrections
 from ..emission._sound_power_reverberation import reverberation_background_correction
 from ._insulation_shared import (
@@ -297,6 +297,7 @@ _LOWEST_FLATNESS_OCTAVE_HZ = 125.0
 _SPEED_OF_SOUND_M_S = 343.0
 
 
+@published_by("phonometry.noise_control")
 class CabinInsulationWarning(PhonometryWarning):
     """The measurement is outside a condition ISO 11957 states."""
 

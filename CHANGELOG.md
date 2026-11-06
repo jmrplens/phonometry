@@ -2304,6 +2304,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A traceback names a warning by the package that publishes it.** Fourteen
+  published warnings, the root `PhonometryWarning` among them, were written in
+  private modules and carried them as their `__module__`, so under
+  `python -W error` a traceback ended with
+  `phonometry.fluids._state.FluidAssumptionWarning`, a repr printed
+  `<class 'phonometry.filters._warnings.FilterBankWarning'>`, and pickle
+  stored the private path. Each now carries the package that exports it:
+  `phonometry.PhonometryWarning`, `phonometry.filters.FilterBankWarning`,
+  `phonometry.fluids.FluidWarning` and `FluidAssumptionWarning`,
+  `phonometry.io.CatalogueWarning`, `ClippingWarning` and
+  `LossyCompressionWarning`, `phonometry.materials.AirflowResistanceWarning`,
+  `phonometry.noise_control.CabinInsulationWarning`,
+  `phonometry.vibration.ImpactExcitationWarning`,
+  `phonometry.room.ImpulseResponseWarning`,
+  `phonometry.emission.SoundPowerWarning`,
+  `phonometry.environment.StatisticalPassByWarning` and
+  `phonometry.signals.ToneBurstWarning`. They are the same classes, so a
+  filter or an `except` that names them is unchanged. `inspect.getsource` of
+  these fourteen now raises `OSError`, as Python does for any class named
+  after it is built, rather than read the public module's file at the line
+  the private one wrote the class on; type checkers still name the module
+  the class is written in. `tests/test_package_architecture.py` checks every
+  published warning, and that `inspect` reads every other published class
+  from the file that writes it (style rule A49).
+
 - **A documented refusal comes before any warning, under `python -W error`
   too.** Five refusals were preceded by an advisory that, made an error,
   took their place: `room.decay_curve` and `room.room_parameters` built the

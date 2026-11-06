@@ -1221,6 +1221,8 @@ raise ValueError("'levels' must be finite")
 
 **Why.** `HVACWarning` fired and `phonometry.noise_control` did not publish it, so a caller could not write a filter for it; `RoadDeviceWarning` derived from `UserWarning` alone, so `simplefilter("error", PhonometryWarning)` let it through. Each topic class is still a `UserWarning`, so a filter on that class still matches, and one filter on `PhonometryWarning` reaches every advisory. The class is named `<Topic>Warning` ([N6](naming.md#n6)).
 
+A warning written in a private module, because two modules of the package raise it, is named by the package that publishes it with `published_by`: a class carries the module it was written in as `__module__`, and a traceback under `python -W error` ended with `phonometry.fluids._state.FluidAssumptionWarning`, a path the reference never shows. The decorator sets `__module__` once the class exists, which drops the line Python recorded for it, so `inspect` says it has no source rather than reading the public module's file at the private module's line, as an assignment in the class body made it do.
+
 **Do**
 
 ```python
@@ -1234,13 +1236,27 @@ class DuctWarning(PhonometryWarning):
 __all__ = ["DuctWarning"]
 ```
 
+```text
+# phonometry/fluids/_state.py, which phonometry.fluids re-exports
+from .._internal.warnings import PhonometryWarning, published_by
+
+
+@published_by("phonometry.fluids")
+class FluidWarning(PhonometryWarning):
+    """A fluid state outside the domain its model states for itself."""
+```
+
 **Don't**
 
 ```py
 class RoadDeviceWarning(UserWarning): ...
+
+
+class FluidWarning(PhonometryWarning):
+    __module__ = "phonometry.fluids"  # inspect then reads fluids/__init__.py at this line
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_every_warning_a_package_can_raise_is_published`, `tests/test_package_architecture.py::test_every_published_warning_is_a_phonometry_warning`
+**Enforced by:** `tests/test_package_architecture.py::test_every_warning_a_package_can_raise_is_published`, `tests/test_package_architecture.py::test_every_published_warning_is_a_phonometry_warning`, `tests/test_package_architecture.py::test_every_published_warning_is_named_by_the_package_that_publishes_it`, `tests/test_package_architecture.py::test_inspect_reads_each_published_class_from_the_file_that_writes_it`
 
 <a id="a50"></a>
 ### A50. Warn with the topic's published class, never `UserWarning` or the bare root

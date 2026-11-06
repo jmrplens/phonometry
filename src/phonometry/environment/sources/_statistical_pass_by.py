@@ -119,7 +119,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_positive_array,
 )
-from ..._internal.warnings import PhonometryWarning, warn_caller
+from ..._internal.warnings import PhonometryWarning, published_by, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -152,6 +152,7 @@ __all__ = [
 ]
 
 
+@published_by("phonometry.environment")
 class StatisticalPassByWarning(PhonometryWarning):
     """A pass-by data set falls short of a condition ISO 11819-1 states."""
 

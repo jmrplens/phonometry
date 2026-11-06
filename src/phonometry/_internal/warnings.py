@@ -16,11 +16,41 @@ import warnings
 from typing import TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from types import FrameType
 
-__all__ = ["PhonometryWarning", "warn_caller"]
+__all__ = ["PhonometryWarning", "published_by", "warn_caller"]
 
 
+def published_by[W: type[Warning]](module: str) -> Callable[[W], W]:
+    """Name a warning class written in a private module by the module that publishes it.
+
+    A class carries the module it was written in as ``__module__``, and a
+    traceback under ``python -W error`` ends with it, a repr prints it and
+    :mod:`pickle` reads the class back from it: a warning written in
+    ``phonometry.fluids._state`` was named by a path the reference never
+    shows and a caller should not import. The decorator names it by the
+    public module instead, which exports the same class.
+
+    It sets ``__module__`` once the class exists, never in the class body:
+    Python then drops the ``__firstlineno__`` it recorded, so :mod:`inspect`
+    says it has no source for the class rather than reading the public
+    module's file at the line the private one wrote it on. A class whose
+    annotations would be read against that module's globals cannot be
+    named so, which is why only warnings are.
+
+    :param module: The public module that exports the class.
+    :return: The decorator, which hands the class back.
+    """
+
+    def name(cls: W) -> W:
+        cls.__module__ = module
+        return cls
+
+    return name
+
+
+@published_by("phonometry")
 class PhonometryWarning(UserWarning):
     """Base class for all phonometry warnings."""
 

@@ -85,7 +85,7 @@ from .._internal.validation import (
     require_count,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._bext import (
     coding_history_line,
     extend_coding_history,
@@ -104,6 +104,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 
+@published_by("phonometry.io")
 class ClippingWarning(PhonometryWarning):
     """Warns that samples exceeded full scale and were saturated on write."""
 

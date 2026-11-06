@@ -129,7 +129,7 @@ Each rule on a page has the same parts:
 | [A46](api.md#a46) | Refuse malformed data the library reads with `ValueError` naming the file | review |
 | [A47](api.md#a47) | Name in an error message the parameter the caller passed | `tests/test_public_vocabulary.py::test_a_message_names_the_parameter_the_caller_passed`, review |
 | [A48](api.md#a48) | Put an error message in a variable before raising it | `ruff EM` |
-| [A49](api.md#a49) | Derive every warning from `PhonometryWarning` and publish it from its domain | `tests/test_package_architecture.py::test_every_warning_a_package_can_raise_is_published`, `tests/test_package_architecture.py::test_every_published_warning_is_a_phonometry_warning` |
+| [A49](api.md#a49) | Derive every warning from `PhonometryWarning` and publish it from its domain | `tests/test_package_architecture.py::test_every_warning_a_package_can_raise_is_published`, `tests/test_package_architecture.py::test_every_published_warning_is_a_phonometry_warning`, `tests/test_package_architecture.py::test_every_published_warning_is_named_by_the_package_that_publishes_it`, `tests/test_package_architecture.py::test_inspect_reads_each_published_class_from_the_file_that_writes_it` |
 | [A50](api.md#a50) | Warn with the topic's published class, never `UserWarning` or the bare root | `tests/test_package_architecture.py::test_every_warning_names_a_published_topic` |
 | [A51](api.md#a51) | Silence inside the library only the warning topic you mean | `tests/test_package_architecture.py::test_a_warning_filter_in_the_library_names_its_topic` |
 | [A52](api.md#a52) | Speak to the caller through warnings, never `print` | `ruff T20` |

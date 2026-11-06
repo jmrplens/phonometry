@@ -743,6 +743,16 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "IEC61094_2_TABLE_C3": "phonometry.metrology.reciprocity_coupler",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
+    # Warnings written in a private module carry the public package that
+    # publishes them as their ``__module__``, so that a traceback names a path
+    # a caller can import; each is still documented on the page of the module
+    # it is written in.
+    "AirflowResistanceWarning": "phonometry.materials.absorbers._airflow_resistance",
+    "CabinInsulationWarning": "phonometry.noise_control._cabin_insulation",
+    "ImpactExcitationWarning": "phonometry.vibration.structural._impact_mobility",
+    "ImpulseResponseWarning": "phonometry.room._impulse_response",
+    "StatisticalPassByWarning": "phonometry.environment.sources._statistical_pass_by",
+    "ToneBurstWarning": "phonometry.signals._test_signals",
     # The io subpackage keeps its implementation modules private and
     # re-exports everything from phonometry/io/__init__.py, so every one of
     # its public names reports a private ``__module__`` and is documented

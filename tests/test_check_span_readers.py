@@ -162,6 +162,7 @@ def test_an_exemption_that_covers_nothing_is_stale(tmp_path: pathlib.Path) -> No
     assert (found, stale, read) == ([], ["scripts/gone.py"], 1)
 
 
+@pytest.mark.whole_tree
 def test_the_tree_keeps_the_rule() -> None:
     found, stale, _ = csr.check(csr.files([]), csr.EXEMPT)
     assert [finding.describe() for finding in found] == []

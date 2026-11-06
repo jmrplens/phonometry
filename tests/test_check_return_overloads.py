@@ -33,6 +33,10 @@ if _SCRIPTS not in sys.path:
 import ast_scan
 import check_return_overloads as cro
 
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("return-overloads")
+
 _IMPORTS = """
 from __future__ import annotations
 
@@ -1143,6 +1147,366 @@ def test_a_def_or_an_import_a_function_makes_under_global_may_be_reached(
     ]
 
 
+def test_a_name_an_assignment_binds_to_a_helper_reaches_that_helper(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_new_axes = _polar`` binds the name to the helper the value names,
+    at the top of the module, in a function under ``global`` and in the
+    function that calls it, as a ``def`` or an import of it would.
+
+    Only a ``def``, a ``class`` or an import bound a name, so a plain
+    ``plot`` that returns what such an alias makes passed, whether the alias
+    replaced a ``def`` that makes plain axes or stood alone.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _plain_axes():
+            return plt.subplots()[1]
+
+        def _new_axes():
+            return plt.subplots()[1]
+
+        def _go_polar():
+            global _new_axes
+            _new_axes = _polar
+
+        def plot_swapped(result: object) -> Axes:
+            return _new_axes()
+
+        def _plain():
+            return plt.subplots()[1]
+
+        _plain = _polar
+
+        def plot_replaced(result: object) -> Axes:
+            return _plain()
+
+        _alias = _polar
+
+        def plot_aliased(result: object) -> Axes:
+            return _alias()
+
+        def plot_local(result: object) -> Axes:
+            make = _polar
+            return make()
+
+        def plot_local_replaced(result: object) -> Axes:
+            make = _polar
+            make = _plain_axes
+            return make()
+
+        def plot_walrus(result: object) -> Axes:
+            if (make := _polar) is not None:
+                pass
+            return make()
+
+        def plot_parameter(result: object, make=_plain_axes) -> Axes:
+            return make()
+
+        _later = _polar
+
+        def _later():
+            return plt.subplots()[1]
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import _later, _plain
+
+        def plot_standing_alias(result: object) -> Axes:
+            return _plain()
+
+        def plot_standing_attribute(result: object) -> Axes:
+            return helpers._plain()
+
+        def plot_replaced_alias(result: object) -> Axes:
+            return _later()
+
+        def plot_replaced_attribute(result: object) -> Axes:
+            return helpers._later()
+        """,
+    )
+    # Another module reads the name once its module has run: what stands
+    # there at the end, an alias that replaced a ``def`` or a ``def`` that
+    # replaced an alias, is what its call reaches.
+    assert sorted(refused) == [
+        "plot_aliased",
+        "plot_local",
+        "plot_replaced",
+        "plot_standing_alias",
+        "plot_standing_attribute",
+        "plot_swapped",
+        "plot_walrus",
+    ]
+
+
+def test_a_later_binding_of_another_kind_ends_a_helper_at_the_top(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A lambda, a call's result or a ``class`` bound to the name at the top
+    of the module after an alias or a ``def`` of it leaves the name holding
+    what the guard cannot read, there and read from another module, so a
+    call of it reaches no helper.
+
+    Only a ``def``, a ``class``, an import and an alias were read as bindings
+    of the top, so the alias of the polar helper stood past the lambda, and
+    the plain ``plot`` that returns what the lambda makes was refused; a
+    ``class`` read by its name reached the ``def`` it replaced, which still
+    held the name in the table of functions.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        _lambda = _polar
+        _lambda = lambda: plt.subplots()[1]
+
+        _made = _polar
+        _made = make_plain()
+
+        def _defined():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        _defined = lambda: plt.subplots()[1]
+
+        def _classed():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class _classed:
+            pass
+
+        _standing = _polar
+
+        def plot_lambda(result: object) -> Axes:
+            return _lambda()
+
+        def plot_made(result: object) -> Axes:
+            return _made()
+
+        def plot_defined(result: object) -> Axes:
+            return _defined()
+
+        def plot_classed(result: object) -> Axes:
+            return _classed()
+
+        def plot_standing(result: object) -> Axes:
+            return _standing()
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import _classed, _lambda
+
+        def plot_imported(result: object) -> Axes:
+            return _lambda()
+
+        def plot_attribute(result: object) -> Axes:
+            return helpers._lambda()
+
+        def plot_imported_class(result: object) -> Axes:
+            return _classed()
+        """,
+    )
+    assert sorted(refused) == ["plot_standing"]
+
+
+def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``saved = _polar`` holds the function ``_polar`` names where the
+    assignment runs, whatever a later ``def`` or ``class`` binds that name
+    to, at the top of a module, in an assignment expression, under
+    ``global`` and read from another module. An import of the module's own
+    name that may stand beside the alias, under ``global`` or in a branch,
+    still reaches what the name holds where the call runs, the later polar
+    ``def`` among them.
+
+    The definitions of ``_polar`` were chosen again where ``saved()`` runs,
+    so a later ``class _polar`` left the call reaching nothing and a later
+    plain ``def _polar`` reached that one, and a plain ``plot`` that returns
+    the polar axes passed; an alias of a plain helper a later polar ``def``
+    replaced, or of a class a later polar ``def`` replaced, was refused.
+    Then the import, which recorded nothing, was read through what the
+    alias had recorded for the same name, so it reached only the plain
+    ``def`` and a plain ``plot`` passed.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _setup():
+            global swapped
+            swapped = _polar
+
+        saved = _polar
+        (walrus := _polar)
+
+        class _polar:
+            pass
+
+        def _replaced():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        replaced = _replaced
+
+        def _replaced():
+            return plt.subplots()[1]
+
+        def _plain():
+            return plt.subplots()[1]
+
+        plain = _plain
+
+        def _plain():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        class _Made:
+            pass
+
+        made = _Made
+
+        def _Made():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_saved(result: object) -> Axes:
+            return saved()
+
+        def plot_walrus(result: object) -> Axes:
+            return walrus()
+
+        def plot_swapped(result: object) -> Axes:
+            return swapped()
+
+        def plot_replaced(result: object) -> Axes:
+            return replaced()
+
+        def plot_plain(result: object) -> Axes:
+            return plain()
+
+        def plot_made(result: object) -> Axes:
+            return made()
+
+        def _held():
+            return plt.subplots()[1]
+
+        held = _held
+
+        def _setup_held():
+            global held
+            from .helpers import _held as held
+
+        def _kept():
+            return plt.subplots()[1]
+
+        kept = _kept
+
+        def _held():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _kept():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        if FLAG:
+            from .helpers import _kept as kept
+
+        def plot_held(result: object) -> Axes:
+            return held()
+
+        def plot_kept(result: object) -> Axes:
+            return kept()
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import saved
+
+        def plot_imported(result: object) -> Axes:
+            return saved()
+
+        def plot_attribute(result: object) -> Axes:
+            return helpers.replaced()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_attribute",
+        "plot_held",
+        "plot_imported",
+        "plot_kept",
+        "plot_replaced",
+        "plot_saved",
+        "plot_swapped",
+        "plot_walrus",
+    ]
+
+
+def test_a_loop_s_target_leaves_a_helper_at_the_top_standing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias or the ``def`` of the
+    polar helper before it, as after the branches of an ``if``, there and
+    read from another module.
+
+    The target was read as bound on every way past the loop, so it ended the
+    helper, and the plain ``plot`` that returns the polar axes passed.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def _polar():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        _no_turn = _polar
+        for _no_turn in ():
+            pass
+
+        _a_turn = _polar
+        for _a_turn in [plt.gca]:
+            pass
+
+        def _defined():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        for _defined in ():
+            pass
+
+        def plot_no_turn(result: object) -> Axes:
+            return _no_turn()
+
+        def plot_a_turn(result: object) -> Axes:
+            return _a_turn()
+
+        def plot_defined(result: object) -> Axes:
+            return _defined()
+        """,
+        importer="""
+        from .helpers import _no_turn
+
+        def plot_imported(result: object) -> Axes:
+            return _no_turn()
+        """,
+    )
+    assert sorted(refused) == [
+        "plot_a_turn",
+        "plot_defined",
+        "plot_imported",
+        "plot_no_turn",
+    ]
+
+
 def test_a_generic_class_s_type_parameter_is_no_function_of_the_module(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -1590,6 +1954,7 @@ def test_heads_overloaded_on_something_else_still_need_both_cases(
     }
 
 
+@pytest.mark.whole_tree
 def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""
     found, stale = ast_scan.exempted(
@@ -1602,6 +1967,7 @@ def test_the_package_keeps_the_rule() -> None:
     assert not stale
 
 
+@pytest.mark.whole_tree
 def test_the_script_reports_and_fails(
     tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

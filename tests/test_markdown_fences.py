@@ -35,8 +35,10 @@ from markdown_fences import (
     code_lines,
     display_math_parts,
     fences,
+    page_kind,
     page_lines,
     python_fences,
+    quotation_marks,
 )
 
 
@@ -124,6 +126,18 @@ def test_an_indented_fence_loses_the_indentation_of_its_marker() -> None:
 
 def test_a_python_fence_never_closed_is_read_to_the_end_of_the_page() -> None:
     assert python_fences("prose\n```python\nx = 1\n") == ["x = 1\n"]
+
+
+def test_a_fence_indented_as_code_is_no_fence_of_a_markdown_page() -> None:
+    """A ``.md`` page reads a block indented four columns as code, written
+    out, so the fence written in it is shown, not run; an ``.mdx`` page has
+    no indented code, and the same lines open a fence.
+    """
+    page = "Text.\n\n    ```python\n    x = 1\n    ```\n"
+    assert python_fences(page, kind="md") == []
+    assert python_fences(page, kind="mdx") == ["x = 1\n"]
+    assert page_kind("guide.md") == "md"
+    assert page_kind("guide.mdx") == "mdx"
 
 
 #: Pages whose fences stand behind the marks of a quotation or a list item, with
@@ -469,18 +483,23 @@ def _pages() -> list[str]:
     return [*(path.read_text(encoding="utf-8") for path in paths), *_CASES]
 
 
+@pytest.mark.whole_tree
 @pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
-def test_the_site_reads_every_page_as_the_scripts_do() -> None:
-    """Which lines are code, and every block with its line, info string and body."""
+@pytest.mark.parametrize("kind", ["md", "mdx"])
+def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
+    """Which lines are code, and every block with its line, info string and
+    body, on each kind of page.
+    """
     pages = _pages()
+    options = json.dumps({"kind": kind})
     script = (
         "import {codeLines, fences, splitLines} from "
         f"{json.dumps(_SITE_READER.as_uri())};"
         "let input = '';"
         "for await (const chunk of process.stdin) input += chunk;"
         "process.stdout.write(JSON.stringify(JSON.parse(input).map((text) => ["
-        "  codeLines(splitLines(text)),"
-        "  fences(text).map((f) => [f.line, f.info, f.body, f.language]),"
+        f"  codeLines(splitLines(text), {options}),"
+        f"  fences(text, {options}).map((f) => [f.line, f.info, f.body, f.language]),"
         "])));"
     )
     ran = subprocess.run(
@@ -494,8 +513,8 @@ def test_the_site_reads_every_page_as_the_scripts_do() -> None:
     )
     python = [
         [
-            list(code_lines(text.splitlines())),
-            [[f.line, f.info, f.body, f.language] for f in fences(text)],
+            list(code_lines(text.splitlines(), kind=kind)),
+            [[f.line, f.info, f.body, f.language] for f in fences(text, kind=kind)],
         ]
         for text in pages
     ]
@@ -508,6 +527,7 @@ def test_the_site_reads_every_page_as_the_scripts_do() -> None:
     assert (len(pages) > len(_CASES), differ) == (True, [])
 
 
+@pytest.mark.whole_tree
 @pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
@@ -551,3 +571,62 @@ def test_only_the_end_the_markdown_parser_reads_ends_a_comment() -> None:
     lines = ["<!-- a --!>", "b", "c -->", "d"]
     roles = [line.role for line in page_lines(lines, kind="md")]
     assert roles == ["html", "raw", "raw", "paragraph"]
+
+
+#: Lines whose quotation marks the two languages have to read alike: marks
+#: parted by a tab or by nothing, behind blanks, and the four columns that make
+#: indented code on a ``.md`` page.
+_MARKED = (
+    "",
+    ">",
+    "> a",
+    ">a",
+    ">\t> a",
+    " > a",
+    "   > a",
+    "    > a",
+    "\t> a",
+    ">\t\ta",
+    "> > > a",
+    ">>a",
+    " >\t>\ta",
+    "a > b",
+)
+
+
+@pytest.mark.whole_tree
+@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.parametrize("kind", ["md", "mdx"])
+def test_the_site_reads_the_marks_of_a_quotation_as_the_scripts_do(kind: str) -> None:
+    """How many quotation marks open a line, and what they leave of it, read
+    by ``quotationMarks`` of the site and :func:`quotation_marks` alike, on
+    every line of every page and on the lines above.
+    """
+    lines = [
+        *_MARKED,
+        *(line for text in _pages() for line in _split_as_the_site_does(text)),
+    ]
+    script = (
+        "import {quotationMarks} from "
+        f"{json.dumps(_SITE_READER.as_uri())};"
+        "let input = '';"
+        "for await (const chunk of process.stdin) input += chunk;"
+        "process.stdout.write(JSON.stringify(JSON.parse(input).map((line) => "
+        f"  quotationMarks(line, {{kind: {json.dumps(kind)}}}))));"
+    )
+    ran = subprocess.run(
+        [str(_NODE), "--input-type=module", "-e", script],
+        input=json.dumps(lines),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=120,
+        check=True,
+    )
+    python = [list(quotation_marks(line, kind=kind)) for line in lines]
+    differ = [
+        line
+        for line, one, other in zip(lines, python, json.loads(ran.stdout), strict=True)
+        if one != other
+    ]
+    assert differ == []

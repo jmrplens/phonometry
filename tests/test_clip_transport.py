@@ -1756,6 +1756,7 @@ print(
 """
 
 
+@pytest.mark.whole_tree
 @pytest.mark.skipif(sys.platform == "win32", reason="a render node is POSIX")
 def test_the_road_through_the_loader_brings_the_nodes_refusal_back(
     repo: pathlib.Path, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch

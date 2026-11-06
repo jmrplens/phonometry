@@ -460,6 +460,7 @@ def test_a_plate_keying_the_linked_letter_upright_passes(
     assert failures == []
 
 
+@pytest.mark.whole_tree
 def test_the_tree_it_ships_with_passes() -> None:
     """The gate is green on this repository, which is what CI asserts."""
     root = pathlib.Path(__file__).resolve().parent.parent

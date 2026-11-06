@@ -21,10 +21,8 @@ import pathlib
 import sys
 import textwrap
 import types
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -272,6 +270,7 @@ def test_the_curated_table_has_no_row_for_a_withdrawn_name() -> None:
     assert gate.stale_rows(markdown, public_names()) == []
 
 
+@pytest.mark.whole_tree
 def test_the_library_gives_every_public_name_one_address() -> None:
     import inspect
 
@@ -501,6 +500,7 @@ def test_a_relative_import_is_read_from_where_it_resolves() -> None:
         assert found == binding, statement
 
 
+@pytest.mark.whole_tree
 def test_the_library_reaches_every_public_module_by_its_name() -> None:
     import inspect
 

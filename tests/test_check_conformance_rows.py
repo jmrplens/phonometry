@@ -20,6 +20,8 @@ import ast
 import pathlib
 import sys
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -228,6 +230,7 @@ def test_a_declared_row_that_no_longer_exists_is_stale() -> None:
     assert stale == [("example._chk_gone", "is no longer a row")]
 
 
+@pytest.mark.whole_tree
 def test_the_real_package_passes() -> None:
     """The tree itself, which is the gate's actual job."""
     assert ccr.main([]) == 0

@@ -1145,7 +1145,7 @@ def _sections(content: str) -> list[str]:
     """
     lines = content.splitlines()
     sections: list[list[str]] = [[]]
-    for line, code in zip(lines, code_lines(lines), strict=True):
+    for line, code in zip(lines, code_lines(lines, kind="md"), strict=True):
         if not code and _is_h2(line):
             sections.append([])
         sections[-1].append(line)

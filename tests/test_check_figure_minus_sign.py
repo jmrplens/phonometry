@@ -263,6 +263,7 @@ def test_every_allowance_carries_a_reason() -> None:
     assert all(reason.strip() for reason in gate.ALLOWED.values())
 
 
+@pytest.mark.whole_tree
 def test_the_committed_figures_pass() -> None:
     """The corpus itself, which is what the gate protects."""
     found, stale = gate.check(gate.IMAGES)

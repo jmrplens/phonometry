@@ -464,6 +464,7 @@ def _verdict_classes() -> set[type]:
     }
 
 
+@pytest.mark.whole_tree
 def test_every_verdict_refuses_a_truth_value() -> None:
     offenders = sorted(
         f"{cls.__module__}.{cls.__qualname__}"

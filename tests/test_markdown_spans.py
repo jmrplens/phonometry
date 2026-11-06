@@ -30,7 +30,9 @@ from markdown_spans import (
     drop_inline_spans,
     drop_inline_spans_by_block,
     inline_spans,
+    inside_quotation,
     lines_read_whole,
+    quote_depth,
     replace_inline_spans_by_block,
 )
 
@@ -429,3 +431,34 @@ def test_lines_read_whole_give_back_a_line_for_each_line() -> None:
 def test_a_reader_that_moves_a_line_break_is_refused() -> None:
     with pytest.raises(ValueError, match="2 lines came back as 1"):
         lines_read_whole(["a", "b"], lambda text: text.replace("\n", " "))
+
+
+@pytest.mark.parametrize(
+    ("line", "kind", "depth", "inside"),
+    [
+        ("> > x", "md", 2, "x"),
+        (">\t> x", "md", 2, "x"),
+        ("> \t> x", "md", 2, "x"),
+        (">\tx", "md", 1, "  x"),
+        ("   >    > x", "md", 2, "x"),
+        (">     > x", "md", 1, "    > x"),
+        (">     > x", "mdx", 2, "x"),
+        (">\t\t> x", "md", 1, "  \t> x"),
+        (">\t\t> x", "mdx", 2, "x"),
+        ("    > x", "md", 0, "    > x"),
+        ("x > y", "md", 0, "x > y"),
+    ],
+)
+def test_the_marks_of_a_quotation_are_read_by_their_columns(
+    line: str, kind: str, depth: int, inside: str
+) -> None:
+    """A tab stands for the columns to its stop: one after a mark is the
+    mark's blank, the rest stay as spaces, and a mark may stand up to three
+    columns past the one before it on a ``.md`` page, where four open
+    indented code, and any number on an ``.mdx`` page, which has none
+    (CommonMark 0.31.2, 2.2 and 5.1). The walk of the page reads them so.
+    """
+    assert (quote_depth(line, kind=kind), inside_quotation(line, kind=kind)) == (
+        depth,
+        inside,
+    )

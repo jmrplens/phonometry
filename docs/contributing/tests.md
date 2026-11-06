@@ -642,3 +642,32 @@ filterwarnings = [
 ```
 
 **Enforced by:** `tests/test_repository_config.py::test_the_pytest_configuration_filters_warnings_by_builtin_class`
+
+<a id="t26"></a>
+### T26. Mark a test that reads the repository whole `whole_tree`
+
+**Why.** A test that runs a guard, a census or a generator over the package, the scripts, the documentation, the site or the committed figures reads the repository's own text, which neither the numba-jitted kernel nor the dependency floors change. Run again in the two jobs that exist for those, 199 such tests made up more than a third of the test time, and both jobs took 39 minutes of their 50 (2026-11-06). Those jobs run `pytest --without-whole-tree`, which leaves the marked tests out, and the nine jobs of the test matrix run them. What makes a test one is what it reads: while a test sets up and runs, `tests/whole_tree.py` counts the files it opens of `src/`, `scripts/`, `docs/`, `site/`, `tests/` and `.github/`, where the committed figures are, through the higher-scoped fixtures it uses too, and an unmarked test that opened a hundred or more fails, naming the count. A guard's test on planted sources opens none and stays unmarked; one that runs the guard over the package to judge a planted case opens it whole and carries the mark.
+
+**Do**
+
+```python
+import pytest
+
+
+@pytest.mark.whole_tree
+def test_the_shipped_pages_pass() -> None:
+    import check_markdown_hazards
+
+    assert check_markdown_hazards.main() == 0
+```
+
+**Don't**
+
+```py
+def test_the_shipped_pages_pass() -> None:  # opens 932 pages of docs/ and site/, unmarked
+    assert check_markdown_hazards.main() == 0
+```
+
+**Enforced by:** `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests (numba-jitted kernel)`, `CI: Library tests at the dependency floors`
+
+**Exceptions.** A test that reads the tree to find what it then runs through the library, so that the kernel or a floor dependency decides its verdict, stays unmarked and stands in `RUNS_THE_LIBRARY` of `tests/whole_tree.py` with its reason. A file the package opens itself, as the remote runner ships its own modules, and a file the import system opens are not counted. The count does not see a file a child process reads, a test that lists names without opening files, or one that takes what a guard's own cache kept from an earlier test of its worker; a test that reads a smaller part of a tree whole, such as the 85 rows of the conformance package, is marked by review.

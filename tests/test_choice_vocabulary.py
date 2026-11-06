@@ -334,6 +334,7 @@ def _strings_in(value: object, depth: int = 0) -> Iterator[str]:
                 yield item
 
 
+@pytest.mark.whole_tree
 def test_no_choice_offers_a_band_set_by_name() -> None:
     """A band set is ``fraction=1`` or ``fraction=3``, everywhere.
 
@@ -375,6 +376,7 @@ def test_no_table_or_tuple_holds_a_band_set_word() -> None:
     assert not offenders, "\n".join(offenders)
 
 
+@pytest.mark.whole_tree
 def test_a_sound_field_is_free_diffuse_or_pressure() -> None:
     """A public ``field`` names a sound field one way: free, diffuse or pressure.
 
@@ -410,6 +412,7 @@ def test_a_sound_field_is_free_diffuse_or_pressure() -> None:
     assert not offenders, "\n".join(sorted(offenders))
 
 
+@pytest.mark.whole_tree
 def test_a_flat_weighting_is_z() -> None:
     """Leaving a signal unweighted is ``weighting="Z"`` wherever it is offered.
 
@@ -592,6 +595,7 @@ def test_a_retired_spelling_is_refused(
         call()
 
 
+@pytest.mark.whole_tree
 def test_a_weighting_is_chosen_by_weighting() -> None:
     """A frequency weighting is ``weighting=``, never a flag or a ``curve``.
 
@@ -610,6 +614,7 @@ def test_a_weighting_is_chosen_by_weighting() -> None:
     assert not offenders, "\n".join(offenders)
 
 
+@pytest.mark.whole_tree
 @pytest.mark.parametrize(
     "exemptions",
     [_BAND_SET_EXEMPT, _FIELD_EXEMPT, _WEIGHTING_EXEMPT, _WEIGHTING_FLAG_EXEMPT],
@@ -683,6 +688,7 @@ def test_anything_else_is_refused_as_a_band_set(
         require_band_fraction(value, "fraction")
 
 
+@pytest.mark.whole_tree
 def test_the_walk_reaches_the_package() -> None:
     assert sum(1 for _ in _choices()) > 5000
     assert phonometry.__name__ == "phonometry"

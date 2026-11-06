@@ -260,6 +260,7 @@ def test_an_exemption_covers_only_its_own_word() -> None:
     assert [o.word for o in offences] == ["medicion"]
 
 
+@pytest.mark.whole_tree
 def test_the_published_tables_carry_every_accent() -> None:
     """The tables as committed: every source found, nothing flagged, nothing stale."""
     values, empty = csa.read_sources()
@@ -443,6 +444,51 @@ def test_a_code_span_across_a_line_break_hides_its_word_from_a_page() -> None:
     break left its first line's word as prose.
     """
     assert _departures("Un `seno\nx` de 1 kHz", page=True) == []
+
+
+@pytest.mark.parametrize(
+    ("suffix", "found"),
+    [(".md", [("decimación", "diezmado", 6)]), (".mdx", [])],
+)
+def test_a_page_is_read_as_its_own_kind(
+    tmp_path: pathlib.Path, suffix: str, found: list[tuple[str, str, int]]
+) -> None:
+    """A ``.md`` page shows a block of raw HTML as written, backticks and
+    all, so a term between two of them is prose there; an ``.mdx`` page reads
+    the same lines as a code span.
+
+    Every page was read as MDX, so the term in the raw HTML of a ``.md`` page
+    passed as code.
+    """
+    page = tmp_path / f"page{suffix}"
+    page.write_text(
+        "---\ntitle: Prueba\n---\n\n<div>\nLa `decimación` previa\n</div>\n",
+        encoding="utf-8",
+    )
+    offences, _ = csa.check(csa.page_values(page))
+    assert [(o.word, o.spelling, o.line) for o in offences] == found
+
+
+@pytest.mark.parametrize("suffix", [".md", ".mdx"])
+@pytest.mark.parametrize("marker", ["1.", "-  "])
+def test_a_paragraph_is_read_where_its_page_puts_it(
+    tmp_path: pathlib.Path, suffix: str, marker: str
+) -> None:
+    """A paragraph indented four columns under a list item continues the
+    item, and its code span is code on a page of either kind.
+
+    Each paragraph was read on its own, so on a ``.md`` page the indented
+    one read as indented code, which a page shows as written, and the term
+    in its code span was refused.
+    """
+    page = tmp_path / f"page{suffix}"
+    page.write_text(
+        f"---\ntitle: Prueba\n---\n\n{marker} Primer paso.\n\n"
+        "    Se aplica la `decimación` previa.\n",
+        encoding="utf-8",
+    )
+    offences, _ = csa.check(csa.page_values(page))
+    assert offences == []
 
 
 def test_a_value_reads_its_code_spans_as_the_site_reads_them() -> None:
@@ -1127,6 +1173,7 @@ def test_a_generated_module_of_the_site_is_read(tmp_path: pathlib.Path) -> None:
     ]
 
 
+@pytest.mark.whole_tree
 def test_the_generated_api_sidebar_is_among_the_pages() -> None:
     """The committed sidebar is read, so its Spanish labels hold the glossary."""
     assert "site/src/generated/*.mjs" in csa.PAGES

@@ -100,6 +100,7 @@ import ast
 import builtins
 import collections
 import collections.abc
+import copy
 import dataclasses
 import enum
 import functools
@@ -118,8 +119,12 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 from ast_scan import (
     COMPOUND_STATEMENTS,
     binding_of,
+    bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
+    for_the_type_checker,
+    global_bindings,
+    held_before,
     imported_names,
     live_bindings,
     own_names,
@@ -1113,13 +1118,16 @@ def _import_source(node: ast.ImportFrom, package: str) -> str | None:
     return source if source.startswith("phonometry") else None
 
 
+@functools.cache
 def _parsed_module(module_name: str) -> tuple[ModuleType, ast.Module, str] | None:
     """The imported module *module_name*, its parsed source and its package,
     or None when it cannot be imported or its source cannot be read.
 
     A module of the package imported only under ``TYPE_CHECKING`` is not
     loaded yet: it is imported here, or the readers cached on this keep it
-    empty whatever runs later.
+    empty whatever runs later. Parsed once, whatever reads it: the program's
+    bindings and the type checker's are read from the one tree
+    (:func:`_read_module`).
     """
     module = sys.modules.get(module_name)
     if module is None and module_name.startswith("phonometry"):
@@ -1234,6 +1242,16 @@ def _constants_of(
     stand, in the branches of a ``try`` or an ``if``, give the name a value
     only when they agree. *annotations* reads what a type checker reads, for
     an alias.
+
+    A name of the module an assignment's value reads is what it held where
+    the assignment runs: those of its bindings at the top of the module that
+    may stand there (:func:`ast_scan.held_before`), and each a function makes
+    under ``global``, which may have run at any time; what an
+    ``if TYPE_CHECKING:`` block holds never runs, and is none of them.
+    ``ALLOWED = KINDS`` holds the table ``KINDS`` names there, whatever a
+    later assignment binds ``KINDS`` to. A name the module binds once, or not
+    at all, holds there what it holds once the module has run, and is read as
+    it was.
     """
     read = _read_module(module_name, annotations=annotations)
     if read is None:
@@ -1241,8 +1259,13 @@ def _constants_of(
     module, tree, package, standing = read
     assignments = _assignments(tree)
     imported: dict[ast.AST, dict[str, ast.expr]] = {}
+    checker = for_the_type_checker(tree)
+    top = bindings_by_name(tree)
+    inside = global_bindings(tree)
 
-    def value(node: ast.AST, name: str) -> ast.expr | None:
+    def value(
+        node: ast.AST, name: str, seen: frozenset[str] = frozenset()
+    ) -> ast.expr | None:
         if isinstance(node, ast.ImportFrom) and depth < _IMPORT_DEPTH:
             if node not in imported:
                 imported[node] = dict(
@@ -1250,7 +1273,40 @@ def _constants_of(
                 )
             return imported[node].get(name)
         statement = assignments.get(node)
-        return dict(_assigned(statement)).get(name) if statement else None
+        assigned = dict(_assigned(statement)).get(name) if statement else None
+        if assigned is None or annotations:
+            return assigned
+        return as_written(assigned, seen | {name})
+
+    def as_written(expr: ast.expr, seen: frozenset[str]) -> ast.expr:
+        """*expr* with each name of the module it reads that held another
+        binding where *expr* is written than once the module has run
+        replaced by what it held there; by nothing the guard reads when the
+        bindings there disagree.
+        """
+        by: dict[int, ast.expr] = {}
+        for read in ast.walk(expr):
+            if (
+                not isinstance(read, ast.Name)
+                or not isinstance(read.ctx, ast.Load)
+                or read.id in seen
+                or read.id not in standing
+            ):
+                continue
+            own = [n for n in top.get(read.id, ()) if id(n) not in checker]
+            sent = [n for n in inside.get(read.id, ()) if id(n) not in checker]
+            if len(own) + len(sent) < 2:
+                continue
+            if binding_of(tree, read, read.id)[1] not in {None, tree}:
+                continue
+            here = [*held_before(tree, own, read), *sent]
+            if not here or {id(node) for node in here} == {
+                id(node) for node in standing[read.id]
+            }:
+                continue
+            held = _agreed([value(node, read.id, seen) for node in here])
+            by[id(read)] = held if held is not None else ast.Constant(value=None)
+        return typing.cast("ast.expr", _replaced(expr, by)) if by else expr
 
     found: dict[str, ast.expr] = {}
     for name, nodes in standing.items():
@@ -1259,6 +1315,31 @@ def _constants_of(
             found[name] = agreed
     _read_frozen_tables(found, vars(module))
     return MappingProxyType(found)
+
+
+def _replaced(node: ast.AST, by: Mapping[int, ast.expr]) -> ast.AST:
+    """A copy of *node* with each node under it whose id *by* holds replaced
+    by the expression it gives; *node* itself, shared, when it holds none of
+    them, so the module's own tree is never written into.
+    """
+    if id(node) in by:
+        return by[id(node)]
+    if not any(id(child) in by for child in ast.walk(node)):
+        return node
+    copied = copy.copy(node)
+    for name, field in ast.iter_fields(node):
+        if isinstance(field, ast.AST):
+            setattr(copied, name, _replaced(field, by))
+        elif isinstance(field, list):
+            setattr(
+                copied,
+                name,
+                [
+                    _replaced(item, by) if isinstance(item, ast.AST) else item
+                    for item in field
+                ],
+            )
+    return copied
 
 
 def _read_frozen_tables(
@@ -4030,19 +4111,13 @@ def _callers_source(
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
         if getattr(_module_object(caller_module), function.name, None) is not defined:
             continue
-        handed: ast.expr | None = None
-        for keyword in call.keywords:
-            if keyword.arg is None:
-                return _OPEN_SOURCE
-            if keyword.arg == name:
-                handed = keyword.value
-        if handed is None and name in positional:
-            index = positional.index(name)
-            if index < len(call.args) and not any(
-                isinstance(argument, ast.Starred) for argument in call.args[: index + 1]
-            ):
-                handed = call.args[index]
-        if handed is None:
+        handed = _handed_in(
+            call,
+            name,
+            positional,
+            keyword=all(a.arg != name for a in function.args.posonlyargs),
+        )
+        if not isinstance(handed, ast.expr):
             return _OPEN_SOURCE
         found.append(_source(handed, caller, caller_module, depth + 1))
     return _merged(found) if found else _OPEN_SOURCE
@@ -4115,21 +4190,35 @@ def _argument_for(
 ) -> ast.expr | None | str:
     """What a call to a record's constructor hands *field*: the expression,
     ``None`` when the field keeps its default, or ``"**"`` when a spread of
-    keywords may.
+    keywords may (:func:`_handed_in`).
     """
-    for keyword in call.keywords:
-        if keyword.arg == field.name:
-            return keyword.value
-        if keyword.arg is None:
-            return "**"
-    if field.name in positional:
-        index = positional.index(field.name)
+    return _handed_in(call, field.name, positional)
+
+
+def _handed_in(
+    call: ast.Call, name: str, positional: list[str], *, keyword: bool = True
+) -> ast.expr | None | str:
+    """What *call* hands the parameter *name*: its keyword, wherever it is
+    written, or the argument in its place before any ``*`` argument, which
+    no ``*`` argument or ``**`` mapping may then fill too, since the call
+    would raise; ``"**"`` when a ``*`` argument at or before its place, or a
+    mapping, may hand it anything; ``None`` when nothing does. A parameter
+    that takes no keyword (*keyword*), a positional-only one, is filled by
+    neither a keyword nor a mapping: what they hand goes to ``**kwargs``.
+    """
+    for item in call.keywords if keyword else ():
+        if item.arg == name:
+            return item.value
+    if name in positional:
+        index = positional.index(name)
         if any(
             isinstance(argument, ast.Starred) for argument in call.args[: index + 1]
         ):
             return "**"
         if index < len(call.args):
             return call.args[index]
+    if keyword and any(item.arg is None for item in call.keywords):
+        return "**"
     return None
 
 

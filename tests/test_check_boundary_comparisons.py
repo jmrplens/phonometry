@@ -242,6 +242,7 @@ def _refused_scopes(module: cbc.Module | None) -> set[str]:
     return {finding.scope.rsplit(".", 1)[-1] for finding in module.findings()}
 
 
+@pytest.mark.whole_tree
 def test_the_tree_passes(capsys: pytest.CaptureFixture[str]) -> None:
     status = cbc.main([])
     assert status == 0, capsys.readouterr().out
@@ -1153,6 +1154,151 @@ def test_a_def_a_function_makes_under_global_may_stand_for_the_module_s_name(
         ("verdict.py", "through_the_import", "spread(levels) <= _SPREAD_DB"),
         ("verdict.py", "through_a_global_import", "_width(levels) <= _SPREAD_DB"),
     ]
+
+
+@pytest.mark.parametrize(
+    "binding",
+    [
+        "def swap():\n    global _spread\n    _spread = _range\n",
+        "_spread = _range\n",
+    ],
+    ids=["under-global", "at-the-top"],
+)
+def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
+    tmp_path: pathlib.Path, binding: str
+) -> None:
+    """``_spread = _range`` binds the name to the function the value names,
+    at the top of the module, in a function under ``global`` and in the
+    function that calls it, as a ``def`` would.
+
+    Only a ``def`` or an import bound a name, so a call of ``_spread`` was
+    read as the constant the first ``def`` returns, and a call through a
+    local alias as nothing of the module.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _spread(levels):\n    return 0.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        f"{binding}"
+        "def judge(levels):\n    return _spread(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(source, tmp_path) == ["_spread(levels) <= _SPREAD_DB"]
+    alone = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        "_alias = _range\n"
+        "def judge(levels):\n    return _alias(levels) <= _SPREAD_DB\n"
+        "def local(levels):\n    fn = _range\n    return fn(levels) <= _SPREAD_DB\n"
+        "def _zero(levels):\n    return 0.0\n"
+        "def replaced(levels):\n"
+        "    fn = _range\n    fn = _zero\n    return fn(levels) <= _SPREAD_DB\n"
+        "def walrus(levels):\n"
+        "    if (named := _range) is not None:\n        pass\n"
+        "    return named(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(alone, tmp_path) == [
+        "_alias(levels) <= _SPREAD_DB",
+        "fn(levels) <= _SPREAD_DB",
+        "named(levels) <= _SPREAD_DB",
+    ]
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        "_within(max(levels) - min(levels), spread=0.0)",
+        "_within(*[max(levels) - min(levels)], spread=0.0)",
+    ],
+)
+def test_a_keyword_fills_no_positional_only_parameter(
+    tmp_path: pathlib.Path, call: str
+) -> None:
+    """A keyword that names a positional-only parameter goes to ``**kw``;
+    the place is the argument's in it, or the ``*`` argument's.
+
+    The keyword was read as the parameter's, so a spread handed in its
+    place beside ``spread=0.0`` read as the constant, and the comparison
+    passed. A mapping already reached no positional-only parameter.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _within(spread, /, **kw):\n    return spread <= _SPREAD_DB\n"
+        f"def judge(levels):\n    return {call}\n"
+    )
+    assert _texts(source, tmp_path) == ["spread <= _SPREAD_DB"]
+    mapped = (
+        "_SPREAD_DB = 3.0\n"
+        "def _within(spread, /, **kw):\n    return spread <= _SPREAD_DB\n"
+        "def judge(levels):\n"
+        "    return _within(0.0, **{'spread': max(levels) - min(levels)})\n"
+    )
+    assert _texts(mapped, tmp_path) == []
+
+
+@pytest.mark.parametrize(
+    "rebinding",
+    [
+        "fn = _range\nfn = lambda levels: 0.0\n",
+        "fn = _range\nfn = make()\n",
+        "def fn(levels):\n    return max(levels) - min(levels)\nfn = lambda levels: 0.0\n",
+        "def fn(levels):\n    return max(levels) - min(levels)\nclass fn:\n    pass\n",
+    ],
+    ids=["lambda", "call", "def-then-lambda", "def-then-class"],
+)
+def test_a_later_binding_of_another_kind_ends_a_function_at_the_top(
+    tmp_path: pathlib.Path, rebinding: str
+) -> None:
+    """A lambda, a call's result or a ``class`` bound to the name at the top
+    of the module after an alias or a ``def`` of it leaves the name holding
+    what the guard cannot read, so a call of it reaches no function of the
+    module.
+
+    Only a ``def``, an import and an alias were read as bindings of the top,
+    so the alias or the ``def`` stood past the lambda, and the comparison of
+    what the lambda returns was refused as the spread's.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        f"{rebinding}"
+        "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(source, tmp_path) == []
+    standing = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        "fn = lambda levels: 0.0\nfn = _range\n"
+        "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(standing, tmp_path) == ["fn(levels) <= _SPREAD_DB"]
+
+
+@pytest.mark.parametrize(
+    "binding",
+    [
+        "fn = _range\nfor fn in ():\n    pass\n",
+        "fn = _range\nfor fn in [print]:\n    pass\n",
+        "def fn(levels):\n    return max(levels) - min(levels)\nfor fn in ():\n    pass\n",
+    ],
+    ids=["no-turn", "a-turn", "def-then-no-turn"],
+)
+def test_a_loop_s_target_leaves_a_function_at_the_top_standing(
+    tmp_path: pathlib.Path, binding: str
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias or the ``def`` before it,
+    as after the branches of an ``if``.
+
+    The target was read as bound on every way past the loop, so it ended
+    the function, and the spread it returns passed its comparison.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _range(levels):\n    return max(levels) - min(levels)\n"
+        f"{binding}"
+        "def judge(levels):\n    return fn(levels) <= _SPREAD_DB\n"
+    )
+    assert _texts(source, tmp_path) == ["fn(levels) <= _SPREAD_DB"]
 
 
 def test_a_value_a_function_writes_under_global_may_be_the_module_s_name(

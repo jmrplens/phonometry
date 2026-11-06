@@ -159,6 +159,12 @@ _SCRIPT_COMMENTS = ("//", "/*", "*", "<!--")
 #: Readers that keep their own fence logic, and why, keyed by the file relative
 #: to the repository and the name of the function that holds the reading.
 EXEMPT: dict[tuple[str, str], str] = {
+    ("site/scripts/citation-quote.test.mjs", "<script>"): (
+        "a test of the citation check hands it a quotation that holds a fenced "
+        "block, and a link to the record left in one, written out as a page "
+        "writes them, to see the shared reader leave them out; it reads no "
+        "fence itself"
+    ),
     ("site/scripts/shared/markdown-spans.test.mjs", "<script>"): (
         "A test of the span reader: its page shows a fence, to say a span does not "
         "pair across one."

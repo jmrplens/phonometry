@@ -209,12 +209,14 @@ def test_the_molar_mass_is_a_quantity_as_a_run_of_words() -> None:
     assert not cpu.names_a_quantity("mass_flow")
 
 
+@pytest.mark.whole_tree
 def test_the_tree_spells_every_unit_one_way() -> None:
     found, stale = cpu.misspelled()
     assert found == []
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_temperature_on_its_scale() -> None:
     """A temperature in degrees Celsius, an interval of temperature in kelvin."""
     found, stale = cpu.temperature_scales()
@@ -248,12 +250,14 @@ def test_the_temperature_scale_rule_reads_a_name(name: str, verdict: str) -> Non
     assert ("refused" if cpu.temperature_scale(name) else "kept") == verdict
 
 
+@pytest.mark.whole_tree
 def test_every_published_constant_says_its_unit() -> None:
     found, stale = cpu.unitless_constants()
     assert found == []
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_retired_spelling_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -277,6 +281,7 @@ def test_a_retired_spelling_put_back_is_reported(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_classmethod_parameter_is_held_to_the_spelling(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -303,6 +308,7 @@ def test_a_classmethod_parameter_is_held_to_the_spelling(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_constant_without_its_unit_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -322,6 +328,7 @@ def test_a_constant_without_its_unit_put_back_is_reported(
     assert [entry.name for entry in found] == ["NOY_BANDS"]
 
 
+@pytest.mark.whole_tree
 def test_a_lone_number_without_its_unit_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -346,12 +353,14 @@ def test_a_lone_number_without_its_unit_put_back_is_reported(
     assert [entry.name for entry in found] == ["TAPPING_IMPACT_RATE"]
 
 
+@pytest.mark.whole_tree
 def test_every_public_function_is_named_for_what_it_returns() -> None:
     found, stale = cpu.unit_named_functions()
     assert found == []
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_level_function_named_with_its_decibels_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -389,6 +398,7 @@ def test_a_level_function_named_with_its_decibels_put_back_is_reported(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_method_named_with_its_decibels_is_reported_and_a_property_is_not(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -427,6 +437,7 @@ def test_a_method_named_with_its_decibels_is_reported_and_a_property_is_not(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_method_inherited_from_a_base_no_module_exports_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -447,6 +458,7 @@ def test_a_method_inherited_from_a_base_no_module_exports_is_reported(
     assert [entry.qualname for entry in found] == ["_DrawableLayer.margin_db"]
 
 
+@pytest.mark.whole_tree
 def test_a_property_inherited_from_a_base_no_module_exports_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -477,6 +489,7 @@ def test_a_property_inherited_from_a_base_no_module_exports_is_reported(
     assert read == [("_DrawableLayer", "insertion_loss_db")]
 
 
+@pytest.mark.whole_tree
 def test_a_parameter_of_an_inherited_method_is_read(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -498,6 +511,7 @@ def test_a_parameter_of_an_inherited_method_is_read(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_function_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -512,6 +526,7 @@ def test_a_function_exemption_nothing_needs_is_stale(
     ]
 
 
+@pytest.mark.whole_tree
 def test_an_exemption_a_name_no_longer_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -749,6 +764,7 @@ def test_a_rate_that_names_its_distance_and_a_pure_alpha_pass() -> None:
     assert found == []
 
 
+@pytest.mark.whole_tree
 def test_the_pressure_of_the_medium_has_one_stem() -> None:
     """Every other word for the ambient pressure is refused, and so is
     ``atmospheric_pressure_`` outside the signatures that carry a stream
@@ -774,6 +790,7 @@ def test_the_pressure_of_the_medium_has_one_stem() -> None:
     ]
 
 
+@pytest.mark.whole_tree
 def test_the_atmosphere_beside_a_stream_is_admitted_where_listed() -> None:
     key = (
         "phonometry.noise_control.valves",
@@ -897,6 +914,7 @@ def test_a_property_is_walked_like_a_field(
     assert [(p.qualname, p.name) for p in unnamed] == [("Mobility", "phase")]
 
 
+@pytest.mark.whole_tree
 def test_the_tree_holds_every_closing_rule() -> None:
     parameters = list(cpu.public_parameters())
     assert cpu.misnamed_rates(parameters) == ([], [])
@@ -1041,12 +1059,14 @@ def test_another_head_noun_declares_nothing(name: str) -> None:
     assert not cpu.declares_its_unit(name)
 
 
+@pytest.mark.whole_tree
 def test_no_level_carries_a_unit_suffix() -> None:
     found, stale = cpu.decibel_suffixed()
     assert found == []
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_level_named_with_its_decibels_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1115,6 +1135,7 @@ def test_a_decibel_value_under_another_head_noun_still_needs_db(
     assert found == []
 
 
+@pytest.mark.whole_tree
 def test_a_level_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1124,6 +1145,7 @@ def test_a_level_exemption_nothing_needs_is_stale(
     assert key in stale
 
 
+@pytest.mark.whole_tree
 def test_the_notebook_table_reads_a_level_the_way_the_rule_does() -> None:
     """The table shows dB for exactly the names the rule reads as a level.
 
@@ -1345,6 +1367,7 @@ def test_a_value_name_is_not_an_axis(name: str) -> None:
     assert not cpu.is_axis(name)
 
 
+@pytest.mark.whole_tree
 def test_a_function_axis_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1354,6 +1377,7 @@ def test_a_function_axis_exemption_nothing_needs_is_stale(
     assert key in stale
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_function_axis_by_name() -> None:
     assert cpu.positional_function_axes() == ([], [])
 
@@ -1473,6 +1497,7 @@ def test_an_answer_of_several_values_is_a_record(
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_tuple_return_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1508,6 +1533,7 @@ def test_a_fixed_tuple_is_read_off_the_return_annotation(
     assert cpu.fixed_tuple_items(annotation) == items
 
 
+@pytest.mark.whole_tree
 def test_the_tree_answers_several_quantities_as_records() -> None:
     assert cpu.tuple_returns() == ([], [])
 
@@ -1683,6 +1709,7 @@ def test_a_unit_named_default_is_passed_by_name(
     assert {(p.qualname, p.name) for p in loose} == {("wave", "duration_s")}
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_input_record_by_name() -> None:
     """The real tree passes the input-record rule, and its exemption is live."""
     assert cpu.positional_records() == ([], [])
@@ -1755,6 +1782,7 @@ def test_a_record_held_by_an_input_record_takes_its_axis_by_name(
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_a_record_axis_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1764,10 +1792,12 @@ def test_a_record_axis_exemption_nothing_needs_is_stale(
     assert key in stale
 
 
+@pytest.mark.whole_tree
 def test_the_tree_writes_every_input_record_axis_by_name() -> None:
     assert cpu.positional_record_axes() == ([], [])
 
 
+@pytest.mark.whole_tree
 def test_a_handed_on_result_no_function_takes_or_returns_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1779,6 +1809,7 @@ def test_a_handed_on_result_no_function_takes_or_returns_is_stale(
     assert cpu.stale_handed_on_results() == [gone, returned_only]
 
 
+@pytest.mark.whole_tree
 def test_every_handed_on_result_is_taken_and_returned() -> None:
     assert cpu.stale_handed_on_results() == []
 
@@ -1805,6 +1836,7 @@ def test_an_input_record_built_by_position_is_refused(
         build()
 
 
+@pytest.mark.whole_tree
 def test_every_condition_on_the_tree_is_written_by_name() -> None:
     _, loose, _ = cpu.offenders()
     assert loose == []
@@ -1896,6 +1928,7 @@ def test_a_name_that_says_its_quantity_passes(name: str) -> None:
     assert cpu.decibel_quantity_head(name) is None
 
 
+@pytest.mark.whole_tree
 def test_every_name_in_decibels_says_its_quantity() -> None:
     found, stale = cpu.qualifier_only_decibels()
     assert found == []
@@ -1906,6 +1939,7 @@ def _fitting(corrected_db: float, *, background_levels: float) -> float:
     return corrected_db - background_levels
 
 
+@pytest.mark.whole_tree
 def test_a_name_made_of_qualifiers_put_back_is_reported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1925,6 +1959,7 @@ def test_a_name_made_of_qualifiers_put_back_is_reported(
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_qualifier_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -53,9 +53,11 @@ a caller's value that no check has read on every path to it:
   decorates with. Its parameters hold what its calls across the package
   hand them, joined: a caller's value no check read where any call hands
   one, checked where every call hands a checked one, and none where only
-  values the library computed reach it. The modules are read again until no
-  call hands anything new. Any other function's parameters, a method's and
-  a nested function's included, are a caller's values.
+  values the library computed reach it; a ``*`` argument or a ``**``
+  mapping hands nothing to a parameter an argument of the call fills in its
+  place or by its name, since the call would raise. The modules are read
+  again until no call hands anything new. Any other function's parameters,
+  a method's and a nested function's included, are a caller's values.
 - **A check**: a call of one of :data:`CHECKS` with the value among its
   arguments, or of a function of the library that hands that parameter to
   one on every path that leaves it by its end or a ``return`` (found by
@@ -125,10 +127,14 @@ from ast_scan import (
     ROOT,
     assigned_value,
     binding_of,
+    bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
     exempted,
     for_the_type_checker,
+    forget_trees,
+    global_bindings,
+    held_before,
     imported_names,
     is_type_checking_block,
     own_names,
@@ -142,7 +148,14 @@ from ast_scan import (
 from ast_scan import parameters as with_defaults
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+    from collections.abc import (
+        Callable,
+        Collection,
+        Iterable,
+        Iterator,
+        Mapping,
+        Sequence,
+    )
 
 #: The library this reads, the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -306,10 +319,6 @@ _KEEPING_ATTRIBUTES = frozenset({"T", "mT"})
 #: cannot tell, keyed by the file relative to the repository and the function
 #: that holds them, with the reason.
 EXEMPT: dict[tuple[str, str], str] = {
-    ("src/phonometry/_plot/common.py", "_plot_band_level_bars"): (
-        "the levels of a result being drawn, a field the result read when it "
-        "was built; the clips fingerprint this module's source"
-    ),
     ("src/phonometry/_internal/validation.py", "real_array"): (
         "the shared reader itself, whose quick path converts only an array of "
         "truth values, integers or floats, which holds no complex number"
@@ -859,6 +868,9 @@ class _Flow:
     checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
     names: _Names
     fields: bool
+    #: The module the function is written in, which says what a test on
+    #: ``TYPE_CHECKING`` reads (:func:`ast_scan.is_type_checking_block`).
+    root: ast.AST
     #: What a call of a check of the library hands back: the arguments it
     #: returns, each with what the check refused in it (:func:`_checker`);
     #: ``None`` for a call of anything else.
@@ -1290,7 +1302,7 @@ class _Flow:
             env[f"self.{target.attr}"] = state
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
-        if is_type_checking_block(node):
+        if is_type_checking_block(node, self.root):
             # One branch never runs, and the other always does.
             return self.block(what_runs(node), env)
         self.expression(node.test, env)
@@ -1590,13 +1602,19 @@ def _reach(
     name: str,
     standing: Mapping[str, Sequence[ast.AST]],
     imports: Mapping[str, str],
+    *,
+    where_written: bool = False,
 ) -> Literal["nearer", "replaced", "spelt"]:
     """What *name*, read at *read*, reaches.
 
     ``"nearer"`` when a scope inside the module binds it to anything but what the
     spelling names; a parameter defaulting to that and a local assigned from it
     (``float=float``, ``asarray = np.asarray``) hide nothing, and a default of the
-    name itself is read where the ``def`` runs its defaults. ``"nearer"`` too when
+    name itself is read where the ``def`` runs its defaults, as the module's
+    bindings of it stand there (:func:`_bound_where_written`), whatever the module
+    binds the name to after it; a method's, as its class body's bindings of it
+    stand there (:func:`_held_in_class`), or, before any of them has run, as the
+    module's stand where the class statement runs. ``"nearer"`` too when
     the read finds a binding of the module that replaces its imports, while
     *imports* holds a function's own import of the name, which this read does not
     reach. ``"replaced"`` when the module's own bindings of a name read by its
@@ -1604,8 +1622,19 @@ def _reach(
     ``"spelt"`` otherwise.
     """
     how, binder = binding_of(tree, read, name)
+    held: list[ast.AST] | None = None
+    if where_written and isinstance(binder, ast.ClassDef):
+        held = _held_in_class(tree, binder, read, name)
+        if not held:
+            # None of the class body's bindings has run yet: Python reads
+            # the name in the module, as it stands where the class runs.
+            binder = None
     if binder is None or binder is tree:
-        live = standing.get(name, ())
+        live = (
+            _bound_where_written(tree, read, name)
+            if where_written
+            else standing.get(name, ())
+        )
         if name in imports and not all(
             isinstance(node, ast.ImportFrom) for node in live
         ):
@@ -1616,9 +1645,14 @@ def _reach(
             and all(_replaces_the_spelling(tree, node, name) for node in live)
         )
         return "replaced" if replaced else "spelt"
-    if how == "import":
+    if held is not None:
+        if any(isinstance(node, ast.Import | ast.ImportFrom) for node in held):
+            return "spelt"
+        values: list[ast.expr | None] = [assigned_value(tree, node) for node in held]
+    elif how == "import":
         return "spelt"
-    values = values_bound(tree, binder, name)
+    else:
+        values = values_bound(tree, binder, name)
     if not values or not all(spells(value, name) for value in values):
         return "nearer"
     for value in values:
@@ -1626,10 +1660,45 @@ def _reach(
             isinstance(value, ast.Name)
             and binding_of(tree, value, name)[1] is not binder
         ):
-            reached = _reach(tree, value, name, standing, imports)
+            reached = _reach(tree, value, name, standing, imports, where_written=True)
             if reached != "spelt":
                 return reached
     return "spelt"
+
+
+def _held_in_class(
+    tree: ast.Module, holder: ast.ClassDef, read: ast.expr, name: str
+) -> list[ast.AST]:
+    """The bindings the class body *holder* makes of *name* that may stand
+    where *read*, a name a default or a value of the body reads where it is
+    written, reads it (:func:`ast_scan.held_before`): none when none has run
+    yet. What an ``if TYPE_CHECKING:`` block holds never runs.
+    """
+    checker = for_the_type_checker(tree)
+    own = [
+        node
+        for node in bindings_by_name(holder).get(name, ())
+        if id(node) not in checker
+    ]
+    return held_before(tree, own, read)
+
+
+def _bound_where_written(tree: ast.Module, read: ast.expr, name: str) -> list[ast.AST]:
+    """The bindings of the module's *name* that may stand where *read*, a
+    name a default or a value reads where it is written, reads it: those at
+    the top of the module that may have run before it (:func:`ast_scan.held_before`),
+    none when none has, so the name is then the builtin, and each a function
+    makes under ``global``, which may have run at any time. What an ``if
+    TYPE_CHECKING:`` block holds never runs, and is none of them.
+    """
+    checker = for_the_type_checker(tree)
+    own = [
+        node for node in bindings_by_name(tree).get(name, ()) if id(node) not in checker
+    ]
+    inside = [
+        node for node in global_bindings(tree).get(name, ()) if id(node) not in checker
+    ]
+    return [*held_before(tree, own, read), *inside]
 
 
 def _replaces_the_spelling(tree: ast.Module, node: ast.AST, name: str) -> bool:
@@ -1710,7 +1779,7 @@ class _Sure:
             sure = sure and not _returns(statement)
 
     def statement(self, node: ast.stmt, *, sure: bool) -> None:
-        if isinstance(node, ast.If) and is_type_checking_block(node):
+        if isinstance(node, ast.If) and is_type_checking_block(node, self.reader.root):
             # One branch never runs, and the other always does.
             self.block(what_runs(node), sure=sure)
         elif isinstance(node, ast.If):
@@ -1895,7 +1964,7 @@ def _signatures(module: _Module) -> list[_Signature]:
     and is not in the body of a ``try`` a handler of which goes on, makes it
     one, of a parameter the call reads before anything rebinds it.
     """
-    reader = _Flow(lambda _: [], module.numpy, fields=False)
+    reader = _Flow(lambda _: [], module.numpy, fields=False, root=module.tree)
     found = []
     for node in module.tree.body:
         if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
@@ -1933,6 +2002,29 @@ def _private(name: str) -> bool:
     return name.startswith("_") and not name.startswith("__")
 
 
+def _filled_by_the_call(
+    call: ast.Call, positional: Sequence[str], keywords: Collection[str]
+) -> frozenset[str]:
+    """The parameters *call* fills with an argument of its own: in its place,
+    before the first ``*`` argument, or by its name, among the *keywords* a
+    keyword can fill. A ``*`` argument or a ``**`` mapping that filled one of
+    them too would make the call raise, so neither reaches it. A keyword
+    that names a positional-only parameter goes to ``**kwargs`` and leaves
+    the place to them.
+    """
+    filled: set[str] = set()
+    for name, argument in zip(positional, call.args, strict=False):
+        if isinstance(argument, ast.Starred):
+            break
+        filled.add(name)
+    filled.update(
+        keyword.arg
+        for keyword in call.keywords
+        if keyword.arg is not None and keyword.arg in keywords
+    )
+    return frozenset(filled)
+
+
 def _dotted(module: _Module, node: ast.AST) -> str | None:
     """The function of the package *node* names in *module*: a name, by what
     the module imports or defines, or an attribute of a module it imports;
@@ -1967,12 +2059,17 @@ class _Helper:
         self, call: ast.Call, state_of: Callable[[ast.expr], State]
     ) -> Iterator[tuple[str, State]]:
         """Each parameter *call* hands a value, with what the value holds; an
-        unpacked argument may reach any parameter from its place on.
+        unpacked argument may reach any parameter from its place on, and a
+        ``**`` mapping any that takes a keyword, but neither one a plain
+        argument of the call fills (:func:`_filled_by_the_call`).
         """
+        filled = _filled_by_the_call(call, self.positional, self.keywords)
         spread: tuple[str, ...] | None = None
         for place, argument in enumerate(call.args):
             if isinstance(argument, ast.Starred) and spread is None:
-                spread = self.positional[place:] + tuple(filter(None, [self.vararg]))
+                spread = tuple(
+                    name for name in self.positional[place:] if name not in filled
+                ) + tuple(filter(None, [self.vararg]))
             value = argument.value if isinstance(argument, ast.Starred) else argument
             if spread is not None:
                 yield from ((name, state_of(value)) for name in spread)
@@ -1981,13 +2078,14 @@ class _Helper:
             elif self.vararg is not None:
                 yield self.vararg, state_of(value)
         for keyword in call.keywords:
-            yield from self._keyword(keyword, state_of(keyword.value))
+            yield from self._keyword(keyword, state_of(keyword.value), filled)
 
     def _keyword(
-        self, keyword: ast.keyword, state: State
+        self, keyword: ast.keyword, state: State, filled: frozenset[str]
     ) -> Iterator[tuple[str, State]]:
         if keyword.arg is None:
-            for name in (*sorted(self.keywords), *filter(None, [self.kwarg])):
+            unfilled = sorted(self.keywords - filled)
+            for name in (*unfilled, *filter(None, [self.kwarg])):
                 yield name, state
         elif keyword.arg in self.keywords:
             yield keyword.arg, state
@@ -2240,7 +2338,8 @@ class _Returns:
                 self._walruses(child, _FUNCTION_SCOPE)
             pending.extend(
                 what_runs(node)
-                if isinstance(node, ast.If) and is_type_checking_block(node)
+                if isinstance(node, ast.If)
+                and is_type_checking_block(node, self.module.tree)
                 else block_statements(node)
             )
         if outer is None:
@@ -2283,10 +2382,16 @@ class _Returns:
         values, it and every argument after it may land in any place from
         its own on, or in ``*args``. A keyword stands for the parameter of
         its name, or for ``**kwargs``; a ``**`` mapping may hand its values
-        to any parameter that takes a keyword, or to ``**kwargs``.
+        to any parameter that takes a keyword, or to ``**kwargs``. Neither a
+        ``*`` argument nor a mapping reaches a parameter a plain argument of
+        the call fills (:func:`_filled_by_the_call`).
         """
         arguments = self.function.args
         positional = [*arguments.posonlyargs, *arguments.args]
+        by_keyword = [*arguments.args, *arguments.kwonlyargs]
+        filled = _filled_by_the_call(
+            call, [p.arg for p in positional], {p.arg for p in by_keyword}
+        )
         unpacked: int | None = None
         for index, value in enumerate(call.args):
             if isinstance(value, ast.Starred) and unpacked is None:
@@ -2294,7 +2399,7 @@ class _Returns:
             places = (
                 positional[index : index + 1]
                 if unpacked is None
-                else (positional[unpacked:])
+                else [p for p in positional[unpacked:] if p.arg not in filled]
             )
             for parameter in places:
                 self._bind(parameter.arg, value, local, reader=caller)
@@ -2302,11 +2407,11 @@ class _Returns:
                 unpacked is not None or index >= len(positional)
             ):
                 self._bind(arguments.vararg.arg, value, local, reader=caller)
-        by_keyword = [*arguments.args, *arguments.kwonlyargs]
         for keyword in call.keywords:
             if keyword.arg is None:
                 for parameter in by_keyword:
-                    self._bind(parameter.arg, keyword.value, local, reader=caller)
+                    if parameter.arg not in filled:
+                        self._bind(parameter.arg, keyword.value, local, reader=caller)
                 if arguments.kwarg is not None:
                     self._bind(arguments.kwarg.arg, keyword.value, local, reader=caller)
             elif any(parameter.arg == keyword.arg for parameter in by_keyword):
@@ -2815,6 +2920,7 @@ class _Reading:
             self.checks,
             _function_names(self.module, function),
             fields=fields or function.name == "__post_init__",
+            root=self.module.tree,
             handed=self.handed,
             calling=self._calling,
         )
@@ -2848,6 +2954,7 @@ class _Reading:
             self.checks,
             outer.names,
             fields=outer.fields,
+            root=outer.root,
             handed=self.handed,
             calling=self._calling,
         )
@@ -2953,39 +3060,44 @@ def census(
     The checks are found across the files read and, with *source*, across
     every module of the library there, so that a file read alone still knows
     the checks its package defines; another copy of the library is read with
-    its own checks only. Each module is parsed twice, once for the checks it
-    defines and once for its conversions, and one at a time, so that no more
-    than one tree is held at once.
+    its own checks only. Each module is parsed once, and its tree serves the
+    checks it defines and every reading of its conversions until the census
+    returns; then the trees are let go, with what the scanner kept of them
+    (:func:`ast_scan.forget_trees`), so that a census holds no tree once it
+    is done.
     """
     read = [path.resolve() for path in paths]
     sources = set(read)
     if source is not None:
         sources |= {path.resolve() for path in source.rglob("*.py")}
-    signatures: list[_Signature] = []
-    helpers: dict[str, _Helper] = {}
-    named: set[str] = set()
-    for path in sorted(sources):
-        module = _module(path)
-        signatures.extend(_signatures(module))
-        defined, names = _helpers(module)
-        helpers.update(defined)
-        named |= names
-    helpers = {name: h for name, h in helpers.items() if name not in named}
-    checks = package_checks(signatures)
-    returned = returned_parameters(signatures)
-    found = _through_callers(read, sources, source, (checks, returned), helpers)
-    return [c for path in read for c in found[path]]
+    try:
+        modules = {path: _module(path) for path in sorted(sources)}
+        signatures: list[_Signature] = []
+        helpers: dict[str, _Helper] = {}
+        named: set[str] = set()
+        for module in modules.values():
+            signatures.extend(_signatures(module))
+            defined, names = _helpers(module)
+            helpers.update(defined)
+            named |= names
+        helpers = {name: h for name, h in helpers.items() if name not in named}
+        checks = package_checks(signatures)
+        returned = returned_parameters(signatures)
+        found = _through_callers(read, modules, source, (checks, returned), helpers)
+        return [c for path in read for c in found[path]]
+    finally:
+        forget_trees()
 
 
 def _through_callers(
     read: Sequence[pathlib.Path],
-    sources: set[pathlib.Path],
+    modules: Mapping[pathlib.Path, _Module],
     source: pathlib.Path | None,
     package: tuple[Mapping[str, Check], Mapping[str, Provenance]],
     helpers: Mapping[str, _Helper],
 ) -> dict[pathlib.Path, list[Conversion]]:
     """The conversions of each module of *read*, every helper's parameters
-    holding what its calls across *sources* hand it.
+    holding what its calls across *modules*, parsed, by their paths, hand it.
 
     Every module is read once with the helpers handed nothing, and then each
     module that defines a helper whose calls hand it something new is read
@@ -2997,11 +3109,11 @@ def _through_callers(
     seeds: Seeds = {}
     handing: dict[pathlib.Path, Seeds] = {}
     found: dict[pathlib.Path, list[Conversion]] = {}
-    pending = sorted(sources)
+    pending = sorted(modules)
     while pending:
         for path in pending:
             conversions, handing[path] = _read_module(
-                _module(path), checks, _spelled(path, source), returned, helpers, seeds
+                modules[path], checks, _spelled(path, source), returned, helpers, seeds
             )
             if path in wanted:
                 found[path] = conversions

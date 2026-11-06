@@ -453,6 +453,7 @@ def _offences() -> list[str]:
     ]
 
 
+@pytest.mark.whole_tree
 def test_a_wrong_type_raises_type_error() -> None:
     found = _offences()
     assert not found, (
@@ -461,6 +462,7 @@ def test_a_wrong_type_raises_type_error() -> None:
     )
 
 
+@pytest.mark.whole_tree
 def test_every_exemption_names_a_function_that_exists() -> None:
     """An exemption outliving its function would excuse the next one."""
     defined = {
@@ -715,6 +717,7 @@ def truncated_whole_numbers(source: str) -> list[str]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_whole_number_goes_through_require_count() -> None:
     found = [
         f"{file.relative_to(SRC).as_posix()}:{where}"
@@ -1942,6 +1945,7 @@ def undocumented_type_errors(
     return found
 
 
+@pytest.mark.whole_tree
 def test_a_public_function_that_raises_type_error_documents_it() -> None:
     found = [
         f"{file.relative_to(SRC).as_posix()}:{where}"

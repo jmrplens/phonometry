@@ -23,11 +23,17 @@ import pathlib
 import sys
 import textwrap
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_language_forwarding as clf
+
+#: The tests that read the whole package run on one worker (rule T19), one
+#: after the other, rather than two of them on two workers at once.
+pytestmark = pytest.mark.xdist_group("language-forwarding")
 
 #: The helper every synthetic package draws its axis with, keyword-only like
 #: ``format_frequency_axis``, and a formatter that takes it positionally.
@@ -572,6 +578,614 @@ def test_an_import_a_function_makes_under_global_may_be_what_a_call_reaches(
     ]
 
 
+def test_a_later_binding_of_another_kind_ends_what_a_name_stood_for(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A lambda or a call's result bound to the name after an alias, an
+    import or a ``def`` of it leaves the name holding what the guard cannot
+    read, at the top of a module and in a function, and an alias in the
+    function replaces the import before it; a ``functools.partial`` of what
+    the name held is that helper still, with its arguments bound.
+
+    Only a ``def``, a ``class``, an import and an alias at the top were read
+    as bindings, so the helper the name first stood for stood past the
+    lambda, and a call that draws nothing of it was refused for dropping its
+    language, or for dropping the language of a helper the alias replaced.
+    Read so, a partial ended the helper it wraps, and a call of it that
+    drops the language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            import functools
+
+            from .helpers import axis, fmt
+
+            by_lambda = axis
+            by_lambda = lambda ax: None
+
+            by_call = axis
+            by_call = make()
+
+            from .helpers import axis as imported
+            imported = lambda ax: None
+
+            standing = axis
+
+            from .helpers import fmt as wrapped
+            wrapped = functools.partial(wrapped)
+
+
+            def _label(value, language="en"):
+                return str(value)
+
+
+            _label = functools.partial(_label)
+
+
+            def plot_lambda(result, ax, language="en"):
+                by_lambda(ax)
+
+
+            def plot_call(result, ax, language="en"):
+                by_call(ax)
+
+
+            def plot_imported(result, ax, language="en"):
+                imported(ax)
+
+
+            def plot_standing(result, ax, language="en"):
+                standing(ax)
+
+
+            def plot_local_lambda(result, ax, language="en"):
+                from .helpers import axis as draw
+                draw = lambda ax: None
+                draw(ax)
+
+
+            def plot_local_alias(result, ax, language="en"):
+                from .helpers import axis as draw
+                draw = fmt
+                draw(ax)
+
+
+            def plot_wrapped(result, ax, language="en"):
+                wrapped(ax)
+
+
+            def plot_label(result, ax, language="en"):
+                _label(ax)
+
+
+            def plot_local_partial(result, ax, language="en"):
+                from .helpers import fmt as draw
+                draw = functools.partial(draw)
+                draw(ax)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_label", "pkg.plots._label"),
+        ("plot_local_alias", "pkg.helpers.fmt"),
+        ("plot_local_partial", "pkg.helpers.fmt"),
+        ("plot_standing", "pkg.helpers.axis"),
+        ("plot_wrapped", "pkg.helpers.fmt"),
+    ]
+
+
+def test_a_loop_s_target_leaves_what_the_name_stood_for_standing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A loop binds its target only on a turn it runs, and it may run none,
+    so after it the name may still hold the alias or the import before it,
+    as after the branches of an ``if``, at the top of a module and in a
+    function.
+
+    The target was read as bound on every way past the loop, so it ended
+    what the name stood for, and a call that drops its language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis, fmt as draw
+
+            no_turn = axis
+            for no_turn in ():
+                pass
+
+            a_turn = axis
+            for a_turn in [print]:
+                pass
+
+            for draw in ():
+                pass
+
+
+            def plot_no_turn(result, ax, language="en"):
+                no_turn(ax)
+
+
+            def plot_a_turn(result, ax, language="en"):
+                a_turn(ax)
+
+
+            def plot_imported(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_local(result, ax, language="en"):
+                from .helpers import fmt as local
+                for local in ():
+                    pass
+                local(ax)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_a_turn", "pkg.helpers.axis"),
+        ("plot_imported", "pkg.helpers.fmt"),
+        ("plot_local", "pkg.helpers.fmt"),
+        ("plot_no_turn", "pkg.helpers.axis"),
+    ]
+
+
+def test_an_alias_reads_its_value_where_the_assignment_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``draw = axis`` written under ``global`` in a function that imports
+    ``axis`` itself reads the import of that function, and ``draw =
+    helpers.axis`` reads ``helpers`` as it stands at the assignment, not as
+    the module binds it once it has run.
+
+    The value was read at the top of the module once it had run, so the
+    first alias reached nothing, and the second reached the ``axis`` of the
+    module a later import bound ``helpers`` to.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.other": """
+            def axis(ax, language="en"):
+                return ax
+            """,
+            "pkg.plots": """
+            from . import helpers
+
+
+            def _setup():
+                global draw
+                from .helpers import axis
+                draw = axis
+
+
+            label = helpers.fmt
+            from . import other as helpers
+
+
+            def plot_global(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_dotted(result, ax, language="en"):
+                label(ax)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_dotted", "pkg.helpers.fmt"),
+        ("plot_global", "pkg.helpers.axis"),
+    ]
+
+
+def test_a_local_alias_reads_its_value_where_the_assignment_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``saved = axis`` in a function, a module body or a class body holds
+    what ``axis`` stands for where the assignment runs, so a later binding
+    of ``axis`` leaves what a call of ``saved`` reaches as it was, through an
+    assignment expression, an annotated assignment, a dotted name and a
+    function written in the function alike.
+
+    The value was read as its names stand once the scope has run, so a
+    lambda bound to ``axis`` after the alias hid the helper the alias holds,
+    and a call of it that drops the language passed, while a helper
+    imported under the value's name after the alias was reported for a call
+    that never reaches it.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            def plot_saved(result, ax, language="en"):
+                from .helpers import axis
+                saved = axis
+                axis = lambda ax: None
+                saved(ax)
+
+
+            def plot_walrus(result, ax, language="en"):
+                from .helpers import axis
+                if (saved := axis) is not None:
+                    pass
+                axis = lambda ax: None
+                saved(ax)
+
+
+            def plot_annotated(result, ax, language="en"):
+                from .helpers import axis
+                saved: object = axis
+                axis = lambda ax: None
+                saved(ax)
+
+
+            def plot_dotted(result, ax, language="en"):
+                from . import helpers
+                saved = helpers.axis
+                helpers = None
+                saved(ax)
+
+
+            def plot_defined(result, ax, language="en"):
+                def inner(ax, language="en"):
+                    return ax
+                saved = inner
+                inner = lambda ax: None
+                saved(ax)
+
+
+            def plot_lambda(result, ax, language="en"):
+                draw = lambda ax: None
+                saved = draw
+                from .helpers import axis as draw
+                saved(ax)
+            """,
+            "figures.__init__": "",
+            "figures.devices": """
+            from pkg.helpers import axis
+
+            saved = axis
+            axis = lambda ax: None
+            saved(None)
+
+
+            class _Panel:
+                from pkg.helpers import axis as draw
+                kept = draw
+                draw = None
+                kept(None)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("<module>", "pkg.helpers.axis"),
+        ("_Panel.<class>", "pkg.helpers.axis"),
+        ("plot_annotated", "pkg.helpers.axis"),
+        ("plot_defined", "pkg.plots.plot_defined.<locals>.inner"),
+        ("plot_dotted", "pkg.helpers.axis"),
+        ("plot_saved", "pkg.helpers.axis"),
+        ("plot_walrus", "pkg.helpers.axis"),
+    ]
+
+
+def test_a_class_body_reads_a_name_it_binds_later_in_its_module(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class body that reads ``axis`` before any binding it makes of the
+    name has run reads the module's ``axis``, as it stands where the class
+    statement runs, whatever the body binds ``axis`` to after: in an alias's
+    value, a call and an alias of a name the body imports too. Once the
+    body has bound the name, it reads the body's binding.
+
+    The body's name was read as the body held it once it had run, so a later
+    ``axis = None`` hid the helper and the call that drops the language
+    passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "figures.__init__": "",
+            "figures.devices": """
+            from pkg.helpers import axis
+
+
+            class _Alias:
+                kept = axis
+                axis = None
+                kept(None)
+
+
+            class _Call:
+                axis(None)
+                axis = None
+
+
+            class _Imported:
+                from pkg.helpers import fmt as shown
+                shown = axis
+                axis = None
+                shown(None)
+
+
+            class _Bound:
+                axis = None
+                kept = axis
+                kept(None)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("_Alias.<class>", "pkg.helpers.axis"),
+        ("_Call.<class>", "pkg.helpers.axis"),
+        ("_Imported.<class>", "pkg.helpers.axis"),
+    ]
+
+
+def test_a_partial_reads_its_names_where_it_is_built(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``functools.partial(axis)`` reads ``partial`` and ``axis`` where it is
+    built: in an assignment, at the top of a module and in a function, and
+    where it is called at once, so a later binding of either name leaves the
+    partial wrapping the helper.
+
+    Both names were read as they stood once the scope had run, so a later
+    ``partial = None`` made the call no partial at all, and a later lambda
+    bound to ``axis`` hid the helper the partial wraps, and the call that
+    drops the language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            import functools
+            from functools import partial
+
+            from .helpers import axis
+
+            _DRAW = partial(axis)
+            partial = None
+
+
+            def plot_top(result, ax, language="en"):
+                _DRAW(ax)
+
+
+            def plot_local(result, ax, language="en"):
+                from functools import partial
+                draw = partial(axis)
+                partial = None
+                draw(ax)
+
+
+            def plot_at_once(result, ax, language="en"):
+                from .helpers import axis
+                functools.partial(axis)(ax)
+                axis = lambda ax: None
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_at_once", "pkg.helpers.axis"),
+        ("plot_local", "pkg.helpers.axis"),
+        ("plot_top", "pkg.helpers.axis"),
+    ]
+
+
+def test_a_local_s_class_is_read_where_its_value_is_made(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``panel = Panel()`` holds an instance of the class ``Panel`` names
+    where the assignment runs, so a later binding of ``Panel`` leaves a call
+    of ``panel.draw`` reaching that class's method.
+
+    The value was read as its names stood once the function had run, so
+    ``Panel = None`` after it left the receiver untyped, the method was read
+    by its name alone, which two classes write with and without the
+    language, and the call that drops it passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.panels": """
+            class Panel:
+                def draw(self, ax, language="en"):
+                    return ax
+
+
+            class Other:
+                def draw(self, ax):
+                    return ax
+            """,
+            "pkg.plots": """
+            def plot_typed(result, ax, language="en"):
+                from .panels import Panel
+                panel = Panel()
+                Panel = None
+                panel.draw(ax)
+            """,
+        },
+    )
+    assert [(f.caller, f.helper) for f in found] == [
+        ("plot_typed", "pkg.panels.Panel.draw"),
+    ]
+
+
+def test_a_name_an_assignment_binds_at_the_top_reaches_the_helper(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``draw = axis`` at the top of a module, or under ``global`` in a
+    function, binds the name to the helper, as an import of it would, and so
+    does ``(draw := axis)``, there or in the function that calls it.
+
+    Only a ``def``, a ``class`` or an import bound a module name, so a call
+    through such an alias reached nothing and dropped the language unread.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            from .helpers import axis
+            from . import helpers
+
+            draw = axis
+            label = helpers.axis
+
+
+            def _localized():
+                global swapped
+                swapped = axis
+
+
+            def plot_top(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_attribute(result, ax, language="en"):
+                label(ax)
+
+
+            def plot_global(result, ax, language="en"):
+                swapped(ax)
+
+
+            if (walked := axis) is not None:
+                pass
+
+
+            def plot_walrus(result, ax, language="en"):
+                walked(ax)
+
+
+            def plot_local_walrus(result, ax, language="en"):
+                if (drawn := axis) is not None:
+                    pass
+                drawn(ax)
+            """,
+            # An alias a later ``def`` or import replaces stands for nothing
+            # at a call that runs once the module has.
+            "pkg.replaced": """
+            from .helpers import fmt
+
+            draw = fmt
+
+
+            def draw(ax):
+                return ax
+
+
+            label = fmt
+            from math import floor as label
+
+
+            def plot_replaced_by_a_def(result, ax, language="en"):
+                draw(ax)
+
+
+            def plot_replaced_by_an_import(result, ax, language="en"):
+                label(ax)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_attribute", "pkg.helpers.axis"),
+        ("plot_global", "pkg.helpers.axis"),
+        ("plot_local_walrus", "pkg.helpers.axis"),
+        ("plot_top", "pkg.helpers.axis"),
+        ("plot_walrus", "pkg.helpers.axis"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("plots", "found"),
+    [
+        pytest.param(
+            """
+            from .helpers import axis
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+
+
+            def axis(ax):
+                return ax
+            """,
+            [("plot_thing", "pkg.helpers.axis")],
+            id="rebound-after-the-def",
+        ),
+        pytest.param(
+            """
+            def axis(ax):
+                return ax
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+
+
+            from .helpers import axis
+            """,
+            [],
+            id="rebound-before-the-def",
+        ),
+        pytest.param(
+            """
+            from .helpers import axis, fmt
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+
+
+            axis = fmt
+            """,
+            [("plot_thing", "pkg.helpers.axis")],
+            id="aliased-after-the-def",
+        ),
+        pytest.param(
+            """
+            from .helpers import axis, fmt
+
+            axis = fmt
+
+
+            def plot_thing(result, ax, language="en", draw=axis):
+                draw(ax)
+            """,
+            [("plot_thing", "pkg.helpers.fmt")],
+            id="aliased-before-the-def",
+        ),
+        pytest.param(
+            """
+            from . import helpers
+
+
+            def plot_thing(result, ax, language="en", draw=helpers.fmt):
+                draw(ax)
+
+
+            from . import other as helpers
+            """,
+            [("plot_thing", "pkg.helpers.fmt")],
+            id="dotted-rebound-after-the-def",
+        ),
+    ],
+)
+def test_a_default_is_the_helper_its_name_holds_where_the_def_runs(
+    tmp_path: pathlib.Path, plots: str, found: list[tuple[str, str]]
+) -> None:
+    """A parameter's default runs once, where the ``def`` does, so it is the
+    helper the name holds there, not the one the module binds it to by its
+    end, the first name of a dotted one alike.
+    """
+    dropped = _dropped(tmp_path, **{"pkg.plots": plots})
+    assert [(f.caller, f.helper) for f in dropped] == found
+
+
 def test_each_of_two_definitions_of_one_name_is_read(tmp_path: pathlib.Path) -> None:
     """A function defined in each branch of an ``if`` has its calls read in both.
 
@@ -786,7 +1400,9 @@ def test_a_helper_is_followed_through_an_alias_and_a_partial(
 
     ``functools.partial`` binds the result and hands the rest on, which is how
     the ISO 17497 fiches pass their drawings to the layout. The bound arguments
-    shift the slot the language is taken at. A callable pulled out of a mapping
+    shift the slot the language is taken at. A partial bound at the top of the
+    module is read as one bound in a function is; it was no binding the guard
+    read there, so a call of it passed. A callable pulled out of a mapping
     stays out of reach, which the module docstring says rather than claims.
     """
     found = _dropped(
@@ -798,6 +1414,8 @@ def test_a_helper_is_followed_through_an_alias_and_a_partial(
             from .helpers import axis
 
             _TABLE = {"axis": axis}
+
+            _DRAW = functools.partial(axis)
 
 
             def via_alias(ax, language="en"):
@@ -817,10 +1435,18 @@ def test_a_helper_is_followed_through_an_alias_and_a_partial(
 
             def via_mapping(ax, language="en"):
                 _TABLE["axis"](ax)
+
+
+            def via_a_partial_at_the_top(ax, language="en"):
+                _DRAW(ax)
             """
         },
     )
-    assert [f.caller for f in found] == ["via_alias", "via_partial"]
+    assert [f.caller for f in found] == [
+        "via_alias",
+        "via_partial",
+        "via_a_partial_at_the_top",
+    ]
 
 
 def test_a_name_only_some_of_whose_methods_take_the_language_is_reported(
@@ -1078,6 +1704,40 @@ def test_a_star_argument_cannot_reach_a_keyword_only_language(
     assert [f.helper for f in found] == ["pkg.helpers.axis"]
 
 
+def test_a_keyword_reaches_no_positional_only_language(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A keyword, or a ``**`` mapping, that names a positional-only language
+    goes to the helper's ``**kw``, and the helper draws in its default.
+
+    ``language=language`` was read as forwarding whatever the helper's
+    parameter was, so both calls passed; the language in its place
+    forwards it.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.plots": """
+            def _label(value, language="en", /, **kw):
+                return value
+
+
+            def by_keyword(result, ax, language="en"):
+                _label(ax, language=language)
+
+
+            def by_mapping(result, ax, language="en"):
+                _label(ax, **{"language": language})
+
+
+            def by_place(result, ax, language="en"):
+                _label(ax, language)
+            """
+        },
+    )
+    assert sorted(f.caller for f in found) == ["by_keyword", "by_mapping"]
+
+
 _EXEMPTED = """
 from .helpers import axis
 
@@ -1110,6 +1770,7 @@ def test_every_exemption_carries_a_reason() -> None:
     assert all(reason.strip() for reason in clf.EXEMPT.values())
 
 
+@pytest.mark.whole_tree
 def test_the_tree_passes_its_language_on() -> None:
     """The corpus itself, which is what the gate protects."""
     assert clf.main([]) == 0

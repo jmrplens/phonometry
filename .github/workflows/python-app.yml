@@ -1473,8 +1473,10 @@ jobs:
   tests-perf:
     name: tests (numba-jitted kernel)
     runs-on: ubuntu-latest
-    # At most 23 min in its last 72 passing runs, and a hung test ends the
-    # run fifteen minutes after it started (pyproject.toml).
+    # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
+    # 2026-11-05, all but a minute or two of it in the test step, and the run of
+    # 2026-11-04 reached this limit and was stopped. A hung test ends the run
+    # fifteen minutes after it started (pyproject.toml).
     timeout-minutes: 50
     permissions:
       contents: read
@@ -1530,7 +1532,15 @@ jobs:
       # to stay serial: the step above compiles it once and the workers that
       # reach it read the cache in a fraction of a second, against a suite
       # that takes about twenty minutes to run one test at a time.
-      run: pytest -q -n auto
+      # --without-whole-tree leaves out the tests that read the repository
+      # whole (tests/whole_tree.py): the guards, censuses and generators run
+      # over the package, the scripts, the documentation, the site and the
+      # committed figures. They read the repository's own text, which the
+      # jitted kernel does not change, and the nine jobs of the test matrix
+      # run them. With them this step took 38:57 on 2026-11-06; they were
+      # 39 % of the summed test time of the Linux 3.14 matrix job of that
+      # run, which puts this step near 25 minutes.
+      run: pytest -q -n auto --without-whole-tree
 
   # The FDTD engines step on any Array API backend. array-api-strict refuses
   # every call outside the standard and every mix of host and device arrays,
@@ -1898,11 +1908,22 @@ jobs:
   # those modules out before importing them, since some import names the floor
   # matplotlib does not have. The jitted kernels are on, so the numba floor is
   # compiled and exercised too.
+  #
+  # Nor does it run the tests that read the repository whole: the guards,
+  # censuses and generators run over the package, the scripts, the
+  # documentation, the site and the committed figures read the repository's
+  # own text, which no dependency floor changes, and the nine jobs of the
+  # test matrix run them.
+  # --without-whole-tree (tests/whole_tree.py) deselects them. With them the
+  # test step took 38:55 on 2026-11-06; they were 37 % of the summed test
+  # time of the Linux 3.12 matrix job of that run, which puts the step near
+  # 25 minutes.
   minimum-versions:
     name: Library tests at the dependency floors
     runs-on: ubuntu-latest
-    # Under 25 min in its last 72 passing runs, and a hung test ends the
-    # run fifteen minutes after it started (pyproject.toml).
+    # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
+    # 2026-11-05, all but a minute or two of it in the test step. A hung test
+    # ends the run fifteen minutes after it started (pyproject.toml).
     timeout-minutes: 50
     permissions:
       contents: read
@@ -1937,7 +1958,7 @@ jobs:
     - name: Check the jitted kernels compile at the numba floor
       run: python scripts/check_jit_kernel.py
     - name: Run the library tests at the floors
-      run: pytest -q -n auto --without-pinned-stack
+      run: pytest -q -n auto --without-pinned-stack --without-whole-tree
 
   # The suite calls _repr_html_ and _repr_pretty_ itself; a notebook goes
   # through IPython, which picks the method, runs matplotlib on its inline

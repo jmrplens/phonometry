@@ -151,6 +151,7 @@ def test_main_names_each_command_and_fails(
     )
 
 
+@pytest.mark.whole_tree
 def test_the_repository_quotes_every_install_command() -> None:
     root = pathlib.Path(__file__).resolve().parents[1]
     found = [

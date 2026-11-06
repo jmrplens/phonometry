@@ -81,6 +81,7 @@ def _whole_shards(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
     return {slug: parts[0] for slug, parts in shards.items()}
 
 
+@pytest.mark.whole_tree
 def test_the_upgrade_guide_over_the_budget_is_cut_at_its_h2_headings(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -107,6 +108,7 @@ def test_the_upgrade_guide_over_the_budget_is_cut_at_its_h2_headings(
     assert [line for part in parts for line in _page_lines(part)] == _page_lines(text)
 
 
+@pytest.mark.whole_tree
 def test_every_shard_that_fits_is_left_as_it_was(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -313,6 +315,7 @@ def test_a_page_with_no_h2_over_the_budget_is_refused_by_name(
         llms._shard_parts("flat", "Flat", [("flat.md", "flat")])
 
 
+@pytest.mark.whole_tree
 def test_the_index_lists_every_part_and_not_the_whole(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -335,6 +338,7 @@ def test_the_index_lists_every_part_and_not_the_whole(
         ) in index
 
 
+@pytest.mark.whole_tree
 def test_a_carved_out_heading_links_every_part_of_its_shard() -> None:
     """The index heading of a cut shard offers each part, in order."""
     files: dict[str, tuple[str, ...]] = {slug: (slug,) for slug in llms.build_shards()}

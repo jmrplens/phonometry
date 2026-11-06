@@ -43,7 +43,12 @@ if _SCRIPTS not in sys.path:
 import check_parameter_annotations as cpa
 import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
-from markdown_fences import python_fences
+from markdown_fences import page_kind, python_fences
+
+#: The tests that read the package share it, the module fixture ``reader``, so
+#: they run on one worker (rule T19): the package is read once, and let go
+#: with the fixture once they are done.
+pytestmark = pytest.mark.xdist_group("record-constructors")
 
 _SOURCE = ROOT / "src" / "phonometry"
 
@@ -68,6 +73,7 @@ def reader() -> cpa.Reader:
     return cpa.Reader(package)
 
 
+@pytest.mark.whole_tree
 def test_every_record_says_what_its_constructor_takes(reader: cpa.Reader) -> None:
     problems: dict[str, list[str]] = {}
     for record in cpa.public_records(reader.package, reader.annotations):
@@ -77,6 +83,7 @@ def test_every_record_says_what_its_constructor_takes(reader: cpa.Reader) -> Non
     assert problems == {}
 
 
+@pytest.mark.whole_tree
 def test_the_records_a_caller_builds_cover_the_named_ones(reader: cpa.Reader) -> None:
     built = cpa.built_records(reader)
     for name in cpa.CALLER_BUILT:
@@ -158,7 +165,8 @@ def guide_built_records() -> dict[str, list[str]]:
     found: dict[str, list[str]] = {}
     for page in _guide_pages():
         names: dict[str, str] = {}
-        for code in python_fences(page.read_text(encoding="utf-8")):
+        text = page.read_text(encoding="utf-8")
+        for code in python_fences(text, kind=page_kind(page.name)):
             try:
                 tree = ast.parse(code)
             except SyntaxError:
@@ -177,6 +185,7 @@ def guide_built_records() -> dict[str, list[str]]:
     return found
 
 
+@pytest.mark.whole_tree
 def test_every_record_a_guide_builds_is_read_as_built_by_a_caller(
     reader: cpa.Reader,
 ) -> None:
@@ -194,6 +203,7 @@ def test_every_record_a_guide_builds_is_read_as_built_by_a_caller(
     assert missing == {}
 
 
+@pytest.mark.whole_tree
 def test_the_guide_reading_finds_a_record_built_through_its_domain() -> None:
     guides = guide_built_records()
     # transfer-stiffness.md builds it as vibration.TransferStiffnessResult(...),
@@ -236,6 +246,7 @@ def test_the_guide_reading_follows_each_way_of_importing() -> None:
         assert dataclasses.is_dataclass(_resolved(dotted))
 
 
+@pytest.mark.whole_tree
 def test_a_stub_exemption_still_covers_a_record_that_converts(
     reader: cpa.Reader,
 ) -> None:

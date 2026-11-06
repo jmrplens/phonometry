@@ -139,6 +139,8 @@ import pathlib
 import sys
 from typing import TYPE_CHECKING, Any, Literal
 
+from ast_scan import reads_type_checking
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
 
@@ -636,7 +638,7 @@ class _ScopeBuilder(ast.NodeVisitor):
     visit_Match = _guarded
 
     def visit_If(self, node: ast.If) -> None:
-        if not _is_type_checking(node.test):
+        if not reads_type_checking(self.module.tree, node.test):
             self._guarded(node)
             return
         # Only a type checker reads the body; it binds nothing at run time.
@@ -1399,13 +1401,17 @@ def _does_nothing(statement: ast.stmt) -> bool:
     )
 
 
-def _at_run_time(statement: ast.stmt) -> ast.stmt | None:
-    """*statement*, at the top of a module, without what only a type checker reads.
+def _at_run_time(statement: ast.stmt, tree: ast.Module) -> ast.stmt | None:
+    """*statement*, at the top of the module *tree* or of a class body in it,
+    without what only a type checker reads.
 
     An ``if TYPE_CHECKING:`` block goes, or keeps only its ``else``; any
-    other statement is itself.
+    other statement is itself, a test on a name the module binds to anything
+    but the flag of ``typing`` among them (:func:`ast_scan.reads_type_checking`).
     """
-    if not (isinstance(statement, ast.If) and _is_type_checking(statement.test)):
+    if not (
+        isinstance(statement, ast.If) and reads_type_checking(tree, statement.test)
+    ):
         return statement
     if not statement.orelse:
         return None
@@ -1618,11 +1624,16 @@ class Sources:
         keeps only its ``else``.
         """
         if module not in self._tops:
-            body = self.modules[module].tree.body
-            if body and _is_docstring(body[0]):
-                body = body[1:]
+            tree = self.modules[module].tree
+            body = (
+                tree.body[1:]
+                if tree.body and _is_docstring(tree.body[0])
+                else tree.body
+            )
             self._tops[module] = [
-                kept for kept in (_at_run_time(s) for s in body) if kept is not None
+                kept
+                for kept in (_at_run_time(s, tree) for s in body)
+                if kept is not None
             ]
         return self._tops[module]
 
@@ -1814,7 +1825,8 @@ class Sources:
         """What the body of the class *node* runs when the class is defined: as :meth:`hashed` reads the top of a module."""
         scope = self.scopes(module).class_scopes[id(node)]
         body = node.body[1:] if node.body and _is_docstring(node.body[0]) else node.body
-        statements = [s for s in (_at_run_time(s) for s in body) if s is not None]
+        tree = self.modules[module].tree
+        statements = [s for s in (_at_run_time(s, tree) for s in body) if s is not None]
         return self._run_on_import(module, scope, statements)
 
     def _run_on_import(
@@ -2326,13 +2338,6 @@ def _dump(node: ast.AST) -> str:
         include_attributes=False,
         **_SHOW_EMPTY,
     )
-
-
-def _is_type_checking(test: ast.expr) -> bool:
-    """Is *test* the ``TYPE_CHECKING`` guard, however it was imported?"""
-    if isinstance(test, ast.Name):
-        return test.id == "TYPE_CHECKING"
-    return isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
 
 
 def _literals(sources: Sources, symbols: Iterable[Symbol]) -> set[str]:

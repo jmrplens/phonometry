@@ -150,6 +150,71 @@ def test_what_a_body_holds_still_meets_the_name_it_annotates(
         assert len(problems) == 1, fence
 
 
+@pytest.mark.parametrize(
+    "fence",
+    [
+        "def shown():\n    format: object\n"
+        "    def inner():\n        global format\n        return format(1)\n"
+        "    return inner()\n",
+        "def shown():\n    format: object\n"
+        "    class Box:\n        global format\n        value = format(1)\n"
+        "    return Box\n",
+        "def shown():\n    format: object\n"
+        "    def outer():\n        global format\n"
+        "        def inner():\n            return format(1)\n"
+        "        return inner()\n"
+        "    return outer()\n",
+    ],
+)
+def test_a_nested_scope_that_sends_the_name_away_reads_the_builtin(
+    tmp_path: pathlib.Path, fence: str
+) -> None:
+    """A function or a class written in the body that declares the name
+    ``global``, or sits inside one that does, reads the module's name, where
+    the builtin answers: the read is not one of the unbound local the
+    function around it annotates.
+    """
+    assert (
+        check_fence_names.check_page(_page(tmp_path, f"```python\n{fence}```\n")) == []
+    )
+
+
+def test_a_nested_scope_that_reaches_the_name_still_meets_the_unbound_local(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A nested function that declares the name ``nonlocal`` reads the local
+    the function around it annotates, which holds nothing, so the builtin
+    does not answer it.
+    """
+    fence = (
+        "def shown():\n    format: object\n"
+        "    def inner():\n        nonlocal format\n        return format(1)\n"
+        "    return inner()\n"
+    )
+    problems = check_fence_names.check_page(_page(tmp_path, f"```python\n{fence}```\n"))
+    assert len(problems) == 1
+    assert "fence 1 uses format" in problems[0]
+
+
+@pytest.mark.parametrize(("suffix", "count"), [(".md", 0), (".mdx", 1)])
+def test_a_page_is_read_as_its_own_kind(
+    tmp_path: pathlib.Path, suffix: str, count: int
+) -> None:
+    """A ``.md`` page shows a block indented four columns as code, written
+    out, so a fence written there is no fence of Python; an ``.mdx`` page
+    has no indented code, and the same lines open one.
+
+    Every page was read as MDX, so the shown example of a ``.md`` page was
+    held to the reading order and its names reported.
+    """
+    page = tmp_path / f"example{suffix}"
+    page.write_text(
+        "Text.\n\n    ```python\n    print(undefined_name)\n    ```\n",
+        encoding="utf8",
+    )
+    assert len(check_fence_names.check_page(page)) == count
+
+
 def test_a_registered_placeholder_is_accepted(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -189,6 +254,7 @@ def test_a_stale_registry_line_is_reported(
     assert "no/such/page" in check_fence_names._stale_placeholder_routes()
 
 
+@pytest.mark.whole_tree
 def test_the_shipped_tree_reads_in_order() -> None:
     """Every committed page passes the gate CI runs."""
     assert check_fence_names.main() == 0

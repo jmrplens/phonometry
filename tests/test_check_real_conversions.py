@@ -30,6 +30,10 @@ import check_real_conversions as guard  # noqa: E402
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+#: The two tests that read the census of the package share it, a module fixture,
+#: so they run on one worker (rule T19): the census is taken once.
+pytestmark = pytest.mark.xdist_group("real-conversions")
+
 
 def _verdicts(tmp_path: Path, source: str) -> dict[str, str]:
     """``{function: verdict}`` for each conversion of *source*, one module of the package."""
@@ -294,6 +298,23 @@ def test_a_predicate_is_no_check(tmp_path: Path) -> None:
 #: Each shape a caller's value reaches a conversion in, one function each,
 #: that no check has read on every path to it: what the guard must report.
 _PLANTED_UNCHECKED = {
+    # A keyword of a positional-only parameter's name goes to ``**kw`` and
+    # leaves the place to what the ``*`` argument unpacks.
+    "a_starred_argument_reaches_a_positional_only_place_a_keyword_names": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, /, y=None, **kw):
+                nonlocal out
+                out = x
+
+            extra = [levels] if reference is None else []
+            inner(*extra, x=real_array(reference, "reference"))
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "python_s_float_of_a_parameter": """
         def f(value):
             return float(value)
@@ -1170,6 +1191,49 @@ _PLANTED_UNCHECKED = {
 
 #: The shapes that answer one: a check on every path, or no caller's value.
 _PLANTED_ANSWERED = {
+    "a_mapping_reaches_no_place_a_keyword_fills_in_a_nested_function": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, y=None):
+                nonlocal out
+                out = x
+
+            inner(x=real_array(reference, "reference"), **{"y": levels})
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_mapping_reaches_no_place_an_argument_fills_in_a_nested_function": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, y=None):
+                nonlocal out
+                out = x
+
+            inner(real_array(reference, "reference"), **{"y": levels})
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
+    "a_starred_argument_reaches_no_place_a_keyword_fills_in_a_nested_function": """
+        def _helper(reference, levels):
+            out = 1.0
+
+            def inner(x, y=None):
+                nonlocal out
+                out = x
+
+            extra = [levels] if reference is None else []
+            inner(*extra, x=real_array(reference, "reference"))
+            return out
+
+        def f(reference, levels):
+            return float(_helper(reference, levels))
+    """,
     "a_call_of_a_name_a_comprehension_binds_reaches_no_nested_function": """
         def _helper(reference, levels):
             real_array(reference, "reference")
@@ -1755,6 +1819,24 @@ _HANDED = {
         "def f(levels):\n    return _convert(*levels)\n",
         "unchecked",
     ),
+    "a_mapping": (
+        "def f(options):\n    return _convert(**options)\n",
+        "unchecked",
+    ),
+    # A place an argument of the call fills is that argument's alone: a
+    # ``*`` argument or a ``**`` mapping that filled it too would raise.
+    "a_keyword_beside_an_unpacked_argument": (
+        "def f(rest):\n    return _convert(*rest, values=np.zeros(3))\n",
+        "computed",
+    ),
+    "a_keyword_beside_a_mapping": (
+        "def f(options):\n    return _convert(values=np.zeros(3), **options)\n",
+        "computed",
+    ),
+    "an_argument_in_its_place_beside_a_mapping": (
+        "def f(options):\n    return _convert(np.zeros(3), **options)\n",
+        "computed",
+    ),
 }
 
 
@@ -1764,6 +1846,34 @@ def test_a_private_helper_reads_what_its_calls_hand_it(
 ) -> None:
     caller, verdict = _HANDED[shape]
     source = _PLANTED_HEADER + _HELPER + "\n" + caller
+    assert _verdicts(tmp_path, source)["_convert"] == verdict
+
+
+#: A helper whose place takes no keyword: a keyword of its name goes to
+#: ``**kwargs``, and leaves the place to what a ``*`` argument unpacks.
+_POSITIONAL_ONLY_HELPER = """
+def _convert(values, /, **kwargs):
+    return np.asarray(values, dtype=np.float64)
+"""
+
+
+@pytest.mark.parametrize(
+    ("caller", "verdict"),
+    [
+        (
+            "def f(rest):\n    return _convert(*rest, values=np.zeros(3))\n",
+            "unchecked",
+        ),
+        (
+            "def f(rest):\n    return _convert(np.zeros(3), values=rest)\n",
+            "computed",
+        ),
+    ],
+)
+def test_a_keyword_fills_no_positional_only_place(
+    tmp_path: Path, caller: str, verdict: str
+) -> None:
+    source = _PLANTED_HEADER + _POSITIONAL_ONLY_HELPER + "\n" + caller
     assert _verdicts(tmp_path, source)["_convert"] == verdict
 
 
@@ -2217,6 +2327,113 @@ def test_a_binding_of_the_module_is_no_conversion_of_that_spelling(
 
 
 @pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        pytest.param(
+            """
+            def f(levels, float=float):
+                return float(levels)
+
+            float = print
+            """,
+            {"f": "unchecked"},
+            id="the-builtin-a-later-assignment-replaces",
+        ),
+        pytest.param(
+            """
+            def f(levels, complex=complex):
+                return complex(levels)
+
+            def complex(x):
+                return x
+            """,
+            {"f": "unchecked"},
+            id="the-builtin-a-later-def-replaces",
+        ),
+        pytest.param(
+            """
+            float = print
+
+            def f(levels, float=float):
+                return float(levels)
+
+            from builtins import float
+            """,
+            {},
+            id="an-assignment-a-later-import-of-the-builtin-replaces",
+        ),
+    ],
+)
+def test_a_default_is_read_where_the_def_runs(
+    tmp_path: Path, source: str, expected: dict[str, str]
+) -> None:
+    """``float=float`` holds what the module's ``float`` is where the ``def``
+    runs its defaults, whatever the module binds the name to after it.
+
+    The default was read as the module held the name once it had run, so a
+    later ``float = print`` or ``def complex`` hid the conversion the default
+    makes, and a later import of the builtin made a conversion of the
+    ``print`` the default holds.
+    """
+    assert _verdicts(tmp_path, source) == expected
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        pytest.param(
+            """
+            class K:
+                def f(self, levels, float=float):
+                    return float(levels)
+
+                float = print
+            """,
+            {"K.f": "unchecked"},
+            id="the-builtin-the-class-body-binds-later",
+        ),
+        pytest.param(
+            """
+            float = print
+
+            class K:
+                def f(self, levels, float=float):
+                    return float(levels)
+
+                float = None
+            """,
+            {},
+            id="the-module-s-binding-where-the-class-runs",
+        ),
+        pytest.param(
+            """
+            class K:
+                float = print
+
+                def f(self, levels, float=float):
+                    return float(levels)
+            """,
+            {},
+            id="the-class-body-s-binding-before-the-def",
+        ),
+    ],
+)
+def test_a_method_s_default_is_read_where_its_class_body_runs_it(
+    tmp_path: Path, source: str, expected: dict[str, str]
+) -> None:
+    """A method's ``float=float`` runs where the ``def`` stands in its class
+    body: before the body binds ``float`` the name is the module's, as it
+    stands where the class statement runs, the builtin when nothing has bound
+    it; after, it is what the body bound.
+
+    The default was read through every binding the class body makes of the
+    name, whether it had run or not, so a later ``float = print`` in the body
+    hid the conversion the default makes.
+    """
+    assert _verdicts(tmp_path, source) == expected
+
+
+@pytest.mark.parametrize(
     "source",
     [
         pytest.param(
@@ -2547,6 +2764,7 @@ def test_every_exemption_names_a_function_that_exists() -> None:
         assert reason
 
 
+@pytest.mark.whole_tree
 def test_the_package_keeps_the_rule(tree_census: list[guard.Conversion]) -> None:
     unchecked = [c for c in tree_census if c.verdict == "unchecked"]
     left, stale = guard.exempted(unchecked, guard.EXEMPT)
@@ -2554,6 +2772,7 @@ def test_the_package_keeps_the_rule(tree_census: list[guard.Conversion]) -> None
     assert stale == []
 
 
+@pytest.mark.whole_tree
 def test_the_census_lists_the_whole_class(
     tree_census: list[guard.Conversion],
 ) -> None:

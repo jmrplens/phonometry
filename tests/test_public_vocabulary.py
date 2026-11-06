@@ -804,6 +804,7 @@ def test_a_retired_spelling_of_a_parameter_is_stale(parameter: str, stale: str) 
     assert stale in _stale_spellings(parameter)
 
 
+@pytest.mark.whole_tree
 def test_a_message_names_the_parameter_the_caller_passed() -> None:
     """No message of a public function quotes a retired spelling of its parameter.
 
@@ -2439,6 +2440,7 @@ def test_an_escaped_backtick_hides_no_prose_from_the_rule() -> None:
     assert count_names_written_as_nouns(text, docstring=False) == ["n_planes"]
 
 
+@pytest.mark.whole_tree
 def test_a_count_name_never_stands_in_for_its_noun_in_prose() -> None:
     """The rename to ``n_<plural>`` stops at the identifier.
 

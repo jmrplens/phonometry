@@ -183,7 +183,9 @@ class TreeReads:
 
     def read_by(self, item: pytest.Item) -> set[str]:
         """The files *item* opened, and those its higher-scoped fixtures opened."""
-        opened = set(item.stash.get(_OPENED, set()))
+        nothing: set[str] = set()
+        own = item.stash.get(_OPENED, nothing)
+        opened = set(own)
         for name in getattr(item, "fixturenames", ()):
             mine = [
                 baseid

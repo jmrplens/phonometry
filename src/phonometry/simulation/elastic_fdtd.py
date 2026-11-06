@@ -137,6 +137,7 @@ from .fdtd import (
     _real_numbers,
     _real_sample,
     _recording_or_empty,
+    _refuse_snapshots_past_an_array,
     _require_courant,
     _require_grid_axes,
     _require_provenance,
@@ -1558,7 +1559,8 @@ class ElasticFDTD2D:
             :class:`ForceSource` returns anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             ``snapshot_every`` or ``snapshot_decimation`` is not a whole
-            number of 1 or more, or such a waveform returns a number too
+            number of 1 or more, the frames would take more bytes than a
+            NumPy array can hold, or such a waveform returns a number too
             large for a float.
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
@@ -1942,8 +1944,10 @@ class ElasticRun(OwnsArrays):
         number or a text.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
         not two whole numbers of two cells or more or is given beside a map of
-        another shape, or a source, a probe or the obstacle does not fit the
-        grid.
+        another shape, a source, a probe or the obstacle does not fit the
+        grid, or the ``duration_s`` covers more steps than the record holds:
+        its time axis or its probe history would take more bytes than a NumPy
+        array can hold.
     """
 
     c_p: float | Field2D
@@ -2053,6 +2057,11 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
     ny, nx = medium.cp_map.shape
     for source in run.sources:
         _check_elastic_source(source, (ny, nx), medium.obstacle)
+    probe_ix = _probe_indices(recording.probes, (ny, nx), medium.obstacle)
+    fields = tuple(recording.probe_fields)
+    steps = _step_count(
+        duration_s, medium.dt, ("signals", (probe_ix.shape[0], len(fields)))
+    )
     return _ElasticChecks(
         grid=(ny, nx),
         dx=medium.dx,
@@ -2061,9 +2070,9 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
         free_sides=medium.free_sides,
         absorbing_sides=absorbing_sides,
         absorbing_layer_cells=width,
-        probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
-        fields=tuple(recording.probe_fields),
-        steps=_step_count(duration_s, medium.dt),
+        probe_ix=read_only(probe_ix),
+        fields=fields,
+        steps=steps,
         snapshot_every=recording.snapshot_every,
         snapshot_field=recording.snapshot_field,
         snapshot_decimation=recording.snapshot_decimation,
@@ -2398,9 +2407,11 @@ def elastic_fdtd_simulation(
         or a ``Fraction`` or a ``Decimal`` the run keeps as given, such as
         ``dx=Fraction(1, 100)``; and, as the run steps, for a waveform that
         returns anything but one real number.
-    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
-        a hosts file that cannot be read or is malformed; and, as the run
-        steps, for a waveform that returns a number too large for a float.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, a
+        hosts file that cannot be read or is malformed, or snapshots that
+        would take more bytes than a NumPy array can hold in the run's dtype,
+        refused before the run steps; and, as the run steps, for a waveform
+        that returns a number too large for a float.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import, unless ``fallback=True``.
@@ -2426,6 +2437,9 @@ def elastic_fdtd_simulation(
         dtype=np.float64,
     )
     frames = checks.snapshot_shape()
+    _refuse_snapshots_past_an_array(
+        frames, request.dtype, checks.snapshot_every, checks.snapshot_decimation
+    )
     snapshots = (
         None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
     )

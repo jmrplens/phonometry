@@ -144,7 +144,7 @@ $1/\sqrt{r}$ amplitude spreading.
 | Exception | When |
 | :--- | :--- |
 | TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; and, as the run steps, for a waveform that returns anything but one real number. |
-| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed; and, as the run steps, for a waveform that returns a number too large for a float. |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, a hosts file that cannot be read or is malformed, or snapshots that would take more bytes than a NumPy array can hold in the run's dtype, refused before the run steps; and, as the run steps, for a waveform that returns a number too large for a float. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation, unless `fallback=True`. |
@@ -453,7 +453,7 @@ with `numpy_field`). The two counts are taken by name, as
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns anything but one real number. |
-| ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, or such a waveform returns a number too large for a float. |
+| ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, the frames would take more bytes than a NumPy array can hold, or such a waveform returns a number too large for a float. |
 
 ### ElasticFDTD2D.step()
 
@@ -650,7 +650,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, or a medium (`c_p`, `c_s`, `rho`, `damping`) that holds a complex number or a text. |
-| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of two cells or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
+| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of two cells or more or is given beside a map of another shape, a source, a probe or the obstacle does not fit the grid, or the `duration_s` covers more steps than the record holds: its time axis or its probe history would take more bytes than a NumPy array can hold. |
 
 ## ExplosionSource
 

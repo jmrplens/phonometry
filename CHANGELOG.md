@@ -2335,13 +2335,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   grid driven by a Gaussian pulse, and by 1.0e-06 at that of a 24-step
   elastic run on the same grid.
 
-- **A run longer than an array can record is refused where it is built.** An
+- **A run longer than its record can hold is refused before it steps.** An
   `FDTDRun` or an `ElasticRun` whose `duration_s` covers more time steps than
-  an array holds, as a sound speed of `2**70` m/s or a `duration_s` of
+  its record holds, as a sound speed of `2**70` m/s or a `duration_s` of
   `1e300` s gives, built and then stopped `fdtd_simulation` or
-  `elastic_fdtd_simulation` with NumPy's `Maximum allowed dimension exceeded`,
-  which names no input. It now raises `ValueError` when the run is built,
-  naming `duration_s` and the time step.
+  `elastic_fdtd_simulation` with NumPy's `Maximum allowed dimension exceeded`
+  or `array is too big`, which name no input. NumPy refuses an array whose
+  bytes pass the largest index, an empty axis left out of the product, so
+  the float64 time axis is past it from about `2**60` steps on, and so is
+  the probe history, the empty one of a run with no probe included, and two
+  probes' history from about `2**59`. Such a run now raises `ValueError` when
+  it is built, naming `duration_s`, the time step, the array and the bytes it
+  would take. Snapshots that no array holds in the run's dtype are refused
+  the same way when the function is called, before the run steps, and so
+  are the frames of an engine's `run(n_steps, snapshot_every=...)`.
 
 - **One number a function reads is read by name.** A function that turned one
   of its caller's numbers into a float with `float()`, or into a complex number

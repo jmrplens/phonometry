@@ -54,6 +54,7 @@ edge, and second-order convergence under grid refinement.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
@@ -152,9 +153,10 @@ _REAL_KINDS = "iuf"
 #: The target reflection of a sponge layer when the caller names none: the
 #: default of both engines, which a run keeps.
 _DEFAULT_SPONGE_REFLECTION = 1e-4
-#: The most steps a run takes: its record holds one sample per step and the
-#: initial one, and an array holds no more than the largest index.
-_MOST_STEPS = float(np.iinfo(np.intp).max)
+#: The most bytes one array takes: NumPy refuses an array whose item size
+#: times its axes, an empty axis left out of the product, passes the largest
+#: index.
+_MOST_BYTES = int(np.iinfo(np.intp).max)
 
 
 def _real_numbers(name: str, value: object, complex_refusal: str | None = None) -> None:
@@ -821,7 +823,10 @@ def _run_recording(
             engine.step()
         return np.zeros((0, 0, 0), dtype=backend.host_dtype)
     first = backend.to_host(engine.p[::d, ::d])
-    frames = np.zeros((n_steps // every + 1, *first.shape), dtype=first.dtype)
+    shape = (n_steps // every + 1, *first.shape)
+    why = f"n_steps={n_steps} with snapshot_every={every} records {shape[0]} frames"
+    _refuse_past_an_array(why, "frames", shape, first.dtype)
+    frames = np.zeros(shape, dtype=first.dtype)
     frames[0] = first
     for i in range(n_steps):
         engine.step()
@@ -1190,26 +1195,89 @@ def _acoustic_medium(
     )
 
 
-def _step_count(duration_s: float, dt: float) -> int:
-    """The number of steps of *dt* that cover *duration_s*, at least one.
+def _refuse_past_an_array(
+    why: str, name: str, shape: tuple[int, ...], dtype: str | np.dtype[Any]
+) -> None:
+    """Refuse an array of *shape* in *dtype* that NumPy would not allocate, by its name and its bytes.
 
-    At most one fewer than an array holds, since the record keeps one sample
-    per step and the initial one: a step count past that (a speed of 2**70
-    m/s makes a step of about 1e-23 s) raised NumPy's ``Maximum allowed
-    dimension exceeded`` from inside the function, naming nothing.
+    NumPy counts an array's bytes as its item size times its axes, an empty
+    axis left out of the product, and refuses a count past the largest index
+    (``np.intp``) with ``array is too big``, which names no input: the empty
+    probe history of a run of no probes, ``np.zeros((0, 2**60 + 1))``, is
+    refused as well. Each array is held to that count on its own, not summed
+    with the others; whether the machine has the memory is another question,
+    which NumPy answers when it allocates.
+
+    :param why: What makes the array that large, the opening words of the
+        refusal.
+    :param name: The array, as the refusal names it.
+    :raises ValueError: for an array whose bytes pass the largest index.
+    """
+    kind = np.dtype(dtype)
+    nbytes = kind.itemsize * math.prod(n for n in shape if n)
+    if nbytes > _MOST_BYTES:
+        msg = (
+            f"{why}: the {name}, of shape {shape} in {kind.name}, would take "
+            f"{nbytes} bytes, more than an array can hold ({_MOST_BYTES})"
+        )
+        raise ValueError(msg)
+
+
+def _step_count(
+    duration_s: float, dt: float, history: tuple[str, tuple[int, ...]]
+) -> int:
+    """The number of steps of *dt* that cover *duration_s*, at least one, as many as the record holds.
+
+    The record keeps one float64 sample per step and the initial one, in the
+    time axis and in the probe history *history* names, whose leading axes
+    (the probes, and the elastic engine's fields) it gives; each is held to
+    the bytes NumPy allocates (:func:`_refuse_past_an_array`). A count past
+    them (a speed of 2**70 m/s makes a step of about 1e-23 s) raised NumPy's
+    ``Maximum allowed dimension exceeded`` or ``array is too big`` from
+    inside the simulation function, naming nothing.
+
+    :param history: The name of the probe history and its axes before the
+        time axis.
     """
     ratio = duration_s / dt
-    if ratio >= _MOST_STEPS:
-        msg = (
-            f"duration_s covers {ratio:.3e} time steps of dt = {dt:.3e} s (from "
-            "dx, cfl and the fastest speed), more than an array can hold"
-        )
+    why = (
+        f"duration_s covers {ratio:.3e} time steps of dt = {dt:.3e} s (from dx, "
+        "cfl and the fastest speed)"
+    )
+    if ratio >= _MOST_BYTES:
+        # Past the largest index the time axis has more samples than an array
+        # has bytes, and an infinite ratio has no whole count to round to.
+        msg = f"{why}: the time axis would take more than an array can hold"
         raise ValueError(msg)
     steps = round(ratio)
     if steps < 1:
         msg = f"duration_s must cover at least one time step (dt = {dt:.3e} s)"
         raise ValueError(msg)
+    _refuse_past_an_array(why, "time axis", (steps + 1,), "float64")
+    name, axes = history
+    _refuse_past_an_array(why, name, (*axes, steps + 1), "float64")
     return steps
+
+
+def _refuse_snapshots_past_an_array(
+    frames: tuple[int, int, int] | None,
+    dtype: str,
+    snapshot_every: int | None,
+    snapshot_decimation: int,
+) -> None:
+    """Refuse the snapshots of a run, *frames* in *dtype*, when NumPy would not allocate them.
+
+    Read where the run's dtype is known, by both simulation functions,
+    before they allocate the snapshots: a float32 run's take half the bytes
+    of a float64 one's.
+    """
+    if frames is None:
+        return
+    why = (
+        f"the run records {frames[0]} frames over its duration_s (snapshot_every="
+        f"{snapshot_every}, snapshot_decimation={snapshot_decimation})"
+    )
+    _refuse_past_an_array(why, "snapshots", frames, dtype)
 
 
 def _snapshot_shape(
@@ -2188,7 +2256,8 @@ class FDTD2D:
             anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             ``snapshot_every`` or ``snapshot_decimation`` is not a whole
-            number of 1 or more, or that waveform returns a number too large
+            number of 1 or more, the frames would take more bytes than a
+            NumPy array can hold, or that waveform returns a number too large
             for a float.
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
@@ -2651,8 +2720,10 @@ class FDTDRun(OwnsArrays):
         or an ``obstacle_mask`` that is not boolean.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
         not two whole numbers of one cell or more or is given beside a map of
-        another shape, or a source, a probe or the obstacle does not fit the
-        grid.
+        another shape, a source, a probe or the obstacle does not fit the
+        grid, or the ``duration_s`` covers more steps than the record holds:
+        its time axis or its probe history would take more bytes than a NumPy
+        array can hold.
     """
 
     c: float | Field2D
@@ -2808,6 +2879,8 @@ def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
     ny, nx = medium.c_map.shape
     for source in run.sources:
         _check_source(source, (ny, nx), medium.obstacle)
+    probe_ix = _probe_indices(recording.probes, (ny, nx), medium.obstacle)
+    steps = _step_count(duration_s, medium.dt, ("pressures", (probe_ix.shape[0],)))
     return _AcousticChecks(
         grid=(ny, nx),
         dx=medium.dx,
@@ -2816,8 +2889,8 @@ def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
         absorbing_sides=absorbing_sides,
         edge_impedance=MappingProxyType(edge_impedance),
         absorbing_layer_cells=width,
-        probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
-        steps=_step_count(duration_s, medium.dt),
+        probe_ix=read_only(probe_ix),
+        steps=steps,
         snapshot_every=recording.snapshot_every,
         snapshot_decimation=recording.snapshot_decimation,
     )
@@ -3157,9 +3230,11 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         keeps as given, such as ``dx=Fraction(1, 100)``; and, as the run
         steps, for the waveform of a :class:`PlaneWaveSource` that returns
         anything but one real number.
-    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
-        a hosts file that cannot be read or is malformed; and, as the run
-        steps, for that waveform returning a number too large for a float.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, a
+        hosts file that cannot be read or is malformed, or snapshots that
+        would take more bytes than a NumPy array can hold in the run's dtype,
+        refused before the run steps; and, as the run steps, for that
+        waveform returning a number too large for a float.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import, unless ``fallback=True``.
@@ -3182,6 +3257,9 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
     # keep it, a float32 run's being half the size. Either route fills them.
     pressures = np.zeros((checks.probe_ix.shape[0], checks.steps + 1), dtype=np.float64)
     frames = checks.snapshot_shape()
+    _refuse_snapshots_past_an_array(
+        frames, request.dtype, checks.snapshot_every, checks.snapshot_decimation
+    )
     snapshots = (
         None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
     )

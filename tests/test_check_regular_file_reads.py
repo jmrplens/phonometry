@@ -377,6 +377,50 @@ def test_a_later_binding_of_another_kind_ends_an_alias(
 
 
 @pytest.mark.parametrize(
+    ("binding", "found"),
+    [
+        pytest.param("io = make()\nopener = io.open\n", [], id="head-rebound-before"),
+        pytest.param(
+            "opener = io.open\nio = make()\n",
+            [("read", _OWN)],
+            id="head-rebound-after",
+        ),
+        pytest.param(
+            "from io import open as held\nheld = lambda path: None\nopener = held\n",
+            [],
+            id="name-rebound-before",
+        ),
+        pytest.param(
+            "held = print\nopener = held\nfrom io import open as held\n",
+            [],
+            id="name-imported-after",
+        ),
+    ],
+)
+@pytest.mark.parametrize("where", ["at-the-top", "in-the-function"])
+def test_an_alias_reads_its_value_where_the_assignment_runs(
+    tmp_path: pathlib.Path, binding: str, found: list[tuple[str, str]], where: str
+) -> None:
+    """``opener = io.open`` holds what ``io`` stands for where the assignment
+    runs: a call's result or a lambda bound to the name before the alias
+    leaves the alias holding what the guard cannot name, and a binding after
+    it changes nothing, at the top of the module and in the function.
+
+    A scope's table of names took its imports and its aliases in the order
+    of the source and nothing else, so the alias read ``io`` as the import
+    before a call's result replaced it, and the read through it was refused;
+    and an import after an alias of ``print`` made the alias a read.
+    """
+    call = "    with opener(path) as fh:\n        return fh.read()\n"
+    if where == "at-the-top":
+        source = f"import io\n{binding}\ndef read(path):\n{call}"
+    else:
+        inner = textwrap.indent(f"import io\n{binding}", "    ")
+        source = f"def read(path):\n{inner}{call}"
+    assert _found(tmp_path, source) == found
+
+
+@pytest.mark.parametrize(
     "loop",
     [
         pytest.param("for opener in ():\n    pass\n", id="no-turn"),

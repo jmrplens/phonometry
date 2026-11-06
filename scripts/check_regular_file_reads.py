@@ -449,7 +449,9 @@ def _bound(
     no scope it is read in binds it; then the imports of the
     scope as :func:`_imported` reads them, the relative ones from *package*,
     a name bound by an assignment to a dotted name (``snd = soundfile``,
-    ``reader = sf.read``) what that name stands for there, and a name any
+    ``reader = sf.read``) what that name stands for where the assignment
+    runs, as the bindings the scope makes of its first name that may stand
+    there say (:func:`_held_where`), and a name any
     other binding stores in (a lambda, a call's result, a loop's target)
     nothing the guard can name, each binding taken in the order of the
     source, so the last one written stands. What the functions and classes
@@ -474,7 +476,9 @@ def _bound(
             if held is not None:
                 aliases[parameter.arg] = held
     checker = for_the_type_checker(scope)
-    written: list[tuple[tuple[int, int], ast.Import | ast.ImportFrom | _Alias]] = []
+    written: list[
+        tuple[tuple[int, int], ast.Import | ast.ImportFrom | ast.Assign | ast.NamedExpr]
+    ] = []
     naming: set[int] = set()
     for node in _own_nodes(scope):
         if id(node) in checker:
@@ -485,15 +489,18 @@ def _bound(
         elif (
             isinstance(node, ast.Assign | ast.NamedExpr)
             and (target := _one_target(node)) is not None
-            and (parts := _dotted(node.value)) is not None
+            and _dotted(node.value) is not None
         ):
-            written.append(((node.lineno, node.col_offset), (target.id, parts)))
+            written.append(((node.lineno, node.col_offset), node))
             naming |= {id(node), id(target)}
     for _place, bound in sorted(written, key=lambda entry: entry[0]):
-        if isinstance(bound, tuple):
-            aliases[bound[0]] = _resolved(bound[1], aliases)
-        else:
+        if isinstance(bound, ast.Import | ast.ImportFrom):
             aliases.update(_imported(bound, package))
+            continue
+        target = _one_target(bound)
+        held = _held_where(bound.value, scope, package, aliases)
+        if target is not None and held is not None:
+            aliases[target.id] = held
     # A name an import or an alias binds, of whose bindings none that may
     # stand once the scope has run is either (a lambda, a call's result, a
     # loop's target or a ``del`` after it), stands for nothing.
@@ -505,11 +512,6 @@ def _bound(
             if not any(id(node) in naming for node in live):
                 aliases.pop(name, None)
     return aliases
-
-
-#: An assignment of a dotted name alone: the name it binds, and the dotted
-#: name's parts.
-_Alias = tuple[str, list[str]]
 
 
 def _one_target(node: ast.Assign | ast.NamedExpr) -> ast.Name | None:

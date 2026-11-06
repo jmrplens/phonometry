@@ -399,6 +399,17 @@ exclude_dirs = ["tests", ".venv"]
 
 [tool.coverage.run]
 relative_files = true
+# Python's own monitoring (PEP 669) on every Python the package supports, as
+# coverage already picks it on 3.14. On 3.12 and 3.13 the default is the C
+# tracer, which takes an event for every call of the run, those of the guards
+# under scripts/ too though nothing there is measured, and one for every line
+# of src/ each time it runs. Under it a guard that reads the whole package ran
+# 2.2 to 2.7 times as long as without coverage, and the tests at the root of
+# tests/ and the Zwicker loudness tests 1.7 and 3.6 times as long as under
+# sysmon, which counts the same lines: a line once counted, and a function
+# outside src/, report nothing more. On 3.12 and 3.13 it measures lines only,
+# and no branch coverage is configured.
+core = "sysmon"
 
 [tool.pytest.ini_options]
 # faulthandler_exit_on_timeout, which the hang guard below rests on, came

@@ -2354,8 +2354,12 @@ class Reader:
         """What a call to a function or a class of the package returns, each
         definition it reaches read (:meth:`reached`, *pins* what its name
         stood for where it was read).
+
+        A function and a class of one name share a key: the class is what
+        the call reaches unless *pins* holds a ``def`` of the key, which an
+        alias bound before the class keeps.
         """
-        if target in self.tree.classes:
+        if target in self.tree.classes and not (pins and pins.get(target)):
             info = self.tree.classes[target]
             if info.record:
                 return self.constructor_sink(

@@ -1162,6 +1162,111 @@ def test_an_alias_reaches_the_definition_its_value_named_where_it_was_bound(
     }
 
 
+def test_an_alias_of_a_def_holds_it_whatever_a_later_class_binds_the_name_to(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``keep = handing_back`` followed by ``class handing_back`` still holds
+    the ``def``, at the top of a module, in an assignment expression and read
+    from another module, while an alias of a ``class`` a later ``def``
+    replaces holds the class; and a call of a name whose ``class`` a later
+    ``def`` replaces reaches the ``def``, in its module and through an
+    import.
+
+    A function and a class of one name share one key, and a call that
+    reached the key was read as a call of the class whenever the class was
+    there, whatever the alias had held where it was bound or the name held
+    where the call ran, so a record that keeps the caller's array through
+    the alias or the replacing ``def`` passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def handing_back(a):
+            return a
+
+        keep = handing_back
+        (walrus := handing_back)
+
+        class handing_back:
+            pass
+
+        class made:
+            pass
+
+        held = made
+
+        def made(a):
+            return a
+
+        class direct:
+            pass
+
+        def direct(a):
+            return a
+
+        def through_an_alias(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_walrus(frequencies, levels):
+            f = walrus(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_alias_of_a_class(frequencies, levels):
+            f = held(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_the_name(frequencies, levels):
+            f = direct(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+        helpers="""
+        def handing_back(a):
+            return a
+
+        kept = handing_back
+
+        class handing_back:
+            pass
+
+        class replaced:
+            pass
+
+        def replaced(a):
+            return a
+        """,
+        importer="""
+        from . import helpers
+        from .helpers import kept, replaced
+        from .results import BandResult
+
+        def through_an_imported_def(frequencies, levels):
+            f = replaced(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_import(frequencies, levels):
+            f = kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_an_attribute(frequencies, levels):
+            f = helpers.kept(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_an_alias", "BandResult.frequencies", "frequencies"),
+        ("through_a_walrus", "BandResult.frequencies", "frequencies"),
+        ("through_an_import", "BandResult.frequencies", "frequencies"),
+        ("through_an_attribute", "BandResult.frequencies", "frequencies"),
+        ("through_the_name", "BandResult.frequencies", "frequencies"),
+        ("through_an_imported_def", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     tmp_path: pathlib.Path,
 ) -> None:

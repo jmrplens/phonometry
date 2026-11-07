@@ -47,6 +47,8 @@ _CODERABBIT = _ROOT / ".coderabbit.yaml"
 _DOCS_WORKFLOW = _ROOT / ".github" / "workflows" / "docs.yml"
 _PYTHON_WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
 _CITATION_MODULE = _ROOT / "site" / "src" / "data" / "citation.mjs"
+_REPO_STATS_MODULE = _ROOT / "site" / "src" / "data" / "repo-stats.mjs"
+_STRUCTURED_DATA_CHECK = _ROOT / "site" / "scripts" / "check-structured-data.mjs"
 
 
 def _glob_to_regex(pattern: str) -> re.Pattern[str]:
@@ -165,27 +167,48 @@ def _trigger_paths(workflow: pathlib.Path, event: str) -> set[str]:
     return set(triggers[event]["paths"])
 
 
+#: The site modules that read files at the repository root, each with the way
+#: it names one: ``citation.mjs`` through its ``root('<name>')`` helper,
+#: ``repo-stats.mjs`` and the structured-data check, which the docs workflow
+#: runs on the build, as ``join(<root>, '<name>')``.
+_ROOT_READERS: dict[pathlib.Path, re.Pattern[str]] = {
+    _CITATION_MODULE: re.compile(r"readFileSync\(\s*root\(\s*'([^']+)'"),
+    _REPO_STATS_MODULE: re.compile(r"\bjoin\(\s*ROOT\s*,\s*'([^']+)'\s*\)"),
+    _STRUCTURED_DATA_CHECK: re.compile(
+        r"\bjoin\(\s*REPOSITORY_ROOT\s*,\s*'([^']+)'\s*\)"
+    ),
+}
+
+
 def test_the_docs_workflow_triggers_on_every_root_file_the_site_build_reads() -> None:
     """A root file the site build reads has to be able to trigger that build.
 
-    ``site/src/data/citation.mjs`` runs only inside ``astro build``, and that
-    build runs only when the docs workflow's path filter matches. Every
-    repository-root file the module reads therefore belongs in both filters:
+    ``site/src/data/citation.mjs`` and ``site/src/data/repo-stats.mjs`` run
+    only inside ``astro build``, the structured-data check only on its output,
+    and both run only when the docs workflow's path filter matches. Every
+    repository-root file these modules read therefore belongs in both filters:
     otherwise a pull request touching one of them merges without the guard
     that reads it ever running, and the failure surfaces later on an unrelated
-    pull request that did not change the file at fault.
+    pull request that did not change the file at fault. ``pyproject.toml`` is
+    one: the site states its Python floor and requirements from it, and stops
+    on a requirement it cannot state.
     """
-    module = _CITATION_MODULE.read_text(encoding="utf-8")
-    read = {
-        match.group(1)
-        for match in re.finditer(r"readFileSync\(\s*root\(\s*'([^']+)'", module)
-    }
-    root_files = sorted(name for name in read if "/" not in name)
-    assert root_files, "citation.mjs reads no repository-root file; update this test"
+    root_files: set[str] = set()
+    for module, reads in _ROOT_READERS.items():
+        read = {
+            match.group(1)
+            for match in reads.finditer(module.read_text(encoding="utf-8"))
+            if "/" not in match.group(1)
+        }
+        assert read, (
+            f"{module.relative_to(_ROOT)} reads no repository-root file; "
+            "update this test"
+        )
+        root_files |= read
 
     for event in ("push", "pull_request"):
         listed = _trigger_paths(_DOCS_WORKFLOW, event)
-        missing = [name for name in root_files if name not in listed]
+        missing = sorted(name for name in root_files if name not in listed)
         assert not missing, (
             f"docs.yml {event} trigger does not list {missing}, "
             "so the site build that reads them cannot run on a change to them"

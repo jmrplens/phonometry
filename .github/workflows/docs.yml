@@ -25,15 +25,21 @@ on:
       # the first entry already.)
       - ".github/brand/**"
       - "scripts/generate_llms.py"
-      # The release commit. site/src/data/citation.mjs reads all four of these
-      # from the repository root, and repo-stats.mjs reads VERSION: without
+      # The release commit and the package's own table.
+      # site/src/data/citation.mjs reads CHANGELOG.md, CITATION.cff and
+      # .zenodo.json from the repository root, and
+      # site/src/data/repo-stats.mjs reads VERSION and pyproject.toml: without
       # them here, publishing a release rebuilt nothing, and the site kept
       # citing the previous version until something under site/ happened to
-      # change. .zenodo.json earns its place a second way: the build is the
-      # only thing that checks its title against CITATION.cff, so a pull
-      # request editing that title alone has to reach this job or the check it
-      # was written for never runs.
+      # change. pyproject.toml gives the Python floor, the install line and
+      # the requirements the site states, and the build stops on a requirement
+      # it cannot state in words, so a pull request that changes that file
+      # alone has to build the site too. .zenodo.json earns its place a second
+      # way: the build is the only thing that checks its title against
+      # CITATION.cff, so a pull request editing that title alone has to reach
+      # this job or the check it was written for never runs.
       - "VERSION"
+      - "pyproject.toml"
       - "CHANGELOG.md"
       - "CITATION.cff"
       - ".zenodo.json"
@@ -57,6 +63,7 @@ on:
       - ".github/brand/**"
       - "scripts/generate_llms.py"
       - "VERSION"
+      - "pyproject.toml"
       - "CHANGELOG.md"
       - "CITATION.cff"
       - ".zenodo.json"

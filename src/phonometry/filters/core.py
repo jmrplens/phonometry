@@ -696,10 +696,10 @@ class OctaveFilterBank:
         self.order = order
         self.limits = limits
         self.filter_type = design.filter_type
-        self.ripple = design.ripple
-        self.attenuation = design.attenuation
-        self.calibration_factor = calibration.factor
-        self.dbfs = calibration.dbfs
+        self.ripple: float = design.ripple
+        self.attenuation: float = design.attenuation
+        self.calibration_factor: float = calibration.factor
+        self.dbfs: bool = calibration.dbfs
         # Whether the caller left the whole calibration bundle alone, which is
         # what decides if a calibrated Signal may supply its own factor. Asked
         # of the bundle rather than of its float field: comparing the frozen
@@ -707,7 +707,7 @@ class OctaveFilterBank:
         # folds in the dBFS switch, since a dBFS bank is referenced to digital
         # full scale and must not be handed pascals either.
         self._default_calibration = calibration == _DEFAULT_CALIBRATION
-        self.stateful = block_processing.stateful
+        self.stateful: bool = block_processing.stateful
 
         # The band set the bank is designed on, held as one immutable record
         # and read through the properties below.
@@ -725,11 +725,14 @@ class OctaveFilterBank:
                     headroom,
                     1.05 * _cheby2_headroom(fraction, order, design.attenuation),
                 )
-            self.factor = _downsamplingfactor(self.upper_edges.tolist(), fs, headroom)
+            # The decimation factor of each band, a whole number from 1.
+            self.factor: NDArray[np.int_] = _downsamplingfactor(
+                self.upper_edges.tolist(), fs, headroom
+            )
         else:
             self.factor = np.ones(self.n_bands, dtype=int)
 
-        self.sos = _design_sos_filter(
+        self.sos: list[NDArray[np.float64]] = _design_sos_filter(
             freq=self.frequencies.tolist(),
             freq_d=self.lower_edges.tolist(),
             freq_u=self.upper_edges.tolist(),

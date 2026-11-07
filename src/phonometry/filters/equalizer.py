@@ -602,12 +602,14 @@ class ParametricEQ:
             msg = "Give at least one EQSection."
             raise ValueError(msg)
 
-        self.fs = float(fs)
+        self.fs: float = float(fs)
         self.sections: tuple[EQSection, ...] = tuple(sections)
         self.stateful = stateful
-        self.sos = np.vstack([_section_sos(self.fs, s) for s in self.sections])
+        self.sos: NDArray[np.float64] = np.vstack(
+            [_section_sos(self.fs, s) for s in self.sections]
+        )
         if self.stateful:
-            self.zi = np.array([])
+            self.zi: NDArray[np.float64] = np.array([])
             self._steady_ic = steady_ic
 
     def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:

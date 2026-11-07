@@ -55,9 +55,14 @@ class NestedSequence[T](Protocol):
     def __reversed__(self, /) -> Iterator[T | NestedSequence[T]]: ...
     # A list of numbers counts only a number: typed object, the method would
     # refuse every typed list, as numpy's own nested sequence says.
-    def count(self, value: Any, /) -> int: ...  # noqa: ANN401
+    def count(self, value: Any, /) -> int:  # noqa: ANN401
+        """How many items equal *value*."""
+        ...
+
     # The same holds for the position of an item.
-    def index(self, value: Any, /) -> int: ...  # noqa: ANN401
+    def index(self, value: Any, /) -> int:  # noqa: ANN401
+        """Where the first item equal to *value* sits."""
+        ...
 
 
 #: The forms of numbers ``np.asarray`` converts to an array of numbers: a

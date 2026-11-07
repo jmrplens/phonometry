@@ -333,8 +333,10 @@ class Provenance(RichDisplay):
     field_test_standards: Mapping[str, str] = field(default_factory=dict)
 
     # A mapping field makes the record unhashable; saying so here gives the
-    # refusal the class's name instead of the mapping's.
-    __hash__ = None  # type: ignore[assignment]
+    # refusal the class's name instead of the mapping's. Declared as a class
+    # variable of None, so a type checker reads the override as written rather
+    # than inferring object's hash method on the rows that inherit it.
+    __hash__: ClassVar[None] = None  # type: ignore[assignment]
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""

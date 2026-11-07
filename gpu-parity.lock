@@ -3,7 +3,7 @@
  "cuda_driver_api": "13.3",
  "cupy": "14.2.0",
  "cupy_cuda_runtime": "13.2",
- "engine_fingerprint": "fad6cf94640ed196572ee5d13f158b4034e17b68d657450b21f853b7ceec7189",
+ "engine_fingerprint": "4b7ad3fac23f7f14d37d1a81ad5e94ee6ffc6ca08170846db30b467fdac65672",
  "fields_bit_identical": true,
  "fields_max_relative": {
   "contour": 0.0,

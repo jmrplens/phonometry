@@ -1343,6 +1343,56 @@ jobs:
     - name: Check that every public parameter admits what its body converts
       run: python scripts/check_parameter_annotations.py
 
+  # pyright's --verifytypes reads the installed package as a user's type
+  # checker does and scores the share of its public names whose type it
+  # knows. It read 99.2%, 137 ambiguous and 8 unknown of 18 689: attributes a
+  # constructor set from an expression (OctaveFilterBank.sos, WeightingFilter.zi,
+  # FDTD2D.p), whose type pyright and mypy may infer differently, and the hash
+  # override of the catalogue's provenance, left undeclared, which made every
+  # catalogue row and each function that takes one partly unknown. Nothing
+  # read the score, so a new attribute of the kind would have lowered it
+  # unseen. This builds the wheel as the release does, installs it in an
+  # environment of its own beside the pyright that requirements-dev.txt pins,
+  # and fails below 100%: on any public type that is ambiguous or unknown, which
+  # pyright reports as an error and which is what keeps the score under 100%.
+  # --ignoreexternal leaves out the types numpy's and matplotlib's own stubs
+  # leave unknown, which no annotation here can make known; the base install
+  # is enough, since no extra adds a public type. `make type-completeness`
+  # runs the same check on a wheel built here.
+  type-completeness:
+    name: Every public name has a type a type checker knows
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Build the wheel as the release does
+      env:
+        PYTHONWARNINGS: error
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements-release.txt
+        python scripts/build_release.py --outdir dist
+    - name: Install the wheel and the pinned pyright in an environment of their own
+      run: |
+        python -m venv "$RUNNER_TEMP/user"
+        "$RUNNER_TEMP/user/bin/python" -m pip install --upgrade pip
+        grep -E '^pyright\[nodejs\]==' requirements-dev.txt | cut -d' ' -f1 > "$RUNNER_TEMP/pyright-pin.txt"
+        "$RUNNER_TEMP/user/bin/python" -m pip install dist/phonometry-*.whl -r "$RUNNER_TEMP/pyright-pin.txt"
+    - name: Fail below a type completeness of 100%
+      run: |
+        set -o pipefail
+        export PATH="$RUNNER_TEMP/user/bin:$PATH" VIRTUAL_ENV="$RUNNER_TEMP/user"
+        pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
+        grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass

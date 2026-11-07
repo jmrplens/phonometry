@@ -40,7 +40,7 @@ Source (clean-room, implemented from the published standard): ECAC.CEAC Doc 29,
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -665,12 +665,15 @@ class PerformanceAircraft(RichDisplay):
     n_engines: int
     max_static_thrust_lb: float
     max_landing_weight_lb: float
-    jet_coefficients: Mapping[str, JetEngineCoefficients] = field(default_factory=dict)
-    propeller_coefficients: Mapping[str, PropellerEngineCoefficients] = field(
-        default_factory=dict
+    # An empty read-only mapping is a default nothing can edit, so it needs no
+    # factory, and the constructor below shows it as written rather than as the
+    # "..." a factory leaves there.
+    jet_coefficients: Mapping[str, JetEngineCoefficients] = MappingProxyType({})
+    propeller_coefficients: Mapping[str, PropellerEngineCoefficients] = (
+        MappingProxyType({})
     )
-    aerodynamic_coefficients: Mapping[tuple[str, str], AerodynamicCoefficients] = field(
-        default_factory=dict
+    aerodynamic_coefficients: Mapping[tuple[str, str], AerodynamicCoefficients] = (
+        MappingProxyType({})
     )
 
     if TYPE_CHECKING:
@@ -682,11 +685,15 @@ class PerformanceAircraft(RichDisplay):
             n_engines: int | np.integer[Any],
             max_static_thrust_lb: float,
             max_landing_weight_lb: float,
-            jet_coefficients: Mapping[str, JetEngineCoefficients] = ...,
-            propeller_coefficients: Mapping[str, PropellerEngineCoefficients] = ...,
+            jet_coefficients: Mapping[str, JetEngineCoefficients] = MappingProxyType(
+                {}
+            ),
+            propeller_coefficients: Mapping[
+                str, PropellerEngineCoefficients
+            ] = MappingProxyType({}),
             aerodynamic_coefficients: Mapping[
                 tuple[str, str], AerodynamicCoefficients
-            ] = ...,
+            ] = MappingProxyType({}),
         ) -> None: ...
 
     def __post_init__(self) -> None:

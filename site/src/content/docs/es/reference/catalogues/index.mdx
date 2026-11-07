@@ -121,28 +121,31 @@ print(sea.validity)
 
 ## Tu propio catálogo
 
-Los catálogos muestran lo que la biblioteca ha leído de un libro o de una
-norma, y nunca mostrarán la tabla de un fabricante: una hoja de características
-se revisa bajo el mismo título, sus condiciones de uso rara vez permiten
+Tus hojas de características, declaraciones de prestaciones, informes de
+ensayo y medidas van en un archivo de catálogo tuyo, un documento JSON o una
+hoja de cálculo guardada como CSV. `io.read_catalogue` lo lee en las mismas
+clases de fila que las tablas publicadas, y todas las búsquedas por nombre
+buscan en él con `catalogue=`, solo o unido a un catálogo publicado. [Tus
+propios catálogos](/phonometry/es/io/material-catalogues/) explica cómo, desde
+una tabla publicada escrita como plantilla hasta el rechazo que señala una
+celda.
+
+Los catálogos publicados recogen lo que la biblioteca ha leído de un libro o
+de una norma, y nunca la tabla de un fabricante: una hoja de características se
+revisa bajo el mismo título, sus condiciones de uso rara vez permiten
 copiarla, y el valor que necesita un proyecto es el de la hoja con la que se
-especificó. Tus hojas de características, declaraciones de prestaciones,
-informes de ensayo y medidas van en un archivo de catálogo tuyo, un documento
-JSON o una hoja de cálculo guardada como CSV, que `io.read_catalogue` lee en
-las mismas clases de fila que las tablas publicadas, y todas las búsquedas por
-nombre buscan en él con `catalogue=`, solo o unido a un catálogo publicado.
-[Tus propios catálogos](/phonometry/es/io/material-catalogues/) explica cómo,
-desde una tabla publicada escrita como plantilla hasta el rechazo que señala
-una celda. Los coeficientes de absorción prácticos de una hoja de
-características, los coeficientes por tercios de octava de un informe de
-ensayo, el índice de reducción acústica de un laboratorio y la mejora a
-impactos de un revestimiento tienen clases de fila propias que ninguna tabla
-publicada usa, y [Cómo leer la hoja de características de un
+especificó. Una tabla de un fabricante pegada en una issue o en una pull
+request nunca se incorpora, y nada de estos catálogos sale de una.
+
+Los coeficientes de absorción prácticos de una hoja de características, los
+coeficientes por tercios de octava de un informe de ensayo, el índice de
+reducción acústica de un laboratorio y la mejora a impactos de un
+revestimiento tienen clases de fila propias que ninguna tabla publicada usa, y
+[Cómo leer la hoja de características de un
 material](/phonometry/es/materials/reading-a-datasheet/) dice qué número de una
 hoja es cuál. El esquema JSON de un archivo de catálogo, para todas las clases
 de fila que publica la biblioteca, se sirve en
 [`schemas/phonometry-catalogue-1.json`](https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json),
-para que un editor complete un archivo tuyo mientras lo escribes. Una tabla de
-un fabricante pegada en una issue o en una pull request nunca se incorpora, y
-nada de estos catálogos sale de una.
+para que un editor complete un archivo tuyo mientras lo escribes.
 
 <CatalogueRouter lang="es" />

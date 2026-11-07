@@ -2354,6 +2354,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   loopbacks: a server on `::1` alone went unseen before. `pnpm run lighthouse`
   starts its preview the same way and refuses an occupied port too.
 
+- **The documentation site builds under a directory that has a
+  `node_modules` above it.** Vite left a package out of the prerender bundle
+  whenever its name resolved from `site/`, and that lookup walks up past the
+  checkout: a home directory holding cookie 0.7.2, zod 3, yaml and picomatch
+  handed all four to a build under it, and every page then failed to render
+  with "does not provide an export named 'parseCookie'". The bundle now
+  carries every package `site/package.json` does not list, as it already did
+  in a checkout with nothing above it, so a parent directory cannot change
+  what the pages run (`site/src/lib/bundled-packages.mjs`).
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

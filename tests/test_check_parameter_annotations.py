@@ -1524,6 +1524,229 @@ def test_an_argument_fills_the_place_the_constructor_or_function_gives_it(
     }
 
 
+#: Records whose constructor and ``__post_init__`` come from their method
+#: resolution order, which reading each base's own order whole, the last
+#: base's first, or the bases depth first, does not give.
+_RESOLUTION_ORDERS = """
+from dataclasses import dataclass, field
+from typing import ClassVar
+
+from ._internal.validation import require_count
+
+__all__ = [
+    "Checked",
+    "Diamond",
+    "Hidden",
+    "Kinded",
+    "Relayed",
+    "checked",
+    "diamond",
+    "hidden",
+    "kinded",
+    "relayed",
+]
+
+@dataclass(frozen=True)
+class _Height:
+    height_m: float
+
+@dataclass(frozen=True)
+class _Count:
+    n_positions: int
+
+@dataclass(frozen=True)
+class _Left(_Height, _Count):
+    pass
+
+@dataclass(frozen=True)
+class _Right(_Height):
+    pass
+
+@dataclass(frozen=True)
+class Diamond(_Left, _Right):
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+@dataclass(frozen=True)
+class _Base:
+    count: int = 1
+
+    def __post_init__(self) -> None:
+        pass
+
+@dataclass(frozen=True)
+class _Plain(_Base):
+    pass
+
+@dataclass(frozen=True)
+class _Checking(_Base):
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "count", require_count(self.count, "count"))
+
+@dataclass(frozen=True)
+class Checked(_Plain, _Checking):
+    pass
+
+@dataclass(frozen=True)
+class Relayed(_Plain, _Checking):
+    def __post_init__(self) -> None:
+        super().__post_init__()
+
+@dataclass(frozen=True)
+class _Kinds:
+    n_positions: ClassVar[int] = 1
+    height_m: float = 0.0
+
+@dataclass(frozen=True)
+class Kinded(_Kinds):
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+@dataclass(frozen=True)
+class _Unset:
+    n_positions: int = field(default=1, init=False)
+    height_m: float = 0.0
+
+@dataclass(frozen=True)
+class Hidden(_Unset):
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+def diamond(n_positions: int) -> Diamond:
+    return Diamond(n_positions, 1.0)
+
+def checked(count: int) -> Checked:
+    return Checked(count)
+
+def relayed(count: int) -> Relayed:
+    return Relayed(count)
+
+def kinded(n_positions: int) -> Kinded:
+    return Kinded(n_positions)
+
+def hidden(n_positions: int) -> Hidden:
+    return Hidden(n_positions)
+"""
+
+
+def test_a_record_reads_its_bases_in_its_method_resolution_order(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``dataclasses`` reads the fields of each class of the record's method
+    resolution order, from the farthest to the nearest, and a method comes
+    from the first class of that order that defines it: ``Diamond(_Left,
+    _Right)``, ``_Left`` built on ``_Height`` and ``_Count`` and ``_Right``
+    on ``_Height``, resolves ``_Left, _Right, _Height, _Count`` and takes
+    ``n_positions`` first; ``Checked(_Plain, _Checking)``, both on
+    ``_Base``, runs the ``__post_init__`` of ``_Checking``, and so does the
+    ``super()`` of ``Relayed``. A ``ClassVar`` and a field the constructor
+    does not take hold their place: a field a later class writes of the name
+    takes it, before the fields after it.
+
+    Each base's own order was read whole, the last base's first, so
+    ``Diamond`` read ``height_m, n_positions``; the bases were looked up
+    depth first, so ``Checked`` and ``Relayed`` ran the ``__post_init__`` of
+    ``_Base``, which validates nothing; and the ``ClassVar`` and the field
+    left out held no place: the five counts passed as ``int``.
+    """
+    refused = _refused(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _RESOLUTION_ORDERS},
+    )
+    assert refused == {
+        "diamond(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Diamond(n_positions), require_count() takes it"
+        ],
+        "checked(count)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Checked(count), require_count() takes it"
+        ],
+        "relayed(count)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Relayed(count), read in _Checking.__post_init__(), "
+            "require_count() takes it"
+        ],
+        "kinded(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Kinded(n_positions), require_count() takes it"
+        ],
+        "hidden(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Hidden(n_positions), require_count() takes it"
+        ],
+    }
+
+
+def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An ``InitVar`` is no field, but the generated ``__init__`` takes it in
+    its place, an inherited one too, and hands it to ``__post_init__`` as
+    the parameter of its place among them: ``Scaled(1.0, n_positions)``
+    hands the count to ``n_positions``, and ``Counted(count)`` to the
+    ``count`` that ``__post_init__`` validates.
+
+    An ``InitVar`` was left out of the order, so the count filled ``scale``
+    and was lost, and one it held was never followed: both passed as
+    ``int``.
+    """
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import InitVar, dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["Counted", "Scaled", "counted", "scaled"]
+
+            @dataclass(frozen=True)
+            class _Scale:
+                scale: InitVar[float]
+
+            @dataclass(frozen=True)
+            class Scaled(_Scale):
+                n_positions: int
+
+                def __post_init__(self, scale: float) -> None:
+                    object.__setattr__(
+                        self, "n_positions", require_count(self.n_positions, "n")
+                    )
+
+            @dataclass(frozen=True)
+            class Counted:
+                count: InitVar[int]
+                total: int = 0
+
+                def __post_init__(self, count: int) -> None:
+                    object.__setattr__(self, "total", require_count(count, "count"))
+
+            def scaled(n_positions: int) -> Scaled:
+                return Scaled(1.0, n_positions)
+
+            def counted(count: int) -> Counted:
+                return Counted(count)
+            """,
+        },
+    )
+    assert refused == {
+        "scaled(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Scaled(n_positions), require_count() takes it"
+        ],
+        "counted(count)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Counted(count), require_count() takes it"
+        ],
+    }
+
+
 def test_a_count_handed_to_a_public_function_that_takes_a_numpy_integer(
     tmp_path: pathlib.Path,
 ) -> None:

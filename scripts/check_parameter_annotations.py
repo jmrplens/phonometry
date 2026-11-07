@@ -773,6 +773,10 @@ class Annotations:
         #: The classes the members of :data:`NUMERIC_ARRAY_LIKE` name, by their
         #: dotted names: what an array-like of numbers is made of.
         self.numeric = self._numeric_classes()
+        #: What :func:`linearized` and :func:`_dataclass_fields` found, read
+        #: once for each class: neither changes once the package is read.
+        self.lines: dict[str, tuple[str, ...]] = {}
+        self.dataclass_fields: dict[str, dict[str, Field]] = {}
 
     def _numeric_classes(self) -> frozenset[str]:
         root = (
@@ -2021,6 +2025,20 @@ def _filled(places: Sequence[str], positions: Sequence[int], spread: int) -> lis
     return filled
 
 
+def _handed_on_as(post_init: overloads.Function, place: int) -> str | None:
+    """The parameter of ``__post_init__`` the generated ``__init__`` hands the
+    ``InitVar`` at *place* among them to: the positional one of that place,
+    or ``*args`` past them.
+    """
+    node = post_init.implementation
+    if node is None:
+        return None
+    parameters = _positional(node, bound=True)
+    if place < len(parameters):
+        return parameters[place].arg
+    return node.args.vararg.arg if node.args.vararg is not None else None
+
+
 def _is_static(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     return any(
         isinstance(decorator, ast.Name) and decorator.id == "staticmethod"
@@ -2070,22 +2088,23 @@ class Reader:
     def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
         return _type_bounds(function.implementation, self.owner(function))
 
-    def _method(self, owner: str, name: str, depth: int = 0) -> str | None:
-        """A method a class defines or takes from a class of the package it extends."""
+    def _method(self, owner: str, name: str) -> str | None:
+        """A method a class defines or takes from a class of the package it
+        extends: that of the first class of its method resolution order
+        (:func:`linearized`) that defines it.
+        """
+        functions = self.package.functions
         dotted = f"{owner}.{name}"
-        if dotted in self.package.functions or depth > _HIERARCHY:
-            return dotted if dotted in self.package.functions else None
-        found = self.annotations.classes.get(owner)
-        if found is None:
-            return None
-        module, node = found
-        for base in node.bases:
-            target = self.package.resolve(module, base)
-            if target is not None and target in self.annotations.classes:
-                method = self._method(target, name, depth + 1)
-                if method is not None:
-                    return method
-        return None
+        if dotted in functions:
+            return dotted
+        return next(
+            (
+                f"{later}.{name}"
+                for later in linearized(self.package, self.annotations, owner)[1:]
+                if f"{later}.{name}" in functions
+            ),
+            None,
+        )
 
     @property
     def public_names(self) -> frozenset[str]:
@@ -2105,18 +2124,19 @@ class Reader:
         return self._public
 
     def _inherited(self, owner: str, name: str) -> str | None:
-        """The method ``super().name`` reaches from a class: its bases' first."""
-        found = self.annotations.classes.get(owner)
-        if found is None:
-            return None
-        module, node = found
-        for base in node.bases:
-            target = self.package.resolve(module, base)
-            if target is not None and target in self.annotations.classes:
-                method = self._method(target, name)
-                if method is not None:
-                    return method
-        return None
+        """The method ``super().name`` reaches from a class: that of the
+        first class after it in its method resolution order
+        (:func:`linearized`) that defines it.
+        """
+        functions = self.package.functions
+        return next(
+            (
+                f"{later}.{name}"
+                for later in linearized(self.package, self.annotations, owner)[1:]
+                if f"{later}.{name}" in functions
+            ),
+            None,
+        )
 
     def _typed(self, target: Target) -> frozenset[str]:
         """The annotations of a callee's parameter that end a route of *target*.
@@ -2647,14 +2667,15 @@ class Reader:
         """What a record built with its generated ``__init__`` does with a value.
 
         The argument fills the field of its keyword, or of its position in
-        the order the constructor takes the fields (:func:`record_fields`; a
-        keyword-only field takes no position, and *positions* carries where
-        a ``*`` argument spreads, :func:`_filled`), and the record's
-        ``__post_init__`` reads that field as ``self.<field>``: a count
-        handed to a record that validates it is followed there as it is into
-        a function.
+        the order the constructor takes the fields (:func:`init_fields`; a
+        keyword-only field takes no position, an ``InitVar`` takes its own,
+        and *positions* carries where a ``*`` argument spreads,
+        :func:`_filled`), and the record's ``__post_init__`` reads that
+        field as ``self.<field>``, or takes an ``InitVar`` as the parameter
+        of its place among them: a count handed to a record that validates
+        it is followed there as it is into a function.
         """
-        fields = record_fields(self.package, self.annotations, record)
+        fields = init_fields(self.package, self.annotations, record)
         positional = [field.name for field in fields.values() if field.positional]
         given, spread = positions
         received = (
@@ -2665,6 +2686,7 @@ class Reader:
         received.extend(keyword for keyword in keywords if keyword in fields)
         dotted = self._method(record, "__post_init__")
         post_init = self.package.functions[dotted] if dotted is not None else None
+        handed_on = [name for name, field in fields.items() if field.kind == _HANDED_ON]
         shown = record.rpartition(".")[2]
         annotations = self.annotations
         for name in dict.fromkeys(received):
@@ -2684,9 +2706,14 @@ class Reader:
                 continue
             if post_init is None:
                 continue
-            for deeper, level, hops in self._known_routes(
-                post_init, f"self.{name}", target
-            ):
+            read = (
+                _handed_on_as(post_init, handed_on.index(name))
+                if field.kind == _HANDED_ON
+                else f"self.{name}"
+            )
+            if read is None:
+                continue
+            for deeper, level, hops in self._known_routes(post_init, read, target):
                 yield f"handed to {shown}({name}), {deeper}", level, hops + 1
 
     def _handed(
@@ -4601,10 +4628,20 @@ _DATACLASS = frozenset({"dataclasses.dataclass"})
 #: The sentinel after which a record's fields are keyword-only.
 _KW_ONLY = frozenset({"dataclasses.KW_ONLY"})
 
-#: The annotations that make a class attribute something other than a field.
-_NOT_FIELDS = frozenset(
-    {"typing.ClassVar", "typing_extensions.ClassVar", "dataclasses.InitVar"}
-)
+#: The annotations that make a class attribute a class variable, no field.
+_CLASS_VARIABLES = frozenset({"typing.ClassVar", "typing_extensions.ClassVar"})
+
+#: The annotation of a pseudo-field the generated ``__init__`` takes and
+#: hands to ``__post_init__`` instead of storing it.
+_INIT_VARIABLE = "dataclasses.InitVar"
+
+#: What an entry of a record's fields is to its generated ``__init__``: a
+#: field it takes and stores, an ``InitVar`` it takes and hands on to
+#: ``__post_init__``, or one it does not take (``field(init=False)``, a
+#: ``ClassVar``), which keeps its place in the order all the same.
+_STORED = "stored"
+_HANDED_ON = "handed on"
+_NOT_TAKEN = "not taken"
 
 
 @dataclass(frozen=True)
@@ -4617,10 +4654,14 @@ class Field:
     module: str
     line: int
     name: str
+    #: Its annotation, the type an ``InitVar`` wraps for one.
     annotation: ast.expr
     #: Whether the generated ``__init__`` takes it by position too: not a
     #: field of a ``kw_only`` record, after ``KW_ONLY`` or ``field(kw_only=True)``.
     positional: bool = True
+    #: What it is to the generated ``__init__``: :data:`_STORED`,
+    #: :data:`_HANDED_ON` or :data:`_NOT_TAKEN`.
+    kind: str = _STORED
 
 
 def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -> bool:
@@ -4671,25 +4712,105 @@ def _keyword_only_record(
     )
 
 
-def record_fields(
-    package: overloads.Package, annotations: Annotations, record: str, depth: int = 0
-) -> dict[str, Field]:
-    """The fields a record's ``__init__`` takes, by name, in the order it
-    takes them: those its bases lend, the last base's first as
-    ``dataclasses`` reads the bases in reverse, then its own; a field
-    written again keeps the place it first took.
+def _c3(head: str, sequences: list[list[str]]) -> tuple[str, ...] | None:
+    """The C3 merge Python builds a method resolution order with: *head*,
+    then each class that heads one of *sequences* and is in the tail of
+    none, the first such each time; ``None`` when no class qualifies, as
+    Python refuses such bases.
     """
-    found = annotations.classes.get(record)
-    if found is None or depth > _HIERARCHY:
-        return {}
-    module, node = found
+    order = [head]
+    pending = [sequence for sequence in sequences if sequence]
+    while pending:
+        chosen = next(
+            (
+                sequence[0]
+                for sequence in pending
+                if not any(sequence[0] in other[1:] for other in pending)
+            ),
+            None,
+        )
+        if chosen is None:
+            return None
+        order.append(chosen)
+        pending = [
+            rest
+            for sequence in pending
+            if (rest := sequence[1:] if sequence[0] == chosen else sequence)
+        ]
+    return tuple(order)
+
+
+def linearized(
+    package: overloads.Package, annotations: Annotations, owner: str
+) -> tuple[str, ...]:
+    """The method resolution order of a class of the package, by dotted
+    names, the class first: the C3 merge of its bases' orders and the bases
+    themselves (:func:`_c3`), the bases of the package alone, read once for
+    each class. A class Python cannot linearize, or one reached again while
+    it is read, is the class alone.
+    """
+    lines = annotations.lines
+    found = lines.get(owner)
+    if found is not None:
+        return found
+    lines[owner] = (owner,)
+    entry = annotations.classes.get(owner)
+    if entry is None:
+        return lines[owner]
+    module, node = entry
+    bases = [
+        target
+        for base in node.bases
+        if (target := package.resolve(module, base)) is not None
+        and target in annotations.classes
+    ]
+    sequences = [list(linearized(package, annotations, base)) for base in bases]
+    found = _c3(owner, [*sequences, bases]) or (owner,)
+    lines[owner] = found
+    return found
+
+
+def _dataclass_fields(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> dict[str, Field]:
+    """Every entry of a class's ``__dataclass_fields__``, by name, in the
+    order its generated ``__init__`` takes them, those it does not take and
+    the ``InitVar`` it hands on included (:attr:`Field.kind`), read once for
+    each class.
+
+    A record's are what ``dataclasses`` builds: those of each class of its
+    method resolution order (:func:`linearized`) from the farthest to the
+    nearest, then its own, a field written again keeping the place it first
+    took, with the later writing's annotation and the way it is taken. A
+    class that is no record has the attribute of the first record of its own
+    order, and its generated ``__init__``.
+    """
+    held = annotations.dataclass_fields
+    found = held.get(record)
+    if found is not None:
+        return found
+    held[record] = {}
+    entry = annotations.classes.get(record)
+    if entry is None:
+        return held[record]
+    module, node = entry
+    line = linearized(package, annotations, record)
     fields: dict[str, Field] = {}
-    for base in reversed(node.bases):
-        target = package.resolve(module, base)
-        if target is not None and target in annotations.classes:
-            fields.update(record_fields(package, annotations, target, depth + 1))
     if not _is_dataclass(package, module, node):
+        later = next(
+            (
+                other
+                for other in line[1:]
+                if _is_dataclass(package, *annotations.classes[other])
+            ),
+            None,
+        )
+        if later is not None:
+            fields = _dataclass_fields(package, annotations, later)
+        held[record] = fields
         return fields
+    for later in reversed(line[1:]):
+        fields.update(_dataclass_fields(package, annotations, later))
     keyword_only = _keyword_only_record(package, module, node)
     for child in node.body:
         if not (
@@ -4703,21 +4824,55 @@ def record_fields(
             keyword_only = True
             continue
         base = written.value if isinstance(written, ast.Subscript) else written
-        if package.resolve(module, base) in _NOT_FIELDS:
-            continue
-        if _field_default_off(child, package, module):
-            fields.pop(child.target.id, None)
-            continue
+        wrapped = package.resolve(module, base)
+        kind = _STORED
+        annotation = written
+        if wrapped in _CLASS_VARIABLES or _field_default_off(child, package, module):
+            kind = _NOT_TAKEN
+        elif wrapped == _INIT_VARIABLE:
+            kind = _HANDED_ON
+            if isinstance(written, ast.Subscript):
+                annotation = written.slice
         own = _field_option(child, package, module, "kw_only")
         fields[child.target.id] = Field(
             record,
             module,
             child.lineno,
             child.target.id,
-            written,
+            annotation,
             positional=not (keyword_only if own is None else own),
+            kind=kind,
         )
+    held[record] = fields
     return fields
+
+
+def init_fields(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> dict[str, Field]:
+    """What a record's generated ``__init__`` takes, by name, in its order:
+    its fields (:func:`record_fields`) and each ``InitVar`` in the place it
+    holds among them, which the constructor hands on to ``__post_init__``.
+    """
+    return {
+        name: field
+        for name, field in _dataclass_fields(package, annotations, record).items()
+        if field.kind != _NOT_TAKEN
+    }
+
+
+def record_fields(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> dict[str, Field]:
+    """The fields a record's ``__init__`` takes and stores, by name, in the
+    order it takes them (:func:`_dataclass_fields`): an ``InitVar`` and a
+    field it does not take left out.
+    """
+    return {
+        name: field
+        for name, field in _dataclass_fields(package, annotations, record).items()
+        if field.kind == _STORED
+    }
 
 
 def public_records(

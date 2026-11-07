@@ -1300,8 +1300,8 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Early decay time: the decay over the first 10 dB of the Schroeder curve, extrapolated to 60 dB, which tracks perceived reverberance rather than the tail.",
-          es: "Tiempo de caída inicial: la caída en los primeros 10 dB de la curva de Schroeder, extrapolada a 60 dB, que sigue la reverberancia percibida y no la cola.",
+          en: "Early decay time: the time a 60 dB decay would take, extrapolated from a least-squares fit over 0 dB to −10 dB of the Schroeder curve; it tracks perceived reverberance rather than the tail.",
+          es: "Tiempo de caída inicial: el tiempo que tardaría una caída de 60 dB, extrapolado desde un ajuste por mínimos cuadrados entre 0 dB y −10 dB de la curva de Schroeder; sigue la reverberancia percibida y no la cola.",
         },
       },
       {

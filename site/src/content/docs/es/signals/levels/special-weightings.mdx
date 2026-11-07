@@ -321,7 +321,8 @@ lau = signals.leq(filters.weighting_filter(x, fs, weighting="AU"))
 la_ref = signals.leq(filters.weighting_filter(audible, fs, weighting="A"))
 print(f"LA = {la:.1f} dB   LAU = {lau:.1f} dB   solo audible = {la_ref:.1f} dB")
 # LA = 79.3 dB   LAU = 71.0 dB   solo audible = 71.0 dB
-# El ultrasonido infla LA en 7,6 dB; AU recupera el nivel audible.
+print(f"el ultrasonido infla LA en {la - la_ref:.1f} dB")
+# el ultrasonido infla LA en 8,4 dB; AU recupera el nivel audible
 ```
 
 El ultrasonido solo llega a un filtro digital si la frecuencia de muestreo lo

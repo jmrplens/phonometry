@@ -157,6 +157,12 @@ Requires matplotlib (the `[plot]` extra); returns the
 axes it drew on: a new polar axes without `ax`, else `ax`, polar or
 not. Never calls `plt.show`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### DiffusionResult.report()
 
 ```python
@@ -245,6 +251,12 @@ Plot the diffusion coefficient `d` versus frequency.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### DiffusionSpectrum.report()
 

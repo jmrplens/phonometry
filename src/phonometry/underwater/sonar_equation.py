@@ -217,7 +217,10 @@ class SonarEquationResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot signal excess versus propagation loss with the detection limit."""
+        """Plot signal excess versus propagation loss with the detection limit.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.underwater import plot_sonar_equation
 
@@ -351,8 +354,10 @@ class DetectionRangeResult(OwnsArrays):
     :ivar propagation_loss: Propagation loss at each range, in dB.
     :ivar absorption_db_per_km: Absorption coefficient :math:`\alpha`, in
         dB/km.
-    :ivar law: The spreading law used.
-    :ivar model: The absorption model used.
+    :ivar law: The spreading law used. One of ``"spherical"``, ``"cylindrical"`` or
+        ``"practical"``.
+    :ivar model: The absorption model used. One of ``"francois-garrison"``,
+        ``"ainslie-mccolm"`` or ``"thorp"``.
     """
 
     detection_range: float
@@ -367,7 +372,10 @@ class DetectionRangeResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the propagation loss against the figure of merit."""
+        """Plot the propagation loss against the figure of merit.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.underwater import plot_detection_range
 
@@ -402,14 +410,16 @@ def detection_range(
     :param figure_of_merit: Maximum allowable one-way propagation loss, in dB.
     :param frequency_hz: Acoustic frequency, in Hz.
     :param law: Spreading law (see
-        :func:`~phonometry.underwater.propagation.spreading_loss`).
+        :func:`~phonometry.underwater.propagation.spreading_loss`). One of
+        ``"spherical"``, ``"cylindrical"`` or ``"practical"``.
     :param transition_range: Transition range for the ``"practical"`` law, in m.
     :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity: Salinity ``S``, in parts per thousand.
     :param depth: Depth, in metres.
     :param ph: Acidity (default 8).
     :param model: Absorption model (see
-        :func:`~phonometry.underwater.propagation.seawater_absorption`).
+        :func:`~phonometry.underwater.propagation.seawater_absorption`). One of
+        ``"francois-garrison"``, ``"ainslie-mccolm"`` or ``"thorp"``.
     :param max_range: Upper bound of the search, in metres.
     :param n_points: Number of ranges kept on the returned loss curve.
     :return: A :class:`DetectionRangeResult`.

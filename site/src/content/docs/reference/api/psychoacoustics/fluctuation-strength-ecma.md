@@ -152,6 +152,12 @@ Draws the time-dependent fluctuation strength F(l50) and a
 specific-fluctuation-strength heatmap. Requires matplotlib
 (the `[plot]` extra).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## fluctuation_strength_ecma
 
 ```python

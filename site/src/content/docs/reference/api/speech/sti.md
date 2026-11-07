@@ -320,6 +320,12 @@ The two level spectra are what `adjusted_for_levels` reads to
 undo the corrections they produced, so a result that carries them can
 be moved to another speech and occupancy-noise condition.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `rating` | One of `"U"`, `"J"`, `"I"`, `"H"`, `"G"`, `"F"`, `"E"`, `"D"`, `"C"`, `"B"`, `"A"` or `"A+"`. |
+
 ### STIResult.adjusted_for_levels()
 
 ```python
@@ -369,6 +375,12 @@ Plot the per-band MTI bars with the STI and rating letter.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### STIResult.report()
 

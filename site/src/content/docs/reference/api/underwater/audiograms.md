@@ -69,7 +69,7 @@ Fit parameters of a published group audiogram.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code, one of [`AUDIOGRAM_GROUPS`](/phonometry/reference/api/underwater/audiograms/#audiogram_groups), as written. |
+| `group` | Hearing-group code, one of [`AUDIOGRAM_GROUPS`](/phonometry/reference/api/underwater/audiograms/#audiogram_groups), as written. One of `"HF"`, `"VHF"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `normalized` | Return the Table 3 normalised fit instead of the Table 2 absolute one. |
 
 **Returns:** The [`AudiogramParameters`](/phonometry/reference/api/underwater/audiograms/#audiogramparameters) for that group.
@@ -103,7 +103,7 @@ Group-audiogram fit parameters (Southall et al. 2019, Tables 2 and 3).
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code. |
+| `group` | Hearing-group code. One of `"HF"`, `"VHF"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `t0` | Vertical position `T0`, in dB. |
 | `f1_khz` | Low-frequency inflection `F1`, in kHz. |
 | `f2_khz` | High-frequency inflection `F2`, in kHz. |
@@ -135,7 +135,7 @@ Hearing threshold versus frequency.
 | :--- | :--- |
 | `frequencies` | Frequencies, in Hz. |
 | `threshold` | Hearing threshold at each frequency, in dB re 1 µPa (under water) or dB re 20 µPa (in air). |
-| `group` | Hearing-group code, or `"orca"` for the species audiogram. |
+| `group` | Hearing-group code, or `"orca"` for the species audiogram. One of `"HF"`, `"VHF"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `source` | Short citation of the fit used. |
 | `in_air` | Whether the reference pressure is 20 µPa. |
 | `best_frequency` | Frequency of the minimum threshold on the evaluated grid, in Hz. |
@@ -153,6 +153,12 @@ AudiogramResult.plot(
 ```
 
 Plot the hearing threshold versus frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## BEST_HEARING_FREQUENCY_KHZ
 
@@ -184,7 +190,7 @@ Table 3 (`normalized=True`).
 | Name | Description |
 | :--- | :--- |
 | `frequency_hz` | Frequency or frequencies, in Hz (strictly positive). |
-| `group` | Hearing-group code, one of [`AUDIOGRAM_GROUPS`](/phonometry/reference/api/underwater/audiograms/#audiogram_groups). |
+| `group` | Hearing-group code, one of [`AUDIOGRAM_GROUPS`](/phonometry/reference/api/underwater/audiograms/#audiogram_groups). One of `"HF"`, `"VHF"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `normalized` | Use the normalised fit (0 dB at best sensitivity). |
 
 **Returns:** An [`AudiogramResult`](/phonometry/reference/api/underwater/audiograms/#audiogramresult).

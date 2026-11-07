@@ -228,7 +228,7 @@ against sound pressure level).
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes to draw on, or `None` for a fresh figure (a polar axes is created for `"directivity"`). |
-| `quantity` | Which characteristic to plot (see above). |
+| `quantity` | Which characteristic to plot (see above). One of `"response"`, `"directivity"`, `"noise"` or `"distortion"`. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
 **Returns:** The axes the characteristic was drawn on, polar for `"directivity"`.

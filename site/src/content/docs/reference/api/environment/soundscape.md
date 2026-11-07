@@ -520,7 +520,7 @@ attributes they name are part 2, and that is what they are applied to
 
 | Name | Description |
 | :--- | :--- |
-| `scale_values` | The eight attributes: a mapping from each name of [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/phonometry/reference/api/environment/soundscape/#perceived_affective_quality_attributes) to one scale value per respondent, or a 2-D array `(respondents, 8)` in that order. `NaN` marks a blank answer. A row may also be a statistic of a group of answers, such as a site's medians, which is why a value between two boxes is accepted here; anything outside 1 to 5 is not a scale value. |
+| `scale_values` | The eight attributes: a mapping from each name of [`PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES`](/phonometry/reference/api/environment/soundscape/#perceived_affective_quality_attributes) to one scale value per respondent, or a 2-D array `(respondents, 8)` in that order. `NaN` marks a blank answer. A row may also be a statistic of a group of answers, such as a site's medians, which is why a value between two boxes is accepted here; anything outside 1 to 5 is not a scale value. Keyed by any of `"pleasant"`, `"chaotic"`, `"vibrant"`, `"uneventful"`, `"calm"`, `"annoying"`, `"eventful"` or `"monotonous"`. |
 | `sites` | The site of each respondent, any labels; `None` puts every respondent at one site named `"all"`. |
 | `central_tendency` | `"median"` (default) or `"mean"`. |
 

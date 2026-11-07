@@ -141,9 +141,9 @@ propulsion noise, a noisy one does not increase it.
 
 | Name | Description |
 | :--- | :--- |
-| `category` | Vehicle category (Table [2.2.a]). |
+| `category` | Vehicle category (Table [2.2.a]). One of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `speed_kmh` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
-| `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). |
+| `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `road_slope_percent` | Road slope `s`, in per cent, positive uphill in the direction of travel. For a bidirectional flow, split the flow in two and correct one half uphill and the other downhill. |
 | `junction_distance` | Distance `x` to the junction, in m. |
 | `junction_type` | Junction type `k` (Table F-3). |
@@ -203,9 +203,9 @@ and their total power is the propulsion term alone (2.2.3).
 
 | Name | Description |
 | :--- | :--- |
-| `category` | Vehicle category (Table [2.2.a]). |
+| `category` | Vehicle category (Table [2.2.a]). One of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `speed_kmh` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
-| `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). |
+| `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `temperature_c` | Air temperature `tau`, in degrees Celsius. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7). |
 | `studded_months` | `T_s` of (2.2.7), the months per year over which studded tyres are in use. |
@@ -263,7 +263,7 @@ temperature, the gradient, the studded-tyre season and the junction.
 | Name | Description |
 | :--- | :--- |
 | `traffic` | One [`RoadTraffic`](/phonometry/reference/api/environment/cnossos-road/#roadtraffic) or a sequence of them, at most one per vehicle category. |
-| `surface` | Road surface (Table F-4). |
+| `surface` | Road surface (Table F-4). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `temperature_c` | Yearly average air temperature `tau`, in degrees Celsius (the reference condition is 20 degC). |
 | `road_slope_percent` | Road slope `s`, in per cent, positive uphill. |
 | `studded_months` | `T_s` of (2.2.7), the months per year over which studded tyres are in use. |
@@ -294,7 +294,7 @@ Look up a Table F-4 row.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | A [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface) member or its description string. |
+| `surface` | A [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface) member or its description string. One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 
 **Returns:** The [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients) of that surface.
 
@@ -333,9 +333,9 @@ propulsion term is the whole of it (2.2.3).
 
 | Name | Description |
 | :--- | :--- |
-| `category` | Vehicle category (Table [2.2.a]). |
+| `category` | Vehicle category (Table [2.2.a]). One of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `speed_kmh` | Average speed `v_m`, in km/h. |
-| `surface` | Road surface (Table F-4). |
+| `surface` | Road surface (Table F-4). One of `"reference road surface"`, `"1-layer ZOAB"`, `"2-layer ZOAB"`, `"2-layer ZOAB (fine)"`, `"SMA-NL5"`, `"SMA-NL8"`, `"brushed down concrete"`, `"optimised brushed down concrete"`, `"fine broomed concrete"`, `"worked surface"`, `"hard elements in herringbone"`, `"hard elements not in herringbone"`, `"quiet hard elements"`, `"thin layer A"` or `"thin layer B"`. |
 | `temperature_c` | Air temperature `tau`, in degrees Celsius. |
 | `road_slope_percent` | Road slope `s`, in per cent. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7). |
@@ -382,14 +382,14 @@ reproduced for comparison with pre-2021 studies.
 
 | Name | Description |
 | :--- | :--- |
-| `rolling_a` | `A_R,i,m` per category, eight octave bands, in dB. |
-| `rolling_b` | `B_R,i,m` per category, eight octave bands, in dB. |
-| `propulsion_a` | `A_P,i,m` per category, eight octave bands, in dB. |
-| `propulsion_b` | `B_P,i,m` per category, eight octave bands, in dB. |
+| `rolling_a` | `A_R,i,m` per category, eight octave bands, in dB. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
+| `rolling_b` | `B_R,i,m` per category, eight octave bands, in dB. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
+| `propulsion_a` | `A_P,i,m` per category, eight octave bands, in dB. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
+| `propulsion_b` | `B_P,i,m` per category, eight octave bands, in dB. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `studded_a` | `a_i` of Table F-2 (category 1 only), in dB. |
 | `studded_b` | `b_i` of Table F-2 (category 1 only), in dB. |
-| `junction_c` | `(C_R, C_P)` of Table F-3 per category and junction type, in dB. |
-| `temperature_coefficient_db_per_k` | `K_m` of (2.2.10), in dB per kelvin, the same number per degree Celsius, since it multiplies a difference of temperatures. |
+| `junction_c` | `(C_R, C_P)` of Table F-3 per category and junction type, in dB. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
+| `temperature_coefficient_db_per_k` | `K_m` of (2.2.10), in dB per kelvin, the same number per degree Celsius, since it multiplies a difference of temperatures. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 
 ## RoadEmissionResult
 
@@ -444,6 +444,12 @@ RoadEmissionResult.plot(
 
 Plot the per-metre line power spectrum and its category breakdown.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## RoadSurface
 
 ```python
@@ -471,8 +477,8 @@ One row of Table F-4: the acoustic signature of a road surface.
 | Name | Description |
 | :--- | :--- |
 | `name` | The surface description as printed in Table F-4. |
-| `alpha` | `alpha_i,m` per category, eight octave bands, in dB. |
-| `beta` | `beta_m` per category (dimensionless speed coefficient). |
+| `alpha` | `alpha_i,m` per category, eight octave bands, in dB. Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
+| `beta` | `beta_m` per category (dimensionless speed coefficient). Keyed by any of `"1"`, `"2"`, `"3"`, `"4a"` or `"4b"`. |
 | `speed_range_kmh` | `(v_min, v_max)` over which the row is declared valid, in km/h, or `None` for the reference surface, which carries no range. Carried for the reader, not enforced: Table F-4 prints these columns without attaching a consequence to them, so refusing a speed outside the range would be stricter than the method itself. |
 
 ## RoadTraffic

@@ -272,7 +272,10 @@ class FluctuationStrengthResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the specific fluctuation strength against critical-band rate."""
+        """Plot the specific fluctuation strength against critical-band rate.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_fluctuation_strength
 

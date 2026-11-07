@@ -964,6 +964,8 @@ class TimeWeightedEnvelope(OwnsArrays):
         the time weighting and nothing else. Needs a calibrated record to
         mean dB SPL, and says so rather than drawing a number counted from
         nothing.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.filters import plot_time_weighted_envelope

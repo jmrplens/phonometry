@@ -83,6 +83,12 @@ AircraftBandAttenuation.plot(
 
 Plot the band and pure-tone mid-band attenuation versus frequency.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## ARP866AAttenuation
 
 ```python
@@ -153,6 +159,12 @@ ARP866AAttenuation.plot(
 ```
 
 Plot the attenuation coefficient versus frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## attenuation_arp866a
 

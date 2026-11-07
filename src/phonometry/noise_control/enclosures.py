@@ -195,6 +195,8 @@ class EnclosureInsertionLossResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.noise_control import plot_enclosure
@@ -522,7 +524,7 @@ def enclosure_required_transmission_loss(
     :param frequencies: Band centre frequencies, Hz; required for a callable
         ``insertion_loss``, optional otherwise.
     :param model: Interior build-up model, one of :data:`ENCLOSURE_MODELS`
-        (see :func:`enclosure_insertion_loss`).
+        (see :func:`enclosure_insertion_loss`). One of ``"bies"`` or ``"norton"``.
     :return: An :class:`EnclosureInsertionLossResult` whose ``panel_transmission_loss`` is
         the **required** ``R`` and whose ``insertion_loss`` is the requested
         target, so it plots and reports like a forward calculation.

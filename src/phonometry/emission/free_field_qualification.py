@@ -558,7 +558,9 @@ class MicrophoneTraverse(OwnsArrays):
         uniform boundary surface), ``"closest boundary"`` and ``"unique
         features"`` (a door, a window, a ventilation opening). One path may
         serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an
-        empty tuple names none.
+        empty tuple names none. Each one of ``"dihedral corner"``,
+        ``"trihedral corner"``, ``"boundary center"``, ``"closest boundary"`` or
+        ``"unique features"``.
     """
 
     positions_m: np.ndarray
@@ -629,7 +631,9 @@ class MicrophoneTraverse(OwnsArrays):
         :param monitor_levels: As for the class.
         :param background_levels: As for the class.
         :param name: As for the class.
-        :param targets: As for the class.
+        :param targets: As for the class. Each one of ``"dihedral corner"``,
+            ``"trihedral corner"``, ``"boundary center"``, ``"closest boundary"`` or
+            ``"unique features"``.
         :return: The traverse.
         :raises ValueError: for a direction that is zero or not finite.
         :raises TypeError: if ``background_levels``, ``direction``, ``distances``,
@@ -929,7 +933,8 @@ class InverseSquareLawResult(OwnsArrays):
     :ivar traverse_names: The label of each traverse as given, ``""`` when
         none was.
     :ivar traverse_targets: What each traverse was selected towards (A.3.3
-        a) to e)), as given.
+        a) to e)), as given. Each one of ``"dihedral corner"``, ``"trihedral corner"``,
+        ``"boundary center"``, ``"closest boundary"`` or ``"unique features"``.
     :ivar positions_m: The measurement points of each traverse, ``(N, 3)``.
     :ivar distances: The distance :math:`r_i` of each point from the origin,
         in metres.
@@ -1293,7 +1298,8 @@ class SourceDirectionalityResult(OwnsArrays):
     """Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 
     :ivar frequencies: The one-third octave mid-band frequencies, in hertz.
-    :ivar room: The room type the source is to qualify.
+    :ivar room: The room type the source is to qualify. One of ``"anechoic"`` or
+        ``"hemi-anechoic"``.
     :ivar mean_level: The arithmetic mean of the decibel levels per band.
     :ivar max_positive_deviation_db: The largest level above the mean.
     :ivar max_negative_deviation_db: The largest level below the mean, a

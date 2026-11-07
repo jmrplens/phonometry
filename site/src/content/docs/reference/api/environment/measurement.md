@@ -475,6 +475,12 @@ TonalAssessmentResult.plot(
 
 Plot the `Kt(ΔLta)` adjustment curve with this tone marked.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## TonalSurveyAssessment
 
 ```python

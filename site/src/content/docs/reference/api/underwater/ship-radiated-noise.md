@@ -169,6 +169,12 @@ ShipSourceLevelResult.plot(
 
 Plot RNL, source level and the ΔL surface correction vs frequency.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## source_level_uncertainty
 
 ```python

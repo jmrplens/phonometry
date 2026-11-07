@@ -196,7 +196,10 @@ class AmbientNoiseResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the composite spectrum and its components versus frequency."""
+        """Plot the composite spectrum and its components versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_ambient_noise
 

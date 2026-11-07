@@ -447,7 +447,10 @@ class TonalCorrectionResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the band spectrum with the emergent-tone differences ``Lt``."""
+        """Plot the band spectrum with the emergent-tone differences ``Lt``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_tonal_correction_rd1367
 
@@ -940,7 +943,10 @@ def outdoor_quality_objectives(
     numeric objective: footnote (2) refers it to the adjoining areas.
 
     :param area_type: Acoustic area type: the letter ``"e"``, ``"a"``, ``"d"``,
-        ``"c"`` or ``"b"``, or an alias such as ``"residential"``.
+        ``"c"`` or ``"b"``, or an alias such as ``"residential"``. One of ``"a"``,
+        ``"b"``, ``"c"``, ``"d"``, ``"e"``, ``"cultural"``, ``"educational"``,
+        ``"entertainment"``, ``"industrial"``, ``"recreational"``, ``"residential"``,
+        ``"sanitary"``, ``"sanitary_educational_cultural"`` or ``"tertiary"``.
     :param urbanization: ``"existing"`` (default) for areas already urbanised
         on 24 October 2007, or ``"new"`` for the rest (5 dB stricter).
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
@@ -1008,7 +1014,9 @@ def indoor_quality_objectives(
     cultural buildings.
 
     :param building_use: ``"residential"``, ``"sanitary"`` (alias
-        ``"hospital"``) or ``"educational"``.
+        ``"hospital"``) or ``"educational"``. One of ``"residential"``, ``"sanitary"``,
+        ``"educational"``, ``"cultural"``, ``"dwelling"``, ``"health"``, ``"hospital"``,
+        ``"hospitalario"`` or ``"housing"``.
     :param room_type: ``"living"`` (living areas), ``"bedrooms"``,
         ``"classrooms"`` or ``"reading_rooms"``.
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
@@ -1029,7 +1037,9 @@ def vibration_quality_objective(building_use: BuildingUse) -> float:
     """Indoor vibration quality objective ``Law``, in dB (Annex II Table C).
 
     :param building_use: ``"residential"``, ``"sanitary"`` (alias
-        ``"hospital"``) or ``"educational"``.
+        ``"hospital"``) or ``"educational"``. One of ``"residential"``, ``"sanitary"``,
+        ``"educational"``, ``"cultural"``, ``"dwelling"``, ``"health"``, ``"hospital"``,
+        ``"hospitalario"`` or ``"housing"``.
     :return: The ``Law`` objective, in dB.
     :raises ValueError: For an unknown building use.
     :raises TypeError: if ``building_use`` is not a text.
@@ -1047,7 +1057,10 @@ def infrastructure_limits(area_type: AreaType) -> RegulationLimits:
     environment of an acoustic area levels above these ``Ld``/``Le``/``Ln``
     values (Article 23.1).
 
-    :param area_type: Acoustic area type letter, or an alias.
+    :param area_type: Acoustic area type letter, or an alias. One of ``"a"``, ``"b"``,
+        ``"c"``, ``"d"``, ``"e"``, ``"cultural"``, ``"educational"``,
+        ``"entertainment"``, ``"industrial"``, ``"recreational"``, ``"residential"``,
+        ``"sanitary"``, ``"sanitary_educational_cultural"`` or ``"tertiary"``.
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
     :raises ValueError: For an unknown area type.
     :raises TypeError: if ``area_type`` is not a text.
@@ -1068,7 +1081,10 @@ def max_infrastructure_limit(area_type: AreaType) -> float:
     The limit is respected when, over a year, 97 % of all daily values stay at
     or below it (Article 25.1 a iii).
 
-    :param area_type: Acoustic area type letter, or an alias.
+    :param area_type: Acoustic area type letter, or an alias. One of ``"a"``, ``"b"``,
+        ``"c"``, ``"d"``, ``"e"``, ``"cultural"``, ``"educational"``,
+        ``"entertainment"``, ``"industrial"``, ``"recreational"``, ``"residential"``,
+        ``"sanitary"``, ``"sanitary_educational_cultural"`` or ``"tertiary"``.
     :return: The ``LAmax`` limit, in dB.
     :raises ValueError: For an unknown area type.
     :raises TypeError: if ``area_type`` is not a text.
@@ -1085,7 +1101,10 @@ def activity_limits(area_type: AreaType) -> RegulationLimits:
     infrastructure must not exceed in the outdoor environment of the acoustic
     area they sit in (Article 24.1).
 
-    :param area_type: Acoustic area type letter, or an alias.
+    :param area_type: Acoustic area type letter, or an alias. One of ``"a"``, ``"b"``,
+        ``"c"``, ``"d"``, ``"e"``, ``"cultural"``, ``"educational"``,
+        ``"entertainment"``, ``"industrial"``, ``"recreational"``, ``"residential"``,
+        ``"sanitary"``, ``"sanitary_educational_cultural"`` or ``"tertiary"``.
     :return: The applicable :class:`RegulationLimits` for the index ``LK,x``.
     :raises ValueError: For an unknown area type.
     :raises TypeError: if ``area_type`` is not a text.
@@ -1356,7 +1375,10 @@ class ActivityAssessment(RichDisplay):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-period indices against their RD 1367/2007 limits."""
+        """Plot the per-period indices against their RD 1367/2007 limits.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_activity_assessment
 
@@ -1558,7 +1580,8 @@ def assess_activity(
         ``"evening"``, ``"night"``). Periods that are absent are not assessed.
     :param limits: The applicable limit row, from :func:`activity_limits` or
         :func:`adjacent_premises_limits`.
-    :param long_term_levels: Annual ``LK,x`` per period, in dB, when known.
+    :param long_term_levels: Annual ``LK,x`` per period, in dB, when known. Keyed by any
+        of ``"day"``, ``"evening"`` or ``"night"``.
     :param operating_days: Number of days a year the activity operates; used
         to derive ``LK,x`` from the daily ``LKeq,x`` when
         ``long_term_levels`` is not given.
@@ -1568,7 +1591,8 @@ def assess_activity(
         literature).
     :param new_activity: Whether the annual criterion applies.
     :param period_hours: Period durations ``T``, in hours, overriding
-        :data:`RD1367_PERIOD_HOURS`.
+        :data:`RD1367_PERIOD_HOURS`. Keyed by any of ``"day"``, ``"evening"`` or
+        ``"night"``.
     :return: An :class:`ActivityAssessment`.
     :raises ValueError: For an unknown period key, empty phase list,
         inconsistent durations, or invalid annual parameters.

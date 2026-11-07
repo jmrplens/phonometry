@@ -128,6 +128,12 @@ Plot the measured spectrum against the NC curves.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### NCResult.report()
 
 ```python
@@ -314,6 +320,12 @@ Plot the measured spectrum against the reference RC Mark II curve.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RCResult.report()
 

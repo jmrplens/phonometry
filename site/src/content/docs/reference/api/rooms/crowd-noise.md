@@ -278,6 +278,12 @@ the crossing point reads directly as the occupancy at which the room
 stops working. Requires matplotlib
 (the `[plot]` extra).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### CrowdNoiseResult.speech_to_noise()
 
 ```python

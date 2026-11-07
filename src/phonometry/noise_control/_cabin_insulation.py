@@ -357,7 +357,8 @@ class CabinInsulationResult(OwnsArrays):
         when the cabin has no integral source.
     :ivar method: ``"laboratory"``, ``"in-situ-loudspeaker"`` or
         ``"in-situ-actual-noise"``.
-    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves.
+    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves. One of ``1``
+        or ``3``.
 
     Whether the answer carries the prime (:attr:`apparent`) is read from the
     method, so it is not a field.
@@ -676,7 +677,8 @@ class CabinUncertainty(RichDisplay):
     Everything but the method and the volume ratio is what clause 10 prints
     for that method and ratio, so it is read from them and is not a field.
 
-    :ivar method: The method the statement is about.
+    :ivar method: The method the statement is about. One of ``"laboratory"``,
+        ``"in-situ-loudspeaker"`` or ``"in-situ-actual-noise"``.
     :ivar volume_ratio: :math:`V_{\text{room}} / V_{\text{cabin}}`.
     """
 
@@ -770,7 +772,7 @@ def cabin_insulation(
     :param method: ``"laboratory"`` (default), ``"in-situ-loudspeaker"`` or
         ``"in-situ-actual-noise"``.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :param room_background_levels: Background in the room per band, in
         decibels, for the correction of 7.2.2.
     :param cabin_background_levels: Background inside the cabin per band, in
@@ -873,7 +875,7 @@ def weighted_cabin_insulation(
         :func:`cabin_insulation` takes it. It decides whether the rating is
         :math:`D_{p,\mathrm{w}}` or :math:`D'_{p,\mathrm{w}}`.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: The rating, as a :class:`WeightedCabinInsulation`.
     :raises ValueError: For a spectrum that is not the rating bands, an
         unknown method or a band set other than 1 or 3.

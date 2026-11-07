@@ -391,7 +391,8 @@ class DBHRGlobalIndexResult(OwnsArrays):
     :ivar reported: The index rounded to an integer, the form DB-HR requires
         for the quantities that define the requirements (3.1.3.1 point 4).
     :ivar name: The index name, e.g. ``"RA"`` or ``_D2M_NT_ATR``.
-    :ivar spectrum: Key of the normalised spectrum used.
+    :ivar spectrum: Key of the normalised spectrum used. One of ``"pink"``,
+        ``"traffic"``, ``"railway"`` or ``"aircraft"``.
     :ivar frequencies: Band centre frequencies, in Hz.
     :ivar band_values: The band insulation values ``X_i``, in dB.
     :ivar spectrum_levels: The normalised spectrum ``L_x,i``, in dBA.
@@ -465,7 +466,10 @@ class DBHRGlobalIndexResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the band insulation with the weighted per-band contributions."""
+        """Plot the band insulation with the weighted per-band contributions.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.building import plot_db_hr_global_index
 
@@ -913,7 +917,10 @@ class DBHRAssessment(RichDisplay):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the achieved values against their DB-HR limits."""
+        """Plot the achieved values against their DB-HR limits.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.building import plot_db_hr_assessment
 

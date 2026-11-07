@@ -115,6 +115,12 @@ Plot the predicted polar response with the diffusion coefficient annotated.
 Requires matplotlib (the `[plot]` extra); returns the polar
 axes it drew on and never calls `plt.show`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 **Returns:** The polar axes.
 
 **Raises**
@@ -138,6 +144,12 @@ Draw the well profile of the predicted surface to scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 **Raises**
 

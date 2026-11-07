@@ -285,7 +285,9 @@ class Provenance(RichDisplay):
     page and the table, the report and the laboratory, and the day it was
     consulted.
 
-    :ivar kind: One of :data:`PROVENANCE_KINDS`.
+    :ivar kind: One of :data:`PROVENANCE_KINDS`. One of ``"datasheet"``,
+        ``"declaration_of_performance"``, ``"test_report"``, ``"measurement"``,
+        ``"calculation"``, ``"publication"`` or ``"other"``.
     :ivar document: The document's title as it prints it.
     :ivar version: The revision the document prints (``"Rev. 4"``), or
         ``None`` when it prints none, which is a different answer from a

@@ -120,9 +120,9 @@ Where a run actually stepped, recorded by the result.
 | Name | Description |
 | :--- | :--- |
 | `host` | The node the run went to, or `None` for this machine. |
-| `device` | The device that stepped the fields. |
+| `device` | The device that stepped the fields. One of `"cpu"`, `"cupy"`, `"torch:cpu"`, `"torch:cuda"` or `"torch:mps"`. |
 | `device_index` | Which GPU, `0` where there is one. |
-| `dtype` | The dtype of the fields. |
+| `dtype` | The dtype of the fields. One of `"float64"` or `"float32"`. |
 | `phonometry_version` | The version of the phonometry that ran the steps (`phonometry.__version__`); on a node, the client's own, whose package the node runs. |
 | `numpy_version` | NumPy's version where the run stepped. |
 | `array_library` | The array library and its version (`"cupy 14.2.0"`), or `None` for NumPy. |

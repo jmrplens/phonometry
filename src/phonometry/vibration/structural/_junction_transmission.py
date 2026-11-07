@@ -379,7 +379,7 @@ def straight_transmission_coefficient(
     :param chi: Wave parameter ``chi`` (Eq. 5.10, > 0).
     :param psi: Wave parameter ``psi`` (Eq. 5.11, > 0).
     :param junction: ``"X"`` or ``"T1"`` (the only junctions with a straight
-        section).
+        section). One of ``"X"``, ``"T1"``, ``"T2"`` or ``"L"``.
     :return: ``tau13(theta)`` (same shape as *angle*).
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle, or a junction without a straight section.
@@ -811,6 +811,8 @@ class JunctionTransmissionResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_junction_transmission
@@ -826,6 +828,8 @@ class JunctionTransmissionResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_junction_result_geometry

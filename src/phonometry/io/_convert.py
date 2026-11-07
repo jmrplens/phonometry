@@ -310,7 +310,8 @@ def convert(
         directory there is opened as Python opens it.
     :param subtype: Target sample format; ``None`` preserves the
         source's depth (the module docstring's mapping). An explicitly
-        narrower choice quantises with the clipping count reported.
+        narrower choice quantises with the clipping count reported. One of ``"PCM_16"``,
+        ``"PCM_24"``, ``"PCM_32"``, ``"FLOAT"`` or ``"DOUBLE"``.
     :param block_size: Frames per streamed block; the memory ceiling.
     :return: :func:`phonometry.io.info` of the written file.
     :raises ValueError: For a lossy or unknown target suffix, source and

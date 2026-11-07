@@ -363,6 +363,12 @@ Plot the fitted `dp(u)` curve with the evaluation point.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### StaticAirflowResult.report()
 
 ```python

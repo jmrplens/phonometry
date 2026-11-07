@@ -80,7 +80,7 @@ Auditory weighting function `W(f)` of a marine-mammal hearing group.
 | Name | Description |
 | :--- | :--- |
 | `frequency_hz` | Frequency or frequencies, in Hz (strictly positive). |
-| `group` | Hearing-group code as used by `guidance`. |
+| `group` | Hearing-group code as used by `guidance`. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `guidance` | `"nmfs-2024"` (default, current), `"nmfs-2018"` or `"southall-2019"`. |
 
 **Returns:** An [`AuditoryWeightingResult`](/phonometry/reference/api/underwater/weighting/#auditoryweightingresult).
@@ -116,8 +116,8 @@ Auditory weighting and exposure functions of one hearing group.
 | `weighting` | Weighting-function amplitude `W(f)`, in dB ($\le 0$). |
 | `exposure_function` | Exposure function $E(f) = K + C - W(f)$, in dB (the frequency-dependent TTS-onset level). |
 | `parameters` | The [`WeightingParameters`](/phonometry/reference/api/underwater/weighting/#weightingparameters) used. |
-| `guidance` | The guidance version. |
-| `group` | Hearing-group code. |
+| `guidance` | The guidance version. One of `"nmfs-2024"`, `"nmfs-2018"` or `"southall-2019"`. |
+| `group` | Hearing-group code. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `weighted_tts_onset` | $T_\mathrm{w} = K + C$, the minimum of the exposure function, in dB. |
 
 ### AuditoryWeightingResult.plot()
@@ -132,6 +132,12 @@ AuditoryWeightingResult.plot(
 ```
 
 Plot the weighting function versus frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## exposure_criteria
 
@@ -150,7 +156,7 @@ Published TTS and injury onset criteria of a hearing group.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code as used by `guidance`. |
+| `group` | Hearing-group code as used by `guidance`. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `guidance` | `"nmfs-2024"` (default), `"nmfs-2018"` or `"southall-2019"`. |
 | `impulsive` | Return the impulsive-noise criteria (dual metric: a weighted SEL and an unweighted peak SPL) instead of the non-impulsive ones. |
 
@@ -192,8 +198,8 @@ is not published by that guidance version.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code. |
-| `guidance` | The guidance version. |
+| `group` | Hearing-group code. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
+| `guidance` | The guidance version. One of `"nmfs-2024"`, `"nmfs-2018"` or `"southall-2019"`. |
 | `impulsive` | Whether these are the impulsive-noise criteria. |
 | `tts_sel` | Weighted TTS-onset sound exposure level, in dB. |
 | `injury_sel` | Weighted injury-onset (PTS / AUD INJ) SEL, in dB. |
@@ -218,7 +224,7 @@ Hearing-group codes defined by a guidance version.
 
 | Name | Description |
 | :--- | :--- |
-| `guidance` | One of [`WEIGHTING_GUIDANCE`](/phonometry/reference/api/underwater/weighting/#weighting_guidance). |
+| `guidance` | One of [`WEIGHTING_GUIDANCE`](/phonometry/reference/api/underwater/weighting/#weighting_guidance). One of `"nmfs-2024"`, `"nmfs-2018"` or `"southall-2019"`. |
 
 **Returns:** The group codes, in the order the source tabulates them.
 
@@ -261,7 +267,7 @@ dual-metric rule requires.
 | :--- | :--- |
 | `frequencies_hz` | Band centre frequencies, in Hz (1-D, positive). |
 | `band_sel` | Per-band single-event SEL, in dB re 1 µPa²·s (or dB re (20 µPa)²·s for an in-air group); same shape. `-inf` is accepted for a band that carries no energy, which is what [`strike_sel_spectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strike_sel_spectrum) returns for bands narrower than its FFT bin spacing; such a band adds nothing to the energy sum. Both input arrays are copied, so the result never aliases the caller's data. |
-| `group` | Hearing-group code as used by `guidance`. |
+| `group` | Hearing-group code as used by `guidance`. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `guidance` | `"nmfs-2024"` (default), `"nmfs-2018"` or `"southall-2019"`. |
 | `impulsive` | Compare against the impulsive criteria (the default, the case for pile driving and air guns). |
 | `n_events` | Number of identical accumulated events, $\ge 1$. |
@@ -319,8 +325,8 @@ Weighted exposure of a spectrum against a hearing group's criteria.
 | `tts_margin` | `cumulative_sel - tts_sel`, in dB (or `None`). |
 | `peak_margin` | `peak_spl - injury_peak_spl`, in dB (or `None`). |
 | `tts_peak_margin` | `peak_spl - tts_peak_spl`, in dB (or `None`): the peak-SPL half of the dual metric on the TTS side, which can trip `exceeds_tts` on its own. |
-| `guidance` | The guidance version. |
-| `group` | Hearing-group code. |
+| `guidance` | The guidance version. One of `"nmfs-2024"`, `"nmfs-2018"` or `"southall-2019"`. |
+| `group` | Hearing-group code. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
 | `impulsive` | Whether the impulsive criteria were compared against. |
 
 The published criteria (`criteria`) are read from the guidance, the
@@ -364,6 +370,12 @@ WeightedExposureResult.plot(
 
 Plot the unweighted and weighted band spectra with the criteria.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## WEIGHTING_GUIDANCE
 
 *Constant* (`tuple`).
@@ -388,8 +400,8 @@ Weighting/exposure parameters of one hearing group.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code as used by `guidance`, as written. |
-| `guidance` | One of [`WEIGHTING_GUIDANCE`](/phonometry/reference/api/underwater/weighting/#weighting_guidance). |
+| `group` | Hearing-group code as used by `guidance`, as written. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
+| `guidance` | One of [`WEIGHTING_GUIDANCE`](/phonometry/reference/api/underwater/weighting/#weighting_guidance). One of `"nmfs-2024"`, `"nmfs-2018"` or `"southall-2019"`. |
 
 **Returns:** The [`WeightingParameters`](/phonometry/reference/api/underwater/weighting/#weightingparameters) row.
 
@@ -426,8 +438,8 @@ Auditory weighting and exposure function parameters for one group.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code as used by its own guidance version. |
-| `guidance` | The guidance version the row comes from. |
+| `group` | Hearing-group code as used by its own guidance version. One of `"LF"`, `"MF"`, `"HF"`, `"VHF"`, `"PW"`, `"OW"`, `"PA"`, `"OA"`, `"SI"`, `"PCW"`, `"OCW"`, `"PCA"` or `"OCA"`. |
+| `guidance` | The guidance version the row comes from. One of `"nmfs-2024"`, `"nmfs-2018"` or `"southall-2019"`. |
 | `description` | Plain-language name of the hearing group. |
 | `a` | Low-frequency exponent `a`. |
 | `b` | High-frequency exponent `b`. |

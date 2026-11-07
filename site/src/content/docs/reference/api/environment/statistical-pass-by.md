@@ -453,9 +453,9 @@ speed windows are judged, kept on the result and emitted as
 | `speeds_kmh` | The speed of each pass-by, in km/h. |
 | `max_levels` | The maximum A-weighted level of each pass-by, time weighting F, in decibels. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3). |
-| `corrected_vehicle_sound_levels` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels` and call this again. |
-| `reference_levels` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. |
-| `weighting_factors` | Other proportions of the three categories (9.5); Table 1 when omitted. |
+| `corrected_vehicle_sound_levels` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels` and call this again. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
+| `reference_levels` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
+| `weighting_factors` | Other proportions of the three categories (9.5); Table 1 when omitted. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 
 **Returns:** The regressions, the levels and the index, as a [`StatisticalPassByResult`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresult).
 
@@ -503,7 +503,7 @@ before calling this.
 | :--- | :--- |
 | `vehicle_sound_levels` | $L_\mathrm{veh}$ of cars, dual-axle and multi-axle heavy vehicles, in decibels, keyed `"1"`, `"2a"` and `"2b"`. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3), which picks the reference speeds and the weighting factors of Table 1. |
-| `weighting_factors` | Other proportions of the three categories, keyed the same way, for the nationally adapted calculations 9.5 allows (the report then has to state them). They must add up to 1. Table 1 when omitted. |
+| `weighting_factors` | Other proportions of the three categories, keyed the same way, for the nationally adapted calculations 9.5 allows (the report then has to state them). They must add up to 1. Table 1 when omitted. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 
 **Returns:** The index, in decibels, unrounded.
 
@@ -537,10 +537,10 @@ The vehicle sound levels and the index of one road surface (ISO 11819-1).
 | :--- | :--- |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"`. |
 | `regressions` | The [`PassByRegression`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregression) of each vehicle category, keyed `"1"`, `"2a"` and `"2b"`. |
-| `weighting_factors` | The $W_x$ the index was computed with. |
-| `vehicle_sound_levels` | $L_\mathrm{veh}$ of each category, uncorrected for temperature and unrounded, in decibels. |
+| `weighting_factors` | The $W_x$ the index was computed with. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
+| `vehicle_sound_levels` | $L_\mathrm{veh}$ of each category, uncorrected for temperature and unrounded, in decibels. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 | `index` | The SPBI of those levels as 9.2 reports them, rounded to one decimal (`reported_vehicle_sound_levels`), in decibels. The index itself is not rounded; `reported_index` is. |
-| `corrected_vehicle_sound_levels` | The temperature-corrected levels the caller supplied (9.4), as supplied, or `None`. |
+| `corrected_vehicle_sound_levels` | The temperature-corrected levels the caller supplied (9.4), as supplied, or `None`. Keyed by any of `"1"`, `"2a"` or `"2b"`. |
 | `corrected_index` | The SPBI of the corrected levels rounded to one decimal, or `None`. |
 | `reference_index` | The SPBI of the reference surface (clause 10): the index supplied, or that of the levels supplied rounded to one decimal; `None` when no reference was given. |
 

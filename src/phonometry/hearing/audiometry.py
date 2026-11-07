@@ -803,7 +803,8 @@ def check_audiometric_ambient_noise(
     :param presentation: ``"air"`` (default), ``"bone"`` or ``"sound field"``.
     :param lowest_test_frequency_hz: The lowest test tone frequency, 125
         (default), 250, or for air conduction 500.
-    :param earphone: A column of Table 3; air conduction only.
+    :param earphone: A column of Table 3; air conduction only. One of ``"supra-aural"``,
+        ``"ER-3A"`` or ``"HDA 200"``.
     :param earphone_attenuation: Or another earphone's attenuation per band
         of Table 3; air conduction only.
     :param lowest_hearing_level: The lowest hearing threshold level to be

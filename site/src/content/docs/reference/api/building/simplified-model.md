@@ -96,6 +96,12 @@ Plot the per-path shares of the transmitted energy.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### AirbornePredictionResult.report()
 
 ```python
@@ -447,6 +453,12 @@ Plot the Formula 21 terms and the resulting `L'n,w`.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ImpactPredictionResult.report()
 
 ```python
@@ -613,7 +625,7 @@ Supported `junction_type` values and their formulas:
 
 | Name | Description |
 | :--- | :--- |
-| `junction_type` | Junction geometry (see above). |
+| `junction_type` | Junction geometry (see above). One of `"rigid_cross"`, `"rigid_t"`, `"flexible_t"`, `"lightweight_facade"`, `"lightweight_double_homogeneous"`, `"lightweight_double_coupled"`, `"corner"` or `"thickness_change"`. |
 | `path` | `"through"` (K13; also the single K12 path of a thickness change), `"corner"` (K12 = K23; also the single path of a corner) or `"double_leaf"` (K24). |
 | `mass_ratio` | $m'_{\perp,i} / m'_i$, the mass per unit area of the perpendicular element over that of the element carrying the path (must be positive). The same per-path convention applies to every branch, including both `double_leaf` (K24) branches. |
 | `frequency` | Frequency at which `Kij` is evaluated, in Hz; only the `"flexible_t"` (through/corner) and the E.7/E.8 lightweight double-leaf junctions are frequency dependent. Defaults to 500 Hz, the value used by the simplified model (Clause 4.4.2), at which the E.7/E.8 $\log_{10}(f/f_k)$ terms vanish. |

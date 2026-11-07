@@ -623,6 +623,12 @@ Plot the stacked per-band attenuation terms with the total.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### OutdoorAttenuation.report()
 
 ```python

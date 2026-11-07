@@ -576,14 +576,20 @@ class ReactiveSilencerResult(OwnsArrays):
     :ivar insertion_loss: Insertion loss per frequency, dB, or ``None`` when no
         source/radiation impedance was supplied.
     :ivar transfer_matrix: The compound ``(n_freq, 2, 2)`` four-pole matrix.
-    :ivar kind: A short label of the device (e.g. ``"expansion chamber"``).
+    :ivar kind: A short label of the device (e.g. ``"expansion chamber"``). One of
+        ``"expansion chamber"``, ``"Helmholtz resonator"``,
+        ``"quarter-wave resonator"``, ``"extended-tube chamber"`` or
+        ``"element chain"``.
     :ivar resonances: Notable resonance frequencies, Hz (e.g. the resonator
         tuning frequency), or ``None``.
     :ivar geometry: The defining geometry the constructor was called with
         (keys matching its keyword names, e.g. ``length``/``chamber_area``/
         ``pipe_area`` for a chamber), retained so :meth:`plot_geometry` can
         draw the device, or ``None`` for a result assembled by a
-        :class:`SilencerChain`, which carries its geometry in ``chain``.
+        :class:`SilencerChain`, which carries its geometry in ``chain``. Keyed by any of
+        ``"length"``, ``"chamber_area"``, ``"pipe_area"``, ``"inlet_extension"``,
+        ``"outlet_extension"``, ``"duct_area"``, ``"neck_area"``, ``"neck_length"``,
+        ``"cavity_volume"`` or ``"branch_area"``.
     :ivar plane_wave_limit: The first higher-order-mode cut-on frequency of the
         widest cross section of the device, Hz (Norton & Karczub Eq. 7.6,
         :func:`phonometry.noise_control.duct_modes.plane_wave_limit`). The
@@ -700,6 +706,8 @@ class ReactiveSilencerResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.noise_control import plot_reactive_silencer

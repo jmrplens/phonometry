@@ -195,3 +195,9 @@ FluctuationStrengthResult.plot(
 ```
 
 Plot the specific fluctuation strength against critical-band rate.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

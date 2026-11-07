@@ -88,7 +88,7 @@ Judge short-term vibration on a building by Annex E.
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity at the foundation, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
+| `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `n_taps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
 
 **Returns:** The comparison, as an [`AssessmentVelocity`](/phonometry/reference/api/vibration/vibration-meter/#assessmentvelocity).
@@ -132,7 +132,7 @@ in time with the record it came from.
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). Annex E filters the unweighted signal, which has already been band-limited by 5.2.3. |
 | `fs` | Sampling frequency, in hertz. |
-| `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
+| `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `n_taps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
 
 **Returns:** `v_Bn(t)`, one value per sample.
@@ -168,7 +168,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `building_class` | The row of DIN 4150-3:1999-02 Table 1, as [`ASSESSMENT_GUIDE_VALUES_MM_S`](/phonometry/reference/api/vibration/vibration-meter/#assessment_guide_values_mm_s) keys it. |
+| `building_class` | The row of DIN 4150-3:1999-02 Table 1, as [`ASSESSMENT_GUIDE_VALUES_MM_S`](/phonometry/reference/api/vibration/vibration-meter/#assessment_guide_values_mm_s) keys it. One of `"commercial"`, `"residential"` or `"sensitive"`. |
 
 **Returns:** The target magnitude, dimensionless, 1 below 10 Hz.
 
@@ -203,7 +203,7 @@ removes.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sampling frequency, in hertz. Table E.1 requires the Nyquist frequency to be above 315 Hz where the meter reaches that far, and this refuses a rate below 630 Hz for the same reason. |
-| `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
+| `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `n_taps` | Length of the filter, odd. The default resolves the 10 Hz corner of the target with room to spare, at half a second of taps. |
 
 **Returns:** The filter coefficients.
@@ -241,7 +241,7 @@ One record judged by Annex E, without a dominant frequency.
 | Name | Description |
 | :--- | :--- |
 | `assessment_velocity_mm_s` | $\vert v_{Bn}\vert _\mathrm{max}$, the peak of the weighted velocity, in millimetres per second. |
-| `building_class` | The row of DIN 4150-3 Table 1 that was used. |
+| `building_class` | The row of DIN 4150-3 Table 1 that was used. One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `velocity_mm_s` | The weighted velocity itself, one value per sample. |
 | `fs` | The sampling frequency the record was read at. |
 
@@ -459,7 +459,7 @@ per second for the result to mean what the standard says.
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
+| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 
 **Returns:** $KB(t)$, one value per sample.
 
@@ -503,7 +503,7 @@ The KB frequency weighting, Formula (4).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
+| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 
 **Returns:** The complex response $H_{B\mathrm{Soll}}$, whose magnitude is Formula (6).
 
@@ -541,7 +541,7 @@ why a measurement is started before the event it is about.
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
+| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 | `time_constant_s` | The averaging time constant, in seconds. The standard fixes it at 0,125 s and the parameter exists so a comparison with another time weighting can be written down, not so a meter can use one. |
 
 **Returns:** $KB_\mathrm{F}(t)$, one value per sample.
@@ -582,7 +582,7 @@ of quiet removes it, which is also how a real measurement is made.
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
 | `fs` | Sampling frequency, in hertz. |
-| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
+| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 | `takt_duration_s` | The clock interval, in seconds (default 30 s). |
 
 **Returns:** The displayed quantities, as a [`VibrationMeterReading`](/phonometry/reference/api/vibration/vibration-meter/#vibrationmeterreading).
@@ -619,7 +619,7 @@ The limits of Tables 2 and 3 at each frequency, in per cent.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
+| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 
 **Returns:** `(lower, upper)`, lower first and signed: the deviation allowed below the design response as a negative percentage and above it as a positive one, so that a deviation keeps to them when `lower <= F(f) <= upper`. Table 2 prints the lower limit $G_\mathrm{u}$ as a magnitude, and 5.2.3.3 states the condition as $-G_\mathrm{u} \le F(f) \le G_\mathrm{o}$; `lower` is $-G_\mathrm{u}$. It is `-10.0` from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$, `-20.0` from $0{,}5\,f_\mathrm{u}$ to $1{,}25\,f_\mathrm{u}$ and from $0{,}8\,f_\mathrm{o}$ to $2\,f_\mathrm{o}$, and `-100.0` outside $0{,}5\,f_\mathrm{u}$ to $2\,f_\mathrm{o}$, where the standard declines to constrain the response from below: a response of zero deviates by -100 % and still keeps to it. `upper` is the Table 3 limit, `10.0` from $1{,}25\,f_\mathrm{u}$ to $0{,}8\,f_\mathrm{o}$ and `20.0` elsewhere.
 
@@ -753,7 +753,7 @@ dropped from the verdict rather than passed for free.
 | `frequencies` | The frequencies the response was measured at, in hertz. The reference frequency has to be among them. |
 | `measured_response` | The measured amplitude response at those frequencies, in any consistent unit: only its shape is graded. |
 | `weighting` | `"kb"` for the weighted response of Formula (4), the default, or `"Z"` for none, the band limitation of Formula (3) alone. |
-| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
+| `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 | `reference_frequency_hz` | The reference frequency of 5.2.10, in hertz (default 16 Hz). |
 
 **Returns:** The comparison, as a [`VibrationMeterVerification`](/phonometry/reference/api/vibration/vibration-meter/#vibrationmeterverification).
@@ -795,7 +795,7 @@ What a meter displays for one record (5.1.6.1).
 | `fs` | The sampling frequency the record was read at. |
 | `measuring_time_s` | $T_M$, the length of the record. |
 | `averaging_time_s` | $T_m$, the whole clock intervals in it. |
-| `working_range` | The working range the chain was built for. |
+| `working_range` | The working range the chain was built for. One of `"building"` or `"railway"`. |
 
 ### VibrationMeterReading.above_detection_limit
 
@@ -853,7 +853,7 @@ One measured amplitude response against Tables 2 and 3.
 | `deviation_percent` | `F(f)` of Formula (7) at each of them: the measured response over the design response, both normalised at the reference frequency, as a percentage departure from unity. |
 | `measured_response` | The measured amplitude response at each of them, as supplied, which footnote a of Table 3 reads. |
 | `weighting` | `"kb"` or `"Z"` (unweighted), which design response the deviation is against. |
-| `working_range` | The working range the limits were read for. |
+| `working_range` | The working range the limits were read for. One of `"building"` or `"railway"`. |
 | `reference_frequency_hz` | The frequency both responses were normalised at. |
 
 The Table 2 and Table 3 limits (`lower_percent`,

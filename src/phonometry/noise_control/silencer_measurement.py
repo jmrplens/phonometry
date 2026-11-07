@@ -651,6 +651,7 @@ def measurement_expanded_uncertainty(
 
     :param frequency: The one-third-octave band centre, in Hz.
     :param quantity: The column of Table 7, as in :func:`measurement_reproducibility`.
+        One of ``"insertion_loss"``, ``"transmission_loss"`` or ``"intensity"``.
     :return: The expanded uncertainty, in dB.
     :raises ValueError: As :func:`measurement_reproducibility`.
     :raises TypeError: if ``quantity`` is not a text.
@@ -1394,6 +1395,8 @@ class OperatingLine(OwnsArrays):
         """Plot the measured points and the line fitted through them.
 
         Requires matplotlib (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.noise_control import plot_operating_line

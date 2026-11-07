@@ -265,6 +265,8 @@ class RoomAcousticsResult(OwnsArrays):
         decay-times panel is drawn on it. Requires matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_room_acoustics
@@ -471,6 +473,8 @@ class DecayCurve(OwnsArrays):
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`. Pass ``fits=False`` to omit the
         EDT/T20/T30 fit lines.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_decay_curve

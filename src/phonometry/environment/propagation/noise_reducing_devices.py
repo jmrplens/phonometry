@@ -264,7 +264,8 @@ class RoadDeviceRating(OwnsArrays):
     :ivar category: The Annex A category of the reported value, ``"A1"`` to
         ``"A5"`` for absorption or ``"B1"`` to ``"B4"`` for insulation, or
         ``None`` for a railway rating and for reflection, whose standards
-        print no ladder.
+        print no ladder. One of ``"A1"``, ``"A2"``, ``"A3"``, ``"A4"``, ``"A5"``,
+        ``"B1"``, ``"B2"``, ``"B3"`` or ``"B4"``.
     :ivar quantity: ``"absorption"``, ``"insulation"`` or ``"reflection"``.
     :ivar spectrum: ``"road"`` (EN 1793-3) or ``"railway"`` (EN 16272-3-1).
     :ivar frequencies: The eighteen band centre frequencies, in Hz.
@@ -294,6 +295,8 @@ class RoadDeviceRating(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_road_device_rating

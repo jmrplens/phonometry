@@ -607,6 +607,8 @@ class WeightedRatingResult(OwnsArrays):
         ``Rw (C; Ctr)`` annotated. Requires matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_weighted_rating
@@ -741,6 +743,8 @@ class ImpactRatingResult(OwnsArrays):
         opposite to airborne) are shaded and ``Ln,w (CI)`` annotated.
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_rating
@@ -974,7 +978,7 @@ def weighted_rating(
         a rating band it lacks is refused rather than filled.
     :param fraction: The band set, 3 for one-third octaves or 1 for octaves,
         or ``None`` to infer it from the number of values or the keys of the
-        mapping.
+        mapping. One of ``1`` or ``3``.
     :return: :class:`WeightedRatingResult` with ``rating``, ``c``,
         ``ctr`` and ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
@@ -1096,7 +1100,7 @@ def weighted_impact_rating(
         one, and a rating band it lacks is refused rather than filled.
     :param fraction: The band set, 3 for one-third octaves or 1 for octaves,
         or ``None`` to infer it from the number of values or the keys of the
-        mapping.
+        mapping. One of ``1`` or ``3``.
     :return: :class:`ImpactRatingResult` with ``rating``, ``ci`` and
         ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
@@ -1203,6 +1207,8 @@ class ImpactImprovementRatingResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_improvement_rating
@@ -1306,6 +1312,8 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         adaptation term the input covered. Requires matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_extended_weighted_rating
@@ -1374,6 +1382,8 @@ class ExtendedImpactRatingResult(OwnsArrays):
         impact rating with ``CI`` and, when covered, ``CI,50-2500``.
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_extended_impact_rating
@@ -1967,6 +1977,8 @@ class ReductionImprovementRating(RichDisplay):
         carries ``ΔRw``, ``Δ(Rw + C)`` and ``Δ(Rw + Ctr)`` with the element
         index. Requires matplotlib (the ``[plot]`` extra); returns
         the :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_reduction_improvement_rating

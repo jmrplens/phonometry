@@ -137,7 +137,7 @@ the laboratory rig, not this record.
 
 | Name | Description |
 | :--- | :--- |
-| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
+| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
 | `n_cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
 | `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 | `amplitude_m_s2` | Zero-to-peak amplitude, in m/s2. The printed responses are for 1 m/s2 and scale with it. |
@@ -182,9 +182,9 @@ One application's row of ISO 8041-1 Table 6 (folio 17).
 
 | Name | Description |
 | :--- | :--- |
-| `application` | The application key, as [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests) files it. |
-| `weightings` | The frequency weightings the application is tested with, in Table 6 order. |
-| `band_limiting_weighting` | The weighting whose Table 3 corners are the band-limiting response of this application's band-limiting row. |
+| `application` | The application key, as [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests) files it. One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `weightings` | The frequency weightings the application is tested with, in Table 6 order. Each one of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
+| `band_limiting_weighting` | The weighting whose Table 3 corners are the band-limiting response of this application's band-limiting row. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `angular_frequency_rad_s` | The saw-tooth angular frequency, in radians per second, which is what the table prints. |
 | `start_time_s` | When the first burst starts, in seconds. |
 | `cycle_counts` | The printed burst lengths, in saw-tooth cycles. |
@@ -234,8 +234,8 @@ the linear and the exponential average of Annex D.
 
 | Name | Description |
 | :--- | :--- |
-| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
-| `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting) for the band-limiting row. |
+| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting) for the band-limiting row. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
 | `n_cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
 | `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 
@@ -271,11 +271,11 @@ A meter's signal-burst indications against ISO 8041-1 Tables 7 to 9.
 
 | Name | Description |
 | :--- | :--- |
-| `application` | The application whose table was used. |
-| `weighting` | The row that was graded, a weighting name or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting). |
+| `application` | The application whose table was used. One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `weighting` | The row that was graded, a weighting name or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
 | `amplitude_m_s2` | The zero-to-peak amplitude of the test signal the printed responses were scaled by. |
 | `cycle_counts` | The burst lengths that were graded, in printed order, with `None` for the continuous row. |
-| `quantities` | The columns that were graded, in printed order. |
+| `quantities` | The columns that were graded, in printed order. Each one of `"rms"`, `"vdv"`, `"mtvv_linear"`, `"mtvv_exponential"` or `"msdv"`. |
 | `measured` | The indications as supplied, one row per burst length and one column per quantity. |
 
 The printed cells (`printed`), their tolerances
@@ -397,8 +397,8 @@ exactly.
 
 | Name | Description |
 | :--- | :--- |
-| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
-| `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting). |
+| `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). One of `"hand-arm"`, `"whole-body"` or `"low-frequency-whole-body"`. |
+| `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"`, `"Wm"` or `"band-limiting"`. |
 | `measured` | The indications, keyed by burst length (`None` for the continuous row) and then by printed column name. Every row has to report the same columns, so that the verdict is a rectangle rather than a ragged set. |
 | `amplitude_m_s2` | The zero-to-peak amplitude of the test signal, in m/s2. |
 

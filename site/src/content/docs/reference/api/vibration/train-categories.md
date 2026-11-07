@@ -144,7 +144,7 @@ an altered or extended line (6.5.3.6 b)).
 
 | Name | Description |
 | :--- | :--- |
-| `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. |
+| `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 | `alignment` | `"surface"` (default) or `"underground"`. |
 
@@ -395,7 +395,7 @@ The weighting factor $\alpha_\mathrm{Zug}$ of Table 2 for one category.
 
 | Name | Description |
 | :--- | :--- |
-| `kind` | The kind of train, as [`TRAIN_KINDS`](/phonometry/reference/api/vibration/train-categories/#train_kinds) lists them. |
+| `kind` | The kind of train, as [`TRAIN_KINDS`](/phonometry/reference/api/vibration/train-categories/#train_kinds) lists them. One of `"tram_metro"`, `"s_bahn"`, `"passenger"`, `"freight"` or `"freight_long"`. |
 | `alignment` | `"surface"` (default) or `"underground"`. |
 
 **Returns:** $\alpha_\mathrm{Zug}$, dimensionless.

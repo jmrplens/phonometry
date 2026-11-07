@@ -267,6 +267,12 @@ Plot the adjustment curve `KI(P)` with the impulses marked.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ImpulseProminenceResult.prominence
 
 *property*
@@ -450,6 +456,12 @@ impulse, annotated with the prominence, adjustment and category.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ImpulsiveSoundResult.prominence
 
 *property*
@@ -501,6 +513,12 @@ Plot the level trace against time.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## predicted_prominence
 

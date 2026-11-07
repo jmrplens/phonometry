@@ -148,6 +148,12 @@ EigenrayResult.plot(
 
 Plot the arrival structure (per-path loss stems against delay).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## eigenrays
 
 ```python
@@ -606,7 +612,7 @@ can be subtracted.
 | `beam_widths` | Beam half-width $W(s)$ on that grid, in metres: Jensen Eq. (3.89), the distance at which the beam's own pressure has fallen by $\mathrm{e}^{-1}$ and its intensity by $\mathrm{e}^{-2}$. |
 | `wavefront_curvatures` | Beam wavefront curvature $K(s)$ on that grid, in 1/m: Jensen Eq. (3.90) with the sign that belongs to the conjugated field this result exposes, so that a beam spreading in free space reproduces Eq. (3.85), $K = x/(x^2 + a^2)$, as a positive number. |
 | `initial_beam_widths` | The $W_0$ of Eq. (3.91) actually used by each beam of the fan, in metres, shape `(n_beams,)`. An explicit `fan.beam_width` fills it with one value; the default is per launch angle (see `_default_beam_widths`), widest on the axis of the fan whenever a shallow channel's modal-resolution term is in play and flat across it otherwise. |
-| `absorption_model` | The seawater absorption model applied along the beams, or `None` when the run propagated without volume absorption (the default). |
+| `absorption_model` | The seawater absorption model applied along the beams, or `None` when the run propagated without volume absorption (the default). One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
 | `absorption_db_per_km` | The absorption coefficient $\alpha$ actually applied, in dB/km (0.0 when `absorption_model` is `None`), as [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption) evaluated it at the source frequency and depth. Recorded so a run's loss can be decomposed without re-deriving what was subtracted. |
 | `seabed_density` | Sediment density of the fluid seabed the bottom bounces were charged with, or `None` when the bottom was one of the perfect reflectors (the default). |
 | `seabed_sound_speed` | Sediment sound speed of that seabed, in m/s, or `None` likewise. Together the pair names the Rayleigh interface of [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient) each beam's bottom reflections multiplied it by. |
@@ -627,6 +633,12 @@ GaussianBeamResult.plot(
 ```
 
 Plot the propagation-loss field (depth increasing downward).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## normal_modes
 
@@ -725,6 +737,12 @@ NormalModeResult.plot(
 ```
 
 Plot the propagation loss versus range (loss increasing downward).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## NumericalPropagationWarning
 
@@ -826,6 +844,12 @@ ParabolicEquationResult.plot(
 ```
 
 Plot the propagation-loss field (depth increasing downward).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## ray_trace
 
@@ -971,6 +995,12 @@ RayTraceResult.plot(
 ```
 
 Plot the ray paths (depth increasing downward).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## VolumeAbsorption
 

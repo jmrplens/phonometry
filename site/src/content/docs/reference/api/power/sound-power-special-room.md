@@ -550,6 +550,12 @@ of the room, which `source_size_recommended` reads and
 `passes` leaves out, the clause saying "should" where 6.2, 6.3 and
 6.6 say "shall".
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `method` | One of `"direct"` or `"comparison"`. |
+
 ### SpecialRoomReverberationCheck.band_within
 
 *property*
@@ -720,6 +726,12 @@ levels over their background, `NaN` where there was nothing to test,
 and `background_requirement_met_a` the 4 dB test of 6.5 read from it.
 `sigma_r0` is Table 5 per band (`NaN` at 63 Hz) and `sigma_r0_a` its
 A-weighted row; the uncertainty properties follow Formulae (12) and (13).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `method` | One of `"direct"` or `"comparison"`. |
 
 ### SpecialRoomSoundPowerResult.background_requirement_met
 

@@ -830,7 +830,7 @@ inside the sponge layer when one is configured on that side).
 
 | Name | Description |
 | :--- | :--- |
-| `direction` | Travel direction of the launched wave. |
+| `direction` | Travel direction of the launched wave. One of `"down"`, `"up"`, `"left"` or `"right"`. |
 | `waveform` | Callable `t -> p_inc(t)` in pascals. |
 | `offset` | Line position, in cells from the launch edge. |
 | `amplitude` | Extra gain applied to `waveform`. |

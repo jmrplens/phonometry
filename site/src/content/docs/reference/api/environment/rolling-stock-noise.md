@@ -308,7 +308,7 @@ direct one.
 | `track_gradient_ratio` | The gradient, rise over length (5:1 000 is 0,005); not judged when omitted. |
 | `small_deviations` | The Annex C verdict of this speed, computed on the quadratic average of `roughness` ([`average_roughness_spectra`](/phonometry/reference/api/environment/acoustic-roughness/#average_roughness_spectra), C.2.1) against `roughness_limit_db` (Formula C.1), which accepts a roughness exceedance whose effect is small. |
 | `roughness_limit_db` | The roughness limit; Figure 2 by default. |
-| `decay_limits_db_per_m` | The decay-rate limits, a band-to-rate mapping for each of the two directions; Figure 3 by default. |
+| `decay_limits_db_per_m` | The decay-rate limits, a band-to-rate mapping for each of the two directions; Figure 3 by default. Keyed by any of `"vertical"` or `"lateral"`. |
 
 **Returns:** The verdict, with every requirement and its numbers.
 
@@ -794,7 +794,7 @@ The verdict on a test track against the reference conditions of ISO 3095 6.2.
 | `roughness` | The roughness spectra of the rails, one per rail or line, each already averaged over its records. |
 | `decay_rates` | The decay rates, vertical and lateral, of each set of measurements. |
 | `roughness_limit_db` | The roughness limit judged against, held as a read-only copy. |
-| `decay_limits_db_per_m` | The decay-rate limits judged against, held as read-only copies. |
+| `decay_limits_db_per_m` | The decay-rate limits judged against, held as read-only copies. Keyed by any of `"vertical"` or `"lateral"`. |
 | `small_deviations` | The Annex C verdict the roughness limit was judged by, when the roughness exceeds the limit and one was given; `None` otherwise. |
 | `curve_radius_m` | The radius of curvature of the track, in metres, or `None` when it was not judged. |
 | `track_gradient_ratio` | The gradient, rise over length, or `None` when it was not judged. |
@@ -933,7 +933,7 @@ normalisation, when one is required, goes on the runs before this
 | Name | Description |
 | :--- | :--- |
 | `run_levels` | The runs of each position, in dB, keyed by a name for the position (`"left"`, `"right"`, `"front, direction 1"`). |
-| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). |
+| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). One of `"constant_speed"`, `"acceleration_maximum"`, `"acceleration_averaged"` or `"braking"`. |
 
 **Returns:** The test.
 
@@ -967,7 +967,7 @@ A test decided by the highest rounded mean of three runs per position.
 
 | Name | Description |
 | :--- | :--- |
-| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). |
+| `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). One of `"constant_speed"`, `"acceleration_maximum"`, `"acceleration_averaged"` or `"braking"`. |
 | `run_levels` | The runs of each position, in dB, keyed by the position's name: $L_{p\mathrm{Aeq},T_p}$ at constant speed, $L_{p\mathrm{AFmax}}$ when starting (maximum level method) and braking, $L_{p\mathrm{Aeq},T}$ when starting (averaged level method). |
 
 ### RollingStockTestResult.final_level

@@ -117,6 +117,12 @@ Redraws the Clause 6.2 regression line from `d2s` and
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### OpenPlanResult.plot_geometry()
 
 ```python
@@ -132,6 +138,12 @@ Draw the measurement line to scale, rD and rP marked.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### OpenPlanResult.report()
 

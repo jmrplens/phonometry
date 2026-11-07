@@ -116,7 +116,7 @@ to 150 m³.
 | Name | Description |
 | :--- | :--- |
 | `volume` | Receiving-room volume `V`, in m³ (0 \< V \<= 150). |
-| `room` | Room-type key (see above). |
+| `room` | Room-type key (see above). One of `"furnished"`, `"kitchen"`, `"bathroom"`, `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"f"`, `"g"`, `"h"`, `"a+e"`, `"b+f"`, `"c+g"` or `"d+h"`. |
 | `weighted` | When `True` return the single A-/C-weighted index (the Table 4 `A, C` column) instead of the five octave-band values, for globally weighted service-equipment noise (Clause 3.17). |
 
 **Returns:** The reverberation index `k` per octave band (125-2000 Hz), in dB, or the scalar A-/C-weighted index when `weighted` is `True`.
@@ -376,6 +376,12 @@ Delegates to the weighted-rating plot. Requires the automatic rating
 (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### SurveyAirborneResult.report()
 
 ```python
@@ -456,6 +462,12 @@ SurveyFacadeResult.plot(
 
 Plot `D2m,nT` against the shifted ISO 717-1 reference curve.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### SurveyFacadeResult.report()
 
 ```python
@@ -532,6 +544,12 @@ SurveyImpactResult.plot(
 ```
 
 Plot `L'nT` against the shifted ISO 717-2 reference curve.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SurveyImpactResult.report()
 

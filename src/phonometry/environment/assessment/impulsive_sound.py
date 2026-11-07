@@ -236,6 +236,8 @@ class ImpulseProminenceResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_impulse_prominence
@@ -649,6 +651,8 @@ class ImpulsiveSoundResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         return _plot_impulsive_sound(self, ax=ax, language=language, **kwargs)
 
@@ -701,6 +705,8 @@ class LevelHistory(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         return _plot_level_history(self, ax=ax, language=language, **kwargs)
 

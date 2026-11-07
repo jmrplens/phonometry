@@ -580,7 +580,8 @@ def sea_water(
     :param latitude_deg: Latitude, in degrees, for the depth-to-pressure
         conversions (default 45).
     :param sound_speed_model: Which of the four fits to use; see the module
-        docstring.
+        docstring. One of ``"unesco"``, ``"del_grosso"``, ``"mackenzie"`` or
+        ``"medwin"``.
     :return: The :class:`~phonometry.fluids.Fluid` at that point.
     :raises TypeError: if ``sound_speed_model`` is not a text.
 

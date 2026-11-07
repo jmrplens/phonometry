@@ -184,6 +184,12 @@ they were not supplied to [`two_microphone_impedance`](/phonometry/reference/api
 and `x1` are always there, because the reduction cannot run without
 them.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `shape` | One of `"circular"`, `"rectangular"` or `"square"`. |
+
 ### ImpedanceTubeResult.plot()
 
 ```python
@@ -200,6 +206,12 @@ Plot the absorption spectrum `alpha(f)` with `|r|` overlaid.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ImpedanceTubeResult.plot_geometry()
 
 ```python
@@ -215,6 +227,12 @@ Draw the two-microphone tube to scale (dimensioned side view).
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ImpedanceTubeResult.report()
 

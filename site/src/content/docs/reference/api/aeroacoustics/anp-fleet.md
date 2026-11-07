@@ -99,6 +99,14 @@ ANPAircraft.event_level(
 
 Single-event level at a receiver (see [`ANPDatabase.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseevent_level)).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
+| `metric` | One of `"exposure"` or `"maximum"`. |
+| `absorption` | One of `"arp5534"` or `"arp866a"`. |
+
 **Raises**
 
 | Exception | When |
@@ -126,6 +134,14 @@ ANPAircraft.noise_contour(
 
 Single-event ground contour (see [`ANPDatabase.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenoise_contour)).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
+| `metric` | One of `"exposure"` or `"maximum"`. |
+| `absorption` | One of `"arp5534"` or `"arp866a"`. |
+
 **Raises**
 
 | Exception | When |
@@ -143,6 +159,13 @@ ANPAircraft.npd_curves(
 ```
 
 NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
+| `metric` | One of `"SEL"` or `"LAmax"`. |
 
 **Raises**
 
@@ -163,6 +186,12 @@ ANPAircraft.profile(
 ```
 
 Fixed-point profile (see [`ANPDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
 
 **Raises**
 
@@ -186,6 +215,14 @@ ANPAircraft.revised_npd_curves(
 ```
 
 NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
+| `metric` | One of `"SEL"` or `"LAmax"`. |
+| `absorption` | One of `"arp5534"` or `"arp866a"`. |
 
 **Raises**
 
@@ -479,6 +516,12 @@ net thrust per engine the NPD tables are indexed on.
 
 Takes the same arguments as `flight_profile`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | One of `"departure"`, `"D"`, `"arrival"` or `"A"`. |
+
 **Returns:** An [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile).
 
 **Raises**
@@ -705,6 +748,12 @@ ANPNPDCurves.plot(
 
 Plot the NPD curve at each tabulated power versus slant distance.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## ANPProfile
 
 ```python
@@ -748,6 +797,12 @@ ANPProfile.plot(
 ```
 
 Plot the trajectory altitude versus along-track distance.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## load_anp_database
 
@@ -817,3 +872,9 @@ SpectralClass.plot(
 ```
 
 Plot the band levels versus frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

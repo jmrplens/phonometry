@@ -509,6 +509,8 @@ class RainGeneratorVerification(OwnsArrays):
         units of its tolerance, so the three share one axis and the window is
         -1 to 1. Requires matplotlib (the ``[plot]`` extra);
         returns the :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_rain_generator_verification
@@ -639,6 +641,8 @@ class RainfallReferenceCorrection(OwnsArrays):
         the laboratory is normalized by. Requires matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_rainfall_reference_correction
@@ -824,6 +828,8 @@ class RainfallSoundResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_rainfall_sound

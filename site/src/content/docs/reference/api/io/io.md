@@ -1124,7 +1124,7 @@ original) so tools that only read PCM can open it.
 | :--- | :--- |
 | `src` | The file to read (any format the readers accept). |
 | `dst` | The file to write; the suffix picks the container (WAV family or, with the `[audio]` extra, FLAC). Lossy suffixes are refused by policy. Nothing or a regular file at the name is replaced only once the new file beside it is whole, as [`write`](/phonometry/reference/api/io/io/#write) does; a link, a pipe, a device or a directory there is opened as Python opens it. |
-| `subtype` | Target sample format; `None` preserves the source's depth (the module docstring's mapping). An explicitly narrower choice quantises with the clipping count reported. |
+| `subtype` | Target sample format; `None` preserves the source's depth (the module docstring's mapping). An explicitly narrower choice quantises with the clipping count reported. One of `"PCM_16"`, `"PCM_24"`, `"PCM_32"`, `"FLOAT"` or `"DOUBLE"`. |
 | `block_size` | Frames per streamed block; the memory ceiling. |
 
 **Returns:** [`phonometry.io.info`](/phonometry/reference/api/io/io/#info) of the written file.
@@ -1280,7 +1280,7 @@ consulted.
 
 | Name | Description |
 | :--- | :--- |
-| `kind` | One of [`PROVENANCE_KINDS`](/phonometry/reference/api/io/io/#provenance_kinds). |
+| `kind` | One of [`PROVENANCE_KINDS`](/phonometry/reference/api/io/io/#provenance_kinds). One of `"datasheet"`, `"declaration_of_performance"`, `"test_report"`, `"measurement"`, `"calculation"`, `"publication"` or `"other"`. |
 | `document` | The document's title as it prints it. |
 | `version` | The revision the document prints (`"Rev. 4"`), or `None` when it prints none, which is a different answer from a version nobody wrote down. |
 | `consulted` | The day the document was read, as `YYYY-MM-DD`: a data sheet changes under the same title. |
@@ -1749,6 +1749,12 @@ Requires matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 **Raises**
 
 | Exception | When |
@@ -1894,7 +1900,7 @@ out of calibrated results).
 | `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. With nothing at the name, or a regular file, the audio is written to a new hidden file beside it, which takes the name only once it is whole, so a write stopped half way (an error, an interrupt) leaves what was there; the new file is readable by its owner alone while it is written over a file, then keeps the permission bits of the old one, and a hard link to the old file keeps the old bytes. A link, a pipe, a device or a directory at the name is opened there as Python opens it: a link is followed, a pipe waits for a reader, a directory raises `IsADirectoryError`. |
 | `x` | A [`Signal`](/phonometry/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
 | `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
-| `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. |
+| `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. One of `"PCM_16"`, `"PCM_24"`, `"PCM_32"`, `"FLOAT"` or `"DOUBLE"`. |
 | `bext` | The broadcast provenance chunk (EBU Tech 3285; see [`phonometry.io._bext`](/phonometry/reference/api/io/io/)). `None` carries the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own provenance when it has one and writes no chunk otherwise; `"loudness"` additionally measures the five R 128 fields with the library's BS.1770 implementation on the samples being written (one extra pass, which is why it is opt-in); a [`BroadcastMetadata`](/phonometry/reference/api/io/io/#broadcastmetadata) is written as given. Every written chunk's CodingHistory is extended, never replaced, with phonometry's `A=,F=,W=,M=,T=` line. |
 | `dither` | `"tpdf"` adds +/-1 LSB triangular-PDF dither before quantising to `PCM_16` (Lipshitz et al. 1992; see the module docstring); `None` (default) quantises plainly. Refused for any other subtype, where it would only add noise. |
 | `rng` | Randomness for the dither noise: a seeded `numpy.random.Generator` (or an int seed) makes the written bytes reproducible, which is what a test or a pinned pipeline needs. `None` (default) draws fresh entropy on every write, and that default is deliberate: dither exists to decorrelate the quantisation error, and repeating one noise pattern across multiple writes would correlate the files with each other, undoing exactly what the dither is for. Refused without `dither`, the only thing it seeds. |

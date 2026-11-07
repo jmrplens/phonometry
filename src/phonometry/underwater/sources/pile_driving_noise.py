@@ -351,7 +351,10 @@ class PileStrikeResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | TwoPanels:
-        """Plot the strike waveform and its cumulative energy."""
+        """Plot the strike waveform and its cumulative energy.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_pile_strike
 
@@ -467,7 +470,10 @@ class StrikeSELSpectrum(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-band single-strike SEL."""
+        """Plot the per-band single-strike SEL.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_strike_sel_spectrum
 

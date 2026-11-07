@@ -214,7 +214,9 @@ def convert_frf(
     :param source: The FRF kind of *value*: one of ``"receptance"``,
         ``"mobility"``, ``"accelerance"``, ``"dynamic_stiffness"``,
         ``"impedance"`` or ``"apparent_mass"``.
-    :param target: The FRF kind to convert to (same set).
+    :param target: The FRF kind to convert to (same set). One of ``"receptance"``,
+        ``"mobility"``, ``"accelerance"``, ``"dynamic_stiffness"``, ``"impedance"`` or
+        ``"apparent_mass"``.
     :return: The FRF value(s) of kind *target*, as a complex array.
     :raises ValueError: for an unknown FRF name, a non-positive frequency, or
         a zero *value* (dead channel) when the conversion involves a
@@ -461,6 +463,8 @@ class RigidMassCalibrationResult(OwnsArrays):
         ``ax`` the deviation diagnostic is drawn on it and that axes returned.
 
         Requires matplotlib (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_rigid_mass_calibration
@@ -648,6 +652,8 @@ class MobilityResult(OwnsArrays):
         impedance :math:`1/Y_{ij}`, not the blocked matrix impedance of Table 1
         (which does not invert element-wise).
 
+        :param target: One of ``"receptance"``, ``"mobility"``, ``"accelerance"``,
+            ``"dynamic_stiffness"``, ``"impedance"`` or ``"apparent_mass"``.
         :raises TypeError: if ``target`` is not a text.
         """
         require_choice(
@@ -673,6 +679,8 @@ class MobilityResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_mobility

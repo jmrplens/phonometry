@@ -276,8 +276,10 @@ class PropagationLossResult(OwnsArrays):
     :ivar frequency: The acoustic frequency, in Hz.
     :ivar absorption_db_per_km: The absorption coefficient :math:`\alpha`,
         in dB/km.
-    :ivar law: The spreading law used.
-    :ivar model: The absorption model used.
+    :ivar law: The spreading law used. One of ``"spherical"``, ``"cylindrical"`` or
+        ``"practical"``.
+    :ivar model: The absorption model used. One of ``"francois-garrison"``,
+        ``"ainslie-mccolm"`` or ``"thorp"``.
     """
 
     range_m: NDArray[np.float64]
@@ -333,7 +335,10 @@ class PropagationLossResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the propagation loss versus range with its two contributions."""
+        """Plot the propagation loss versus range with its two contributions.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_propagation_loss
 
@@ -359,12 +364,14 @@ def propagation_loss(
 
     :param range_m: Range(s) from the source, in metres (scalar or array).
     :param frequency_hz: Acoustic frequency, in Hz.
-    :param law: Spreading law (see :func:`spreading_loss`).
+    :param law: Spreading law (see :func:`spreading_loss`). One of ``"spherical"``,
+        ``"cylindrical"`` or ``"practical"``.
     :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity: Salinity ``S``, in parts per thousand.
     :param depth: Depth, in metres.
     :param ph: Acidity (default 8).
-    :param model: Absorption model (see :func:`seawater_absorption`).
+    :param model: Absorption model (see :func:`seawater_absorption`). One of
+        ``"francois-garrison"``, ``"ainslie-mccolm"`` or ``"thorp"``.
     :param transition_range: Transition range for the ``"practical"`` law, in m.
     :return: A :class:`PropagationLossResult`.
     :raises ValueError: If the inputs are invalid.

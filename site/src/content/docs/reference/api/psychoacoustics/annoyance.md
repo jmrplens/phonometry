@@ -173,3 +173,9 @@ PsychoacousticAnnoyanceResult.plot(
 ```
 
 Plot the PA value and the `wS` / `wFR` term contributions.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

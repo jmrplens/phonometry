@@ -553,6 +553,8 @@ class HeavyImpactSourceCheck(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_heavy_impact_source
@@ -711,6 +713,8 @@ class StandardizedMaxImpactResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_standardized_maximum_impact
@@ -819,7 +823,7 @@ class AWeightedMaxImpactResult(OwnsArrays):
 
     :ivar frequencies: Band centre frequencies, in Hz.
     :ivar fraction: The band set, 3 for one-third octaves (50-630 Hz) or 1
-        for octaves (63-500 Hz).
+        for octaves (63-500 Hz). One of ``1`` or ``3``.
     :ivar levels: Input maximum levels ``Xi,Fmax,j`` per band, in dB.
     :ivar a_weighting: Table D.3 correction ``Aj`` per band, in dB.
     :ivar corrected: ``Xi,Fmax,j + Aj`` per band, in dB.
@@ -876,6 +880,8 @@ class AWeightedMaxImpactResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_a_weighted_maximum_impact
@@ -917,7 +923,7 @@ def a_weighted_max_impact_level(
         must be exactly the rating bands of the chosen band set.
     :param fraction: The band set, 3 for one-third octaves or 1 for octaves;
         inferred from the number of values (12 one-third octaves, 4 octaves)
-        when omitted.
+        when omitted. One of ``1`` or ``3``.
     :return: An :class:`AWeightedMaxImpactResult`.
     :raises ValueError: for a wrong number of values or mismatched bands.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or

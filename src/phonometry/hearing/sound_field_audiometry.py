@@ -459,7 +459,8 @@ class DiffuseSoundFieldCheck(OwnsArrays):
     :ivar standard: The clause this check applies, ``"ISO 8253-2 5.3"`` or
         ``"ISO 4869-3 5.2.2"``, which picks the Table 1 the index is read
         against.
-    :ivar positions: The position names, in row order.
+    :ivar positions: The position names, in row order. Each one of ``"front"``,
+        ``"back"``, ``"left"``, ``"right"``, ``"up"`` or ``"down"``.
 
     What Table 1 allows the variation (:attr:`allowable_variation_db`) is read
     from the microphone's index and the standard's table, not stored, so a
@@ -827,7 +828,8 @@ class FreeSoundFieldCheck(OwnsArrays):
         behind it, per band, in dB.
     :ivar loudspeaker_distance_m: :math:`r`, the distance from the loudspeaker
         to the reference point, in metres.
-    :ivar positions: The lateral position names, in row order.
+    :ivar positions: The lateral position names, in row order. Each one of ``"left"``,
+        ``"right"``, ``"up"`` or ``"down"``.
 
     Where the axial points sit (:attr:`axis_offset_m`) is the clause's, and
     so is the difference the inverse distance law gives there

@@ -735,6 +735,8 @@ class SoundStrengthResult(OwnsArrays):
         second panel shows the two levels G is the difference of. Requires
         matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_sound_strength
@@ -916,6 +918,8 @@ class LateralEnergyResult(OwnsArrays):
     ``"cosine"`` for Equation (A.15). Both are dimensionless and Table A.1
     gives them a just-noticeable difference of 0,05 and a typical range of
     0,05 to 0,35 over the 125 Hz to 1 kHz octave bands.
+
+    :ivar weighting: One of ``"squared"`` or ``"cosine"``.
     """
 
     frequencies: NDArray[np.float64] | None
@@ -929,6 +933,8 @@ class LateralEnergyResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_lateral_energy
@@ -1071,6 +1077,8 @@ class LateLateralResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_late_lateral
@@ -1274,6 +1282,8 @@ class InterauralCorrelationResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_interaural_correlation
@@ -1514,6 +1524,8 @@ class StageSupportResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_stage_support
@@ -1700,6 +1712,9 @@ class AuditoriumQuantity(RichDisplay):
     it: frequency-averaged values at single positions in unoccupied concert
     and multi-purpose halls up to 25 000 m³. It is not a range for one band,
     for an occupied hall, or for a spatial average.
+
+    :ivar symbol: One of ``"G"``, ``"EDT"``, ``"C80"``, ``"D50"``, ``"Ts"``, ``"J_LF"``
+        or ``"L_J"``.
     """
 
     #: The difference is in the unit of the quantity, decibels for some, seconds or a ratio for others.
@@ -1876,7 +1891,8 @@ def single_number_average(
         is taken too: Table A.1 prints the early lateral energy fraction as
         one row, "J_LF or J_LFC", so both weightings of
         :func:`early_lateral_energy_fraction` share its four bands, its
-        just-noticeable difference and its typical range.
+        just-noticeable difference and its typical range. One of ``"G"``, ``"EDT"``,
+        ``"C80"``, ``"D50"``, ``"Ts"``, ``"J_LF"``, ``"J_LFC"`` or ``"L_J"``.
     :param values: Its per-band values, one per entry of ``frequencies``.
     :param frequencies: The band centre frequencies in Hz, as a result carries
         them.
@@ -1955,7 +1971,9 @@ class PerceptibleDifference(OwnsArrays):
     symbol and the two values, so they are not fields: a record cannot be
     built against another JND.
 
-    :ivar symbol: The quantity, as :data:`TABLE_A1` keys it, or ``"J_LFC"``.
+    :ivar symbol: The quantity, as :data:`TABLE_A1` keys it, or ``"J_LFC"``. One of
+        ``"G"``, ``"EDT"``, ``"C80"``, ``"D50"``, ``"Ts"``, ``"J_LF"``, ``"J_LFC"`` or
+        ``"L_J"``.
     :ivar first: One value, in the quantity's unit.
     :ivar second: The other, of the same shape.
     """
@@ -2039,7 +2057,8 @@ def assess_perceptible_difference(
         is taken too: Table A.1 prints the early lateral energy fraction as
         one row, "J_LF or J_LFC", so both weightings of
         :func:`early_lateral_energy_fraction` share its four bands, its
-        just-noticeable difference and its typical range.
+        just-noticeable difference and its typical range. One of ``"G"``, ``"EDT"``,
+        ``"C80"``, ``"D50"``, ``"Ts"``, ``"J_LF"``, ``"J_LFC"`` or ``"L_J"``.
     :param first: One value, in the quantity's unit.
     :param second: The other, of the same shape.
     :return: The answer, as a :class:`PerceptibleDifference`; its

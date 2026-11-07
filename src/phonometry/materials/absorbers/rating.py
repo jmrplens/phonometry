@@ -268,7 +268,8 @@ class AbsorptionRatingResult(OwnsArrays):
     :ivar shape_indicator: Concatenated shape indicators, ``L``/``M``/``H``
         in that order, or an empty string when none applies (Clause 4.3).
     :ivar absorption_class: Sound absorption class ``A``-``E`` or
-        ``"Not classified"`` from Table B.1 (Annex B).
+        ``"Not classified"`` from Table B.1 (Annex B). One of ``"A"``, ``"B"``, ``"C"``,
+        ``"D"``, ``"E"`` or ``"Not classified"``.
     :ivar shift: Downward shift applied to the reference curve, in
         absorption units (Clause 4.2); :math:`\alpha_\mathrm{w} = 1.00 - \text{shift}`.
     :ivar unfavorable_sum: Sum of the unfavourable deviations at the final
@@ -460,6 +461,8 @@ class AbsorptionRatingResult(OwnsArrays):
         shaded and ``alpha_w`` annotated. Requires matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_weighted_absorption

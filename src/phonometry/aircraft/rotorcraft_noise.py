@@ -220,7 +220,10 @@ class RotorcraftHemisphere(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the hemisphere directivity for one band (polar section)."""
+        """Plot the hemisphere directivity for one band (polar section).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_hemisphere
 
@@ -937,7 +940,10 @@ class FlightPathKinematics(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the speed and angle profiles along the track."""
+        """Plot the speed and angle profiles along the track.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_flight_path_kinematics
 
@@ -1206,7 +1212,10 @@ class RotorcraftEventResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the A-weighted level time history with its event metrics."""
+        """Plot the A-weighted level time history with its event metrics.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_event
 
@@ -1262,7 +1271,10 @@ class RotorcraftNoiseContourResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot filled noise contours over the ground plane."""
+        """Plot filled noise contours over the ground plane.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_noise_contour
 
@@ -1380,7 +1392,8 @@ class RotorcraftGround(OwnsArrays):
         :func:`~phonometry.aircraft.rotorcraft_propagation.ground_effect_adjustment`).
         A contour grid also accepts one value per grid point (shape
         ``(len(y), len(x))``) for heterogeneous ground across the receivers
-        (each receiver's two-ray model uses its local value).
+        (each receiver's two-ray model uses its local value). One of ``"A"``, ``"B"``,
+        ``"C"``, ``"D"``, ``"E"``, ``"F"``, ``"G"`` or ``"H"``.
     :ivar terrain: Optional digital elevation model ``(x, y, z)`` on the
         track frame (``x`` and ``y`` strictly increasing, ``z`` of shape
         ``(len(y), len(x))``, all in metres on the track datum). When given,

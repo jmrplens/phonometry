@@ -724,6 +724,8 @@ class HVACSpectrumResult(OwnsArrays):
         """Plot the quantity against a continuous log-frequency axis.
 
         Requires matplotlib (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.noise_control import plot_hvac_spectrum

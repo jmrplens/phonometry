@@ -627,7 +627,10 @@ class WestonPropagationResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the composite loss with each regime's law and the boundaries."""
+        """Plot the composite loss with each regime's law and the boundaries.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_weston_regimes
 

@@ -313,6 +313,12 @@ Plot the three Biot wavenumbers against frequency.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## frame_bulk_modulus
 
 ```python

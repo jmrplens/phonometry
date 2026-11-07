@@ -868,6 +868,12 @@ Plot the quantity against a continuous log-frequency axis.
 
 Requires matplotlib (the `[plot]` extra).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### HVACSpectrumResult.report()
 
 ```python

@@ -124,6 +124,12 @@ Plot the quantity with its `±U` uncertainty ribbon (band quantities).
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### AbsorptionUncertaintyResult.reported_expanded_uncertainty
 
 *property*

@@ -272,6 +272,8 @@ class AirbornePredictionResult(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_airborne_prediction
@@ -377,6 +379,8 @@ class ImpactPredictionResult(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_prediction
@@ -639,7 +643,10 @@ def junction_vibration_reduction(
     - ``"thickness_change"`` (E.9 B, thickness change in an element): through
       :math:`K_{12} = 5 M^2 - 5` (:math:`= K_{21}`); the only path.
 
-    :param junction_type: Junction geometry (see above).
+    :param junction_type: Junction geometry (see above). One of ``"rigid_cross"``,
+        ``"rigid_t"``, ``"flexible_t"``, ``"lightweight_facade"``,
+        ``"lightweight_double_homogeneous"``, ``"lightweight_double_coupled"``,
+        ``"corner"`` or ``"thickness_change"``.
     :param path: ``"through"`` (K13; also the single K12 path of a thickness
         change), ``"corner"`` (K12 = K23; also the single path of a corner) or
         ``"double_leaf"`` (K24).

@@ -592,7 +592,7 @@ Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrolog
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. |
+| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. Keyed by any of `"series_impedance"`, `"voltage_ratio"`, `"cross_talk"`, `"noise"`, `"distortion"`, `"reflections"`, `"frequency"`, `"receiver_shield"`, `"transmitter_shield"`, `"distance"`, `"static_pressure"`, `"temperature"`, `"relative_humidity"`, `"standing_waves"`, `"air_attenuation"`, `"acoustic_centers"`, `"polarizing_voltage"`, `"plane_wave_deviation"`, `"mathematical_manipulations"`, `"rounding"`, `"repeatability"`, `"static_pressure_corrections"` or `"temperature_corrections"`. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
 ### FreeFieldParameterUncertainty.plot()

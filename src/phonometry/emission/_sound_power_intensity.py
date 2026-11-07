@@ -236,6 +236,9 @@ class SoundPowerIntensityResult(OwnsArrays):
     verdicts, the totals and the indicators read from the partial powers are
     read-only properties, worked out from the fields and the limits Annex B
     prints, so they are not fields.
+
+    :ivar fraction: One of ``1`` or ``3``.
+    :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
 
     frequencies: np.ndarray | None
@@ -418,6 +421,8 @@ class SoundPowerIntensityResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_power
@@ -598,7 +603,7 @@ def sound_power_intensity(
     :param frequencies: ``(N_bands,)`` nominal band centres (Hz), for the
         A-weighted total and the Table 2 repeatability limits.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves (Table 2 lookup).
+        octaves (Table 2 lookup). One of ``1`` or ``3``.
     :param grade: ``'engineering'`` (grade 2) or ``'survey'`` (grade 3);
         selects ``K`` for the reported ``Ld`` and the criterion-2 warning.
     :param repeatability_limit: Override for the criterion-3 limit ``s`` (dB),
@@ -1291,6 +1296,8 @@ class PrecisionIntensityResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_power

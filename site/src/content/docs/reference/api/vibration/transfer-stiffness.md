@@ -1447,6 +1447,12 @@ Plot the transfer-stiffness level `L_k(f)`.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### TransferStiffnessResult.report()
 
 ```python

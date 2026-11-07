@@ -96,6 +96,12 @@ Plot the aperture sound reduction index `R(f)`.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ApertureTransmissionResult.plot_geometry()
 
 ```python
@@ -111,6 +117,12 @@ Draw the wall-aperture cross-section to scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ApertureTransmissionResult.transmission_loss
 

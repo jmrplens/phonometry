@@ -196,7 +196,8 @@ def fundamental_period(
     form, since the annex gives a range and no way to choose inside it; state
     *coefficient* to use the value of a particular code.
 
-    :param model: One of :data:`PERIOD_MODELS`.
+    :param model: One of :data:`PERIOD_MODELS`. One of ``"stories"``, ``"height"``,
+        ``"height_width"`` or ``"slenderness"``.
     :param n_stories: Number of storeys ``n``, for the storey model.
     :param height_m: Height ``h`` above the base, in metres.
     :param width_m: Width ``b`` parallel to the force, in metres.
@@ -254,7 +255,8 @@ def fundamental_frequency(
     states two of its four predictors as frequencies and two as periods, and a
     reader should not have to remember which.
 
-    :param model: One of :data:`PERIOD_MODELS`.
+    :param model: One of :data:`PERIOD_MODELS`. One of ``"stories"``, ``"height"``,
+        ``"height_width"`` or ``"slenderness"``.
     :param n_stories: Number of storeys ``n``, for the storey model.
     :param height_m: Height ``h`` above the base, in metres.
     :param width_m: Width ``b`` parallel to the force, in metres.
@@ -327,7 +329,8 @@ class BuildingFrequencyEstimate(RichDisplay):
 
     :ivar frequency_hz: The predicted fundamental frequency.
     :ivar period_s: The same prediction as a period.
-    :ivar model: Which of :data:`PERIOD_MODELS` produced it.
+    :ivar model: Which of :data:`PERIOD_MODELS` produced it. One of ``"stories"``,
+        ``"height"``, ``"height_width"`` or ``"slenderness"``.
     :ivar coefficient: The code coefficient used, or ``None`` for the storey
         model, which has none.
     :ivar height_m: The height it was computed from, where the model uses one.
@@ -385,7 +388,8 @@ def estimate_fundamental_frequency(
 ) -> BuildingFrequencyEstimate:
     """One prediction, bundled with the coefficient and the error band.
 
-    :param model: One of :data:`PERIOD_MODELS`.
+    :param model: One of :data:`PERIOD_MODELS`. One of ``"stories"``, ``"height"``,
+        ``"height_width"`` or ``"slenderness"``.
     :param n_stories: Number of storeys ``n``, for the storey model.
     :param height_m: Height ``h`` above the base, in metres.
     :param width_m: Width ``b`` parallel to the force, in metres.

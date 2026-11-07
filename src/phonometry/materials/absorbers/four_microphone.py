@@ -482,6 +482,8 @@ class TransferMatrix(OwnsArrays):
     ``air_characteristic_impedance`` ``rho c``); all default to ``None`` so a
     hand-built matrix (for example :func:`air_layer_transfer_matrix`) is
     unchanged.
+
+    :ivar shape: One of ``"circular"``, ``"rectangular"`` or ``"square"``.
     """
 
     #: The tube geometry of ASTM E2611-19 is written with its own symbols,
@@ -703,6 +705,7 @@ class TransferMatrix(OwnsArrays):
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :raises ValueError: If the matrix does not retain its tube geometry
             (``l1``/``s1``/``l2``/``s2``/``thickness_m``).
         """

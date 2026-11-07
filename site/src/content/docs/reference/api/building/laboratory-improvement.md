@@ -170,6 +170,12 @@ Plot the improvement `ΔLr` per band.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## laboratory_floor_covering_improvement
 
 ```python
@@ -466,6 +472,12 @@ Plot the improvement `ΔR` per band with its single numbers.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## LiningCuringCheck
 
 ```python
@@ -539,3 +551,9 @@ Plot the admissible curing time and time lag with this measurement.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

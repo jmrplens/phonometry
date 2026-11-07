@@ -78,7 +78,8 @@ __all__ = [
 class AudiogramParameters(RichDisplay):
     r"""Group-audiogram fit parameters (Southall et al. 2019, Tables 2 and 3).
 
-    :ivar group: Hearing-group code.
+    :ivar group: Hearing-group code. One of ``"HF"``, ``"VHF"``, ``"SI"``, ``"PCW"``,
+        ``"OCW"``, ``"PCA"`` or ``"OCA"``.
     :ivar t0: Vertical position ``T0``, in dB.
     :ivar f1_khz: Low-frequency inflection ``F1``, in kHz.
     :ivar f2_khz: High-frequency inflection ``F2``, in kHz.
@@ -178,7 +179,8 @@ def audiogram_parameters(
     """Fit parameters of a published group audiogram.
 
     :param group: Hearing-group code, one of :data:`AUDIOGRAM_GROUPS`, as
-        written.
+        written. One of ``"HF"``, ``"VHF"``, ``"SI"``, ``"PCW"``, ``"OCW"``, ``"PCA"``
+        or ``"OCA"``.
     :param normalized: Return the Table 3 normalised fit instead of the Table 2
         absolute one.
     :return: The :class:`AudiogramParameters` for that group.
@@ -207,7 +209,8 @@ class AudiogramResult(OwnsArrays):
     :ivar frequencies: Frequencies, in Hz.
     :ivar threshold: Hearing threshold at each frequency, in dB re 1 µPa
         (under water) or dB re 20 µPa (in air).
-    :ivar group: Hearing-group code, or ``"orca"`` for the species audiogram.
+    :ivar group: Hearing-group code, or ``"orca"`` for the species audiogram. One of
+        ``"HF"``, ``"VHF"``, ``"SI"``, ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
     :ivar source: Short citation of the fit used.
     :ivar in_air: Whether the reference pressure is 20 µPa.
     :ivar best_frequency: Frequency of the minimum threshold on the evaluated
@@ -244,7 +247,10 @@ class AudiogramResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the hearing threshold versus frequency."""
+        """Plot the hearing threshold versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_marine_mammal_audiogram
 
@@ -299,7 +305,8 @@ def group_audiogram(
     Table 3 (``normalized=True``).
 
     :param frequency_hz: Frequency or frequencies, in Hz (strictly positive).
-    :param group: Hearing-group code, one of :data:`AUDIOGRAM_GROUPS`.
+    :param group: Hearing-group code, one of :data:`AUDIOGRAM_GROUPS`. One of ``"HF"``,
+        ``"VHF"``, ``"SI"``, ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
     :param normalized: Use the normalised fit (0 dB at best sensitivity).
     :return: An :class:`AudiogramResult`.
     :raises ValueError: If the group is unknown or a frequency is invalid.

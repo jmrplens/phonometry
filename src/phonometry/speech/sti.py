@@ -174,6 +174,9 @@ class STIResult(OwnsArrays):
     The two level spectra are what :meth:`adjusted_for_levels` reads to
     undo the corrections they produced, so a result that carries them can
     be moved to another speech and occupancy-noise condition.
+
+    :ivar rating: One of ``"U"``, ``"J"``, ``"I"``, ``"H"``, ``"G"``, ``"F"``, ``"E"``,
+        ``"D"``, ``"C"``, ``"B"``, ``"A"`` or ``"A+"``.
     """
 
     sti: float
@@ -223,6 +226,8 @@ class STIResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.speech import plot_sti

@@ -482,6 +482,8 @@ class BandUncertainty(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_band_uncertainty
@@ -600,7 +602,13 @@ def single_number_uncertainty(
         situation-A value is an *estimate*: no reproducibility results are
         available for impact sound insulation (Table 5, footnote a).
 
-    :param quantity: Rating descriptor (see above).
+    :param quantity: Rating descriptor (see above). One of ``"r_w"``,
+        ``"r_w+c_50_3150"``, ``"r_w+c_50_5000"``, ``"r_w+c_100_3150"``,
+        ``"r_w+c_100_5000"``, ``"r_w+ctr_50_3150"``, ``"r_w+ctr_50_5000"``,
+        ``"r_w+ctr_100_3150"``, ``"r_w+ctr_100_5000"``, ``"ln_w"``, ``"ln_w+ci"``,
+        ``"delta_lw"``, ``"rprime_w"``, ``"r_prime_w"``, ``"dn_w"``, ``"dnw"``,
+        ``"dnt_w"``, ``"dntw"``, ``"lprime_n_w"``, ``"lnprime_w"``, ``"lnt_w"``,
+        ``"lprime_nt_w"`` or ``"delta_l_w"``.
     :param situation: Measurement situation ``"A"``, ``"B"`` or ``"C"`` (Clause 5.2).
     :param upper_limit: Select the ``σR95`` upper limit (airborne, situation A).
     :raises ValueError: Unknown descriptor, an untabulated situation, or an
@@ -712,7 +720,13 @@ def uncertain_value(
     :attr:`UncertainValue.lower` / :attr:`UncertainValue.upper` (Formulae 4/5).
 
     :param value: Best estimate ``y`` (e.g. ``Rw`` in dB).
-    :param quantity: Rating descriptor (see :func:`single_number_uncertainty`).
+    :param quantity: Rating descriptor (see :func:`single_number_uncertainty`). One of
+        ``"r_w"``, ``"r_w+c_50_3150"``, ``"r_w+c_50_5000"``, ``"r_w+c_100_3150"``,
+        ``"r_w+c_100_5000"``, ``"r_w+ctr_50_3150"``, ``"r_w+ctr_50_5000"``,
+        ``"r_w+ctr_100_3150"``, ``"r_w+ctr_100_5000"``, ``"ln_w"``, ``"ln_w+ci"``,
+        ``"delta_lw"``, ``"rprime_w"``, ``"r_prime_w"``, ``"dn_w"``, ``"dnw"``,
+        ``"dnt_w"``, ``"dntw"``, ``"lprime_n_w"``, ``"lnprime_w"``, ``"lnt_w"``,
+        ``"lprime_nt_w"`` or ``"delta_l_w"``.
     :param situation: Measurement situation ``"A"``, ``"B"`` or ``"C"`` (Clause 5.2).
     :param coverage: Coverage probability as a fraction.
     :param one_sided: Use the one-sided coverage factor.

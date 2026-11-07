@@ -295,7 +295,8 @@ def correlation(
         arrays; either may be a :class:`~phonometry.io.Signal` and supply it,
         and two Signals recorded at different rates are refused rather than
         arbitrated.
-    :param normalization: See above (default ``'unbiased'``).
+    :param normalization: See above (default ``'unbiased'``). One of ``"biased"``,
+        ``"unbiased"`` or ``"coefficient"``.
     :param max_lag: Largest lag magnitude to keep, in seconds (default:
         the full ``N-1`` samples).
     :return: A :class:`CorrelationResult`.
@@ -511,7 +512,8 @@ class TimeDelayResult(OwnsArrays):
     :ivar delay_samples: The same delay in (fractional) samples.
     :ivar method: ``'direct'``, ``'gcc'`` or ``'phase'``.
     :ivar weighting: GCC weighting name (``None`` unless
-        ``method='gcc'``).
+        ``method='gcc'``). One of ``"none"``, ``"roth"``, ``"scot"``, ``"phat"`` or
+        ``"ml"``.
     :ivar lags: Lag axis of :attr:`correlation`, in seconds.
     :ivar correlation: The correlation function whose peak was located:
         the correlation coefficient :math:`\hat{\rho}_{xy}(\tau)` for
@@ -807,7 +809,7 @@ def time_delay(
         arbitrated.
     :param method: ``'gcc'`` (default), ``'direct'`` or ``'phase'``.
     :param weighting: GCC weighting (default ``'phat'``; ignored
-        otherwise).
+        otherwise). One of ``"none"``, ``"roth"``, ``"scot"``, ``"phat"`` or ``"ml"``.
     :param window: Welch taper for ``'gcc'``/``'phase'``, a scipy window name or a tuple
         of a name and its parameters (default Hann).
     :param nperseg: Welch segment length for ``'gcc'``/``'phase'``

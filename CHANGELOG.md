@@ -2306,6 +2306,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **`help()` names the values every choice takes.** A choice written once
+  and reused is a type alias the package does not publish, and the
+  annotations are read as text, so `help(filters.octave_filter)` and a
+  notebook's signature showed `mode: 'Mode' = 'rms'`: an alias no caller
+  can look up, and none of the values. The `:param:` field of each of the
+  512 public parameters typed with such an alias that left some value out,
+  and the `:ivar:` field of a record's, now lists every value as the caller
+  writes it ("One of ``"rms"`` or ``"peak"``"), 237 of them in a field that
+  was missing, `language` on 202 plots among them; the API reference shows
+  the same lists. `tests/test_choice_values_documented.py` holds every public
+  parameter to it (style rule D24).
+
 - **A complex tangent that saturates says nothing on Windows either.**
   `tanh(z)` tends to 1 as the real part of `z` grows and `tan(z)` to `j` as
   its imaginary part does, which NumPy on Linux and macOS returns without a

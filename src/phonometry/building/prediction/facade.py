@@ -342,7 +342,10 @@ class FacadePredictionResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-element partial indices and the façade ``R'`` / ``D2m,nT``."""
+        """Plot the per-element partial indices and the façade ``R'`` / ``D2m,nT``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.building import plot_facade_prediction
 
@@ -356,6 +359,8 @@ class FacadePredictionResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_facade_result_geometry
@@ -457,7 +462,10 @@ class RadiatedPowerResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the radiated sound power level ``LW`` per band."""
+        """Plot the radiated sound power level ``LW`` per band.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.building import plot_radiated_power
 
@@ -540,7 +548,7 @@ def facade_sound_reduction(
         reflecting façade).
     :param fraction: The band set of the single-number ratings, passed to
         :func:`weighted_rating`: 3 for one-third octaves, 1 for octaves or
-        ``None`` (Default) to read it from the number of bands.
+        ``None`` (Default) to read it from the number of bands. One of ``1`` or ``3``.
     :param frequencies: Optional band centre frequencies (Hz), stored on the
         result for plotting; must match the element band count.
     :return: A :class:`FacadePredictionResult`.
@@ -755,7 +763,10 @@ def facade_shape_level_difference(
     ``"balcony_8"`` (6-8) and ``"terrace_open"`` / ``"terrace_closed"`` (9,
     open or closed fence).
 
-    :param shape: Façade shape key (see above).
+    :param shape: Façade shape key (see above). One of ``"plane_facade"``,
+        ``"gallery_2"``, ``"gallery_3"``, ``"gallery_4"``, ``"gallery_5"``,
+        ``"balcony_6"``, ``"balcony_7"``, ``"balcony_8"``, ``"terrace_open"`` or
+        ``"terrace_closed"``.
     :param line_of_sight: Height of the line of sight from the source at the
         façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m).
     :param absorption: Weighted absorption coefficient ``αw`` of the underside

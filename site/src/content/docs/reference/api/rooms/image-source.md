@@ -234,6 +234,12 @@ reflection order, with the $1 / r$ free-field envelope overlaid.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ImageSourceResult.plot_geometry()
 
 ```python

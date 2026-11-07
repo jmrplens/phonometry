@@ -381,7 +381,7 @@ def statistical_pass_by_index(
     :param weighting_factors: Other proportions of the three categories, keyed
         the same way, for the nationally adapted calculations 9.5 allows (the
         report then has to state them). They must add up to 1. Table 1 when
-        omitted.
+        omitted. Keyed by any of ``"1"``, ``"2a"`` or ``"2b"``.
     :return: The index, in decibels, unrounded.
     :raises ValueError: For a road speed category the standard does not define,
         a level missing, unknown or not finite, or weighting factors that are
@@ -682,14 +682,17 @@ class StatisticalPassByResult(RichDisplay):
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"``.
     :param regressions: The :class:`PassByRegression` of each vehicle category,
         keyed ``"1"``, ``"2a"`` and ``"2b"``.
-    :param weighting_factors: The :math:`W_x` the index was computed with.
+    :param weighting_factors: The :math:`W_x` the index was computed with. Keyed by any
+        of ``"1"``, ``"2a"`` or ``"2b"``.
     :param vehicle_sound_levels: :math:`L_\mathrm{veh}` of each category,
-        uncorrected for temperature and unrounded, in decibels.
+        uncorrected for temperature and unrounded, in decibels. Keyed by any of ``"1"``,
+        ``"2a"`` or ``"2b"``.
     :param index: The SPBI of those levels as 9.2 reports them, rounded to
         one decimal (:attr:`reported_vehicle_sound_levels`), in decibels.
         The index itself is not rounded; :attr:`reported_index` is.
     :param corrected_vehicle_sound_levels: The temperature-corrected levels
-        the caller supplied (9.4), as supplied, or ``None``.
+        the caller supplied (9.4), as supplied, or ``None``. Keyed by any of ``"1"``,
+        ``"2a"`` or ``"2b"``.
     :param corrected_index: The SPBI of the corrected levels rounded to one
         decimal, or ``None``.
     :param reference_index: The SPBI of the reference surface (clause 10):
@@ -894,14 +897,14 @@ def statistical_pass_by(
         choosing, keyed by category, for which the index is also computed,
         from the levels rounded to one decimal. 9.4 gives no method. To correct
         each pass-by instead, which 9.4 prefers, correct ``max_levels`` and
-        call this again.
+        call this again. Keyed by any of ``"1"``, ``"2a"`` or ``"2b"``.
     :param reference_levels: The reference surface of clause 10: either its SPBI in
         decibels, used as given, or its three vehicle sound levels keyed by
         category (for instance :data:`SPB_NORMALIZED_REFERENCE_LEVELS`), whose
         index is then computed from the levels rounded to one decimal, with
-        the same weighting factors.
+        the same weighting factors. Keyed by any of ``"1"``, ``"2a"`` or ``"2b"``.
     :param weighting_factors: Other proportions of the three categories (9.5);
-        Table 1 when omitted.
+        Table 1 when omitted. Keyed by any of ``"1"``, ``"2a"`` or ``"2b"``.
     :return: The regressions, the levels and the index, as a
         :class:`StatisticalPassByResult`.
     :raises ValueError: For a category the method does not use, rows that do

@@ -232,6 +232,12 @@ Plot the per-band insulation quantities (`DnT`, `D`, `R'`).
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### AirborneInsulationResult.report()
 
 ```python
@@ -444,6 +450,12 @@ quantities (`D2m`, `D2m,n`, `R'`) against frequency. Requires
 matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### FacadeInsulationResult.report()
 
 ```python
@@ -603,6 +615,12 @@ Plot the per-band impact levels (`L'nT` and, if present, `L'n`).
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ImpactInsulationResult.report()
 

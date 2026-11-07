@@ -517,6 +517,8 @@ class CrowdNoiseResult(OwnsArrays):
         the crossing point reads directly as the occupancy at which the room
         stops working. Requires matplotlib
         (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_crowd_noise

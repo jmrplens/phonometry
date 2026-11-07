@@ -117,7 +117,7 @@ area cancels and only the tie density `n` enters.
 | `bending_stiffness1` | Bending stiffness per unit width `B'` of leaf 1, in N.m (> 0); see [`phonometry.vibration.structural.point_mobility.plate_bending_stiffness`](/phonometry/reference/api/vibration/point-mobility/#plate_bending_stiffness). |
 | `bending_stiffness2` | Bending stiffness per unit width of leaf 2, in N.m. |
 | `ties_per_area` | Number of ties per unit area `n`, in 1/m^2 (> 0). |
-| `tie` | A name from [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), an explicit dynamic stiffness `k` in N/m, or `None` for a rigid connection ($Y_\mathrm{c} = 0$, the screw/nail/bolt limit). |
+| `tie` | A name from [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), an explicit dynamic stiffness `k` in N/m, or `None` for a rigid connection ($Y_\mathrm{c} = 0$, the screw/nail/bolt limit). One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` or `"vertical_twist_100mm"`. |
 
 **Returns:** A [`WallTieCouplingResult`](/phonometry/reference/api/building/masonry-cavity-wall/#walltiecouplingresult).
 
@@ -184,7 +184,7 @@ mass-spring-mass resonance. Feed it to
 | Name | Description |
 | :--- | :--- |
 | `ties_per_area` | Number of ties per unit area $n = N/S$, in 1/m^2 (> 0). |
-| `tie` | A name from [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), or an explicit dynamic stiffness `k` of one tie, in N/m (> 0). |
+| `tie` | A name from [`WALL_TIE_STIFFNESS`](/phonometry/reference/api/building/masonry-cavity-wall/#wall_tie_stiffness), or an explicit dynamic stiffness `k` of one tie, in N/m (> 0). One of `"butterfly"`, `"double_triangle"`, `"vertical_twist"` or `"vertical_twist_100mm"`. |
 
 **Returns:** The stiffness per unit area $n k$, in N/m^3.
 
@@ -240,6 +240,12 @@ Plot `eta_ij(f)` against the rigid-connection ceiling.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## WallTieStiffness
 

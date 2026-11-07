@@ -4,8 +4,8 @@
 The overview says, in English and in Spanish, how many of the
 documentation's animations the two solvers made, how many each made, how
 many of them sit on the guides whose physics they settle rather than in the
-simulation section, and how many of the elastic solver's are among those,
-and it gives a table of the guides that carry the acoustic solver's clips.
+simulation section, and how many of each solver's are among those, and
+it gives a table of the guides that carry the acoustic solver's clips.
 Each count and each row is taken here from where it is decided: a clip of
 the acoustic solver is one ``scripts/figures/registry.py`` names
 ``anim_fdtd_*``, one of the elastic solver ``anim_elastic_*``, and a clip is
@@ -45,10 +45,18 @@ _DOCS = _ROOT / "site" / "src" / "content" / "docs"
 #: KeyError: add its words here and to both pages. Spanish counts
 #: animations, a feminine noun, so 21 is "veintiuna".
 _WORDS = {
-    "en": {3: "three", 5: "five", 19: "nineteen", 21: "twenty-one", 24: "twenty-four"},
+    "en": {
+        3: "three",
+        5: "five",
+        18: "eighteen",
+        19: "nineteen",
+        21: "twenty-one",
+        24: "twenty-four",
+    },
     "es": {
         3: "tres",
         5: "cinco",
+        18: "dieciocho",
         19: "diecinueve",
         21: "veintiuna",
         24: "veinticuatro",
@@ -62,10 +70,13 @@ _PAGES = [
 #: A clip a page embeds: the ``name`` of its ``Video`` component.
 _EMBEDDED = re.compile(r"\bname=\"(anim_(?:fdtd|elastic)_[a-z0-9_]+)\"")
 #: A row of the overview's table of the guides that carry the acoustic
-#: solver's clips: its first cell links the guide by its site address.
+#: solver's clips: its first cell links the guide by its site address,
+#: whose language prefix is caught apart from the guide's route.
 _GUIDE_ROW = re.compile(
-    r"^\| \[[^\]]+\]\(/phonometry/(?:es/)?([a-z0-9/-]+)/\) \|", re.MULTILINE
+    r"^\| \[[^\]]+\]\(/phonometry/(es/)?([a-z0-9/-]+)/\) \|", re.MULTILINE
 )
+#: The prefix each language's pages put before the route of a guide.
+_LANGUAGE_PREFIX = {"en": "", "es": "es/"}
 #: Any clip a page embeds, the solvers' or not.
 _VIDEO = re.compile(r"<Video\b[^>]*?\bname=\"([^\"]+)\"", re.DOTALL)
 
@@ -115,6 +126,7 @@ def _phrases(language: str) -> list[str]:
     total = words[len(acoustic) + len(elastic)]
     n_acoustic, n_elastic = words[len(acoustic)], words[len(elastic)]
     n_guides = words[len(guides & (acoustic | elastic))]
+    n_acoustic_guides = words[len(guides & acoustic)].capitalize()
     n_elastic_guides = words[len(guides & elastic)].capitalize()
     if language == "en":
         return [
@@ -122,12 +134,16 @@ def _phrases(language: str) -> list[str]:
             f" these two solvers, {n_acoustic} from the acoustic one and"
             f" {n_elastic} from the elastic one, and {n_guides} of them are filed"
             " on the guides whose physics they settle",
+            f"{n_acoustic_guides} of the acoustic solver's {n_acoustic} are on"
+            " these guides:",
             f"{n_elastic_guides} of the elastic solver's {n_elastic} are on guides too",
         ]
     return [
         f"{total} de las animaciones de esta documentación son salida de estos"
         f" dos esquemas, {n_acoustic} del acústico y {n_elastic} del elástico,"
         f" y {n_guides} de ellas están archivadas en las guías cuya física zanjan",
+        f"{n_acoustic_guides} de las {n_acoustic} del esquema acústico están en"
+        " estas guías:",
         f"{n_elastic_guides} de las {n_elastic} del esquema elástico están también en guías",
     ]
 
@@ -162,8 +178,15 @@ def test_each_spanish_page_embeds_the_clips_of_its_english_twin() -> None:
 def test_the_overview_tables_each_guide_that_carries_an_acoustic_clip_once(
     page: str, language: str
 ) -> None:
-    """The overview's table of guides names, once each, the guides that embed an acoustic solver clip."""
-    rows = _GUIDE_ROW.findall((_DOCS / page).read_text(encoding="utf-8"))
+    """The overview's table names, once each, the guides of its own language that embed an acoustic solver clip."""
+    links = _GUIDE_ROW.findall((_DOCS / page).read_text(encoding="utf-8"))
+    foreign = sorted(
+        f"/phonometry/{prefix}{route}/"
+        for prefix, route in links
+        if prefix != _LANGUAGE_PREFIX[language]
+    )
+    assert not foreign, f"{page} links guides of the other language: {foreign}"
+    rows = [route for _, route in links]
     repeated = sorted({route for route in rows if rows.count(route) > 1})
     assert not repeated, f"{page} gives these guides more than one row: {repeated}"
     wanted = _guides_with("anim_fdtd_", language)

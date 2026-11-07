@@ -2346,7 +2346,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **The site's audits reach the preview in a stock `node:24` container.**
   `site/scripts/with-preview.mjs`, which runs pa11y, `check:sidebar` and
   `check:visual` against `astro preview`, started the preview with no host and
-  polled `localhost`. In that container Vite listens on `::1` first
+  polled `http://localhost`. In that container Vite listens on `::1` first
   while Node's fetch tries `127.0.0.1` alone, so the poll was refused for two
   minutes and no audit ran. The preview listens on `127.0.0.1` now and is
   polled there, and the check for a server already on the port, there so that
@@ -3167,16 +3167,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   destinations and the comments a page does not show (HTML, MDX and
   frontmatter comments), the spaced form in any other published string, and
   the spaced single hyphen after a list item's head outside code and those
-  comments, so none can come back (rule P6); it also reads the entities and
-  the escapes of the em dash (`&mdash;`, `\u2014`) as the character they
-  publish, where they are decoded: an escape in a frontmatter counts in a
-  double-quoted value only, as YAML has it. The API reference fences a code
-  directive's body and a doctest as code, under a fence longer than any run
-  of backticks the example shows, as the check reads them in the docstring.
-  The `fluids` package opens with a sentence naming humid air by IEC 61094-2
-  Annex F, sea water, ideal gases and the fluid states and nonlinearity
-  parameters books print, where its API page read "fluids domain of
-  phonometry (see module docstrings)".
+  comments, so none can come back (rule P6). It reads a page's code spans,
+  comments and addresses in one pass from left to right, as the site does, so
+  a URL or a comment opener written in a code span is code and hides no prose
+  after it, and a backtick inside a URL opens no span; it also reads the
+  entities and the escapes of the em dash (`&mdash;`, `\u2014`) as the
+  character they publish, where they are decoded: an escape in a frontmatter
+  counts in a double-quoted value only, as YAML has it. The API reference
+  fences a code directive's body and a doctest as code, under a fence longer
+  than any run of backticks the example shows, as the check reads them in the
+  docstring. The `fluids` package opens with a sentence naming humid air by
+  IEC 61094-2 Annex F, sea water, ideal gases and the fluid states and
+  nonlinearity parameters books print, where its API page read "fluids domain
+  of phonometry (see module docstrings)".
 
 - **The bundled EASA ANP tables carry EASA's terms and no condition of ours,
   and the PyOctaveBand bridge ships its licence.**

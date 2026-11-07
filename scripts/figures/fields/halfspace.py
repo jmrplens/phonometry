@@ -552,9 +552,11 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     # would be an empty field. 95 us is where the peak of the Rayleigh train
     # is still 0.12 m inside the right edge (it leaves at 135.5 us, 32 us of
     # pulse delay and 103.5 us of travel), the shear front sits on its arc
-    # 13 mm ahead of it and the compressional front is crossing the two
-    # bottom corners. `fields/pillar_hall._poster_ss_for` carries the same
-    # number so that `make posters` agrees with a full render.
+    # 13 mm ahead of it, and the compressional arc, 0.406 m out, has crossed
+    # the bottom edge and the sides and is still 18 mm short of the two
+    # bottom corners, which it reaches at 97.8 us.
+    # `fields/pillar_hall._poster_ss_for` carries the same number so that
+    # `make posters` agrees with a full render.
     poster_frame = 95.0e-6 / (5.0 * 0.6 * _HS_DX / (_HS_CP * float(np.sqrt(2.0))))
     _render_clip(
         fig,

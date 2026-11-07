@@ -1908,39 +1908,54 @@ class Reader:
                 return self.tree.holds_array(ast.unparse(argument.annotation))
         return True
 
-    def built_record(self, node: ast.expr | None) -> ClassInfo | None:
-        """The record class a call builds, if *node* is such a call.
-
-        Every function or class the call may name is that one record, with
-        no ``def`` of its name standing where the name was read (*pins*,
-        :meth:`Tree.resolve_top`), and one ``class`` statement of it
-        (:meth:`classes_built`): a call that may run a function instead, one
-        bound to the name in another branch or a ``def`` that took the name
-        from the class, or one that may build either of two classes of the
-        name, builds no record the guard can vouch for.
+    def built_records(self, node: ast.expr | None) -> list[ClassInfo]:
+        """Each record class a call may build, if *node* is a call that
+        builds a record whichever path runs (:meth:`records_built`); ``cls``
+        in a method of a record is that record. No record for any other call.
         """
         if not isinstance(node, ast.Call):
-            return None
+            return []
         func = node.func
         owner = self.function.owner
         if isinstance(func, ast.Name) and func.id == "cls":
-            return owner if owner is not None and owner.record else None
+            return [owner] if owner is not None and owner.record else []
         pins: _Pins = {}
-        built: list[ClassInfo] = []
-        for key in self.callees(func, pins=pins):
-            if (
-                key not in self.tree.classes
-                or not self.builds_class(key, pins)
-                or _pinned_functions(pins, key)
-            ):
-                return None
-            for info in self.classes_built(key, pins):
-                if not info.record:
-                    return None
-                built.append(info)
+        return self.records_built(self.callees(func, pins=pins), pins)
+
+    def built_record(self, node: ast.expr | None) -> ClassInfo | None:
+        """The record class a call builds, if *node* is a call that builds
+        that one record whichever path runs (:meth:`built_records`); none for
+        one that may build either of two.
+        """
+        built = self.built_records(node)
         if not built or any(info is not built[0] for info in built):
             return None
         return built[0]
+
+    def records_built(
+        self, targets: Sequence[tuple[str, str]], pins: _Pins | None
+    ) -> list[ClassInfo]:
+        """Each record class a call that may name each of *targets* builds,
+        when it builds a record whichever path runs.
+
+        Every one of them is a class with no ``def`` of its name standing
+        where the name was read (*pins*, :meth:`Tree.resolve_top`), and each
+        ``class`` statement of it the call may build (:meth:`classes_built`)
+        is a record: two records bound to a name in two branches, or a class
+        written in each, are each built. A call that may run a function
+        instead, one bound to the name in another branch or a ``def`` that
+        took the name from the class, or build a class that is no record,
+        builds none the guard can vouch for.
+        """
+        built: list[ClassInfo] = []
+        for key in targets:
+            if key not in self.tree.classes or _pinned_functions(pins, key):
+                return []
+            for info in self.classes_built(key, pins):
+                if not info.record:
+                    return []
+                built.append(info)
+        return built
 
     def builds_class(self, target: tuple[str, str], pins: _Pins | None) -> bool:
         """Whether a call that reaches *target* may make an instance of the
@@ -1953,6 +1968,21 @@ class Reader:
         return not _pinned_functions(pins, target) or any(
             isinstance(found, ClassInfo) for found in held
         )
+
+    def copies_on_every_path(
+        self, targets: Sequence[tuple[str, str]], pins: _Pins | None
+    ) -> bool:
+        """Whether a call that may name each of *targets* builds a record
+        that copies whichever path runs: it builds a record on every path
+        (:meth:`records_built`, *pins* what stood where each name was read),
+        and each of them inherits :data:`MECHANISM`.
+
+        A copy handed to such a call is made twice whichever path runs; one
+        handed to a call that may also run a function, or build a class that
+        does not copy, may be what keeps the caller's array out on that path.
+        """
+        built = self.records_built(targets, pins)
+        return bool(built) and all(self.tree.copies_arrays(info) for info in built)
 
     def classes_built(
         self, target: tuple[str, str], pins: _Pins | None
@@ -2341,7 +2371,7 @@ class Reader:
                                 keywords,
                                 bound=False,
                                 pins=pins,
-                                alone=len(resolved) == 1,
+                                alone=self.copies_on_every_path(resolved, pins),
                             )
                             for key in resolved
                         )
@@ -2402,7 +2432,7 @@ class Reader:
                             keywords,
                             bound=False,
                             pins=named,
-                            alone=len(targets) == 1,
+                            alone=self.copies_on_every_path(targets, named),
                         )
                         for key in targets
                     )
@@ -2482,8 +2512,8 @@ class Reader:
     ) -> Value:
         """What a call to a function or a class of the package returns, each
         definition it reaches read (:meth:`reached`, *pins* what its name
-        stood for where it was read; *alone* when the call names nothing of
-        the package but *target*).
+        stood for where it was read; *alone* when every function or class
+        the call may name is a record that copies, :meth:`copies_on_every_path`).
 
         A function and a class of one name share a key: the class is what
         the call reaches unless *pins* holds a ``def`` of the key, which an
@@ -2493,15 +2523,19 @@ class Reader:
         ``class`` statement of the key the call may build
         (:meth:`classes_built`), the one an alias was bound to when a later
         one replaced it, and each read with its own fields. A copy handed to
-        a record that copies is made twice only when that record is all the
-        call may build or run: on another path the copy may be what keeps
-        the caller's array out.
+        a record that copies is made twice only when every class the call
+        may build or function it may run is a record that copies: on another
+        path the copy may be what keeps the caller's array out.
         """
         values: list[Value] = []
         if target in self.tree.classes and self.builds_class(target, pins):
             built = self.classes_built(target, pins)
             pinned = _pinned_functions(pins, target)
-            alone = alone and len(built) == 1 and not pinned
+            alone = (
+                alone
+                and not pinned
+                and all(info.record and self.tree.copies_arrays(info) for info in built)
+            )
             values.extend(
                 self.constructor_sink(
                     info,
@@ -2619,8 +2653,9 @@ class Reader:
     ) -> Value:
         """Report what a record keeps, and return the record as a value.
 
-        A copy handed to a record that copies is reported only when the call
-        builds that record *alone* (:meth:`apply`).
+        A copy handed to a record that copies is reported only when every
+        class the call may build is a record that copies, and no function it
+        may run hands its argument back instead (*alone*, :meth:`apply`).
         """
         fields = self.tree.record_fields(info)
         annotations = dict(fields)
@@ -2817,8 +2852,9 @@ class Reader:
         Read: an operand of arithmetic or of a comparison, a truth test, a
         number in an f-string, its size or shape, a method or a numpy
         function whose result is a new array, an index into something else,
-        a builtin that reads it, a record that copies it, and a function of
-        the package whose parameter is used the same way. A view of it
+        a builtin that reads it, a record that copies it whichever path of
+        the call runs (:meth:`built_records`), and a function of the package
+        whose parameter is used the same way. A view of it
         (indexing, ``.T``, ``read_only``, ``np.asarray``) is followed to its
         own use. Anything else is not.
         """
@@ -2925,9 +2961,9 @@ class Reader:
             ):
                 return self.harmless(call, parents, depth)
             return True
-        info = self.built_record(call)
-        if info is not None:
-            return self.tree.copies_arrays(info)
+        built = self.built_records(call)
+        if built:
+            return all(self.tree.copies_arrays(info) for info in built)
         if depth >= 3:
             return False
         # Every definition the call can reach only reads what it is given.
@@ -2959,8 +2995,8 @@ class Reader:
         ``handed_over(name)`` lets the record keep the array without a copy,
         which is right only when nothing else can reach it, now or later.
         That is proved here from the syntax alone: the call is an argument of
-        a record that inherits :data:`MECHANISM`, built in the ``return``
-        statement, so nothing of the function runs after the record holds the
+        a record that inherits :data:`MECHANISM` whichever path of the call
+        runs (:meth:`built_records`), built in the ``return`` statement, so nothing of the function runs after the record holds the
         array; the name is bound once, in the function's own scope, to an
         array a numpy allocation makes (:data:`_NUMPY_FRESH`, or ``None`` in
         one branch of a conditional); and every other read of it only writes
@@ -2976,8 +3012,8 @@ class Reader:
             or any(argument is call for argument in record.args)
         ):
             return "it is not an argument of a record"
-        info = self.built_record(record)
-        if info is None or not self.tree.copies_arrays(info):
+        built = self.built_records(record)
+        if not built or not all(self.tree.copies_arrays(info) for info in built):
             return f"it is not an argument of a record that inherits {MECHANISM}"
         if not isinstance(parents.get(record), ast.Return):
             return "the record is not built in the return statement"

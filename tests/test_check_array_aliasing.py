@@ -1461,18 +1461,24 @@ def test_a_class_an_alias_holds_is_read_with_its_own_fields(
     }
 
 
-def test_a_copy_is_made_twice_only_where_the_call_builds_that_record_alone(
+def test_a_copy_is_made_twice_only_where_every_path_of_the_call_copies(
     tmp_path: pathlib.Path,
 ) -> None:
     """A name that may run a function handing back its argument, or build a
     record that does not copy, as well as a record that copies, needs the
-    copy it is handed on the other path; one that builds the record alone
-    copies twice.
+    copy it is handed on the other path; one whose every function or class
+    is a record that copies copies twice: the record alone, either of two
+    records that copy, bound in two branches, or a class written in each
+    branch that copies in both, called by its name or as a module's
+    attribute, and handed the copy itself or a name bound to it.
 
     Each record that copies a call may build was held to the copy alone, so
     ``make(read_only_copy(f))`` was refused as a copy made twice where
     ``make`` is a saved ``def`` in one branch, or another record in the
     other, and dropping the copy would hand that path the caller's array.
+    Then a copy was refused only where the call named one key that built
+    one ``class`` statement, so one handed to either of two records that
+    both copy passed, and so did one bound to a name first.
     """
     found = _findings(
         tmp_path,
@@ -1514,8 +1520,85 @@ def test_a_copy_is_made_twice_only_where_the_call_builds_that_record_alone(
         def alone(frequencies):
             return Spectrum(read_only_copy(frequencies))
         """,
+        copying="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only_copy
+
+        @dataclass(frozen=True)
+        class First(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Second(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        if os.environ.get("RATING"):
+            either = First
+
+            @dataclass(frozen=True)
+            class Shown(OwnsArrays):
+                frequencies: NDArray[np.float64]
+        else:
+            either = Second
+
+            @dataclass(frozen=True)
+            class Shown(OwnsArrays):
+                frequencies: NDArray[np.float64]
+
+        def either_record(frequencies):
+            return either(read_only_copy(frequencies))
+
+        def either_class_statement(frequencies):
+            return Shown(read_only_copy(frequencies))
+
+        def bound_copy_to_either_record(frequencies):
+            f = read_only_copy(frequencies)
+            return either(frequencies=f)
+
+        def bound_copy_to_either_class_statement(frequencies):
+            f = read_only_copy(frequencies)
+            return Shown(frequencies=f)
+        """,
+        elsewhere="""
+        from . import copying
+        from ._internal.frozen import read_only_copy
+
+        def either_record_of_the_module(frequencies):
+            return copying.either(read_only_copy(frequencies))
+
+        def either_class_statement_of_the_module(frequencies):
+            return copying.Shown(read_only_copy(frequencies))
+        """,
     )
-    assert found == {("alone", "Spectrum.frequencies (copied twice)", "")}
+    assert found == {
+        ("alone", "Spectrum.frequencies (copied twice)", ""),
+        ("either_record", "First.frequencies (copied twice)", ""),
+        ("either_record", "Second.frequencies (copied twice)", ""),
+        ("either_class_statement", "Shown.frequencies (copied twice)", ""),
+        ("either_record_of_the_module", "First.frequencies (copied twice)", ""),
+        ("either_record_of_the_module", "Second.frequencies (copied twice)", ""),
+        (
+            "either_class_statement_of_the_module",
+            "Shown.frequencies (copied twice)",
+            "",
+        ),
+        ("bound_copy_to_either_record", "First.frequencies (copied twice, as f)", ""),
+        (
+            "bound_copy_to_either_record",
+            "Second.frequencies (copied twice, as f)",
+            "",
+        ),
+        (
+            "bound_copy_to_either_class_statement",
+            "Shown.frequencies (copied twice, as f)",
+            "",
+        ),
+    }
 
 
 def test_a_call_reads_the_def_or_class_its_function_defines_where_it_runs(
@@ -3628,6 +3711,73 @@ def test_a_handover_reads_every_def_and_class_a_call_may_reach(
     ((function, sink),) = found
     assert function == "run"
     assert sink.startswith("handed_over(...): " + reason), sink
+
+
+#: Two records that copy bound to one name in two branches, a record that
+#: copies written in each branch, and a name bound to a record that copies in
+#: one branch and to one that keeps what it is given in the other.
+_EITHER_RECORD = """
+import os
+from dataclasses import dataclass
+
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+@dataclass(frozen=True)
+class Other(OwnsArrays):
+    frames: NDArray[np.float64] | None
+    times: NDArray[np.float64]
+
+if os.environ.get("RUN"):
+    either = Run
+    mixed = Run
+
+    @dataclass(frozen=True)
+    class Shown(OwnsArrays):
+        frames: NDArray[np.float64] | None
+        times: NDArray[np.float64]
+else:
+    either = Other
+    mixed = _Plain
+
+    @dataclass(frozen=True)
+    class Shown(OwnsArrays):
+        frames: NDArray[np.float64] | None
+        times: NDArray[np.float64]
+"""
+
+
+@pytest.mark.parametrize(
+    ("name", "refused"),
+    [
+        ("either", None),
+        ("Shown", None),
+        ("mixed", "it is not an argument of a record that inherits OwnsArrays"),
+    ],
+    ids=["two-records-that-copy", "a-class-in-each-branch", "one-that-keeps-it"],
+)
+def test_a_handover_to_a_record_that_copies_whichever_path_runs_passes(
+    tmp_path: pathlib.Path, name: str, refused: str | None
+) -> None:
+    """An array handed over to either of two records that copy, bound to one
+    name in two branches, or to a class that copies written in each branch,
+    goes into a record that copies whichever path runs; one that may go into
+    a record that keeps what it is given is refused.
+
+    The check took a call for the argument of a record only where it named
+    one key that built one ``class`` statement, so it refused the first two
+    as well.
+    """
+    body = f"""
+    def run(n):
+        frames = np.zeros((n, 3))
+        return {name}(frames=handed_over(frames), times=np.arange(n))
+    """
+    found = _handovers(tmp_path, _EITHER_RECORD + textwrap.dedent(body))
+    assert found == (
+        set() if refused is None else {("run", f"handed_over(...): {refused}")}
+    )
 
 
 #: What a factory defines of its own: a record that copies, and the list a

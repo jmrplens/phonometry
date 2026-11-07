@@ -15,7 +15,7 @@ permissions:
 jobs:
   label:
     name: Label by changed paths
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/labeler@v7
         with:

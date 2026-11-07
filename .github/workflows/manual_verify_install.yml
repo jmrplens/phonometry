@@ -15,7 +15,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-26.04, macos-latest, windows-latest]
         python-version: ["3.13"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}

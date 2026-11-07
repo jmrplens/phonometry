@@ -2306,6 +2306,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Every public name has a type a type checker knows.** pyright's
+  `--verifytypes` read 99.2% of the installed package: 137 of its 18 689
+  public names had a type checkers may infer differently and 8 had none it
+  could name. The attributes the constructors of `OctaveFilterBank`,
+  `WeightingFilter`, `ParametricEQ`, `FDTD2D` and `ElasticFDTD2D` set from an
+  expression (`sos`, `zi`, `factor`, `p`, `c`, `dx` and the rest) were left to
+  inference, so pyright saw `WeightingFilter.zi` as `NDArray | Any` where mypy
+  saw an array, and the catalogue's provenance record replaced its inherited
+  hash with an undeclared `None`, which left every catalogue row partly
+  unknown, and with it each function that takes or returns one,
+  `io.read_catalogue` and `io.write_catalogue` among them. Each attribute is
+  now annotated where it is set, the hash is declared as the class variable
+  it is, and the three coefficient tables of `aircraft.PerformanceAircraft`
+  default to an empty read-only mapping that its signature shows, where it
+  showed `...`. The score is 100%, and a CI job holds the wheel to it.
+
 - **Two threads importing two domains no longer deadlock.** After a plain
   `import phonometry`, a thread pool that read `phonometry.electroacoustics`
   and `phonometry.vibration` raised `_DeadlockError` in one of its two

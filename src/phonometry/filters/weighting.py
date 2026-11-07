@@ -126,7 +126,7 @@ from ._weighting_design import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, DTypeLike
+    from numpy.typing import ArrayLike, DTypeLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -575,9 +575,9 @@ class WeightingFilter:
         self.high_accuracy = high_accuracy
 
         if self.weighting == "Z":
-            self.sos = np.array([])
+            self.sos: NDArray[np.float64] = np.array([])
             if self.stateful:
-                self.zi = np.array([])
+                self.zi: NDArray[np.float64] = np.array([])
             return
 
         if self.weighting not in _PROTOTYPE_CURVES:

@@ -757,6 +757,8 @@ ANPAircraft(..., _database=db)
 
 **Why.** The test suite was the last unannotated corner, and an `Any` that is not forwarding keyword arguments promises nothing a reader can check.
 
+A public attribute a constructor sets is annotated too. `self.sos = _design_sos_filter(...)` left its type to whatever each checker infers from the expression: pyright and mypy inferred `OctaveFilterBank.factor` and `WeightingFilter.zi` differently, and pyright marked 37 such attributes, the fields of `FDTD2D` among them, as ones checkers may read differently. With them and the catalogue's undeclared `__hash__ = None`, which made every catalogue row and each function that takes one partly unknown, pyright's `--verifytypes` read 99.2% of the package's public names as known. Annotate the attribute where the constructor first sets it (`self.zi: NDArray[np.float64] = np.array([])`), declare the class variable that puts a value in place of an inherited method (`__hash__: ClassVar[None] = None`), give a protocol's methods a docstring, and write a default a declared constructor shows as the field's own value, not the `...` a factory leaves there. The score is held to 100% on the wheel a user installs.
+
 **Do**
 
 ```python
@@ -774,7 +776,7 @@ def plot(ax, values):
     ...
 ```
 
-**Enforced by:** `ruff ANN001`, `ruff ANN401`, `mypy`, `tests/test_package_architecture.py::test_no_published_field_is_typed_any`, `tests/test_package_architecture.py::test_no_published_field_is_typed_dict`
+**Enforced by:** `ruff ANN001`, `ruff ANN401`, `mypy`, `make type-completeness`, `CI: Every public name has a type a type checker knows`, `tests/test_package_architecture.py::test_no_published_field_is_typed_any`, `tests/test_package_architecture.py::test_no_published_field_is_typed_dict`
 
 **Exceptions.** A forwarding `*args` or `**kwargs` may be `Any` (matplotlib's keyword surface is open). Elsewhere write `object` when the code never looks inside, or give the `noqa` its reason ([C4](docstrings.md#c4)). A field of a published record is never `Any` and never a `dict`, which a caller's narrower `dict` does not match, at any depth of its annotation and through any alias (`Untyped = Any`, `Table = Dict[str, float]`), which the tests read as `scripts/check_parameter_annotations.py` reads them: it says what it holds (`Mapping[...]` for a mapping, read-only as [A34](#a34) holds it); one that must stay `Any` goes in `ANY_FIELD_EXEMPT` of `tests/test_package_architecture.py` with its reason.
 

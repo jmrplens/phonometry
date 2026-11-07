@@ -11,6 +11,7 @@
 # The versions here are the versions there; bump them together.
 ruff==0.17.3
 mypy==2.4.1
+pyright[nodejs]==1.1.414  # CI's type-completeness job: pyright --verifytypes on the built wheel, 100% or it fails; the extra brings the Node.js pyright runs on
 bandit==1.9.4
 zizmor==1.31.1  # audits .github/: workflows (template injection, token permissions, persisted credentials) and Dependabot
 types-setuptools==84.0.0.20261006

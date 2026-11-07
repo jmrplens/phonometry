@@ -1821,10 +1821,11 @@ class FDTD2D:
             obstacle_mask=obstacle_mask,
         )
         c_map, rho_map = medium.c_map, medium.rho_map
-        self.dx, self.dt = medium.dx, medium.dt
+        self.dx: float = medium.dx
+        self.dt: float = medium.dt
         ny, nx = c_map.shape
         #: Thickness of the absorbing (sponge) layer, in cells.
-        self.absorbing_layer_cells = medium.absorbing_layer_cells
+        self.absorbing_layer_cells: int = medium.absorbing_layer_cells
         #: Sides carrying the absorbing layer; none when it has no cells.
         self.absorbing_sides: tuple[Side, ...] = medium.absorbing_sides
         self._obstacle: NDArray[np.bool_] | None = medium.obstacle
@@ -1839,13 +1840,13 @@ class FDTD2D:
         # The medium the simulation was built on, as read-only copies of its
         # own: an edit to the caller's maps cannot make them disagree with
         # dt and kappa, which were computed from them here.
-        self.c = read_only_copy(c_map)
-        self.rho = read_only_copy(rho_map)
+        self.c: NDArray[np.float64] = read_only_copy(c_map)
+        self.rho: NDArray[np.float64] = read_only_copy(rho_map)
         c_max = float(c_map.max())
         #: Mean sound speed, cached for the plane-wave machinery.
         self._c_ref = float(c_map.mean())
         #: Bulk modulus at the cell centres [Pa], a read-only NumPy copy.
-        self.kappa = read_only_copy(rho_map * c_map**2)
+        self.kappa: NDArray[np.float64] = read_only_copy(rho_map * c_map**2)
         self._kappa = backend.asarray(self.kappa)
         # Density averaged onto the faces where each velocity lives, kept on
         # the host for the plane-wave initial condition and on the device
@@ -1856,14 +1857,14 @@ class FDTD2D:
         self._rho_x = backend.asarray(rho_x)
         self._rho_y = backend.asarray(rho_y)
 
-        self.p = backend.zeros((ny, nx))
-        self.vx = backend.zeros((ny, nx - 1))
-        self.vy = backend.zeros((ny - 1, nx))
+        self.p: _backends.DeviceArray = backend.zeros((ny, nx))
+        self.vx: _backends.DeviceArray = backend.zeros((ny, nx - 1))
+        self.vy: _backends.DeviceArray = backend.zeros((ny - 1, nx))
         self._div = backend.zeros((ny, nx))
         self._sources: list[Source] = []
         self._plane_sources: list[PlaneWaveSource] = []
         self._contour_probes: list[ContourProbe] = []
-        self.n = 0  # completed steps
+        self.n: int = 0  # completed steps
 
         self._init_decay(
             medium.sides,

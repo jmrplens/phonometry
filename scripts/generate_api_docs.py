@@ -1308,12 +1308,27 @@ def _keyword_annotation(node: ast.expr) -> ast.expr:
     return node
 
 
+class _Written:
+    """A default the page shows as the stub writes it."""
+
+    __slots__ = ("text",)
+
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def __repr__(self) -> str:
+        return self.text
+
+
 def _stub_default(node: ast.expr | None, runtime: inspect.Parameter | None) -> object:
     """The default a stub parameter shows: the literal it writes, else the running one.
 
     ``...`` is a stub's placeholder (a ``default_factory`` field writes it),
     and a name (a module constant) is read from the running signature, which
-    is the same object the dataclass holds as the field's default.
+    is the same object the dataclass holds as the field's default. Any other
+    expression, ``MappingProxyType({})`` say, shows as written: its running
+    value would print as its own repr, ``mappingproxy({})``, which names no
+    type a reader can find.
     """
     if node is None:
         return inspect.Parameter.empty
@@ -1322,6 +1337,8 @@ def _stub_default(node: ast.expr | None, runtime: inspect.Parameter | None) -> o
     try:
         return ast.literal_eval(node)
     except ValueError:
+        if not isinstance(node, ast.Name | ast.Attribute):
+            return _Written(ast.unparse(node))
         return runtime.default if runtime is not None else Ellipsis
 
 
@@ -1545,6 +1562,8 @@ def _format_parameter(
             # The placeholder an overload head uses for "whatever the
             # implementation defaults to"; `repr` would print `Ellipsis`.
             default = "..."
+        elif isinstance(parameter.default, _Written):
+            default = parameter.default.text
         elif type(parameter.default).__module__ not in ("builtins", "types"):
             # Third-party reprs (numpy arrays) are not pinned, so a repr here
             # would make the drift gate hostage to dependency upgrades; the

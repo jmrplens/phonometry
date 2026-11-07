@@ -931,10 +931,11 @@ class ElasticFDTD2D:
             obstacle_mask=obstacle_mask,
         )
         cp_map, cs_map, rho_map = medium.cp_map, medium.cs_map, medium.rho_map
-        self.dx, self.dt = medium.dx, medium.dt
+        self.dx: float = medium.dx
+        self.dt: float = medium.dt
         ny, nx = cp_map.shape
         #: Thickness of the absorbing (sponge) layer, in cells.
-        self.absorbing_layer_cells = medium.absorbing_layer_cells
+        self.absorbing_layer_cells: int = medium.absorbing_layer_cells
         #: Sides carrying the absorbing layer; none when it has no cells.
         self.absorbing_sides: tuple[Side, ...] = medium.absorbing_sides
         #: Sides carrying a traction-free surface (immutable record).
@@ -950,16 +951,16 @@ class ElasticFDTD2D:
         self._xp = backend.xp
         # Read-only copies of their own, so the maps the simulation reports
         # stay the ones mu, lam and dt were computed from.
-        self.c_p = read_only_copy(cp_map)
-        self.c_s = read_only_copy(cs_map)
-        self.rho = read_only_copy(rho_map)
+        self.c_p: NDArray[np.float64] = read_only_copy(cp_map)
+        self.c_s: NDArray[np.float64] = read_only_copy(cs_map)
+        self.rho: NDArray[np.float64] = read_only_copy(rho_map)
         c_max = float(cp_map.max())
         #: Shear modulus ``mu = rho c_s**2`` at cell centres, a read-only
         #: NumPy copy.
-        self.mu = read_only_copy(rho_map * cs_map**2)
+        self.mu: NDArray[np.float64] = read_only_copy(rho_map * cs_map**2)
         #: First Lame parameter ``lambda = rho (c_p**2 - 2 c_s**2)``, a
         #: read-only NumPy copy.
-        self.lam = read_only_copy(
+        self.lam: NDArray[np.float64] = read_only_copy(
             np.maximum(rho_map * (cp_map**2 - 2.0 * cs_map**2), 0.0)
         )
         mu2 = 2.0 * self.mu
@@ -989,18 +990,18 @@ class ElasticFDTD2D:
         self._rho_y = backend.asarray(rho_y)
         self._mu_c = backend.asarray(mu_c)
 
-        self.txx = backend.zeros((ny, nx))
-        self.tyy = backend.zeros((ny, nx))
-        self.txy = backend.zeros((ny - 1, nx - 1))
-        self.vx = backend.zeros((ny, nx - 1))
-        self.vy = backend.zeros((ny - 1, nx))
+        self.txx: DeviceArray = backend.zeros((ny, nx))
+        self.tyy: DeviceArray = backend.zeros((ny, nx))
+        self.txy: DeviceArray = backend.zeros((ny - 1, nx - 1))
+        self.vx: DeviceArray = backend.zeros((ny, nx - 1))
+        self.vy: DeviceArray = backend.zeros((ny - 1, nx))
         self._div = backend.zeros((ny, nx))
         self._dvx = backend.zeros((ny, nx))
         self._dvy = backend.zeros((ny, nx))
         self._dty = backend.zeros((ny, nx - 1))
         self._dtx = backend.zeros((ny - 1, nx))
         self._sources: list[ElasticSource] = []
-        self.n = 0  # completed steps
+        self.n: int = 0  # completed steps
 
         self._init_decay(
             medium.sides,

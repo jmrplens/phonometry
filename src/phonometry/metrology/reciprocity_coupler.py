@@ -314,7 +314,11 @@ def _gerber_exact(ratio: float, x: float) -> complex:
     zeros = _bessel_zeros(count)
     q = np.sqrt(zeros**2 + s)
     z = q * ratio
-    terms = 4.0 / zeros**2 * (s / q**2) * (1.0 - np.tanh(z) / z)
+    # tanh saturates to 1 for the large X of the table's last rows; NumPy's
+    # own routine on Windows overflows on the way there, and says so.
+    with np.errstate(over="ignore"):
+        saturating = np.tanh(z)
+    terms = 4.0 / zeros**2 * (s / q**2) * (1.0 - saturating / z)
     edge = float(zeros[-1]) + 0.5 * math.pi
     root = np.sqrt(s)
     first = 4.0 * (1.0 / edge - np.arctan(root / edge) / root)
@@ -625,9 +629,12 @@ class CapillaryTubeImpedance(OwnsArrays):
         r""":math:`Z_{\mathrm{a,C}} = Z_{\mathrm{a,t}}\tanh\gamma l_\mathrm{C}`
         (Formula (B.1)), in Pa·s/m³.
         """
-        return self.wave_impedance_pa_s_m3 * np.tanh(
-            self.propagation_coefficient_per_m * self.length_m
-        )
+        # tanh saturates to 1 for a long tube; NumPy's own routine on Windows
+        # overflows on the way there, and says so.
+        with np.errstate(over="ignore"):
+            return self.wave_impedance_pa_s_m3 * np.tanh(
+                self.propagation_coefficient_per_m * self.length_m
+            )
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

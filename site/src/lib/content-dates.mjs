@@ -490,8 +490,9 @@ const later = (a, b) => (a === undefined || (b !== undefined && b > a) ? b : a);
  * source, a count or a text.
  *
  * @param {{ repo: string, pathspec: string, pages: string[], dates: Map<string, Date>, entries: ReturnType<typeof readDateSources> }} options
- * @returns {Promise<{ sourced: number, raised: number }>} How many pages have
- *   sources, and how many of them a source dates.
+ * @returns {Promise<{ sourced: number, raised: number, commits: Map<string, { sha: string, date: Date }> }>}
+ *   How many pages have sources, how many of them a source dates, and the
+ *   commit that last changed each source outside the content tree.
  */
 async function applySources({ repo, pathspec, pages, dates, entries }) {
   const content = `${pathspec}/`;
@@ -518,15 +519,21 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
   }
 
   // Any other source is data: every commit that changed it counts, and its
-  // history is read from trees alone.
+  // history is read from trees alone. The commit is kept with its date: the
+  // conformance report names the one that last changed the data it renders.
   const files = sources.filter((spec) => !spec.startsWith(content));
+  const commits = new Map();
   if (files.length > 0) {
     const tracked = await filesAtHead(repo, files);
     const missing = files.find((spec) => !tracked.some((path) => names(spec, path)));
     if (missing !== undefined) throw stale(`the source ${missing}`);
     for (const commit of await readHistory(repo, files)) {
       for (const { path } of commit.changes) {
-        for (const spec of files) if (!newest.has(spec) && names(spec, path)) newest.set(spec, commit.date);
+        for (const spec of files) {
+          if (newest.has(spec) || !names(spec, path)) continue;
+          newest.set(spec, commit.date);
+          commits.set(spec, { sha: commit.sha, date: commit.date });
+        }
       }
       if (newest.size === sources.length) break;
     }
@@ -580,7 +587,7 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
       }
     }
   }
-  return { sourced: sourced.size, raised: raised.size };
+  return { sourced: sourced.size, raised: raised.size, commits };
 }
 
 /** Memoised per site root: the build asks once per page. */
@@ -620,13 +627,16 @@ function realPath(path) {
  *   build runs from it.
  * @returns {Promise<{
  *   dateOf: (filePath: string) => Date,
+ *   sourceCommit: (source: string) => { sha: string, date: Date },
  *   pages: number, rounds: number, blobs: number, sourced: number, raised: number,
  * }>} `dateOf` takes a content file's path, absolute or relative to the site
  *   root, and returns the date its content last changed. A file git has never
  *   seen (a page being written, not committed yet) is dated by the file
  *   itself; a committed one without a date, or a path that is no page, throws.
- *   `sourced` counts the pages date-sources.json lists and `raised` those of
- *   them a source dates.
+ *   `sourceCommit` takes a source date-sources.json names outside the content
+ *   tree, as it names it, and returns the commit that last changed it; any
+ *   other path throws. `sourced` counts the pages date-sources.json lists and
+ *   `raised` those of them a source dates.
  */
 export function loadContentDates({ siteRoot = process.cwd() } = {}) {
   const root = realPath(resolve(siteRoot));
@@ -672,7 +682,7 @@ async function readContentDates(siteRoot) {
   const committed = new Set(pages);
 
   const { dates, rounds, blobs } = await resolveDates({ repo, pathspec, ignore, pages });
-  const { sourced, raised } = await applySources({ repo, pathspec, pages, dates, entries });
+  const { sourced, raised, commits } = await applySources({ repo, pathspec, pages, dates, entries });
 
   return {
     pages: dates.size,
@@ -680,6 +690,14 @@ async function readContentDates(siteRoot) {
     blobs,
     sourced,
     raised,
+    sourceCommit(source) {
+      const commit = commits.get(source);
+      if (commit) return commit;
+      throw new Error(
+        `content dates: ${source} is no source ${DATE_SOURCES} names outside the content tree, so no commit of it ` +
+          'was read; list it as a source of the page that shows it.',
+      );
+    },
     dateOf(filePath) {
       const absolute = isAbsolute(filePath) ? realPath(filePath) : join(siteRoot, filePath);
       const key = relative(repo, absolute).split(sep).join('/');

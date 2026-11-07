@@ -412,6 +412,29 @@ test('a page is dated by a source that its description-only commit also changed'
 	assert.equal(dates.raised, 1);
 });
 
+test('a data source gives the commit that last changed it, and a path no entry names as a source fails', async (t) => {
+	const repo = repository(t);
+	repo.write('report.mdx', page());
+	repo.writeFile('docs/report.json', '{"rows": 1}\n');
+	const first = repo.commit(1);
+	repo.writeFile('docs/report.json', '{"rows": 2}\n');
+	const second = repo.commit(2);
+	// A later commit to the page alone leaves the data's commit where it was.
+	repo.write('report.mdx', page({ body: 'Rewritten.\n' }));
+	repo.commit(3);
+	repo.sources({ pages: ['site/src/content/docs/report.mdx'], sources: ['docs/report.json'] });
+	const dates = await repo.dates();
+	const commit = dates.sourceCommit('docs/report.json');
+	assert.notEqual(second, first);
+	assert.equal(commit.sha, second, 'the commit that last changed the data');
+	assert.equal(isoDay(commit.date), '2026-01-02');
+	assert.equal(day(dates, 'report.mdx'), '2026-01-03', 'the page is dated by its own change');
+	// The report page names the commit of the data it renders; a file no entry
+	// lists has no commit read for it, and asking for one is a mistake to say.
+	assert.throws(() => dates.sourceCommit('docs/other.json'), /docs\/other\.json is no source date-sources\.json names/);
+	assert.throws(() => dates.sourceCommit('site/src/content/docs/report.mdx'), /is no source/);
+});
+
 test('a later commit that changed only a source moves the page, and an earlier one does not', async (t) => {
 	const repo = repository(t);
 	repo.write('a.mdx', page());

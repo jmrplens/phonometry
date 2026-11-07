@@ -384,6 +384,37 @@ def test_two_numbers_that_share_a_float_are_still_two_numbers() -> None:
     assert _disagreement("inf", "inf") == ""
     assert _disagreement("-inf", "inf") != ""
     assert _disagreement("-0.0", "0.0") == ""
+    # Nor is the gap between them rounded to the 28 digits of the default
+    # context: one digit past those, 2**53 + 0.5 and a little more rounds to
+    # ...993 at the comment's last digit, and 1.2999...9 still begins with 1.2.
+    long_half = "9007199254740992.5000000000000000000000000000001"
+    assert "9007199254740992 where" in _disagreement("9007199254740992", long_half)
+    assert _disagreement("1", "1.5000000000000000000000000000001") != ""
+    assert _disagreement("1.2...", "1.2999999999999999999999999999999") == ""
+    assert "1e1000000" in _disagreement("1e1000000", "5")
+
+
+def test_the_bounds_of_a_number_hold_at_every_exponent() -> None:
+    """The bounds a comment's number sets are exact whatever its exponent.
+
+    The exponents of the default context stop near a million, past which the
+    step of the last digit overflowed, or underflowed to zero and passed any
+    print; a number written with an exponent no decimal holds is held to its
+    text, and is reported, not raised.
+    """
+    assert _disagreement("1e1000000", "1.4e1000000") == ""
+    assert _disagreement("1e-1000030", "1.4e-1000030") == ""
+    assert _disagreement("1e-1000030", "1.6e-1000030") != ""
+    huge = "1e9999999999999999999999"
+    assert huge in _disagreement(huge, "5")
+    assert _disagreement(huge, huge) == ""
+    assert _disagreement("9e999999999999999999", "9e999999999999999999") == ""
+    # A bound past the largest exponent is held to the text, not rounded.
+    assert _disagreement("~9e999999999999999999", "9e999999999999999999") == ""
+    assert _disagreement("~9e999999999999999999", "8.5e999999999999999999") != ""
+    # A cut-short value keeps the sign it writes, a negative zero's too.
+    assert _disagreement("-0.0...", "-0.0123") == ""
+    assert _disagreement("0.0...", "-0.0123") != ""
 
 
 def test_a_complex_number_holds_at_the_decimals_of_each_part() -> None:
@@ -395,11 +426,18 @@ def test_a_complex_number_holds_at_the_decimals_of_each_part() -> None:
     assert _disagreement("4.57j", "(0.001+4.567j)") != ""
     assert _disagreement("1.23", "(1.234+0.5j)") != ""
     assert _disagreement("1.23", "(1.234+0j)") == ""
-    # Given roughly or cut short, each part is held that way.
+    # Given roughly, each part is held that way.
     assert _disagreement("~1.2+4.6j", "(1.28+4.52j)") == ""
     assert _disagreement("~1.2+4.6j", "(1.31+4.52j)") != ""
+    # An ellipsis cuts short only the digits it follows, those of the last
+    # part; a real part the sign closes is written in full and rounds.
     assert _disagreement("1.23+4.56j...", "(1.2345+4.5678j)") == ""
     assert _disagreement("1.23+4.57j...", "(1.2345+4.5678j)") != ""
+    assert _disagreement("1.23+4.56j...", "(1.2296+4.5678j)") == ""
+    assert _disagreement("1.23+4.56j...", "(1.2391+4.5678j)") != ""
+    assert _disagreement("-1.23-4.56j...", "(-1.2296-4.5678j)") == ""
+    assert _disagreement("-1.23-4.56j...", "(-1.2391-4.5678j)") != ""
+    assert _disagreement("4.56j...", "4.5678j") == ""
 
 
 def test_a_minus_sign_reads_as_a_hyphen() -> None:

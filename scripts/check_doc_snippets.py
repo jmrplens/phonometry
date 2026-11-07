@@ -72,7 +72,15 @@ import sys
 import tempfile
 import tokenize
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import (
+    MAX_EMAX,
+    MIN_EMIN,
+    Context,
+    Decimal,
+    DecimalException,
+    Inexact,
+    InvalidOperation,
+)
 from typing import TYPE_CHECKING, TypeGuard
 
 if TYPE_CHECKING:
@@ -719,15 +727,40 @@ def _written_parts(
     return out
 
 
-def _resolution(number: str) -> Decimal | None:
-    """The unit of the last digit *number* writes, ``None`` for a form with none.
-
-    ``0.67`` writes hundredths, ``126`` units, and ``1.0012e6`` hundreds.
+def _read_number(text: str) -> Decimal | None:
+    """The number *text* writes, digit for digit, or ``None`` when its
+    exponent is longer than a :class:`~decimal.Decimal` holds, some eighteen
+    digits on a 64-bit build.
     """
-    match = re.fullmatch(r"[-+]?\d*(?:\.(\d*))?(?:[eE]([-+]?\d+))?", number)
-    if match is None:
+    try:
+        return Decimal(text)
+    except InvalidOperation:
         return None
-    return Decimal(1).scaleb(int(match.group(2) or 0) - len(match.group(1) or ""))
+
+
+def _states(said: Decimal, wrote: Decimal, *, rough: bool, cut: bool) -> bool:
+    """True when the finite *said* states the finite *wrote*, held at the last
+    digit *said* writes: ``0.67`` writes hundredths, ``126`` units, and
+    ``1.0012e6`` hundreds.
+
+    The step of that digit is built from the exponent, and the bounds are
+    worked in a context with room for every digit of *said* and two more and
+    for every exponent a decimal holds, so they are exact and the comparisons
+    with them are too: no gap is rounded onto a bound, as it was in the 28
+    digits of the default context, and no step overflows or underflows.
+    Past the exponents a decimal holds, where a bound would be rounded, the
+    context raises a :class:`~decimal.DecimalException` instead.
+    """
+    digits = len(said.as_tuple().digits)
+    exponent = said.adjusted() - digits + 1  # that of the last digit
+    exact = Context(prec=digits + 2, Emax=MAX_EMAX, Emin=MIN_EMIN, traps=[Inexact])
+    step = Decimal((0, (1,), exponent))
+    if cut:  # its digits begin the printed ones, sign and all
+        if said.is_signed():
+            return exact.subtract(said, step) < wrote <= said
+        return said <= wrote < exact.add(said, step)
+    reach = step if rough else Decimal((0, (5,), exponent - 1))
+    return exact.subtract(said, reach) <= wrote <= exact.add(said, reach)
 
 
 def _number_parts(text: str) -> tuple[str | None, str | None]:
@@ -748,23 +781,24 @@ def _same_part(said: str | None, wrote: str | None, *, rough: bool, cut: bool) -
     a part either writes none of standing for an exact zero.
     """
     if said is None:
-        return wrote is None or Decimal(wrote) == 0
+        if wrote is None:
+            return True
+        zero = _read_number(wrote)
+        return zero is not None and zero == 0
     # Decimals, not floats: a comment written to every digit of a float is
     # held to its last digit, a step finer than the spacing of floats there,
     # and two numbers that round to one float are still two numbers.
-    a, b = Decimal(said), Decimal(0 if wrote is None else wrote)
+    a, b = _read_number(said), _read_number("0" if wrote is None else wrote)
+    if a is None or b is None:  # an exponent no decimal holds: the text
+        return said == wrote
     if a.is_nan() or b.is_nan():
         return a.is_nan() and b.is_nan()
     if a.is_infinite() or b.is_infinite():
         return a == b
-    step = _resolution(said)
-    if step is None:  # pragma: no cover - every finite part writes a last digit
-        return a == b
-    gap = b - a
-    if cut:
-        return 0 <= (gap if a >= 0 else -gap) < step
-    reach = step if rough else step / 2
-    return abs(gap) <= reach
+    try:
+        return _states(a, b, rough=rough, cut=cut)
+    except DecimalException:  # a bound past the exponents a decimal holds
+        return said == wrote
 
 
 def _same_value(said: _Part, wrote: str) -> bool:
@@ -777,16 +811,21 @@ def _same_value(said: _Part, wrote: str) -> bool:
     begin with its own. The digits decide, not the float they read as:
     ``9007199254740993`` does not state ``9007199254740992``. A complex
     number holds each of its parts that way, ``(1.23+4.57j)`` stating
-    ``(1.234+4.567j)``, and a part it does not write is an exact zero. A
-    constant states only itself.
+    ``(1.234+4.567j)``, and a part it does not write is an exact zero; an
+    ellipsis cuts short only the part it follows, so ``1.23+4.56j...``
+    states ``(1.2296+4.5678j)``. A constant states only itself.
     """
     try:
         complex(said.text), complex(wrote)
     except ValueError:
         return said.text == wrote
+    parts = _number_parts(said.text)
+    # An ellipsis cuts short the digits it follows, those of the last part
+    # the comment writes; a sign closes the real part before it in full.
+    last = 0 if parts[1] is None else 1
     return all(
-        _same_part(a, b, rough=said.rough, cut=said.cut)
-        for a, b in zip(_number_parts(said.text), _number_parts(wrote), strict=True)
+        _same_part(a, b, rough=said.rough, cut=said.cut and index == last)
+        for index, (a, b) in enumerate(zip(parts, _number_parts(wrote), strict=True))
     )
 
 

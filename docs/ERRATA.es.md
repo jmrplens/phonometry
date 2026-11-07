@@ -1919,8 +1919,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   redundancia tal como allí está impreso, en
   [`_index_from_corrected_mtf`](../src/phonometry/speech/sti.py); el test de
   factores de ponderación por pares de A.2.2 lo fija de forma independiente,
-  y las filas de conformidad «IEC 60268-16:2020 A.2.2» e «IEC 60268-16 Annex
-  M» leen ambas el índice que produce.
+  y las filas de conformidad «IEC 60268-16:2020 A.2.2» e
+  «IEC 60268-16:2011 Annex M» leen ambas el índice que produce.
 - **Estado:** sin notificar.
 
 ## IEC 60268-16:2011, Table M.1 (I_k tabulado un millón de veces sus vecinos)
@@ -1958,7 +1958,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   de [`sti.py`](../src/phonometry/speech/sti.py); la transcripción en
   [`tests/reference_data/`](../tests/reference_data/) conserva las celdas
   impresas al pie de la letra y nombra el $10^{6}$ por el que las reescala, y
-  la fila de conformidad «IEC 60268-16 Annex M» lee el ajuste que alimentan.
+  la fila de conformidad «IEC 60268-16:2011 Annex M» lee el ajuste que
+  alimentan.
 - **Estado:** sin notificar.
 
 ## IEC 60268-16:2011, Table M.1 (I_am,k del paso 3 a 250 Hz)

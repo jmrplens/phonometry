@@ -64,7 +64,7 @@ def _chk_sti_uniform() -> Outcome:
 
 @register(
     "Speech transmission (IEC 60268-16)",
-    "IEC 60268-16 Annex M",
+    "IEC 60268-16:2011 Annex M",
     "Full-STI worked example: printed MTF + speech/noise spectra -> STI",
 )
 def _chk_sti_annex_m() -> Outcome:
@@ -100,7 +100,7 @@ _ANNEX_M_MTF_TOL = 0.001
 
 @register(
     "Speech transmission (IEC 60268-16)",
-    "IEC 60268-16 Annex M",
+    "IEC 60268-16:2011 Annex M",
     "Occupancy-noise adjustment: measured MTF and four level spectra -> STI",
 )
 def _chk_sti_annex_m_adjustment() -> Outcome:
@@ -225,7 +225,7 @@ def _annex_m_rows_outcome(step: str, rows: Sequence[_PrintedRow]) -> Outcome:
 
 @register(
     "Speech transmission (IEC 60268-16)",
-    "IEC 60268-16 Annex M",
+    "IEC 60268-16:2011 Annex M",
     "Step 2 printed intermediates: the measurement condition, row by row",
 )
 def _chk_sti_annex_m_step2_rows() -> Outcome:
@@ -314,7 +314,7 @@ def _chk_sti_annex_m_step2_rows() -> Outcome:
 
 @register(
     "Speech transmission (IEC 60268-16)",
-    "IEC 60268-16 Annex M",
+    "IEC 60268-16:2011 Annex M",
     "Step 3 printed intermediates: the operational condition, row by row",
 )
 def _chk_sti_annex_m_step3_rows() -> Outcome:
@@ -407,7 +407,7 @@ _ANNEX_M_SNR_TOL = 0.08
 
 @register(
     "Speech transmission (IEC 60268-16)",
-    "IEC 60268-16 Annex M",
+    "IEC 60268-16:2011 Annex M",
     "Step 4a printed intermediates: 98 effective signal-to-noise ratios",
 )
 def _chk_sti_annex_m_step4_effective_snr() -> Outcome:

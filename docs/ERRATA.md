@@ -1782,8 +1782,8 @@ in the same order.
   there, in
   [`_index_from_corrected_mtf`](../src/phonometry/speech/sti.py); the pairwise
   weighting-factor test of A.2.2 pins it independently, and the conformance
-  rows "IEC 60268-16:2020 A.2.2" and "IEC 60268-16 Annex M" both read the
-  index it produces.
+  rows "IEC 60268-16:2020 A.2.2" and "IEC 60268-16:2011 Annex M" both read
+  the index it produces.
 - **Status:** unreported.
 
 ## IEC 60268-16:2011, Table M.1 (I_k tabulated a million times its neighbours)
@@ -1819,7 +1819,7 @@ in the same order.
   [`sti.py`](../src/phonometry/speech/sti.py); the transcription in
   [`tests/reference_data/`](../tests/reference_data/) keeps the printed cells
   verbatim and names the $10^{6}$ it rescales them by, and the conformance row
-  "IEC 60268-16 Annex M" reads the adjustment they feed.
+  "IEC 60268-16:2011 Annex M" reads the adjustment they feed.
 - **Status:** unreported.
 
 ## IEC 60268-16:2011, Table M.1 (step 3 I_am,k at 250 Hz)

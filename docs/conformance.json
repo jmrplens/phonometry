@@ -8367,14 +8367,15 @@
       "verdict": "pass"
     },
     {
-      "id": "speech-transmission-iec-60268-16/iec-60268-16-annex-m/full-sti-worked-example-printed-mtf-speech-noise-spectra-sti",
+      "id": "speech-transmission-iec-60268-16/iec-60268-16-2011-annex-m/full-sti-worked-example-printed-mtf-speech-noise-spectra-sti",
       "domain": "speech-transmission-iec-60268-16",
       "reference": {
-        "cite": "IEC 60268-16 Annex M",
+        "cite": "IEC 60268-16:2011 Annex M",
         "documents": [
           {
             "kind": "standard",
             "designation": "IEC 60268-16",
+            "edition": "2011",
             "clause": "Annex M"
           }
         ]
@@ -8395,14 +8396,15 @@
       "verdict": "pass"
     },
     {
-      "id": "speech-transmission-iec-60268-16/iec-60268-16-annex-m/occupancy-noise-adjustment-measured-mtf-and-four-level-spectra-sti",
+      "id": "speech-transmission-iec-60268-16/iec-60268-16-2011-annex-m/occupancy-noise-adjustment-measured-mtf-and-four-level-spectra-sti",
       "domain": "speech-transmission-iec-60268-16",
       "reference": {
-        "cite": "IEC 60268-16 Annex M",
+        "cite": "IEC 60268-16:2011 Annex M",
         "documents": [
           {
             "kind": "standard",
             "designation": "IEC 60268-16",
+            "edition": "2011",
             "clause": "Annex M"
           }
         ]
@@ -8423,14 +8425,15 @@
       "verdict": "pass"
     },
     {
-      "id": "speech-transmission-iec-60268-16/iec-60268-16-annex-m/step-2-printed-intermediates-the-measurement-condition-row-by-row",
+      "id": "speech-transmission-iec-60268-16/iec-60268-16-2011-annex-m/step-2-printed-intermediates-the-measurement-condition-row-by-row",
       "domain": "speech-transmission-iec-60268-16",
       "reference": {
-        "cite": "IEC 60268-16 Annex M",
+        "cite": "IEC 60268-16:2011 Annex M",
         "documents": [
           {
             "kind": "standard",
             "designation": "IEC 60268-16",
+            "edition": "2011",
             "clause": "Annex M"
           }
         ]
@@ -8456,14 +8459,15 @@
       "verdict": "pass"
     },
     {
-      "id": "speech-transmission-iec-60268-16/iec-60268-16-annex-m/step-3-printed-intermediates-the-operational-condition-row-by-row",
+      "id": "speech-transmission-iec-60268-16/iec-60268-16-2011-annex-m/step-3-printed-intermediates-the-operational-condition-row-by-row",
       "domain": "speech-transmission-iec-60268-16",
       "reference": {
-        "cite": "IEC 60268-16 Annex M",
+        "cite": "IEC 60268-16:2011 Annex M",
         "documents": [
           {
             "kind": "standard",
             "designation": "IEC 60268-16",
+            "edition": "2011",
             "clause": "Annex M"
           }
         ]
@@ -8489,14 +8493,15 @@
       "verdict": "pass"
     },
     {
-      "id": "speech-transmission-iec-60268-16/iec-60268-16-annex-m/step-4a-printed-intermediates-98-effective-signal-to-noise-ratios",
+      "id": "speech-transmission-iec-60268-16/iec-60268-16-2011-annex-m/step-4a-printed-intermediates-98-effective-signal-to-noise-ratios",
       "domain": "speech-transmission-iec-60268-16",
       "reference": {
-        "cite": "IEC 60268-16 Annex M",
+        "cite": "IEC 60268-16:2011 Annex M",
         "documents": [
           {
             "kind": "standard",
             "designation": "IEC 60268-16",
+            "edition": "2011",
             "clause": "Annex M"
           }
         ]

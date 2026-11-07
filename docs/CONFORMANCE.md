@@ -42,7 +42,7 @@
 | ISO 11820:1996 Eq. (31) / VDI 2081 Blatt 2:2005-05 Tabelle 1, PDF page 12, folio 12 | The mean velocity in the passages of a splitter silencer carrying 16 000 m3/h, from the face velocity and the area ratio | 14.815 m/s | 0.005 m/s | 100 % |
 | E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 4 Hz by Formula (1) | 28.8 dB | -0.1 dB | 100 % |
 | ISO 11820:1996 Table 1 | The printed table is a rounded version of the logarithmic subtraction and departs from it by under 0,35 dB | largest departure 0.349 dB | 0.3491 dB | 100 % |
-| IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
+| IEC 60268-16:2011 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
 
 <details>
 <summary><b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
@@ -509,11 +509,11 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|:---:|
 | IEC 60268-16:2020 A.2.2 | STI weighting-factor pair (500 Hz + 1 kHz bands) | 0.398 (+/-0.001) | 0.398 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 A.3.1.2 | Uniform MTF m=0.5 maps to STI=0.5 | 0.5 (+/-0.01) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16 Annex M | Full-STI worked example: printed MTF + speech/noise spectra -> STI | STI 0.76 (MTI row of step 4c) | STI 0.758 (max MTI dev 0.00) | -0.002 | - | ![Pass][cv-pass] Pass |
-| IEC 60268-16 Annex M | Occupancy-noise adjustment: measured MTF and four level spectra -> STI | STI 0.76 (step 3 matrix, step 4 STI) | STI 0.758 (max MTF dev 0.0009) | -0.002 | - | ![Pass][cv-pass] Pass |
-| IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | every printed row of step 2 rounds as tabulated | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16 Annex M | Step 3 printed intermediates: the operational condition, row by row | every printed row of step 3 rounds as tabulated | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16 Annex M | Step 4a printed intermediates: 98 effective signal-to-noise ratios | all 98 printed effective SNRs | worst cell 0.074 dB from its printed value | 0.074 dB | 92 % | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2011 Annex M | Full-STI worked example: printed MTF + speech/noise spectra -> STI | STI 0.76 (MTI row of step 4c) | STI 0.758 (max MTI dev 0.00) | -0.002 | - | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2011 Annex M | Occupancy-noise adjustment: measured MTF and four level spectra -> STI | STI 0.76 (step 3 matrix, step 4 STI) | STI 0.758 (max MTF dev 0.0009) | -0.002 | - | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2011 Annex M | Step 2 printed intermediates: the measurement condition, row by row | every printed row of step 2 rounds as tabulated | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2011 Annex M | Step 3 printed intermediates: the operational condition, row by row | every printed row of step 3 rounds as tabulated | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2011 Annex M | Step 4a printed intermediates: 98 effective signal-to-noise ratios | all 98 printed effective SNRs | worst cell 0.074 dB from its printed value | 0.074 dB | 92 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.2 | 0.3 (+/-0.01) | 0.2992 | -0.0008 | 8 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.5 | 0.5 (+/-0.01) | 0.4998 | -0.0002 | 2 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.8 | 0.7 (+/-0.01) | 0.7002 | 0.0002 | 2 % | ![Pass][cv-pass] Pass |

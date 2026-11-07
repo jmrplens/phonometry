@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from types import ModuleType
 
+import guard_caches
 import pinned_stack
 import pytest
 
@@ -199,6 +200,34 @@ def _forget_scanned_trees() -> Iterator[None]:
     ast_scan = sys.modules.get("ast_scan")
     if ast_scan is not None:
         ast_scan.forget_trees()
+
+
+@pytest.fixture
+def fresh_caches(monkeypatch: pytest.MonkeyPatch) -> Iterator[guard_caches.FreshCaches]:
+    """Point globals of a module elsewhere for one test, with no cache of the module kept across it.
+
+    A function a ``functools`` cache keeps answers with what it read the
+    first time for as long as the process runs: a test that points
+    ``generate_llms.DOCS`` at a tree of its own would read the pages of
+    whatever tree an earlier test of its worker read, and leave its own to
+    the next one, so its verdict would hang on the order the tests ran in.
+    ``fresh_caches(module, NAME=value, ...)`` clears every cache a function
+    of the module keeps (``guard_caches.forget``), then sets the names for
+    the test; once the test is done the caches are cleared again, before
+    ``monkeypatch`` puts the names back. Called with the module alone, it
+    clears its caches on both sides of a test that replaces something else
+    they read.
+    """
+    touched: list[ModuleType] = []
+
+    def point(module: ModuleType, **values: object) -> None:
+        guard_caches.forget(module)
+        touched.append(module)
+        for name, value in values.items():
+            monkeypatch.setattr(module, name, value)
+
+    yield point
+    guard_caches.forget(*touched)
 
 
 # The modules whose tests dominate the wall clock (steady-state FDTD runs,

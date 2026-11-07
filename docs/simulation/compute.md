@@ -331,24 +331,25 @@ medium under a free surface, and elastic force sources around an obstacle),
 on grids of 32 by 40 to 64 by 48 cells stepped 60 to 120 times, with
 decimated snapshots in two of them.
 
-**NumPy, float64: bit-identical.** Identical inputs give bit-identical
-outputs on the same platform: no random numbers, and every operation in a
-fixed order. The NumPy path is also held to SHA-256 digests of every number
-those scenarios give (`engine-digests.json`, checked in CI). A frozen copy of
-the two engines as they stood before they could step anywhere else first
-proved the new engines equal to it bit for bit on every runner, and the
-digests were then taken from the new engines, so the other devices cost the
+**NumPy, float64: bit-identical.** Identical inputs give bit-identical outputs
+on the same platform: no random numbers, and every operation in a fixed order.
+The NumPy path is also held to SHA-256 digests of every number those scenarios
+give ([`engine-digests.json`](../../engine-digests.json), checked in CI). A
+frozen copy of the two engines as they stood before they could step anywhere
+else first proved the new engines equal to it bit for bit on every runner, and
+the digests were then taken from the new engines, so the other devices cost the
 NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
 4060 with NVIDIA driver 610.57.04, CuPy 14.2.0 (`cupy-cuda13x`, CUDA runtime
-13.2, driver API 13.3) and Python 3.13, every field, snapshot frame, collocated
-field and contour phasor of the seven scenarios was bit-identical to NumPy's.
-The energy, a sum over the whole grid, differed by at most 1.79×10⁻¹⁶ relative
-over those seven runs, because the GPU adds the cells in another order; that is
-the worst of the matrix, and a sum over a larger grid can differ more. The
-measurement is recorded in `gpu-parity.lock`, at the root of the repository,
-with the NVIDIA driver, the CUDA versions, the container image it ran in and a
+13.2, driver API 13.3) and Python 3.13, measured on 9 November 2026, every
+field, snapshot frame, collocated field and contour phasor of the seven
+scenarios was bit-identical to NumPy's. The energy, a sum over the whole grid,
+differed by at most 1.79×10⁻¹⁶ relative over those seven runs, because the GPU
+adds the cells in another order; that is the worst of the matrix, and a sum
+over a larger grid can differ more. The measurement is recorded in
+[`gpu-parity.lock`](../../gpu-parity.lock), at the root of the repository, with
+the NVIDIA driver, the CUDA versions, the container image it ran in and a
 fingerprint of the two engines, their backends and the scenario matrix. CI
 checks that fingerprint on every pull request, so an engine that changes
 without a new proof on a GPU fails. The promise is that one measurement: the

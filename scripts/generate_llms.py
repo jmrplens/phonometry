@@ -43,12 +43,14 @@ import functools
 import itertools
 import json
 import pathlib
+import posixpath
 import re
 import subprocess
 import tomllib
 from typing import TYPE_CHECKING
 
-from markdown_fences import code_lines
+from markdown_fences import NOT_INLINE_ROLES, code_lines, page_lines
+from markdown_spans import blank_inline_spans_by_block
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -79,8 +81,75 @@ def _ignored_paths() -> frozenset[str]:
 
 
 def _git_ignored(path: pathlib.Path) -> bool:
-    """Is this file one git ignores (a local plan, a scratch note)?"""
-    return path.relative_to(ROOT).as_posix() in _ignored_paths()
+    """Is this page of the mirror one git ignores (a local plan, a scratch note)?
+
+    The page is named as :func:`_ignored_paths` lists it, ``docs/`` and its
+    path under :data:`DOCS`, wherever the tree it is read from lies.
+    """
+    return f"docs/{path.relative_to(DOCS).as_posix()}" in _ignored_paths()
+
+
+@functools.cache
+def _repository_files() -> frozenset[str] | None:
+    """Every file of the repository, kept or new, that git does not ignore, as repo-relative paths.
+
+    What a link of the mirror may name: a file one checkout holds and git
+    ignores (a local plan) is on no other copy of the repository, and an
+    address on GitHub built from it would lead nowhere. A file git keeps
+    counts whether or not this checkout holds it: the docs build checks out
+    a sparse cone of the repository, where src/ and tests/ are in git's
+    index and not on disk, and GitHub serves them all the same. A file git
+    does not keep yet counts only while it is on disk. None where git cannot
+    list them, in a tree with no ``.git`` (a source archive), which holds
+    the repository's files and nothing git ignores, so that the files on
+    disk are the answer there.
+    """
+    listings: list[list[str]] = []
+    for which in (["--cached"], ["--others", "--exclude-standard"]):
+        try:
+            result = subprocess.run(
+                ["git", "ls-files", *which, "-z"],
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+                check=False,
+            )
+        except FileNotFoundError:
+            return None
+        if result.returncode != 0:
+            return None
+        listings.append([name for name in result.stdout.split("\0") if name])
+    kept, new = listings
+    return frozenset(kept) | {name for name in new if (ROOT / name).is_file()}
+
+
+@functools.cache
+def _repository_folders() -> frozenset[str] | None:
+    """Every folder that holds a file of :func:`_repository_files`, or None as it gives."""
+    files = _repository_files()
+    if files is None:
+        return None
+    return frozenset(
+        str(parent)
+        for name in files
+        for parent in pathlib.PurePosixPath(name).parents
+        if str(parent) != "."
+    )
+
+
+def _kept(path: str) -> str | None:
+    """``"blob"`` for a file of the repository, ``"tree"`` for a folder of it, else None."""
+    if path == ".." or path.startswith("../"):
+        return None
+    files, folders = _repository_files(), _repository_folders()
+    if files is None or folders is None:
+        on_disk = ROOT / path
+        if on_disk.is_file():
+            return "blob"
+        return "tree" if on_disk.is_dir() else None
+    if path in files:
+        return "blob"
+    return "tree" if path in folders else None
 
 
 CONTENT = ROOT / "site" / "src" / "content" / "docs"
@@ -1043,42 +1112,97 @@ def build_llms_txt(version: str, shard_files: Mapping[str, tuple[str, ...]]) -> 
     return "\n".join(lines)
 
 
+#: Where a link's destination is written (CommonMark 0.31.2, 6.3 and 4.7): in an
+#: inline link or image, before its title, bare or in angle brackets; in a
+#: reference definition (a footnote's ``[^1]:`` is none); and in the ``href`` or
+#: ``src`` of a tag. Each is read on the page with its code and maths blanked.
+_LINK_DESTINATIONS = (
+    re.compile(
+        r"\]\(\s*(?:<(?P<angled>[^>\n]*)>|(?P<bare>[^\s()<>]+))"
+        r"(?=\s*(?:\"[^\"\n]*\"|'[^'\n]*'|\([^)\n]*\))?\s*\))"
+    ),
+    re.compile(
+        r"^ {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*(?:<(?P<angled>[^>\n]*)>|(?P<bare>\S+))",
+        re.MULTILINE,
+    ),
+    re.compile(r"""\b(?:href|src)\s*=\s*(?:"(?P<angled>[^"]*)"|'(?P<bare>[^']*)')"""),
+)
+#: A destination that is an address already: a scheme, an anchor of the same
+#: page, or a path from the site's root.
+_ABSOLUTE_DESTINATION = re.compile(r"[A-Za-z][\w+.-]*:|#|/")
+#: The documents at the root of docs/ and the routes that publish them.
+_ROOT_DOCUMENTS = {
+    "docs/README.md": "",
+    "docs/CONFORMANCE.md": "reference/conformance",
+    "docs/ERRATA.md": "reference/errata",
+    "docs/ERRATA.es.md": "es/reference/errata",
+}
+
+
+def _prose_of(content: str) -> str:
+    """*content* with its fenced code, its maths and its code spans blanked, line and column kept."""
+    lines = content.split("\n")
+    kept = [
+        " " * len(line) if walked.role in NOT_INLINE_ROLES else line
+        for line, walked in zip(lines, page_lines(lines, kind="md"), strict=True)
+    ]
+    return blank_inline_spans_by_block("\n".join(kept), "`$", kind="md")
+
+
 def _absolutize_links(content: str, md_name: str) -> str:
-    """Rewrite mirror-relative markdown links to canonical absolute URLs.
+    """Rewrite the mirror's relative links to the addresses they lead to.
 
-    The shards are served as flat text, so a link relative to the page that
-    holds it (``[x](../filters/filter-banks.md#anchor)``) would not resolve.
-    The mirror is laid out like the site, so the target resolved against the
-    page's own folder is the route, with the two generated documents at the
-    repository root transplanted into the routes that publish them.
+    The exports are flat text served from the site, so a link relative to
+    the page that holds it would resolve against the export's own address
+    and lead nowhere. Every relative destination, in whatever form a link
+    writes it (:data:`_LINK_DESTINATIONS`), is resolved against the page's
+    folder in the repository: a mirror page the site publishes becomes its
+    route, with the documents at the root of docs/ transplanted into the
+    routes that publish them; a folder whose own page the site publishes
+    becomes that route; any other file or folder of the repository becomes
+    its address on GitHub. A destination outside the repository, or one that
+    names no file of it, stops the run, naming the page and the link. Code
+    and maths are left as written. The pages the site publishes are read once
+    a page has a relative destination, so a page with none asks nothing of
+    the mirror.
     """
-    here = pathlib.PurePosixPath(md_name).parent
-    #: Mirror page at the repository root -> the route that publishes it.
-    transplanted = {
-        "README": "",
-        "CONFORMANCE": "reference/conformance",
-        "ERRATA": "reference/errata",
-        "ERRATA.es": "es/reference/errata",
-    }
+    here = pathlib.PurePosixPath("docs", md_name).parent
 
-    def repl(match: re.Match[str]) -> str:
-        target, anchor = match.group(1), match.group(2) or ""
-        resolved = (here / target).as_posix()
-        parts: list[str] = []
-        for step in resolved.split("/"):
-            if step == "..":
-                if parts:
-                    parts.pop()
-            elif step not in (".", ""):
-                parts.append(step)
-        route = "/".join(parts).removesuffix(".md").removesuffix("/index")
-        if route == "CONTRIBUTING":
-            return f"]({REPO_URL}/blob/main/CONTRIBUTING.md{anchor})"
-        route = transplanted.get(route, route)
-        suffix = f"{route}/" if route else ""
-        return f"]({SITE_URL}/{suffix}{anchor})"
+    @functools.cache
+    def published() -> dict[str, str]:
+        return {f"docs/{page}": route for page, route in _routes()} | _ROOT_DOCUMENTS
 
-    return re.sub(r"\]\(((?:\.\./)*[\w./-]+\.md)(#[\w-]+)?\)", repl, content)
+    def address(target: str) -> str:
+        parts = re.fullmatch(r"([^?#]*)(\?[^#]*)?(#.*)?", target, re.DOTALL)
+        path, query, anchor = parts.groups(default="") if parts else (target, "", "")
+        resolved = posixpath.normpath(f"{here}/{path}")
+        folder = f"{resolved}/index.md"
+        pages = published()
+        if resolved in pages or folder in pages:
+            route = pages.get(resolved, pages.get(folder, ""))
+            return f"{SITE_URL}/{f'{route}/' if route else ''}{query}{anchor}"
+        kind = _kept(resolved)
+        if kind is not None:
+            return f"{REPO_URL}/{kind}/main/{resolved}{query}{anchor}"
+        msg = f"generate_llms.py: docs/{md_name} links {target}, which names no file of the repository"
+        raise SystemExit(msg)
+
+    prose = _prose_of(content)
+    found: dict[tuple[int, int], str] = {}
+    for pattern in _LINK_DESTINATIONS:
+        for match in pattern.finditer(prose):
+            group = "angled" if match.group("angled") is not None else "bare"
+            target = content[match.start(group) : match.end(group)]
+            if not target or _ABSOLUTE_DESTINATION.match(target):
+                continue
+            # Angle brackets around an inline destination go with it: the
+            # address written in their place needs none.
+            bracketed = int(group == "angled" and pattern is _LINK_DESTINATIONS[0])
+            found[match.start(group) - bracketed, match.end(group) + bracketed] = target
+    out = content
+    for (start, end), target in sorted(found.items(), reverse=True):
+        out = f"{out[:start]}{address(target)}{out[end:]}"
+    return out
 
 
 def _page_text(md_name: str) -> str:

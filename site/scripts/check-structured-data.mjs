@@ -32,6 +32,8 @@ import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 
+import { decode, markupOf } from './shared/dist-pages.mjs';
+
 const here = dirname(fileURLToPath(import.meta.url));
 // An explicit directory is for reproducing a defect against a build kept aside;
 // with none, the check reads the build that is there.
@@ -317,6 +319,39 @@ const BAND_HEADING = /^\d+(?:[.,]\d+)? k?Hz$/;
  */
 const DATASET_CLAIMS = ['license', 'contentUrl', 'distribution', 'encoding'];
 
+/**
+ * Text with what the site's typographer sets undone, its blanks one space:
+ * remark-smartypants, which Astro runs on every page, curls the straight
+ * quotes, sets three dots as an ellipsis and two hyphens as a dash. A dataset
+ * says what the page's source says; the page sets it.
+ */
+const unset = (text) =>
+	String(text)
+		.replace(/[\u2018\u2019]/g, "'")
+		.replace(/[\u201c\u201d]/g, '"')
+		.replace(/\u2026/g, '...')
+		.replace(/[\u2013\u2014]/g, '--')
+		.replace(/[ \t\r\n]+/g, ' ')
+		.trim();
+
+/** The text a reader sees of an element's markup: its tags out, its references decoded. */
+const shownText = (inner) => unset(decode(inner.replace(/<[^>]*>/g, '')));
+
+/**
+ * What a page shows a dataset could be named or described by: the text of
+ * its title and its `##` headings, and of its paragraphs.
+ *
+ * @param {string} html A built page.
+ * @returns {{headings: Set<string>, paragraphs: Set<string>}}
+ */
+function pageTexts(html) {
+	const markup = markupOf(html);
+	return {
+		headings: new Set([...markup.matchAll(/<h([12])\b[^>]*>([\s\S]*?)<\/h\1>/gi)].map(([, , inner]) => shownText(inner))),
+		paragraphs: new Set([...markup.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)].map(([, inner]) => shownText(inner))),
+	};
+}
+
 /** What each catalogue's columns call the variables a dataset of it measures, per language. */
 const variableNames = (key, lang) =>
 	new Set(
@@ -346,6 +381,8 @@ const seen = {
 	datasetBasis: 0,
 	datasetDated: 0,
 	datasetUndated: 0,
+	datasetShown: 0,
+	datasetUnshown: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -589,6 +626,8 @@ for (const file of files) {
 	// writes once in each language, is checked after the loop.
 	if (CATALOGUE_PAGES.has(slug)) {
 		cataloguePagesSeen[lang] += 1;
+		/** What the page shows, read once a dataset needs it. */
+		let pageText;
 		const datasets = nodes.filter((node) => typesOf(node).includes('Dataset'));
 		if (datasets.length === 0) fail(`${route}: a catalogue page publishes no Dataset`);
 		const mainEntities = [article.mainEntity ?? []].flat().map((item) => item?.['@id']);
@@ -620,6 +659,26 @@ for (const file of files) {
 					fail(`${at}: the dataset has no ${field}`);
 				}
 			}
+			// What a dataset says is what its page shows: its name is the page's
+			// title or the `##` heading of its section, and its description a
+			// paragraph of the page, or the page's own description where the page
+			// renders one catalogue alone. Read off the built page, so a reading of
+			// the page's source that took markup for text, or a paragraph inside an
+			// aside for the page's own, fails here whatever the reader did.
+			pageText ??= pageTexts(html);
+			const nameShown = pageText.headings.has(unset(dataset.name ?? ''));
+			const descriptionShown =
+				pageText.paragraphs.has(unset(dataset.description ?? '')) ||
+				(datasets.length === 1 && dataset.description === article.description);
+			if (!nameShown) fail(`${at}: the dataset's name, ${JSON.stringify(dataset.name)}, is no heading of its page`);
+			if (!descriptionShown) {
+				fail(
+					`${at}: the dataset's description is no paragraph of its page` +
+						`${datasets.length === 1 ? ' and not its description' : ''}: ` +
+						JSON.stringify(String(dataset.description ?? '').slice(0, 120)),
+				);
+			}
+			seen[nameShown && descriptionShown ? 'datasetShown' : 'datasetUnshown'] += 1;
 			// A page of several catalogues describes them all, so its description
 			// says of one dataset what belongs to another.
 			if (datasets.length > 1 && dataset.description === article.description) {
@@ -1028,6 +1087,12 @@ for (const lang of ['en', 'es']) {
 	}
 	if (seen.datasetDated > 0 && seen.datasetUndated === 0) {
 		ok(`each of the ${seen.datasetDated} datasets is dated as the page that renders it`);
+	}
+	if (seen.datasetShown > 0 && seen.datasetUnshown === 0) {
+		ok(
+			`each of the ${seen.datasetShown} datasets is named by a heading of its page and described by a paragraph ` +
+				'of it, or by the description of a page of one catalogue',
+		);
 	}
 	if (seen.datasetBasis > 0) {
 		ok(`the datasets name each of the ${seen.datasetBasis} works they are based on where they cite it`);

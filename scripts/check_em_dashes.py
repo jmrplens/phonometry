@@ -89,9 +89,13 @@ the double hyphen it is. It is looked for where it is published:
   comment of the frontmatter), the value of an ``href``, ``src``, ``style``,
   ``id`` or ``class`` attribute (``var(--sl-color-accent)``), and a line that
   is only a rule: a docstring's heading underline, a table's separator row, a
-  horizontal rule, a frontmatter fence. A run that fills a whole table cell,
-  or a whole slash-separated item of one, is the empty-cell mark, as the em
-  dash is. A docstring and the page generated from it read the same:
+  horizontal rule, a frontmatter fence. On a page the code and maths spans,
+  the comments and the addresses are read in one pass from left to right, as
+  the site reads them, and whichever opens first wins: a URL, a link
+  destination, a comment or an attribute written in a code span is code, and
+  a backtick inside one of them opens no span. A run that fills a whole
+  table cell, or a whole slash-separated item of one, is the empty-cell mark,
+  as the em dash is. A docstring and the page generated from it read the same:
   ``scripts/generate_api_docs.py`` fences a code directive's body and a
   doctest as code, and turns the math into ``$`` and ``$$`` spans.
 - **Any other string of a module, and the site's data modules**, are refused
@@ -1264,23 +1268,22 @@ _RULE_LINE = re.compile(r"^[\s\-=~^+*_#|:]*(?:\||([\-=~^+*_#])\1\1)[\s\-=~^+*_#|
 #: A run of hyphens that fills a whole table cell, or a whole slash-separated
 #: item of one: the empty-cell mark, as the em dash is.
 _HYPHEN_PLACEHOLDER = re.compile(r"(?:^|(?<=/))\s*-{2,}\s*(?=/|$)")
-#: An HTML comment, which the page does not show.
-_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
-#: An MDX comment, an expression that holds nothing but a comment: an MDX page
-#: does not show it, and a markdown page shows it as written.
-_MDX_COMMENT = re.compile(r"\{\s*/\*.*?\*/\s*\}", re.DOTALL)
 #: A link destination, a reference definition's target and a URL, which are
-#: addresses: a heading's anchor keeps the double hyphen its slug was given.
+#: addresses: a heading's anchor keeps the double hyphen its slug was given. A
+#: URL ends where GFM ends a bare one, at a blank or a ``<``.
 _ADDRESSES = (
     re.compile(r"\]\([^)\s]*(?:\s+\"[^\"]*\")?\)"),
     re.compile(r"^\s*\[[^\]]+\]:\s*\S+", re.MULTILINE),
     re.compile(r"<[a-z]+://[^>\s]*>"),
-    re.compile(r"[a-z]+://[^\s)>\]]+"),
+    re.compile(r"[a-z]+://[^\s)<>\]]+"),
 )
 #: An attribute whose value is an address or a style, not text a reader sees.
 _ADDRESS_ATTRIBUTE = re.compile(
     r"\b(?:href|src|style|id|class|className)=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})"
 )
+#: What a page's prose holds that is no text a reader sees, read with its code
+#: spans and its comments in one pass (:func:`_blank_page_spans`).
+_PAGE_ADDRESSES = (*_ADDRESSES, _ADDRESS_ATTRIBUTE)
 #: An inline literal, a role or an interpreted span of a docstring, across the
 #: lines of a paragraph if it wraps: ``x``, :func:`x` or `x`.
 _DOCSTRING_CODE_SPAN = re.compile(r"``(?:[^`]|`(?!`))+``|(?::[\w:+-]+:)?`[^`]+`")
@@ -1303,8 +1306,8 @@ def _blank_out(match: re.Match[str]) -> str:
     return re.sub(r"[^\n]", " ", match.group())
 
 
-def _blank_page_spans(text: str, *, walked: list[PageLine]) -> str:
-    """The text of a page with every code span and every maths span blanked.
+def _blank_page_spans(text: str, *, kind: str, walked: list[PageLine]) -> str:
+    """The text of a page with every code span, maths span, comment and address blanked.
 
     Read as the site reads them (:mod:`markdown_spans`): left to right and a
     block of the page at a time, the first run of backticks or dollar signs
@@ -1313,12 +1316,29 @@ def _blank_page_spans(text: str, *, walked: list[PageLine]) -> str:
     escapes nothing. remark-math reads ``$...$`` as CommonMark reads a code
     span. A span never runs from one list item, heading, table row or
     quotation into the next, so the dollar sign of one item does not pair
-    with the one of the next and hide the prose between them.
+    with the one of the next and hide the prose between them. The comments
+    the page does not show and its addresses (:data:`_PAGE_ADDRESSES`) are
+    read in the same pass, whichever opens first winning: a URL or a comment
+    written in a code span is code, and a backtick in a URL, a link
+    destination, a comment or an attribute opens no span.
 
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind, which says what a
+        comment is: an HTML comment on both, and an MDX comment on an MDX page.
     :param walked: The walk of the page as written, of which *text* has lines
         blanked.
     """
-    return blank_inline_spans_by_block(text, "`$", walked=walked)
+    return blank_inline_spans_by_block(
+        text, "`$", kind, walked=walked, constructs=_PAGE_ADDRESSES
+    )
+
+
+def _blank_comment(piece: str) -> str:
+    """A comment the page does not show, blanked; a code or maths span, as written.
+
+    A span begins with the run that opens it, a comment with its ``<`` or ``{``
+    (:func:`markdown_spans.replace_inline_spans_by_block`).
+    """
+    return piece if piece[0] in "`$" else re.sub(r"[^\n]", " ", piece)
 
 
 def _blank_docstring_code_spans(text: str) -> str:
@@ -1407,20 +1427,18 @@ def _page_code_lines(
     return [False] * head + [a or b for a, b in zip(code, maths, strict=True)]
 
 
-def _page_without_code_or_comments(
-    written: list[str], *, mdx: bool, walked: list[PageLine] | None = None
+def _page_without_code(
+    written: list[str], *, kind: str, walked: list[PageLine]
 ) -> list[str]:
-    """The lines of a page with its code, its display math and its comments blanked.
+    """The lines of a page with its code, its display math and its frontmatter's comments blanked.
 
-    The comments are the ones the page does not show: an HTML comment and an
-    MDX comment of the body, the second on an MDX page only, and a comment of
-    the frontmatter, whose values open neither. Every line keeps its place, so
-    that a line still counts as the one written.
+    The body's comments stay: a code span may spell one, so they are read
+    with the spans (:func:`_blank_page_spans`, :func:`_page_without_code_or_comments`).
+    Every line keeps its place, so that a line still counts as the one written.
 
-    :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     :param walked: The walk of the lines past the frontmatter (:func:`_page_code_lines`).
     """
-    kind = "mdx" if mdx else "md"
     lines = [
         "" if code else line
         for line, code in zip(
@@ -1428,13 +1446,34 @@ def _page_without_code_or_comments(
         )
     ]
     _read_frontmatter(lines, _Frontmatter(decode_escapes=False, blank_comments=True))
+    return lines
 
-    def without_comments(text: str) -> str:
-        text = _HTML_COMMENT.sub(_blank_out, text)
-        return _MDX_COMMENT.sub(_blank_out, text) if mdx else text
 
+def _page_without_code_or_comments(
+    written: list[str], *, mdx: bool, walked: list[PageLine]
+) -> list[str]:
+    """The lines of a page with its code, its display math and its comments blanked.
+
+    The comments are the ones the page does not show: an HTML comment and an
+    MDX comment of the body, the second on an MDX page only, and a comment of
+    the frontmatter, whose values open neither. Those of the body are read
+    with the code and maths spans, left to right as the site reads them, so a
+    span that spells a comment's opener (``<!--``) opens none; the spans stay
+    as written. Every line keeps its place, so that a line still counts as the
+    one written.
+
+    :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
+    :param walked: The walk of the lines past the frontmatter (:func:`_page_code_lines`).
+    """
+    kind = "mdx" if mdx else "md"
+    lines = _page_without_code(written, kind=kind, walked=walked)
     head = _frontmatter_head(lines)
-    return lines[:head] + lines_read_whole(lines[head:], without_comments)
+    return lines[:head] + lines_read_whole(
+        lines[head:],
+        lambda body: replace_inline_spans_by_block(
+            body, _blank_comment, "`$", kind, walked=walked
+        ),
+    )
 
 
 def _without_addresses(text: str) -> str:
@@ -1459,10 +1498,9 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     head = _frontmatter_head(written)
     kind = "mdx" if mdx else "md"
     walked = list(page_lines(written[head:], kind=kind))
-    lines = _page_without_code_or_comments(written, mdx=mdx, walked=walked)
+    lines = _page_without_code(written, kind=kind, walked=walked)
     masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
-        lines[head:],
-        lambda body: _blank_page_spans(_without_addresses(body), walked=walked),
+        lines[head:], lambda body: _blank_page_spans(body, kind=kind, walked=walked)
     )
     return [
         index + 1

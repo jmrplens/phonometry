@@ -2,12 +2,13 @@
  * A reader of the TOML pyproject.toml is written in.
  *
  * The site reads the package's Python floor, its requirements and its extras
- * from pyproject.toml (src/data/repo-stats.mjs), and the tests of what it
- * reads run before the site's dependencies are installed, so the reader has
- * no dependency of its own. It reads the TOML the file is written in, whole:
- * tables and arrays of tables, bare, quoted and dotted keys, the four kinds of
- * string, integers, floats, booleans, arrays over several lines with comments
- * between their values, and inline tables.
+ * from pyproject.toml (src/data/repo-stats.mjs), and the Python tests import
+ * that module too (tests/test_minimum_requirements.py), where none of the
+ * site's packages is installed, so the reader has no dependency of its own.
+ * It reads the TOML the file is written in, whole: tables and arrays of
+ * tables, bare, quoted and dotted keys, the four kinds of string, integers,
+ * floats, booleans, arrays over several lines with comments between their
+ * values, and inline tables, with its lines ended by a line feed or by CRLF.
  *
  * What it does not read, a date or a hexadecimal integer among them, stops it
  * with the line it met it on rather than being read as something else: a
@@ -57,21 +58,46 @@ export function parseToml(text, source = 'TOML') {
 		if (at < text.length && peek() !== '\n' && peek(2) !== '\r\n') fail('unexpected text after the value');
 	};
 
+	/** The length of the line end at `offset`, a line feed or CRLF, or 0 where there is none. */
+	const lineEndAt = (offset) => (text.startsWith('\r\n', offset) ? 2 : text[offset] === '\n' ? 1 : 0);
+
+	/**
+	 * Stop on a control character a string may not hold: any but the tab, a
+	 * carriage return on its own among them. A multi-line string's line ends
+	 * are read before this is asked.
+	 */
+	const refuseControl = (char, offset) => {
+		if (/[\u0000-\u0008\u000a-\u001f\u007f]/.test(char)) {
+			const code = char.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+			fail(`a string holds U+${code}, a control character TOML does not allow there`, offset);
+		}
+	};
+
 	function basicString() {
 		const start = at;
 		const multiline = peek(3) === '"""';
 		at += multiline ? 3 : 1;
-		if (multiline && peek() === '\n') at += 1;
+		// The line end right after the opening quotes is not part of the
+		// string, CRLF as much as a line feed, and every other line end in it
+		// reads as one line feed, as Python's own reader reads it.
+		if (multiline) at += lineEndAt(at);
 		let value = '';
 		for (;;) {
-			if (at >= text.length || (!multiline && peek() === '\n')) fail('a string is not closed', start);
+			if (at >= text.length || (!multiline && lineEndAt(at) > 0)) fail('a string is not closed', start);
 			if (multiline ? peek(3) === '"""' : peek() === '"') {
 				at += multiline ? 3 : 1;
 				return value;
 			}
+			const lineEnd = multiline ? lineEndAt(at) : 0;
+			if (lineEnd > 0) {
+				value += '\n';
+				at += lineEnd;
+				continue;
+			}
 			const char = peek();
 			at += 1;
 			if (char !== '\\') {
+				refuseControl(char, at - 1);
 				value += char;
 				continue;
 			}
@@ -98,11 +124,22 @@ export function parseToml(text, source = 'TOML') {
 		const start = at;
 		const multiline = peek(3) === "'''";
 		at += multiline ? 3 : 1;
-		if (multiline && peek() === '\n') at += 1;
+		if (multiline) at += lineEndAt(at);
 		const end = text.indexOf(multiline ? "'''" : "'", at);
 		const newline = text.indexOf('\n', at);
 		if (end < 0 || (!multiline && newline >= 0 && newline < end)) fail('a string is not closed', start);
-		const value = text.slice(at, end);
+		let value = '';
+		for (let offset = at; offset < end; ) {
+			const lineEnd = multiline ? lineEndAt(offset) : 0;
+			if (lineEnd > 0) {
+				value += '\n';
+				offset += lineEnd;
+				continue;
+			}
+			refuseControl(text[offset], offset);
+			value += text[offset];
+			offset += 1;
+		}
 		at = end + (multiline ? 3 : 1);
 		return value;
 	}

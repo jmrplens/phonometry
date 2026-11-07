@@ -5,8 +5,8 @@
 // node said "Python >= 3.12 with NumPy and SciPy (matplotlib and numba
 // optional)", naming two of the five optional extras, the year after the
 // other three were added. They are read from pyproject.toml now, by a reader
-// small enough to run before the site's dependencies are installed, which is
-// when these tests run.
+// with no dependency of its own, which the Python tests import too, where
+// none of the site's packages is installed.
 //
 // A hand reader of TOML that misreads a multi-line array or a marker writes a
 // wrong requirement onto every page, so it is tested on the exact lines the
@@ -98,6 +98,11 @@ test('what an array, a string or a comment can hold reads as Python reads it', (
 		'raw = \'\'\'',
 		'kept \\n as written\'\'\'',
 		'dotted.key = "value"',
+		// A CRLF right after the opening quotes is trimmed as a line feed is,
+		// and every CRLF inside a multi-line string reads as one line feed.
+		'crlf = """\r\nfirst\r\nsecond"""',
+		"crlf_literal = '''\r\nfirst\r\nsecond'''",
+		'crlf_joined = """one \\\r\n    two"""',
 		'[[b.c]]',
 		'n = 1',
 		'[[b.c]]',
@@ -105,6 +110,14 @@ test('what an array, a string or a comment can hold reads as Python reads it', (
 		'',
 	].join('\n');
 	assert.deepEqual(parseToml(text), tomllib(text));
+});
+
+test('a file whose lines end in CRLF reads as Python reads it', () => {
+	for (const lines of [ONE_FLOOR, PER_PYTHON]) {
+		const text = lines.replaceAll('\n', '\r\n');
+		assert.deepEqual(parseToml(text), tomllib(text));
+		assert.deepEqual(parseToml(text), parseToml(lines));
+	}
 });
 
 test('what the reader cannot read stops it, with the line, rather than being misread', () => {
@@ -115,6 +128,11 @@ test('what the reader cannot read stops it, with the line, rather than being mis
 		['[project]\nname = "a"\nname = "b"\n', /line 3: .*name.*twice/],
 		['[project]\nname =\n', /line 2: .*value/],
 		['[project]\nname = "a" "b"\n', /line 2: .*after/],
+		// A carriage return on its own, or any control character but the tab,
+		// is not TOML inside a string, whichever kind.
+		['[project]\nname = "a\rb"\n', /line 2: .*U\+000D/],
+		["[project]\nname = '''a\rb'''\n", /line 2: .*U\+000D/],
+		['[project]\nname = """a\u0001b"""\n', /line 2: .*U\+0001/],
 	];
 	for (const [text, message] of refusals) {
 		assert.throws(() => parseToml(text), message, text);

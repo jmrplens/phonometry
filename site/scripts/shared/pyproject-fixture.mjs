@@ -8,7 +8,8 @@
 // with Python's own, and the tests of the requirements check hold a sentence
 // to each, so both suites test the same lines.
 //
-// Nothing here is installed: the tests run before the site's dependencies are.
+// Nothing here imports a package, nor do the reader and the check these lines
+// are handed to.
 
 /**
  * A `[project]` table that gives every requirement one floor and no marker, as

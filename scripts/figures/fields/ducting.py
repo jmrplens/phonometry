@@ -25,6 +25,14 @@ if TYPE_CHECKING:
 
 _DUCT_AXIS = 400.0  # channel-axis depth [m]
 _DUCT_SRC_DEPTHS = (400.0, 150.0)  # on the axis / near the surface
+_DUCT_DX = 2.0  # grid spacing [m]
+_DUCT_NY, _DUCT_NX = 400, 1200  # 800 m depth x 2400 m range
+_DUCT_SPONGE = 30  # absorbing cells on every side
+_DUCT_SRC_IX = 100  # source column, its centre 201 m in
+#: The doublet: its Gaussian half-width, and how long after the first
+#: pulse's peak (four half-widths in, GaussianPulse's default) the second,
+#: inverted one peaks [s].
+_DUCT_HALF_WIDTH_S, _DUCT_OFFSET_S = 0.028, 0.033
 
 
 def _duct_profile(z: NDArray[np.floating[Any]]) -> NDArray[np.float64]:
@@ -41,6 +49,24 @@ def _duct_profile(z: NDArray[np.floating[Any]]) -> NDArray[np.float64]:
     eta = 2.0 * (np.asarray(z, dtype=np.float64) - _DUCT_AXIS) / b_scale
     c = c1 * (1.0 + eps * (eta + np.exp(-eta) - 1.0))
     return np.minimum(c, c1 + 250.0)
+
+
+def _duct_crossed_s() -> float:
+    """When the axis run's trapped arrival has gone into the right sponge [s].
+
+    Launched on the axis, the last of the pulse to arrive anywhere is what
+    stays on the axis, at the minimum sound speed: every ray that leaves it
+    crosses faster water. The second, inverted pulse peaks 4 w + offset in,
+    at 145 ms; at the axis speed it reaches the face where the right sponge
+    starts, 2 139 m from the source cell, 1.445 s later; and two half-widths
+    after that its Gaussian is down to e^-4 of its peak. 1.646 s in all, the
+    delay counted as the seabed and plate-junction clips count theirs.
+    """
+    x_source = (_DUCT_SRC_IX + 0.5) * _DUCT_DX
+    x_sponge = (_DUCT_NX - _DUCT_SPONGE) * _DUCT_DX
+    c_axis = float(_duct_profile(np.array([_DUCT_AXIS]))[0])
+    second_peak = 4.0 * _DUCT_HALF_WIDTH_S + _DUCT_OFFSET_S
+    return second_peak + (x_sponge - x_source) / c_axis + 2.0 * _DUCT_HALF_WIDTH_S
 
 
 # SOFAR-duct timeline. Mesh: the pulse carries useful energy to ~19 Hz,
@@ -93,24 +119,28 @@ def _ducting_fields(
 
     compute = clip_placement.compute_for("anim_fdtd_ducting")
 
-    dx = 2.0
-    ny, nx = 400, 1200  # 800 m depth x 2400 m range
+    dx = _DUCT_DX
+    ny, nx = _DUCT_NY, _DUCT_NX
     z = (np.arange(ny) + 0.5) * dx
     c_prof = _duct_profile(z)
     c_map = np.repeat(c_prof[:, np.newaxis], nx, axis=1)
     every = _DUCT_EVERY
-    width, offset = 0.028, 0.033
+    width, offset = _DUCT_HALF_WIDTH_S, _DUCT_OFFSET_S
     p_all, e_all = [], []
     times = np.zeros(0)
     for depth in _DUCT_SRC_DEPTHS:
         sim = FDTD2D(
-            c=c_map, dx=dx, rho=1025.0, absorbing_layer_cells=30, compute=compute
+            c=c_map,
+            dx=dx,
+            rho=1025.0,
+            absorbing_layer_cells=_DUCT_SPONGE,
+            compute=compute,
         )
         iy = round(depth / dx)
-        sim.add_source(GaussianPulse(ix=100, iy=iy, half_width_s=width))
+        sim.add_source(GaussianPulse(ix=_DUCT_SRC_IX, iy=iy, half_width_s=width))
         sim.add_source(
             GaussianPulse(
-                ix=100,
+                ix=_DUCT_SRC_IX,
                 iy=iy,
                 half_width_s=width,
                 t0=4.0 * width + offset,
@@ -309,12 +339,13 @@ def animate_fdtd_ducting(output_dir: str) -> None:
             "edgecolor": "none",
         },
     )
-    # ~17.5 s, 1.545 s into the run. The near-surface run's energy has
-    # crossed by then, but the trapped arrival of the axis run, the slowest
-    # and last, is still 50 m short of the right sponge, which it reaches at
-    # 1.58 s, after the overlay is opaque (measured on the axis row). The
-    # energy map it fades to holds that last stretch all the same.
-    reveal = int(0.83 * p_all.shape[1])
+    # The overlay comes in once the pulse has crossed: the axis run's
+    # trapped arrival, the slowest and last, has gone into the right sponge
+    # (_duct_crossed_s: 1.646 s into the run, frame 3356 of 3793, 18.6 s of
+    # playback), so no front is still on its way when the energy map covers
+    # the field. It is opaque 12 frames later and stays 2.4 s, past the 2 s
+    # hold the other clips close on.
+    reveal = int(np.searchsorted(times, _duct_crossed_s()))
     captions_on = int(0.38 * p_all.shape[1])  # first refocus is visible
 
     def update(k: int) -> tuple[Any, ...]:

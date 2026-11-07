@@ -76,6 +76,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -125,8 +126,8 @@ _BOUND_SLACK = 1e-9
 
 
 def _band_indices(
-    frequencies: np.ndarray, targets: tuple[float, ...]
-) -> np.ndarray | None:
+    frequencies: NDArray[np.float64], targets: tuple[float, ...]
+) -> NDArray[np.intp] | None:
     """Indices of ``targets`` in ``frequencies`` (6 % match), or ``None``.
 
     The 6 % window is the one the ISO 717 rating code matches nominal band
@@ -147,7 +148,7 @@ def _paired_spectra(
     frequencies: NumericArrayLike,
     first: tuple[str, NumericArrayLike],
     second: tuple[str, NumericArrayLike],
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Validate a band axis and the two spectra measured on it."""
     freqs = require_positive_array(frequencies, "frequencies")
     a = require_finite_array(first[1], first[0])
@@ -186,10 +187,10 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
     :ivar delta_rw_ctr_direct: ``Δ(Rw + Ctr)direct``, in dB, or ``None``.
     """
 
-    frequencies: np.ndarray
-    r_without: np.ndarray
-    r_with: np.ndarray
-    delta_r: np.ndarray
+    frequencies: NDArray[np.float64]
+    r_without: NDArray[np.float64]
+    r_with: NDArray[np.float64]
+    delta_r: NDArray[np.float64]
     basic_element: Literal["heavy_wall", "heavy_floor", "lightweight_wall"] | None
     rating: ReductionImprovementRating | None
     delta_rw_direct: int | None
@@ -489,10 +490,10 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
         ``Ln,0,w`` and ``CI,0`` of H.5 i), or ``None``.
     """
 
-    frequencies: np.ndarray
-    l_n0: np.ndarray
-    l_n: np.ndarray
-    improvement: np.ndarray
+    frequencies: NDArray[np.float64]
+    l_n0: NDArray[np.float64]
+    l_n: NDArray[np.float64]
+    improvement: NDArray[np.float64]
     reference_floor: Literal[
         "heavyweight", "lightweight_1", "lightweight_2", "lightweight_3"
     ]
@@ -714,10 +715,10 @@ class HeavyImpactImprovementResult(OwnsArrays):
         L_\mathrm{i,Fmax}` per band, in dB (Formula (H.3)).
     """
 
-    frequencies: np.ndarray
-    l_i_fmax_0: np.ndarray
-    l_i_fmax: np.ndarray
-    improvement: np.ndarray
+    frequencies: NDArray[np.float64]
+    l_i_fmax_0: NDArray[np.float64]
+    l_i_fmax: NDArray[np.float64]
+    improvement: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject columns of different lengths.

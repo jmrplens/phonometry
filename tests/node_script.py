@@ -5,9 +5,9 @@ The parity tests hand pages to the site's readers and compare what comes
 back with what the scripts' Python readers make of the same pages.
 :func:`answer` gives the script its input as JSON on stdin and reads its
 answer as JSON from stdout. When Node fails, to import a reader or inside
-one, the test fails with what Node wrote on stderr: the cause is there, and
-a :class:`subprocess.CalledProcessError` names only the command and its
-status.
+one, the test fails with how Node ended and what it wrote on stderr: the
+cause is there, and a :class:`subprocess.CalledProcessError` names only the
+command and its status.
 """
 
 from __future__ import annotations
@@ -29,7 +29,8 @@ def answer(script: str, given: object, *, timeout: float) -> list[object]:
     :param given: What the script reads.
     :param timeout: How long Node may take [s].
     :raises AssertionError: when Node ends with a status other than 0, with
-        what it wrote on stderr.
+        that status, or the signal that stopped it, and what it wrote on
+        stderr.
     """
     assert NODE is not None, "no JavaScript engine on the path"
     ran = subprocess.run(  # nosec B603 - a fixed argument list
@@ -41,6 +42,25 @@ def answer(script: str, given: object, *, timeout: float) -> list[object]:
         timeout=timeout,
         check=False,
     )
-    assert ran.returncode == 0, ran.stderr
+    assert ran.returncode == 0, _how_node_ended(ran)
     read: list[object] = json.loads(ran.stdout)
     return read
+
+
+def _how_node_ended(ran: subprocess.CompletedProcess[str]) -> str:
+    """What the report of a failed test says of a Node that ended badly.
+
+    Pytest rewrites the ``assert`` of a test module to show the values it
+    compares, and not this module's, so the message is all the report says:
+    it names the status, or the signal that stopped Node, which a process
+    killed for running out of memory has and nothing on stderr besides.
+
+    :param ran: How Node ended.
+    """
+    if ran.returncode < 0:
+        ended = f"Node was stopped by signal {-ran.returncode}"
+    else:
+        ended = f"Node ended with status {ran.returncode}"
+    if not ran.stderr:
+        return f"{ended} and wrote nothing on stderr"
+    return f"{ended}, and wrote on stderr:\n{ran.stderr}"

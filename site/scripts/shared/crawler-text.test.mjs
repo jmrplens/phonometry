@@ -38,6 +38,14 @@ test('a space between the two elements, written or as an entity, is the word bre
 
 test('a block between the two breaks the text', () => {
 	assert.deepEqual(numberGlue('<div>1897</div><div>checks</div>'), []);
+	// Two readout cells written against each other: textContent would read
+	// "passing227", this reader breaks between the cells.
+	assert.deepEqual(
+		numberGlue(
+			'<section><div><span>1897</span> <span>checks passing</span></div><div><span>227</span> <span>designations</span></div></section>',
+		),
+		[],
+	);
 	assert.deepEqual(numberGlue('<li><a>Theory</a></li><li><a>7 pages</a></li>'), []);
 	assert.deepEqual(numberGlue('<td>12</td><td>dB</td>'), []);
 	assert.deepEqual(numberGlue('<span>12</span><br><span>dB</span>'), []);

@@ -45,16 +45,21 @@ const spectrum = `${IMAGES}/signal_response_fraction_3.svg`;
 <div class="home">
 	{/* The spaces between a number and its label, and between two chips, are
 	    for a reader with no stylesheet: a flex container draws no whitespace
-	    between its items, and without one a crawler reads "1897conformance". */}
+	    between its items, and without one a crawler reads "1897conformance".
+	    The space after each cell and after each start step is for a reader
+	    that takes the text with no break at all between blocks, as an audit
+	    that quoted "passing227normative" did; a grid draws none of them. */}
 	<section class="readout" aria-label={content.statsLabel}>
 		{
 			content.stats.map((s) => (
-				<div class="readout-cell">
-					<span class="readout-value">{s.value}</span>{' '}
-					<span class="readout-label">
-						{s.href ? <a href={s.href}>{s.label}</a> : s.label}
-					</span>
-				</div>
+				<>
+					<div class="readout-cell">
+						<span class="readout-value">{s.value}</span>{' '}
+						<span class="readout-label">
+							{s.href ? <a href={s.href}>{s.label}</a> : s.label}
+						</span>
+					</div>{' '}
+				</>
 			))
 		}
 	</section>
@@ -202,22 +207,24 @@ const spectrum = `${IMAGES}/signal_response_fraction_3.svg`;
 			<ol class="steps">
 				{
 					content.start.steps.map((s, i) => (
-						<li>
-							<span class="step-n" aria-hidden="true">
-								{String(i + 1).padStart(2, '0')}
-							</span>
-							<h3>{s.title}</h3>
-							<p>{s.body}</p>
-							{s.code && <Code code={s.code} lang="bash" frame="none" />}
-							<a class="step-link" href={s.href}>
-								{s.linkText}
-							</a>
-							{s.also && (
-								<a class="step-link step-link-also" href={s.also.href}>
-									{s.also.linkText}
+						<>
+							<li>
+								<span class="step-n" aria-hidden="true">
+									{String(i + 1).padStart(2, '0')}
+								</span>{' '}
+								<h3>{s.title}</h3>
+								<p>{s.body}</p>
+								{s.code && <Code code={s.code} lang="bash" frame="none" />}
+								<a class="step-link" href={s.href}>
+									{s.linkText}
 								</a>
-							)}
-						</li>
+								{s.also && (
+									<a class="step-link step-link-also" href={s.also.href}>
+										{s.also.linkText}
+									</a>
+								)}
+							</li>{' '}
+						</>
 					))
 				}
 			</ol>

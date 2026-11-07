@@ -12,6 +12,14 @@
 // space between them costs the layout nothing and gives the crawler its word
 // break.
 //
+// A block boundary is a break here by design. A reader that takes a page as
+// its textContent breaks nowhere, and to it every pair of table cells and
+// every entry of the table of contents is glue: tens of thousands of places
+// across the site, where a crawler that keeps the page's structure, as the
+// markdown converters of the language-model crawlers do, breaks the text
+// anyway. The home spaces its readout cells and its start steps all the same,
+// since that is the reading an audit quoted them in ("passing227normative").
+//
 // `numberGlue` reads a page's markup that way and returns every place where
 // the text before an element boundary ends in a letter or a digit, the text
 // after it starts with one, at least one of the two is a digit, and nothing

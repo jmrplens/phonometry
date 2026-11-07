@@ -8,6 +8,11 @@
  * makes the tree the only place that can be wrong, exactly as
  * `conformance-stats.mjs` already does for the conformance headline.
  *
+ * The same goes for what the site says the package needs: the Python floor,
+ * the install line and the requirements are read from pyproject.toml, the
+ * table pip installs from, and this module is the one place in the site that
+ * reads it, as it is the one place that reads `VERSION`.
+ *
  * Definitions, so the labels these numbers sit under stay honest:
  *   version   first line of `VERSION`, the released version the tag points at
  *   guides    topic guides under the topic folders of `content/docs/`,
@@ -24,6 +29,14 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { catalogues } from '../generated/catalogues.mjs';
+import {
+  describeRequirements,
+  installLine,
+  platformOf,
+  pythonFloor as floorOf,
+  readProject,
+} from '../lib/pyproject.mjs';
+import { parseToml } from '../lib/toml.mjs';
 import { domainIds } from './topics.mjs';
 
 /**
@@ -97,6 +110,53 @@ export const version = (() => {
     );
   }
 })();
+
+/**
+ * The `[project]` table of pyproject.toml, read once for everything below.
+ *
+ * The software node of the structured data, the API pages and the landing
+ * page all state some of it, and each used to type its own copy: the node
+ * named two of the five optional extras a year after the other three were
+ * added.
+ */
+const project = (() => {
+  const file = join(ROOT, 'pyproject.toml');
+  let text;
+  try {
+    text = readFileSync(file, 'utf8');
+  } catch (cause) {
+    throw new Error(
+      `cannot read what the package needs: ${file} is not readable. The site ` +
+        'states its Python floor and requirements through site/src/data/repo-stats.mjs.',
+      { cause },
+    );
+  }
+  return readProject(parseToml(text, file));
+})();
+
+/** The package's `requires-python`, e.g. ">=3.12". */
+export const requiresPython = project.requiresPython;
+
+/** The oldest Python the package installs on, e.g. "3.12", for "3.12 or newer". */
+export const pythonFloor = floorOf(project.requiresPython);
+
+/** The Python the API reference documents, e.g. "Python >= 3.12". */
+export const targetPlatform = platformOf(project.requiresPython);
+
+/** The install line the landing page gives, `pip install "phonometry[full]"`. */
+export const installCommand = installLine(project);
+
+/** The runtime requirements, each with its name, version clauses and Python marker. */
+export const dependencies = project.dependencies;
+
+/** The optional extras, in the order pyproject.toml lists them. */
+export const extras = project.extras;
+
+/**
+ * The software node's `softwareRequirements`: the Python floor, every
+ * requirement with its floor, and every optional extra by name.
+ */
+export const softwareRequirements = describeRequirements(project);
 
 //: The topics the guides live under: every topic that teaches, read from the
 //: navigation data rather than listed here, the way

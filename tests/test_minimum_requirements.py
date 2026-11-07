@@ -720,16 +720,26 @@ def _tracked_text() -> list[Path]:
     ]
 
 
+#: The tests of the site's scripts, which hand its readers and its checks
+#: requirement sentences made up for the case, a floor of another Python and
+#: a version longer than the table's among them.
+_SITE_SCRIPT_TESTS = ".test.mjs"
+
+
 @pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_every_statement_of_the_oldest_python_names_requires_python() -> None:
     """Wherever the tree says "Python 3.N or newer", N is the requires-python floor.
 
-    The CHANGELOG is left out: it records what each release needed.
+    The CHANGELOG is left out: it records what each release needed. So are
+    the tests of the site's scripts: what they write is the input of a test,
+    not a statement to a reader.
     """
     floor = _MODULE.python_floor(_pyproject())
     wrong = []
     for path in _tracked_text():
+        if path.name.endswith(_SITE_SCRIPT_TESTS):
+            continue
         try:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, FileNotFoundError):

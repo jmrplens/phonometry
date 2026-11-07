@@ -8,6 +8,11 @@ on:
         required: false
         default: ''
 
+# pip prints a notice whenever the pip a step runs lags its newest
+# release, which says nothing about the build and lands in every log.
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
 jobs:
   verify-pypi-install:
     runs-on: ${{ matrix.os }}

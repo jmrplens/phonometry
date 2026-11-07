@@ -187,39 +187,93 @@ test('an entry without tables, a work the page cites for something else, is no p
 
 const contentDir = fileURLToPath(new URL('../src/content/docs', import.meta.url));
 
+/** The keys of an entry this test reads; any other key is followed and skipped. */
+const READ_KEYS = new Set(['type', 'authors', 'organization', 'designation', 'title', 'year', 'tables']);
+
 /**
  * The entries of a page's `references`, each with the keys this test reads.
  *
- * A narrow reader, like the one in scripts/shared/search-index.mjs: the site
+ * A narrow reader, like the one in scripts/generate_site_reports.py: the site
  * has no YAML parser installed and the frontmatter is written one key per
- * line. An entry opens at a list item under `references:`; `tables` and
- * `authors` are flow lists of quoted strings, read as JSON; a line it cannot
- * read fails the test rather than reading as no claim.
+ * line. An entry opens at a list item under `references:`, every other line of
+ * it is one key with its value on that line, and `tables` and `authors` are
+ * flow lists of quoted strings, read as JSON. Any other line under
+ * `references:` fails the test rather than reading as no claim: a key whose
+ * value is on the lines below it (`tables` written as a block list), a key
+ * before the first item, an item or a comment at the margin, and a list
+ * written on the line of its key. A blank line ends nothing.
  */
 function readReferences(text, file) {
   const end = text.indexOf('\n---', 3);
   assert.ok(text.startsWith('---') && end > 0, `${file} has no frontmatter`);
   const entries = [];
   let inReferences = false;
-  for (const line of text.slice(3, end).split('\n')) {
+  // The first line split off is the rest of the opening fence, so each line's
+  // index is its line number less one.
+  for (const [index, line] of text.slice(3, end).split('\n').entries()) {
+    if (!line.trim()) continue;
+    const where = `${file}:${index + 1}`;
     if (/^\S/.test(line)) {
-      inReferences = /^references:\s*$/.test(line);
+      // Under `references:` the only line at the margin is the next key: an
+      // item or a comment there is YAML that would otherwise end the list.
+      assert.ok(
+        !inReferences || /^[A-Za-z_][A-Za-z0-9_]*:/.test(line),
+        `${where}: a references line this reader cannot follow: ${JSON.stringify(line)}`,
+      );
+      const [name, ...rest] = line.split(':');
+      const value = rest.join(':').trim();
+      assert.ok(
+        name !== 'references' || value === '' || value === '[]',
+        `${where}: references written on the line of its key, which this reader cannot follow: ${JSON.stringify(line)}`,
+      );
+      inReferences = name === 'references' && value === '';
       continue;
     }
     if (!inReferences) continue;
-    if (/^ {2}- /.test(line)) entries.push({});
-    const key = /^ {2}(?:- | {2})(type|authors|organization|designation|title|year|tables): (.*)$/.exec(line);
-    if (!key) continue;
+    const key = /^ {2}(- | {2})([A-Za-z]+): (.+)$/.exec(line);
+    assert.ok(
+      key && (key[1] === '- ' || entries.length > 0),
+      `${where}: a references line this reader cannot follow: ${JSON.stringify(line)}`,
+    );
+    if (key[1] === '- ') entries.push({});
+    if (!READ_KEYS.has(key[2])) continue;
     const entry = entries.at(-1);
-    if (key[1] === 'tables' || key[1] === 'authors') {
-      assert.match(key[2], /^\[.*\]$/, `${file}: ${key[1]} is not written as a flow list on one line`);
-      entry[key[1]] = JSON.parse(key[2]);
+    if (key[2] === 'tables' || key[2] === 'authors') {
+      assert.match(key[3], /^\[.*\]$/, `${where}: ${key[2]} is not written as a flow list on one line`);
+      entry[key[2]] = JSON.parse(key[3]);
     } else {
-      entry[key[1]] = key[2].replace(/^"(.*)"$/, '$1');
+      entry[key[2]] = key[3].replace(/^"(.*)"$/, '$1');
     }
   }
   return entries;
 }
+
+test('the reader of the pages follows the one way they write references, and stops on any other', () => {
+  const page = (...lines) => ['---', 'title: "A page"', ...lines, '---', '', 'Text.', ''].join('\n');
+  const entry = ['  - type: book', '    authors: ["Mechel, F. P. (Ed.)"]', '    year: 2008', '    title: "Formulas of acoustics"'];
+  const read = readReferences(
+    page('references:', ...entry, '    tables: ["mechel-2008-table-d-3"]', '', ...entry, 'sidebar:', '  order: 1'),
+    'two.mdx',
+  );
+  assert.deepEqual(
+    read.map((ref) => ref.tables),
+    [['mechel-2008-table-d-3'], undefined],
+    'an entry after a blank line, and the claim of the one before it, are read',
+  );
+  assert.equal(read[0].title, 'Formulas of acoustics');
+  assert.deepEqual(readReferences(page('references: []'), 'none.mdx'), []);
+  const refused = {
+    'a block list of tables': page('references:', ...entry, '    tables:', '      - "mechel-2008-table-d-3"'),
+    'a block list of authors': page('references:', '  - type: book', '    authors:', '      - "Mechel, F. P. (Ed.)"'),
+    'a key before the first item': page('references:', '    tables: ["mechel-2008-table-d-3"]', ...entry),
+    'an item at the margin': page('references:', ...entry, '- type: book', '  tables: ["mechel-2008-table-d-3"]'),
+    'a comment at the margin': page('references:', ...entry, '# the catalogue source', ...entry),
+    'a list on the line of its key': page('references: [{type: book, tables: ["mechel-2008-table-d-3"]}]'),
+  };
+  for (const [what, text] of Object.entries(refused)) {
+    assert.throws(() => readReferences(text, 'page.mdx'), /page\.mdx:\d+: .*this reader cannot follow/, what);
+  }
+});
 
 /** The catalogues a page renders, read off its source as catalogue-pages.ts does. */
 const KEYS = /<Catalogues\s+catalogue="(\w+)"/g;

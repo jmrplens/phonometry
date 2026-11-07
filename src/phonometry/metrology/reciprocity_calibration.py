@@ -83,9 +83,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 
 __all__ = [
@@ -126,7 +127,9 @@ _TRIAD = 3
 _PAIR = 2
 
 
-def _complex_column(values: ArrayLike, name: str, count: int) -> NDArray[np.complex128]:
+def _complex_column(
+    values: NumericArrayLike, name: str, count: int
+) -> NDArray[np.complex128]:
     """A finite complex column of one value per frequency, a scalar spread.
 
     :raises ValueError: for a value that is not numeric or not finite, or a
@@ -350,8 +353,8 @@ def _calibration(
     *,
     field: CalibrationField,
     method: Literal["three_microphones", "auxiliary_source"],
-    corrections: Mapping[str, ArrayLike] | None,
-    expanded_uncertainty_db: ArrayLike | None,
+    corrections: Mapping[str, NumericArrayLike] | None,
+    expanded_uncertainty_db: NumericArrayLike | None,
 ) -> ReciprocityCalibration:
     """Build the result; shared by the pressure and the free-field routes."""
     return ReciprocityCalibration(
@@ -372,11 +375,11 @@ def _calibration(
 def _solved(
     frequencies: NDArray[np.float64],
     products: Sequence[NDArray[np.complex128]],
-    sensitivity_ratio: ArrayLike | None,
+    sensitivity_ratio: NumericArrayLike | None,
     *,
     field: CalibrationField,
-    corrections: Mapping[str, ArrayLike] | None,
-    expanded_uncertainty_db: ArrayLike | None,
+    corrections: Mapping[str, NumericArrayLike] | None,
+    expanded_uncertainty_db: NumericArrayLike | None,
 ) -> ReciprocityCalibration:
     """Solve the products for the sensitivities, by the triad or by a pair."""
     method: Literal["three_microphones", "auxiliary_source"]
@@ -834,45 +837,45 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
 
 @overload
 def reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[PressureReciprocityComponent, ArrayLike],
+    standard_uncertainties_db: Mapping[PressureReciprocityComponent, NumericArrayLike],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: Literal["pressure"] = "pressure",
-    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    additional_uncertainties_db: Mapping[str, NumericArrayLike] | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReciprocityUncertaintyBudget: ...
 
 
 @overload
 def reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[FreeFieldReciprocityComponent, ArrayLike],
+    standard_uncertainties_db: Mapping[FreeFieldReciprocityComponent, NumericArrayLike],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: Literal["free"],
-    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    additional_uncertainties_db: Mapping[str, NumericArrayLike] | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReciprocityUncertaintyBudget: ...
 
 
 @overload
 def reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[SharedReciprocityComponent, ArrayLike],
+    standard_uncertainties_db: Mapping[SharedReciprocityComponent, NumericArrayLike],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: CalibrationField,
-    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    additional_uncertainties_db: Mapping[str, NumericArrayLike] | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReciprocityUncertaintyBudget: ...
 
 
 def reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[PressureReciprocityComponent, ArrayLike]
-    | Mapping[FreeFieldReciprocityComponent, ArrayLike]
-    | Mapping[SharedReciprocityComponent, ArrayLike],
+    standard_uncertainties_db: Mapping[PressureReciprocityComponent, NumericArrayLike]
+    | Mapping[FreeFieldReciprocityComponent, NumericArrayLike]
+    | Mapping[SharedReciprocityComponent, NumericArrayLike],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: CalibrationField = "pressure",
-    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    additional_uncertainties_db: Mapping[str, NumericArrayLike] | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReciprocityUncertaintyBudget:
     r"""The uncertainty budget of a reciprocity calibration (IEC 61094-2:2009
@@ -932,7 +935,7 @@ def reciprocity_uncertainty_budget(
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
     table = _BUDGET_TABLES[field]
-    given: Mapping[ReciprocityComponent, ArrayLike] = dict(
+    given: Mapping[ReciprocityComponent, NumericArrayLike] = dict(
         standard_uncertainties_db.items()
     )
     unknown = [key for key in given if isinstance(key, str) and key not in table]

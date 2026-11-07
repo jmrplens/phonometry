@@ -94,10 +94,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "BENDING_STRESS_CONSTANT",
@@ -238,7 +238,7 @@ STORY_FREQUENCY_MIN_STORIES: int = 5
 
 
 def _refuse_unread_frequency(
-    frequency: ArrayLike | None, where: str, when: str
+    frequency: NumericArrayLike | None, where: str, when: str
 ) -> None:
     """Refuse a frequency for a case whose printed value does not read one.
 
@@ -293,7 +293,7 @@ def guideline_velocity[V: RealValues](
 
 
 @overload
-def guideline_velocity[A: ArrayLike](
+def guideline_velocity[A: NumericArrayLike](
     building_class: BuildingClass,
     frequency: A | None = None,
     *,
@@ -305,7 +305,7 @@ def guideline_velocity[A: ArrayLike](
 
 def guideline_velocity(
     building_class: BuildingClass,
-    frequency: ArrayLike | None = None,
+    frequency: NumericArrayLike | None = None,
     *,
     location: MeasurementLocation = "foundation",
     duration: VibrationDuration = "short_term",
@@ -636,7 +636,7 @@ def bending_stress[V: RealValues](
 
 
 @overload
-def bending_stress[A: ArrayLike](
+def bending_stress[A: NumericArrayLike](
     peak_velocity_m_s: A,
     *,
     dynamic_modulus_pa: float,
@@ -647,7 +647,7 @@ def bending_stress[A: ArrayLike](
 
 
 def bending_stress(
-    peak_velocity_m_s: ArrayLike,
+    peak_velocity_m_s: NumericArrayLike,
     *,
     dynamic_modulus_pa: float,
     density: float,
@@ -722,7 +722,7 @@ class GuidelineCurve(OwnsArrays):
 
 def foundation_guideline_curve(
     building_class: BuildingClass,
-    frequency: ArrayLike | None = None,
+    frequency: NumericArrayLike | None = None,
 ) -> GuidelineCurve:
     """Bild 1 as two arrays: frequency and guideline velocity.
 

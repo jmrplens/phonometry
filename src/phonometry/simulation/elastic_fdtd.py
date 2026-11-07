@@ -155,9 +155,10 @@ from .fdtd import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ._backends import DeviceArray
     from ._remote.client import Expected
     from .compute import Compute, RunProvenance
@@ -575,7 +576,9 @@ def scholte_speed(
     return sol.c_s * float(np.sqrt(root))
 
 
-def _resolve_speed_map(name: str, value: ArrayLike, shape: GridShape | None) -> Field2D:
+def _resolve_speed_map(
+    name: str, value: NumericArrayLike, shape: GridShape | None
+) -> Field2D:
     """Broadcast/validate a wave-speed spec into a finite 2D map.
 
     :raises TypeError: for a speed that holds a complex number or a text,
@@ -615,7 +618,7 @@ def _resolve_free_sides(
 
 
 def _elastic_grid(
-    c_p: ArrayLike, shape: GridShape | None, cfl: float, dx: float
+    c_p: NumericArrayLike, shape: GridShape | None, cfl: float, dx: float
 ) -> tuple[Field2D, float, float]:
     """The P-wave speed map, the grid spacing and the time step, checked on the host.
 
@@ -636,7 +639,7 @@ def _elastic_grid(
     return cp_map, dx, _time_step(courant, dx, float(cp_map.max()))
 
 
-def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
+def _checked_shear_speed(c_s: NumericArrayLike, cp_map: Field2D) -> Field2D:
     """The S-wave speed map on the grid of *cp_map*, checked against it."""
     ny, nx = cp_map.shape
     cs_map = _resolve_speed_map("c_s", c_s, (ny, nx))
@@ -658,7 +661,7 @@ def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
     return cs_map
 
 
-def _checked_density(rho: ArrayLike, ny: int, nx: int) -> Field2D:
+def _checked_density(rho: NumericArrayLike, ny: int, nx: int) -> Field2D:
     """The density map on the ``(ny, nx)`` grid, strictly positive.
 
     :raises TypeError: for a density that holds a complex number or a text,
@@ -701,19 +704,19 @@ class _ElasticMedium:
 
 
 def _elastic_medium(
-    c_p: ArrayLike,
-    c_s: ArrayLike,
+    c_p: NumericArrayLike,
+    c_s: NumericArrayLike,
     dx: float,
     *,
-    rho: ArrayLike,
+    rho: NumericArrayLike,
     cfl: float,
     absorbing_layer_cells: int | np.integer[Any],
     absorbing_sides: Side | Iterable[Side] | None,
     absorbing_layer_reflection: float,
-    damping: ArrayLike,
+    damping: NumericArrayLike,
     shape: GridShape | None,
     free_sides: Side | Iterable[Side] | None,
-    obstacle_mask: ArrayLike | None,
+    obstacle_mask: NumericArrayLike | None,
 ) -> _ElasticMedium:
     """Check every argument of :class:`ElasticFDTD2D` that describes the medium.
 
@@ -902,18 +905,18 @@ class ElasticFDTD2D:
     def __init__(
         self,
         *,
-        c_p: ArrayLike,
-        c_s: ArrayLike,
+        c_p: NumericArrayLike,
+        c_s: NumericArrayLike,
         dx: float,
-        rho: ArrayLike,
+        rho: NumericArrayLike,
         cfl: float = 0.6,
         absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: ArrayLike = 0.0,
+        damping: NumericArrayLike = 0.0,
         shape: GridShape | None = None,
         free_sides: Side | Iterable[Side] | None = None,
-        obstacle_mask: ArrayLike | None = None,
+        obstacle_mask: NumericArrayLike | None = None,
         compute: Compute | None = None,
     ) -> None:
         medium = _elastic_medium(
@@ -1026,9 +1029,9 @@ class ElasticFDTD2D:
         absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: ArrayLike = 0.0,
+        damping: NumericArrayLike = 0.0,
         free_sides: Side | Iterable[Side] | None = None,
-        obstacle_mask: ArrayLike | None = None,
+        obstacle_mask: NumericArrayLike | None = None,
         compute: Compute | None = None,
     ) -> ElasticFDTD2D:
         """Build the engine from named materials painted over a background.
@@ -1978,18 +1981,18 @@ class ElasticRun(OwnsArrays):
         def __init__(
             self,
             *,
-            c_p: ArrayLike,
-            c_s: ArrayLike,
+            c_p: NumericArrayLike,
+            c_s: NumericArrayLike,
             dx: float,
             duration_s: float,
             sources: Sequence[ElasticSource],
-            rho: ArrayLike,
+            rho: NumericArrayLike,
             shape: GridShape | None = None,
             cfl: float = 0.6,
             recording: ElasticRecording | None = None,
             boundaries: ElasticBoundaries | None = None,
-            obstacle_mask: ArrayLike | None = None,
-            damping: ArrayLike = 0.0,
+            obstacle_mask: NumericArrayLike | None = None,
+            damping: NumericArrayLike = 0.0,
         ) -> None: ...
 
     def __post_init__(self) -> None:

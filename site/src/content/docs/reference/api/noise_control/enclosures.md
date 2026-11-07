@@ -69,12 +69,12 @@ interior room constant reuses [`phonometry.room.room_constant`](/phonometry/refe
 
 ```python
 enclosure_insertion_loss(
-    panel_transmission_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike] | PanelTransmissionResult,
+    panel_transmission_loss: NumericArrayLike | Callable[[NDArray[np.float64]], NumericArrayLike] | PanelTransmissionResult,
     external_area: float,
     internal_area: float,
-    internal_absorption: ArrayLike,
+    internal_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     model: Literal['bies', 'norton'] = 'bies',
 ) -> EnclosureInsertionLossResult
 ```
@@ -117,12 +117,12 @@ ENCLOSURE_MODELS = {'bies': 0.3, 'norton': 0.0}
 
 ```python
 enclosure_required_transmission_loss(
-    insertion_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    insertion_loss: NumericArrayLike | Callable[[NDArray[np.float64]], NumericArrayLike],
     external_area: float,
     internal_area: float,
-    internal_absorption: ArrayLike,
+    internal_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     model: Literal['bies', 'norton'] = 'bies',
 ) -> EnclosureInsertionLossResult
 ```

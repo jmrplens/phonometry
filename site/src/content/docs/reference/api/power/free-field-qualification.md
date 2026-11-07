@@ -201,7 +201,7 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 ```python
 directionality_tolerance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> np.ndarray
@@ -471,10 +471,10 @@ The traverse paths lie in the working area of the room (A.3.3), as declared.
 inverse_square_law_deviations(
     traverses: Sequence[MicrophoneTraverse],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     room: Literal['anechoic', 'hemi-anechoic'],
-    origin_m: ArrayLike | None = None,
-    source_box_m: ArrayLike | None = None,
+    origin_m: NumericArrayLike | None = None,
+    source_box_m: NumericArrayLike | None = None,
 ) -> InverseSquareLawResult
 ```
 
@@ -513,7 +513,7 @@ span the frequency range, each with its own mathematical origin, and
 
 ```python
 inverse_square_law_tolerance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> np.ndarray
@@ -649,10 +649,10 @@ The Table A.1 limit of each frequency, in dB, read from the room.
 ```python
 MicrophoneTraverse(
     *,
-    positions_m: ArrayLike,
-    levels: ArrayLike,
-    monitor_levels: ArrayLike | None = None,
-    background_levels: ArrayLike | None = None,
+    positions_m: NumericArrayLike,
+    levels: NumericArrayLike,
+    monitor_levels: NumericArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     name: str = '',
     targets: Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features'] | Sequence[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features']] = (),
 )
@@ -677,13 +677,13 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 
 ```python
 MicrophoneTraverse.along(
-    direction: ArrayLike,
-    distances: ArrayLike,
-    levels: ArrayLike,
+    direction: NumericArrayLike,
+    distances: NumericArrayLike,
+    levels: NumericArrayLike,
     *,
-    start_m: ArrayLike = (0.0, 0.0, 0.0),
-    monitor_levels: ArrayLike | None = None,
-    background_levels: ArrayLike | None = None,
+    start_m: NumericArrayLike = (0.0, 0.0, 0.0),
+    monitor_levels: NumericArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     name: str = '',
     targets: Sequence[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features']] = (),
 ) -> MicrophoneTraverse
@@ -821,9 +821,9 @@ Per band, whether both extreme deviations are within Table B.1.
 
 ```python
 verify_source_directionality(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> SourceDirectionalityResult
 ```

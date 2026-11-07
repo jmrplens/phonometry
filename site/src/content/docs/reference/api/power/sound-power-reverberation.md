@@ -90,9 +90,9 @@ alike for the two quantities.
 
 ```python
 octave_band_levels(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> OctaveBandLevels
 ```
 
@@ -177,10 +177,10 @@ A level array of several spectra draws one curve per spectrum.
 
 ```python
 reverberation_background_correction(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -403,15 +403,15 @@ and the speed of sound.
 
 ```python
 sound_energy_comparison(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ReferenceSourceCalibration | ArrayLike,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: ReferenceSourceCalibration | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult
@@ -468,14 +468,14 @@ time-averaged correction of 9.1.2.
 
 ```python
 sound_energy_reverberation(
-    levels: ArrayLike,
-    t60: ArrayLike,
+    levels: NumericArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     surface_area: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -539,13 +539,13 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 
 ```python
 sound_power_comparison(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ReferenceSourceCalibration | ArrayLike,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: ReferenceSourceCalibration | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult
@@ -591,13 +591,13 @@ the two sources, so the room absorption need not be known.
 
 ```python
 sound_power_reverberation(
-    levels: ArrayLike,
-    t60: ArrayLike,
+    levels: NumericArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     surface_area: float,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult

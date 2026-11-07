@@ -24,7 +24,7 @@ caller's responsibility.
 
 ```python
 prominence_ratio(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     tone_frequency: float | None = None,
@@ -67,7 +67,7 @@ Warns about biased tonality estimates (e.g. coarse FFT resolution).
 
 ```python
 tone_to_noise_ratio(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     tone_frequency: float | None = None,

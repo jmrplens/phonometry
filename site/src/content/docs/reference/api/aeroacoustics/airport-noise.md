@@ -126,12 +126,12 @@ Engine-installation lateral-directivity correction `ΔI(φ)` (Eq. 4-15/4-16).
 
 ```python
 event_level(
-    path: ArrayLike,
-    observer: ArrayLike,
-    powers: ArrayLike,
-    distances_m: ArrayLike,
-    exposure_levels: ArrayLike,
-    max_levels: ArrayLike,
+    path: NumericArrayLike,
+    observer: NumericArrayLike,
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    exposure_levels: NumericArrayLike,
+    max_levels: NumericArrayLike,
     *,
     reference_speed_m_s: float = 82.31104,
     mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
@@ -179,9 +179,9 @@ ground-roll segments, and combines them into the exposure level `SEL`
 ```python
 FlightSegmentState(
     *,
-    ground_roll: ArrayLike | None = None,
-    landing_roll: ArrayLike | None = None,
-    bank: ArrayLike | None = None,
+    ground_roll: NumericArrayLike | None = None,
+    landing_roll: NumericArrayLike | None = None,
+    bank: NumericArrayLike | None = None,
 )
 ```
 
@@ -303,14 +303,14 @@ Excess lateral attenuation `Λ(β, ℓ)` over soft ground (Eq. 4-18/4-19).
 
 ```python
 noise_contour(
-    path: ArrayLike,
-    powers: ArrayLike,
-    distances_m: ArrayLike,
-    exposure_levels: ArrayLike,
-    max_levels: ArrayLike,
+    path: NumericArrayLike,
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    exposure_levels: NumericArrayLike,
+    max_levels: NumericArrayLike,
     *,
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     reference_speed_m_s: float = 82.31104,
     mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
     metric: Literal['exposure', 'maximum'] = 'exposure',
@@ -423,12 +423,12 @@ Plot filled noise contours over the ground plane.
 
 ```python
 npd_curve(
-    powers: ArrayLike,
-    distances_m: ArrayLike,
-    levels: ArrayLike,
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
     power: float,
     *,
-    query_distances_m: ArrayLike | None = None,
+    query_distances_m: NumericArrayLike | None = None,
 ) -> NPDLevelResult
 ```
 
@@ -457,11 +457,11 @@ NPD event level over a distance sweep at one power setting.
 
 ```python
 npd_level(
-    powers: ArrayLike,
-    distances_m: ArrayLike,
-    levels: ArrayLike,
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
     power: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

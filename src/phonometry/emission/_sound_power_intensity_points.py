@@ -125,10 +125,9 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import BandFraction
+    from .._internal.types import BandFraction, NumericArrayLike
 
 from .._internal.boundary import settled, settled_net_share, settled_ratio
 from .._internal.display import RichDisplay
@@ -615,7 +614,7 @@ def error_factor(grade: DeterminationGrade, *, a_weighted: bool = False) -> floa
 
 
 def normal_intensity_from_levels(
-    levels: ArrayLike, *, negative: ArrayLike = False
+    levels: NumericArrayLike, *, negative: NumericArrayLike = False
 ) -> np.ndarray:
     r"""Signed normal intensity from printed intensity levels (clause 9.1).
 
@@ -728,7 +727,7 @@ class PartialPowerConcentration(RichDisplay):
 
 
 def _positive_partial_powers(
-    normal_intensity: ArrayLike, areas: ArrayLike
+    normal_intensity: NumericArrayLike, areas: NumericArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """One band of signed normal intensities and its segment areas, validated."""
     i_n = np.atleast_1d(real_array(normal_intensity, "normal_intensity"))
@@ -744,8 +743,8 @@ def _positive_partial_powers(
 
 
 def partial_power_concentration(
-    normal_intensity: ArrayLike,
-    areas: ArrayLike,
+    normal_intensity: NumericArrayLike,
+    areas: NumericArrayLike,
     *,
     grade: DeterminationGrade = "engineering",
 ) -> PartialPowerConcentration:
@@ -1370,7 +1369,7 @@ def _validate_positions(
 
 
 def _position_grid(
-    normal_intensity: ArrayLike, areas: ArrayLike
+    normal_intensity: NumericArrayLike, areas: NumericArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """The measured intensities as ``(positions, bands)``, with their areas.
 
@@ -1398,7 +1397,7 @@ def _position_grid(
 
 
 def _checked_position_band_grid(
-    values: ArrayLike | None, name: str, n_positions: int, n_bands: int
+    values: NumericArrayLike | None, name: str, n_positions: int, n_bands: int
 ) -> np.ndarray | None:
     """A per-position (per-band) input on the ``(positions, bands)`` grid.
 
@@ -1424,7 +1423,7 @@ def _checked_position_band_grid(
 
 
 def _checked_frequencies(
-    frequencies: ArrayLike | None, n_bands: int, fraction: int
+    frequencies: NumericArrayLike | None, n_bands: int, fraction: int
 ) -> np.ndarray | None:
     """The supplied band centres, one per band and each one a tabulated band.
 
@@ -1447,7 +1446,7 @@ def _checked_frequencies(
 
 
 def _checked_residual_index(
-    pressure_residual_index: float | ArrayLike | None, n_bands: int
+    pressure_residual_index: float | NumericArrayLike | None, n_bands: int
 ) -> np.ndarray | None:
     r"""The instrument's :math:`\delta_{pI0}` as one finite value per band.
 
@@ -1596,7 +1595,7 @@ def _band_indicators(
 
 
 def _temporal_indicator(
-    temporal_intensity: ArrayLike | None, n_bands: int
+    temporal_intensity: NumericArrayLike | None, n_bands: int
 ) -> np.ndarray | None:
     """F1 per band from the short-time samples of the initial test (A.2.1)."""
     require_scalar(n_bands, "n_bands")
@@ -1920,13 +1919,13 @@ def _a_weighted_grade(
 
 
 def sound_power_intensity_points(
-    normal_intensity: ArrayLike,
-    areas: ArrayLike,
+    normal_intensity: NumericArrayLike,
+    areas: NumericArrayLike,
     *,
-    pressure_levels: ArrayLike | None = None,
-    pressure_residual_index: float | ArrayLike | None = None,
-    temporal_intensity: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    pressure_levels: NumericArrayLike | None = None,
+    pressure_residual_index: float | NumericArrayLike | None = None,
+    temporal_intensity: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     fraction: BandFraction | np.integer[Any] = 3,
     grade: DeterminationGrade = "engineering",
 ) -> DiscretePointIntensityResult:

@@ -46,9 +46,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "VESSEL_CLASSES",
@@ -133,7 +134,7 @@ def _default_bands() -> NDArray[np.float64]:
 
 
 def _clean_frequencies(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
 ) -> NDArray[np.float64]:
     if frequencies is None:
         return _default_bands()
@@ -271,7 +272,7 @@ def ship_source_spectrum(
     length_m: float = 100.0,
     vessel_class: VesselClass = "containership",
     model: ShipModel = "jomopans-echo",
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ShipTrafficSpectrum:
     """Predicted underwater source-level spectrum of a ship.
 

@@ -42,7 +42,7 @@ simplification, both transcriptions verified digit-for-digit).
 
 ```python
 propagation_loss(
-    range_m: ArrayLike,
+    range_m: NumericArrayLike,
     frequency_hz: float,
     *,
     law: Literal['spherical', 'cylindrical', 'practical'] = 'spherical',
@@ -134,7 +134,7 @@ Plot the propagation loss versus range with its two contributions.
 
 ```python
 seawater_absorption(
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
     *,
     temperature_c: float = 10.0,
     salinity: float = 35.0,
@@ -170,7 +170,7 @@ Volume absorption coefficient $\alpha$, in dB/km.
 
 ```python
 spreading_loss(
-    range_m: ArrayLike,
+    range_m: NumericArrayLike,
     *,
     law: Literal['spherical', 'cylindrical', 'practical'] = 'spherical',
     transition_range: float | None = None,

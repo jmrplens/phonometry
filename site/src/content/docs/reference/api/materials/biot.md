@@ -442,7 +442,7 @@ poroelastic_transfer_matrix(
     waves: BiotWavesResult,
     thickness_m: float,
     *,
-    transverse_wavenumber: ArrayLike = 0.0,
+    transverse_wavenumber: NumericArrayLike = 0.0,
 ) -> NDArray[np.complex128]
 ```
 

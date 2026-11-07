@@ -172,7 +172,7 @@ BEST_HEARING_FREQUENCY_KHZ = {'HF': (55.0, 58.0), 'VHF': (105.0, 105.0), 'SI': (
 
 ```python
 group_audiogram(
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
     group: Literal['HF', 'VHF', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
     normalized: bool = False,
@@ -205,7 +205,7 @@ Table 3 (`normalized=True`).
 ## orca_audiogram
 
 ```python
-orca_audiogram(frequency_hz: ArrayLike) -> AudiogramResult
+orca_audiogram(frequency_hz: NumericArrayLike) -> AudiogramResult
 ```
 
 Killer-whale hearing threshold (Ainslie 2010, Equation 11.159).

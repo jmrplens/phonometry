@@ -96,10 +96,10 @@ judged here.
 
 ```python
 heavy_impact_improvement(
-    l_i_fmax_0: ArrayLike,
-    l_i_fmax: ArrayLike,
+    l_i_fmax_0: NumericArrayLike,
+    l_i_fmax: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> HeavyImpactImprovementResult
 ```
 
@@ -180,10 +180,10 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 laboratory_floor_covering_improvement(
-    l_n0: ArrayLike,
-    l_n: ArrayLike,
+    l_n0: NumericArrayLike,
+    l_n: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = 'heavyweight',
 ) -> LaboratoryFloorCoveringImprovementResult
 ```
@@ -232,10 +232,10 @@ is the one of the `reference_floor` the caller names.
 
 ```python
 laboratory_lining_improvement(
-    r_without: ArrayLike,
-    r_with: ArrayLike,
+    r_without: NumericArrayLike,
+    r_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None = 'heavy_wall',
 ) -> LaboratoryLiningImprovementResult
 ```

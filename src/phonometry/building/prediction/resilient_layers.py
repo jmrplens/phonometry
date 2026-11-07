@@ -95,10 +95,9 @@ from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction
+    from ..._internal.types import BandFraction, NumericArrayLike
 
 __all__ = [
     "TAPPING_DROP_HEIGHT_M",
@@ -371,7 +370,7 @@ def hammer_limiting_frequency(
 
 
 def force_pulse(
-    time: ArrayLike,
+    time: NumericArrayLike,
     contact_stiffness: float,
     impedance: float,
     *,
@@ -458,7 +457,7 @@ def force_pulse(
 
 
 def short_pulse_mean_square_force(
-    frequencies: ArrayLike, *, fraction: BandFraction | np.integer[Any] = 3
+    frequencies: NumericArrayLike, *, fraction: BandFraction | np.integer[Any] = 3
 ) -> np.ndarray:
     r"""Band mean-square force of a short impact
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
@@ -656,7 +655,7 @@ class TappingForceResult(OwnsArrays):
 
 
 def tapping_force_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     contact_stiffness: float,
     impedance: float,
     *,
@@ -869,7 +868,7 @@ class CoveringImprovementResult(OwnsArrays):
 
 
 def covering_improvement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     covering_stiffness: float,
     plate_stiffness: float,
     impedance: float,
@@ -1024,7 +1023,7 @@ def floating_floor_resonance_frequency(
     return float(_ISO_RESONANCE_CONSTANT * np.sqrt(s * 1e-6 / m))
 
 
-def combined_dynamic_stiffness(layers: ArrayLike) -> float:
+def combined_dynamic_stiffness(layers: NumericArrayLike) -> float:
     r"""Total dynamic stiffness of stacked resilient layers (Formula C.6).
 
     :math:`s'_\mathrm{tot} = (\sum 1/s'_i)^{-1}`, springs in series (Hopkins
@@ -1189,7 +1188,7 @@ class FloatingFloorImprovementResult(OwnsArrays):
 
 @overload
 def floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal["cremer_hammer"],
@@ -1201,7 +1200,7 @@ def floating_floor_improvement_spectrum(
 
 @overload
 def floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal["cremer_hammer"],
@@ -1211,7 +1210,7 @@ def floating_floor_improvement_spectrum(
 
 @overload
 def floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal["en12354", "cremer"] = ...,
@@ -1222,7 +1221,7 @@ def floating_floor_improvement_spectrum(
 
 @overload
 def floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal["en12354", "cremer"] = ...,
@@ -1230,7 +1229,7 @@ def floating_floor_improvement_spectrum(
 
 
 def floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: FloatingFloorModel = "en12354",
@@ -1330,11 +1329,11 @@ def floating_floor_improvement_spectrum(
 
 
 def resilient_mount_improvement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     impedance: float,
     mass_per_area: float,
-    loss_factor: ArrayLike,
+    loss_factor: NumericArrayLike,
     mount_stiffness: float,
     mount_density: float,
 ) -> np.ndarray:

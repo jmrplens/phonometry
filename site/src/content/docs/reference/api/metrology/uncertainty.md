@@ -120,7 +120,7 @@ unpacked by position (GUM clause 6, Annex G).
 
 ```python
 monte_carlo(
-    model: Callable[..., ArrayLike],
+    model: Callable[..., NumericArrayLike],
     quantities: Sequence[Quantity],
     n_trials: int | np.integer[Any] = 1000000,
     coverage: float = 0.95,
@@ -292,7 +292,7 @@ The standard uncertainty is $a / \sqrt{2}$.
 uncertainty_propagation(
     model: Callable[..., float | np.floating[Any] | np.integer[Any]],
     quantities: Sequence[Quantity],
-    correlation: ArrayLike | None = None,
+    correlation: NumericArrayLike | None = None,
 ) -> UncertaintyResult
 ```
 

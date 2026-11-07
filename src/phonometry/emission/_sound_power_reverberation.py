@@ -86,10 +86,10 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -320,7 +320,7 @@ def _speed_of_sound(temperature_c: float) -> float:
     return float(20.05 * np.sqrt(273.0 + temperature_c))
 
 
-def _mean_level(levels: ArrayLike, name: str = "levels") -> np.ndarray:
+def _mean_level(levels: NumericArrayLike, name: str = "levels") -> np.ndarray:
     """Energy mean over microphone positions (rows), returning one value per
     band. A 1D input is treated as a single averaged spectrum (ISO 3741
     Eq. 16).
@@ -364,7 +364,10 @@ def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bo
 
 
 def reverberation_background_correction(
-    levels: ArrayLike, background_levels: ArrayLike, *, frequencies: ArrayLike
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""Background-noise correction :math:`K_1`, ISO 3741:2010 Equation (14).
 
@@ -404,8 +407,8 @@ def reverberation_background_correction(
 
 
 def _checked_background(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
     names: tuple[str, str] = ("levels", "background_levels"),
 ) -> np.ndarray:
@@ -455,8 +458,8 @@ def _checked_background(
 
 
 def _background_corrected_mean(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     frequencies: np.ndarray,
     *,
     reference: bool = False,
@@ -537,7 +540,7 @@ def _min_room_volume(lowest_band: float) -> float:
 
 
 def _room_qualification_warnings(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     t60: np.ndarray,
     volume: float,
     surface_area: float,
@@ -573,7 +576,7 @@ def _room_qualification_warnings(
 
 
 def _position_sampling_warnings(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
 ) -> None:
     """Emit the microphone-sampling advisories for a per-position level array.
 
@@ -649,7 +652,7 @@ def _room_inputs(
 
 
 def _band_inputs(
-    n_bands: int, t60: ArrayLike, frequencies: ArrayLike
+    n_bands: int, t60: NumericArrayLike, frequencies: NumericArrayLike
 ) -> tuple[np.ndarray, np.ndarray]:
     """The per-band ``T60`` and mid-band frequencies, one value per band."""
     freqs = real_array(frequencies, "frequencies")
@@ -710,9 +713,9 @@ def _direct_terms(
 
 def _comparison_inputs(
     n_bands: int,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ReferenceSourceCalibration | ArrayLike,
-    frequencies: ArrayLike | None,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: ReferenceSourceCalibration | NumericArrayLike,
+    frequencies: NumericArrayLike | None,
     *,
     temperature_c: float,
     static_pressure_kpa: float,
@@ -777,13 +780,13 @@ def _a_weighted_total(
 
 
 def sound_power_reverberation(
-    levels: ArrayLike,
-    t60: ArrayLike,
+    levels: NumericArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     surface_area: float,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult:
@@ -863,13 +866,13 @@ def sound_power_reverberation(
 
 
 def sound_power_comparison(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ReferenceSourceCalibration | ArrayLike,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: ReferenceSourceCalibration | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult:
@@ -965,10 +968,10 @@ def sound_power_comparison(
 
 
 def _checked_comparison_backgrounds(
-    levels: ArrayLike,
-    background_levels: ArrayLike | None,
-    reference_levels: ArrayLike,
-    reference_background_levels: ArrayLike | None,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike | None,
+    reference_levels: NumericArrayLike,
+    reference_background_levels: NumericArrayLike | None,
     freqs: np.ndarray | None,
 ) -> None:
     """Refuse a background of a comparison before any advisory is raised.
@@ -991,8 +994,8 @@ def _checked_comparison_backgrounds(
 
 def _reference_source_level(
     lp_rss: np.ndarray,
-    reference_levels: ArrayLike,
-    reference_background_levels: ArrayLike | None,
+    reference_levels: NumericArrayLike,
+    reference_background_levels: NumericArrayLike | None,
     freqs: np.ndarray | None,
 ) -> np.ndarray:
     """The reference source's mean room level, background-corrected if asked.
@@ -1120,7 +1123,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
 
 
 def _room_event_levels(
-    levels: ArrayLike, n_events: int | np.integer[Any] | None
+    levels: NumericArrayLike, n_events: int | np.integer[Any] | None
 ) -> tuple[np.ndarray, int | None]:
     """The mean single event level of one event behind the three input forms.
 
@@ -1166,14 +1169,14 @@ def _room_event_levels(
 
 
 def sound_energy_reverberation(
-    levels: ArrayLike,
-    t60: ArrayLike,
+    levels: NumericArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     surface_area: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -1284,15 +1287,15 @@ def sound_energy_reverberation(
 
 
 def sound_energy_comparison(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ReferenceSourceCalibration | ArrayLike,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: ReferenceSourceCalibration | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult:
@@ -1443,7 +1446,7 @@ class OctaveBandLevels(OwnsArrays):
 
 
 def octave_band_levels(
-    levels: ArrayLike, *, frequencies: ArrayLike
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> OctaveBandLevels:
     r"""Octave-band levels from one-third-octave band levels (ISO 3741 Annex F).
 

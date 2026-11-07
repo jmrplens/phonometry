@@ -59,9 +59,9 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Condition = Literal["reproducibility", "repeatability"]
 
@@ -158,7 +158,7 @@ def _condition(condition: object) -> Condition:
     return require_choice(condition, "condition", _CONDITIONS)
 
 
-def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
+def _finite_bands(values: NumericArrayLike, name: str) -> np.ndarray:
     a = np.atleast_1d(real_array(values, name))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
@@ -359,9 +359,9 @@ def _band_uncertainty(
 
 
 def sound_absorption_coefficient_uncertainty(
-    alpha: ArrayLike,
+    alpha: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
@@ -395,9 +395,9 @@ def sound_absorption_coefficient_uncertainty(
 
 
 def equivalent_area_uncertainty(
-    area: ArrayLike,
+    area: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
@@ -441,9 +441,9 @@ def equivalent_area_uncertainty(
 
 
 def practical_coefficient_uncertainty(
-    alpha_p: ArrayLike,
+    alpha_p: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:

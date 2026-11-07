@@ -110,10 +110,9 @@ from .free_field_qualification import FreeFieldCheck, _band_index, _nominal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import BandFraction
+    from .._internal.types import BandFraction, NumericArrayLike
     from ._sound_power_anechoic import PrecisionSoundPowerResult
 
 RadiationCharacter = Literal["monopole", "dipole", "unknown"]
@@ -230,7 +229,7 @@ def _stepped[T](k: int, rows: tuple[tuple[int, T], ...], low: int, what: str) ->
     return rows[-1][1]
 
 
-def repeatability_standard_deviation(levels: ArrayLike) -> np.ndarray:
+def repeatability_standard_deviation(levels: NumericArrayLike) -> np.ndarray:
     r"""Standard deviation under repeatability conditions (ISO 6926 Formula (1)).
 
     :math:`\sigma_r = \sqrt{\sum_j (L_{X,j} - \overline{L_X})^2 / (N - 1)}` with
@@ -288,7 +287,7 @@ def radiation_impedance_correction(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0,
     radiation: RadiationCharacter = "unknown",
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     knee_frequency_hz: float | None = None,
 ) -> np.ndarray:
     r"""The radiation impedance correction :math:`C_2` of ISO 6926 Annex A.
@@ -348,7 +347,7 @@ def radiation_impedance_correction(
 
 
 def reference_source_reproducibility(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     environment: CalibrationEnvironment,
     arrangement: MicrophoneArrangement | None = None,
@@ -420,7 +419,7 @@ class CalibrationConditions(OwnsArrays):
     _: KW_ONLY
     temperature_c: float = 23.0
     static_pressure_kpa: float = _PS0
-    air_absorption_db_per_m: ArrayLike | None = None
+    air_absorption_db_per_m: NumericArrayLike | None = None
 
     def __post_init__(self) -> None:
         """Refuse the conditions Formula (2) cannot read.
@@ -612,7 +611,7 @@ class ReferenceSourceCalibration(OwnsArrays):
 
     def sound_power_level_at(
         self,
-        frequencies: ArrayLike,
+        frequencies: NumericArrayLike,
         *,
         fraction: BandFraction | np.integer[Any] = 3,
         temperature_c: float | None = None,
@@ -762,7 +761,7 @@ def _annex_b(
     return replaced, agree
 
 
-def _calibration_bands(frequencies: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
+def _calibration_bands(frequencies: NumericArrayLike) -> tuple[np.ndarray, np.ndarray]:
     """Ascending one-third octave mid-bands from 50 Hz to 20 kHz, and their indices."""
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
@@ -779,10 +778,10 @@ def _calibration_bands(frequencies: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _hemisphere_levels(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     freqs: np.ndarray,
-    background_levels: ArrayLike | None,
-    max_levels: ArrayLike | None,
+    background_levels: NumericArrayLike | None,
+    max_levels: NumericArrayLike | None,
 ) -> PrecisionSoundPowerResult:
     """The surface level over the 2 m hemisphere, refusing levels that are not finite.
 
@@ -814,7 +813,7 @@ def _hemisphere_levels(
 
 
 def _c3_correction(
-    air_absorption_db_per_m: ArrayLike | None, freqs: np.ndarray
+    air_absorption_db_per_m: NumericArrayLike | None, freqs: np.ndarray
 ) -> np.ndarray:
     """:math:`C_3` of 8.4 over the 2 m path, zero without an air absorption.
 
@@ -833,7 +832,7 @@ def _c3_correction(
 
 
 def _with_annex_b(
-    lw: np.ndarray, ks: np.ndarray, intensity_sound_power_level: ArrayLike | None
+    lw: np.ndarray, ks: np.ndarray, intensity_sound_power_level: NumericArrayLike | None
 ) -> tuple[np.ndarray, np.ndarray, bool | None]:
     """The levels with Annex B applied, the bands it replaced and the agreement.
 
@@ -852,7 +851,7 @@ def _with_annex_b(
 
 
 def _calibration_directivity(
-    precision: PrecisionSoundPowerResult, max_levels: ArrayLike | None
+    precision: PrecisionSoundPowerResult, max_levels: NumericArrayLike | None
 ) -> np.ndarray:
     """The directivity index of each position, from the traverse maxima if given (8.3.2)."""
     if max_levels is None:
@@ -883,17 +882,17 @@ def _calibration_room_qualified(
 
 
 def reference_source_calibration(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     arrangement: MicrophoneArrangement,
-    background_levels: ArrayLike | None = None,
-    max_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    max_levels: NumericArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: RadiationCharacter = "unknown",
     knee_frequency_hz: float | None = None,
-    c2: ArrayLike | None = None,
-    intensity_sound_power_level: ArrayLike | None = None,
+    c2: NumericArrayLike | None = None,
+    intensity_sound_power_level: NumericArrayLike | None = None,
     room_qualification: FreeFieldCheck | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReferenceSourceCalibration:
@@ -1287,9 +1286,9 @@ def _spectrum_steps(ks: np.ndarray, lw: np.ndarray) -> tuple[np.ndarray, np.ndar
 
 
 def _clause5_levels(
-    calibration: ReferenceSourceCalibration | ArrayLike,
-    frequencies: ArrayLike | None,
-    directivity_index: ArrayLike | None,
+    calibration: ReferenceSourceCalibration | NumericArrayLike,
+    frequencies: NumericArrayLike | None,
+    directivity_index: NumericArrayLike | None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
     """The bands, levels and directivity a clause 5 verdict reads.
 
@@ -1334,7 +1333,7 @@ def _highest_directivity(
 
 
 def _repeatability_of(
-    repeated_levels: ArrayLike | None, n_bands: int
+    repeated_levels: NumericArrayLike | None, n_bands: int
 ) -> np.ndarray | None:
     r""":math:`\sigma_r` of Formula (1) from three or five repetitions, if given."""
     require_scalar(n_bands, "n_bands")
@@ -1353,7 +1352,7 @@ def _repeatability_of(
 
 
 def _supply_variation_of(
-    supply_variation_db: ArrayLike | None, freqs: np.ndarray
+    supply_variation_db: NumericArrayLike | None, freqs: np.ndarray
 ) -> np.ndarray | None:
     """The change over the declared supply range per band (5.2), if given."""
     if supply_variation_db is None:
@@ -1368,12 +1367,12 @@ def _supply_variation_of(
 
 
 def verify_reference_sound_source(
-    calibration: ReferenceSourceCalibration | ArrayLike,
+    calibration: ReferenceSourceCalibration | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    repeated_levels: ArrayLike | None = None,
-    supply_variation_db: ArrayLike | None = None,
-    directivity_index: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    repeated_levels: NumericArrayLike | None = None,
+    supply_variation_db: NumericArrayLike | None = None,
+    directivity_index: NumericArrayLike | None = None,
     reverberation_rooms_only: bool = False,
 ) -> ReferenceSoundSourceVerdict:
     """May this source be declared a reference sound source? (ISO 6926 clause 5).
@@ -1514,10 +1513,10 @@ class ReferenceSourceDriftResult(OwnsArrays):
 
 
 def verify_reference_source_drift(
-    reference_levels: ArrayLike,
-    latest_levels: ArrayLike,
+    reference_levels: NumericArrayLike,
+    latest_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> ReferenceSourceDriftResult:
     """Has the source drifted beyond what ISO 6926 5.6 allows?
 

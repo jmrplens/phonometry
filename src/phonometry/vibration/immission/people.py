@@ -104,9 +104,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 TimeOfDay = Literal["day", "night"]
 Edition = Literal["1999", "2023"]
@@ -652,7 +653,7 @@ def construction_guide_values(
 
 
 def _exposures(
-    kb_ftm: ArrayLike, exposure_s: ArrayLike
+    kb_ftm: NumericArrayLike, exposure_s: NumericArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Matched, finite, non-negative stretches of exposure."""
     severities = require_finite_array(kb_ftm, "kb_ftm")
@@ -667,11 +668,11 @@ def _exposures(
 
 
 def assessment_vibration_severity(
-    kb_ftm: ArrayLike,
-    exposure_s: ArrayLike,
+    kb_ftm: NumericArrayLike,
+    exposure_s: NumericArrayLike,
     *,
     time_of_day: TimeOfDay = "day",
-    in_rest_time: ArrayLike | None = None,
+    in_rest_time: NumericArrayLike | None = None,
 ) -> float:
     r"""The assessment vibration severity :math:`KB_\mathrm{FTr}`, Formulae (4) and (5).
 
@@ -763,7 +764,7 @@ def admissible_trains_per_hour(kb_ftm: float, a_r: float) -> float:
     return _TAKTE_PER_HOUR * (guide / severity) ** 2
 
 
-def railway_takt_max_rms(kb_fti: ArrayLike) -> float:
+def railway_takt_max_rms(kb_fti: NumericArrayLike) -> float:
     r"""The clock maximum r.m.s. of one class of train, Formula (A.1).
 
     The root of the mean square of the clock maxima the trains of the class
@@ -780,7 +781,7 @@ def railway_takt_max_rms(kb_fti: ArrayLike) -> float:
     return takt_max_rms(_maxima(kb_fti))
 
 
-def _maxima(kb_fti: ArrayLike) -> NDArray[np.float64]:
+def _maxima(kb_fti: NumericArrayLike) -> NDArray[np.float64]:
     values = require_finite_array(kb_fti, "kb_fti")
     if np.any(values < 0.0):
         msg = "'kb_fti' must not be negative; a clock maximum never is."
@@ -788,7 +789,7 @@ def _maxima(kb_fti: ArrayLike) -> NDArray[np.float64]:
     return values
 
 
-def railway_takt_spread(kb_fti: ArrayLike) -> float:
+def railway_takt_spread(kb_fti: NumericArrayLike) -> float:
     r"""The standard deviation of the square of the clock maxima, Formula (A.2).
 
     :math:`s(KB^2_{\mathrm{FTm},j}) = \sqrt{\frac{1}{Z_j - 1} \sum_i (KB^2_{\mathrm{FT}i,j} -
@@ -834,11 +835,11 @@ class RailwayAssessment(OwnsArrays):
 
 
 def railway_assessment_severity(
-    kb_ftm: ArrayLike,
-    occupied_takte: ArrayLike,
+    kb_ftm: NumericArrayLike,
+    occupied_takte: NumericArrayLike,
     *,
     time_of_day: TimeOfDay = "day",
-    spread: ArrayLike | None = None,
+    spread: NumericArrayLike | None = None,
 ) -> RailwayAssessment:
     r"""The assessment vibration severity of a railway, Formulae (A.3) and (A.4).
 

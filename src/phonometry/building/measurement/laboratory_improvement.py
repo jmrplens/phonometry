@@ -76,10 +76,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
     from .ratings import BasicElement, ImpactRatingResult, ReferenceFloor
 
@@ -145,9 +144,9 @@ def _band_indices(
 
 def _paired_spectra(
     owner: str,
-    frequencies: ArrayLike,
-    first: tuple[str, ArrayLike],
-    second: tuple[str, ArrayLike],
+    frequencies: NumericArrayLike,
+    first: tuple[str, NumericArrayLike],
+    second: tuple[str, NumericArrayLike],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Validate a band axis and the two spectra measured on it."""
     freqs = require_positive_array(frequencies, "frequencies")
@@ -243,10 +242,10 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
 
 
 def laboratory_lining_improvement(
-    r_without: ArrayLike,
-    r_with: ArrayLike,
+    r_without: NumericArrayLike,
+    r_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     basic_element: BasicElement | None = "heavy_wall",
 ) -> LaboratoryLiningImprovementResult:
     r"""Improvement of airborne sound insulation by a lining (ISO 10140-1:2021 G).
@@ -623,10 +622,10 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
 
 
 def laboratory_floor_covering_improvement(
-    l_n0: ArrayLike,
-    l_n: ArrayLike,
+    l_n0: NumericArrayLike,
+    l_n: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     reference_floor: ReferenceFloor = "heavyweight",
 ) -> LaboratoryFloorCoveringImprovementResult:
     r"""Improvement of impact sound insulation by a floor covering (ISO 10140-1 H).
@@ -754,7 +753,10 @@ class HeavyImpactImprovementResult(OwnsArrays):
 
 
 def heavy_impact_improvement(
-    l_i_fmax_0: ArrayLike, l_i_fmax: ArrayLike, *, frequencies: ArrayLike
+    l_i_fmax_0: NumericArrayLike,
+    l_i_fmax: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
 ) -> HeavyImpactImprovementResult:
     r"""Improvement of a floor covering under the rubber ball (H.6.1).
 

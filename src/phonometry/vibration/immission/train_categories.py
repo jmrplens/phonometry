@@ -82,7 +82,9 @@ from .vibration_meter import TAKT_SUPPRESSION_THRESHOLD
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "RAILWAY_CHANGE_TOLERANCE_PERCENT",
@@ -176,7 +178,7 @@ def train_weighting_factor(
     return row[require_choice(alignment, "alignment", _ALIGNMENTS)]
 
 
-def _passages(kb_fti_zug: ArrayLike) -> NDArray[np.float64]:
+def _passages(kb_fti_zug: NumericArrayLike) -> NDArray[np.float64]:
     values = require_finite_array(kb_fti_zug, "kb_fti_zug")
     if np.any(values < 0.0):
         msg = "'kb_fti_zug' must not be negative; a clock maximum never is."
@@ -184,7 +186,7 @@ def _passages(kb_fti_zug: ArrayLike) -> NDArray[np.float64]:
     return values
 
 
-def train_category_rms(kb_fti_zug: ArrayLike) -> float:
+def train_category_rms(kb_fti_zug: NumericArrayLike) -> float:
     r"""The clock maximum r.m.s. of one category of train, Formula (5).
 
     :math:`KB_\mathrm{FTm,Zug} = \sqrt{\frac{1}{Z}\sum_{i=1}^{Z} KB^2_{\mathrm{FT}i,\mathrm{Zug}}}` over
@@ -204,7 +206,7 @@ def train_category_rms(kb_fti_zug: ArrayLike) -> float:
     return float(np.sqrt(np.mean(values**2)))
 
 
-def train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]:
+def train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> NDArray[np.float64]:
     r"""The :math:`KB_\mathrm{Fmax,Zug}` of each category, Formula (7).
 
     :math:`KB_\mathrm{Fmax,Zug} = 1{,}5 \cdot KB_\mathrm{FTm,Zug}`, the estimate the
@@ -226,7 +228,7 @@ def train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]:
     return TRAIN_KB_FMAX_FACTOR * values
 
 
-def railway_kb_fmax(kb_ftm_zug: ArrayLike) -> float:
+def railway_kb_fmax(kb_ftm_zug: NumericArrayLike) -> float:
     r"""The :math:`KB_\mathrm{Fmax}` of a railway, Formula (8).
 
     The largest :math:`KB_\mathrm{Fmax,Zug}` of Formula (7) over the
@@ -241,10 +243,10 @@ def railway_kb_fmax(kb_ftm_zug: ArrayLike) -> float:
 
 
 def train_assessment_severity(
-    kb_ftm_zug: ArrayLike,
-    trains: ArrayLike,
+    kb_ftm_zug: NumericArrayLike,
+    trains: NumericArrayLike,
     *,
-    alpha: ArrayLike,
+    alpha: NumericArrayLike,
     time_of_day: TimeOfDay = "day",
 ) -> float:
     r"""The assessment vibration severity of a railway, Formula (6).

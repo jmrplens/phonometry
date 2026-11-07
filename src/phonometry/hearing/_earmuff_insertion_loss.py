@@ -83,9 +83,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "ATF_FRONT_TO_RANDOM_INDEX",
@@ -217,7 +217,7 @@ def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values <= np.asarray(bound) + _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _level_grid(values: ArrayLike, name: str) -> np.ndarray:
+def _level_grid(values: NumericArrayLike, name: str) -> np.ndarray:
     """Levels as a ``(repetitions, bands)`` grid of finite values.
 
     :param values: One spectrum, or one per repetition.
@@ -242,7 +242,9 @@ def _level_grid(values: ArrayLike, name: str) -> np.ndarray:
     return grid
 
 
-def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndarray:
+def _band_axis(
+    frequencies: NumericArrayLike | None, count: int, owner: str
+) -> np.ndarray:
     """The centre frequencies, defaulted to the 22 bands of 5.3.
 
     :param frequencies: The caller's frequencies, or ``None``.
@@ -579,11 +581,11 @@ def _level_uncertainty(grid: np.ndarray, typical_db: float) -> np.ndarray:
 
 
 def earmuff_insertion_loss(
-    open_levels: ArrayLike,
-    occluded_levels: ArrayLike,
+    open_levels: NumericArrayLike,
+    occluded_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    isolation_cup_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    isolation_cup_levels: NumericArrayLike | None = None,
     fixture_uncertainty_db: float = 0.3,
     sound_field_uncertainty_db: float = 0.5,
     equipment_uncertainty_db: float = 0.2,
@@ -684,12 +686,12 @@ def earmuff_insertion_loss(
 
 
 def check_random_incidence_field(
-    position_levels: Mapping[SoundFieldPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[SoundFieldPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    directional_levels: ArrayLike | None = None,
-    front_to_random_index: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    directional_levels: NumericArrayLike | None = None,
+    front_to_random_index: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck:
     """Is the random-incidence field of the test site good enough? (5.2.2).
 
@@ -848,12 +850,12 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
 
 def check_plane_progressive_wave(
-    end_face_levels: ArrayLike,
+    end_face_levels: NumericArrayLike,
     *,
-    facing_levels: ArrayLike | None = None,
-    facing_away_levels: ArrayLike | None = None,
-    front_to_rear_index: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    facing_levels: NumericArrayLike | None = None,
+    facing_away_levels: NumericArrayLike | None = None,
+    front_to_rear_index: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> PlaneProgressiveWaveCheck:
     """Is the plane progressive wave of the test site good enough? (5.2.3).
 
@@ -910,13 +912,17 @@ def check_plane_progressive_wave(
             )
             raise ValueError(msg)
         facing = real_array(
-            cast("ArrayLike", facing_levels), "facing_levels", copy=True
+            cast("NumericArrayLike", facing_levels), "facing_levels", copy=True
         )
         away = real_array(
-            cast("ArrayLike", facing_away_levels), "facing_away_levels", copy=True
+            cast("NumericArrayLike", facing_away_levels),
+            "facing_away_levels",
+            copy=True,
         )
         given_index = real_array(
-            cast("ArrayLike", front_to_rear_index), "front_to_rear_index", copy=True
+            cast("NumericArrayLike", front_to_rear_index),
+            "front_to_rear_index",
+            copy=True,
         )
         if given_index.ndim == 0:
             given_index = np.full(count, float(given_index))
@@ -1047,10 +1053,10 @@ class FixtureIsolationVerification(OwnsArrays):
 
 
 def verify_fixture_isolation(
-    open_levels: ArrayLike,
-    cup_levels: ArrayLike,
+    open_levels: NumericArrayLike,
+    cup_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FixtureIsolationVerification:
     """Does the test fixture isolate its microphone well enough? (5.1.4).
 

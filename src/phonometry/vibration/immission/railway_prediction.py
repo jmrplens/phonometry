@@ -104,9 +104,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Floor = Literal["concrete", "timber"]
 Statistic = Literal["mean", "lower", "upper"]
@@ -438,11 +439,13 @@ _KB_BAND_COUNT = len(KB_WEIGHTING_CORRECTIONS)
 _UM_PER_MM = 1000.0
 
 
-def _levels(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _levels(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     return require_finite_array(values, name)
 
 
-def _nominal(frequencies: ArrayLike, table: tuple[float, ...]) -> NDArray[np.intp]:
+def _nominal(
+    frequencies: NumericArrayLike, table: tuple[float, ...]
+) -> NDArray[np.intp]:
     """The index of each frequency in a nominal table, or an error."""
     freqs = require_positive_array(frequencies, "frequencies")
     grid = real_array(table, "table")
@@ -459,12 +462,12 @@ def _nominal(frequencies: ArrayLike, table: tuple[float, ...]) -> NDArray[np.int
 
 
 def predict_floor_spectrum(
-    emission_levels: ArrayLike,
+    emission_levels: NumericArrayLike,
     *,
-    ground_level_difference: ArrayLike = 0.0,
-    foundation_level_difference: ArrayLike = 0.0,
-    floor_level_difference: ArrayLike = 0.0,
-    mitigation_level_difference: ArrayLike = 0.0,
+    ground_level_difference: NumericArrayLike = 0.0,
+    foundation_level_difference: NumericArrayLike = 0.0,
+    floor_level_difference: NumericArrayLike = 0.0,
+    mitigation_level_difference: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""The predicted spectrum on a floor, Formula (1).
 
@@ -513,7 +516,7 @@ def predict_floor_spectrum(
 
 
 def rescale_emission_for_speed(
-    levels: ArrayLike, *, speed_from_kmh: float, speed_to_kmh: float
+    levels: NumericArrayLike, *, speed_from_kmh: float, speed_to_kmh: float
 ) -> NDArray[np.float64]:
     r"""An emission spectrum carried to another train speed, Formula (3).
 
@@ -550,7 +553,7 @@ def rescale_emission_for_speed(
 
 
 def ground_attenuation_coefficient_per_m(
-    frequencies: ArrayLike, *, damping_ratio: float, shear_wave_speed_m_s: float
+    frequencies: NumericArrayLike, *, damping_ratio: float, shear_wave_speed_m_s: float
 ) -> NDArray[np.float64]:
     r"""The material damping of the ground, :math:`\alpha_R` of Clause 5.3.
 
@@ -575,11 +578,11 @@ def ground_attenuation_coefficient_per_m(
 
 
 def ground_transmission(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     distance_m: float,
     reference_distance_m: float,
-    exponent: ArrayLike,
+    exponent: NumericArrayLike,
     damping_ratio: float | None = None,
     shear_wave_speed_m_s: float | None = None,
 ) -> NDArray[np.float64]:
@@ -692,7 +695,7 @@ def ground_to_foundation_level_difference(
 
 
 def foundation_to_floor_level_difference(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     floor: Floor,
     floor_natural_frequency_hz: float,
@@ -741,7 +744,7 @@ def foundation_to_floor_level_difference(
 
 
 def kb_weighted_levels(
-    levels: ArrayLike, *, frequencies: ArrayLike
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The KB-weighted third-octave levels, Formula (8) with Table 2.
 
@@ -767,7 +770,7 @@ def kb_weighted_levels(
     return levels + weights
 
 
-def takt_max_kb(weighted_levels: ArrayLike) -> float:
+def takt_max_kb(weighted_levels: NumericArrayLike) -> float:
     r"""The clock maximum r.m.s. of a category from its spectrum, Formula (9).
 
     :math:`KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0
@@ -806,7 +809,7 @@ def peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float:
     return PEAK_VELOCITY_FACTOR * require_non_negative(kb_fmax_zug, "kb_fmax_zug")
 
 
-def velocity_spectrum_um_s(levels: ArrayLike) -> NDArray[np.float64]:
+def velocity_spectrum_um_s(levels: NumericArrayLike) -> NDArray[np.float64]:
     r"""A level spectrum as a velocity spectrum, Formula (13).
 
     :math:`v_\mathrm{RMS}(f_{\mathrm{T}n}) = 1000 \, v_0 \,
@@ -870,13 +873,13 @@ class TrainCategoryPrediction(OwnsArrays):
 
 
 def predict_train_category(
-    emission_levels: ArrayLike,
+    emission_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike = PREDICTION_BAND_CENTERS_HZ,
-    ground_level_difference: ArrayLike = 0.0,
-    foundation_level_difference: ArrayLike = 0.0,
-    floor_level_difference: ArrayLike = 0.0,
-    mitigation_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike = PREDICTION_BAND_CENTERS_HZ,
+    ground_level_difference: NumericArrayLike = 0.0,
+    foundation_level_difference: NumericArrayLike = 0.0,
+    floor_level_difference: NumericArrayLike = 0.0,
+    mitigation_level_difference: NumericArrayLike = 0.0,
 ) -> TrainCategoryPrediction:
     r"""Run the chain from an emission spectrum to the assessment quantities.
 
@@ -1019,7 +1022,7 @@ def train_decay_exponent(
 
 
 def train_velocity_ratio(
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     reference_distance_m: float,
     transition_distance_m: float,

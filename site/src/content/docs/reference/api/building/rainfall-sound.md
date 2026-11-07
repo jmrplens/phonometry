@@ -159,10 +159,10 @@ one hour (the definition under Table H.1).
 
 ```python
 rainfall_reference_correction(
-    l_i_reference: ArrayLike,
-    structural_reverberation_time: ArrayLike,
+    l_i_reference: NumericArrayLike,
+    structural_reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> RainfallReferenceCorrection
 ```
 
@@ -219,14 +219,14 @@ RAINFALL_REFERENCE_LOSS_FACTOR_DB = {100.0: -10.0, 125.0: -11.0, 160.0: -11.0, 2
 
 ```python
 rainfall_sound(
-    l_pr: ArrayLike,
-    reverberation_time: ArrayLike,
+    l_pr: NumericArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     excited_area_m2: float,
-    background_levels: ArrayLike | None = None,
-    reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reference_correction: RainfallReferenceCorrection | NumericArrayLike | None = None,
 ) -> RainfallSoundResult
 ```
 
@@ -277,12 +277,12 @@ for comparison between laboratories.
 
 ```python
 rainfall_sound_from_intensity(
-    l_im: ArrayLike,
+    l_im: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     measuring_area_m2: float,
     excited_area_m2: float,
-    reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
+    reference_correction: RainfallReferenceCorrection | NumericArrayLike | None = None,
 ) -> RainfallSoundResult
 ```
 
@@ -602,8 +602,8 @@ verify_rain_generator(
     rainfall_rate_mm_h: float,
     *,
     rain_type: Literal['intense', 'heavy'] = 'heavy',
-    drop_diameters_mm: ArrayLike | None = None,
-    fall_velocities_m_s: ArrayLike | None = None,
+    drop_diameters_mm: NumericArrayLike | None = None,
+    fall_velocities_m_s: NumericArrayLike | None = None,
 ) -> RainGeneratorVerification
 ```
 

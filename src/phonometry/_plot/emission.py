@@ -44,9 +44,9 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.container import BarContainer
     from matplotlib.patches import Rectangle
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission._sound_power_hard_walled import (
         HardWalledRoomCheck,
@@ -810,7 +810,7 @@ def plot_field_indicators(
     result: FieldIndicators,
     ax: Axes | None = None,
     *,
-    dynamic_capability: ArrayLike | None = None,
+    dynamic_capability: NumericArrayLike | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:

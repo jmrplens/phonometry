@@ -131,7 +131,7 @@ to 150 m³.
 ## reverberation_index
 
 ```python
-reverberation_index(t: ArrayLike, *, t0: float = 0.5) -> np.ndarray
+reverberation_index(t: NumericArrayLike, *, t0: float = 0.5) -> np.ndarray
 ```
 
 Reverberation index $k = 10 \log_{10}(T/T_0)$ (ISO 10052, Cl. 3.3).
@@ -156,18 +156,18 @@ Reverberation index $k = 10 \log_{10}(T/T_0)$ (ISO 10052, Cl. 3.3).
 
 ```python
 survey_airborne_insulation(
-    l1: ArrayLike,
-    l2: ArrayLike,
-    reverberation_index: ArrayLike,
+    l1: NumericArrayLike,
+    l2: NumericArrayLike,
+    reverberation_index: NumericArrayLike,
     *,
     volume: float,
     area: float,
 ) -> SurveyAirborneResult
 
 survey_airborne_insulation(
-    l1: ArrayLike,
-    l2: ArrayLike,
-    reverberation_index: ArrayLike,
+    l1: NumericArrayLike,
+    l2: NumericArrayLike,
+    reverberation_index: NumericArrayLike,
     *,
     volume: float = ...,
 ) -> SurveyAirborneResult
@@ -214,9 +214,9 @@ reverberation index `k` comes from [`reverberation_index`](/phonometry/reference
 
 ```python
 survey_facade_insulation(
-    l1_2m: ArrayLike,
-    l2: ArrayLike,
-    reverberation_index: ArrayLike,
+    l1_2m: NumericArrayLike,
+    l2: NumericArrayLike,
+    reverberation_index: NumericArrayLike,
     *,
     volume: float | None = None,
 ) -> SurveyFacadeResult
@@ -255,8 +255,8 @@ $D_{2\mathrm{m,n}} = D_{2\mathrm{m}} + k + 10 \log_{10}(A_0 T_0 / (0.16\,V))$
 
 ```python
 survey_impact_insulation(
-    li: ArrayLike,
-    reverberation_index: ArrayLike,
+    li: NumericArrayLike,
+    reverberation_index: NumericArrayLike,
     *,
     volume: float | None = None,
 ) -> SurveyImpactResult
@@ -295,8 +295,8 @@ positions, Clause 3.7).
 
 ```python
 survey_service_equipment_level(
-    measurements: ArrayLike,
-    reverberation_index: ArrayLike,
+    measurements: NumericArrayLike,
+    reverberation_index: NumericArrayLike,
     *,
     volume: float | None = None,
 ) -> SurveyServiceEquipmentResult

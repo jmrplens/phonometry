@@ -32,14 +32,14 @@ but how much output there is when there should be none.
 
 ```python
 dynamic_range(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
     full_scale: float = 1.0,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -83,7 +83,7 @@ known as the signal-to-noise ratio (6.4.1 note).
 
 ```python
 idle_channel_noise(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     bandwidth: float | None = 20000.0,

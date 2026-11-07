@@ -73,9 +73,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "AssumedProtectionResult",
@@ -244,7 +244,7 @@ def _alpha_for(performance: int | np.integer[Any]) -> float:
 
 
 def _subject_attenuations(
-    attenuation: ArrayLike,
+    attenuation: NumericArrayLike,
 ) -> np.ndarray:
     """The ``(subjects, bands)`` attenuation grid ISO 4869-1 produces.
 
@@ -327,10 +327,10 @@ class AssumedProtectionResult(OwnsArrays):
 
 
 def assumed_protection_value(
-    attenuation: ArrayLike,
+    attenuation: NumericArrayLike,
     *,
     performance: int | np.integer[Any] = 84,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> AssumedProtectionResult:
     r"""Assumed protection values of a hearing protector (Formula (1)).
 
@@ -384,7 +384,9 @@ def assumed_protection_value(
     )
 
 
-def _octave_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndarray:
+def _octave_axis(
+    frequencies: NumericArrayLike | None, count: int, owner: str
+) -> np.ndarray:
     """The band axis of a result, defaulted to Formula (2)'s eight bands.
 
     :param frequencies: The caller's frequencies, or ``None``.
@@ -469,11 +471,11 @@ class ProtectedLevelResult(OwnsArrays):
 
 
 def octave_band_protected_level(
-    noise_levels: ArrayLike,
-    apv: AssumedProtectionResult | ArrayLike,
+    noise_levels: NumericArrayLike,
+    apv: AssumedProtectionResult | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    a_weighting: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    a_weighting: NumericArrayLike | None = None,
 ) -> ProtectedLevelResult:
     r"""Effective A-weighted level by the octave-band method (Formula (2)).
 
@@ -548,7 +550,9 @@ def octave_band_protected_level(
     )
 
 
-def _a_weighting_axis(a_weighting: ArrayLike | None, freqs: np.ndarray) -> np.ndarray:
+def _a_weighting_axis(
+    a_weighting: NumericArrayLike | None, freqs: np.ndarray
+) -> np.ndarray:
     """Frequency weighting A over the bands in play, defaulted from the table.
 
     The default is keyed to the *frequencies* and not to how many there are: a
@@ -641,7 +645,7 @@ class HMLRatingResult(OwnsArrays):
 
 
 def hml_rating(
-    attenuation: ArrayLike, *, performance: int | np.integer[Any] = 84
+    attenuation: NumericArrayLike, *, performance: int | np.integer[Any] = 84
 ) -> HMLRatingResult:
     r"""The ``H``, ``M`` and ``L`` values of a protector (Formulas (3) to (15)).
 
@@ -841,7 +845,7 @@ class SNRRatingResult(OwnsArrays):
 
 
 def snr_rating(
-    attenuation: ArrayLike, *, performance: int | np.integer[Any] = 84
+    attenuation: NumericArrayLike, *, performance: int | np.integer[Any] = 84
 ) -> SNRRatingResult:
     r"""The single number rating of a protector (Formulas (19) to (22)).
 

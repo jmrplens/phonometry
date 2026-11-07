@@ -54,7 +54,7 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 atmospheric_absorption(
     distance: float,
     *,
-    frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
+    frequencies: NumericArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
     static_pressure_kpa: float = 101.325,
@@ -165,7 +165,7 @@ Whether double diffraction (Eq. (17)/(15)) applies (`e` given).
 barrier_attenuation(
     barrier: Barrier,
     distance: float,
-    frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
+    frequencies: NumericArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
 ) -> NDArray[np.float64]
 ```
 
@@ -309,7 +309,7 @@ ground_attenuation(
     source_height_m: float,
     receiver_height_m: float,
     *,
-    frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
+    frequencies: NumericArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
@@ -427,8 +427,8 @@ trees, farmland). The default is hard ground throughout.
 
 ```python
 mean_path_height(
-    profile_distances: ArrayLike,
-    profile_heights_m: ArrayLike,
+    profile_distances: NumericArrayLike,
+    profile_heights_m: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float | None = None,
@@ -525,7 +525,7 @@ outdoor_propagation_attenuation(
     source_height_m: float,
     receiver_height_m: float,
     *,
-    frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
+    frequencies: NumericArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
@@ -686,10 +686,10 @@ the total attenuation `A`.
 
 ```python
 predicted_receiver_level(
-    sound_power_level: ArrayLike,
+    sound_power_level: NumericArrayLike,
     geometry: PropagationGeometry,
     *,
-    frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
+    frequencies: NumericArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground: GroundFactors | None = None,
     barrier: Barrier | None = None,
     atmosphere: AtmosphericConditions | None = None,
@@ -765,8 +765,8 @@ meteorological correction of clause 8 are written in.
 
 ```python
 region_ground_factors(
-    segment_lengths: ArrayLike,
-    segment_ground_factors: ArrayLike,
+    segment_lengths: NumericArrayLike,
+    segment_ground_factors: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
 ) -> GroundFactors
@@ -818,7 +818,7 @@ middle-region term altogether.
 ```python
 SourceEmission(
     *,
-    sound_power_level: ArrayLike,
+    sound_power_level: NumericArrayLike,
     directivity_index: float = 0.0,
     d_omega: float = 0.0,
     cmet: float | None = None,

@@ -90,10 +90,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -487,8 +487,8 @@ def _warn_static_velocity_range(
 
 
 def static_airflow_resistance(
-    velocities: ArrayLike,
-    pressure_drops_pa: ArrayLike,
+    velocities: NumericArrayLike,
+    pressure_drops_pa: NumericArrayLike,
     area: float,
     *,
     thickness_m: float | None = None,

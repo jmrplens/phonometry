@@ -59,13 +59,13 @@ AIR1845_ATTENUATION_DB_PER_100M = {50.0: 0.033, 63.0: 0.033, 80.0: 0.033, 100.0:
 
 ```python
 npd_atmosphere_increment(
-    spectrum: SpectralClass | ArrayLike,
+    spectrum: SpectralClass | NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
     absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
-    distances_m: ArrayLike | None = None,
+    distances_m: NumericArrayLike | None = None,
 ) -> NPDAtmosphereIncrement
 ```
 
@@ -243,7 +243,7 @@ Plot the attenuation of both atmospheres against frequency at one distance.
 ```python
 revise_npd_curves(
     curves: ANPNPDCurves,
-    spectrum: SpectralClass | ArrayLike,
+    spectrum: SpectralClass | NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,

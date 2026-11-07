@@ -138,9 +138,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 #: The eighteen bands of EN 1793-3, 100 Hz to 5 kHz.
 _BANDS_HZ: tuple[float, ...] = _devices.TRAFFIC_NOISE_BANDS_HZ
@@ -725,7 +726,7 @@ def _require_fs(fs: float) -> float:
     return rate
 
 
-def _record(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _record(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A finite one-dimensional impulse response."""
     record = real_array(values, name)
     if record.ndim != 1 or record.size < _MINIMUM_SAMPLES:
@@ -919,7 +920,7 @@ def _windowed(
     return np.asarray(record[start:stop] * window, dtype=np.float64)
 
 
-def _per_microphone(value: float | ArrayLike, name: str) -> NDArray[np.float64]:
+def _per_microphone(value: float | NumericArrayLike, name: str) -> NDArray[np.float64]:
     """One window length for all nine microphones, or one per microphone."""
     lengths = np.atleast_1d(real_array(value, name))
     if lengths.size == 1:
@@ -932,7 +933,7 @@ def _per_microphone(value: float | ArrayLike, name: str) -> NDArray[np.float64]:
     return lengths
 
 
-def _directivity(values: ArrayLike | None) -> NDArray[np.float64]:
+def _directivity(values: NumericArrayLike | None) -> NDArray[np.float64]:
     """The (9, 18) directivity corrections, ones when there are none."""
     bands = len(_BANDS_HZ)
     if values is None:
@@ -956,8 +957,8 @@ def source_directivity_corrections(
     specular_irs: SignalInput,
     fs: float | None = None,
     *,
-    window_length_s: float | ArrayLike = ADRIENNE_SHORT_LENGTH_S,
-    low_band_window_length_s: float | ArrayLike = ADRIENNE_STANDARD_LENGTH_S,
+    window_length_s: float | NumericArrayLike = ADRIENNE_SHORT_LENGTH_S,
+    low_band_window_length_s: float | NumericArrayLike = ADRIENNE_STANDARD_LENGTH_S,
 ) -> NDArray[np.float64]:
     r""":math:`C_{\mathrm{dir},k}(\Delta f_j)`, Formula (3).
 
@@ -1075,7 +1076,7 @@ def _grid_positions(
                 raise TypeError(msg)
             entries.append(entry)
         return entries
-    records = real_array(cast("ArrayLike", values), name)
+    records = real_array(cast("NumericArrayLike", values), name)
     if records.ndim == _GRIDS_RANK:
         if records.shape[1] != _MICROPHONES:
             msg = (
@@ -1454,7 +1455,7 @@ def _result(
 
 
 def reflection_index_from_positions(
-    position_values: ArrayLike, *, lowest_band_hz: float = 200.0
+    position_values: NumericArrayLike, *, lowest_band_hz: float = 200.0
 ) -> ReflectionIndexResult:
     r"""Combine the index of several grid positions into the declared one.
 
@@ -1490,11 +1491,11 @@ def reflection_index(
     fs: float | None = None,
     *,
     speed_of_sound: float,
-    window_length_s: float | ArrayLike = ADRIENNE_SHORT_LENGTH_S,
-    low_band_window_length_s: float | ArrayLike = ADRIENNE_STANDARD_LENGTH_S,
+    window_length_s: float | NumericArrayLike = ADRIENNE_SHORT_LENGTH_S,
+    low_band_window_length_s: float | NumericArrayLike = ADRIENNE_STANDARD_LENGTH_S,
     low_band_microphones: Sequence[int | np.integer[Any]]
     | NDArray[np.integer[Any]] = REFLECTION_LOW_BAND_MICROPHONES,
-    directivity_corrections: ArrayLike | None = None,
+    directivity_corrections: NumericArrayLike | None = None,
     lowest_band_hz: float = 200.0,
 ) -> ReflectionIndexResult:
     r"""The sound reflection index :math:`RI_j`, Formula (1).
@@ -1992,7 +1993,7 @@ class ReflectionGridCheck(OwnsArrays):
 
 
 def check_reflection_grid_position(
-    time_delays_s: ArrayLike,
+    time_delays_s: NumericArrayLike,
     *,
     speed_of_sound: float,
     check: Literal["relative", "grid"] = "grid",

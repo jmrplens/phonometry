@@ -138,7 +138,7 @@ Plate a x b inside its baffle frame, boundary condition in the title.
 
 ```python
 radiation_efficiency(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     length_x: float,
     length_y: float,
     critical_frequency: float,

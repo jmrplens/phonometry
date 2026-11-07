@@ -34,11 +34,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
-    from ..._internal.types import ReportEngine, TwoPanels
+    from ..._internal.types import NumericArrayLike, ReportEngine, TwoPanels
     from ..._report.metadata import ReportMetadata
 from scipy import signal
 
@@ -821,7 +820,7 @@ def _core_loudness_from_levels(levels: np.ndarray, *, diffuse: bool) -> np.ndarr
 
 
 def loudness_zwicker_from_spectrum(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     field: Literal["free", "diffuse"] = "free",
 ) -> ZwickerLoudness:
     """Stationary Zwicker loudness from one-third-octave band levels.
@@ -864,7 +863,7 @@ def loudness_zwicker_from_spectrum(
 
 
 def loudness_zwicker(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: int | np.integer[Any] | None = None,
     field: Literal["free", "diffuse"] = "free",
     *,

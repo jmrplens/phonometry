@@ -76,9 +76,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...signals.spectra import SpectralDensityResult
 
 __all__ = [
@@ -191,7 +192,7 @@ _UPPER_BAND_RANGE_HZ: tuple[float, float] = (80.0, 315.0)
 
 
 def running_velocity_rms(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
@@ -225,7 +226,7 @@ def _level(values: NDArray[np.float64], reference: float) -> NDArray[np.float64]
 
 
 def running_velocity_level(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
@@ -246,7 +247,7 @@ def running_velocity_level(
 
 
 def running_acceleration_level(
-    acceleration_m_s2: ArrayLike,
+    acceleration_m_s2: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
@@ -296,7 +297,7 @@ def _slice(size: int, fs: float, interval_s: tuple[float, float]) -> slice:
 
 
 def interval_rms(
-    values: ArrayLike, fs: float, *, interval_s: tuple[float, float]
+    values: NumericArrayLike, fs: float, *, interval_s: tuple[float, float]
 ) -> float:
     r"""The interval r.m.s. of Formula (4), or of Formula (5).
 
@@ -367,7 +368,7 @@ def event_velocity_level(interval_rms_mm_s: float, duration_s: float) -> float:
     )
 
 
-def _non_negative(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _non_negative(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A finite, non-empty array with no negative entry."""
     x = require_finite_array(values, name)
     if x.size == 0 or np.any(x < 0.0):
@@ -376,7 +377,7 @@ def _non_negative(values: ArrayLike, name: str) -> NDArray[np.float64]:
     return x
 
 
-def combined_event_velocity(event_velocities_mm_s: ArrayLike) -> float:
+def combined_event_velocity(event_velocities_mm_s: NumericArrayLike) -> float:
     r"""The event value of every passage in one hour, Formula (10), in mm/s.
 
     Event values add in square, because each is already the energy of its
@@ -394,7 +395,7 @@ def combined_event_velocity(event_velocities_mm_s: ArrayLike) -> float:
     return float(np.sqrt(np.sum(values**2)))
 
 
-def passage_average_velocity(interval_rms_mm_s: ArrayLike) -> float:
+def passage_average_velocity(interval_rms_mm_s: NumericArrayLike) -> float:
     r"""The energy average of r.m.s. values over repeated passages (Clause 9).
 
     Clause 9 averages the results of a class of trains energetically, which
@@ -414,17 +415,17 @@ def passage_average_velocity(interval_rms_mm_s: ArrayLike) -> float:
 
 
 @overload
-def passage_average_level(levels: ArrayLike, *, axis: None = None) -> float: ...
+def passage_average_level(levels: NumericArrayLike, *, axis: None = None) -> float: ...
 
 
 @overload
 def passage_average_level(
-    levels: ArrayLike, *, axis: int | np.integer[Any]
+    levels: NumericArrayLike, *, axis: int | np.integer[Any]
 ) -> NDArray[np.float64]: ...
 
 
 def passage_average_level(
-    levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
+    levels: NumericArrayLike, *, axis: int | np.integer[Any] | None = None
 ) -> float | NDArray[np.float64]:
     r"""The energy average of levels over repeated passages (Clause 9), in dB.
 
@@ -470,7 +471,7 @@ class AmplitudeDistribution(OwnsArrays):
 
 
 def amplitude_distribution(
-    velocity_mm_s: ArrayLike, *, n_bins: int | np.integer[Any] = 101
+    velocity_mm_s: NumericArrayLike, *, n_bins: int | np.integer[Any] = 101
 ) -> AmplitudeDistribution:
     """The amplitude distribution of a stretch of velocity (Clause 6.3).
 
@@ -505,7 +506,7 @@ def amplitude_distribution(
 
 
 def narrowband_psd(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     resolution_hz: float = NARROWBAND_RESOLUTION_HZ,
@@ -553,7 +554,7 @@ def narrowband_psd(
 
 
 def passage_energy_spectral_density(
-    psd: ArrayLike, duration_s: float
+    psd: NumericArrayLike, duration_s: float
 ) -> NDArray[np.float64]:
     r"""The energy spectral density of :math:`T_2`, Formula (13), in (mm/s)²/Hz².
 
@@ -578,7 +579,7 @@ def passage_energy_spectral_density(
     return np.asarray(0.5 * g * duration, dtype=np.float64)
 
 
-def spectral_density_level(psd: ArrayLike) -> NDArray[np.float64]:
+def spectral_density_level(psd: NumericArrayLike) -> NDArray[np.float64]:
     r"""The level of a power spectral density, as Figure 7 draws it, in dB.
 
     :math:`10 \lg(G / G_0)` with :math:`G_0 = (5 \cdot 10^{-8}\,\mathrm{m/s})^2
@@ -599,7 +600,7 @@ def spectral_density_level(psd: ArrayLike) -> NDArray[np.float64]:
 
 
 def velocity_psd_from_voltage(
-    psd_v2_per_hz: ArrayLike, *, sensitivity_v_per_mm_s: float, gain: float
+    psd_v2_per_hz: NumericArrayLike, *, sensitivity_v_per_mm_s: float, gain: float
 ) -> NDArray[np.float64]:
     r"""A density measured in volts, in the unit of the velocity (Annex A).
 
@@ -659,7 +660,7 @@ class ThirdOctaveVelocities(OwnsArrays):
 
 
 def third_octaves_from_narrowband(
-    psd: ArrayLike, *, frequencies: ArrayLike
+    psd: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> ThirdOctaveVelocities:
     r"""Add a narrow-band spectrum back into third octaves, Formula (23).
 
@@ -730,7 +731,7 @@ def third_octaves_from_narrowband(
 
 
 def elastic_insertion_loss(
-    levels_before: ArrayLike, levels_after: ArrayLike
+    levels_before: NumericArrayLike, levels_after: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The insertion loss :math:`D_\mathrm{e}(f_{\mathrm{T}n})` of Annex B, Formula (B.1), in dB.
 
@@ -756,7 +757,7 @@ def elastic_insertion_loss(
     return np.asarray(before - after, dtype=np.float64)
 
 
-def band_sum_level(levels: ArrayLike) -> float:
+def band_sum_level(levels: NumericArrayLike) -> float:
     r"""The sum level :math:`\Sigma L` of a spectrum, Annex B, Formula (B.3).
 
     :math:`10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}`, the energy sum of the bands.
@@ -774,7 +775,7 @@ def band_sum_level(levels: ArrayLike) -> float:
 
 
 def centered_interval(
-    velocity_mm_s: ArrayLike, fs: float, *, duration_s: float = T1_DURATION_S
+    velocity_mm_s: NumericArrayLike, fs: float, *, duration_s: float = T1_DURATION_S
 ) -> tuple[float, float]:
     """The stretch :math:`T_1` of Clause 5 a), centred on the largest amplitude.
 
@@ -926,7 +927,7 @@ def _stretch_bounds(
 
 
 def evaluate_train_passage(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     t2_s: tuple[float, float],

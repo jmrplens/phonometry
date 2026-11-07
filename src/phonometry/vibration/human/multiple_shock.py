@@ -90,10 +90,10 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -173,7 +173,7 @@ def _mz_for_sex(sex: str) -> float:
 # ---------------------------------------------------------------------------
 
 
-def seat_to_spine_transfer(frequencies: ArrayLike) -> np.ndarray:
+def seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray:
     r"""Seat-to-spine transfer function :math:`H(\omega)` (clause 5.2,
     Formula 1).
 
@@ -246,7 +246,7 @@ def spinal_response(
     return np.asarray(response, dtype=np.float64)
 
 
-def response_peaks(response: ArrayLike) -> np.ndarray:
+def response_peaks(response: NumericArrayLike) -> np.ndarray:
     r"""Positive response peaks :math:`A_{\mathrm{z},i}` (clause 5.3).
 
     A peak is the maximum value of the response between two consecutive zero
@@ -271,7 +271,7 @@ def response_peaks(response: ArrayLike) -> np.ndarray:
     return np.maximum.reduceat(sig, starts)
 
 
-def dose_from_peaks(peaks: ArrayLike) -> float:
+def dose_from_peaks(peaks: NumericArrayLike) -> float:
     r"""Acceleration dose :math:`D_\mathrm{z}` from response peaks (clause 5.3,
     Formula 3).
 
@@ -328,7 +328,9 @@ def daily_dose(dose: float, exposure_time: float, measurement_time: float) -> fl
 
 
 def daily_dose_multi(
-    doses: ArrayLike, exposure_times: ArrayLike, measurement_times: ArrayLike
+    doses: NumericArrayLike,
+    exposure_times: NumericArrayLike,
+    measurement_times: NumericArrayLike,
 ) -> float:
     r"""Daily dose from several exposure conditions (clause 5.3, Formula 5).
 
@@ -397,7 +399,7 @@ def static_stress(mz: float = _MZ_MALE) -> float:
     return mz * _GRAVITY
 
 
-def ultimate_strength(age: ArrayLike, *, sex: Sex = "male") -> np.ndarray:
+def ultimate_strength(age: NumericArrayLike, *, sex: Sex = "male") -> np.ndarray:
     r"""Ultimate lumbar strength :math:`S_\mathrm{u}` at an age (Annex C,
     Formula C.4).
 
@@ -482,13 +484,13 @@ def injury_probability[V: RealValues](
 
 
 @overload
-def injury_probability[A: ArrayLike](
+def injury_probability[A: NumericArrayLike](
     risk: A, *, sex: Sex = "male"
 ) -> float | NDArray[np.float64]: ...
 
 
 def injury_probability(
-    risk: ArrayLike, *, sex: Sex = "male"
+    risk: NumericArrayLike, *, sex: Sex = "male"
 ) -> float | NDArray[np.float64]:
     r"""Probability of lumbar injury :math:`P(R)` (Annex C, Formula C.5).
 
@@ -558,7 +560,7 @@ class MultipleShockResult(OwnsArrays):
             start_age: float,
             exposure_duration_years: int,
             days_per_year: float,
-            peaks: ArrayLike,
+            peaks: NumericArrayLike,
             risk_thresholds: RealValues,
         ) -> None: ...
 

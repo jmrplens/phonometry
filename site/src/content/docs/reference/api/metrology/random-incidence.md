@@ -177,7 +177,7 @@ the two planes of Annex A), so the pole readings enter every plane's sum
 
 ```python
 axisymmetric_directivity_factor(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     reference_level: float | None = None,
 ) -> DirectivityFactor
@@ -222,15 +222,15 @@ one plane.
 
 ```python
 diffuse_field_sensitivity(
-    indicated_level: ArrayLike,
-    reference_indicated_level: ArrayLike,
+    indicated_level: NumericArrayLike,
+    reference_indicated_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_random_incidence_level: ArrayLike | None = None,
-    reference_free_field_level: ArrayLike | None = None,
-    reference_directivity_index: ArrayLike | None = None,
-    reference_pressure_level: ArrayLike | None = None,
-    reference_diffuse_pressure_difference_db: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    reference_random_incidence_level: NumericArrayLike | None = None,
+    reference_free_field_level: NumericArrayLike | None = None,
+    reference_directivity_index: NumericArrayLike | None = None,
+    reference_pressure_level: NumericArrayLike | None = None,
+    reference_diffuse_pressure_difference_db: NumericArrayLike | None = None,
 ) -> DiffuseFieldSensitivity
 ```
 
@@ -372,7 +372,7 @@ reference instrument, in dB.
 
 ```python
 directivity_factor(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     reference_level: float | None = None,
 ) -> DirectivityFactor
@@ -517,8 +517,8 @@ $L(\phi) - L_\mathrm{rd}$ of each reading, in dB.
 
 ```python
 equal_area_directivity_factor(
-    horizontal_levels: ArrayLike,
-    vertical_levels: ArrayLike,
+    horizontal_levels: NumericArrayLike,
+    vertical_levels: NumericArrayLike,
     *,
     reference_level: float | None = None,
 ) -> DirectivityFactor
@@ -643,10 +643,10 @@ symmetry stands for the same two planes and is judged on their division.
 
 ```python
 random_incidence_sensitivity(
-    free_field_level: ArrayLike,
-    directivity_index: ArrayLike,
+    free_field_level: NumericArrayLike,
+    directivity_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> RandomIncidenceSensitivity
 ```
 

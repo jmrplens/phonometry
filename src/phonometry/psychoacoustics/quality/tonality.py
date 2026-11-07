@@ -30,10 +30,10 @@ from ..._internal.welch import _welch_autospectrum
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "TonalityWarning",
@@ -351,7 +351,7 @@ def _pr_criterion(ft: float) -> float:
 
 
 def tone_to_noise_ratio(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     tone_frequency: float | None = None,
@@ -487,7 +487,7 @@ def _fitted_edge(
 
 
 def prominence_ratio(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     tone_frequency: float | None = None,

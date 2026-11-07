@@ -68,10 +68,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "DAMPING_RATIO_RANGE",
@@ -282,12 +282,14 @@ def height_fundamental_frequency[V: RealValues](height_m: V) -> NDArray[np.float
 
 
 @overload
-def height_fundamental_frequency[A: ArrayLike](
+def height_fundamental_frequency[A: NumericArrayLike](
     height_m: A,
 ) -> float | NDArray[np.float64]: ...
 
 
-def height_fundamental_frequency(height_m: ArrayLike) -> float | NDArray[np.float64]:
+def height_fundamental_frequency(
+    height_m: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     """The ``f = 46/h`` fit D.2 closes with, in hertz.
 
     Fitted to 163 rectangular-plan buildings rather than taken from a code,

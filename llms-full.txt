@@ -76732,6 +76732,27 @@ fraction or a bool it used to take is refused, as in the rows above. A result
 record that validates a count or a band fraction holds the `int` it reads,
 where it kept a NumPy integer as it was given.
 
+## A parameter that takes numbers refuses a text before the call runs
+
+A parameter that takes numbers was annotated with NumPy's `ArrayLike`, which
+admits any `str` and any `bytes`, so `signals.leq("not a signal")` type
+checked in mypy and pyright and only the call refused it. Every such
+parameter, field and declared constructor now takes `NumericArrayLike`, a
+number, a sequence of numbers nested to any depth, or a NumPy array, or
+anything with an `__array__`, of a numeric or boolean dtype, and no text. A
+list, a tuple, a nested list, an array of any numeric dtype and a Signal
+type check as before, and the calls run as they ran.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `signals.leq("not a signal")` type checked, and the call raised `TypeError` | a type checker refuses it, and the call raises the same `TypeError` |
+| `levels: ArrayLike = load(); signals.leq(levels)` type checked | a type checker refuses it, since `ArrayLike` says a text may be there; annotate `levels` with what it holds, `NDArray[np.float64]`, `Sequence[float]` or `float` |
+| `view = memoryview(samples); signals.leq(view)` type checked | a type checker refuses it, as it refuses a `ctypes` array or another object that offers its numbers only through the buffer protocol, while the call runs as it ran; pass `np.asarray(view)` |
+
+The labels of `environment.statistical_pass_by` (`vehicle_categories`) and
+the `sites` of the soundscape summaries of `environment` keep `ArrayLike`:
+they take texts.
+
 ## Verdicts are result objects, not dictionaries
 
 The three `verify_*` functions of 3.3.0 returned `dict[str, Any]` and now

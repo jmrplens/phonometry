@@ -237,11 +237,11 @@ ASSESSMENT_TAKT_COUNT = {'day': 1920, 'night': 960}
 
 ```python
 assessment_vibration_severity(
-    kb_ftm: ArrayLike,
-    exposure_s: ArrayLike,
+    kb_ftm: NumericArrayLike,
+    exposure_s: NumericArrayLike,
     *,
     time_of_day: Literal['day', 'night'] = 'day',
-    in_rest_time: ArrayLike | None = None,
+    in_rest_time: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -637,11 +637,11 @@ treats such a verdict as open.
 
 ```python
 railway_assessment_severity(
-    kb_ftm: ArrayLike,
-    occupied_takte: ArrayLike,
+    kb_ftm: NumericArrayLike,
+    occupied_takte: NumericArrayLike,
     *,
     time_of_day: Literal['day', 'night'] = 'day',
-    spread: ArrayLike | None = None,
+    spread: NumericArrayLike | None = None,
 ) -> RailwayAssessment
 ```
 
@@ -683,7 +683,7 @@ RAILWAY_NIGHT_INVESTIGATION_KB = {'surface': 0.6, 'underground': 0.3}
 ## railway_takt_max_rms
 
 ```python
-railway_takt_max_rms(kb_fti: ArrayLike) -> float
+railway_takt_max_rms(kb_fti: NumericArrayLike) -> float
 ```
 
 The clock maximum r.m.s. of one class of train, Formula (A.1).
@@ -712,7 +712,7 @@ worked Example 8 carry and the print of (A.1b) lost. The rule of Formula
 ## railway_takt_spread
 
 ```python
-railway_takt_spread(kb_fti: ArrayLike) -> float
+railway_takt_spread(kb_fti: NumericArrayLike) -> float
 ```
 
 The standard deviation of the square of the clock maxima, Formula (A.2).

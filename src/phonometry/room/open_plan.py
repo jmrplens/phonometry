@@ -52,10 +52,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -267,9 +266,9 @@ def _sti_crossing(slope: float, intercept: float, threshold: float) -> float:
 
 
 def open_plan_metrics(
-    positions_m: ArrayLike,
-    spl_a_speech: ArrayLike,
-    sti_values: ArrayLike,
+    positions_m: NumericArrayLike,
+    spl_a_speech: NumericArrayLike,
+    sti_values: NumericArrayLike,
 ) -> OpenPlanResult:
     r"""Open-plan-office single-number quantities per ISO 3382-3:2012.
 

@@ -38,7 +38,9 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 ## absorption_from_reflection
 
 ```python
-absorption_from_reflection(reflection: ArrayLike) -> NDArray[np.float64]
+absorption_from_reflection(
+    reflection: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Normal-incidence absorption coefficient (ISO 10534-2, Eq. (18)).
@@ -65,8 +67,8 @@ ASTM E2611-19 Eq. (28).
 ```python
 air_density_iso10534(
     *,
-    temperature_c: ArrayLike,
-    static_pressure_kpa: ArrayLike = 101.325,
+    temperature_c: NumericArrayLike,
+    static_pressure_kpa: NumericArrayLike = 101.325,
 ) -> NDArray[np.float64]
 ```
 
@@ -96,8 +98,8 @@ kelvin.
 
 ```python
 apply_microphone_calibration(
-    h12_uncorrected: ArrayLike,
-    calibration_factor: ArrayLike,
+    h12_uncorrected: NumericArrayLike,
+    calibration_factor: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -289,8 +291,8 @@ Advisory for out-of-plane-wave-range impedance-tube frequencies.
 
 ```python
 microphone_calibration_factor(
-    h12_config1: ArrayLike,
-    h12_config2: ArrayLike,
+    h12_config1: NumericArrayLike,
+    h12_config2: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -320,7 +322,7 @@ microphones physically interchanged (II); the cabling to the analyser is
 
 ```python
 normalized_surface_admittance(
-    reflection: ArrayLike,
+    reflection: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -346,7 +348,7 @@ $G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)$.
 
 ```python
 normalized_surface_impedance(
-    reflection: ArrayLike,
+    reflection: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -512,11 +514,11 @@ range of
 
 ```python
 reflection_factor(
-    h12: ArrayLike,
+    h12: NumericArrayLike,
     *,
     spacing_m: float,
     x1: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -551,7 +553,10 @@ the sample to the **farther** microphone (Clause 7.7).
 ## speed_of_sound_iso10534
 
 ```python
-speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> NDArray[np.float64]
+speed_of_sound_iso10534(
+    *,
+    temperature_c: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Speed of sound in air (ISO 10534-2:2001, Eq. (5)).
@@ -577,7 +582,7 @@ $c_0 = 343.2 \sqrt{T / 293}$, with $T$ in kelvin.
 
 ```python
 surface_impedance(
-    reflection: ArrayLike,
+    reflection: NumericArrayLike,
     characteristic_impedance: float,
 ) -> NDArray[np.complex128]
 ```
@@ -605,7 +610,7 @@ $Z = \rho c_0 (1 + r) / (1 - r)$.
 
 ```python
 tube_attenuation_constant(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float,
     diameter_m: float,
 ) -> NDArray[np.float64]
@@ -637,10 +642,10 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 
 ```python
 tube_wavenumber(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float,
     *,
-    attenuation_np_per_m: ArrayLike | None = None,
+    attenuation_np_per_m: NumericArrayLike | None = None,
 ) -> NDArray[np.complex128]
 ```
 
@@ -670,14 +675,14 @@ constant `k0''` enters with a **minus** sign on the imaginary part
 
 ```python
 two_microphone_impedance(
-    h12: ArrayLike,
+    h12: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     spacing_m: float,
     x1: float,
     speed_of_sound: float,
     characteristic_impedance: float,
-    attenuation_np_per_m: ArrayLike | None = None,
+    attenuation_np_per_m: NumericArrayLike | None = None,
     diameter_m: float | None = None,
     shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> ImpedanceTubeResult

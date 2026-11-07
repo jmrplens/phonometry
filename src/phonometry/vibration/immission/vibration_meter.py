@@ -95,9 +95,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "ASSESSMENT_GUIDE_VALUES_MM_S",
@@ -310,13 +311,13 @@ def _range_limits(working_range: WorkingRange) -> tuple[float, float]:
     return WORKING_RANGES_HZ[name]
 
 
-def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
+def _frequencies(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """Positive, finite frequencies as a float array."""
     return require_positive_array(frequencies, "frequencies")
 
 
 def _record(
-    velocity_mm_s: ArrayLike, name: str = "velocity_mm_s"
+    velocity_mm_s: NumericArrayLike, name: str = "velocity_mm_s"
 ) -> NDArray[np.float64]:
     """A finite one-dimensional record as a float array, reported as *name*."""
     x = require_finite_array(velocity_mm_s, name)
@@ -393,7 +394,7 @@ def _sample_rate(fs: float, working_range: WorkingRange) -> float:
 
 
 def band_limitation_response(
-    frequencies: ArrayLike, *, working_range: WorkingRange = "building"
+    frequencies: NumericArrayLike, *, working_range: WorkingRange = "building"
 ) -> NDArray[np.complex128]:
     r"""The band limitation of the unweighted signal, Formula (3).
 
@@ -416,7 +417,7 @@ def band_limitation_response(
 
 
 def kb_weighting_response(
-    frequencies: ArrayLike, *, working_range: WorkingRange = "building"
+    frequencies: NumericArrayLike, *, working_range: WorkingRange = "building"
 ) -> NDArray[np.complex128]:
     r"""The KB frequency weighting, Formula (4).
 
@@ -435,7 +436,7 @@ def kb_weighting_response(
 
 
 def response_tolerance_percent(
-    frequencies: ArrayLike, *, working_range: WorkingRange = "building"
+    frequencies: NumericArrayLike, *, working_range: WorkingRange = "building"
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""The limits of Tables 2 and 3 at each frequency, in per cent.
 
@@ -602,9 +603,9 @@ class VibrationMeterVerification(OwnsArrays):
 
 
 def verify_vibration_meter(
-    measured_response: ArrayLike,
+    measured_response: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     weighting: MeterWeighting = "kb",
     working_range: WorkingRange = "building",
     reference_frequency_hz: float = KB_REFERENCE_FREQUENCY_HZ,
@@ -672,7 +673,10 @@ def verify_vibration_meter(
 
 
 def kb_signal(
-    velocity_mm_s: ArrayLike, fs: float, *, working_range: WorkingRange = "building"
+    velocity_mm_s: NumericArrayLike,
+    fs: float,
+    *,
+    working_range: WorkingRange = "building",
 ) -> NDArray[np.float64]:
     """The KB signal :math:`KB(t)` of 3.10.1.1, which is dimensionless.
 
@@ -699,7 +703,7 @@ def kb_signal(
 
 
 def kbf_signal(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     working_range: WorkingRange = "building",
@@ -734,7 +738,7 @@ def kbf_signal(
 
 
 def _exponential_running_rms(
-    values: ArrayLike,
+    values: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = KB_TIME_CONSTANT_S,
@@ -772,7 +776,7 @@ def _exponential_running_rms(
 
 
 def takt_maxima(
-    kbf: ArrayLike, fs: float, *, takt_duration_s: float = TAKT_DURATION_S
+    kbf: NumericArrayLike, fs: float, *, takt_duration_s: float = TAKT_DURATION_S
 ) -> NDArray[np.float64]:
     r"""The clock maxima :math:`KB_{\mathrm{FT}i}` of 3.10.1.4, one per whole clock interval.
 
@@ -803,7 +807,7 @@ def takt_maxima(
     return np.asarray(blocks.max(axis=1), dtype=np.float64)
 
 
-def takt_max_rms(maxima: ArrayLike) -> float:
+def takt_max_rms(maxima: NumericArrayLike) -> float:
     r"""The clock maximum r.m.s. :math:`KB_\mathrm{FTm}`, Formula (2).
 
     Both rules of the formula are here: a clock maximum at or below
@@ -892,7 +896,7 @@ class VibrationMeterReading(OwnsArrays):
 
 
 def measure_vibration_immission(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     working_range: WorkingRange = "building",
@@ -941,7 +945,7 @@ def measure_vibration_immission(
 
 
 def assessment_weighting_response(
-    frequencies: ArrayLike, *, building_class: BuildingClass
+    frequencies: NumericArrayLike, *, building_class: BuildingClass
 ) -> NDArray[np.float64]:
     """The target magnitude of an Annex E weighting filter, Table E.1.
 
@@ -1035,7 +1039,7 @@ def assessment_weighting_taps(
 
 
 def assessment_velocity(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     building_class: BuildingClass,
@@ -1144,7 +1148,7 @@ class AssessmentVelocity(OwnsArrays):
 
 
 def assess_short_term_vibration(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     building_class: BuildingClass,
@@ -1193,7 +1197,7 @@ class DominantFrequency(RichDisplay):
 
 
 def dominant_frequency(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     method: DominantFrequencyMethod = "zero_crossing",

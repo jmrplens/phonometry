@@ -104,10 +104,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
+    from .._internal.types import NumericArrayLike
 
 Statistic = Literal["mean_square", "rms", "mean", "variance"]
 Method = Literal["reverse_arrangements", "runs"]
@@ -657,7 +658,7 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
 
 
 def _validate_trend_inputs(
-    values: ArrayLike, method: object, alpha: float
+    values: NumericArrayLike, method: object, alpha: float
 ) -> NDArray[np.float64]:
     require_scalar(alpha, "alpha")
     seq = real_array(values, "values")
@@ -681,7 +682,7 @@ def _validate_trend_inputs(
 
 
 def trend_test(
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
     method: Method = "reverse_arrangements",
     alpha: float = 0.05,
@@ -866,7 +867,7 @@ def _segment_statistic(
 
 
 def stationarity_test(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     n_segments: int | np.integer[Any] = 20,
@@ -1064,10 +1065,10 @@ class LevelCrossingResult(OwnsArrays):
 
 
 def level_crossing_rate(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    levels: ArrayLike | None = None,
+    levels: NumericArrayLike | None = None,
     nperseg: int | np.integer[Any] | None = None,
 ) -> LevelCrossingResult:
     r"""Level-crossing rates of a record and their Rice expectations.
@@ -1387,7 +1388,7 @@ class PeakStatisticsResult(OwnsArrays):
             owner,
         )
 
-    def peak_exceedance(self, z: ArrayLike) -> NDArray[np.float64]:
+    def peak_exceedance(self, z: NumericArrayLike) -> NDArray[np.float64]:
         r""":math:`P[\text{peak} > z]` at the record's irregularity
         factor.
 
@@ -1404,7 +1405,7 @@ class PeakStatisticsResult(OwnsArrays):
         za = np.atleast_1d(real_array(z, "z"))
         return _rice_peak_exceedance(za, self.irregularity_factor)
 
-    def peak_density(self, z: ArrayLike) -> NDArray[np.float64]:
+    def peak_density(self, z: NumericArrayLike) -> NDArray[np.float64]:
         """Peak probability density ``w(z)`` (B&P Eq. (5.217)).
 
         :param z: Standardized peak heights (units of the record RMS).
@@ -1429,7 +1430,7 @@ class PeakStatisticsResult(OwnsArrays):
 
 
 def peak_statistics(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | np.integer[Any] | None = None,

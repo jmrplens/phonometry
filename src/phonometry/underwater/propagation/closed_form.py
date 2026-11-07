@@ -50,9 +50,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "PropagationLossResult",
@@ -91,7 +92,7 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _positive_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _positive_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     arr = np.atleast_1d(real_array(values, name))
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be finite and non-empty."
@@ -103,7 +104,7 @@ def _positive_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
 
 
 def spreading_loss(
-    range_m: ArrayLike,
+    range_m: NumericArrayLike,
     *,
     law: SpreadingLaw = "spherical",
     transition_range: float | None = None,
@@ -204,7 +205,7 @@ def _ainslie_mccolm(
 
 
 def seawater_absorption(
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
     *,
     temperature_c: float = 10.0,
     salinity: float = 35.0,
@@ -348,7 +349,7 @@ class PropagationLossResult(OwnsArrays):
 
 
 def propagation_loss(
-    range_m: ArrayLike,
+    range_m: NumericArrayLike,
     frequency_hz: float,
     *,
     law: SpreadingLaw = "spherical",

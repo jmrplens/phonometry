@@ -81,7 +81,9 @@ from .._internal.validation import (
 from ..fluids import Fluid
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "SIMULATION_AIR",
@@ -123,10 +125,10 @@ class ContourPhasors(OwnsArrays):
             self,
             *,
             frequency: float,
-            positions: ArrayLike,
-            normals: ArrayLike,
-            pressure: ArrayLike,
-            normal_velocity: ArrayLike,
+            positions: NumericArrayLike,
+            normals: NumericArrayLike,
+            pressure: NumericArrayLike,
+            normal_velocity: NumericArrayLike,
             segment: float,
         ) -> None: ...
 
@@ -278,7 +280,7 @@ SIMULATION_AIR = Fluid(
 
 def far_field_from_contour(
     contour: ContourPhasors,
-    angles_deg: ArrayLike,
+    angles_deg: NumericArrayLike,
     *,
     distance: float | None = None,
     origin: tuple[float, float] = (0.0, 0.0),

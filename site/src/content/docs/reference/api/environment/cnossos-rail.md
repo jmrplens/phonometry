@@ -256,7 +256,7 @@ Which text of the vertical directivity (2.3.16) to evaluate.
 horizontal_directivity(
     phi: float,
     *,
-    frequencies: ArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
+    frequencies: NumericArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
 ) -> NDArray[np.float64]
 ```
 
@@ -291,7 +291,7 @@ here to every source, as the Commission's reference module does.
 
 ```python
 impact_roughness(
-    single: ArrayLike,
+    single: NumericArrayLike,
     joint_density: float,
 ) -> NDArray[np.float64]
 ```
@@ -334,7 +334,9 @@ Directive prescribes for jointed track.
 ## octave_bands_from_third_octaves
 
 ```python
-octave_bands_from_third_octaves(levels: ArrayLike) -> NDArray[np.float64]
+octave_bands_from_third_octaves(
+    levels: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Energy-sum a 24-band 1/3-octave spectrum into the eight octave bands.
@@ -419,7 +421,7 @@ Digit 2 of the track descriptor, Table [2.3.b].
 ## RailSourceSpectra
 
 ```python
-RailSourceSpectra(*, source_a: ArrayLike, source_b: ArrayLike)
+RailSourceSpectra(*, source_a: NumericArrayLike, source_b: NumericArrayLike)
 ```
 
 The sound power spectra of the two source heights of a railway source.
@@ -573,10 +575,10 @@ Plot the per-metre line power of the two equivalent source heights.
 RailwayTrack(
     *,
     rail_roughness: WavelengthSpectrum,
-    track_transfer: ArrayLike,
+    track_transfer: NumericArrayLike,
     impact_roughness: WavelengthSpectrum | None = None,
     joint_density: float = 0.01,
-    bridge_transfer: ArrayLike | None = None,
+    bridge_transfer: NumericArrayLike | None = None,
     squeal_excess: float = 0.0,
     length: float = 100.0,
 )
@@ -633,8 +635,8 @@ REFERENCE_JOINT_DENSITY_PER_M = 0.01
 
 ```python
 rolling_sound_power(
-    roughness: ArrayLike,
-    transfer: ArrayLike,
+    roughness: NumericArrayLike,
+    transfer: NumericArrayLike,
     n_axles: float,
 ) -> NDArray[np.float64]
 ```
@@ -671,8 +673,8 @@ RollingStock(
     n_axles: int,
     wheel_roughness: WavelengthSpectrum,
     contact_filter: WavelengthSpectrum,
-    wheel_transfer: ArrayLike,
-    superstructure_transfer: ArrayLike | None = None,
+    wheel_transfer: NumericArrayLike,
+    superstructure_transfer: NumericArrayLike | None = None,
     traction: RailSourceSpectra | None = None,
     aerodynamic: RailSourceSpectra | None = None,
     aerodynamic_alpha: float = 50.0,
@@ -704,11 +706,11 @@ than from the [`cnossos_rail`](/phonometry/reference/api/environment/cnossos-rai
 
 ```python
 roughness_to_frequency(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    wavelengths_mm: ArrayLike,
+    wavelengths_mm: NumericArrayLike,
     speed_kmh: float,
-    frequencies: ArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
+    frequencies: NumericArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
     interpolation: RoughnessInterpolation = ...,
 ) -> NDArray[np.float64]
 ```
@@ -786,9 +788,9 @@ for freight wagons only.
 
 ```python
 total_effective_roughness(
-    rail: ArrayLike,
-    wheel: ArrayLike,
-    filter_: ArrayLike,
+    rail: NumericArrayLike,
+    wheel: NumericArrayLike,
+    filter_: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -1043,7 +1045,7 @@ Digit 1 of the vehicle descriptor, Table [2.3.a].
 vertical_directivity(
     psi: float,
     *,
-    frequencies: ArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
+    frequencies: NumericArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
     height: int | np.integer[Any] = 1,
     aerodynamic: bool = False,
     edition: DirectivityEdition = ...,
@@ -1082,7 +1084,11 @@ other source.
 ## WavelengthSpectrum
 
 ```python
-WavelengthSpectrum(*, wavelengths_mm: ArrayLike, levels: ArrayLike)
+WavelengthSpectrum(
+    *,
+    wavelengths_mm: NumericArrayLike,
+    levels: NumericArrayLike,
+)
 ```
 
 A roughness or contact-filter spectrum over wavelength (Appendix G).

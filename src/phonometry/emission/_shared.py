@@ -70,9 +70,7 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
-
-    from .._internal.types import BandFraction
+    from .._internal.types import BandFraction, NumericArrayLike
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 #: Reference static pressure of the ISO 3740 family, in kilopascals
@@ -182,7 +180,7 @@ def _check_grade(grade: object) -> Grade:
 
 
 def _single_event_mean(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     n_events: int | np.integer[Any] | None,
     *,
     name: str,
@@ -251,7 +249,7 @@ def _single_event_mean(
 
 
 def _background_exposure(
-    background_levels: ArrayLike, integration_time: float | None
+    background_levels: NumericArrayLike, integration_time: float | None
 ) -> np.ndarray:
     r"""The background's single event time-integrated level over ``T``.
 
@@ -320,7 +318,7 @@ def _reference_power_levels(
     from .reference_sound_source import ReferenceSourceCalibration
 
     if not isinstance(reference_sound_power_levels, ReferenceSourceCalibration):
-        return real_array(cast("ArrayLike", reference_sound_power_levels), name)
+        return real_array(cast("NumericArrayLike", reference_sound_power_levels), name)
     if frequencies is None:
         msg = (
             f"'frequencies' are required to read '{name}' from a "
@@ -328,7 +326,7 @@ def _reference_power_levels(
         )
         raise ValueError(msg)
     return reference_sound_power_levels.sound_power_level_at(
-        real_array(cast("ArrayLike", frequencies), "frequencies"),
+        real_array(cast("NumericArrayLike", frequencies), "frequencies"),
         fraction=fraction,
         temperature_c=temperature_c,
         static_pressure_kpa=static_pressure_kpa,

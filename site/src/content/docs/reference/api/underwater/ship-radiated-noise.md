@@ -34,7 +34,7 @@ pressure-release sea surface and ignores wind; the reported source level is an
 hydrophone_depths(
     cpa_distance: float,
     *,
-    angles_deg: ArrayLike = (15.0, 30.0, 45.0),
+    angles_deg: NumericArrayLike = (15.0, 30.0, 45.0),
 ) -> NDArray[np.float64]
 ```
 
@@ -65,10 +65,10 @@ $d = d_{\mathrm{CPA}} \tan(\mathrm{angle})$.
 
 ```python
 monopole_source_level(
-    rnl: ArrayLike,
+    rnl: NumericArrayLike,
     draft_m: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float = 1500.0,
 ) -> ShipSourceLevelResult
 ```

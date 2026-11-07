@@ -213,7 +213,7 @@ its sensitivity level through this module.
 
 ```python
 air_gap_series_impedance_pa_s_m3(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     gap_length_m: float,
     gap_radius_m: float,
@@ -607,7 +607,7 @@ each and prints no value.
 
 ```python
 diameter_sound_field_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     reference_radius_m: float,
     test_diaphragm_radius_m: float,
@@ -803,14 +803,14 @@ estimate to make.
 
 ```python
 environmental_sensitivity_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     static_pressure_kpa: float,
     temperature_c: float,
     relative_humidity_percent: float,
-    static_pressure_coefficient_db_per_kpa: ArrayLike,
-    temperature_coefficient_db_per_k: ArrayLike,
-    humidity_coefficient_db_per_percent: ArrayLike = 0.0,
+    static_pressure_coefficient_db_per_kpa: NumericArrayLike,
+    temperature_coefficient_db_per_k: NumericArrayLike,
+    humidity_coefficient_db_per_percent: NumericArrayLike = 0.0,
     reference_static_pressure_kpa: float = 101.325,
     reference_temperature_c: float = 23.0,
     reference_relative_humidity_percent: float = 50.0,
@@ -1114,12 +1114,12 @@ IEC61094_8_TABLE_1 = {'primary_free_field': ReferenceCalibrationRow(microphone_t
 
 ```python
 impedance_pressure_ratio(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    reference_equivalent_volume_m3: ArrayLike,
-    test_equivalent_volume_m3: ArrayLike,
-    coupling_equivalent_volume_m3: ArrayLike | None = None,
-    coupling_impedance_pa_s_m3: ArrayLike | None = None,
+    reference_equivalent_volume_m3: NumericArrayLike,
+    test_equivalent_volume_m3: NumericArrayLike,
+    coupling_equivalent_volume_m3: NumericArrayLike | None = None,
+    coupling_impedance_pa_s_m3: NumericArrayLike | None = None,
 ) -> ImpedancePressureRatio
 ```
 
@@ -1292,7 +1292,7 @@ experiment.
 
 ```python
 jig_diameter_correction(
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> JigDiameterCorrection
 ```
 
@@ -1535,10 +1535,10 @@ a coverage factor), in dB: the special-case component of Table D.1.
 ```python
 MonitorReadings(
     *,
-    reference_level: ArrayLike,
-    test_level: ArrayLike,
-    reference_phase_deg: ArrayLike | None = None,
-    test_phase_deg: ArrayLike | None = None,
+    reference_level: NumericArrayLike,
+    test_level: NumericArrayLike,
+    reference_phase_deg: NumericArrayLike | None = None,
+    test_phase_deg: NumericArrayLike | None = None,
 )
 ```
 
@@ -1693,7 +1693,9 @@ $b$ of Formula (B.10), half the duration, in s.
 ### RectangularPulse.level_at()
 
 ```python
-RectangularPulse.level_at(frequencies: ArrayLike) -> NDArray[np.float64]
+RectangularPulse.level_at(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 $20\lg\lvert X(f)/X(0)\rvert$, how far the spectrum has
@@ -1743,7 +1745,9 @@ frequencies of interest.
 ### RectangularPulse.spectrum_at()
 
 ```python
-RectangularPulse.spectrum_at(frequencies: ArrayLike) -> NDArray[np.float64]
+RectangularPulse.spectrum_at(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 $X(f)$ of Formula (B.10), in V·s, the transform of the pulse
@@ -1845,19 +1849,19 @@ fall within this time too.
 
 ```python
 sequential_comparison(
-    reference_sensitivity_level: ArrayLike,
-    reference_output_level: ArrayLike,
-    test_output_level: ArrayLike,
+    reference_sensitivity_level: NumericArrayLike,
+    reference_output_level: NumericArrayLike,
+    test_output_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     monitor: MonitorReadings | None = None,
     field: Literal['pressure', 'free'] = 'pressure',
-    pressure_level_difference: ArrayLike = 0.0,
-    corrections: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: NumericArrayLike = 0.0,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference: ArrayLike | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    reference_free_field_difference: NumericArrayLike | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
     phase: SequentialComparisonPhase | None = None,
 ) -> ComparisonCalibration
 ```
@@ -1937,10 +1941,10 @@ same measurement point (7.3), $\arg R_P$ is 0.
 ```python
 SequentialComparisonPhase(
     *,
-    reference_sensitivity_phase_deg: ArrayLike,
-    reference_output_phase_deg: ArrayLike,
-    test_output_phase_deg: ArrayLike,
-    pressure_phase_difference_deg: ArrayLike | None = None,
+    reference_sensitivity_phase_deg: NumericArrayLike,
+    reference_output_phase_deg: NumericArrayLike,
+    test_output_phase_deg: NumericArrayLike,
+    pressure_phase_difference_deg: NumericArrayLike | None = None,
 )
 ```
 
@@ -1968,18 +1972,18 @@ to [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-cali
 
 ```python
 simultaneous_comparison(
-    reference_sensitivity_level: ArrayLike,
-    channel_difference: ArrayLike,
-    interchanged_channel_difference: ArrayLike | None = None,
+    reference_sensitivity_level: NumericArrayLike,
+    channel_difference: NumericArrayLike,
+    interchanged_channel_difference: NumericArrayLike | None = None,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: Literal['pressure', 'free'] = 'pressure',
-    pressure_level_difference: ArrayLike = 0.0,
-    corrections: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: NumericArrayLike = 0.0,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference: ArrayLike | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    reference_free_field_difference: NumericArrayLike | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
     phase: SimultaneousComparisonPhase | None = None,
 ) -> ComparisonCalibration
 ```
@@ -2065,10 +2069,10 @@ the complex ratio the sensitivity "both modulus and phase" is.
 ```python
 SimultaneousComparisonPhase(
     *,
-    reference_sensitivity_phase_deg: ArrayLike,
-    channel_phase_difference_deg: ArrayLike,
-    interchanged_channel_phase_difference_deg: ArrayLike | None = None,
-    pressure_phase_difference_deg: ArrayLike | None = None,
+    reference_sensitivity_phase_deg: NumericArrayLike,
+    channel_phase_difference_deg: NumericArrayLike,
+    interchanged_channel_phase_difference_deg: NumericArrayLike | None = None,
+    pressure_phase_difference_deg: NumericArrayLike | None = None,
 )
 ```
 
@@ -2095,9 +2099,9 @@ on the two microphones differ in phase. Pass one to
 
 ```python
 stepped_sine_impulse_response(
-    response: ArrayLike,
+    response: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> SteppedSineImpulseResponse
 ```
 
@@ -2210,7 +2214,7 @@ The time of each sample, in s.
 
 ```python
 time_selective_response(
-    impulse_response: ArrayLike,
+    impulse_response: NumericArrayLike,
     fs: float,
     *,
     window_start_s: float,
@@ -2353,7 +2357,7 @@ an impulse response to its frequency step.
 
 ```python
 TimeSelectiveResponse.level_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -2372,7 +2376,7 @@ times a second.
 
 ```python
 TimeSelectiveResponse.phase_deg_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -2394,7 +2398,7 @@ TimeSelectiveResponse.plot(
     ax: Axes | None = None,
     *,
     quantity: Literal['impulse', 'response'] = 'impulse',
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -2426,7 +2430,7 @@ $H(f)$ with and without the window.
 
 ```python
 TimeSelectiveResponse.record_response_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -2451,7 +2455,7 @@ included: what the window takes away, for comparison.
 
 ```python
 TimeSelectiveResponse.response_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -2505,7 +2509,7 @@ verify_jig_or_coupler(
     validation: ComparisonCalibration | ReciprocityCalibration,
     *,
     microphone: int | np.integer[Any] | None = None,
-    shared_standard_uncertainty_db: ArrayLike = 0.0,
+    shared_standard_uncertainty_db: NumericArrayLike = 0.0,
 ) -> JigCouplerVerification
 ```
 

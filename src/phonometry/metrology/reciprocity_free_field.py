@@ -99,9 +99,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "AcousticCenter",
@@ -279,7 +280,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
 
 
 def reciprocity_air_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     static_pressure_pa: float,
@@ -429,7 +430,7 @@ def _medium(
 
 
 def _positions(
-    acoustic_centers_m: Sequence[ArrayLike], count: int, microphones: int
+    acoustic_centers_m: Sequence[NumericArrayLike], count: int, microphones: int
 ) -> list[NDArray[np.float64]]:
     """The acoustic centre of each microphone at each frequency."""
     require_scalar(microphones, "microphones")
@@ -485,17 +486,17 @@ def _distances(diaphragm_distances_m: Sequence[float], count: int) -> list[float
 
 
 def free_field_reciprocity(
-    electrical_transfer_impedances_ohm: Sequence[ArrayLike],
+    electrical_transfer_impedances_ohm: Sequence[NumericArrayLike],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diaphragm_distances_m: Sequence[float],
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0, 0.0),
     dispersion: bool = True,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The free-field sensitivities of three microphones calibrated in pairs
     (IEC 61094-3:2016 5.7.1, Formula (8)).
@@ -582,18 +583,18 @@ def free_field_reciprocity(
 
 
 def free_field_reciprocity_pair(
-    electrical_transfer_impedance_ohm: ArrayLike,
-    sensitivity_ratio: ArrayLike,
+    electrical_transfer_impedance_ohm: NumericArrayLike,
+    sensitivity_ratio: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The complex free-field sensitivities of two microphones and an
     auxiliary sound source (IEC 61094-3:2016 5.1.3 and 5.7.2, Formula (9) as
@@ -664,15 +665,15 @@ def free_field_reciprocity_pair(
 
 
 def free_field_transfer_impedance(
-    sensitivity_1_v_per_pa: ArrayLike,
-    sensitivity_2_v_per_pa: ArrayLike,
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
 ) -> NDArray[np.complex128]:
     r"""The electrical transfer impedance two microphones of known free-field
@@ -799,8 +800,8 @@ class AcousticCenter(OwnsArrays):
 
 
 def acoustic_center(
-    distances: ArrayLike,
-    sound_pressures_pa: ArrayLike,
+    distances: NumericArrayLike,
+    sound_pressures_pa: NumericArrayLike,
     *,
     attenuation_np_per_m: float = 0.0,
 ) -> AcousticCenter:
@@ -973,7 +974,7 @@ class FreeFieldArrangementCheck(RichDisplay):
 
 
 def check_free_field_arrangement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     diaphragm_distances_m: Sequence[float],
     microphone_diameter_m: float,
@@ -1193,7 +1194,7 @@ class FreeFieldInputUncertainties(OwnsArrays):
 
     _: KW_ONLY
     u_distance_m: float = 0.0
-    u_acoustic_center_m: ArrayLike = 0.0
+    u_acoustic_center_m: NumericArrayLike = 0.0
     u_static_pressure_pa: float = 0.0
     u_temperature_k: float = 0.0
     u_relative_humidity_percent: float = 0.0
@@ -1228,14 +1229,14 @@ class FreeFieldInputUncertainties(OwnsArrays):
 
 
 def free_field_parameter_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     uncertainties: FreeFieldInputUncertainties,
     *,
     diaphragm_distances_m: Sequence[float],
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0, 0.0),
     microphone: int = 1,
     dispersion: bool = True,
 ) -> FreeFieldParameterUncertainty:

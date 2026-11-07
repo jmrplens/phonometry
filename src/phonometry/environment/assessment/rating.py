@@ -16,7 +16,7 @@ from ..._internal.validation import real_array, require_scalar
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from numpy.typing import ArrayLike
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "composite_rating_level",
@@ -37,7 +37,7 @@ _PERIOD_FIELDS = 3
 
 
 def composite_rating_level(
-    periods: Iterable[tuple[float, float, float]] | ArrayLike,
+    periods: Iterable[tuple[float, float, float]] | NumericArrayLike,
 ) -> float:
     r"""Composite whole-day rating level (ISO 1996-1:2016, 6.5).
 

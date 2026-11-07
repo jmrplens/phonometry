@@ -126,6 +126,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 VehicleCategory = Literal["1", "2a", "2b"]
 RoadSpeedCategory = Literal["low", "medium", "high"]
@@ -549,8 +550,8 @@ class PassByRegression(OwnsArrays):
 
 
 def _fit(
-    speeds_kmh: ArrayLike,
-    max_levels: ArrayLike,
+    speeds_kmh: NumericArrayLike,
+    max_levels: NumericArrayLike,
     vehicle_category: VehicleCategory,
     road_speed_category: RoadSpeedCategory,
 ) -> PassByRegression:
@@ -632,8 +633,8 @@ def _warn_regression(
 
 
 def pass_by_regression(
-    speeds_kmh: ArrayLike,
-    max_levels: ArrayLike,
+    speeds_kmh: NumericArrayLike,
+    max_levels: NumericArrayLike,
     *,
     vehicle_category: VehicleCategory,
     road_speed_category: RoadSpeedCategory,
@@ -863,8 +864,8 @@ class StatisticalPassByResult(RichDisplay):
 
 def statistical_pass_by(
     vehicle_categories: ArrayLike,
-    speeds_kmh: ArrayLike,
-    max_levels: ArrayLike,
+    speeds_kmh: NumericArrayLike,
+    max_levels: NumericArrayLike,
     *,
     road_speed_category: RoadSpeedCategory,
     corrected_vehicle_sound_levels: Mapping[VehicleCategory, float] | None = None,

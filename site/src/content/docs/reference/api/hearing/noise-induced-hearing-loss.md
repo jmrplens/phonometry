@@ -31,8 +31,8 @@ $H' = H + N - H N / 120$ (clause 6.1, Formula 1).
 
 ```python
 age_and_noise_threshold(
-    htla: ArrayLike,
-    nipts_value: ArrayLike,
+    htla: NumericArrayLike,
+    nipts_value: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -74,7 +74,7 @@ htlan(
     l_ex: float,
     exposure_duration_years: float,
     fractile: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HTLANResult
 ```
 
@@ -222,7 +222,7 @@ nipts(
     l_ex: float,
     exposure_duration_years: float,
     fractile: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> NIPTSResult
 ```
 

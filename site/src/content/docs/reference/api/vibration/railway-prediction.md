@@ -93,7 +93,7 @@ FLOOR_NATURAL_FREQUENCIES_HZ = (8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 5
 
 ```python
 foundation_to_floor_level_difference(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     floor: Literal['concrete', 'timber'],
     floor_natural_frequency_hz: float,
@@ -156,7 +156,7 @@ GEOMETRIC_DECAY_EXPONENT_RANGE = (0.2, 0.4)
 
 ```python
 ground_attenuation_coefficient_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     damping_ratio: float,
     shear_wave_speed_m_s: float,
@@ -275,11 +275,11 @@ GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES = {'basement': {'lower': (-9.1, -8.2, -8.
 
 ```python
 ground_transmission(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     distance_m: float,
     reference_distance_m: float,
-    exponent: ArrayLike,
+    exponent: NumericArrayLike,
     damping_ratio: float | None = None,
     shear_wave_speed_m_s: float | None = None,
 ) -> NDArray[np.float64]
@@ -330,9 +330,9 @@ KB_ASSESSMENT_BANDS_HZ = (4.0, 80.0)
 
 ```python
 kb_weighted_levels(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -481,12 +481,12 @@ of Table 1 the line behaviour is the rule.
 
 ```python
 predict_floor_spectrum(
-    emission_levels: ArrayLike,
+    emission_levels: NumericArrayLike,
     *,
-    ground_level_difference: ArrayLike = 0.0,
-    foundation_level_difference: ArrayLike = 0.0,
-    floor_level_difference: ArrayLike = 0.0,
-    mitigation_level_difference: ArrayLike = 0.0,
+    ground_level_difference: NumericArrayLike = 0.0,
+    foundation_level_difference: NumericArrayLike = 0.0,
+    floor_level_difference: NumericArrayLike = 0.0,
+    mitigation_level_difference: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -527,13 +527,13 @@ foundation term zero (Annex C does exactly that).
 
 ```python
 predict_train_category(
-    emission_levels: ArrayLike,
+    emission_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0),
-    ground_level_difference: ArrayLike = 0.0,
-    foundation_level_difference: ArrayLike = 0.0,
-    floor_level_difference: ArrayLike = 0.0,
-    mitigation_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0),
+    ground_level_difference: NumericArrayLike = 0.0,
+    foundation_level_difference: NumericArrayLike = 0.0,
+    floor_level_difference: NumericArrayLike = 0.0,
+    mitigation_level_difference: NumericArrayLike = 0.0,
 ) -> TrainCategoryPrediction
 ```
 
@@ -588,7 +588,7 @@ RECOMMENDED_DISTANCES_M = {'freight_soft_soil': {'tunnel': None, 'surface': 200.
 
 ```python
 rescale_emission_for_speed(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     speed_from_kmh: float,
     speed_to_kmh: float,
@@ -640,7 +640,7 @@ TAKT_MAX_FACTOR = 1.0
 ## takt_max_kb
 
 ```python
-takt_max_kb(weighted_levels: ArrayLike) -> float
+takt_max_kb(weighted_levels: NumericArrayLike) -> float
 ```
 
 The clock maximum r.m.s. of a category from its spectrum, Formula (9).
@@ -705,7 +705,7 @@ point exponent below the correction gives a negative result, as printed.
 
 ```python
 train_velocity_ratio(
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     reference_distance_m: float,
     transition_distance_m: float,
@@ -801,7 +801,7 @@ Requires matplotlib (the `[plot]` extra).
 ## velocity_spectrum_um_s
 
 ```python
-velocity_spectrum_um_s(levels: ArrayLike) -> NDArray[np.float64]
+velocity_spectrum_um_s(levels: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 A level spectrum as a velocity spectrum, Formula (13).

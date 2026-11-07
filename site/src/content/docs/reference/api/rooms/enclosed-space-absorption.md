@@ -48,7 +48,7 @@ air_absorption_area(
 ) -> NDArray[np.float64]
 
 air_absorption_area(
-    m: ArrayLike,
+    m: NumericArrayLike,
     volume: float,
     object_fraction: float = 0.0,
 ) -> float | NDArray[np.float64]
@@ -76,13 +76,13 @@ Equivalent absorption area of the air (Formula 2).
 
 ```python
 enclosed_space_reverberation(
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     volume: float,
     *,
-    objects: ArrayLike = (),
+    objects: NumericArrayLike = (),
     object_fraction: float = 0.0,
     air_condition: Literal['10C_30-50', '10C_50-70', '10C_70-90', '20C_30-50', '20C_50-70', '20C_70-90'] | None = None,
-    frequencies: ArrayLike = ...,
+    frequencies: NumericArrayLike = ...,
     speed_of_sound: float = 345.6,
 ) -> ReverberationResult
 ```
@@ -117,10 +117,10 @@ and the reverberation time (Formula 5).
 
 ```python
 equivalent_absorption_area(
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     *,
-    objects: ArrayLike = (),
-    air_area: ArrayLike = 0.0,
+    objects: NumericArrayLike = (),
+    air_area: NumericArrayLike = 0.0,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -145,7 +145,7 @@ Total equivalent sound absorption area (Formula 1).
 ## hard_object_absorption
 
 ```python
-hard_object_absorption(object_volume: ArrayLike) -> np.ndarray
+hard_object_absorption(object_volume: NumericArrayLike) -> np.ndarray
 ```
 
 Equivalent absorption area of a hard object (Formula 4).
@@ -170,7 +170,7 @@ furniture) whose equivalent area is not otherwise available.
 ## object_fraction
 
 ```python
-object_fraction(object_volumes: ArrayLike, volume: float) -> float
+object_fraction(object_volumes: NumericArrayLike, volume: float) -> float
 ```
 
 Object fraction `psi` of an enclosed space (Formula 3).
@@ -210,7 +210,7 @@ reverberation_time(
 ) -> NDArray[np.float64]
 
 reverberation_time(
-    absorption_area: ArrayLike,
+    absorption_area: NumericArrayLike,
     volume: float,
     *,
     object_fraction: float = 0.0,

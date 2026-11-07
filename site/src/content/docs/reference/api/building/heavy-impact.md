@@ -103,9 +103,9 @@ used when the *measurement* is reported in octaves.
 
 ```python
 a_weighted_max_impact_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | Sequence[float] | None = None,
+    frequencies: NumericArrayLike | Sequence[float] | None = None,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> AWeightedMaxImpactResult
 ```
@@ -190,7 +190,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 check_heavy_impact_source(
-    force_exposure_level: ArrayLike,
+    force_exposure_level: NumericArrayLike,
     source: Literal['rubber_ball', 'bang_machine'] = 'rubber_ball',
 ) -> HeavyImpactSourceCheck
 ```
@@ -222,7 +222,7 @@ Table A.1 (bang machine).
 
 ```python
 fast_reverberation_correction(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
     reference_time: float = 0.5,
 ) -> np.ndarray
@@ -275,7 +275,7 @@ HEAVY_IMPACT_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0)
 ## heavy_impact_octave_levels
 
 ```python
-heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray
+heavy_impact_octave_levels(levels: NumericArrayLike) -> np.ndarray
 ```
 
 Combine one-third-octave maximum levels into octaves (Formula (20)).
@@ -523,7 +523,7 @@ spectrum by other means still conforms.
 
 ```python
 impact_force_exposure_level(
-    force_n: Signal | ArrayLike,
+    force_n: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     reference_force: float = 1.0,
@@ -593,11 +593,11 @@ pulse followed by a second of silence.
 
 ```python
 standardized_max_impact_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     volume: float,
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     reference_time: float = 0.5,
     reference_volume: float = 50.0,
 ) -> StandardizedMaxImpactResult

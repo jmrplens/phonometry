@@ -130,8 +130,8 @@ check_plant_measurement(
     contour: PlantMeasurementContour,
     sound_power: PlantSoundPowerResult | None = None,
     *,
-    measurement_time_s: float | ArrayLike | None = None,
-    leq_range_db: float | ArrayLike | None = None,
+    measurement_time_s: float | NumericArrayLike | None = None,
+    leq_range_db: float | NumericArrayLike | None = None,
 ) -> PlantMeasurementCheck
 ```
 
@@ -320,7 +320,7 @@ PLANT_AIR_ABSORPTION_DB_PER_M = {31.5: 0.0, 63.0: 0.0, 125.0: 0.0, 250.0: 0.001,
 
 ```python
 plant_air_absorption_db_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -386,7 +386,7 @@ plant_background_correction(
 ) -> NDArray[np.float64]
 
 plant_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -419,7 +419,7 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 
 ```python
 plant_characteristic_height_m(
-    source_heights_m: ArrayLike,
+    source_heights_m: NumericArrayLike,
     *,
     n_low_sources: int | np.integer[Any] = 0,
 ) -> float
@@ -484,8 +484,8 @@ where no contour meets the clause.
 
 ```python
 plant_measurement_contour(
-    plant_outline_m: ArrayLike,
-    contour_m: ArrayLike,
+    plant_outline_m: NumericArrayLike,
+    contour_m: NumericArrayLike,
     *,
     characteristic_height_m: float,
     n_positions: int | np.integer[Any] | None = None,
@@ -602,16 +602,16 @@ reported; [`check_plant_measurement`](/phonometry/reference/api/power/sound-powe
 
 ```python
 plant_sound_power(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,
     mean_distance_m: float,
     plant_area_m2: float,
-    background_levels: ArrayLike | None = None,
-    directional_microphone_angle_deg: float | ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    directional_microphone_angle_deg: float | NumericArrayLike | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
 ) -> PlantSoundPowerResult
@@ -923,12 +923,12 @@ $h$ of 9.3 for this contour and plant, in metres.
 
 ```python
 PlantMeasurementContour.sound_power(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     microphone_height_m: float | None = None,
-    background_levels: ArrayLike | None = None,
-    directional_microphone_angle_deg: float | ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    directional_microphone_angle_deg: float | NumericArrayLike | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
 ) -> PlantSoundPowerResult

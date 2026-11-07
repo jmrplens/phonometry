@@ -90,10 +90,10 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
@@ -449,13 +449,15 @@ def excess_sound_pressure_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
 
 
 @overload
-def excess_sound_pressure_level[V: RealValues, A2: ArrayLike, A3: ArrayLike](
-    level: V, reference_sound_power_levels: A2, distance: A3
-) -> NDArray[np.float64]: ...
+def excess_sound_pressure_level[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](level: V, reference_sound_power_levels: A2, distance: A3) -> NDArray[np.float64]: ...
 
 
 @overload
-def excess_sound_pressure_level[S1: RealScalar, V: RealValues, A3: ArrayLike](
+def excess_sound_pressure_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
     level: S1, reference_sound_power_levels: V, distance: A3
 ) -> NDArray[np.float64]: ...
 
@@ -467,13 +469,19 @@ def excess_sound_pressure_level[S1: RealScalar, S2: RealScalar, V: RealValues](
 
 
 @overload
-def excess_sound_pressure_level[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+def excess_sound_pressure_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
     level: A1, reference_sound_power_levels: A2, distance: A3
 ) -> float | NDArray[np.float64]: ...
 
 
 def excess_sound_pressure_level(
-    level: ArrayLike, reference_sound_power_levels: ArrayLike, distance: ArrayLike
+    level: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike,
+    distance: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""Excess of sound pressure level over the free field at a distance from
     the reference sound source (ISO 3747:2010 Annex A, Eq. A.1).
@@ -576,7 +584,9 @@ def _margin_met(margin: np.ndarray) -> np.ndarray:
         return np.asarray(settled(margin) >= _K1_VALID_DB, dtype=bool)
 
 
-def _finite_grid(value: ArrayLike, name: str, ndim: tuple[int, ...]) -> np.ndarray:
+def _finite_grid(
+    value: NumericArrayLike, name: str, ndim: tuple[int, ...]
+) -> np.ndarray:
     """A finite float array of one of the admissible ranks, or a refusal
     naming the argument.
     """
@@ -591,7 +601,7 @@ def _finite_grid(value: ArrayLike, name: str, ndim: tuple[int, ...]) -> np.ndarr
     return arr
 
 
-def _checked_frequencies(frequencies: ArrayLike, n_bands: int) -> np.ndarray:
+def _checked_frequencies(frequencies: NumericArrayLike, n_bands: int) -> np.ndarray:
     """The octave mid-band frequencies, one per band and all in Table D.1."""
     freqs = real_array(frequencies, "frequencies")
     if freqs.shape != (n_bands,):
@@ -619,8 +629,8 @@ def _checked_frequencies(frequencies: ArrayLike, n_bands: int) -> np.ndarray:
 
 
 def _reference_grids(
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike,
     n_positions: int,
     n_bands: int,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -657,7 +667,7 @@ def _reference_grids(
 
 
 def _background_grid(
-    background: ArrayLike | None, name: str, n_positions: int, n_bands: int
+    background: NumericArrayLike | None, name: str, n_positions: int, n_bands: int
 ) -> np.ndarray | None:
     """The background levels as ``(n, bands)``: one spectrum for every
     position, or one per position; ``None`` when none were given.
@@ -699,7 +709,7 @@ class GradeConditions(OwnsArrays):
         needs it within 7 dB.
     """
 
-    excess_levels: ArrayLike | None = None
+    excess_levels: NumericArrayLike | None = None
     directivity_range: float | None = None
 
 
@@ -782,7 +792,7 @@ def _position_advisory(n_positions: int) -> None:
         )
 
 
-def _background_advisory(background_levels: ArrayLike | None) -> None:
+def _background_advisory(background_levels: NumericArrayLike | None) -> None:
     """Warn when no background levels reached the determination at all.
 
     Clause 7.5 has the background obtained once at each microphone position,
@@ -812,10 +822,10 @@ class _Comparison:
     clauses 8.5 and 9 read the same for power and for energy.
     """
 
-    reference_levels: ArrayLike
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration
-    frequencies: ArrayLike
-    reference_background_levels: ArrayLike | None
+    reference_levels: NumericArrayLike
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration
+    frequencies: NumericArrayLike
+    reference_background_levels: NumericArrayLike | None
     temperature_c: float
     static_pressure_kpa: float
     conditions: GradeConditions | None
@@ -1021,13 +1031,13 @@ def _determine(
 
 
 def sound_power_in_situ(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
@@ -1151,14 +1161,14 @@ def sound_power_in_situ(
 
 
 def sound_energy_in_situ(
-    event_levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    event_levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,

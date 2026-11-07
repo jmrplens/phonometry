@@ -115,7 +115,7 @@ IMPULSE_INVALID_DEVIATION_DB = 5.0
 ## impulse_mean_level
 
 ```python
-impulse_mean_level(repeat_levels: ArrayLike) -> float
+impulse_mean_level(repeat_levels: NumericArrayLike) -> float
 ```
 
 The level of an impulsive measurement, 5.6.2.1.
@@ -266,10 +266,10 @@ OUTDOOR_RANGE_M = 25.0
 
 ```python
 screen_attenuation(
-    unscreened_levels: ArrayLike,
-    screened_levels: ArrayLike,
+    unscreened_levels: NumericArrayLike,
+    screened_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     source_kind: Literal['actual', 'artificial'] = 'actual',
     a_weighted_unscreened_level: float | None = None,
     a_weighted_screened_level: float | None = None,
@@ -318,8 +318,8 @@ machine's, so the pair is refused rather than computed under
 
 ```python
 screen_background_corrected_level(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -366,7 +366,9 @@ SCREEN_DISTANCE_FACTORS = (0.25, 0.5, 1.0, 2.0)
 ## screen_source_directivity_index
 
 ```python
-screen_source_directivity_index(levels: ArrayLike) -> NDArray[np.float64]
+screen_source_directivity_index(
+    levels: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 The directivity index of a source, definition 3.10.

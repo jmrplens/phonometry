@@ -82,9 +82,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "ISO10847_BACKGROUND_CORRECTIONS",
@@ -281,7 +282,7 @@ class BarrierInSituWarning(PhonometryWarning):
 
 
 def barrier_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""The background correction of Table 3, in decibels to add.
 
@@ -652,11 +653,11 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
 
 
 def _four_levels(
-    reference_levels_before: ArrayLike,
-    reference_levels_after: ArrayLike,
-    receiver_levels_before: ArrayLike,
-    receiver_levels_after: ArrayLike,
-    frequencies: ArrayLike | None,
+    reference_levels_before: NumericArrayLike,
+    reference_levels_after: NumericArrayLike,
+    receiver_levels_before: NumericArrayLike,
+    receiver_levels_after: NumericArrayLike,
+    frequencies: NumericArrayLike | None,
 ) -> tuple[
     NDArray[np.float64],
     NDArray[np.float64],
@@ -697,12 +698,12 @@ def _four_levels(
 
 
 def measured_insertion_loss_direct(
-    reference_levels_before: ArrayLike,
-    reference_levels_after: ArrayLike,
-    receiver_levels_before: ArrayLike,
-    receiver_levels_after: ArrayLike,
+    reference_levels_before: NumericArrayLike,
+    reference_levels_after: NumericArrayLike,
+    receiver_levels_before: NumericArrayLike,
+    receiver_levels_after: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> MeasuredBarrierInsertionLoss:
     r"""The insertion loss by the direct method, 8.2.1.
 
@@ -754,12 +755,12 @@ def measured_insertion_loss_direct(
 
 
 def measured_insertion_loss_indirect(
-    reference_levels_before: ArrayLike,
-    reference_levels_after: ArrayLike,
-    receiver_levels_before: ArrayLike,
-    receiver_levels_after: ArrayLike,
+    reference_levels_before: NumericArrayLike,
+    reference_levels_after: NumericArrayLike,
+    receiver_levels_before: NumericArrayLike,
+    receiver_levels_after: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     receiver_type_before: ReceiverType = "hemi_free_field",
     receiver_type_after: ReceiverType = "hemi_free_field",
 ) -> MeasuredBarrierInsertionLoss:

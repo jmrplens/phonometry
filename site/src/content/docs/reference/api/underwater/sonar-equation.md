@@ -54,7 +54,7 @@ range at which the detection probability is 50 %:
 ```python
 active_sonar_equation(
     source_level: float,
-    propagation_loss: ArrayLike,
+    propagation_loss: NumericArrayLike,
     target_strength: float,
     noise_level: float,
     *,
@@ -206,8 +206,8 @@ merit works for both sonar modes: the active figure of merit returned by
 ```python
 detection_range_from_curve(
     figure_of_merit: float,
-    range_m: ArrayLike,
-    propagation_loss: ArrayLike,
+    range_m: NumericArrayLike,
+    propagation_loss: NumericArrayLike,
     *,
     crossing: Literal['first', 'last'] = 'first',
 ) -> float
@@ -330,7 +330,7 @@ Plot the propagation loss against the figure of merit.
 ```python
 passive_sonar_equation(
     source_level: float,
-    propagation_loss: ArrayLike,
+    propagation_loss: NumericArrayLike,
     noise_level: float,
     *,
     directivity_index: float = 0.0,

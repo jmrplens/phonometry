@@ -72,9 +72,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .anp_fleet import ANPNPDCurves
 
 Absorption = Literal["arp5534", "arp866a"]
@@ -151,7 +152,7 @@ _ABSORPTION: tuple[Absorption, ...] = ("arp5534", "arp866a")
 _DISTANCE_MATCH_RTOL = 1e-9
 
 
-def _spectrum_levels(spectrum: SpectralClass | ArrayLike) -> NDArray[np.float64]:
+def _spectrum_levels(spectrum: SpectralClass | NumericArrayLike) -> NDArray[np.float64]:
     """The 24 band levels of a spectral class, or of a bare array of them."""
     raw = spectrum.levels if isinstance(spectrum, SpectralClass) else spectrum
     levels = require_finite_array(raw, "spectrum")
@@ -331,13 +332,13 @@ class NPDAtmosphereIncrement(OwnsArrays):
 
 
 def npd_atmosphere_increment(
-    spectrum: SpectralClass | ArrayLike,
+    spectrum: SpectralClass | NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
     absorption: Absorption = "arp5534",
-    distances_m: ArrayLike | None = None,
+    distances_m: NumericArrayLike | None = None,
 ) -> NPDAtmosphereIncrement:
     r"""NPD increment of a spectral class for a specified atmosphere (Doc 29 Appendix D).
 
@@ -501,7 +502,7 @@ class RevisedNPDCurves(RichDisplay):
 
 def revise_npd_curves(
     curves: ANPNPDCurves,
-    spectrum: SpectralClass | ArrayLike,
+    spectrum: SpectralClass | NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,

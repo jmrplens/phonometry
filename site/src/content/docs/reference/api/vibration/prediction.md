@@ -100,7 +100,7 @@ wavelength that matters. Figure A.19 prints 0,005 for a damping ratio of
 ```python
 blast_peak_velocity_mm_s(
     charge_kg: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     coefficient_mm_s: float,
     charge_exponent: float,
@@ -176,7 +176,7 @@ kilojoules, the unit Formula (6) wants.
 ```python
 far_field_velocity_mm_s(
     reference_velocity_mm_s: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     reference_distance_m: float,
     exponent: float,
@@ -318,7 +318,7 @@ The exponent $n$ of Formula (2) for a source and a wave, Figure 1.
 ```python
 impact_peak_velocity_mm_s(
     fall_energy_kj: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     coefficient_mm_s: float,
     distance_exponent: float,
@@ -386,7 +386,7 @@ MACHINE_COUNT_CORRECTION = {3: (0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383,
 
 ```python
 machine_count_correction(
-    n_machines: ArrayLike,
+    n_machines: NumericArrayLike,
     *,
     n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
@@ -428,7 +428,7 @@ MACHINE_FREQUENCY_BANDS_HZ = {'counter_blow_hammer': (4.0, 8.0), 'forging_press_
 ```python
 machine_hall_velocity_mm_s(
     reference_velocity_mm_s: float,
-    n_machines: ArrayLike,
+    n_machines: NumericArrayLike,
     *,
     n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
@@ -463,7 +463,7 @@ sixty, the nearest group; beyond that the added groups are further off.
 
 ```python
 material_damping_factor(
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     damping_ratio: float,
     frequency_hz: float,

@@ -70,10 +70,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -304,7 +304,7 @@ class SourceEmission(OwnsArrays):
         ``LfT(DW)`` directly (:math:`C_\mathrm{met} = 0`).
     """
 
-    sound_power_level: ArrayLike
+    sound_power_level: NumericArrayLike
     directivity_index: float = 0.0
     d_omega: float = 0.0
     cmet: float | None = None
@@ -538,7 +538,7 @@ def geometric_divergence(distance: float) -> float:
 def atmospheric_absorption(
     distance: float,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
+    frequencies: NumericArrayLike = DEFAULT_FREQUENCIES_HZ,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
     static_pressure_kpa: float = 101.325,
@@ -633,7 +633,7 @@ def ground_attenuation(
     source_height_m: float,
     receiver_height_m: float,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
+    frequencies: NumericArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
@@ -810,8 +810,8 @@ def _mean_ground_factor(
 
 
 def region_ground_factors(
-    segment_lengths: ArrayLike,
-    segment_ground_factors: ArrayLike,
+    segment_lengths: NumericArrayLike,
+    segment_ground_factors: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
 ) -> GroundFactors:
@@ -893,8 +893,8 @@ def region_ground_factors(
 
 
 def mean_path_height(
-    profile_distances: ArrayLike,
-    profile_heights_m: ArrayLike,
+    profile_distances: NumericArrayLike,
+    profile_heights_m: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float | None = None,
@@ -992,7 +992,7 @@ def _c3_double(lam: float, edge_separation: float) -> float:
 def barrier_attenuation(
     barrier: Barrier,
     distance: float,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
+    frequencies: NumericArrayLike = DEFAULT_FREQUENCIES_HZ,
 ) -> NDArray[np.float64]:
     r"""Barrier diffraction attenuation ``Dz`` (ISO 9613-2:1996, Eq. (14)).
 
@@ -1149,7 +1149,7 @@ def outdoor_propagation_attenuation(
     source_height_m: float,
     receiver_height_m: float,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
+    frequencies: NumericArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
@@ -1247,10 +1247,10 @@ def outdoor_propagation_attenuation(
 
 
 def predicted_receiver_level(
-    sound_power_level: ArrayLike,
+    sound_power_level: NumericArrayLike,
     geometry: PropagationGeometry,
     *,
-    frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
+    frequencies: NumericArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground: GroundFactors | None = None,
     barrier: Barrier | None = None,
     atmosphere: AtmosphericConditions | None = None,

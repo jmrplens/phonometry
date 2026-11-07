@@ -77,10 +77,11 @@ from .._internal.welch import _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
+    from .._internal.types import NumericArrayLike
 
 
 __all__ = [
@@ -211,7 +212,7 @@ def noise_signal(
 # ---------------------------------------------------------------------------
 
 
-def _validate_1d_finite(x: Signal | ArrayLike, name: str) -> NDArray[np.float64]:
+def _validate_1d_finite(x: Signal | NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce, check and calibrate a one-dimensional record.
 
     The sibling of ``spectra._validate_signal`` for the consumers that do
@@ -608,7 +609,7 @@ class ResampledSignalResult(OwnsArrays):
 
 
 def resample_signal(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     fs_new: float,
@@ -764,7 +765,7 @@ def fractional_delay(
 
 @overload
 def fractional_delay(
-    x: ArrayLike,
+    x: NumericArrayLike,
     delay: float,
     *,
     mode: Literal["linear", "circular"] = ...,
@@ -772,7 +773,7 @@ def fractional_delay(
 
 
 def fractional_delay(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     delay: float,
     *,
     mode: Literal["linear", "circular"] = "linear",

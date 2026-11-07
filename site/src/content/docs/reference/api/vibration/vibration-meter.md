@@ -72,7 +72,7 @@ hardware. Passing here is necessary for conformity and is not conformity.
 
 ```python
 assess_short_term_vibration(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
@@ -112,7 +112,7 @@ ASSESSMENT_GUIDE_VALUES_MM_S = {'commercial': 20.0, 'residential': 5.0, 'sensiti
 
 ```python
 assessment_velocity(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
@@ -148,7 +148,7 @@ in time with the record it came from.
 
 ```python
 assessment_weighting_response(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
 ) -> NDArray[np.float64]
@@ -306,7 +306,7 @@ BAND_LIMIT_CORNER_FACTOR = 0.8
 
 ```python
 band_limitation_response(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     working_range: Literal['building', 'railway'] = 'building',
 ) -> NDArray[np.complex128]
@@ -334,7 +334,7 @@ The band limitation of the unweighted signal, Formula (3).
 
 ```python
 dominant_frequency(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     method: Literal['zero_crossing', 'fourier'] = 'zero_crossing',
@@ -439,7 +439,7 @@ KB_REFERENCE_INDICATIONS = {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 
 
 ```python
 kb_signal(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     working_range: Literal['building', 'railway'] = 'building',
@@ -490,7 +490,7 @@ KB_TIME_CONSTANT_S = 0.125
 
 ```python
 kb_weighting_response(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     working_range: Literal['building', 'railway'] = 'building',
 ) -> NDArray[np.complex128]
@@ -518,7 +518,7 @@ The KB frequency weighting, Formula (4).
 
 ```python
 kbf_signal(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     working_range: Literal['building', 'railway'] = 'building',
@@ -557,7 +557,7 @@ why a measurement is started before the event it is about.
 
 ```python
 measure_vibration_immission(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     working_range: Literal['building', 'railway'] = 'building',
@@ -606,7 +606,7 @@ RESPONSE_TOLERANCE_LOWER_PERCENT = ((1.25, 0.8, 10.0), (0.5, 2.0, 20.0))
 
 ```python
 response_tolerance_percent(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     working_range: Literal['building', 'railway'] = 'building',
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
@@ -649,7 +649,7 @@ TAKT_DURATION_S = 30.0
 ## takt_max_rms
 
 ```python
-takt_max_rms(maxima: ArrayLike) -> float
+takt_max_rms(maxima: NumericArrayLike) -> float
 ```
 
 The clock maximum r.m.s. $KB_\mathrm{FTm}$, Formula (2).
@@ -678,7 +678,7 @@ pulls the result down instead of leaving it unchanged.
 
 ```python
 takt_maxima(
-    kbf: ArrayLike,
+    kbf: NumericArrayLike,
     fs: float,
     *,
     takt_duration_s: float = 30.0,
@@ -728,9 +728,9 @@ VELOCITY_DETECTION_LIMIT_MM_S = 0.05
 
 ```python
 verify_vibration_meter(
-    measured_response: ArrayLike,
+    measured_response: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     weighting: Literal['kb', 'Z'] = 'kb',
     working_range: Literal['building', 'railway'] = 'building',
     reference_frequency_hz: float = 16.0,

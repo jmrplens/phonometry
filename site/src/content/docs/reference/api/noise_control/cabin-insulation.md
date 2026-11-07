@@ -130,14 +130,14 @@ An octave with no printed limit is reported as within it.
 
 ```python
 cabin_insulation(
-    room_levels: ArrayLike,
-    cabin_levels: ArrayLike,
+    room_levels: NumericArrayLike,
+    cabin_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
     fraction: Literal[1, 3] | np.integer[Any] = 3,
-    room_background_levels: ArrayLike | None = None,
-    cabin_background_levels: ArrayLike | None = None,
+    room_background_levels: NumericArrayLike | None = None,
+    cabin_background_levels: NumericArrayLike | None = None,
     a_weighted_room_level: float | None = None,
     a_weighted_cabin_level: float | None = None,
     internal_noise_level: float | None = None,
@@ -329,9 +329,9 @@ The range the statement covers, in hertz, or `None` when nothing is stateable.
 
 ```python
 check_band_flatness(
-    third_octave_levels: ArrayLike,
+    third_octave_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> BandFlatnessCheck
 ```
 
@@ -364,7 +364,7 @@ for the octaves below 125 Hz, so nothing is claimed for them here.
 
 ```python
 check_source_positions(
-    insulation_by_position: ArrayLike,
+    insulation_by_position: NumericArrayLike,
 ) -> SourcePositionCheck
 ```
 
@@ -410,10 +410,10 @@ DEFAULT_BAND_FLATNESS_LIMIT_DB = 4.0
 
 ```python
 estimated_cabin_noise_insulation(
-    spectrum_levels: ArrayLike,
-    insulation: ArrayLike,
+    spectrum_levels: NumericArrayLike,
+    insulation: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> float
 ```
 
@@ -498,7 +498,7 @@ INTERNAL_NOISE_CORRECTION_WINDOW_DB = (6.0, 10.0)
 
 ```python
 internal_noise_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     background_level: float | None = None,
 ) -> float
@@ -817,7 +817,7 @@ WALL_CLEARANCE_FACTOR = 0.5
 
 ```python
 weighted_cabin_insulation(
-    insulation: ArrayLike,
+    insulation: NumericArrayLike,
     *,
     method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
     fraction: Literal[1, 3] | np.integer[Any] = 3,

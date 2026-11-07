@@ -16,7 +16,7 @@ and composite whole-day rating levels (6.5, Formulae 5-6).
 
 ```python
 composite_rating_level(
-    periods: Iterable[tuple[float, float, float]] | ArrayLike,
+    periods: Iterable[tuple[float, float, float]] | NumericArrayLike,
 ) -> float
 ```
 

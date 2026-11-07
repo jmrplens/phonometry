@@ -105,9 +105,9 @@ Amendment 2 replaces 12.1, the three coils that make a uniform magnetic field.
 
 ```python
 check_program_signal(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> ProgramSignalCheck
 ```
 
@@ -143,7 +143,9 @@ table.
 ## program_signal_filter
 
 ```python
-program_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]
+program_signal_filter(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.complex128]
 ```
 
 The transfer function of the filter of IEC 60268-1:1985 Figure 2.

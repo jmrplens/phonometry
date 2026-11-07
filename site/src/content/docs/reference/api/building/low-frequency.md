@@ -98,11 +98,11 @@ checks that stand in for one.
 
 ```python
 apply_low_frequency_procedure(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     procedure: LowFrequencyProcedure,
     *,
-    frequencies: ArrayLike,
-    reverberation_time: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    reverberation_time: NumericArrayLike | None = None,
     room: Literal['receiving', 'source'] = 'receiving',
 ) -> LowFrequencyResult
 ```
@@ -147,7 +147,7 @@ brings a 63 Hz octave value.
 ## corner_level
 
 ```python
-corner_level(corner_levels: ArrayLike) -> np.ndarray
+corner_level(corner_levels: NumericArrayLike) -> np.ndarray
 ```
 
 Corner sound pressure level $L_\mathrm{Corner}$ per band.
@@ -193,7 +193,10 @@ own where-list.
 ## low_frequency_level
 
 ```python
-low_frequency_level(level: ArrayLike, corner: ArrayLike) -> np.ndarray
+low_frequency_level(
+    level: NumericArrayLike,
+    corner: NumericArrayLike,
+) -> np.ndarray
 ```
 
 Combine the default and corner levels into $L_\mathrm{LF}$.
@@ -283,7 +286,7 @@ LOW_FREQUENCY_VOLUME_LIMIT_M3 = 25.0
 LowFrequencyProcedure(
     *,
     volume: float,
-    corner_levels: ArrayLike,
+    corner_levels: NumericArrayLike,
     reverberation_63_octave: float | None = None,
 )
 ```

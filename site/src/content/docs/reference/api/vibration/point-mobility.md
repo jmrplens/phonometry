@@ -70,7 +70,7 @@ bending wavenumber.
 
 ```python
 beam_bending_wave_speed(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
 ) -> NDArray[np.float64]
@@ -100,7 +100,7 @@ $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$.
 
 ```python
 infinite_beam_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
@@ -137,7 +137,7 @@ bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
 
 ```python
 infinite_beam_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
@@ -174,7 +174,7 @@ $\omega^{-1/2}$.
 
 ```python
 infinite_beam_moment_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
 ) -> NDArray[np.complex128]
@@ -207,7 +207,7 @@ at the driving point.
 
 ```python
 infinite_beam_point_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
@@ -308,7 +308,7 @@ independent).
 
 ```python
 infinite_plate_point_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_area: float,
     *,
@@ -343,8 +343,8 @@ with the ISO 7626 mobility machinery.
 
 ```python
 injected_power(
-    force_n: ArrayLike,
-    mobility: ArrayLike,
+    force_n: NumericArrayLike,
+    mobility: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -466,7 +466,7 @@ in N.m used throughout this module and by the coincidence frequency of
 
 ```python
 plate_bending_wave_speed(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_area: float,
 ) -> NDArray[np.float64]

@@ -34,12 +34,12 @@ what those pages add beside this procedure is unknown here.
 
 ```python
 sti_adjusted_for_levels(
-    mtf: ArrayLike,
+    mtf: NumericArrayLike,
     *,
-    measured_levels: ArrayLike,
-    measured_ambient: ArrayLike | None = None,
-    operational_levels: ArrayLike,
-    operational_ambient: ArrayLike | None = None,
+    measured_levels: NumericArrayLike,
+    measured_ambient: NumericArrayLike | None = None,
+    operational_levels: NumericArrayLike,
+    operational_ambient: NumericArrayLike | None = None,
 ) -> STIResult
 ```
 
@@ -108,27 +108,27 @@ from the result itself and is the safe route.
 
 ```python
 sti_from_impulse_response(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None,
     snr: None,
-    levels: ArrayLike,
-    ambient: ArrayLike,
+    levels: NumericArrayLike,
+    ambient: NumericArrayLike,
 ) -> STIResult
 
 sti_from_impulse_response(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = ...,
     snr: None = ...,
     *,
-    levels: ArrayLike,
-    ambient: ArrayLike,
+    levels: NumericArrayLike,
+    ambient: NumericArrayLike,
 ) -> STIResult
 
 sti_from_impulse_response(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = ...,
-    snr: ArrayLike | None = ...,
-    levels: ArrayLike | None = ...,
+    snr: NumericArrayLike | None = ...,
+    levels: NumericArrayLike | None = ...,
 ) -> STIResult
 ```
 
@@ -188,27 +188,27 @@ STI itself stays within ~0.001.
 
 ```python
 stipa(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None,
-    reference: Signal | ArrayLike | None,
-    levels: ArrayLike,
-    ambient: ArrayLike,
+    reference: Signal | NumericArrayLike | None,
+    levels: NumericArrayLike,
+    ambient: NumericArrayLike,
 ) -> STIResult
 
 stipa(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = ...,
-    reference: Signal | ArrayLike | None = ...,
+    reference: Signal | NumericArrayLike | None = ...,
     *,
-    levels: ArrayLike,
-    ambient: ArrayLike,
+    levels: NumericArrayLike,
+    ambient: NumericArrayLike,
 ) -> STIResult
 
 stipa(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = ...,
-    reference: Signal | ArrayLike | None = ...,
-    levels: ArrayLike | None = ...,
+    reference: Signal | NumericArrayLike | None = ...,
+    levels: NumericArrayLike | None = ...,
 ) -> STIResult
 ```
 
@@ -331,8 +331,8 @@ be moved to another speech and occupancy-noise condition.
 ```python
 STIResult.adjusted_for_levels(
     *,
-    operational_levels: ArrayLike,
-    operational_ambient: ArrayLike | None = None,
+    operational_levels: NumericArrayLike,
+    operational_ambient: NumericArrayLike | None = None,
 ) -> STIResult
 ```
 

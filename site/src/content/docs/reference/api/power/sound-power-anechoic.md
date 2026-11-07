@@ -53,7 +53,7 @@ meteorological_corrections(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
-    air_absorption_db_per_m: ArrayLike | None = None,
+    air_absorption_db_per_m: NumericArrayLike | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection
 ```
@@ -118,10 +118,10 @@ $\overline{L_p} + 10 \log_{10}(S/S_0)$ to obtain `LW`.
 
 ```python
 precision_background_correction(
-    source_levels: ArrayLike,
-    background_levels: ArrayLike,
+    source_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -210,7 +210,7 @@ precision_uncertainty(
 ) -> NDArray[np.float64]
 
 precision_uncertainty(
-    sigma_r0: ArrayLike,
+    sigma_r0: NumericArrayLike,
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
 ) -> float | NDArray[np.float64]
@@ -357,31 +357,31 @@ energy-averaged level `Lp'`.
 
 ```python
 sound_power_anechoic(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
-    background_levels: ArrayLike,
-    frequencies: ArrayLike,
-    areas: ArrayLike | None = ...,
+    background_levels: NumericArrayLike,
+    frequencies: NumericArrayLike,
+    areas: NumericArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: ArrayLike | None = ...,
+    air_absorption_db_per_m: NumericArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult
 
 sound_power_anechoic(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
-    frequencies: ArrayLike | None = ...,
-    areas: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
+    areas: NumericArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: ArrayLike | None = ...,
+    air_absorption_db_per_m: NumericArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,

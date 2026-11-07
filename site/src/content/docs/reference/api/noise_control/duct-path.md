@@ -95,11 +95,11 @@ criterion.
 
 ```python
 duct_path(
-    source_level: ArrayLike,
+    source_level: NumericArrayLike,
     elements: Sequence[DuctElement],
     *,
-    frequencies: ArrayLike,
-    room_effect: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    room_effect: NumericArrayLike | None = None,
     source_label: str = 'Fan',
     criterion: Literal['NC', 'RC'] = 'NC',
     target: float | None = None,
@@ -150,8 +150,8 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 DuctElement(
     *,
     label: str,
-    attenuation: ArrayLike | HVACSpectrumResult | None = None,
-    self_noise: ArrayLike | HVACSpectrumResult | None = None,
+    attenuation: NumericArrayLike | HVACSpectrumResult | None = None,
+    self_noise: NumericArrayLike | HVACSpectrumResult | None = None,
     code: str = '',
 )
 ```

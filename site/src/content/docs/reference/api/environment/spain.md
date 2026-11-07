@@ -467,9 +467,9 @@ values (Article 23.1).
 
 ```python
 long_term_corrected_level(
-    daily_levels: ArrayLike,
+    daily_levels: NumericArrayLike,
     *,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -855,9 +855,9 @@ for a negative level differs from Python's banker's `round`.
 
 ```python
 tonal_correction(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> TonalCorrectionResult
 ```
 

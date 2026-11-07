@@ -81,9 +81,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "ISO11821_BAND_RANGE_HZ",
@@ -178,7 +179,7 @@ class ScreenInSituWarning(PhonometryWarning):
 
 
 def screen_background_corrected_level(
-    levels: ArrayLike, background_levels: ArrayLike
+    levels: NumericArrayLike, background_levels: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The level with the background taken off, clause 5.7.
 
@@ -224,7 +225,7 @@ def screen_background_corrected_level(
     return np.asarray(np.where(judged > upper, levels, corrected), dtype=np.float64)
 
 
-def screen_source_directivity_index(levels: ArrayLike) -> NDArray[np.float64]:
+def screen_source_directivity_index(levels: NumericArrayLike) -> NDArray[np.float64]:
     r"""The directivity index of a source, definition 3.10.
 
     :math:`DI_i = L_{360} - L_{30,i}`, where :math:`L_{360}` is the
@@ -291,7 +292,7 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
     return np.maximum(factors * height, MIN_MICROPHONE_DISTANCE_M)
 
 
-def impulse_mean_level(repeat_levels: ArrayLike) -> float:
+def impulse_mean_level(repeat_levels: NumericArrayLike) -> float:
     r"""The level of an impulsive measurement, 5.6.2.1.
 
     A single-impulse source is measured at least three times with the S time
@@ -403,10 +404,10 @@ class ScreenInSituResult(OwnsArrays):
 
 
 def screen_attenuation(
-    unscreened_levels: ArrayLike,
-    screened_levels: ArrayLike,
+    unscreened_levels: NumericArrayLike,
+    screened_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     source_kind: SourceKind = "actual",
     a_weighted_unscreened_level: float | None = None,
     a_weighted_screened_level: float | None = None,

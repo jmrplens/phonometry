@@ -399,7 +399,7 @@ was.
 
 ```python
 PracticalAbsorptionSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -886,7 +886,7 @@ was.
 
 ```python
 ThirdOctaveAbsorptionSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

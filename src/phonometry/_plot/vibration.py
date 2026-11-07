@@ -58,10 +58,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
     from ..vibration.human.exposure import (
         DailyVibrationExposure,
         WeightedSpectrum,
@@ -129,10 +129,10 @@ if TYPE_CHECKING:
         """
 
         @property
-        def frequencies(self) -> ArrayLike: ...
+        def frequencies(self) -> NumericArrayLike: ...
 
         @property
-        def amplitude(self) -> ArrayLike: ...
+        def amplitude(self) -> NumericArrayLike: ...
 
 
 #: Shared frequency-axis label of the vibration renderers.

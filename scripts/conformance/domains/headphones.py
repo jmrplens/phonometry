@@ -196,7 +196,8 @@ def _chk_generator_record() -> Outcome:
     x = ea.simulated_program_signal(_FS, 60.0, seed=1)
     bands = octave_filter(x, _FS, fraction=3, limits=[19.95, 19952.6])
     check = ea.check_program_signal(
-        frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
+        frequencies=np.asarray(bands.frequencies, dtype=np.float64),
+        band_levels=np.asarray(bands.levels),
     )
     return mask(
         expected="all 31 bands inside Table II",

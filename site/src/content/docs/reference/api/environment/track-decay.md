@@ -98,10 +98,10 @@ The hammer positions of Figure 2, in metres from the accelerometer.
 
 ```python
 track_decay_rate(
-    responses: ArrayLike,
+    responses: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    distances: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    distances: NumericArrayLike | None = None,
     sleeper_spacing_m: float = 0.6,
     direction: Literal['vertical', 'lateral'] = 'vertical',
 ) -> TrackDecayRate
@@ -142,10 +142,10 @@ the ratio to the direct response enters.
 TrackDecayRate(
     *,
     direction: Literal['vertical', 'lateral'],
-    frequencies: ArrayLike,
-    decay_rates_db_per_m: ArrayLike,
-    distances: ArrayLike | None = None,
-    responses: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    decay_rates_db_per_m: NumericArrayLike,
+    distances: NumericArrayLike | None = None,
+    responses: NumericArrayLike | None = None,
 )
 ```
 

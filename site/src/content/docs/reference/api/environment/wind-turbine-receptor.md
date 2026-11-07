@@ -74,7 +74,7 @@ amplitude_modulation_adjustment(
 ) -> NDArray[np.float64]
 
 amplitude_modulation_adjustment(
-    modulation_depth_db: ArrayLike,
+    modulation_depth_db: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -120,12 +120,12 @@ level cannot be determined (11.6.4).
 
 ```python
 bin_sound_levels(
-    levels: ArrayLike,
-    wind_speeds_m_s: ArrayLike,
+    levels: NumericArrayLike,
+    wind_speeds_m_s: NumericArrayLike,
     *,
-    wind_directions_deg: ArrayLike | None = None,
+    wind_directions_deg: NumericArrayLike | None = None,
     averaging: Literal['energy', 'arithmetic'] = 'energy',
-    type_b_uncertainty_db: ArrayLike = 0.0,
+    type_b_uncertainty_db: NumericArrayLike = 0.0,
     bin_width_m_s: float = 1.0,
     sector_width_deg: float = 30.0,
 ) -> BinnedSoundLevels
@@ -319,7 +319,7 @@ logarithmic_wind_speed(
 ) -> NDArray[np.float64]
 
 logarithmic_wind_speed(
-    reference_speed_m_s: ArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
@@ -472,7 +472,7 @@ power_law_wind_speed(
     *,
     height_m: float,
     reference_height_m: float,
-    shear_exponent: ArrayLike,
+    shear_exponent: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 power_law_wind_speed(
@@ -484,11 +484,11 @@ power_law_wind_speed(
 ) -> NDArray[np.float64]
 
 power_law_wind_speed(
-    reference_speed_m_s: ArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
-    shear_exponent: ArrayLike,
+    shear_exponent: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -520,8 +520,8 @@ profile of IEC 61400-11:2012 D.3 that Table K.1 evaluates for 120 m and
 
 ```python
 predicted_receptor_level(
-    turbine_levels: ArrayLike,
-    sound_power_uncertainty_db: ArrayLike,
+    turbine_levels: NumericArrayLike,
+    sound_power_uncertainty_db: NumericArrayLike,
     *,
     prediction_model_uncertainty_db: float = 2.0,
     modeling_uncertainty_db: float = 0.5,
@@ -639,10 +639,10 @@ ROUGHNESS_LENGTHS_M = {'Water, snow or sand surfaces': 0.0001, 'Open, flat land,
 
 ```python
 sound_emergence(
-    ambient_levels: ArrayLike,
-    background_levels: ArrayLike,
+    ambient_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    wind_speeds_m_s: ArrayLike | None = None,
+    wind_speeds_m_s: NumericArrayLike | None = None,
 ) -> SoundEmergence
 ```
 
@@ -676,7 +676,7 @@ background.
 
 ```python
 sound_relevant_turbines(
-    predicted_levels: ArrayLike,
+    predicted_levels: NumericArrayLike,
 ) -> SoundRelevantTurbines
 ```
 
@@ -773,7 +773,7 @@ Which turbines are relevant is read from the predicted levels and the
 
 ```python
 SoundRelevantTurbines.binning_wind_speed_m_s(
-    turbine_wind_speeds_m_s: ArrayLike,
+    turbine_wind_speeds_m_s: NumericArrayLike,
 ) -> float
 ```
 
@@ -914,13 +914,13 @@ Plot the band attenuation over the distance and the 20 dB line.
 
 ```python
 turbine_sound_levels(
-    total_levels: ArrayLike,
-    background_levels: ArrayLike,
+    total_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    total_uncertainty_db: ArrayLike = 0.0,
-    background_uncertainty_db: ArrayLike = 0.0,
-    wind_speeds_m_s: ArrayLike | None = None,
-    wind_directions_deg: ArrayLike | None = None,
+    total_uncertainty_db: NumericArrayLike = 0.0,
+    background_uncertainty_db: NumericArrayLike = 0.0,
+    wind_speeds_m_s: NumericArrayLike | None = None,
+    wind_directions_deg: NumericArrayLike | None = None,
 ) -> TurbineSoundLevels
 ```
 
@@ -1090,7 +1090,7 @@ wind_shear_exponent(
 
 wind_shear_exponent(
     speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    reference_speed_m_s: ArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
@@ -1105,8 +1105,8 @@ wind_shear_exponent(
 ) -> NDArray[np.float64]
 
 wind_shear_exponent(
-    speed_m_s: ArrayLike,
-    reference_speed_m_s: ArrayLike,
+    speed_m_s: NumericArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
@@ -1178,14 +1178,14 @@ speed at any height by Equation (K.1).
 
 ```python
 wind_turbine_low_frequency_level(
-    sound_power_levels: ArrayLike,
+    sound_power_levels: NumericArrayLike,
     *,
-    distance: ArrayLike,
-    hub_height_m: ArrayLike,
-    frequencies: ArrayLike = ...,
-    ground_correction: ArrayLike | None = None,
-    air_attenuation_db_per_km: ArrayLike | None = None,
-    facade_insulation: ArrayLike | None = None,
+    distance: NumericArrayLike,
+    hub_height_m: NumericArrayLike,
+    frequencies: NumericArrayLike = ...,
+    ground_correction: NumericArrayLike | None = None,
+    air_attenuation_db_per_km: NumericArrayLike | None = None,
+    facade_insulation: NumericArrayLike | None = None,
     weighting: Literal['A', 'Z'] = 'A',
 ) -> LowFrequencyLevel
 ```
@@ -1328,7 +1328,7 @@ WindShearProfile.speed_at(
 ) -> NDArray[np.float64]
 
 WindShearProfile.speed_at(
-    height_m: ArrayLike,
+    height_m: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 

@@ -131,9 +131,10 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..fluids import Fluid
 
 Coupler = Literal["plane_wave", "large_volume"]
@@ -341,7 +342,7 @@ def _gerber_approximation(
 
 def temperature_transfer_function(
     length_to_diameter_ratio: float,
-    x: ArrayLike,
+    x: NumericArrayLike,
     *,
     method: Method = "exact",
 ) -> NDArray[np.complex128]:
@@ -463,7 +464,7 @@ class HeatConductionCorrection(OwnsArrays):
 
 
 def heat_conduction_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     volume_m3: float,
     surface_area_m2: float,
@@ -657,7 +658,7 @@ class CapillaryTubeImpedance(OwnsArrays):
 
 
 def capillary_tube_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     length_m: float,
     radius_m: float,
@@ -814,7 +815,7 @@ class ReciprocityMicrophone(RichDisplay):
         return self.loss_factor / (omega * self.compliance_m3_per_pa)
 
     def complex_equivalent_volume_m3(
-        self, frequencies: ArrayLike
+        self, frequencies: NumericArrayLike
     ) -> NDArray[np.complex128]:
         r"""The complex equivalent volume :math:`V_\mathrm{e}` of Formula (3),
         in m³, which tends to :attr:`equivalent_volume_m3` at low frequencies:
@@ -836,7 +837,7 @@ class ReciprocityMicrophone(RichDisplay):
         return np.asarray(volume, dtype=np.complex128)
 
     def acoustic_impedance_pa_s_m3(
-        self, frequencies: ArrayLike
+        self, frequencies: NumericArrayLike
     ) -> NDArray[np.complex128]:
         r""":math:`Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a}
         + 1/(\mathrm{j}\omega c_\mathrm{a})`, in Pa·s/m³.
@@ -853,9 +854,9 @@ class ReciprocityMicrophone(RichDisplay):
 
 
 def microphone_acoustic_impedance(
-    electrical_admittance_s: ArrayLike,
-    blocked_impedance_ohm: ArrayLike,
-    pressure_sensitivity_v_per_pa: ArrayLike,
+    electrical_admittance_s: NumericArrayLike,
+    blocked_impedance_ohm: NumericArrayLike,
+    pressure_sensitivity_v_per_pa: NumericArrayLike,
 ) -> NDArray[np.complex128]:
     r"""The acoustic impedance of a microphone from its electrical admittance
     (IEC 61094-2:2009 E.4, Formula (E.1)).
@@ -1359,7 +1360,7 @@ def _plane_wave(
 
 
 def coupler_transfer_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     transmitter: ReciprocityMicrophone,
     receiver: ReciprocityMicrophone,
@@ -1439,7 +1440,7 @@ def coupler_transfer_impedance(
 
 
 def _acoustic(
-    value: ArrayLike | CouplerTransferImpedance,
+    value: NumericArrayLike | CouplerTransferImpedance,
     name: str,
     frequencies: NDArray[np.float64],
 ) -> NDArray[np.complex128]:
@@ -1466,12 +1467,12 @@ def _acoustic(
 
 
 def pressure_reciprocity(
-    electrical_transfer_impedances_ohm: Sequence[ArrayLike],
-    acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
+    electrical_transfer_impedances_ohm: Sequence[NumericArrayLike],
+    acoustic_transfer_impedances: Sequence[NumericArrayLike | CouplerTransferImpedance],
     *,
-    frequencies: ArrayLike,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The pressure sensitivities of three microphones calibrated in pairs in
     a coupler (IEC 61094-2:2009 5.7.1, Formula (7)).
@@ -1541,13 +1542,13 @@ def pressure_reciprocity(
 
 
 def pressure_reciprocity_pair(
-    electrical_transfer_impedance_ohm: ArrayLike,
-    acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
-    sensitivity_ratio: ArrayLike,
+    electrical_transfer_impedance_ohm: NumericArrayLike,
+    acoustic_transfer_impedance: NumericArrayLike | CouplerTransferImpedance,
+    sensitivity_ratio: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The pressure sensitivities of two microphones and an auxiliary sound
     source (IEC 61094-2:2009 5.1.3 and 5.7.2, Formula (8)).
@@ -1722,7 +1723,7 @@ def _table_c3(frequency: float) -> tuple[float, bool]:
 
 
 def large_volume_wave_motion_correction(
-    frequencies: ArrayLike, *, speed_of_sound_ratio: float = 1.0
+    frequencies: NumericArrayLike, *, speed_of_sound_ratio: float = 1.0
 ) -> WaveMotionCorrection:
     """The wave-motion correction of the large-volume coupler used with LS1P
     microphones (IEC 61094-2:2009 C.3, Table C.3).
@@ -1937,7 +1938,7 @@ def _within(value: float, bounds: tuple[float, float]) -> bool:
 
 
 def check_coupler(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     *,
@@ -2230,7 +2231,7 @@ class CouplerInputUncertainties(RichDisplay):
 
 
 def coupler_parameter_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     uncertainties: CouplerInputUncertainties,

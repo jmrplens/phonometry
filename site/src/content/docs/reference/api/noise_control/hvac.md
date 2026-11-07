@@ -199,7 +199,7 @@ $f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60$.
 
 ```python
 diffuser_sound_power(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     face_area: float,
     volume_flow: float,
     pressure_drop_pa: float,
@@ -276,7 +276,7 @@ which is what `n_devices` applies.
 
 ```python
 elbow_insertion_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     width_m: float,
     *,
     bend_type: Literal['round', 'square'] = 'square',
@@ -334,7 +334,7 @@ one rather than as the width in the plane of the bend.
 
 ```python
 end_reflection_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diameter_m: float,
     *,
     termination: Literal['flush', 'room', 'wall', 'edge', 'corner', 'free'] = 'flush',
@@ -385,7 +385,7 @@ The two agree within a couple of decibels over the bands both cover.
 
 ```python
 end_reflection_loss_closed_form(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diameter_m: float,
     *,
     termination: Literal['flush', 'free'] = 'flush',
@@ -452,7 +452,7 @@ Equivalent duct diameter $d = \sqrt{4S/\pi}$ (Long Eq. 14.16).
 
 ```python
 fan_casing_attenuation(
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HVACSpectrumResult
 ```
 
@@ -522,7 +522,7 @@ fan_sound_power(
     fan_type: Literal['airfoil_large', 'airfoil_small', 'forward_curved', 'radial_low', 'radial_medium', 'radial_high', 'vaneaxial_hub_low', 'vaneaxial_hub_medium', 'vaneaxial_hub_high', 'tubeaxial_large', 'tubeaxial_small', 'propeller'] = ...,
     relative_efficiency_percent: float = ...,
     blade_frequency: float | None = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
 ) -> HVACSpectrumResult
 
 fan_sound_power(
@@ -535,7 +535,7 @@ fan_sound_power(
     specific_sound_power_level: float | None = ...,
     n_blades: int | np.integer[Any] | None = ...,
     relative_flow: float = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
 ) -> HVACSpectrumResult
 ```
 
@@ -625,7 +625,7 @@ duty point, worth 0,1 dB at the optimum itself.
 
 ```python
 flexible_duct_insertion_loss(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     diameter_m: float,
     length: float,
 ) -> HVACSpectrumResult
@@ -663,7 +663,7 @@ value is returned.
 
 ```python
 flow_noise_bend(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flow_velocity: float,
     area: float,
     height_m: float,
@@ -739,7 +739,7 @@ $\lg St$ is not real below one.
 
 ```python
 flow_noise_straight_duct(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flow_velocity: float,
     area: float,
 ) -> HVACSpectrumResult
@@ -928,7 +928,7 @@ An HVAC input outside the span the table it feeds was tabulated from.
 
 ```python
 lined_circular_duct_attenuation(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     diameter_m: float,
     length: float,
     lining_thickness_m: float,
@@ -968,7 +968,7 @@ ignores it.
 
 ```python
 lined_rectangular_duct_attenuation(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     width_m: float,
     height_m: float,
     length: float,
@@ -1014,7 +1014,7 @@ ducts). Flanking limits the total to 40 dB.
 ```python
 octave_band_limits(
     a_weighted_limit_db: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HVACSpectrumResult
 ```
 
@@ -1076,7 +1076,7 @@ plenum_attenuation(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
-    mean_absorption: ArrayLike,
+    mean_absorption: NumericArrayLike,
     *,
     angle_rad: float = 0.0,
 ) -> float | NDArray[np.float64]
@@ -1171,7 +1171,7 @@ room_effect(
     distance: float,
     room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 room_effect(
@@ -1183,9 +1183,9 @@ room_effect(
 
 room_effect(
     distance: float,
-    room_constant: ArrayLike,
+    room_constant: NumericArrayLike,
     *,
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 
 room_effect(
@@ -1199,7 +1199,7 @@ room_effect(
     distance: float,
     *,
     absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 room_effect(
@@ -1212,8 +1212,8 @@ room_effect(
 room_effect(
     distance: float,
     *,
-    absorption_area: ArrayLike,
-    directivity: ArrayLike = ...,
+    absorption_area: NumericArrayLike,
+    directivity: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -1260,7 +1260,7 @@ guideline's directivity comes from a chart against frequency, which is why
 
 ```python
 section_change_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     upstream_area: float,
     downstream_area: float,
     *,
@@ -1327,7 +1327,7 @@ VDI 2081 treats the two as separate elements of the chain.
 
 ```python
 silencer_self_noise(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     airway_velocity: float,
     n_passages: int | np.integer[Any],
     height_m: float,
@@ -1394,7 +1394,7 @@ correction because the face size enters through `N` and `H`.
 ```python
 split_loss(
     main_area: float,
-    branch_areas: ArrayLike,
+    branch_areas: NumericArrayLike,
     *,
     branch: int | np.integer[Any] = 0,
     model: Literal['ashrae', 'vdi2081'] = 'ashrae',
@@ -1460,10 +1460,10 @@ records.
 splitter_silencer_insertion_loss(
     height_m: float,
     length: float,
-    airway_widths: ArrayLike,
+    airway_widths: NumericArrayLike,
     splitter_thickness_m: float,
     *,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
 ) -> HVACSpectrumResult
 ```
 
@@ -1516,7 +1516,7 @@ noise is a separate quantity, [`silencer_self_noise`](/phonometry/reference/api/
 
 ```python
 unlined_circular_duct_attenuation(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     length: float,
     *,
     diameter_m: float | None = None,
@@ -1559,7 +1559,7 @@ of this element, and it is why `diameter_m` is required there and not here.
 
 ```python
 unlined_rectangular_duct_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     width_m: float,
     height_m: float,
     length: float,

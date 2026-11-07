@@ -47,7 +47,9 @@ from .display import RichDisplay
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    from numpy.typing import ArrayLike, DTypeLike, NDArray
+    from numpy.typing import DTypeLike, NDArray
+
+    from .types import NumericArrayLike
 
 
 def read_only[A: np.ndarray](array: A) -> A:
@@ -81,7 +83,7 @@ def read_only_copy(
 
 @overload
 def read_only_copy(
-    array: ArrayLike,
+    array: NumericArrayLike,
     dtype: DTypeLike | None = None,
     *,
     name: str | None = None,
@@ -90,7 +92,7 @@ def read_only_copy(
 
 
 def read_only_copy(
-    array: ArrayLike | None,
+    array: NumericArrayLike | None,
     dtype: DTypeLike | None = None,
     *,
     name: str | None = None,

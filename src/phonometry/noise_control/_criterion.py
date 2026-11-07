@@ -22,8 +22,9 @@ import numpy as np
 from .._internal.validation import real_array, require_choice, require_scalar
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
+    from .._internal.types import NumericArrayLike
     from ..room.noise_criteria import NCResult, RCResult
 
 #: The room-criterion families a composed workflow can be rated against:
@@ -66,12 +67,16 @@ class PerBandValues(Protocol):
     """
 
     @property
-    def values(self) -> ArrayLike:
+    def values(self) -> NumericArrayLike:
         """The per-band quantity."""
 
 
 def as_band_spectrum(
-    value: ArrayLike | PerBandValues | None, n: int, name: str, *, default: float = 0.0
+    value: NumericArrayLike | PerBandValues | None,
+    n: int,
+    name: str,
+    *,
+    default: float = 0.0,
 ) -> NDArray[np.float64]:
     """Coerce a scalar, array or spectrum result to a finite ``n``-band array.
 
@@ -91,7 +96,7 @@ def as_band_spectrum(
     if value is None:
         require_scalar(default, "default")
         return np.full(n, default, dtype=np.float64)
-    values = cast("ArrayLike", getattr(value, "values", value))
+    values = cast("NumericArrayLike", getattr(value, "values", value))
     arr = np.atleast_1d(real_array(values, name))
     if arr.size == 1:
         arr = np.full(n, float(arr[0]), dtype=np.float64)
@@ -153,7 +158,7 @@ def rating_of(result: CriterionCarrier) -> NCResult | RCResult:
 
 
 def _criterion_curve_at(
-    family: str, index: float, frequencies: ArrayLike
+    family: str, index: float, frequencies: NumericArrayLike
 ) -> np.ndarray:
     """An NC or RC curve resampled onto an arbitrary octave-band grid.
 

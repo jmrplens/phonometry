@@ -66,7 +66,7 @@ from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.resolve import (
@@ -91,7 +91,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
 
 LeadingEdge = Literal["blackman-harris", "cosine-squared"]
 
@@ -498,7 +498,7 @@ def in_situ_reflection_factor(
     return np.asarray(r, dtype=np.complex128)
 
 
-def in_situ_absorption_from_reflection(reflection: ArrayLike) -> Real:
+def in_situ_absorption_from_reflection(reflection: NumericArrayLike) -> Real:
     r"""Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
 
     :math:`\alpha = 1 - \lvert r \rvert^2`. With ``r`` already carrying the
@@ -603,8 +603,8 @@ def in_situ_absorption_coefficient(
 
 
 def absorption_reference_corrected(
-    road_reflection: ArrayLike,
-    reference_reflection: ArrayLike,
+    road_reflection: NumericArrayLike,
+    reference_reflection: NumericArrayLike,
 ) -> Real:
     r"""Reference-corrected road absorption (ISO 13472-1:2002, Annex B).
 
@@ -678,9 +678,9 @@ class OneThirdOctaveAbsorption(OwnsArrays):
 
 
 def one_third_octave_absorption(
-    absorption: ArrayLike,
+    absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
     f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,
@@ -1062,7 +1062,7 @@ def spot_microphone_spacing_bounds(
     return s_min, s_max
 
 
-def check_spot_frequency_range(frequency: ArrayLike) -> None:
+def check_spot_frequency_range(frequency: NumericArrayLike) -> None:
     """Advise when a spot-method frequency is out of range (ISO 13472-2, Scope).
 
     The spot method is valid over the one-third-octave bands 250-1600 Hz
@@ -1088,8 +1088,8 @@ def check_spot_frequency_range(frequency: ArrayLike) -> None:
 
 
 def spot_internal_loss_correction(
-    measured_absorption: ArrayLike,
-    system_absorption: ArrayLike,
+    measured_absorption: NumericArrayLike,
+    system_absorption: NumericArrayLike,
     *,
     clip_negative: bool = True,
 ) -> Real:

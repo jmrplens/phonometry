@@ -36,10 +36,10 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
     from ..room._crowd_noise import CrowdNoiseResult
     from ..room._impulse_response import ImpulseResponseResult, ShapedSweepResult
     from ..room.acoustics import DecayCurve, RoomAcousticsResult
@@ -284,7 +284,7 @@ def _localize_band_axes(ax: Axes, language: Language) -> None:
 
 
 def _band_labels(
-    frequency: ArrayLike | None, count: int, language: Language
+    frequency: NumericArrayLike | None, count: int, language: Language
 ) -> tuple[list[str], bool]:
     """Tick labels for a categorical band axis, and whether they are bands.
 
@@ -400,7 +400,7 @@ def plot_room_acoustics(
 
 
 def _single_number(
-    frequency: ArrayLike | None,
+    frequency: NumericArrayLike | None,
     values: NDArray[np.float64],
     bands: tuple[float, ...] = _SINGLE_NUMBER_BANDS_HZ,
 ) -> float | None:
@@ -417,7 +417,7 @@ def _single_number(
 
 
 def _band_indices(
-    frequency: ArrayLike | None, bands: tuple[float, ...]
+    frequency: NumericArrayLike | None, bands: tuple[float, ...]
 ) -> list[int] | None:
     """Where the named nominal bands sit on a result's band axis."""
     if frequency is None:
@@ -1226,7 +1226,7 @@ def plot_open_plan(
 
 @overload
 def plot_excitation(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
@@ -1238,7 +1238,7 @@ def plot_excitation(
 
 @overload
 def plot_excitation(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
@@ -1250,7 +1250,7 @@ def plot_excitation(
 
 @closes_its_figures
 def plot_excitation(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",

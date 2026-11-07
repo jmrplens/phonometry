@@ -126,7 +126,7 @@ from ._weighting_design import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, DTypeLike, NDArray
+    from numpy.typing import DTypeLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -628,9 +628,9 @@ class WeightingFilter:
     def filter(self, x: Signal) -> Signal: ...
 
     @overload
-    def filter(self, x: ArrayLike) -> np.ndarray: ...
+    def filter(self, x: NumericArrayLike) -> np.ndarray: ...
 
-    def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
+    def filter(self, x: Signal | NumericArrayLike) -> Signal | np.ndarray:
         """Apply the weighting filter to a signal.
 
         :param x: Input signal (1D or 2D [channels, samples]), or a
@@ -713,12 +713,12 @@ def _as_envelope(
 
 @overload
 def _as_envelope(
-    x: ArrayLike, mean_square: np.ndarray, fs: float, mode: Mode
+    x: NumericArrayLike, mean_square: np.ndarray, fs: float, mode: Mode
 ) -> np.ndarray: ...
 
 
 def _as_envelope(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     mean_square: np.ndarray,
     fs: float,
     mode: Mode,
@@ -844,7 +844,7 @@ def weighting_filter(
 
 @overload
 def weighting_filter(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     weighting: Weighting = ...,
     *,
@@ -853,7 +853,7 @@ def weighting_filter(
 
 
 def weighting_filter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     weighting: Weighting = "A",
     *,
@@ -989,7 +989,7 @@ def time_weighting(
 
 @overload
 def time_weighting(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     mode: Mode = ...,
     initial_state: InitialState | NumericArrayLike | None = ...,
@@ -997,7 +997,7 @@ def time_weighting(
 
 
 def time_weighting(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     mode: Mode = "fast",
     initial_state: InitialState | NumericArrayLike | None = None,
@@ -1095,9 +1095,11 @@ class TimeWeighting:
     def process(self, x: Signal) -> TimeWeightedEnvelope: ...
 
     @overload
-    def process(self, x: ArrayLike) -> np.ndarray: ...
+    def process(self, x: NumericArrayLike) -> np.ndarray: ...
 
-    def process(self, x: Signal | ArrayLike) -> TimeWeightedEnvelope | np.ndarray:
+    def process(
+        self, x: Signal | NumericArrayLike
+    ) -> TimeWeightedEnvelope | np.ndarray:
         """Apply time weighting to a block, continuing from the previous block.
 
         The block form of :func:`time_weighting`, and it returns the same
@@ -1142,12 +1144,16 @@ def linkwitz_riley(
 
 @overload
 def linkwitz_riley(
-    x: ArrayLike, fs: float, *, frequency: float, order: int | np.integer[Any] = ...
+    x: NumericArrayLike,
+    fs: float,
+    *,
+    frequency: float,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
 def linkwitz_riley(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     frequency: float,

@@ -94,25 +94,25 @@ box the rating on the field report form.
 
 ```python
 airborne_insulation(
-    l1: ArrayLike,
-    l2: ArrayLike,
-    t2: ArrayLike,
+    l1: NumericArrayLike,
+    l2: NumericArrayLike,
+    t2: NumericArrayLike,
     *,
     area: float,
     volume: float,
     t0: float = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
     source_low_frequency: LowFrequencyProcedure | None = ...,
     receiver_low_frequency: LowFrequencyProcedure | None = ...,
 ) -> AirborneInsulationResult
 
 airborne_insulation(
-    l1: ArrayLike,
-    l2: ArrayLike,
-    t2: ArrayLike,
+    l1: NumericArrayLike,
+    l2: NumericArrayLike,
+    t2: NumericArrayLike,
     *,
     t0: float = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
     source_low_frequency: LowFrequencyProcedure | None = ...,
     receiver_low_frequency: LowFrequencyProcedure | None = ...,
 ) -> AirborneInsulationResult
@@ -288,7 +288,7 @@ verdict row and a footer with the identity block and disclaimer.
 
 ```python
 energy_average_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     axis: int | np.integer[Any] = -1,
 ) -> float | NDArray[np.float64]
@@ -320,16 +320,16 @@ $L = 10 \log_{10}\left( \frac{1}{n} \sum_j 10^{L_j/10} \right)$.
 
 ```python
 facade_insulation(
-    l1_2m: ArrayLike,
-    l2: ArrayLike,
-    t2: ArrayLike,
+    l1_2m: NumericArrayLike,
+    l2: NumericArrayLike,
+    t2: NumericArrayLike,
     *,
     area: float | None = None,
     volume: float | None = None,
-    surface_level: ArrayLike | None = None,
+    surface_level: NumericArrayLike | None = None,
     method: Literal['road_traffic', 'loudspeaker'] = 'loudspeaker',
     t0: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
 ) -> FacadeInsulationResult
 ```
@@ -507,12 +507,12 @@ and a footer with the identity block and disclaimer.
 
 ```python
 impact_insulation(
-    li: ArrayLike,
-    t2: ArrayLike,
+    li: NumericArrayLike,
+    t2: NumericArrayLike,
     *,
     volume: float | None = None,
     t0: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
 ) -> ImpactInsulationResult
 ```

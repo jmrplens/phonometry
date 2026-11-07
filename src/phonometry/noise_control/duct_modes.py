@@ -58,9 +58,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "DuctModeResult",
@@ -379,7 +380,7 @@ def plane_wave_limit(
 
 
 def _warn_above_plane_wave_limit(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     limit: float,
     context: str,
 ) -> NDArray[np.bool_]:

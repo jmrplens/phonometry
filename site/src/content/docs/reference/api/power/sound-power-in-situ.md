@@ -97,14 +97,14 @@ excess_sound_pressure_level(
 
 excess_sound_pressure_level(
     level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    reference_sound_power_levels: ArrayLike,
-    distance: ArrayLike,
+    reference_sound_power_levels: NumericArrayLike,
+    distance: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
     level: float | np.floating[Any] | np.integer[Any],
     reference_sound_power_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    distance: ArrayLike,
+    distance: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
@@ -114,9 +114,9 @@ excess_sound_pressure_level(
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
-    level: ArrayLike,
-    reference_sound_power_levels: ArrayLike,
-    distance: ArrayLike,
+    level: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike,
+    distance: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -157,7 +157,7 @@ traverse of levels and distances.
 ```python
 GradeConditions(
     *,
-    excess_levels: ArrayLike | None = None,
+    excess_levels: NumericArrayLike | None = None,
     directivity_range: float | None = None,
 )
 ```
@@ -353,14 +353,14 @@ while the reference source's margin met it everywhere.
 
 ```python
 sound_energy_in_situ(
-    event_levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    event_levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -421,13 +421,13 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 
 ```python
 sound_power_in_situ(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,

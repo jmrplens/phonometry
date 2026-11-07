@@ -411,7 +411,7 @@ was.
 
 ```python
 PredictedScatteringSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

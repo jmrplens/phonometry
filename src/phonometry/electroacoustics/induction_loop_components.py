@@ -170,9 +170,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 Component = Literal["x", "y", "z", "magnitude"]
 
@@ -477,9 +477,9 @@ def rectangular_loop_field(
     current_a: float,
     length_m: float,
     width_m: float,
-    x_m: ArrayLike,
-    y_m: ArrayLike,
-    z_m: ArrayLike,
+    x_m: NumericArrayLike,
+    y_m: NumericArrayLike,
+    z_m: NumericArrayLike,
     *,
     n_turns: int | np.integer[Any] = 1,
 ) -> LoopField:
@@ -842,7 +842,7 @@ def rectangular_loop_inductance(
     return n * n * _MU_0 / math.pi * bracket
 
 
-def _frequencies_to_read(frequency_hz: ArrayLike) -> np.ndarray:
+def _frequencies_to_read(frequency_hz: NumericArrayLike) -> np.ndarray:
     """Frequencies of any shape to read a tabulated quantity at: positive, finite."""
     f = real_array(frequency_hz, "frequency_hz")
     if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
@@ -880,7 +880,7 @@ class LoopImpedance(OwnsArrays):
         """The frequency where the reactance equals the resistance, in hertz."""
         return self.resistance_ohm / (2.0 * math.pi * self.inductance_h)
 
-    def at(self, frequency_hz: ArrayLike) -> np.ndarray:
+    def at(self, frequency_hz: NumericArrayLike) -> np.ndarray:
         """The magnitude of the impedance at any frequency, in ohms.
 
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
@@ -891,7 +891,9 @@ class LoopImpedance(OwnsArrays):
         f = _frequencies_to_read(frequency_hz)
         return np.hypot(self.resistance_ohm, 2.0 * math.pi * f * self.inductance_h)
 
-    def drive_voltage(self, current_a: float, frequency_hz: ArrayLike) -> np.ndarray:
+    def drive_voltage(
+        self, current_a: float, frequency_hz: NumericArrayLike
+    ) -> np.ndarray:
         """The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 
         :param current_a: RMS loop current, in amperes.
@@ -928,7 +930,7 @@ def loop_impedance(
     resistance_ohm: float,
     inductance_h: float,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> LoopImpedance:
     """The impedance of a loop from its resistance and inductance.
 
@@ -1010,8 +1012,8 @@ class MaxOutputCurrent(OwnsArrays):
 
 
 def max_output_current(
-    resistor_voltage_v: ArrayLike,
-    thd_percent: ArrayLike,
+    resistor_voltage_v: NumericArrayLike,
+    thd_percent: NumericArrayLike,
     *,
     load_resistance_ohm: float,
     rated_thd_percent: float,
@@ -1094,7 +1096,7 @@ def max_output_current(
     )
 
 
-def compliance_voltage(voltage_v: ArrayLike) -> float:
+def compliance_voltage(voltage_v: NumericArrayLike) -> float:
     r"""The compliance voltage of an amplifier (IEC 62489-1:2010 5.4.8).
 
     The voltage across the rated load is recorded "over a period of at least
@@ -1214,7 +1216,7 @@ class AmplifierFrequencyResponse(OwnsArrays):
     output_current_a: np.ndarray
     response_db: np.ndarray
 
-    def at(self, frequency_hz: ArrayLike) -> np.ndarray:
+    def at(self, frequency_hz: NumericArrayLike) -> np.ndarray:
         """The response at any frequency inside the measured range, in dB.
 
         Interpolated linearly against the logarithm of frequency, the way a
@@ -1258,7 +1260,7 @@ class AmplifierFrequencyResponse(OwnsArrays):
 
 
 def amplifier_frequency_response(
-    output_current_a: ArrayLike, *, frequencies: ArrayLike
+    output_current_a: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> AmplifierFrequencyResponse:
     """The frequency response of an amplifier into its rated load (5.4.12).
 
@@ -1434,7 +1436,7 @@ class AGCCharacteristic(OwnsArrays):
 
 
 def agc_characteristic(
-    source_emf_levels: ArrayLike, output_level: ArrayLike
+    source_emf_levels: NumericArrayLike, output_level: NumericArrayLike
 ) -> AGCCharacteristic:
     """The output/input characteristic of an amplifier and its AGC range (5.4.13).
 
@@ -1546,7 +1548,7 @@ class QuadraturePhaseError(OwnsArrays):
 
 
 def quadrature_phase_error(
-    phase_difference_deg: ArrayLike, *, frequencies: ArrayLike
+    phase_difference_deg: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> QuadraturePhaseError:
     """The maximum deviation from 90 degrees between two loop currents (5.4.14).
 
@@ -1657,10 +1659,10 @@ class NeckLoopCharacteristics(OwnsArrays):
 
 
 def neck_loop_characteristics(
-    field_strength_level: ArrayLike,
-    impedance_ohm: ArrayLike,
+    field_strength_level: NumericArrayLike,
+    impedance_ohm: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     input_voltage_v: float,
 ) -> NeckLoopCharacteristics:
     r"""The input voltage, input impedance and frequency response of a neck loop.

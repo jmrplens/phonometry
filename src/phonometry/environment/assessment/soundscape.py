@@ -128,7 +128,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 EnvironmentType = Literal["real", "recorded", "virtual"]
 
@@ -472,7 +472,7 @@ _MIN_PAIRS = 3
 
 
 def _as_responses(
-    values: ArrayLike, name: str, *, integer: bool
+    values: NumericArrayLike, name: str, *, integer: bool
 ) -> NDArray[np.float64]:
     """A 1-D array of scale values, ``NaN`` where a question was left blank.
 
@@ -526,7 +526,7 @@ def _site_groups(
 
 
 def _columns(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[str, NumericArrayLike] | NumericArrayLike,
     default_items: Sequence[tuple[str, ...]],
     single_item: str,
     *,
@@ -624,13 +624,13 @@ def method_a_scale_values[V: RealValues](
 
 
 @overload
-def method_a_scale_values[A: ArrayLike](
+def method_a_scale_values[A: NumericArrayLike](
     positions: A, *, part: int | np.integer[Any]
 ) -> float | NDArray[np.float64]: ...
 
 
 def method_a_scale_values(
-    positions: ArrayLike, *, part: int | np.integer[Any]
+    positions: NumericArrayLike, *, part: int | np.integer[Any]
 ) -> float | NDArray[np.float64]:
     """The scale value of a ticked box of Method A (ISO/TS 12913-3 Table A.1).
 
@@ -732,7 +732,7 @@ class MethodASummary(OwnsArrays):
 
 
 def method_a_summary(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[str, NumericArrayLike] | NumericArrayLike,
     *,
     part: int,
     sites: ArrayLike | Sequence[object] | None = None,
@@ -907,7 +907,7 @@ class PleasantnessEventfulness(OwnsArrays):
 
 
 def pleasantness_eventfulness(
-    scale_values: Mapping[AffectiveQuality, ArrayLike] | ArrayLike,
+    scale_values: Mapping[AffectiveQuality, NumericArrayLike] | NumericArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
     central_tendency: Literal["median", "mean"] = "median",
@@ -963,7 +963,7 @@ def pleasantness_eventfulness(
                 f"{sorted(missing)}."
             )
             raise ValueError(msg)
-        ordered: dict[str, ArrayLike] = {
+        ordered: dict[str, NumericArrayLike] = {
             name: scale_values[name] for name in PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
         }
         _, matrix = _columns(ordered, [], "", integer=False)
@@ -1084,7 +1084,7 @@ class SoundscapeCorrelation(OwnsArrays):
 
 
 def _paired(
-    x: ArrayLike, y: ArrayLike
+    x: NumericArrayLike, y: NumericArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Two finite 1-D arrays of one length, at least three pairs, not constant."""
     arrays = []
@@ -1136,8 +1136,8 @@ def _tie_term(ranks: NDArray[np.float64]) -> float:
 
 
 def spearman_rank_correlation(
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     *,
     alternative: Literal["two-sided", "greater", "less"] = "two-sided",
 ) -> SoundscapeCorrelation:
@@ -1217,8 +1217,8 @@ def spearman_rank_correlation(
 
 
 def pearson_correlation(
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     *,
     alternative: Literal["two-sided", "greater", "less"] = "two-sided",
 ) -> SoundscapeCorrelation:
@@ -1285,12 +1285,14 @@ def method_b_scale_values[V: RealValues](marked_fraction: V) -> NDArray[np.float
 
 
 @overload
-def method_b_scale_values[A: ArrayLike](
+def method_b_scale_values[A: NumericArrayLike](
     marked_fraction: A,
 ) -> float | NDArray[np.float64]: ...
 
 
-def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.float64]:
+def method_b_scale_values(
+    marked_fraction: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     """The scale value of a mark on a Method B scale (ISO/TS 12913-3 B.2).
 
     A continuous-category scale of Figure C.7 runs from its left-hand tick
@@ -1399,7 +1401,7 @@ class MethodBSummary(OwnsArrays):
 
 
 def method_b_summary(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[str, NumericArrayLike] | NumericArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
     confidence: float = 0.95,

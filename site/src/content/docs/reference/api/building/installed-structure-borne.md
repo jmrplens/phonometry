@@ -79,10 +79,10 @@ multi-junction adjustment `dK` of clause F.1
 
 ```python
 coupling_term(
-    source_mobility: ArrayLike,
-    receiver_mobility: ArrayLike,
+    source_mobility: NumericArrayLike,
+    receiver_mobility: NumericArrayLike,
     *,
-    transfer_mobility: ArrayLike = 0.0,
+    transfer_mobility: NumericArrayLike = 0.0,
 ) -> np.ndarray
 ```
 
@@ -114,8 +114,8 @@ connection, Formula 19b).
 
 ```python
 coupling_term_force_source(
-    source_mobility: ArrayLike,
-    receiver_mobility: ArrayLike,
+    source_mobility: NumericArrayLike,
+    receiver_mobility: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -145,8 +145,8 @@ $$
 
 ```python
 coupling_term_velocity_source(
-    source_mobility: ArrayLike,
-    receiver_impedance: ArrayLike,
+    source_mobility: NumericArrayLike,
+    receiver_impedance: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -176,8 +176,8 @@ $$
 
 ```python
 installed_power_from_reception_plate(
-    reception_plate_level: ArrayLike,
-    receiver_mobility: ArrayLike,
+    reception_plate_level: NumericArrayLike,
+    receiver_mobility: NumericArrayLike,
     *,
     plate_mobility: float = 5e-06,
 ) -> np.ndarray
@@ -217,11 +217,11 @@ mobility instead of `Y_inf,i` yields the characteristic level
 
 ```python
 installed_source_prediction(
-    characteristic_power_level: ArrayLike,
-    coupling_term: ArrayLike,
+    characteristic_power_level: NumericArrayLike,
+    coupling_term: NumericArrayLike,
     paths: Sequence[Mapping[str, Any]],
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> InstalledSourceResult
 ```
 
@@ -257,8 +257,8 @@ broadcast to the band count).
 
 ```python
 installed_structure_borne_power_level(
-    characteristic_power_level: ArrayLike,
-    coupling_term: ArrayLike,
+    characteristic_power_level: NumericArrayLike,
+    coupling_term: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -430,9 +430,9 @@ REFERENCE_AREA_M2 = 10.0
 
 ```python
 structure_borne_pressure_level_path(
-    installed_power_level: ArrayLike,
-    adjustment_term: ArrayLike,
-    flanking_reduction_index: ArrayLike,
+    installed_power_level: NumericArrayLike,
+    adjustment_term: NumericArrayLike,
+    flanking_reduction_index: NumericArrayLike,
     element_area: float,
     *,
     reference_area: float = 10.0,
@@ -468,11 +468,11 @@ $$
 
 ```python
 structure_to_airborne_adjustment(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     critical_frequency: float,
     mass_per_area: float,
     *,
-    radiation_factor: ArrayLike = 1.0,
+    radiation_factor: NumericArrayLike = 1.0,
 ) -> np.ndarray
 ```
 
@@ -539,9 +539,9 @@ TABLE_F1_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 400
 
 ```python
 tapping_machine_characteristic_power_level(
-    force_level: ArrayLike,
+    force_level: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -581,9 +581,9 @@ of Table F.1 against its own printed "re 1 pN" caption.
 
 ```python
 tapping_machine_coupling_term(
-    receiver_mobility: ArrayLike,
+    receiver_mobility: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     hammer_mass: float = 0.5,
 ) -> np.ndarray
 ```
@@ -639,7 +639,7 @@ Feed them to [`tapping_machine_characteristic_power_level`](/phonometry/referenc
 
 ```python
 tapping_machine_force_level_estimate(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     fraction: Literal[1, 3] | np.integer[Any] = 1,
 ) -> np.ndarray
@@ -678,7 +678,9 @@ bands the standard does not tabulate.
 ## total_structure_borne_pressure_level
 
 ```python
-total_structure_borne_pressure_level(path_levels: ArrayLike) -> np.ndarray
+total_structure_borne_pressure_level(
+    path_levels: NumericArrayLike,
+) -> np.ndarray
 ```
 
 Combine path sound pressure levels energetically (Formula 17).
@@ -707,7 +709,7 @@ $$
 typical_element_mobility(
     structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
     *,
-    frequency: ArrayLike | None = None,
+    frequency: NumericArrayLike | None = None,
     mass: float | None = None,
     density: float | None = None,
     longitudinal_velocity: float | None = None,

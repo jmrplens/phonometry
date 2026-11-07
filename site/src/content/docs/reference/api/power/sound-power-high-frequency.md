@@ -122,7 +122,7 @@ in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
 
 ```python
 air_absorption_np_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -165,7 +165,7 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 
 ```python
 free_field_absorption_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     radius: float,
     temperature_c: float,
@@ -260,10 +260,10 @@ standard applies and no A-weighted level is asked for.
 
 ```python
 high_frequency_sound_power(
-    pressure_levels: ArrayLike,
+    pressure_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    room_constant: ArrayLike,
+    frequencies: NumericArrayLike,
+    room_constant: NumericArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     tonal: bool = False,
@@ -305,11 +305,11 @@ clause 7).
 
 ```python
 high_frequency_sound_power_comparison(
-    pressure_levels: ArrayLike,
+    pressure_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_pressure_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    frequencies: NumericArrayLike,
+    reference_pressure_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     noise_bandwidth_hz: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -431,7 +431,7 @@ carry.
 
 ```python
 min_analyzer_bandwidth(
-    tone_frequency_hz: ArrayLike,
+    tone_frequency_hz: NumericArrayLike,
     *,
     microphone_speed_m_s: float,
     speed_of_sound: float,
@@ -467,7 +467,7 @@ summed with [`tone_level_from_sidebands`](/phonometry/reference/api/power/sound-
 
 ```python
 room_absorption_coefficient(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
     volume: float,
     surface_area: float,
@@ -503,7 +503,7 @@ constant is the 0,16 the formula prints.
 
 ```python
 room_constant_from_air_absorption(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     volume: float,
     surface_area: float,
@@ -548,7 +548,7 @@ longer negligible there and the measured reverberation time of
 
 ```python
 room_constant_from_reverberation_time(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
     volume: float,
     surface_area: float,
@@ -581,7 +581,7 @@ the room constant of the method of clause 6. It goes into
 ## tone_level_from_sidebands
 
 ```python
-tone_level_from_sidebands(sideband_levels: ArrayLike) -> float
+tone_level_from_sidebands(sideband_levels: NumericArrayLike) -> float
 ```
 
 Total level of a tone from its sideband levels (ISO 9295 Formula (3)).

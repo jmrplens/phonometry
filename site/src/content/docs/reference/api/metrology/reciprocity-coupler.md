@@ -97,7 +97,7 @@ coupler to be filled with hydrogen or helium.
 
 ```python
 capillary_tube_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     length_m: float,
     radius_m: float,
@@ -228,7 +228,7 @@ GPa·s/m³, the unit of Tables B.1 and B.2.
 
 ```python
 check_coupler(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     *,
@@ -279,7 +279,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 
 ```python
 coupler_parameter_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     microphones: Sequence[ReciprocityMicrophone],
     uncertainties: CouplerInputUncertainties,
@@ -339,7 +339,7 @@ are the length and the radius of the capillary tubes.
 
 ```python
 coupler_transfer_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
     transmitter: ReciprocityMicrophone,
     receiver: ReciprocityMicrophone,
@@ -724,7 +724,7 @@ Pa·s/m³.
 
 ```python
 heat_conduction_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     volume_m3: float,
     surface_area_m2: float,
@@ -857,7 +857,7 @@ IEC61094_2_TABLE_C3 = {800.0: 0.0, 1000.0: -0.002, 1250.0: -0.013, 1600.0: -0.03
 
 ```python
 large_volume_wave_motion_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     speed_of_sound_ratio: float = 1.0,
 ) -> WaveMotionCorrection
@@ -1003,9 +1003,9 @@ cavities (7.3.3.1, Figure C.2).
 
 ```python
 microphone_acoustic_impedance(
-    electrical_admittance_s: ArrayLike,
-    blocked_impedance_ohm: ArrayLike,
-    pressure_sensitivity_v_per_pa: ArrayLike,
+    electrical_admittance_s: NumericArrayLike,
+    blocked_impedance_ohm: NumericArrayLike,
+    pressure_sensitivity_v_per_pa: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -1067,12 +1067,12 @@ A plane-wave coupler: a cylinder of the diameter of the front cavities
 
 ```python
 pressure_reciprocity(
-    electrical_transfer_impedances_ohm: Sequence[ArrayLike],
-    acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
+    electrical_transfer_impedances_ohm: Sequence[NumericArrayLike],
+    acoustic_transfer_impedances: Sequence[NumericArrayLike | CouplerTransferImpedance],
     *,
-    frequencies: ArrayLike,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
 
@@ -1114,13 +1114,13 @@ complex products together, on the branch described in
 
 ```python
 pressure_reciprocity_pair(
-    electrical_transfer_impedance_ohm: ArrayLike,
-    acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
-    sensitivity_ratio: ArrayLike,
+    electrical_transfer_impedance_ohm: NumericArrayLike,
+    acoustic_transfer_impedance: NumericArrayLike | CouplerTransferImpedance,
+    sensitivity_ratio: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
 
@@ -1199,7 +1199,7 @@ times the resonance frequency.
 
 ```python
 ReciprocityMicrophone.acoustic_impedance_pa_s_m3(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -1223,7 +1223,7 @@ $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\ome
 
 ```python
 ReciprocityMicrophone.complex_equivalent_volume_m3(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -1272,7 +1272,7 @@ $r_\mathrm{a} = d/(2\pi f_0 c_\mathrm{a})$, in Pa·s/m³.
 ```python
 temperature_transfer_function(
     length_to_diameter_ratio: float,
-    x: ArrayLike,
+    x: NumericArrayLike,
     *,
     method: Literal['exact', 'approximation'] = 'exact',
 ) -> NDArray[np.complex128]

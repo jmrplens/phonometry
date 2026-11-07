@@ -62,9 +62,10 @@ from .certification import NOY_BANDS_HZ
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 EtaInterpolation = Literal["quadratic", "linear"]
 
@@ -236,7 +237,7 @@ class AircraftBandAttenuation(OwnsArrays):
 
 
 def band_attenuation_arp5534(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     path_length_m: float,
     *,
     temperature_c: float = 25.0,
@@ -488,7 +489,9 @@ class ARP866AAttenuation(OwnsArrays):
             "coefficient_db_per_100m",
         )
 
-    def path_attenuation(self, path_length_m: float | ArrayLike) -> NDArray[np.float64]:
+    def path_attenuation(
+        self, path_length_m: float | NumericArrayLike
+    ) -> NDArray[np.float64]:
         r"""Attenuation over a path, :math:`\alpha \cdot s / 100`, in dB.
 
         ARP 866A gives a rate, so the attenuation is proportional to the path
@@ -557,7 +560,7 @@ _ETA_INTERPOLATION: tuple[EtaInterpolation, ...] = ("quadratic", "linear")
 
 
 def attenuation_arp866a(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,

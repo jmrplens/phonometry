@@ -90,10 +90,9 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
     from ...fluids import Fluid
 
 Geometry = Literal["square", "slit"]
@@ -197,7 +196,7 @@ class EffectiveFluidProperties(OwnsArrays):
 
 
 def slit_effective_properties(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     slit_height_m: float,
     fluid: Fluid = ABSORBER_AIR,
@@ -249,7 +248,7 @@ def slit_effective_properties(
 
 
 def rectangular_duct_properties(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     side_m: float,
     fluid: Fluid = ABSORBER_AIR,
@@ -447,7 +446,7 @@ def _square_resonator_ducts(
 
 
 def helmholtz_resonator_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     resonator: HelmholtzResonator,
     *,
     slit_height_m: float | None = None,
@@ -708,7 +707,7 @@ def _matmul(a: Complex, b: Complex) -> Complex:
 
 
 def slit_helmholtz_absorber(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     resonators: HelmholtzResonator | Sequence[HelmholtzResonator],
     *,
     slit_height_m: float,

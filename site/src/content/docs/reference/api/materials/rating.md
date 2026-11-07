@@ -190,7 +190,7 @@ full ISO 354 one-third-octave `alpha_s` table with the octave
 
 ```python
 practical_absorption_coefficient(
-    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -239,7 +239,7 @@ REFERENCE_CURVE = {250: 0.8, 500: 1.0, 1000: 1.0, 2000: 1.0, 4000: 0.9}
 
 ```python
 weighted_absorption(
-    alpha_p: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    alpha_p: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> AbsorptionRatingResult
 ```
 
@@ -269,7 +269,7 @@ unfavourable deviations (measured below the shifted curve) is at most
 
 ```python
 weighted_absorption_from_third_octave(
-    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> AbsorptionRatingResult
 ```
 

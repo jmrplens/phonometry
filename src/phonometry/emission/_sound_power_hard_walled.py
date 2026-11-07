@@ -111,10 +111,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -192,7 +191,7 @@ _TABLE2_OTHER_ROOM_LOCATIONS = 2
 
 
 def _octave_frequencies(
-    frequencies: ArrayLike, n_bands: int, table: str = f"{_STANDARD}, Table B.1"
+    frequencies: NumericArrayLike, n_bands: int, table: str = f"{_STANDARD}, Table B.1"
 ) -> np.ndarray:
     """The nominal octave mid-band frequencies, one per band, all in Table B.1,
     distinct and ascending.
@@ -230,7 +229,7 @@ def _octave_frequencies(
     return freqs
 
 
-def _finite(value: ArrayLike, name: str, ndims: tuple[int, ...]) -> np.ndarray:
+def _finite(value: NumericArrayLike, name: str, ndims: tuple[int, ...]) -> np.ndarray:
     """A finite, non-empty float array of one of the admissible ranks.
 
     :raises ValueError: naming the argument, for any other rank or a
@@ -595,7 +594,7 @@ def _source_grid(arr: np.ndarray) -> tuple[np.ndarray, bool]:
 
 
 def _position_mean(
-    value: ArrayLike, name: str, n_positions: int, n_bands: int
+    value: NumericArrayLike, name: str, n_positions: int, n_bands: int
 ) -> np.ndarray:
     """The energy mean over the microphone positions of a ``(NB,)`` spectrum
     already averaged, or of one ``(NM, NB)`` row per position (Eq. 11, 12).
@@ -680,11 +679,11 @@ class _Reference:
     read too.
     """
 
-    reference_levels: ArrayLike
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration
-    frequencies: ArrayLike
-    background_levels: ArrayLike | None
-    reference_background_levels: ArrayLike | None
+    reference_levels: NumericArrayLike
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration
+    frequencies: NumericArrayLike
+    background_levels: NumericArrayLike | None
+    reference_background_levels: NumericArrayLike | None
     temperature_c: float
     static_pressure_kpa: float
     sigma_omc_db: float | None
@@ -805,13 +804,13 @@ def _determine(
 
 
 def sound_power_hard_walled(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -948,15 +947,15 @@ def _event_grid(
 
 
 def sound_energy_hard_walled(
-    event_levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    event_levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -1308,12 +1307,12 @@ class HardWalledRoomCheck(OwnsArrays):
 
 
 def check_hard_walled_room(
-    orientation_levels: ArrayLike,
+    orientation_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
-    reference_box_m: ArrayLike,
-    absorption_coefficients: ArrayLike | None = None,
+    reference_box_m: NumericArrayLike,
+    absorption_coefficients: NumericArrayLike | None = None,
 ) -> HardWalledRoomCheck:
     r"""Is this room a hard-walled test room? ISO 3743-1:2010, 4.2 to 4.4.
 
@@ -1522,7 +1521,7 @@ class SourceLocationPlan(OwnsArrays):
 
 
 def hard_walled_source_locations(
-    levels: ArrayLike, *, frequencies: ArrayLike
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> SourceLocationPlan:
     r"""The number of source locations from the preliminary survey of
     ISO 3743-1:2010, 7.4 (Table 2).

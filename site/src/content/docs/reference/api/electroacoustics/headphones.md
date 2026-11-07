@@ -224,7 +224,7 @@ of 8.3.4 with the level of the whole signal
 
 ```python
 check_limiting_test_signal(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> LimitingTestSignalCheck
 ```
@@ -261,9 +261,9 @@ peak over its RMS against the two limits.
 
 ```python
 coupler_frequency_response(
-    sound_pressure_level: ArrayLike,
+    sound_pressure_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     rated_frequency_range_hz: tuple[float, float] | None = None,
 ) -> CouplerFrequencyResponse
 ```
@@ -376,10 +376,10 @@ The level relative to its value at a reference frequency, in dB.
 
 ```python
 crosstalk_attenuation(
-    driven_level: ArrayLike,
-    other_level: ArrayLike,
+    driven_level: NumericArrayLike,
+    other_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> CrosstalkAttenuation
 ```
 
@@ -468,10 +468,10 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 ear_canal_frequency_response(
-    earphone_levels: ArrayLike,
-    sound_field_levels: ArrayLike,
+    earphone_levels: NumericArrayLike,
+    sound_field_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     reference_frequency_hz: float = 500.0,
 ) -> EarCanalFrequencyResponse
 ```
@@ -711,10 +711,10 @@ EARPHONE_TYPES = {'C': 'circumaural', 'E': 'intra-concha', 'H': 'earshell', 'I':
 
 ```python
 field_comparison_response(
-    field_level: ArrayLike,
-    source_emf_v: ArrayLike,
+    field_level: NumericArrayLike,
+    source_emf_v: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: Literal['free', 'diffuse'],
     reference_frequency_hz: float = 1000.0,
 ) -> FieldComparisonResponse
@@ -1147,12 +1147,12 @@ Spaces around the hyphens are ignored, so the clause's own layout,
 
 ```python
 program_characteristic_voltage(
-    source_emf_v: ArrayLike,
-    band_levels: ArrayLike,
+    source_emf_v: NumericArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     weighting: Literal['A', 'Z'] = 'Z',
-    free_field_response_db: ArrayLike | None = None,
+    free_field_response_db: NumericArrayLike | None = None,
 ) -> ProgramCharacteristicVoltage
 ```
 
@@ -1190,11 +1190,11 @@ measurements".
 
 ```python
 program_signal_level(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     weighting: Literal['A', 'Z'] = 'Z',
-    free_field_response_db: ArrayLike | None = None,
+    free_field_response_db: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -1326,8 +1326,8 @@ The e.m.f. that gives 94 dB in each fitting, in volts (RMS).
 
 ```python
 protection_voltage(
-    source_emf_v: ArrayLike,
-    sound_pressure_level: ArrayLike,
+    source_emf_v: NumericArrayLike,
+    sound_pressure_level: NumericArrayLike,
 ) -> ProtectionVoltage
 ```
 
@@ -1526,9 +1526,9 @@ verify_ear_canal_microphone(
     entrance_area_mm2: float,
     canal_section_area_mm2: float,
     volume_mm3: float,
-    pink_noise_band_levels: ArrayLike,
-    open_levels: ArrayLike,
-    sealed_levels: ArrayLike,
+    pink_noise_band_levels: NumericArrayLike,
+    open_levels: NumericArrayLike,
+    sealed_levels: NumericArrayLike,
     ear_canal_area_mm2: float = 45.0,
 ) -> EarCanalMicrophoneVerification
 ```
@@ -1571,9 +1571,9 @@ certificate, are not numbers.
 
 ```python
 verify_rated_impedance(
-    impedance_ohm: ArrayLike,
+    impedance_ohm: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     rated_impedance_ohm: float,
     rated_frequency_range_hz: tuple[float, float],
 ) -> RatedImpedanceVerification

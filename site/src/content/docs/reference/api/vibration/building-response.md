@@ -290,7 +290,7 @@ height_fundamental_frequency(
 ) -> NDArray[np.float64]
 
 height_fundamental_frequency(
-    height_m: ArrayLike,
+    height_m: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 

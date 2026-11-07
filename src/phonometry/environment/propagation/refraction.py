@@ -71,9 +71,10 @@ from ...materials import ABSORBER_AIR
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
@@ -141,7 +142,7 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
         require_ranks(self, heights_m=1, speeds_of_sound=1)
         require_same_length(self, "heights_m", "speeds_of_sound", axis="profile node")
 
-    def speed_at(self, height_m: ArrayLike) -> NDArray[np.float64]:
+    def speed_at(self, height_m: NumericArrayLike) -> NDArray[np.float64]:
         """Piecewise-linear effective sound speed at one or more heights.
 
         :raises TypeError: if ``height_m`` holds a text or a value that is not a real
@@ -488,7 +489,7 @@ def atmospheric_ray_paths(
     profile: EffectiveSoundSpeedProfile,
     *,
     source_height_m: float,
-    launch_angles_deg: ArrayLike,
+    launch_angles_deg: NumericArrayLike,
     max_range: float = 1000.0,
     n_steps: int | np.integer[Any] = 2000,
 ) -> AtmosphericRayResult:
@@ -691,7 +692,7 @@ class AtmosphericPEResult(OwnsArrays):
 
 def _resolve_pe_impedance(
     frequency: float,
-    impedance: ArrayLike | PorousMediumResult | None,
+    impedance: NumericArrayLike | PorousMediumResult | None,
     flow_resistivity: float | None,
     model: str,
     fluid: Fluid,
@@ -709,7 +710,7 @@ def atmospheric_parabolic_equation(
     profile: EffectiveSoundSpeedProfile,
     *,
     source_height_m: float,
-    impedance: ArrayLike | PorousMediumResult | None = None,
+    impedance: NumericArrayLike | PorousMediumResult | None = None,
     flow_resistivity_pa_s_m2: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     max_range: float = 1000.0,

@@ -95,10 +95,10 @@ from .._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "PistonDirectivity",
@@ -124,10 +124,10 @@ def piston_resistance[V: RealValues](x: V) -> NDArray[np.float64]: ...
 
 
 @overload
-def piston_resistance[A: ArrayLike](x: A) -> float | NDArray[np.float64]: ...
+def piston_resistance[A: NumericArrayLike](x: A) -> float | NDArray[np.float64]: ...
 
 
-def piston_resistance(x: ArrayLike) -> float | NDArray[np.float64]:
+def piston_resistance(x: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Piston resistance function :math:`R_1(x) = 1 - 2 J_1(x) / x`.
 
     The real part of the normalized radiation impedance of a baffled circular
@@ -161,10 +161,10 @@ def piston_reactance[V: RealValues](x: V) -> NDArray[np.float64]: ...
 
 
 @overload
-def piston_reactance[A: ArrayLike](x: A) -> float | NDArray[np.float64]: ...
+def piston_reactance[A: NumericArrayLike](x: A) -> float | NDArray[np.float64]: ...
 
 
-def piston_reactance(x: ArrayLike) -> float | NDArray[np.float64]:
+def piston_reactance(x: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Piston reactance function :math:`X_1(x) = 2 H_1(x) / x` (``H1`` Struve
     order 1).
 
@@ -195,7 +195,7 @@ def piston_directivity[S1: RealScalar, S2: RealScalar](ka: S1, theta: S2) -> flo
 
 
 @overload
-def piston_directivity[V: RealValues, A2: ArrayLike](
+def piston_directivity[V: RealValues, A2: NumericArrayLike](
     ka: V, theta: A2
 ) -> NDArray[np.float64]: ...
 
@@ -207,12 +207,14 @@ def piston_directivity[S1: RealScalar, V: RealValues](
 
 
 @overload
-def piston_directivity[A1: ArrayLike, A2: ArrayLike](
+def piston_directivity[A1: NumericArrayLike, A2: NumericArrayLike](
     ka: A1, theta: A2
 ) -> float | NDArray[np.float64]: ...
 
 
-def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> float | NDArray[np.float64]:
+def piston_directivity(
+    ka: NumericArrayLike, theta: NumericArrayLike
+) -> float | NDArray[np.float64]:
     r"""Far-field directivity :math:`D = 2 J_1(ka \sin\theta) / (ka \sin\theta)`.
 
     The pressure amplitude of a baffled circular piston relative to its
@@ -341,9 +343,9 @@ class PistonDirectivity(OwnsArrays):
 
 
 def piston_directivity_pattern(
-    ka: ArrayLike,
+    ka: NumericArrayLike,
     *,
-    angles_rad: ArrayLike | None = None,
+    angles_rad: NumericArrayLike | None = None,
 ) -> PistonDirectivity:
     r"""Far-field directivity pattern of one or more baffled circular pistons.
 
@@ -568,11 +570,11 @@ class RadiatingPistonResult(OwnsArrays):
 
 def radiating_piston(
     radius: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-    angles_rad: ArrayLike | None = None,
+    angles_rad: NumericArrayLike | None = None,
 ) -> RadiatingPistonResult:
     r"""Radiation impedance and directivity of a rigid baffled circular
     piston.

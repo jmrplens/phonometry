@@ -57,10 +57,9 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
     from ...fluids import Fluid
 
 ResonatorGeometry = Literal["square", "slit"]
@@ -205,7 +204,7 @@ def _check_panel(
 
 
 def metadiffuser_reflection(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth_m: float,
@@ -283,7 +282,7 @@ def metadiffuser_polar_response(
     *,
     depth_m: float,
     period_m: float,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
+    angles_deg: NumericArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     resonator_geometry: ResonatorGeometry = "slit",
@@ -348,12 +347,12 @@ def metadiffuser_polar_response(
 
 
 def metadiffuser_diffusion_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth_m: float,
     period_m: float,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
+    angles_deg: NumericArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     resonator_geometry: ResonatorGeometry = "slit",

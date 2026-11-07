@@ -77,9 +77,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Guidance = Literal["nmfs-2024", "nmfs-2018", "southall-2019"]
 
@@ -691,7 +692,7 @@ class AuditoryWeightingResult(OwnsArrays):
 
 
 def _positive_frequencies(
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
     name: str = "frequency_hz",
 ) -> NDArray[np.float64]:
     f = np.atleast_1d(real_array(frequency_hz, name, copy=True))
@@ -705,7 +706,7 @@ def _positive_frequencies(
 
 
 def auditory_weighting(
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
     group: HearingGroup,
     *,
     guidance: Guidance = "nmfs-2024",
@@ -1139,10 +1140,10 @@ def _require_margins_restate(result: WeightedExposureResult) -> None:
 
 
 def weighted_exposure(
-    band_sel: ArrayLike,
+    band_sel: NumericArrayLike,
     group: HearingGroup,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies_hz: NumericArrayLike,
     guidance: Guidance = "nmfs-2024",
     impulsive: bool = True,
     n_events: int | np.integer[Any] = 1,

@@ -135,7 +135,7 @@ band, dB.
 
 ```python
 circular_aperture_transmission_coefficient(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     radius: float,
     depth: float,
     *,
@@ -167,8 +167,8 @@ Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 
 ```python
 composite_transmission_loss(
-    areas: ArrayLike,
-    reduction_indices: ArrayLike,
+    areas: NumericArrayLike,
+    reduction_indices: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -292,7 +292,7 @@ because the end correction `e` depends weakly on frequency.
 
 ```python
 slit_transmission_coefficient(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     width_m: float,
     depth: float,
     *,
@@ -327,7 +327,7 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 ## transmission_loss_from_coefficient
 
 ```python
-transmission_loss_from_coefficient(tau: ArrayLike) -> np.ndarray
+transmission_loss_from_coefficient(tau: NumericArrayLike) -> np.ndarray
 ```
 
 Sound reduction index $R = -10 \log_{10}(\tau)$ from a transmission

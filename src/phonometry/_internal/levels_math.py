@@ -16,18 +16,20 @@ import numpy as np
 from .validation import real_array
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from .types import NumericArrayLike
 
 
 @overload
-def energy_mean(levels: ArrayLike, axis: None = None) -> float: ...
+def energy_mean(levels: NumericArrayLike, axis: None = None) -> float: ...
 
 
 @overload
-def energy_mean(levels: ArrayLike, axis: int) -> np.ndarray: ...
+def energy_mean(levels: NumericArrayLike, axis: int) -> np.ndarray: ...
 
 
-def energy_mean(levels: ArrayLike, axis: int | None = None) -> np.ndarray | float:
+def energy_mean(
+    levels: NumericArrayLike, axis: int | None = None
+) -> np.ndarray | float:
     """Energy (mean-square) average of decibel levels.
 
     Computes ``10 lg( (1/n) sum_i 10^(Li/10) )`` along *axis*.
@@ -45,14 +47,14 @@ def energy_mean(levels: ArrayLike, axis: int | None = None) -> np.ndarray | floa
 
 
 @overload
-def energy_sum(levels: ArrayLike, axis: None = None) -> float: ...
+def energy_sum(levels: NumericArrayLike, axis: None = None) -> float: ...
 
 
 @overload
-def energy_sum(levels: ArrayLike, axis: int) -> np.ndarray: ...
+def energy_sum(levels: NumericArrayLike, axis: int) -> np.ndarray: ...
 
 
-def energy_sum(levels: ArrayLike, axis: int | None = None) -> np.ndarray | float:
+def energy_sum(levels: NumericArrayLike, axis: int | None = None) -> np.ndarray | float:
     """Energetic sum of decibel levels.
 
     Computes ``10 lg( sum_i 10^(Li/10) )`` along *axis*.
@@ -71,18 +73,18 @@ def energy_sum(levels: ArrayLike, axis: int | None = None) -> np.ndarray | float
 
 @overload
 def weighted_energy_mean(
-    levels: ArrayLike, weights: ArrayLike, axis: None = None
+    levels: NumericArrayLike, weights: NumericArrayLike, axis: None = None
 ) -> float: ...
 
 
 @overload
 def weighted_energy_mean(
-    levels: ArrayLike, weights: ArrayLike, axis: int
+    levels: NumericArrayLike, weights: NumericArrayLike, axis: int
 ) -> np.ndarray: ...
 
 
 def weighted_energy_mean(
-    levels: ArrayLike, weights: ArrayLike, axis: int | None = None
+    levels: NumericArrayLike, weights: NumericArrayLike, axis: int | None = None
 ) -> np.ndarray | float:
     """Weighted energy average of decibel levels.
 

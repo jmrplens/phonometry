@@ -125,10 +125,10 @@ if TYPE_CHECKING:
     from collections.abc import Hashable, Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from .uncertainty import Distribution
 
@@ -409,7 +409,7 @@ _RANGE_CLAUSES = (12, 13, 14)
 # ---------------------------------------------------------------------------
 
 
-def _frequency_axis(frequencies: ArrayLike) -> NDArray[np.float64]:
+def _frequency_axis(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """Positive, finite and strictly increasing frequencies.
 
     :raises ValueError: for anything else.
@@ -421,7 +421,9 @@ def _frequency_axis(frequencies: ArrayLike) -> NDArray[np.float64]:
     return frequencies
 
 
-def _band_column(values: ArrayLike, name: str, count: int) -> NDArray[np.float64]:
+def _band_column(
+    values: NumericArrayLike, name: str, count: int
+) -> NDArray[np.float64]:
     """A finite column of one value per frequency, a scalar spread over all.
 
     :raises ValueError: if it is neither a scalar nor one value per frequency.
@@ -439,7 +441,9 @@ def _band_column(values: ArrayLike, name: str, count: int) -> NDArray[np.float64
     return column
 
 
-def _determinations(values: ArrayLike, name: str, count: int) -> NDArray[np.float64]:
+def _determinations(
+    values: NumericArrayLike, name: str, count: int
+) -> NDArray[np.float64]:
     """Readings as a matrix of one row per determination, one column per band.
 
     A scalar is one value for every band, a 1-D array one determination, and a
@@ -600,7 +604,7 @@ def exact_frequencies(
 
 
 def _tolerance_column(
-    tolerance_db: ArrayLike | None, count: int
+    tolerance_db: NumericArrayLike | None, count: int
 ) -> NDArray[np.float64] | None:
     """One tolerance per frequency, positive, infinity allowed; or ``None``.
 
@@ -804,14 +808,14 @@ class AdjustmentValue(OwnsArrays):
 
 
 def adjustment_value(
-    free_field_indicated_level: ArrayLike,
+    free_field_indicated_level: NumericArrayLike,
     calibrator_indicated_level_before: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     calibrator_level: float,
-    incident_level: ArrayLike | None = None,
-    tolerance_db: ArrayLike | None = None,
-    pressure_indicated_level: ArrayLike | None = None,
+    incident_level: NumericArrayLike | None = None,
+    tolerance_db: NumericArrayLike | None = None,
+    pressure_indicated_level: NumericArrayLike | None = None,
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ,
 ) -> AdjustmentValue:
     r"""The adjustment value at the calibration check frequency
@@ -1081,14 +1085,14 @@ class FreeFieldCorrection(OwnsArrays):
 
 
 def _substitution(
-    frequencies: ArrayLike,
-    readings: Mapping[str, ArrayLike],
+    frequencies: NumericArrayLike,
+    readings: Mapping[str, NumericArrayLike],
     *,
     source: Literal["sound_calibrator", "comparison_coupler", "electrostatic_actuator"],
-    reference_correction: ArrayLike,
-    source_level_difference_db: ArrayLike,
+    reference_correction: NumericArrayLike,
+    source_level_difference_db: NumericArrayLike,
     source_difference_name: str,
-    free_field_level_difference: ArrayLike,
+    free_field_level_difference: NumericArrayLike,
     microphones: Sequence[Hashable] | None,
 ) -> FreeFieldCorrection:
     """Formula (D.7) or (E.6): the two responses and the reference correction.
@@ -1140,15 +1144,15 @@ def _substitution(
 
 
 def sound_calibrator_correction(
-    slm_free_field_level: ArrayLike,
-    reference_free_field_level: ArrayLike,
-    slm_calibrator_level: ArrayLike,
-    reference_calibrator_level: ArrayLike,
+    slm_free_field_level: NumericArrayLike,
+    reference_free_field_level: NumericArrayLike,
+    slm_calibrator_level: NumericArrayLike,
+    reference_calibrator_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_free_field_correction: ArrayLike,
-    free_field_level_difference: ArrayLike = 0.0,
-    calibrator_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike,
+    reference_free_field_correction: NumericArrayLike,
+    free_field_level_difference: NumericArrayLike = 0.0,
+    calibrator_level_difference: NumericArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections for use with a multi-frequency sound calibrator
@@ -1226,15 +1230,15 @@ def sound_calibrator_correction(
 
 
 def comparison_coupler_correction(
-    slm_free_field_level: ArrayLike,
-    reference_free_field_level: ArrayLike,
-    slm_coupler_level: ArrayLike,
-    reference_coupler_level: ArrayLike,
+    slm_free_field_level: NumericArrayLike,
+    reference_free_field_level: NumericArrayLike,
+    slm_coupler_level: NumericArrayLike,
+    reference_coupler_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_free_field_correction: ArrayLike,
-    free_field_level_difference: ArrayLike = 0.0,
-    coupler_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike,
+    reference_free_field_correction: NumericArrayLike,
+    free_field_level_difference: NumericArrayLike = 0.0,
+    coupler_level_difference: NumericArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections for use with a comparison coupler
@@ -1303,15 +1307,15 @@ def comparison_coupler_correction(
 
 
 def electrostatic_actuator_correction(
-    slm_free_field_level: ArrayLike,
-    reference_free_field_level: ArrayLike,
-    slm_actuator_level: ArrayLike,
+    slm_free_field_level: NumericArrayLike,
+    reference_free_field_level: NumericArrayLike,
+    slm_actuator_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_sensitivity_level: ArrayLike,
-    reference_channel_gain_db: ArrayLike = 0.0,
-    actuator_level: ArrayLike = 0.0,
-    free_field_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike,
+    reference_sensitivity_level: NumericArrayLike,
+    reference_channel_gain_db: NumericArrayLike = 0.0,
+    actuator_level: NumericArrayLike = 0.0,
+    free_field_level_difference: NumericArrayLike = 0.0,
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
@@ -1879,7 +1883,7 @@ def _maximum_at(frequency: float, clause: int) -> float:
 
 
 def max_expanded_uncertainty(
-    frequencies: ArrayLike, *, clause: int | np.integer[Any]
+    frequencies: NumericArrayLike, *, clause: int | np.integer[Any]
 ) -> NDArray[np.float64]:
     r"""The maximum permitted expanded uncertainty of a correction
     (IEC 62585:2012, clauses 9 to 14).
@@ -2132,19 +2136,19 @@ class CorrectionUncertaintyVerification(OwnsArrays):
 
 
 def _optional_column(
-    values: ArrayLike | None, name: str, count: int
+    values: NumericArrayLike | None, name: str, count: int
 ) -> NDArray[np.float64] | None:
     return None if values is None else _band_column(values, name, count)
 
 
 def verify_correction_uncertainty(
-    expanded_uncertainty_db: ArrayLike,
+    expanded_uncertainty_db: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     clause: int | np.integer[Any],
-    correction: ArrayLike | None = None,
-    coverage_factor: ArrayLike | None = None,
-    correction_range_db: ArrayLike | None = None,
+    correction: NumericArrayLike | None = None,
+    coverage_factor: NumericArrayLike | None = None,
+    correction_range_db: NumericArrayLike | None = None,
 ) -> CorrectionUncertaintyVerification:
     r"""Verify the expanded uncertainties of a set of corrections against the
     maxima of their clause (IEC 62585:2012, clauses 5 and 9 to 14).

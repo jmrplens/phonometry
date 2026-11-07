@@ -95,10 +95,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "REAT_BETWEEN_LABORATORY_UNCERTAINTY",
@@ -272,7 +272,9 @@ _POSITIONS: tuple[SoundFieldPosition, ...] = (
 )
 
 
-def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndarray:
+def _band_axis(
+    frequencies: NumericArrayLike | None, count: int, owner: str
+) -> np.ndarray:
     """The centre frequencies of the test signals, defaulted to those of 4.1.
 
     :param frequencies: The caller's frequencies in hertz, or ``None``.
@@ -289,7 +291,7 @@ def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndar
     return _octave_axis(given, count, owner)
 
 
-def _subject_grid(values: ArrayLike, name: str) -> np.ndarray:
+def _subject_grid(values: NumericArrayLike, name: str) -> np.ndarray:
     """A ``(subjects, bands)`` grid of finite decibel values.
 
     :param values: One row per test subject, one column per test signal.
@@ -365,11 +367,11 @@ class RealEarAttenuationResult(OwnsArrays):
 
 
 def real_ear_attenuation(
-    attenuation: ArrayLike | None = None,
+    attenuation: NumericArrayLike | None = None,
     *,
-    open_threshold_levels: ArrayLike | None = None,
-    occluded_threshold_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    open_threshold_levels: NumericArrayLike | None = None,
+    occluded_threshold_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> RealEarAttenuationResult:
     r"""The attenuation of a protector, its spread and its uncertainty (4.6, A.2).
 
@@ -469,7 +471,7 @@ def _frequency_range(frequency: float) -> FrequencyRange:
 
 
 def reat_expanded_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     protector: Protector,
     between_laboratories: bool = False,
@@ -522,13 +524,13 @@ def min_significant_difference[V: RealValues](
 
 
 @overload
-def min_significant_difference[A: ArrayLike](
+def min_significant_difference[A: NumericArrayLike](
     expanded_uncertainty_db: A,
 ) -> float | NDArray[np.float64]: ...
 
 
 def min_significant_difference(
-    expanded_uncertainty_db: ArrayLike,
+    expanded_uncertainty_db: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""The smallest difference between two means that is significant (B.1.1).
 
@@ -658,7 +660,7 @@ class AttenuationDifferenceResult(OwnsArrays):
         return plot_attenuation_difference(self, ax=ax, language=language, **kwargs)
 
 
-def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
+def _band_values(values: NumericArrayLike, count: int | None, name: str) -> np.ndarray:
     """A one-dimensional array of finite decibel values, one per band.
 
     :param values: The values, or a scalar to broadcast over ``count`` bands.
@@ -682,8 +684,8 @@ def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
 
 
 def _mean_and_uncertainty(
-    measurement: ArrayLike | RealEarAttenuationResult,
-    uncertainty: ArrayLike | None,
+    measurement: NumericArrayLike | RealEarAttenuationResult,
+    uncertainty: NumericArrayLike | None,
     which: str,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
     """The mean, the expanded uncertainty and the band axis of one measurement.
@@ -726,12 +728,12 @@ def _mean_and_uncertainty(
 
 
 def assess_attenuation_difference(
-    first: ArrayLike | RealEarAttenuationResult,
-    second: ArrayLike | RealEarAttenuationResult,
+    first: NumericArrayLike | RealEarAttenuationResult,
+    second: NumericArrayLike | RealEarAttenuationResult,
     *,
-    first_expanded_uncertainty_db: ArrayLike | None = None,
-    second_expanded_uncertainty_db: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    first_expanded_uncertainty_db: NumericArrayLike | None = None,
+    second_expanded_uncertainty_db: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> AttenuationDifferenceResult:
     r"""Do two attenuation measurements differ significantly? (Annex B).
 
@@ -963,12 +965,12 @@ class REATSoundFieldCheck(OwnsArrays):
 
 
 def check_reat_sound_field(
-    position_levels: Mapping[SoundFieldPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[SoundFieldPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    rotation_levels: ArrayLike | None = None,
+    rotation_levels: NumericArrayLike | None = None,
     free_field_rejection: float | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> REATSoundFieldCheck:
     r"""Is the sound field of the test site diffuse enough? (4.2.2).
 

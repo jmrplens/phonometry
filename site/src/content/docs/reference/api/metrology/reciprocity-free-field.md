@@ -75,8 +75,8 @@ attenuation: its verdict is whether the arrangement is the recommended one.
 
 ```python
 acoustic_center(
-    distances: ArrayLike,
-    sound_pressures_pa: ArrayLike,
+    distances: NumericArrayLike,
+    sound_pressures_pa: NumericArrayLike,
     *,
     attenuation_np_per_m: float = 0.0,
 ) -> AcousticCenter
@@ -176,7 +176,7 @@ front of it (Annex A).
 
 ```python
 check_free_field_arrangement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     diaphragm_distances_m: Sequence[float],
     microphone_diameter_m: float,
@@ -223,14 +223,14 @@ between 150 mm and 500 mm, which is reported without entering the verdict.
 
 ```python
 free_field_parameter_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     uncertainties: FreeFieldInputUncertainties,
     *,
     diaphragm_distances_m: Sequence[float],
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0, 0.0),
     microphone: int = 1,
     dispersion: bool = True,
 ) -> FreeFieldParameterUncertainty
@@ -276,17 +276,17 @@ is moved by a fraction of itself,
 
 ```python
 free_field_reciprocity(
-    electrical_transfer_impedances_ohm: Sequence[ArrayLike],
+    electrical_transfer_impedances_ohm: Sequence[NumericArrayLike],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diaphragm_distances_m: Sequence[float],
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0, 0.0),
     dispersion: bool = True,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
 
@@ -332,18 +332,18 @@ printed Formula (8) drops (module docstring).
 
 ```python
 free_field_reciprocity_pair(
-    electrical_transfer_impedance_ohm: ArrayLike,
-    sensitivity_ratio: ArrayLike,
+    electrical_transfer_impedance_ohm: NumericArrayLike,
+    sensitivity_ratio: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
-    corrections: Mapping[str, ArrayLike] | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
 
@@ -388,15 +388,15 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 
 ```python
 free_field_transfer_impedance(
-    sensitivity_1_v_per_pa: ArrayLike,
-    sensitivity_2_v_per_pa: ArrayLike,
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
+    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
 ) -> NDArray[np.complex128]
 ```
@@ -536,7 +536,7 @@ The support is at least twenty diameters long, as 6.4 recommends, or `None`.
 FreeFieldInputUncertainties(
     *,
     u_distance_m: float = 0.0,
-    u_acoustic_center_m: ArrayLike = 0.0,
+    u_acoustic_center_m: NumericArrayLike = 0.0,
     u_static_pressure_pa: float = 0.0,
     u_temperature_k: float = 0.0,
     u_relative_humidity_percent: float = 0.0,
@@ -622,7 +622,7 @@ Plot each component against frequency.
 
 ```python
 reciprocity_air_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     static_pressure_pa: float,

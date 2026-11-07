@@ -93,10 +93,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, ReportEngine
+    from ..._internal.types import BandFraction, NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -118,7 +118,7 @@ _S0 = 1.0
 _T0 = 0.5
 
 
-def _as_array(value: ArrayLike, name: str) -> np.ndarray:
+def _as_array(value: NumericArrayLike, name: str) -> np.ndarray:
     """Return *value* as a 1-D float array, raising on non-finite entries."""
     arr = np.atleast_1d(real_array(value, name))
     if not np.all(np.isfinite(arr)):
@@ -159,9 +159,9 @@ class FacadeElement(OwnsArrays):
             *,
             name: str,
             area: float | None = None,
-            r: ArrayLike | None = None,
-            dn_e: ArrayLike | None = None,
-            insertion_loss: ArrayLike | None = None,
+            r: NumericArrayLike | None = None,
+            dn_e: NumericArrayLike | None = None,
+            insertion_loss: NumericArrayLike | None = None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -531,7 +531,7 @@ def facade_sound_reduction(
     volume: float,
     delta_l_fs: float = 0.0,
     fraction: BandFraction | np.integer[Any] | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FacadePredictionResult:
     """Predict façade airborne sound insulation ``D2m,nT`` (EN 12354-3:2000).
 
@@ -597,11 +597,11 @@ def facade_sound_reduction(
 def radiated_sound_power(
     elements: Sequence[FacadeElement],
     *,
-    lp_in: ArrayLike,
+    lp_in: NumericArrayLike,
     area: float,
     c_d: float = -6.0,
     r_prime_cap: float | None = None,
-    octave_bands: ArrayLike | None = None,
+    octave_bands: NumericArrayLike | None = None,
 ) -> RadiatedPowerResult:
     r"""Predict the sound power radiated outside by a segment (EN 12354-4).
 
@@ -806,8 +806,8 @@ def facade_shape_level_difference(
 
 
 def outdoor_level(
-    l_w: ArrayLike,
-    attenuation: ArrayLike,
+    l_w: NumericArrayLike,
+    attenuation: NumericArrayLike,
 ) -> float:
     r"""Exterior level from one or more radiating sides (EN 12354-4 Formula E.1).
 

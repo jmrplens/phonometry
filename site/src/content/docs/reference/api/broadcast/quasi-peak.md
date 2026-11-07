@@ -121,7 +121,7 @@ DBQPS_REFERENCE_V = 0.775
 
 ```python
 quasi_peak_meter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     weighting: Literal['468', 'Z'] = '468',

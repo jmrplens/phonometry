@@ -49,10 +49,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -489,7 +488,7 @@ class HTLANResult(OwnsArrays):
         )
 
 
-def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
+def _select(values: np.ndarray, frequencies: NumericArrayLike | None) -> np.ndarray:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
         return values
@@ -542,7 +541,7 @@ def nipts(
     l_ex: float,
     exposure_duration_years: float,
     fractile: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> NIPTSResult:
     """Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
 
@@ -612,7 +611,9 @@ def nipts(
         )
 
 
-def age_and_noise_threshold(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarray:
+def age_and_noise_threshold(
+    htla: NumericArrayLike, nipts_value: NumericArrayLike
+) -> np.ndarray:
     r"""Combine the age and noise components by Formula (1) (clause 6.1).
 
     :math:`H' = H + N - H N / 120`, the hearing threshold level associated
@@ -644,7 +645,7 @@ def htlan(
     l_ex: float,
     exposure_duration_years: float,
     fractile: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HTLANResult:
     r"""Hearing threshold level associated with age and noise (clause 6.1).
 

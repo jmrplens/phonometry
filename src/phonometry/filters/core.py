@@ -43,10 +43,10 @@ from .frequencies import _genfreqs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealValues
+    from .._internal.types import NumericArrayLike, RealValues
 
 Mode = Literal["rms", "peak"]
 
@@ -244,7 +244,7 @@ def _spectrogram_axis(
         its axis of ``levels``.
     """
     count = levels.shape[-1 if name == "times" else -2]
-    axis = real_array(cast("ArrayLike", value), name)
+    axis = real_array(cast("NumericArrayLike", value), name)
     if axis.ndim != 1:
         msg = (
             f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
@@ -799,7 +799,7 @@ class OctaveFilterBank:
 
     def filter(
         self,
-        x: Signal | ArrayLike,
+        x: Signal | NumericArrayLike,
         *,
         sigbands: bool = False,
         mode: Mode = "rms",
@@ -880,7 +880,7 @@ class OctaveFilterBank:
         return OctaveFilterResult(spl, freq_out)
 
     def _prepare_signal(
-        self, x: Signal | ArrayLike, *, detrend: bool
+        self, x: Signal | NumericArrayLike, *, detrend: bool
     ) -> tuple[np.ndarray, bool]:
         """Coerce the input to a 2D ``[channels, samples]`` array for filtering.
 
@@ -919,7 +919,7 @@ class OctaveFilterBank:
 
     def spectrogram(
         self,
-        x: Signal | ArrayLike,
+        x: Signal | NumericArrayLike,
         window_time: float = 0.125,
         overlap: float = 0.5,
         mode: Mode = "rms",
@@ -1190,7 +1190,7 @@ def _cached_filter_bank(
 
 
 def octave_filter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fraction: float | np.integer[Any] = 1,
     order: int | np.integer[Any] = 6,

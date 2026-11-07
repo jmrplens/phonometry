@@ -177,9 +177,9 @@ if TYPE_CHECKING:
     from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "ACOUSTIC_TEST_FREQUENCIES_HZ",
@@ -935,7 +935,7 @@ def _row(
         where none is allowed.
     """
     try:
-        array = real_array(cast("ArrayLike", values), name)
+        array = real_array(cast("NumericArrayLike", values), name)
     except TypeError:
         msg = f"'{name}' must be a sequence of numbers."
         raise TypeError(msg) from None
@@ -1155,20 +1155,26 @@ if TYPE_CHECKING:
         as every field defaults to ``None``.
         """
 
-        static_pressures_kpa: ArrayLike | None
-        air_temperatures_c: ArrayLike | None
-        relative_humidities_percent: ArrayLike | None
+        static_pressures_kpa: NumericArrayLike | None
+        air_temperatures_c: NumericArrayLike | None
+        relative_humidities_percent: NumericArrayLike | None
         calibration_check_initial_level: float | None
         calibration_check_adjusted_level: float | None
         microphone_self_noise_level: float | None
         electrical_self_noise_levels: Mapping[MeterWeighting, float] | None
-        acoustic_weighting_deviations_db: ArrayLike | None
-        acoustic_weighting_uncertainties_db: ArrayLike | None
-        acoustic_weighting_uncertainties_without_correction_data_db: ArrayLike | None
-        electrical_weighting_deviations_db: Mapping[MeterWeighting, ArrayLike] | None
-        electrical_weighting_uncertainties_db: Mapping[MeterWeighting, ArrayLike] | None
+        acoustic_weighting_deviations_db: NumericArrayLike | None
+        acoustic_weighting_uncertainties_db: NumericArrayLike | None
+        acoustic_weighting_uncertainties_without_correction_data_db: (
+            NumericArrayLike | None
+        )
+        electrical_weighting_deviations_db: (
+            Mapping[MeterWeighting, NumericArrayLike] | None
+        )
+        electrical_weighting_uncertainties_db: (
+            Mapping[MeterWeighting, NumericArrayLike] | None
+        )
         electrical_weighting_uncertainties_without_correction_data_db: (
-            Mapping[MeterWeighting, ArrayLike] | None
+            Mapping[MeterWeighting, NumericArrayLike] | None
         )
         weighting_at_1khz_deviations_db: Mapping[WeightingVersusA, float] | None
         weighting_at_1khz_uncertainties_db: Mapping[WeightingVersusA, float] | None
@@ -1176,19 +1182,19 @@ if TYPE_CHECKING:
         time_weighting_at_1khz_uncertainties_db: Mapping[DisplayVersusF, float] | None
         long_term_stability_db: float | None
         long_term_stability_uncertainty_db: float | None
-        linearity_deviations_db: ArrayLike | None
-        linearity_uncertainties_db: ArrayLike | None
-        linearity_levels: ArrayLike | None
-        linear_operating_range_db: ArrayLike | None
+        linearity_deviations_db: NumericArrayLike | None
+        linearity_uncertainties_db: NumericArrayLike | None
+        linearity_levels: NumericArrayLike | None
+        linear_operating_range_db: NumericArrayLike | None
         linearity_starting_level: float | None
         linearity_overload_level: float | None
         linearity_under_range_level: float | None
-        range_linearity_deviations_db: Mapping[RangeReading, ArrayLike] | None
-        range_linearity_uncertainties_db: Mapping[RangeReading, ArrayLike] | None
-        toneburst_responses_db: Mapping[ToneburstResponse, ArrayLike] | None
-        toneburst_uncertainties_db: Mapping[ToneburstResponse, ArrayLike] | None
-        c_peak_differences: ArrayLike | None
-        c_peak_uncertainties_db: ArrayLike | None
+        range_linearity_deviations_db: Mapping[RangeReading, NumericArrayLike] | None
+        range_linearity_uncertainties_db: Mapping[RangeReading, NumericArrayLike] | None
+        toneburst_responses_db: Mapping[ToneburstResponse, NumericArrayLike] | None
+        toneburst_uncertainties_db: Mapping[ToneburstResponse, NumericArrayLike] | None
+        c_peak_differences: NumericArrayLike | None
+        c_peak_uncertainties_db: NumericArrayLike | None
         c_peak_overload_indicated: bool | np.bool_ | None
         overload_difference: float | None
         overload_uncertainty_db: float | None

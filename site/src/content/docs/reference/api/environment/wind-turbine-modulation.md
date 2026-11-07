@@ -151,9 +151,9 @@ AM_SAMPLE_INTERVAL_S = 0.1
 
 ```python
 amplitude_modulation_band_levels(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     band: int | np.integer[Any],
     weighting: Literal['A', 'Z'],
 ) -> NDArray[np.float64]
@@ -189,7 +189,7 @@ value at each nominal centre frequency.
 
 ```python
 amplitude_modulation_block(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
 ) -> ModulationBlock
@@ -234,10 +234,10 @@ Equation (12) gives it.
 
 ```python
 amplitude_modulation_period(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
-    excluded_blocks: ArrayLike | None = None,
+    excluded_blocks: NumericArrayLike | None = None,
 ) -> ModulationPeriod
 ```
 
@@ -272,12 +272,12 @@ its bin by [`bin_amplitude_modulation`](/phonometry/reference/api/environment/wi
 
 ```python
 bin_amplitude_modulation(
-    ratings_db: ArrayLike,
-    wind_speeds_m_s: ArrayLike,
+    ratings_db: NumericArrayLike,
+    wind_speeds_m_s: NumericArrayLike,
     *,
-    wind_directions_deg: ArrayLike | None = None,
+    wind_directions_deg: NumericArrayLike | None = None,
     bands: Iterable[int | np.integer[Any]] = (1, 2, 3),
-    excluded: ArrayLike | None = None,
+    excluded: NumericArrayLike | None = None,
     sector_width_deg: float = 30.0,
 ) -> BinnedModulation
 ```

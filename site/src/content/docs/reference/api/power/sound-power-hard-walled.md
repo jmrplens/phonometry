@@ -99,12 +99,12 @@ deviation decides how many source locations the determination needs
 
 ```python
 check_hard_walled_room(
-    orientation_levels: ArrayLike,
+    orientation_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
-    reference_box_m: ArrayLike,
-    absorption_coefficients: ArrayLike | None = None,
+    reference_box_m: NumericArrayLike,
+    absorption_coefficients: NumericArrayLike | None = None,
 ) -> HardWalledRoomCheck
 ```
 
@@ -148,9 +148,9 @@ that meet it in words, and the coefficients are optional here.
 
 ```python
 hard_walled_source_locations(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> SourceLocationPlan
 ```
 
@@ -588,15 +588,15 @@ value is still returned.
 
 ```python
 sound_energy_hard_walled(
-    event_levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    event_levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -654,13 +654,13 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 
 ```python
 sound_power_hard_walled(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,

@@ -114,7 +114,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from .._internal.frozen import OwnsArrays, read_only_copy, reduce_with_plain_rows
 from .._internal.validation import (
@@ -139,7 +139,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 #: The device a reactive silencer result describes, as its report names it.
@@ -188,7 +188,7 @@ _Complex = NDArray[np.complex128]
 _FOUR_POLE_NDIM = 3
 
 
-def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
+def _frequencies(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """Validate a strictly positive, finite 1-D frequency grid (Hz)."""
     f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if f.ndim != 1 or f.size == 0:
@@ -200,7 +200,7 @@ def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
     return f
 
 
-def _per_frequency(impedance: ArrayLike, name: str, n_freq: int) -> _Complex:
+def _per_frequency(impedance: NumericArrayLike, name: str, n_freq: int) -> _Complex:
     """Coerce an impedance to one complex value per analysis frequency.
 
     A scalar is held constant over the grid; anything else must already be
@@ -219,7 +219,7 @@ def _per_frequency(impedance: ArrayLike, name: str, n_freq: int) -> _Complex:
 
 
 def duct_matrix(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     area: float,
     *,
@@ -255,7 +255,7 @@ def duct_matrix(
     return t
 
 
-def shunt_matrix(branch_impedance: ArrayLike) -> _Complex:
+def shunt_matrix(branch_impedance: NumericArrayLike) -> _Complex:
     """Four-pole matrix of a side branch of impedance ``Z_b`` (Bies Eq. (8.144)).
 
     :param branch_impedance: Acoustic impedance ``Z_b`` of the branch,
@@ -301,7 +301,7 @@ def _shorting_frequency(
     return real_number(f[index], "f")
 
 
-def cascade(*matrices: ArrayLike) -> _Complex:
+def cascade(*matrices: NumericArrayLike) -> _Complex:
     """Cascade element four-pole matrices from inlet to outlet.
 
     The compound matrix is the ordered product ``T1 @ T2 @ ... @ Tn`` (the
@@ -388,8 +388,8 @@ def transmission_loss(
 def insertion_loss(
     transfer_matrix: _Complex,
     *,
-    source_impedance: ArrayLike,
-    radiation_impedance: ArrayLike,
+    source_impedance: NumericArrayLike,
+    radiation_impedance: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""Insertion loss of a four-pole element for given end impedances.
 
@@ -426,7 +426,7 @@ def insertion_loss(
 
 
 def helmholtz_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     neck_area: float,
     neck_length: float,
     cavity_volume: float,
@@ -472,7 +472,7 @@ def helmholtz_impedance(
 
 
 def quarter_wave_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     area: float,
     *,
@@ -802,8 +802,8 @@ def _result(
     outlet_area: float,
     c: float,
     rho: float,
-    source_impedance: ArrayLike | None,
-    radiation_impedance: ArrayLike | None,
+    source_impedance: NumericArrayLike | None,
+    radiation_impedance: NumericArrayLike | None,
     kind: SilencerKind,
     resonances: NDArray[np.float64] | None = None,
     geometry: Mapping[SilencerDimension, float] | None = None,
@@ -862,15 +862,15 @@ def _result(
 
 
 def expansion_chamber(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     chamber_area: float,
     pipe_area: float,
     *,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult:
     r"""Simple expansion-chamber silencer (Bies Eq. (8.111) / four-pole).
 
@@ -916,7 +916,7 @@ def expansion_chamber(
 
 
 def helmholtz_resonator(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     duct_area: float,
     neck_area: float,
     neck_length: float,
@@ -925,8 +925,8 @@ def helmholtz_resonator(
     resistance: float = 0.0,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult:
     r"""Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 
@@ -982,15 +982,15 @@ def helmholtz_resonator(
 
 
 def quarter_wave_resonator(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     duct_area: float,
     length: float,
     branch_area: float,
     *,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult:
     r"""Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 
@@ -1042,7 +1042,7 @@ def quarter_wave_resonator(
 
 
 def extended_tube_chamber(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     chamber_area: float,
     pipe_area: float,
@@ -1051,8 +1051,8 @@ def extended_tube_chamber(
     outlet_extension: float = 0.0,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult:
     r"""Extended-inlet/outlet expansion chamber (Bies §8.9.7).
 
@@ -1240,7 +1240,7 @@ class SilencerChain:
 
     def __init__(
         self,
-        frequencies: ArrayLike,
+        frequencies: NumericArrayLike,
         *,
         speed_of_sound: float = _C_AIR,
         density: float = _RHO_AIR,
@@ -1303,7 +1303,7 @@ class SilencerChain:
         return self
 
     def shunt(
-        self, branch_impedance: ArrayLike, *, label: str | None = None
+        self, branch_impedance: NumericArrayLike, *, label: str | None = None
     ) -> SilencerChain:
         """Append a side branch of acoustic impedance ``Z_b``.
 
@@ -1339,8 +1339,8 @@ class SilencerChain:
         *,
         inlet_area: float,
         outlet_area: float,
-        source_impedance: ArrayLike | None = None,
-        radiation_impedance: ArrayLike | None = None,
+        source_impedance: NumericArrayLike | None = None,
+        radiation_impedance: NumericArrayLike | None = None,
     ) -> ReactiveSilencerResult:
         """Evaluate the chain into a :class:`ReactiveSilencerResult`.
 

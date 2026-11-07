@@ -30,7 +30,7 @@ sensitivity(
 ) -> float
 
 sensitivity(
-    reference_signal: Signal | ArrayLike,
+    reference_signal: Signal | NumericArrayLike,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     *,
@@ -43,7 +43,7 @@ sensitivity(
 ) -> float
 
 sensitivity(
-    reference_signal: Signal | ArrayLike,
+    reference_signal: Signal | NumericArrayLike,
     target_spl: float,
     reference_pressure_pa: float,
     fs: float,
@@ -56,7 +56,7 @@ sensitivity(
 ) -> float
 
 sensitivity(
-    reference_signal: Signal | ArrayLike,
+    reference_signal: Signal | NumericArrayLike,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: float | None = ...,

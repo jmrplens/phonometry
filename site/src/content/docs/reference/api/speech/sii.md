@@ -247,12 +247,12 @@ fixed disclaimer.
 
 ```python
 speech_intelligibility_index(
-    speech_spectrum: Literal['normal', 'raised', 'loud', 'shout'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray],
-    noise_spectrum: ArrayLike | None = None,
+    speech_spectrum: Literal['normal', 'raised', 'loud', 'shout'] | NumericArrayLike,
+    noise_spectrum: NumericArrayLike | None = None,
     *,
-    threshold: ArrayLike | None = None,
+    threshold: NumericArrayLike | None = None,
     method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'] = 'one-third-octave',
-    band_importance: ArrayLike | None = None,
+    band_importance: NumericArrayLike | None = None,
 ) -> SIIResult
 ```
 

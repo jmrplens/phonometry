@@ -83,10 +83,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, ReportEngine
+    from ..._internal.types import BandFraction, NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -139,7 +138,7 @@ REFERENCE_AREA_M2: float = 10.0
 _REFERENCE_PLATE_MOBILITY: float = 5.0e-6
 
 
-def _positive_real_part(values: ArrayLike, name: str) -> np.ndarray:
+def _positive_real_part(values: NumericArrayLike, name: str) -> np.ndarray:
     """Validate that the real part of a mobility/impedance is positive."""
     arr = complex_array(values, name)
     re = np.real(arr)
@@ -156,7 +155,7 @@ def _positive_real_part(values: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _positive_values(values: ArrayLike, name: str) -> np.ndarray:
+def _positive_values(values: NumericArrayLike, name: str) -> np.ndarray:
     """Validate finite, strictly positive reals, preserving the input shape.
 
     The shape-preserving sibling of
@@ -173,7 +172,7 @@ def _positive_values(values: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _nonzero_magnitude(values: ArrayLike, name: str) -> np.ndarray:
+def _nonzero_magnitude(values: NumericArrayLike, name: str) -> np.ndarray:
     """Validate a finite, non-zero (complex) mobility magnitude."""
     arr = complex_array(values, name)
     mag = np.abs(arr)
@@ -184,10 +183,10 @@ def _nonzero_magnitude(values: ArrayLike, name: str) -> np.ndarray:
 
 
 def coupling_term(
-    source_mobility: ArrayLike,
-    receiver_mobility: ArrayLike,
+    source_mobility: NumericArrayLike,
+    receiver_mobility: NumericArrayLike,
     *,
-    transfer_mobility: ArrayLike = 0.0,
+    transfer_mobility: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Coupling term ``D_C`` for a point excitation (EN 12354-5, Formula 19b/19e).
 
@@ -227,7 +226,7 @@ def coupling_term(
 
 
 def coupling_term_force_source(
-    source_mobility: ArrayLike, receiver_mobility: ArrayLike
+    source_mobility: NumericArrayLike, receiver_mobility: NumericArrayLike
 ) -> np.ndarray:
     r"""Coupling term for a force source, high source mobility (Formula 19c).
 
@@ -250,7 +249,7 @@ def coupling_term_force_source(
 
 
 def coupling_term_velocity_source(
-    source_mobility: ArrayLike, receiver_impedance: ArrayLike
+    source_mobility: NumericArrayLike, receiver_impedance: NumericArrayLike
 ) -> np.ndarray:
     r"""Coupling term for a velocity source, low source mobility (Formula 19d).
 
@@ -318,7 +317,7 @@ _TABLE_D1_FREQUENCY_DEPENDENT: frozenset[str] = frozenset(
 )
 
 
-def _mass_mobility(frequency: ArrayLike, mass: float) -> np.ndarray:
+def _mass_mobility(frequency: NumericArrayLike, mass: float) -> np.ndarray:
     r"""Mobility of a mass (EN 12354-5, Table D.1, row "Mass").
 
     .. math::
@@ -361,7 +360,7 @@ def _bar_end_mobility(
 
 
 def _beam_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     density: float,
     longitudinal_velocity: float,
     thickness: float,
@@ -422,7 +421,7 @@ def _plate_mobility(
 
 
 def _pipe_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     density: float,
     longitudinal_velocity: float,
     thickness: float,
@@ -454,7 +453,7 @@ def _pipe_mobility(
 
 
 def _mass_spring_mobility(
-    frequency: ArrayLike, mass: float, stiffness: float, loss_factor: float
+    frequency: NumericArrayLike, mass: float, stiffness: float, loss_factor: float
 ) -> np.ndarray:
     r"""Mobility of a mass on a spring (Table D.1, row "Mass-spring").
 
@@ -496,7 +495,9 @@ def _mass_spring_mobility(
 
 
 def _table_d1_arguments(
-    structure: Structure, supplied: dict[str, float | None], frequency: ArrayLike | None
+    structure: Structure,
+    supplied: dict[str, float | None],
+    frequency: NumericArrayLike | None,
 ) -> dict[str, float]:
     """Check the quantities supplied for one Table D.1 row against its column.
 
@@ -531,7 +532,7 @@ def _table_d1_arguments(
 def typical_element_mobility(
     structure: Structure,
     *,
-    frequency: ArrayLike | None = None,
+    frequency: NumericArrayLike | None = None,
     mass: float | None = None,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
@@ -743,7 +744,7 @@ def tapping_machine_force_level() -> np.ndarray:
 
 
 def tapping_machine_force_level_estimate(
-    frequency: ArrayLike, *, fraction: BandFraction | np.integer[Any] = 1
+    frequency: NumericArrayLike, *, fraction: BandFraction | np.integer[Any] = 1
 ) -> np.ndarray:
     r"""Closed form printed under Table F.1 for the tapping machine force level.
 
@@ -781,7 +782,7 @@ def tapping_machine_force_level_estimate(
 
 
 def tapping_machine_characteristic_power_level(
-    force_level: ArrayLike, *, frequency: ArrayLike
+    force_level: NumericArrayLike, *, frequency: NumericArrayLike
 ) -> np.ndarray:
     r"""Characteristic power level of the tapping machine (Formula D.9a).
 
@@ -813,9 +814,9 @@ def tapping_machine_characteristic_power_level(
 
 
 def tapping_machine_coupling_term(
-    receiver_mobility: ArrayLike,
+    receiver_mobility: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     hammer_mass: float = TAPPING_HAMMER_MASS_KG,
 ) -> np.ndarray:
     r"""Coupling term of the tapping machine (EN 12354-5, Formula D.9b).
@@ -891,11 +892,11 @@ def multi_junction_adjustment(n_junctions: int | np.integer[Any]) -> float:
 
 
 def structure_to_airborne_adjustment(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     critical_frequency: float,
     mass_per_area: float,
     *,
-    radiation_factor: ArrayLike = 1.0,
+    radiation_factor: NumericArrayLike = 1.0,
 ) -> np.ndarray:
     r"""Adjustment term ``D_sa`` of a supporting element (Formula F.3).
 
@@ -939,8 +940,8 @@ def structure_to_airborne_adjustment(
 
 
 def installed_power_from_reception_plate(
-    reception_plate_level: ArrayLike,
-    receiver_mobility: ArrayLike,
+    reception_plate_level: NumericArrayLike,
+    receiver_mobility: NumericArrayLike,
     *,
     plate_mobility: float = _REFERENCE_PLATE_MOBILITY,
 ) -> np.ndarray:
@@ -987,7 +988,7 @@ def installed_power_from_reception_plate(
 
 
 def installed_structure_borne_power_level(
-    characteristic_power_level: ArrayLike, coupling_term: ArrayLike
+    characteristic_power_level: NumericArrayLike, coupling_term: NumericArrayLike
 ) -> np.ndarray:
     r"""Installed structure-borne power level (EN 12354-5, Formula 18b).
 
@@ -1010,9 +1011,9 @@ def installed_structure_borne_power_level(
 
 
 def structure_borne_pressure_level_path(
-    installed_power_level: ArrayLike,
-    adjustment_term: ArrayLike,
-    flanking_reduction_index: ArrayLike,
+    installed_power_level: NumericArrayLike,
+    adjustment_term: NumericArrayLike,
+    flanking_reduction_index: NumericArrayLike,
     element_area: float,
     *,
     reference_area: float = REFERENCE_AREA_M2,
@@ -1052,7 +1053,7 @@ def structure_borne_pressure_level_path(
     return np.asarray(lp, dtype=np.float64)
 
 
-def total_structure_borne_pressure_level(path_levels: ArrayLike) -> np.ndarray:
+def total_structure_borne_pressure_level(path_levels: NumericArrayLike) -> np.ndarray:
     r"""Combine path sound pressure levels energetically (Formula 17).
 
     .. math::
@@ -1252,11 +1253,11 @@ def _path_pressure_levels(
 
 
 def installed_source_prediction(
-    characteristic_power_level: ArrayLike,
-    coupling_term: ArrayLike,
+    characteristic_power_level: NumericArrayLike,
+    coupling_term: NumericArrayLike,
     paths: Sequence[Mapping[str, Any]],
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> InstalledSourceResult:
     """Predict the installed structure-borne SPL over several paths (EN 12354-5).
 

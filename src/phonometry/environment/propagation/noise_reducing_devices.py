@@ -93,9 +93,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Spectrum = Literal["road", "railway"]
 
@@ -322,7 +323,7 @@ def _round_half_up(value: float) -> int:
 
 
 def _weighted(
-    values: ArrayLike, name: str, spectrum: object
+    values: NumericArrayLike, name: str, spectrum: object
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The band values and the spectrum weights, checked against each other."""
     weights = SPECTRA[require_choice(spectrum, "spectrum", tuple(SPECTRA))]
@@ -349,7 +350,7 @@ def _category(
 
 
 def sound_absorption_rating(
-    absorption_coefficients: ArrayLike, *, spectrum: Spectrum = "road"
+    absorption_coefficients: NumericArrayLike, *, spectrum: Spectrum = "road"
 ) -> RoadDeviceRating:
     r"""``DLα``, the single-number rating of sound absorption.
 
@@ -404,7 +405,7 @@ def sound_absorption_rating(
 
 
 def airborne_insulation_rating(
-    sound_reduction_index: ArrayLike, *, spectrum: Spectrum = "road"
+    sound_reduction_index: NumericArrayLike, *, spectrum: Spectrum = "road"
 ) -> RoadDeviceRating:
     r"""``DL_R``, the single-number rating of airborne sound insulation.
 
@@ -444,7 +445,7 @@ def airborne_insulation_rating(
 
 
 def sound_reflection_rating(
-    reflection_indices: ArrayLike, *, lowest_band_hz: float = 200.0
+    reflection_indices: NumericArrayLike, *, lowest_band_hz: float = 200.0
 ) -> RoadDeviceRating:
     r"""``DL_RI``, the single-number rating of sound reflection.
 

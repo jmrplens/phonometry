@@ -131,9 +131,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .induction_loop_components import AmplifierFrequencyResponse, LoopImpedance
 
 Weighting = Literal["Z", "A"]
@@ -375,7 +375,7 @@ _SMALL_VOLUME_LAYOUTS: tuple[SmallVolumeLayout, ...] = (
 # ---------------------------------------------------------------------------
 
 
-def field_strength_level(field_strength_a_per_m: ArrayLike) -> np.ndarray:
+def field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray:
     r"""The magnetic field strength level, in dB re 400 mA/m (IEC 60118-4:2014 3.1).
 
     .. math::
@@ -394,7 +394,7 @@ def field_strength_level(field_strength_a_per_m: ArrayLike) -> np.ndarray:
     return 20.0 * np.log10(h / REFERENCE_FIELD_STRENGTH_A_PER_M)
 
 
-def field_strength(level: ArrayLike) -> np.ndarray:
+def field_strength(level: NumericArrayLike) -> np.ndarray:
     r"""The magnetic field strength of a level in dB re 400 mA/m, in A/m.
 
     The inverse of :func:`field_strength_level`: -12 dB is the 100 mA/m of
@@ -412,7 +412,7 @@ def field_strength(level: ArrayLike) -> np.ndarray:
     return REFERENCE_FIELD_STRENGTH_A_PER_M * 10.0 ** (level / 20.0)
 
 
-def magnetic_flux_density(field_strength_a_per_m: ArrayLike) -> np.ndarray:
+def magnetic_flux_density(field_strength_a_per_m: NumericArrayLike) -> np.ndarray:
     r"""The magnetic flux density in air of a field strength (IEC 60118-4:2014 E.6).
 
     :math:`B = \mu_0 \mu_\mathrm{r} H` with :math:`\mu_\mathrm{r} = 1` in air,
@@ -432,7 +432,7 @@ def magnetic_flux_density(field_strength_a_per_m: ArrayLike) -> np.ndarray:
     return _MU_0 * h
 
 
-def telecoil_response(angle_deg: ArrayLike) -> np.ndarray:
+def telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray:
     r"""The relative response of a telecoil off its axis, in dB (IEC 60118-4:2014 E.2).
 
     A telecoil follows a cosine law, :math:`20\lg|\cos\theta|`: 3 dB down at
@@ -512,7 +512,7 @@ class FieldStrengthReading(OwnsArrays):
 
 
 def field_strength_meter(
-    x: ArrayLike, fs: int | np.integer[Any], *, weighting: Weighting = "Z"
+    x: NumericArrayLike, fs: int | np.integer[Any], *, weighting: Weighting = "Z"
 ) -> FieldStrengthReading:
     """Read a magnetic field strength record like the true-RMS meter of 6.1.3.
 
@@ -565,7 +565,7 @@ def field_strength_meter(
 # ---------------------------------------------------------------------------
 
 
-def band_limit_response(frequencies: ArrayLike) -> np.ndarray:
+def band_limit_response(frequencies: NumericArrayLike) -> np.ndarray:
     r"""The theoretical response of the band limiting of the pink noise, in dB.
 
     6.4 band-limits the pink noise with third-order Butterworth high-pass and
@@ -882,7 +882,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
 
 
 def assess_background_noise(
-    noise_levels: ArrayLike, *, noise_is_tonal: bool = False
+    noise_levels: NumericArrayLike, *, noise_is_tonal: bool = False
 ) -> BackgroundNoiseAssessment:
     """How quiet is the site magnetically? (IEC 60118-4:2014 7.2).
 
@@ -1080,7 +1080,7 @@ class InductionLoopVerification(RichDisplay):
         return plot_induction_loop_verification(self, ax, language=language, **kwargs)
 
 
-def _levels(values: ArrayLike, name: str) -> np.ndarray:
+def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
     """A non-empty array of finite, real levels, of any shape."""
     arr = real_array(values, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
@@ -1104,7 +1104,7 @@ def _band_requirement(
 
 
 def _frequency_response_requirement(
-    frequencies: ArrayLike, response_db: ArrayLike
+    frequencies: NumericArrayLike, response_db: NumericArrayLike
 ) -> LoopRequirement:
     """The 8.3.7 requirement on responses measured at one or more points."""
     f = require_positive_array(frequencies, "frequencies")
@@ -1138,13 +1138,13 @@ def _frequency_response_requirement(
 
 
 def verify_induction_loop_system(
-    field_strength_levels: ArrayLike,
+    field_strength_levels: NumericArrayLike,
     *,
     specified_level: float = 0.0,
-    frequencies: ArrayLike | None = None,
-    response_db: ArrayLike | None = None,
-    background_noise_levels: ArrayLike | None = None,
-    system_noise_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    response_db: NumericArrayLike | None = None,
+    background_noise_levels: NumericArrayLike | None = None,
+    system_noise_levels: NumericArrayLike | None = None,
     noise_is_tonal: bool = False,
 ) -> InductionLoopVerification:
     """Does an installed loop meet IEC 60118-4:2014 over its useful volume?
@@ -1274,7 +1274,7 @@ def verify_induction_loop_system(
 
 
 def _height_coverage(
-    levels: np.ndarray, heights_m: ArrayLike | None, name: str
+    levels: np.ndarray, heights_m: NumericArrayLike | None, name: str
 ) -> None:
     """Refuse a useful volume of 9.4 that leaves out a height of 9.2 or 9.3.
 
@@ -1314,13 +1314,13 @@ def _height_coverage(
 
 
 def verify_small_volume_system(
-    field_strength_levels: ArrayLike,
+    field_strength_levels: NumericArrayLike,
     *,
     layout: SmallVolumeLayout,
-    heights_m: ArrayLike | None = None,
-    standing_area_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
-    response_db: ArrayLike | None = None,
+    heights_m: NumericArrayLike | None = None,
+    standing_area_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    response_db: NumericArrayLike | None = None,
 ) -> InductionLoopVerification:
     """Does a refuge, call-point or counter loop meet clause 9 as amended?
 

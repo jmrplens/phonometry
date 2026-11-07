@@ -85,8 +85,8 @@ altitude or below 10 degrees C (clauses 8.2.5 and 8.3.6).
 
 ```python
 background_noise_correction(
-    source_levels: ArrayLike,
-    background_levels: ArrayLike,
+    source_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> np.ndarray
 ```
@@ -138,9 +138,9 @@ environmental_correction(
     surface_area: float,
     *,
     absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    reverberation_time: ArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: ArrayLike | None = None,
+    mean_absorption_coefficient: NumericArrayLike | None = None,
     room_surface: float | None = None,
 ) -> NDArray[np.float64]
 
@@ -150,7 +150,7 @@ environmental_correction(
     absorption_area: None = None,
     reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     volume: float | None = None,
-    mean_absorption_coefficient: ArrayLike | None = None,
+    mean_absorption_coefficient: NumericArrayLike | None = None,
     room_surface: float | None = None,
 ) -> NDArray[np.float64]
 
@@ -167,10 +167,10 @@ environmental_correction(
 environmental_correction(
     surface_area: float,
     *,
-    absorption_area: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    absorption_area: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: ArrayLike | None = None,
+    mean_absorption_coefficient: NumericArrayLike | None = None,
     room_surface: float | None = None,
 ) -> float | NDArray[np.float64]
 ```
@@ -221,7 +221,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 
 ```python
 mean_single_event_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     n_events: int | np.integer[Any] | None = None,
 ) -> np.ndarray
@@ -319,7 +319,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 ```python
 plot_microphone_positions(
-    positions: ArrayLike,
+    positions: NumericArrayLike,
     *,
     ax: Axes3D | None = None,
     radius: float | None = None,
@@ -439,10 +439,10 @@ whether it was measured or estimated from the altitude by Eq. (G.2), and
 ```python
 RoomEnvironment(
     *,
-    absorption_area: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    absorption_area: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: ArrayLike | None = None,
+    mean_absorption_coefficient: NumericArrayLike | None = None,
     room_surface: float | None = None,
 )
 ```
@@ -474,7 +474,7 @@ per band with that shape.
 
 ```python
 sound_energy_pressure(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: Literal['hemisphere', 'box'],
     *,
     radius: float | None = None,
@@ -482,9 +482,9 @@ sound_energy_pressure(
     distance: float | None = None,
     n_reflecting_planes: int = 1,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Literal['engineering', 'survey'] = 'engineering',
     sigma_omc_db: float = 0.0,
@@ -561,15 +561,15 @@ The level holds for the meteorological conditions of the test; above
 
 ```python
 sound_power_pressure(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: Literal['hemisphere', 'box'],
     *,
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     n_reflecting_planes: int = 1,
-    background_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Literal['engineering', 'survey'] = 'engineering',
     sigma_omc_db: float = 0.0,

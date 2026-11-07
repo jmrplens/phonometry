@@ -87,11 +87,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
 
 Kind = Literal["power", "real", "complex"]
 Mode = Literal["lowpass", "highpass"]
@@ -278,7 +278,7 @@ class CepstrumResult(OwnsArrays):
 
 
 def cepstrum(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     kind: Kind = "power",
@@ -438,7 +438,7 @@ class LifterResult(OwnsArrays):
 
 
 def lifter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     cutoff: float,
@@ -606,7 +606,7 @@ class EchoDetectionResult(OwnsArrays):
 
 
 def echo_detection(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     min_quefrency: float | None = None,

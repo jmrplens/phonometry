@@ -82,10 +82,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "GEAR_ACCEPTANCE_HEADROOM",
@@ -235,13 +235,13 @@ def evaluation_zone[V: RealValues](
 
 
 @overload
-def evaluation_zone[A: ArrayLike](
+def evaluation_zone[A: NumericArrayLike](
     magnitude: A, boundaries: ZoneBoundaries
 ) -> EvaluationZone | NDArray[np.str_]: ...
 
 
 def evaluation_zone(
-    magnitude: ArrayLike, boundaries: ZoneBoundaries
+    magnitude: NumericArrayLike, boundaries: ZoneBoundaries
 ) -> EvaluationZone | NDArray[np.str_]:
     """Grade a vibration magnitude into zone A, B, C or D (6.3.2.3).
 
@@ -272,7 +272,9 @@ _ZONE_LETTERS = np.array(["A", "B", "C", "D"])
 _ZONES: tuple[EvaluationZone, ...] = ("A", "B", "C", "D")
 
 
-def _zone_index(magnitude: ArrayLike, boundaries: ZoneBoundaries) -> NDArray[np.intp]:
+def _zone_index(
+    magnitude: NumericArrayLike, boundaries: ZoneBoundaries
+) -> NDArray[np.intp]:
     """Which of the four zones a magnitude falls in, as an index into the ladder."""
     values = real_array(magnitude, "magnitude")
     if np.any(values < 0.0) or not np.all(np.isfinite(values)):
@@ -284,7 +286,7 @@ def _zone_index(magnitude: ArrayLike, boundaries: ZoneBoundaries) -> NDArray[np.
 
 
 def _zone_letters(
-    index: NDArray[np.intp], *, like: tuple[ArrayLike | None, ...]
+    index: NDArray[np.intp], *, like: tuple[NumericArrayLike | None, ...]
 ) -> EvaluationZone | NDArray[np.str_]:
     """The grade or grades an index or array of them stands for.
 
@@ -329,7 +331,7 @@ def allowable_velocity[V: RealValues](
 
 
 @overload
-def allowable_velocity[A: ArrayLike](
+def allowable_velocity[A: NumericArrayLike](
     frequency: A,
     *,
     constant_velocity_mm_s: float,
@@ -342,7 +344,7 @@ def allowable_velocity[A: ArrayLike](
 
 
 def allowable_velocity(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     constant_velocity_mm_s: float,
     zone_factor: float = 1.0,
@@ -595,7 +597,7 @@ def industrial_machine_zone[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def industrial_machine_zone[V: RealValues, A2: ArrayLike](
+def industrial_machine_zone[V: RealValues, A2: NumericArrayLike](
     group: Literal["group_1", "group_2"],
     support: Literal["rigid", "flexible"],
     *,
@@ -615,7 +617,7 @@ def industrial_machine_zone[S1: RealScalar, V: RealValues](
 
 
 @overload
-def industrial_machine_zone[A1: ArrayLike, A2: ArrayLike](
+def industrial_machine_zone[A1: NumericArrayLike, A2: NumericArrayLike](
     group: Literal["group_1", "group_2"],
     support: Literal["rigid", "flexible"],
     *,
@@ -628,8 +630,8 @@ def industrial_machine_zone(
     group: MachineGroup,
     support: MachineSupport,
     *,
-    displacement_um: ArrayLike | None = None,
-    velocity_mm_s: ArrayLike | None = None,
+    displacement_um: NumericArrayLike | None = None,
+    velocity_mm_s: NumericArrayLike | None = None,
 ) -> EvaluationZone | NDArray[np.str_]:
     """Grade an industrial machine against Table A.1 or A.2.
 
@@ -954,13 +956,13 @@ def gear_shaft_displacement_limit[V: RealValues](
 
 
 @overload
-def gear_shaft_displacement_limit[A: ArrayLike](
+def gear_shaft_displacement_limit[A: NumericArrayLike](
     frequency: A, *, rating: float
 ) -> float | NDArray[np.float64]: ...
 
 
 def gear_shaft_displacement_limit(
-    frequency: ArrayLike, *, rating: float
+    frequency: NumericArrayLike, *, rating: float
 ) -> float | NDArray[np.float64]:
     r"""The shaft displacement rating curve of Figure A.1.
 
@@ -1006,13 +1008,13 @@ def gear_housing_velocity_limit[V: RealValues](
 
 
 @overload
-def gear_housing_velocity_limit[A: ArrayLike](
+def gear_housing_velocity_limit[A: NumericArrayLike](
     frequency: A, *, rating: float
 ) -> float | NDArray[np.float64]: ...
 
 
 def gear_housing_velocity_limit(
-    frequency: ArrayLike, *, rating: float
+    frequency: NumericArrayLike, *, rating: float
 ) -> float | NDArray[np.float64]:
     r"""The housing velocity rating curve of Figure A.2.
 

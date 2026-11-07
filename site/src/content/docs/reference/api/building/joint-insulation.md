@@ -62,7 +62,7 @@ flanking rules it calls in, to ISO 10140-2:2021 A.3.
 ## check_gap_width
 
 ```python
-check_gap_width(readings_mm: ArrayLike) -> GapWidthCheck
+check_gap_width(readings_mm: NumericArrayLike) -> GapWidthCheck
 ```
 
 Check the gap width read along the joint and average it (J.2.2).
@@ -233,7 +233,7 @@ Whether no two readings differ by more than 0,3 mm.
 
 ```python
 joint_gap_series(
-    gap_widths_mm: ArrayLike,
+    gap_widths_mm: NumericArrayLike,
     results: Sequence[LaboratoryJointInsulationResult],
     *,
     nominal_gap_mm: float = 5.0,
@@ -280,9 +280,9 @@ them.
 
 ```python
 joint_sound_reduction_index(
-    l1: ArrayLike,
-    l2: ArrayLike,
-    absorption_area: ArrayLike,
+    l1: NumericArrayLike,
+    l2: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     joint_length_m: float,
 ) -> np.ndarray
@@ -669,10 +669,10 @@ Whether the width is no greater than 50 mm.
 
 ```python
 laboratory_joint_insulation(
-    r_s_prime: ArrayLike,
-    r_s_max: ArrayLike,
+    r_s_prime: NumericArrayLike,
+    r_s_max: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     joint_length_m: float | None = None,
     limit_at_max: bool = True,
 ) -> LaboratoryJointInsulationResult

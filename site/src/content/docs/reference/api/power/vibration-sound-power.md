@@ -84,8 +84,8 @@ integer decibel to index the standard's table.
 
 ```python
 mean_velocity_level(
-    levels: ArrayLike,
-    areas: ArrayLike | None = None,
+    levels: NumericArrayLike,
+    areas: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -122,10 +122,10 @@ NORMALIZED_IMPEDANCE_PA_S_M = 411.0
 
 ```python
 radiated_sound_power_level(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     area: float,
     *,
-    radiation_factor: ArrayLike = 1.0,
+    radiation_factor: NumericArrayLike = 1.0,
     reference_area: float = 1.0,
     normalized_impedance: float = 411.0,
     reference_impedance: float = 400.0,
@@ -165,9 +165,9 @@ With the default `radiation_factor = 1` this is the Part 1 *upper limit*
 
 ```python
 radiation_factor(
-    sound_power: ArrayLike,
+    sound_power: NumericArrayLike,
     area: float,
-    mean_square_velocity: ArrayLike,
+    mean_square_velocity: NumericArrayLike,
     *,
     impedance: float = 411.0,
 ) -> np.ndarray
@@ -209,11 +209,11 @@ REFERENCE_VELOCITY_M_S = 5e-08
 
 ```python
 sound_power_from_vibration(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     area: float,
     *,
-    radiation_factor: ArrayLike = 1.0,
-    frequencies: ArrayLike | None = None,
+    radiation_factor: NumericArrayLike = 1.0,
+    frequencies: NumericArrayLike | None = None,
 ) -> VibrationSoundPowerResult
 ```
 
@@ -240,7 +240,7 @@ Bundle a sound-power-from-vibration determination (ISO/TS 7849).
 
 ```python
 velocity_level(
-    velocity: ArrayLike,
+    velocity: NumericArrayLike,
     *,
     reference: float = 5e-08,
 ) -> np.ndarray
@@ -270,9 +270,9 @@ $L_v = 20 \log_{10}(v/v_0)$ with `v0` the reference velocity.
 
 ```python
 velocity_level_from_acceleration(
-    peak_acceleration: ArrayLike,
+    peak_acceleration: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     reference: float = 5e-08,
 ) -> np.ndarray
 ```

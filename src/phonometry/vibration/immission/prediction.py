@@ -76,7 +76,9 @@ from ..._internal.validation import (
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "BLASTING_RELEVANT_DISTANCE_M",
@@ -345,7 +347,7 @@ def attenuation_coefficient_per_m(
 
 def far_field_velocity_mm_s(
     reference_velocity_mm_s: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     reference_distance_m: float,
     exponent: float,
@@ -391,7 +393,7 @@ def far_field_velocity_mm_s(
 
 
 def material_damping_factor(
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     damping_ratio: float,
     frequency_hz: float,
@@ -509,7 +511,7 @@ def floor_transfer_max(floor_damping_ratio: float) -> float:
 
 def blast_peak_velocity_mm_s(
     charge_kg: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     coefficient_mm_s: float,
     charge_exponent: float,
@@ -549,7 +551,7 @@ def blast_peak_velocity_mm_s(
     )
 
 
-def _distances(distance_m: ArrayLike) -> NDArray[np.float64]:
+def _distances(distance_m: NumericArrayLike) -> NDArray[np.float64]:
     distances = require_finite_array(distance_m, "distance_m")
     if np.any(distances <= 0.0):
         msg = "'distance_m' must be positive."
@@ -576,7 +578,7 @@ def fall_energy_kj(weight_kn: float, *, drop_height_m: float) -> float:
 
 def impact_peak_velocity_mm_s(
     fall_energy_kj: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
     *,
     coefficient_mm_s: float,
     distance_exponent: float,
@@ -638,7 +640,7 @@ def track_excitation_frequency(
 
 
 def machine_count_correction(
-    n_machines: ArrayLike, *, n_reference_machines: int | np.integer[Any]
+    n_machines: NumericArrayLike, *, n_reference_machines: int | np.integer[Any]
 ) -> NDArray[np.float64]:
     r"""The correction :math:`\chi` of Formula (7), Figure 3.
 
@@ -673,7 +675,7 @@ def machine_count_correction(
 
 def machine_hall_velocity_mm_s(
     reference_velocity_mm_s: float,
-    n_machines: ArrayLike,
+    n_machines: NumericArrayLike,
     *,
     n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]:

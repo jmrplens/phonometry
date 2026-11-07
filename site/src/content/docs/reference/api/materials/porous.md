@@ -193,10 +193,10 @@ matters.
 
 ```python
 delany_bazley(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
-    coefficients: Literal['delany_bazley', 'garai_pompoli', 'dunn_davern', 'wu'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'delany_bazley',
+    coefficients: Literal['delany_bazley', 'garai_pompoli', 'dunn_davern', 'wu'] | NumericArrayLike = 'delany_bazley',
     fluid: Fluid = ...,
 ) -> PorousMediumResult
 ```
@@ -323,7 +323,7 @@ FiberResistivityFit(
     k1: float,
     k2: float,
     fiber_diameter_um: float,
-    bulk_density_range_kg_m3: ArrayLike,
+    bulk_density_range_kg_m3: NumericArrayLike,
     direction: Literal['lateral', 'longitudinal'],
     source: str,
 )
@@ -391,7 +391,7 @@ end-corrected plug length $t' = t + 2 \delta a$ (Cox & D'Antonio
 
 ```python
 johnson_champoux_allard(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
     porosity: float,
@@ -587,7 +587,7 @@ The bound $\lvert K_c/K_\mathrm{f} \rvert$ must stay below.
 
 ```python
 membrane_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     surface_density: float,
     resistance: float = 0.0,
@@ -657,7 +657,7 @@ the porous-filled cavity case below about 500 Hz.
 
 ```python
 microperforated_plate_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     thickness_m: float,
     hole_radius: float,
@@ -709,7 +709,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
 ```python
 miki(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
     fluid: Fluid = ...,
@@ -757,7 +757,7 @@ MIKI_VALIDITY = (0.01, 1.0)
 
 ```python
 perforated_plate_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     thickness_m: float,
     hole_radius: float,

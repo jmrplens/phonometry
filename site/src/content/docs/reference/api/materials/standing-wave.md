@@ -29,7 +29,7 @@ measured one frequency at a time; see
 ## standing_wave_absorption
 
 ```python
-standing_wave_absorption(swr: ArrayLike) -> NDArray[np.float64]
+standing_wave_absorption(swr: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Absorption coefficient from the standing-wave ratio (ISO 10534-1).
@@ -56,10 +56,10 @@ $\alpha = 4s/(s + 1)^2$.
 
 ```python
 standing_wave_normalized_impedance(
-    swr: ArrayLike,
-    first_min_distance: ArrayLike,
+    swr: NumericArrayLike,
+    first_min_distance: NumericArrayLike,
     *,
-    wavelength: ArrayLike,
+    wavelength: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -82,7 +82,7 @@ Eqs. (25)/(26).
 
 ```python
 standing_wave_ratio_from_level(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -109,10 +109,10 @@ $\Delta L = L_{\max} - L_{\min}$ in decibels.
 
 ```python
 standing_wave_reflection(
-    swr: ArrayLike,
-    first_min_distance: ArrayLike,
+    swr: NumericArrayLike,
+    first_min_distance: NumericArrayLike,
     *,
-    wavelength: ArrayLike,
+    wavelength: NumericArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -141,7 +141,9 @@ $\phi = \pi (4 x_{\text{min},1} / \lambda_0 - 1)$ (Eq. (20)).
 ## standing_wave_reflection_magnitude
 
 ```python
-standing_wave_reflection_magnitude(swr: ArrayLike) -> NDArray[np.float64]
+standing_wave_reflection_magnitude(
+    swr: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Reflection magnitude from the standing-wave ratio (ISO 10534-1, Eq. (14)).

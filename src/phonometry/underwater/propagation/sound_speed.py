@@ -29,9 +29,10 @@ from ...fluids import sea_water_sound_speed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "SoundSpeedProfile",
@@ -113,9 +114,9 @@ class SoundSpeedProfile(OwnsArrays):
 
 
 def sound_speed_profile(
-    depths: ArrayLike,
-    temperatures_c: ArrayLike,
-    salinities: ArrayLike,
+    depths: NumericArrayLike,
+    temperatures_c: NumericArrayLike,
+    salinities: NumericArrayLike,
     *,
     model: SoundSpeedModel = "unesco",
     latitude: float = 45.0,

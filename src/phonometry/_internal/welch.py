@@ -22,10 +22,10 @@ from .resolve import apply_calibration
 from .validation import real_array, require_count, require_scalar
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .signal import Signal
-    from .types import WindowSpec
+    from .types import NumericArrayLike, WindowSpec
 
 #: Default overlap fraction between Welch segments.
 _DEFAULT_OVERLAP = 0.5
@@ -43,7 +43,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _validate_signal(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     name: str,
     *,
     context: str = "a spectral estimate",

@@ -58,7 +58,7 @@ modulation lines read low by the taper's scalloping loss.
 
 ```python
 envelope(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     decimation_factor: int | np.integer[Any] = 1,
@@ -109,11 +109,11 @@ same time axis.
 
 ```python
 envelope_spectrum(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     kind: Literal['magnitude', 'squared'] = 'magnitude',
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     nfft: int | np.integer[Any] | None = None,
     remove_dc: bool = True,
     band: tuple[float, float] | None = None,
@@ -250,7 +250,7 @@ EnvelopeSpectrumResult(
     kind: Literal['magnitude', 'squared'],
     times: NDArray[np.float64],
     envelope: NDArray[np.float64],
-    window: str | tuple[ArrayLike, ...],
+    window: str | tuple[str | NumericArrayLike, ...],
     *,
     remove_dc: bool,
     fs: float,

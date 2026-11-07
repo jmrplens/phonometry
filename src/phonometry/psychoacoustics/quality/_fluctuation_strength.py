@@ -63,10 +63,11 @@ from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
+    from ..._internal.types import NumericArrayLike
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
@@ -315,7 +316,7 @@ def _cross_covariance(x: NDArray[np.float64], y: NDArray[np.float64]) -> float:
     return float(num / np.sqrt(product))
 
 
-def _validate_signal(x: Signal | ArrayLike) -> NDArray[np.float64]:
+def _validate_signal(x: Signal | NumericArrayLike) -> NDArray[np.float64]:
     sig = real_array(x, "x")
     if sig.ndim != 1:
         msg = "'x' must be one-dimensional."
@@ -523,7 +524,7 @@ def _c_fs() -> float:
 
 
 def fluctuation_strength(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> FluctuationStrengthResult:
     r"""Fluctuation strength of a calibrated signal (Osses 2016 model).

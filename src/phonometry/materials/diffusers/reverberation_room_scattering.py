@@ -53,10 +53,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import Real, ReportEngine
+    from ..._internal.types import NumericArrayLike, Real, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -167,7 +167,7 @@ def _positive_scalar(value: float, name: str) -> float:
     return v
 
 
-def _positive_array(value: ArrayLike, name: str) -> Real:
+def _positive_array(value: NumericArrayLike, name: str) -> Real:
     """Return ``value`` as a positive float array or raise ``ValueError``."""
     arr = real_array(value, name)
     if not np.all(np.isfinite(arr)):
@@ -179,7 +179,7 @@ def _positive_array(value: ArrayLike, name: str) -> Real:
     return arr
 
 
-def _nonneg_array(value: ArrayLike, name: str) -> Real:
+def _nonneg_array(value: NumericArrayLike, name: str) -> Real:
     """Return ``value`` as a non-negative float array or raise ``ValueError``."""
     arr = real_array(value, name)
     if not np.all(np.isfinite(arr)):
@@ -194,7 +194,7 @@ def _nonneg_array(value: ArrayLike, name: str) -> Real:
 # ---------------------------------------------------------------------------
 # ISO 17497-1: speed of sound in air (Clause 8, Eq. (2)).
 # ---------------------------------------------------------------------------
-def speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> Real:
+def speed_of_sound_iso17497(*, temperature_c: NumericArrayLike) -> Real:
     r"""Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).
 
     :math:`c = 343.2 \sqrt{(273.15 + t) / 293.15}` (m/s).
@@ -216,8 +216,8 @@ def speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> Real:
 def _sabine_absorption(
     volume: float,
     area: float,
-    situation_a: tuple[ArrayLike, ArrayLike, ArrayLike],
-    situation_b: tuple[ArrayLike, ArrayLike, ArrayLike],
+    situation_a: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike],
+    situation_b: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike],
     *,
     labels: tuple[str, str],
 ) -> Real:
@@ -259,12 +259,12 @@ def random_incidence_absorption(
     volume: float,
     area: float,
     *,
-    c1: ArrayLike,
-    t1: ArrayLike,
-    c2: ArrayLike,
-    t2: ArrayLike,
-    m1: ArrayLike = 0.0,
-    m2: ArrayLike = 0.0,
+    c1: NumericArrayLike,
+    t1: NumericArrayLike,
+    c2: NumericArrayLike,
+    t2: NumericArrayLike,
+    m1: NumericArrayLike = 0.0,
+    m2: NumericArrayLike = 0.0,
 ) -> Real:
     r"""Random-incidence absorption coefficient ``alpha_s`` (ISO 17497-1, Eq. (1)).
 
@@ -303,12 +303,12 @@ def specular_absorption_coefficient(
     volume: float,
     area: float,
     *,
-    c3: ArrayLike,
-    t3: ArrayLike,
-    c4: ArrayLike,
-    t4: ArrayLike,
-    m3: ArrayLike = 0.0,
-    m4: ArrayLike = 0.0,
+    c3: NumericArrayLike,
+    t3: NumericArrayLike,
+    c4: NumericArrayLike,
+    t4: NumericArrayLike,
+    m3: NumericArrayLike = 0.0,
+    m4: NumericArrayLike = 0.0,
 ) -> Real:
     r"""Specular absorption coefficient ``alpha_spec`` (ISO 17497-1, Eq. (4)).
 
@@ -342,8 +342,8 @@ def specular_absorption_coefficient(
 
 
 def scattering_coefficient(
-    alpha_spec: ArrayLike,
-    alpha_s: ArrayLike,
+    alpha_spec: NumericArrayLike,
+    alpha_s: NumericArrayLike,
     *,
     truncate_negative: bool = True,
 ) -> Real:
@@ -505,10 +505,10 @@ class ScatteringResult(OwnsArrays):
 
 
 def scattering_coefficient_spectrum(
-    specular_absorption: ArrayLike,
-    random_absorption: ArrayLike,
+    specular_absorption: NumericArrayLike,
+    random_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     truncate_negative: bool = True,
 ) -> ScatteringResult:
     """Scattering-coefficient spectrum ``s(f)`` (ISO 17497-1, Eq. (5)).
@@ -559,12 +559,12 @@ def base_plate_scattering(
     volume: float,
     area: float,
     *,
-    c1: ArrayLike,
-    t1: ArrayLike,
-    c3: ArrayLike,
-    t3: ArrayLike,
-    m1: ArrayLike = 0.0,
-    m3: ArrayLike = 0.0,
+    c1: NumericArrayLike,
+    t1: NumericArrayLike,
+    c3: NumericArrayLike,
+    t3: NumericArrayLike,
+    m1: NumericArrayLike = 0.0,
+    m3: NumericArrayLike = 0.0,
 ) -> Real:
     r"""Scattering coefficient of the base plate alone (ISO 17497-1, Eq. (6)).
 
@@ -714,7 +714,7 @@ class BasePlateScatteringCheck(OwnsArrays):
 
 
 def check_base_plate_scattering(
-    scattering: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    scattering: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> BasePlateScatteringCheck:
     """Is the base plate good enough for the measurement? (ISO 17497-1, 6.2).
 
@@ -774,7 +774,7 @@ def check_base_plate_scattering(
 # ---------------------------------------------------------------------------
 # ISO 17497-1: measurement uncertainty (Annex A, Eqs. (A.1)-(A.5)).
 # ---------------------------------------------------------------------------
-def reverberation_time_uncertainty(times: ArrayLike) -> Real:
+def reverberation_time_uncertainty(times: NumericArrayLike) -> Real:
     r"""Standard uncertainty of a reverberation time (ISO 17497-1, Eq. (A.1)).
 
     .. math::
@@ -808,11 +808,11 @@ def absorption_coefficient_uncertainty(
     volume: float,
     area: float,
     *,
-    speed_of_sound: ArrayLike,
-    t_a: ArrayLike,
-    u_a: ArrayLike,
-    t_b: ArrayLike,
-    u_b: ArrayLike,
+    speed_of_sound: NumericArrayLike,
+    t_a: NumericArrayLike,
+    u_a: NumericArrayLike,
+    t_b: NumericArrayLike,
+    u_b: NumericArrayLike,
 ) -> Real:
     r"""Uncertainty of a Sabine absorption coefficient (ISO 17497-1, A.3/A.4).
 
@@ -865,10 +865,10 @@ class ScatteringUncertainty(OwnsArrays):
 
 
 def scattering_coefficient_uncertainty(
-    alpha_spec: ArrayLike,
-    alpha_s: ArrayLike,
-    u_alpha_spec: ArrayLike,
-    u_alpha_s: ArrayLike,
+    alpha_spec: NumericArrayLike,
+    alpha_s: NumericArrayLike,
+    u_alpha_spec: NumericArrayLike,
+    u_alpha_s: NumericArrayLike,
 ) -> ScatteringUncertainty:
     r"""Uncertainty of the scattering coefficient (ISO 17497-1, Eq. (A.5)).
 

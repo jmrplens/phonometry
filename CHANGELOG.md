@@ -2362,6 +2362,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   in a checkout with nothing above it, so a parent directory cannot change
   what the pages run (`site/src/lib/bundled-packages.mjs`).
 
+- **The site and the Pyodide smoke test install with pnpm 12.18.0, the
+  newest release.** Both pinned 12.10.1, so pnpm printed its notice of a newer
+  release on a contributor's machine once a day. The two pins and their
+  lockfiles, which pnpm 12 writes its own release into, now have a test that
+  holds them to one release.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

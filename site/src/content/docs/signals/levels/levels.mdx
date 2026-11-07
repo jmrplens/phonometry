@@ -221,7 +221,7 @@ varying = np.tile(np.concatenate([quiet, loud]), 3)
 
 stats = signals.ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
-# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
+# LA10=66.7  LA50=65.4  LA90=58.6 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%" loading="eager" />
@@ -385,7 +385,7 @@ la_fmax = 10 * np.log10(filters.time_weighting(weighted, fs, mode="fast").max()
 la_smax = 10 * np.log10(filters.time_weighting(weighted, fs, mode="slow").max()
                         / (2e-5) ** 2)
 print(f"LAFmax = {la_fmax:.1f} dB   LASmax = {la_smax:.1f} dB")
-# LAFmax = 66.6 dB   LASmax = 64.7 dB
+# LAFmax = 66.8 dB   LASmax = 64.8 dB
 ```
 
 Both weightings are part of the name, and for good reason: the same events read
@@ -440,8 +440,8 @@ lex = signals.lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sens
 print(f"event: LCpeak {peak:.1f} dB(C) | "
       f"LAeq {signals.laeq(event, fs):.1f} dB | LAE {lae:.1f} dB")
 print(f"shift: E {E:.2f} Pa2h | LEX,8h {lex:.1f} dB")
-# event: LCpeak 91.6 dB(C) | LAeq 73.3 dB | LAE 79.3 dB
-# shift: E 1.01 Pa2h | LEX,8h 85.0 dB
+# event: LCpeak 91.7 dB(C) | LAeq 73.5 dB | LAE 79.5 dB
+# shift: E 1.05 Pa2h | LEX,8h 85.1 dB
 ```
 
 The three roles are deliberately different signals. The 4 s event has an

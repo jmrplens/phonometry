@@ -707,7 +707,10 @@ real:
 # El mismo soporte de 1 MN/m bajo un forjado de hormigón y bajo uno ligero de madera.
 for k_t in (3e9, 2e6, 5e5):
     ratio = abs(complex(vibration.blocking_force_ratio(1e6, k_t)))
-    print(f"{k_t:.0e}", round(ratio, 3))     # 1.0 / 0.667 / 0.333
+    print(f"{k_t:.0e}", round(ratio, 3))
+# 3e+09 1.0
+# 2e+06 0.667
+# 5e+05 0.333
 ```
 
 Sobre el forjado de hormigón ($k_\mathrm{t} = 3$ GN/m) la fuerza entregada *es* la

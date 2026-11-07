@@ -544,8 +544,8 @@ raw = ring + 3.0 * np.sin(2 * np.pi * 50.0 * t_s)
 wide = signals.envelope_spectrum(raw, fs)
 narrow = signals.envelope_spectrum(raw, fs, band=(2000.0, 4000.0))
 k120 = int(round(120.0 * wide.nfft / fs))
-print(round(wide.amplitude[k120], 4),        # 0.0093 — buried
-      round(narrow.amplitude[k120], 4))      # 0.1964 — 26 dB better
+print(round(wide.amplitude[k120], 4),        # buried in the wide band
+      round(narrow.amplitude[k120], 4))      # 0.0093 0.1964: 26 dB better in the band
 ```
 
 The lines the chain produces are identified by *frequency*, not by amplitude,

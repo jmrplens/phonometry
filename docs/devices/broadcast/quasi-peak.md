@@ -72,8 +72,8 @@ burst = signals.tone_burst(fs, 5000.0, 25, amplitude=0.285,
                            n_repetitions=16, repetition_rate=10.0,
                            post_silence=0.5)
 result = broadcast.quasi_peak_meter(burst.signal, fs)
-print(round(result.reading, 4))                            # 0.5872   volts
-print(round(result.level, 2), result.level_unit)        # -2.41 dBqps
+print(round(result.reading, 4))                            # 0.591    volts
+print(round(result.level, 2), result.level_unit)        # -2.35 dBqps
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter.svg" alt="Quasi-peak detector reading a train of sixteen 5 millisecond bursts of 5 kilohertz tone at 10 per second. Grey vertical bars mark the rectified 468-weighted bursts, reaching 1.10 volts. The blue detector output climbs from zero over the first half second, then ripples gently along 0.58 volts for the rest of the train, and decays smoothly after the last burst at 1.55 seconds, falling to 0.16 volts by 2.1 seconds. A red dashed line marks the reading of 0.5872 volts, minus 2.41 dBqps, and a green dotted line above it marks the 0.775 volts the same tone would read steadily, 0 dBqps" width="96%"></picture>
@@ -203,13 +203,13 @@ the same chain's steady reading.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.255
 row = report.stimuli[0]
-print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
+print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.85
 ```
 
 All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. The worst margin
-is 0.259 dB, at the 100 bursts per second cell whose upper limit is the
+is 0.255 dB, at the 100 bursts per second cell whose upper limit is the
 physical ceiling. Between those five rates no reading moves by more than
 0.080 dB, or 4.2 % of its own window, which is why the peak-follower worry
 about reading the largest *sample* rather than the largest value of the
@@ -219,7 +219,7 @@ taken.
 
 `deviation_db` is also reported, against the *reference* column, and the
 report calls it what it is: a self-imposed regression bound, not conformance.
-The worst is 0.140 dB, at 10 bursts per second. The reference row is printed
+The worst is 0.148 dB, at 10 bursts per second. The reference row is printed
 to two significant figures on nine of the eleven cells, so its own quantum is
 0.027 to 0.108 dB, and nothing tighter than that would mean anything.
 

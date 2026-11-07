@@ -133,7 +133,7 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
 ```
 

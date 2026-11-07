@@ -812,7 +812,11 @@ from phonometry import vibration
 
 # The four points of Table C.1 the relation interpolates between.
 for a8 in (26.0, 14.0, 7.0, 3.7):
-    print(a8, round(vibration.hav_vwf_lifetime_years(a8), 1))   # 1.0 / 1.9 / 4.0 / 7.9 years
+    print(a8, round(vibration.hav_vwf_lifetime_years(a8), 1))
+# 26.0 1.0   years
+# 14.0 1.9
+# 7.0 4.0
+# 3.7 7.9
 
 # And the two values the Directive fixes, read on the same curve.
 print(round(vibration.hav_vwf_lifetime_years(2.5), 1))   # 12.0 years at the EAV

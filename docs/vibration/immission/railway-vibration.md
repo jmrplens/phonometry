@@ -231,10 +231,10 @@ for band in (40.0, 63.0):
         f"{band:g} Hz: L_vF2 {passage.band_interval_levels[1, i]:.1f} dB,"
         f" L_vFmax {passage.band_max_levels[i]:.1f} dB"
     )
-# 40 Hz: L_vF2 70.4 dB, L_vFmax 72.0 dB
-# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.3 dB
+# 40 Hz: L_vF2 70.3 dB, L_vFmax 71.9 dB
+# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.2 dB
 print(f"sum level {vibration.band_sum_level(passage.band_interval_levels[1]):.1f} dB")
-# 71.1 dB, Formula (B.3)
+# 71.0 dB, Formula (B.3)
 ```
 
 ## 5. Narrow band, and what Table 1 is

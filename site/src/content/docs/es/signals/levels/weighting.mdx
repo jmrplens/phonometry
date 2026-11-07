@@ -184,7 +184,7 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A por encima de 20 dB: el número ponderado A ocultaría el retumbo.
 ```
 
@@ -276,8 +276,8 @@ print(f"suma energética de las bandas ponderadas A "
       f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
 print(f"LAeq de la misma señal                     "
       f"{signals.laeq(band_source, fs):.2f} dB")
-# suma energética de las bandas ponderadas A 62.84 dB
-# LAeq de la misma señal                     62.79 dB
+# suma energética de las bandas ponderadas A 62.85 dB
+# LAeq de la misma señal                     62.81 dB
 ```
 
 La vía de la **tabla** es a la que te ves obligado cuando los datos llegan ya

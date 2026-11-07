@@ -91,10 +91,10 @@ print(result.range_limited)          # True: sus bandas altas llegan a Nyquist
 print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
-print(band["frequency"], band["class"], band["checked_to_omega"])
-# 12.589254117941678 1 1906.3877633382747
-print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
-# 0.39999977486865645 0.35126579320766144
+print(round(band["frequency"], 3), band["class"], round(band["checked_to_omega"], 1))
+# 12.589 1 1906.4
+print(round(band["margin_class1_db"], 3), round(band["bandwidth_margin_class1_db"], 3))
+# 0.4 0.351
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Cadena de cálculo para calificar un filtro de banda frente a la Tabla 1 de IEC 61260-1. Arriba, cuatro cajas encadenadas: la banda diseñada, un tercio de octava a 1000 Hz de orden 6; su atenuación relativa, la atenuación en cada frecuencia normalizada menos la del centro de banda; la máscara de la Tabla 1, con sus puntos de quiebre de octava llevados a tercio de octava y los límites rectos en lg Ω entre ellos; y el margen y la clase. Debajo, dos paneles comparten un eje de frecuencia estirado punto de quiebre a punto de quiebre. El panel de la banda de paso va de Ω = 1 al borde de banda en 1,122 y contiene el corredor de clase 1, un suelo en −0,4 dB bajo un techo que sube de +0,4 dB a +5,3 dB, con el corredor más ancho de clase 2 en discontinua a su alrededor; la banda se queda plana en 0 dB y sube a 3 dB en el borde. El panel de la banda atenuada va del borde a 5,392, donde solo rige un mínimo, que sube de 1,2 dB pasando por 16,6, 40,5 y 60 dB hasta 70 dB para la clase 1, y la banda sube muy por encima. Bajo las columnas, cada punto de quiebre de octava, desde G elevado a un octavo hasta G elevado a la cuarta, va emparejado con su valor en tercio de octava, y una fila da el margen de clase 1 en cada uno: +0,40 dB en los tres primeros, recuadrados como margen de la banda, luego +0,49, +2,29 y +1,81 dB, y de 26 a 92 dB en la banda atenuada. Una nota añade la clase 0 de la edición de 1995, ±0,15 dB en el centro de banda y 75 dB desde G elevado a la cuarta. Una caja verde da el veredicto, clase 1 con márgenes de +0,40 dB y +0,60 dB, un banco que toma la clase de su peor banda, y range_limited avisando de una banda cuya máscara sigue más allá de la mitad de la frecuencia de muestreo de entrada. A la derecha, una caja continua que sale de la caja de atenuación relativa recoge lo que el verificador también calcula sobre el diseño, los ensayos de IEC 61260-2 que no necesitan espécimen: al menos 24 sinusoides por ancho de banda en Ω = G elevado a i entre bS (Fórmula 1), la desviación del ancho de banda efectivo del 5.12 por la Fórmula (2) dentro de ±0,4 dB o ±0,6 dB, la suma de salidas del 5.16 por la Fórmula (3) entre +0,8 dB y −1,8 dB en clase 1, y el barrido del 5.14 por el propio banco. Debajo, una columna discontinua, fuera de la comprobación, recoge lo que un laboratorio le hace a un instrumento: IEC 61260-2 sobre un espécimen, al menos tres presentados y al menos uno ensayado por completo, 1 dB bajo el techo del rango lineal, de 20 °C a 26 °C y humedad relativa del 35 % al 65 %; y los ensayos periódicos de IEC 61260-3, cada filtro en su centro de banda o un barrido, tres filtros, bajo, medio y alto, en hasta 15 frecuencias, cuyos resultados califica verify_filter_periodic, con la incertidumbre dentro del Anexo B, de 0,20 a 0,50 dB. Las Fórmulas 9 y 11 van recuadradas al pie" width="100%" />
@@ -428,7 +428,7 @@ from phonometry import filters
 bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
 swept = filters.verify_time_invariance(bank)
 print(swept.overall_class)                       # 1
-print(round(swept.worst_deviation_db, 3))        # 0.056
+print(round(swept.worst_deviation_db, 3))        # 0.049
 print(swept.seconds_per_decade)                  # (2.0, 5.0)
 print(round(filters.swept_band_level(
     127.0, fraction=3, sweep_duration_s=30, averaging_time_s=30,

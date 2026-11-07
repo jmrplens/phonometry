@@ -2,7 +2,7 @@
 """Gate for the Python snippets printed in the documentation.
 
 The guides teach by example, and an example that does not run teaches the
-wrong thing. Three checks, cheapest first:
+wrong thing. Four checks, cheapest first:
 
 1. **Shadowing.** A name imported from ``phonometry`` must not be rebound
    later in the same block, by an assignment or by another import. This is
@@ -20,22 +20,40 @@ wrong thing. Three checks, cheapest first:
    on the ``language="es"`` argument, which is the one difference the pages
    are supposed to have. The ``docs/`` mirror is not paired with anything: it
    is written by hand for GitHub and does not carry the same set of examples,
-   so it gets the shadowing check and nothing else.
+   so it is not held to the imports of a twin.
 
-3. **Execution.** Every English page's blocks, plus those of the README, of
-   ``llms.txt`` and of the site's home page, are concatenated in reading
-   order (a guide is a narrative: later blocks use the variables the earlier
-   ones bound) and run in a subprocess. A page that reads a file the reader
-   brings runs on one :data:`_FIXTURES` writes first. Pages that cannot run
-   standalone are listed in :data:`_SKIP` with a reason, and the list is
-   checked for staleness: a page that starts passing must leave it. A block that passes
+3. **Execution.** Every page's blocks, in English, in Spanish and in the
+   ``docs/`` mirror, plus those of the README, of ``llms.txt`` and of the
+   site's home page, are concatenated in reading order (a guide is a
+   narrative: later blocks use the variables the earlier ones bound) and run
+   in a subprocess. A page that reads a file the reader brings runs on one
+   :data:`_FIXTURES` writes first. Pages that cannot run standalone are
+   listed in :data:`_SKIP` with a reason, and the list is checked for
+   staleness: a page that starts passing must leave it. A block that passes
    ``...`` to a call is a sketch of a call rather than a computation, so it is
    read but not run.
 
+4. **Output.** The guides teach through the value a print writes, given in a
+   comment at the end of the print's line or on the comment line under it:
+   ``print(round(bulk, 1))  # 5958.0 MPa``. Running a page proves only that it
+   finishes, so a change to a solver, a catalogue row or a rounding that moved
+   a printed value left the old value in the comment with every check green.
+   Each page runs with ``print`` wrapped to record what every print of the
+   page's own code writes, keyed by its line, and every comment that opens
+   like a value (:data:`_OUTPUT_OPENING`) once a symbol, an ``e.g.`` or an
+   aligning ``#`` before it is read past (:func:`_reading`), or opens on the
+   word the print writes first, is held to that text
+   (:func:`output_disagreement`): the values first, in their order, each at
+   the decimals the comment writes it to, with units, labels and annotation
+   read past, and none of them left out at the end. A comment whose print
+   never runs is a failure too. There is no list of excused comments: one
+   the check misreads is taught to it, and one that is wrong is corrected on
+   the page.
+
 Usage::
 
-    python scripts/check_doc_snippets.py            # all three checks
-    python scripts/check_doc_snippets.py --static   # skip the execution pass
+    python scripts/check_doc_snippets.py            # all four checks
+    python scripts/check_doc_snippets.py --static   # skip the execution and output passes
 
 Exit status 0 when everything passes, 1 otherwise.
 """
@@ -45,13 +63,23 @@ from __future__ import annotations
 import argparse
 import ast
 import concurrent.futures
+import io
+import json
+import math
 import pathlib
 import re
 import subprocess
 import sys
 import tempfile
+import tokenize
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
+from typing import TYPE_CHECKING, TypeGuard
 
-from markdown_fences import page_kind, python_fences
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+from markdown_fences import fences, page_kind
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _DOCS = _ROOT / "docs"
@@ -128,12 +156,26 @@ def _template_literal(raw: str) -> str:
     return re.sub(r"\\([`$\\])", r"\1", raw)
 
 
-def _blocks(path: pathlib.Path) -> list[str]:
-    """Python blocks of a page, in reading order."""
+def _located_blocks(path: pathlib.Path) -> list[tuple[int, str]]:
+    """Python blocks of a page, in reading order, each with the line of the
+    page its first line stands on, counted from 1.
+    """
     text = path.read_text(encoding="utf-8")
     if path.suffix == ".ts":
-        return [_template_literal(m.group(1)) for m in _TEMPLATE_CODE.finditer(text)]
-    return python_fences(text, kind=page_kind(path.name))
+        return [
+            (text.count("\n", 0, m.start(1)) + 1, _template_literal(m.group(1)))
+            for m in _TEMPLATE_CODE.finditer(text)
+        ]
+    return [
+        (fence.line + 1, fence.body)
+        for fence in fences(text, kind=page_kind(path.name))
+        if fence.language == "python"
+    ]
+
+
+def _blocks(path: pathlib.Path) -> list[str]:
+    """Python blocks of a page, in reading order."""
+    return [body for _, body in _located_blocks(path)]
 
 
 def _imported_names(code: str) -> list[str]:
@@ -278,26 +320,846 @@ def _is_sketch(code: str) -> bool:
     return any(isinstance(n, ast.Call) and placeholder(n) for n in ast.walk(tree))
 
 
-def _run_page(page: pathlib.Path, fixture: str = "") -> tuple[pathlib.Path, str]:
-    """Run a page's blocks as one script; return its stderr tail on failure.
+#: How a comment that states an output opens, once what leads it is read past
+#: (:func:`_reading`): past the reference of a formula a print writes before
+#: its values (``(A.4) -0.638``), a ``~`` that gives a value roughly and the
+#: brackets of a printed container, with a number (a digit, or a sign or a
+#: decimal point before one), a constant Python prints by its name, an
+#: ellipsis, the quote of a printed string or an empty container. A comment
+#: that opens on a word, or on a bracket around words (``(n_samples,)``,
+#: ``(Formula C.4)``), describes the line; it does not state what the line
+#: prints.
+_OUTPUT_OPENING = re.compile(
+    r"(?:\([A-Z]\.\d+(?:\.\d+)*\)\s*)?"
+    r"[~\u2248]?[\s(\[{]*"
+    r"(?:[-+\u2212]?\.?\d|(?:True|False|None|nan|-?inf)\b|\.\.\.|\u2026|['\"]"
+    r"|\(\)|\[\]|\{\})"
+)
 
-    *fixture* runs first, in the same directory: the files of
+#: A number as a comment writes one in the arithmetic that leads to a value.
+_FIGURE = r"[-+\u2212]?(?:\d+(?:\.\d*)?|\.\d+)"
+
+#: What leads the output in a comment and is read past: the second ``#`` of a
+#: comment aligned under another (``#            # [ 6.57 23.28] dB``), an
+#: ``e.g.``, or ``p. ej.`` on a Spanish page, that offers the value as an
+#: example, and the symbol a comment names the value by (``LWA = 89.7 dB``),
+#: with any arithmetic that leads from it to the value (``Ld = 12 - 10 =
+#: 2.0 dB``), so that the value read is the one after the last ``=``; before
+#: a ``≈`` only the symbol, the ``≈`` giving the value roughly.
+_LEAD = re.compile(
+    r"(?:#\s*)+"
+    r"|(?:e\.\s?g\.|p\.\s?ej\.)[\s,:]*"
+    r"|[^\W\d][^\s=(){}\[\]\u2248]*\s*=(?!=)"
+    rf"(?:\s*{_FIGURE}(?:\s*[-+*/\u2212\u00d7]\s*{_FIGURE})+\s*=(?!=))*\s*"
+    r"|[^\W\d][^\s=(){}\[\]\u2248]*\s*(?=\u2248)"
+)
+
+
+def _reading(text: str) -> str:
+    """*text*, a comment, from where the output it states begins (:data:`_LEAD`)."""
+    while (lead := _LEAD.match(text)) is not None and lead.end():
+        text = text[lead.end() :]
+    return text
+
+
+#: A real number as Python and NumPy print one: ``2``, ``-1.``, ``.5``, ``2e-05``.
+#: A point before an ellipsis is the ellipsis's, not the number's.
+_REAL = r"(?:\d+(?:\.(?!\.\.)\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
+
+#: The parts of an output, as :func:`output_disagreement` reads them: a value
+#: (a complex number, a real one, or a constant printed by its name), a word,
+#: and an ellipsis, which stands for values left out. A ``~`` before a value
+#: gives it roughly, and an ellipsis right after its digits says they go on.
+#: Punctuation and spaces are not parts: a container prints them its own way
+#: and a comment lays them out its own.
+_OUTPUT_PART = re.compile(
+    r"(?P<rough>[~\u2248]\s*)?"
+    rf"(?P<value>[-+]?{_REAL}[-+]{_REAL}j|[-+]?{_REAL}j?"
+    r"|(?<![\w.])(?:True|False|None|nan|-?inf)(?![\w.]))"
+    r"(?P<cut>\.\.\.|\u2026)?"
+    r"|(?P<word>[^\W\d]\w*)"
+    r"|(?P<gap>\.\.\.|\u2026)"
+)
+
+#: What a comment writes beside its values that only looks like one: the power
+#: of a unit (``m/s^2``, ``m/s^1.5``) and the index of a symbol (``A(8)``).
+_NOT_A_VALUE = re.compile(r"\^[-+]?\d+(?:\.\d+)?|(?<=[A-Za-z])\(\d+\)")
+
+
+@dataclass(frozen=True)
+class _Part:
+    """One part of an output or of a comment.
+
+    :param kind: ``"value"``, ``"word"``, ``"gap"`` (an ellipsis) or, in an
+        output, ``"line"``, the end of a line it writes.
+    :param text: The part as written.
+    :param label: True for a part of an output that the print's own string
+        literal writes: a label around the values, which a comment need not
+        repeat.
+    :param rough: True for a value a comment gives roughly, after a ``~``.
+    :param cut: True for a value a comment cuts short, its digits followed by
+        an ellipsis.
+    :param before: What the text writes between the part before and this
+        one: the spaces, the punctuation and the brackets.
+    """
+
+    kind: str
+    text: str
+    label: bool = False
+    rough: bool = False
+    cut: bool = False
+    before: str = ""
+
+
+#: What one argument of a print is: ``None`` for a value the code computes, or
+#: the pieces of a string the page writes, each literal text or ``None`` for a
+#: value an f-string formats into it.
+_Argument = tuple[str | None, ...] | None
+
+
+@dataclass(frozen=True)
+class _Promise:
+    """The output a comment promises for one print of a page's script.
+
+    :param first: The line of the script the print statement opens on.
+    :param last: The line it closes on.
+    :param lines: The comment and the comment lines that continue it.
+    :param arguments: What each argument of the print is (:data:`_Argument`),
+        or ``None`` when its arguments cannot be told apart (``*args``).
+    :param word: For a comment that opens on a word, the word: such a comment
+        states the output only when the print writes that word first, which
+        the run tells (:func:`output_disagreements`); ``None`` for a comment
+        that opens like an output whatever the print writes.
+    """
+
+    first: int
+    last: int
+    lines: tuple[str, ...]
+    arguments: tuple[_Argument, ...] | None = None
+    word: str | None = None
+
+    @property
+    def text(self) -> str:
+        """The comment, its continuation lines joined to it."""
+        return " ".join(self.lines)
+
+
+def _is_print(node: ast.AST) -> TypeGuard[ast.Expr]:
+    """True for a statement that is a call of the builtin ``print``."""
+    return (
+        isinstance(node, ast.Expr)
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id == "print"
+    )
+
+
+def _open_brackets(text: str) -> int:
+    """How many brackets *text* opens and leaves open."""
+    return sum(text.count(c) for c in "([{") - sum(text.count(c) for c in ")]}")
+
+
+def _arguments(call: ast.Call) -> tuple[_Argument, ...] | None:
+    """What each argument of *call* is, as :data:`_Argument` says."""
+    if any(isinstance(arg, ast.Starred) for arg in call.args):
+        return None
+    out: list[_Argument] = []
+    for arg in call.args:
+        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+            out.append((arg.value,))
+        elif isinstance(arg, ast.JoinedStr):
+            out.append(
+                tuple(
+                    piece.value
+                    if isinstance(piece, ast.Constant) and isinstance(piece.value, str)
+                    else None
+                    for piece in arg.values
+                )
+            )
+        else:
+            out.append(None)
+    return tuple(out)
+
+
+def _label_word(call: ast.Call) -> str | None:
+    """The first word the string literal a print opens with writes, if any."""
+    if not call.args:
+        return None
+    first = call.args[0]
+    if isinstance(first, ast.JoinedStr) and first.values:
+        first = first.values[0]
+    if isinstance(first, ast.Constant) and isinstance(first.value, str):
+        match = re.match(r"\s*([^\W\d]\w*)", first.value)
+        return match.group(1) if match else None
+    return None
+
+
+def _opens_output(text: str, call: ast.Call) -> bool:
+    """True for a comment that opens like the output of *call*: like a value
+    (:data:`_OUTPUT_OPENING`) once what leads it is read past (:func:`_reading`),
+    or on the word the print's own label opens with.
+    """
+    if _OUTPUT_OPENING.match(_reading(text)):
+        return True
+    word = _label_word(call)
+    return word is not None and re.match(rf"{re.escape(word)}\b", text) is not None
+
+
+def _opening_word(text: str) -> str | None:
+    """The word a comment opens on, once what leads it is read past."""
+    match = re.match(r"[^\W\d]\w*", _reading(text))
+    return match.group() if match else None
+
+
+def promised_outputs(script: str) -> list[_Promise]:
+    """The output each print of *script* promises in a comment.
+
+    A print promises an output when the comment at the end of its last line,
+    or else the comment line right under it, opens like that output
+    (:func:`_opens_output`), or opens on a word, which the run then has to
+    show the print writes first (:attr:`_Promise.word`): the name of a class
+    or a rating, a message. The comment goes on over the comment lines under
+    it that open like an output too, one for each line a print in a loop
+    writes, and over any that a bracket it leaves open carries on to, as a
+    printed container goes on over lines. Prints that follow one another line
+    after line with no comment of their own share out the comment lines under
+    the last of them, one line each, when each of those lines opens like the
+    output of its print or on a word.
+    """
+    lines = script.splitlines()
+    comments: dict[int, tuple[int, str]] = {}
+    for token in tokenize.generate_tokens(io.StringIO(script).readline):
+        if token.type == tokenize.COMMENT:
+            comments[token.start[0]] = (token.start[1], token.string[1:].strip())
+
+    def comment_only(number: int) -> bool:
+        return (
+            number in comments and not lines[number - 1][: comments[number][0]].strip()
+        )
+
+    def trailing(number: int) -> str | None:
+        """The comment at the end of line *number*, after code."""
+        return (
+            None
+            if number not in comments or comment_only(number)
+            else comments[number][1]
+        )
+
+    def run_from(number: int, said: list[str], call: ast.Call) -> list[str]:
+        """*said* and the comment lines from *number* down that go on with it."""
+        said = list(said)
+        while comment_only(number):
+            text = comments[number][1]
+            if not (_open_brackets(" ".join(said)) > 0 or _opens_output(text, call)):
+                break
+            said.append(text)
+            number += 1
+        return said
+
+    def end(node: ast.stmt) -> int:
+        return node.end_lineno or node.lineno
+
+    def call_of(node: ast.stmt) -> ast.Call:
+        value = node.value if isinstance(node, ast.Expr) else None
+        if not isinstance(value, ast.Call):  # pragma: no cover - passed _is_print
+            raise TypeError(node)
+        return value
+
+    prints = sorted(
+        (node for node in ast.walk(ast.parse(script)) if _is_print(node)),
+        key=lambda node: node.lineno,
+    )
+    said_by: dict[int, list[str]] = {}
+    word_by: dict[int, str] = {}
+
+    def opening(text: str, index: int) -> bool:
+        """Whether *text* opens like the output of the print at *index*, or
+        on a word, noted for the run to settle.
+        """
+        if _opens_output(text, call_of(prints[index])):
+            return True
+        word = _opening_word(text)
+        if word is not None:
+            word_by[index] = word
+        return word is not None
+
+    at = 0
+    while at < len(prints):
+        node = prints[at]
+        comment = trailing(end(node))
+        if comment is not None:
+            if opening(comment, at):
+                said_by[at] = run_from(end(node) + 1, [comment], call_of(node))
+            at += 1
+            continue
+        stack = [at]
+        while (
+            stack[-1] + 1 < len(prints)
+            and prints[stack[-1] + 1].lineno == end(prints[stack[-1]]) + 1
+            and trailing(end(prints[stack[-1] + 1])) is None
+        ):
+            stack.append(stack[-1] + 1)
+        under = end(prints[stack[-1]]) + 1
+        dealt = [
+            comments[under + place][1]
+            for place, index in enumerate(stack)
+            if comment_only(under + place)
+            and opening(comments[under + place][1], index)
+        ]
+        last = call_of(prints[stack[-1]])
+        # A line that opens on a word may be prose that starts a comment the
+        # next lines go on with, so a share-out that counts one holds only
+        # when there is exactly one comment line for each print.
+        depth = 0
+        while comment_only(under + depth):
+            depth += 1
+        worded = any(index in word_by for index in stack)
+        if (
+            len(stack) > 1
+            and len(dealt) == len(stack)
+            and (not worded or depth == len(stack))
+        ):
+            for place, index in enumerate(stack[:-1]):
+                said_by[index] = [dealt[place]]
+            said_by[stack[-1]] = run_from(under + len(stack), [dealt[-1]], last)
+        else:
+            for index in stack:
+                word_by.pop(index, None)
+            run = run_from(under, [], last)
+            if run:
+                said_by[stack[-1]] = run
+            elif comment_only(under) and opening(comments[under][1], stack[-1]):
+                said_by[stack[-1]] = run_from(under + 1, [comments[under][1]], last)
+        at = stack[-1] + 1
+    return [
+        _Promise(
+            prints[index].lineno,
+            end(prints[index]),
+            tuple(said),
+            _arguments(call_of(prints[index])),
+            word_by.get(index),
+        )
+        for index, said in sorted(said_by.items())
+    ]
+
+
+def _parts(text: str, *, label: bool = False) -> list[_Part]:
+    """The values, words and ellipses of *text*, in order."""
+    parts: list[_Part] = []
+    at = 0
+    for match in _OUTPUT_PART.finditer(text):
+        before, at = text[at : match.start()], match.end()
+        if match.group("value") is not None:
+            parts.append(
+                _Part(
+                    "value",
+                    match.group("value"),
+                    label,
+                    rough=match.group("rough") is not None,
+                    cut=match.group("cut") is not None,
+                    before=before,
+                )
+            )
+        elif match.group("word") is not None:
+            parts.append(_Part("word", match.group(), label, before=before))
+        elif match.group("gap") is not None:
+            parts.append(_Part("gap", match.group(), label, before=before))
+    return parts
+
+
+def _pieces(text: str, argument: _Argument) -> list[tuple[str, bool]]:
+    """*text*, what one argument of a print wrote, cut into the pieces the
+    page's own string literal wrote (``True``) and the values in between.
+    """
+    if argument is None:
+        return [(text, False)]
+    pieces: list[tuple[str, bool]] = []
+    at = 0
+    for index, literal in enumerate(argument):
+        if literal is None:
+            continue
+        if index == 0:
+            start = 0 if text.startswith(literal) else -1
+        elif index == len(argument) - 1:
+            start = len(text) - len(literal) if text.endswith(literal) else -1
+        else:
+            start = text.find(literal, at)
+        if start < at:
+            return [(text, False)]  # the literal is not where it should be
+        if start > at:
+            pieces.append((text[at:start], False))
+        pieces.append((literal, True))
+        at = start + len(literal)
+    if at < len(text):
+        pieces.append((text[at:], False))
+    return pieces
+
+
+def _written_parts(
+    calls: Sequence[tuple[str, Sequence[str]]],
+    arguments: tuple[_Argument, ...] | None,
+) -> list[_Part]:
+    """The parts of what a print wrote over all its calls, each call and each
+    line it wrote closed by a ``"line"`` part, its own literal text marked as
+    a label.
+    """
+    out: list[_Part] = []
+    for sep, texts in calls:
+        known = arguments is not None and len(arguments) == len(texts)
+        pieces: list[tuple[str, bool]] = []
+        for index, text in enumerate(texts):
+            if index:
+                pieces.append((sep, True))
+            pieces += _pieces(text, arguments[index] if known and arguments else None)
+        for text, label in pieces:
+            for number, line in enumerate(text.split("\n")):
+                if number:
+                    out.append(_Part("line", "\n"))
+                out += _parts(line, label=label)
+        out.append(_Part("line", "\n"))
+    return out
+
+
+def _resolution(number: str) -> Decimal | None:
+    """The unit of the last digit *number* writes, ``None`` for a form with none.
+
+    ``0.67`` writes hundredths, ``126`` units, and ``1.0012e6`` hundreds.
+    """
+    match = re.fullmatch(r"[-+]?\d*(?:\.(\d*))?(?:[eE]([-+]?\d+))?", number)
+    if match is None:
+        return None
+    return Decimal(1).scaleb(int(match.group(2) or 0) - len(match.group(1) or ""))
+
+
+def _decimal(text: str, value: float) -> Decimal:
+    """The number *text* writes, read digit for digit; *value* is its float."""
+    try:
+        return Decimal(text)
+    except InvalidOperation:
+        return Decimal(value)
+
+
+def _same_value(said: _Part, wrote: str) -> bool:
+    """True when the comment's value *said* states the printed value *wrote*.
+
+    A number states a printed one that rounds to it at the last digit it
+    writes, so ``0.67`` states ``0.6667``, ``126`` states ``125.89`` and
+    ``1.0012e6`` states ``1001249.2``. Given roughly (``~``), it states one
+    within a unit of that digit; cut short (``55.350667...``), one whose digits
+    begin with its own. A constant states only itself.
+    """
+    try:
+        a, b = complex(said.text), complex(wrote)
+    except ValueError:
+        return said.text == wrote
+    if a == b or (math.isnan(a.real) and math.isnan(b.real)):
+        return True
+    step = _resolution(said.text)
+    if step is None or a.imag or b.imag or not math.isfinite(b.real):
+        return False
+    # Decimals, not floats: a comment written to every digit of a float is
+    # held to its last digit, a step finer than the spacing of floats there.
+    gap = _decimal(wrote, b.real) - _decimal(said.text, a.real)
+    if said.cut:
+        return 0 <= (gap if a.real >= 0 else -gap) < step
+    reach = step if said.rough else step / 2
+    return abs(gap) <= reach
+
+
+def _meet_after_gap(
+    said: list[_Part], k: int, wrote: list[_Part], j: int
+) -> tuple[int, int] | None:
+    """Where the comment, past an ellipsis at ``said[k - 1]``, meets the
+    output again from ``wrote[j]`` on: the next part of each to read.
+
+    The values after an ellipsis are the last ones of a line of the output, or
+    of the whole of it: the ellipsis stands for the middle of an array or for
+    the lines of a loop between the first and the last. The fewest values
+    that meet that way win, so words and numbers of annotation after them
+    stay annotation. Failing that, the ellipsis stands for what comes before
+    the first value that meets the next one, as at the head of a quoted
+    message.
+    """
+    after: list[int] = []
+    for n in range(k, len(said)):
+        if said[n].kind == "gap":
+            break
+        if said[n].kind == "value":
+            after.append(n)
+    if not after:
+        return len(said), len(wrote)
+    stated = [
+        n
+        for n in range(j, len(wrote))
+        if wrote[n].kind == "value" and not wrote[n].label
+    ]
+    ends = [n for n in range(j, len(wrote)) if wrote[n].kind == "line"]
+    for end in [*ends, len(wrote)]:
+        before = [n for n in stated if n < end]
+        for count in range(min(len(after), len(before)), 0, -1):
+            tail = before[-count:]
+            if all(
+                _same_value(said[a], wrote[b].text)
+                for a, b in zip(after[:count], tail, strict=True)
+            ):
+                return after[count - 1] + 1, tail[-1] + 1
+    for n in stated:
+        if _same_value(said[after[0]], wrote[n].text):
+            return after[0] + 1, n + 1
+    return None
+
+
+def _promised_after(said: list[_Part], last: int) -> str | None:
+    """The first value the comment writes after ``said[last]``, the last value
+    the print bore out (``-1`` for none), when that value is still part of
+    what the comment promises the print writes, or ``None``.
+
+    It is when it stands inside the innermost bracket that was open at
+    ``said[last]`` and has not closed since, as the print that writes
+    ``[0.52 0.7  0.8 ]`` or ``(5,)`` has lost a value of its comment
+    ``[0.52 0.7  0.8  0.89]`` or ``(5 bands, 59225 samples)``; or when only
+    spaces, commas and opening brackets stand between the two and no word
+    follows it, as in ``2 3 4`` or ``True 0.12 (40.0, 315.0)``. A value after
+    a word, outside that bracket, is annotation, and so is one a word follows,
+    the ``0.458`` of ``0.358  (0.458 with normal hearing)`` or the ``1`` of a
+    unit ``1/s``, unless it is the value the comment opens on.
+    """
+    depth = sum(_open_brackets(part.before) for part in said[: last + 1])
+    floor = depth
+    inside = depth > 0
+    adjacent = True
+    for at in range(last + 1, len(said)):
+        part = said[at]
+        for char in part.before:
+            depth += (char in "([{") - (char in ")]}")
+            inside = inside and depth >= floor
+        adjacent = adjacent and re.fullmatch(r"[\s,(\[{]*", part.before) is not None
+        if part.kind == "gap":
+            return None
+        if part.kind == "value":
+            followed = at + 1 < len(said) and said[at + 1].kind == "word"
+            opens = adjacent and (last < 0 or not followed)
+            return part.text if inside or opens else None
+        adjacent = False
+    return None
+
+
+def _held(said: list[_Part], wrote: list[_Part]) -> str:
+    """Why the comment's parts *said* do not state the output's parts *wrote*,
+    or ``""`` (:func:`output_disagreement` gives the reading).
+    """
+    said_values = [part for part in said if part.kind == "value"]
+    wrote_values = [p for p in wrote if p.kind == "value" and not p.label]
+    if (
+        len(said_values) == 1
+        and len(wrote_values) > 1
+        and all(_same_value(said_values[0], p.text) for p in wrote_values)
+    ):
+        return ""  # one value for an output that is that value throughout
+    # The last value of the comment the print has borne out so far.
+    last = -1
+    k = j = 0
+    # Whether the comment has stated a value, whether a line of the output
+    # has ended since the last one it stated, how many words the comment has
+    # quoted in a row, and whether that row was broken by a part either side
+    # read past.
+    stated = crossed = broken = False
+    quoted = 0
+    while j < len(wrote):
+        part = wrote[j]
+        if part.kind == "line":
+            crossed = True
+        elif part.kind == "word":
+            if k < len(said) and said[k].kind == "word" and said[k].text == part.text:
+                k += 1
+                quoted = 1 if broken else quoted + 1
+                broken = False
+            elif k < len(said):
+                broken = True
+        else:
+            while k < len(said) and said[k].kind == "word":
+                k += 1
+                broken = True
+            if k < len(said) and said[k].kind == "gap":
+                meet = _meet_after_gap(said, k + 1, wrote, j)
+                if meet is None:
+                    value = next(p.text for p in said[k + 1 :] if p.kind == "value")
+                    return f"the comment's {value} after its ellipsis is never printed"
+                k, j = meet
+                if said[k - 1].kind == "value":
+                    last = k - 1
+                stated, crossed, broken, quoted = True, False, True, 0
+                continue
+            if k == len(said):
+                if not part.label:
+                    if (stated and crossed) or (quoted and not broken):
+                        return ""
+                    return f"the comment stops before the printed {part.text}"
+            elif _same_value(said[k], part.text):
+                last = k
+                k += 1
+                if broken:
+                    quoted, broken = 0, False
+                stated, crossed = True, False
+            elif part.label:
+                broken = True
+            else:
+                return (
+                    f"the comment says {said[k].text} where the print wrote {part.text}"
+                )
+        j += 1
+    promised = _promised_after(said, last)
+    if promised is None:
+        return ""
+    if last < 0:
+        return f"the comment says {promised} where the print wrote no value"
+    return f"the print stops before the comment's {promised}"
+
+
+def _lines_of(parts: list[_Part]) -> list[list[_Part]]:
+    """*parts* cut at each ``"line"`` part, the empty lines left out."""
+    lines: list[list[_Part]] = [[]]
+    for part in parts:
+        if part.kind == "line":
+            lines.append([])
+        else:
+            lines[-1].append(part)
+    return [line for line in lines if line]
+
+
+#: An arrow, which in a comment leads from the output to a note on it:
+#: ``78.2 Hz, 38.6 Hz -> valid here``.
+_ARROW = re.compile(r"\s*(?:->|\u2192)")
+
+
+def _disagreement(
+    said_lines: Sequence[str],
+    wrote: list[_Part],
+    *,
+    decimal_comma: bool,
+    arrow: bool = True,
+) -> str:
+    """Why the comment lines *said_lines* do not state the output *wrote*.
+
+    :param decimal_comma: Read a comma between two digits as a decimal point.
+    :param arrow: Let a line of the comment end what it states at an arrow
+        (:data:`_ARROW`), the rest of it a note; off when the print writes an
+        arrow itself.
+    """
+    texts = [
+        _NOT_A_VALUE.sub("", _reading(text).replace("\u2212", "-"))
+        for text in said_lines
+    ]
+    if decimal_comma:
+        texts = [re.sub(r"(?<=\d),(?=\d)", ".", text) for text in texts]
+    why = _read(texts, wrote)
+    if why and arrow:
+        noted = [_ARROW.split(text, maxsplit=1)[0] for text in texts]
+        if noted != texts and not _read(noted, wrote):
+            return ""
+    return why
+
+
+def _read(texts: list[str], wrote: list[_Part]) -> str:
+    """Why the comment lines *texts*, as :func:`_disagreement` prepared them,
+    do not state the output *wrote*, or ``""``.
+    """
+    said = _parts(" ".join(texts))
+    if said and said[0].kind == "word" and texts[0].lstrip("~\u2248 ")[:1] in "'\"":
+        first = next((p.text for p in wrote if p.kind == "word"), None)
+        if first != said[0].text:
+            return f"the comment opens on {said[0].text!r}, the print on {first!r}"
+    why = _held(said, wrote)
+    if why and len(texts) > 1:
+        lines = _lines_of(wrote)
+        if len(lines) >= len(texts) and not any(
+            _held(_parts(text), line) for text, line in zip(texts, lines, strict=False)
+        ):
+            return ""
+    return why
+
+
+def _reads_decimal_comma(output: str, *, spanish: bool) -> bool:
+    """Whether a comma between two digits of a comment is a decimal point.
+
+    It is on a Spanish page, unless the print writes such a comma itself, in a
+    row of text it prints (``'0,025'``): then the comment quotes it as written.
+    """
+    return spanish and re.search(r"\d,\d", output) is None
+
+
+def output_disagreement(
+    promised: str | Sequence[str],
+    written: str | Sequence[str],
+    *,
+    decimal_comma: bool = False,
+) -> str:
+    """Why the comment *promised* does not state the output *written*, or ``""``.
+
+    The comment states the printed values in their order, every one of them,
+    each at the decimals it writes it to (:func:`_same_value`); what follows
+    the last is annotation, unless the print stops short of a value the
+    comment still promises (:func:`_promised_after`), and an arrow may start
+    that annotation early (:data:`_ARROW`). Between two values it may write a
+    unit or a word,
+    and it need not repeat a word the print wrote, nor a number of the
+    print's own string literal, the label around the values. It may stop at
+    the end of a line of the output, having stated the lines before in full,
+    as a comment beside a print in a loop states the first time round; and a
+    comment that quotes a message word for word may stop where its quotation
+    does. An ellipsis stands for the values it leaves out (:func:`_meet_after_gap`),
+    and one value states an output that is that value throughout. A comment
+    over several lines may also state the output line by line, each line with
+    its own annotation. A comment that opens on a quoted word quotes the word
+    the print opens with. *decimal_comma* reads a comma between two digits as
+    a decimal point, as a Spanish page may write one, unless the print writes
+    such a comma itself (:func:`_reads_decimal_comma`).
+
+    :param promised: The comment, or its lines.
+    :param written: What the print wrote, or what each of its calls wrote, as
+        values with no label.
+    """
+    lines = promised.splitlines() if isinstance(promised, str) else list(promised)
+    calls = [written] if isinstance(written, str) else list(written)
+    wrote = _written_parts([(" ", [text]) for text in calls], None)
+    output = "\n".join(calls)
+    comma = _reads_decimal_comma(output, spanish=decimal_comma)
+    arrow = _ARROW.search(output) is None
+    return _disagreement(lines, wrote, decimal_comma=comma, arrow=arrow)
+
+
+def output_disagreements(
+    page: pathlib.Path,
+    script: str,
+    lines: dict[int, int],
+    written: dict[int, list[tuple[str, list[str]]]],
+) -> list[str]:
+    """Failures for every output comment of *page* that its print contradicts.
+
+    :param script: The script the page ran as (:func:`_script`).
+    :param lines: The line of the page each line of the script stands on.
+    :param written: What each print wrote, keyed by its line in the script:
+        one ``(sep, texts)`` per call, *texts* holding what each argument
+        wrote, in the order the calls came.
+    """
+    failures: list[str] = []
+    spanish = page.is_relative_to(_SITE_ES)
+    for promise in promised_outputs(script):
+        where = f"{_rel(page)}:{lines.get(promise.first, promise.first)}"
+        calls = [
+            call
+            for number in range(promise.first, promise.last + 1)
+            for call in written.get(number, [])
+        ]
+        wrote = _written_parts(calls, promise.arguments)
+        if promise.word is not None:
+            first = next((part for part in wrote if part.kind != "line"), None)
+            if first is None or (first.kind, first.text) != ("word", promise.word):
+                continue  # prose about the line, not what the print writes
+        if not calls:
+            failures.append(
+                f"{where}: the comment promises {promise.text!r}, but the page "
+                "never runs this print"
+            )
+            continue
+        output = "\n".join(sep.join(texts) for sep, texts in calls)
+        comma = _reads_decimal_comma(output, spanish=spanish)
+        arrow = _ARROW.search(output) is None
+        why = _disagreement(promise.lines, wrote, decimal_comma=comma, arrow=arrow)
+        if why:
+            failures.append(
+                f"{where}: {why}; the comment promises {promise.text!r}, the "
+                f"print wrote {output!r}"
+            )
+    return failures
+
+
+#: The module a page's script imports before anything else. It wraps
+#: ``print`` so that every call made from the script itself, at any depth of
+#: its own functions and loops, also records the text the call writes, keyed
+#: by the line of the script the call stands on; a print made inside the
+#: library is not the page's and is not recorded. When the script ends, however
+#: it ends, the record is saved beside it as JSON for :func:`_run_page` to read.
+_RECORDER = """\
+import atexit
+import builtins
+import json
+import os
+import sys
+
+_SCRIPT = sys.argv[0]
+_SAVED = os.path.join(os.path.dirname(os.path.abspath(_SCRIPT)), "printed.json")
+_PRINT = builtins.print
+_WRITTEN = {}
+
+
+def _print(*args, sep=" ", end="\\n", file=None, flush=False):
+    caller = sys._getframe(1)
+    if caller.f_code.co_filename == _SCRIPT:
+        texts = [str(arg) for arg in args]
+        _WRITTEN.setdefault(caller.f_lineno, []).append(
+            [" " if sep is None else sep, texts]
+        )
+    _PRINT(*args, sep=sep, end=end, file=file, flush=flush)
+
+
+def _save():
+    with open(_SAVED, "w", encoding="utf-8") as out:
+        json.dump(_WRITTEN, out)
+
+
+builtins.print = _print
+atexit.register(_save)
+"""
+
+
+def _script(page: pathlib.Path, fixture: str = "") -> tuple[str, dict[int, int]]:
+    """The script a page runs as, and the line of the page each line of a
+    block stands on, keyed by its line in the script.
+
+    *fixture* runs first, after the harness's own lines: the files of
     :data:`_FIXTURES` the page reads.
     """
-    runnable = [fixture, *(b for b in _blocks(page) if not _is_sketch(b))]
     # A deprecated phonometry name in a snippet is an error, exactly as it is
     # in the test suite (pyproject filterwarnings): the guides teach the
     # canonical API, and a page that teaches an alias teaches a path that the
     # next major release removes.
     script = (
+        "import _snippet_recorder\n"
+        "del _snippet_recorder\n"
         "import warnings\n"
         "warnings.filterwarnings('error', message='.*is deprecated since phonometry.*',"
         " category=DeprecationWarning)\n"
-        "import matplotlib\nmatplotlib.use('Agg')\n" + "\n".join(runnable)
+        "import matplotlib\nmatplotlib.use('Agg')\n" + fixture
     )
+    lines: dict[int, int] = {}
+    for first, block in _located_blocks(page):
+        if _is_sketch(block):
+            continue
+        script += "\n"
+        start = script.count("\n") + 1
+        for offset in range(block.count("\n") + 1):
+            lines[start + offset] = first + offset
+        script += block
+    return script, lines
+
+
+def _run_page(
+    page: pathlib.Path, fixture: str = ""
+) -> tuple[pathlib.Path, str, list[str]]:
+    """Run a page's blocks as one script.
+
+    :return: The page; the tail of its stderr when it fails, empty when it
+        runs; and when it runs, every output comment of the page that
+        disagrees with what its print wrote (:func:`output_disagreements`).
+    """
+    script, lines = _script(page, fixture)
     with tempfile.TemporaryDirectory() as tmp:
         path = pathlib.Path(tmp) / "snippet.py"
         path.write_text(script, encoding="utf-8")
+        (pathlib.Path(tmp) / "_snippet_recorder.py").write_text(
+            _RECORDER, encoding="utf-8"
+        )
         try:
             done = subprocess.run(
                 [sys.executable, str(path)],
@@ -308,32 +1170,44 @@ def _run_page(page: pathlib.Path, fixture: str = "") -> tuple[pathlib.Path, str]
                 cwd=tmp,
             )
         except subprocess.TimeoutExpired:
-            return page, f"timed out after {_TIMEOUT_S} s"
-    if done.returncode == 0:
-        return page, ""
-    tail = done.stderr.strip().splitlines()
-    return page, tail[-1] if tail else f"exit status {done.returncode}"
+            return page, f"timed out after {_TIMEOUT_S} s", []
+        if done.returncode != 0:
+            tail = done.stderr.strip().splitlines()
+            return page, tail[-1] if tail else f"exit status {done.returncode}", []
+        record = pathlib.Path(tmp) / "printed.json"
+        if not record.exists():
+            return page, "the run ended without saving what its prints wrote", []
+        saved = json.loads(record.read_text("utf-8"))
+    written = {
+        int(line): [(sep, texts) for sep, texts in calls]
+        for line, calls in saved.items()
+    }
+    return page, "", output_disagreements(page, script, lines, written)
 
 
 def check_execution(pages: list[pathlib.Path]) -> list[str]:
-    """Failures for every runnable page that does not run, and stale skips."""
+    """Failures for every runnable page that does not run, every output
+    comment of a page that runs and disagrees with what its print wrote, and
+    stale skips.
+    """
     runnable = [p for p in pages if p.stem not in _SKIP and _blocks(p)]
     skipped = [p for p in pages if p.stem in _SKIP and _blocks(p)]
     failures: list[str] = []
     still_skipped: dict[str, list[pathlib.Path]] = {}
     with concurrent.futures.ProcessPoolExecutor() as pool:
         fixtures = [_FIXTURES.get(page.stem, "") for page in runnable]
-        for page, error in pool.map(_run_page, runnable, fixtures):
+        for page, error, disagreements in pool.map(_run_page, runnable, fixtures):
             if error:
                 failures.append(f"{_rel(page)}: {error}")
+            failures += disagreements
         # A page that starts running must leave the skip list, or the list
         # quietly grows into a list of pages nobody checks. An entry covers a
-        # guide, and a guide is written twice, as the site page and as the
-        # hand-written mirror under docs/; the entry is stale only once both
-        # editions run, since dropping it while one of them still fails would
-        # turn a stale-skip report into a failing page.
+        # guide, and a guide is written three times, as the site page in each
+        # language and as the hand-written mirror under docs/; the entry is
+        # stale only once every edition runs, since dropping it while one of
+        # them still fails would turn a stale-skip report into a failing page.
         fixtures = [_FIXTURES.get(page.stem, "") for page in skipped]
-        for page, error in pool.map(_run_page, skipped, fixtures):
+        for page, error, _ in pool.map(_run_page, skipped, fixtures):
             if error:
                 still_skipped.setdefault(page.stem, []).append(page)
     for page in skipped:
@@ -410,6 +1284,27 @@ def _pages() -> tuple[list[pathlib.Path], list[tuple[pathlib.Path, pathlib.Path]
     return everything, pairs
 
 
+def _runnable(pages: list[pathlib.Path]) -> list[pathlib.Path]:
+    """The pages of *pages* the execution and output checks run.
+
+    Every edition a reader can copy from: the site page in both languages,
+    and the hand-written mirror under docs/ that GitHub serves, with the
+    published surfaces. The mirror is not a copy -- 105 of its 171 pages
+    carry different code from their site page, mostly reworded comments but
+    not only -- so running the site page proves nothing about it, and its 835
+    blocks were the largest body of published example code nothing executed.
+    The Spanish page translates its strings and its comments, the output
+    comments among them, and 42 of its pages bind more than that differently
+    from their English twin, so what it prints is known only by running it.
+    The generated dumps restate guide text and are not run.
+    """
+    return (
+        [p for p in pages if p.is_relative_to(_SITE)]
+        + [p for p in pages if p.is_relative_to(_DOCS)]
+        + _published()
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--static", action="store_true", help="skip the execution pass")
@@ -422,22 +1317,7 @@ def main() -> int:
     failures += check_translations(pairs)
     stage = "static checks"
     if not args.static:
-        # Every edition a reader can copy from: the site page, and the
-        # hand-written mirror under docs/ that GitHub serves. The mirror is
-        # not a copy -- 105 of its 171 pages carry different code from their
-        # site page, mostly reworded comments but not only -- so running the
-        # site page proves nothing about it, and its 835 blocks were the
-        # largest body of published example code nothing executed.
-        runnable = (
-            [
-                p
-                for p in pages
-                if p.is_relative_to(_SITE) and not p.is_relative_to(_SITE_ES)
-            ]
-            + [p for p in pages if p.is_relative_to(_DOCS)]
-            + _published()
-        )
-        failures += check_execution(runnable)
+        failures += check_execution(_runnable(pages))
         stage = "checks"
 
     if failures:

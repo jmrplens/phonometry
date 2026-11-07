@@ -198,7 +198,7 @@ def analytic_sti(t60):
 
 measured = [speech.sti_from_impulse_response(decay(t), fs).sti
             for t in t60_points]
-print(np.round(measured, 3))     # [0.827 0.731 0.641 0.555 0.437 0.368 0.269]
+print(np.round(measured, 3))     # [0.83  0.738 0.652 0.557 0.436 0.368 0.27 ]
 
 fig, ax = plt.subplots(figsize=(10, 6))
 edges = [0.36, 0.40, 0.44, 0.48, 0.52, 0.56, 0.60, 0.64, 0.68, 0.72, 0.76]
@@ -339,7 +339,7 @@ rng = np.random.default_rng(0)
 n = np.arange(fs)
 ir = rng.standard_normal(fs) * np.exp(-6.9078 * n / fs / 0.9)
 res = speech.sti_from_impulse_response(ir, fs, snr=15.0)
-print(round(res.sti, 3), res.rating)      # 0.583 E
+print(round(res.sti, 3), res.rating)      # 0.584 E
 
 # En una línea: las barras de MTI por banda con el STI y su valoración.
 res.plot(language="es")
@@ -535,7 +535,7 @@ totals = np.arange(40.0, 100.5, 2.5)
 curve = [speech.sti_from_impulse_response(
     ir, fs, levels=shape - shape_total + t, ambient=ambient).sti for t in totals]
 print(round(min(curve), 3), round(max(curve), 3))          # 0.246 0.604
-print(round(speech.sti_from_impulse_response(ir, fs).sti, 3))   # 0.609
+print(round(speech.sti_from_impulse_response(ir, fs).sti, 3))   # 0.61
 
 fig, ax = plt.subplots()
 ax.plot(totals, curve)

@@ -363,7 +363,7 @@ R = materials.alternating_airflow_resistance(
     piston_stroke_specimen=14e-3, piston_stroke_termination=1.4e-3,
     frequency=2.0, cavity_volume=7.854e-4, kappa_prime=kp,
 )
-print(round(R))                   # 222956  airflow resistance R [Pa*s/m^3]
+print(round(R))                   # 222949  airflow resistance R [Pa*s/m^3]
 ```
 
 $b$ is 1.83 mm at 2 Hz, which is millimetre-scale, against a cavity 100 mm
@@ -448,7 +448,7 @@ print(round((1.4e-3 / 14e-3) * 10 ** ((74.0 - 90.0) / 20), 3))   # 0.016
 
 # Finish the chain the static method gets for free: R -> R_s -> sigma.
 r_s = materials.specific_airflow_resistance(R, area)
-print(round(r_s, 1), round(r_s / 0.05))    # 1751.1 Pa*s/m, 35022 Pa*s/m^2
+print(round(r_s, 1), round(r_s / 0.05))    # 1751.0 Pa*s/m, 35021 Pa*s/m^2
 ```
 
 **What Part 2 returns, and what it does not.** Unlike the static method,

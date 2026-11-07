@@ -59,7 +59,7 @@ x = electroacoustics.simulated_program_signal(fs, 60.0, spectrum="figure_2", see
 bands = octave_filter(x, fs, fraction=3, limits=[19.95, 19952.6])
 check = electroacoustics.check_program_signal(bands.levels, frequencies=bands.frequencies)
 print(check.passes, round(check.margin_db, 2), check.binding_bands_hz)
-# True 0.12 (315.0, 5000.0)
+# True 0.12 (40.0, 315.0)
 
 y = electroacoustics.simulated_program_signal(fs, 60.0, seed=2)
 bands_y = octave_filter(y, fs, fraction=3, limits=[19.95, 19952.6])

@@ -400,9 +400,11 @@ jobs:
         # else. The Spanish API pages declared themselves Spanish pages of
         # their own while carrying the English text, ten pages shared a title,
         # the errata page had two h1 elements and the Spanish header linked an
-        # address that redirects, with this whole job green. This reads the
-        # build the way a crawler does, with no browser and no server, and
-        # holds each sitemap date to the one the page's structured data and
+        # address that redirects, with this whole job green. So did the text a
+        # crawler takes with no stylesheet, which read "1897conformance checks
+        # passing" on the home and "ISO 7173 entries" on the errata index. This
+        # reads the build the way a crawler does, with no browser and no server,
+        # and holds each sitemap date to the one the page's structured data and
         # footer give.
         run: pnpm run check:crawl
         working-directory: site

@@ -86,7 +86,9 @@ const count =
 
 <div class="errata-family" data-errata-family>
 	<p class="errata-family-name">
-		<a href={page}>{name}</a>
+		{/* Written, because the build drops the line break between the two
+		    tags, and a crawler would read "ISO 7173 entries". */}
+		<a href={page}>{name}</a>{' '}
 		<span class="errata-family-count">{count}</span>
 	</p>
 	<ul>

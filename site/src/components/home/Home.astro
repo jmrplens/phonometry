@@ -43,11 +43,14 @@ const spectrum = `${IMAGES}/signal_response_fraction_3.svg`;
 ---
 
 <div class="home">
+	{/* The spaces between a number and its label, and between two chips, are
+	    for a reader with no stylesheet: a flex container draws no whitespace
+	    between its items, and without one a crawler reads "1897conformance". */}
 	<section class="readout" aria-label={content.statsLabel}>
 		{
 			content.stats.map((s) => (
 				<div class="readout-cell">
-					<span class="readout-value">{s.value}</span>
+					<span class="readout-value">{s.value}</span>{' '}
 					<span class="readout-label">
 						{s.href ? <a href={s.href}>{s.label}</a> : s.label}
 					</span>
@@ -177,7 +180,9 @@ const spectrum = `${IMAGES}/signal_response_fraction_3.svg`;
 								<td role="cell">
 									<span class="chips">
 										{(a.standards.length > 0 ? a.standards : [content.coverage.noStandard]).map((s) => (
-											<span class="chip">{s}</span>
+											<>
+												<span class="chip">{s}</span>{' '}
+											</>
 										))}
 									</span>
 								</td>

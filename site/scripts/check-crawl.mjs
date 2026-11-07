@@ -16,7 +16,11 @@
 // - the header of every Spanish page linked `/phonometry/es`, which GitHub
 //   Pages answers with a 301 to `/phonometry/es/`;
 // - 150 links pointed at an accented heading through a percent-encoded
-//   fragment, which matches no id as written (docs/contributing F13).
+//   fragment, which matches no id as written (docs/contributing F13);
+// - the home read "1897conformance checks passing", the topic landings
+//   "Theory7 pages" and the errata index "ISO 7173 entries": components that
+//   lay a number and its label out as two flex items wrote no space between
+//   them, and a crawler that applies no stylesheet joins the two.
 //
 // So this reads the build the way a crawler does, with no browser and no
 // server, and asserts each of those directly:
@@ -48,7 +52,11 @@
 //    `lastUpdated` src/routeData.ts sets. Without that override Starlight
 //    sets its own, the last commit that touched the file, and nothing else
 //    would notice; nor would anything notice a stamp that found no sitemap
-//    to write into.
+//    to write into;
+// 8. no number run into a word in the text a crawler reads with no
+//    stylesheet: inline elements join as written and only HTML's own blocks
+//    break the text (shared/crawler-text.mjs says what it reads and what it
+//    leaves alone).
 //
 // The redirect stubs are not pages and are only read to know where they are,
 // and the error page is held to rules 1 and 2 alone.
@@ -70,6 +78,7 @@ import {
 	tags,
 	walk,
 } from './shared/dist-pages.mjs';
+import { numberGlue } from './shared/crawler-text.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
@@ -130,6 +139,7 @@ for (const [route, file] of walk(DIST)) {
 		times: tags(markup, 'time')
 			.map((time) => time.datetime)
 			.filter((datetime) => datetime !== undefined),
+		glued: numberGlue(markup),
 	});
 }
 
@@ -371,6 +381,15 @@ report(
 		`every fragment of an internal link names an id on its page, as written`,
 	);
 }
+
+// --- 8. Numbers run into words --------------------------------------------
+report(
+	[...pages].flatMap(([route, page]) =>
+		page.glued.map(({ before, after }) => `${route}: "${before}" runs into "${after}"`),
+	),
+	"place(s) where a number runs into a word in the text a crawler reads (write a space between the two elements, {' '} in a component)",
+	`no number runs into a word in the text a crawler reads`,
+);
 
 console.log(`\n${failures()} failing check(s).`);
 process.exit(failures() ? 1 : 0);

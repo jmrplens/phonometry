@@ -213,18 +213,24 @@ const sorted = [...references.entries()].sort(([, a], [, b]) =>
 								inner
 							);
 						})}
+						{/* The annotation is a block by its stylesheet only; the space
+						    keeps a reader with none from running a DOI's last digit
+						    into the annotation's first word. */}
 						{ref.note && (
-							<span class="ref-note">
-								{noteParts(ref.note).map((part) =>
-									part.href ? (
-										<a href={part.href} rel="noopener">
-											{part.text}
-										</a>
-									) : (
-										part.text
-									),
-								)}
-							</span>
+							<>
+								{' '}
+								<span class="ref-note">
+									{noteParts(ref.note).map((part) =>
+										part.href ? (
+											<a href={part.href} rel="noopener">
+												{part.text}
+											</a>
+										) : (
+											part.text
+										),
+									)}
+								</span>
+							</>
 						)}
 					</li>
 				))}

@@ -211,12 +211,16 @@ const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}
 		const rows = sections.flatMap((section) => [...section.querySelectorAll<HTMLTableRowElement>('tbody tr')]);
 
 		/** Folded the way Catalogues.astro folds, so a reader who types
-		    "hormigon" or "argon" finds "hormigón" and "argón". */
+		    "hormigon" or "argon" finds "hormigón" and "argón", and with a run
+		    of blanks read as one space: a cell writes a space at the edge of
+		    its group, its variant and its note, and its words are joined by
+		    another, so a name typed with its variant still finds its row. */
 		const fold = (text: string) =>
 			text
 				.normalize('NFD')
 				.replace(/\p{M}/gu, '')
-				.toLowerCase();
+				.toLowerCase()
+				.replace(/\s+/g, ' ');
 
 		/** Every text node of a cell, a space between each: the heading above a
 		    name, the name and the variant under it are separate words. */

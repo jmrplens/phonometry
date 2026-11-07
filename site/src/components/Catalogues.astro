@@ -341,14 +341,16 @@ const say = (row: CatalogueRow, field: CatalogueTextField | 'gauge') =>
 const cellText = (cell: CatalogueCell) => (lang === 'es' && cell.textEs) || cell.text;
 const cellNote = (cell: CatalogueCell) => (lang === 'es' && cell.noteEs) || cell.note;
 
-/** Lower case and without accents, so "hormigon" finds "hormigón" and
-    "aluminium" still finds the row on the Spanish page. The finder folds what
-    the reader types, and the words a row shows, the same way. */
+/** Lower case, without accents and with a run of blanks as one space, so
+    "hormigon" finds "hormigón" and "aluminium" still finds the row on the
+    Spanish page. The finder folds what the reader types, and the words a row
+    shows, the same way. */
 const folded = (text: string) =>
 	text
 		.normalize('NFD')
 		.replace(/\p{M}/gu, '')
-		.toLowerCase();
+		.toLowerCase()
+		.replace(/\s+/g, ' ');
 
 const data = catalogues[section];
 const tables = tablesOf(data.rows);
@@ -519,7 +521,12 @@ const cellTitle = (cell: CatalogueCell) =>
 						data.columns.map((column) => (
 							<th scope="col" class="numeric">
 								{heading(column)}
-								{column.unit && <span class="unit">{column.unit}</span>}
+								{column.unit && (
+									<>
+										{' '}
+										<span class="unit">{column.unit}</span>
+									</>
+								)}
 							</th>
 						))
 					}
@@ -535,12 +542,33 @@ const cellTitle = (cell: CatalogueCell) =>
 						   source and everything between is a quantity. */
 						<tr data-table={row.table} data-also={alsoOf(row) || undefined}>
 							<th scope="row" title={say(row, 'note') || undefined}>
+								{/* The group, the variant and the note are blocks by
+								    the stylesheet only, as the unit of a column
+								    heading is; the written spaces keep a reader with
+								    none from running a name into the "16 kg/m³, 25 mm"
+								    of its variant, or a group into the name under it. */}
 								<span>
-									{row.group && <span class="group">{say(row, 'group')}</span>}
+									{row.group && (
+										<>
+											<span class="group">{say(row, 'group')}</span>{' '}
+										</>
+									)}
 									{say(row, 'name')}
-									{row.variant && <span class="variant">{say(row, 'variant')}</span>}
+									{row.variant && (
+										<>
+											{' '}
+											<span class="variant">{say(row, 'variant')}</span>
+										</>
+									)}
 								</span>
-								{row.note && <span class="note">{say(row, 'note')}</span>}
+								{/* Inside the note, which the table hides, so the
+								    asterisk after the name stays against it. */}
+								{row.note && (
+									<span class="note">
+										{' '}
+										{say(row, 'note')}
+									</span>
+								)}
 							</th>
 							{textColumns.map((column) => (
 								<td class={column.field}>

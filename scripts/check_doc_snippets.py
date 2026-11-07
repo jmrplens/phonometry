@@ -877,26 +877,43 @@ def _meet_after_gap(
     return None
 
 
-def _promised_after(said: list[_Part], last: int) -> int | None:
+def _promised_after(said: list[_Part], last: int, read: int) -> int | None:
     """Where the comment writes the first value after ``said[last]``, the last
     value the print bore out (``-1`` for none), when that value is still part
     of what the comment promises the print writes, or ``None``.
 
-    It is when it stands inside the innermost bracket that was open at
-    ``said[last]`` and has not closed since, as the print that writes
-    ``[0.52 0.7  0.8 ]`` or ``(5,)`` has lost a value of its comment
-    ``[0.52 0.7  0.8  0.89]`` or ``(5 bands, 59225 samples)``; or when only
-    spaces, commas and opening brackets stand between the two and no word
-    follows it, as in ``2 3 4`` or ``True 0.12 (40.0, 315.0)``. A value after
-    a word, outside that bracket, is annotation, and so is one a word follows,
-    the ``0.458`` of ``0.358  (0.458 with normal hearing)`` or the ``1`` of a
-    unit ``1/s``, unless it is the value the comment opens on.
+    The parts before ``said[read]``, the first part of the comment the print
+    did not reach, are words the comment read beside the print and numbers of
+    the print's own label: they say what the print wrote, so they are read
+    past as if they were not there, and so is a colon or an equals sign after
+    them.
 
-    An ellipsis before that value says the print goes on to the values after
-    it, so the first of them is promised wherever it stands, as it is when the
-    print does go on (:func:`_meet_after_gap`): the print that writes
-    ``[99.8]`` has lost the ``87.7`` of ``[99.8 ... 87.7]``. An ellipsis with
-    no value after it, ``[0 1 2 ...]``, promises none.
+    The value is promised when it stands inside the innermost bracket that
+    was open at ``said[last]`` and has not closed since, as the print that
+    writes ``[0.52 0.7  0.8 ]`` or ``(5,)`` has lost a value of its comment
+    ``[0.52 0.7  0.8  0.89]`` or ``(5 bands, 59225 samples)``; when only
+    spaces, commas and opening brackets stand between the two and no word
+    follows it, as in ``2 3 4``, ``True 0.12 (40.0, 315.0)`` or, the print's
+    words read past, ``Lp: 99.8 Bands: [12.6 15.8]`` beside a print that
+    wrote ``Lp: 99.8 Bands: []``; and when the comment opens on it, whatever
+    follows it, as the print that writes ``Bands: []`` has lost the ``12.6``
+    of ``Bands: [12.6, 15.8]``. A value after a word of the comment's own,
+    outside that bracket, is a note, as the ``2`` of ``engineering (Table 2
+    class 3)`` is beside a print that wrote ``engineering``, and so is one a
+    word follows, the ``0.458`` of ``0.358  (0.458 with normal hearing)`` or
+    the ``1`` of a unit ``1/s``.
+
+    A note ends the reading of the values next to the printed ones, not what
+    an ellipsis promises: the first ellipsis after ``said[last]``, a note
+    before it or not, says the print goes on to the values after it, so the
+    first of them is promised wherever it stands, as it is when the print
+    does go on (:func:`_meet_after_gap`). The print that writes ``[99.8]`` has
+    lost the ``87.7`` of ``[99.8 ... 87.7]``, and the print that writes
+    ``99.8 dB`` that of ``99.8 dB at 125 Hz ... 87.7 dB at 8000 Hz``; a note
+    that writes an ellipsis before a number of its own, as ``7 octaves ... 3
+    thirds``, promises that number too, so such a note goes after an arrow
+    (:data:`_ARROW`). An ellipsis with no value after it, ``[0 1 2 ...]``,
+    promises none.
     """
     depth = sum(_open_brackets(part.before) for part in said[: last + 1])
     floor = depth
@@ -907,17 +924,22 @@ def _promised_after(said: list[_Part], last: int) -> int | None:
         for char in part.before:
             depth += (char in "([{") - (char in ")]}")
             inside = inside and depth >= floor
-        adjacent = adjacent and re.fullmatch(r"[\s,(\[{]*", part.before) is not None
+        if at < read:
+            continue  # read beside the print's own text
+        between = r"[\s:=,(\[{]*" if last + 1 < read == at else r"[\s,(\[{]*"
+        adjacent = adjacent and re.fullmatch(between, part.before) is not None
         if part.kind == "gap":
-            return next(
-                (n for n in range(at + 1, len(said)) if said[n].kind == "value"), None
-            )
+            break
         if part.kind == "value":
             followed = at + 1 < len(said) and said[at + 1].kind == "word"
-            opens = adjacent and (last < 0 or not followed)
-            return at if inside or opens else None
+            if inside or (adjacent and (last < 0 or not followed)):
+                return at
+            break
         adjacent = False
-    return None
+    gap = next((n for n in range(last + 1, len(said)) if said[n].kind == "gap"), None)
+    if gap is None:
+        return None
+    return next((n for n in range(gap + 1, len(said)) if said[n].kind == "value"), None)
 
 
 def _held(said: list[_Part], wrote: list[_Part]) -> str:
@@ -932,7 +954,9 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
         and all(_same_value(said_values[0], p.text) for p in wrote_values)
     ):
         return ""  # one value for an output that is that value throughout
-    # The last value of the comment the print has borne out so far.
+    # The last value of the comment the print has borne out so far, a number
+    # of the print's own label left out: the comment repeats that, as it
+    # repeats a word the print wrote.
     last = -1
     k = j = 0
     # Whether the comment has stated a value, whether a line of the output
@@ -972,7 +996,8 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
                         return ""
                     return f"the comment stops before the printed {part.text}"
             elif _same_value(said[k], part.text):
-                last = k
+                if not part.label:
+                    last = k
                 k += 1
                 if broken:
                     quoted, broken = 0, False
@@ -984,7 +1009,7 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
                     f"the comment says {said[k].text} where the print wrote {part.text}"
                 )
         j += 1
-    promised = _promised_after(said, last)
+    promised = _promised_after(said, last, k)
     if promised is None:
         return ""
     value = said[promised].text

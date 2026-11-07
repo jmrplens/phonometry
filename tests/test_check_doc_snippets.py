@@ -385,6 +385,33 @@ def test_an_ellipsis_goes_on_over_a_second_one_to_the_values_after_both() -> Non
     assert _disagreement(arrays, ["[0.1 0.2 0.3]", "[0.5 0.9]"]) == ""
 
 
+def test_a_note_before_an_ellipsis_does_not_end_what_it_promises() -> None:
+    """A note between the last printed value and an ellipsis is still a note,
+    and the ellipsis after it still says the print goes on to the value after
+    it, so a print that stops at the note has lost that value.
+    """
+    said = "99.8 dB at 125 Hz ... 87.7 dB at 8000 Hz"
+    assert _disagreement(said, "99.8 dB") == _lost("87.7")
+    assert _disagreement("45.2 dB at 63 Hz ... 30.1 dB at 8000 Hz", "45.2") == _lost(
+        "30.1"
+    )
+    assert _disagreement("[99.8] dB at 1 m ... 87.7", "[99.8] dB") == _lost("87.7")
+    brackets = "[99.8] dB at 1 m ... [87.7] dB at 8 m"
+    assert _disagreement(brackets, "[99.8]") == _lost("87.7")
+    loop = ["99.8 dB at 125 Hz", "97.1 dB at 250 Hz", "87.7 dB at 8000 Hz"]
+    assert _disagreement(said, loop) == ""
+    assert _disagreement(brackets, ["[99.8] dB at 1 m", "[87.7] dB at 8 m"]) == ""
+    # A note with no ellipsis after it keeps its numbers.
+    assert _disagreement("0.358  (0.458 with normal hearing)", "0.358") == ""
+    assert _disagreement("4.606 1/s", "4.606") == ""
+    # A note that writes an ellipsis before a number of its own reads that
+    # number as promised; after an arrow it is a note whatever it writes.
+    full = "[99.8 97.1 95.0 93.2 91.0 89.4 87.7]"
+    octaves = "[99.8 ... 87.7] dB, 7 octaves ... 3 thirds each"
+    assert _disagreement(octaves, full) == _lost("3")
+    assert _disagreement(octaves.replace(",", " ->"), full) == ""
+
+
 def test_a_number_holds_at_the_decimals_it_is_written_to() -> None:
     assert _disagreement("0.67", "0.6666666666666666") == ""
     assert _disagreement("126", "125.89254117941672") == ""
@@ -712,6 +739,37 @@ def test_a_value_a_word_follows_after_the_printed_ones_is_annotation() -> None:
     assert _disagreement("1479.6, 0.03 % below water", "1479.6") == ""
     # The value a comment opens on is promised whatever follows it.
     assert "3" in _disagreement("3 rooms", "none")
+
+
+def test_a_value_right_after_the_words_the_print_wrote_is_promised() -> None:
+    """The words a comment repeats from the print are the print's, not a note
+    of the comment's, so the value right after them is promised as the value
+    a comment opens on is, or as one right after the last printed value is.
+    """
+    none = "the comment says 12.6 where the print wrote no value"
+    assert _disagreement("Bands: [12.6, 15.8]", "Bands: []") == none
+    assert _disagreement("[12.6, 15.8]", "[]") == none
+    bands = "Bands: [12.6, 15.8, ..., 19952.6]  (33 bands)"
+    assert _disagreement(bands, "Bands: []") == none
+    assert _disagreement(bands, "Bands: [12.6 15.8 16.0 19952.6]") == ""
+    two = "Lp: 99.8 Bands: [12.6 15.8]"
+    stops = "the print stops before the comment's 12.6"
+    assert _disagreement(two, "Lp: 99.8 Bands: []") == stops
+    assert _disagreement(two, "Lp: 99.8 Bands: [12.6 15.8]") == ""
+    # A word of the comment's own starts a note, and so does a word after
+    # a value that follows the printed ones.
+    assert _disagreement("engineering (Table 2 class 3)", "engineering") == ""
+    assert _disagreement("12.3 s, 5 bands", "12.3 s") == ""
+
+
+def test_a_value_right_after_the_print_s_own_label_is_promised() -> None:
+    """A number of the print's string literal is its label, not a value it
+    bore out, so the value after it is the comment's opening one.
+    """
+    script = 'bands = []\nprint(f"Band 1: {bands}")  # Band 1: [0.5]\n'
+    (failure,) = _failures(script, {2: "Band 1: []"})
+    assert "the comment says 0.5 where the print wrote no value" in failure
+    assert _failures(script, {2: "Band 1: [0.5]"}) == []
 
 
 def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:

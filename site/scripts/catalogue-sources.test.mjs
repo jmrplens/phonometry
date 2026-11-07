@@ -2,21 +2,28 @@
 //
 // src/lib/catalogue-sources.mjs holds a catalogue page's rows to its
 // frontmatter `references`, and src/lib/catalogue-pages.ts stops the build on
-// what it finds. The first tests hand the function small pages with each
-// defect it exists for; the last reads the real pages of both languages, so
-// the gate fails here, before a twenty-minute build, when a page loses or
-// never had the source of one of its tables.
+// what it finds. The first tests hand the functions small pages with each
+// defect they exist for; the last two read the real pages of both languages,
+// so the gate fails here, before a twenty-minute build, when a page loses or
+// never had the source of one of its tables, names the wrong one, or carries
+// `tables` where nothing reads it.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
-import { catalogueSourceProblems, isLibraryTable, printedTables } from '../src/lib/catalogue-sources.mjs';
+import {
+  catalogueSourceProblems,
+  isCataloguePage,
+  isLibraryTable,
+  printedTables,
+  strayTableClaims,
+} from '../src/lib/catalogue-sources.mjs';
 
 const book = (author, year, tables) => ({
   type: 'book',
@@ -65,11 +72,60 @@ test('a page with no references fails once for each table it prints', () => {
 test('a table two entries claim is refused, naming both', () => {
   const problems = catalogueSourceProblems({
     page: 'reference/catalogues/solids',
-    references: [book('Roe', 2000, ['roe-2000-table-1']), book('Doe', 2001, ['roe-2000-table-1'])],
+    references: [
+      book('Roe', 2000, ['roe-2000-table-1']),
+      { ...book('Roe', 2000, ['roe-2000-table-1']), title: 'Another book by Roe' },
+    ],
     tables: ['roe-2000-table-1'],
   });
   assert.equal(problems.length, 1);
-  assert.match(problems[0], /claimed by 2 entries.*Roe \(2000\); Doe \(2001\)/);
+  assert.match(problems[0], /claimed by 2 entries.*Roe \(2000\); Roe \(2000\)/);
+});
+
+test('a table claimed by another work than the one its key names is refused', () => {
+  const carpets = { page: 'reference/catalogues/carpets', tables: ['harris-1995-table-30-2'] };
+  const harris = (year, tables) => ({ ...book('Harris', year, tables), authors: ['Harris, C. M. (Ed.)'] });
+  // Under the other Harris handbook: the author is right and the year is not.
+  const otherYear = catalogueSourceProblems({ ...carpets, references: [harris(1977, ['harris-1995-table-30-2'])] });
+  assert.equal(otherYear.length, 1);
+  assert.match(otherYear[0], /Harris \(1977\) claims harris-1995-table-30-2, a table of another work \(a key of this work carries its year, 1977\)/);
+  // Under Bies: neither is.
+  const otherBook = catalogueSourceProblems({ ...carpets, references: [book('Bies', 2017, ['harris-1995-table-30-2'])] });
+  assert.equal(otherBook.length, 1);
+  assert.match(otherBook[0], /Bies \(2017\) claims harris-1995-table-30-2, a table of another work \(a key of this work starts with bies-, and a key of this work carries its year, 2017\)/);
+  // Under its own book, it is the one claim the page needs.
+  assert.deepEqual(catalogueSourceProblems({ ...carpets, references: [harris(1995, ['harris-1995-table-30-2'])] }), []);
+});
+
+test("a key names its work by the first word of the first surname, an organization's short name or a standard's number", () => {
+  const passes = (references, tables) =>
+    assert.deepEqual(catalogueSourceProblems({ page: 'reference/catalogues/solids', references, tables }), []);
+  passes([{ ...book('Norton', 2003, ['norton-karczub-2003-table-3-1']), authors: ['Norton, M. P.', 'Karczub, D. G.'] }], [
+    'norton-karczub-2003-table-3-1',
+  ]);
+  passes([{ ...book('Arau-Puchades', 1999, ['arau-1999-table-4-1']) }], ['arau-1999-table-4-1']);
+  passes([{ ...book('Vér', 2006, ['ver-beranek-2006-table-14-1']) }], ['ver-beranek-2006-table-14-1']);
+  const ashrae = {
+    type: 'report',
+    organization: 'American Society of Heating, Refrigerating and Air-Conditioning Engineers',
+    year: 2019,
+    title: 'Handbook',
+  };
+  passes([{ ...ashrae, tables: ['ashrae-2019-table-40'] }], ['ashrae-2019-table-40']);
+  const standard = (designation, tables) => ({ type: 'standard', organization: 'IEC', designation, title: 't', tables });
+  passes([standard('IEC 61094-2:2009', ['iec-61094-2-annex-f'])], ['iec-61094-2-annex-f']);
+  // The issuer is not held: one text carries the designations of several bodies.
+  passes([standard('ISO 12354-1:2017', ['en-12354-annex-a'])], ['en-12354-annex-a']);
+
+  // A standard's table under another standard, and an organization's under another.
+  const wrong = catalogueSourceProblems({
+    page: 'reference/catalogues/fluids',
+    references: [standard('IEC 61094-2:2009', ['en-12354-6-table-1']), { ...ashrae, organization: 'Nordtest', tables: ['ashrae-2019-table-40'] }],
+    tables: ['en-12354-6-table-1', 'ashrae-2019-table-40'],
+  });
+  assert.equal(wrong.length, 2);
+  assert.match(wrong[0], /IEC 61094-2:2009 claims en-12354-6-table-1, a table of another work \(the key's number, 12354-6, is not in the designation\)/);
+  assert.match(wrong[1], /Nordtest \(2019\) claims ashrae-2019-table-40, a table of another work \(a key of this work starts with nordtest-\)/);
 });
 
 test('a claim on a table the page does not print is refused', () => {
@@ -98,6 +154,24 @@ test("the library's own tables claim no source, and none may be claimed", () => 
   assert.match(claimed[0], /a table the library fixes itself/);
 });
 
+test('a page that is not a catalogue page and carries tables is named, in either language', () => {
+  assert.ok(isCataloguePage('reference/catalogues/solids'));
+  assert.ok(isCataloguePage('es/reference/catalogues/solids'));
+  assert.ok(!isCataloguePage('reference/catalogues'));
+  assert.ok(!isCataloguePage('room/absorbers/porous'));
+  const problems = strayTableClaims([
+    { id: 'reference/catalogues/solids', references: [book('Roe', 2000, ['roe-2000-table-1'])] },
+    { id: 'reference/catalogues', references: [book('Roe', 2000, ['roe-2000-table-1'])] },
+    { id: 'es/materials/absorbers/porous', references: [book('Doe', 2001), book('Roe', 2000, [])] },
+    { id: 'materials/absorbers/porous', references: [book('Doe', 2001)] },
+    { id: 'start/guides' },
+  ]);
+  assert.deepEqual(problems, [
+    'reference/catalogues is not a catalogue page, and an entry of its references names `tables`',
+    'es/materials/absorbers/porous is not a catalogue page, and an entry of its references names `tables`',
+  ]);
+});
+
 test('an entry without tables, a work the page cites for something else, is no problem', () => {
   const problems = catalogueSourceProblems({
     page: 'reference/catalogues/solids',
@@ -118,9 +192,9 @@ const contentDir = fileURLToPath(new URL('../src/content/docs', import.meta.url)
  *
  * A narrow reader, like the one in scripts/shared/search-index.mjs: the site
  * has no YAML parser installed and the frontmatter is written one key per
- * line. An entry opens at a list item under `references:`; `tables` is a flow
- * list of quoted keys, read as JSON; a line it cannot read fails the test
- * rather than reading as no claim.
+ * line. An entry opens at a list item under `references:`; `tables` and
+ * `authors` are flow lists of quoted strings, read as JSON; a line it cannot
+ * read fails the test rather than reading as no claim.
  */
 function readReferences(text, file) {
   const end = text.indexOf('\n---', 3);
@@ -134,12 +208,12 @@ function readReferences(text, file) {
     }
     if (!inReferences) continue;
     if (/^ {2}- /.test(line)) entries.push({});
-    const key = /^ {2}(?:- | {2})(designation|title|year|tables): (.*)$/.exec(line);
+    const key = /^ {2}(?:- | {2})(type|authors|organization|designation|title|year|tables): (.*)$/.exec(line);
     if (!key) continue;
     const entry = entries.at(-1);
-    if (key[1] === 'tables') {
-      assert.match(key[2], /^\[.*\]$/, `${file}: tables is not written as a flow list on one line`);
-      entry.tables = JSON.parse(key[2]);
+    if (key[1] === 'tables' || key[1] === 'authors') {
+      assert.match(key[2], /^\[.*\]$/, `${file}: ${key[1]} is not written as a flow list on one line`);
+      entry[key[1]] = JSON.parse(key[2]);
     } else {
       entry[key[1]] = key[2].replace(/^"(.*)"$/, '$1');
     }
@@ -167,4 +241,30 @@ test('every catalogue page of both languages names the work behind every table i
   }
   assert.deepEqual(problems, [], `${problems.length} table(s) without their source:\n  ${problems.join('\n  ')}`);
   assert.ok(claimed > 0, 'no catalogue page prints a table read from a work');
+});
+
+/** Every page under the content directory, as an entry id and its file. */
+async function contentPages(dir = contentDir, prefix = '') {
+  const pages = [];
+  for (const item of await readdir(dir, { withFileTypes: true })) {
+    const file = path.join(dir, item.name);
+    if (item.isDirectory()) pages.push(...(await contentPages(file, `${prefix}${item.name}/`)));
+    else if (/\.mdx?$/.test(item.name)) {
+      const stem = item.name.replace(/\.mdx?$/, '');
+      const id = stem === 'index' ? prefix.replace(/\/$/, '') : `${prefix}${stem}`;
+      pages.push({ id, file });
+    }
+  }
+  return pages;
+}
+
+test('no page of either language but a catalogue page carries tables', async () => {
+  const pages = await contentPages();
+  const read = await Promise.all(
+    pages.map(async ({ id, file }) => ({ id, references: readReferences(await readFile(file, 'utf8'), file) })),
+  );
+  assert.deepEqual(strayTableClaims(read), []);
+  const cited = read.filter((page) => !isCataloguePage(page.id) && page.references.length > 0);
+  assert.ok(cited.length > 200, `only ${cited.length} pages that are not catalogue pages cite a work: the reader lost them`);
+  assert.ok(read.some((page) => page.id.startsWith('es/')), 'no Spanish page was read');
 });

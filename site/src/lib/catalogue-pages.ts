@@ -23,10 +23,10 @@
  * The rows are held to the page's bibliography the same way. Every table a
  * page prints is claimed by one entry of its frontmatter `references`, the
  * work it was read from, through that entry's `tables`; a table no entry
- * claims, a table claimed twice, or a claim on a table the page does not
- * print stops the build too (src/lib/catalogue-sources.mjs says why), and so
- * does a `tables` on a page that is not a catalogue page, where nothing reads
- * it.
+ * claims, a table claimed twice, a claim on a table the page does not print
+ * or a claim on a key of another work stops the build too
+ * (src/lib/catalogue-sources.mjs says why), and so does a `tables` on a page
+ * that is not a catalogue page, where nothing reads it.
  */
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
@@ -34,7 +34,7 @@ import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { basePath } from '../data/site.mjs';
 import { catalogueSlugs } from '../data/topics.mjs';
 import { catalogues } from '../generated/catalogues.mjs';
-import { catalogueSourceProblems, printedTables } from './catalogue-sources.mjs';
+import { catalogueSourceProblems, printedTables, strayTableClaims } from './catalogue-sources.mjs';
 
 /** One catalogue's page, in one language. */
 export interface CataloguePage {
@@ -100,13 +100,11 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 	/* What the pages say of their sources, gathered across the language so one
 	   build names every page to fix. A `tables` anywhere else is read by
 	   nothing, so it is refused rather than left to look like a source. */
-	const sourceProblems: string[] = docs
-		.filter((entry) => (entry.id === 'es' || entry.id.startsWith('es/')) === (lang === 'es'))
-		.filter((entry) => !entry.id.startsWith(`${prefix}reference/catalogues/`))
-		.filter((entry) =>
-			((entry.data.references ?? []) as { tables?: string[] }[]).some((ref) => ref.tables !== undefined),
-		)
-		.map((entry) => `${entry.id} is not a catalogue page, and an entry of its references names \`tables\``);
+	const sourceProblems: string[] = strayTableClaims(
+		docs
+			.filter((entry) => (entry.id === 'es' || entry.id.startsWith('es/')) === (lang === 'es'))
+			.map((entry) => ({ id: entry.id, references: (entry.data.references ?? []) as { tables?: string[] }[] })),
+	);
 
 	const pages = await Promise.all(
 		catalogueSlugs.map(async (path) => {

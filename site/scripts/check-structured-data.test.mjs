@@ -274,6 +274,29 @@ test('a page that names a work otherwise than the bibliography fails, field by f
 	);
 });
 
+test("a work described in a catalogue page's words about its own rows fails, in either language", (t) => {
+	const built = build();
+	const id = (url) => book(url)['@id'];
+	nodeAt(built, 'en/bibliography', id(EN)).description = 'Table 4.1: the source of the rows of this catalogue that cite it.';
+	nodeAt(built, 'es/bibliography', id(ES)).description = 'Tabla 4.1: fuente de las filas de este catálogo que la citan.';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	for (const route of ['/reference/bibliography/', '/es/reference/bibliography/']) {
+		assert.match(
+			ran.err,
+			new RegExp(`FAIL ${route}: 1 of the 1 works it describes take the words of a catalogue page about its own rows: #doi-10-1000-book`),
+		);
+	}
+
+	// Named, the catalogue is a fact about the work wherever it is read.
+	const named = build();
+	nodeAt(named, 'en/bibliography', id(EN)).description = 'Table 4.1: the source of the rows of the catalogue of solids that cite it.';
+	nodeAt(named, 'es/bibliography', id(ES)).description = 'Tabla 4.1: fuente de las filas del catálogo de sólidos que la citan.';
+	const passed = check(t, named);
+	assert.equal(passed.status, 0, passed.err);
+	assert.match(passed.out, /ok {3}\/es\/reference\/bibliography\/: none of the 1 works it describes is described as one catalogue page's rows/);
+});
+
 test('a stub claiming a sameAs the bibliography does not give fails', (t) => {
 	const built = build();
 	built['en/guide'].article.citation[2].sameAs = 'https://doi.org/10.1000/another';

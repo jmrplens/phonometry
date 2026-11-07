@@ -58,9 +58,11 @@ const referenceBase = {
    * work, by the key every one of their rows carries
    * (`arau-1999-table-4-1`, src/generated/catalogues.mjs). It is how a row
    * reaches the work it was read from, and the build holds it both ways: a
-   * table no entry claims, or a claim on a table the page does not print,
-   * stops it (src/lib/catalogue-sources.mjs). Read nowhere else, and refused
-   * on any other page.
+   * table no entry claims, a claim on a table the page does not print, and a
+   * claim on a key of another work (a key starts with its work's first
+   * author or organization and its year, or a standard's number) stop it
+   * (src/lib/catalogue-sources.mjs). Read nowhere else, and refused on any
+   * other page.
    */
   tables: z
     .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'a table key is the lowercase key its rows carry'))

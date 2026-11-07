@@ -195,6 +195,28 @@ test('two works by one author in one year, or by one body, are two @ids', () => 
   );
 });
 
+test("a work's description is a guide's note before a catalogue page's, and every catalogue's when only catalogues cite it", () => {
+  const harris = { type: 'book', authors: ['Harris, C. M. (Ed.)'], publisher: 'McGraw-Hill', year: 1995, title: 'Manual' };
+  const at = (note, tables) => ({ ...harris, note, tables });
+  const carpets = 'Tables 30.2 and 30.3: the source of the rows of the catalogue of carpets that cite it.';
+  const impact = 'Tables 32.1 to 32.8: the source of the rows of the catalogue of impact insulation that cite it.';
+  // Listed out of order: the catalogue pages are read in page order.
+  const catalogues = [
+    { id: 'reference/catalogues/impact-insulation', references: [at(impact, ['harris-1995-tables-32-1-to-32-8'])] },
+    { id: 'reference/catalogues/carpets', references: [at(carpets, ['harris-1995-table-30-2'])] },
+  ];
+  const id = referenceId(harris, EN);
+  assert.equal(citedWorks(catalogues, EN).get(id).note, `${carpets} ${impact}`);
+
+  // A guide that cites the work, even one read after the catalogues, describes it.
+  const guide = { id: 'room/acoustics/absorbers', references: [{ ...harris, note: 'The handbook of measurements.' }] };
+  assert.equal(citedWorks([...catalogues, guide], EN).get(id).note, 'The handbook of measurements.');
+
+  // In Spanish too, and one catalogue's note alone is that note.
+  const es = [{ id: 'es/reference/catalogues/carpets', references: [at('Tablas 30.2 y 30.3.', ['harris-1995-table-30-2'])] }];
+  assert.equal(citedWorks(es, ES).get(referenceId(harris, ES)).note, 'Tablas 30.2 y 30.3.');
+});
+
 test('the works a language cites, one reference each, refused when two pages describe one two ways', () => {
   const pages = [
     { id: 'a', references: [iso('ISO 1:2000', { note: 'Clause 4.' }), book] },

@@ -59,8 +59,9 @@ _HS_T0 = 4.0 * _HS_SRC_W
 # so -- because a sponge absorbs a grazing surface wave far less well than
 # a body wave. Here the peak of the Rayleigh train, which leaves the source
 # when the pulse peaks at 32 us, reaches a sponge 0.13 m outside the frame
-# at 180 us, and anything it sent back would need another 45 us to re-enter
-# the view, past the 196 us captured.
+# at 180 us, and the train's leading lobe, 12 us ahead of the peak, at
+# 169 us; anything either sent back would need another 45 us to re-enter
+# the view, 214 us at the earliest, past the 196 us captured.
 _HS_NY, _HS_NX = 450, 1100
 _HS_SPONGE = 120
 _HS_HALF = 300  # view half-width and depth [cells]
@@ -116,8 +117,10 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     So t0 + 1.2 x 137 = 196 us is captured, the delay counted as the seabed
     and plate-junction clips count theirs -- 2.7 times the 73 us of the
     still figure, which stops before the surface train has separated. The
-    S front reaches that corner at 169 us, and the last 27 us show the
-    block with every front gone. Sampling: dt = 0.6 dx / (c_P sqrt(2)) =
+    S arc reaches that corner at 169 us and the tail of its pulse follows
+    it out: after 177.3 us nothing in either panel is above a fifth of its
+    colour scale (measured on the two runs, NumPy), so the last 19 us show
+    the block with every front gone. Sampling: dt = 0.6 dx / (c_P sqrt(2)) =
     65.77 ns, a stride of 5 gives a frame every 0.329 us, i.e. 50.3 frames
     per period of the 60.4 kHz upper edge of the source spectrum (>= the 48
     the clips keep), and 597 frames.

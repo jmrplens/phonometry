@@ -432,7 +432,7 @@ t = np.arange(int(4.0 * fs)) / fs
 event = 0.25 * np.exp(-0.5 * ((t - 2.0) / 0.6) ** 2) * rng.standard_normal(t.size)
 
 # Una muestra de jornada: 10 s tomados como representativos de un puesto estable de 85 dB(A).
-shift_sample = 0.4946 * rng.standard_normal(int(10.0 * fs))
+shift_sample = 0.4865 * rng.standard_normal(int(10.0 * fs))
 
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
 peak = signals.lc_peak(event, fs, calibration_factor=sensitivity)
@@ -448,7 +448,7 @@ print(f"evento: LCpeak {peak:.1f} dB(C) | "
       f"LAeq {signals.laeq(event, fs):.1f} dB | LAE {lae:.1f} dB")
 print(f"jornada: E {E:.2f} Pa2h | LEX,8h {lex:.1f} dB")
 # evento: LCpeak 91.7 dB(C) | LAeq 73.5 dB | LAE 79.5 dB
-# jornada: E 1.05 Pa2h | LEX,8h 85.1 dB
+# jornada: E 1.01 Pa2h | LEX,8h 85.0 dB
 ```
 
 Los tres papeles son deliberadamente señales distintas. El evento de 4 s tiene
@@ -682,7 +682,7 @@ cada contorno, y por eso rotula la línea y no un eje.*
 # duración. Calculado a través de lex_8h y no a partir de la fórmula, para que
 # la línea sea la aritmética de la propia biblioteca.
 hours = np.geomspace(1 / 60, 8.0, 40)
-sample = 0.4946 * np.random.default_rng(1).standard_normal(2 * fs)  # 84,9 dB(A)
+sample = 0.4865 * np.random.default_rng(1).standard_normal(2 * fs)  # 84,9 dB(A)
 base = float(signals.laeq(sample, fs))
 
 # lex_8h(sample, duration_hours=h) - LAeq(sample) es la normalización

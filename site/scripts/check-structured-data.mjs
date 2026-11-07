@@ -58,11 +58,11 @@
 // text src/data/scope.mjs writes; the feature list has to give, in each
 // language, one entry per topic in the order src/data/topics.mjs lists them,
 // opening with the topic's own label there; no feature or keyword may
-// publish the placeholder, and no keyword the bare name of an area whose row
-// gives a keyword in its place ("files"). The software's requirements are held
-// to pyproject.toml, as src/data/repo-stats.mjs reads it: the Python it
-// requires, every requirement as one phrase with its versions and the Python
-// its marker limits it to, and every extra by name
+// publish the placeholder, and no keyword the bare name of an area that says
+// nothing about acoustics on its own ("files"). The software's requirements
+// are held to pyproject.toml, as src/data/repo-stats.mjs reads it: the Python
+// it requires, every requirement as one phrase with its versions and the
+// Python its marker limits it to, and every extra by name
 // (scripts/shared/requirement-defects.mjs). Every API page has to name the
 // release in VERSION and the Python pyproject.toml requires.
 //
@@ -513,7 +513,7 @@ function featureDefects(featureList) {
  * What the software node's keywords get wrong: each is a text, tagged with a
  * language of the site where it is written in words, none is the
  * placeholder an area with no governing standard shows, and none is the bare
- * name of an area whose row gives a keyword in its place.
+ * name of an area that says nothing about acoustics on its own (BARE_LABELS).
  *
  * @param {unknown} keywords The node's `keywords`.
  * @returns {string[]} The defects.

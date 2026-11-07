@@ -76,6 +76,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -132,8 +133,8 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
         (one-third octave) nor 5 (octave) and no rating can be formed.
     """
 
-    r: np.ndarray
-    absorption_area: np.ndarray
+    r: NDArray[np.float64]
+    absorption_area: NDArray[np.float64]
     rating: WeightedRatingResult | None
 
     def __post_init__(self) -> None:
@@ -261,8 +262,8 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
         (one-third octave) nor 5 (octave) and no rating can be formed.
     """
 
-    l_n: np.ndarray
-    absorption_area: np.ndarray
+    l_n: NDArray[np.float64]
+    absorption_area: NDArray[np.float64]
     rating: ImpactRatingResult | None
 
     def __post_init__(self) -> None:
@@ -419,7 +420,9 @@ def _render_iso10140(
     )
 
 
-def _absorption_area(t2: NumericArrayLike, volume: float, n_bands: int) -> np.ndarray:
+def _absorption_area(
+    t2: NumericArrayLike, volume: float, n_bands: int
+) -> NDArray[np.float64]:
     r"""Sabine equivalent absorption area :math:`A = 0.16\,V/T` per band.
 
     (ISO 10140-4:2010, Clause 4.6.3, Formula (5).)
@@ -445,7 +448,7 @@ def _absorption_area(t2: NumericArrayLike, volume: float, n_bands: int) -> np.nd
 def background_correction(
     signal_and_background: NumericArrayLike,
     background: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Correct receiving-room levels for background noise (ISO 10140-4:2010).
 
     Applies the correction of Clause 4.3 per band from the combined

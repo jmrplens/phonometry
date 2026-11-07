@@ -2005,6 +2005,67 @@ def test_a_call_of_a_class_runs_the_init_its_order_gives(
     ]
 
 
+def test_super_init_and_an_init_by_name_run_the_init_the_order_gives(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``super().__init__(...)`` and ``Rec.__init__(obj, ...)`` run the
+    ``__init__`` of the first class of the order that has one of its own, as
+    a call of the class does: past ``Rec``, which ``@dataclass`` writes one,
+    no ``_Labelled.__init__`` runs, so ``Sub`` and ``plot_via_init`` have no
+    language to hand it. Over ``Plain``, which writes none, both reach the
+    one ``_Labelled`` writes and drop the language it takes.
+
+    The ``__init__`` was looked up by name through the bases, so both were
+    refused for a helper that never runs.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            from dataclasses import dataclass
+
+
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+
+
+            @dataclass
+            class Rec(_Labelled):
+                value: float = 0.0
+
+
+            class Plain(_Labelled):
+                pass
+
+
+            class Sub(Rec):
+                def __init__(self, value, *, language="en"):
+                    super().__init__(value)
+
+
+            class PlainSub(Plain):
+                def __init__(self, value, *, language="en"):
+                    super().__init__(value)
+
+
+            def plot_via_init(ax, *, language="en"):
+                r = Rec.__new__(Rec)
+                Rec.__init__(r, 1.0)
+
+
+            def plot_plain_via_init(ax, *, language="en"):
+                r = Plain.__new__(Plain)
+                Plain.__init__(r, 1.0)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("PlainSub.__init__", "pkg.records._Labelled.__init__"),
+        ("plot_plain_via_init", "pkg.records._Labelled.__init__"),
+    ]
+
+
 _EXEMPTED = """
 from .helpers import axis
 

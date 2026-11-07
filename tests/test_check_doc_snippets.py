@@ -371,6 +371,37 @@ def test_a_number_holds_at_its_last_digit_down_to_the_last_bit_of_a_float() -> N
     assert _disagreement("55.350667...", "55.350668") != ""
 
 
+def test_two_numbers_that_share_a_float_are_still_two_numbers() -> None:
+    """Equality is decided on the digits too, not on the float they round to.
+
+    2**53 + 1 and 2**53 are one float, and a comment written to the last digit
+    of either is held to that digit; so is a number beyond the range of floats,
+    which is not the infinity it overflows to.
+    """
+    assert "9007199254740993" in _disagreement("9007199254740993", "9007199254740992")
+    assert _disagreement("9007199254740993", "9007199254740993") == ""
+    assert _disagreement("1e400", "inf") != ""
+    assert _disagreement("inf", "inf") == ""
+    assert _disagreement("-inf", "inf") != ""
+    assert _disagreement("-0.0", "0.0") == ""
+
+
+def test_a_complex_number_holds_at_the_decimals_of_each_part() -> None:
+    assert _disagreement("(1.23+4.57j)", "(1.234+4.567j)") == ""
+    assert _disagreement("4.57j", "4.567j") == ""
+    assert "1.23+4.58j" in _disagreement("(1.23+4.58j)", "(1.234+4.567j)")
+    assert "1.24+4.57j" in _disagreement("(1.24+4.57j)", "(1.234+4.567j)")
+    # A part the comment does not write is zero, and exactly zero.
+    assert _disagreement("4.57j", "(0.001+4.567j)") != ""
+    assert _disagreement("1.23", "(1.234+0.5j)") != ""
+    assert _disagreement("1.23", "(1.234+0j)") == ""
+    # Given roughly or cut short, each part is held that way.
+    assert _disagreement("~1.2+4.6j", "(1.28+4.52j)") == ""
+    assert _disagreement("~1.2+4.6j", "(1.31+4.52j)") != ""
+    assert _disagreement("1.23+4.56j...", "(1.2345+4.5678j)") == ""
+    assert _disagreement("1.23+4.57j...", "(1.2345+4.5678j)") != ""
+
+
 def test_a_minus_sign_reads_as_a_hyphen() -> None:
     assert _disagreement("\u22128.27 dB", "-8.27") == ""
 

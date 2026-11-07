@@ -65,7 +65,6 @@ import ast
 import concurrent.futures
 import io
 import json
-import math
 import pathlib
 import re
 import subprocess
@@ -73,7 +72,7 @@ import sys
 import tempfile
 import tokenize
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from typing import TYPE_CHECKING, TypeGuard
 
 if TYPE_CHECKING:
@@ -731,12 +730,41 @@ def _resolution(number: str) -> Decimal | None:
     return Decimal(1).scaleb(int(match.group(2) or 0) - len(match.group(1) or ""))
 
 
-def _decimal(text: str, value: float) -> Decimal:
-    """The number *text* writes, read digit for digit; *value* is its float."""
-    try:
-        return Decimal(text)
-    except InvalidOperation:
-        return Decimal(value)
+def _number_parts(text: str) -> tuple[str | None, str | None]:
+    """The real and the imaginary part a number *text* writes, as written,
+    each ``None`` where it writes none: ``1.2+3.4j`` writes both, ``3.4j``
+    only the imaginary one, ``5`` and ``nan`` only the real one.
+    """
+    if not text.endswith("j"):
+        return text, None
+    both = re.fullmatch(rf"([-+]?{_REAL})([-+]{_REAL})j", text)
+    if both is not None:
+        return both.group(1), both.group(2)
+    return None, text[:-1]
+
+
+def _same_part(said: str | None, wrote: str | None, *, rough: bool, cut: bool) -> bool:
+    """True when the comment's part *said* states the printed part *wrote*,
+    a part either writes none of standing for an exact zero.
+    """
+    if said is None:
+        return wrote is None or Decimal(wrote) == 0
+    # Decimals, not floats: a comment written to every digit of a float is
+    # held to its last digit, a step finer than the spacing of floats there,
+    # and two numbers that round to one float are still two numbers.
+    a, b = Decimal(said), Decimal(0 if wrote is None else wrote)
+    if a.is_nan() or b.is_nan():
+        return a.is_nan() and b.is_nan()
+    if a.is_infinite() or b.is_infinite():
+        return a == b
+    step = _resolution(said)
+    if step is None:  # pragma: no cover - every finite part writes a last digit
+        return a == b
+    gap = b - a
+    if cut:
+        return 0 <= (gap if a >= 0 else -gap) < step
+    reach = step if rough else step / 2
+    return abs(gap) <= reach
 
 
 def _same_value(said: _Part, wrote: str) -> bool:
@@ -746,24 +774,20 @@ def _same_value(said: _Part, wrote: str) -> bool:
     writes, so ``0.67`` states ``0.6667``, ``126`` states ``125.89`` and
     ``1.0012e6`` states ``1001249.2``. Given roughly (``~``), it states one
     within a unit of that digit; cut short (``55.350667...``), one whose digits
-    begin with its own. A constant states only itself.
+    begin with its own. The digits decide, not the float they read as:
+    ``9007199254740993`` does not state ``9007199254740992``. A complex
+    number holds each of its parts that way, ``(1.23+4.57j)`` stating
+    ``(1.234+4.567j)``, and a part it does not write is an exact zero. A
+    constant states only itself.
     """
     try:
-        a, b = complex(said.text), complex(wrote)
+        complex(said.text), complex(wrote)
     except ValueError:
         return said.text == wrote
-    if a == b or (math.isnan(a.real) and math.isnan(b.real)):
-        return True
-    step = _resolution(said.text)
-    if step is None or a.imag or b.imag or not math.isfinite(b.real):
-        return False
-    # Decimals, not floats: a comment written to every digit of a float is
-    # held to its last digit, a step finer than the spacing of floats there.
-    gap = _decimal(wrote, b.real) - _decimal(said.text, a.real)
-    if said.cut:
-        return 0 <= (gap if a.real >= 0 else -gap) < step
-    reach = step if said.rough else step / 2
-    return abs(gap) <= reach
+    return all(
+        _same_part(a, b, rough=said.rough, cut=said.cut)
+        for a, b in zip(_number_parts(said.text), _number_parts(wrote), strict=True)
+    )
 
 
 def _meet_after_gap(

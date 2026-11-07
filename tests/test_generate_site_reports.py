@@ -355,6 +355,7 @@ def test_every_shipped_page_fits_the_site_limits() -> None:
         assert len(set(titles)) == len(titles)
 
 
+@pytest.mark.whole_tree
 def test_every_entry_lands_on_exactly_one_page_in_both_languages() -> None:
     """Nothing is dropped or duplicated by the split, in either edition."""
     pages = generate_site_reports.rendered_pages()
@@ -496,6 +497,7 @@ def _index_text(lang: str) -> str:
     return " ".join(text.replace("*", "").split()).lower()
 
 
+@pytest.mark.whole_tree
 @pytest.mark.parametrize(
     ("lang", "claim"),
     [
@@ -526,6 +528,7 @@ def test_the_index_says_each_thing_of_its_introduction_once(
     assert _index_text(lang).count(claim) == 1
 
 
+@pytest.mark.whole_tree
 def test_the_index_keeps_what_only_the_registry_says() -> None:
     """The status legend and the evidence rule, which every family page points to."""
     english, spanish = _index_text("en"), _index_text("es")
@@ -846,6 +849,7 @@ def test_every_alias_names_a_designation_the_registry_prints() -> None:
     assert set(generate_site_reports.DESIGNATED_AS) <= printed
 
 
+@pytest.mark.whole_tree
 def test_list_unmatched_prints_the_works_and_fails(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -946,6 +950,7 @@ def _corrects() -> dict[tuple[str, str], tuple[str, ...]]:
     return out
 
 
+@pytest.mark.whole_tree
 def test_every_family_page_names_the_works_it_corrects() -> None:
     """Each family page carries ``corrects``, one fragment per work it corrects.
 
@@ -974,6 +979,7 @@ def test_every_family_page_names_the_works_it_corrects() -> None:
             assert bool(named) == (page.family.group != "not-errata"), where
 
 
+@pytest.mark.whole_tree
 @pytest.mark.parametrize(
     ("lang", "slug", "fragments"),
     [
@@ -1028,6 +1034,7 @@ def test_a_family_page_names_these_works(
     assert _corrects()[lang, slug] == fragments
 
 
+@pytest.mark.whole_tree
 @pytest.mark.parametrize("lang", ["en", "es"])
 def test_the_family_pages_of_a_language_name_133_works(lang: str) -> None:
     """In each language, 95 family pages name 133 works in all."""

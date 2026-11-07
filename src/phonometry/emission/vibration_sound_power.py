@@ -56,6 +56,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -119,7 +120,7 @@ _K1A_CLAMPED_BELOW_DB: float = 3.0
 
 def velocity_level(
     velocity: NumericArrayLike, *, reference: float = REFERENCE_VELOCITY_M_S
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Vibratory velocity level (ISO/TS 7849-1, Eq. 3).
 
     :math:`L_v = 20 \log_{10}(v/v_0)` with ``v0`` the reference velocity.
@@ -141,7 +142,7 @@ def velocity_level_from_acceleration(
     *,
     frequency: NumericArrayLike,
     reference: float = REFERENCE_VELOCITY_M_S,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
 
     :math:`L_v = 20 \log_{10}\!\left( \frac{a_{\text{peak}}}{2\pi f v_0 \sqrt{2}}
@@ -204,7 +205,7 @@ def radiation_factor(
     mean_square_velocity: NumericArrayLike,
     *,
     impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""A-weighted radiation factor ``epsilon`` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
 
     :math:`\epsilon = P / (Z_\mathrm{c} \langle v^2 \rangle S)`, the sound-radiation
@@ -238,7 +239,7 @@ def radiated_sound_power_level(
     reference_area: float = _REFERENCE_AREA,
     normalized_impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
     reference_impedance: float = _REFERENCE_IMPEDANCE,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Radiated sound power level (ISO/TS 7849-1 Eq. 12, -2 Eq. 15).
 
     .. math::
@@ -313,11 +314,11 @@ class VibrationSoundPowerResult(OwnsArrays):
     :ivar area: Radiating surface area ``S``, in m^2.
     """
 
-    velocity_level: np.ndarray
-    sound_power_level: np.ndarray
-    radiation_factor: np.ndarray
+    velocity_level: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    radiation_factor: NDArray[np.float64]
     area: float
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.

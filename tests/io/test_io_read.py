@@ -15,6 +15,9 @@ message is tested by blocking the import, so it runs either way.
 from __future__ import annotations
 
 import builtins
+import errno
+import mmap
+import os
 import struct
 import warnings
 from typing import TYPE_CHECKING
@@ -130,6 +133,27 @@ def test_read_memory_is_owned_and_writable(tmp_path: Path) -> None:
         while isinstance(base, np.ndarray) and base.base is not None:
             base = base.base
         assert not isinstance(base, np.memmap), bits
+
+
+@pytest.mark.parametrize("bits", [8, 16, 32])
+def test_a_file_system_that_refuses_a_map_is_read_without_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, bits: int
+) -> None:
+    """A WAV on a file system that cannot be memory-mapped reads all the same.
+
+    JupyterLite's notebook folder (``/drive``) refuses ``mmap`` with
+    ``OSError: [Errno 43] No such device``, as some network and FUSE mounts
+    do; the samples are the ones a mapped read gives.
+    """
+    codes = np.array([1, -2, 3, -4]) if bits > 8 else np.array([1, 2, 3, 4])
+    path = _write(tmp_path, pcm_wav(codes, bits=bits))
+    mapped = np.asarray(read(path))
+
+    def refused(*args: object, **kwargs: object) -> object:
+        raise OSError(errno.ENODEV, os.strerror(errno.ENODEV))
+
+    monkeypatch.setattr(mmap, "mmap", refused)
+    np.testing.assert_array_equal(np.asarray(read(path)), mapped)
 
 
 # ---------------------------------------------------------------------------

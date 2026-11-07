@@ -244,8 +244,10 @@ jobs:
         # must move the date of the page built from it, a git failure that
         # must fail the build rather than leave the dates empty, and the
         # sitemap stamp that must fail on a URL with no source or a build with
-        # no sitemap. Node's own test runner and no dependencies, so it runs
-        # before the install.
+        # no sitemap. The reader the site takes the package's requirements from
+        # is held to the tomllib of the runner's python3 on the whole of
+        # pyproject.toml. Node's own test runner and no dependencies, so it
+        # runs before the install.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own

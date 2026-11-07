@@ -66,8 +66,8 @@ one and [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs4
   absolute factor, the network's +11.7 dB at 5 kHz included, cancels.
 * **The ballistics run at the caller's rate** on the record
   [`phonometry.filters.weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) returns. Measured across 32,
-  44.1, 48, 96 and 192 kHz, no reading moves by more than 0.080 dB, or 4.2 %
-  of its own window.
+  44.1, 48, 96 and 192 kHz, no reading moves by more than 0.043 dB, and none
+  by more than 1.8 % of its own window.
 
 What no oracle can check
 ------------------------

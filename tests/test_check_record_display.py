@@ -23,6 +23,7 @@ if _SCRIPTS not in sys.path:
 
 import ast_scan
 import check_record_display as crd
+from check_array_aliasing import SOURCE
 
 #: The mechanism, as the package spells it.
 _DISPLAY = """
@@ -259,6 +260,91 @@ def test_a_named_tuple_must_call_the_mechanism(tmp_path: pathlib.Path) -> None:
     }
 
 
+def test_each_class_statement_of_a_public_record_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record with a ``class`` statement of its name in each branch of an
+    ``if``, or one an alias keeps after a later one replaced it, is shown as
+    the statement that ran made it; and a base with a class of its name in
+    each branch gives the table only when both do.
+
+    Only the last ``class`` statement of a name was read, its bases and the
+    methods any statement of the name defined, so a record without the
+    mechanism passed beside one of its name that had it.
+    """
+    refused = _refused(
+        tmp_path,
+        results="""
+        import os
+        from dataclasses import dataclass
+        from typing import NamedTuple
+
+        from ._internal.display import RichDisplay, record_html, record_pretty
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class Either:
+                level: float
+        else:
+            @dataclass(frozen=True)
+            class Either(RichDisplay):
+                level: float
+
+        @dataclass(frozen=True)
+        class Kept:
+            level: float
+
+        saved = Kept
+
+        @dataclass(frozen=True)
+        class Kept(RichDisplay):
+            level: float
+
+        if os.environ.get("BANDS"):
+            class _Base:
+                pass
+        else:
+            class _Base(RichDisplay):
+                pass
+
+        @dataclass(frozen=True)
+        class Child(_Base):
+            level: float
+
+        if os.environ.get("BANDS"):
+            class Pair(NamedTuple):
+                k1: float
+        else:
+            class Pair(NamedTuple):
+                k1: float
+
+                def _repr_html_(self):
+                    return record_html(self)
+
+                def _repr_pretty_(self, printer, cycle):
+                    record_pretty(self, printer, cycle)
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class Shown(RichDisplay):
+                level: float
+        else:
+            @dataclass(frozen=True)
+            class Shown(RichDisplay):
+                level: float
+        """,
+    )
+    assert refused == {
+        "Either": "Either does not inherit RichDisplay",
+        "Kept": "Kept does not inherit RichDisplay",
+        "Child": "Child does not inherit RichDisplay",
+        "Pair": (
+            "Pair is a named tuple whose _repr_html_ and _repr_pretty_ are not "
+            "the mechanism's"
+        ),
+    }
+
+
 def test_a_private_record_is_held_only_once_a_public_module_lists_it(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -300,6 +386,6 @@ def test_an_exemption_silences_its_class_and_goes_stale_without_it(
 
 @pytest.mark.whole_tree
 def test_the_package_shows_every_public_record_as_a_table() -> None:
-    files = sorted(crd.SOURCE.rglob("*.py"))
-    assert crd.records_without_display(files, crd.SOURCE) == []
+    files = sorted(SOURCE.rglob("*.py"))
+    assert crd.records_without_display(files, SOURCE) == []
     assert crd.EXEMPT == {}

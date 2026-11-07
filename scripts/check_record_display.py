@@ -37,7 +37,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from ast_scan import exempted, python_files
-from check_array_aliasing import SOURCE, ClassInfo, Finding, Tree
+from check_array_aliasing import SOURCE, ClassInfo, Finding, FunctionInfo, Tree
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -61,19 +61,22 @@ EXEMPT: dict[tuple[str, str], str] = {}
 def _bases(tree: Tree, info: ClassInfo, name: str) -> list[ClassInfo]:
     """Every class of the package a base of *info* may name: each one the
     name may hold once its module has run (:meth:`Tree.resolve_all`), a
-    class a function writes under ``global`` among them; none when it names
-    none.
+    class a function writes under ``global`` among them, and each ``class``
+    statement of it that stands there (:meth:`Tree.classes_stood`), one in
+    each branch of an ``if``; none when it names none.
     """
+    pins: dict[tuple[str, str], list[FunctionInfo | ClassInfo]] = {}
     resolved = [
-        tree.classes[key]
-        for key in tree.resolve_all(info.module, name)
+        found
+        for key in tree.resolve_all(info.module, name, pins=pins)
         if key in tree.classes
+        for found in tree.classes_stood(key, pins)
     ]
     if resolved:
         return resolved
-    local = tree.classes.get((info.module, name))
-    if local is not None:
-        return [local]
+    local = tree.class_definitions.get((info.module, name), [])
+    if local:
+        return list(local)
     candidates = tree.class_by_name.get(name, [])
     return candidates[:1] if len(candidates) == 1 else []
 
@@ -113,30 +116,43 @@ def records_without_display(
 ) -> list[Finding]:
     """Every public record a notebook would show as its raw ``repr``.
 
+    Each ``class`` statement of a public name is read, as a notebook may show
+    the one written in either branch of an ``if``, or one an alias keeps
+    after a later one replaced it.
     *tree* is the package already read from *files*, when the caller has it.
     """
     if tree is None:
         tree = Tree(files, root)
     found: list[Finding] = []
-    for key in sorted(tree.public):
-        info = tree.classes[key]
+    records = [
+        (key, info)
+        for key in sorted(tree.public)
+        for info in tree.class_definitions[key]
+    ]
+    for key, info in records:
         if not info.record:
             continue
         module, qualname = key
-        own = {
-            method
+        # The display methods this ``class`` statement defines, each
+        # ``def`` of them, which another class of its name does not lend it.
+        methods = {
+            method: [
+                definition
+                for definition in tree.definitions.get(
+                    (module, f"{qualname}.{method}"), []
+                )
+                if definition.owner is info
+            ]
             for method in NAMED_TUPLE_CALLS
-            if (module, f"{qualname}.{method}") in tree.functions
         }
+        own = {method for method, written in methods.items() if written}
         reason: str | None = None
         if "NamedTuple" in info.bases:
             missing = [
                 method
                 for method, call in NAMED_TUPLE_CALLS.items()
-                if method not in own
-                or not _calls(
-                    tree.functions[(module, f"{qualname}.{method}")].node, call
-                )
+                if not methods[method]
+                or not all(_calls(written.node, call) for written in methods[method])
             ]
             if missing:
                 reason = (

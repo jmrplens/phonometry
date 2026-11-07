@@ -17,6 +17,8 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { PREVIEW_HOST, servedLoopback } from "./shared/preview.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
 const RESULTS_DIR = join(siteRoot, "lighthouse-results");
@@ -40,11 +42,19 @@ const AUDIT_PATHS = [
 
 const isDesktop = process.argv.includes("--desktop");
 const externalBase = process.env.BASE_URL;
-const baseUrl = externalBase ?? `http://localhost:${PORT}`;
+const baseUrl = externalBase ?? `http://${PREVIEW_HOST}:${PORT}`;
 
-/** Start `astro preview` and resolve once it serves the base path. */
+/**
+ * Start `astro preview` on the IPv4 loopback and resolve once it serves the
+ * base path there, refusing a port something already answers on, whose pages
+ * the audit would read in place of this build's.
+ */
 async function startPreview() {
-  const child = spawn("pnpm", ["exec", "astro", "preview", "--port", PORT], {
+  const served = await servedLoopback(PORT);
+  if (served !== null) {
+    throw new Error(`something is already serving on ${served}:${PORT}; stop it, or set PORT to a free one`);
+  }
+  const child = spawn("pnpm", ["exec", "astro", "preview", "--port", PORT, "--host", PREVIEW_HOST], {
     cwd: siteRoot,
     stdio: "ignore",
     detached: true,

@@ -199,22 +199,25 @@ the exact $c_\mathrm{P}(t - t_0)$ and $c_\mathrm{S}(t - t_0)$ radii, so they
 measure rather than label. It is
 not enough for the third wave, whose speed differs from the shear front's by
 6.5 % and whose defining property is that it stays on the surface while the
-body fronts leave. Run the same hit for 164 µs, with sponges on the other
+body fronts leave. Run the same hit for 196 µs, with sponges on the other
 three sides and the corner between a sponge and the free surface pushed
 outside the frame, and run it twice: top declared `"free"`, then top left at
 the solver default, the shear-free rigid wall. Same aluminium, same hit, same
 two body fronts, no surface train at all in the second.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.gif" alt="Animation: a vertical hit on an aluminium half-space, with dotted analytic arcs tracking the compressional and shear fronts as they expand and leave the frame, a train of surface lobes staying behind on the free-surface panel, and no surface train on the rigid-surface panel" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.gif" alt="Animation: a vertical hit on an aluminium half-space, with dotted analytic arcs tracking the compressional and shear fronts as they expand and leave the frame, a train of surface lobes following them along the free surface, and no surface train on the rigid-surface panel" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.webm)
 
-Both body arcs run out of the frame and keep going. The surface lobes do not
-go anywhere but along the surface, and they are still there when the body
-waves have left, which is the whole of "a Rayleigh wave". The inset traces
-two surface probes 0.15 m apart, and the delay between their peaks is the
-measurement: the simulated $c_\mathrm{R}$ against 2897 m/s, the root of the exact
-characteristic equation, which the tests pin to within 2 %.
+Both body arcs sink into the block and out of the frame, the compressional
+one by 98 µs and the shear one by 169 µs, and the run goes on until both have
+gone. The surface lobes go nowhere but along the surface, which is the whole
+of "a Rayleigh wave". They run a step behind the shear front and, once clear
+of the impact, are the strongest motion in the frame until they leave through
+its sides at 136 µs. The inset traces two surface probes 0.15 m apart, and
+the delay between their peaks is the measurement: the simulated
+$c_\mathrm{R}$ against 2897 m/s, the root of the exact characteristic
+equation, which the tests pin to within 2 %.
 
 The two field panels carry their own colour scales, and say so: a vertical
 force applied *on* a rigid wall nearly cancels against its own image, so

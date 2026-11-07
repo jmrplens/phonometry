@@ -36,9 +36,10 @@ def _poster_ss_for(webm: str) -> float | None:
     * the transmission tube at its verdict frame, where the reflected and
       transmitted halves are separated and both still inside the tube (its
       anechoic ends have absorbed everything by the last frame);
-    * Lamb's problem at 95 us, where the Rayleigh train is still 22 mm inside
-      the right edge (it leaves the 0.30 m view at 103 us) and both body
-      fronts are drawn against their analytic arcs.
+    * Lamb's problem at 95 us, where the peak of the Rayleigh train is still
+      117 mm inside the right edge (it leaves the 0.30 m view at 135.5 us, the
+      pulse peaking 32 us in) and both body fronts sit on their analytic
+      arcs, the compressional one crossing the two bottom corners.
     """
     # The code that draws the clips is hashed into
     # scripts/animation_fingerprints.txt, so rewriting this asks for a

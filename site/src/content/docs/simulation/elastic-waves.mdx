@@ -335,7 +335,7 @@ they are a measurement and not a label. What one frame cannot settle is the
 shear front's by 6.5 %, and its defining property (it stays on the surface
 while the body fronts leave) is a statement about what happens next.
 
-So run the same hit for 164 µs instead, with sponges on the other three sides
+So run the same hit for 196 µs instead, with sponges on the other three sides
 and the domain widened until the corner where a sponge meets the free surface
 is outside the frame, and run it twice: once with the top declared `"free"`
 and once with it left at the solver default, the shear-free rigid wall. Same
@@ -348,21 +348,23 @@ the Rayleigh wave, not the material.
   width={2400}
   height={1350}
   title="Lamb's problem with a free and with a rigid top surface"
-  description="A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes stays behind on the surface long after the body fronts have gone, and the two probe traces below it separate by the Rayleigh time of flight. On the rigid-surface panel the same two fronts appear and no surface train follows them."
+  description="A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes runs along the surface a step behind the shear front, the strongest motion in the frame once clear of the impact, until it leaves through the sides, and the two probe traces beside it separate by the Rayleigh time of flight. The clip runs on until both body fronts have left the frame. On the rigid-surface panel the same two fronts appear and no surface train follows them."
 />
 
-Watch what the fronts do at the end. Both body arcs run out of the frame and
-keep going; the surface lobes do not go anywhere but along the surface, at
-their own slower speed, and they are still there when the body waves have
-left. The inset traces two surface probes 0.15 m apart, and the delay between
-their peaks is the measurement: the simulated $c_\mathrm{R}$ against 2897 m/s, the root
-of the exact Rayleigh characteristic equation quoted above, which the tests
-pin to within 2 %.
+Watch what the fronts do. Both body arcs sink into the block and out of the
+frame, the compressional one by 98 µs and the shear one by 169 µs, and the run
+goes on until both have gone. The surface lobes go nowhere but along the
+surface, a step behind the shear front and at their own slower speed, and once
+clear of the impact they are the strongest motion in the frame until they leave
+through its sides at 136 µs. The inset traces two surface probes 0.15 m
+apart, and the delay between their peaks is the measurement: the simulated
+$c_\mathrm{R}$ against 2897 m/s, the root of the exact Rayleigh characteristic
+equation quoted above, which the tests pin to within 2 %.
 
 The two field panels are drawn on **their own colour scales**, and the clip
 says so, because a vertical force applied *on* a rigid wall nearly
 cancels against its own image and that run radiates far less than the free
-one. The probe traces below them keep a single shared scale, which is where
+one. The probe traces beside them keep a single shared scale, which is where
 the comparison stays quantitative: the missing surface arrival is a missing
 peak, not a rescaled one.
 

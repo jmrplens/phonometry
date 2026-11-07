@@ -134,6 +134,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -299,7 +300,7 @@ def _lookup_bands(frequencies: NumericArrayLike) -> list[int]:
     return [_band_index(float(f)) for f in freqs]
 
 
-def _band_indices(frequencies: NumericArrayLike) -> np.ndarray:
+def _band_indices(frequencies: NumericArrayLike) -> NDArray[np.int64]:
     """Band indices of a 1-D frequency axis, refusing two in one band."""
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
@@ -341,7 +342,7 @@ def _table_b1(k: int, room: str) -> float:
 
 def inverse_square_law_tolerance(
     frequencies: NumericArrayLike, *, room: FreeFieldRoom
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Allowable deviation from the inverse square law per band (Table A.1).
 
     ISO 26101:2017 Annex A and ISO 3745:2012/Amd.1:2017 A.2.2 print the same
@@ -364,7 +365,7 @@ def inverse_square_law_tolerance(
 
 def directionality_tolerance(
     frequencies: NumericArrayLike, *, room: FreeFieldRoom
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
     :param frequencies: One-third octave mid-band frequencies, in hertz.
@@ -383,7 +384,7 @@ def directionality_tolerance(
 
 def qualification_frequencies(
     low_hz: float = 100.0, *, high_hz: float = 10000.0
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The frequencies ISO 3745:2012/Amd.1:2017 A.2.3 evaluates over a range.
 
     Below 125 Hz and above 4 000 Hz every one-third octave band, between them
@@ -430,7 +431,9 @@ def _wavelength_m(frequency_hz: float, speed_of_sound: float) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _as_levels(value: NumericArrayLike, n_points: int, name: str) -> np.ndarray:
+def _as_levels(
+    value: NumericArrayLike, n_points: int, name: str
+) -> NDArray[np.float64]:
     require_scalar(n_points, "n_points")
     arr = real_array(value, name)
     if arr.ndim == 1:
@@ -456,7 +459,7 @@ def _checked_targets(
     return named
 
 
-def _checked_positions(value: NumericArrayLike) -> np.ndarray:
+def _checked_positions(value: NumericArrayLike) -> NDArray[np.float64]:
     """An ``(N, 3)`` array of finite coordinates with at least two points."""
     positions = real_array(value, "value")
     if (
@@ -475,7 +478,9 @@ def _checked_positions(value: NumericArrayLike) -> np.ndarray:
     return positions
 
 
-def _checked_traverse_levels(value: NumericArrayLike, n_points: int) -> np.ndarray:
+def _checked_traverse_levels(
+    value: NumericArrayLike, n_points: int
+) -> NDArray[np.float64]:
     """The levels of a traverse: finite, or ``nan`` where not measured."""
     levels = _as_levels(value, n_points, "levels")
     if np.any(np.isinf(levels)):
@@ -487,7 +492,9 @@ def _checked_traverse_levels(value: NumericArrayLike, n_points: int) -> np.ndarr
     return levels
 
 
-def _checked_monitor(value: NumericArrayLike, levels: np.ndarray) -> np.ndarray:
+def _checked_monitor(
+    value: NumericArrayLike, levels: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """The monitor readings, finite wherever Formula (1) reads them."""
     monitor = _as_levels(value, levels.shape[0], "monitor_levels")
     if monitor.shape != levels.shape:
@@ -507,7 +514,9 @@ def _checked_monitor(value: NumericArrayLike, levels: np.ndarray) -> np.ndarray:
     return monitor
 
 
-def _checked_background(value: NumericArrayLike, levels: np.ndarray) -> np.ndarray:
+def _checked_background(
+    value: NumericArrayLike, levels: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """The background, per point or one row, finite at every measured point."""
     background = real_array(value, "value")
     if background.ndim == 1 and background.shape[0] == levels.shape[1]:
@@ -563,10 +572,10 @@ class MicrophoneTraverse(OwnsArrays):
         ``"unique features"``.
     """
 
-    positions_m: np.ndarray
-    levels: np.ndarray
-    monitor_levels: np.ndarray | None = None
-    background_levels: np.ndarray | None = None
+    positions_m: NDArray[np.float64]
+    levels: NDArray[np.float64]
+    monitor_levels: NDArray[np.float64] | None = None
+    background_levels: NDArray[np.float64] | None = None
     name: str = ""
     targets: tuple[PathTarget, ...] = ()
 
@@ -671,7 +680,9 @@ class MicrophoneTraverse(OwnsArrays):
 # ---------------------------------------------------------------------------
 
 
-def _stability_corrected(traverse: MicrophoneTraverse) -> tuple[np.ndarray, np.ndarray]:
+def _stability_corrected(
+    traverse: MicrophoneTraverse,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Formula (1) and the largest monitor excursion per frequency."""
     levels = traverse.levels
     if traverse.monitor_levels is None:
@@ -699,17 +710,17 @@ class _Evaluation:
     the field diverges from.
     """
 
-    traverse_radius: np.ndarray  # (NT, NF)
-    band_radius: np.ndarray  # (NF,)
+    traverse_radius: NDArray[np.float64]  # (NT, NF)
+    band_radius: NDArray[np.float64]  # (NF,)
     radius: float
     rank: float
     share: float
-    distances: tuple[np.ndarray, ...]
+    distances: tuple[NDArray[np.float64], ...]
 
 
 def _prefix_radius(
-    r: np.ndarray, y: np.ndarray, tolerance: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    r: NDArray[np.float64], y: NDArray[np.float64], tolerance: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.bool_]]:
     """The qualified distance of one traverse per frequency, for a fixed origin.
 
     ``r`` is ``(N,)``, ``y`` is ``(N, NF)`` with ``nan`` for points not
@@ -738,11 +749,11 @@ def _prefix_radius(
 
 
 def _evaluate(
-    origin: np.ndarray,
-    positions: Sequence[np.ndarray],
-    levels: Sequence[np.ndarray],
-    tolerance: np.ndarray,
-    reference: np.ndarray | None = None,
+    origin: NDArray[np.float64],
+    positions: Sequence[NDArray[np.float64]],
+    levels: Sequence[NDArray[np.float64]],
+    tolerance: NDArray[np.float64],
+    reference: NDArray[np.float64] | None = None,
 ) -> _Evaluation:
     """Qualified distances for one origin: per traverse, per band, overall.
 
@@ -805,10 +816,10 @@ def _evaluate(
 
 def _better(
     a: _Evaluation,
-    a_origin: np.ndarray,
+    a_origin: NDArray[np.float64],
     b: _Evaluation,
-    b_origin: np.ndarray,
-    centre: np.ndarray,
+    b_origin: NDArray[np.float64],
+    centre: NDArray[np.float64],
 ) -> bool:
     """Lexicographic order of the origin search: rank, share, then centring.
 
@@ -830,12 +841,12 @@ def _better(
 
 
 def _compass_step(
-    evaluate: Callable[[np.ndarray], _Evaluation],
+    evaluate: Callable[[NDArray[np.float64]], _Evaluation],
     best: _Evaluation,
-    best_origin: np.ndarray,
-    step: np.ndarray,
-    box: np.ndarray,
-) -> tuple[_Evaluation, np.ndarray, bool]:
+    best_origin: NDArray[np.float64],
+    step: NDArray[np.float64],
+    box: NDArray[np.float64],
+) -> tuple[_Evaluation, NDArray[np.float64], bool]:
     """One pass of the compass search: a step either way along each axis.
 
     :return: The best evaluation and origin after the pass, and whether the
@@ -860,11 +871,11 @@ def _compass_step(
 
 
 def _search_origin(
-    box: np.ndarray,
-    positions: Sequence[np.ndarray],
-    levels: Sequence[np.ndarray],
-    tolerance: np.ndarray,
-) -> tuple[np.ndarray, _Evaluation]:
+    box: NDArray[np.float64],
+    positions: Sequence[NDArray[np.float64]],
+    levels: Sequence[NDArray[np.float64]],
+    tolerance: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], _Evaluation]:
     """Lattice then compass search of the origin inside the source box."""
     lo, hi = box[0], box[1]
     centre = (lo + hi) / 2.0
@@ -900,7 +911,9 @@ def _search_origin(
     return best_origin, best
 
 
-def _chebyshev_centre(y: np.ndarray, inside: np.ndarray) -> np.ndarray:
+def _chebyshev_centre(
+    y: NDArray[np.float64], inside: NDArray[np.bool_]
+) -> NDArray[np.float64]:
     """Midpoint of the spread of ``y`` over the points ``inside``, per band.
 
     Every band must have at least one point inside.
@@ -910,7 +923,7 @@ def _chebyshev_centre(y: np.ndarray, inside: np.ndarray) -> np.ndarray:
     return np.asarray((hi + lo) / 2.0, dtype=np.float64)
 
 
-def _same_radii(given: NumericArrayLike, qualified: np.ndarray) -> bool:
+def _same_radii(given: NumericArrayLike, qualified: NDArray[np.float64]) -> bool:
     """Whether ``given`` holds the radii :func:`_evaluate` qualified."""
     radii = real_array(given, "given")
     return radii.shape == qualified.shape and bool(
@@ -959,23 +972,23 @@ class InverseSquareLawResult(OwnsArrays):
         every traverse at once, ``(NF,)``, in metres.
     """
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     room: Literal["anechoic", "hemi-anechoic"]
-    origin_m: np.ndarray
+    origin_m: NDArray[np.float64]
     origin_fitted: bool
-    source_box_m: np.ndarray | None
+    source_box_m: NDArray[np.float64] | None
     traverse_names: tuple[str, ...]
     traverse_targets: tuple[tuple[PathTarget, ...], ...]
-    positions_m: tuple[np.ndarray, ...]
-    distances: tuple[np.ndarray, ...]
-    levels: tuple[np.ndarray, ...]
-    background_margin_db: tuple[np.ndarray | None, ...]
-    source_stability_db: tuple[np.ndarray, ...]
-    source_strength_db: np.ndarray
-    initial_source_strength_db: np.ndarray
-    deviations_db: tuple[np.ndarray, ...]
-    traverse_radius_m: np.ndarray
-    band_radius_m: np.ndarray
+    positions_m: tuple[NDArray[np.float64], ...]
+    distances: tuple[NDArray[np.float64], ...]
+    levels: tuple[NDArray[np.float64], ...]
+    background_margin_db: tuple[NDArray[np.float64] | None, ...]
+    source_stability_db: tuple[NDArray[np.float64], ...]
+    source_strength_db: NDArray[np.float64]
+    initial_source_strength_db: NDArray[np.float64]
+    deviations_db: tuple[NDArray[np.float64], ...]
+    traverse_radius_m: NDArray[np.float64]
+    band_radius_m: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a room, a frequency or a radius Table A.1 does not give.
@@ -1011,7 +1024,7 @@ class InverseSquareLawResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def tolerance_db(self) -> np.ndarray:
+    def tolerance_db(self) -> NDArray[np.float64]:
         """The Table A.1 limit of each frequency, in dB, read from the room.
 
         :return: :func:`inverse_square_law_tolerance` of
@@ -1031,7 +1044,7 @@ class InverseSquareLawResult(OwnsArrays):
         return float(np.min(self.band_radius_m))
 
     @property
-    def largest_deviation_db(self) -> np.ndarray:
+    def largest_deviation_db(self) -> NDArray[np.float64]:
         r"""The largest :math:`|\Delta L_{pi}|` within each band's radius.
 
         :return: One value per frequency, in dB.
@@ -1075,10 +1088,10 @@ class InverseSquareLawResult(OwnsArrays):
 class _Prepared:
     """The traverses of one source, read for the fit."""
 
-    positions: list[np.ndarray]
-    levels: list[np.ndarray]  # after the stability correction of Formula (1)
-    margins: tuple[np.ndarray | None, ...]
-    stability: tuple[np.ndarray, ...]
+    positions: list[NDArray[np.float64]]
+    levels: list[NDArray[np.float64]]  # after the stability correction of Formula (1)
+    margins: tuple[NDArray[np.float64] | None, ...]
+    stability: tuple[NDArray[np.float64], ...]
 
 
 def _prepared_traverses(
@@ -1086,10 +1099,10 @@ def _prepared_traverses(
 ) -> _Prepared:
     """Correct every traverse by Formula (1), refusing one that cannot be fitted."""
     require_scalar(n_bands, "n_bands")
-    positions: list[np.ndarray] = []
-    levels: list[np.ndarray] = []
-    margins: list[np.ndarray | None] = []
-    stability: list[np.ndarray] = []
+    positions: list[NDArray[np.float64]] = []
+    levels: list[NDArray[np.float64]] = []
+    margins: list[NDArray[np.float64] | None] = []
+    stability: list[NDArray[np.float64]] = []
     for index, traverse in enumerate(traverses):
         if traverse.levels.shape[1] != n_bands:
             msg = (
@@ -1115,10 +1128,10 @@ def _prepared_traverses(
 def _placed_origin(
     origin_m: NumericArrayLike | None,
     source_box_m: NumericArrayLike | None,
-    positions: Sequence[np.ndarray],
-    levels: Sequence[np.ndarray],
-    tolerance: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray | None, _Evaluation]:
+    positions: Sequence[NDArray[np.float64]],
+    levels: Sequence[NDArray[np.float64]],
+    tolerance: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64] | None, _Evaluation]:
     """The origin given, or searched inside the source box, and its evaluation.
 
     :return: The origin, the box (``None`` for a fixed origin) and the
@@ -1149,8 +1162,8 @@ def _placed_origin(
 
 
 def _source_strengths(
-    evaluation: _Evaluation, levels: Sequence[np.ndarray]
-) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
+    evaluation: _Evaluation, levels: Sequence[NDArray[np.float64]]
+) -> tuple[NDArray[np.float64], NDArray[np.float64], list[NDArray[np.float64]]]:
     """``b`` of Formula (2), the start of Formula (3) and the deviations of (4).
 
     :return: ``b`` and the starting value per traverse and frequency, and the
@@ -1159,7 +1172,7 @@ def _source_strengths(
     shape = (len(levels), evaluation.band_radius.size)
     strengths = np.empty(shape, dtype=np.float64)
     initial = np.empty(shape, dtype=np.float64)
-    deviations: list[np.ndarray] = []
+    deviations: list[NDArray[np.float64]] = []
     for t, (r, lv) in enumerate(zip(evaluation.distances, levels, strict=True)):
         y = lv + 20.0 * np.log10(r / _R0_M)[:, np.newaxis]
         valid = np.isfinite(y)
@@ -1262,7 +1275,7 @@ def inverse_square_law_deviations(
 
 def directionality_positions(
     room: FreeFieldRoom, *, radius: float = _DIRECTIONALITY_RADIUS_M
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Microphone positions of the directionality test (ISO 26101 B.3.2).
 
     The angle of elevation :math:`\varphi` is counted from the vertical above
@@ -1306,11 +1319,11 @@ class SourceDirectionalityResult(OwnsArrays):
         negative number.
     """
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     room: FreeFieldRoom
-    mean_level: np.ndarray
-    max_positive_deviation_db: np.ndarray
-    max_negative_deviation_db: np.ndarray
+    mean_level: NDArray[np.float64]
+    max_positive_deviation_db: NDArray[np.float64]
+    max_negative_deviation_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a room or a frequency Table B.1 cannot be read for.
@@ -1324,7 +1337,7 @@ class SourceDirectionalityResult(OwnsArrays):
         _lookup_bands(self.frequencies)
 
     @property
-    def tolerance_db(self) -> np.ndarray:
+    def tolerance_db(self) -> NDArray[np.float64]:
         """The Table B.1 limit per band, in dB, read from the room.
 
         :return: :func:`directionality_tolerance` of :attr:`frequencies`
@@ -1336,7 +1349,7 @@ class SourceDirectionalityResult(OwnsArrays):
         )
 
     @property
-    def within_tolerance(self) -> np.ndarray:
+    def within_tolerance(self) -> NDArray[np.bool_]:
         """Per band, whether both extreme deviations are within Table B.1.
 
         :return: One boolean per band.
@@ -1470,7 +1483,7 @@ def _spacing_limit(
     return min(tenth, fixed)
 
 
-def _equally_spaced(ps: np.ndarray) -> bool:
+def _equally_spaced(ps: NDArray[np.float64]) -> bool:
     """Whether the points of one traverse sit on one equally spaced grid (A.4.3).
 
     The points are taken along the line of the traverse. The step is the
@@ -1713,12 +1726,12 @@ class FreeFieldCheck(OwnsArrays):
         return self.results[0].room
 
     @property
-    def frequencies(self) -> np.ndarray:
+    def frequencies(self) -> NDArray[np.float64]:
         """Every evaluated frequency, ascending, in hertz."""
         return self._reading.frequencies.copy()
 
     @property
-    def band_radius_m(self) -> np.ndarray:
+    def band_radius_m(self) -> NDArray[np.float64]:
         """The distance to which each frequency is qualified on every traverse, in metres."""
         return self._reading.band_radius_m.copy()
 
@@ -1728,12 +1741,12 @@ class FreeFieldCheck(OwnsArrays):
         return float(np.min(self._reading.band_radius_m))
 
     @property
-    def points_met(self) -> np.ndarray:
+    def points_met(self) -> NDArray[np.bool_]:
         """At least 10 points on each traverse and 50 in total within the radius (A.4.3), per band."""
         return self._column("points")
 
     @property
-    def equal_spacing_met(self) -> np.ndarray:
+    def equal_spacing_met(self) -> NDArray[np.bool_]:
         """The points of every traverse within the radius equally spaced at the frequency, per band.
 
         A.4.3 and ISO 26101 5.1.4.3; points added between two of them near a
@@ -1742,7 +1755,7 @@ class FreeFieldCheck(OwnsArrays):
         return self._column("equal_spacing")
 
     @property
-    def spacing_met(self) -> np.ndarray:
+    def spacing_met(self) -> NDArray[np.bool_]:
         """Spacing at most a tenth of a wavelength below 250 Hz and 100 mm above, per band.
 
         Amended ISO 3745 A.4.3; the band that contains 250 Hz is held to the
@@ -1751,7 +1764,7 @@ class FreeFieldCheck(OwnsArrays):
         return self._column("spacing")
 
     @property
-    def iso26101_spacing_met(self) -> np.ndarray:
+    def iso26101_spacing_met(self) -> NDArray[np.bool_]:
         """Spacing at most a tenth of a wavelength below 1 kHz and 25 mm above, per band.
 
         ISO 26101 A.4.3, cited by A.2.4; the band that contains 1 kHz is held
@@ -1760,7 +1773,7 @@ class FreeFieldCheck(OwnsArrays):
         return self._column("spacing_iso26101")
 
     @property
-    def length_met(self) -> np.ndarray:
+    def length_met(self) -> NDArray[np.bool_]:
         """Traverse starting at most, and running at least, a quarter wavelength at the lowest frequency, per band.
 
         ISO 26101 5.1.4.3.
@@ -1768,7 +1781,7 @@ class FreeFieldCheck(OwnsArrays):
         return self._column("length")
 
     @property
-    def background_met(self) -> np.ndarray | None:
+    def background_met(self) -> NDArray[np.bool_] | None:
         """Levels at least 6 dB above the background at every point, per band.
 
         ISO 26101 5.1.2.2 c); ``None`` when a traverse came without
@@ -1777,7 +1790,7 @@ class FreeFieldCheck(OwnsArrays):
         return _judged_column(self._reading.verdicts, "background")
 
     @property
-    def directionality_met(self) -> np.ndarray | None:
+    def directionality_met(self) -> NDArray[np.bool_] | None:
         """The test source within Table B.1 in the band.
 
         ``None`` without a directionality result for its source.
@@ -1865,12 +1878,12 @@ class FreeFieldCheck(OwnsArrays):
             working=self.paths_in_working_area,
         )
 
-    def _column(self, name: str) -> np.ndarray:
+    def _column(self, name: str) -> NDArray[np.bool_]:
         """One flag per band of a requirement every band is judged on."""
         return np.array([getattr(v, name) for v in self._reading.verdicts], dtype=bool)
 
     @property
-    def band_met(self) -> np.ndarray:
+    def band_met(self) -> NDArray[np.bool_]:
         """Per band, whether every judged per-band requirement is met.
 
         :return: One boolean per evaluated frequency.
@@ -2118,7 +2131,9 @@ def _free_field_not_judged(
     return tuple(name for name, missing in unjudged if missing)
 
 
-def _judged_column(verdicts: Sequence[_BandVerdict], name: str) -> np.ndarray | None:
+def _judged_column(
+    verdicts: Sequence[_BandVerdict], name: str
+) -> NDArray[np.bool_] | None:
     """One flag per band, or ``None`` when a band was not judged on it."""
     values = [getattr(v, name) for v in verdicts]
     if any(value is None for value in values):
@@ -2208,8 +2223,8 @@ def check_free_field(
 class _FreeFieldEvaluation:
     """What a :class:`FreeFieldCheck` reads from its analyses, once."""
 
-    frequencies: np.ndarray
-    band_radius_m: np.ndarray
+    frequencies: NDArray[np.float64]
+    band_radius_m: NDArray[np.float64]
     verdicts: tuple[_BandVerdict, ...]
     conforming_range_hz: tuple[float, float] | None
     conforming_radius_m: float
@@ -2297,7 +2312,7 @@ def _run_conforms(
 def _widest_conforming_run(
     bands: Sequence[_Band],
     fits: Sequence[InverseSquareLawResult],
-    band_radius: np.ndarray,
+    band_radius: NDArray[np.float64],
     directionality: Sequence[SourceDirectionalityResult | None],
     speed_of_sound: float,
     measurement: float | None,

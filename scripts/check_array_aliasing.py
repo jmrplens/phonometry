@@ -148,6 +148,7 @@ from __future__ import annotations
 import argparse
 import ast
 import functools
+import itertools
 import pathlib
 import re
 import sys
@@ -573,8 +574,24 @@ class ClassInfo:
     #: through ``read_only`` or ``read_only_copy``: a copy nobody can write
     #: into, which a result may share without sharing anyone's edits.
     sealed: dict[str, bool] = field(default_factory=dict)
+    #: Every field the ``class`` statement writes, in the order written, with
+    #: its annotation and how the constructor takes it: :data:`_BY_PLACE`,
+    #: :data:`_BY_KEYWORD` (``kw_only``, or after ``KW_ONLY``) or
+    #: :data:`_NOT_TAKEN` (``field(init=False)``), which keeps its place.
+    declared: list[tuple[str, str, str]] = field(default_factory=list)
     #: The ``class`` statement read, one of several a key may have.
     node: ast.ClassDef | None = None
+
+
+#: How a record's constructor takes a field: by its place or by keyword
+#: alone, or not at all.
+_BY_PLACE = "place"
+_BY_KEYWORD = "keyword"
+_NOT_TAKEN = "not taken"
+
+#: One order a record's constructor may take its fields in: each field's
+#: name, annotation and how the constructor takes it.
+_Order = tuple[tuple[str, str, str], ...]
 
 
 @dataclass
@@ -704,6 +721,8 @@ class Tree:
         self.base_cache: dict[ast.AST | None, tuple[tuple[ClassInfo, ...], ...]] = {}
         self.copies_cache: dict[ast.AST | None, bool] = {}
         self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
+        self.orders_cache: dict[tuple[ast.AST | None, bool], tuple[_Order, ...]] = {}
+        self.places_cache: dict[ast.AST | None, tuple[tuple[str, ...], ...]] = {}
         self.attribute_cache: dict[tuple[ast.AST | None, str], str | None] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
@@ -841,6 +860,7 @@ class Tree:
                     node.lineno,
                     node=node,
                 )
+                keyword_only = _keyword_only_record(node.decorator_list)
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(
                         item.target, ast.Name
@@ -849,12 +869,25 @@ class Tree:
                         if annotation.startswith(("ClassVar", "typing.ClassVar")):
                             continue
                         if annotation in {"KW_ONLY", "dataclasses.KW_ONLY"}:
+                            keyword_only = True
                             continue
                         if _excluded_from_init(item.value):
                             info.attributes[item.target.id] = annotation
+                            info.declared.append(
+                                (item.target.id, annotation, _NOT_TAKEN)
+                            )
                             continue
                         info.fields.append((item.target.id, annotation))
                         info.attributes[item.target.id] = annotation
+                        own = _field_keyword_only(item.value)
+                        taken = keyword_only if own is None else own
+                        info.declared.append(
+                            (
+                                item.target.id,
+                                annotation,
+                                _BY_KEYWORD if taken else _BY_PLACE,
+                            )
+                        )
                 self.classes[(module, qualname)] = info
                 self.class_definitions.setdefault((module, qualname), []).append(info)
                 self.qualnames[node] = (module, qualname)
@@ -1324,43 +1357,106 @@ class Tree:
         return tuple(candidates) if len(candidates) == 1 else ()
 
     def record_fields(self, info: ClassInfo) -> list[tuple[str, str]]:
-        """The constructor's fields of a record, the inherited ones first:
-        those of the records each base may be where the ``class`` statement
-        reads it (:meth:`base_classes`), a field one of them annotates as able
-        to hold an array taking that annotation. The list is the tree's own,
-        read once for each statement: a caller reads it and leaves it whole.
+        """The constructor's fields of a record, by name, the inherited ones
+        too: each field its constructor takes in some order it may take them
+        in (:meth:`field_orders`), a field one order annotates as able to
+        hold an array taking that annotation. Which field an argument fills
+        by its place is read from :meth:`positional_orders`, not from this
+        list. The list is the tree's own, read once for each statement: a
+        caller reads it and leaves it whole.
         """
         node = info.node
         if not info.bases:
             return info.fields
         if node in self.fields_cache:
             return self.fields_cache[node]
+        merged: dict[str, str] = {}
+        for order in self.field_orders(info):
+            for name, annotation, taken in order:
+                if taken == _NOT_TAKEN:
+                    continue
+                held = merged.get(name)
+                if held is None or (
+                    not self.holds_array(held) and self.holds_array(annotation)
+                ):
+                    merged[name] = annotation
+        found = list(merged.items())
+        self.fields_cache[node] = found
+        return found
+
+    def field_orders(self, info: ClassInfo, *, own: bool = True) -> tuple[_Order, ...]:
+        """Every order the constructor of a record may take its fields in,
+        each field with its annotation and how it is taken (:data:`_Order`),
+        read once for each statement.
+
+        The order is the one ``dataclasses`` builds: the fields each base
+        lends, those of the last base first, then the class's own, and a
+        field written again keeps the place it first took, with the later
+        writing's annotation and the way it takes it. A base is each class it
+        may be where the ``class`` statement reads it (:meth:`base_classes`),
+        so a base with a class in each branch of an ``if`` gives an order for
+        each, and one the guard cannot follow lends none. A class that is no
+        record lends what its own bases lend, its annotations being no fields
+        (*own* false).
+        """
+        key = (info.node, own)
+        found = self.orders_cache.get(key)
+        if found is not None:
+            return found
+        written: _Order = tuple(info.declared) if own else ()
         # A class a function writes under ``global`` may be its own base:
         # while it is read, it lends its own fields alone.
-        self.fields_cache[node] = info.fields
-        fields: list[tuple[str, str]] = []
-        for classes in self.base_classes(info):
-            inherited: dict[str, str] = {}
-            for candidate in classes:
-                if not candidate.record:
-                    continue
-                for name, annotation in self.record_fields(candidate):
-                    held = inherited.get(name)
-                    if held is None or (
-                        not self.holds_array(held) and self.holds_array(annotation)
-                    ):
-                        inherited[name] = annotation
-            fields.extend(inherited.items())
-        names = {name for name, _ in info.fields}
-        found = [f for f in fields if f[0] not in names] + info.fields
-        self.fields_cache[node] = found
+        self.orders_cache[key] = (written,)
+        lent = [
+            tuple(
+                dict.fromkeys(
+                    order
+                    for candidate in classes
+                    for order in self.field_orders(candidate, own=candidate.record)
+                )
+            )
+            or ((),)
+            for classes in self.base_classes(info)
+        ]
+        orders: dict[_Order, None] = {}
+        for chosen in itertools.product(*lent):
+            merged: dict[str, tuple[str, str]] = {}
+            for order in (*reversed(chosen), written):
+                for name, annotation, taken in order:
+                    merged[name] = (annotation, taken)
+            orders[
+                tuple(
+                    (name, annotation, taken)
+                    for name, (annotation, taken) in merged.items()
+                )
+            ] = None
+        found = tuple(orders)
+        self.orders_cache[key] = found
+        return found
+
+    def positional_orders(self, info: ClassInfo) -> tuple[tuple[str, ...], ...]:
+        """The fields a record's constructor takes by place, in each order it
+        may take its fields in (:meth:`field_orders`): a keyword-only field
+        and one it does not take hold no place.
+        """
+        node = info.node
+        found = self.places_cache.get(node)
+        if found is None:
+            found = tuple(
+                dict.fromkeys(
+                    tuple(name for name, _, taken in order if taken == _BY_PLACE)
+                    for order in self.field_orders(info)
+                )
+            )
+            self.places_cache[node] = found
         return found
 
     def copies_arrays(self, info: ClassInfo) -> bool:
         """Whether a record inherits :data:`MECHANISM`, itself or through a
         base every class of which it may be where the ``class`` statement
-        reads it (:meth:`base_classes`) is a record that copies, and so
-        copies every array it is built with.
+        reads it (:meth:`base_classes`) copies, and so copies every array it
+        is built with. A class that is no record copies through its own
+        bases: the record built on it runs the ``__post_init__`` they lend.
         """
         if MECHANISM in info.bases:
             return True
@@ -1373,11 +1469,7 @@ class Tree:
         # while it is read, it copies nothing.
         self.copies_cache[node] = False
         copies = any(
-            classes
-            and all(
-                candidate.record and self.copies_arrays(candidate)
-                for candidate in classes
-            )
+            classes and all(self.copies_arrays(candidate) for candidate in classes)
             for classes in self.base_classes(info)
         )
         self.copies_cache[node] = copies
@@ -1388,7 +1480,9 @@ class Tree:
     ) -> bool:
         """Whether a record copies a field itself: every field of one that
         inherits :data:`MECHANISM`, or one its own ``__post_init__`` copies,
-        or that of every record a base may be (:meth:`base_classes`).
+        or that of every class a base may be (:meth:`base_classes`), a class
+        that is no record through its own bases as :meth:`copies_arrays`
+        reads it.
         """
         if info.owned.get(name) or self.copies_arrays(info):
             return True
@@ -1397,9 +1491,7 @@ class Tree:
         seen = seen | {info.node}
         for classes in self.base_classes(info):
             if classes and all(
-                candidate.record
-                and candidate.node not in seen
-                and self.owns(candidate, name, seen)
+                candidate.node not in seen and self.owns(candidate, name, seen)
                 for candidate in classes
             ):
                 return True
@@ -1409,7 +1501,7 @@ class Tree:
         self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
     ) -> bool:
         """Whether a record publishes a field as a read-only copy of its own,
-        itself or through every record a base may be (:meth:`base_classes`).
+        itself or through every class a base may be (:meth:`base_classes`).
         """
         if self.copies_arrays(info) or (
             info.sealed.get(name) and self.owns(info, name)
@@ -1420,9 +1512,7 @@ class Tree:
         seen = seen | {info.node}
         for classes in self.base_classes(info):
             if classes and all(
-                candidate.record
-                and candidate.node not in seen
-                and self.seals(candidate, name, seen)
+                candidate.node not in seen and self.seals(candidate, name, seen)
                 for candidate in classes
             ):
                 return True
@@ -1495,6 +1585,28 @@ def _excluded_from_init(value: ast.expr | None) -> bool:
         k.arg == "init" and isinstance(k.value, ast.Constant) and k.value.value is False
         for k in value.keywords
     )
+
+
+def _keyword_only_record(decorators: Sequence[ast.expr]) -> bool:
+    """Whether ``@dataclass(kw_only=True)`` makes every field of the class
+    keyword-only.
+    """
+    return any(
+        isinstance(decorator, ast.Call)
+        and _is_record_decorator(decorator)
+        and _keyword_constant(decorator, "kw_only", default=False) is True
+        for decorator in decorators
+    )
+
+
+def _field_keyword_only(value: ast.expr | None) -> bool | None:
+    """What ``field(kw_only=...)`` says of its field, or ``None`` when the
+    field leaves it to the class.
+    """
+    if not isinstance(value, ast.Call) or _base_name(value.func) != "field":
+        return None
+    found = _keyword_constant(value, "kw_only", default=None)
+    return found if isinstance(found, bool) else None
 
 
 def _module_statements(body: Iterable[ast.stmt]) -> Iterable[ast.stmt]:
@@ -2773,7 +2885,10 @@ class Reader:
     ) -> Value:
         """Report what a record keeps, and return the record as a value.
 
-        A copy handed to a record that copies is reported only when every
+        An argument given by its place fills each field that place may hold
+        (:func:`_places_reached`), and one that may fall past the last of
+        them is read as spread over the record, as a ``*`` argument is. A
+        copy handed to a record that copies is reported only when every
         class the call may build is a record that copies, and no function it
         may run hands its argument back instead (*alone*, :meth:`apply`).
         """
@@ -2787,22 +2902,30 @@ class Reader:
             return Fields(tuple((name, _CLEAN) for name, _ in fields))
         kept: dict[str, Value] = {}
         spilled: list[Value] = []
+
+        def keep(name: str, value: Value) -> None:
+            kept[name] = union(kept[name], value) if name in kept else value
+
+        places = _places_reached(self.tree.positional_orders(info), node.args)
         for index, value in enumerate(arguments):
-            if isinstance(node.args[index], ast.Starred) or index >= len(fields):
+            names, past = places[index]
+            if isinstance(node.args[index], ast.Starred) or past:
                 spilled.append(value)
+            if isinstance(node.args[index], ast.Starred):
                 continue
-            kept[fields[index][0]] = value
+            for filled in names:
+                keep(filled, value)
         for name, value in keywords.items():
             if name is None and isinstance(value, Fields):
                 for key, item in value.items:
                     if key in annotations:
-                        kept[key] = item
+                        keep(key, item)
                     else:
                         spilled.append(item)
             elif name is None or name not in annotations:
                 spilled.append(value)
             else:
-                kept[name] = value
+                keep(name, value)
         # A field the record copies itself, or one that cannot hold an array,
         # carries nothing a later read could keep.
         kept = {
@@ -2880,24 +3003,36 @@ class Reader:
         a ``read_only_copy`` (or a ``.copy()``) written around the argument
         copies the same array twice. So does a copy bound to a name first and
         handed over by that name, bare or through ``read_only``, when the
-        copy does nothing else: see :meth:`copy_only_handed_over`.
+        copy does nothing else: see :meth:`copy_only_handed_over`. An
+        argument given by its place is read against each field that place
+        may hold (:func:`_places_reached`), and is refused only when it is a
+        copy for every one of them.
         """
         annotations = dict(fields)
-        given: list[tuple[str, ast.expr]] = [
-            (fields[index][0], argument)
-            for index, argument in enumerate(node.args)
-            if index < len(fields) and not isinstance(argument, ast.Starred)
+        places = _places_reached(self.tree.positional_orders(info), node.args)
+        given: list[tuple[tuple[str, ...], ast.expr]] = [
+            (names, argument)
+            for (names, _), argument in zip(places, node.args, strict=True)
+            if names and not isinstance(argument, ast.Starred)
         ]
-        given += [(k.arg, k.value) for k in node.keywords if k.arg in annotations]
-        for name, argument in given:
-            if self.is_copy(argument, annotations[name]):
-                self.mark(argument, f"{info.name}.{name} (copied twice)")
+        given += [
+            ((k.arg,), k.value)
+            for k in node.keywords
+            if k.arg is not None and k.arg in annotations
+        ]
+        for names, argument in given:
+            if all(self.is_copy(argument, annotations[name]) for name in names):
+                for name in names:
+                    self.mark(argument, f"{info.name}.{name} (copied twice)")
                 continue
             local = _handed_name(argument)
-            if local is not None and self.copy_only_handed_over(
-                local, annotations[name]
+            if local is not None and all(
+                self.copy_only_handed_over(local, annotations[name]) for name in names
             ):
-                self.mark(argument, f"{info.name}.{name} (copied twice, as {local})")
+                for name in names:
+                    self.mark(
+                        argument, f"{info.name}.{name} (copied twice, as {local})"
+                    )
 
     # -- a copy bound to a name and handed over ----------------------------
     def copy_only_handed_over(self, name: str, annotation: str) -> bool:
@@ -3818,6 +3953,40 @@ def _constant_strings(
             out.extend(found)
         return tuple(out)
     return None
+
+
+def _places_reached(
+    orders: Sequence[tuple[str, ...]], arguments: Sequence[ast.expr]
+) -> list[tuple[tuple[str, ...], bool]]:
+    """What each argument a call gives by its place may fill of a record's
+    fields, in every order its constructor may take them in
+    (:meth:`Tree.positional_orders`), and whether it may fall past the last
+    of them in one.
+
+    From the first ``*`` argument on, the number of values the call hands is
+    unknown: an argument written after it may fill any place from the
+    star's own on, as :func:`bind` reads it for a function.
+    """
+    spread = next(
+        (
+            index
+            for index, argument in enumerate(arguments)
+            if isinstance(argument, ast.Starred)
+        ),
+        None,
+    )
+    reached: list[tuple[tuple[str, ...], bool]] = []
+    for index in range(len(arguments)):
+        names: dict[str, None] = {}
+        past = False
+        for order in orders:
+            if spread is not None and index > spread:
+                names.update(dict.fromkeys(order[spread:]))
+            elif index < len(order):
+                names[order[index]] = None
+            past = past or index >= len(order)
+        reached.append((tuple(names), past))
+    return reached
 
 
 def bind(

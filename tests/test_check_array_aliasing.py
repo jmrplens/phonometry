@@ -3067,6 +3067,243 @@ def test_a_base_s_fields_copies_and_attributes_are_those_of_the_class_it_reads(
     }
 
 
+def test_an_argument_fills_the_field_of_its_place_in_each_order_a_base_gives(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record on a base with a class in each branch of an ``if`` takes its
+    fields in the order of the class that stood, so an argument fills the
+    field of its place in each: ``Child(None, values)`` keeps ``values`` in
+    ``payload`` on one path and in ``data`` on the other, and a label handed
+    first may be ``data`` itself.
+
+    The fields of the classes a base may be were merged by name in the order
+    the first gave them, ``data, note, payload``, so the second argument
+    filled ``note``, a text, and the array the record keeps passed.
+    """
+    found = _findings(
+        tmp_path,
+        either="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class _Base:
+                data: NDArray[np.float64]
+        else:
+            @dataclass(frozen=True)
+            class _Base:
+                note: str
+                data: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Child(_Base):
+            payload: NDArray[np.float64] | None = None
+
+        def build_either(values):
+            return Child(None, values)
+
+        def build_labelled(label, values):
+            return Child(label, values)
+        """,
+    )
+    assert found == {
+        ("build_either", "Child.data", "values"),
+        ("build_either", "Child.payload", "values"),
+        ("build_labelled", "Child.data", "label, values"),
+        ("build_labelled", "Child.payload", "values"),
+    }
+
+
+#: Records whose constructor takes its fields in another order than the one
+#: they are written in, each built by position with the caller's array.
+_FIELD_ORDERS = """
+from dataclasses import KW_ONLY, dataclass, field
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+@dataclass(frozen=True)
+class _Base:
+    data: NDArray[np.float64]
+    note: str
+
+@dataclass(frozen=True)
+class Redefined(_Base):
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Levels:
+    levels: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Label:
+    label: str
+
+@dataclass(frozen=True)
+class Both(_Levels, _Label):
+    pass
+
+@dataclass(frozen=True, kw_only=True)
+class _Tagged:
+    label: str = ""
+
+@dataclass(frozen=True)
+class Tagged(_Tagged):
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class Marked:
+    label: str = field(default="", kw_only=True)
+    data: NDArray[np.float64] | None = None
+
+@dataclass(frozen=True)
+class _Sentinel:
+    _: KW_ONLY
+    label: str = ""
+
+@dataclass(frozen=True)
+class AfterTheSentinel(_Sentinel):
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Plain:
+    data: NDArray[np.float64]
+
+class _Mixin(_Plain):
+    cache: NDArray[np.float64] | None = None
+
+    def describe(self):
+        return ""
+
+@dataclass(frozen=True)
+class Described(_Mixin):
+    note: str = ""
+
+@dataclass(frozen=True)
+class _Owning(OwnsArrays):
+    data: NDArray[np.float64]
+
+class _Showing(_Owning):
+    def describe(self):
+        return ""
+
+@dataclass(frozen=True)
+class Shown(_Showing):
+    note: str = ""
+
+@dataclass(frozen=True)
+class TaggedCopy(_Tagged, OwnsArrays):
+    data: NDArray[np.float64]
+
+def build_redefined(values):
+    return Redefined(values, "x")
+
+def build_both(values):
+    return Both("x", values)
+
+def build_tagged(values):
+    return Tagged(values)
+
+def build_marked(values):
+    return Marked(values)
+
+def build_after_the_sentinel(values):
+    return AfterTheSentinel(values)
+
+def build_described(values):
+    return Described(values)
+
+def build_described_late(label, values):
+    return Described(label, values)
+
+def build_shown(values):
+    return Shown(values)
+
+def build_tagged_copy(values):
+    return TaggedCopy(values.copy())
+"""
+
+
+def test_a_record_takes_its_fields_in_the_order_its_constructor_does(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An argument fills the field of its place in the constructor's order:
+    a field a record writes again keeps the place its base gave it, the
+    fields of the last base come first, a keyword-only field takes no place,
+    and a class that is no record lends the fields of the record it is built
+    on, and its copies, but no annotation of its own.
+
+    The fields were read as written, the base's first and in the order of the
+    bases, a field written again last, a keyword-only field in its place and
+    a class that is no record with none, so each of these records filled a
+    text with the caller's array and passed; ``values.copy()`` handed to a
+    record that copies was read against a text and passed; and a record on a
+    plain class over one that copies would have kept what it copies.
+    """
+    found = _findings(tmp_path / "a", orders=_FIELD_ORDERS)
+    assert found == {
+        ("build_redefined", "Redefined.data", "values"),
+        ("build_both", "Both.levels", "values"),
+        ("build_tagged", "Tagged.data", "values"),
+        ("build_marked", "Marked.data", "values"),
+        ("build_after_the_sentinel", "AfterTheSentinel.data", "values"),
+        ("build_described", "Described.data", "values"),
+        ("build_described_late", "Described.data", "label"),
+        ("build_tagged_copy", "TaggedCopy.data (copied twice)", ""),
+    }
+    assert _unequipped(tmp_path / "b", orders=_FIELD_ORDERS) == {
+        "BandResult",
+        "Redefined",
+        "Both",
+        "Tagged",
+        "Marked",
+        "AfterTheSentinel",
+        "Described",
+    }
+
+
+def test_an_argument_after_a_star_may_fill_any_place_from_the_star_s_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The ``*`` argument hands an unknown number of values, so an argument
+    written after it may fill any field from the star's place on: with
+    nothing in ``head`` it fills ``first``, with one ``label``, with two
+    ``data``.
+
+    It was read at its written place alone, the text ``label``, so the two
+    fields that may keep the caller's array passed.
+    """
+    found = _findings(
+        tmp_path,
+        spread="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        @dataclass(frozen=True)
+        class Spread:
+            first: NDArray[np.float64]
+            label: str = ""
+            data: NDArray[np.float64] | None = None
+
+        def build_spread(head, values):
+            return Spread(*head, values)
+        """,
+    )
+    assert found == {
+        ("build_spread", "Spread(*...)", "head"),
+        ("build_spread", "Spread.first", "values"),
+        ("build_spread", "Spread.data", "values"),
+    }
+
+
 def test_a_record_that_copies_takes_the_caller_s_array_as_it_is(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -302,9 +302,11 @@ fitted. The conformity evidence is real and it is published, in
   audio-frequency noise voltage level in sound broadcasting* (Recommendation
   ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468/en).
   The weighting network of clause 1 and the quasi-peak detector of clause 2.
-- International Electrotechnical Commission. (1985). *Sound system equipment -
-  Part 1: General* (IEC 60268-1:1985), Appendix A, with Amendment 1:1988. The
-  same network and meter, as Table AI, Fig. A1 and Tables AII and AIII.
+- International Electrotechnical Commission. (1985). *Sound system equipment —
+  Part 1: General* (IEC 60268-1:1985).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1204).
+  Appendix A, with Amendment 1:1988: the same network and meter, as Table AI,
+  Fig. A1 and Tables AII and AIII.
 - Audio Engineering Society. (2015). *AES standard method for digital audio
   engineering - Measurement of digital audio equipment* (AES17-2015),
   clause 5.2.7. The same curve shifted by −5.63 dB and read with an r.m.s.

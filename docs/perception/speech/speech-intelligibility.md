@@ -572,8 +572,8 @@ mechanisms are in play, compute both.
 
 ## Standards
 
-ANSI S3.5-1997 (R2017), *American National Standard Methods for
-the Calculation of the Speech Intelligibility Index*: the four band procedures
+ANSI S3.5-1997 (R2017), *Methods for calculation of the speech
+intelligibility index*: the four band procedures
 (critical band, 21 bands, Table 1; equally-contributing critical band, 17
 bands, Table 2; one-third octave, 18 bands, Table 3; octave, 6 bands, Table 4)
 with their band-importance functions, standard speech spectrum levels and

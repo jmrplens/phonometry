@@ -457,7 +457,7 @@ this implementation.
 
 ## Standards
 
-ITU-R BS.1770-5 (11/2023), *Algorithms to measure audio programme loudness
+Recommendation ITU-R BS.1770-5, *Algorithms to measure audio programme loudness
 and true-peak audio level*: the K-weighting pre-filter (Annex 1, Tables
 1-2), the channel-weighted loudness and two-stage gating (Annex 1, Formulae
 1-7, Table 3), the true-peak estimation guidelines (Annex 2 and its

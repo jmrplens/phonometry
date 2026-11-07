@@ -21,6 +21,14 @@
 // what the page emits. A check that read Head.astro's idea of the answer would
 // have agreed with the defect.
 //
+// The glossary's terms are held to src/data/glossary.mjs, the data the page
+// is built from, field by field: a DefinedTerm is named by its entry's
+// quantity, a symbol is its code and alternate name, a named entry's alternate
+// name is the alias it declares, and the guide is the one the entry names.
+// The code itself is not recomputed here: comparing it with what the page's
+// own maths-to-text step produces would agree with that step's defects, so it
+// is held to what a code has to be, present and free of TeX.
+//
 // Two things the built HTML cannot answer on its own are read from git: the
 // SoftwareApplication's `dateCreated` is the UTC day of the repository's first
 // commit, and its `dateModified` the UTC day of the last commit that changed
@@ -42,6 +50,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { glossary } from '../src/data/glossary.mjs';
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs, topicForSlug, topicSections, topics } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
@@ -756,7 +765,6 @@ const seen = {
 	datasetUnshown: 0,
 	corrected: 0,
 	history: 0,
-	glossaries: 0,
 	definedTerms: 0,
 };
 
@@ -776,6 +784,162 @@ const articleIds = new Set();
 const glossarySubjects = [];
 /** How many of the glossary's checks failed, so its summary line is only printed when none did. */
 let glossaryDefects = 0;
+
+/** Every glossary entry by its id: what each DefinedTerm of the built pages answers to. */
+const GLOSSARY = new Map(glossary.flatMap((group) => group.terms).map((entry) => [entry.id, entry]));
+
+/** The guides the glossary's entries name, each a route in either language. */
+const GLOSSARY_GUIDES = new Set([...GLOSSARY.values()].map((entry) => entry.guide));
+
+/**
+ * The glossary pages found in each language, and how many of the guides its
+ * entries name each language's pages publish.
+ */
+const glossaryPages = { en: { found: 0, guides: 0 }, es: { found: 0, guides: 0 } };
+
+/** A field an entry stores once for both languages, or as `{ en, es }`, in `lang`. */
+const fieldIn = (value, lang) =>
+	value !== null && typeof value === 'object' && !Array.isArray(value) ? value[lang] : value;
+
+/** The alternate name a named entry's declared aliases give in `lang`: none, one, or the list. */
+const declaredAlias = (entry, lang) => {
+	const aliases = [fieldIn(entry.alias, lang) ?? []].flat();
+	return aliases.length > 1 ? aliases : aliases[0];
+};
+
+/** What is left of TeX in a string written for machines: a code has none of it. */
+const TEX_IN_CODE = /[$\\{}^_]/;
+
+/**
+ * What is left of TeX in a description. A caret is not on the list: an
+ * exponent with no superscript form is written `m/s^1.75`, on purpose.
+ */
+const TEX_IN_TEXT = /[$\\{}_]/;
+
+/** The first few items of a list, for a report line that stays one line. */
+const sample = (list) => `${list.slice(0, 5).join(', ')}${list.length > 5 ? ', ...' : ''}`;
+
+/**
+ * Hold one glossary page's DefinedTerms to src/data/glossary.mjs, and fail
+ * once for each kind of defect, with the terms it was found on.
+ *
+ * @param {string} route The page's route, which names it in the report.
+ * @param {string} canonical The page's own address, every term's `@id` prefix.
+ * @param {'en' | 'es'} lang The page's language.
+ * @param {object[]} nodes Every node of the page's graph.
+ */
+function checkGlossary(route, canonical, lang, nodes) {
+	/** What is wrong, said of some DefinedTerms, mapped to the terms it is wrong on. */
+	const problems = new Map();
+	const note = (what, where) => problems.set(what, [...(problems.get(what) ?? []), where]);
+	const terms = nodeOfType(nodes, 'DefinedTermSet')?.hasDefinedTerm ?? [];
+	seen.definedTerms += terms.length;
+	if (terms.length === 0) {
+		fail(`${route}: the glossary publishes no DefinedTerm`);
+		glossaryDefects += 1;
+		return;
+	}
+	const published = new Set();
+	for (const term of terms) {
+		const id = String(term['@id'] ?? '');
+		const label = id.startsWith(`${canonical}#`) ? id.slice(canonical.length + 1) : `(${id || 'no @id'})`;
+		const entry = GLOSSARY.get(label);
+		if (!entry) {
+			note('have no entry in src/data/glossary.mjs', label);
+			continue;
+		}
+		if (published.has(label)) {
+			note('are published more than once', label);
+			continue;
+		}
+		published.add(label);
+
+		// The name is the quantity, as the entry spells it in this language. The
+		// one defect this check was written for, a term named by its symbol,
+		// gets a message of its own because it is the one most likely to return.
+		const quantity = entry.quantity[lang];
+		if (term.name !== quantity) {
+			const what =
+				term.termCode !== undefined && term.name === term.termCode
+					? 'are named by their termCode instead of the quantity'
+					: 'are not named by the quantity their entry gives';
+			note(what, `${label} (${JSON.stringify(term.name)}, not ${JSON.stringify(quantity)})`);
+		}
+
+		if (entry.symbol !== undefined) {
+			// A symbol is the term's code and its alternate name, the same string,
+			// read as a machine reads it: no TeX left, and nothing blank.
+			const code = term.termCode;
+			if (typeof code !== 'string' || code.trim() === '' || code !== code.trim()) {
+				note('have a symbol and no usable termCode', `${label} (${JSON.stringify(code)})`);
+			} else if (TEX_IN_CODE.test(code)) {
+				note('carry TeX in their termCode', `${label} (${JSON.stringify(code)})`);
+			}
+			if (term.alternateName !== code) {
+				note(
+					'have an alternateName that is not their termCode',
+					`${label} (${JSON.stringify(term.alternateName)} for ${JSON.stringify(code)})`,
+				);
+			}
+		} else {
+			if (term.termCode !== undefined) {
+				note(
+					'are named rather than symbolised and still carry a termCode',
+					`${label} (${JSON.stringify(term.termCode)})`,
+				);
+			}
+			const alias = declaredAlias(entry, lang);
+			if (JSON.stringify(term.alternateName) !== JSON.stringify(alias)) {
+				note(
+					'carry an alternateName that is not the alias their entry declares',
+					`${label} (${JSON.stringify(term.alternateName)} for ${JSON.stringify(alias)})`,
+				);
+			}
+		}
+
+		// A command the maths-to-text step does not know leaves a hole where it
+		// stood, two spaces or a space before the punctuation after it, or the
+		// TeX itself.
+		const description = String(term.description ?? '');
+		const hole = /\s{2}|\s[,.;:)]|\(\s/.exec(description);
+		if (description.trim() === '') note('have no description', label);
+		else if (hole) {
+			const at = hole.index;
+			note(
+				'have a hole in their description where a symbol was dropped',
+				`${label} ("${description.slice(Math.max(0, at - 12), at + 8)}")`,
+			);
+		} else if (TEX_IN_TEXT.test(description)) {
+			const at = description.search(TEX_IN_TEXT);
+			note('carry TeX in their description', `${label} ("${description.slice(Math.max(0, at - 12), at + 8)}")`);
+		}
+
+		// The guide is the one the entry names, in the page's own language, and
+		// the term points at the article node that page publishes.
+		const url = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${entry.guide}/`;
+		const subject = term.subjectOf;
+		if (subject === undefined) note('do not point at the guide that computes them', label);
+		else if (subject.url !== url || subject['@id'] !== `${url}#article`) {
+			note(
+				"point at another page than their entry's guide, or not at its article node",
+				`${label} (${JSON.stringify(subject['@id'])}, not ${url}#article)`,
+			);
+		} else if (typeof subject.name !== 'string' || subject.name.trim() === '') {
+			note('point at their guide without naming it', label);
+		} else {
+			glossarySubjects.push({ route, term: label, target: subject['@id'] });
+		}
+	}
+	for (const [what, where] of problems) {
+		fail(`${route}: ${where.length} of ${terms.length} DefinedTerm(s) ${what}: ${sample(where)}`);
+		glossaryDefects += 1;
+	}
+	const missing = [...GLOSSARY.keys()].filter((id) => !published.has(id));
+	if (missing.length > 0) {
+		fail(`${route}: ${missing.length} entr(y/ies) of src/data/glossary.mjs have no DefinedTerm: ${sample(missing)}`);
+		glossaryDefects += 1;
+	}
+}
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
 const LISTED = new Set(knownSlugs());
@@ -958,70 +1122,16 @@ for (const file of files) {
 		}
 	}
 
-	// The glossary publishes one DefinedTerm per quantity, and each is quoted
-	// on its own. It used to be named by its symbol alone, the same string as
-	// its termCode, so the node for LAeq never said "A-weighted equivalent
+	// The glossary publishes one DefinedTerm per entry, and each is quoted on
+	// its own. It used to be named by its symbol alone, the same string as its
+	// termCode, so the node for LAeq never said "A-weighted equivalent
 	// continuous sound pressure level"; and the guide it points at named no
 	// `@id`, so nothing joined it to the article that guide publishes.
 	if (slug === 'reference/glossary') {
-		seen.glossaries += 1;
-		const set = nodeOfType(nodes, 'DefinedTermSet');
-		const terms = set?.hasDefinedTerm ?? [];
-		if (terms.length === 0) {
-			fail(`${route}: the glossary publishes no DefinedTerm`);
-			glossaryDefects += 1;
-		}
-		seen.definedTerms += terms.length;
-		const unnamed = [];
-		const blankCode = [];
-		const gapped = [];
-		const namedByCode = [];
-		const repeated = [];
-		const unjoined = [];
-		for (const term of terms) {
-			const label = term['@id']?.split('#').pop() ?? '(no @id)';
-			if (typeof term.name !== 'string' || term.name.trim() === '') unnamed.push(label);
-			else if (term.name === term.termCode) namedByCode.push(term.termCode);
-			else if (term.name === term.alternateName) repeated.push(label);
-			const blank = (value) => value !== undefined && String(value).trim() === '';
-			if (blank(term.termCode) || blank(term.alternateName)) blankCode.push(label);
-			// A command the maths-to-text step does not know leaves a hole where
-			// it stood: two spaces, or a space before the punctuation after it.
-			const hole = /\s{2}|\s[,.;:)]|\(\s/.exec(String(term.description ?? ''));
-			if (hole) gapped.push(`${label} ("${term.description.slice(Math.max(0, hole.index - 12), hole.index + 8)}")`);
-			const subject = term.subjectOf;
-			if (subject === undefined) continue;
-			if (!isOnThisSite(subject.url) || subject['@id'] !== `${subject.url}#article`) {
-				unjoined.push(`${label} (${JSON.stringify(subject['@id'])})`);
-			} else {
-				glossarySubjects.push({ route, term: label, target: subject['@id'] });
-			}
-		}
-		const sample = (list) => `${list.slice(0, 5).join(', ')}${list.length > 5 ? ', ...' : ''}`;
-		glossaryDefects += [unnamed, blankCode, gapped, namedByCode, repeated, unjoined].filter((list) => list.length > 0).length;
-		if (unnamed.length > 0) fail(`${route}: ${unnamed.length} DefinedTerm(s) have no name: ${sample(unnamed)}`);
-		if (blankCode.length > 0) {
-			fail(`${route}: ${blankCode.length} DefinedTerm(s) carry an empty termCode or alternateName: ${sample(blankCode)}`);
-		}
-		if (gapped.length > 0) {
-			fail(`${route}: ${gapped.length} DefinedTerm description(s) have a hole where a symbol was dropped: ${sample(gapped)}`);
-		}
-		if (namedByCode.length > 0) {
-			fail(
-				`${route}: ${namedByCode.length} of ${terms.length} DefinedTerms are named by their termCode ` +
-					`instead of the quantity: ${sample(namedByCode)}`,
-			);
-		}
-		if (repeated.length > 0) {
-			fail(`${route}: ${repeated.length} DefinedTerm(s) repeat their name as alternateName: ${sample(repeated)}`);
-		}
-		if (unjoined.length > 0) {
-			fail(
-				`${route}: ${unjoined.length} of ${terms.length} DefinedTerms point at their guide with an @id ` +
-					`that is not the guide's own article node: ${sample(unjoined)}`,
-			);
-		}
+		glossaryPages[lang].found += 1;
+		checkGlossary(route, canonical, lang, nodes);
 	}
+	if (GLOSSARY_GUIDES.has(slug)) glossaryPages[lang].guides += 1;
 
 	// The error page is not an article and must not be indexed as one, which is
 	// the whole reason Head.astro special-cases it.
@@ -1861,11 +1971,32 @@ if (unresolved.length > 0) {
 		console.error(`     ${subject.route}#${subject.term} -> ${subject.target}`);
 	}
 }
-if (seen.glossaries !== 2) fail(`found ${seen.glossaries} glossary pages, not the English one and its Spanish twin`);
-else if (glossaryDefects === 0 && unresolved.length === 0) {
+// The glossary indexes the quantities its guides compute, so a build that
+// publishes one of those guides publishes the glossary in that language too,
+// once. Its route is matched by name above: were the page to move, its checks
+// would stop with nothing to say so, and this is what says so. A build of a
+// few pages that publishes none of the guides, as the tests of the other
+// checks write, has no glossary to answer for, and gets no line about one.
+for (const [lang, { found, guides }] of Object.entries(glossaryPages)) {
+	if (found > 1 || (found === 0 && guides > 0)) {
+		fail(
+			`found ${found} glossary pages in ${LANGUAGE[lang]}, not one, in a build that publishes ` +
+				`${guides} of the ${GLOSSARY_GUIDES.size} guides its entries name in that language`,
+		);
+	}
+}
+if (
+	glossaryPages.en.found === 1 &&
+	glossaryPages.es.found === 1 &&
+	glossaryDefects === 0 &&
+	unresolved.length === 0
+) {
 	ok(
-		`checked the ${seen.definedTerms} DefinedTerms of the glossary in both languages: named by their quantity, ` +
-			`and ${glossarySubjects.length} joined to the article node of the guide that computes them`,
+		`checked the ${seen.definedTerms} DefinedTerms of the glossary in both languages against ` +
+			`src/data/glossary.mjs: one per entry, each named by its entry's quantity, a symbol as its ` +
+			`termCode and alternateName with no TeX left, a named entry with no code and only its declared ` +
+			`alias, a description with no hole and no TeX, and its own guide's article node, which all ` +
+			`${glossarySubjects.length} resolve to in this build`,
 	);
 }
 

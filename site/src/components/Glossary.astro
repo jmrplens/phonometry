@@ -24,7 +24,9 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import katex from 'katex';
 import { glossary } from '../data/glossary.mjs';
-import { basePath, siteUrl } from '../data/site.mjs';
+import { basePath } from '../data/site.mjs';
+import { glossaryTermSet } from '../lib/glossary-structured-data.mjs';
+import { GREEK_LETTERS, plainText } from '../lib/maths-text.mjs';
 
 interface Props {
 	/** Locale of the page the glossary is rendered on. */
@@ -32,11 +34,10 @@ interface Props {
 }
 const { lang = 'en' } = Astro.props;
 
-// The two site-wide strings live in one place, which is where astro.config.mjs
-// and the audit scripts read them from; a second copy here would be a second
-// thing to remember on a move.
+// The base path lives in one place, which is where astro.config.mjs and the
+// audit scripts read it from; a second copy here would be a second thing to
+// remember on a move.
 const BASE = basePath;
-const SITE = `${siteUrl}${basePath}`;
 /** The locale prefix this page's URLs carry, after the base. */
 const LOCALE = lang === 'es' ? '/es' : '';
 
@@ -85,77 +86,16 @@ const terms = glossary.flatMap((group) =>
 			...term,
 			group,
 			label: term.symbol ?? localized(term.name) ?? term.id,
-			quantityText: localized(term.quantity) as string,
 			unitText: localized(term.unit),
 			standardText: localized(term.standard),
 			clauseText: localized(term.clause),
 			qualifierText: localized(term.qualifier),
 			definitionText: localized(term.definition) as string,
-			// The path without the base: the href a browser follows carries it, the
-			// absolute URL in the structured data carries it too, and building both
-			// from the slug keeps neither from having to strip it back off.
-			path: guide ? `${LOCALE}/${guide}/` : undefined,
 			href: guide ? `${BASE}${LOCALE}/${guide}/` : undefined,
 			guideTitle: title,
 		};
 	}),
 );
-
-/**
- * The notation as a machine reads it: the maths syntax removed, not just the
- * delimiters, so `$L_{Aeq}$` is the "LAeq" a search engine can match against a
- * query and not the TeX that produced it.
- */
-const termCode = (label: string) => plain(label);
-
-/**
- * A string as a machine reads it: the maths syntax removed, not just the
- * delimiters, so `$L_{Aeq}$` is the "LAeq" a search engine can match against a
- * query, and a definition carrying `$\mathrm{THD}_F$` reads as "THDF" rather
- * than as the TeX that produced it.
- *
- * A command stands for a character or a word, and it is replaced by that
- * rather than dropped: a Greek letter by the letter, `\le` by "≤", `\log` by
- * "log". Dropping them, as this did, left nine terms whose whole symbol is a
- * Greek letter with an empty name in the structured data, and read
- * "$K_{2\mathrm{A}} \le 4$ dB" as "K2A  4 dB". A command missing from the
- * tables still disappears, so a new one belongs in `TEX_WORDS`.
- */
-function plain(source: string): string {
-	return source
-		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
-		.replace(/\\([a-zA-Z]+)/g, (_match, name: string) => GREEK[name] ?? TEX_WORDS[name] ?? '')
-		.replace(/[$\\{}_^]/g, '');
-}
-
-/** The commands other than Greek letters that the glossary writes, as text. */
-const TEX_WORDS: Record<string, string> = {
-	le: '≤', ge: '≥', cdot: '·', times: '×', pm: '±', approx: '≈', sqrt: '√',
-	log: 'log', lg: 'lg', ln: 'ln', exp: 'exp', sin: 'sin', cos: 'cos',
-};
-
-/**
- * The character a reader is actually holding. Someone scanning for the sigma
- * on a datasheet has to find a row that says sigma, so the symbol index and
- * the structured data keep the letter and drop the rest of the TeX.
- */
-const GREEK: Record<string, string> = {
-	alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', Delta: 'Δ', epsilon: 'ε',
-	varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', vartheta: 'ϑ', kappa: 'κ',
-	lambda: 'λ', Lambda: 'Λ', mu: 'µ', nu: 'ν', xi: 'ξ', pi: 'π', rho: 'ρ',
-	sigma: 'σ', Sigma: 'Σ', tau: 'τ', upsilon: 'υ', phi: 'φ', varphi: 'φ',
-	Phi: 'Φ', chi: 'χ', psi: 'ψ', omega: 'ω', Omega: 'Ω', infty: '∞',
-};
-
-function scannable(source: string): string {
-	return source
-		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
-		.replace(/\\([a-zA-Z]+)/g, (_match, name: string) => GREEK[name] ?? '')
-		.replace(/[$\\{}^]/g, '')
-		.replace(/_/g, '');
-}
-
-const GREEK_LETTERS = new Set(Object.values(GREEK));
 
 /**
  * The bucket a symbol files under: its first Latin letter, its own character if
@@ -164,67 +104,16 @@ const GREEK_LETTERS = new Set(Object.values(GREEK));
  * grouping below cannot serve.
  */
 function indexKey(label: string): string {
-	for (const character of scannable(label)) {
+	for (const character of plainText(label)) {
 		if (GREEK_LETTERS.has(character)) return character;
 		if (/[A-Za-z]/.test(character)) return character.toUpperCase();
 	}
 	return '#';
 }
 
-const jsonld = {
-	'@context': 'https://schema.org',
-	'@type': 'DefinedTermSet',
-	'@id': `${SITE}${LOCALE}/reference/glossary/#glossary`,
-	name: lang === 'es' ? 'Glosario acústico de phonometry' : 'phonometry acoustic glossary',
-	url: `${SITE}${LOCALE}/reference/glossary/`,
-	inLanguage: lang,
-	// A term is named by its quantity, the words a reader asking about it uses,
-	// and the symbol rides along as the alternate name and the code. Named by
-	// the symbol alone, as every symbolised entry used to be, the node for
-	// LAeq never said "A-weighted equivalent continuous sound pressure level".
-	// An entry labelled by a term rather than a symbol has no code, and keeps
-	// its label as the alternate name only where the label says more than the
-	// quantity does ("PML (perfectly matched layer)").
-	//
-	// The guide stays an inline node, named and with its address, so a reader
-	// of this page alone still learns where the quantity is computed; its `@id`
-	// is the article node that page itself publishes, which is what lets a
-	// consumer that has read both join them.
-	hasDefinedTerm: terms.map((term) => {
-		const code = term.symbol ? termCode(term.symbol) : undefined;
-		const label = plain(term.label);
-		const alternate = code ?? (label !== term.quantityText ? label : undefined);
-		const where = [term.standardText, term.clauseText]
-			.filter((value): value is string => Boolean(value))
-			.map(plain)
-			.join(', ');
-		const unit = term.unitText
-			? ` ${lang === 'es' ? 'Unidad' : 'Unit'}: ${plain(term.unitText)}.`
-			: '';
-		const guideUrl = term.path ? `${SITE}${term.path}` : undefined;
-		return {
-			'@type': 'DefinedTerm',
-			'@id': `${SITE}${LOCALE}/reference/glossary/#${term.id}`,
-			name: term.quantityText,
-			// Present whenever the entry has a symbol, even if it came out empty, so
-			// that check-structured-data.mjs sees a symbol `plain()` could not read.
-			...(alternate === undefined ? {} : { alternateName: alternate }),
-			...(code === undefined ? {} : { termCode: code }),
-			description: `${plain(term.definitionText)}${unit} ${lang === 'es' ? 'Definida en' : 'Defined in'}: ${where}.`,
-			inDefinedTermSet: { '@id': `${SITE}${LOCALE}/reference/glossary/#glossary` },
-			...(guideUrl && term.guideTitle
-				? {
-						subjectOf: {
-							'@type': 'TechArticle',
-							'@id': `${guideUrl}#article`,
-							name: term.guideTitle,
-							url: guideUrl,
-						},
-					}
-				: {}),
-		};
-	}),
-};
+// The structured data comes from the same array, built where the check's own
+// tests can build it too (src/lib/glossary-structured-data.mjs).
+const jsonld = glossaryTermSet(lang, (slug) => titleOf.get(slug));
 
 // The symbol index: Latin letters first, then the Greek ones, each row holding
 // every entry whose notation starts with that character.
@@ -232,7 +121,11 @@ const index = new Map<string, { id: string; scan: string; qualifier?: string }[]
 for (const term of terms) {
 	const key = indexKey(term.label);
 	const row = index.get(key) ?? [];
-	row.push({ id: term.id, scan: scannable(term.label), qualifier: term.qualifierText });
+	row.push({
+		id: term.id,
+		scan: plainText(term.label),
+		qualifier: term.qualifierText ? plainText(term.qualifierText) : undefined,
+	});
 	index.set(key, row);
 }
 const indexRows = [...index.entries()].sort(([a], [b]) => {
@@ -285,7 +178,9 @@ const t =
 							<header>
 								<h3 class="notation">
 									<Fragment set:html={notation(term.label)} />
-									{term.qualifierText && <span class="qualifier">({term.qualifierText})</span>}
+									{term.qualifierText && (
+										<span class="qualifier" set:html={`(${notation(term.qualifierText)})`} />
+									)}
 								</h3>
 								{term.unitText && <span class="unit">{term.unitText}</span>}
 							</header>

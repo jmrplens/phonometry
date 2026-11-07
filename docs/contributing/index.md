@@ -311,6 +311,7 @@ Each rule on a page has the same parts:
 | [F66](docs-and-figures.md#f66) | Start a process from the site's source once per build, never once per page | `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F67](docs-and-figures.md#f67) | Write beside a print what it writes: its values first, in their order | `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py` |
 | [F68](docs-and-figures.md#f68) | Close the figure a plot made when it raises, through `closes_its_figures` | `tests/test_plot_errors.py` |
+| [F69](docs-and-figures.md#f69) | Leave the site build printing no warning | `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 
 ### Prose, commits and pull requests
 

@@ -2332,6 +2332,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   other formulas of the site do, in English, in Spanish and in the `docs/`
   mirror.
 
+- **The docs workflow fails on a warning the site build prints.** The two
+  notices above rode in every build because a build that passes says nothing
+  about what it printed, and nobody reads a log of a thousand route lines.
+  The workflow keeps the output of `pnpm build`, and
+  `site/scripts/check-build-output.mjs` fails on a warning of Astro's logger,
+  a line that says something is deprecated, KaTeX's strict-mode report or a
+  Node process warning, wherever on its line it is printed. Starlight's lookup
+  of a 404 entry the site does not have is the one warning it lists as known,
+  with the reason, and an entry the build stops printing fails too. Rule F69
+  of the contributor guide states it.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

@@ -10,6 +10,8 @@
 // The software node names its operating systems one per entry, as jmrp.io does
 // for the same `@id`: the site-wide graph is the same on every page, so the
 // check reads it once per distinct value and says on how many pages it stands.
+// The same block is held to a byte budget: most of it is the Person spliced
+// from jmrp.io, which grows when jmrp.io changes and never in a diff here.
 //
 // The real build only ever hands the check the works the guides cite today,
 // named the way citations.mjs names them today, so a branch of the check that
@@ -187,7 +189,8 @@ function build({ pages = 4, dated = pages, published = '2026-07-01', platforms =
 			}
 		}
 		const bibliography = page('reference/bibliography', lang);
-		bibliography.nodes.push(ISO, SPAIN, ...works);
+		// Copies, so a test that takes a field off a body takes it off its own build only.
+		bibliography.nodes.push({ ...ISO }, { ...SPAIN }, ...works);
 		built[`${lang}/bibliography`] = bibliography;
 
 		built[`${lang}/guide`] = page(GUIDE, lang, {
@@ -209,16 +212,28 @@ function build({ pages = 4, dated = pages, published = '2026-07-01', platforms =
 	return built;
 }
 
-/** Write `built` as HTML files, run the check on it, and say how it ended. */
+/** The types of the nodes astro.config.mjs writes in a block of their own on every page. */
+const SITE_TYPES = new Set(['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode']);
+
+/**
+ * Write `built` as HTML files, run the check on it, and say how it ended.
+ *
+ * Each page carries two blocks, as the built site does: the site-wide nodes
+ * astro.config.mjs puts on every page, and the page's own graph from
+ * Head.astro.
+ */
 function check(t, built) {
 	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
 	t.after(() => rmSync(dist, { recursive: true, force: true }));
+	const script = (nodes) =>
+		`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes })}</script>`;
 	for (const { path, nodes } of Object.values(built)) {
-		const graph = JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes });
+		const site = nodes.filter((node) => SITE_TYPES.has(node['@type']));
+		const own = nodes.filter((node) => !SITE_TYPES.has(node['@type']));
 		mkdirSync(dirname(join(dist, path)), { recursive: true });
 		writeFileSync(
 			join(dist, path),
-			`<!DOCTYPE html><html><head><script type="application/ld+json">${graph}</script></head><body></body></html>`,
+			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head><body></body></html>`,
 		);
 	}
 	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
@@ -425,4 +440,34 @@ test('a build where no page names a cited work fails rather than passing on noth
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL no page names a cited work: the citation markup changed under this check/);
+});
+
+test('the site-wide block within its byte budget passes, and says its size and how much of it the Person is', (t) => {
+	const ran = check(t, build());
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /ok {3}the site-wide ld\+json block is \d+ bytes on 4 pages, within its budget of \d+; the Person is \d+ of them/);
+});
+
+test('a site-wide block over its byte budget fails, and says how much of it the Person is', (t) => {
+	// A Person spliced from jmrp.io with every link listed twice over: the
+	// growth no page of this repository shows in a diff.
+	const built = build();
+	const links = Array.from({ length: 600 }, (_, i) => `https://example.org/profiles/maintainer-${i}`);
+	for (const { nodes } of Object.values(built)) {
+		nodes.find((node) => node['@type'] === 'Person').sameAs = links;
+	}
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL 4 page\(s\): the site-wide ld\+json block is \d+ bytes, over its budget of \d+; the Person spliced from jmrp\.io is \d+ of them/,
+	);
+});
+
+test('a build with no site-wide block fails rather than passing the budget on nothing', (t) => {
+	const built = build();
+	for (const entry of Object.values(built)) entry.nodes = entry.nodes.filter((node) => node['@type'] !== 'Person');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL no page carries the site-wide ld\+json block/);
 });

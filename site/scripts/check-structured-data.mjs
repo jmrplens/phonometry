@@ -159,6 +159,20 @@ const EDITED_FLOOR = 0.1;
 /** The nodes astro.config.mjs puts on every page for the per-page ones to join. */
 const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode'];
 
+/**
+ * The most bytes the site-wide ld+json block may take, the one astro.config.mjs
+ * writes on every page around the Person it splices from jmrp.io verbatim.
+ *
+ * That Person is most of the block, and it changes when jmrp.io changes, with
+ * no diff in this repository: four profile links added there grew every page
+ * here by 132 bytes, and an earlier change there doubled the Person. The block
+ * was 23,545 bytes on 2026-11-07, 16,320 of them the Person. The budget leaves
+ * room for a few more links or topics and none for a second copy of a list,
+ * so a growth of that kind stops the build and is decided here, by raising the
+ * budget or by trimming the source, instead of shipping on every page unseen.
+ */
+const SITE_BLOCK_BUDGET = 25_000;
+
 /** Every JSON-LD block of a document, whatever else the script tag carries. */
 const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
 
@@ -270,6 +284,8 @@ const missingSection = [];
 const wrongSection = [];
 /** Each distinct `operatingSystem` of the software node, as JSON, and the pages that carry it. */
 const platformLists = new Map();
+/** Each distinct size of the site-wide block, in bytes, with the Person's share and the pages. */
+const siteBlocks = new Map();
 /** Pages whose `isBasedOn` points at a work without naming it, with the count. */
 const unnamedBasis = [];
 /** Pages that point at a cited work nothing on the page names, with the count. */
@@ -344,6 +360,15 @@ for (const file of files) {
 				continue;
 			}
 			nodes.push(node);
+		}
+		// The site-wide block is the one that carries the Person, measured as
+		// published: the bytes every page pays before its own graph.
+		const person = graph.find((node) => node && typeof node === 'object' && typesOf(node).includes('Person'));
+		if (person) {
+			const size = Buffer.byteLength(body, 'utf8');
+			const entry = siteBlocks.get(size) ?? { person: Buffer.byteLength(JSON.stringify(person), 'utf8'), pages: 0 };
+			entry.pages += 1;
+			siteBlocks.set(size, entry);
 		}
 	}
 
@@ -658,6 +683,26 @@ for (const [platforms, pages] of platformLists) {
 		fail(
 			`${pages} page(s): the software node's operatingSystem is ${platforms}; ` +
 				'it has to list each platform once, one name per entry, as jmrp.io/projects/ does for the same @id',
+		);
+	}
+}
+
+// The site-wide block, judged once per distinct size: it is the same bytes on
+// every page, so a growth shows as one size on every page at once.
+if (siteBlocks.size === 0) {
+	fail('no page carries the site-wide ld+json block with the Person: the site graph changed under this check');
+}
+for (const [size, { person, pages }] of [...siteBlocks].sort(([a], [b]) => b - a)) {
+	if (size > SITE_BLOCK_BUDGET) {
+		fail(
+			`${pages} page(s): the site-wide ld+json block is ${size} bytes, over its budget of ${SITE_BLOCK_BUDGET}; ` +
+				`the Person spliced from jmrp.io is ${person} of them. Trim the source, or raise SITE_BLOCK_BUDGET ` +
+				'in scripts/check-structured-data.mjs if the growth is wanted',
+		);
+	} else {
+		ok(
+			`the site-wide ld+json block is ${size} bytes on ${pages} pages, within its budget of ` +
+				`${SITE_BLOCK_BUDGET}; the Person is ${person} of them`,
 		);
 	}
 }

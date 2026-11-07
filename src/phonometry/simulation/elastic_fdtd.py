@@ -881,11 +881,12 @@ class ElasticFDTD2D:
         that is not a number, a side of ``absorbing_sides`` or ``free_sides``
         is not a text, or ``compute`` is neither a :class:`Compute` nor
         ``None``.
-    :raises ValueError: for an argument out of its range, a ``shape`` given
-        beside a map of another shape, a side that is not ``"left"``,
-        ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
-        names a host: an engine steps in this process, and only
-        :func:`elastic_fdtd_simulation` and
+    :raises ValueError: for an argument out of its range, a ``dx``, a ``cfl``
+        and a fastest speed of ``c_p`` that give a time step past a float's
+        range (zero or infinite), a ``shape`` given beside a map of another
+        shape, a side that is not ``"left"``, ``"right"``, ``"top"`` or
+        ``"bottom"``, and for a ``compute`` that names a host: an engine steps
+        in this process, and only :func:`elastic_fdtd_simulation` and
         :func:`~phonometry.simulation.write_elastic_fdtd_animation` run on a
         node.
     :raises ComputeImportError: when the library of the device ``compute``
@@ -1942,12 +1943,13 @@ class ElasticRun(OwnsArrays):
         ``shape`` that is not a pair or holds a count that is not a number, or
         a medium (``c_p``, ``c_s``, ``rho``, ``damping``) that holds a complex
         number or a text.
-    :raises ValueError: If an argument is out of its range, a ``shape`` is
-        not two whole numbers of two cells or more or is given beside a map of
-        another shape, a source, a probe or the obstacle does not fit the
-        grid, or the ``duration_s`` covers more steps than the record holds:
-        its time axis or its probe history would take more bytes than a NumPy
-        array can hold.
+    :raises ValueError: If an argument is out of its range, a ``dx``, a
+        ``cfl`` and a fastest speed of ``c_p`` give a time step past a float's
+        range (zero or infinite), a ``shape`` is not two whole numbers of two
+        cells or more or is given beside a map of another shape, a source, a
+        probe or the obstacle does not fit the grid, or the ``duration_s``
+        covers more steps than the record holds: its time axis or its probe
+        history would take more bytes than a NumPy array can hold.
     """
 
     c_p: float | Field2D

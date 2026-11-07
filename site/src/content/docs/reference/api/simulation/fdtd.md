@@ -251,7 +251,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
+| ValueError | for an argument out of its range, a `dx`, a `cfl` and a fastest speed of `c` that give a time step past a float's range (zero or infinite), a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation, unless `fallback=True`. |
 
@@ -753,7 +753,7 @@ changes afterwards reaches a checked run.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a medium (`c`, `rho`, `damping`) that holds a complex number or a text, or an `obstacle_mask` that is not boolean. |
-| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, a source, a probe or the obstacle does not fit the grid, or the `duration_s` covers more steps than the record holds: its time axis or its probe history would take more bytes than a NumPy array can hold. |
+| ValueError | If an argument is out of its range, a `dx`, a `cfl` and a fastest speed of `c` give a time step past a float's range (zero or infinite), a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, a source, a probe or the obstacle does not fit the grid, or the `duration_s` covers more steps than the record holds: its time axis or its probe history would take more bytes than a NumPy array can hold. |
 
 ## GaussianPulse
 

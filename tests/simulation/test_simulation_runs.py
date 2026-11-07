@@ -14,6 +14,7 @@ from __future__ import annotations
 import copy
 import dataclasses
 import pickle
+import re
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -65,6 +66,15 @@ def _elastic(**changes: Any) -> ElasticRun:
         **changes,
     }
     return ElasticRun(c_p=4000.0, c_s=2300.0, dx=0.01, **fields)
+
+
+#: The refusal of a run whose steps pass the largest index, where the time
+#: axis has more samples than an array has bytes.
+_PAST_THE_LARGEST_INDEX = (
+    r": the time axis, of more than "
+    rf"{np.iinfo(np.intp).max} samples in float64, would take more than "
+    rf"{8 * int(np.iinfo(np.intp).max)} bytes, more than an array can hold"
+)
 
 
 @pytest.mark.parametrize(
@@ -169,17 +179,32 @@ def _elastic(**changes: Any) -> ElasticRun:
         ),
         # More steps than the record's arrays can hold, which NumPy refused
         # from inside the function as "Maximum allowed dimension exceeded".
+        # Past the largest index the refusal still names the time axis, its
+        # samples, its dtype and its bytes, as bounds: a ratio of 1e308 s over
+        # a step is infinite, with no whole count to give.
         (
             _acoustic,
             {"duration_s": 1e300},
             ValueError,
-            r"duration_s covers .* time steps .* more than an array can hold",
+            r"duration_s covers .* time steps .*" + _PAST_THE_LARGEST_INDEX,
         ),
         (
             _elastic,
             {"duration_s": 1e300},
             ValueError,
-            r"duration_s covers .* time steps .* more than an array can hold",
+            r"duration_s covers .* time steps .*" + _PAST_THE_LARGEST_INDEX,
+        ),
+        (
+            _acoustic,
+            {"duration_s": 1e308},
+            ValueError,
+            r"duration_s covers inf time steps .*" + _PAST_THE_LARGEST_INDEX,
+        ),
+        (
+            _elastic,
+            {"duration_s": 1e308},
+            ValueError,
+            r"duration_s covers inf time steps .*" + _PAST_THE_LARGEST_INDEX,
         ),
     ],
 )
@@ -324,6 +349,62 @@ def test_an_engine_refuses_frames_that_pass_an_array_before_it_steps(
         ),
     ):
         sim.run(n_steps, snapshot_every=1)
+
+
+def _acoustic_run_on(dx: float, speed: float) -> FDTDRun:
+    return FDTDRun(c=speed, dx=dx, duration_s=1e-4, shape=(8, 8), sources=[_PULSE])
+
+
+def _elastic_run_on(dx: float, speed: float) -> ElasticRun:
+    source = ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)
+    return ElasticRun(
+        c_p=2.0 * speed,
+        c_s=speed,
+        rho=2500.0,
+        dx=dx,
+        duration_s=1e-4,
+        shape=(8, 8),
+        sources=[source],
+    )
+
+
+def _acoustic_engine_on(dx: float, speed: float) -> FDTD2D:
+    return FDTD2D(c=speed, dx=dx, shape=(8, 8))
+
+
+def _elastic_engine_on(dx: float, speed: float) -> ElasticFDTD2D:
+    return ElasticFDTD2D(c_p=2.0 * speed, c_s=speed, rho=2500.0, dx=dx, shape=(8, 8))
+
+
+@pytest.mark.parametrize(
+    ("dx", "speed", "step"),
+    [
+        # cfl * dx / (c * sqrt(2)) under the smallest float rounds to zero: a
+        # run divided its duration_s by it and stopped on "float division by
+        # zero", an engine built and stepped with it.
+        (1e-320, 1e10, r"0\.000e\+00"),
+        # Past the largest float it is infinite: a run blamed its duration_s
+        # for covering no step, an engine built and stepped into NaN.
+        (1e10, 1e-300, "inf"),
+    ],
+    ids=["zero", "infinite"],
+)
+@pytest.mark.parametrize(
+    "build",
+    [_acoustic_run_on, _elastic_run_on, _acoustic_engine_on, _elastic_engine_on],
+    ids=["FDTDRun", "ElasticRun", "FDTD2D", "ElasticFDTD2D"],
+)
+def test_a_time_step_no_float_holds_is_refused_by_the_numbers_that_give_it(
+    build: Callable[[float, float], object], dx: float, speed: float, step: str
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match=(
+            rf"dx = {re.escape(f'{dx:.3e}')} m, cfl = 0\.6 and the fastest speed "
+            rf"of .* m/s give a time step of {step} s, past the range of a float"
+        ),
+    ):
+        build(dx, speed)
 
 
 def test_a_changed_copy_of_a_run_is_checked_again() -> None:

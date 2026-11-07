@@ -1112,8 +1112,21 @@ def _time_step(cfl: float, dx: float, c_max: float) -> float:
 
     One formula for both engines and for the simulation functions, which
     count a run's steps before they build its engine.
+
+    :raises ValueError: for a step past the range of a float, zero or
+        infinite: a run divided its ``duration_s`` by a zero step, and an
+        engine stepped with either, never moving with a zero one and turning
+        every field NaN with an infinite one.
     """
-    return cfl * dx / (c_max * float(np.sqrt(2.0)))
+    dt = cfl * dx / (c_max * float(np.sqrt(2.0)))
+    if not np.isfinite(dt) or dt <= 0.0:
+        msg = (
+            f"dx = {dx:.3e} m, cfl = {cfl:g} and the fastest speed of {c_max:.3e} "
+            f"m/s give a time step of {dt:.3e} s, past the range of a float: "
+            "cfl * dx / (c * sqrt(2)) must be positive and finite"
+        )
+        raise ValueError(msg)
+    return dt
 
 
 def _acoustic_grid(
@@ -1234,7 +1247,9 @@ def _step_count(
     the bytes NumPy allocates (:func:`_refuse_past_an_array`). A count past
     them (a speed of 2**70 m/s makes a step of about 1e-23 s) raised NumPy's
     ``Maximum allowed dimension exceeded`` or ``array is too big`` from
-    inside the simulation function, naming nothing.
+    inside the simulation function, naming nothing. *dt* is positive and
+    finite (:func:`_time_step`), so the ratio is a number, infinite only
+    when the division passes a float's range.
 
     :param history: The name of the probe history and its axes before the
         time axis.
@@ -1246,8 +1261,13 @@ def _step_count(
     )
     if ratio >= _MOST_BYTES:
         # Past the largest index the time axis has more samples than an array
-        # has bytes, and an infinite ratio has no whole count to round to.
-        msg = f"{why}: the time axis would take more than an array can hold"
+        # has bytes, and an infinite ratio has no whole count to round to:
+        # the refusal gives its samples and bytes as the bounds they pass.
+        msg = (
+            f"{why}: the time axis, of more than {_MOST_BYTES} samples in "
+            f"float64, would take more than {8 * _MOST_BYTES} bytes, more than "
+            f"an array can hold ({_MOST_BYTES})"
+        )
         raise ValueError(msg)
     steps = round(ratio)
     if steps < 1:
@@ -1753,11 +1773,12 @@ class FDTD2D:
         not a text, an impedance of ``edge_impedance`` is not a real number or
         an array of them (a flag, ``None`` or a text among them), or
         ``compute`` is neither a :class:`Compute` nor ``None``.
-    :raises ValueError: for an argument out of its range, a ``shape`` given
-        beside a map of another shape, a side that is not ``"left"``,
-        ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
-        names a host: an engine steps in this process, and only
-        :func:`fdtd_simulation` and
+    :raises ValueError: for an argument out of its range, a ``dx``, a ``cfl``
+        and a fastest speed of ``c`` that give a time step past a float's
+        range (zero or infinite), a ``shape`` given beside a map of another
+        shape, a side that is not ``"left"``, ``"right"``, ``"top"`` or
+        ``"bottom"``, and for a ``compute`` that names a host: an engine steps
+        in this process, and only :func:`fdtd_simulation` and
         :func:`~phonometry.simulation.write_fdtd_animation` run on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import, unless
@@ -2718,12 +2739,13 @@ class FDTDRun(OwnsArrays):
         that is not a pair or holds a count that is not a number, a medium
         (``c``, ``rho``, ``damping``) that holds a complex number or a text,
         or an ``obstacle_mask`` that is not boolean.
-    :raises ValueError: If an argument is out of its range, a ``shape`` is
-        not two whole numbers of one cell or more or is given beside a map of
-        another shape, a source, a probe or the obstacle does not fit the
-        grid, or the ``duration_s`` covers more steps than the record holds:
-        its time axis or its probe history would take more bytes than a NumPy
-        array can hold.
+    :raises ValueError: If an argument is out of its range, a ``dx``, a
+        ``cfl`` and a fastest speed of ``c`` give a time step past a float's
+        range (zero or infinite), a ``shape`` is not two whole numbers of one
+        cell or more or is given beside a map of another shape, a source, a
+        probe or the obstacle does not fit the grid, or the ``duration_s``
+        covers more steps than the record holds: its time axis or its probe
+        history would take more bytes than a NumPy array can hold.
     """
 
     c: float | Field2D

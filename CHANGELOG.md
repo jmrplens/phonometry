@@ -2345,10 +2345,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the float64 time axis is past it from about `2**60` steps on, and so is
   the probe history, the empty one of a run with no probe included, and two
   probes' history from about `2**59`. Such a run now raises `ValueError` when
-  it is built, naming `duration_s`, the time step, the array and the bytes it
-  would take. Snapshots that no array holds in the run's dtype are refused
-  the same way when the function is called, before the run steps, and so
-  are the frames of an engine's `run(n_steps, snapshot_every=...)`.
+  it is built, naming `duration_s`, the time step and the array, with its
+  shape, its dtype and its bytes. Past the largest index, where `2**70` m/s
+  and `1e300` s fall and where a long enough `duration_s` makes the count
+  infinite, the refusal gives the time axis as more samples than that index
+  and more bytes than eight times it. Snapshots that no array holds in
+  the run's dtype are refused the same way when the function is called,
+  before the run steps, and so are the frames of an engine's
+  `run(n_steps, snapshot_every=...)`.
+
+- **A time step no float holds is refused by the numbers that give it.** A
+  `dx`, a `cfl` and a fastest speed whose step `cfl * dx / (c * sqrt(2))`
+  rounds to zero, as `c=1e154` with `dx=1e-170` gives, stopped an `FDTDRun`
+  or an `ElasticRun` with Python's `float division by zero`, which names no
+  input, and built an `FDTD2D` or an `ElasticFDTD2D` that stepped without
+  moving the wave. An infinite step, as `c=1e-300` with `dx=1e10` gives,
+  refused the run for a `duration_s` that covered no step and turned every
+  cell of the engine NaN. Both engines and both runs now raise `ValueError`
+  when they are built, naming `dx`, `cfl`, the fastest speed and the step.
 
 - **One number a function reads is read by name.** A function that turned one
   of its caller's numbers into a float with `float()`, or into a complex number

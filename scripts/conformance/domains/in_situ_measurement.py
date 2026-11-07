@@ -353,6 +353,37 @@ _SABINE_QUARTERS = 4.0
 #: the row is checked against the page and not against the table it exercises.
 _PRESSURE_DOUBLING_DB = 6.0
 
+
+def _mixed_receivers(
+    reference: np.ndarray, receiver: np.ndarray, attenuation_db: float
+) -> tuple[ph.environment.MeasuredBarrierInsertionLoss, bool]:
+    """A hemi-free-field receiver before and a facade one after, and the advisory.
+
+    The NOTE to ISO 10847 8.2.2 prefers two receivers of one kind, and the
+    library says so when they differ. Mixing them is what the rows that call
+    this check, so the advisory is part of the answer: it comes back as the
+    flag, and any other warning reaches the report as it would have.
+    """
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ph.environment.BarrierInSituWarning)
+        mixed = ph.environment.measured_insertion_loss_indirect(
+            reference,
+            reference,
+            receiver,
+            receiver - attenuation_db,
+            receiver_type_after="reflecting_surface",
+        )
+    advised = False
+    for entry in caught:
+        if issubclass(entry.category, ph.environment.BarrierInSituWarning):
+            advised = True
+        else:
+            warnings.warn_explicit(
+                entry.message, entry.category, entry.filename, entry.lineno
+            )
+    return mixed, advised
+
+
 #: Equation (15) as printed: the upstream measurement surface stands one and a
 #: half equivalent diameters away. Re-typed here rather than imported from the
 #: library, because the library's own constant is half of what the row is
@@ -1264,20 +1295,12 @@ def _chk_iso10847_methods_agree() -> Outcome:
     "by exactly the 6 dB of the pressure doubling",
 )
 def _chk_iso10847_receiver_correction() -> Outcome:
-    reference_before = np.array([70.0, 72.0, 74.0])
-    reference_after = reference_before
-    receiver_before = np.array([60.0, 62.0, 63.0])
-    receiver_after = receiver_before - 10.0
+    reference = np.array([70.0, 72.0, 74.0])
+    receiver = np.array([60.0, 62.0, 63.0])
     direct = ph.environment.measured_insertion_loss_direct(
-        reference_before, reference_after, receiver_before, receiver_after
+        reference, reference, receiver, receiver - 10.0
     )
-    mixed = ph.environment.measured_insertion_loss_indirect(
-        reference_before,
-        reference_after,
-        receiver_before,
-        receiver_after,
-        receiver_type_after="reflecting_surface",
-    )
+    mixed, advised = _mixed_receivers(reference, receiver, 10.0)
     # The departure from the correction, band by band, and not the largest
     # shift: a maximum passes on one band alone, and a correction that reached
     # only the first of the three would read as the whole spectrum moving.
@@ -1286,11 +1309,14 @@ def _chk_iso10847_receiver_correction() -> Outcome:
     worst = float(np.max(np.abs(shifts - correction)))
     return numeric(
         0.0,
-        worst,
+        worst if advised else float("inf"),
         1e-12,
         unit="dB",
-        expected_label=f"{correction:g} dB in every band",
-        computed_label=f"max absolute departure {worst:.3f} dB over the three bands",
+        expected_label=f"{correction:g} dB in every band, and the NOTE's advisory",
+        computed_label=(
+            f"max absolute departure {worst:.3f} dB over the three bands"
+            + ("" if advised else ", with no advisory")
+        ),
     )
 
 
@@ -1782,24 +1808,14 @@ def _chk_iso10847_receiver_correction_is_a_pressure_doubling() -> Outcome:
     open_field = ph.environment.measured_insertion_loss_direct(
         reference, reference, receiver, receiver - 10.0
     )
-    with warnings.catch_warnings():
-        # The clause prefers two receivers of one kind and the library says so;
-        # mixing them is the point here, since that is what moves the answer.
-        warnings.simplefilter("ignore")
-        facade = ph.environment.measured_insertion_loss_indirect(
-            reference,
-            reference,
-            receiver,
-            receiver - 10.0,
-            receiver_type_after="reflecting_surface",
-        )
+    facade, advised = _mixed_receivers(reference, receiver, 10.0)
     # As above: the departure from 6 dB in every band, so that a correction
     # reaching one band and not the other two cannot be read as the doubling.
     shifts = facade.insertion_loss - open_field.insertion_loss
     worst = float(np.max(np.abs(shifts - _PRESSURE_DOUBLING_DB)))
     return numeric(
         0.0,
-        worst,
+        worst if advised else float("inf"),
         1e-12,
         unit="dB",
         expected_label=(

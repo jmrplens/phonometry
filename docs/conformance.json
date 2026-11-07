@@ -59495,7 +59495,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "6 dB in every band"
+        "label": "6 dB in every band, and the NOTE's advisory"
       },
       "computed": {
         "value": 0.0,

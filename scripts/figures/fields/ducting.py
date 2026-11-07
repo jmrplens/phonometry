@@ -55,7 +55,10 @@ def _duct_profile(z: NDArray[np.floating[Any]]) -> NDArray[np.float64]:
 # path (1 480 m/s on the channel axis). The near-surface source at
 # (200, 150) m is the binding one at 2 294 m -- the on-axis source is
 # 2 236 m away -- so 2 294 / 1 480 x 1.2 = 1.860 s, against the old
-# 1.589 s window, which cut the wavefronts off before the frame edge.
+# 1.589 s window, which cut the wavefronts off before the frame edge. The
+# doublet peaks 112 and 145 ms in, which that count leaves out; the margin
+# covers it, and by the last frame the energy left in the frame is below
+# 0.1 % of its peak in both runs (measured on the two runs, NumPy).
 # Sampling: every solver step is captured, 490.5 us apart, i.e. 107.3
 # frames per 19 Hz period (>= 48; a two-step stride would already drop to
 # 53.6, still compliant, but this grid's dt is the natural floor). 3 793
@@ -306,7 +309,12 @@ def animate_fdtd_ducting(output_dir: str) -> None:
             "edgecolor": "none",
         },
     )
-    reveal = int(0.83 * p_all.shape[1])  # ~17.5 s: pulse has crossed
+    # ~17.5 s, 1.545 s into the run. The near-surface run's energy has
+    # crossed by then, but the trapped arrival of the axis run, the slowest
+    # and last, is still 50 m short of the right sponge, which it reaches at
+    # 1.58 s, after the overlay is opaque (measured on the axis row). The
+    # energy map it fades to holds that last stretch all the same.
+    reveal = int(0.83 * p_all.shape[1])
     captions_on = int(0.38 * p_all.shape[1])  # first refocus is visible
 
     def update(k: int) -> tuple[Any, ...]:

@@ -192,6 +192,8 @@ const listedParentOf = (slug) => {
 };
 const missingSection = [];
 const wrongSection = [];
+/** Each distinct `operatingSystem` of the software node, as JSON, and the pages that carry it. */
+const platformLists = new Map();
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -264,6 +266,11 @@ for (const file of files) {
 
 	for (const type of SITE_NODES) {
 		if (!nodeOfType(nodes, type)) fail(`${route}: no ${type} node`);
+	}
+	const software = nodeOfType(nodes, 'SoftwareApplication');
+	if (software) {
+		const platforms = JSON.stringify(software.operatingSystem ?? null);
+		platformLists.set(platforms, (platformLists.get(platforms) ?? 0) + 1);
 	}
 
 	// The error page is not an article and must not be indexed as one, which is
@@ -448,6 +455,30 @@ if (wrongSection.length > 0) {
 }
 if (missingSection.length === 0 && wrongSection.length === 0) {
 	ok(`every one of the ${seen.sections} pages under a topic names its section as topics.mjs does`);
+}
+
+// The software node's operating systems, one platform per entry. jmrp.io's
+// projects page publishes the same `@id` with `operatingSystem` as a list of
+// single names, and this site published one comma-joined string. That string
+// was valid on its own, but a consumer merging the two documents by `@id` read
+// four values for three platforms, one of them a list inside a string, and
+// nothing on either side flagged it. The graph is the same on every page, so
+// it is judged once per distinct value, with the pages that carry it.
+for (const [platforms, pages] of platformLists) {
+	const names = JSON.parse(platforms);
+	const onePerEntry =
+		Array.isArray(names) &&
+		names.length > 0 &&
+		names.every((name) => typeof name === 'string' && /^[^,\s](?:[^,]*[^,\s])?$/.test(name)) &&
+		new Set(names).size === names.length;
+	if (onePerEntry) {
+		ok(`the software node names its ${names.length} operating systems one per entry on ${pages} pages`);
+	} else {
+		fail(
+			`${pages} page(s): the software node's operatingSystem is ${platforms}; ` +
+				'it has to list each platform once, one name per entry, as jmrp.io/projects/ does for the same @id',
+		);
+	}
 }
 
 const editedLine = `${seen.edited} of the ${seen.articles} articles were last edited after the day they were first published`;

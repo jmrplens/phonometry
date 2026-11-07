@@ -231,3 +231,65 @@ test('the works a language cites, one reference each, refused when two pages des
     /DOI 10\.59161\/jcgm100-2008e names 2 works/,
   );
 });
+
+test('one standard cited under two designations of one base and year is refused, and two editions are not', () => {
+  const cite = (designation, year, organization = 'Ecma International') =>
+    iso(designation, { year, organization, url: undefined });
+  const ecma = [
+    { id: 'a', references: [cite('ECMA-418-2, 4th ed.', 2025)] },
+    { id: 'b', references: [cite('ECMA-418-2:2025', 2025)] },
+    { id: 'c', references: [cite('ECMA-418-2:2025 (4th ed.)', 2025)] },
+  ];
+  assert.throws(
+    () => citedWorks(ecma, EN),
+    /ECMA-418-2 \(2025\) is cited as 3 standards: "ECMA-418-2, 4th ed\." on a; "ECMA-418-2:2025" on b; "ECMA-418-2:2025 \(4th ed\.\)" on c/,
+  );
+
+  // An annex cited as a work of its own, a date, a reaffirmation: each is
+  // still the one standard.
+  for (const [first, second, year] of [
+    ['IEC 60268-1:1985, Appendix A (with Amendment 1:1988)', 'IEC 60268-1:1985', 1985],
+    ['Recommendation ITU-R BS.1770-5 (11/2023)', 'Recommendation ITU-R BS.1770-5', 2023],
+    ['ANSI S3.5-1997 (R2017)', 'ANSI S3.5-1997 (R2020)', 1997],
+    ['ISO 7235:2003', 'ISO 7235:2003 (EN ISO 7235:2009)', 2003],
+  ]) {
+    const pages = [
+      { id: 'a', references: [cite(first, year)] },
+      { id: 'b', references: [cite(second, year)] },
+    ];
+    assert.throws(() => citedWorks(pages, EN), /is cited as 2 standards/, `${first} and ${second}`);
+  }
+
+  // Two editions are two works, with the year in the designation or only in
+  // the year field.
+  const editions = [
+    { id: 'a', references: [cite('ISO 10140-1:2010', 2010), cite('ISO 1:2000', undefined)] },
+    { id: 'b', references: [cite('ISO 10140-1:2021', 2021), cite('ISO 1:2010', undefined)] },
+  ];
+  assert.equal(citedWorks(editions, EN).size, 4);
+});
+
+test('two works sharing a base designation and a year pass only when listed with the reason they differ', () => {
+  const volume = (designation) =>
+    iso(designation, { year: 2017, organization: 'International Civil Aviation Organization', url: undefined });
+  const pages = [
+    { id: 'a', references: [volume('ICAO Annex 16, Vol. I')] },
+    { id: 'b', references: [volume('ICAO Annex 16, Vol. II')] },
+  ];
+  assert.throws(() => citedWorks(pages, EN), /ICAO Annex 16 \(2017\) is cited as 2 standards/);
+
+  const reason = 'Volume I is aircraft noise and Volume II engine emissions: two documents.';
+  const listed = [{ designations: ['ICAO Annex 16, Vol. I', 'ICAO Annex 16, Vol. II'], reason }];
+  assert.equal(citedWorks(pages, EN, { separateStandards: listed }).size, 2);
+
+  // An entry without its reason is refused, and so is one that no longer
+  // separates anything: only one of its designations is still cited.
+  assert.throws(
+    () => citedWorks(pages, EN, { separateStandards: [{ designations: listed[0].designations, reason: ' ' }] }),
+    /says no reason/,
+  );
+  assert.throws(
+    () => citedWorks([pages[0]], EN, { separateStandards: listed }),
+    /lists "ICAO Annex 16, Vol\. I", "ICAO Annex 16, Vol\. II" as separate works, and only "ICAO Annex 16, Vol\. I" is cited/,
+  );
+});

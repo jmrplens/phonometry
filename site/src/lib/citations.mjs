@@ -69,6 +69,35 @@ function withoutDoi(ref) {
 const PAGE_FIELDS = new Set(['note', 'primary', 'implemented']);
 
 /**
+ * Standards that share a base designation and a year and are still different
+ * documents, each with the reason it is so. `citedWorks` refuses any other
+ * such pair as one standard written two ways, and refuses an entry here that
+ * carries no reason or of which only one designation is still cited.
+ *
+ * Empty today: every standard the guides cite under one base and year is one
+ * document. A volume or a part that shares its base with another, a second
+ * volume of an ICAO annex in the year of the first, would go here.
+ */
+export const SEPARATE_STANDARDS = Object.freeze([]);
+
+/**
+ * What a standard's designation names once its qualifiers are set aside, and
+ * the year of the edition: `["ECMA-418-2", 2025]` for "ECMA-418-2:2025",
+ * "ECMA-418-2:2025 (4th ed.)" and "ECMA-418-2, 4th ed." of 2025 alike.
+ *
+ * A parenthesis (an edition, a date, a reaffirmation, an adoption) and
+ * whatever follows a comma (an edition, a clause, an annex) are qualifiers.
+ * The year is the one the designation carries after a colon, and otherwise
+ * the reference's own `year`, so two editions stay two works whichever way
+ * they are written.
+ */
+export function designationBase(ref) {
+  const bare = String(ref.designation).replace(/\s*\([^)]*\)/g, '').replace(/,.*$/, '').trim();
+  const dated = bare.match(/^(.*):(\d{4})(?:-\d{2})?$/);
+  return dated ? [dated[1], Number(dated[2])] : [bare, ref.year];
+}
+
+/**
  * Every work one language's pages cite, once each, by `@id`.
  *
  * A page describes each work it cites in its own frontmatter, and many pages
@@ -85,16 +114,26 @@ const PAGE_FIELDS = new Set(['note', 'primary', 'implemented']);
  * work given its DOI on one page and not on another, which keys on the DOI
  * there and on its title here, and so would never be compared above.
  *
+ * And it refuses one standard under two designations. A standard keys on its
+ * designation, so "ECMA-418-2:2025", "ECMA-418-2:2025 (4th ed.)" and
+ * "ECMA-418-2, 4th ed." were three `@id`s for one document, each described
+ * consistently and so never compared. Two designations with one base and one
+ * year (`designationBase`) are one standard written two ways, unless
+ * `separateStandards` lists them with the reason they are not.
+ *
  * @param {Iterable<{id: string, references?: object[]}>} pages The content
  *   entries of one language.
  * @param {string} bibliographyUrl Absolute URL of that language's bibliography.
+ * @param {{separateStandards?: readonly {designations: string[], reason: string}[]}} [options]
+ *   The standards known to be different works despite one base and year;
+ *   `SEPARATE_STANDARDS` unless a caller says otherwise.
  * @returns {Map<string, object>} Each `@id` to the first reference to it, the
  *   one whose `note` the bibliography prints.
  * @throws {Error} Listing every `@id` described two ways, every DOI under two
- *   `@id`s and every work cited with its DOI on one page and without it on
- *   another.
+ *   `@id`s, every work cited with its DOI on one page and without it on
+ *   another, and every standard cited under two designations.
  */
-export function citedWorks(pages, bibliographyUrl) {
+export function citedWorks(pages, bibliographyUrl, { separateStandards = SEPARATE_STANDARDS } = {}) {
   const works = new Map();
   const doiIds = new Map();
   const doiOf = new Map();
@@ -138,6 +177,7 @@ export function citedWorks(pages, bibliographyUrl) {
     const doi = doiOf.get(withoutDoi(ref));
     if (doi) problems.push(`#${withoutDoi(ref)} doi: (none) on ${page}; ${JSON.stringify(doi)} elsewhere`);
   }
+  problems.push(...oneStandardTwoDesignations(works, separateStandards, listed));
   if (problems.length > 0) {
     throw new Error(
       `the pages' references describe works cited under ${bibliographyUrl} two ways, in ` +
@@ -146,6 +186,48 @@ export function citedWorks(pages, bibliographyUrl) {
     );
   }
   return new Map([...works].map(([id, [first]]) => [id, first.ref]));
+}
+
+/**
+ * The standards `works` cites under two or more designations of one base and
+ * year, and the entries of `separateStandards` that carry no reason or no
+ * longer separate two cited designations, as problems for `citedWorks`.
+ */
+function oneStandardTwoDesignations(works, separateStandards, listed) {
+  const problems = [];
+  const byBase = new Map();
+  for (const citing of works.values()) {
+    const { ref } = citing[0];
+    if (ref.type !== 'standard') continue;
+    const [base, year] = designationBase(ref);
+    const key = `${base} (${year ?? 'n.d.'})`;
+    if (!byBase.has(key)) byBase.set(key, []);
+    byBase.get(key).push({ designation: ref.designation, pages: citing.map(({ page }) => page) });
+  }
+  const cited = new Set([...byBase.values()].flat().map(({ designation }) => designation));
+  for (const { designations, reason } of separateStandards) {
+    const named = designations.map((designation) => JSON.stringify(designation)).join(', ');
+    if (typeof reason !== 'string' || reason.trim() === '') {
+      problems.push(`SEPARATE_STANDARDS lists ${named} and says no reason they are different works`);
+    }
+    const still = designations.filter((designation) => cited.has(designation));
+    if (still.length === 1) {
+      problems.push(
+        `SEPARATE_STANDARDS lists ${named} as separate works, and only ${JSON.stringify(still[0])} is cited`,
+      );
+    }
+  }
+  const separate = (group) =>
+    separateStandards.some(({ designations }) => group.every(({ designation }) => designations.includes(designation)));
+  for (const [key, group] of byBase) {
+    if (group.length < 2 || separate(group)) continue;
+    const written = group.map(({ designation, pages }) => `${JSON.stringify(designation)} on ${listed(pages)}`);
+    problems.push(
+      `${key} is cited as ${group.length} standards: ${written.join('; ')}; write one designation and put the ` +
+        'edition, date or clause in the note, or list them in SEPARATE_STANDARDS with the reason they differ',
+    );
+  }
+  return problems;
 }
 
 /**

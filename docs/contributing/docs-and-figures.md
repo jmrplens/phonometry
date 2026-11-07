@@ -161,7 +161,7 @@ references:
 
 **Enforced by:** `CI: Site builds and validates`
 
-**Exceptions.** The docs/ mirror page, read on GitHub without the layout, keeps a hand references section. Clauses used go in each reference's `note:`.
+**Exceptions.** The docs/ mirror page, read on GitHub without the layout, keeps a hand references section. Clauses used go in each reference's `note:`, and so do the edition, the date and the annex of a standard: every page writes one standard with one designation, and the build refuses two designations with one base and one year (`ECMA-418-2:2025` and `ECMA-418-2, 4th ed.`) unless `SEPARATE_STANDARDS` in `site/src/lib/citations.mjs` lists them with the reason they are different documents.
 
 <a id="f8"></a>
 ### F8. Give every `<ScopeClaim>` its `status`

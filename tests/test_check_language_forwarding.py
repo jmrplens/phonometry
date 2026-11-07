@@ -1720,6 +1720,67 @@ def test_a_method_a_class_inherits_is_read_from_the_base_its_statement_reads(
     assert [(f.line, f.helper) for f in found] == [(6, "pkg.results._Late.plot")]
 
 
+def test_a_method_a_class_inherits_comes_from_its_method_resolution_order(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class takes a method from the first class of its method resolution
+    order that defines it, and ``super()`` from the first after it:
+    ``Shown(_Left, _Right)``, both on ``_Base``, resolves ``_Left, _Right,
+    _Base``, so its ``plot`` and the one ``Relayed``'s ``super()`` reaches
+    are ``_Right.plot``, which takes the language.
+
+    The bases were looked up depth first, ``_Left`` then its own base, and
+    ``super()`` read the first base alone, so both reached ``_Base.plot``,
+    which takes none, and the two calls that drop the language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.results": """
+            from __future__ import annotations
+
+
+            class _Base:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Left(_Base):
+                pass
+
+
+            class _Right(_Base):
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            class Shown(_Left, _Right):
+                pass
+
+
+            class Relayed(_Left, _Right):
+                def plot(self, ax=None, *, language="en"):
+                    return super().plot(ax)
+
+
+            def shown() -> Shown:
+                return Shown()
+            """,
+            "pkg.plots": """
+            from .results import shown
+
+
+            def figure(ax, language="en"):
+                shown().plot(ax)
+            """,
+        },
+    )
+    assert sorted((f.path, f.line, f.caller, f.helper) for f in found) == [
+        ("pkg/plots.py", 6, "figure", "pkg.results._Right.plot"),
+        ("pkg/results.py", 25, "Relayed.plot", "pkg.results._Right.plot"),
+    ]
+
+
 def test_an_untyped_result_plot_is_told_apart_from_axes_plot(
     tmp_path: pathlib.Path,
 ) -> None:

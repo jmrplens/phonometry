@@ -1483,8 +1483,8 @@ class SourceLocationPlan(OwnsArrays):
         asks for in the test room, which is the number a single determination
         covering them all has to use.
         """
-        return int(
-            max(np.max(self.source_locations), self.n_a_weighted_source_locations)
+        return max(
+            int(np.max(self.source_locations)), int(self.n_a_weighted_source_locations)
         )
 
     @property

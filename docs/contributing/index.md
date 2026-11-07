@@ -237,6 +237,7 @@ Each rule on a page has the same parts:
 | [T24](tests.md#t24) | Bound every wait a test makes on another process or thread | `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review |
 | [T25](tests.md#t25) | Filter a warning in the pytest configuration by a builtin class, never an imported one | `tests/test_repository_config.py::test_the_pytest_configuration_filters_warnings_by_builtin_class` |
 | [T26](tests.md#t26) | Mark a test that reads the repository whole `whole_tree` | `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests (numba-jitted kernel)`, `CI: Library tests at the dependency floors` |
+| [T27](tests.md#t27) | Mark a test that asks git about the repository `git_checkout` | `tests/git_checkout.py`, `tests/test_git_checkout.py` |
 
 ### Documentation and figures
 

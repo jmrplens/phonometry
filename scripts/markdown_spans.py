@@ -131,13 +131,15 @@ def drop_inline_spans(text: str, markers: str = "`") -> str:
 #: A comment and the line that opens one, by the page's kind: an HTML comment
 #: on a ``.md`` page, which opening a line is an HTML block that ends at its
 #: ``-->``, and an MDX comment, an expression, beside it on a ``.mdx`` page.
+#: MDX shows nothing of an expression that holds only a comment, so the blanks
+#: between its braces and the comment are the comment's too (``{ /* x */ }``).
 _COMMENTS = {
     "md": re.compile(r"<!--.*?-->", re.DOTALL),
-    "mdx": re.compile(r"<!--.*?-->|\{/\*.*?\*/\}", re.DOTALL),
+    "mdx": re.compile(r"<!--.*?-->|\{\s*/\*.*?\*/\s*\}", re.DOTALL),
 }
 _COMMENT_LINE = {
     "md": re.compile(r" {0,3}<!--"),
-    "mdx": re.compile(r" {0,3}(?:<!--|\{/\*)"),
+    "mdx": re.compile(r" {0,3}(?:<!--|\{[ \t]*/\*)"),
 }
 
 
@@ -258,25 +260,75 @@ def _unclosed(
     return closer.match("\n".join(block).lstrip()) is None
 
 
-def _spans_and_comments(
-    text: str, markers: str, comments: str | None
-) -> list[tuple[int, int]]:
-    """The code spans and comments of a piece of a block, read left to right.
+def _first_found(
+    found: list[re.Match[str] | None],
+    others: Sequence[re.Pattern[str]],
+    text: str,
+    done: int,
+    stop: int,
+) -> re.Match[str] | None:
+    """The match of *others* that opens first at or past *done*, the earlier listed on a tie.
 
-    Whichever opens first wins: a comment opened in a span is code, and a
-    backtick in a comment is the comment's.
+    *found* holds each pattern's next match, kept from one call to the next so
+    that a pattern is searched again only once the reading has passed its match.
     """
-    if comments is None:
-        return inline_spans(text, markers)
-    pattern = _COMMENTS[comments]
+    for index, pattern in enumerate(others):
+        match = found[index]
+        if match is not None and match.start() < done:
+            found[index] = pattern.search(text, done, stop)
+    present = [match for match in found if match is not None]
+    return min(present, key=lambda match: match.start()) if present else None
+
+
+def _spans_and_others(
+    text: str,
+    markers: str,
+    others: Sequence[re.Pattern[str]],
+    start: int = 0,
+    end: int | None = None,
+) -> list[tuple[int, int]]:
+    """The spans of a piece of a block and what *others* find there, read left to right.
+
+    Whichever opens first wins: a comment or a construct opened in a span is
+    code, and a backtick in a comment or a construct is its own. The spans past
+    a comment or a construct that holds a run are read again from its end, since
+    that run no longer opens or closes one.
+
+    :param text: The block, its lines joined.
+    :param others: The comments of the page and the reader's own constructs,
+        each searched in *text* itself, so that what stands before the piece
+        (the pipe before a cell, the start of a line) is what it sees there.
+    :param start: Where the piece opens in *text*.
+    :param end: Where it ends; the end of *text* by default.
+    :return: The spans and the finds, from their start to their end in *text*,
+        in the order they open.
+    """
+    stop = len(text) if end is None else end
+
+    def spans_from(done: int) -> list[tuple[int, int]]:
+        return [
+            (first + done, last + done)
+            for first, last in inline_spans(text[done:stop], markers)
+        ]
+
+    if not others:
+        return spans_from(start)
     found: list[tuple[int, int]] = []
-    done = 0
+    matches = [pattern.search(text, start, stop) for pattern in others]
+    spans = spans_from(start)
+    upcoming = 0
+    done = start
     while True:
-        spans = inline_spans(text[done:], markers)
-        comment = pattern.search(text, done)
-        span = (spans[0][0] + done, spans[0][1] + done) if spans else None
-        if comment is not None and (span is None or comment.start() < span[0]):
-            span = comment.span()
+        while upcoming < len(spans) and spans[upcoming][0] < done:
+            upcoming += 1
+        span = spans[upcoming] if upcoming < len(spans) else None
+        other = _first_found(matches, others, text, done, stop)
+        if other is not None and (span is None or other.start() < span[0]):
+            found.append(other.span())
+            done = other.end()
+            if markers and any(marker in other.group() for marker in markers):
+                spans, upcoming = spans_from(done), 0
+            continue
         if span is None:
             return found
         found.append(span)
@@ -284,19 +336,19 @@ def _spans_and_comments(
 
 
 def _block_spans(
-    block: _Block, text: str, markers: str, comments: str | None
+    block: _Block, text: str, markers: str, others: Sequence[re.Pattern[str]]
 ) -> list[tuple[int, int]]:
-    """The spans and comments of one block, whose lines are joined in *text*."""
+    """The spans, comments and constructs of one block, whose lines are joined in *text*."""
     if block.reads == "code":
         return []
     if block.reads == "raw":
-        return _spans_and_comments(text, "", comments)
+        return _spans_and_others(text, "", others)
     if block.reads == "text":
-        return _spans_and_comments(text, markers, comments)
+        return _spans_and_others(text, markers, others)
     return [
-        (first + start, last + start)
+        found
         for start, end in cell_spans(text)
-        for first, last in _spans_and_comments(text[start:end], markers, comments)
+        for found in _spans_and_others(text, markers, others, start, end)
     ]
 
 
@@ -307,6 +359,7 @@ def blank_inline_spans_by_block(
     *,
     kind: str = "",
     walked: Iterable[PageLine] | None = None,
+    constructs: Sequence[re.Pattern[str]] = (),
 ) -> str:
     """*text* with its spans blanked, each block of a page read whole.
 
@@ -324,6 +377,8 @@ def blank_inline_spans_by_block(
         a ``.md`` page if neither says.
     :param walked: The walk of the page as written, for a reader that blanked some
         of its lines (:func:`_blocks`).
+    :param constructs: The reader's own constructs to blank with the spans
+        (:func:`replace_inline_spans_by_block`).
     :return: The text, its spans blanked, with as many lines as it had.
     """
     return replace_inline_spans_by_block(
@@ -333,6 +388,7 @@ def blank_inline_spans_by_block(
         comments,
         kind=kind,
         walked=walked,
+        constructs=constructs,
     )
 
 
@@ -572,6 +628,7 @@ def replace_inline_spans_by_block(
     *,
     kind: str = "",
     walked: Iterable[PageLine] | None = None,
+    constructs: Sequence[re.Pattern[str]] = (),
 ) -> str:
     """*text*, each span and comment of each block replaced by what *replace* makes of it.
 
@@ -591,14 +648,22 @@ def replace_inline_spans_by_block(
         a ``.md`` page if neither says.
     :param walked: The walk of the page as written, for a reader that blanked some
         of its lines (:func:`_blocks`).
+    :param constructs: What else the reader takes out of the prose, an address
+        or an attribute of a tag, each handed to *replace* as a comment is. Each
+        is read with the spans and the comments in the same pass, whichever
+        opens first winning, in every block a comment is read in, a raw HTML
+        block among them: a URL written in a code span is code, and a backtick
+        in a URL opens no span. The site's scripts read no such construct, so
+        ``dropInlineSpansByBlock`` takes none.
     """
     read: list[str] = []
     page_kind = kind or comments or "md"
+    others = [*([_COMMENTS[comments]] if comments else []), *constructs]
     for block in _blocks(text.split("\n"), comments, page_kind, walked):
         joined = "\n".join(block.lines)
         pieces: list[str] = []
         done = 0
-        for start, end in _block_spans(block, joined, markers, comments):
+        for start, end in _block_spans(block, joined, markers, others):
             pieces.extend((joined[done:start], replace(joined[start:end])))
             done = end
         pieces.append(joined[done:])

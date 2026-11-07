@@ -103,12 +103,17 @@ export function dropInlineSpans(text, markers = '`') {
  * A comment, by the page's kind: an HTML comment on a `.md` page, which
  * opening a line is an HTML block (CommonMark 4.6, type 2) that runs to its
  * `-->` and may interrupt a paragraph, and an MDX comment, an expression,
- * beside it on a `.mdx` page.
+ * beside it on a `.mdx` page. MDX shows nothing of an expression that holds
+ * only a comment, so the blanks between its braces and the comment's marks
+ * are the comment's too.
  */
-const COMMENTS = { md: /<!--[\s\S]*?-->/g, mdx: /<!--[\s\S]*?-->|\{\/\*[\s\S]*?\*\/\}/g };
+const COMMENTS = {
+  md: /<!--[\s\S]*?-->/g,
+  mdx: /<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\}/g,
+};
 
 /** A line that opens a comment, by the page's kind. */
-const COMMENT_LINE = { md: /^ {0,3}<!--/, mdx: /^ {0,3}(?:<!--|\{\/\*)/ };
+const COMMENT_LINE = { md: /^ {0,3}<!--/, mdx: /^ {0,3}(?:<!--|\{[ \t]*\/\*)/ };
 
 /**
  * `text` with every span of {@link inlineSpans} taken out, each block read

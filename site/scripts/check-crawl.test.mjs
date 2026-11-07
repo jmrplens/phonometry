@@ -69,10 +69,10 @@ function page(
 
 /**
  * Write a build of `pages` (route -> HTML) with a sitemap that lists every
- * route with its <lastmod> (`lastmod[route]`, or none), run the check on it,
- * and say how it ended.
+ * route with its <lastmod> (`lastmod[route]`, or none), and any other files
+ * named in `files`, run the check on it, and say how it ended.
  */
-function check(t, pages, lastmod) {
+function check(t, pages, lastmod, files = {}) {
 	const dist = mkdtempSync(join(tmpdir(), 'check-crawl-'));
 	t.after(() => rmSync(dist, { recursive: true, force: true }));
 	for (const [route, html] of Object.entries(pages)) {
@@ -80,6 +80,7 @@ function check(t, pages, lastmod) {
 		mkdirSync(dirname(file), { recursive: true });
 		writeFileSync(file, html);
 	}
+	for (const [name, contents] of Object.entries(files)) writeFileSync(join(dist, name), contents);
 	const urls = Object.keys(pages)
 		.map((route) => `<url><loc>${ORIGIN}${route}</loc>${lastmod[route] ? `<lastmod>${lastmod[route]}</lastmod>` : ''}</url>`)
 		.join('');
@@ -154,8 +155,11 @@ test('a page published after the day it last changed fails', (t) => {
 /** The day the home of the builds below was last changed, in all three places. */
 const DAY = '2026-03-01';
 
-/** Run the check on a build of the home alone, showing `body`, and say how it ended. */
-const home = (t, body) => check(t, { '/': page('/', { modified: DAY, body }) }, { '/': DAY });
+/**
+ * Run the check on a build of the home alone, showing `body`, with any other
+ * files named in `files`, and say how it ended.
+ */
+const home = (t, body, files = {}) => check(t, { '/': page('/', { modified: DAY, body }) }, { '/': DAY }, files);
 
 const READOUT = (gap) =>
 	`<section class="readout"><div class="readout-cell"><span class="readout-value">1897</span>${gap}<span class="readout-label"><a href="${basePath}/">conformance checks passing</a></span></div></section>`;
@@ -195,4 +199,15 @@ test('every glued place is reported, with the page it is on', (t) => {
 	assert.match(ran.err, /FAIL 2 place\(s\)/);
 	assert.match(ran.err, /\/: "ISO 717" runs into "ISO 3382"/);
 	assert.match(ran.err, /\/: "ISO 717ISO 3382" runs into "IEC 61260"/);
+});
+
+test('the error page is read for a number run into a word like any other page', (t) => {
+	const error = [
+		'<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>404 | phonometry</title></head>',
+		'<body><h1>Page not found</h1><p><span>404</span><span>Page not found</span></p></body></html>',
+	].join('');
+	const ran = home(t, READOUT(' '), { '404.html': error });
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL 1 place\(s\) where a number runs into a word[^\n]*:\s+\/404\/: "404" runs into "Page not found"/);
+	assert.match(ran.out, /\n1 failing check\(s\)\./);
 });

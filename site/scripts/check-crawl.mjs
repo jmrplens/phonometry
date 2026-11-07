@@ -58,8 +58,12 @@
 //    break the text (shared/crawler-text.mjs says what it reads and what it
 //    leaves alone).
 //
-// The redirect stubs are not pages and are only read to know where they are,
-// and the error page is held to rules 1 and 2 alone.
+// The redirect stubs are not pages and are only read to know where they are.
+// The error page has no canonical twin and is not indexed, so rule 3 leaves it
+// out, rule 4 asks only that the sitemap leave it out, which keeps it out of
+// rule 7 too, since rule 7 dates what the sitemap lists, and rule 1 does not
+// compare its title with the others; every other rule reads it as it reads a
+// page, since a crawler reads its text and follows its links too.
 //
 // Usage: node scripts/check-crawl.mjs [dist-directory]
 import { existsSync, readFileSync } from 'node:fs';

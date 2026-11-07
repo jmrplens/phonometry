@@ -1711,11 +1711,13 @@ from ._internal.validation import require_count
 
 __all__ = [
     "Hooked",
+    "Narrow",
     "Only",
     "Plain",
     "Shadowed",
     "Unwritten",
     "hooked",
+    "narrow",
     "only",
     "plain",
     "shadowed",
@@ -1767,6 +1769,18 @@ class Only:
     def __post_init__(self, count: int) -> None:
         object.__setattr__(self, "total", require_count(count, "count"))
 
+@dataclass(frozen=True)
+class _Counted:
+    n_positions: int
+    height_m: float = 0.0
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+@dataclass(frozen=True, init=False)
+class Narrow(_Counted):
+    n_positions: int = field(default=1, init=False)
+
 def plain(n_positions: int) -> Plain:
     return Plain(n_positions)
 
@@ -1781,6 +1795,9 @@ def shadowed(n_positions: int) -> Shadowed:
 
 def only(count: int) -> Only:
     return Only(count)
+
+def narrow(n: int) -> Narrow:
+    return Narrow(n)
 """
 
 
@@ -1797,7 +1814,10 @@ def test_a_call_runs_the_init_its_class_has_and_the_post_init_that_calls(
     ``__init__`` ``@dataclass`` writes it, not the one ``_Mixin`` writes.
     A record whose only input is an ``InitVar``, ``Only``, is built by its
     generated ``__init__`` too, which hands the count on to
-    ``__post_init__``.
+    ``__post_init__``. The fields a call fills are those of the ``__init__``
+    it runs: ``Narrow``, told ``init=False``, says its count is not taken,
+    but runs the one written for ``_Counted``, which takes it first and
+    hands it to the check.
 
     The ``__post_init__`` of the first class of the order was read for any
     call, so ``plain`` and ``unwritten`` were refused for a check that never
@@ -1815,9 +1835,112 @@ def test_a_call_runs_the_init_its_class_has_and_the_post_init_that_calls(
             "annotated int, which refuses np.integer[Any], while handed to "
             "Hooked(n_positions), require_count() takes it"
         ],
+        "narrow(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Narrow(n_positions), require_count() takes it"
+        ],
         "only(count)": [
             "annotated int, which refuses np.integer[Any], while handed to "
             "Only(count), require_count() takes it"
+        ],
+    }
+
+
+#: Classes whose ``__init__`` hands its values on with ``super().__init__``
+#: to the one ``@dataclass`` writes a record of their order.
+_SUPER_INITS = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["Overriding", "Sub", "Wrapped", "overriding", "sub", "wrapped"]
+
+class _Mixin:
+    def __init__(self, scale: float, n: int | np.integer[Any]) -> None:
+        require_count(n, "n")
+
+@dataclass(frozen=True)
+class _Rec(_Mixin):
+    height_m: float = 0.0
+    depth_m: float = 0.0
+
+class Sub(_Rec):
+    def __init__(self, scale: float, n: int) -> None:
+        super().__init__(scale, n)
+
+@dataclass(frozen=True)
+class _Validated:
+    height_m: float = 0.0
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+class Wrapped(_Validated):
+    def __init__(self, n: int) -> None:
+        super().__init__(1.0, n)
+
+@dataclass(frozen=True)
+class _Hooking:
+    height_m: float = 0.0
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        pass
+
+class Overriding(_Hooking):
+    def __init__(self, n: int) -> None:
+        super().__init__(1.0, n)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+def sub(n_positions: int) -> Sub:
+    return Sub(1.0, n_positions)
+
+def wrapped(n: int) -> Wrapped:
+    return Wrapped(n)
+
+def overriding(n: int) -> Overriding:
+    return Overriding(n)
+"""
+
+
+def test_super_init_runs_the_init_the_order_gives(tmp_path: pathlib.Path) -> None:
+    """``super().__init__(...)`` runs the ``__init__`` of the first class
+    after the method's own in its method resolution order that has one of
+    its own: for ``Sub`` the one ``@dataclass`` writes ``_Rec``, which
+    takes ``height_m`` and ``depth_m`` and runs no ``_Mixin.__init__``; for
+    ``Wrapped`` the one written for ``_Validated``, which hands the count to
+    its check; for ``Overriding`` the one written for ``_Hooking``, which
+    calls the ``__post_init__`` the instance's class resolves, its own.
+
+    The ``__init__`` was looked up by name past the one ``@dataclass``
+    writes, so ``sub`` was refused for ``_Mixin.__init__``, which never
+    runs, and a generated one was found nowhere, so the counts ``Wrapped``
+    and ``Overriding`` hand to a check passed as ``int``.
+    """
+    refused = _refused(
+        tmp_path, **{"_internal.validation": _VALIDATION, "api": _SUPER_INITS}
+    )
+    assert refused == {
+        "Overriding.__init__(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_Hooking(n_positions), require_count() takes it"
+        ],
+        "Wrapped.__init__(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_Validated(n_positions), require_count() takes it"
+        ],
+        "overriding(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Overriding.__init__(n), handed to _Hooking(n_positions), "
+            "require_count() takes it"
+        ],
+        "wrapped(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Wrapped.__init__(n), handed to _Validated(n_positions), "
+            "require_count() takes it"
         ],
     }
 
@@ -1831,13 +1954,17 @@ from ._internal.validation import require_count
 
 __all__ = [
     "Held",
+    "Named",
     "Second",
     "Stored",
     "Unread",
+    "by_keyword",
     "first_place",
     "into_record",
     "into_second",
     "into_vararg",
+    "positional_only",
+    "record_by_keyword",
     "second_place",
 ]
 
@@ -1847,6 +1974,9 @@ def _first(n: int = 1, scale: float = 1.0, offset: float = 0.0) -> int:
     return require_count(n, "n")
 
 def _second(scale: float = 1.0, n: int = 1, offset: float = 0.0) -> int:
+    return require_count(n, "n")
+
+def _second_only(scale: float = 1.0, n: int = 1, /, **options: object) -> int:
     return require_count(n, "n")
 
 def _tail(scale: float = 1.0, *counts: int) -> int:
@@ -1859,6 +1989,9 @@ def _hold(record: object, name: str, *rest: str) -> None:
     require_count(getattr(record, name), name)
 
 def _store(record: object, name: str, unit: str = "") -> None:
+    object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+def _put(record: object, unit: str = "", label: str = "", name: str = "") -> None:
     object.__setattr__(record, name, require_count(getattr(record, name), name))
 
 @dataclass(frozen=True)
@@ -1894,6 +2027,14 @@ class Stored:
     def __post_init__(self) -> None:
         _store(*_PREFIX, self, "ix", "iy")
 
+@dataclass(frozen=True, kw_only=True)
+class Named:
+    ix: int
+    iy: int
+
+    def __post_init__(self) -> None:
+        _put(*_PREFIX, self, "iy", name="ix")
+
 def first_place(value: int, head: tuple[float, ...] = ()) -> int:
     return _first(*head, 1, value)
 
@@ -1908,6 +2049,15 @@ def into_record(*counts: int) -> Second:
 
 def into_vararg(*counts: int) -> int:
     return _tail(*counts)
+
+def by_keyword(*scales: float, value: int) -> int:
+    return _second(*scales, n=value)
+
+def record_by_keyword(*heights: float, value: int) -> Second:
+    return Second(*heights, n_positions=value)
+
+def positional_only(*counts: int, value: int) -> int:
+    return _second_only(*counts, n=value)
 """
 
 
@@ -1924,13 +2074,24 @@ def test_a_star_and_what_follows_it_fill_places_from_their_lowest_on(
     "n_positions")`` hands the field's name to ``unit`` alone,
     ``_hold(*_PREFIX, None, self, "n_positions")`` the record to ``name``
     alone, and ``_store(*_PREFIX, self, "ix", "iy")`` the name ``iy`` to
-    ``unit``: the record stores ``ix`` alone.
+    ``unit``: the record stores ``ix`` alone. A place an explicit keyword
+    fills is that keyword's alone, as Python raises rather than put an item
+    there: ``_second(*scales, n=value)`` hands the count ``value`` alone,
+    ``Second(*heights, n_positions=value)`` likewise, and
+    ``_put(*_PREFIX, self, "iy", name="ix")`` stores ``ix``, which the
+    keyword names. A keyword fills no positional-only place, so
+    ``_second_only(*counts, n=value)`` hands the count an item of
+    ``counts`` and ``value`` to ``**options``.
 
     Every argument after a star was read from the star's own place on, so
     ``first_place``, ``Unread`` and ``Held`` were refused for a count that
-    never reaches a validator and ``iy`` was read as stored; and the star
-    was read at its own place alone, so the counts it hands passed as
-    ``int``.
+    never reaches a validator and ``iy`` was read as stored; the star was
+    read at its own place alone, so the counts it hands passed as ``int``;
+    then the star was read as filling a place a keyword fills too, so
+    ``scales`` and ``heights`` were refused for a count they never reach
+    and ``_put`` was read as storing ``iy``, and a keyword as filling a
+    positional-only place, so ``value`` was refused for a count it never
+    reaches.
     """
     root = _package(
         tmp_path,
@@ -1940,8 +2101,15 @@ def test_a_star_and_what_follows_it_fill_places_from_their_lowest_on(
         overloads.Package(sorted(root.rglob("*.py")), root), handed_on=frozenset()
     )
     assert cpa.converted_fields(reader, "pkg.api.Stored") == {"ix"}
+    assert cpa.converted_fields(reader, "pkg.api.Named") == {"ix"}
     found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
     assert sorted((f.function, f.parameter, f.problem) for f in found) == [
+        (
+            "by_keyword",
+            "value",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_second(n), require_count() takes it",
+        ),
         (
             "into_record",
             "counts",
@@ -1959,6 +2127,18 @@ def test_a_star_and_what_follows_it_fill_places_from_their_lowest_on(
             "counts",
             "annotated int, which refuses np.integer[Any], while handed to "
             "_tail(counts), require_count() takes it",
+        ),
+        (
+            "positional_only",
+            "counts",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_second_only(n), require_count() takes it",
+        ),
+        (
+            "record_by_keyword",
+            "value",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Second(n_positions), require_count() takes it",
         ),
         (
             "second_place",

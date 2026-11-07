@@ -101,6 +101,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -190,7 +191,7 @@ def joint_sound_reduction_index(
     absorption_area: NumericArrayLike,
     *,
     joint_length_m: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Sound reduction index of joints per metre, Formula (J.1).
 
     .. math::
@@ -278,7 +279,9 @@ class JointOpenBandRating(RichDisplay):
 
 
 def _sum_term(
-    values: np.ndarray, spectrum: tuple[int, ...] | np.ndarray, rating: int
+    values: NDArray[np.float64],
+    spectrum: tuple[int, ...] | NDArray[np.float64],
+    rating: int,
 ) -> int | None:
     """``XAj - Xw`` over *values*, or ``None`` when every band is open."""
     finite = np.isfinite(values)
@@ -290,7 +293,10 @@ def _sum_term(
 
 
 def _open_band_rating(
-    r_s: np.ndarray, freqs: np.ndarray, core: np.ndarray, open_mask: np.ndarray
+    r_s: NDArray[np.float64],
+    freqs: NDArray[np.float64],
+    core: NDArray[np.intp],
+    open_mask: NDArray[np.bool_],
 ) -> JointOpenBandRating:
     """Rate *r_s* with the bands of *open_mask* set to an infinite index.
 
@@ -371,10 +377,10 @@ class LaboratoryJointInsulationResult(OwnsArrays):
     and the maximum indices and ``limit_at_max``, so it is not a field.
     """
 
-    frequencies: np.ndarray
-    r_s_prime: np.ndarray
-    r_s_max: np.ndarray
-    r_s: np.ndarray
+    frequencies: NDArray[np.float64]
+    r_s_prime: NDArray[np.float64]
+    r_s_max: NDArray[np.float64]
+    r_s: NDArray[np.float64]
     joint_length_m: float | None
     rating: WeightedRatingResult | None
     c_100_5000: int | None
@@ -439,12 +445,12 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         )
 
     @property
-    def min_value(self) -> np.ndarray:
+    def min_value(self) -> NDArray[np.bool_]:
         r"""Bands whose :math:`R_\mathrm{s}` is a minimum value (``"limit"`` or ``"maximum"``)."""
         return np.asarray([r in {"limit", "maximum"} for r in self.regime], dtype=bool)
 
     @property
-    def indicative(self) -> np.ndarray:
+    def indicative(self) -> NDArray[np.bool_]:
         r"""Bands where :math:`R_\mathrm{s}' > R_\mathrm{s,max} - 3` dB (J.1)."""
         return _indicative_bands(np.asarray(self.r_s_prime), np.asarray(self.r_s_max))
 
@@ -581,7 +587,9 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         )
 
 
-def _indicative_bands(measured: np.ndarray, maximum: np.ndarray) -> np.ndarray:
+def _indicative_bands(
+    measured: NDArray[np.float64], maximum: NDArray[np.float64]
+) -> NDArray[np.bool_]:
     r"""Bands where :math:`R_\mathrm{s}' > R_\mathrm{s,max} - 3` dB (J.1).
 
     The one reading of the rule: on the measured :math:`R_\mathrm{s}'`, the
@@ -595,7 +603,7 @@ def _indicative_bands(measured: np.ndarray, maximum: np.ndarray) -> np.ndarray:
 
 
 def _regimes(
-    measured: np.ndarray, maximum: np.ndarray, *, limit_at_max: bool
+    measured: NDArray[np.float64], maximum: NDArray[np.float64], *, limit_at_max: bool
 ) -> tuple[str, ...]:
     """Which rule of J.1 and ISO 10140-2:2021 A.3 corrects each band."""
     regime: list[str] = []
@@ -612,8 +620,8 @@ def _regimes(
 
 
 def _correct(
-    measured: np.ndarray, maximum: np.ndarray, *, limit_at_max: bool
-) -> np.ndarray:
+    measured: NDArray[np.float64], maximum: NDArray[np.float64], *, limit_at_max: bool
+) -> NDArray[np.float64]:
     """The flanking correction of J.1 and ISO 10140-2:2021 A.3, band by band."""
     corrected = np.empty_like(measured)
     regimes = _regimes(measured, maximum, limit_at_max=limit_at_max)
@@ -962,13 +970,13 @@ class JointGapSeries(OwnsArrays):
         C_\mathrm{tr}` at each width, in dB.
     """
 
-    gap_widths_mm: np.ndarray
+    gap_widths_mm: NDArray[np.float64]
     results: tuple[LaboratoryJointInsulationResult, ...]
     nominal_gap_mm: float
     min_gap_mm: float | None
-    r_s_w: np.ndarray
-    r_s_w_c: np.ndarray
-    r_s_w_ctr: np.ndarray
+    r_s_w: NDArray[np.float64]
+    r_s_w_c: NDArray[np.float64]
+    r_s_w_ctr: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject columns of different lengths.
@@ -1005,7 +1013,7 @@ class JointGapSeries(OwnsArrays):
 
     def single_number(
         self, quantity: Literal["r_s_w", "r_s_w_c", "r_s_w_ctr"] = "r_s_w_ctr"
-    ) -> np.ndarray:
+    ) -> NDArray[np.float64]:
         """The single number at each width: ``"r_s_w"``, ``"r_s_w_c"`` or ``"r_s_w_ctr"``.
 
         :raises TypeError: if ``quantity`` is not a text.

@@ -140,7 +140,7 @@ _BIAS_CORRECTION_MAX_KDR = np.pi / 2.0
 _MIN_VARIATION_OBSERVATIONS = 2
 
 
-def _finite_difference_correction(k_dr: np.ndarray) -> np.ndarray:
+def _finite_difference_correction(k_dr: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Reciprocal :math:`(k \Delta r)/\sin(k \Delta r)` of the
     finite-difference response.
 
@@ -246,13 +246,13 @@ class IntensityResult(OwnsArrays):
         }
     )
 
-    frequencies: np.ndarray | None
-    intensity: np.ndarray | None
-    intensity_level: np.ndarray | None
-    pressure_level: np.ndarray | None
-    pressure_intensity_index: np.ndarray | None
-    direction: np.ndarray | None
-    bias_correction: np.ndarray | None
+    frequencies: NDArray[np.float64] | None
+    intensity: NDArray[np.float64] | None
+    intensity_level: NDArray[np.float64] | None
+    pressure_level: NDArray[np.float64] | None
+    pressure_intensity_index: NDArray[np.float64] | None
+    direction: NDArray[np.intp] | None
+    bias_correction: NDArray[np.float64] | None
     total_intensity: float
     total_intensity_level: float
     total_pressure_level: float
@@ -486,11 +486,11 @@ class FieldIndicators(OwnsArrays):
         {"f2": "dB", "f3": "dB"}
     )
 
-    f2: float | np.ndarray
-    f3: float | np.ndarray
-    f4: float | np.ndarray
-    frequencies: np.ndarray | None = None
-    f1: float | np.ndarray | None = None
+    f2: float | NDArray[np.float64]
+    f3: float | NDArray[np.float64]
+    f4: float | NDArray[np.float64]
+    frequencies: NDArray[np.float64] | None = None
+    f1: float | NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject indicators that do not all describe the same bands.
@@ -614,22 +614,22 @@ def _level(value: float, reference: float) -> float:
     return float(10.0 * np.log10(max(value, np.finfo(float).tiny) / reference))
 
 
-def _level_array(values: np.ndarray, reference: float) -> np.ndarray:
+def _level_array(values: NDArray[np.float64], reference: float) -> NDArray[np.float64]:
     guarded = np.maximum(values, np.finfo(float).tiny)
     return np.asarray(10.0 * np.log10(guarded / reference), dtype=np.float64)
 
 
 def _band_integrals(
-    fpos: np.ndarray,
-    i_density: np.ndarray,
-    p_density: np.ndarray,
+    fpos: NDArray[np.float64],
+    i_density: NDArray[np.float64],
+    p_density: NDArray[np.float64],
     df: float,
     fraction: int,
     band_limits: list[float],
     fs: float,
     *,
     limits_given: bool,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Integrate the two spectral densities over the ANSI S1.11/IEC 61260-1 bands.
 
     Returns the aligned (band centres, band intensities, band mean-square
@@ -666,7 +666,7 @@ def _band_integrals(
     )
 
 
-def _validate_probe_signals(x1: np.ndarray, x2: np.ndarray) -> None:
+def _validate_probe_signals(x1: NDArray[np.float64], x2: NDArray[np.float64]) -> None:
     """Reject microphone signals that are not a matched pair of 1D pressures."""
     if x1.ndim != 1 or x2.ndim != 1:
         msg = "sound_intensity expects 1D pressure signals."
@@ -842,13 +842,13 @@ def sound_intensity(
     total_li = _level(abs(total_i), _I0)
     total_lp = _level(total_msp, _P0**2)
 
-    frequency: np.ndarray | None = None
-    intensity: np.ndarray | None = None
-    intensity_level: np.ndarray | None = None
-    pressure_level: np.ndarray | None = None
-    pressure_intensity_index: np.ndarray | None = None
-    direction: np.ndarray | None = None
-    bias_correction: np.ndarray | None = None
+    frequency: NDArray[np.float64] | None = None
+    intensity: NDArray[np.float64] | None = None
+    intensity_level: NDArray[np.float64] | None = None
+    pressure_level: NDArray[np.float64] | None = None
+    pressure_intensity_index: NDArray[np.float64] | None = None
+    direction: NDArray[np.intp] | None = None
+    bias_correction: NDArray[np.float64] | None = None
 
     if fraction is not None:
         band_limits = (
@@ -925,7 +925,7 @@ _F1_NON_POSITIVE = (
 
 
 def _coefficient_of_variation(
-    samples: np.ndarray, *, non_positive_message: str
+    samples: NDArray[np.float64], *, non_positive_message: str
 ) -> float:
     r"""Coefficient of variation
     :math:`\frac{1}{\bar{x}} \sqrt{\sum (x - \bar{x})^2 / (n - 1)}` of one
@@ -1023,7 +1023,9 @@ def temporal_variability_indicator(
     return as_float_if_reduced(f1.reshape(samples.shape[1:]))
 
 
-def _field_indicators_1d(lp: np.ndarray, i_n: np.ndarray) -> tuple[float, float, float]:
+def _field_indicators_1d(
+    lp: NDArray[np.float64], i_n: NDArray[np.float64]
+) -> tuple[float, float, float]:
     """F2/F3/F4 of one band from the per-position ``Lpi`` and ``Ini``."""
     # Equation (A.4): surface pressure level.
     lp_surface = energy_mean(lp)
@@ -1046,7 +1048,7 @@ def _temporal_indicator_for(
 
 @overload
 def _temporal_indicator_for(
-    temporal_intensity: list[float] | np.ndarray,
+    temporal_intensity: list[float] | NDArray[np.floating[Any]],
     n_bands: int,
     *,
     scalar_surface: Literal[True],
@@ -1055,7 +1057,7 @@ def _temporal_indicator_for(
 
 @overload
 def _temporal_indicator_for(
-    temporal_intensity: list[float] | np.ndarray,
+    temporal_intensity: list[float] | NDArray[np.floating[Any]],
     n_bands: int,
     *,
     scalar_surface: Literal[False],
@@ -1195,7 +1197,7 @@ def field_indicators(
 
     # The number is a count of array axes, not a quantity.
     n_bands = lp.shape[1] if lp.ndim == 2 else 1  # noqa: PLR2004
-    freqs: np.ndarray | None = None
+    freqs: NDArray[np.float64] | None = None
     if frequencies is not None:
         freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
         if freqs.size != n_bands:

@@ -842,6 +842,7 @@ def test_a_band_column_of_a_quantity_nobody_named_stops_the_generator() -> None:
         gcd.name_band_quantities(document)
 
 
+@pytest.mark.whole_tree
 def test_every_band_quantity_is_named_as_the_pages_of_its_language_name_it() -> None:
     """A dataset names its quantity in the words the site already uses for it.
 

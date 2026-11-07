@@ -9,6 +9,12 @@
 // them: a check that adds a site-wide requirement adds it to this file, and
 // each suite keeps testing only its own defect.
 //
+// A page is data until the build is written: its article node, every node of
+// its graph and what it says, which a test changes in place before `check`
+// writes the build. Each page carries two ld+json blocks, as the built site
+// does: the site-wide nodes astro.config.mjs puts on every page, and the
+// page's own graph from Head.astro.
+//
 // Nothing here is installed: the tests run before the site's dependencies are.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -54,10 +60,18 @@ export const LIBRARY_MODIFIED = commitDay('%ct', '-1', '--', 'src');
 /** The platforms the software node names when a test does not say otherwise. */
 export const PLATFORMS = ['Linux', 'macOS', 'Windows'];
 
-const PERSON = 'https://jmrp.io/#person';
-const WEBSITE = `${ORIGIN}/#website`;
 const REPOSITORY = 'https://github.com/jmrplens/phonometry';
-const SOFTWARE = `${REPOSITORY}#software`;
+
+/** The `@id` of each node astro.config.mjs puts on every page, as the config writes it. */
+export const SITE = {
+	person: 'https://jmrp.io/#person',
+	website: `${ORIGIN}/#website`,
+	software: `${REPOSITORY}#software`,
+	source: `${REPOSITORY}#source-code`,
+};
+
+/** The types of the nodes astro.config.mjs writes in a block of their own on every page. */
+export const SITE_TYPES = new Set(['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode']);
 
 /** The years of the maintainer's research role, as the Person node dates it and the About page states it. */
 export const RESEARCH = { start: '2019', end: '2023' };
@@ -72,15 +86,14 @@ export const MASTER_END = '2019';
  * technician's, with a start and an end, and the master's degree, dated by
  * the year it was awarded alone, as the node dates every degree.
  *
- * @param {object} [options]
- * @param {unknown} [options.operatingSystem] What the software node names; null leaves the property out.
+ * @param {unknown} [operatingSystem] What the software node names; null leaves the property out.
  * @returns {object[]} Person, WebSite, SoftwareApplication and SoftwareSourceCode.
  */
-export function siteNodes({ operatingSystem = PLATFORMS } = {}) {
+export function siteNodes(operatingSystem = PLATFORMS) {
 	return [
 		{
 			'@type': 'Person',
-			'@id': PERSON,
+			'@id': SITE.person,
 			name: 'The maintainer',
 			alumniOf: [
 				{
@@ -127,15 +140,15 @@ export function siteNodes({ operatingSystem = PLATFORMS } = {}) {
 				},
 			],
 		},
-		{ '@type': 'WebSite', '@id': WEBSITE, name: 'phonometry', url: `${ORIGIN}/` },
+		{ '@type': 'WebSite', '@id': SITE.website, name: 'phonometry', url: `${ORIGIN}/` },
 		{
 			'@type': 'SoftwareApplication',
-			'@id': SOFTWARE,
+			'@id': SITE.software,
 			name: 'phonometry',
 			alternateName: 'PyOctaveBand',
 			codeRepository: REPOSITORY,
 			releaseNotes: `${REPOSITORY}/releases`,
-			softwareHelp: { '@id': WEBSITE },
+			softwareHelp: { '@id': SITE.website },
 			sameAs: ['https://pypi.org/project/phonometry/', 'https://pypi.org/project/PyOctaveBand/'],
 			dateCreated: FIRST_COMMIT,
 			dateModified: LIBRARY_MODIFIED,
@@ -143,85 +156,68 @@ export function siteNodes({ operatingSystem = PLATFORMS } = {}) {
 		},
 		{
 			'@type': 'SoftwareSourceCode',
-			'@id': `${REPOSITORY}#source-code`,
+			'@id': SITE.source,
+			name: 'phonometry',
 			codeRepository: REPOSITORY,
 			dateCreated: FIRST_COMMIT,
-			targetProduct: { '@id': SOFTWARE },
+			targetProduct: { '@id': SITE.software },
 			archivedAt: `https://archive.softwareheritage.org/browse/origin/?origin_url=${REPOSITORY}`,
 		},
 	];
 }
 
 /**
- * The built HTML of one page whose structured data is whole.
+ * One page whose structured data is whole: its article node, the trail from
+ * the home page down to it, and the site-wide nodes.
  *
- * The page is English unless its route starts with `es/`. A page under a
- * topic names the topic's section, and a Spanish page points back at its
- * English original.
+ * A page under a topic names the topic's section, a guide is a learning
+ * resource, and a Spanish page points back at its English original. Every
+ * page is published on 2026-07-01 and last edited on 2026-10-01 unless a test
+ * says otherwise.
  *
- * @param {string} route The page's route without slashes at either end, `es/start/about` for one.
- * @param {object} [options]
- * @param {string} [options.datePublished] The article's first publication.
- * @param {string} [options.dateModified] The article's last edit.
- * @param {string|string[]} [options.types] The article node's `@type`.
- * @param {object[]} [options.nodes] The site-wide nodes, `siteNodes()` unless given.
- * @param {string} [options.text] What the page says, as the body of its HTML.
- * @returns {string} The page's HTML.
+ * @param {string} slug The page's route without the language prefix or slashes at either end.
+ * @param {'en'|'es'} lang The page's language.
+ * @param {object} [extra] Fields of the article node, over its own.
+ * @returns {{path: string, article: object, nodes: object[], text: string}} The page: where the
+ *   build writes it, its article node, every node of its graph, and what it says.
  */
-export function page(
-	route,
-	{
-		datePublished = '2026-10-01',
-		dateModified = '2026-10-01',
-		types = 'TechArticle',
-		nodes = siteNodes(),
-		text = '',
-	} = {},
-) {
-	const lang = route.startsWith('es/') ? 'es' : 'en';
-	const slug = route.replace(/^es\//, '');
-	const url = `${ORIGIN}/${route}/`;
-	const twin = `${ORIGIN}${lang === 'es' ? '' : '/es'}/${slug}/#article`;
+export function page(slug, lang, extra = {}) {
+	const prefix = lang === 'es' ? '/es' : '';
+	const canonical = `${ORIGIN}${prefix}/${slug}/`;
 	const topic = topicForSlug(slug);
-	const graph = [
-		...nodes,
-		{
-			'@type': types,
-			'@id': `${url}#article`,
-			url,
-			inLanguage: lang,
-			[lang === 'es' ? 'translationOfWork' : 'workTranslation']: { '@id': twin },
-			...(topic ? { articleSection: topic.label[lang] } : {}),
-			...Object.fromEntries(
-				[
-					'about',
-					'author',
-					'description',
-					'headline',
-					'image',
-					'isPartOf',
-					'mainEntityOfPage',
-					'publisher',
-					'speakable',
-					'wordCount',
-				].map((field) => [field, 'a value']),
-			),
-			datePublished,
-			dateModified,
+	const parts = slug.split('/');
+	const crumbs = [`${ORIGIN}${prefix}/`, ...parts.map((_, i) => `${ORIGIN}${prefix}/${parts.slice(0, i + 1).join('/')}/`)];
+	const article = {
+		'@type': topic?.isDomain ? ['TechArticle', 'LearningResource'] : 'TechArticle',
+		'@id': `${canonical}#article`,
+		headline: slug,
+		description: 'A page.',
+		inLanguage: lang,
+		url: canonical,
+		mainEntityOfPage: canonical,
+		image: `${ORIGIN}/og.png`,
+		speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] },
+		datePublished: '2026-07-01',
+		dateModified: '2026-10-01',
+		wordCount: 100,
+		...(topic ? { articleSection: topic.label[lang] } : {}),
+		...(topic?.isDomain ? { learningResourceType: 'Guide' } : {}),
+		[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
+			'@id': `${ORIGIN}${lang === 'en' ? '/es' : ''}/${slug}/#article`,
 		},
-		{
-			'@type': 'BreadcrumbList',
-			itemListElement: [
-				{ position: 1, name: 'Home', item: `${ORIGIN}/` },
-				{ position: 2, name: slug, item: url },
-			],
-		},
-	];
-	const block = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
-	return (
-		`<!doctype html><html lang="${lang}"><head><script type="application/ld+json">${block}</script></head>` +
-		`<body><main>${text}</main></body></html>`
-	);
+		author: { '@id': SITE.person },
+		publisher: { '@id': SITE.person },
+		isPartOf: { '@id': SITE.website },
+		about: { '@id': SITE.software },
+		...extra,
+	};
+	const trail = {
+		'@type': 'BreadcrumbList',
+		'@id': `${canonical}#breadcrumbs`,
+		itemListElement: crumbs.map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: `crumb ${i}`, item })),
+	};
+	const path = `${prefix.slice(1)}${prefix ? '/' : ''}${slug}/index.html`;
+	return { path, article, nodes: [...siteNodes(), article, trail], text: '' };
 }
 
 /**
@@ -241,34 +237,67 @@ export const ABOUT_TEXT = {
  * The About page of one language, typed and worded as the check asks.
  *
  * @param {'en'|'es'} lang The page's language.
- * @param {object} [options] As `page()` takes them; `types` and `text` default to the About page's own.
- * @returns {string} The page's HTML.
+ * @param {object} [extra] Fields of the article node, as `page()` takes them.
+ * @returns {{path: string, article: object, nodes: object[], text: string}} The page.
  */
-export function aboutPage(lang, options = {}) {
-	return page(lang === 'es' ? 'es/start/about' : 'start/about', {
-		types: ['AboutPage', 'TechArticle'],
-		text: ABOUT_TEXT[lang],
-		...options,
-	});
+export function aboutPage(lang, extra = {}) {
+	return { ...page('start/about', lang, { '@type': ['AboutPage', 'TechArticle'], ...extra }), text: ABOUT_TEXT[lang] };
 }
 
-/** Where each About page is written in a build. */
-export const ABOUT_FILES = { en: 'start/about/index.html', es: 'es/start/about/index.html' };
+/**
+ * A build the check has nothing to report on: the pages in `base`, then the
+ * About page in English and in Spanish, which the check asks of every build,
+ * then plain English pages up to `pages` in all.
+ *
+ * The first `dated` pages, in that order, are published on `published` and
+ * the rest on the day of their last edit, 2026-10-01. `platforms` gives the
+ * software node's `operatingSystem` on each page by the same index; null
+ * leaves the property out, and a page past its end names the default
+ * platforms.
+ *
+ * @param {object} [options]
+ * @param {Record<string, object>} [options.base] Pages a suite needs in every build of its own, by key.
+ * @returns {Record<string, {path: string, article: object, nodes: object[], text: string}>} Each page by its key.
+ */
+export function build({ pages = 10, dated = pages, published = '2026-07-01', platforms = [], base = {} } = {}) {
+	const built = { ...base, 'en/about': aboutPage('en'), 'es/about': aboutPage('es') };
+	for (let i = Object.keys(built).length; i < pages; i += 1) built[`page/${i}`] = page(`page-${i}`, 'en');
+	Object.values(built).forEach(({ article, nodes }, i) => {
+		article.datePublished = i < dated ? published : '2026-10-01';
+		if (i < platforms.length) {
+			const software = nodes.find((node) => node['@type'] === 'SoftwareApplication');
+			if (platforms[i] === null) delete software.operatingSystem;
+			else software.operatingSystem = platforms[i];
+		}
+	});
+	return built;
+}
 
 /**
- * Write a build of `files` into a directory of its own, run the check on it
- * the way CI does, and say how it ended.
+ * Write `built` as HTML files into a directory of their own, run the check on
+ * them the way CI does, and say how it ended.
+ *
+ * Each page carries two blocks, as the built site does: the site-wide nodes
+ * astro.config.mjs puts on every page, and the page's own graph from
+ * Head.astro; what it says is the text of its `<main>`.
  *
  * @param {import('node:test').TestContext} t The test, which removes the build when it ends.
- * @param {Record<string, string>} files Each page's HTML by its path in the build.
+ * @param {Record<string, {path: string, nodes: object[], text?: string}>|object[]} built The pages.
  * @returns {{status: number|null, out: string, err: string}} The check's exit status and what it printed.
  */
-export function runCheck(t, files) {
+export function check(t, built) {
 	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
 	t.after(() => rmSync(dist, { recursive: true, force: true }));
-	for (const [path, html] of Object.entries(files)) {
+	const script = (nodes) =>
+		`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes })}</script>`;
+	for (const { path, nodes, text = '' } of Object.values(built)) {
+		const site = nodes.filter((node) => SITE_TYPES.has(node['@type']));
+		const own = nodes.filter((node) => !SITE_TYPES.has(node['@type']));
 		mkdirSync(dirname(join(dist, path)), { recursive: true });
-		writeFileSync(join(dist, path), html);
+		writeFileSync(
+			join(dist, path),
+			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head><body><main>${text}</main></body></html>`,
+		);
 	}
 	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };

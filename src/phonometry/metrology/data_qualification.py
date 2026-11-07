@@ -79,6 +79,7 @@ import numpy as np
 from scipy import special
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs
 from .._internal.validation import (
     real_array,
     require_axis_count,
@@ -90,8 +91,14 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import resolve_fs
-from ..signals.spectra import _positive, _validate_signal, power_spectral_density
+from .._internal.welch import (
+    _DEFAULT_OVERLAP,
+    _noverlap_samples,
+    _positive,
+    _validate_signal,
+    _validate_welch_params,
+    _welch_autospectrum,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -100,7 +107,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 Statistic = Literal["mean_square", "rms", "mean", "variance"]
 Method = Literal["reverse_arrangements", "runs"]
@@ -950,6 +957,10 @@ def _spectral_moments(
 ) -> tuple[float, float, float]:
     r"""Frequency moments ``m0, m2, m4`` of the one-sided Welch autospectrum.
 
+    The autospectrum is the one :func:`~phonometry.signals.power_spectral_density`
+    estimates with its defaults (a Hann taper, half-overlapped segments), taken
+    from the Welch core both share.
+
     :math:`m_k = \int f^k G(f) \, df`, the B&P Eqs. (5.214)-(5.216)
     variances are :math:`\sigma_x^2 = m_0`,
     :math:`\sigma_v^2 = (2\pi)^2 m_2` and
@@ -957,11 +968,11 @@ def _spectral_moments(
     rate formulas: :math:`N_0 = 2\sqrt{m_2/m_0}` and
     :math:`M = \sqrt{m_4/m_2}`.
     """
-    psd = power_spectral_density(x, fs, nperseg=nperseg)
-    f = psd.frequencies
-    m0 = float(np.trapezoid(psd.psd, f))
-    m2 = float(np.trapezoid(psd.psd * f**2, f))
-    m4 = float(np.trapezoid(psd.psd * f**4, f))
+    segment, overlap = _validate_welch_params(x.size, fs, nperseg, _DEFAULT_OVERLAP)
+    f, gxx = _welch_autospectrum(x, fs, segment, _noverlap_samples(segment, overlap))
+    m0 = float(np.trapezoid(gxx, f))
+    m2 = float(np.trapezoid(gxx * f**2, f))
+    m4 = float(np.trapezoid(gxx * f**4, f))
     return m0, m2, m4
 
 
@@ -1090,7 +1101,7 @@ def level_crossing_rate(
     :param levels: Crossing levels in signal units about the mean
         (default: 13 levels evenly spaced over +-3 RMS).
     :param nperseg: Welch segment length for the spectral moments
-        (default: the :func:`power_spectral_density` default).
+        (default: the :func:`~phonometry.signals.power_spectral_density` default).
     :return: A :class:`LevelCrossingResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
@@ -1449,7 +1460,7 @@ def peak_statistics(
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
     :param nperseg: Welch segment length for the spectral moments
-        (default: the :func:`power_spectral_density` default).
+        (default: the :func:`~phonometry.signals.power_spectral_density` default).
     :return: A :class:`PeakStatisticsResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     """

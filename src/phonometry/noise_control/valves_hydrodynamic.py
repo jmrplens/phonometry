@@ -1412,7 +1412,7 @@ def _require_below_flashing(ratio: float) -> float:
 
 def _default_bands() -> NDArray[np.float64]:
     """The one-third-octave band centres 5.4.1 prints, 50 Hz to 20 kHz."""
-    from ..filters.frequencies import normalized_frequencies
+    from ..filters import normalized_frequencies
 
     bands = np.asarray(normalized_frequencies(3), dtype=np.float64)
     low, high = _BAND_RANGE_HZ

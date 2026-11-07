@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.json_input import escaped
+from .._internal.signal import Signal
 from .._internal.validation import require_count, require_scalar
 from ._audio_file import open_audio, require_regular_audio
 from ._backends import _import_soundfile, _sniff, _warn_lossy, info, soundfile_stamp
@@ -55,7 +56,6 @@ from ._chunks import (
     parse_wav_chunks,
 )
 from ._sidecar import CalibrationSidecar, check_sidecar_labels, read_sidecar
-from ._signal import Signal
 from ._wav import linear_wav_origin
 
 if TYPE_CHECKING:

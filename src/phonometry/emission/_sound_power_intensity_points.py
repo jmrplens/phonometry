@@ -133,6 +133,7 @@ if TYPE_CHECKING:
 from .._internal.boundary import settled, settled_net_share, settled_ratio
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.types import BAND_SET_NAMES
 from .._internal.validation import (
     is_at_most,
@@ -148,8 +149,8 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import warn_caller
-from ..metrology.reference_values import REFERENCE_VALUES
-from ._shared import SoundPowerWarning, _a_weighting_corrections
+from ..metrology import REFERENCE_VALUES
+from ._shared import SoundPowerWarning
 from .intensity import (
     _F4_NON_POSITIVE,
     _F4_REMAINDER_NON_POSITIVE,

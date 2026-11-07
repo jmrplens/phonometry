@@ -77,6 +77,7 @@ from .._internal.boundary import round_half_even, settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.validation import (
     real_array,
     require_band_fraction,
@@ -88,8 +89,7 @@ from .._internal.validation import (
     require_positive,
 )
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
-from ..emission._shared import _a_weighting_corrections
-from ..emission._sound_power_reverberation import reverberation_background_correction
+from ..emission import reverberation_background_correction
 from ._insulation_shared import (
     _THIRD_OCTAVE,
     PREFERRED_BAND_RANGE_HZ,

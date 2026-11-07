@@ -50,9 +50,10 @@ from scipy._lib._array_api import array_namespace
 from trig_oracle import correctly_rounded_arctangent
 
 from phonometry import filters
+from phonometry._internal import itu_r_468, pinned_complex
+from phonometry._internal.pinned_trig import pinned_hypot
 from phonometry.filters import _weighting_design
 from phonometry.filters import weighting as weighting_module
-from phonometry.filters._pinned_trig import pinned_hypot
 from phonometry.filters._weighting_design import (
     _CORNER_DECADES,
     _cascade_magnitude,
@@ -1309,7 +1310,7 @@ def test_a_numpy_that_fuses_complex_products_designs_the_same_filters(
     }
     monkeypatch.setattr(sg, "bilinear_zpk", _fused_bilinear_zpk)
     monkeypatch.setattr(np, "prod", _fused_prod)
-    weighting_module._itu_r_468_prototype.cache_clear()
+    itu_r_468.itu_r_468_prototype.cache_clear()
     try:
         for fs, expected in sorted(_A_DIGESTS.items()):
             sos = _cached_weighting_sos.__wrapped__("A", fs, high_accuracy=True)
@@ -1320,7 +1321,7 @@ def test_a_numpy_that_fuses_complex_products_designs_the_same_filters(
                 fused.view(np.uint64), unfused.view(np.uint64), err_msg=curve
             )
     finally:
-        weighting_module._itu_r_468_prototype.cache_clear()
+        itu_r_468.itu_r_468_prototype.cache_clear()
 
 
 #: Roots of every kind the transform's branches take: complex zeros over real
@@ -1547,7 +1548,7 @@ def test_every_curve_is_the_documented_design_on_every_platform(curve: str) -> N
     and some designs of B, C, D, G and AU came out of 64-bit ARM with other
     last bits, so only the A weighting was held across the matrix.
     """
-    weighting_module._itu_r_468_prototype.cache_clear()
+    itu_r_468.itu_r_468_prototype.cache_clear()
     _cached_weighting_sos.cache_clear()
     sos = filters.WeightingFilter(48000, curve).sos
     assert hashlib.sha256(sos.tobytes()).hexdigest()[:16] == _DIGESTS_48K[curve]
@@ -1587,13 +1588,13 @@ def test_a_design_calls_no_library_root_finder_or_section_former(
 
     for owner, name in _LIBRARY_STEPS:
         monkeypatch.setattr(owner, name, refuse)
-    weighting_module._itu_r_468_prototype.cache_clear()
+    itu_r_468.itu_r_468_prototype.cache_clear()
     try:
         fs = 1000 if curve == "AU" else 48000
         designed = _cached_weighting_sos.__wrapped__(curve, fs, high_accuracy=True)
         plain = _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=False)
     finally:
-        weighting_module._itu_r_468_prototype.cache_clear()
+        itu_r_468.itu_r_468_prototype.cache_clear()
     assert np.isfinite(designed).all()
     assert np.isfinite(plain).all()
 
@@ -2376,35 +2377,37 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     ``pow``), a :mod:`math`, :mod:`cmath`, numpy or SciPy special function, or
     an import that hides one under another name, is a platform's answer
     standing in for the design's, and each has a pinned spelling in
-    ``_pinned_exp``, ``_pinned_log`` or ``_pinned_trig``, with no exception.
+    ``pinned_exp``, ``pinned_log`` or ``pinned_trig``, with no exception.
     So is a complex product or quotient: ``numpy.prod`` of a complex array,
     SciPy's ``bilinear_zpk`` and the frequency responses that evaluate with
     complex arithmetic, or ``*`` and ``/`` on an imaginary literal, run a loop
     a compiler may fuse into multiply-adds, which numpy built with clang does
     on macOS and on Windows and numpy built with GCC does not. That is how
     the A weighting at 48 kHz once hashed to ``5f5e34e5d3a8aa6e`` on both of
-    them; the spelling is :func:`~phonometry.filters._weighting_design.complex_product`
+    them; the spelling is :func:`~phonometry._internal.pinned_complex.complex_product`
     and its neighbours. So is a step that hands a sum of products to the
     BLAS or to LAPACK: ``numpy.roots``, ``numpy.convolve`` and the polynomial
     products, ``@`` and ``numpy.linalg``, and SciPy's ``zpk2sos`` and the
     conversions beside it, which on 64-bit ARM gave the 468 prototype's poles
     and the sections of fourteen other designs other last bits; the spelling
-    is :func:`~phonometry.filters._pinned_roots.correctly_rounded_roots` and
+    is :func:`~phonometry._internal.pinned_roots.correctly_rounded_roots` and
     :func:`~phonometry.filters._weighting_design.second_order_sections`.
     So is numpy's sort or partition, as a function or as an array's method:
     its default kind is not stable, and the order it gives two equal keys
     follows the processor's kernel; the design sorts with Python's stable
     ``sorted``.
     In ``weighting.py`` the scan covers the imports and everything the cached
-    design reaches by name, the prototypes and their helpers included.
+    design reaches by name, the prototypes and their helpers included; the
+    ITU-R BS.468-4 network and the complex arithmetic the design imports from
+    ``_internal`` are read whole, as the design module is.
     """
-    design = ast.parse(inspect.getsource(_weighting_design))
-    assert _platform_operations(design) == []
+    for module in (_weighting_design, itu_r_468, pinned_complex):
+        tree = ast.parse(inspect.getsource(module))
+        assert _platform_operations(tree) == [], module.__name__
     weighting_tree = ast.parse(inspect.getsource(weighting_module))
     reached = _reached_from(weighting_tree, "_cached_weighting_sos")
     assert {
-        "_analog_weighting_zpk", "_itu_r_468_prototype", "_abcd_product",
-        "_u_poles", "_fit_band", "_ITU_R_468_LADDER", "_ladder_element",
+        "_analog_weighting_zpk", "_itu_r_468_zpk", "_u_poles", "_fit_band",
         "_prototype", "_zeros_at_origin",
     } <= set(reached)  # fmt: skip
     imports = [

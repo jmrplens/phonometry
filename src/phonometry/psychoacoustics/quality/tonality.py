@@ -22,18 +22,18 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
+from ..._internal.resolve import apply_calibration, resolve_fs
 from ..._internal.utils import _typesignal
 from ..._internal.validation import real_number, require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning, warn_caller
-from ...io._resolve import apply_calibration, resolve_fs
-from ...signals.spectra import _welch_autospectrum
+from ..._internal.welch import _welch_autospectrum
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ...io._signal import Signal
+    from ..._internal.signal import Signal
 
 __all__ = [
     "TonalityWarning",

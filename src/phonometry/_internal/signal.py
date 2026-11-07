@@ -20,6 +20,12 @@ The channel convention is the library's: ``data`` is ``(channels, samples)``
 float64, reductions run over ``axis=-1``. ``__array__`` returns the mono
 channel 1-D and a multichannel block 2-D, matching what every function in
 the library expects from a bare array.
+
+:mod:`phonometry.io` publishes the class, and ``phonometry`` itself does too.
+It is written here, among the helpers every package shares, because every
+package that takes measured audio accepts one: a domain reads it, and the
+rules of :mod:`phonometry._internal.resolve` that go with it, without
+importing another domain.
 """
 
 from __future__ import annotations
@@ -30,8 +36,8 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from .._internal.display import RichDisplay
-from .._internal.validation import (
+from .display import RichDisplay
+from .validation import (
     indices_of,
     is_integer,
     is_text,
@@ -49,7 +55,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, DTypeLike, NDArray
 
     from .._i18n import Language
-    from ._chunks import BroadcastMetadata
+    from ..io._chunks import BroadcastMetadata
 
 
 @dataclass(frozen=True, kw_only=True)

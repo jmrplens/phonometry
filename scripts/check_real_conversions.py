@@ -355,21 +355,21 @@ EXEMPT: dict[tuple[str, str], str] = {
         "with the start, the length and the coefficients of its own three pieces"
     ),
     (
-        "src/phonometry/filters/weighting_compliance.py",
+        "src/phonometry/_internal/weighting_tables.py",
         "_analytic_weighting_db._c_gain",
     ): (
         "a stage of the analytic weighting, called only with the frequencies "
         "real_array read at the top of _analytic_weighting_db"
     ),
     (
-        "src/phonometry/filters/weighting_compliance.py",
+        "src/phonometry/_internal/weighting_tables.py",
         "_analytic_weighting_db._a_gain",
     ): (
         "a stage of the analytic weighting, called only with the frequencies "
         "real_array read at the top of _analytic_weighting_db"
     ),
     (
-        "src/phonometry/filters/weighting_compliance.py",
+        "src/phonometry/_internal/weighting_tables.py",
         "_analytic_weighting_db._b_gain",
     ): (
         "a stage of the analytic weighting, called only with the frequencies "

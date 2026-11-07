@@ -84,6 +84,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
@@ -104,7 +105,6 @@ from ._shared import (
     _S0,
     Grade,
     SoundPowerWarning,
-    _a_weighting_corrections,
     _background_exposure,
     _check_grade,
     _single_event_mean,

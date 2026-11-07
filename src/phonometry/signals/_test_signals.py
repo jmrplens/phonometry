@@ -57,6 +57,12 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import (
+    apply_calibration,
+    like_input,
+    require_signal_rate,
+    resolve_fs,
+)
 from .._internal.validation import (
     real_array,
     real_number,
@@ -67,20 +73,14 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
-from ..io._resolve import (
-    apply_calibration,
-    like_input,
-    require_signal_rate,
-    resolve_fs,
-)
-from .spectra import _positive
+from .._internal.welch import _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 
 __all__ = [

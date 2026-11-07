@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Shared assertion for the ``Signal`` overload contract tests.
 
-Every surface that adopts ``phonometry.io._resolve`` is held to the same
+Every surface that adopts ``phonometry._internal.resolve`` is held to the same
 statement: the call that hands a ``Signal`` must produce the *identical*
 result the equivalent bare-array call produces, never a nearby number. The
 results are dataclasses of arrays, so the comparison has to walk them field

@@ -106,10 +106,9 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...materials.absorbers.porous import ABSORBER_AIR
+from ...materials import ABSORBER_AIR
 from ...solids import PUBLISHED_PLATEAU_DATA, PlateauMaterial
-from ...vibration.structural._radiation_efficiency import coincidence_frequency
-from ...vibration.structural.point_mobility import plate_bending_stiffness
+from ...vibration import coincidence_frequency, plate_bending_stiffness
 
 if TYPE_CHECKING:
     import os

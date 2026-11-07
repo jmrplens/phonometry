@@ -108,6 +108,14 @@ from scipy.fft import next_fast_len
 from scipy.optimize import minimize_scalar
 
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.resolve import (
+    SignalInput,
+    apply_calibration,
+    like_input,
+    require_signal_rate,
+    resolve_pair_fs,
+)
+from ..._internal.signal import Signal
 from ..._internal.validation import (
     indices_of,
     real_array,
@@ -122,15 +130,7 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ..._internal.warnings import PhonometryWarning, warn_caller
-from ...io._resolve import (
-    SignalInput,
-    apply_calibration,
-    like_input,
-    require_signal_rate,
-    resolve_pair_fs,
-)
-from ...io._signal import Signal
-from ...materials.surfaces.road_absorption import max_sampled_area_radius
+from ...materials import max_sampled_area_radius
 from . import noise_reducing_devices as _devices
 from .noise_reducing_devices import RoadDeviceRating, sound_reflection_rating
 

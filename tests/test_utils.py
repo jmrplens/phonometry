@@ -164,8 +164,8 @@ def test_a_factor_that_overflows_its_samples_is_refused(entry: str, field: str) 
     overflows is built wrong somewhere along it, and saying only "non-finite"
     would send the reader to whichever end they looked at first.
     """
+    from phonometry._internal.resolve import apply_calibration, resolve_samples
     from phonometry.io import Signal
-    from phonometry.io._resolve import apply_calibration, resolve_samples
 
     samples = np.full(4, 1e300)
     signal = Signal(samples, 48000, calibration_factor=1e10)
@@ -188,8 +188,8 @@ def test_a_calibration_the_instruments_actually_use_is_untouched() -> None:
     to pascals by a factor of 1e5 lands at 5e4, which is 1e303 short of the
     ceiling, so nothing an instrument produces comes near this refusal.
     """
+    from phonometry._internal.resolve import resolve_samples
     from phonometry.io import Signal
-    from phonometry.io._resolve import resolve_samples
 
     scaled = resolve_samples(Signal(np.full(4, 0.5), 48000, calibration_factor=1e5))
     assert np.all(np.isfinite(scaled))

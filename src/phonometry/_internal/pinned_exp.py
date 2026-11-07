@@ -28,7 +28,7 @@ product neither overflows nor loses bits to the subnormal range, which every
 call site here satisfies.
 
 What "the routine glibc ships" rests on is measured, not asserted:
-``tests/filters/test_pinned_exp.py`` holds both functions bit for bit to
+``tests/test_internalpinned_exp.py`` holds both functions bit for bit to
 :func:`math.exp` and :func:`math.pow` on a machine whose C library is that
 routine, over the inputs an actual design evaluates and over draws spanning the
 full domain, and to :func:`math.fma` for the emulation.
@@ -44,8 +44,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from .._internal.validation import real_array
-from ._pinned_log import _two_product
+from .pinned_log import _two_product
+from .validation import real_array
 
 __all__ = ["pinned_exp", "pinned_pow"]
 

@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The platform whose C library is the routine the pinned transcendentals spell.
 
-``phonometry.filters._pinned_exp`` and ``_pinned_log`` spell glibc's ``exp``,
+``phonometry._internal.pinned_exp`` and ``pinned_log`` spell glibc's ``exp``,
 ``pow`` and ``log`` (ARM's optimized-routines) in the variant glibc selects on
 an x86-64 processor with a fused multiply-add unit, and ``pinned_log10`` is
 glibc's SunPro ``log10`` on top of that ``log``. On that platform the

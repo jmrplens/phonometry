@@ -90,6 +90,7 @@ if TYPE_CHECKING:
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.validation import (
     check_engine,
     real_array,
@@ -104,7 +105,6 @@ from .._internal.validation import (
 from .._internal.warnings import warn_caller
 from ._shared import (
     SoundPowerWarning,
-    _a_weighting_corrections,
     _c2_correction,
     _reference_power_levels,
     _validate_meteorology,

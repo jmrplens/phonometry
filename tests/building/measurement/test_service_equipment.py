@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 from matplotlib.text import Annotation
 
 from phonometry import building
-from phonometry.filters.weighting_compliance import _WEIGHTING_TABLE3
+from phonometry._internal.weighting_tables import WEIGHTING_TABLE3
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -87,7 +87,7 @@ def test_third_octave_c_weighting_departs_from_print_only_in_the_defect() -> Non
 
 
 def test_corrected_c_cells_are_iec_61672_1_table_3() -> None:
-    iec = {row[0]: (row[1], row[2]) for row in _WEIGHTING_TABLE3}
+    iec = {row[0]: (row[1], row[2]) for row in WEIGHTING_TABLE3}
     columns: tuple[tuple[Weighting, int], ...] = (("A", 0), ("C", 1))
     for weighting, column in columns:
         for f, value in building.SERVICE_EQUIPMENT_WEIGHTING[3][weighting].items():

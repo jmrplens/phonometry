@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The pinned ``exp`` and ``pow`` return glibc's own bits.
 
-``_pinned_exp`` exists so the weighting fit takes its exponentials and powers
+``pinned_exp`` exists so the weighting fit takes its exponentials and powers
 from no platform at all, and that is only worth having if it moves no shipped
 coefficient: the routines it spells are glibc's (ARM's optimized-routines, in
 the variant compiled for a fused multiply-add unit), so on a machine whose C
@@ -20,13 +20,13 @@ import numpy as np
 import pytest
 from libm_identity import on_the_pinned_libm
 
-from phonometry.filters import _weighting_design
-from phonometry.filters._pinned_exp import (
+from phonometry._internal.pinned_exp import (
     _fused_multiply_add,
     _round_to_odd_sum,
     pinned_exp,
     pinned_pow,
 )
+from phonometry.filters import _weighting_design
 from phonometry.filters.weighting import _analog_weighting_zpk, _fit_band
 
 

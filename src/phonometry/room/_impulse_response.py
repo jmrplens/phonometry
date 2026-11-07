@@ -71,7 +71,11 @@ import numpy as np
 from scipy import signal
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.utils import _typesignal
+from .._internal.resolve import (
+    apply_calibration,
+    resolve_optional_pair_fs,
+)
+from .._internal.utils import _apply_fade, _typesignal
 from .._internal.validation import (
     arrays_of,
     real_array,
@@ -85,10 +89,6 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
-from ..io._resolve import (
-    apply_calibration,
-    resolve_optional_pair_fs,
-)
 
 #: How an impulse response was measured: by spectral division or the Farina
 #: deconvolution of a swept sine, by a maximum-length sequence, or by a
@@ -108,8 +108,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, DTypeLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import TwoPanels
-    from ..io._signal import Signal
 
 #: Warn from mls_impulse_response when the recovered IR still carries more than
 #: this level (dB re its peak) in the last 10 % of the MLS period: an IR longer
@@ -339,19 +339,6 @@ def sweep_signal(
     if fade > 0.0:
         sweep = _apply_fade(sweep, fade)
     return sweep
-
-
-def _apply_fade(x: np.ndarray, fade: float) -> np.ndarray:
-    """Apply symmetric half-Hann fade windows to both ends of ``x``."""
-    n = x.size
-    m = round(fade * n)
-    if m < 1:
-        return x
-    ramp = 0.5 * (1.0 - np.cos(np.pi * (np.arange(m) + 0.5) / m))
-    window = np.ones(n)
-    window[:m] = ramp
-    window[-m:] = ramp[::-1]
-    return x * window
 
 
 def inverse_filter(

@@ -72,23 +72,22 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import reduce_with_plain_rows
+from ..._internal.loudness_statistics import (
+    FLUCTUATION_SETTLING_FRAMES,
+    ROUGHNESS_SETTLING_FRAMES,
+    _percentile,
+)
+from ..._internal.resolve import resolve_calibration, resolve_fs, resolve_samples
 from ..._internal.validation import is_text, real_number, require_choice
 from ..._internal.warnings import PhonometryWarning, warn_caller
-from ...filters.weighting import weighting_filter
-from ...io._resolve import resolve_calibration, resolve_fs, resolve_samples
-from ...psychoacoustics.loudness.zwicker import _percentile, loudness_zwicker
-from ...psychoacoustics.quality._fluctuation_strength_ecma import (
-    _TRANSIENT as _FLUCTUATION_SETTLING_FRAMES,
-)
-from ...psychoacoustics.quality._fluctuation_strength_ecma import (
+from ...filters import weighting_filter
+from ...psychoacoustics import (
     fluctuation_strength_ecma,
+    loudness_zwicker,
+    roughness_ecma,
+    tonality_ecma,
 )
-from ...psychoacoustics.quality._roughness_ecma import (
-    _TRANSIENT as _ROUGHNESS_SETTLING_FRAMES,
-)
-from ...psychoacoustics.quality._roughness_ecma import roughness_ecma
-from ...psychoacoustics.quality._tonality_ecma import tonality_ecma
-from ...signals.levels import laeq, leq, ln_levels
+from ...signals import laeq, leq, ln_levels
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -97,7 +96,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ...io._resolve import SignalInput
+    from ..._internal.resolve import SignalInput
 
 __all__ = [
     "BINAURAL_PARAMETERS",
@@ -598,7 +597,7 @@ def _roughness(
     for channel in pressure:
         result = roughness_ecma(channel, fs, field=field)
         r10, r50 = _percentiles_after_settling(
-            np.asarray(result.roughness_vs_time), _ROUGHNESS_SETTLING_FRAMES
+            np.asarray(result.roughness_vs_time), ROUGHNESS_SETTLING_FRAMES
         )
         ten.append(r10)
         fifty.append(r50)
@@ -616,7 +615,7 @@ def _fluctuation(
         result = fluctuation_strength_ecma(channel, fs, field=field)
         f10, f50 = _percentiles_after_settling(
             np.asarray(result.fluctuation_strength_vs_time),
-            _FLUCTUATION_SETTLING_FRAMES,
+            FLUCTUATION_SETTLING_FRAMES,
         )
         ten.append(f10)
         fifty.append(f50)

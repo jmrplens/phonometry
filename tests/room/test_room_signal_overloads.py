@@ -2,7 +2,7 @@
 """The room measurements take a ``Signal`` in place of ``(ir, fs)``.
 
 Same contract as the rest of the library, held by
-``phonometry.io._resolve``. What is particular here is that the room
+``phonometry._internal.resolve``. What is particular here is that the room
 surface splits in two over how much it needs the rate.
 
 :func:`decay_curve` and :func:`room_parameters` integrate over time and

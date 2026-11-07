@@ -24,8 +24,8 @@ import matplotlib as mpl
 import refusing_disk
 
 from phonometry import io
+from phonometry._internal.video import video_request
 from phonometry.io import VideoOptions
-from phonometry.io._video import video_request
 from phonometry.simulation import (
     FDTD2D,
     AnimationFrame,
@@ -646,7 +646,7 @@ def test_a_raw_encoder_this_ffmpeg_lacks_names_the_ffmpeg_by_its_escapes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[FDTD2D]
 ) -> None:
     """The ffmpeg is named by ``rcParams`` or ``PATH``, and its version line is its own."""
-    from phonometry.io import _video_encoders as ve
+    from phonometry._internal import video_encoders as ve
 
     named = f"{tmp_path}{os.sep}ff\u202empeg"
     monkeypatch.setattr(ve, "find_ffmpeg", lambda: named)

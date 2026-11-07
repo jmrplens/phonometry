@@ -31,11 +31,10 @@ import reference_data as ref
 from scipy import signal as sp_signal
 
 from phonometry import filters
+from phonometry._internal.itu_r_468 import LADDER, itu_r_468_prototype
 from phonometry.electroacoustics import weighting_bs468
 from phonometry.filters.weighting import (
     _FIT_SECTIONS,
-    _ITU_R_468_LADDER,
-    _itu_r_468_prototype,
     _runtime_frequency_response,
 )
 
@@ -79,7 +78,7 @@ def test_ladder_is_the_seven_component_values_of_figure_1a() -> None:
     capacitors, two series inductors and the one series capacitor, in ladder
     order, left to right.
     """
-    assert _ITU_R_468_LADDER == (
+    assert LADDER == (
         ("shunt_c", 13.85e-9),
         ("series_l", 12.88e-3),
         ("shunt_c", 26.82e-9),
@@ -100,7 +99,7 @@ def test_prototype_is_one_zero_at_the_origin_and_six_stable_poles() -> None:
     element values are real, so the pole set must be its own mirror image in
     that axis.
     """
-    poles, gain = _itu_r_468_prototype()
+    poles, gain = itu_r_468_prototype()
     assert len(poles) == 6
     assert all(pole.real < 0.0 for pole in poles)
     assert gain > 0.0
@@ -212,7 +211,7 @@ def test_the_468_curve_keeps_the_network_order() -> None:
     """
     assert _FIT_SECTIONS["468"] == 3
     assert filters.WeightingFilter(48000, "468").sos.shape == (3, 6)
-    assert len(_itu_r_468_prototype()[0]) == 6
+    assert len(itu_r_468_prototype()[0]) == 6
 
 
 def test_weighting_filter_emphasises_the_6_khz_band_of_a_record() -> None:

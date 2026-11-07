@@ -20,31 +20,32 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.peaks import inter_sample_peak
+from .._internal.resolve import (
+    resolve_calibration as _resolve_calibration,
+)
+from .._internal.resolve import (
+    resolve_fs as _resolve_fs,
+)
+from .._internal.resolve import (
+    resolve_samples as _resolve_samples_raw,
+)
 from .._internal.types import as_float_if_reduced
 from .._internal.validation import (
     require_choice,
     require_count,
     require_scalar,
+    require_str,
 )
-from ..filters.weighting import _require_str, time_weighting, weighting_filter
-from ..io._resolve import (
-    resolve_calibration as _resolve_calibration,
-)
-from ..io._resolve import (
-    resolve_fs as _resolve_fs,
-)
-from ..io._resolve import (
-    resolve_samples as _resolve_samples_raw,
-)
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..filters import time_weighting, weighting_filter
+from ..metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from numpy.typing import ArrayLike, NDArray
 
+    from .._internal.signal import Signal
     from ..filters.weighting import Weighting
-    from ..io._signal import Signal
 
 __all__ = [
     "laeq",
@@ -192,7 +193,7 @@ def ln_levels(
         if not 0 < value < 100:  # noqa: PLR2004
             msg = "Percentile values in 'n' must be between 0 and 100."
             raise ValueError(msg)
-    if _require_str(weighting, "weighting") != "Z":
+    if require_str(weighting, "weighting") != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
 
     envelope = time_weighting(x_proc, fs, mode=mode)
@@ -313,7 +314,7 @@ def sel(
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
-    if _require_str(weighting, "weighting") != "Z":
+    if require_str(weighting, "weighting") != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
     duration_s = x_proc.shape[-1] / fs
     base = leq(x_proc, calibration_factor=calibration_factor, dbfs=dbfs)

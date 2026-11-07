@@ -56,6 +56,37 @@ if TYPE_CHECKING:
 #: Packages whose dataclasses are rendering and validation helpers, not results.
 PRIVATE_PACKAGES = ("phonometry._internal", "phonometry._plot", "phonometry._report")
 
+
+@functools.cache
+def _published_by_a_domain() -> frozenset[type]:
+    """Every class a package of phonometry publishes, wherever it is written.
+
+    A record several domains share, ``io.Signal`` and ``io.SignalOrigin`` among
+    them, is written in ``_internal`` so that no domain imports another's
+    modules for it, and is a public record all the same.
+    """
+    import phonometry
+
+    found: set[type] = set()
+    for package in phonometry.__all__:
+        if not package.islower() or package.startswith("_"):
+            continue
+        module = importlib.import_module(f"phonometry.{package}")
+        for name in getattr(module, "__all__", ()):
+            obj = getattr(module, name, None)
+            if isinstance(obj, type):
+                found.add(obj)
+    return frozenset(found)
+
+
+def is_private_helper(cls: type) -> bool:
+    """Whether *cls* is a helper of a private package that no package publishes."""
+    return (
+        cls.__module__.startswith(PRIVATE_PACKAGES)
+        and cls not in _published_by_a_domain()
+    )
+
+
 _ORDER = (ast.Lt, ast.LtE, ast.Gt, ast.GtE)
 
 #: Calls whose value is the verdict of their arguments, or of their receiver.
@@ -574,7 +605,7 @@ def _built_class(call: ast.Call, namespace: Mapping[str, object]) -> type | None
         isinstance(cls, type)
         and dataclasses.is_dataclass(cls)
         and not cls.__name__.startswith("_")
-        and not cls.__module__.startswith(PRIVATE_PACKAGES)
+        and not is_private_helper(cls)
     ):
         return None
     return cls

@@ -430,7 +430,7 @@ def plot_binned_modulation(
     from ..environment.assessment.wind_turbine_modulation import (
         AM_FREQUENCY_BANDS_HZ,
     )
-    from .geometry._draft import _chip
+    from .geometry import _draft
 
     ax = ax if ax is not None else _new_axes()
     speeds = np.asarray(result.wind_speeds_m_s)
@@ -452,7 +452,7 @@ def plot_binned_modulation(
                 va="center",
                 fontsize="medium",
                 color=line.get_color(),
-                bbox=_chip(ax, 0.25),
+                bbox=_draft._chip(ax, 0.25),
                 zorder=4,
             )
     # Room at the ends for the chips drawn on the first and last points.

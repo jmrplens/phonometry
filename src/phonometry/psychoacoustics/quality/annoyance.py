@@ -48,13 +48,13 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
+from ..._internal.resolve import SignalInput, resolve_calibration, resolve_fs
 from ..._internal.validation import (
     real_array,
     require_count,
     require_positive,
     require_scalar,
 )
-from ...io._resolve import SignalInput, resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

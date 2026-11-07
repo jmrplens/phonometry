@@ -26,7 +26,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
-from ...io._resolve import resolve_calibration, resolve_fs
+from ..._internal.loudness_statistics import _percentile
+from ..._internal.resolve import resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
     import os
@@ -36,9 +37,9 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.signal import Signal
     from ..._internal.types import ReportEngine, TwoPanels
     from ..._report.metadata import ReportMetadata
-    from ...io._signal import Signal
 from scipy import signal
 
 from ..._internal.frozen import OwnsArrays
@@ -794,36 +795,6 @@ def _sone_to_phon(loudness: float) -> float:
         loudness_level: float = 40.0 * (loudness + 0.0005) ** 0.35
         return max(loudness_level, 3.0)
     return 10.0 * math.log(loudness) / math.log(2.0) + 40.0
-
-
-def _percentile(values: np.ndarray, percentile: int) -> float:
-    r"""Percentile loudness as computed by the reference implementation.
-
-    NX is the loudness exceeded X % of the time: with the values sorted
-    ascending and :math:`k = \lfloor (1 - X/100)\, n \rfloor`, the mean of
-    the samples at positions k-1 and k (clause 6.4, Annex A main program).
-
-    Provenance: this (k-1, k) mean comes from the electronic attachment's
-    main program, not from a printed formula, and is supported by the
-    Annex B.5 results (N5 within the clause 6.1 tolerance for all twelve
-    technical signals, Nmax to < 0.01 %). Confirmed line by line against
-    the attachment's Annex A.4 reference source (``f_calc_percentile``:
-    the reference program truncates (1 - X/100)*n to an integer index and
-    averages that sorted sample with its predecessor on the ascending
-    sort). The workbooks' own B.5 N5 header values are not reproducible
-    from their published traces with any Annex A percentile reading, so
-    the headers are held to the 5-6 % tolerance only.
-    """
-    ordered = np.sort(values)
-    n = ordered.size
-    if percentile == 0:
-        return float(ordered[-1])
-    # The top of the percentile scale.
-    if percentile == 100:  # noqa: PLR2004
-        return float(ordered[0])
-    k = int((1.0 - percentile / 100.0) * n)
-    k = min(max(k, 1), n - 1)
-    return float((ordered[k - 1] + ordered[k]) / 2.0)
 
 
 # ---------------------------------------------------------------------------

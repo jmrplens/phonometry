@@ -27,7 +27,7 @@ def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
     squared internally. Float64 arrays are passed through without copying.
 
     Every entry point that consumes a recording resolves its samples here or
-    through :func:`phonometry.io._resolve.resolve_samples`, which is why the
+    through :func:`phonometry._internal.resolve.resolve_samples`, which is why the
     three refusals below live in one place rather than in each of them.
 
     ``np.asarray`` on its own says too little and admits too much. A string
@@ -155,3 +155,16 @@ def _sos_state_mismatch(zi: np.ndarray, x_proc: np.ndarray) -> bool:
     if x_proc.ndim == 1:
         return zi.ndim != _ZI_NDIM_MONO
     return zi.ndim != _ZI_NDIM_MULTICHANNEL or zi.shape[1] != x_proc.shape[0]
+
+
+def _apply_fade(x: np.ndarray, fade: float) -> np.ndarray:
+    """Apply symmetric half-Hann fade windows to both ends of ``x``."""
+    n = x.size
+    m = round(fade * n)
+    if m < 1:
+        return x
+    ramp = 0.5 * (1.0 - np.cos(np.pi * (np.arange(m) + 0.5) / m))
+    window = np.ones(n)
+    window[:m] = ramp
+    window[-m:] = ramp[::-1]
+    return x * window

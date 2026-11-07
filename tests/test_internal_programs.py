@@ -13,8 +13,8 @@ from typing import TYPE_CHECKING
 import pytest
 import windows_lookup
 
+from phonometry._internal import video_encoders as ve
 from phonometry._internal.programs import past_the_working_directory
-from phonometry.io import _video_encoders as ve
 from phonometry.simulation._remote import command
 
 if TYPE_CHECKING:

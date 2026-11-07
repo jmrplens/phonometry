@@ -85,6 +85,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import like_input, require_signal_rate, resolve_fs
 from .._internal.validation import (
     real_array,
     require_count,
@@ -92,9 +93,8 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import like_input, require_signal_rate, resolve_fs
+from .._internal.welch import _positive
 from ._test_signals import _validate_1d_finite, fractional_delay
-from .spectra import _positive
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -103,8 +103,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import TwoPanels
-    from ..io._signal import Signal
 
 __all__ = [
     "SynchronousAverageResult",

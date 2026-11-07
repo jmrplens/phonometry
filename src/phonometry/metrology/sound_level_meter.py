@@ -3341,7 +3341,7 @@ def _weighting_limits(meter_class: int) -> dict[float, tuple[float, float]]:
     Read through :func:`phonometry.filters.weighting_class_limits`, which
     publishes the table, rather than transcribed a second time.
     """
-    from ..filters.weighting_compliance import weighting_class_limits
+    from ..filters import weighting_class_limits
 
     limits = weighting_class_limits(meter_class)
     frequencies, lower, upper = limits.frequencies, limits.lower, limits.upper

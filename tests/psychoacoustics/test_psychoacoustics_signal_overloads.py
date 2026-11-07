@@ -2,7 +2,7 @@
 """The psychoacoustic models take a ``Signal`` in place of ``(x, fs)``.
 
 Same contract as the rest of the library, held by
-``phonometry.io._resolve``. This is the surface where it matters most, and
+``phonometry._internal.resolve``. This is the surface where it matters most, and
 for a reason the other packages do not share: a loudness, a sharpness, a
 roughness and a fluctuation strength are all defined on *absolute* sound
 pressure. Handing one an uncalibrated record does not scale its answer, it

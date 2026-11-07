@@ -118,6 +118,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.air_absorption import _EIGHT_686, _KELVIN, _pure_tone_terms, _validate
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -130,12 +131,6 @@ from .._internal.validation import (
     require_same_length,
 )
 from .._internal.warnings import warn_caller
-from ..environment.propagation.air_absorption import (
-    _EIGHT_686,
-    _KELVIN,
-    _pure_tone_terms,
-    _validate,
-)
 from ._shared import (
     SoundPowerWarning,
     _c1_correction,

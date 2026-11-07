@@ -33,11 +33,11 @@ them rather than inventing a number.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Literal, overload
+from typing import TYPE_CHECKING, overload
 
 import numpy as np
 
-from .._internal.types import as_float_or_array
+from .._internal.types import SoundSpeedModel, as_float_or_array
 from .._internal.validation import (
     require_above_absolute_zero,
     require_above_absolute_zero_array,
@@ -51,9 +51,6 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._internal.types import RealScalar, RealValues
-
-#: The four sound-speed equations of sea water.
-SoundSpeedModel = Literal["unesco", "del_grosso", "mackenzie", "medwin"]
 
 __all__ = [
     "depth_to_absolute_pressure_pa",

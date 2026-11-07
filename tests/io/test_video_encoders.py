@@ -18,8 +18,8 @@ pytest.importorskip("matplotlib")
 import fake_ffmpeg
 import windows_lookup
 
-from phonometry.io import _video_encoders as ve
-from phonometry.io._video_quality import ENCODER_QUALITY, GIF_PALETTE
+from phonometry._internal import video_encoders as ve
+from phonometry._internal.video_quality import ENCODER_QUALITY, GIF_PALETTE
 
 if TYPE_CHECKING:
     from collections.abc import Callable

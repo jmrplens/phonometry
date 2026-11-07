@@ -591,7 +591,7 @@ def room_to_room_transmission(
     :raises TypeError: if ``partition_area`` or ``receiver_distance_m`` is not a single
         number, or ``frequencies`` holds a text or a value that is not a real number.
     """
-    from ..room.steady_field import steady_state_spl
+    from ..room import steady_state_spl
 
     source = SourceRoom() if source is None else source
     criterion = DesignCriterion() if criterion is None else criterion

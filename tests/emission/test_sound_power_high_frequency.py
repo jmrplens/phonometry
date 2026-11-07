@@ -36,11 +36,11 @@ import reference_data as ref
 from matplotlib.colors import to_rgba
 
 from phonometry import emission
+from phonometry._internal.air_absorption import _pure_tone_terms
 from phonometry._plot.common import _C_MUTED, _C_PRIMARY
 from phonometry.environment.propagation import air_attenuation
 from phonometry.environment.propagation.air_absorption import (
     AtmosphericAbsorptionWarning,
-    _pure_tone_terms,
 )
 
 THIRDS = np.array([12500.0, 16000.0, 20000.0])

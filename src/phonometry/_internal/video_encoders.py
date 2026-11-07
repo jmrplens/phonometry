@@ -37,10 +37,10 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final, Literal
 
-from .._internal.extras import install_hint
-from .._internal.json_input import escaped
-from .._internal.programs import past_the_working_directory
-from ._video_quality import ENCODER_QUALITY, GIF_PALETTE, Quality
+from .extras import install_hint
+from .json_input import escaped
+from .programs import past_the_working_directory
+from .video_quality import ENCODER_QUALITY, GIF_PALETTE, Quality
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping

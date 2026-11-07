@@ -92,7 +92,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...vibration.structural.point_mobility import infinite_plate_mobility
+from ...vibration import infinite_plate_mobility
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

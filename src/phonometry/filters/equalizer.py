@@ -66,6 +66,12 @@ from scipy import signal
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import (
+    like_input,
+    refuse_foreign_rate,
+    resolve_fs,
+    resolve_samples,
+)
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
     require_choice,
@@ -74,20 +80,14 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import (
-    like_input,
-    refuse_foreign_rate,
-    resolve_fs,
-    resolve_samples,
-)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import TwoPanels
-    from ..io._signal import Signal
 
 __all__ = [
     "EQResponseResult",

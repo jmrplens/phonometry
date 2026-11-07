@@ -10,11 +10,12 @@ that contract, in one place, so that the surfaces adopting it cannot
 drift apart. Every function in the library that consumes a recording is
 on it.
 
-They live beside :class:`Signal` rather than in ``_internal`` because that
-tree is a leaf every package may import: a resolver there would have to
-import ``phonometry.io``, and importing a submodule runs its package
-``__init__``, so ``_internal`` would sit at the wrong end of an import
-cycle the moment ``io`` reached back for a toolbox helper.
+They live in ``_internal`` beside :class:`Signal`, which belongs to no
+single domain, so that a domain reaches the contract without importing
+another domain's private module. Importing a submodule of another package
+first runs that package's ``__init__``, and a thread doing so can deadlock
+against a thread importing the package itself; ``_internal`` imports no
+domain, so every package can import it from any thread.
 
 The rules, identical everywhere:
 
@@ -62,9 +63,9 @@ from typing import Any, overload
 import numpy as np
 from numpy.typing import ArrayLike
 
-from .._internal.utils import _typesignal
-from .._internal.validation import require_scalar
-from ._signal import Signal
+from .signal import Signal
+from .utils import _typesignal
+from .validation import require_scalar
 
 #: What a function that consumes a recording accepts for its signal
 #: argument: a Signal, or the samples as anything ``np.asarray`` converts

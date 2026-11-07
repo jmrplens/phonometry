@@ -39,7 +39,7 @@ import numpy as np
 from reference_data import service_equipment as ref
 
 from phonometry import building
-from phonometry.filters.weighting_compliance import _WEIGHTING_TABLE3
+from phonometry._internal.weighting_tables import WEIGHTING_TABLE3
 
 from ..registry import Outcome, count, numeric, register
 
@@ -127,7 +127,7 @@ def _chk_table_a1_a() -> Outcome:
 )
 def _chk_table_a1_c() -> Outcome:
     table = building.SERVICE_EQUIPMENT_WEIGHTING
-    iec = {row[0]: row[2] for row in _WEIGHTING_TABLE3}
+    iec = {row[0]: row[2] for row in WEIGHTING_TABLE3}
     defect = set(ref.ISO16032_TABLE_A1_C_DEFECT_HZ)
     matching = 0
     for f, _, printed in ref.ISO16032_TABLE_A1_THIRD:

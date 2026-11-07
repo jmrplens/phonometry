@@ -98,7 +98,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from .flanking_transmission import total_loss_factor
 
 __all__ = [

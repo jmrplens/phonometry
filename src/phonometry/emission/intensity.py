@@ -63,7 +63,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
-from ..io._resolve import SignalInput, apply_calibration, resolve_pair_fs
+from .._internal.resolve import SignalInput, apply_calibration, resolve_pair_fs
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -74,6 +74,7 @@ if TYPE_CHECKING:
     from .._i18n import Language
     from .._internal.types import BandFraction, RealValues
 
+from .._internal.bands import bands_held
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
@@ -93,14 +94,14 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..filters.frequencies import _genfreqs
-from ..metrology.reference_values import REFERENCE_VALUES
-from ..signals.spectra import (
+from .._internal.welch import (
     _MIN_SAMPLES,
     _default_nperseg,
     _welch_autospectrum,
     _welch_cross_spectrum,
 )
+from ..filters import FilterBankWarning, nominal_frequencies
+from ..metrology import REFERENCE_VALUES
 
 __all__ = [
     "TEMPORAL_VARIABILITY_LIMIT",
@@ -635,14 +636,21 @@ def _band_integrals(
     pressures); bands with no spectral bin of their own are dropped, so the
     arrays can be shorter than the nominal band list.
     """
-    bands = _genfreqs(band_limits, fraction, fs, warn=limits_given)
+    bands = nominal_frequencies(fraction, band_limits)
+    held = bands_held(
+        bands.labels,
+        bands.upper_edges,
+        fs,
+        warn=limits_given,
+        category=FilterBankWarning,
+    )
     centers: list[float] = []
     band_i: list[float] = []
     band_msp: list[float] = []
     for fc, lo, hi in zip(
-        bands.frequencies.tolist(),
-        bands.lower_edges.tolist(),
-        bands.upper_edges.tolist(),
+        bands.frequencies[held].tolist(),
+        bands.lower_edges[held].tolist(),
+        bands.upper_edges[held].tolist(),
         strict=True,
     ):
         mask = (fpos > lo) & (fpos <= hi)

@@ -182,9 +182,9 @@ def test_a_fractional_rate_reaches_the_weighting_unrounded(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The weighted residual of a THD is filtered at the record's own rate."""
-    from phonometry.filters import weighting
+    from phonometry import filters
 
-    seen = _spy(monkeypatch, weighting, "weighting_filter")
+    seen = _spy(monkeypatch, filters, "weighting_filter")
     tone = np.sin(2.0 * np.pi * 1000.0 * np.arange(48000) / FS)
     electroacoustics.weighted_thd(
         tone + 0.01 * tone**2, FS, fundamental=1000.0, weighting="A"
@@ -197,9 +197,9 @@ def test_a_fractional_rate_reaches_the_band_analysis_unrounded(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The one-third octaves of a limiting test signal run at its own rate."""
-    from phonometry.filters import core
+    from phonometry import filters
 
-    seen = _spy(monkeypatch, core, "octave_filter")
+    seen = _spy(monkeypatch, filters, "octave_filter")
     noise = np.clip(np.random.default_rng(3).standard_normal(96000), -2.0, 2.0)
     electroacoustics.check_limiting_test_signal(noise, FS)
     assert seen == [FS]

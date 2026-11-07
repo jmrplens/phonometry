@@ -51,7 +51,7 @@ and falling at about -30 dB/octave above 12.5 kHz, which is what makes
 broadband noise audible in a programme chain rather than what makes it
 loud. Clause 1 defines it as the response of the passive network of Fig. 1a,
 so it is built from that network's seven printed component values
-(`_itu_r_468_prototype`) and reproduces all 21 rows of the Table 1
+(`itu_r_468_prototype`) and reproduces all 21 rows of the Table 1
 sampling to 0.0503 dB. Its skirt is steep enough that the plain bilinear
 design at the input rate reads 23 dB out at 16 kHz, so `high_accuracy=False`
 is refused for this curve rather than shipped: the Recommendation prints one
@@ -387,7 +387,7 @@ Initialize the weighting filter.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate in Hz. |
-| `weighting` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical: removed from the IEC sound-level-meter standards), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012, audible sound in the presence of ultrasound), '468' (ITU-R BS.468-4 psophometric noise weighting, see `_itu_r_468_prototype`) or 'Z'. |
+| `weighting` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical: removed from the IEC sound-level-meter standards), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012, audible sound in the presence of ultrasound), '468' (ITU-R BS.468-4 psophometric noise weighting, see `itu_r_468_prototype`) or 'Z'. |
 | `stateful` | If True, carry the section state between calls, so concatenated blocks equal one continuous call. Available for every curve and independent of `high_accuracy`: both designs are a plain cascade of second-order sections at the input rate, and `sosfilt` with a carried `zi` reproduces a single call bit for bit. |
 | `steady_ic` | If True, calculate steady state initial conditions for filter. |
 | `high_accuracy` | Which of the two designs to build, both of them second-order sections at the input rate. `True` (the default) fits the analog prototype at *fs*, undoing the bilinear frequency warping instead of tolerating it (`phonometry.filters._weighting_design`). Measured against the prototype over the standard's own band, the worst deviation is 0.008 dB for A at 32 kHz and 0.0003 dB at 48 kHz, and at most 0.06 dB for any curve at any rate in this corpus, the 0.06 belonging to the 468 curve at 44.1 and 48 kHz, where a -30 dB/octave skirt has to flatten inside the last half percent below the Nyquist frequency. A and C verify to class 1 at every sample rate from 8 kHz up, and at every Table 3 row their deviation stays inside the 0.05 dB the table itself is rounded to. The design is fitted over the interval `_fit_band` returns and is not claimed outside it. `False` is the plain bilinear transform of the printed prototype: the closed-form design a reader can check against the standard term by term, at the cost of the warping. That cost grows quadratically toward the Nyquist frequency: for A at 48 kHz it reads 15.7 dB below the design goal at the 19 952.6 Hz row, which the class 1 mask does not see because its lower limit there is -inf, and 61.4 dB below it at 15 848.9 Hz when fs = 32 kHz, which it does. So it verifies to class 1 for fs >= 44 100 Hz, degrades to class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz. It is refused for the '468' curve, whose skirt puts it 23 dB out at 16 kHz with no lower grade in the Recommendation to fall back to. Defaults to True. |

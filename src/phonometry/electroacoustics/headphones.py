@@ -196,7 +196,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 __all__ = [
     "ACOUSTIC_COUPLINGS",
@@ -914,11 +914,11 @@ def _band_corrections(
     free_field_response_db: ArrayLike | None,
 ) -> NDArray[np.float64]:
     """The per-band A-weighting minus the free-field response, in dB."""
-    from ..filters.weighting_compliance import _analytic_weighting_db, _exact_base10
+    from .._internal.weighting_tables import _analytic_weighting_db, exact_base10
 
     corrections = np.zeros_like(frequencies)
     if weighting == "A":
-        corrections += _analytic_weighting_db("A", _exact_base10(frequencies))
+        corrections += _analytic_weighting_db("A", exact_base10(frequencies))
     if free_field_response_db is not None:
         response = _levels(free_field_response_db, "free_field_response_db")
         if response.shape != frequencies.shape:
@@ -1217,8 +1217,8 @@ def check_limiting_test_signal(
     :raises ValueError: If the record is not 1-D and finite, or too short.
     :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    from ..filters.core import octave_filter
-    from ..io._resolve import resolve_fs
+    from .._internal.resolve import resolve_fs
+    from ..filters import octave_filter
 
     rate = resolve_fs(x, fs, name="x")
     x = real_array(x, "x")

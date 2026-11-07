@@ -59,7 +59,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..filters.weighting_compliance import _WEIGHTING_TABLE3
+from .._internal.weighting_tables import WEIGHTING_TABLE3
 from .anp_fleet import SpectralClass
 from .atmospheric_absorption import (
     _arp5534_coefficient,
@@ -126,7 +126,7 @@ def _nominal_a_weighting_db(bands: NDArray[np.float64]) -> NDArray[np.float64]:
     Read from the one transcription of that table the library keeps, the one
     the weighting-class verifier uses, so the two cannot drift apart.
     """
-    by_band = {row[0]: row[1] for row in _WEIGHTING_TABLE3}
+    by_band = {row[0]: row[1] for row in WEIGHTING_TABLE3}
     return read_only(np.array([by_band[real_number(band, "bands")] for band in bands]))
 
 

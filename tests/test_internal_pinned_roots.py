@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The polynomial roots the BS.468-4 prototype takes, correctly rounded.
 
-:mod:`phonometry.filters._pinned_roots` finds every root of a polynomial with
+:mod:`phonometry._internal.pinned_roots` finds every root of a polynomial with
 exact coefficients and rounds each part to the nearest double. These tests
 hold it to answers found another way: roots written in closed form, rounded
 here by exact integer square roots and rational midpoints, so neither the
@@ -25,19 +25,19 @@ import numpy as np
 import pytest
 import scipy.linalg
 
-from phonometry.filters import _pinned_roots
-from phonometry.filters._pinned_roots import (
+from phonometry._internal import pinned_roots
+from phonometry._internal.itu_r_468 import (
+    LADDER,
+    LOAD_OHM,
+    SOURCE_OHM,
+    _abcd_product,
+    _ladder_element,
+    itu_r_468_prototype,
+)
+from phonometry._internal.pinned_roots import (
     correctly_rounded_roots,
     exact_polynomial_product,
     exact_polynomial_sum,
-)
-from phonometry.filters.weighting import (
-    _ITU_R_468_LADDER,
-    _ITU_R_468_LOAD_OHM,
-    _ITU_R_468_SOURCE_OHM,
-    _abcd_product,
-    _itu_r_468_prototype,
-    _ladder_element,
 )
 
 #: The six poles of the ITU-R BS.468-4 network of Fig. 1a, in rad/s: the roots
@@ -58,12 +58,12 @@ _468_POLES = (
 def _468_denominator() -> tuple[Fraction, ...]:
     """The network's denominator, exactly, as the prototype builds it."""
     abcd = [
-        [(Fraction(1),), (Fraction(_ITU_R_468_SOURCE_OHM),)],
+        [(Fraction(1),), (Fraction(SOURCE_OHM),)],
         [(Fraction(0),), (Fraction(1),)],
     ]
-    for kind, value in _ITU_R_468_LADDER:
+    for kind, value in LADDER:
         abcd = _abcd_product(abcd, _ladder_element(kind, value))
-    load = Fraction(_ITU_R_468_LOAD_OHM)
+    load = Fraction(LOAD_OHM)
     return exact_polynomial_sum(abcd[0][0], tuple(c / load for c in abcd[0][1]))
 
 
@@ -79,7 +79,7 @@ def test_the_468_poles_are_the_correctly_rounded_roots_of_the_network() -> None:
     the same on every platform and says which doubles the prototype has; the
     pairs are exact conjugates and the two real poles have no imaginary part.
     """
-    poles, _ = _itu_r_468_prototype()
+    poles, _ = itu_r_468_prototype()
     expected = [complex(float.fromhex(re), float.fromhex(im)) for re, im in _468_POLES]
     assert _bits(poles) == _bits(expected)
     assert _bits(correctly_rounded_roots(_468_denominator())) == _bits(expected)
@@ -107,7 +107,7 @@ def test_numpy_finds_the_468_poles_within_its_own_error() -> None:
     monic = [c / exact[0] for c in exact]
     doubles = np.array([float(c) for c in monic])
     degree = len(doubles) - 1
-    ours = np.array(_itu_r_468_prototype()[0])
+    ours = np.array(itu_r_468_prototype()[0])
     theirs = np.roots(doubles)
     companion = np.diag(np.ones(degree - 1), -1)
     companion[0, :] = -doubles[1:]
@@ -245,7 +245,7 @@ _CHILD = textwrap.dedent(
     """
     import sys
     from fractions import Fraction
-    from phonometry.filters._pinned_roots import correctly_rounded_roots
+    from phonometry._internal.pinned_roots import correctly_rounded_roots
     coefficients = [Fraction(c) for c in sys.argv[1:]]
     try:
         roots = correctly_rounded_roots(coefficients)
@@ -366,11 +366,11 @@ def test_close_roots_are_told_apart(apart: int) -> None:
 
 
 #: The root finder's helpers as it ships them, which :class:`_Path` wraps.
-_VALUE_AND_SLOPE = _pinned_roots._value_and_slope
-_RADIUS_ABOVE = _pinned_roots._radius_above
-_SHIFTED = _pinned_roots._shifted
-_CERTIFIED_ROOT = _pinned_roots._certified_root
-_BOUNDARY_WITHIN = _pinned_roots._boundary_within
+_VALUE_AND_SLOPE = pinned_roots._value_and_slope
+_RADIUS_ABOVE = pinned_roots._radius_above
+_SHIFTED = pinned_roots._shifted
+_CERTIFIED_ROOT = pinned_roots._certified_root
+_BOUNDARY_WITHIN = pinned_roots._boundary_within
 
 
 class _Path:
@@ -383,7 +383,7 @@ class _Path:
         self.decided_on_the_axis = 0
         self.waited_across_the_axis = 0
         self.at_the_threshold = 0
-        module = _pinned_roots
+        module = pinned_roots
         value_and_slope, radius_above = _VALUE_AND_SLOPE, _RADIUS_ABOVE
         shifted, certified_root = _SHIFTED, _CERTIFIED_ROOT
         boundary_within = _BOUNDARY_WITHIN
@@ -504,8 +504,8 @@ def test_the_grid_keeps_the_origin_and_a_lone_point_reaches_no_boundary() -> Non
     an interval that has reached one.
     """
     origin = (Fraction(0), Fraction(0))
-    assert _pinned_roots._on_grid(origin, 64) == origin
-    assert _pinned_roots._boundary_within(Fraction(1), Fraction(1)) is None
+    assert pinned_roots._on_grid(origin, 64) == origin
+    assert pinned_roots._boundary_within(Fraction(1), Fraction(1)) is None
 
 
 def _double(value: Fraction) -> float:
@@ -615,7 +615,7 @@ def test_no_two_starting_points_are_conjugate_and_none_is_real() -> None:
     failing = []
     for degree in range(2, 201):
         monic = (Fraction(1),) + (Fraction(0),) * (degree - 1) + (Fraction(1),)
-        points = _pinned_roots._starts(monic)
+        points = pinned_roots._starts(monic)
         mirrored = {(re, -im) for re, im in points}
         if any(not im for _, im in points) or mirrored & set(points):
             failing.append(degree)
@@ -718,7 +718,7 @@ def test_the_root_finder_reaches_no_numerical_library() -> None:
     A ``numpy`` call or a ``math`` transcendental slipped in would answer
     with the platform's bits again.
     """
-    tree = ast.parse(inspect.getsource(_pinned_roots))
+    tree = ast.parse(inspect.getsource(pinned_roots))
     imported = {
         alias.name for node in ast.walk(tree) if isinstance(node, ast.Import)
         for alias in node.names

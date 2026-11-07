@@ -56,6 +56,7 @@ from scipy.io import wavfile
 
 from .._internal.display import RichDisplay
 from .._internal.json_input import escaped
+from .._internal.signal import Signal, SignalOrigin
 from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
@@ -63,7 +64,6 @@ from ._chunks import (
     WavChunks,
     parse_wav_chunks,
 )
-from ._signal import Signal, SignalOrigin
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray

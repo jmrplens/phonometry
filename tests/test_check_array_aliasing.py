@@ -3334,6 +3334,11 @@ class Copied:
     def __post_init__(self):
         object.__setattr__(self, "data", read_only_copy(self.data))
 
+@dataclass(frozen=True)
+class Named:
+    first: NDArray[np.float64]
+    data: NDArray[np.float64]
+
 def _second(x, rest):
     rec = _Rec(x, *rest)
     return rec.b
@@ -3359,6 +3364,15 @@ def build_picked(head, values):
 
 def build_copied(rest):
     return Copied(*rest)
+
+def _kept(head, values):
+    return _Rec(*head, b=values).b
+
+def build_named(head, values):
+    return Named(*head, data=values)
+
+def build_kept(head, values):
+    return BandResult(frequencies=_kept(head, values), levels=None)
 """
 
 
@@ -3372,8 +3386,11 @@ def test_a_star_fills_each_place_from_the_lowest_it_may_take_on(
     before the plain arguments written ahead of it allow: in
     ``Trailing(*head, 1, values)`` and ``_picked(*head, None, values)``
     the array lands in the second place or a later one, never in ``data``
-    or ``first``, which only an item of ``head`` may fill. A field the
-    record copies keeps nothing of the star.
+    or ``first``, which only an item of ``head`` may fill. A field an
+    explicit keyword fills is that keyword's alone, as Python raises rather
+    than put an item there: ``Named(*head, data=values)`` keeps ``head`` in
+    ``first`` alone, and ``_Rec(*head, b=values).b`` hands back ``values``
+    alone. A field the record copies keeps nothing of the star.
 
     The star was kept in no field, only spread over the fields an argument
     had already filled, so the two fields it alone filled carried nothing
@@ -3381,7 +3398,9 @@ def test_a_star_fills_each_place_from_the_lowest_it_may_take_on(
     was read from the star's own place on, so ``values`` was refused as
     kept in ``data`` and handed back as ``first``; and the star was read as
     spread over the record, so ``Copied(*rest)`` was refused though the
-    record copies its one array.
+    record copies its one array; then the star was kept in a field a keyword
+    fills too, so ``head`` was read as kept in ``data`` and handed back as
+    ``b``.
     """
     found = _findings(tmp_path, lowest=_LOWEST_PLACES)
     assert found == {
@@ -3389,7 +3408,134 @@ def test_a_star_fills_each_place_from_the_lowest_it_may_take_on(
         ("build_first", "BandResult.frequencies", "rest"),
         ("build_trailing", "Trailing.data", "head"),
         ("build_picked", "BandResult.frequencies", "head"),
+        ("build_named", "Named.first", "head"),
+        ("build_named", "Named.data", "values"),
+        ("build_kept", "BandResult.frequencies", "values"),
     }
+
+
+#: Classes whose call runs an ``__init__`` other than their own, and so a
+#: ``__post_init__`` other than theirs, or none.
+_INIT_RUNS = """
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays, read_only_copy
+
+@dataclass(frozen=True)
+class _Base:
+    data: NDArray[np.float64]
+    other: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Hooking:
+    data: NDArray[np.float64]
+    other: NDArray[np.float64]
+
+    def __post_init__(self):
+        pass
+
+@dataclass(frozen=True, init=False)
+class Unwritten(_Base):
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+class PlainNoHook(_Base):
+    pass
+
+class Owned(_Base):
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+class Hooked(_Hooking):
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+@dataclass(frozen=True)
+class Handing(_Hooking):
+    def __init__(self, data, other):
+        super().__init__(data, other)
+
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+@dataclass(frozen=True, init=False)
+class Lent(_Base, OwnsArrays):
+    pass
+
+@dataclass(frozen=True)
+class Stubbed:
+    data: NDArray[np.float64]
+    other: NDArray[np.float64]
+
+    if TYPE_CHECKING:
+
+        def __init__(self, data, other): ...
+
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+def build_unwritten(data, other):
+    return Unwritten(data, other)
+
+def build_plain(data, other):
+    return PlainNoHook(data, other)
+
+def build_owned(data, other):
+    return Owned(data=data, other=other)
+
+def build_hooked(data, other):
+    return Hooked(data, other)
+
+def build_handing(data, other):
+    return Handing(data, other)
+
+def build_stubbed(data, other):
+    return Stubbed(data, other)
+"""
+
+
+def test_a_call_keeps_what_the_init_it_runs_keeps(tmp_path: pathlib.Path) -> None:
+    """A call of a class runs the ``__init__`` of the first class of its
+    method resolution order that has one of its own, and the copies its
+    ``__post_init__`` makes only when that ``__init__`` calls it: the one
+    ``@dataclass`` wrote for ``_Base`` calls none, so ``Unwritten``,
+    ``Owned`` and ``Lent`` keep the caller's arrays whatever they copy, and
+    a call of ``PlainNoHook``, a class that is no record, keeps both. The
+    one written for ``_Hooking`` calls the hook ``Hooked`` writes, and so
+    does ``Handing``'s, which hands its values on to it. An ``__init__``
+    written under ``if TYPE_CHECKING:`` never runs: ``Stubbed`` runs the one
+    ``@dataclass`` writes it, and its hook.
+
+    A record's own ``__post_init__`` was read as copying whatever
+    ``__init__`` ran, so ``data`` was read as owned, and a call of a class
+    that is no record as keeping nothing.
+    """
+    found = _findings(tmp_path, runs=_INIT_RUNS)
+    assert found == {
+        ("build_unwritten", "Unwritten.data", "data"),
+        ("build_unwritten", "Unwritten.other", "other"),
+        ("build_plain", "PlainNoHook.data", "data"),
+        ("build_plain", "PlainNoHook.other", "other"),
+        ("build_owned", "Owned.data", "data"),
+        ("build_owned", "Owned.other", "other"),
+        ("build_hooked", "Hooked.other", "other"),
+        ("build_handing", "Handing.other", "other"),
+        ("build_stubbed", "Stubbed.other", "other"),
+    }
+    root = _package(tmp_path / "unequipped", {"runs": _INIT_RUNS})
+    lent = [
+        finding.sink
+        for finding in caa.records_without_mechanism(sorted(root.rglob("*.py")), root)
+        if finding.function == "Lent"
+    ]
+    assert lent == [
+        "Lent can hold an array (data, other) and inherits OwnsArrays, but the "
+        "__init__ a call of it runs calls no __post_init__"
+    ]
 
 
 #: Records whose constructor takes the fields of their bases in their method

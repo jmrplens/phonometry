@@ -31,7 +31,7 @@ auditory filters and their loudness summation.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing close to 1 sone at 40 dB SPL" width="80%"></picture>
 
 *The three models pass through approximately 1 sone at the 40 dB anchor
-(the Sottek front-end documents 0.984 sone_HMS there) and diverge with level:
+(the Sottek front-end documents 0.9845 sone_HMS there) and diverge with level:
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
 more slowly (about 1.65× per 10 dB), an intrinsic difference between the
 auditory summations, not a calibration error.*
@@ -292,7 +292,7 @@ filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
 with $z = 0.5\ ..\ 26.5$, half-wave rectification, block RMS and a compressive
 nonlinearity, Formula 23) that is **shared** by its loudness, tonality and
 roughness metrics. The loudness $N$ is reported in **sone_HMS**, and the same
-1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.984,
+1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.9845,
 with the full Clause 6.2.3 band averaging; the residual's origin is
 documented in the module docstring). `loudness_ecma` is monaural: the
 binaural combination of Formula 118 (Clause 8.1.5) is not implemented, so

@@ -469,7 +469,7 @@ internamente a float64, pero una muestra int16 de +32767 entra en el banco como
 32767.0 y no como 1.0. Todos los niveles salen, por tanto,
 $20\log_{10}(32768) = 90{,}3$ dB por encima de los de la misma señal leída como
 float: medido, una sinusoide de 1 kHz de amplitud unidad tiene su máximo en
-90,95 dB y esa misma sinusoide escrita en int16 lo tiene en 181,26 dB. Divide por
+90,94 dB y esa misma sinusoide escrita en int16 lo tiene en 181,25 dB. Divide por
 el valor de fondo de escala (`signal / 32768.0` para int16) antes de analizar, o
 deja que lo absorba el paso de calibración: una sensibilidad determinada a
 partir de una grabación de calibrador *en el mismo formato entero* ya lleva el

@@ -200,7 +200,7 @@ ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) 
 
 # Indirect method: from a measured room impulse response
 res = speech.sti_from_impulse_response(ir, fs, snr=25.0)
-print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
+print(f"STI = {res.sti:.2f}  ({res.rating})")   # 0.73 (A)
 
 # Direct STIPA measurement: play speech.stipa_signal() in the room, record it
 test = speech.stipa_signal(fs, duration_s=18.0, level=80.0)

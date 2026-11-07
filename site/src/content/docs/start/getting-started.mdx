@@ -448,8 +448,8 @@ at once, each with its own sensitivity.
 error because integers are converted to float64 internally, but an int16 sample
 of +32767 enters the bank as 32767.0 rather than 1.0. Every level therefore
 comes out $20\log_{10}(32768) = 90.3$ dB above the same signal read as float.
-For example, a unit-amplitude 1 kHz sine peaks at 90.95 dB and the same sine
-written to int16 peaks at 181.26 dB. Divide by the full-scale value
+For example, a unit-amplitude 1 kHz sine peaks at 90.94 dB and the same sine
+written to int16 peaks at 181.25 dB. Divide by the full-scale value
 (`signal / 32768.0` for int16) before analysing, or let the calibration step
 absorb it: a sensitivity determined from a calibrator recording *in the same
 integer format* already carries the factor. Mixing the two (a float-read

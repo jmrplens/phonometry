@@ -2314,6 +2314,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the check runs `astro check --minimumFailingSeverity hint`, so a new one
   fails the docs workflow.
 
+- **The documentation site hands its remark and rehype plugins to the
+  Markdown processor.** `site/astro.config.mjs` set them as
+  `markdown.remarkPlugins` and `markdown.rehypePlugins`, which Astro 7
+  deprecates, so every build and every type check printed that they were
+  deprecated while Astro moved them onto a `unified()` processor of its own.
+  The config builds that processor itself now, with the same plugins in the
+  same order, and neither prints the notice.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

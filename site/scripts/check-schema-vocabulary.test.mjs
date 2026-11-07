@@ -30,6 +30,7 @@ import {
 	loadVocabulary,
 } from './check-schema-vocabulary.mjs';
 import { VOCABULARY_PATH, compactVocabulary, serializeVocabulary } from './generate-schema-vocabulary.mjs';
+import { referenceNode } from '../src/lib/citations.mjs';
 
 const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-schema-vocabulary.mjs');
 const vocabulary = loadVocabulary();
@@ -155,6 +156,39 @@ test('the article inside its issue, inside its volume, inside its periodical pas
 		),
 		{},
 	);
+});
+
+test("the bibliography's own writer gives every kind of reference a node the vocabulary holds", () => {
+	// The bibliography pages carry what referenceNode writes, so the writer
+	// itself is checked here: an article names its volume and its issue only
+	// through the parts it sits in, whichever of the two its reference has.
+	const bibliography = `${ORIGIN}/reference/bibliography/`;
+	const journal = { type: 'article', authors: ['A. Author'], title: 'An article', journal: 'A journal' };
+	const references = [
+		{ label: 'both', ...journal, year: 2001, volume: 64, issue: 1, pages: '1-10', doi: '10.1000/x' },
+		{ label: 'volume', ...journal, year: 2002, volume: 12 },
+		{ label: 'issue', ...journal, year: 2003, issue: 4 },
+		{ label: 'neither', ...journal, year: 2004 },
+		{ label: 'iso', type: 'standard', designation: 'ISO 1996-1:2016', title: 'A standard', organization: 'ISO' },
+		{ label: 'book', type: 'book', authors: ['B. Author'], title: 'A book', publisher: 'A press', edition: '2nd' },
+		{ label: 'report', type: 'report', title: 'A report', institution: 'A lab', number: 'R-1' },
+		{ label: 'web', type: 'web', title: 'A page', organization: 'A body', url: 'https://example.org/' },
+	];
+	const nodes = references.map((ref) => referenceNode(ref, bibliography));
+	assert.deepEqual(failuresOf(onePage(nodes)), {});
+	const partOf = Object.fromEntries(
+		nodes.slice(0, 4).map((node, i) => {
+			const chain = [];
+			for (let part = node.isPartOf; part; part = part.isPartOf) chain.push(part['@type']);
+			return [references[i].label, chain.join(' > ')];
+		}),
+	);
+	assert.deepEqual(partOf, {
+		both: 'PublicationIssue > PublicationVolume > Periodical',
+		volume: 'PublicationVolume > Periodical',
+		issue: 'PublicationIssue > Periodical',
+		neither: 'Periodical',
+	});
 });
 
 test('codeRepository and programmingLanguage fail on an APIReference', () => {

@@ -9,6 +9,8 @@ an NC criterion.
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 
 import phonometry as ph
@@ -72,7 +74,16 @@ def _silencer_example() -> tuple[object, ReportMetadata, str]:
     apply.
     """
     freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000], dtype=float)
-    result = ph.noise_control.silencers.expansion_chamber(freqs, 0.5, 0.08, 0.01)
+    with warnings.catch_warnings():
+        # The 0.08 m2 chamber carries higher-order modes from about 630 Hz, so
+        # the library says the top three octaves are the plane-wave mode only.
+        # The fiche shows that model across the seven octaves on purpose.
+        warnings.filterwarnings(
+            "ignore",
+            message=r"expansion chamber: \d+ of \d+ frequencies are above",
+            category=ph.noise_control.PlaneWaveWarning,
+        )
+        result = ph.noise_control.silencers.expansion_chamber(freqs, 0.5, 0.08, 0.01)
     metadata = ReportMetadata(
         specimen="Simple expansion-chamber muffler (m = 8, design case)",
         client="Example client",

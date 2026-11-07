@@ -59,8 +59,8 @@ _HS_T0 = 4.0 * _HS_SRC_W
 # so -- because a sponge absorbs a grazing surface wave far less well than
 # a body wave. Here the peak of the Rayleigh train, which leaves the source
 # when the pulse peaks at 32 us, reaches a sponge 0.13 m outside the frame
-# at 180 us, after the 164 us captured, and anything it sent back would need
-# another 45 us to re-enter the view.
+# at 180 us, and anything it sent back would need another 45 us to re-enter
+# the view, past the 196 us captured.
 _HS_NY, _HS_NX = 450, 1100
 _HS_SPONGE = 120
 _HS_HALF = 300  # view half-width and depth [cells]
@@ -111,12 +111,16 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
 
     Timeline per the animation norms. Flight: the farthest visible point is
     a bottom corner of the view at sqrt(0.30^2 + 0.30^2) = 0.424 m, reached
-    by the slowest body wave of interest (S at 3098.7 m/s) in 137 us, so
-    1.2 x 137 = 164 us is captured -- 2.2 times the 73 us of the still
-    figure, which stops before the surface train has separated. Sampling:
-    dt = 0.6 dx / (c_P sqrt(2)) = 65.77 ns, a stride of 5 gives a frame
-    every 0.329 us, i.e. 50.3 frames per period of the 60.4 kHz upper edge
-    of the source spectrum (>= the 48 the clips keep), and 500 frames.
+    by the slowest body wave of interest (S at 3098.7 m/s) 137 us after it
+    leaves the source, which it does when the pulse peaks, at t0 = 32 us.
+    So t0 + 1.2 x 137 = 196 us is captured, the delay counted as the seabed
+    and plate-junction clips count theirs -- 2.7 times the 73 us of the
+    still figure, which stops before the surface train has separated. The
+    S front reaches that corner at 169 us, and the last 27 us show the
+    block with every front gone. Sampling: dt = 0.6 dx / (c_P sqrt(2)) =
+    65.77 ns, a stride of 5 gives a frame every 0.329 us, i.e. 50.3 frames
+    per period of the 60.4 kHz upper edge of the source spectrum (>= the 48
+    the clips keep), and 597 frames.
 
     Returns the two decimated ``vy`` stacks, the two surface-probe
     histories, the frame times and the Rayleigh speed measured off the free
@@ -131,7 +135,7 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     dt = 0.6 * dx / (_HS_CP * float(np.sqrt(2.0)))
     corner = float(np.hypot(_HS_HALF * dx, _HS_HALF * dx))
     every = 5
-    n_active = int(np.ceil(1.2 * corner / _HS_CS / (every * dt)))
+    n_active = int(np.ceil((_HS_T0 + 1.2 * corner / _HS_CS) / (every * dt)))
     src_ix = _HS_NX // 2
     # Surface probes 0.15 m apart, both inside the view: the Rayleigh
     # arrival separates between them by 0.15 / c_R = 51.8 us, which is the
@@ -541,15 +545,13 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
         return (*ims, *marks, *r_labs, *v_txts, speeds, scale_txt, t_txt)
 
     # The poster is grabbed mid-flight rather than at the end of the hold:
-    # by the last frame the surface train and the compressional front have
-    # left the view, the shear front is going out through the bottom corners,
-    # and the default poster is an almost empty field. 95 us is where the
-    # peak of the Rayleigh train is still 0.12 m inside the right edge (it
-    # leaves at 135 us, 32 us of pulse delay and 104 us of travel), the shear
-    # front sits on its arc 13 mm ahead of it and the compressional front is
-    # crossing the two bottom corners. `fields/pillar_hall._poster_ss_for`
-    # carries the same number so that `make posters` agrees with a full
-    # render.
+    # by the last frame every front has left the view and the default poster
+    # would be an empty field. 95 us is where the peak of the Rayleigh train
+    # is still 0.12 m inside the right edge (it leaves at 135.5 us, 32 us of
+    # pulse delay and 103.5 us of travel), the shear front sits on its arc
+    # 13 mm ahead of it and the compressional front is crossing the two
+    # bottom corners. `fields/pillar_hall._poster_ss_for` carries the same
+    # number so that `make posters` agrees with a full render.
     poster_frame = 95.0e-6 / (5.0 * 0.6 * _HS_DX / (_HS_CP * float(np.sqrt(2.0))))
     _render_clip(
         fig,

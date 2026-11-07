@@ -160,8 +160,8 @@ tropieza quien implementa:
   fija el factor de escala.
 - **dBqps es un nivel de tensión.** phonometry mide el factor a la frecuencia
   de muestreo de quien llama en lugar de guardar uno ajustado a 48 kHz, porque
-  la ganancia de la cadena para un tono permanente se mueve 0,0141 dB entre 32
-  y 192 kHz y el apartado 2.6 no admite ese margen.
+  la ganancia de la cadena para un tono permanente se mueve 0,0147 dB entre 32,
+  44,1, 48, 96 y 192 kHz y el apartado 2.6 no admite ese margen.
 
 ```python
 import numpy as np
@@ -270,11 +270,12 @@ row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.85
 ```
 
-Las once ventanas se cumplen a 32, 44,1, 48, 96 y 192 kHz. El peor margen es de
-0,255 dB, en la celda de 100 ráfagas por segundo cuyo límite superior es el
-techo físico. Entre esas cinco frecuencias ninguna lectura se mueve más de
-0,043 dB, ni ninguna más del 1,8 % de su propia ventana, y por eso
-no muerde aquí la
+Las once ventanas se cumplen a 32, 44,1, 48, 96 y 192 kHz. A cada frecuencia, el
+peor margen está en la celda de 100 ráfagas por segundo, cuyo límite superior
+es el techo físico: 0,255 dB a 48 kHz, el margen que imprime el ejemplo, y
+0,248 dB a 32 kHz, el menor de los cinco. Entre esas cinco frecuencias ninguna
+lectura se mueve más de 0,043 dB, ni ninguna más del 1,8 % de su propia
+ventana, y por eso no muerde aquí la
 preocupación clásica de que un seguidor de picos lea la mayor *muestra* en
 lugar del mayor valor de la forma de onda: la carga de 1,41 ms abarca catorce
 semiperiodos de la portadora de 5 kHz rectificada, así que el rizado ha

@@ -365,7 +365,7 @@ answer by construction.
 
 | Name | Description |
 | :--- | :--- |
-| `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) warns; the consequence measures 0.006 dB against a 2.626 dB window. |
+| `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) warns; gating it a whole sample later moves the reading by under 0.0001 dB, against a 2.626 dB window. |
 | `ballistics` | The chain to check, defaulting to the fitted [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs468_ballistics). Passing another set is how the published statement about how far each constant can move is reproduced, and the reason the chain takes them as an argument at all. |
 
 **Returns:** A [`QuasiPeakDynamicsResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakdynamicsresult), which carries the verdict together with the eleven rows it is the conjunction of.

@@ -162,6 +162,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, NumericArrayLike
@@ -806,7 +807,9 @@ _MOUNTINGS: Final = ("wall", "ceiling")
 # ---------------------------------------------------------------------------
 
 
-def _round_half_up_array(values: NumericArrayLike, decimals: int) -> np.ndarray:
+def _round_half_up_array(
+    values: NumericArrayLike, decimals: int
+) -> NDArray[np.float64]:
     """Round halves upward, not to even as :func:`round` would.
 
     7.5 rounds the band average to one decimal and 7.8 the weighted values to
@@ -825,7 +828,7 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     return float(_round_half_up_array(value, decimals))
 
 
-def _nominal_bands(frequencies: NumericArrayLike, fraction: int) -> np.ndarray:
+def _nominal_bands(frequencies: NumericArrayLike, fraction: int) -> NDArray[np.float64]:
     """Match each given centre to the nominal band of 4.2 it stands for."""
     table = np.asarray(_THIRD_OCTAVE_BANDS if fraction == _THIRD else _OCTAVE_BANDS)
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
@@ -852,7 +855,9 @@ def _nominal_bands(frequencies: NumericArrayLike, fraction: int) -> np.ndarray:
     return nominal
 
 
-def _in_range(nominal: np.ndarray, bounds: tuple[float, float]) -> np.ndarray:
+def _in_range(
+    nominal: NDArray[np.float64], bounds: tuple[float, float]
+) -> NDArray[np.bool_]:
     """Which nominal bands lie within an inclusive frequency range."""
     low, high = bounds
     return (nominal >= low * (1.0 - _NOMINAL_TOLERANCE)) & (
@@ -860,7 +865,9 @@ def _in_range(nominal: np.ndarray, bounds: tuple[float, float]) -> np.ndarray:
     )
 
 
-def _covers(nominal: np.ndarray, fraction: int, bounds: tuple[float, float]) -> bool:
+def _covers(
+    nominal: NDArray[np.float64], fraction: int, bounds: tuple[float, float]
+) -> bool:
     """Whether every nominal band of a range is among the given ones."""
     table = np.asarray(_THIRD_OCTAVE_BANDS if fraction == _THIRD else _OCTAVE_BANDS)
     needed = table[_in_range(table, bounds)]
@@ -868,7 +875,9 @@ def _covers(nominal: np.ndarray, fraction: int, bounds: tuple[float, float]) -> 
 
 
 def _weighted_sum(
-    levels: np.ndarray, corrections: np.ndarray, mask: np.ndarray
+    levels: NDArray[np.float64],
+    corrections: NDArray[np.float64],
+    mask: NDArray[np.bool_],
 ) -> float:
     """Formula (2) or (3): the energy sum of the weighted bands in the range."""
     return float(
@@ -876,7 +885,7 @@ def _weighted_sum(
     )
 
 
-def _as_levels(value: NumericArrayLike, name: str) -> np.ndarray:
+def _as_levels(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A finite float array of levels, or a ``ValueError`` naming the input."""
     arr = real_array(value, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
@@ -913,7 +922,7 @@ def _positive_number(value: NumericArrayLike, name: str) -> float:
     return require_positive(real_array(value, name).item(), name)
 
 
-def _numbers(value: NumericArrayLike, name: str) -> np.ndarray:
+def _numbers(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A float array of what was given, refusing text and flags by name.
 
     ``np.asarray("0.3", dtype=float)`` is 0,3 and ``True`` is 1,0: read
@@ -937,7 +946,7 @@ def _numbers(value: NumericArrayLike, name: str) -> np.ndarray:
     return real_array(value, name)
 
 
-def _room(room_dimensions_m: NumericArrayLike) -> np.ndarray:
+def _room(room_dimensions_m: NumericArrayLike) -> NDArray[np.float64]:
     """The length, width and height of a rectangular room, or a ``ValueError``."""
     dims = real_array(room_dimensions_m, "room_dimensions_m")
     if dims.shape != (3,) or not np.all(np.isfinite(dims)) or np.any(dims <= 0.0):
@@ -978,9 +987,9 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
     they are read-only properties and not fields.
     """
 
-    measured_levels: np.ndarray
-    background_levels: np.ndarray
-    frequencies: np.ndarray | None = None
+    measured_levels: NDArray[np.float64]
+    background_levels: NDArray[np.float64]
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a correction whose band arrays disagree in length.
@@ -997,7 +1006,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def difference(self) -> np.ndarray:
+    def difference(self) -> NDArray[np.float64]:
         r""":math:`\Delta L = L_1 - L_2` per band, in dB (Formula (9))."""
         return np.asarray(
             np.asarray(self.measured_levels) - np.asarray(self.background_levels),
@@ -1010,19 +1019,19 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
         return _background_regime(self.difference)[1]
 
     @property
-    def correction(self) -> np.ndarray:
+    def correction(self) -> NDArray[np.float64]:
         """The correction :math:`K` per band, in dB (Formulae (7) to (9))."""
         return _background_regime(self.difference)[0]
 
     @property
-    def corrected_levels(self) -> np.ndarray:
+    def corrected_levels(self) -> NDArray[np.float64]:
         """:math:`L = L_1 - K` per band, in dB (Formula (7))."""
         return np.asarray(
             np.asarray(self.measured_levels) - self.correction, dtype=np.float64
         )
 
     @property
-    def limited(self) -> np.ndarray:
+    def limited(self) -> NDArray[np.bool_]:
         """Per band, whether the background held the correction at 2,2 dB.
 
         :return: One boolean per band; ``True`` marks an upper limit.
@@ -1112,7 +1121,9 @@ def service_equipment_background_correction(
     )
 
 
-def _background_regime(difference: np.ndarray) -> tuple[np.ndarray, tuple[str, ...]]:
+def _background_regime(
+    difference: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], tuple[str, ...]]:
     r"""The Clause 9 correction and regime of each band, from :math:`\Delta L`."""
     # The thresholds are read with the slack of a decimal difference: 20,4 dB
     # over 10,4 dB is a 10 dB margin to Clause 9 and a hair under it in binary.
@@ -1183,19 +1194,19 @@ class ServiceEquipmentResult(OwnsArrays):
         {"ratings": "dB", "unrounded_ratings": "dB"}
     )
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     fraction: BandFraction
     quantity: Literal["Smax", "Fmax", "eq"]
     a_weighting_range: Literal["restricted", "extended"]
-    reading_levels: np.ndarray
-    average_levels: np.ndarray
+    reading_levels: NDArray[np.float64]
+    average_levels: NDArray[np.float64]
     background: ServiceEquipmentBackgroundResult | None
-    corrected_levels: np.ndarray
-    standardized_levels: np.ndarray | None
-    normalized_levels: np.ndarray | None
+    corrected_levels: NDArray[np.float64]
+    standardized_levels: NDArray[np.float64] | None
+    normalized_levels: NDArray[np.float64] | None
     ratings: Mapping[str, int]
     unrounded_ratings: Mapping[str, float]
-    reproducibility_db: np.ndarray
+    reproducibility_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a result whose band arrays do not share one band set.
@@ -1237,7 +1248,7 @@ class ServiceEquipmentResult(OwnsArrays):
         return reduce_with_plain_rows(self)
 
     @property
-    def standardizable(self) -> np.ndarray:
+    def standardizable(self) -> NDArray[np.bool_]:
         """Per band, whether 7.7 lets it be standardized or normalized.
 
         :return: One boolean per band, ``True`` inside the range 7.7 gives for
@@ -1258,7 +1269,7 @@ class ServiceEquipmentResult(OwnsArrays):
         """
         return int(np.asarray(self.reading_levels).shape[0])
 
-    def _range_mask(self, weighting: str) -> np.ndarray:
+    def _range_mask(self, weighting: str) -> NDArray[np.bool_]:
         """The bands a weighted value of this result was summed over."""
         key = self.a_weighting_range if weighting == "A" else "extended"
         return _in_range(
@@ -1494,13 +1505,13 @@ def service_equipment_level(
 
 
 def _standardize(
-    corrected: np.ndarray,
-    standardizable: np.ndarray,
+    corrected: NDArray[np.float64],
+    standardizable: NDArray[np.bool_],
     *,
     reverberation_time: NumericArrayLike | None,
     volume: float | None,
     t0: float,
-) -> tuple[np.ndarray | None, np.ndarray | None]:
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Formulae (5) and (6) over the standardization range of 7.7.
 
     ``t0`` is :math:`T_0` in s, already checked by the caller.
@@ -1553,7 +1564,7 @@ class PositionSpreadCheck(OwnsArrays):
         then (corner, 4, 5) and (corner, 6, 7) for each further stage, in dB.
     """
 
-    levels: np.ndarray
+    levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Hold the readings read-only and reject a partial stage.
@@ -1799,10 +1810,10 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
         was not given.
     """
 
-    room_dimensions_m: np.ndarray
-    corner_position_m: np.ndarray
-    room_positions_m: np.ndarray
-    source_positions_m: np.ndarray
+    room_dimensions_m: NDArray[np.float64]
+    corner_position_m: NDArray[np.float64]
+    room_positions_m: NDArray[np.float64]
+    source_positions_m: NDArray[np.float64]
     small_room: bool
     corner_obstacle_distance_m: float | None = None
 
@@ -1835,7 +1846,7 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
         return float(np.min(to_source))
 
     @property
-    def heights_m(self) -> np.ndarray:
+    def heights_m(self) -> NDArray[np.float64]:
         """The heights of the room positions, in m."""
         return self.room_positions_m[:, 2].copy()
 
@@ -1998,7 +2009,7 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
         )
 
 
-def _points(value: NumericArrayLike, name: str) -> np.ndarray:
+def _points(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """An ``(n, 3)`` array of finite coordinates, or a ``ValueError``.
 
     An empty list is no position at all, the same as an empty ``(0, 3)``
@@ -2143,7 +2154,7 @@ def additional_microphone_position(
     source_position_m: NumericArrayLike,
     *,
     mounting: _Mounting,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The extra position for a sound source in the room (ISO/DIS 16032:2023 7.9).
 
     A source in the room itself, a ventilation outlet in a wall or in the
@@ -2204,7 +2215,7 @@ def additional_microphone_position(
 # ---------------------------------------------------------------------------
 
 
-def _readings(value: NumericArrayLike, name: str) -> np.ndarray:
+def _readings(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """One or more finite levels as a one-dimensional array, or a ``ValueError``."""
     arr = np.atleast_1d(_as_levels(_numbers(value, name), name))
     if arr.ndim != 1:
@@ -2228,9 +2239,9 @@ class CalibrationDeviationResult(OwnsArrays):
         a first reading with nothing before it.
     """
 
-    levels: np.ndarray
-    previous_levels: np.ndarray
-    deviations_db: np.ndarray
+    levels: NDArray[np.float64]
+    previous_levels: NDArray[np.float64]
+    deviations_db: NDArray[np.float64]
 
     @property
     def limit_db(self) -> float:
@@ -2370,7 +2381,7 @@ class BackgroundDurationCheck(OwnsArrays):
         accepts as "approximately", in s. The draft prints none.
     """
 
-    durations_s: np.ndarray
+    durations_s: NDArray[np.float64]
     tolerance_s: float
 
     @property
@@ -2382,7 +2393,7 @@ class BackgroundDurationCheck(OwnsArrays):
         return _BACKGROUND_DURATION_S
 
     @property
-    def departures_s(self) -> np.ndarray:
+    def departures_s(self) -> NDArray[np.float64]:
         """How far each duration departs from 30 s, in s.
 
         :return: The duration less 30 s, one per background measurement.
@@ -2398,7 +2409,7 @@ class BackgroundDurationCheck(OwnsArrays):
         return float(np.max(np.abs(self.departures_s)))
 
     @property
-    def within_tolerance(self) -> np.ndarray:
+    def within_tolerance(self) -> NDArray[np.bool_]:
         """Per background, whether it departs from 30 s by no more than the tolerance.
 
         A departure of exactly :attr:`tolerance_s` is within it.
@@ -2511,10 +2522,10 @@ class VaryingBackgroundCheck(OwnsArrays):
     :ivar frequencies: The band centres, in Hz, or ``None`` when not given.
     """
 
-    background_max_level: np.ndarray
-    equipment_levels: np.ndarray
+    background_max_level: NDArray[np.float64]
+    equipment_levels: NDArray[np.float64]
     observation_time_s: float
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     @property
     def limit_db(self) -> float:
@@ -2541,7 +2552,7 @@ class VaryingBackgroundCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def margin_db(self) -> np.ndarray:
+    def margin_db(self) -> NDArray[np.float64]:
         """How far the background maximum lies below the equipment, per band.
 
         :return: The equipment level less the background maximum, in dB.
@@ -2553,7 +2564,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         )
 
     @property
-    def margin_ok(self) -> np.ndarray:
+    def margin_ok(self) -> NDArray[np.bool_]:
         """Per band, whether the background maximum is 10 dB or more below.
 
         :return: One boolean per band.
@@ -2674,8 +2685,8 @@ class MeasurementDisturbanceCheck(OwnsArrays):
         period, in dB.
     """
 
-    max_levels: np.ndarray
-    equivalent_levels: np.ndarray
+    max_levels: NDArray[np.float64]
+    equivalent_levels: NDArray[np.float64]
 
     @property
     def limit_db(self) -> float:
@@ -2699,7 +2710,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def differences(self) -> np.ndarray:
+    def differences(self) -> NDArray[np.float64]:
         """The maximum less the equivalent level of each period, in dB.
 
         :return: One difference per measurement period.
@@ -2711,7 +2722,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
         )
 
     @property
-    def undisturbed(self) -> np.ndarray:
+    def undisturbed(self) -> NDArray[np.bool_]:
         """Per period, whether the difference is less than 5 dB.
 
         A difference of exactly 5,0 dB is not "less than 5 dB".

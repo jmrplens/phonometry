@@ -114,6 +114,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -161,30 +162,32 @@ AMBIENT_NOISE_BANDS_HZ: tuple[float, ...] = _SOUND_FIELD_BANDS_HZ[:-2]
 #: :data:`AMBIENT_NOISE_BANDS_HZ`, keyed by the lowest test tone frequency in
 #: hertz (125, 250 or 500). They hold for hearing threshold levels down to
 #: 0 dB with at most +2 dB of threshold shift from the ambient noise.
-AIR_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType(
-    {
-        125.0: read_only(
-            np.array(
-                [56, 52, 47, 42, 38, 33, 28, 23, 20, 19, 18, 18, 18, 18, 20, 23]
-                + [25, 27, 30, 32, 34, 36, 35, 34, 33],
-                dtype=np.float64,
-            )
-        ),
-        250.0: read_only(
-            np.array(
-                [66, 62, 57, 52, 48, 43, 39, 30, 20, 19, 18, 18, 18, 18, 20, 23]
-                + [25, 27, 30, 32, 34, 36, 35, 34, 33],
-                dtype=np.float64,
-            )
-        ),
-        500.0: read_only(
-            np.array(
-                [78, 73, 68, 64, 59, 55, 51, 47, 42, 37, 33, 24, 18, 18, 20, 23]
-                + [25, 27, 30, 32, 34, 36, 35, 34, 33],
-                dtype=np.float64,
-            )
-        ),
-    }
+AIR_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, NDArray[np.float64]] = (
+    MappingProxyType(
+        {
+            125.0: read_only(
+                np.array(
+                    [56, 52, 47, 42, 38, 33, 28, 23, 20, 19, 18, 18, 18, 18, 20, 23]
+                    + [25, 27, 30, 32, 34, 36, 35, 34, 33],
+                    dtype=np.float64,
+                )
+            ),
+            250.0: read_only(
+                np.array(
+                    [66, 62, 57, 52, 48, 43, 39, 30, 20, 19, 18, 18, 18, 18, 20, 23]
+                    + [25, 27, 30, 32, 34, 36, 35, 34, 33],
+                    dtype=np.float64,
+                )
+            ),
+            500.0: read_only(
+                np.array(
+                    [78, 73, 68, 64, 59, 55, 51, 47, 42, 37, 33, 24, 18, 18, 20, 23]
+                    + [25, 27, 30, 32, 34, 36, 35, 34, 33],
+                    dtype=np.float64,
+                )
+            ),
+        }
+    )
 )
 
 #: Table 4: the maximum permissible ambient sound pressure levels
@@ -193,23 +196,25 @@ AIR_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType(
 #: tone frequency in hertz (125 or 250). The ears are open, so no earphone
 #: shelters them, and NOTE 2 warns that levels below 5 dB are hard to measure
 #: with most sound level meters.
-BONE_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType(
-    {
-        125.0: read_only(
-            np.array(
-                [55, 47, 41, 35, 30, 25, 20, 17, 15, 13, 11, 9, 8, 8, 7, 7, 7, 8]
-                + [8, 6, 4, 2, 4, 9, 15],
-                dtype=np.float64,
-            )
-        ),
-        250.0: read_only(
-            np.array(
-                [63, 56, 49, 44, 39, 35, 28, 21, 15, 13, 11, 9, 8, 8, 7, 7, 7, 8]
-                + [8, 6, 4, 2, 4, 9, 15],
-                dtype=np.float64,
-            )
-        ),
-    }
+BONE_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, NDArray[np.float64]] = (
+    MappingProxyType(
+        {
+            125.0: read_only(
+                np.array(
+                    [55, 47, 41, 35, 30, 25, 20, 17, 15, 13, 11, 9, 8, 8, 7, 7, 7, 8]
+                    + [8, 6, 4, 2, 4, 9, 15],
+                    dtype=np.float64,
+                )
+            ),
+            250.0: read_only(
+                np.array(
+                    [63, 56, 49, 44, 39, 35, 28, 21, 15, 13, 11, 9, 8, 8, 7, 7, 7, 8]
+                    + [8, 6, 4, 2, 4, 9, 15],
+                    dtype=np.float64,
+                )
+            ),
+        }
+    )
 )
 
 #: Table 3: the average sound attenuation of three earphones, in dB, one per
@@ -217,7 +222,7 @@ BONE_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType
 #: supra-aural earphones, the ones Table 2 assumes), ``"ER-3A"`` (the Etymotic
 #: insert earphone) and ``"HDA 200"`` (the Sennheiser circumaural one). The
 #: HDA 200 column prints no value below 63 Hz, which is NaN here.
-EARPHONE_ATTENUATION: Mapping[Earphone, np.ndarray] = MappingProxyType(
+EARPHONE_ATTENUATION: Mapping[Earphone, NDArray[np.float64]] = MappingProxyType(
     {
         "supra-aural": read_only(
             np.array(
@@ -331,7 +336,9 @@ _MASKING_DB = 2.0
 _COVERAGE_FACTOR = 2.0
 
 
-def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
+def _at_most(
+    values: NDArray[np.float64], bound: NDArray[np.float64] | float
+) -> NDArray[np.bool_]:
     """Per element, whether ``values`` is at or below ``bound``.
 
     :param values: The values, in dB.
@@ -341,7 +348,9 @@ def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values <= np.asarray(bound) + _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _at_least(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
+def _at_least(
+    values: NDArray[np.float64], bound: NDArray[np.float64] | float
+) -> NDArray[np.bool_]:
     """Per element, whether ``values`` is at or above ``bound``.
 
     :param values: The values, in dB.
@@ -351,7 +360,9 @@ def _at_least(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values >= np.asarray(bound) - _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _levels(values: NumericArrayLike, name: str, *, minimum: int = 1) -> np.ndarray:
+def _levels(
+    values: NumericArrayLike, name: str, *, minimum: int = 1
+) -> NDArray[np.float64]:
     """A one-dimensional array of finite levels, in dB.
 
     :param values: The levels.
@@ -389,7 +400,7 @@ def _round_half_up(value: float, step: float) -> float:
 
 def _table_for(
     presentation: str,
-) -> tuple[Mapping[float, np.ndarray], tuple[float, ...]]:
+) -> tuple[Mapping[float, NDArray[np.float64]], tuple[float, ...]]:
     """The limit table and its band axis for a presentation.
 
     :param presentation: ``"air"``, ``"bone"`` or ``"sound field"``.
@@ -408,7 +419,7 @@ def _table_for(
 
 def _earphone_allowance(
     presentation: str, earphone: Earphone, earphone_attenuation: NumericArrayLike | None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """What an earphone's extra attenuation adds to the limits of Table 2.
 
     :param presentation: The presentation.
@@ -460,7 +471,7 @@ def ambient_noise_limits(
     earphone_attenuation: NumericArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The maximum permissible ambient sound pressure levels of a test room.
 
     For air conduction (ISO 8253-1 Table 2), bone conduction (Table 4) or
@@ -546,7 +557,9 @@ def ambient_noise_limits(
     return limits
 
 
-def _table_rows(presentation: str, frequencies: np.ndarray) -> np.ndarray:
+def _table_rows(
+    presentation: str, frequencies: NDArray[np.float64]
+) -> NDArray[np.int64]:
     """The row of the presentation's table each frequency is a band of.
 
     :param presentation: ``"air"``, ``"bone"`` or ``"sound field"``.
@@ -606,15 +619,15 @@ class AmbientNoiseCheck(OwnsArrays):
     """
 
     presentation: Presentation
-    frequencies: np.ndarray
-    levels: np.ndarray
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
     lowest_test_frequency_hz: float
     lowest_hearing_level: float
-    noise_floor_levels: np.ndarray | None = None
+    noise_floor_levels: NDArray[np.float64] | None = None
     earphone: Literal["supra-aural", "ER-3A", "HDA 200", "own attenuation"] | None = (
         None
     )
-    earphone_attenuation: np.ndarray | None = None
+    earphone_attenuation: NDArray[np.float64] | None = None
     allowed_threshold_shift_db: float = _BASE_THRESHOLD_SHIFT_DB
 
     def __post_init__(self) -> None:
@@ -656,13 +669,13 @@ class AmbientNoiseCheck(OwnsArrays):
         return tuple(float(b) for b in _table_for(self.presentation)[1])
 
     @property
-    def _rows(self) -> np.ndarray:
+    def _rows(self) -> NDArray[np.int64]:
         return _table_rows(
             self.presentation, np.atleast_1d(np.asarray(self.frequencies, np.float64))
         )
 
     @property
-    def limits_db(self) -> np.ndarray:
+    def limits_db(self) -> NDArray[np.float64]:
         """The maximum permissible level per band, in dB.
 
         :return: :func:`ambient_noise_limits` of the presentation and the
@@ -687,7 +700,7 @@ class AmbientNoiseCheck(OwnsArrays):
         return np.asarray(limits[self._rows], dtype=np.float64)
 
     @property
-    def exceedance_db(self) -> np.ndarray:
+    def exceedance_db(self) -> NDArray[np.float64]:
         """The measured level less the limit per band, in dB.
 
         :return: Positive where the room is too loud.
@@ -695,7 +708,7 @@ class AmbientNoiseCheck(OwnsArrays):
         return np.asarray(self.levels - self.limits_db, dtype=np.float64)
 
     @property
-    def within(self) -> np.ndarray:
+    def within(self) -> NDArray[np.bool_]:
         """Per band, whether the measured level is at or below the limit.
 
         :return: One boolean per band.
@@ -711,7 +724,7 @@ class AmbientNoiseCheck(OwnsArrays):
         return self.frequencies.size == len(self.table_bands_hz)
 
     @property
-    def floor_limited(self) -> np.ndarray:
+    def floor_limited(self) -> NDArray[np.bool_]:
         """Per band, whether the reading is within 6 dB of the noise floor.
 
         11.1 asks the measuring chain for a noise floor at least 6 dB below
@@ -911,11 +924,11 @@ class AscendingThresholdResult(OwnsArrays):
     :ivar responses: Whether each presentation drew a response, or ``None``.
     """
 
-    ascent_levels: np.ndarray
+    ascent_levels: NDArray[np.float64]
     shortened: bool
     next_level: float
-    presentation_levels: np.ndarray | None = None
-    responses: np.ndarray | None = None
+    presentation_levels: NDArray[np.float64] | None = None
+    responses: NDArray[np.bool_] | None = None
 
     def _rule(self) -> tuple[float, bool, bool]:
         return _ascending_rule(
@@ -1020,8 +1033,8 @@ def _ascending_rule(
 
 
 def _replay_ascending(
-    levels: np.ndarray,
-    responses: np.ndarray,
+    levels: NDArray[np.float64],
+    responses: NDArray[np.bool_],
     *,
     shortened: bool,
     familiarization_level: float | None,
@@ -1065,7 +1078,9 @@ def _replay_ascending(
     return ascents, threshold, determined, exhausted, next_level
 
 
-def _check_first_tone(levels: np.ndarray, familiarization_level: float | None) -> None:
+def _check_first_tone(
+    levels: NDArray[np.float64], familiarization_level: float | None
+) -> None:
     """6.2.3.2 Step 1: the first tone 10 dB below the familiarization response.
 
     :raises ValueError: for a first tone at another level.
@@ -1084,7 +1099,9 @@ def _check_first_tone(levels: np.ndarray, familiarization_level: float | None) -
         raise ValueError(msg)
 
 
-def _check_step(levels: np.ndarray, responses: np.ndarray, i: int) -> None:
+def _check_step(
+    levels: NDArray[np.float64], responses: NDArray[np.bool_], i: int
+) -> None:
     """6.2.3.2: 10 dB down after a response, 5 dB up after none.
 
     :raises ValueError: for presentation ``i`` at another level.
@@ -1102,8 +1119,8 @@ def _check_step(levels: np.ndarray, responses: np.ndarray, i: int) -> None:
 
 
 def _next_ascending_level(
-    levels: np.ndarray,
-    responses: np.ndarray,
+    levels: NDArray[np.float64],
+    responses: NDArray[np.bool_],
     ascents: list[float],
     familiarization_level: float | None,
     *,
@@ -1287,8 +1304,8 @@ class BracketingThresholdResult(OwnsArrays):
         mean halfway between two steps goes to the higher one.
     """
 
-    ascent_levels: np.ndarray
-    descent_levels: np.ndarray
+    ascent_levels: NDArray[np.float64]
+    descent_levels: NDArray[np.float64]
     mean_level: float
     threshold_level: float
 
@@ -1405,7 +1422,7 @@ def bracketing_method_threshold(
 # ---------------------------------------------------------------------------
 
 
-def _reversal_kinds(levels: np.ndarray, name: str) -> np.ndarray:
+def _reversal_kinds(levels: NDArray[np.float64], name: str) -> NDArray[np.bool_]:
     """Which reversals of a tracing are peaks, the rest being valleys.
 
     :param levels: The levels at successive reversals, in dB.
@@ -1428,7 +1445,7 @@ def _reversal_kinds(levels: np.ndarray, name: str) -> np.ndarray:
     return kinds
 
 
-def _retained_reversals(levels: np.ndarray) -> np.ndarray:
+def _retained_reversals(levels: NDArray[np.float64]) -> NDArray[np.bool_]:
     """Which reversals 6.3.5 a) keeps.
 
     The first reversal after the change of frequency is ignored, and so are
@@ -1445,7 +1462,7 @@ def _retained_reversals(levels: np.ndarray) -> np.ndarray:
     return retained
 
 
-def _tracing_mean(levels: np.ndarray) -> float:
+def _tracing_mean(levels: NDArray[np.float64]) -> float:
     """The mean of the average kept peak and the average kept valley (6.3.5 b).
 
     :param levels: The levels at successive reversals, in dB.
@@ -1479,7 +1496,7 @@ class AutomaticThresholdResult(OwnsArrays):
     (:attr:`retained`) are read from the levels, so they are not fields.
     """
 
-    reversal_levels: np.ndarray
+    reversal_levels: NDArray[np.float64]
     mean_level: float
     threshold_level: float
 
@@ -1516,7 +1533,7 @@ class AutomaticThresholdResult(OwnsArrays):
                 raise ValueError(msg)
 
     @property
-    def is_peak(self) -> np.ndarray:
+    def is_peak(self) -> NDArray[np.bool_]:
         """Whether each reversal is a peak, a local maximum of the level.
 
         The others are valleys. Read from the direction the trace turns at
@@ -1530,7 +1547,7 @@ class AutomaticThresholdResult(OwnsArrays):
         )
 
     @property
-    def retained(self) -> np.ndarray:
+    def retained(self) -> NDArray[np.bool_]:
         """Whether each reversal is kept after 6.3.5 a).
 
         The first is ignored, and so are both ends of every excursion of
@@ -1541,7 +1558,7 @@ class AutomaticThresholdResult(OwnsArrays):
         return _retained_reversals(np.asarray(self.reversal_levels, dtype=np.float64))
 
     @property
-    def peak_levels(self) -> np.ndarray:
+    def peak_levels(self) -> NDArray[np.float64]:
         """The retained peaks, in dB.
 
         :return: Their levels, in order.
@@ -1551,7 +1568,7 @@ class AutomaticThresholdResult(OwnsArrays):
         )
 
     @property
-    def valley_levels(self) -> np.ndarray:
+    def valley_levels(self) -> NDArray[np.float64]:
         """The retained valleys, in dB.
 
         :return: Their levels, in order.
@@ -1636,8 +1653,8 @@ def automatic_audiometry_threshold(
 
 
 def _sweep_frequencies(
-    reversal_frequencies: NumericArrayLike, levels: np.ndarray
-) -> np.ndarray:
+    reversal_frequencies: NumericArrayLike, levels: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """The reversal frequencies of a sweep, one per level, running one way.
 
     :raises ValueError: when they do not match the levels, are not positive,
@@ -1657,7 +1674,9 @@ def _sweep_frequencies(
     return freqs
 
 
-def _sweep_reversals(levels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _sweep_reversals(
+    levels: NDArray[np.float64],
+) -> tuple[NDArray[np.intp], NDArray[np.intp]]:
     """The positions of the peaks and of the valleys of a sweep tracing.
 
     :raises ValueError: when the reversals do not alternate, or fewer than
@@ -1672,8 +1691,10 @@ def _sweep_reversals(levels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _sweep_means(
-    freqs: np.ndarray, levels: np.ndarray, targets: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    freqs: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    targets: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """At each target, the 7.5 mean of the three nearest peaks and valleys.
 
     :return: The means, in dB, and the larger spread of the three peaks and
@@ -1693,8 +1714,8 @@ def _sweep_means(
 
 
 def _running_threshold(
-    freqs: np.ndarray, levels: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    freqs: NDArray[np.float64], levels: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The semicontinuous threshold of 7.5, run over six reversals at a time.
 
     :return: The geometric mean frequency of each run, in hertz, and the
@@ -1732,14 +1753,14 @@ class SweepThresholdResult(OwnsArrays):
     it is not a field.
     """
 
-    reversal_frequencies: np.ndarray
-    reversal_levels: np.ndarray
-    frequencies: np.ndarray
-    mean_level: np.ndarray
-    threshold_level: np.ndarray
-    spread_db: np.ndarray
-    running_frequencies: np.ndarray
-    running_threshold_levels: np.ndarray
+    reversal_frequencies: NDArray[np.float64]
+    reversal_levels: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    mean_level: NDArray[np.float64]
+    threshold_level: NDArray[np.float64]
+    spread_db: NDArray[np.float64]
+    running_frequencies: NDArray[np.float64]
+    running_threshold_levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a tracing whose reversals or whose thresholds disagree.
@@ -1782,7 +1803,7 @@ class SweepThresholdResult(OwnsArrays):
                 raise ValueError(msg)
 
     @property
-    def is_peak(self) -> np.ndarray:
+    def is_peak(self) -> NDArray[np.bool_]:
         """Whether each reversal is a peak, the others being valleys.
 
         Read from the direction the trace turns at each reversal.
@@ -1795,7 +1816,7 @@ class SweepThresholdResult(OwnsArrays):
         )
 
     @property
-    def less_reliable(self) -> np.ndarray:
+    def less_reliable(self) -> NDArray[np.bool_]:
         """Per frequency, whether its peaks or valleys spread over 10 dB.
 
         7.5 NOTE 1 calls such a determination less reliable.
@@ -2022,13 +2043,13 @@ class AudiogramCautions(OwnsArrays):
         the audiometer's bone conduction is calibrated for.
     """
 
-    frequencies: np.ndarray
-    air_conduction_threshold_levels: np.ndarray | None
-    bone_conduction_threshold_levels: np.ndarray | None
+    frequencies: NDArray[np.float64]
+    air_conduction_threshold_levels: NDArray[np.float64] | None
+    bone_conduction_threshold_levels: NDArray[np.float64] | None
     vibrator_placement: VibratorPlacement
 
     @property
-    def vibrotactile_levels(self) -> np.ndarray:
+    def vibrotactile_levels(self) -> NDArray[np.float64]:
         """The average vibrotactile threshold of 8.4 at each frequency, in dB.
 
         :return: One level per frequency, 10 dB lower for forehead placement,
@@ -2042,7 +2063,7 @@ class AudiogramCautions(OwnsArrays):
         return levels
 
     @property
-    def cross_hearing(self) -> np.ndarray:
+    def cross_hearing(self) -> NDArray[np.bool_]:
         """Per frequency, whether the air-conduction level is 40 dB or more.
 
         6.2.3.2 asks for such results to be interpreted with caution because
@@ -2061,7 +2082,7 @@ class AudiogramCautions(OwnsArrays):
         )
 
     @property
-    def vibrotactile(self) -> np.ndarray:
+    def vibrotactile(self) -> NDArray[np.bool_]:
         """Per frequency, whether the bone-conduction level reaches 8.4's level.
 
         At or above the average vibrotactile threshold the subject may feel
@@ -2153,7 +2174,7 @@ def audiogram_cautions(
     ):
         msg = "give 'air_conduction_threshold_levels', 'bone_conduction_threshold_levels' or both."
         raise ValueError(msg)
-    sets: dict[str, np.ndarray | None] = {}
+    sets: dict[str, NDArray[np.float64] | None] = {}
     for name, values in (
         ("air_conduction_threshold_levels", air_conduction_threshold_levels),
         ("bone_conduction_threshold_levels", bone_conduction_threshold_levels),

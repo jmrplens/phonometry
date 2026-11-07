@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
+import { unified } from '@astrojs/markdown-remark';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import remarkMath from 'remark-math';
@@ -509,17 +510,23 @@ export default defineConfig({
     // designed, not a regression.
     concurrency: 4,
   },
+  // The plugins go to the processor itself. Astro 7 deprecates
+  // `markdown.remarkPlugins` and `markdown.rehypePlugins`: given those, it
+  // built this same `unified()` on its own and said so in every build and
+  // every type check. The plugins an integration adds still run after these.
   markdown: {
-    remarkPlugins: [remarkMath],
-    // rehypeSingleTextMath must run after rehypeKatex: it rewrites the
-    // elements KaTeX has just produced.
-    rehypePlugins: [
-      rehypeKatex,
-      rehypeSingleTextMath,
-      rehypeWrappableMath,
-      rehypeLocalMedia,
-      rehypeTableAlign,
-    ],
+    processor: unified({
+      remarkPlugins: [remarkMath],
+      // rehypeSingleTextMath must run after rehypeKatex: it rewrites the
+      // elements KaTeX has just produced.
+      rehypePlugins: [
+        rehypeKatex,
+        rehypeSingleTextMath,
+        rehypeWrappableMath,
+        rehypeLocalMedia,
+        rehypeTableAlign,
+      ],
+    }),
   },
   integrations: [
     starlight({

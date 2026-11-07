@@ -27,6 +27,12 @@
 // graph used to take the date of the commit at HEAD, so a dependency bump of
 // the documentation site announced a library that had not moved.
 //
+// The About page is held to the Person node it carries: every span of years
+// the page writes has to be the years of a role that node dates. The node
+// comes from jmrp.io and the page is written here, and the two disagreed once,
+// the page giving 2020 for a research role the node starts in 2019, with
+// nothing to say so.
+//
 // Usage: node scripts/check-structured-data.mjs [dist-directory] [content-directory]
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -235,10 +241,10 @@ const sameAsOf = (node) => (Array.isArray(node.sameAs) ? node.sameAs : [node.sam
  * defect, so the same defect on every page is reported once.
  *
  * Each expected value comes from somewhere other than astro.config.mjs: the
- * dates from git, the release notes from the node's own repository, the help
- * from the WebSite node the page defines, the old name's package page from
- * the node's own `alternateName`. A check that read the config's idea of the
- * answer would agree with whatever the config says.
+ * dates from git, the release notes and the archive from the node's own
+ * repository, the help from the WebSite node the page defines, the old name's
+ * package page from the node's own `alternateName`. A check that read the
+ * config's idea of the answer would agree with whatever the config says.
  *
  * @param {object[]} nodes Every node of one page's graph.
  * @returns {string[]} The defects, empty when the history is whole.
@@ -267,9 +273,15 @@ function softwareDefects(nodes) {
 				`not ${LIBRARY_MODIFIED}, the date of the last commit under src/`,
 		);
 	}
-	const releases = `${String(app.codeRepository ?? '').replace(/\/$/, '')}/releases`;
-	if (app.releaseNotes !== releases) {
-		defects.push(`SoftwareApplication releaseNotes is ${JSON.stringify(app.releaseNotes)}, not ${releases}`);
+	if (typeof app.codeRepository !== 'string' || !app.codeRepository) {
+		defects.push(
+			"SoftwareApplication names no codeRepository, so its releaseNotes cannot be held to the repository's releases",
+		);
+	} else {
+		const releases = `${app.codeRepository.replace(/\/$/, '')}/releases`;
+		if (app.releaseNotes !== releases) {
+			defects.push(`SoftwareApplication releaseNotes is ${JSON.stringify(app.releaseNotes)}, not ${releases}`);
+		}
 	}
 	if (app.softwareHelp?.['@id'] !== site['@id']) {
 		defects.push(
@@ -291,7 +303,106 @@ function softwareDefects(nodes) {
 				`not the SoftwareApplication ${app['@id']}`,
 		);
 	}
+	if (typeof code.codeRepository !== 'string' || !code.codeRepository) {
+		defects.push(
+			"SoftwareSourceCode names no codeRepository, so its archivedAt cannot be held to the repository's archive",
+		);
+	} else {
+		const archive = `${SOFTWARE_HERITAGE}${code.codeRepository}`;
+		if (code.archivedAt !== archive) {
+			defects.push(
+				`SoftwareSourceCode archivedAt is ${JSON.stringify(code.archivedAt)}, not ${archive}, ` +
+					'the Software Heritage archive of its repository',
+			);
+		}
+	}
 	return defects;
+}
+
+/**
+ * Where Software Heritage shows the archive of a repository, given the
+ * repository's URL after it. The archive keeps every visit of the origin under
+ * this one address, so the link holds as new visits are made.
+ */
+const SOFTWARE_HERITAGE = 'https://archive.softwareheritage.org/browse/origin/?origin_url=';
+
+/**
+ * The years of every role a Person node dates with both a start and an end,
+ * wherever in the node it sits: the schools it was at, the occupations it
+ * held, the bodies it belonged to.
+ *
+ * @param {object} person The Person node.
+ * @returns {{start: string, end: string}[]} The years of each dated role.
+ */
+function datedRoles(person) {
+	const roles = [];
+	const visit = (value) => {
+		if (Array.isArray(value)) {
+			value.forEach(visit);
+			return;
+		}
+		if (!value || typeof value !== 'object') return;
+		if (typesOf(value).some((type) => /Role$/.test(String(type))) && value.startDate && value.endDate) {
+			roles.push({ start: String(value.startDate).slice(0, 4), end: String(value.endDate).slice(0, 4) });
+		}
+		Object.values(value).forEach(visit);
+	};
+	visit(person);
+	return roles;
+}
+
+/**
+ * What a page says, as a reader reads it: the text of its main content (the
+ * whole body when it has no `<main>`), without scripts, styles or markup, with
+ * runs of white space as one space.
+ */
+const textOf = (html) => {
+	const body =
+		html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ??
+		html.match(/<body\b[^>]*>([\s\S]*)<\/body>/i)?.[1] ??
+		html;
+	return body
+		.replace(/<(script|style|template)\b[\s\S]*?<\/\1>/gi, ' ')
+		.replace(/<[^>]+>/g, ' ')
+		.replace(/&nbsp;|&#160;|&#xa0;/gi, ' ')
+		.replace(/&amp;/g, '&')
+		.replace(/\s+/g, ' ');
+};
+
+/** How a page in each language writes the years a role ran: "from 2019 to 2023", "de 2019 a 2023". */
+const YEARS = { en: /\bfrom (\d{4}) to (\d{4})\b/g, es: /\bde (\d{4}) a (\d{4})\b/g };
+
+/**
+ * What the About page in `lang` gets wrong about the years of the maintainer's
+ * roles, against the Person node it carries.
+ *
+ * Every span of years the page writes has to be the years of a role the node
+ * dates. The page also has to write at least one: a page that dates no role
+ * the way the node does leaves this check nothing to hold, and a span written
+ * some other way ("between 2019 and 2023") would pass unread. The page need not
+ * date every role it names; what it says of today, it says without years.
+ *
+ * @param {object} person The Person node of the page.
+ * @param {string} text What the page says (`textOf`).
+ * @param {'en'|'es'} lang The page's language.
+ * @returns {{defects: string[], spans: number}} The defects, and how many distinct spans the page writes.
+ */
+function yearsDefects(person, text, lang) {
+	const roles = datedRoles(person);
+	const defects = [];
+	const spans = new Set();
+	for (const [span, start, end] of text.matchAll(YEARS[lang])) {
+		spans.add(span);
+		if (!roles.some((role) => role.start === start && role.end === end)) {
+			defects.push(`the page says "${span}", and no role the Person node dates runs from ${start} to ${end}`);
+		}
+	}
+	if (spans.size === 0) {
+		defects.push(
+			`the page writes the years of none of the ${roles.length} roles the Person node dates, so they cannot be held to it`,
+		);
+	}
+	return { defects, spans: spans.size };
 }
 
 /** Each defect of the software's nodes, with the number of pages that carry it. */
@@ -743,6 +854,17 @@ for (const file of files) {
 			(node) => node['@id'] === `${canonical}#article` && typesOf(node).includes('AboutPage'),
 		);
 		if (!typed) fail(`${route}: the About page's article node is not typed AboutPage`);
+		const person = nodeOfType(nodes, 'Person');
+		if (person) {
+			const { defects, spans } = yearsDefects(person, textOf(html), lang);
+			for (const defect of defects) fail(`${route}: ${defect}`);
+			if (defects.length === 0) {
+				ok(
+					`the About page in ${lang === 'es' ? 'Spanish' : 'English'} writes ${spans} span${spans === 1 ? '' : 's'} ` +
+						'of years, each the years of a role the Person node dates',
+				);
+			}
+		}
 	}
 
 	// The error page is not an article and must not be indexed as one, which is
@@ -1554,7 +1676,7 @@ for (const [defect, pages] of siteNodeDefects) fail(`${defect} (on ${pages} page
 if (siteNodeDefects.size === 0) {
 	ok(
 		`the software's nodes on all ${seen.pages} pages give its history: created ${FIRST_COMMIT}, ` +
-			`library last changed ${LIBRARY_MODIFIED}, release notes, help and its former package`,
+			`library last changed ${LIBRARY_MODIFIED}, release notes, help, its former package and its archive`,
 	);
 }
 if (seen.about === 2) ok('checked the About page in both languages for the AboutPage type');

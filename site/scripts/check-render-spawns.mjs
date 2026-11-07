@@ -40,7 +40,7 @@ const SITE = process.argv[2] ? resolve(process.argv[2]) : join(here, '..');
 const ONCE_PER_BUILD = new Map([
 	[
 		'astro.config.mjs',
-		{ calls: 1, exports: ['default'], why: 'reads the date of the last commit once, when the config loads' },
+		{ calls: 1, exports: ['default'], why: 'reads the date of the last commit under src/ once, when the config loads' },
 	],
 	[
 		'src/lib/page-dates.mjs',

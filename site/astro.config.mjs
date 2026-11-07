@@ -467,6 +467,9 @@ const jsonLd = JSON.stringify({
       runtimePlatform: 'Windows, Linux, macOS',
       license: 'https://opensource.org/license/MIT',
       dateCreated,
+      // Software Heritage keeps every visit of the repository under this one
+      // address, so the code stays readable whatever becomes of GitHub.
+      archivedAt: `https://archive.softwareheritage.org/browse/origin/?origin_url=${repositoryUrl}`,
       isPartOf: { '@id': softwareId },
       // The application this code builds, which schema.org names from the
       // code's side with its own property.

@@ -188,6 +188,17 @@ test('the kind of a page says where a span stops', () => {
   }
 });
 
+test('an MDX comment may stand between blanks in its braces', () => {
+  // MDX shows nothing of an expression that holds only a comment, blanks and all.
+  const cases = [
+    ['a { /* b */ } c', `a ${SPAN_MARK} c`],
+    ['{ /*\nb\n\nc\n*/ }\nd', `${SPAN_MARK}\n\n\n\n\nd`],
+  ];
+  for (const [text, shown] of cases) {
+    assert.equal(dropInlineSpansByBlock(text, '`', { comments: 'mdx' }), shown, text);
+  }
+});
+
 test('a line of code is not read for a span', () => {
   const text = 'a `b\n```\nc` d\n```\ne` f';
   assert.equal(dropInlineSpansByBlock(text), text);

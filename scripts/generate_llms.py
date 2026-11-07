@@ -53,11 +53,14 @@ import subprocess
 import tomllib
 from typing import TYPE_CHECKING
 
+from generate_site_reports import family_pages
 from markdown_fences import NOT_INLINE_ROLES, code_lines, page_lines
 from markdown_spans import blank_inline_spans_by_block, page_markup
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+    from generate_site_reports import FamilyPage
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
@@ -287,28 +290,88 @@ def _source_of(route: str) -> pathlib.Path:
     raise SystemExit(msg)
 
 
+#: The escapes of a YAML double-quoted scalar (YAML 1.2, section 5.7) that
+#: stand for one character each; ``\x``, ``\u`` and ``\U`` take two, four and
+#: eight hex digits.
+_YAML_ESCAPES = {
+    "0": "\0",
+    "a": "\a",
+    "b": "\b",
+    "t": "\t",
+    "\t": "\t",
+    "n": "\n",
+    "v": "\v",
+    "f": "\f",
+    "r": "\r",
+    "e": "\x1b",
+    " ": " ",
+    '"': '"',
+    "/": "/",
+    "\\": "\\",
+    "N": "\x85",
+    "_": "\xa0",
+    "L": "\u2028",
+    "P": "\u2029",
+}
+
+_YAML_ESCAPE = re.compile(
+    r"\\(?:x([0-9A-Fa-f]{2})|u([0-9A-Fa-f]{4})|U([0-9A-Fa-f]{8})|(.))", re.DOTALL
+)
+
+
+def _yaml_double_quoted(text: str, where: str) -> str:
+    """The value of a YAML double-quoted scalar written on one line, its escapes read.
+
+    The site reads its frontmatter with a YAML parser, so a page may write
+    ``\u00e7`` for a ``ç``; an escape YAML does not have stops the run rather
+    than reading as something the page does not say.
+    """
+
+    def escape(found: re.Match[str]) -> str:
+        digits = found.group(1) or found.group(2) or found.group(3)
+        if digits:
+            return chr(int(digits, 16))
+        if found.group(4) not in _YAML_ESCAPES:
+            msg = f"generate_llms.py: {where} writes {found.group(0)!r}, which is no YAML escape"
+            raise SystemExit(msg)
+        return _YAML_ESCAPES[found.group(4)]
+
+    return _YAML_ESCAPE.sub(escape, text)
+
+
 def _frontmatter_field(path: pathlib.Path, name: str) -> str:
-    """One scalar of a page's frontmatter, written on its own line.
+    """One scalar of a page's frontmatter, written on its own line, as YAML reads it.
 
     The site's pages write their title and description on one line each,
-    double-quoted, single-quoted or bare; a page without the field stops the
-    run, since every line of the index that names a page says what it is
-    about from it.
+    double-quoted, single-quoted or bare, and the site reads them with a YAML
+    parser: a double-quoted value's escapes are YAML's, a single-quoted one
+    doubles its quotation mark, and a bare one ends before a comment. A value
+    in any other shape (a block scalar, a flow collection, one that runs on to
+    the next line) stops the run, as does a page without the field, since
+    every line of the index that names a page says what it is about from it.
+    ``tests/test_generate_llms.py`` holds this reader to a YAML parser on
+    every page of the site.
     """
     text = path.read_text(encoding="utf-8")
+    shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
     head = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
     found = head and re.search(
-        rf"""^{name}:[ \t]*(?:"((?:[^"\\]|\\.)*)"|'([^']*)'|(\S.*?))[ \t]*$""",
+        rf"""^{name}:[ \t]*(?:"((?:[^"\\]|\\.)*)"|'((?:[^']|'')*)'|([^\s"'|>\[{{&*!%@`#][^\n]*?))(?:[ \t]+\#[^\n]*)?[ \t]*$""",
         head.group(1),
         re.MULTILINE,
     )
     if not found:
-        msg = f"generate_llms.py: {path.relative_to(ROOT)} has no frontmatter {name}"
+        msg = (
+            f"generate_llms.py: {shown} has no frontmatter {name} written on one "
+            "line, double-quoted, single-quoted or bare"
+        )
         raise SystemExit(msg)
     double, single, bare = found.groups()
     if double is not None:
-        return re.sub(r"\\(.)", r"\1", double)
-    return single if single is not None else bare
+        return _yaml_double_quoted(double, f"{shown}, {name}")
+    if single is not None:
+        return single.replace("''", "'")
+    return bare
 
 
 def _description(route: str) -> str:
@@ -1166,41 +1229,53 @@ def _count(number: int, noun: str) -> str:
     return f"{number} {noun[:-1]}ies" if noun.endswith("y") else f"{number} {noun}s"
 
 
-def _headings(path: pathlib.Path) -> int:
-    """How many ``##`` headings a page has outside its code: one per errata entry."""
-    lines = path.read_text(encoding="utf-8").splitlines()
-    kind = "mdx" if path.suffix == ".mdx" else "md"
-    return sum(
-        1
-        for line, code in zip(lines, code_lines(lines, kind=kind), strict=True)
-        if not code and line.startswith("## ")
-    )
+#: Where the errata register's pages are, under the site's content.
+ERRATA_ROUTE = "reference/errata"
+
+
+def _errata_families() -> list[FamilyPage]:
+    """The pages of the errata register, read from the register itself.
+
+    :func:`generate_site_reports.family_pages` is what writes the site's
+    family pages from ``docs/ERRATA.md``: it files each entry under its
+    document family and knows the page of properties that are not errata
+    apart, so an entry is counted where the register files it, not by the
+    headings a page happens to carry.
+    """
+    return family_pages()
 
 
 def _errata_section() -> list[str]:
-    """One line per family page of the errata register, with its entry count."""
-    families = sorted(
-        path
-        for path in (CONTENT / "reference" / "errata").glob("*.md*")
-        if path.stem != "index"
-    )
+    """One line per family page of the errata register, with its entry count.
+
+    The page of the register's properties that are not errata is no family
+    and has no entries: it is listed in a section of its own with what it is
+    about, as the register's index lists it under a heading of its own.
+    """
+    families = sorted(_errata_families(), key=lambda page: page.family.slug)
     lines = [
         "## Errata by source",
         "",
         (
             "The errata register has one page per document family, each with "
             "the defects found in that family's printed text, the evidence and "
-            f"what the library does about each (index: {SITE_URL}/reference/errata/)."
+            f"what the library does about each (index: {SITE_URL}/{ERRATA_ROUTE}/)."
         ),
         "",
     ]
-    for path in families:
-        route = path.relative_to(CONTENT).with_suffix("").as_posix()
-        title = _frontmatter_field(path, "title")
+    apart: list[str] = []
+    for page in families:
+        route = f"{ERRATA_ROUTE}/{page.family.slug}"
+        title = _frontmatter_field(_source_of(route), "title")
+        if page.family.group == "not-errata":
+            apart.append(_site_entry(title, route))
+            continue
         lines.append(
-            f"- [{title}]({SITE_URL}/{route}/): {_count(_headings(path), 'entry')}"
+            f"- [{title}]({SITE_URL}/{route}/): {_count(len(page.positions), 'entry')}"
         )
     lines.append("")
+    if apart:
+        lines += ["## Properties that are not errata", "", *apart, ""]
     return lines
 
 
@@ -1234,13 +1309,14 @@ def _catalogue_section() -> list[str]:
         for path in (CONTENT / "reference" / "catalogues").glob("*.md*")
         if path.stem != "index"
     )
+    # What the catalogues hold is said by their index page, in its own words.
+    index = "reference/catalogues"
     lines = [
         "## Published catalogues",
         "",
         (
-            "Every value the library reads off a printed page, one page per "
-            "catalogue, each row with the book, the table and the page it came "
-            f"from (index: {SITE_URL}/reference/catalogues/)."
+            f"{_description(index)} One page per catalogue, each listed here with "
+            f"the rows it tables (index: {SITE_URL}/{index}/)."
         ),
         "",
     ]
@@ -1269,12 +1345,34 @@ def _joined(items: list[str]) -> str:
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 
 
+def _spanish_routes() -> set[str]:
+    """Every route of the Spanish tree of the site source, without its ``es/``.
+
+    The pages the site translates: an English route with none here is served
+    under ``/es/`` as the English page (Starlight's fallback), which has no file
+    of its own and so no copy (``routeOf`` of ``site/src/lib/page-markdown.mjs``).
+    """
+    routes = set()
+    for path in (CONTENT / "es").rglob("*.md*"):
+        relative = path.relative_to(CONTENT / "es").with_suffix("").as_posix()
+        routes.add(re.sub(r"(?:^|/)index$", "", relative))
+    return routes
+
+
+#: The route the generated API reference lives under, named as one in the
+#: sentence on the copies.
+API_ROUTE = "reference/api"
+
+
 def _copies_sentence() -> str:
     """Where a page's Markdown copy is, and which pages publish none.
 
-    The pages that publish none are named from :func:`_withheld_routes`, by
-    kind: the landing pages, the catalogues, and any other page by its English
-    title and the languages it is withheld in.
+    Read from the site's tree, not written by hand: the English pages that
+    have no Spanish page (the API reference, by name, and any other by its
+    title) are said to be English only, their Spanish addresses showing the
+    English page and its copy; the pages that publish none are named from
+    :func:`_withheld_routes`, by kind: the landing pages, the catalogues, and
+    any other page by its English title and the languages it is withheld in.
     """
     withheld = _withheld_routes()
     kinds: list[str] = []
@@ -1305,12 +1403,33 @@ def _copies_sentence() -> str:
             kinds.append(
                 f"the {name} {_joined(titles)} page{'s' if len(titles) > 1 else ''}"
             )
+    sentence = (
+        "Every page listed here but the ones named at the end of this section "
+        "has a Markdown copy beside it at `<page>/index.md`, for example "
+        f"{SITE_URL}/start/getting-started/index.md, and its Spanish twin under "
+        "`/es/` has one too where the page is translated."
+    )
+    english_only = sorted(_content_routes() - _spanish_routes() - withheld)
+    api = [r for r in english_only if r == API_ROUTE or r.startswith(f"{API_ROUTE}/")]
+    untranslated = (
+        [f"the {_count(len(api), 'page')} of the API reference"] if api else []
+    )
+    untranslated += [
+        f'the "{_frontmatter_field(_source_of(r), "title")}" page'
+        for r in english_only
+        if r not in api
+    ]
+    if untranslated:
+        listed = _joined(untranslated)
+        verb = "are" if len(untranslated) > 1 or len(api) > 1 else "is"
+        sentence += (
+            f" {listed[0].upper()}{listed[1:]} {verb} in English only: at the "
+            "Spanish address the site shows the English page, which points to "
+            "its English copy."
+        )
     return (
-        "Every page listed here has a Markdown copy beside it at "
-        f"`<page>/index.md`, for example {SITE_URL}/start/getting-started/index.md, "
-        "and so does its Spanish twin under `/es/`. The "
-        f"{len(withheld)} pages that show their data through a component "
-        f"publish none and are read on the page itself: {_joined(kinds)}."
+        f"{sentence} The {len(withheld)} pages that show their data through a "
+        f"component publish none and are read on the page itself: {_joined(kinds)}."
     )
 
 

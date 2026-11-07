@@ -539,7 +539,6 @@ The errata register has one page per document family, each with the defects foun
 - [Errata in NMFS (2024)](https://docs.jmrp.io/phonometry/reference/errata/nmfs/): 1 entry
 - [Errata in NORAH2 rotorcraft guidance](https://docs.jmrp.io/phonometry/reference/errata/norah2/): 8 entries
 - [Errata in Norton & Karczub (2003)](https://docs.jmrp.io/phonometry/reference/errata/norton-karczub/): 5 entries
-- [Source properties that are not errata](https://docs.jmrp.io/phonometry/reference/errata/not-errata/): 1 entry
 - [Errata in Osses, García & Kohlrausch (2016)](https://docs.jmrp.io/phonometry/reference/errata/osses-garcia-kohlrausch/): 1 entry
 - [Errata in RANDI 3.1 Physics Description](https://docs.jmrp.io/phonometry/reference/errata/randi/): 1 entry
 - [Errata in Real Decreto 1367/2007](https://docs.jmrp.io/phonometry/reference/errata/real-decreto-1367-2007/): 1 entry
@@ -549,9 +548,13 @@ The errata register has one page per document family, each with the defects foun
 - [Errata in Ver & Beranek (2006)](https://docs.jmrp.io/phonometry/reference/errata/ver-beranek/): 4 entries
 - [Errata in Vigran (2008)](https://docs.jmrp.io/phonometry/reference/errata/vigran/): 3 entries
 
+## Properties that are not errata
+
+- [Source properties that are not errata](https://docs.jmrp.io/phonometry/reference/errata/not-errata/): Properties of the published sources that look like misprints and are not, recorded so that nobody corrects the library to match them.
+
 ## Published catalogues
 
-Every value the library reads off a printed page, one page per catalogue, each row with the book, the table and the page it came from (index: https://docs.jmrp.io/phonometry/reference/catalogues/).
+Every material, gas and fluid the library reads from a printed page, from elastic constants to fluid states, with its source table and what its cell said. One page per catalogue, each listed here with the rows it tables (index: https://docs.jmrp.io/phonometry/reference/catalogues/).
 
 - [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/) (459 rows): What finishes absorbed in a reverberation room, band by band, with the mounting and the source of each row, and the absorption area of audiences and air.
 - [Catalogue of air attenuation](https://docs.jmrp.io/phonometry/reference/catalogues/air-attenuation/) (6 rows): The air attenuation coefficient, band by band, for the six temperature and humidity conditions a building standard's room model tabulates, in neper per metre.
@@ -642,7 +645,7 @@ Every page above also exists in Spanish under the `/es/` prefix, for example htt
 
 ## Markdown copies
 
-Every page listed here has a Markdown copy beside it at `<page>/index.md`, for example https://docs.jmrp.io/phonometry/start/getting-started/index.md, and so does its Spanish twin under `/es/`. The 52 pages that show their data through a component publish none and are read on the page itself: the two landing pages, the 23 catalogues and the "Report fiches" page in both languages and the Spanish "Conformance report" and "Glossary" pages.
+Every page listed here but the ones named at the end of this section has a Markdown copy beside it at `<page>/index.md`, for example https://docs.jmrp.io/phonometry/start/getting-started/index.md, and its Spanish twin under `/es/` has one too where the page is translated. The 269 pages of the API reference are in English only: at the Spanish address the site shows the English page, which points to its English copy. The 52 pages that show their data through a component publish none and are read on the page itself: the two landing pages, the 23 catalogues and the "Report fiches" page in both languages and the Spanish "Conformance report" and "Glossary" pages.
 
 ## Optional
 

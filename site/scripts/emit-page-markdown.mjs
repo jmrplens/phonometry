@@ -35,6 +35,7 @@ import { TRANSPLANTED, hasMarkdownCopy, mirrorOf, routeOf } from "../src/lib/pag
 import { basePath, siteUrl } from "../src/data/site.mjs";
 import { catalogueSlugs } from "../src/data/topics.mjs";
 import {
+  bracketText,
   copyDefects,
   figureMarkdown,
   frontmatterSource,
@@ -59,15 +60,19 @@ const SITE_URL = `${siteUrl}${basePath}`;
  * component out with it: an agent would get the sentence that introduces the
  * list and no list. So the list is written here as Markdown, from the same
  * pages in the same order, each catalogue's label linked to its page and
- * followed by its description.
+ * followed by its description, read from its frontmatter as the site reads it
+ * (a YAML parser, so an escape or a quotation mark in a value reads as the
+ * page shows it).
  */
 function catalogueIndex(lang) {
   const prefix = lang === "es" ? "es/" : "";
   return catalogueSlugs
     .map((slug) => {
-      const source = readFileSync(join(contentDir, `${prefix}${slug}.mdx`), "utf8");
-      const field = (name) => source.match(new RegExp(`^\\s*${name}: "([^"]*)"`, "m"))?.[1] ?? "";
-      return `- [${field("label") || field("title")}](${SITE_URL}/${prefix}${slug}/): ${field("description")}`;
+      const page = readFileSync(join(contentDir, `${prefix}${slug}.mdx`), "utf8");
+      const frontmatter = parseYaml(frontmatterSource(page)) ?? {};
+      const label = String(frontmatter.sidebar?.label ?? frontmatter.title ?? "");
+      const description = String(frontmatter.description ?? "");
+      return `- [${bracketText(label)}](${SITE_URL}/${prefix}${slug}/): ${description}`;
     })
     .join("\n");
 }

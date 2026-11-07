@@ -677,8 +677,8 @@ first:
   is fixed by that sentence.
 - **dBqps is a voltage level.** phonometry measures the factor at the caller's
   own sample rate rather than storing one fitted at 48 kHz, because the
-  chain's steady-sine gain moves by 0.0141 dB between 32 and 192 kHz and
-  clause 2.6 admits no such slack.
+  chain's steady-sine gain moves by 0.0147 dB across 32, 44.1, 48, 96 and
+  192 kHz and clause 2.6 admits no such slack.
 
 ```python
 import numpy as np
@@ -783,12 +783,13 @@ row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.85
 ```
 
-All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. The worst margin
-is 0.255 dB, at the 100 bursts per second cell whose upper limit is the
-physical ceiling. Between those five rates no reading moves by more than
-0.043 dB, and none by more than 1.8 % of its own window, which is why the
-peak-follower worry
-about reading the largest *sample* rather than the largest value of the
+All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. At each rate the
+worst margin is at the 100 bursts per second cell, whose upper limit is the
+physical ceiling: 0.255 dB at 48 kHz, the margin the example prints, and
+0.248 dB at 32 kHz, the smallest of the five. Between those five rates no
+reading moves by more than 0.043 dB, and none by more than 1.8 % of its own
+window, which is why the peak-follower worry about reading the largest
+*sample* rather than the largest value of the
 waveform does not bite here: the 1.41 ms charge spans fourteen half-periods of
 the rectified 5 kHz carrier, so the ripple is long gone before any maximum is
 taken.

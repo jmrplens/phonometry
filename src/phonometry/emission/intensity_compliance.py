@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -231,9 +232,9 @@ class ResidualIndexLimits(OwnsArrays):
         {"class_1": "dB", "class_2": "dB"}
     )
 
-    frequencies: np.ndarray
-    class_1: np.ndarray
-    class_2: np.ndarray
+    frequencies: NDArray[np.float64]
+    class_1: NDArray[np.float64]
+    class_2: NDArray[np.float64]
 
 
 def residual_index_limits(
@@ -317,10 +318,10 @@ def instrument_class_from_components(
 
 
 def _band_verdicts(
-    freqs: np.ndarray,
-    measured: np.ndarray,
-    class1: np.ndarray,
-    class2: np.ndarray,
+    freqs: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    class1: NDArray[np.float64],
+    class2: NDArray[np.float64],
 ) -> list[dict[str, Any]]:
     """Per-band class verdicts and margins against the two Table 2 minima."""
     bands: list[dict[str, Any]] = []
@@ -446,8 +447,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
     :ivar spacing_m: Microphone separation the verdict applies to, in metres.
     """
 
-    frequencies: np.ndarray
-    residual_index: np.ndarray
+    frequencies: NDArray[np.float64]
+    residual_index: NDArray[np.float64]
     device: Device
     spacing_m: float
 
@@ -556,7 +557,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         return not full_range
 
     @property
-    def limit_class1(self) -> np.ndarray:
+    def limit_class1(self) -> NDArray[np.float64]:
         """Class 1 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing_m``.
 
         :return: Table 2 for :attr:`device`, plus :attr:`spacing_offset_db`.
@@ -566,7 +567,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         ).class_1
 
     @property
-    def limit_class2(self) -> np.ndarray:
+    def limit_class2(self) -> NDArray[np.float64]:
         """Class 2 minimum ``delta_pI0`` per band, in dB, rescaled to ``spacing_m``.
 
         :return: Table 2 for :attr:`device`, plus :attr:`spacing_offset_db`.
@@ -633,7 +634,9 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         key = f"margin_class{cls}_db"
         return [float(b["frequency"]) for b in self.bands if float(b[key]) < 0.0]
 
-    def phase_mismatch_deg(self, *, speed_of_sound: float = 343.0) -> np.ndarray:
+    def phase_mismatch_deg(
+        self, *, speed_of_sound: float = 343.0
+    ) -> NDArray[np.float64]:
         """Equivalent channel phase mismatch per band, in degrees.
 
         Converts the measured ``delta_pI0`` spectrum with
@@ -715,8 +718,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
 
 
 def _plane_wave_phase_deg(
-    frequency: np.ndarray, spacing: float, c: float
-) -> np.ndarray:
+    frequency: NDArray[np.float64], spacing: float, c: float
+) -> NDArray[np.float64]:
     r"""Plane-wave phase difference :math:`k d` across the spacer, in
     degrees.
     """
@@ -743,7 +746,7 @@ def phase_mismatch_from_residual_index(
     *,
     frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Channel phase mismatch equivalent to a pressure-residual intensity index.
 
     In an axially propagating plane progressive wave the true phase difference
@@ -789,7 +792,7 @@ def residual_index_from_phase_mismatch(
     *,
     frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Pressure-residual intensity index of a given channel phase mismatch.
 
     The inverse of :func:`phase_mismatch_from_residual_index`:

@@ -343,8 +343,14 @@ def animate_fdtd_ducting(output_dir: str) -> None:
     # trapped arrival, the slowest and last, has gone into the right sponge
     # (_duct_crossed_s: 1.646 s into the run, frame 3356 of 3793, 18.6 s of
     # playback), so no front is still on its way when the energy map covers
-    # the field. It is opaque 12 frames later and stays 2.4 s, past the 2 s
-    # hold the other clips close on.
+    # the field. The same frame holds for the near-surface run: its source
+    # sits in the 1 730 m/s water above the channel, so no ray it launches
+    # is turned back into the slow water, and what is left in either panel's
+    # open water at that frame is faint, 12.5 % of the shared colour scale on
+    # the axis panel and 8.8 % on the near-surface one, which also drops
+    # below 5 % first, at 1.697 s against 1.706 s (measured on the two runs,
+    # NumPy). The overlay is opaque 12 frames later and stays 2.4 s, past
+    # the 2 s hold the other clips close on.
     reveal = int(np.searchsorted(times, _duct_crossed_s()))
     captions_on = int(0.38 * p_all.shape[1])  # first refocus is visible
 

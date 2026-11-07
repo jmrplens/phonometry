@@ -197,7 +197,7 @@ from ..filters.weighting import weighting_filter  # a module inside filters
 <a id="a9"></a>
 ### A9. Import domain code in `_plot` and `_report` only under `TYPE_CHECKING`
 
-**Why.** The rendering leaves are imported lazily by `.plot()` and `.report()`; a module-level import of domain code from them creates a cycle and drags the domain into every render.
+**Why.** The rendering leaves are imported lazily by `.plot()` and `.report()`; a module-level import of domain code from them creates a cycle and drags the domain into every render. The import a renderer makes inside its function runs when a record draws or prints, with the record's domain loaded and the domains it imports, and maybe no other: a module inside any other domain is reached through that domain's package and a name it publishes, or through `_internal`, never named, for the lock order of [A8](#a8). `from ..filters.frequencies import _format_nominal_freq` in the ISO 10846 fiche of a vibration record, which loads no filters, raced a thread importing `filters`.
 
 **Do**
 
@@ -214,9 +214,9 @@ if TYPE_CHECKING:
 from ..room.modes import RoomModesResult  # at module level in src/phonometry/_plot/room.py
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_render_modules_only_type_check_domain_imports`
+**Enforced by:** `tests/test_package_architecture.py::test_render_modules_only_type_check_domain_imports`, `tests/test_package_architecture.py::test_a_renderer_reaches_into_a_domain_only_its_records_have_loaded`, `tests/test_concurrent_imports.py::test_a_record_draws_and_prints_without_a_race`
 
-**Exceptions.** Imports from `_internal`, which imports nothing from the domains.
+**Exceptions.** Imports from `_internal`, which imports nothing from the domains. Inside a function, a module inside the record's own domain, or inside a domain every caller of the function loads when it is imported, may be named: the package is in place.
 
 <a id="a10"></a>
 ### A10. Import matplotlib inside the function that draws, never at module scope

@@ -2328,11 +2328,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the architecture tests refuse an import of a module inside another
   domain or of a name it does not publish, a cycle between domains at
   import, a module reading a name off the root, and `_internal` importing a
-  domain. Every public name keeps its import path, and seven now name
-  another module as their own: `io.Signal` and `io.SignalOrigin` name
-  `phonometry._internal.signal`, `io.VideoOptions` and `io.write_video`
-  `phonometry._internal.video`, `io.VideoEncoderError` and
-  `io.FFmpegNotFoundError` `phonometry._internal.video_encoders`, and
+  domain. A record that draws or prints itself takes the locks in the same
+  order: `TimeWeightedEnvelope.plot()`, `Signal.plot(scale="db")` and the
+  ISO 10846, EN 15657 and ISO 1996-2 tone fiches named a module of a domain
+  their record's had not loaded, and reach it now through its package or
+  `_internal`; the race test drives them, and an architecture test follows
+  every renderer to the records that call it. Every public name keeps its
+  import path, and seven now name another module as their own: `io.Signal`
+  and `io.SignalOrigin` name `phonometry._internal.signal`,
+  `io.VideoOptions` and `io.write_video` `phonometry._internal.video`,
+  `io.VideoEncoderError` and `io.FFmpegNotFoundError`
+  `phonometry._internal.video_encoders`, and
   `environment.AtmosphericAbsorptionWarning`, in a traceback and a repr,
   `phonometry.environment`. A `Signal` or a `VideoOptions` pickled under
   4.0.0rc1 names a module of `phonometry.io` that no longer exists, so it

@@ -93,7 +93,7 @@ _BAND_MATCH_REL = 0.06
 
 #: Fewest band centres from which adjacent-centre ratios can classify the band
 #: set as octave vs one-third octave (the same pair guard
-#: ``filters.frequencies._infer_band_fraction`` applies); below it the caption
+#: ``_internal.bands._infer_band_fraction`` applies); below it the caption
 #: falls back to "Single-band parameters".
 _MIN_BANDS_TO_INFER_FRACTION = 2
 
@@ -104,7 +104,7 @@ _MIN_BANDS_TO_INFER_FRACTION = 2
 _MAX_ROOMY_ROWS = 8
 
 #: The one-third-octave bandwidth fraction as returned by
-#: ``filters.frequencies._infer_band_fraction`` (3 bands per octave, vs 1 for
+#: ``_internal.bands._infer_band_fraction`` (3 bands per octave, vs 1 for
 #: octaves).
 _THIRD_OCTAVE_FRACTION = 3
 
@@ -137,7 +137,7 @@ def _fraction_label(frequency: np.ndarray | None, language: Language) -> str:
         return t("Broadband analysis", language)
     if frequency.size < _MIN_BANDS_TO_INFER_FRACTION:
         return t("Single-band parameters", language)
-    from ..filters.frequencies import _infer_band_fraction
+    from .._internal.bands import _infer_band_fraction
 
     if _infer_band_fraction(frequency) == 1:
         return t("Octave-band parameters", language)
@@ -235,7 +235,7 @@ def _parameter_table(result: RoomAcousticsResult, language: Language = "en") -> 
     ts = np.asarray(result.ts, dtype=np.float64)
     n = t30.size
 
-    from ..filters.frequencies import _infer_band_fraction
+    from .._internal.bands import _infer_band_fraction
 
     fraction = _infer_band_fraction(freq) if freq is not None else 1
     if freq is None:
@@ -337,7 +337,7 @@ def _band_fraction(frequency: np.ndarray | None) -> int:
     """
     if frequency is None:
         return 1
-    from ..filters.frequencies import _infer_band_fraction
+    from .._internal.bands import _infer_band_fraction
 
     return _infer_band_fraction(real_array(frequency, "frequency"))
 

@@ -7,14 +7,15 @@
 // the wait is as long as it needs to be and no longer, and it stops the preview
 // on every exit path rather than only the ordinary one.
 //
-// The preview is pinned to the IPv4 loopback and polled there, and a server
-// already on the port is looked for on both loopbacks (shared/preview.mjs says
-// why): the audits still open http://localhost:<port>.
+// The preview is pinned to the IPv4 loopback and polled there, it is kept in
+// the foreground so that it stops with this runner, and a server already on
+// the port is looked for on both loopbacks (shared/preview.mjs says why): the
+// audits still open http://localhost:<port>.
 //
 // Usage: node scripts/with-preview.mjs [--port 4321] -- <command...>
 import { spawn } from 'node:child_process';
 
-import { PREVIEW_HOST, servedLoopback } from './shared/preview.mjs';
+import { PREVIEW_HOST, previewArgs, servedLoopback } from './shared/preview.mjs';
 
 const argv = process.argv.slice(2);
 const split = argv.indexOf('--');
@@ -50,7 +51,7 @@ if (served !== null) {
   process.exit(1);
 }
 
-const preview = spawn('./node_modules/.bin/astro', ['preview', '--port', port, '--host', PREVIEW_HOST], {
+const preview = spawn('./node_modules/.bin/astro', previewArgs(port), {
   stdio: ['ignore', 'inherit', 'inherit'],
 });
 

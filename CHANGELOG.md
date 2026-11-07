@@ -2344,13 +2344,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **The site's audits reach the preview in a stock `node:24` container.**
   `site/scripts/with-preview.mjs`, which runs pa11y, `check:sidebar` and
   `check:visual` against `astro preview`, started the preview with no host and
-  polled `http://localhost`. In that container Vite listens on `::1` first
+  polled `localhost`. In that container Vite listens on `::1` first
   while Node's fetch tries `127.0.0.1` alone, so the poll was refused for two
   minutes and no audit ran. The preview listens on `127.0.0.1` now and is
   polled there, and the check for a server already on the port, there so that
   an audit never reads a stale dev server in place of the build, asks both
-  loopbacks: a server on `::1` alone went unseen before. `pnpm run lighthouse`
-  starts its preview the same way and refuses an occupied port too.
+  loopbacks: a server on `::1` alone went unseen before. Under an AI coding
+  agent, which Astro 7 reads from the environment, `astro preview` started the
+  server as a detached process and exited, so the runner stopped a process
+  that had already ended, the server kept the port, and the next audit was
+  refused it; the runner now passes `--ignore-lock`, which keeps the preview
+  in the foreground. `pnpm run lighthouse` starts its preview the same way and
+  refuses an occupied port too.
 
 - **The documentation site builds under a directory that has a
   `node_modules` above it.** Vite left a package out of the prerender bundle

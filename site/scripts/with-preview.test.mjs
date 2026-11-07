@@ -14,6 +14,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
+import { connect } from 'node:net';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -25,17 +26,29 @@ const RUNNER = join(dirname(fileURLToPath(import.meta.url)), 'with-preview.mjs')
  * A stand-in for `astro preview`: it writes the arguments it was given beside
  * itself, and serves a 404 on the host and port they name. Given no host, it
  * exits at once, as a preview the runner could never reach would leave it
- * waiting for good.
+ * waiting for good. Given no `--ignore-lock`, it does what Astro 7 does under
+ * an AI coding agent: it starts the server as a detached process of its own,
+ * writes that process's id beside itself, and exits.
  */
 const STAND_IN = `#!/usr/bin/env node
+const { spawn } = require('node:child_process');
 const { writeFileSync } = require('node:fs');
 const { createServer } = require('node:http');
 const args = process.argv.slice(2);
 writeFileSync(__dirname + '/args.json', JSON.stringify(args));
 const at = (flag) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined);
 const host = at('--host');
+const port = Number(at('--port'));
 if (!host) process.exit(3);
-createServer((request, response) => response.writeHead(404).end()).listen(Number(at('--port')), host);
+if (args.includes('--ignore-lock')) {
+  createServer((request, response) => response.writeHead(404).end()).listen(port, host);
+} else {
+  const serve = \`require('node:http').createServer((q, s) => s.writeHead(404).end()).listen(\${port}, '\${host}')\`;
+  const server = spawn(process.execPath, ['-e', serve], { detached: true, stdio: 'ignore' });
+  writeFileSync(__dirname + '/background.pid', String(server.pid));
+  server.unref();
+  setTimeout(() => process.exit(0), 1000);
+}
 `;
 
 /** A port nothing listens on now, on the IPv4 loopback. */
@@ -102,14 +115,46 @@ async function run(t, port, command) {
 	} catch {
 		// The stand-in never ran.
 	}
+	t.after(() => {
+		// A server the stand-in left behind belongs to this test, and goes with it.
+		try {
+			process.kill(Number(readFileSync(join(site, 'node_modules', '.bin', 'background.pid'), 'utf8')));
+		} catch {
+			// None was left.
+		}
+	});
 	return { status, err, args };
+}
+
+/** Whether something accepts a connection on `host`:`port` within `ms`. */
+async function listening(host, port, ms) {
+	const deadline = Date.now() + ms;
+	for (;;) {
+		const open = await new Promise((resolve) => {
+			const socket = connect({ host, port });
+			socket.once('connect', () => {
+				socket.destroy();
+				resolve(true);
+			});
+			socket.once('error', () => resolve(false));
+		});
+		if (!open || Date.now() > deadline) return open;
+		await new Promise((resolve) => setTimeout(resolve, 100));
+	}
 }
 
 test('the preview starts on the IPv4 loopback, and the command runs once it answers there', async (t) => {
 	const port = await freePort();
 	const ran = await run(t, port, [process.execPath, '-e', 'process.exit(7)']);
-	assert.deepEqual(ran.args, ['preview', '--port', String(port), '--host', '127.0.0.1']);
+	assert.deepEqual(ran.args, ['preview', '--port', String(port), '--host', '127.0.0.1', '--ignore-lock']);
 	assert.equal(ran.status, 7, ran.err);
+});
+
+test('the preview stops with the runner, though an AI coding agent runs it', async (t) => {
+	const port = await freePort();
+	const ran = await run(t, port, [process.execPath, '-e', 'process.exit(0)']);
+	assert.equal(ran.status, 0, ran.err);
+	assert.equal(await listening('127.0.0.1', port, 2000), false, `a server still answers on 127.0.0.1:${port}`);
 });
 
 test('a server already answering on the IPv4 loopback is refused before the preview starts', async (t) => {

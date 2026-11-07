@@ -17,7 +17,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { PREVIEW_HOST, servedLoopback } from "./shared/preview.mjs";
+import { PREVIEW_HOST, previewArgs, servedLoopback } from "./shared/preview.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
@@ -54,7 +54,7 @@ async function startPreview() {
   if (served !== null) {
     throw new Error(`something is already serving on ${served}:${PORT}; stop it, or set PORT to a free one`);
   }
-  const child = spawn("pnpm", ["exec", "astro", "preview", "--port", PORT, "--host", PREVIEW_HOST], {
+  const child = spawn("pnpm", ["exec", "astro", ...previewArgs(PORT)], {
     cwd: siteRoot,
     stdio: "ignore",
     detached: true,

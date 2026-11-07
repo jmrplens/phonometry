@@ -11,6 +11,17 @@
 /** The address the preview listens on and is polled at. */
 export const PREVIEW_HOST = '127.0.0.1';
 
+/**
+ * The arguments that start `astro preview` on `port` as a server of the
+ * runner's own: on the IPv4 loopback, and in the foreground. Under an AI
+ * coding agent, which Astro 7 reads from the environment, `astro preview`
+ * otherwise starts the server as a detached process with a lock file and
+ * exits, so the runner stopped a process that had already ended, the server
+ * outlived it, and the next audit found the port taken. `--ignore-lock` keeps
+ * it a one-off server in the foreground.
+ */
+export const previewArgs = (port) => ['preview', '--port', String(port), '--host', PREVIEW_HOST, '--ignore-lock'];
+
 /** Both loopbacks, as a URL writes them. */
 const LOOPBACKS = ['127.0.0.1', '[::1]'];
 

@@ -114,6 +114,7 @@ from ._sound_power_reverberation import _speed_of_sound
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -641,16 +642,16 @@ class InDuctSoundPowerResult(OwnsArrays):
     (negative on the inlet side) and ``shield`` names the microphone shield.
     """
 
-    frequencies: np.ndarray
-    sound_power_level: np.ndarray
-    mean_pressure_level: np.ndarray
-    corrected_pressure_level: np.ndarray
-    microphone_correction: np.ndarray
-    shield_correction: np.ndarray
-    flow_modal_correction: np.ndarray
-    combined_correction: np.ndarray
-    reproducibility_standard_deviation: np.ndarray
-    expanded_uncertainty: np.ndarray
+    frequencies: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    mean_pressure_level: NDArray[np.float64]
+    corrected_pressure_level: NDArray[np.float64]
+    microphone_correction: NDArray[np.float64]
+    shield_correction: NDArray[np.float64]
+    flow_modal_correction: NDArray[np.float64]
+    combined_correction: NDArray[np.float64]
+    reproducibility_standard_deviation: NDArray[np.float64]
+    expanded_uncertainty: NDArray[np.float64]
     duct_diameter_m: float
     duct_area: float
     characteristic_impedance: float
@@ -717,7 +718,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def information_only_band(self) -> np.ndarray:
+    def information_only_band(self) -> NDArray[np.bool_]:
         """Per band, whether the standard gives it for information only.
 
         ``True`` above 10 kHz (3.8, clause 4), and in every band when the
@@ -754,7 +755,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
 
 
-def _nominal_bands(frequencies: NumericArrayLike) -> np.ndarray:
+def _nominal_bands(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """The band axis, refused unless every entry is a nominal centre.
 
     The coefficients of Annex A, the A-weighting of Table C.1 and the
@@ -781,7 +782,7 @@ def _nominal_bands(frequencies: NumericArrayLike) -> np.ndarray:
     return freqs
 
 
-def _band_keys(frequencies: np.ndarray) -> list[int]:
+def _band_keys(frequencies: NDArray[np.float64]) -> list[int]:
     """The nominal integer key of each validated band centre."""
     return [round(real_number(f, "frequencies")) for f in frequencies]
 
@@ -856,7 +857,9 @@ def _check_flow_velocity(flow_velocity: float, shield: str) -> float:
     return u
 
 
-def _check_informative_bands(frequencies: np.ndarray, flow_velocity: float) -> None:
+def _check_informative_bands(
+    frequencies: NDArray[np.float64], flow_velocity: float
+) -> None:
     r"""Refuse the corner of Annex A the tables leave empty.
 
     Tables A.1 to A.6 are split by a band header. Over 50 Hz to 10 kHz the
@@ -900,7 +903,9 @@ def _annex_a_rows(duct_diameter_m: float) -> _Rows:
     return _ANNEX_A_TABLES[-1][1]
 
 
-def _warn_reconstructed_coefficient(duct_diameter_m: float, freqs: np.ndarray) -> None:
+def _warn_reconstructed_coefficient(
+    duct_diameter_m: float, freqs: NDArray[np.float64]
+) -> None:
     """Say so when a band is answered with a coefficient that is a reading.
 
     One cell of Annex A is not legible: the ``a3`` of the 5 000 Hz row of
@@ -942,7 +947,7 @@ def flow_modal_correction(
     *,
     shield: MicrophoneShield = "sampling-tube",
     speed_of_sound: float = _C_NORMAL,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Combined mean flow velocity and modal correction :math:`C_{3,4}`.
 
     For the sampling tube, the polynomial of clause 5.3.3.4 with the
@@ -1018,7 +1023,7 @@ def flow_modal_correction(
     )
 
 
-def in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray:
+def in_duct_reproducibility(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     r"""Standard deviation of reproducibility :math:`\sigma_R` per band.
 
     Table 2 of ISO 5136:2003 for the sampling tube, 50 Hz to 10 kHz, which is
@@ -1072,7 +1077,7 @@ def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float,
     return c, rho * c
 
 
-def _position_levels(levels: NumericArrayLike, n_bands: int) -> np.ndarray:
+def _position_levels(levels: NumericArrayLike, n_bands: int) -> NDArray[np.float64]:
     r"""The measured levels as ``(positions, bands)`` or a ``(bands,)`` average.
 
     A 2-D array is one row per circumferential microphone position, to be

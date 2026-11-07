@@ -69,10 +69,11 @@ function withoutDoi(ref) {
 const PAGE_FIELDS = new Set(['note', 'primary', 'implemented']);
 
 /**
- * Standards that share a base designation and a year and are still different
- * documents, each with the reason it is so. `citedWorks` refuses any other
- * such pair as one standard written two ways, and refuses an entry here that
- * carries no reason or of which only one designation is still cited.
+ * Standards of one body whose designations carry the same numbers in one year
+ * and are still different documents, each with the reason it is so.
+ * `citedWorks` refuses any other such pair as one standard written two ways,
+ * and refuses an entry here that carries no reason or no longer separates two
+ * designations cited as one base and year.
  *
  * Empty today: every standard the guides cite under one base and year is one
  * document. A volume or a part that shares its base with another, a second
@@ -90,6 +91,11 @@ export const SEPARATE_STANDARDS = Object.freeze([]);
  * The year is the one the designation carries after a colon, and otherwise
  * the reference's own `year`, so two editions stay two works whichever way
  * they are written.
+ *
+ * The words of the base are not the standard's identity: a Spanish page
+ * writes "Recomendación UIT-R BS.468-4" for "Recommendation ITU-R
+ * BS.468-4", and a designation may carry its body's name in front or not.
+ * `citedWorks` compares the numbers of the base, under one body and year.
  */
 export function designationBase(ref) {
   const bare = String(ref.designation).replace(/\s*\([^)]*\)/g, '').replace(/,.*$/, '').trim();
@@ -117,9 +123,11 @@ export function designationBase(ref) {
  * And it refuses one standard under two designations. A standard keys on its
  * designation, so "ECMA-418-2:2025", "ECMA-418-2:2025 (4th ed.)" and
  * "ECMA-418-2, 4th ed." were three `@id`s for one document, each described
- * consistently and so never compared. Two designations with one base and one
- * year (`designationBase`) are one standard written two ways, unless
- * `separateStandards` lists them with the reason they are not.
+ * consistently and so never compared. Two designations of one body whose
+ * bases carry the same numbers in one year (`designationBase`) are one
+ * standard written two ways, whatever words surround the numbers, the page's
+ * language included, unless `separateStandards` lists them with the reason
+ * they are not.
  *
  * @param {Iterable<{id: string, references?: object[]}>} pages The content
  *   entries of one language.
@@ -189,9 +197,12 @@ export function citedWorks(pages, bibliographyUrl, { separateStandards = SEPARAT
 }
 
 /**
- * The standards `works` cites under two or more designations of one base and
- * year, and the entries of `separateStandards` that carry no reason or no
- * longer separate two cited designations, as problems for `citedWorks`.
+ * The standards `works` cites under two or more designations of one body whose
+ * bases carry the same numbers in one year, and the entries of
+ * `separateStandards` that carry no reason or no longer separate two cited
+ * designations, as problems for `citedWorks`.
+ *
+ * Each group is named by the base and year of its first designation.
  */
 function oneStandardTwoDesignations(works, separateStandards, listed) {
   const problems = [];
@@ -200,30 +211,38 @@ function oneStandardTwoDesignations(works, separateStandards, listed) {
     const { ref } = citing[0];
     if (ref.type !== 'standard') continue;
     const [base, year] = designationBase(ref);
-    const key = `${base} (${year ?? 'n.d.'})`;
-    if (!byBase.has(key)) byBase.set(key, []);
-    byBase.get(key).push({ designation: ref.designation, pages: citing.map(({ page }) => page) });
+    const numbers = base.match(/\d+/g)?.join(' ') ?? base;
+    const key = JSON.stringify([ref.organization, numbers, year ?? null]);
+    if (!byBase.has(key)) byBase.set(key, { label: `${base} (${year ?? 'n.d.'})`, group: [] });
+    byBase.get(key).group.push({ designation: ref.designation, pages: citing.map(({ page }) => page) });
   }
-  const cited = new Set([...byBase.values()].flat().map(({ designation }) => designation));
+  const keyOf = new Map(
+    [...byBase].flatMap(([key, { group }]) => group.map(({ designation }) => [designation, key])),
+  );
   for (const { designations, reason } of separateStandards) {
     const named = designations.map((designation) => JSON.stringify(designation)).join(', ');
     if (typeof reason !== 'string' || reason.trim() === '') {
       problems.push(`SEPARATE_STANDARDS lists ${named} and says no reason they are different works`);
     }
-    const still = designations.filter((designation) => cited.has(designation));
-    if (still.length === 1) {
-      problems.push(
-        `SEPARATE_STANDARDS lists ${named} as separate works, and only ${JSON.stringify(still[0])} is cited`,
-      );
+    const still = designations.filter((designation) => keyOf.has(designation));
+    const keys = still.map((designation) => keyOf.get(designation));
+    if (new Set(keys).size === keys.length) {
+      const why =
+        still.length === 0
+          ? 'none of them is cited'
+          : still.length === 1
+            ? `only ${JSON.stringify(still[0])} is cited`
+            : 'no two of them share a base and a year any more';
+      problems.push(`SEPARATE_STANDARDS lists ${named} as separate works, and ${why}`);
     }
   }
   const separate = (group) =>
     separateStandards.some(({ designations }) => group.every(({ designation }) => designations.includes(designation)));
-  for (const [key, group] of byBase) {
+  for (const { label, group } of byBase.values()) {
     if (group.length < 2 || separate(group)) continue;
     const written = group.map(({ designation, pages }) => `${JSON.stringify(designation)} on ${listed(pages)}`);
     problems.push(
-      `${key} is cited as ${group.length} standards: ${written.join('; ')}; write one designation and put the ` +
+      `${label} is cited as ${group.length} standards: ${written.join('; ')}; write one designation and put the ` +
         'edition, date or clause in the note, or list them in SEPARATE_STANDARDS with the reason they differ',
     );
   }

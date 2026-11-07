@@ -232,7 +232,7 @@ test('the works a language cites, one reference each, refused when two pages des
   );
 });
 
-test('one standard cited under two designations of one base and year is refused, and two editions are not', () => {
+test('one standard cited under two designations, translated or not, is refused, and two editions or two bodies are not', () => {
   const cite = (designation, year, organization = 'Ecma International') =>
     iso(designation, { year, organization, url: undefined });
   const ecma = [
@@ -260,6 +260,40 @@ test('one standard cited under two designations of one base and year is refused,
     assert.throws(() => citedWorks(pages, EN), /is cited as 2 standards/, `${first} and ${second}`);
   }
 
+  // A designation translated with the page, or written with its body's name
+  // in front, is still the one standard: the body, the numbers of the base
+  // and the year say which it is, whatever words surround them.
+  const itu = (designation, year) => cite(designation, year, 'International Telecommunication Union');
+  assert.throws(
+    () =>
+      citedWorks(
+        [
+          { id: 'es/a', references: [itu('Recomendación UIT-R BS.468-4', 1986)] },
+          { id: 'es/b', references: [itu('Recommendation ITU-R BS.468-4', 1986)] },
+        ],
+        ES,
+      ),
+    /Recomendación UIT-R BS\.468-4 \(1986\) is cited as 2 standards: "Recomendación UIT-R BS\.468-4" on es\/a; "Recommendation ITU-R BS\.468-4" on es\/b/,
+  );
+  for (const [first, second, year, organization] of [
+    ['Recomendación UIT-R BS.1770-5 (11/2023)', 'Recommendation ITU-R BS.1770-5', 2023, 'International Telecommunication Union'],
+    ['ANSI/ASA S3.5-1997', 'ANSI S3.5-1997 (R2017)', 1997, 'American National Standards Institute'],
+  ]) {
+    const pages = [
+      { id: 'a', references: [cite(first, year, organization)] },
+      { id: 'b', references: [cite(second, year, organization)] },
+    ];
+    assert.throws(() => citedWorks(pages, EN), /is cited as 2 standards/, `${first} and ${second}`);
+  }
+
+  // The same numbers and year from two bodies are two documents: the
+  // European adoption of an ISO standard is CEN's, with its own foreword.
+  const adoption = [
+    { id: 'a', references: [cite('ISO 354:2003', 2003, 'International Organization for Standardization')] },
+    { id: 'b', references: [cite('EN ISO 354:2003', 2003, 'European Committee for Standardization')] },
+  ];
+  assert.equal(citedWorks(adoption, EN).size, 2);
+
   // Two editions are two works, with the year in the designation or only in
   // the year field.
   const editions = [
@@ -283,7 +317,8 @@ test('two works sharing a base designation and a year pass only when listed with
   assert.equal(citedWorks(pages, EN, { separateStandards: listed }).size, 2);
 
   // An entry without its reason is refused, and so is one that no longer
-  // separates anything: only one of its designations is still cited.
+  // separates anything: only one of its designations is still cited, none of
+  // them is, or the ones still cited no longer share a base and a year.
   assert.throws(
     () => citedWorks(pages, EN, { separateStandards: [{ designations: listed[0].designations, reason: ' ' }] }),
     /says no reason/,
@@ -291,5 +326,18 @@ test('two works sharing a base designation and a year pass only when listed with
   assert.throws(
     () => citedWorks([pages[0]], EN, { separateStandards: listed }),
     /lists "ICAO Annex 16, Vol\. I", "ICAO Annex 16, Vol\. II" as separate works, and only "ICAO Annex 16, Vol\. I" is cited/,
+  );
+  const elsewhere = [{ id: 'c', references: [iso('ISO 1:2000', { year: 2000, url: undefined })] }];
+  assert.throws(
+    () => citedWorks(elsewhere, EN, { separateStandards: listed }),
+    /lists "ICAO Annex 16, Vol\. I", "ICAO Annex 16, Vol\. II" as separate works, and none of them is cited/,
+  );
+  const apart = [
+    { id: 'a', references: [volume('ICAO Annex 16, Vol. I')] },
+    { id: 'b', references: [iso('ICAO Annex 16, Vol. II', { year: 2018, organization: 'International Civil Aviation Organization', url: undefined })] },
+  ];
+  assert.throws(
+    () => citedWorks(apart, EN, { separateStandards: listed }),
+    /lists "ICAO Annex 16, Vol\. I", "ICAO Annex 16, Vol\. II" as separate works, and no two of them share a base and a year any more/,
   );
 });

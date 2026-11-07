@@ -287,12 +287,14 @@ const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceC
  * That Person is most of the block, and it changes when jmrp.io changes, with
  * no diff in this repository: four profile links added there grew every page
  * here by 132 bytes, and an earlier change there doubled the Person. The block
- * was 23,545 bytes on 2026-11-07, 16,320 of them the Person. The budget leaves
+ * was 23,545 bytes on 2026-11-07, 16,320 of them the Person, and 30,804 once
+ * it gave its descriptions, feature list and keywords in Spanish beside the
+ * English and listed a feature for each topic that teaches. The budget leaves
  * room for a few more links or topics and none for a second copy of a list,
  * so a growth of that kind stops the build and is decided here, by raising the
  * budget or by trimming the source, instead of shipping on every page unseen.
  */
-const SITE_BLOCK_BUDGET = 25_000;
+const SITE_BLOCK_BUDGET = 32_000;
 
 /** `sameAs` as an array, whichever of the two shapes a node uses. */
 const sameAsOf = (node) => (Array.isArray(node.sameAs) ? node.sameAs : [node.sameAs].filter(Boolean));

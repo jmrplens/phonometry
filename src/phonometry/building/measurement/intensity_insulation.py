@@ -102,6 +102,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -144,7 +145,7 @@ def _validate_intensity_report(
     engine: ReportEngine,
     language: Language,
     rating: WeightedRatingResult | None,
-    curve: np.ndarray,
+    curve: NDArray[np.float64],
     label: str,
 ) -> WeightedRatingResult:
     """Validate a shared ISO 15186-1 intensity-report request, or raise.
@@ -206,8 +207,8 @@ class IntensityReductionResult(OwnsArrays):
         ``None`` on a manually built result (Clause 8 g).
     """
 
-    r_i: np.ndarray
-    r_i_modified: np.ndarray | None
+    r_i: NDArray[np.float64]
+    r_i_modified: NDArray[np.float64] | None
     rating: WeightedRatingResult | None
     rating_modified: WeightedRatingResult | None
     area: float | None = None
@@ -380,7 +381,7 @@ class IntensityElementNormalizedResult(OwnsArrays):
     :ivar n: Number ``N`` of element units within the measurement surface.
     """
 
-    d_i_n_e: np.ndarray
+    d_i_n_e: NDArray[np.float64]
     rating: WeightedRatingResult | None
     measurement_area: float | None = None
     n: int = 1
@@ -513,11 +514,11 @@ def adaptation_term_kc(
     *,
     boundary_area: float,
     volume: float,
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 @overload
-def adaptation_term_kc(frequencies: NumericArrayLike) -> np.ndarray: ...
+def adaptation_term_kc(frequencies: NumericArrayLike) -> NDArray[np.float64]: ...
 
 
 def adaptation_term_kc(
@@ -525,7 +526,7 @@ def adaptation_term_kc(
     *,
     boundary_area: float | None = None,
     volume: float | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Adaptation term ``Kc`` per ISO 15186-1:2000, Annex B.
 
     Returns, per one-third-octave midband frequency, the term ``Kc`` that
@@ -579,7 +580,7 @@ def adaptation_term_kc(
 def surface_pressure_intensity_indicator(
     lp: NumericArrayLike,
     l_in: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Surface pressure-intensity indicator ``FpI`` (ISO 15186-1, Formula (10)).
 
     Returns :math:`F_{pI} = L_p - L_{I\mathrm{n}}` per band from the surface- and
@@ -627,7 +628,7 @@ class SubareaIntensityLevel(OwnsArrays):
         \rvert`, the total measured area, in m² (Formula (12)).
     """
 
-    levels: np.ndarray
+    levels: NDArray[np.float64]
     measurement_area: float
 
 
@@ -768,7 +769,7 @@ def intensity_sound_reduction(
 
     r_i = lp1_bands - _DIFFUSE_FIELD - (l_in_bands + 10.0 * np.log10(sm / s))
 
-    r_i_modified: np.ndarray | None = None
+    r_i_modified: NDArray[np.float64] | None = None
     if kc is not None:
         kc_bands = real_array(kc, "kc")
         require_equal_shapes(
@@ -929,7 +930,7 @@ def limp_panel_reduction_index(
     area: float,
     temperature_c: float = 23.0,
     static_pressure_pa: float = _ANNEX_A_B0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Sound reduction index of a limp panel (ISO 15186-3:2002, Annex A).
 
     Annex A is normative and is how a laboratory qualifies itself: measure a
@@ -1085,11 +1086,11 @@ def _low_frequency_limit(*, absorbing_specimen_surface: bool) -> float:
 
 def _low_frequency_qualification(
     l_p: NumericArrayLike | None,
-    l_in: np.ndarray,
+    l_in: NDArray[np.float64],
     *,
     owner: str,
     absorbing_specimen_surface: bool | np.bool_,
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """Formula (5), which the Clause 6.4.2 verdict is read from, or ``None``.
 
     Clause 6.4.2 asks for the receiving-side pressure level "if possible", so
@@ -1110,7 +1111,7 @@ def _check_low_frequency_bands(
     band_count: int,
     *,
     owner: str,
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """Clause 1.1: this part applies from 50 Hz to 160 Hz and nowhere else.
 
     The six one-third octaves are matched by proximity rather than equality,
@@ -1143,7 +1144,9 @@ def _check_low_frequency_bands(
     return freqs
 
 
-def _qualified(indicator: np.ndarray | None, limit: float) -> np.ndarray | None:
+def _qualified(
+    indicator: NDArray[np.float64] | None, limit: float
+) -> NDArray[np.bool_] | None:
     """The Clause 6.4.2 verdict per band, read settled, or ``None`` without an indicator."""
     if indicator is None:
         return None
@@ -1176,9 +1179,9 @@ class LowFrequencyIntensityResult(OwnsArrays):
         in the receiving room and 10 dB when it is sound-reflecting.
     """
 
-    r_i: np.ndarray
-    surface_pressure_intensity_indicator: np.ndarray | None
-    frequencies: np.ndarray | None
+    r_i: NDArray[np.float64]
+    surface_pressure_intensity_indicator: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None
     area: float
     measurement_area: float
     _: KW_ONLY
@@ -1229,7 +1232,7 @@ class LowFrequencyIntensityResult(OwnsArrays):
         )
 
     @property
-    def qualified(self) -> np.ndarray | None:
+    def qualified(self) -> NDArray[np.bool_] | None:
         """The Clause 6.4.2 verdict per band, read from the indicator.
 
         ``True`` in each band whose ``FpI`` is within :attr:`indicator_limit`,
@@ -1391,9 +1394,9 @@ class LowFrequencyElementResult(OwnsArrays):
         was applied.
     """
 
-    d_i_n_e: np.ndarray
-    surface_pressure_intensity_indicator: np.ndarray | None
-    frequencies: np.ndarray | None
+    d_i_n_e: NDArray[np.float64]
+    surface_pressure_intensity_indicator: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None
     measurement_area: float
     n_elements: int
     _: KW_ONLY
@@ -1436,7 +1439,7 @@ class LowFrequencyElementResult(OwnsArrays):
         )
 
     @property
-    def qualified(self) -> np.ndarray | None:
+    def qualified(self) -> NDArray[np.bool_] | None:
         """The Clause 6.4.2 verdict per band, read from the indicator, or ``None``.
 
         ``None`` throughout when the indicator itself is ``None``.

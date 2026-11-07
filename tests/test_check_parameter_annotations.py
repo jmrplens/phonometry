@@ -1698,6 +1698,153 @@ def test_a_record_reads_its_bases_in_its_method_resolution_order(
     }
 
 
+#: Calls whose ``*`` argument fills the places from its own on, and whose
+#: arguments after it never fill a place before theirs.
+_LOWEST_PLACES = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = [
+    "Held",
+    "Second",
+    "Stored",
+    "Unread",
+    "first_place",
+    "into_record",
+    "into_second",
+    "into_vararg",
+    "second_place",
+]
+
+_PREFIX: tuple[str, ...] = ()
+
+def _first(n: int = 1, scale: float = 1.0, offset: float = 0.0) -> int:
+    return require_count(n, "n")
+
+def _second(scale: float = 1.0, n: int = 1, offset: float = 0.0) -> int:
+    return require_count(n, "n")
+
+def _tail(scale: float = 1.0, *counts: int) -> int:
+    total = 0
+    for count in counts:
+        total += require_count(count, "count")
+    return total
+
+def _hold(record: object, name: str, *rest: str) -> None:
+    require_count(getattr(record, name), name)
+
+def _store(record: object, name: str, unit: str = "") -> None:
+    object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+@dataclass(frozen=True)
+class Second:
+    height_m: float = 0.0
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+@dataclass(frozen=True)
+class Unread:
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        self._check(*_PREFIX, "unit", "n_positions")
+
+    def _check(self, name: str, unit: str) -> None:
+        require_count(getattr(self, name), name)
+
+@dataclass(frozen=True)
+class Held:
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        _hold(*_PREFIX, None, self, "n_positions")
+
+@dataclass(frozen=True, kw_only=True)
+class Stored:
+    ix: int
+    iy: int
+
+    def __post_init__(self) -> None:
+        _store(*_PREFIX, self, "ix", "iy")
+
+def first_place(value: int, head: tuple[float, ...] = ()) -> int:
+    return _first(*head, 1, value)
+
+def second_place(value: int, head: tuple[float, ...] = ()) -> int:
+    return _second(*head, 1, value)
+
+def into_second(*counts: int) -> int:
+    return _second(*counts)
+
+def into_record(*counts: int) -> Second:
+    return Second(*counts)
+
+def into_vararg(*counts: int) -> int:
+    return _tail(*counts)
+"""
+
+
+def test_a_star_and_what_follows_it_fill_places_from_their_lowest_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument hands an unknown number of values, none among them,
+    so it fills every place from its own on, and the ``*args`` past them,
+    and an argument after it any place from the number of plain arguments
+    before it on: ``_first(*head, 1, value)`` never hands ``value`` to the
+    count, which comes first, and ``_second(*head, 1, value)`` may. The
+    star itself reaches the count ``_second``, ``Second`` and ``_tail``
+    validate. Read by name, ``self._check(*_PREFIX, "unit",
+    "n_positions")`` hands the field's name to ``unit`` alone,
+    ``_hold(*_PREFIX, None, self, "n_positions")`` the record to ``name``
+    alone, and ``_store(*_PREFIX, self, "ix", "iy")`` the name ``iy`` to
+    ``unit``: the record stores ``ix`` alone.
+
+    Every argument after a star was read from the star's own place on, so
+    ``first_place``, ``Unread`` and ``Held`` were refused for a count that
+    never reaches a validator and ``iy`` was read as stored; and the star
+    was read at its own place alone, so the counts it hands passed as
+    ``int``.
+    """
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _LOWEST_PLACES},
+    )
+    reader = cpa.Reader(
+        overloads.Package(sorted(root.rglob("*.py")), root), handed_on=frozenset()
+    )
+    assert cpa.converted_fields(reader, "pkg.api.Stored") == {"ix"}
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter, f.problem) for f in found) == [
+        (
+            "into_record",
+            "counts",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Second(n_positions), require_count() takes it",
+        ),
+        (
+            "into_second",
+            "counts",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_second(n), require_count() takes it",
+        ),
+        (
+            "into_vararg",
+            "counts",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_tail(counts), require_count() takes it",
+        ),
+        (
+            "second_place",
+            "value",
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_second(n), require_count() takes it",
+        ),
+    ]
+
+
 def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -197,6 +197,7 @@ from typing import TYPE_CHECKING
 import check_return_overloads as overloads
 from ast_scan import (
     ROOT,
+    argument_places,
     is_type_checking_block,
     own_names,
     python_files,
@@ -2001,38 +2002,49 @@ def _positional(
     return every[1:] if bound and every else every
 
 
-def _first_star(call: ast.Call) -> int | None:
-    """The place of a call's first ``*`` argument, if it has one."""
-    for index, argument in enumerate(call.args):
-        if isinstance(argument, ast.Starred):
-            return index
-    return None
+#: Where each argument of a call with a ``*`` argument may land
+#: (:func:`ast_scan.argument_places`): the lowest place, and whether any
+#: place from there on. ``None`` for a call without one, whose arguments
+#: each fill their own place.
+type _Spread = Sequence[tuple[int, bool]] | None
 
 
-def _filled(places: Sequence[str], positions: Sequence[int], spread: int) -> list[str]:
+def _landing(call: ast.Call) -> _Spread:
+    """Where each argument of *call* may land, if it has a ``*`` argument."""
+    if not any(isinstance(argument, ast.Starred) for argument in call.args):
+        return None
+    return argument_places(call.args)
+
+
+def _filled(
+    places: Sequence[str], positions: Sequence[int], spread: _Spread
+) -> list[str]:
     """The names of *places* a call's arguments at *positions* may fill.
 
-    An argument past the first ``*`` argument (at *spread*) may fill any
-    place from the star's own on, as the star hands an unknown number of
-    values; one before it fills the place it is written in.
+    A ``*`` argument, and every argument after one, may fill any place from
+    the lowest it may take on (*spread*), the star its items one each: in
+    ``f(*head, 1, n)`` the count fills the second place or a later one,
+    never the first. An argument with no star at or before it fills the
+    place it is written in.
     """
     filled: list[str] = []
     for index in positions:
-        if index > spread:
-            filled.extend(places[spread:])
+        lowest, spreads = spread[index] if spread is not None else (index, False)
+        if spreads:
+            filled.extend(places[lowest:])
         elif index < len(places):
             filled.append(places[index])
     return filled
 
 
-def _past_the_places(positions: Sequence[int], places: int, spread: int | None) -> bool:
+def _past_the_places(positions: Sequence[int], places: int, spread: _Spread) -> bool:
     """Whether a call's argument at one of *positions* may land past a
     function's *places* named positional parameters, in its ``*args``: one
-    written past them, or one after the call's first ``*`` argument (at
-    *spread*), which may land anywhere from the star's place on.
+    written past them, a ``*`` argument, whose items may run past them, or
+    one after it (*spread*).
     """
     return any(
-        index >= places or (spread is not None and index > spread)
+        index >= places or (spread is not None and spread[index][1])
         for index in positions
     )
 
@@ -2076,9 +2088,10 @@ class Reader:
         self._rebound: dict[int, frozenset[str]] = {}
         self._calls: dict[int, list[ast.Call]] = {}
         self._refusing: dict[int, frozenset[int]] = {}
-        #: The place of each call's first ``*`` argument (:func:`_first_star`),
-        #: read once for each call, as every route through it asks again.
-        self._stars: dict[ast.Call, int | None] = {}
+        #: Where each argument of a call with a ``*`` argument may land
+        #: (:func:`_landing`), read once for each call, as every route through
+        #: it asks again.
+        self._stars: dict[ast.Call, _Spread] = {}
         self._memo: dict[tuple[str, str, str, str], list[tuple[str, int, int]]] = {}
         self._active: set[tuple[str, str, str, str]] = set()
         self._cut = False
@@ -2460,8 +2473,8 @@ class Reader:
         """Where a call takes the parameter leads through one callee it may reach.
 
         *given* is where the call takes it, by position and by keyword, and
-        the level it is read at. A position past the call's first ``*``
-        argument may be any place from the star's own on (:func:`_filled`).
+        the level it is read at. A ``*`` argument, and a position after one,
+        may be any place from the lowest it may take on (:func:`_filled`).
         """
         positions, keywords, level = given
         ends = self._ends(target)
@@ -2483,7 +2496,7 @@ class Reader:
         if call in stars:
             spread = stars[call]
         else:
-            spread = stars[call] = _first_star(call)
+            spread = stars[call] = _landing(call)
         handed = (
             self._constructed(reached, (positions, spread), keywords, target)
             if reached in self.annotations.classes
@@ -2568,7 +2581,8 @@ class Reader:
         of a vararg it loops over: ``_hold_cells(self, "ix", "iy")`` reads
         ``getattr(record, name)`` for each ``name`` of ``names``. A name or
         the record written after a ``*`` argument may fill any parameter
-        from the star's place on (:func:`_filled`), or the vararg.
+        from the lowest place it may take on (:func:`_filled`), or the
+        vararg.
         """
         owner, _, field = name.partition(".")
         if owner not in _OWNERS or not field or field.startswith("{"):
@@ -2598,7 +2612,7 @@ class Reader:
         holders = [owner] if bound_self else _holders(call, positional, owner)
         if not holders:
             return
-        spread = _first_star(call)
+        spread = _landing(call)
         received = (
             [positional[index] for index in given if index < len(positional)]
             if spread is None
@@ -2680,7 +2694,7 @@ class Reader:
     def _constructed(
         self,
         record: str,
-        positions: tuple[list[int], int | None],
+        positions: tuple[list[int], _Spread],
         keywords: list[str],
         target: Target,
     ) -> Iterator[tuple[str, int, int]]:
@@ -2739,7 +2753,7 @@ class Reader:
     def _handed(
         self,
         reached: str,
-        positions: tuple[list[int], int | None],
+        positions: tuple[list[int], _Spread],
         keywords: list[str],
         *,
         bound: bool,
@@ -4963,15 +4977,15 @@ def _holders(call: ast.Call, positional: Sequence[str], owner: str) -> list[str]
 
     ``_hold_cells(self, "ix", "iy")`` hands ``self`` to the parameter
     ``record`` of ``_hold_cells(record, *names)``. Written after a ``*``
-    argument, the record may fill any of *positional* from the star's place
-    on (:func:`_filled`).
+    argument, the record may fill any of *positional* from the lowest place
+    it may take on (:func:`_filled`).
     """
     given = [
         index
         for index, value in enumerate(call.args)
         if isinstance(value, ast.Name) and value.id == owner
     ]
-    spread = _first_star(call)
+    spread = _landing(call)
     if spread is None:
         return [positional[index] for index in given if index < len(positional)]
     return list(dict.fromkeys(_filled(positional, given, spread)))
@@ -5004,8 +5018,9 @@ def _handed_stores(
     text, a parameter filled by the call, or a loop name over its vararg;
     *looping* reads the call's own arguments when they are loop names of the
     caller. A method called on ``self`` is read where it is called. After a
-    ``*`` argument, an argument may fill any place from the star's on, or
-    the vararg, and the record any parameter from there (:func:`_holders`).
+    ``*`` argument, an argument may fill any place from the lowest it may
+    take on, or the vararg, and the record any parameter from there
+    (:func:`_holders`).
     """
     if not any(
         isinstance(value, ast.Name) and value.id in _OWNERS for value in call.args
@@ -5022,7 +5037,7 @@ def _handed_stores(
         holder for owner in _OWNERS for holder in _holders(call, positional, owner)
     }
     vararg = node.args.vararg
-    spread = _first_star(call)
+    spread = _landing(call)
     rest = [
         value
         for index, value in enumerate(call.args)
@@ -5051,11 +5066,19 @@ def _handed_stores(
             handed.extend(rest)
         elif isinstance(field, ast.Name) and field.id in places:
             place = places[field.id]
-            if spread is not None and place >= spread:
-                # Past the star, any argument after it may fill the place.
-                handed.extend(call.args[spread + 1 :])
-            elif place < len(call.args):
-                handed.append(call.args[place])
+            if spread is None:
+                handed.extend(call.args[place : place + 1])
+            else:
+                # An argument after a star may fill any place from the
+                # lowest it may take on.
+                handed.extend(
+                    argument
+                    for argument, (lowest, spreads) in zip(
+                        call.args, spread, strict=True
+                    )
+                    if not isinstance(argument, ast.Starred)
+                    and (lowest <= place if spreads else lowest == place)
+                )
         for value in handed:
             named = _field_named(value, looping)
             if named is not None:

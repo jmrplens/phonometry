@@ -250,6 +250,9 @@ export const SAME_WORKS = Object.freeze(
 export function governingDocuments(report) {
   const documents = new Map();
   for (const check of report.checks) {
+    if (!Array.isArray(check?.reference?.documents)) {
+      throw new Error(`the conformance check ${check?.id} names no documents (reference.documents)`);
+    }
     for (const document of check.reference.documents) {
       if (document.kind !== 'standard' || document.relation === IN_PASSING) continue;
       const key = document.edition ? `${document.designation}:${document.edition}` : document.designation;
@@ -290,6 +293,11 @@ function isWork(ref, work) {
  * @param {readonly { document: string, works: readonly object[], reason: string }[]} [options.sameWorks]
  * @param {'en' | 'es'} [options.lang] The pages' language, which names an
  *   article's two authors with "&" or "y".
+ * @param {boolean} [options.strict] False to read the report as far as it
+ *   resolves, counting the checks of the documents that do and leaving out the
+ *   rest, instead of failing: how a report of the past is read, to tell which
+ *   commit to it changed the line a page shows (src/lib/content-dates.mjs). A
+ *   page is only ever rendered from a strict join.
  * @returns {{
  *   governing: object[],
  *   verifiedBy: (references: object[] | undefined) => ({ checks: number, works: string[], domains: { id: string, title: string, checks: number, path: string }[] } | undefined),
@@ -302,7 +310,7 @@ function isWork(ref, work) {
  *   needed, leaves out the work the designations already join it to, or adds
  *   beside it a work that does not amend it.
  */
-export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath, sameWorks = SAME_WORKS, lang = 'en' }) {
+export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath, sameWorks = SAME_WORKS, lang = 'en', strict = true }) {
   // Every work the pages cite once, by `@id`, with each key it answers to.
   const works = new Map();
   for (const page of pages) {
@@ -398,7 +406,7 @@ export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath
       resolved.set(key, found);
     }
   }
-  if (problems.length > 0) {
+  if (problems.length > 0 && strict) {
     throw new Error(
       `the conformance report is based on standards the pages under ${bibliographyUrl} do not resolve, in ` +
         `${problems.length} place(s); cite each where it belongs, or say in SAME_WORKS ` +

@@ -318,3 +318,25 @@ test('a pairing that picks one of the editions a standard with no year names may
     /SAME_WORKS pairs ISO 717-1 with ISO 3745:2012 beside ISO 717-1:2020, ISO 717-1:2013, which its designation already names, and ISO 3745:2012 amends none of them/,
   );
 });
+
+test('a report of the past is read as far as it resolves, and one with no documents named draws nothing', () => {
+  // How the dates read a version of the report from before a page cited one
+  // of its standards: the checks of what resolves count, the rest count
+  // nowhere, and nothing fails.
+  const checks = [check('a/1', 'a', [['ISO 1', '2000']]), check('a/2', 'a', [['ISO 4', '2004']])];
+  assert.throws(() => evidence(checks, [standard('ISO 1:2000', 2000)]), /ISO 4:2004: no page cites it/);
+  const past = conformanceEvidence({
+    report: report(checks),
+    pages: [{ id: 'topic/guide', references: [standard('ISO 1:2000', 2000)] }],
+    bibliographyUrl: BIBLIOGRAPHY,
+    reportPath: REPORT_PATH,
+    sameWorks: [],
+    strict: false,
+  });
+  assert.equal(past.verifiedBy([standard('ISO 1:2000', 2000)])?.checks, 1);
+  // A report whose checks name no documents cannot be joined at all.
+  assert.throws(
+    () => evidence([{ id: 'a/1', domain: 'a', reference: { cite: 'ISO 1:2000 Table 1' } }], [standard('ISO 1:2000', 2000)]),
+    /the conformance check a\/1 names no documents/,
+  );
+});

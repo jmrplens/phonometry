@@ -1,7 +1,7 @@
 ---
 /**
  * The line under a guide's title that says which conformance checks verify
- * it: how many checks of the report are based on the standards the page
+ * it: how many checks of the report are based on the works the page
  * implements, against which of them, and in which domains of the report, each
  * a link to its section, which the report opens on arrival.
  *
@@ -11,12 +11,16 @@
  * for each standard by hand. The join is made once per language and build
  * (src/lib/page-evidence.ts, src/lib/conformance-evidence.mjs), from the
  * page's own `references` frontmatter and the documents each check cites in
- * docs/conformance.json, so the line cannot name a standard the page does
- * not implement, nor a domain that checks none of them.
+ * docs/conformance.json, so the line cannot name a work the page does not
+ * implement, nor a domain that checks none of them. Each work is named the
+ * way a reader finds it on the page, without the commas that separate the
+ * works in the line (`workName`).
  *
- * Like the header chips, which summarise the bibliography, the line
- * summarises another document: the page's date follows its own text
- * (src/lib/content-dates.mjs), not the report's.
+ * Unlike the header chips, which come from the page's own frontmatter alone,
+ * the line shows numbers read from another file, so it dates the page: a
+ * commit to docs/conformance.json moves a page's date when it changed the
+ * line that page shows, and leaves every other page's (src/lib/content-dates.mjs,
+ * the entry of the whole content tree in date-sources.json).
  *
  * A page whose standards no check is based on renders nothing and carries no
  * `data-verified-by` (src/lib/page-markdown.mjs), which is how a reader of the

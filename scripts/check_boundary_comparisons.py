@@ -129,6 +129,7 @@ import sys
 from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
+    argument_places,
     assigned_value,
     assignment_target,
     binding_of,
@@ -2055,23 +2056,21 @@ def _unpacked_into(
     when no argument of its own does (:func:`_argument`).
 
     A ``*`` argument, and every argument after it, may land in any place
-    from its own on: in the place of *name* when that is one of them. A
-    ``**`` mapping may hand any parameter that takes a keyword (*keyword*)
-    one of its values: those of a ``{...}`` written there, or the mapping.
+    from the lowest it may take on (:func:`ast_scan.argument_places`): in
+    the place of *name* when that is one of them, so ``f(*head, 1, value)``
+    hands ``value`` to no first parameter. A ``**`` mapping may hand any
+    parameter that takes a keyword (*keyword*) one of its values: those of
+    a ``{...}`` written there, or the mapping.
     """
     found: list[ast.expr] = []
-    spread = next(
-        (
-            index
-            for index, argument in enumerate(call.args)
-            if isinstance(argument, ast.Starred)
-        ),
-        None,
-    )
-    if spread is not None and name in positional[spread:]:
+    if name in positional:
+        place = positional.index(name)
         found.extend(
             argument.value if isinstance(argument, ast.Starred) else argument
-            for argument in call.args[spread:]
+            for argument, (lowest, spreads) in zip(
+                call.args, argument_places(call.args), strict=True
+            )
+            if spreads and lowest <= place
         )
     if keyword:
         for item in call.keywords:

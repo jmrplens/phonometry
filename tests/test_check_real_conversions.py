@@ -1877,6 +1877,42 @@ def test_a_keyword_fills_no_positional_only_place(
     assert _verdicts(tmp_path, source)["_convert"] == verdict
 
 
+#: A helper whose first place an argument after a ``*`` one may not reach.
+_PLACED_HELPER = """
+def _convert(values, scale=1.0, offset=0.0):
+    return np.asarray(values, dtype=np.float64)
+"""
+
+
+@pytest.mark.parametrize(
+    ("caller", "verdict"),
+    [
+        (
+            "def f(levels):\n    return _convert(*[np.zeros(3)], 1.0, levels)\n",
+            "computed",
+        ),
+        (
+            "def f(levels):\n    return _convert(*[np.zeros(3)], levels)\n",
+            "unchecked",
+        ),
+    ],
+)
+def test_an_argument_after_a_star_takes_no_place_before_its_lowest(
+    tmp_path: Path, caller: str, verdict: str
+) -> None:
+    """An argument after a ``*`` one lands in the place of the number of
+    plain arguments before it, or a later one: in ``_convert(*[...], 1.0,
+    levels)`` the caller's ``levels`` never reaches ``values``, which the
+    computed array or the ``1.0`` fills, and without the ``1.0`` it may.
+
+    Every argument after the star was read from the star's own place on, so
+    ``levels`` reached ``values`` and the conversion was read as one of the
+    caller's value.
+    """
+    source = _PLANTED_HEADER + _PLACED_HELPER + "\n" + caller
+    assert _verdicts(tmp_path, source)["_convert"] == verdict
+
+
 def _read_apart(tmp_path: Path, published: str) -> str:
     """The verdict on a conversion in a private module that a public one calls."""
     package = tmp_path / "phonometry"

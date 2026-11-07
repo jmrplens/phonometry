@@ -125,6 +125,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
 from ast_scan import (
     ROOT,
+    argument_places,
     assigned_value,
     binding_of,
     bindings_by_name,
@@ -2059,20 +2060,21 @@ class _Helper:
         self, call: ast.Call, state_of: Callable[[ast.expr], State]
     ) -> Iterator[tuple[str, State]]:
         """Each parameter *call* hands a value, with what the value holds; an
-        unpacked argument may reach any parameter from its place on, and a
-        ``**`` mapping any that takes a keyword, but neither one a plain
-        argument of the call fills (:func:`_filled_by_the_call`).
+        unpacked argument, and every argument after one, may reach any
+        parameter from the lowest place it may take on
+        (:func:`ast_scan.argument_places`), and a ``**`` mapping any that
+        takes a keyword, but neither one a plain argument of the call fills
+        (:func:`_filled_by_the_call`).
         """
         filled = _filled_by_the_call(call, self.positional, self.keywords)
-        spread: tuple[str, ...] | None = None
+        extra = tuple(filter(None, [self.vararg]))
+        places = argument_places(call.args)
         for place, argument in enumerate(call.args):
-            if isinstance(argument, ast.Starred) and spread is None:
-                spread = tuple(
-                    name for name in self.positional[place:] if name not in filled
-                ) + tuple(filter(None, [self.vararg]))
+            lowest, spreads = places[place]
             value = argument.value if isinstance(argument, ast.Starred) else argument
-            if spread is not None:
-                yield from ((name, state_of(value)) for name in spread)
+            if spreads:
+                reached = [n for n in self.positional[lowest:] if n not in filled]
+                yield from ((name, state_of(value)) for name in (*reached, *extra))
             elif place < len(self.positional):
                 yield self.positional[place], state_of(value)
             elif self.vararg is not None:

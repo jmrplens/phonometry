@@ -65,33 +65,27 @@ solver to verify the assumptions it rests on.
 Those cross-checks are not only arguments: twenty-four of the animations in
 this documentation are output from these two solvers, nineteen from the
 acoustic one and five from the elastic one, and twenty-one of them are filed
-on the guides whose physics they settle rather than here. Room modes growing
-on and off resonance appear in
-[room acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)
-and [reverberation prediction](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/),
-which also carries the hall of columns that turns one wavefront into a mixed
-field and the same absorption placed two ways; barrier diffraction at two
-wavelengths in
-[outdoor propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)
-and [ground effect and barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/);
-downwind and upwind refraction in
-[atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/);
-the ground-effect lobe pattern in outdoor propagation and in
-[airport noise](https://docs.jmrp.io/phonometry/aircraft/airport-noise/); the standing-wave and
-transmission tubes in [the impedance tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/);
-the open duct end radiating at two frequencies in
-[measuring a silencer](https://docs.jmrp.io/phonometry/devices/noise-control/silencer-measurement/);
-a duct driven below and above its first cut-on in
-[duct-borne noise](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/);
-the QRD and metadiffuser panels in
-[diffusers](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/) and
-[metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/); the slit
-absorber in [metamaterial absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/);
-the expansion chamber and the quarter-wave side branch in
-[silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/);
-the wall aperture in [panel sound insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/);
-and the SOFAR duct and the critical grazing angle over two seabeds in
-[underwater propagation](https://docs.jmrp.io/phonometry/underwater/underwater-propagation/).
+on the guides whose physics they settle rather than here. Eighteen of the
+acoustic solver's nineteen are on these guides:
+
+| Guide | What its animations show |
+|---|---|
+| [Room acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) | room modes growing on and off resonance |
+| [Reverberation prediction](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/) | the same room modes, the hall of columns that turns one wavefront into a mixed field, and the same absorption placed two ways |
+| [Outdoor propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) | barrier diffraction at two wavelengths, and the ground-effect lobe pattern |
+| [Ground effect and barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/) | barrier diffraction at two wavelengths |
+| [Atmospheric refraction](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/) | downwind and upwind refraction |
+| [Airport noise](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) | the ground-effect lobe pattern |
+| [Impedance tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/) | the virtual impedance tube and the virtual transmission tube |
+| [Measuring a silencer](https://docs.jmrp.io/phonometry/devices/noise-control/silencer-measurement/) | the open duct end radiating at two frequencies |
+| [Duct-borne noise](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/) | a duct driven below and above its first cut-on |
+| [Diffusers](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/) | a flat panel beside a QRD |
+| [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/) | the metadiffuser beside the QRD it mimics |
+| [Metamaterial absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/) | the slit absorber |
+| [Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/) | the expansion chamber and the quarter-wave side branch |
+| [Panel sound insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) | the wall aperture |
+| [Underwater propagation](https://docs.jmrp.io/phonometry/underwater/underwater-propagation/) | the SOFAR duct, and the critical grazing angle over two seabeds |
+
 Three of the elastic solver's five are on guides too: the bending packet
 entering an L-junction, on
 [junction transmission](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/),

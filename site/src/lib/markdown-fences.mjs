@@ -132,7 +132,8 @@ const HTML_LONE_TAG =
 /**
  * A tag of an `.mdx` page, over as many lines as it takes: a quoted value and an
  * expression among its attributes may hold a `>`. Sticky: a reader sets its
- * `lastIndex` to where the tag would open. `pageMarkup` of
+ * `lastIndex` to where the tag would open, and one that looks for every tag of a
+ * text builds its own from the `source`. `pageMarkup` of
  * `scripts/shared/markdown-spans.mjs` reads the tags of a page by it too.
  */
 export const MDX_TAG = /<\/?(?:[A-Za-z_$][\w.:$-]*(?:[^"'>{]|"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\})*)?>/y;
@@ -539,20 +540,7 @@ class Walk {
    * text stands beside them, so they are inline ones of a paragraph.
    */
   mdxFlow(index, body) {
-    const text = [body, ...this.lines.slice(index + 1)].join('\n');
-    let at = 0;
-    for (;;) {
-      const reader = text[at] === '<' ? MDX_TAG : MDX_EXPRESSION;
-      reader.lastIndex = at;
-      const found = reader.exec(text);
-      if (found === null) return null;
-      at = found.index + found[0].length;
-      while (text[at] === ' ' || text[at] === '\t') at += 1;
-      if (at >= text.length || text[at] === '\n') {
-        return text.slice(0, at).split('\n').length - 1;
-      }
-      if (text[at] !== '<' && text[at] !== '{') return null;
-    }
+    return flowOf([body, ...this.lines.slice(index + 1)].join('\n'))?.lines ?? null;
   }
 
   /** The fence, the display block, the aside or the HTML block a line opens, or `null`. */
@@ -621,6 +609,35 @@ class Walk {
     }
     this.leaf = 'table';
     return true;
+  }
+}
+
+/**
+ * The tags and expressions an `.mdx` flow is made of, as the walk of a page reads
+ * one: from the start of `text`, one after another with blanks between them, up to
+ * the end of a line with nothing else on it, each as written, and how many lines
+ * past the first they take. `null` when text stands beside them on that line, so
+ * they are inline ones of a paragraph.
+ *
+ * @param {string} text A line from its first `<` or `{` on, its blanks off its end,
+ *   and the lines after it, joined by a line feed.
+ * @returns {{pieces: string[], lines: number} | null}
+ */
+export function flowOf(text) {
+  const pieces = [];
+  let at = 0;
+  for (;;) {
+    const reader = text[at] === '<' ? MDX_TAG : MDX_EXPRESSION;
+    reader.lastIndex = at;
+    const found = reader.exec(text);
+    if (found === null) return null;
+    pieces.push(found[0]);
+    at = found.index + found[0].length;
+    while (text[at] === ' ' || text[at] === '\t') at += 1;
+    if (at >= text.length || text[at] === '\n') {
+      return { pieces, lines: text.slice(0, at).split('\n').length - 1 };
+    }
+    if (text[at] !== '<' && text[at] !== '{') return null;
   }
 }
 

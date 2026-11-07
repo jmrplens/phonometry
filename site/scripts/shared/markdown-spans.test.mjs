@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { dropInlineSpans, dropInlineSpansByBlock, inlineSpans, pageMarkup, SPAN_MARK } from './markdown-spans.mjs';
+import { dropInlineSpans, dropInlineSpansByBlock, inlineParts, inlineSpans, pageMarkup, SPAN_MARK } from './markdown-spans.mjs';
 
 const spans = (text, markers = '`') =>
   inlineSpans(text, markers).map(([start, end]) => text.slice(start, end));
@@ -266,6 +266,27 @@ test('a tag the page renders is read whole', () => {
   for (const [tag, kind] of cases) {
     assert.ok(pageMarkup(`Text.\n\n${tag} and \`d\`\n`, { kind }).includes(tag), tag);
   }
+});
+
+test('a run of inline text is read in parts, each with what it is, whichever opens first taking what follows', () => {
+  const text = 'A `b` $c$ \\* {/* $d$ */} <x t="$e$" /> {f} {// g\n} {/* h */ i}.';
+  const parts = inlineParts(text).map(({ start, end, what }) => [text.slice(start, end), what]);
+  assert.deepEqual(parts, [
+    ['`b`', 'code'],
+    ['$c$', 'maths'],
+    ['\\*', 'escape'],
+    ['{/* $d$ */}', 'comment'],
+    ['{f}', 'expression'],
+    ['{// g\n}', 'comment'],
+    ['{/* h */ i}', 'expression'],
+  ]);
+  // A tag is read whole and is no part: what its attributes write opens nothing.
+  assert.deepEqual(inlineParts('<x t="`" /> `y`').map(({ what }) => what), ['code']);
+  // On a `.md` page braces are text and an HTML comment shows nothing.
+  assert.deepEqual(
+    inlineParts('{a} <!-- `b` --> `c`', { kind: 'md' }).map(({ what }) => what),
+    ['comment', 'code'],
+  );
 });
 
 test('what opens first wins between a tag, a span and an expression', () => {

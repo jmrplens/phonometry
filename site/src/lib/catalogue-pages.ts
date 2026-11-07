@@ -36,7 +36,9 @@
  * catalogue of several with no paragraph before it, a later one with no
  * heading of its own, or a heading with no paragraph under it would be a
  * dataset with no name, nothing to say, or the page's words about rows it
- * does not hold, and stops the build too.
+ * does not hold, and a name or a description that holds a component, an
+ * expression or a formula would publish it as written: each stops the build
+ * too.
  */
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
@@ -202,7 +204,8 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 				'The first catalogue a page renders takes the page\'s title, and its description too unless the ' +
 				'page renders more than one, when the paragraph that opens the page describes it; give every ' +
 				'later one a `##` heading of its own, after the catalogue before it, and open its section with ' +
-				'a paragraph that says what it holds.',
+				'a paragraph that says what it holds, written on the page itself and not inside an aside, a list ' +
+				'or a component, in words alone: a dataset carries no component, expression or formula.',
 		);
 	}
 

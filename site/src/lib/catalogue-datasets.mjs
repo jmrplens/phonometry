@@ -27,35 +27,109 @@
  *   - its date is the page's `dateModified`, the day the page's content last
  *     changed: the dataset is the page's text and the rows the page renders.
  *
+ * The page is read as the site reads it. Its blocks come from the walk of
+ * src/lib/markdown-fences.mjs, so an aside, a component, a list, a quotation
+ * or a table is never taken for the paragraph that describes a dataset, and a
+ * heading ends the paragraph above it. The text of a heading or a paragraph
+ * is what the page shows of it, read once from left to right as the page
+ * reads it, so that a comment owns what it holds and a tag what its
+ * attributes write: its code spans, its escapes, its comments, its character
+ * references, its links and its marks read as CommonMark and MDX read them. Its
+ * quotes, dots and hyphens stay as the source writes them, as the page's meta
+ * description keeps them: the site's typographer, remark-smartypants, curls
+ * the quotes and sets three dots and two hyphens on the page alone, and the
+ * structured data check compares the two with that setting undone. What the
+ * page shows as something other than text, a component of its own, an
+ * expression, a formula, is not text a dataset can carry, and stops the
+ * build where a name or a description holds it.
+ *
  * And what it leaves out is decided: no `license`, because these rows are
  * transcribed from works that keep their own rights and the site can grant
  * none over them, and no `contentUrl` or `distribution`, because the site
  * serves the rows on the page and nowhere else.
  */
 
-import { inlineSpans } from '../../scripts/shared/markdown-spans.mjs';
+import { inlineParts } from '../../scripts/shared/markdown-spans.mjs';
 import { referenceStub } from './citations.mjs';
 import { printedTables } from './catalogue-sources.mjs';
-import { prose } from './markdown-fences.mjs';
+import { flowOf, MDX_TAG, NOT_INLINE_ROLES, pageLines, splitLines } from './markdown-fences.mjs';
 
 /** The catalogues a page renders, in its source. */
 const CATALOGUE_TAG = /<Catalogues\s+catalogue="(\w+)"/;
 
-/** A heading of the level a section of a page takes. */
-const SECTION_HEADING = /^##\s+(.+?)\s*#*\s*$/;
+/**
+ * A heading of the level a section of a page takes, past its blanks: its two
+ * marks, its text, and the closing marks a blank sets apart from the text.
+ */
+const SECTION_HEADING = /^##[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/;
 
 /**
- * A line that is markup rather than prose: an import, a component tag or
- * a heading of any level.
+ * A line of an `.mdx` page that opens its ESM, an `import` or an `export`,
+ * which runs to the next blank line and is code, not a paragraph.
  */
-const NOT_PROSE = /^\s*(?:import\s|<|#)/;
+const MDX_ESM = /^(?:import|export)\s/;
+
+/** A line the walk read as opening an aside (`:::note`), and one that closes it. */
+const ASIDE_OPENS = /^:{3,}[A-Za-z0-9]/;
+const ASIDE_CLOSES = /^:{3,}[ \t]*$/;
 
 /**
- * The first character of the private use area, from which each code span of a
- * paragraph takes a character of its own to hold its place while the marks
- * around it are read.
+ * The first character of the private use area, from which each piece of a
+ * paragraph that is read before its marks (a code span, an escaped
+ * character, a character reference) takes a character of its own to hold its
+ * place while the marks around it are read.
  */
-const SPAN_PLACE = 0xe000;
+const HELD = 0xe000;
+
+/** Every character of the private use area, where the held pieces wait. */
+const HELD_PLACE = /[\ue000-\uf8ff]/g;
+
+/** The character references by name a page writes, and what each shows. */
+const NAMED_REFERENCES = new Map([
+  ['amp', '&'],
+  ['lt', '<'],
+  ['gt', '>'],
+  ['quot', '"'],
+  ['apos', "'"],
+  ['nbsp', '\u00a0'],
+]);
+
+/** A character reference: a decimal or hexadecimal code point, or a name (CommonMark 2.5). */
+const REFERENCE = /&(?:#(\d{1,7})|#[xX]([\da-fA-F]{1,6})|([A-Za-z][A-Za-z\d]{0,31}));/g;
+
+/** Every tag of a paragraph, as the walk of the page reads a tag. */
+const INLINE_TAG = new RegExp(MDX_TAG.source, 'g');
+
+/**
+ * A link or an image, `[text](address "title")` (CommonMark 6.3 and 6.4): its
+ * text may hold brackets one level deep, its address parentheses one level
+ * deep or anything but a line end between angle brackets, and its title
+ * stands in quotes or parentheses.
+ */
+const LINK =
+  /!?\[((?:[^[\]]|\[[^[\]]*\])*)\]\([ \t]*(?:<[^<>\n]*>|(?:[^()\s]|\([^()\s]*\))*)(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^()]*\)))?[ \t]*\)/g;
+
+/** Emphasis and strong emphasis by asterisks, the marks around the text they mark. */
+const STARS = /(\*{1,2})(\S(?:.*?\S)?)\1/g;
+
+/**
+ * Emphasis and strong emphasis by underscores, which mark only where they open
+ * or close a word, as CommonMark reads them: `snake_case` keeps its own.
+ */
+const UNDERSCORES = /(?<![\p{L}\p{N}_])(_{1,2})(\S(?:.*?\S)?)\1(?![\p{L}\p{N}_])/gu;
+
+/** Struck text, by one tilde or two (GitHub Flavored Markdown 6.5). */
+const STRUCK = /(~{1,2})(\S(?:.*?\S)?)\1/g;
+
+/**
+ * What is left of a paragraph, once read, that the page shows as something
+ * other than its text: a tag that renders a component of its own, an
+ * expression, or a character reference by a name it does not decode.
+ */
+const UNREAD = /<[^<>]*>?|\{[^{}]*\}?|\}|&[A-Za-z][A-Za-z\d]*;/g;
+
+/** The blanks a page's source runs together into one space between words. */
+const BLANKS = /[ \t\r\n]+/g;
 
 /**
  * What a code span shows: the text between its runs of backticks, a space
@@ -71,36 +145,115 @@ function codeOf(text, start, end) {
     : code;
 }
 
+/** What a character reference shows, or `undefined` for a name the reader does not decode. */
+function referenceOf(decimal, hexadecimal, name) {
+  if (name !== undefined) return NAMED_REFERENCES.get(name);
+  const point = decimal !== undefined ? Number(decimal) : Number.parseInt(hexadecimal, 16);
+  return point > 0 && point <= 0x10ffff && (point < 0xd800 || point > 0xdfff)
+    ? String.fromCodePoint(point)
+    : '\ufffd';
+}
+
+/** Whether a line ends on a backslash that breaks it: one no other backslash escapes. */
+const breaksOnBackslash = (line) => /(?<!\\)(?:\\\\)*\\$/.test(line);
+
 /**
- * A paragraph as a reader sees it: inline code without its backticks, a link
- * as its text, emphasis without its marks, every run of blanks one space.
+ * What the page shows of a run of inline text, and what in it the page shows
+ * as something other than text.
  *
- * The code spans are read as the page reads them, through
- * site/scripts/shared/markdown-spans.mjs, and what they hold is code: no mark
- * inside one is read as emphasis or a link. An underscore marks emphasis only
- * where it opens or closes a word, as CommonMark reads it, so `snake_case`
- * written outside code keeps its own.
+ * The text is read once, left to right, as the page reads it, through
+ * `inlineParts` of site/scripts/shared/markdown-spans.mjs: whichever of a code
+ * span, a formula, a backslash escape (CommonMark 2.4), a comment, a tag and
+ * an expression opens first takes what follows, so a comment owns a formula or
+ * a backtick it holds, and a tag what its attributes write. What a code span
+ * holds is code, and no mark inside one is read; a formula is not text; an
+ * escape is the character it stands for, which opens nothing; and a comment,
+ * or an expression that holds nothing but blanks and comments, shows nothing.
+ * Then each character reference (2.5) is the character it stands for; a tag
+ * around text shows the text; a link and an image show their text; and
+ * emphasis, strong emphasis and struck text show what they mark, read until
+ * no mark is left. A backslash at the end of a line breaks the line, and the
+ * blanks between words are one space. Unicode spaces the page shows, a
+ * non-breaking one or a thin one, stay as written.
+ *
+ * Left as written, and named in `markup`: a formula, a tag that renders a
+ * component of its own (`<Badge text="new" />`), an expression (`{x}`) and a
+ * character reference by a name the reader does not decode (`&shy;`).
+ *
+ * @param {string[]} lines The lines of a paragraph, or a heading's text.
+ * @returns {{text: string, markup: string[]}}
+ */
+export function readInline(lines) {
+  const held = [];
+  const markup = [];
+  const hold = (shown) => String.fromCharCode(HELD + held.push(shown) - 1);
+  // The parts are read with the line ends where the page writes them, so a
+  // line comment ends where its line does; the text around them reads each
+  // line end as the blank it is, at the same index.
+  const written = lines
+    .map((line, index) => (index < lines.length - 1 && breaksOnBackslash(line) ? line.slice(0, -1) : line))
+    .join('\n');
+  const text = written.replaceAll('\n', ' ');
+  let marked = '';
+  let done = 0;
+  for (const { start, end, what } of inlineParts(written)) {
+    const part = text.slice(start, end);
+    let shown = '';
+    if (what === 'code') shown = hold(codeOf(text, start, end));
+    else if (what === 'escape') shown = hold(part[1]);
+    else if (what !== 'comment') {
+      // A formula or an expression: not text, and named in `markup`.
+      markup.push(part);
+      shown = hold(part);
+    }
+    marked += text.slice(done, start) + shown;
+    done = end;
+  }
+  let read = (marked + text.slice(done))
+    .replace(REFERENCE, (reference, decimal, hexadecimal, name) => {
+      const shown = referenceOf(decimal, hexadecimal, name);
+      return shown === undefined ? reference : hold(shown);
+    })
+    .replace(INLINE_TAG, (tag) => (tag.endsWith('/>') ? tag : ''))
+    .replace(LINK, '$1');
+  for (let before; before !== read; ) {
+    before = read;
+    read = read.replace(STARS, '$2').replace(UNDERSCORES, '$2').replace(STRUCK, '$2');
+  }
+  const restore = (piece) => piece.replace(HELD_PLACE, (place) => held[place.charCodeAt(0) - HELD] ?? place);
+  markup.push(...[...read.matchAll(UNREAD)].map(([piece]) => restore(piece)));
+  return { text: restore(read).replace(BLANKS, ' ').trim(), markup };
+}
+
+/**
+ * A paragraph as a reader sees it: inline code without its backticks, an
+ * escaped character without its backslash, a link as its text, emphasis
+ * without its marks, every run of blanks one space (`readInline`).
  *
  * @param {string[]} lines The paragraph's lines.
  * @returns {string}
  */
 export function plainText(lines) {
-  const text = lines.join(' ');
-  const codes = [];
-  let marked = '';
-  let done = 0;
-  for (const [start, end] of inlineSpans(text)) {
-    marked += text.slice(done, start) + String.fromCharCode(SPAN_PLACE + codes.length);
-    codes.push(codeOf(text, start, end));
-    done = end;
-  }
-  return (marked + text.slice(done))
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/(\*{1,2})(\S(?:.*?\S)?)\1/g, '$2')
-    .replace(/(?<![\p{L}\p{N}_])_(\S(?:.*?\S)?)_(?![\p{L}\p{N}_])/gu, '$1')
-    .replace(/[\ue000-\uf8ff]/g, (place) => codes[place.charCodeAt(0) - SPAN_PLACE] ?? place)
-    .replace(/\s+/g, ' ')
-    .trim();
+  return readInline(lines).text;
+}
+
+/** A line's text past the blanks on either side of it. */
+const pastBlanks = (text) => text.replace(/^[ \t]+|[ \t]+$/g, '');
+
+/**
+ * How a piece of an `.mdx` flow changes the elements open around the lines
+ * after it: a tag opens one, a closing tag closes one, and a tag that closes
+ * itself or an expression does neither.
+ */
+function nesting(piece) {
+  if (!piece.startsWith('<')) return 0;
+  if (piece.startsWith('</')) return -1;
+  return piece.endsWith('/>') ? 0 : 1;
+}
+
+/** A section's reading of a heading or a paragraph: its text, and its markup if any. */
+function asRead(field, { text, markup }) {
+  return { [field]: text, ...(markup.length > 0 ? { [`${field}Markup`]: markup } : {}) };
 }
 
 /**
@@ -110,53 +263,103 @@ export function plainText(lines) {
  * A heading counts for a catalogue only when it comes after the catalogue
  * before it, so a catalogue that follows another with no heading between them
  * has none. The first catalogue's lead is the paragraph that opens the page,
- * the first one before it whatever heading comes between them. Fenced code is
- * not read: a `##` inside a fence is not a heading.
+ * the first one before it whatever heading comes between them.
+ *
+ * The page is read in blocks, as the site reads it (`pageLines`): code is not
+ * read, its ESM (`import`) neither, and a `##` inside a fence is not a heading. A paragraph or a heading
+ * counts only where it stands on the page itself, outside any list, quotation,
+ * aside (`:::note`) or component (`<Aside>`), so what those hold never
+ * describes a dataset. A heading ends the paragraph above it, with no blank
+ * line between them, and so does any other block; a line underlined with
+ * hyphens is a `##` heading too. A heading or a lead whose text holds markup
+ * carries it as `headingMarkup` or `leadMarkup` (`readInline`).
  *
  * @param {string} body The page's source, without its frontmatter.
- * @returns {{key: string, heading?: string, lead?: string}[]}
+ * @returns {{key: string, heading?: string, lead?: string, headingMarkup?: string[], leadMarkup?: string[]}[]}
  */
 export function catalogueSections(body) {
-  const lines = prose(body).split('\n');
+  const lines = splitLines(body);
   const sections = [];
   let heading;
   let lead;
   // The page opens the first catalogue's paragraph; after it, only a heading does.
-  let paragraph = [];
-  for (const line of lines) {
-    const tag = CATALOGUE_TAG.exec(line);
+  let open = true;
+  // The lines of the paragraph being read, when the page itself holds it.
+  let paragraph = null;
+  let opensSection = false;
+  // The asides and the elements open around the line, and the line past the flow read last.
+  let depth = 0;
+  let flowEnd = 0;
+  const endParagraph = () => {
+    if (paragraph !== null && opensSection && lead === undefined) lead = readInline(paragraph);
+    paragraph = null;
+  };
+  const startSection = (title) => {
+    heading = title;
+    // Before the first catalogue, the paragraph that opened the page stays.
+    if (sections.length > 0 || lead === undefined) {
+      lead = undefined;
+      open = true;
+    }
+  };
+  pageLines(lines).forEach((line, index) => {
+    if (NOT_INLINE_ROLES.has(line.role)) {
+      endParagraph();
+      return;
+    }
+    const tag = CATALOGUE_TAG.exec(line.text);
     if (tag) {
-      if (paragraph && lead === undefined) lead = plainText(paragraph);
+      endParagraph();
       sections.push({
         key: tag[1],
-        ...(heading !== undefined ? { heading } : {}),
-        ...(lead ? { lead } : {}),
+        ...(heading !== undefined ? asRead('heading', heading) : {}),
+        ...(lead?.text ? asRead('lead', lead) : {}),
       });
       heading = undefined;
       lead = undefined;
-      paragraph = undefined;
-      continue;
+      open = false;
     }
-    const title = SECTION_HEADING.exec(line);
-    if (title) {
-      heading = plainText([title[1]]);
-      // Before the first catalogue, the paragraph that opened the page stays.
-      if (sections.length > 0 || lead === undefined) {
-        lead = undefined;
-        paragraph = [];
+    if (line.role === 'text') {
+      paragraph?.push(line.rest);
+      return;
+    }
+    if (line.role === 'underline' && paragraph !== null) {
+      // The paragraph above was a heading all along: `##` under hyphens, `#` under equals signs.
+      if (pastBlanks(line.rest).startsWith('-')) startSection(readInline(paragraph));
+      paragraph = null;
+      return;
+    }
+    endParagraph();
+    // Where the page itself holds the line, with no container of the walk's around it.
+    const onPage = depth === 0 && line.rest === line.text;
+    const written = pastBlanks(line.rest);
+    if (line.role === 'paragraph' && onPage && !tag && !MDX_ESM.test(written)) {
+      paragraph = [line.rest];
+      opensSection = open && lead === undefined;
+    } else if (line.role === 'heading' && onPage) {
+      const title = SECTION_HEADING.exec(written);
+      if (title) startSection(readInline([title[1]]));
+    } else if (line.role === 'single' && ASIDE_OPENS.test(written)) {
+      depth += 1;
+    } else if (line.role === 'single' && ASIDE_CLOSES.test(written)) {
+      depth = Math.max(depth - 1, 0);
+    } else if (line.role === 'single' && index >= flowEnd && /^[<{]/.test(written)) {
+      const flow = flowOf([written, ...lines.slice(index + 1)].join('\n'));
+      if (flow !== null) {
+        depth = Math.max(depth + flow.pieces.reduce((sum, piece) => sum + nesting(piece), 0), 0);
+        flowEnd = index + flow.lines + 1;
       }
-      continue;
     }
-    // Only the first paragraph under a heading opens its section.
-    if (paragraph === undefined || lead !== undefined) continue;
-    if (line.trim() === '') {
-      if (paragraph.length > 0) lead = plainText(paragraph);
-    } else if (paragraph.length > 0 || !NOT_PROSE.test(line)) {
-      paragraph.push(line);
-    }
-  }
+  });
+  endParagraph();
   return sections;
 }
+
+/** The markup a section's heading or lead holds, quoted, for a message. */
+const quoted = (markup) => markup.map((piece) => JSON.stringify(piece)).join(', ');
+
+/** What a message says of markup a dataset would publish as written. */
+const AS_WRITTEN = 'markup the page shows as something other than text, which its dataset would publish as written';
 
 /**
  * The name and description of each catalogue a page renders, or what stops
@@ -169,13 +372,14 @@ export function catalogueSections(body) {
  * describes it. Every later one is a table the page holds beside it, and has
  * to sit under a `##` heading of its own, after the catalogue before it: the
  * heading names its dataset and the paragraph that opens the section
- * describes it.
+ * describes it. A heading or a paragraph that holds markup the page does not
+ * show as text names or describes nothing.
  *
  * @param {object} page
  * @param {string} page.id The page's entry id, which the messages name.
  * @param {string} page.title The page's title.
  * @param {string} page.description The page's description.
- * @param {{key: string, heading?: string, lead?: string}[]} page.sections
+ * @param {{key: string, heading?: string, lead?: string, headingMarkup?: string[], leadMarkup?: string[]}[]} page.sections
  *   What `catalogueSections` read off the page.
  * @returns {{datasets: {key: string, name: string, description: string}[], problems: string[]}}
  */
@@ -191,6 +395,11 @@ export function catalogueDatasets({ id, title, description, sections }) {
           `${section.key}, and with the page's description speaking of them all, that paragraph is what ` +
           'describes its dataset',
       );
+    } else if (i === 0 && section.leadMarkup) {
+      problems.push(
+        `${id}: the paragraph that opens the page, which describes ${section.key}, holds ` +
+          `${quoted(section.leadMarkup)}: ${AS_WRITTEN}`,
+      );
     } else if (i === 0) {
       datasets.push({ key: section.key, name: title, description: section.lead });
     } else if (section.heading === undefined) {
@@ -203,6 +412,16 @@ export function catalogueDatasets({ id, title, description, sections }) {
         `${id}: the \`## ${section.heading}\` section that holds ${section.key} opens with no paragraph, ` +
           'and that paragraph is what describes its dataset',
       );
+    } else if (section.headingMarkup || section.leadMarkup) {
+      const held = [
+        ...(section.headingMarkup
+          ? [`the \`## ${section.heading}\` heading, which names ${section.key}, holds ${quoted(section.headingMarkup)}`]
+          : []),
+        ...(section.leadMarkup
+          ? [`the paragraph that opens it, which describes ${section.key}, holds ${quoted(section.leadMarkup)}`]
+          : []),
+      ];
+      problems.push(`${id}: ${held.join('; ')}: ${AS_WRITTEN}`);
     } else {
       datasets.push({ key: section.key, name: section.heading, description: section.lead });
     }

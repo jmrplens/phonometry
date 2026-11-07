@@ -25,6 +25,7 @@ import {
   datasetNode,
   datasetStub,
   plainText,
+  readInline,
   variablesMeasured,
 } from '../src/lib/catalogue-datasets.mjs';
 import { isLibraryTable, printedTables } from '../src/lib/catalogue-sources.mjs';
@@ -145,6 +146,141 @@ test('a section that opens with a component and no paragraph has no lead', () =>
   assert.deepEqual(sections[1], { key: 'b', heading: 'Second' });
 });
 
+/**
+ * The second section of a page of two catalogues, its heading followed by the
+ * lines of `opening` and then by a paragraph of its own.
+ */
+const secondSection = (opening) =>
+  catalogueSections(
+    [
+      'Opening paragraph.',
+      '',
+      '<Catalogues catalogue="absorption" lang="en" />',
+      '',
+      '## Areas',
+      '',
+      ...opening,
+      '',
+      'The paragraph that describes it.',
+      '',
+      '<Catalogues catalogue="absorptionAreas" lang="en" />',
+    ].join('\n'),
+  )[1];
+
+test('a section that opens with an aside, a list, a quotation, a table or a figure takes its own first paragraph, not what they hold', () => {
+  for (const opening of [
+    ['<Aside type="note">', 'A note that is not the description.', '</Aside>'],
+    ['<Aside>', '', 'A paragraph inside an aside.', '', '<Aside>', 'One inside that.', '</Aside>', '', 'Still inside.', '', '</Aside>'],
+    [':::note', 'A note.', ':::'],
+    ['- one item', '- two item', '', '  A second paragraph of the item.'],
+    ['1. A numbered item.'],
+    ['> A quotation', 'that runs on.'],
+    ['| Band | Area |', '| --- | --- |', '| 125 Hz | 0,1 |'],
+    ['<ThemeImage', '  src="room.svg"', '  alt="A room"', '/>'],
+  ]) {
+    assert.deepEqual(
+      secondSection(opening),
+      { key: 'absorptionAreas', heading: 'Areas', lead: 'The paragraph that describes it.' },
+      opening.join(' / '),
+    );
+  }
+});
+
+test('a paragraph that opens with an inline tag keeps its first line, and shows what the tag holds', () => {
+  const sections = catalogueSections(
+    [
+      '## Areas',
+      '',
+      '<abbr title="International Organization for Standardization">ISO</abbr> 354 rooms',
+      'measured these areas per person.',
+      '',
+      '<Catalogues catalogue="absorptionAreas" lang="en" />',
+    ].join('\n'),
+  );
+  assert.equal(sections[0].lead, 'ISO 354 rooms measured these areas per person.');
+});
+
+test('a heading right under a paragraph ends it: the opening one stays the first catalogue\'s, and no heading joins a lead', () => {
+  const sections = catalogueSections(
+    [
+      'What the first holds,',
+      'read band by band.',
+      '## Coefficients',
+      '',
+      'Under the heading.',
+      '',
+      '<Catalogues catalogue="absorption" lang="en" />',
+      '',
+      '## Areas',
+      'The paragraph that describes it.',
+      '### A subheading',
+      'Prose under the subheading.',
+      '<Catalogues catalogue="absorptionAreas" lang="en" />',
+    ].join('\n'),
+  );
+  assert.deepEqual(sections, [
+    { key: 'absorption', heading: 'Coefficients', lead: 'What the first holds, read band by band.' },
+    { key: 'absorptionAreas', heading: 'Areas', lead: 'The paragraph that describes it.' },
+  ]);
+});
+
+test('a line underlined with hyphens is a section heading, and one underlined with equals signs is not', () => {
+  const sections = catalogueSections(
+    [
+      'Opening paragraph.',
+      '',
+      '<Catalogues catalogue="absorption" lang="en" />',
+      '',
+      'Absorption areas',
+      'of people and air',
+      '----------------',
+      '',
+      'The paragraph that describes it.',
+      '',
+      '<Catalogues catalogue="absorptionAreas" lang="en" />',
+      '',
+      'Not a section',
+      '=============',
+      '',
+      'A paragraph under no section heading.',
+      '',
+      '<Catalogues catalogue="solids" lang="en" />',
+    ].join('\n'),
+  );
+  assert.deepEqual(sections.slice(1), [
+    { key: 'absorptionAreas', heading: 'Absorption areas of people and air', lead: 'The paragraph that describes it.' },
+    { key: 'solids' },
+  ]);
+});
+
+test('markup a name or a description holds that the page shows otherwise is named as a problem, and the build stops', () => {
+  const sections = catalogueSections(
+    [
+      'What the first holds, with a <Badge text="new" /> on it.',
+      '',
+      '<Catalogues catalogue="absorption" lang="en" />',
+      '',
+      '## Areas of {props.kind}',
+      '',
+      'Rows in $\\mathrm{m}^2$ per &shy;person.',
+      '',
+      '<Catalogues catalogue="absorptionAreas" lang="en" />',
+    ].join('\n'),
+  );
+  const { datasets, problems } = catalogueDatasets({ id: 'reference/catalogues/x', title: 'T', description: 'D', sections });
+  assert.deepEqual(datasets, []);
+  assert.equal(problems.length, 2, problems.join('\n'));
+  assert.match(problems[0], /reference\/catalogues\/x: the paragraph that opens the page, which describes absorption, holds "<Badge text=\\"new\\" \/>"/);
+  assert.match(problems[1], /`## Areas of \{props\.kind\}` heading, which names absorptionAreas, holds "\{props\.kind\}"/);
+  assert.match(problems[1], /the paragraph that opens it, which describes absorptionAreas, holds "\$\\\\mathrm\{m\}\^2\$", "&shy;"/);
+  // Escaped, the same characters are text the page shows as written.
+  const escaped = catalogueSections(
+    ['A \\<Badge\\> and \\{braces\\}, \\$5 and &amp;shy; as text.', '', '<Catalogues catalogue="a" />', '', '## B', '', 'B.', '', '<Catalogues catalogue="b" />'].join('\n'),
+  );
+  assert.deepEqual(catalogueDatasets({ id: 'x', title: 'T', description: 'D', sections: escaped }).problems, []);
+  assert.equal(escaped[0].lead, 'A <Badge> and {braces}, $5 and &shy; as text.');
+});
+
 test('plain text drops the marks a reader does not see and keeps the underscores of a name', () => {
   assert.equal(
     plainText(['A *word*, a **strong** one, an _emphasis_,', 'PUBLISHED_ABSORPTION_AREAS and `code`.']),
@@ -161,8 +297,88 @@ test('plain text reads a code span as the page does, whatever its run of backtic
   assert.equal(plainText(['The `*_rows_*` and `[a](b)` keys.']), 'The *_rows_* and [a](b) keys.');
   // A span runs over the lines of its paragraph.
   assert.equal(plainText(['The `two', 'lines` key.']), 'The two lines key.');
-  // An escaped backtick opens nothing, and a run no later run closes stays text.
-  assert.equal(plainText(['A \\`tick and ``one`.']), 'A \\`tick and ``one`.');
+  // An escaped backtick opens nothing and is shown without its backslash, and
+  // a run no later run closes stays text.
+  assert.equal(plainText(['A \\`tick and ``one`.']), 'A `tick and ``one`.');
+});
+
+test('plain text shows an escaped character as written, without its backslash, and opens nothing on it', () => {
+  assert.equal(plainText(['Rows priced in \\*sabins\\* and \\_feet\\_.']), 'Rows priced in *sabins* and _feet_.');
+  assert.equal(plainText(['A \\[bracket\\](not a link), a \\\\ backslash and a \\a.']), 'A [bracket](not a link), a \\ backslash and a \\a.');
+  // Inside a code span a backslash escapes nothing.
+  assert.equal(plainText(['The `C:\\rows\\*` path.']), 'The C:\\rows\\* path.');
+});
+
+test('plain text reads a link whose address holds parentheses, whose text holds brackets or that carries a title', () => {
+  assert.equal(plainText(['See [the table](https://en.wikipedia.org/wiki/Sabin_(unit)) here.']), 'See the table here.');
+  assert.equal(plainText(['See [the [first] table](/x/ "A title") and [this](</a b/>).']), 'See the [first] table and this.');
+  assert.equal(plainText(['A figure, ![a room seen from above](room.svg), stands for its text.']), 'A figure, a room seen from above, stands for its text.');
+});
+
+test('plain text reads character references, line breaks, struck and nested marks, comments and inline tags as the page shows them', () => {
+  assert.equal(plainText(['Bies &amp; Long, 1&#8201;250 Hz &#x2013; on &lt;dB&gt;.']), 'Bies & Long, 1\u2009250 Hz \u2013 on <dB>.');
+  assert.equal(plainText(['A line that breaks\\', 'here, and one that ends in \\\\', 'a backslash.']), 'A line that breaks here, and one that ends in \\ a backslash.');
+  assert.equal(plainText(['A ~~struck~~ word, ***both*** marks and __strong__ ones.']), 'A struck word, both marks and strong ones.');
+  assert.equal(plainText(['An inline {/* note to self */} comment.']), 'An inline comment.');
+  assert.equal(plainText(['<abbr title="x">ISO</abbr> 354 and <span class="a">b</span>.']), 'ISO 354 and b.');
+  // A space the page shows as it is written stays that space.
+  assert.equal(plainText(['1\u202f250 Hz,', 'at\u00a0once.']), '1\u202f250 Hz, at\u00a0once.');
+});
+
+// A paragraph is read once, left to right, as the page reads it: whichever of
+// a code or maths span, an escape, a comment, a tag and an expression opens
+// first takes what follows, so what a comment or a tag's attributes hold is
+// neither text nor markup.
+
+test('a comment owns what it holds: a formula, a lone backtick or a code span inside one is neither markup nor text', () => {
+  assert.deepEqual(readInline(['Rows {/* $x$ */} in bands.']), { text: 'Rows in bands.', markup: [] });
+  assert.deepEqual(readInline(['Rows {/* `x */} in `bands`.']), { text: 'Rows in bands.', markup: [] });
+  // The backtick inside the comment opens nothing, so the code span after it is the page's.
+  assert.deepEqual(readInline(['A {/* ` */} b `*/}` c.']), { text: 'A b */} c.', markup: [] });
+  // What opens before a comment owns the comment's marks: a code span holds them as code, and a formula stays markup.
+  assert.deepEqual(readInline(['Rows `{/* x */}` in bands.']), { text: 'Rows {/* x */} in bands.', markup: [] });
+  assert.deepEqual(readInline(['Rows $x$ {/* note */} in bands.']), { text: 'Rows $x$ in bands.', markup: ['$x$'] });
+});
+
+test('an expression that holds nothing but blanks and comments shows nothing, a line comment that ends its line among them', () => {
+  assert.deepEqual(readInline(['Rows {// $x$', '} in bands.']), { text: 'Rows in bands.', markup: [] });
+  assert.deepEqual(readInline(['Rows {/* a */', '// `b', '} in bands.']), { text: 'Rows in bands.', markup: [] });
+  assert.deepEqual(readInline(['Rows {} in { } bands.']), { text: 'Rows in bands.', markup: [] });
+});
+
+test('a tag owns what its attributes write: a formula or a backtick there is neither markup nor a span', () => {
+  assert.deepEqual(readInline(['Rows of <abbr title="$x$">dB</abbr> in bands.']), { text: 'Rows of dB in bands.', markup: [] });
+  assert.deepEqual(readInline(['Rows of <abbr title="a`b">dB</abbr> in `bands`.']), { text: 'Rows of dB in bands.', markup: [] });
+});
+
+test('an expression that prints a value between two comments is markup, not a comment', () => {
+  assert.deepEqual(readInline(['Rows {/* a */ n /* b */} in bands.']).markup, ['{/* a */ n /* b */}']);
+  assert.deepEqual(readInline(['Rows {// a', 'n} in bands.']).markup, ['{// a n}']);
+});
+
+test('a hidden comment in the paragraphs and the heading that name and describe two datasets stops nothing', () => {
+  const body = [
+    'Rows {/* $\\alpha$ */} of absorption coefficients.',
+    '',
+    '<Catalogues catalogue="absorption" />',
+    '',
+    '## Absorption areas {/* $A$ */}',
+    '',
+    'Areas of objects {/* `T */}, per object.',
+    '',
+    '<Catalogues catalogue="absorptionAreas" />',
+    '',
+  ].join('\n');
+  const { datasets, problems } = catalogueDatasets({ id: 'x', title: 'T', description: 'D', sections: catalogueSections(body) });
+  assert.deepEqual(problems, []);
+  // As the page shows them: the blank written before a comment stays.
+  assert.deepEqual(
+    datasets.map(({ name, description }) => [name, description]),
+    [
+      ['T', 'Rows of absorption coefficients.'],
+      ['Absorption areas', 'Areas of objects , per object.'],
+    ],
+  );
 });
 
 // ---------------------------------------------------------------------------

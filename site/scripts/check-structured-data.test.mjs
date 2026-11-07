@@ -639,6 +639,92 @@ test('a hole or TeX left in a description fails', (t) => {
 	assert.match(failsWith(ran, 'en', /carry TeX in their description/), /tau/);
 });
 
+// What a step that writes maths as text loses on the way. The step the page
+// used before dropped every command it did not know: of the 26 codes and the
+// 17 descriptions in each language it misread, the check saw only the 12
+// codes left blank or opening with a space and the 6 descriptions with two
+// spaces in a row, and said every code had no TeX left and every description
+// no hole. A code or a description that loses a Greek letter, a named
+// function, a root or an exponent cleanly, or reads a thin space as a comma,
+// is missing something its entry writes, and the check counts what the entry
+// writes.
+
+/** The code and alternate name of entry `id` in a set, written as `code`. */
+function plantCode(set, id, code) {
+	termOf(set, id).termCode = code;
+	termOf(set, id).alternateName = code;
+}
+
+/** The description of entry `id` in a set, with `published` written as `misread`. */
+function plantDescription(set, id, published, misread) {
+	const term = termOf(set, id);
+	assert.ok(term.description.includes(published), `${id}: "${published}" is not in "${term.description}"`);
+	term.description = term.description.replace(published, misread);
+}
+
+test('a code that lost a Greek letter, has a hole, or reads a thin space as a comma fails by name', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		plantCode(en, 'alpha-s', 's');
+		plantCode(en, 'se', 'SE,  LSE');
+		plantCode(en, 'l-p-a-s-4m', 'Lp,A,S,4,m');
+	});
+	const lost = failsWith(ran, 'en', /have a termCode that lost what their symbol writes/);
+	assert.match(lost, /alpha-s \("s": 1 of its 1 Greek letter\(s\)\)/);
+	assert.match(lost, /se \("SE, {2}LSE": 1 of its 1 Greek letter\(s\)\)/);
+	assert.match(failsWith(ran, 'en', /have a hole in their termCode/), /se \("SE, {2}LSE"\)/);
+	const commas = failsWith(ran, 'en', /termCode whose commas are not those of their symbol/);
+	assert.match(commas, /l-p-a-s-4m \("Lp,A,S,4,m": 4, the symbol 3\)/);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+test('a description that lost a Greek letter, a function name or an exponent fails by name', (t) => {
+	const ran = glossaryCheck(t, ({ es }) => {
+		plantDescription(es, 'eta-tot', 'Ts = 2,2/(f ηtot)', 'Ts = 2,2/(f,tot)');
+		plantDescription(es, 'k-1', '-10 log10(1 - 10^(-0,1ΔLp))', '-1010(1 - 10-0,1 Lp)');
+	});
+	const lost = failsWith(ran, 'es', /have a description that lost what their entry writes/);
+	assert.match(lost, /eta-tot \(1 of its 1 Greek letter\(s\)\)/);
+	assert.match(lost, /k-1 \(1 of its 1 Greek letter\(s\), \\log, 1 exponent\(s\)\)/);
+	const commas = failsWith(ran, 'es', /description whose commas are not those of their entry/);
+	assert.match(commas, /eta-tot \(\d+, the entry \d+\)/);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+/**
+ * The step the page used to write its maths as text with: the argument of a
+ * font command kept, every other command dropped, and the TeX characters
+ * deleted.
+ */
+const droppingStep = (source) =>
+	source
+		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
+		.replace(/\\[a-zA-Z]+/g, '')
+		.replace(/[$\\{}_^]/g, '');
+
+test('every code and description the step that dropped commands wrote fails, in both languages', (t) => {
+	const entries = new Map(glossary.flatMap((group) => group.terms).map((entry) => [entry.id, entry]));
+	const ran = glossaryCheck(t, (sets) => {
+		for (const [lang, set] of Object.entries(sets)) {
+			for (const term of set.hasDefinedTerm) {
+				const entry = entries.get(term['@id'].split('#').pop());
+				if (entry.symbol) plantCode(set, entry.id, droppingStep(entry.symbol));
+				// The definition the step misread, and the unit and the standard
+				// after it as the page writes them.
+				const definition = typeof entry.definition === 'string' ? entry.definition : entry.definition[lang];
+				const end = term.description.indexOf(lang === 'es' ? ' Definida en: ' : ' Defined in: ');
+				const unit = term.description.lastIndexOf(lang === 'es' ? ' Unidad: ' : ' Unit: ', end);
+				term.description = `${droppingStep(definition)}${term.description.slice(unit < 0 ? end : unit)}`;
+			}
+		}
+	});
+	for (const lang of ['en', 'es']) {
+		failsWith(ran, lang, /have a termCode that lost what their symbol writes/);
+		failsWith(ran, lang, /termCode whose commas are not those of their symbol/);
+		failsWith(ran, lang, /have a description that lost what their entry writes/);
+	}
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
 // The glossary is found by its route. Were the page to move, its checks would
 // stop with nothing to say so; a build that publishes the guides its entries
 // name has to publish it, once in each language, and a build of a few pages

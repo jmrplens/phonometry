@@ -41,7 +41,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
 
@@ -69,6 +69,7 @@ from ._shared import (
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -149,6 +150,20 @@ class RoomAcousticsResult(OwnsArrays):
     C = 100*(T30/T20 - 1) in percent (ISO 3382-2:2008, B.3); values
     above 10 % indicate an unreliable, non-straight decay.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "c50": "dB",
+            "c80": "dB",
+            "curvature": "%",
+            "dynamic_range": "dB",
+            "edt": "s",
+            "t20": "s",
+            "t30": "s",
+            "ts": "s",
+        }
+    )
 
     frequencies: np.ndarray | None
     edt: np.ndarray

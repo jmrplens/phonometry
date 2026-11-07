@@ -41,7 +41,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 from scipy import signal
@@ -57,6 +58,8 @@ from .compliance import _G, _band_relative_attenuation, _reference_attenuation_d
 from .core import _decimate_and_filter
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
 
     from .._i18n import Language
@@ -133,6 +136,11 @@ class TimeInvarianceResult(OwnsArrays):
         :math:`L_\mathrm{out}`, shape ``(rates, bands)``.
     :ivar expected_levels: :math:`L_\mathrm{c}` of Formula (17), same shape.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"seconds_per_decade": "s/decade"}
+    )
 
     frequencies: np.ndarray
     fraction: float

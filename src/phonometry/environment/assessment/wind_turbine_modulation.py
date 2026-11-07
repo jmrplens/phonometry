@@ -82,7 +82,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -435,6 +435,11 @@ class ModulationBlock(OwnsArrays):
     :attr:`status` is read from the prominence, the threshold of 4 of
     13.6.2.3 e) and the exclusion, so it is not a field.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"power_spectrum": "dB²"}
+    )
 
     levels: NDArray[np.float64]
     detrended_levels: NDArray[np.float64]

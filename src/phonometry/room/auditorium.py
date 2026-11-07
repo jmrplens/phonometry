@@ -713,6 +713,9 @@ class SoundStrengthResult(OwnsArrays):
     ``exposure_level - reference_level``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"strength": "dB"})
+
     frequencies: NDArray[np.float64] | None
     strength: NDArray[np.float64]
     exposure_level: NDArray[np.float64]

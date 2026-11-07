@@ -61,7 +61,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -2147,6 +2147,9 @@ class ToneSearchLimit(OwnsArrays):
     :ivar relative_humidity_percent: Relative humidity, in %.
     :ivar static_pressure_kpa: Atmospheric pressure, in kPa.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"distance": "m"})
 
     distance: float
     frequencies: NDArray[np.float64]

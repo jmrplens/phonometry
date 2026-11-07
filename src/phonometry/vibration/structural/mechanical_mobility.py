@@ -72,7 +72,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -370,6 +370,9 @@ class RigidMassCalibrationResult(OwnsArrays):
     :ivar mass: Mass ``m`` of the calibration block, in kg.
     :ivar quantity: FRF kind checked (``"accelerance"`` or ``"mobility"``).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"mass": "kg"})
 
     frequencies: np.ndarray
     measured: np.ndarray

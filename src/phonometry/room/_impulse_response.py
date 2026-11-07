@@ -64,7 +64,8 @@ decay curves; that step belongs to downstream room-acoustics modules.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -101,6 +102,8 @@ class ImpulseResponseWarning(PhonometryWarning):
 
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, DTypeLike, NDArray
 
@@ -914,6 +917,11 @@ class ShapedSweepResult(OwnsArrays):
         applies before synthesis, which this module does not implement:
         typical shaped sweeps here measure about 4.2-4.3 dB.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"f_range": "Hz", "group_delay": "s"}
+    )
 
     signal: np.ndarray
     fs: float

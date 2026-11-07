@@ -25,7 +25,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, overload
 
 import numpy as np
 
@@ -59,6 +60,8 @@ from ..acoustics import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -278,6 +281,11 @@ class PileStrikeResult(OwnsArrays):
         array otherwise.
     :ivar fs: Sample rate, in Hz.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"single_strike_sel": "dB"}
+    )
 
     single_strike_sel: float
     peak_spl: float

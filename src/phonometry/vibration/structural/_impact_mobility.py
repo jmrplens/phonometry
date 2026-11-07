@@ -568,9 +568,10 @@ class DoubleHitCheck(OwnsArrays):
         to exceed to count as an impact.
     """
 
-    #: The impact indices are sample positions, not levels.
+    #: The impact indices are sample positions, not levels, and the force is
+    #: in newtons, which the ``_n`` of its name does not say.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
-        {"impact_indices": ""}
+        {"force_n": "N", "impact_indices": ""}
     )
 
     force_n: np.ndarray
@@ -804,6 +805,11 @@ class ImpactMobilityResult(OwnsArrays):
         ``"acceleration"``, ``"velocity"`` or ``"displacement"``.
     :ivar driving_point: ``True`` if force and response are co-located.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"force_energy_spectral_density": "N²·s/Hz"}
+    )
 
     frequencies: np.ndarray
     mobility: np.ndarray
@@ -1734,6 +1740,11 @@ class ForceSpectrumCheck(OwnsArrays):
     :ivar max_drop_db: The largest fall across the range the check accepts,
         in dB.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"energy_spectral_density": "N²·s/Hz"}
+    )
 
     frequencies: np.ndarray
     energy_spectral_density: np.ndarray

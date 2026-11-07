@@ -69,7 +69,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -86,6 +87,7 @@ from ...fluids import Fluid
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -201,6 +203,18 @@ class StaticAirflowResult(RichDisplay):
     specific airflow resistance (Pa*s/m). ``pressure_drop_pa`` is the fitted
     :math:`\Delta p` at ``evaluation_velocity`` (Pa).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "evaluation_velocity": "m/s",
+            "linear_coefficient": "Pa·s/m",
+            "quadratic_coefficient": "Pa·s²/m²",
+            "resistance": "Pa·s/m³",
+            "resistivity": "Pa·s/m²",
+            "specific_resistance": "Pa·s/m",
+        }
+    )
 
     resistance: float
     specific_resistance: float

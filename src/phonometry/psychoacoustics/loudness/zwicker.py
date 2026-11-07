@@ -21,7 +21,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -29,6 +30,7 @@ from ...io._resolve import resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -143,6 +145,17 @@ class ZwickerLoudness(OwnsArrays):
     or ``"diffuse"``), one of the items clause 7 requires a loudness report
     to state.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "loudness": "sone",
+            "loudness_vs_time": "sone",
+            "n10": "sone",
+            "n5": "sone",
+            "specific": "sone/Bark",
+        }
+    )
 
     loudness: float
     loudness_level: float

@@ -69,7 +69,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -269,6 +269,11 @@ class PorousMediumResult(OwnsArrays):
     :math:`Z_\mathrm{c} = \sqrt{\rho_\mathrm{e} K_\mathrm{e}}` and
     :math:`k = \omega \sqrt{\rho_\mathrm{e} / K_\mathrm{e}}` for every model.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"air_density": "kg/m³"}
+    )
 
     frequencies: Real
     characteristic_impedance: Complex

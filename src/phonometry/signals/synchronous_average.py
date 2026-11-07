@@ -79,7 +79,8 @@ No resampling onto an ``M``-point angular grid is performed.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, overload
 
 import numpy as np
 
@@ -96,6 +97,8 @@ from ._test_signals import _validate_1d_finite, fractional_delay
 from .spectra import _positive
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -214,6 +217,11 @@ class SynchronousAverageResult(OwnsArrays):
     (:attr:`interpolated`) is read from :attr:`fs` and :attr:`period_s`, so
     it is not a field.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"comb_frequencies": "Hz"}
+    )
 
     period_waveform: Signal | NDArray[np.float64]
     times: NDArray[np.float64]

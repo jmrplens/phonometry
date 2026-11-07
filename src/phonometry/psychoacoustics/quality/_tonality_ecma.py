@@ -30,7 +30,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -38,6 +39,8 @@ from scipy import signal
 from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -103,6 +106,18 @@ class EcmaTonality(OwnsArrays):
     ``tonal_frequency_vs_time`` its frequency f_ton(l) (Formula 62). ``field``
     records the assumed sound field.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "bark": "Bark_HMS",
+            "specific_tonality": "tu_HMS",
+            "tonal_frequencies": "Hz",
+            "tonal_frequency_vs_time": "Hz",
+            "tonality": "tu_HMS",
+            "tonality_vs_time": "tu_HMS",
+        }
+    )
 
     tonality: float
     specific_tonality: np.ndarray

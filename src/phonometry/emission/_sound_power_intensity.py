@@ -87,12 +87,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -240,6 +242,11 @@ class SoundPowerIntensityResult(OwnsArrays):
     :ivar fraction: One of ``1`` or ``3``.
     :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"partial_power": "W"}
+    )
 
     frequencies: np.ndarray | None
     partial_power: np.ndarray

@@ -44,7 +44,8 @@ coarse grids degrade it and are what ``oversample`` mitigates.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, overload
 
 import numpy as np
 
@@ -59,6 +60,8 @@ from .._internal.validation import (
 from ._cepstrum import _fold_causal
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -273,6 +276,11 @@ class PhaseDecompositionResult(OwnsArrays):
         :math:`\lvert H \rvert \exp(j \, \text{minimum\_phase\_rad})`.
     :ivar fs: Sample rate of the underlying record, in Hz.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"excess_group_delay": "s", "group_delay": "s"}
+    )
 
     frequencies: NDArray[np.float64]
     magnitude: NDArray[np.float64]

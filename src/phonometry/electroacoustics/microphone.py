@@ -63,7 +63,8 @@ so the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -89,6 +90,7 @@ from .loudspeaker import (
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
@@ -534,6 +536,11 @@ class MicrophoneCharacteristics(OwnsArrays):
     :ivar supply_current_ma: Current drawn from the power supply, in mA (9.1),
         or ``None``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"effective_range": "Hz", "noise_frequencies": "Hz", "polar_frequency": "Hz"}
+    )
 
     frequencies: NDArray[np.float64]
     response_db: NDArray[np.float64]

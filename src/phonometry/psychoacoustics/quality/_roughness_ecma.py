@@ -48,7 +48,8 @@ unmodulated carrier: a fully modulated signal whose carrier alone sits at
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -57,6 +58,8 @@ from scipy.interpolate import PchipInterpolator
 from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -213,6 +216,17 @@ class EcmaRoughness(OwnsArrays):
     R'(l50, z) (Formula 109) of shape ``(n_times, 53)``. ``field`` records the
     assumed sound field.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "bark": "Bark_HMS",
+            "roughness": "asper",
+            "roughness_vs_time": "asper",
+            "specific_roughness": "asper/Bark_HMS",
+            "specific_roughness_vs_time": "asper/Bark_HMS",
+        }
+    )
 
     roughness: float
     specific_roughness: np.ndarray

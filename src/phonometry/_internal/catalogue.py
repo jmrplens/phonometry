@@ -657,14 +657,17 @@ def read_packaged(package: str, filename: str) -> dict[str, Any]:
     through :func:`parse_packaged` like every other packaged table.
 
     :param package: The package that owns the data, as ``phonometry.solids``.
-        The file is read from its ``data`` subpackage.
+        The file is read from its ``data`` directory.
     :param filename: The file name inside ``data``, including the extension.
     :return: The decoded document.
     :raises CatalogueError: for anything :func:`parse_packaged` refuses.
     """
     from importlib.resources import files
 
-    text = (files(f"{package}.data") / filename).read_text(encoding="utf-8")
+    # The directory is read as files: imported as f"{package}.data", which
+    # has no __init__.py, it became a namespace package in sys.modules and in
+    # the namespace, and so in the completion, of its domain.
+    text = (files(package) / "data" / filename).read_text(encoding="utf-8")
     return parse_packaged(text, filename)
 
 
@@ -672,7 +675,7 @@ def read_table(package: str, filename: str) -> tuple[str, tuple[dict[str, Any], 
     """Read one published table from a package's ``data`` directory.
 
     :param package: The package that owns the data, as ``phonometry.solids``.
-        The file is read from its ``data`` subpackage.
+        The file is read from its ``data`` directory.
     :param filename: The file name inside ``data``, including the extension.
     :return: The citation every row of the file shares, and the rows in the
         order the file lists them, each a plain dictionary ready to be passed

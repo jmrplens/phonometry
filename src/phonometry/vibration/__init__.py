@@ -977,3 +977,8 @@ __all__ = [
     "single_mode_fit",
     "verify_channel_match",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.vibration.`` offers alone."""
+    return sorted(__all__)

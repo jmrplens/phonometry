@@ -46,3 +46,8 @@ __all__ = [
     "true_peak_level",
     "verify_quasi_peak_dynamics",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.broadcast.`` offers alone."""
+    return sorted(__all__)

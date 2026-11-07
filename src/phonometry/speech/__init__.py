@@ -41,3 +41,8 @@ __all__ = [
     "stipa_signal",
     "stoi",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.speech.`` offers alone."""
+    return sorted(__all__)

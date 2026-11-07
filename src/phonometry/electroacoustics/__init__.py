@@ -297,3 +297,8 @@ __all__ = [
     "weighted_thd",
     "working_sound_pressure_level",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.electroacoustics.`` offers alone."""
+    return sorted(__all__)

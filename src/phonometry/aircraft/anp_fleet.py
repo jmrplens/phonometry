@@ -1814,7 +1814,8 @@ def _read_tables(path: str | os.PathLike[str] | None) -> dict[str, Traversable]:
     if path is None:
         from importlib.resources import files
 
-        root = files("phonometry.aircraft.data.anp")
+        # Read as files, never imported as a namespace package.
+        root = files("phonometry.aircraft") / "data" / "anp"
         return {
             entry.name: entry
             for entry in root.iterdir()

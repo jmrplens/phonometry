@@ -205,3 +205,8 @@ __all__ = [
     "weston_regime_boundaries",
     "wind_noise_spectrum",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.underwater.`` offers alone."""
+    return sorted(__all__)

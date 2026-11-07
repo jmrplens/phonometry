@@ -2433,10 +2433,8 @@ def _packaged_table(row: CatalogueRow) -> dict[str, Any] | None:
         ):
             continue
         package = module.rpartition(".")[0]
-        try:
-            resource = files(f"{package}.data") / f"{table}.json"
-        except ModuleNotFoundError:
-            continue
+        # Read as files, never imported as a namespace package.
+        resource = files(package) / "data" / f"{table}.json"
         if resource.is_file():
             return read_packaged(package, f"{table}.json")
     return None

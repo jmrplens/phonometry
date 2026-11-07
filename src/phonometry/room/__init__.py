@@ -413,3 +413,8 @@ __all__ = [
     "workstation_level",
     "workstation_level_increase",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.room.`` offers alone."""
+    return sorted(__all__)

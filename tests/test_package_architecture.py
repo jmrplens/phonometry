@@ -4606,3 +4606,83 @@ def test_the_sequence_rule_reads_a_union_whole(tmp_path: Path) -> None:
         "pkg.api:14: pair: tuple[float, float]",
         "pkg.api:15: channels: list[np.integer[Any]] | Sequence[int]",
     ]
+
+
+def _domains() -> list[str]:
+    """The domain packages the root publishes, by name."""
+    import inspect
+
+    import phonometry
+
+    return [
+        name
+        for name in phonometry.__all__
+        if inspect.ismodule(getattr(phonometry, name, None))
+    ]
+
+
+@pytest.mark.parametrize("domain", ["phonometry", *_domains()])
+def test_dir_of_the_root_and_of_each_domain_lists_what_it_publishes(
+    domain: str,
+) -> None:
+    """``dir()`` and the completion it feeds offer the published names alone.
+
+    A package's namespace also holds ``annotations`` from its ``__future__``
+    import, every submodule it imported from, and the data directories a
+    catalogue was read from: ``phonometry.filters.`` completed to 49 names,
+    ``core`` and ``design`` among them, which are no address of anything.
+    """
+    import importlib
+
+    package = importlib.import_module(
+        domain if domain == "phonometry" else f"phonometry.{domain}"
+    )
+    assert set(dir(package)) == set(package.__all__)
+
+
+def test_reading_a_published_catalogue_imports_no_data_directory() -> None:
+    """A catalogue's data files are read as files, never imported as packages.
+
+    ``importlib.resources.files("phonometry.solids.data")`` imported the data
+    directory, which has no ``__init__.py``, as a namespace package, so it
+    sat in ``sys.modules`` and in the namespace of its domain.
+    """
+    code = textwrap.dedent(
+        """
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        import phonometry
+        from phonometry import aircraft, io, solids
+
+        for name in phonometry.__all__:
+            getattr(phonometry, name)
+        rows = solids.PUBLISHED_SOLIDS
+        table = next(iter(rows.values())).table
+        with tempfile.TemporaryDirectory() as folder:
+            io.write_catalogue(
+                {key: row for key, row in rows.items() if row.table == table},
+                Path(folder) / "solids.json",
+                catalogue="my-solids",
+            )
+        aircraft.load_anp_database()
+        print(sorted(
+            name
+            for name in sys.modules
+            if name.startswith("phonometry.")
+            and (name.endswith(".data") or ".data." in name)
+        ))
+        """
+    )
+    env = {"PYTHONPATH": str(Path(__file__).resolve().parents[1] / "src")}
+    done = subprocess.run(  # nosec B603 - the test's own interpreter and code
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        env=env,
+        check=False,
+    )
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.strip() == "[]"

@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -207,7 +208,9 @@ _END_FACE_POSITIONS = 2
 _MINIMUM_ROWS_FOR_SPREAD = 2
 
 
-def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
+def _at_most(
+    values: NDArray[np.float64], bound: NDArray[np.float64] | float
+) -> NDArray[np.bool_]:
     """Per element, whether ``values`` is at or below ``bound``.
 
     :param values: The values, in dB.
@@ -217,7 +220,7 @@ def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values <= np.asarray(bound) + _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _level_grid(values: NumericArrayLike, name: str) -> np.ndarray:
+def _level_grid(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Levels as a ``(repetitions, bands)`` grid of finite values.
 
     :param values: One spectrum, or one per repetition.
@@ -244,7 +247,7 @@ def _level_grid(values: NumericArrayLike, name: str) -> np.ndarray:
 
 def _band_axis(
     frequencies: NumericArrayLike | None, count: int, owner: str
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The centre frequencies, defaulted to the 22 bands of 5.3.
 
     :param frequencies: The caller's frequencies, or ``None``.
@@ -408,17 +411,17 @@ class EarmuffInsertionLossResult(OwnsArrays):
         of the earmuff per band, in dB, or ``None``.
     """
 
-    insertion_loss: np.ndarray
-    repetition_insertion_loss: np.ndarray
-    open_levels: np.ndarray
-    occluded_levels: np.ndarray
-    open_uncertainty_db: np.ndarray
-    occluded_uncertainty_db: np.ndarray
+    insertion_loss: NDArray[np.float64]
+    repetition_insertion_loss: NDArray[np.float64]
+    open_levels: NDArray[np.float64]
+    occluded_levels: NDArray[np.float64]
+    open_uncertainty_db: NDArray[np.float64]
+    occluded_uncertainty_db: NDArray[np.float64]
     fixture_uncertainty_db: float
     sound_field_uncertainty_db: float
     equipment_uncertainty_db: float
-    frequencies: np.ndarray
-    isolation_cup_levels: np.ndarray | None = None
+    frequencies: NDArray[np.float64]
+    isolation_cup_levels: NDArray[np.float64] | None = None
 
     @property
     def n_repetitions(self) -> int:
@@ -440,7 +443,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return self.n_repetitions >= _MINIMUM_REPETITIONS
 
     @property
-    def reported_insertion_loss(self) -> np.ndarray:
+    def reported_insertion_loss(self) -> NDArray[np.float64]:
         """The insertion loss as Clause 6 reports it, to the nearest 0,1 dB.
 
         :return: One value per band, halves rounded upwards.
@@ -448,7 +451,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return round_half_up(self.insertion_loss, _REPORT_DECIMALS)
 
     @property
-    def standard_uncertainty_db(self) -> np.ndarray:
+    def standard_uncertainty_db(self) -> NDArray[np.float64]:
         """The combined standard uncertainty per band (Formula (B.2)), in dB.
 
         :return: One value per band.
@@ -465,7 +468,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         )
 
     @property
-    def expanded_uncertainty_db(self) -> np.ndarray:
+    def expanded_uncertainty_db(self) -> NDArray[np.float64]:
         """The expanded uncertainty per band, :math:`U = 2u` (B.4), in dB.
 
         :return: One value per band.
@@ -496,7 +499,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         )
 
     @property
-    def floor_margin_db(self) -> np.ndarray | None:
+    def floor_margin_db(self) -> NDArray[np.float64] | None:
         """The mean occluded level less the isolation cup's, per band, in dB.
 
         :return: The margin, or ``None`` when no cup levels were given.
@@ -507,7 +510,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return np.asarray(margin, dtype=np.float64)
 
     @property
-    def floor_adequate(self) -> np.ndarray | None:
+    def floor_adequate(self) -> NDArray[np.bool_] | None:
         """Per band, whether the isolation cup reads 10 dB lower at least (5.3).
 
         :return: One boolean per band, or ``None`` without cup levels.
@@ -518,7 +521,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return np.asarray(margin >= _FLOOR_MARGIN_DB - _BOUNDARY_SLACK_DB, dtype=bool)
 
     @property
-    def level_drift_db(self) -> np.ndarray:
+    def level_drift_db(self) -> NDArray[np.float64]:
         """How far the open level strayed from its first measurement, in dB.
 
         5.3 keeps the test signal within ±1 dB of the level set before the
@@ -530,7 +533,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return np.max(np.abs(self.open_levels - self.open_levels[0]), axis=0)
 
     @property
-    def level_stable(self) -> np.ndarray:
+    def level_stable(self) -> NDArray[np.bool_]:
         """Per band, whether the open level stayed within ±1 dB (5.3).
 
         :return: One boolean per band.
@@ -567,7 +570,9 @@ class EarmuffInsertionLossResult(OwnsArrays):
         return plot_earmuff_insertion_loss(self, ax=ax, language=language, **kwargs)
 
 
-def _level_uncertainty(grid: np.ndarray, typical_db: float) -> np.ndarray:
+def _level_uncertainty(
+    grid: NDArray[np.float64], typical_db: float
+) -> NDArray[np.float64]:
     r"""The standard uncertainty of a mean level, per band.
 
     :param grid: ``(repetitions, bands)`` levels.
@@ -761,13 +766,13 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
         index per band, in dB, NaN where not given.
     """
 
-    frequencies: np.ndarray
-    end_face_difference: np.ndarray
-    front_to_back_ratio_db: np.ndarray
-    front_to_rear_index: np.ndarray
+    frequencies: NDArray[np.float64]
+    end_face_difference: NDArray[np.float64]
+    front_to_back_ratio_db: NDArray[np.float64]
+    front_to_rear_index: NDArray[np.float64]
 
     @property
-    def end_faces_matched(self) -> np.ndarray:
+    def end_faces_matched(self) -> NDArray[np.bool_]:
         """Per band, whether the two end-face positions are within 2 dB.
 
         :return: One boolean per band.
@@ -775,7 +780,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
         return _at_most(self.end_face_difference, _END_FACE_TOLERANCE_DB)
 
     @property
-    def directional_required(self) -> np.ndarray:
+    def directional_required(self) -> NDArray[np.bool_]:
         """Per band, whether the directional test applies (500 Hz and up).
 
         :return: One boolean per band.
@@ -783,7 +788,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
         return np.asarray(self.frequencies >= _DIRECTIONAL_FROM_HZ, dtype=bool)
 
     @property
-    def microphone_suitable(self) -> np.ndarray:
+    def microphone_suitable(self) -> NDArray[np.bool_]:
         """Per band, whether the microphone's front-to-rear index exceeds 15 dB.
 
         :return: One boolean per band; ``False`` where no index was given.
@@ -791,7 +796,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
         return np.asarray(self.front_to_rear_index > _FRONT_TO_REAR_INDEX_DB)
 
     @property
-    def progressive(self) -> np.ndarray:
+    def progressive(self) -> NDArray[np.bool_]:
         """Per band, whether facing the source reads at least 10 dB more.
 
         Bands below 500 Hz count as meeting it; a band from 500 Hz up without
@@ -949,7 +954,7 @@ def check_plane_progressive_wave(
     )
 
 
-def _isolation_requirement(frequencies: np.ndarray) -> np.ndarray:
+def _isolation_requirement(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """The least acoustic isolation of 5.1.4 per band, NaN below 63 Hz.
 
     :param frequencies: The centre frequencies, in hertz.
@@ -979,8 +984,8 @@ class FixtureIsolationVerification(OwnsArrays):
         dB.
     """
 
-    frequencies: np.ndarray
-    isolation: np.ndarray
+    frequencies: NDArray[np.float64]
+    isolation: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a check whose isolation does not follow its bands.
@@ -992,7 +997,7 @@ class FixtureIsolationVerification(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def min_isolation(self) -> np.ndarray:
+    def min_isolation(self) -> NDArray[np.float64]:
         """The least isolation 5.1.4 asks per band, in dB.
 
         :return: 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and
@@ -1001,7 +1006,7 @@ class FixtureIsolationVerification(OwnsArrays):
         return _isolation_requirement(np.asarray(self.frequencies, dtype=np.float64))
 
     @property
-    def sufficient(self) -> np.ndarray:
+    def sufficient(self) -> NDArray[np.bool_]:
         """Per band, whether the isolation reaches the requirement.
 
         :return: One boolean per band; ``True`` where nothing is required.
@@ -1010,7 +1015,7 @@ class FixtureIsolationVerification(OwnsArrays):
         return np.asarray(np.isnan(self.min_isolation) | reached, dtype=bool)
 
     @property
-    def margin_db(self) -> np.ndarray:
+    def margin_db(self) -> NDArray[np.float64]:
         """The isolation less the requirement per band, in dB.
 
         :return: Negative where the fixture falls short, NaN where nothing is

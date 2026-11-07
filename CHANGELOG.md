@@ -2324,6 +2324,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The config builds that processor itself now, with the same plugins in the
   same order, and neither prints the notice.
 
+- **The sound-strength guide sets the micro prefix of 20 µPa in the formula's
+  own font.** Its check that $p_0^2 S_0 / \rho c$ is 1 pW wrote the prefix as
+  the character µ inside `\text{}`, which KaTeX has no metrics for: the page
+  took the glyph from a fallback font, and every build printed two
+  strict-mode warnings for each language. It reads `\mu\text{Pa}` now, as the
+  other formulas of the site do, in English, in Spanish and in the `docs/`
+  mirror.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

@@ -26,7 +26,7 @@ import {
 	writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { delimiter, dirname, join, relative, resolve } from 'node:path';
+import { delimiter, dirname, join, relative, resolve, sep } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -34,6 +34,7 @@ import { basePath, siteUrl } from '../src/data/site.mjs';
 import { domainIds } from '../src/data/topics.mjs';
 import { loadContentDates } from '../src/lib/content-dates.mjs';
 import {
+	CONTENT_DIR,
 	DATE_SOURCES,
 	DATELESS_KEYS,
 	frontmatterOnly,
@@ -604,34 +605,97 @@ test('the day a page was published is its first commit\'s day in UTC, as the day
 
 /** Modules that hold no text a page shows: the site's address and the icon shapes. */
 const NOT_CONTENT = new Set(['src/data/site.mjs', 'src/data/icons.mjs']);
-const IMPORT = /^\s*import\s[^;]*?from\s+['"]([^'"]+)['"]/gm;
+/** An import that brings a value, with what it binds: `import type` brings none. */
+const IMPORT = /^\s*import\s+(?!type\s)([^;]*?)\s*from\s+['"]([^'"]+)['"]/gm;
+
+/** The banner that make conformance draws from the report, with the counts every page states. */
+const BANNER = '.github/badges/conformance-summary.svg';
 
 /**
- * Why a module puts data from outside a page into it, or null: it is a data
- * module, it reads the content collection, or it imports one that does.
+ * The modules that read the repository when the site builds, and what each
+ * of their exports is read from: the files whose commits change it, any one
+ * of which the entry of a page that shows it has to name as a source, or
+ * `count`, a number of files or lines the entry has to carry under the
+ * export's own name. A page that shows an export is dated by what it is
+ * read from, which the imports alone do not show.
  */
-function dataBehind(file, seen = new Map()) {
-	if (seen.has(file)) return seen.get(file);
-	seen.set(file, null);
-	const rel = relative(SITE, file).split('\\').join('/');
-	let why = null;
-	if (/^src\/(data|generated)\//.test(rel)) why = NOT_CONTENT.has(rel) ? null : rel;
-	else if (/\.(astro|mjs|ts)$/.test(file)) {
-		let text = '';
-		try {
-			text = readFileSync(file, 'utf8');
-		} catch {
-			// A package or a virtual module: not this site's data.
-		}
-		if (/\b(getCollection|getEntry)\s*\(/.test(text)) why = `${rel} reads the content collection`;
-		for (const [, spec] of text.matchAll(IMPORT)) {
-			if (why || !spec.startsWith('.')) continue;
-			const behind = dataBehind(resolveImport(file, spec), seen);
-			if (behind) why = `${rel} imports ${behind}`;
+const READS = {
+	'site/src/data/repo-stats.mjs': {
+		version: ['VERSION'],
+		guides: 'count',
+		apiPages: 'count',
+		figures: 'count',
+		fiches: 'count',
+		catalogueRows: ['site/src/generated/catalogues.mjs'],
+		catalogueCount: ['site/src/generated/catalogues.mjs'],
+	},
+	'site/src/data/conformance-stats.mjs': {
+		passingChecks: [BANNER, 'docs/conformance.json'],
+		totalChecks: [BANNER, 'docs/conformance.json'],
+		domains: [BANNER, 'docs/conformance.json'],
+		designations: [BANNER, 'docs/conformance.json'],
+		sources: [BANNER, 'docs/conformance.json'],
+		checksRatio: [BANNER, 'docs/conformance.json'],
+		report: ['docs/conformance.json'],
+		errataEntries: 'count',
+	},
+};
+
+/** The names an import clause binds from its module; `*` for all of them. */
+function boundNames(clause) {
+	const names = [];
+	const braces = /\{([^}]*)\}/.exec(clause);
+	if (braces) {
+		for (const part of braces[1].split(',').map((text) => text.trim())) {
+			if (part === '' || part.startsWith('type ')) continue;
+			const name = part.split(/\s+as\s+/)[0];
+			names.push(name === 'default' ? '*' : name);
 		}
 	}
-	seen.set(file, why);
-	return why;
+	// A default or a namespace binding takes the whole module.
+	if (/^\s*[\w$]+\s*(,|$)/.test(clause) || /\*\s+as\s/.test(clause)) names.push('*');
+	return names;
+}
+
+/**
+ * What a module brings into a page from outside the page's own file, as
+ * repository paths, each under its kind: every data module it reaches
+ * (`src/data`, `src/generated`), through any chain of imports and the data
+ * modules' own, as `data`, and every module that reads the content
+ * collection as `collection`. `bound` gathers, for each module that reads
+ * the repository at build time, the names imported from it on the way.
+ *
+ * @param {string} file
+ * @param {string} [site]
+ * @param {Map<string, 'data' | 'collection'>} [out]
+ * @param {Set<string>} [seen]
+ * @param {Map<string, Set<string>>} [bound]
+ * @returns {Map<string, 'data' | 'collection'>}
+ */
+function reach(file, site = SITE, out = new Map(), seen = new Set(), bound = new Map()) {
+	if (seen.has(file)) return out;
+	seen.add(file);
+	const rel = relative(site, file).split(sep).join('/');
+	if (NOT_CONTENT.has(rel)) return out;
+	const path = relative(resolve(site, '..'), file).split(sep).join('/');
+	if (/^src\/(data|generated)\//.test(rel)) out.set(path, 'data');
+	if (!/\.(astro|mjs|ts|mdx?)$/.test(file)) return out;
+	let text = '';
+	try {
+		text = readFileSync(file, 'utf8');
+	} catch {
+		return out; // A package or a virtual module: not this site's data.
+	}
+	if (/\b(getCollection|getEntry)\s*\(/.test(text)) out.set(path, 'collection');
+	for (const [, clause, spec] of text.matchAll(IMPORT)) {
+		if (!spec.startsWith('.')) continue;
+		const target = resolveImport(file, spec);
+		const module = relative(resolve(site, '..'), target).split(sep).join('/');
+		if (!bound.has(module)) bound.set(module, new Set());
+		for (const name of boundNames(clause)) bound.get(module).add(name);
+		reach(target, site, out, seen, bound);
+	}
+	return out;
 }
 
 /** An import specifier as the file it names, extension supplied as Vite would. */
@@ -648,8 +712,8 @@ function resolveImport(from, spec) {
 	return target;
 }
 
-/** Every page of the site, as repository paths. */
-function sitePages(dir = join(SITE, 'src', 'content', 'docs'), out = []) {
+/** Every page of the site, as file paths. */
+function sitePages(dir = join(SITE, CONTENT_DIR), out = []) {
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
 		const path = join(dir, entry.name);
 		if (entry.isDirectory()) sitePages(path, out);
@@ -659,7 +723,88 @@ function sitePages(dir = join(SITE, 'src', 'content', 'docs'), out = []) {
 }
 
 const REPO = resolve(SITE, '..');
-const repoPath = (file) => relative(REPO, file).split('\\').join('/');
+
+/**
+ * What a site's date-sources.json leaves out of what its pages show: a page
+ * that reaches data and has no entry, a listed page that reaches none, and
+ * for each entry a data module or a reader of the content collection that
+ * its pages reach and that neither "sources" nor "_via" names. "_via" maps
+ * such a module to the source the entry dates it by (a path, which the
+ * entry has to name in "sources" or as a count) or to the reason it moves
+ * no page (a sentence). A reader of the content collection always needs
+ * one, since naming the reader as a source dates the page by the reader's
+ * code, not by the pages it reads. A "_via" key that none of the entry's
+ * pages reaches, or that "sources" already names, is wrong too. And an
+ * export of a module that reads the repository at build time (`reads`)
+ * that the pages import has to be dated by what it is read from.
+ *
+ * @param {string} [site]
+ * @param {Record<string, Record<string, string[] | 'count'>>} [reads]
+ * @returns {{ problems: string[], built: number }}
+ */
+function auditDateSources(site = SITE, reads = READS) {
+	const file = join(site, DATE_SOURCES);
+	const raw = JSON.parse(readFileSync(file, 'utf8')).entries;
+	const entries = readDateSources(file);
+	const repo = resolve(site, '..');
+	const matches = (spec, path) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec);
+	const problems = [];
+	const reached = entries.map(() => new Map());
+	const imported = entries.map(() => new Map());
+	let built = 0;
+	for (const page of sitePages(join(site, CONTENT_DIR))) {
+		const path = relative(repo, page).split(sep).join('/');
+		const bound = new Map();
+		const behind = reach(page, site, new Map(), new Set(), bound);
+		const owners = entries.flatMap((entry, index) => (entry.pages.some((spec) => matches(spec, path)) ? [index] : []));
+		if (behind.size > 0) built += 1;
+		if (behind.size > 0 && owners.length === 0) {
+			problems.push(`${path} shows what ${[...behind.keys()].join(', ')} hold(s), and no entry lists it`);
+		}
+		if (behind.size === 0 && owners.length > 0) problems.push(`${path} is listed, and renders nothing from outside its file`);
+		for (const index of owners) {
+			for (const [module, kind] of behind) reached[index].set(module, kind);
+			for (const [module, names] of bound) {
+				if (!imported[index].has(module)) imported[index].set(module, new Set());
+				for (const name of names) imported[index].get(module).add(name);
+			}
+		}
+	}
+	entries.forEach((entry, index) => {
+		const where = `entry ${index + 1} (${entry.pages[0]})`;
+		const via = raw[index]._via ?? {};
+		const named = (path) => entry.sources.some((spec) => matches(spec, path));
+		for (const [module, kind] of reached[index]) {
+			if (kind === 'data' && named(module)) {
+				if (Object.hasOwn(via, module)) problems.push(`${where}: "_via" explains ${module}, which "sources" already names`);
+			} else if (!Object.hasOwn(via, module)) {
+				const what = kind === 'data' ? 'the data of' : 'the pages of the content collection that are read by';
+				problems.push(`${where}: its pages show ${what} ${module}, and neither "sources" nor "_via" names it`);
+			}
+		}
+		for (const [module, why] of Object.entries(via)) {
+			if (!reached[index].has(module)) problems.push(`${where}: "_via" names ${module}, which none of its pages reaches`);
+			if (typeof why !== 'string' || why.trim() === '') {
+				problems.push(`${where}: "_via" gives ${module} neither a source nor a reason`);
+			} else if (!/\s/.test(why) && !named(why) && !Object.hasOwn(entry.counts, why)) {
+				problems.push(`${where}: "_via" dates ${module} by ${why}, which is neither a source nor a count of the entry`);
+			}
+		}
+		for (const [module, exports] of Object.entries(reads)) {
+			const names = imported[index].get(module) ?? new Set();
+			for (const name of names.has('*') ? Object.keys(exports) : names) {
+				const from = exports[name];
+				if (from === undefined) problems.push(`${where}: its pages show ${name} of ${module}, and the test does not say what that is read from`);
+				else if (from === 'count' && !Object.hasOwn(entry.counts, name)) {
+					problems.push(`${where}: its pages show ${name} of ${module}, a count the entry does not carry`);
+				} else if (from !== 'count' && !from.some((file) => named(file))) {
+					problems.push(`${where}: its pages show ${name} of ${module}, read from ${from.join(' or ')}, which "sources" does not name`);
+				}
+			}
+		}
+	});
+	return { problems, built };
+}
 
 /**
  * The files of HEAD some pathspecs match, matched the way src/lib/content-dates.mjs
@@ -673,25 +818,78 @@ function filesAtHead(repo, pathspecs) {
 	return listed.stdout.split('\0').filter(Boolean);
 }
 
-test('every page that renders data from outside its file is listed in date-sources.json, and no other', () => {
-	const entries = readDateSources(join(SITE, DATE_SOURCES));
-	const listed = (path) => entries.some((entry) => entry.pages.some((spec) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec)));
-	const unlisted = [];
-	const needless = [];
-	let built = 0;
-	for (const file of sitePages()) {
-		const text = readFileSync(file, 'utf8');
-		let why = null;
-		for (const [, spec] of text.matchAll(IMPORT)) {
-			if (!why && spec.startsWith('.')) why = dataBehind(resolveImport(file, spec));
-		}
-		if (why) built += 1;
-		if (why && !listed(repoPath(file))) unlisted.push(`${repoPath(file)}: ${why}`);
-		if (!why && listed(repoPath(file))) needless.push(repoPath(file));
-	}
+test('a listed page has to name every module it reaches, in "sources" or in "_via"', (t) => {
+	const root = mkdtempSync(join(tmpdir(), 'content-dates-'));
+	t.after(() => rmSync(root, { recursive: true, force: true }));
+	const site = join(root, 'repo', 'site');
+	const write = (path, text) => {
+		mkdirSync(dirname(join(site, path)), { recursive: true });
+		writeFileSync(join(site, path), text);
+	};
+	write('src/content/docs/a.mdx', "import { count } from '../../data/numbers.mjs';\n\n{count} rows.\n");
+	write('src/content/docs/b.mdx', "import Index from '../../components/Index.astro';\n\n<Index />\n");
+	write('src/content/docs/c.mdx', 'Plain text.\n');
+	write('src/data/numbers.mjs', "import { rows } from './rows.mjs';\nimport { siteUrl } from './site.mjs';\nexport const count = rows.length;\n");
+	write('src/data/rows.mjs', 'export const rows = [1, 2];\n');
+	write('src/data/site.mjs', "export const siteUrl = 'https://example.org';\n");
+	write('src/components/Index.astro', "---\nimport type { Shape } from '../data/shape.mjs';\nimport { getCollection } from 'astro:content';\nconst docs = await getCollection('docs');\n---\n");
+	write('src/data/shape.mjs', 'export const shape = 1;\n');
+	const page = (name) => `site/src/content/docs/${name}`;
+	const audit = (...entries) => {
+		write(DATE_SOURCES, JSON.stringify({ entries }));
+		return auditDateSources(site, {}).problems;
+	};
+	const a = { pages: [page('a.mdx')], sources: ['site/src/data/numbers.mjs'], _via: { 'site/src/data/rows.mjs': 'the rows that numbers.mjs counts, as the page shows them' } };
+	const b = { pages: [page('b.mdx')], sources: [page('c.mdx')], _via: { 'site/src/components/Index.astro': page('c.mdx') } };
+
+	assert.deepEqual(audit(a, b), [], 'every module named; the site address and a type import are not data');
+	assert.deepEqual(audit({ ...a, _via: {} }, b), [
+		'entry 1 (site/src/content/docs/a.mdx): its pages show the data of site/src/data/rows.mjs, and neither "sources" nor "_via" names it',
+	]);
+	assert.deepEqual(audit(a, { ...b, sources: [page('c.mdx'), 'site/src/components/Index.astro'], _via: {} }), [
+		'entry 2 (site/src/content/docs/b.mdx): its pages show the pages of the content collection that are read by site/src/components/Index.astro, and neither "sources" nor "_via" names it',
+	]);
+	assert.deepEqual(audit(a, { ...b, _via: { 'site/src/components/Index.astro': page('a.mdx') } }), [
+		'entry 2 (site/src/content/docs/b.mdx): "_via" dates site/src/components/Index.astro by site/src/content/docs/a.mdx, which is neither a source nor a count of the entry',
+	]);
+	assert.deepEqual(audit({ ...a, _via: { ...a._via, 'site/src/data/numbers.mjs': 'the number of rows', 'site/src/data/gone.mjs': 'a module no page imports' } }, b), [
+		'entry 1 (site/src/content/docs/a.mdx): "_via" explains site/src/data/numbers.mjs, which "sources" already names',
+		'entry 1 (site/src/content/docs/a.mdx): "_via" names site/src/data/gone.mjs, which none of its pages reaches',
+	]);
+	assert.deepEqual(audit(a, b, { pages: [page('c.mdx')], sources: ['site/src/data/rows.mjs'] }), [
+		'site/src/content/docs/c.mdx is listed, and renders nothing from outside its file',
+	]);
+	assert.deepEqual(audit(a), [
+		'site/src/content/docs/b.mdx shows what site/src/components/Index.astro hold(s), and no entry lists it',
+	]);
+
+	// A module that reads the repository as the site builds: what the page
+	// shows of it is dated by the files each export is read from.
+	const readsOf = (count) => auditDateSources(site, { 'site/src/data/numbers.mjs': { count } }).problems;
+	write(DATE_SOURCES, JSON.stringify({ entries: [a, b] }));
+	assert.deepEqual(readsOf(['site/src/data/rows.mjs']), [
+		'entry 1 (site/src/content/docs/a.mdx): its pages show count of site/src/data/numbers.mjs, read from site/src/data/rows.mjs, which "sources" does not name',
+	]);
+	assert.deepEqual(readsOf('count'), [
+		'entry 1 (site/src/content/docs/a.mdx): its pages show count of site/src/data/numbers.mjs, a count the entry does not carry',
+	]);
+	assert.deepEqual(auditDateSources(site, { 'site/src/data/numbers.mjs': {} }).problems, [
+		'entry 1 (site/src/content/docs/a.mdx): its pages show count of site/src/data/numbers.mjs, and the test does not say what that is read from',
+	]);
+	write(DATE_SOURCES, JSON.stringify({ entries: [{ ...a, sources: ['site/src/data/numbers.mjs', 'site/src/data/rows.mjs'], _via: {} }, b] }));
+	assert.deepEqual(readsOf(['site/src/data/rows.mjs']), []);
+});
+
+test('every page that renders data from outside its file is listed in date-sources.json with all of it, and no other', async () => {
+	const { problems, built } = auditDateSources();
 	assert.ok(built > 0, 'the scan found no page built from data, so it is not looking');
-	assert.deepEqual(unlisted, [], `${DATE_SOURCES} has to say what these pages are built from`);
-	assert.deepEqual(needless, [], `${DATE_SOURCES} lists pages that render no data from outside their file`);
+	assert.deepEqual(problems, [], `${DATE_SOURCES} has to say what these pages are built from`);
+	// The table of what each export is read from covers every export, so a
+	// number added to one of these modules has to say where it comes from.
+	for (const [module, exports] of Object.entries(READS)) {
+		const names = Object.keys(await import(pathToFileURL(join(REPO, module)).href)).filter((name) => name !== 'default');
+		assert.deepEqual(names.sort(), Object.keys(exports).sort(), `what each export of ${module} is read from`);
+	}
 });
 
 test('each count in date-sources.json is the number the page shows: files as repo-stats.mjs counts them, lines as conformance-stats.mjs does', async (t) => {

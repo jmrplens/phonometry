@@ -15,10 +15,12 @@
     "{\"file\": path, \"lines\": pattern} is the number of lines of that file the pattern",
     "matches, named after its src/data/conformance-stats.mjs export: an edit inside an",
     "entry leaves it, a new entry moves it. The build fails on a page or a source HEAD",
-    "does not have, and",
-    "site/scripts/content-dates.test.mjs fails on a page that imports data, or a",
-    "component built from it, without an entry here, and on a count whose files are not",
-    "the ones repo-stats.mjs counts. Keys beginning with an underscore are notes."
+    "does not have. site/scripts/content-dates.test.mjs fails on a page that reaches data",
+    "without an entry here, on an entry that leaves out a data module or a reader of",
+    "the content collection its pages reach, and on a count that is not the number its",
+    "export computes. Keys beginning with an underscore are notes to the build; the test",
+    "reads \"_via\", which maps each module the pages reach and are not dated by to the",
+    "source that stands for it, or to the reason it moves no page."
   ],
   "entries": [
     {
@@ -43,6 +45,10 @@
           ":(exclude,glob)site/src/content/docs/**/index.*"
         ],
         "fiches": [":(glob).github/reports/*.pdf"]
+      },
+      "_via": {
+        "site/src/data/topics.mjs": "the icon each area row carries, matched on its link, and the topics the guides are counted under, which counts.guides takes through {topic}, so a topic added with its guides moves the page. A topic added over guides its folder already holds, or a topic that did not teach made one that does, changes the number with no guide added, and that commit moves nothing, since the count reads every commit through the topics of the tree it builds: dating the page by topics.mjs instead would move it with every edit to the navigation, a label, an order or an icon, that changes no number it shows",
+        "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which the landing page shows"
       }
     },
     {
@@ -51,7 +57,8 @@
         "site/src/content/docs/reference/conformance.mdx",
         "site/src/content/docs/es/reference/conformance.mdx"
       ],
-      "sources": ["docs/conformance.json", "site/src/components/Conformance.astro"]
+      "sources": ["docs/conformance.json", "site/src/components/Conformance.astro"],
+      "_via": { "site/src/components/Conformance.astro": "docs/conformance.json" }
     },
     {
       "_why": "These guides quote the conformance counts, as the summary banner prints them and conformance-stats.mjs reads them.",
@@ -78,7 +85,10 @@
         "site/src/content/docs/reference/glossary.mdx",
         "site/src/content/docs/es/reference/glossary.mdx"
       ],
-      "sources": ["site/src/data/glossary.mjs", "site/src/components/Glossary.astro"]
+      "sources": ["site/src/data/glossary.mjs", "site/src/components/Glossary.astro"],
+      "_via": {
+        "site/src/components/Glossary.astro": "the title of each guide a term links to, printed as the link: a title moves no page's date, its own included, so a guide retitled without a change to glossary.mjs leaves the glossary's date where it is"
+      }
     },
     {
       "_why": "The index of fiches lists every fiche the repository ships.",
@@ -92,7 +102,12 @@
     {
       "_why": "Each catalogue page renders its tables from the generated catalogue data.",
       "pages": ["site/src/content/docs/reference/catalogues/"],
-      "sources": ["site/src/generated/catalogues.mjs", "site/src/components/Catalogues.astro"]
+      "sources": ["site/src/generated/catalogues.mjs", "site/src/components/Catalogues.astro"],
+      "_via": {
+        "site/src/lib/catalogue-pages.ts": "the label, description and catalogue keys of every catalogue page, which the finder and the overview list: a label or a description moves no page's date anywhere on the site, and a catalogue key arrives with its rows in catalogues.mjs, a source",
+        "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue joins it with its rows in catalogues.mjs, a source",
+        "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which these pages show"
+      }
     },
     {
       "_why": "The Spanish catalogue pages render the same tables with their Spanish text.",
@@ -101,17 +116,24 @@
         "site/src/generated/catalogues.mjs",
         "site/src/components/Catalogues.astro",
         "site/src/data/catalogue-es.json"
-      ]
+      ],
+      "_via": {
+        "site/src/lib/catalogue-pages.ts": "the label, description and catalogue keys of every catalogue page, which the finder and the overview list: a label or a description moves no page's date anywhere on the site, and a catalogue key arrives with its rows in catalogues.mjs, a source",
+        "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue joins it with its rows in catalogues.mjs, a source",
+        "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which these pages show"
+      }
     },
     {
       "_why": "The errata index lists every entry of every family page.",
       "pages": ["site/src/content/docs/reference/errata/index.mdx"],
-      "sources": ["site/src/content/docs/reference/errata/"]
+      "sources": ["site/src/content/docs/reference/errata/"],
+      "_via": { "site/src/components/ErrataFamily.astro": "site/src/content/docs/reference/errata/" }
     },
     {
       "_why": "The Spanish errata index lists every entry of every Spanish family page.",
       "pages": ["site/src/content/docs/es/reference/errata/index.mdx"],
-      "sources": ["site/src/content/docs/es/reference/errata/"]
+      "sources": ["site/src/content/docs/es/reference/errata/"],
+      "_via": { "site/src/components/ErrataFamily.astro": "site/src/content/docs/es/reference/errata/" }
     }
   ]
 }

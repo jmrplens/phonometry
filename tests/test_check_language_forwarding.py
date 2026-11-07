@@ -1654,6 +1654,72 @@ def test_a_method_call_is_covered(tmp_path: pathlib.Path) -> None:
     ]
 
 
+def test_a_method_a_class_inherits_is_read_from_the_base_its_statement_reads(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class's base is what its name stands for where the ``class``
+    statement reads it, so the ``plot`` a result inherits is that base's,
+    not that of a later class of the base's name.
+
+    A base was read as its module stood once it had run, so the call that
+    drops the language ``Shown.plot`` takes passed, and the one to
+    ``Plain.plot``, which takes none, was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.results": """
+            from __future__ import annotations
+
+
+            class _Late:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            class Shown(_Late):
+                pass
+
+
+            class _Late:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Early:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class Plain(_Early):
+                pass
+
+
+            class _Early:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            def shown() -> Shown:
+                return Shown()
+
+
+            def plain() -> Plain:
+                return Plain()
+            """,
+            "pkg.plots": """
+            from .results import plain, shown
+
+
+            def figure(ax, language="en"):
+                shown().plot(ax)
+                plain().plot(ax)
+            """,
+        },
+    )
+    assert [(f.line, f.helper) for f in found] == [(6, "pkg.results._Late.plot")]
+
+
 def test_an_untyped_result_plot_is_told_apart_from_axes_plot(
     tmp_path: pathlib.Path,
 ) -> None:

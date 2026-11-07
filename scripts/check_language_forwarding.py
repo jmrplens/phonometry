@@ -1040,8 +1040,13 @@ class Tree:
     # -- classes ----------------------------------------------------------
 
     def _bases(self, klass: Class) -> Iterator[Class]:
+        """Each base of *klass* that is a class of the tree: what its name
+        stands for where the ``class`` statement reads it (:meth:`resolve`),
+        so a base a later ``class`` of its name replaces is the class it was
+        when the statement ran.
+        """
         for base in klass.node.bases:
-            found = self.resolve(base, klass.scope, klass.module)
+            found = self.resolve(base, klass.scope, klass.module, base)
             if isinstance(found, Class):
                 yield found
 

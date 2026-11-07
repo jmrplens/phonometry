@@ -274,7 +274,7 @@ _POSITIONS: tuple[SoundFieldPosition, ...] = (
 
 def _band_axis(
     frequencies: NumericArrayLike | None, count: int, owner: str
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The centre frequencies of the test signals, defaulted to those of 4.1.
 
     :param frequencies: The caller's frequencies in hertz, or ``None``.
@@ -291,7 +291,7 @@ def _band_axis(
     return _octave_axis(given, count, owner)
 
 
-def _subject_grid(values: NumericArrayLike, name: str) -> np.ndarray:
+def _subject_grid(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A ``(subjects, bands)`` grid of finite decibel values.
 
     :param values: One row per test subject, one column per test signal.
@@ -338,12 +338,12 @@ class RealEarAttenuationResult(OwnsArrays):
     :ivar n_subjects: The number of test subjects :math:`N`.
     """
 
-    attenuation: np.ndarray
-    mean_attenuation: np.ndarray
-    standard_deviation_db: np.ndarray
-    standard_uncertainty_db: np.ndarray
-    expanded_uncertainty_db: np.ndarray
-    frequencies: np.ndarray
+    attenuation: NDArray[np.float64]
+    mean_attenuation: NDArray[np.float64]
+    standard_deviation_db: NDArray[np.float64]
+    standard_uncertainty_db: NDArray[np.float64]
+    expanded_uncertainty_db: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     n_subjects: int
 
     def plot(
@@ -475,7 +475,7 @@ def reat_expanded_uncertainty(
     *,
     protector: Protector,
     between_laboratories: bool = False,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The typical :math:`U_{95}` of a mean attenuation, band by band (A.2, B.2).
 
     Reads the budget of Table A.2 (within one laboratory) or Table B.2
@@ -578,14 +578,14 @@ class AttenuationDifferenceResult(OwnsArrays):
     :ivar frequencies: The centre frequencies of the test signals, in hertz.
     """
 
-    first_mean_attenuation: np.ndarray
-    second_mean_attenuation: np.ndarray
-    first_expanded_uncertainty_db: np.ndarray
-    second_expanded_uncertainty_db: np.ndarray
-    frequencies: np.ndarray
+    first_mean_attenuation: NDArray[np.float64]
+    second_mean_attenuation: NDArray[np.float64]
+    first_expanded_uncertainty_db: NDArray[np.float64]
+    second_expanded_uncertainty_db: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
 
     @property
-    def difference(self) -> np.ndarray:
+    def difference(self) -> NDArray[np.float64]:
         """:math:`|m_1 - m_2|` per band, in dB."""
         return np.asarray(
             np.abs(self.first_mean_attenuation - self.second_mean_attenuation),
@@ -593,7 +593,7 @@ class AttenuationDifferenceResult(OwnsArrays):
         )
 
     @property
-    def significance_limit_db(self) -> np.ndarray:
+    def significance_limit_db(self) -> NDArray[np.float64]:
         r""":math:`\sqrt{U_{95,1}^2 + U_{95,2}^2}` per band, in dB.
 
         A difference larger than this is significant at the 5 % level.
@@ -607,7 +607,7 @@ class AttenuationDifferenceResult(OwnsArrays):
         )
 
     @property
-    def significant(self) -> np.ndarray:
+    def significant(self) -> NDArray[np.bool_]:
         """Whether each band's difference exceeds its criterion, judged settled."""
         return np.asarray(
             settled(self.difference - self.significance_limit_db) > 0.0, dtype=bool
@@ -623,7 +623,7 @@ class AttenuationDifferenceResult(OwnsArrays):
         return bool(np.any(self.significant))
 
     @property
-    def significant_frequencies(self) -> np.ndarray:
+    def significant_frequencies(self) -> NDArray[np.float64]:
         """The test signals at which the two measurements differ, in hertz.
 
         :return: The centre frequencies of the significant bands.
@@ -660,7 +660,9 @@ class AttenuationDifferenceResult(OwnsArrays):
         return plot_attenuation_difference(self, ax=ax, language=language, **kwargs)
 
 
-def _band_values(values: NumericArrayLike, count: int | None, name: str) -> np.ndarray:
+def _band_values(
+    values: NumericArrayLike, count: int | None, name: str
+) -> NDArray[np.float64]:
     """A one-dimensional array of finite decibel values, one per band.
 
     :param values: The values, or a scalar to broadcast over ``count`` bands.
@@ -687,7 +689,7 @@ def _mean_and_uncertainty(
     measurement: NumericArrayLike | RealEarAttenuationResult,
     uncertainty: NumericArrayLike | None,
     which: str,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64] | None]:
     """The mean, the expanded uncertainty and the band axis of one measurement.
 
     :param measurement: A result, or the mean attenuations as an array.
@@ -854,10 +856,10 @@ class REATSoundFieldCheck(OwnsArrays):
     verdict of a) on its own.
     """
 
-    frequencies: np.ndarray
-    position_deviation_db: np.ndarray
-    left_right_difference: np.ndarray
-    rotation_variation_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    position_deviation_db: NDArray[np.float64]
+    left_right_difference: NDArray[np.float64]
+    rotation_variation_db: NDArray[np.float64]
     free_field_rejection: float | None
     positions: tuple[SoundFieldPosition, ...] = _POSITIONS
 
@@ -882,7 +884,7 @@ class REATSoundFieldCheck(OwnsArrays):
         return allowable_field_variation(self.free_field_rejection)
 
     @property
-    def uniform(self) -> np.ndarray:
+    def uniform(self) -> NDArray[np.bool_]:
         """Per band, whether all six positions stay within ±2,5 dB (4.2.2 a)).
 
         :return: One boolean per band.
@@ -893,7 +895,7 @@ class REATSoundFieldCheck(OwnsArrays):
         )
 
     @property
-    def balanced(self) -> np.ndarray:
+    def balanced(self) -> NDArray[np.bool_]:
         """Per band, whether right and left differ by 3 dB at most (4.2.2 a)).
 
         :return: One boolean per band.
@@ -901,7 +903,7 @@ class REATSoundFieldCheck(OwnsArrays):
         return settled(self.left_right_difference) <= _LEFT_RIGHT_TOLERANCE_DB
 
     @property
-    def diffuse(self) -> np.ndarray:
+    def diffuse(self) -> NDArray[np.bool_]:
         """Per band, whether the rotation stays within Table 1 (4.2.2 b)).
 
         Bands the clause does not reach, below 500 Hz, count as meeting it.

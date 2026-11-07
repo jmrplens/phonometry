@@ -841,12 +841,17 @@ def _meet_after_gap(
     that meet that way win, so words and numbers of annotation after them
     stay annotation. Failing that, the ellipsis stands for what comes before
     the first value that meets the next one, as at the head of a quoted
-    message.
+    message. A second ellipsis before any value leaves out the same stretch,
+    words between the two or not, so the values after it are the ones that
+    meet: ``[1 ... ... 9]`` and ``1 ... one line a band ... 9`` still end on
+    the 9.
     """
     after: list[int] = []
     for n in range(k, len(said)):
         if said[n].kind == "gap":
-            break
+            if after:
+                break
+            continue
         if said[n].kind == "value":
             after.append(n)
     if not after:
@@ -872,10 +877,10 @@ def _meet_after_gap(
     return None
 
 
-def _promised_after(said: list[_Part], last: int) -> str | None:
-    """The first value the comment writes after ``said[last]``, the last value
-    the print bore out (``-1`` for none), when that value is still part of
-    what the comment promises the print writes, or ``None``.
+def _promised_after(said: list[_Part], last: int) -> int | None:
+    """Where the comment writes the first value after ``said[last]``, the last
+    value the print bore out (``-1`` for none), when that value is still part
+    of what the comment promises the print writes, or ``None``.
 
     It is when it stands inside the innermost bracket that was open at
     ``said[last]`` and has not closed since, as the print that writes
@@ -886,6 +891,12 @@ def _promised_after(said: list[_Part], last: int) -> str | None:
     a word, outside that bracket, is annotation, and so is one a word follows,
     the ``0.458`` of ``0.358  (0.458 with normal hearing)`` or the ``1`` of a
     unit ``1/s``, unless it is the value the comment opens on.
+
+    An ellipsis before that value says the print goes on to the values after
+    it, so the first of them is promised wherever it stands, as it is when the
+    print does go on (:func:`_meet_after_gap`): the print that writes
+    ``[99.8]`` has lost the ``87.7`` of ``[99.8 ... 87.7]``. An ellipsis with
+    no value after it, ``[0 1 2 ...]``, promises none.
     """
     depth = sum(_open_brackets(part.before) for part in said[: last + 1])
     floor = depth
@@ -898,11 +909,13 @@ def _promised_after(said: list[_Part], last: int) -> str | None:
             inside = inside and depth >= floor
         adjacent = adjacent and re.fullmatch(r"[\s,(\[{]*", part.before) is not None
         if part.kind == "gap":
-            return None
+            return next(
+                (n for n in range(at + 1, len(said)) if said[n].kind == "value"), None
+            )
         if part.kind == "value":
             followed = at + 1 < len(said) and said[at + 1].kind == "word"
             opens = adjacent and (last < 0 or not followed)
-            return part.text if inside or opens else None
+            return at if inside or opens else None
         adjacent = False
     return None
 
@@ -974,9 +987,12 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
     promised = _promised_after(said, last)
     if promised is None:
         return ""
+    value = said[promised].text
+    if any(part.kind == "gap" for part in said[last + 1 : promised]):
+        return f"the comment's {value} after its ellipsis is never printed"
     if last < 0:
-        return f"the comment says {promised} where the print wrote no value"
-    return f"the print stops before the comment's {promised}"
+        return f"the comment says {value} where the print wrote no value"
+    return f"the print stops before the comment's {value}"
 
 
 def _lines_of(parts: list[_Part]) -> list[list[_Part]]:

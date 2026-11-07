@@ -347,6 +347,44 @@ def test_an_ellipsis_stands_for_the_values_it_leaves_out() -> None:
     assert "never printed" in _disagreement("[0, 1, ..., 8] dB", "[0 1 2 3 4 5 6 7 9]")
 
 
+def _lost(value: str) -> str:
+    return f"the comment's {value} after its ellipsis is never printed"
+
+
+def test_the_values_after_an_ellipsis_are_promised_where_the_print_stops() -> None:
+    """An ellipsis says the print goes on to the values after it, so a print
+    that stops before the ellipsis has lost them, as one that goes on and
+    never writes them has.
+    """
+    said = "[99.8 ... 87.7] dB, three thirds summed per octave"
+    assert _disagreement(said, "[99.8]") == _lost("87.7")
+    assert _disagreement(said, "[99.8 95.0]") == _lost("87.7")
+    assert _disagreement(said, "[99.8 87.7]") == ""
+    assert _disagreement(said, "[99.8 95.0 87.7]") == ""
+    loop = "63 Hz: 45.2 ... 8000 Hz: 30.1"
+    assert _disagreement(loop, "63 Hz: 45.2") == _lost("8000")
+    assert _disagreement("45.2 dB ... 30.1 dB", "45.2") == _lost("30.1")
+    assert _disagreement("[1 ... 9 ... 20]", "[1 5 9]") == _lost("20")
+    # An ellipsis with no value after it promises none.
+    assert _disagreement("[99.8 ...] dB", "[99.8]") == ""
+    assert _disagreement("[0 1 2 ...]", "[0 1 2]") == ""
+
+
+def test_an_ellipsis_goes_on_over_a_second_one_to_the_values_after_both() -> None:
+    """Two ellipses with only words between them leave out one stretch, and
+    the values after the second are still the last ones of the output.
+    """
+    assert _disagreement("[1 ... ... 9]", "[1 2 3]") == _lost("9")
+    assert _disagreement("[1 ... ... 9]", "[1 2 9]") == ""
+    said = "1 ... one line a band ... 9"
+    assert _disagreement(said, ["1", "2", "3"]) == _lost("9")
+    assert _disagreement(said, ["1", "2", "9"]) == ""
+    arrays = "[0.1 0.2 ...] ... [0.9]"
+    assert _disagreement(arrays, "[0.1 0.2 0.3]") == _lost("0.9")
+    assert _disagreement(arrays, "[0.1 0.2]") == _lost("0.9")
+    assert _disagreement(arrays, ["[0.1 0.2 0.3]", "[0.5 0.9]"]) == ""
+
+
 def test_a_number_holds_at_the_decimals_it_is_written_to() -> None:
     assert _disagreement("0.67", "0.6666666666666666") == ""
     assert _disagreement("126", "125.89254117941672") == ""

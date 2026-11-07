@@ -2343,6 +2343,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with the reason, and an entry the build stops printing fails too. Rule F69
   of the contributor guide states it.
 
+- **The site's audits reach the preview in a stock `node:24` container.**
+  `site/scripts/with-preview.mjs`, which runs pa11y, `check:sidebar` and
+  `check:visual` against `astro preview`, started the preview with no host and
+  polled `http://localhost`. In that container Vite listens on `::1` first
+  while Node's fetch tries `127.0.0.1` alone, so the poll was refused for two
+  minutes and no audit ran. The preview listens on `127.0.0.1` now and is
+  polled there, and the check for a server already on the port, there so that
+  an audit never reads a stale dev server in place of the build, asks both
+  loopbacks: a server on `::1` alone went unseen before. `pnpm run lighthouse`
+  starts its preview the same way and refuses an occupied port too.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

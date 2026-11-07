@@ -84,7 +84,7 @@ _SURFACE_CHOICE_MSG = "'surface' must be 'sphere' or 'hemisphere'."
 # area (S/40). z points up from the horizontal plane z = 0.
 
 #: Table D.1 - sphere, anechoic room (Annex D). 40 positions.
-_TABLE_D1: np.ndarray = np.array(
+_TABLE_D1: NDArray[np.float64] = np.array(
     [
         [-0.999, 0.0, 0.050],
         [0.494, -0.856, 0.150],
@@ -130,7 +130,7 @@ _TABLE_D1: np.ndarray = np.array(
 )
 #: Table E.1 - hemisphere, general case (Annex E). 40 positions. z/r at pos
 #: 7/27 is 0.320 (not 0.325), verified against the source image.
-_TABLE_E1: np.ndarray = np.array(
+_TABLE_E1: NDArray[np.float64] = np.array(
     [
         [-1.000, 0.000, 0.025],
         [0.499, -0.864, 0.075],
@@ -176,7 +176,7 @@ _TABLE_E1: np.ndarray = np.array(
 )
 #: Table E.2 - hemisphere, broadband omnidirectional source (Annex E). 40
 #: positions. Pos 19 x/r is -0.380 (a normal negative), verified.
-_TABLE_E2: np.ndarray = np.array(
+_TABLE_E2: NDArray[np.float64] = np.array(
     [
         [-1.000, 0.000, 0.025],
         [0.499, -0.864, 0.075],
@@ -262,7 +262,7 @@ class MeteorologicalCorrection(OwnsArrays):
 
     c1: float
     c2: float
-    c3: float | np.ndarray
+    c3: float | NDArray[np.float64]
 
 
 @dataclass(frozen=True)
@@ -290,21 +290,21 @@ class PrecisionSoundPowerResult(OwnsArrays):
     :ivar surface: One of ``"sphere"`` or ``"hemisphere"``.
     """
 
-    frequencies: np.ndarray | None
-    sound_power_level: np.ndarray
-    surface_pressure_level: np.ndarray
-    mean_pressure_level: np.ndarray
-    background_correction: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    sound_power_level: NDArray[np.float64]
+    surface_pressure_level: NDArray[np.float64]
+    mean_pressure_level: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
     c1: float
     c2: float
-    c3: np.ndarray
-    directivity_index: np.ndarray
-    non_uniformity_index: np.ndarray
+    c3: NDArray[np.float64]
+    directivity_index: NDArray[np.float64]
+    non_uniformity_index: NDArray[np.float64]
     surface_area: float
     surface: PrecisionSurface
     sound_power_level_a: float
     uncertainty: float
-    uncertainty_bands: np.ndarray
+    uncertainty_bands: NDArray[np.float64]
     coverage_factor: float
 
     def __post_init__(self) -> None:
@@ -433,7 +433,9 @@ class PrecisionSoundPowerResult(OwnsArrays):
         )
 
 
-def _precision_table(surface: PrecisionSurface, array: PrecisionArray) -> np.ndarray:
+def _precision_table(
+    surface: PrecisionSurface, array: PrecisionArray
+) -> NDArray[np.float64]:
     """Select the normative coordinate table (Annex D/E) and self-check it."""
     if surface == "sphere":
         table = _TABLE_D1
@@ -457,7 +459,7 @@ def precision_positions(
     radius: float,
     array: PrecisionArray = "general",
     n_positions: int = 40,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Normative ISO 3745:2012 microphone coordinates, scaled by ``radius``.
 
     For a ``'sphere'`` (anechoic room) the coordinates come from Annex D
@@ -490,7 +492,7 @@ def precision_positions(
     return np.asarray(table[:n_positions] * radius, dtype=np.float64)
 
 
-def _k1_lower_criterion(frequencies: np.ndarray) -> np.ndarray:
+def _k1_lower_criterion(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """Frequency-dependent lower K1 criterion, in dB (clause 9.4.2)."""
     freqs = real_array(frequencies, "frequencies")
     return np.where(
@@ -505,7 +507,7 @@ def precision_background_correction(
     background_levels: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Per-position background correction ``K1i`` (ISO 3745:2012 Eq. 11).
 
     :math:`K_{1i} = -10 \log_{10}\left( 1 - 10^{-0.1 \Delta L_{pi}} \right)` with
@@ -619,7 +621,7 @@ def meteorological_corrections(
     c1 = float(p_term + 5.0 * np.log10(theta_k / _THETA0_K))
     c2 = float(p_term + 15.0 * np.log10(theta_k / _THETA1_K))
     if air_absorption_db_per_m is None:
-        c3: float | np.ndarray = 0.0
+        c3: float | NDArray[np.float64] = 0.0
     else:
         a0 = real_array(air_absorption_db_per_m, "air_absorption_db_per_m") * radius
         if np.any(a0 < 0.0):
@@ -706,10 +708,10 @@ def precision_uncertainty(
 
 
 def _precision_k1(
-    levels: np.ndarray,
+    levels: NDArray[np.float64],
     background_levels: NumericArrayLike | None,
-    freqs: np.ndarray | None,
-) -> np.ndarray:
+    freqs: NDArray[np.float64] | None,
+) -> NDArray[np.float64]:
     """Per-position background correction K1i (Eq. 11), zero without background.
 
     A single background spectrum is broadcast over the microphone positions;
@@ -737,8 +739,8 @@ def _precision_k1(
 
 
 def _precision_surface_level(
-    corrected: np.ndarray, areas: NumericArrayLike | None
-) -> np.ndarray:
+    corrected: NDArray[np.float64], areas: NumericArrayLike | None
+) -> NDArray[np.float64]:
     """Surface time-averaged level Lp_bar: equal-area Eq. 12 or area-weighted
     Eq. 13 when partial areas ``Si`` are supplied.
     """
@@ -757,7 +759,9 @@ def _precision_surface_level(
     )
 
 
-def _precision_a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> float:
+def _precision_a_weighted_total(
+    lw: NDArray[np.float64], freqs: NDArray[np.float64] | None
+) -> float:
     """A-weighted total LWA (Eq. C.1), NaN where it is not defined."""
     if freqs is None:
         return real_number(lw[0], "lw") if lw.shape[0] == 1 else float("nan")
@@ -773,12 +777,12 @@ def _precision_a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> flo
 
 
 def _precision_uncertainty_bands(
-    freqs: np.ndarray | None,
+    freqs: NDArray[np.float64] | None,
     n_bands: int,
     room: PrecisionRoom,
     sigma_omc_db: float,
     coverage_factor: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Per-band expanded uncertainty (Eq. 24/25), NaN without band centres."""
     if freqs is None:
         return np.full(n_bands, np.nan, dtype=np.float64)

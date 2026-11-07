@@ -11,8 +11,8 @@ the acoustic solver is one ``scripts/figures/registry.py`` names
 ``anim_fdtd_*``, one of the elastic solver ``anim_elastic_*``, and a clip is
 on a guide when a page of the overview's language outside the simulation
 section embeds it, in a ``Video`` component the page renders: one quoted in
-a fence, a code span or a comment, or written in the frontmatter, embeds
-nothing. A clip added, dropped or moved leaves the overview failing until it
+a fence, a code span, a comment or an expression, written behind a
+backslash, or written in the frontmatter, embeds nothing. A clip added, dropped or moved leaves the overview failing until it
 says the new count and tables the guides that carry the clips now, and a
 Spanish page that embeds other clips than its English twin fails on its own.
 Every row of the table is read, and one whose first cell does not link a
@@ -285,8 +285,9 @@ def test_the_overview_tables_each_guide_that_carries_an_acoustic_clip_once(
 
 #: A page that names a clip in each place a page can write one: in its
 #: frontmatter, in a fence of backticks and in one of tildes, in a code span,
-#: in a comment, and in a ``Video`` component of its own, which is the one it
-#: embeds.
+#: in a comment, behind a backslash, in a string of an expression, and in a
+#: ``Video`` component of its own, which is what it embeds, the last ones with
+#: two dollar signs and two backticks among their attributes.
 _NAMED_EVERYWHERE = """---
 description: 'Embeds <Video name="anim_fdtd_frontmatter" /> on the page'
 ---
@@ -307,11 +308,45 @@ Embed one with `<Video name="anim_fdtd_spanned" />` in the guide.
   name="anim_fdtd_embedded"
   width={2400}
 />
+
+Write \\<Video name="anim_fdtd_escaped" /> to embed one.
+
+<code>{'<Video name="anim_fdtd_string" />'}</code>
+
+<Video alt="from $20" name="anim_fdtd_priced" caption="to $30" />
+
+<Video alt="a `b" name="anim_fdtd_ticked" caption="c` d" />
 """
 
 
 def test_a_clip_named_outside_a_component_the_page_renders_is_not_embedded() -> None:
-    assert _embedded_in(_NAMED_EVERYWHERE) == ["anim_fdtd_embedded"]
+    assert _embedded_in(_NAMED_EVERYWHERE) == [
+        "anim_fdtd_embedded",
+        "anim_fdtd_priced",
+        "anim_fdtd_ticked",
+    ]
+
+
+@pytest.mark.parametrize(
+    "opening",
+    [
+        pytest.param("\n", id="a blank line"),
+        pytest.param("\n  \n", id="blank lines"),
+        pytest.param("\ufeff", id="a byte order mark"),
+    ],
+)
+def test_a_clip_named_in_a_frontmatter_behind_its_opening_is_not_embedded(
+    opening: str,
+) -> None:
+    """Astro reads a frontmatter after a byte order mark or blank lines too."""
+    page = (
+        f"{opening}---\n"
+        "description: '<Video name=\"anim_fdtd_frontmatter\" />'\n"
+        "---\n"
+        "\n"
+        '<Video name="anim_fdtd_embedded" />\n'
+    )
+    assert _embedded_in(page) == ["anim_fdtd_embedded"]
 
 
 #: An English table of guides, with the rows each check is for.

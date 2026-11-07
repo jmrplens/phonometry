@@ -22,6 +22,7 @@
  */
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
+import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { basePath } from '../data/site.mjs';
 import { catalogueSlugs } from '../data/topics.mjs';
 import { catalogues } from '../generated/catalogues.mjs';
@@ -42,7 +43,9 @@ export interface CataloguePage {
 	rows: number;
 }
 
-/** The catalogues a page renders, read off its source in order. */
+/** The catalogues a page renders, read off its source in order: read as the
+    site renders it (`pageMarkup`), so a tag quoted in a fence, a code span, a
+    comment or an expression, or written behind a backslash, renders none. */
 const KEYS = /<Catalogues\s+catalogue="(\w+)"/g;
 
 /** The pages of each language, read once per build: the finder, the overview's
@@ -95,7 +98,7 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 						'Every catalogue has a page in both languages.',
 				);
 			}
-			const keys = [...(entry.body ?? '').matchAll(KEYS)].map(([, key]) => key);
+			const keys = [...pageMarkup(entry.body ?? '').matchAll(KEYS)].map(([, key]) => key);
 			const unknown = keys.filter((key) => !(key in catalogues));
 			if (keys.length === 0 || unknown.length > 0) {
 				throw new Error(

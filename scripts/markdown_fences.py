@@ -140,14 +140,16 @@ _HTML_LONE_TAG = re.compile(
     r"|</[A-Za-z][A-Za-z0-9-]*[ \t]*>)[ \t]*$"
 )
 #: A tag of an ``.mdx`` page, over as many lines as it takes: a quoted value and
-#: an expression among its attributes may hold a ``>``.
-_MDX_TAG = re.compile(
+#: an expression among its attributes may hold a ``>``. ``MDX_TAG`` of
+#: ``site/src/lib/markdown-fences.mjs``; :func:`markdown_spans.page_markup` reads
+#: the tags of a page by it too.
+MDX_TAG = re.compile(
     r"</?(?:[A-Za-z_$][\w.:$-]*"
     r"(?:[^\"'>{]|\"[^\"]*\"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\})*)?>"
 )
 #: An expression of an ``.mdx`` page, over as many lines as it takes: a comment,
-#: or braces balanced three levels down.
-_MDX_EXPRESSION = re.compile(
+#: or braces balanced three levels down (``MDX_EXPRESSION`` of the site's reader).
+MDX_EXPRESSION = re.compile(
     r"\{\s*/\*.*?\*/\s*\}|\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", re.DOTALL
 )
 #: The roles of a line that is code.
@@ -539,7 +541,7 @@ class _Walk:
         text = "\n".join([body, *following])
         at = 0
         while True:
-            reader = _MDX_TAG if text[at] == "<" else _MDX_EXPRESSION
+            reader = MDX_TAG if text[at] == "<" else MDX_EXPRESSION
             found = reader.match(text, at)
             if found is None:
                 return None

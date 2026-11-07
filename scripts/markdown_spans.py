@@ -27,7 +27,14 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from markdown_fences import NOT_INLINE_ROLES, cell_spans, page_lines, quotation_marks
+from markdown_fences import (
+    MDX_EXPRESSION,
+    MDX_TAG,
+    NOT_INLINE_ROLES,
+    cell_spans,
+    page_lines,
+    quotation_marks,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -329,47 +336,185 @@ def blank_inline_spans_by_block(
     )
 
 
-def _frontmatter_lines(lines: Sequence[str]) -> int:
-    """How many lines of a page its frontmatter takes, both fences in, 0 with none.
+#: JavaScript's ``\s``, which Astro's reading of a frontmatter is written with:
+#: Python's own takes other characters and leaves the byte order mark out.
+_JS_SPACE = (
+    r"[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]"
+)
+#: A page's frontmatter as Astro reads it (``frontmatterRE`` of
+#: ``@astrojs/internal-helpers``): fenced by ``---`` or by ``+++``, at the start
+#: of the page behind a byte order mark or after blank lines, its closing fence
+#: opening a line. One that never closes is no frontmatter.
+_FRONTMATTER = re.compile(
+    rf"(?:\A\ufeff?|\A{_JS_SPACE}*\n)(?:---|\+\+\+)(.*?\n)(?:---|\+\+\+)", re.DOTALL
+)
+#: A backslash and the ASCII punctuation character it escapes (CommonMark
+#: 0.31.2, 2.4): the page shows the character, and it opens nothing.
+_ESCAPE = re.compile(r"\\[!-/:-@\[-`{-~]")
+#: A tag of raw HTML written in the prose of a ``.md`` page, open or closing,
+#: and an autolink (CommonMark 0.31.2, 6.6 and 6.5), each taken whole.
+_HTML_TAG = re.compile(
+    r"<[A-Za-z][A-Za-z0-9-]*(?:[ \t\n]+[A-Za-z_:][\w.:-]*"
+    r"(?:[ \t\n]*=[ \t\n]*(?:[^ \t\n\"'=<>`]+|'[^']*'|\"[^\"]*\"))?)*[ \t\n]*/?>"
+    r"|</[A-Za-z][A-Za-z0-9-]*[ \t\n]*>"
+    r"|<[A-Za-z][A-Za-z0-9+.-]{1,31}:[^ \t\n<>]*>"
+)
+#: What may open where a backslash, a tag, an expression or a comment does.
+_OPENER = re.compile(r"[\\<{]")
 
-    Its fences stand at the first column, as Astro reads them, and one that
-    never closes is no frontmatter.
+
+def _blank(text: str) -> str:
+    """*text* with every character but a line end a space."""
+    return re.sub(r"[^\n]", " ", text)
+
+
+def _opened_at(
+    text: str, at: int, end: int, *, kind: str, reads: str
+) -> tuple[int, bool] | None:
+    """Where what opens at ``text[at]`` ends, and whether the page renders it as
+    markup, or ``None`` when nothing opens there.
+
+    A backslash escape and a comment end inside the piece of a block that ends at
+    *end*; a tag and an expression may run on over the lines after it. On the
+    lines of a raw HTML block only a comment opens.
     """
-    if not lines or lines[0].rstrip() != "---":
-        return 0
-    closing = next((n for n in range(1, len(lines)) if lines[n].rstrip() == "---"), 0)
-    return closing + 1 if closing else 0
+    opened = text[at]
+    comment = _COMMENTS[kind].match(text, at, end) if opened in "<{" else None
+    if comment is not None:
+        return comment.end(), False
+    if reads == "raw":
+        return None
+    if opened == "\\":
+        escape = _ESCAPE.match(text, at, end)
+        return None if escape is None else (escape.end(), False)
+    if opened == "<":
+        tag = (MDX_TAG if kind == "mdx" else _HTML_TAG).match(text, at)
+        return None if tag is None else (tag.end(), True)
+    if kind == "mdx":
+        expression = MDX_EXPRESSION.match(text, at)
+        return None if expression is None else (expression.end(), False)
+    return None
+
+
+def _first_opened(
+    text: str, at: int, end: int, *, kind: str, reads: str
+) -> tuple[int, int, bool] | None:
+    """The first escape, comment, tag or expression past *at* and before *end*:
+    where it opens and ends, and whether the page renders it as markup.
+    """
+    for opener in _OPENER.finditer(text, at, end):
+        opened = _opened_at(text, opener.start(), end, kind=kind, reads=reads)
+        if opened is not None:
+            return opener.start(), *opened
+    return None
+
+
+def _unrendered(
+    text: str, *, kind: str, walked: Sequence[PageLine]
+) -> list[tuple[int, int]]:
+    """The ``(start, end)`` of each part of *text* the page shows as text or hides.
+
+    Read left to right, each block of the page (:func:`_blocks`) and each cell
+    of a row on its own, as the site's parser reads them: at each character the
+    first of a code or maths span, a backslash escape, a comment, a tag and an
+    expression that opens there takes what follows. A tag the page renders is
+    markup, and the spans, escapes and expressions are read again from its end:
+    nothing between its quotes opens a span. Everything else that opened is in
+    the result. A tag and an expression may run on over the lines after their
+    block, as a component written over several lines does.
+
+    The spans of a piece are read once and taken in turn, and are read again only
+    past what else opened, which may have held a run of theirs; the next opener is
+    looked for again only once a span has held it.
+
+    :param text: The page, its frontmatter and its code and display maths blanked.
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :param walked: The walk of the page with its frontmatter blanked.
+    """
+    found: list[tuple[int, int]] = []
+    at = 0
+    start = 0
+    for block in _blocks(text.split("\n"), kind, kind, walked):
+        joined = "\n".join(block.lines)
+        pieces = (
+            [(start + first, start + last) for first, last in cell_spans(joined)]
+            if block.reads == "row"
+            else [(start, start + len(joined))]
+        )
+        start += len(joined) + 1
+        if block.reads == "code":
+            continue
+        markers = "" if block.reads == "raw" else "`$"
+        for first, last in pieces:
+            at = max(at, first)
+            spans: list[tuple[int, int]] | None = None
+            opened: tuple[int, int, bool] | None = None
+            looked = False
+            while at < last:
+                if spans is None:
+                    spans = [
+                        (at + a, at + b)
+                        for a, b in inline_spans(text[at:last], markers)
+                    ]
+                    spans.reverse()
+                if not looked or (opened is not None and opened[0] < at):
+                    opened = _first_opened(text, at, last, kind=kind, reads=block.reads)
+                    looked = True
+                span = spans[-1] if spans else None
+                if span is not None and (opened is None or span[0] < opened[0]):
+                    found.append(spans.pop())
+                    at = span[1]
+                elif opened is not None:
+                    if not opened[2]:
+                        found.append(opened[:2])
+                    at = opened[1]
+                    spans, looked = None, False
+                else:
+                    break
+    return found
 
 
 def page_markup(text: str, *, kind: str = "mdx") -> str:
     """*text* with every part of the page that renders no tag blanked.
 
-    A component a page renders, a ``<Video>`` or a ``<ReportPreview>``, is one
+    A component a page renders, a ``<Video>`` or a ``<ReportPreview>``, is a tag
     written outside its frontmatter, its code, fenced or indented, its display
-    maths, its inline code and maths spans and its comments. Quoted in any of
-    those it is text the page shows or hides, and a reader that looks for a
-    component in the page as written counts it as one the page embeds. Each of
-    them is blanked here as the site reads it: the frontmatter by its fences,
-    the blocks by one walk of the page (:func:`markdown_fences.page_lines`)
-    and the spans and comments by block (:func:`blank_inline_spans_by_block`).
-    Every character blanked but a line end becomes a space, so a tag found in
-    the result stands at the line and the column where the page writes it.
+    maths, its inline code and maths spans, its comments and its expressions,
+    and not behind a backslash. Written in any of those it is text the page
+    shows or hides, and a reader that looks for a component in the page as
+    written counts it as one the page embeds. Each of them is blanked here as
+    the site reads it: the frontmatter as Astro finds it, after a byte order
+    mark or blank lines too, the blocks by one walk of the page
+    (:func:`markdown_fences.page_lines`), and the rest left to right over each
+    block, whichever opens first taking what follows: a span written before a
+    tag holds it, and a tag holds what its attributes write, a ``$`` or a
+    backtick among them. On a ``.md`` page a tag is one of raw HTML, and there
+    is no expression. Every character blanked but a line end becomes a space,
+    so a tag found in the result stands at the line and the column where the
+    page writes it, as the page writes it.
+
+    ``pageMarkup`` of ``site/scripts/shared/markdown-spans.mjs`` is the same
+    reading for the site's code.
 
     :param text: The page as written, its frontmatter in.
     :param kind: ``"md"`` or ``"mdx"``, the page's kind.
     :return: The page, as many lines long as it was.
     """
-    lines = text.split("\n")
-    head = _frontmatter_lines(lines)
-    body = [" " * len(line) for line in lines[:head]] + lines[head:]
-    walked = list(page_lines(body, kind=kind))
-    prose = [
+    head = _FRONTMATTER.match(text)
+    body = text if head is None else _blank(text[: head.end()]) + text[head.end() :]
+    lines = body.split("\n")
+    walked = list(page_lines(lines, kind=kind))
+    prose = "\n".join(
         " " * len(line) if read.role in NOT_INLINE_ROLES else line
-        for line, read in zip(body, walked, strict=True)
-    ]
-    return blank_inline_spans_by_block(
-        "\n".join(prose), "`$", kind, kind=kind, walked=walked
+        for line, read in zip(lines, walked, strict=True)
     )
+    pieces: list[str] = []
+    done = 0
+    for start, end in _unrendered(prose, kind=kind, walked=walked):
+        pieces.extend((prose[done:start], _blank(prose[start:end])))
+        done = end
+    pieces.append(prose[done:])
+    return "".join(pieces)
 
 
 def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[str]:

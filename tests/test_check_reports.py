@@ -150,8 +150,10 @@ def test_unreadable_fiche_fails() -> None:
 
 def test_a_fiche_named_outside_a_component_the_page_renders_is_not_shown() -> None:
     """Only a ``ReportPreview`` the page renders shows a fiche: one quoted in a
-    fence, a code span or a comment, or written in the frontmatter, shows none,
-    and a fiche named only there is one no reader sees.
+    fence, a code span, a comment or an expression, written behind a backslash,
+    or written in the frontmatter, shows none, and a fiche named only there is
+    one no reader sees. Two dollar signs among the attributes of one the page
+    renders open no maths inside it.
     """
     page = (
         "---\n"
@@ -169,5 +171,26 @@ def test_a_fiche_named_outside_a_component_the_page_renders_is_not_shown() -> No
         "<ReportPreview\n"
         '  name="shown"\n'
         "/>\n"
+        "\n"
+        'Write \\<ReportPreview name="escaped" /> here.\n'
+        "\n"
+        "<code>{'<ReportPreview name=\"string\" />'}</code>\n"
+        "\n"
+        '<ReportPreview title="Costs $5" name="priced" description="and $6" />\n'
+    )
+    assert cr.shown_fiches(page) == {"shown", "priced"}
+
+
+@pytest.mark.parametrize("opening", ["\n", "\n  \n", "\ufeff"])
+def test_a_fiche_named_in_a_frontmatter_behind_its_opening_is_not_shown(
+    opening: str,
+) -> None:
+    """Astro reads a frontmatter after a byte order mark or blank lines too."""
+    page = (
+        f"{opening}---\n"
+        "description: '<ReportPreview name=\"frontmatter\" />'\n"
+        "---\n"
+        "\n"
+        '<ReportPreview name="shown" />\n'
     )
     assert cr.shown_fiches(page) == {"shown"}

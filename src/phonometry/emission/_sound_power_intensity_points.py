@@ -125,6 +125,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import BandFraction, NumericArrayLike
@@ -388,8 +389,8 @@ def _check_fraction(fraction: object) -> BandFraction:
 
 
 def _dynamic_capability(
-    residual_index: np.ndarray, grade: DeterminationGrade
-) -> np.ndarray:
+    residual_index: NDArray[np.float64], grade: DeterminationGrade
+) -> NDArray[np.float64]:
     r"""Per-band :math:`L_\mathrm{d} = \delta_{pI0} - K` at one grade (Eq. (10)).
 
     Goes through :func:`~phonometry.emission.dynamic_capability_index` rather
@@ -615,7 +616,7 @@ def error_factor(grade: DeterminationGrade, *, a_weighted: bool = False) -> floa
 
 def normal_intensity_from_levels(
     levels: NumericArrayLike, *, negative: NumericArrayLike = False
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Signed normal intensity from printed intensity levels (clause 9.1).
 
     ISO 9614-1 does not print a signed level. A normal intensity level is
@@ -728,7 +729,7 @@ class PartialPowerConcentration(RichDisplay):
 
 def _positive_partial_powers(
     normal_intensity: NumericArrayLike, areas: NumericArrayLike
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One band of signed normal intensities and its segment areas, validated."""
     i_n = np.atleast_1d(real_array(normal_intensity, "normal_intensity"))
     seg = np.atleast_1d(real_array(areas, "areas"))
@@ -966,14 +967,14 @@ class DiscretePointIntensityResult(OwnsArrays):
     :ivar grade: One of ``"precision"``, ``"engineering"`` or ``"survey"``.
     """
 
-    frequencies: np.ndarray | None
-    normal_intensity: np.ndarray
-    segment_areas_m2: np.ndarray
-    f1: np.ndarray | None
-    f2: np.ndarray | None
-    f3: np.ndarray | None
-    f4: np.ndarray | None
-    pressure_residual_index: np.ndarray | None
+    frequencies: NDArray[np.float64] | None
+    normal_intensity: NDArray[np.float64]
+    segment_areas_m2: NDArray[np.float64]
+    f1: NDArray[np.float64] | None
+    f2: NDArray[np.float64] | None
+    f3: NDArray[np.float64] | None
+    f4: NDArray[np.float64] | None
+    pressure_residual_index: NDArray[np.float64] | None
     fraction: BandFraction
     grade: DeterminationGrade
 
@@ -1069,7 +1070,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         return float(np.sum(self.segment_areas_m2))
 
     @property
-    def partial_power(self) -> np.ndarray:
+    def partial_power(self) -> NDArray[np.float64]:
         r"""The signed :math:`P_i = I_{\mathrm{n}i} S_i` per position and band (equation (11))."""
         return np.asarray(
             self.normal_intensity * np.asarray(self.segment_areas_m2)[:, None],
@@ -1077,12 +1078,12 @@ class DiscretePointIntensityResult(OwnsArrays):
         )
 
     @property
-    def sound_power(self) -> np.ndarray:
+    def sound_power(self) -> NDArray[np.float64]:
         """The signed band total of the partial powers (the sum of equation (12))."""
         return np.asarray(np.sum(self.partial_power, axis=0), dtype=np.float64)
 
     @property
-    def _applicable(self) -> np.ndarray:
+    def _applicable(self) -> NDArray[np.bool_]:
         # ``~(P > 0)`` and not ``P <= 0``: a NaN total answers every comparison
         # False. The sign is that of the net power as a settled share of the
         # gross, so partial powers that cancel in decimal leave a band with no
@@ -1090,12 +1091,12 @@ class DiscretePointIntensityResult(OwnsArrays):
         return np.asarray(settled_net_share(self.partial_power, axis=0) > 0.0)
 
     @property
-    def not_applicable_band(self) -> np.ndarray:
+    def not_applicable_band(self) -> NDArray[np.bool_]:
         """Per band, whether the total sound power is not positive (clause 9.2)."""
         return np.asarray(~self._applicable, dtype=bool)
 
     @property
-    def sound_power_level(self) -> np.ndarray:
+    def sound_power_level(self) -> NDArray[np.float64]:
         """The band sound power level (equation (12)), ``NaN`` outside the method."""
         with np.errstate(divide="ignore", invalid="ignore"):
             level = np.where(
@@ -1107,14 +1108,14 @@ class DiscretePointIntensityResult(OwnsArrays):
         return np.asarray(level, dtype=np.float64)
 
     @property
-    def dynamic_capability_index(self) -> np.ndarray | None:
+    def dynamic_capability_index(self) -> NDArray[np.float64] | None:
         r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade (Eq. (10))."""
         if self.pressure_residual_index is None:
             return None
         return _dynamic_capability(self.pressure_residual_index, self.grade)
 
     @property
-    def criterion_1(self) -> np.ndarray | None:
+    def criterion_1(self) -> NDArray[np.bool_] | None:
         r"""Criterion 1, :math:`L_\mathrm{d} > F_2` (equation (B.1)), per band."""
         ld = self.dynamic_capability_index
         if ld is None or self.f2 is None:
@@ -1122,28 +1123,30 @@ class DiscretePointIntensityResult(OwnsArrays):
         return np.asarray(ld > self.f2, dtype=bool)
 
     @property
-    def negative_power_within_limit(self) -> np.ndarray | None:
+    def negative_power_within_limit(self) -> NDArray[np.bool_] | None:
         r"""Figure B.1's unnumbered :math:`F_3 - F_2 \le 3` dB gate, per band."""
         if self.f2 is None or self.f3 is None:
             return None
         return np.asarray((self.f3 - self.f2) <= _NEGATIVE_POWER_LIMIT, dtype=bool)
 
     @property
-    def criterion_2(self) -> np.ndarray | None:
+    def criterion_2(self) -> NDArray[np.bool_] | None:
         r"""Criterion 2, :math:`N > C F_4^2` (equation (B.2)), per band."""
         if self.f4 is None:
             return None
         return self._criterion_2[0]
 
     @property
-    def min_positions(self) -> np.ndarray | None:
+    def min_positions(self) -> NDArray[np.float64] | None:
         r"""The :math:`C F_4^2` that criterion 2 compares :attr:`n_positions` against."""
         if self.f4 is None:
             return None
         return self._criterion_2[1]
 
     @property
-    def _criterion_2(self) -> tuple[np.ndarray | None, np.ndarray | None]:
+    def _criterion_2(
+        self,
+    ) -> tuple[NDArray[np.bool_] | None, NDArray[np.float64] | None]:
         f4 = np.asarray(self.f4, dtype=np.float64)
         return _criterion_2(
             f4,
@@ -1154,7 +1157,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         )
 
     @property
-    def achieved_grade(self) -> np.ndarray | None:
+    def achieved_grade(self) -> NDArray[np.object_] | None:
         """The grade each band reaches over the gates of Figure B.1.
 
         One of ``'precision'``, ``'engineering'`` and ``'none'`` per band, or
@@ -1175,7 +1178,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         )
 
     @property
-    def confidence_interval(self) -> np.ndarray | None:
+    def confidence_interval(self) -> NDArray[np.float64] | None:
         r"""The 95 % interval :math:`10 \lg (1 \pm 2 F_4 / \sqrt{N})` (equation (B.3)), per band."""
         if self.f4 is None:
             return None
@@ -1184,14 +1187,14 @@ class DiscretePointIntensityResult(OwnsArrays):
         )
 
     @property
-    def expanded_uncertainty(self) -> np.ndarray | None:
+    def expanded_uncertainty(self) -> NDArray[np.float64] | None:
         """Table 2 footnote 1's 2s per band, at the grade each band achieved."""
         return _expanded_uncertainty(
             self.achieved_grade, self.frequencies, _check_fraction(self.fraction)
         )
 
     @property
-    def a_weighting_omitted_bands(self) -> np.ndarray | None:
+    def a_weighting_omitted_bands(self) -> NDArray[np.bool_] | None:
         """The bands clause 10.5 b) keeps out of the A-weighted sum, or ``None``."""
         return _a_weighting_omission(
             self.criterion_1, self.criterion_2, self._applicable
@@ -1341,7 +1344,7 @@ def _band_actions(
 
 
 def _validate_positions(
-    intensity: np.ndarray, areas: np.ndarray, *, intensity_name: str
+    intensity: NDArray[np.float64], areas: NDArray[np.float64], *, intensity_name: str
 ) -> None:
     """Reject a position set whose intensities or segment areas are unusable."""
     if areas.size == 0:
@@ -1370,7 +1373,7 @@ def _validate_positions(
 
 def _position_grid(
     normal_intensity: NumericArrayLike, areas: NumericArrayLike
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The measured intensities as ``(positions, bands)``, with their areas.
 
     The rank of the input as supplied is what tells one band at ``N`` positions
@@ -1398,7 +1401,7 @@ def _position_grid(
 
 def _checked_position_band_grid(
     values: NumericArrayLike | None, name: str, n_positions: int, n_bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """A per-position (per-band) input on the ``(positions, bands)`` grid.
 
     ``None`` for an input that was not supplied, which is how every optional
@@ -1424,7 +1427,7 @@ def _checked_position_band_grid(
 
 def _checked_frequencies(
     frequencies: NumericArrayLike | None, n_bands: int, fraction: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """The supplied band centres, one per band and each one a tabulated band.
 
     Read here rather than at the first lookup so that a band count that does
@@ -1447,7 +1450,7 @@ def _checked_frequencies(
 
 def _checked_residual_index(
     pressure_residual_index: float | NumericArrayLike | None, n_bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     r"""The instrument's :math:`\delta_{pI0}` as one finite value per band.
 
     A scalar is the usual form and stands for the whole spectrum, so it is
@@ -1498,7 +1501,7 @@ def _sampling_warnings(n_positions: int, area: float) -> None:
         )
 
 
-def _test_conditions_met(intensity: np.ndarray) -> np.ndarray:
+def _test_conditions_met(intensity: NDArray[np.float64]) -> NDArray[np.bool_]:
     r"""A.2.3's per-band verdict on the test conditions, ``True`` where met.
 
     "If :math:`\sum I_{\mathrm{n}i}/I_0` is negative in any frequency band,
@@ -1530,10 +1533,12 @@ def _test_conditions_met(intensity: np.ndarray) -> np.ndarray:
 
 
 def _band_indicators(
-    intensity: np.ndarray,
-    pressure_levels: np.ndarray | None,
-    conditions_met: np.ndarray,
-) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None]:
+    intensity: NDArray[np.float64],
+    pressure_levels: NDArray[np.float64] | None,
+    conditions_met: NDArray[np.bool_],
+) -> tuple[
+    NDArray[np.float64] | None, NDArray[np.float64] | None, NDArray[np.float64] | None
+]:
     r"""Annex A ``F2``, ``F3`` and ``F4`` per band, ``NaN`` where undefined.
 
     All three are ``None``, and not merely ``NaN``, below the two positions the
@@ -1596,7 +1601,7 @@ def _band_indicators(
 
 def _temporal_indicator(
     temporal_intensity: NumericArrayLike | None, n_bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """F1 per band from the short-time samples of the initial test (A.2.1)."""
     require_scalar(n_bands, "n_bands")
     if temporal_intensity is None:
@@ -1615,12 +1620,12 @@ def _temporal_indicator(
 
 
 def _criterion_2(
-    f4: np.ndarray,
+    f4: NDArray[np.float64],
     n_positions: int,
-    frequencies: np.ndarray | None,
+    frequencies: NDArray[np.float64] | None,
     fraction: BandFraction,
     grade: DeterminationGrade,
-) -> tuple[np.ndarray | None, np.ndarray | None]:
+) -> tuple[NDArray[np.bool_] | None, NDArray[np.float64] | None]:
     r"""Criterion 2 per band, and the :math:`C F_4^2` it compares ``N`` against.
 
     ``None`` when the criterion has no per-band form: without ``frequencies``
@@ -1647,16 +1652,16 @@ def _criterion_2(
 
 
 def _per_band_grade(
-    applicable: np.ndarray,
-    f1: np.ndarray | None,
-    f2: np.ndarray | None,
-    f3: np.ndarray | None,
-    f4: np.ndarray,
-    residual_index: np.ndarray | None,
+    applicable: NDArray[np.bool_],
+    f1: NDArray[np.float64] | None,
+    f2: NDArray[np.float64] | None,
+    f3: NDArray[np.float64] | None,
+    f4: NDArray[np.float64],
+    residual_index: NDArray[np.float64] | None,
     n_positions: int,
-    frequencies: np.ndarray | None,
+    frequencies: NDArray[np.float64] | None,
     fraction: BandFraction,
-) -> np.ndarray | None:
+) -> NDArray[np.object_] | None:
     """The grade each band reaches, over the gates of Figure B.1.
 
     Grades 1 and 2 share the bias error factor K = 10 dB of Table 1, so
@@ -1688,7 +1693,9 @@ def _per_band_grade(
     return verdict
 
 
-def _confidence_interval(f4: np.ndarray, n_positions: int) -> np.ndarray:
+def _confidence_interval(
+    f4: NDArray[np.float64], n_positions: int
+) -> NDArray[np.float64]:
     r"""The 95 % interval :math:`10 \lg(1 \pm 2 F_4/\sqrt{N})` of equation (B.3).
 
     Returned as ``(bands, 2)``, the lower end first. The lower end is ``NaN``
@@ -1705,8 +1712,10 @@ def _confidence_interval(f4: np.ndarray, n_positions: int) -> np.ndarray:
 
 
 def _expanded_uncertainty(
-    achieved: np.ndarray | None, frequencies: np.ndarray | None, fraction: BandFraction
-) -> np.ndarray | None:
+    achieved: NDArray[np.object_] | None,
+    frequencies: NDArray[np.float64] | None,
+    fraction: BandFraction,
+) -> NDArray[np.float64] | None:
     r"""Table 2 footnote 1's :math:`\pm 2s` per band, at the grade *achieved*.
 
     Clause 10.6 is explicit about which grade a report states: "debe
@@ -1739,10 +1748,10 @@ def _expanded_uncertainty(
 
 
 def _a_weighting_omission(
-    criterion_1: np.ndarray | None,
-    criterion_2: np.ndarray | None,
-    applicable: np.ndarray,
-) -> np.ndarray | None:
+    criterion_1: NDArray[np.bool_] | None,
+    criterion_2: NDArray[np.bool_] | None,
+    applicable: NDArray[np.bool_],
+) -> NDArray[np.bool_] | None:
     """The bands clause 10.5 b) keeps out of the A-weighted sum.
 
     The clause omits "the bands failing criteria 1 and/or 2" and asks for the
@@ -1765,8 +1774,8 @@ def _a_weighting_omission(
 
 
 def _a_weighted_factor(
-    contributions: np.ndarray,
-    frequencies: np.ndarray,
+    contributions: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     fraction: BandFraction,
     grade: DeterminationGrade,
 ) -> float:
@@ -1802,17 +1811,17 @@ def _a_weighted_factor(
 
 
 def _a_weighted_determination(
-    intensity: np.ndarray,
-    sound_power_level: np.ndarray,
-    applicable: np.ndarray,
-    omitted: np.ndarray | None,
-    frequencies: np.ndarray | None,
+    intensity: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    applicable: NDArray[np.bool_],
+    omitted: NDArray[np.bool_] | None,
+    frequencies: NDArray[np.float64] | None,
     fraction: BandFraction,
     n_positions: int,
-    residual_index: np.ndarray | None,
-    f1: np.ndarray | None,
-    f2: np.ndarray | None,
-    f3: np.ndarray | None,
+    residual_index: NDArray[np.float64] | None,
+    f1: NDArray[np.float64] | None,
+    f2: NDArray[np.float64] | None,
+    f3: NDArray[np.float64] | None,
 ) -> tuple[float, float, str | None]:
     r"""The A-weighted level, its field non-uniformity and the grade it reaches.
 
@@ -1883,15 +1892,15 @@ def _a_weighted_determination(
 def _a_weighted_grade(
     *,
     f4_a: float,
-    contributions: np.ndarray,
-    frequencies: np.ndarray,
+    contributions: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     fraction: BandFraction,
     n_positions: int,
-    residual_index: np.ndarray | None,
-    f1: np.ndarray | None,
-    f2: np.ndarray | None,
-    f3: np.ndarray | None,
-    summed: np.ndarray,
+    residual_index: NDArray[np.float64] | None,
+    f1: NDArray[np.float64] | None,
+    f2: NDArray[np.float64] | None,
+    f3: NDArray[np.float64] | None,
+    summed: NDArray[np.bool_],
 ) -> str | None:
     """The grade the A-weighted sum reaches, best first.
 

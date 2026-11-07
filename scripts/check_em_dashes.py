@@ -93,9 +93,13 @@ the double hyphen it is. It is looked for where it is published:
   the comments and the addresses are read in one pass from left to right, as
   the site reads them, and whichever opens first wins: a URL, a link
   destination, a comment or an attribute written in a code span is code, and
-  a backtick inside one of them opens no span. A run that fills a whole
-  table cell, or a whole slash-separated item of one, is the empty-cell mark,
-  as the em dash is. A docstring and the page generated from it read the same:
+  a backtick inside one of them opens no span. An identifier field of a
+  reference in the frontmatter (``number``, ``doi``, ``isbn``, ``url``) is
+  printed by the References section as written, outside the text smartypants
+  reads, so a run with no blank on either side is the identifier's own there:
+  the report number ``NRL/FR/7176--95-9628``. A run that fills a whole table
+  cell, or a whole slash-separated item of one, is the empty-cell mark, as the
+  em dash is. A docstring and the page generated from it read the same:
   ``scripts/generate_api_docs.py`` fences a code directive's body and a
   doctest as code, and turns the math into ``$`` and ``$$`` spans.
 - **Any other string of a module, and the site's data modules**, are refused
@@ -1260,6 +1264,22 @@ _DOUBLE_HYPHEN = re.compile(r"-{2,}")
 #: (``--keep``), the separator of one (``"--"``, quotes and all) or the rule of
 #: a console banner (``--- Generating ---``).
 _SPACED_DOUBLE_HYPHEN = re.compile(r"(?<![^\s])--(?![^\s])")
+#: The fields of a frontmatter reference that hold an identifier, not text: a
+#: report's number, a DOI, an ISBN and an address. The References section
+#: prints each as it is written, outside the text smartypants reads, or not at
+#: all, so a run of hyphens inside one is the identifier's own: the Naval
+#: Research Laboratory numbers its RANDI report NRL/FR/7176--95-9628.
+REFERENCE_IDENTIFIERS = frozenset({"number", "doi", "isbn", "url"})
+#: A key of a frontmatter line at the first column, which ends the value of
+#: the key above it.
+_TOP_LEVEL_KEY = re.compile(r"^(?P<key>[A-Za-z_][\w-]*)\s*:")
+#: A key of an entry of a list and its value on one line, with the entry's
+#: dash or without it.
+_ENTRY_FIELD = re.compile(r"^ +(?:- +)?(?P<key>[A-Za-z]+):(?=[ \t]|$)")
+#: A run of hyphens with a character on either side that is neither blank nor
+#: a quote of the value: one inside an identifier, not between two words or at
+#: its edge.
+_UNSPACED_HYPHENS = re.compile(r"(?<=[^\s\"'])-{2,}(?=[^\s\"'])")
 #: A line that is only a rule, as written: a docstring's heading underline, a
 #: table's separator row, a horizontal rule or a frontmatter fence. It holds
 #: nothing but the characters a rule is drawn with, and a pipe or a run of
@@ -1476,6 +1496,33 @@ def _page_without_code_or_comments(
     )
 
 
+def _without_reference_identifiers(lines: list[str]) -> list[str]:
+    """A frontmatter's lines with the hyphens inside a reference's identifiers blanked.
+
+    A field of :data:`REFERENCE_IDENTIFIERS` in an entry of ``references``
+    is no prose (see there), so a run of hyphens with no blank on either side
+    of it is blanked there, columns kept. A spaced one is a dash written in
+    ASCII wherever it stands, and any other field of the entry, its title and
+    its note above all, is read as prose. The list ends at the next key of the
+    first column, and a key of that name anywhere else is the page's own.
+
+    :param lines: The lines of the frontmatter, its fences included, with its
+        comments blanked.
+    """
+    kept = list(lines)
+    inside = False
+    for index, line in enumerate(lines):
+        top = _TOP_LEVEL_KEY.match(line)
+        if top is not None:
+            inside = top["key"] == "references"
+            continue
+        entry = _ENTRY_FIELD.match(line) if inside else None
+        if entry is not None and entry["key"] in REFERENCE_IDENTIFIERS:
+            start = entry.end()
+            kept[index] = line[:start] + _UNSPACED_HYPHENS.sub(_blank_out, line[start:])
+    return kept
+
+
 def _without_addresses(text: str) -> str:
     """The text with its link destinations, URLs and address or style attributes blanked."""
     for address in _ADDRESSES:
@@ -1490,7 +1537,8 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     or not, so any such run is looked for, once the code, the math, the
     addresses, the comments, the address and style attributes and the rules
     are out. The frontmatter is read apart from the body, as plain text with
-    no span in it, so nothing a value of it opens reaches the body.
+    no span in it, so nothing a value of it opens reaches the body, and with
+    the identifiers of its references out (:func:`_without_reference_identifiers`).
 
     :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
@@ -1499,7 +1547,8 @@ def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     kind = "mdx" if mdx else "md"
     walked = list(page_lines(written[head:], kind=kind))
     lines = _page_without_code(written, kind=kind, walked=walked)
-    masked = lines_read_whole(lines[:head], _without_addresses) + lines_read_whole(
+    frontmatter = _without_reference_identifiers(lines[:head])
+    masked = lines_read_whole(frontmatter, _without_addresses) + lines_read_whole(
         lines[head:], lambda body: _blank_page_spans(body, kind=kind, walked=walked)
     )
     return [

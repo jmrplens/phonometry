@@ -945,8 +945,9 @@ have gone. The surface lobes go nowhere but along the surface, which is the
 whole of "a Rayleigh wave". They run a step behind the shear front and, once
 clear of the impact, are the strongest motion in the frame until the peak of
 the train reaches its sides at 136 µs; the trailing lobe, a third as strong,
-follows it out at 147 µs. The inset traces two surface probes 0.15 m apart, and
-the delay between their peaks is the measurement: the simulated
+reaches them at 147 µs, and by about 160 µs the train has left the frame. The
+inset traces two surface probes 0.15 m apart, and the delay between their peaks
+is the measurement: the simulated
 $c_\mathrm{R}$ against 2897 m/s, the root of the exact characteristic
 equation, which the tests pin to within 2 %.
 

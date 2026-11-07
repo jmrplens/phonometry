@@ -73,6 +73,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -245,7 +246,7 @@ def _alpha_for(performance: int | np.integer[Any]) -> float:
 
 def _subject_attenuations(
     attenuation: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The ``(subjects, bands)`` attenuation grid ISO 4869-1 produces.
 
     :param attenuation: One row per test subject, one column per octave band.
@@ -303,12 +304,12 @@ class AssumedProtectionResult(OwnsArrays):
     :ivar n_subjects: Number of test subjects the distribution came from.
     """
 
-    apv: np.ndarray
-    mean_attenuation: np.ndarray
-    standard_deviation: np.ndarray
+    apv: NDArray[np.float64]
+    mean_attenuation: NDArray[np.float64]
+    standard_deviation: NDArray[np.float64]
     performance: int
     alpha: float
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     n_subjects: int
 
     def plot(
@@ -386,7 +387,7 @@ def assumed_protection_value(
 
 def _octave_axis(
     frequencies: NumericArrayLike | None, count: int, owner: str
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The band axis of a result, defaulted to Formula (2)'s eight bands.
 
     :param frequencies: The caller's frequencies, or ``None``.
@@ -442,8 +443,8 @@ class ProtectedLevelResult(OwnsArrays):
     noise_reduction: float | None
     performance: int | None
     method: Literal["octave-band", "HML", "SNR"]
-    band_levels: np.ndarray | None = None
-    frequencies: np.ndarray | None = None
+    band_levels: NDArray[np.float64] | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     @property
     def reported_level(self) -> int:
@@ -551,8 +552,8 @@ def octave_band_protected_level(
 
 
 def _a_weighting_axis(
-    a_weighting: NumericArrayLike | None, freqs: np.ndarray
-) -> np.ndarray:
+    a_weighting: NumericArrayLike | None, freqs: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Frequency weighting A over the bands in play, defaulted from the table.
 
     The default is keyed to the *frequencies* and not to how many there are: a
@@ -610,10 +611,10 @@ class HMLRatingResult(OwnsArrays):
     high: float
     medium: float
     low: float
-    subject_high: np.ndarray
-    subject_medium: np.ndarray
-    subject_low: np.ndarray
-    predicted_reduction: np.ndarray
+    subject_high: NDArray[np.float64]
+    subject_medium: NDArray[np.float64]
+    subject_low: NDArray[np.float64]
+    predicted_reduction: NDArray[np.float64]
     performance: int
     alpha: float
 
@@ -713,7 +714,7 @@ def hml_rating(
     )
 
 
-def _from_125_hz(grid: np.ndarray, owner: str) -> np.ndarray:
+def _from_125_hz(grid: NDArray[np.float64], owner: str) -> NDArray[np.float64]:
     """The seven bands from 125 Hz that Formulas (15) and (22) read.
 
     :param grid: A ``(subjects, bands)`` attenuation grid.
@@ -815,7 +816,7 @@ class SNRRatingResult(OwnsArrays):
     """
 
     snr: float
-    subject_snr: np.ndarray
+    subject_snr: NDArray[np.float64]
     mean: float
     standard_deviation: float
     performance: int

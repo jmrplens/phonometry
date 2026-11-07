@@ -631,6 +631,15 @@ distributed, which is exactly where the five disagree.
   its Tables 32.1 to 32.8 the measured impact insulation class of forty-two
   floor-ceiling constructions and the improvement six elastic surface
   treatments add over a hard massive floor.
+- Arau-Puchades, H. (1999). *ABC de la acústica arquitectónica*. Grupo
+  Editorial CEAC. ISBN 84-329-2017-7.
+  The Spanish textbook of architectural acoustics, cited in this tree as
+  Arau-Puchades (1999) and not to be confused with his 1988 paper on the
+  reverberation formula. Its Table 4.1 prints the density, the critical
+  frequency of a one-centimetre plate and the damping factor of seventeen
+  solids, and its Table 6.1 the octave-band absorption coefficients of
+  building materials and finishes, each row numbered; the book prints a
+  decimal point.
 - International Organization for Standardization. (2020). *Acoustics —
   Rating of sound insulation in buildings and of building elements — Part 1:
   Airborne sound insulation* (ISO 717-1:2020).

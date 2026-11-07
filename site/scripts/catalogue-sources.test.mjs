@@ -1,0 +1,170 @@
+// Every table a catalogue page prints names the work it was read from.
+//
+// src/lib/catalogue-sources.mjs holds a catalogue page's rows to its
+// frontmatter `references`, and src/lib/catalogue-pages.ts stops the build on
+// what it finds. The first tests hand the function small pages with each
+// defect it exists for; the last reads the real pages of both languages, so
+// the gate fails here, before a twenty-minute build, when a page loses or
+// never had the source of one of its tables.
+//
+// Usage: node --test 'scripts/**/*.test.mjs'
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+import { catalogueSlugs } from '../src/data/topics.mjs';
+import { catalogues } from '../src/generated/catalogues.mjs';
+import { catalogueSourceProblems, isLibraryTable, printedTables } from '../src/lib/catalogue-sources.mjs';
+
+const book = (author, year, tables) => ({
+  type: 'book',
+  authors: [`${author}, A.`],
+  year,
+  title: `A book by ${author}`,
+  publisher: 'A Press',
+  ...(tables ? { tables } : {}),
+});
+
+const rows = (...tables) => ({ rows: tables.map((table) => ({ table })) });
+
+test('the tables a page prints come once each, in the order of their rows', () => {
+  const printed = printedTables([rows('a-2000-table-1', 'a-2000-table-1', 'b-2001-table-2'), rows('a-2000-table-1')]);
+  assert.deepEqual(printed, ['a-2000-table-1', 'b-2001-table-2']);
+});
+
+test('a page whose every printed table is claimed once passes', () => {
+  const problems = catalogueSourceProblems({
+    page: 'reference/catalogues/solids',
+    references: [book('Roe', 2000, ['roe-2000-table-1']), book('Doe', 2001, ['doe-2001-table-3', 'doe-2001-table-4'])],
+    tables: ['roe-2000-table-1', 'doe-2001-table-3', 'doe-2001-table-4'],
+  });
+  assert.deepEqual(problems, []);
+});
+
+test('a table no entry claims is named with its page', () => {
+  const problems = catalogueSourceProblems({
+    page: 'reference/catalogues/carpets',
+    references: [book('Roe', 2000, ['roe-2000-table-1'])],
+    tables: ['roe-2000-table-1', 'harris-1995-table-30-2'],
+  });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /reference\/catalogues\/carpets prints rows of harris-1995-table-30-2/);
+});
+
+test('a page with no references fails once for each table it prints', () => {
+  const problems = catalogueSourceProblems({
+    page: 'reference/catalogues/carpets',
+    references: [],
+    tables: ['harris-1995-table-30-2', 'harris-1995-table-30-3'],
+  });
+  assert.equal(problems.length, 2);
+});
+
+test('a table two entries claim is refused, naming both', () => {
+  const problems = catalogueSourceProblems({
+    page: 'reference/catalogues/solids',
+    references: [book('Roe', 2000, ['roe-2000-table-1']), book('Doe', 2001, ['roe-2000-table-1'])],
+    tables: ['roe-2000-table-1'],
+  });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /claimed by 2 entries.*Roe \(2000\); Doe \(2001\)/);
+});
+
+test('a claim on a table the page does not print is refused', () => {
+  const problems = catalogueSourceProblems({
+    page: 'reference/catalogues/solids',
+    references: [book('Roe', 2000, ['roe-2000-table-1', 'roe-2000-table-9'])],
+    tables: ['roe-2000-table-1'],
+  });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /Roe \(2000\) claims roe-2000-table-9, which no catalogue on the page prints/);
+});
+
+test("the library's own tables claim no source, and none may be claimed", () => {
+  assert.ok(isLibraryTable('phonometry-solver'));
+  assert.ok(!isLibraryTable('iec-61094-2-annex-f'));
+  assert.deepEqual(
+    catalogueSourceProblems({ page: 'reference/catalogues/fluids', references: [], tables: ['phonometry-solver'] }),
+    [],
+  );
+  const claimed = catalogueSourceProblems({
+    page: 'reference/catalogues/fluids',
+    references: [book('Roe', 2000, ['phonometry-solver'])],
+    tables: ['phonometry-solver'],
+  });
+  assert.equal(claimed.length, 1);
+  assert.match(claimed[0], /a table the library fixes itself/);
+});
+
+test('an entry without tables, a work the page cites for something else, is no problem', () => {
+  const problems = catalogueSourceProblems({
+    page: 'reference/catalogues/solids',
+    references: [book('Roe', 2000, ['roe-2000-table-1']), book('Doe', 2001)],
+    tables: ['roe-2000-table-1'],
+  });
+  assert.deepEqual(problems, []);
+});
+
+// ---------------------------------------------------------------------------
+// The pages as they are.
+// ---------------------------------------------------------------------------
+
+const contentDir = fileURLToPath(new URL('../src/content/docs', import.meta.url));
+
+/**
+ * The entries of a page's `references`, each with the keys this test reads.
+ *
+ * A narrow reader, like the one in scripts/shared/search-index.mjs: the site
+ * has no YAML parser installed and the frontmatter is written one key per
+ * line. An entry opens at a list item under `references:`; `tables` is a flow
+ * list of quoted keys, read as JSON; a line it cannot read fails the test
+ * rather than reading as no claim.
+ */
+function readReferences(text, file) {
+  const end = text.indexOf('\n---', 3);
+  assert.ok(text.startsWith('---') && end > 0, `${file} has no frontmatter`);
+  const entries = [];
+  let inReferences = false;
+  for (const line of text.slice(3, end).split('\n')) {
+    if (/^\S/.test(line)) {
+      inReferences = /^references:\s*$/.test(line);
+      continue;
+    }
+    if (!inReferences) continue;
+    if (/^ {2}- /.test(line)) entries.push({});
+    const key = /^ {2}(?:- | {2})(designation|title|year|tables): (.*)$/.exec(line);
+    if (!key) continue;
+    const entry = entries.at(-1);
+    if (key[1] === 'tables') {
+      assert.match(key[2], /^\[.*\]$/, `${file}: tables is not written as a flow list on one line`);
+      entry.tables = JSON.parse(key[2]);
+    } else {
+      entry[key[1]] = key[2].replace(/^"(.*)"$/, '$1');
+    }
+  }
+  return entries;
+}
+
+/** The catalogues a page renders, read off its source as catalogue-pages.ts does. */
+const KEYS = /<Catalogues\s+catalogue="(\w+)"/g;
+
+test('every catalogue page of both languages names the work behind every table it prints', async () => {
+  const problems = [];
+  let claimed = 0;
+  for (const prefix of ['', 'es/']) {
+    for (const slug of catalogueSlugs) {
+      const file = path.join(contentDir, `${prefix}${slug}.mdx`);
+      const text = await readFile(file, 'utf8');
+      const keys = [...text.matchAll(KEYS)].map(([, key]) => key);
+      assert.ok(keys.length > 0, `${file} renders no catalogue`);
+      const references = readReferences(text, file);
+      const tables = printedTables(keys.map((key) => catalogues[key]));
+      claimed += tables.filter((table) => !isLibraryTable(table)).length;
+      problems.push(...catalogueSourceProblems({ page: `${prefix}${slug}`, references, tables }));
+    }
+  }
+  assert.deepEqual(problems, [], `${problems.length} table(s) without their source:\n  ${problems.join('\n  ')}`);
+  assert.ok(claimed > 0, 'no catalogue page prints a table read from a work');
+});

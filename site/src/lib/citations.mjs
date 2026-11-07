@@ -64,9 +64,9 @@ function withoutDoi(ref) {
 /**
  * Fields of a reference that are about the page citing the work, not the
  * work: what it anchors there, whether the page marks it, whether the page
- * implements it.
+ * implements it, and which of the page's catalogue tables it is the source of.
  */
-const PAGE_FIELDS = new Set(['note', 'primary', 'implemented']);
+const PAGE_FIELDS = new Set(['note', 'primary', 'implemented', 'tables']);
 
 /**
  * Standards of one body whose designations carry the same numbers in one year
@@ -288,7 +288,16 @@ const STANDARDS_BODIES = [
   { id: 'sae', name: 'SAE International', url: 'https://www.sae.org/' },
   { id: 'icao', name: 'International Civil Aviation Organization', alternateName: 'ICAO', url: 'https://www.icao.int/' },
   { id: 'vdi', name: 'Verein Deutscher Ingenieure', alternateName: 'VDI', url: 'https://www.vdi.de/' },
-  { id: 'une', name: 'Asociación Española de Normalización', alternateName: 'UNE', url: 'https://www.une.org/' },
+  // The Spanish standards body. Its editions before 2017 name it AENOR, the
+  // association that then issued the UNE standards and handed that work to
+  // UNE; one body, under the name each edition prints.
+  {
+    id: 'une',
+    name: 'Asociación Española de Normalización',
+    alternateName: 'UNE',
+    url: 'https://www.une.org/',
+    spelled: ['Asociación Española de Normalización', 'Asociación Española de Normalización y Certificación'],
+  },
   {
     id: 'ahri',
     name: 'Air-Conditioning, Heating, and Refrigeration Institute',

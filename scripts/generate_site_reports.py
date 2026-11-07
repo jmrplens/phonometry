@@ -48,6 +48,16 @@ editions drift. Entry *i* of the Spanish edition goes to the family page of
 entry *i* of the English one, so the two languages split identically even
 where a heading is translated past recognition ("Anexo 16 de la OACI").
 
+**Every family names a document the bibliography describes.** An errata page
+is about the documents its entries correct, and the site describes each
+document it relies on once, on ``/reference/bibliography/``, from the
+``references`` its pages declare. A run reads those references and stops when
+a work a family corrects has no entry there in either language, or more than
+one, naming each: a standards family corrects the editions its headings print
+(:data:`DESIGNATED_AS` holds the ones the registry spells otherwise than the
+guides), any other family the works its :data:`SOURCES` row lists.
+``--list-unmatched`` prints that list and writes nothing.
+
 Stdlib only. Regenerate with ``make site-reports``.
 """
 
@@ -55,6 +65,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import json
 import pathlib
 import posixpath
 import re
@@ -64,7 +75,7 @@ from typing import TYPE_CHECKING, Literal
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable, Mapping, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
@@ -280,14 +291,81 @@ _ISSUER_ORDER = ("ISO", "IEC", "EN", "DIN", "ANSI", "ECMA", "ITU-R BS", "VDI")
 
 
 @dataclasses.dataclass(frozen=True)
+class Work:
+    """A document an errata family corrects, as the site's bibliography names it.
+
+    The bibliography is what the guides cite: every entry of a page's
+    frontmatter ``references`` is a work, described once on
+    ``/reference/bibliography/`` and named from every page that cites it
+    (``site/src/lib/citations.mjs``). A work is found there by what names it
+    the same way on every page: a standard by its designation, a work with a
+    DOI by the DOI, and anything else by its type, the surname of its first
+    author or its organization, and its year, with the title where one author
+    or body issued two works of a kind in one year.
+
+    A Spanish page writes some designations in Spanish ("Recomendación UIT-R
+    BS.468-4", "8.ª ed."); ``designation_es`` is the designation there, where
+    it differs.
+    """
+
+    designation: str | None = None
+    designation_es: str | None = None
+    doi: str | None = None
+    #: The frontmatter ``type`` (``book``, ``report``, ...).
+    kind: str | None = None
+    #: The first author's surname, or the organization written out.
+    who: str | None = None
+    year: int | None = None
+    title: str | None = None
+
+    def matches(self, ref: Mapping[str, object], lang: Lang) -> bool:
+        """Whether a frontmatter reference describes this work.
+
+        :param ref: One entry of a page's ``references``.
+        :type ref: Mapping[str, object]
+        :param lang: The language of the page it is on.
+        :type lang: Lang
+        :return: ``True`` when every field this work is named by agrees.
+        :rtype: bool
+        """
+        if self.designation is not None:
+            wanted = (
+                self.designation_es
+                if lang == "es" and self.designation_es
+                else self.designation
+            )
+            return ref.get("type") == "standard" and ref.get("designation") == wanted
+        if self.doi is not None:
+            return str(ref.get("doi", "")).lower() == self.doi.lower()
+        authors = ref.get("authors")
+        first = authors[0] if isinstance(authors, list) and authors else None
+        surname = str(first).split(",")[0].strip() if first is not None else None
+        return (
+            ref.get("type") == self.kind
+            and self.who in (surname, ref.get("organization"))
+            and ref.get("year") == self.year
+            and (self.title is None or ref.get("title") == self.title)
+        )
+
+    def __str__(self) -> str:
+        """The work as a message names it."""
+        if self.designation is not None:
+            return self.designation
+        if self.doi is not None:
+            return f"doi:{self.doi}"
+        title = f", {self.title!r}" if self.title else ""
+        return f"{self.kind} by {self.who} ({self.year}){title}"
+
+
+@dataclasses.dataclass(frozen=True)
 class Source:
     """A published source that is not a standard: a book, a paper, a guide.
 
     Their headings name them in prose ("Long, Architectural Acoustics 2e
     (2014)", "Allard & Atalla 2e (2009)"), which no rule reads reliably, so
-    each is listed here by hand with the name its page carries. A heading that
-    matches neither a designation nor a row here fails the run, which is how
-    a new kind of source gets its row.
+    each is listed here by hand with the name its page carries and the works
+    it corrects. A heading that matches neither a designation nor a row here
+    fails the run, which is how a new kind of source gets its row.
     """
 
     #: URL segment of the family page. Never changed once published.
@@ -301,6 +379,9 @@ class Source:
     #: title reads "Erratas del Anexo 16 de la OACI" and not "de Anexo 16".
     #: Empty for an author or a designation, which take none.
     article_es: str = ""
+    #: The works the family's entries correct, as the bibliography names them
+    #: (:class:`Work`). Every one has to be there, in both languages.
+    corrects: tuple[Work, ...] = ()
 
 
 def _source(
@@ -309,69 +390,214 @@ def _source(
     name_en: str,
     name_es: str | None = None,
     article_es: str = "",
+    *,
+    corrects: tuple[Work, ...],
 ) -> Source:
-    return Source(slug, re.compile(pattern), name_en, name_es or name_en, article_es)
+    return Source(
+        slug, re.compile(pattern), name_en, name_es or name_en, article_es, corrects
+    )
 
 
 SOURCES: tuple[Source, ...] = (
-    _source("ainslie", r"Ainslie\b", "Ainslie (2010)"),
-    _source("allard-atalla", r"Allard & Atalla\b", "Allard & Atalla (2009)"),
-    _source("ashrae", r"ASHRAE\b", "ASHRAE (2019)"),
+    _source(
+        "ainslie",
+        r"Ainslie\b",
+        "Ainslie (2010)",
+        corrects=(Work(doi="10.1007/978-3-540-87662-5"),),
+    ),
+    _source(
+        "allard-atalla",
+        r"Allard & Atalla\b",
+        "Allard & Atalla (2009)",
+        corrects=(Work(doi="10.1002/9780470747339"),),
+    ),
+    _source(
+        "ashrae",
+        r"ASHRAE\b",
+        "ASHRAE (2019)",
+        corrects=(
+            Work(
+                kind="report",
+                who="American Society of Heating, Refrigerating and Air-Conditioning Engineers",
+                year=2019,
+            ),
+        ),
+    ),
     _source(
         "attenborough-van-renterghem",
         r"Attenborough & Van Renterghem\b",
         "Attenborough & Van Renterghem (2021)",
+        corrects=(Work(doi="10.1201/9780429470806"),),
     ),
     _source(
         "barham-barrera-figueroa-avison",
         r"Barham\b",
         "Barham, Barrera-Figueroa & Avison (2014)",
+        corrects=(Work(doi="10.1088/0026-1394/51/3/129"),),
     ),
-    _source("bies-hansen-howard", r"Bies\b", "Bies, Hansen & Howard (2017)"),
-    _source("cox-dantonio", r"Cox & D'Antonio\b", "Cox & D'Antonio (2017)"),
+    _source(
+        "bies-hansen-howard",
+        r"Bies\b",
+        "Bies, Hansen & Howard (2017)",
+        corrects=(Work(doi="10.1201/9781351228152"),),
+    ),
+    _source(
+        "cox-dantonio",
+        r"Cox & D'Antonio\b",
+        "Cox & D'Antonio (2017)",
+        corrects=(Work(doi="10.1201/9781315369211"),),
+    ),
     _source(
         "directive-eu-2015-996",
         r"(?:Commission )?Directive \(EU\) 2015/996\b",
         "Directive (EU) 2015/996",
         "Directiva (UE) 2015/996",
         "la",
+        corrects=(Work(designation="Directive (EU) 2015/996"),),
     ),
-    _source("ecac-doc-29", r"ECAC Doc 29\b", "ECAC Doc 29"),
-    _source("harris", r"Harris\b", "Harris (1995)"),
+    _source(
+        "ecac-doc-29",
+        r"ECAC Doc 29\b",
+        "ECAC Doc 29",
+        # Every entry is on the fifth edition's Volume 2, one of two volumes
+        # issued under the same report number in the same year.
+        corrects=(
+            Work(
+                kind="report",
+                who="European Civil Aviation Conference",
+                year=2026,
+                title=(
+                    "Report on standard method of computing noise contours around "
+                    "civil airports, Volume 2: Technical guide"
+                ),
+            ),
+        ),
+    ),
+    _source(
+        "harris",
+        r"Harris\b",
+        "Harris (1995)",
+        corrects=(Work(kind="book", who="Harris", year=1995),),
+    ),
     _source(
         "icao-annex-16",
         r"ICAO Annex 16\b",
         "ICAO Annex 16",
         "Anexo 16 de la OACI",
         "el",
+        corrects=(
+            Work(
+                designation="ICAO Annex 16, Vol. I, 8th ed.",
+                designation_es="ICAO Annex 16, Vol. I, 8.ª ed.",
+            ),
+        ),
     ),
-    _source("jarvis", r"Jarvis\b", "Jarvis (1996)"),
-    _source("jimenez", r"Jiménez\b", "Jiménez et al. (2017)"),
-    _source("long", r"Long, Architectural Acoustics\b", "Long (2014)"),
-    _source("maa", r"Maa\b", "Maa (1998)"),
-    _source("mechel", r"Mechel\b", "Mechel (2008)"),
-    _source("medwin-clay", r"Medwin & Clay\b", "Medwin & Clay (1998)"),
-    _source("nmfs", r"NMFS\b", "NMFS (2024)"),
+    _source(
+        "jarvis",
+        r"Jarvis\b",
+        "Jarvis (1996)",
+        corrects=(Work(kind="report", who="Jarvis", year=1996),),
+    ),
+    _source(
+        "jimenez",
+        r"Jiménez\b",
+        "Jiménez et al. (2017)",
+        # The slit-radiation entry is on both papers of 2017, the second on the
+        # Applied Sciences one alone.
+        corrects=(
+            Work(doi="10.3390/app7060618"),
+            Work(doi="10.1038/s41598-017-05710-5"),
+        ),
+    ),
+    _source(
+        "long",
+        r"Long, Architectural Acoustics\b",
+        "Long (2014)",
+        corrects=(Work(doi="10.1016/C2012-0-03257-5"),),
+    ),
+    _source("maa", r"Maa\b", "Maa (1998)", corrects=(Work(doi="10.1121/1.423870"),)),
+    _source(
+        "mechel",
+        r"Mechel\b",
+        "Mechel (2008)",
+        corrects=(Work(doi="10.1007/978-3-540-76833-3"),),
+    ),
+    _source(
+        "medwin-clay",
+        r"Medwin & Clay\b",
+        "Medwin & Clay (1998)",
+        corrects=(Work(kind="book", who="Medwin", year=1998),),
+    ),
+    _source(
+        "nmfs",
+        r"NMFS\b",
+        "NMFS (2024)",
+        corrects=(
+            Work(kind="report", who="National Marine Fisheries Service", year=2024),
+        ),
+    ),
     _source(
         "norah2",
         r"NORAH2\b",
         "NORAH2 rotorcraft guidance",
         "guía de rotorcraft NORAH2",
         "la",
+        corrects=(Work(kind="report", who="Olsen", year=2024),),
     ),
-    _source("norton-karczub", r"Norton & Karczub\b", "Norton & Karczub (2003)"),
-    _source("osses-garcia-kohlrausch", r"Osses\b", "Osses, García & Kohlrausch (2016)"),
-    _source("randi", r"RANDI\b", "RANDI 3.1 Physics Description"),
+    _source(
+        "norton-karczub",
+        r"Norton & Karczub\b",
+        "Norton & Karczub (2003)",
+        corrects=(Work(doi="10.1017/CBO9781139163927"),),
+    ),
+    _source(
+        "osses-garcia-kohlrausch",
+        r"Osses\b",
+        "Osses, García & Kohlrausch (2016)",
+        corrects=(Work(doi="10.1121/2.0000410"),),
+    ),
+    _source(
+        "randi",
+        r"RANDI\b",
+        "RANDI 3.1 Physics Description",
+        corrects=(Work(kind="report", who="Breeding", year=1996),),
+    ),
     _source(
         "real-decreto-1367-2007",
         r"Real Decreto 1367/2007\b",
         "Real Decreto 1367/2007",
         article_es="el",
+        corrects=(
+            Work(
+                designation="RD 1367/2007 (BOE-A-2007-18397), consolidated text",
+                designation_es="RD 1367/2007 (BOE-A-2007-18397), texto consolidado",
+            ),
+        ),
     ),
-    _source("rossing", r"Rossing\b", "Rossing (2014)"),
-    _source("southall", r"Southall\b", "Southall et al. (2019)"),
-    _source("ver-beranek", r"Ver & Beranek\b", "Ver & Beranek (2006)"),
-    _source("vigran", r"Vigran\b", "Vigran (2008)"),
+    _source(
+        "rossing",
+        r"Rossing\b",
+        "Rossing (2014)",
+        corrects=(Work(kind="book", who="Rossing", year=2014),),
+    ),
+    _source(
+        "southall",
+        r"Southall\b",
+        "Southall et al. (2019)",
+        corrects=(Work(doi="10.1578/AM.45.2.2019.125"),),
+    ),
+    _source(
+        "ver-beranek",
+        r"Ver & Beranek\b",
+        "Ver & Beranek (2006)",
+        corrects=(Work(doi="10.1002/9780470172568"),),
+    ),
+    _source(
+        "vigran",
+        r"Vigran\b",
+        "Vigran (2008)",
+        corrects=(Work(doi="10.1201/9781482266016"),),
+    ),
 )
 
 #: The registry's last ``##`` section, which is not an entry but a list of
@@ -395,6 +621,9 @@ class Family:
     name_en: str
     name_es: str
     article_es: str = ""
+    #: The works a family of books, papers and guidance corrects; a
+    #: standards family's are its printed editions (:func:`corrected_works`).
+    corrects: tuple[Work, ...] = ()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -485,6 +714,7 @@ def family_of(heading: str) -> Family:
                 name_en=source.name_en,
                 name_es=source.name_es,
                 article_es=source.article_es,
+                corrects=source.corrects,
             )
     if _LOOKS_LIKE_A_DESIGNATION.match(heading):
         sys.exit(
@@ -1097,6 +1327,288 @@ def check_edition_parity(english: pathlib.Path, spanish: pathlib.Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# The works each family corrects, in the site's bibliography.
+# ---------------------------------------------------------------------------
+
+#: The bibliography's designation of a document the registry writes another
+#: way. A heading names the document it read the way the registry's own
+#: conventions write it; the guides name the same text their own way, and
+#: only the guides make bibliography entries. Each line says why the entry it
+#: names carries the defects the heading records:
+#:
+#: * ``ISO/DIS 16032:2023`` is the draft the guide cites in the publication the
+#:   copy was read in, ``E DIN EN ISO 16032:2023-05``;
+#: * ``A1`` and ``AMD1`` are one amendment, and the 2010 base edition of
+#:   IEC 62489-1 is the text the consolidated ``+AMD1:2014`` the guide cites
+#:   carries unchanged, which is the copy its entries were read in;
+#: * ``ISO 15186-1`` carries no edition because the copy read was its
+#:   identical-text British adoption; the bibliography names the ISO text by
+#:   its 2000 edition;
+#: * ``ANSI S3.5-1997`` is cited reaffirmed: the speech intelligibility guide,
+#:   which implements it, cites the 2017 reaffirmation;
+#: * ``EN 61260:1995`` is the identical-text European adoption of IEC
+#:   61260:1995, read in BS EN 61260:1996, as the guide's entry for the IEC
+#:   text says, so a defect of its text is a defect of the IEC original;
+#: * ``UNE-EN ISO 9295:2015`` is the Spanish adoption the guide's entry for
+#:   ISO 9295:2015 says it was read in, and the defects its headings record
+#:   are already in ISO/DIS 9295, as the registry entries show, so they are
+#:   the ISO text's;
+#: * any other adoption whose errata may be defects of the adoption alone (a
+#:   translation such as ``UNE-EN 61043:1999``, or the only print read, such
+#:   as ``UNE-EN 15657:2018``) has an entry of its own under its own
+#:   designation, and no line here;
+#: * the rest add what the guides print beside the designation (the edition of
+#:   ECMA-418-1, the word "Recommendation", the month of a VDI guideline).
+DESIGNATED_AS: dict[str, str] = {
+    "ANSI S3.5-1997": "ANSI S3.5-1997 (R2017)",
+    "ECMA-418-1:2024": "ECMA-418-1:2024 (3rd ed.)",
+    "EN 61260:1995": "IEC 61260:1995",
+    "IEC 60118-4:2014/A1:2017": "IEC 60118-4:2014/AMD1:2017",
+    "IEC 62489-1:2010": "IEC 62489-1:2010+AMD1:2014",
+    "IEC 62489-1:2010+A1:2014": "IEC 62489-1:2010+AMD1:2014",
+    "ISO 15186-1": "ISO 15186-1:2000",
+    "ISO/DIS 16032:2023": "E DIN EN ISO 16032:2023-05",
+    "ITU-R BS.468-4": "Recommendation ITU-R BS.468-4",
+    "UNE-EN ISO 9295:2015": "ISO 9295:2015",
+    "VDI 2081 Blatt 1:2001": "VDI 2081 Blatt 1:2001-07",
+}
+
+#: How the Spanish pages write a designation of :data:`DESIGNATED_AS`, where
+#: they translate part of it.
+DESIGNATED_IN_SPANISH: dict[str, str] = {
+    "ECMA-418-1:2024 (3rd ed.)": "ECMA-418-1:2024 (3.ª ed.)",
+    "Recommendation ITU-R BS.468-4": "Recomendación UIT-R BS.468-4",
+}
+
+
+def corrected_works(page: FamilyPage) -> tuple[Work, ...]:
+    """The works a family page's entries correct.
+
+    A standards family corrects each edition its headings print
+    (:attr:`FamilyPage.editions`), under the bibliography's spelling where
+    :data:`DESIGNATED_AS` has one; any other family corrects the works its
+    :data:`SOURCES` row lists; the page of properties that are not errata
+    corrects nothing.
+
+    :param page: A family page.
+    :type page: FamilyPage
+    :return: The works, in the order the registry names them.
+    :rtype: tuple[Work, ...]
+    """
+    if page.family.group == "standards":
+        works = []
+        for edition in page.editions:
+            designation = DESIGNATED_AS.get(edition, edition)
+            spanish = DESIGNATED_IN_SPANISH.get(designation)
+            works.append(Work(designation=designation, designation_es=spanish))
+        return tuple(works)
+    return page.family.corrects
+
+
+#: One entry of a page's ``references``: the line that opens it and the lines
+#: of its other keys. The site writes every entry this way, one key per line,
+#: and a line under ``references:`` in no other shape stops the run.
+_ITEM_LINE = re.compile(r"^  - (?P<key>[A-Za-z]+): (?P<value>.+)$")
+#: A key of the frontmatter's top level, the only line at the margin that
+#: may follow the entries of ``references``.
+_TOP_LEVEL_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*:")
+_KEY_LINE = re.compile(r"^    (?P<key>[A-Za-z]+): (?P<value>.+)$")
+
+
+def _scalar(raw: str, where: str) -> object:
+    """One frontmatter value: a quoted string or flow list, a word, a number, a boolean.
+
+    A double-quoted YAML scalar on one line, and a flow list of them, read as
+    JSON: the escapes the pages use, an escaped quotation mark and a Unicode
+    code point, are JSON's too.
+
+    :raises SystemExit: On a value of any other shape.
+    """
+    if raw.startswith(('"', "[")):
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            sys.exit(f"{where}: {raw!r} is not a value this reader follows.")
+    if raw in {"true", "false"}:
+        return raw == "true"
+    if re.fullmatch(r"\d+", raw):
+        return int(raw)
+    # A plain word YAML reads as a string, such as ``standard`` or ``7/8``;
+    # nothing that YAML would read as a number of another kind, or as syntax.
+    if re.fullmatch(r"[\w/-]+", raw) and not re.fullmatch(r"[\d.e+-]+", raw):
+        return raw
+    sys.exit(f"{where}: {raw!r} is not a value this reader follows.")
+
+
+def read_references(path: pathlib.Path) -> list[dict[str, object]]:
+    """Every entry of a page's frontmatter ``references``, as written.
+
+    Stdlib only, like the rest of this script, so a narrow reader rather than a
+    YAML parser: it follows the one way the pages write their bibliography and
+    stops the run on any line under ``references:`` it does not, so it cannot
+    read too little in silence. ``tests/test_generate_site_reports.py`` holds
+    it to a YAML parser on every page of the site.
+
+    :param path: A page under ``site/src/content/docs``.
+    :type path: pathlib.Path
+    :return: The entries, in page order; empty for a page that cites nothing.
+    :rtype: list[dict[str, object]]
+    :raises SystemExit: On a line of the bibliography this reader cannot follow.
+    """
+    text = path.read_text(encoding="utf8")
+    if not text.startswith("---\n"):
+        return []
+    end = text.find("\n---", 3)
+    entries: list[dict[str, object]] = []
+    inside = False
+    shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+    for number, line in enumerate(text[4:end].splitlines(), start=2):
+        if not line.strip():
+            # A blank line ends nothing in YAML, so it ends nothing here.
+            continue
+        where = f"{shown}:{number}"
+        if not line.startswith(" "):
+            # Under ``references:`` the only line at the margin is the next
+            # key: an item or a comment there is YAML this reader would
+            # otherwise take for the end of the list.
+            if inside and not _TOP_LEVEL_KEY.match(line):
+                sys.exit(
+                    f"{where}: a references line this reader cannot follow: {line!r}"
+                )
+            name, _, rest = line.partition(":")
+            inside = name == "references" and not rest.strip()
+            if name == "references" and rest.strip() not in {"", "[]"}:
+                sys.exit(
+                    f"{where}: references written on the line of its key, which "
+                    f"this reader cannot follow: {line!r}"
+                )
+            continue
+        if not inside:
+            continue
+        item = _ITEM_LINE.match(line)
+        key = item or _KEY_LINE.match(line)
+        if key is None or (item is None and not entries):
+            sys.exit(f"{where}: a references line this reader cannot follow: {line!r}")
+        if item is not None:
+            entries.append({})
+        entries[-1][key["key"]] = _scalar(key["value"], where)
+    return entries
+
+
+def read_bibliography(
+    lang: Lang, content: pathlib.Path = CONTENT
+) -> list[dict[str, object]]:
+    """Every reference every page of one language cites, page by page.
+
+    These are the works the bibliography describes: the site builds its nodes
+    from the same frontmatter (``site/src/components/Head.astro``).
+
+    :param lang: The language.
+    :type lang: Lang
+    :param content: The content root, ``site/src/content/docs``.
+    :type content: pathlib.Path
+    :return: The references, repeated as often as pages cite them.
+    :rtype: list[dict[str, object]]
+    """
+    spanish = content / "es"
+    references: list[dict[str, object]] = []
+    for path in sorted([*content.rglob("*.md"), *content.rglob("*.mdx")]):
+        if path.is_relative_to(spanish) != (lang == "es"):
+            continue
+        references.extend(read_references(path))
+    return references
+
+
+def _work_key(ref: Mapping[str, object]) -> tuple[object, ...]:
+    """What makes two references one work, as the site keys its bibliography.
+
+    The same choice as ``referenceId`` in ``site/src/lib/citations.mjs``: a
+    standard by its designation, a work with a DOI by the DOI, anything else
+    by its type, first author or organization, year and title.
+    """
+    if ref.get("type") == "standard":
+        return ("standard", ref.get("designation"))
+    if ref.get("doi"):
+        return ("doi", str(ref["doi"]).lower())
+    authors = ref.get("authors")
+    who = (
+        authors[0] if isinstance(authors, list) and authors else ref.get("organization")
+    )
+    return (ref.get("type"), who, ref.get("year"), ref.get("title"))
+
+
+@dataclasses.dataclass(frozen=True)
+class Unmatched:
+    """A work a family corrects that the bibliography of a language does not name once."""
+
+    family: str
+    lang: Lang
+    work: Work
+    #: How many distinct works of the bibliography it matched: none, or more
+    #: than one.
+    found: int
+
+    def __str__(self) -> str:
+        """The line ``--list-unmatched`` prints."""
+        if self.found == 0:
+            return f"{self.family} ({self.lang}): {self.work} has no bibliography entry"
+        return (
+            f"{self.family} ({self.lang}): {self.work} matches {self.found} "
+            "bibliography entries; name it by more than that"
+        )
+
+
+def unmatched_works(
+    pages: Iterable[FamilyPage],
+    bibliographies: Mapping[Lang, Sequence[Mapping[str, object]]],
+) -> list[Unmatched]:
+    """Every corrected work a language's bibliography does not name exactly once.
+
+    The errata pages are about the documents they correct, and the page that
+    describes a document for the site and for the search engines that read
+    it is the bibliography. A family whose document is cited by no page has
+    nothing there to point at, so its errata could only name the document as
+    a string. This is the list of those, to add where they belong: to the
+    guide that implements the document, and only failing that to the
+    bibliography page itself.
+
+    :param pages: The family pages.
+    :type pages: Iterable[FamilyPage]
+    :param bibliographies: :func:`read_bibliography` of each language.
+    :type bibliographies: Mapping[Lang, Sequence[Mapping[str, object]]]
+    :return: One entry per family, language and work, in index order.
+    :rtype: list[Unmatched]
+    """
+    out = []
+    for page in pages:
+        for work in corrected_works(page):
+            for lang in ("en", "es"):
+                found = {
+                    _work_key(ref)
+                    for ref in bibliographies[lang]
+                    if work.matches(ref, lang)
+                }
+                if len(found) != 1:
+                    out.append(Unmatched(page.family.slug, lang, work, len(found)))
+    return out
+
+
+def check_bibliography(pages: Sequence[FamilyPage]) -> list[Unmatched]:
+    """The corrected works the site's bibliography is missing, read off the pages.
+
+    :param pages: The family pages.
+    :type pages: Sequence[FamilyPage]
+    :return: :func:`unmatched_works` on the site as it is.
+    :rtype: list[Unmatched]
+    """
+    bibliographies: dict[Lang, list[dict[str, object]]] = {
+        "en": read_bibliography("en"),
+        "es": read_bibliography("es"),
+    }
+    return unmatched_works(pages, bibliographies)
+
+
+# ---------------------------------------------------------------------------
 # Writing.
 # ---------------------------------------------------------------------------
 
@@ -1122,6 +1634,16 @@ def check_page_metadata(pages: Iterable[FamilyPage]) -> None:
                     f"{len(description)} characters, over {MAX_DESCRIPTION}: "
                     f"{description!r}. Give the source a shorter name."
                 )
+
+
+def family_pages() -> list[FamilyPage]:
+    """The family pages of the registry as it stands, in index order.
+
+    :return: :func:`plan_families` of the English registry's headings.
+    :rtype: list[FamilyPage]
+    """
+    registry = read_registry(EDITIONS[0])
+    return plan_families([heading for heading, _ in registry.entries])
 
 
 def rendered_pages() -> dict[pathlib.Path, str]:
@@ -1170,16 +1692,46 @@ def main(argv: list[str] | None = None) -> int:
 
     :param argv: Command-line arguments (defaults to :data:`sys.argv`).
     :type argv: list[str] | None
-    :return: ``0`` on success, ``1`` when ``--check`` finds a stale page.
+    :return: ``0`` on success; ``1`` when ``--check`` finds a stale page, and
+        in every mode when a corrected work has no bibliography entry.
     :rtype: int
     """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--check",
         action="store_true",
         help="do not write; exit non-zero if any page is out of date",
     )
+    mode.add_argument(
+        "--list-unmatched",
+        action="store_true",
+        help=(
+            "write nothing; print every work a family corrects that the site's "
+            "bibliography does not name once, and exit non-zero if there is one"
+        ),
+    )
     args = parser.parse_args(argv)
+
+    unmatched = check_bibliography(family_pages())
+    if args.list_unmatched:
+        for line in unmatched:
+            print(line)
+        print(f"[site-reports] {len(unmatched)} corrected work(s) without an entry")
+        return 1 if unmatched else 0
+    if unmatched:
+        print(
+            "These errata families correct works no page of the site cites, so the "
+            "bibliography has nothing to name them by. Add each to the references "
+            "of the guide that implements it (its Spanish twin too, and the "
+            "References section of its docs/ mirror), or, with no such guide, of "
+            "/reference/bibliography/; or, where the registry spells a cited "
+            "document differently, say so in DESIGNATED_AS:",
+            file=sys.stderr,
+        )
+        for line in unmatched:
+            print(f"  {line}", file=sys.stderr)
+        return 1
 
     pages = rendered_pages()
     stale: list[str] = []

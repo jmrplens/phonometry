@@ -495,6 +495,15 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   aislamiento al impacto medida de cuarenta y dos conjuntos de suelo-techo y la
   mejora que seis tratamientos elásticos de superficie añaden sobre un suelo
   macizo.
+- Arau-Puchades, H. (1999). *ABC de la acústica arquitectónica*. Grupo
+  Editorial CEAC. ISBN 84-329-2017-7.
+  El manual español de acústica arquitectónica, citado en este árbol como
+  Arau-Puchades (1999) y que no hay que confundir con su artículo de 1988
+  sobre la fórmula de reverberación. Su tabla 4.1 imprime la densidad, la
+  frecuencia crítica de una placa de un centímetro y el factor de
+  amortiguamiento de diecisiete sólidos, y su tabla 6.1 los coeficientes de
+  absorción por bandas de octava de materiales y acabados de construcción, con
+  cada fila numerada; el libro imprime punto decimal.
 - Long, M. (2014). *Architectural acoustics* (2.ª ed.). Academic Press.
   [doi:10.1016/C2012-0-03257-5](https://doi.org/10.1016/C2012-0-03257-5).
   El complemento de diseño arquitectónico a las normas de medición: las

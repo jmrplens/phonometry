@@ -27,23 +27,29 @@ const REPOSITORY_ROOT = join(here, '..', '..', '..');
 export const ORIGIN = `${siteUrl}${basePath}`;
 
 /**
- * The date of the last commit `git log` lists with these arguments, as
- * `YYYY-MM-DD` in the committer's own time, the way the check reads it.
+ * The day of the last commit `git log` lists with these arguments, as
+ * `YYYY-MM-DD`: in UTC, from the commit's timestamp, the way the check reads
+ * it, or as the committer's clock wrote it, which a test gives the check to
+ * see it refused.
  *
+ * @param {'%ct'|'%cI'} format `%ct` for the UTC day, `%cI` for the committer's.
  * @param {...string} args Arguments after `git -C <repository root> log`.
- * @returns {string} The date.
+ * @returns {string} The day.
  */
-const commitDate = (...args) =>
-	execFileSync('git', ['-C', REPOSITORY_ROOT, 'log', '--format=%cI', ...args], { encoding: 'utf8' })
+export const commitDay = (format, ...args) => {
+	const printed = execFileSync('git', ['-C', REPOSITORY_ROOT, 'log', `--format=${format}`, ...args], {
+		encoding: 'utf8',
+	})
 		.trim()
 		.split('\n')
-		.at(-1)
-		.slice(0, 10);
+		.at(-1);
+	return format === '%ct' ? new Date(Number(printed) * 1000).toISOString().slice(0, 10) : printed.slice(0, 10);
+};
 
-/** The repository's first commit, which the software's `dateCreated` has to give. */
-export const FIRST_COMMIT = commitDate('--max-parents=0', 'HEAD');
-/** The last commit under src/, which the software's `dateModified` has to give. */
-export const LIBRARY_MODIFIED = commitDate('-1', '--', 'src');
+/** The UTC day of the repository's first commit, which the software's `dateCreated` has to give. */
+export const FIRST_COMMIT = commitDay('%ct', '--max-parents=0', 'HEAD');
+/** The UTC day of the last commit under src/, which the software's `dateModified` has to give. */
+export const LIBRARY_MODIFIED = commitDay('%ct', '-1', '--', 'src');
 
 /** The platforms the software node names when a test does not say otherwise. */
 export const PLATFORMS = ['Linux', 'macOS', 'Windows'];
@@ -56,11 +62,15 @@ const SOFTWARE = `${REPOSITORY}#software`;
 /** The years of the maintainer's research role, as the Person node dates it and the About page states it. */
 export const RESEARCH = { start: '2019', end: '2023' };
 
+/** The year the maintainer's master's degree was awarded, the one date the Person node gives it. */
+export const MASTER_END = '2019';
+
 /**
  * The four nodes astro.config.mjs puts on every page, whole: the software's
  * history the check reads from git, and the maintainer's dated roles as the
- * Person node jmrp.io publishes gives them, one the About page names and one
- * it does not.
+ * Person node jmrp.io publishes gives them: the research role and the sound
+ * technician's, with a start and an end, and the master's degree, dated by
+ * the year it was awarded alone, as the node dates every degree.
  *
  * @param {object} [options]
  * @param {unknown} [options.operatingSystem] What the software node names; null leaves the property out.
@@ -82,6 +92,12 @@ export function siteNodes({ operatingSystem = PLATFORMS } = {}) {
 					},
 					startDate: RESEARCH.start,
 					endDate: RESEARCH.end,
+				},
+				{
+					'@type': 'OrganizationRole',
+					roleName: "Master's degree in acoustical engineering",
+					alumniOf: { '@type': 'EducationalOrganization', name: 'Universitat Politècnica de València' },
+					endDate: MASTER_END,
 				},
 			],
 			hasOccupation: [
@@ -208,10 +224,17 @@ export function page(
 	);
 }
 
-/** What each About page says of the research role, in its own language. */
+/**
+ * What each About page says of the master's degree and the research role, in
+ * its own language and in the two forms the real page writes its years in.
+ */
 export const ABOUT_TEXT = {
-	en: `<p>I worked as an acoustics researcher at the UPV from ${RESEARCH.start} to ${RESEARCH.end}.</p>`,
-	es: `<p>Trabajé como investigador en acústica en la UPV de ${RESEARCH.start} a ${RESEARCH.end}.</p>`,
+	en:
+		`<p>I took the master's degree at the UPV (2018-${MASTER_END}) and worked as an acoustics ` +
+		`researcher there from ${RESEARCH.start} to ${RESEARCH.end}.</p>`,
+	es:
+		`<p>Cursé el máster en la UPV (2018-${MASTER_END}) y trabajé allí como investigador en acústica ` +
+		`de ${RESEARCH.start} a ${RESEARCH.end}.</p>`,
 };
 
 /**

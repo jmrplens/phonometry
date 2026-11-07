@@ -192,35 +192,42 @@ const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').tri
 
 // The software's history, for the SoftwareApplication node. `dateCreated` is
 // the repository's first commit, in June 2020, when the code was published as
-// PyOctave, a name that became PyOctaveBand that July; `datePublished` is the
+// PyOctave, a name that became PyOctaveBand that July. `datePublished` is the
 // first release, v1.0.0 on GitHub on 2026-01-06, the day PyOctaveBand 1.0.1
-// reached PyPI. Both are fixed.
+// reached PyPI, and is fixed. `dateModified` is the last commit that changed
+// the library itself, under src/. It used to be the commit at HEAD, so a
+// dependency bump of this site announced a new library.
 //
-// `dateModified` is the last commit that changed the library itself, under
-// src/. It used to be the commit at HEAD, so a dependency bump of this site
-// announced a new library. The path is absolute because git reads a pathspec
-// from the directory it runs in, and the build runs in site/, whose own src/ is
-// this site's source. There is no fallback date: a build with no git history at
-// all stops here rather than publish one it made up. A shallow clone still
-// names a commit, the oldest one it fetched, and would date the library from
-// it; that build is caught by check-structured-data.mjs, which refuses a
-// shallow clone, reads the same commit to hold the built pages to it, and runs
-// before the site deploys.
-const dateCreated = '2020-06-29';
+// A commit's date is the UTC day of its timestamp, the day every page of this
+// site is dated by, not the day the committer's clock wrote: the first commit
+// was made at one in the morning two hours ahead of UTC, on the 29th by that
+// clock and the 28th in UTC. The src/ path is absolute because git reads a
+// pathspec from the directory it runs in, and the build runs in site/, whose
+// own src/ is this site's source. There is no fallback date: a build with no
+// git history at all stops here rather than publish one it made up. A shallow
+// clone still names commits, the oldest one it fetched among them, and would
+// date the software from them; that build is caught by
+// check-structured-data.mjs, which refuses a shallow clone, reads the same
+// commits to hold the built pages to them, and runs before the site deploys.
+const commitDay = (args, what) => {
+  const printed = execFileSync('git', ['log', '--format=%ct', ...args], { encoding: 'utf8' })
+    .trim()
+    .split('\n')
+    .at(-1);
+  if (!/^\d+$/.test(printed ?? '')) {
+    throw new Error(
+      `[dates] git names no commit for ${what}, so the software's history is unknown. ` +
+        'The build needs the repository history (a checkout with fetch-depth 0).',
+    );
+  }
+  return new Date(Number(printed) * 1000).toISOString().slice(0, 10);
+};
+const dateCreated = commitDay(['--max-parents=0', 'HEAD'], 'the first commit');
 const datePublished = '2026-01-06';
-const dateModified = execFileSync(
-  'git',
-  ['log', '-1', '--format=%cI', '--', fileURLToPath(new URL('../src/', import.meta.url))],
-  { encoding: 'utf8' },
-)
-  .trim()
-  .slice(0, 10);
-if (!/^\d{4}-\d{2}-\d{2}$/.test(dateModified)) {
-  throw new Error(
-    '[dates] git names no commit under src/, so the date the library last changed is unknown. ' +
-      'The build needs the repository history (a checkout with fetch-depth 0).',
-  );
-}
+const dateModified = commitDay(
+  ['-1', '--', fileURLToPath(new URL('../src/', import.meta.url))],
+  'the last change under src/',
+);
 
 const softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
 

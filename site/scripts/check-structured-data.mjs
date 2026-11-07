@@ -22,16 +22,19 @@
 // have agreed with the defect.
 //
 // Two things the built HTML cannot answer on its own are read from git: the
-// SoftwareApplication's `dateCreated` is the repository's first commit, and its
-// `dateModified` is the last commit that changed the library under src/. The
-// graph used to take the date of the commit at HEAD, so a dependency bump of
-// the documentation site announced a library that had not moved.
+// SoftwareApplication's `dateCreated` is the UTC day of the repository's first
+// commit, and its `dateModified` the UTC day of the last commit that changed
+// the library under src/. The graph used to take the date of the commit at
+// HEAD, so a dependency bump of the documentation site announced a library
+// that had not moved.
 //
 // The About page is held to the Person node it carries: every span of years
-// the page writes has to be the years of a role that node dates. The node
-// comes from jmrp.io and the page is written here, and the two disagreed once,
-// the page giving 2020 for a research role the node starts in 2019, with
-// nothing to say so.
+// the page writes, "(2011-2018)", "from 2019 to 2023", "de 2019 a 2023" or any
+// other form `SPAN_FORMS` reads, has to be the years of a role that node
+// dates, its start year included where the node gives one. The node comes from
+// jmrp.io and the page is written here, and the two disagreed once, the page
+// giving 2020 for a research role the node starts in 2019, with nothing to say
+// so.
 //
 // Usage: node scripts/check-structured-data.mjs [dist-directory] [content-directory]
 import { execFileSync } from 'node:child_process';
@@ -59,27 +62,30 @@ const ORIGIN = `${siteUrl}${basePath}`;
 const REPOSITORY_ROOT = join(here, '..', '..');
 
 /**
- * The calendar date of the last commit `git log` lists, as `YYYY-MM-DD`.
+ * The day in UTC of the last commit `git log` lists, as `YYYY-MM-DD`.
  *
- * The date is the committer's own, as `%cI` prints it, which is how
- * astro.config.mjs reads it too: a UTC date compared with a local one would
- * disagree on every commit made late in the evening.
+ * The day is read from the commit's timestamp, not from the date the committer's
+ * clock wrote: the site dates every page by the UTC day of its commit, and
+ * astro.config.mjs dates the software the same way. The committer's own day
+ * would date the repository's first commit, made at one in the morning two
+ * hours ahead of UTC, a day after its UTC day, and a library change made
+ * after midnight a day after the pages of the same commit.
  *
  * @param {string[]} args Arguments after `git -C <repository root> log`.
  * @param {string} what What the date is, for the error a missing history raises.
- * @returns {string} The date; a history that names no commit throws instead.
+ * @returns {string} The day; a history that names no commit throws instead.
  */
-const commitDate = (args, what) => {
-	const printed = execFileSync('git', ['-C', REPOSITORY_ROOT, 'log', '--format=%cI', ...args], {
+const commitDay = (args, what) => {
+	const printed = execFileSync('git', ['-C', REPOSITORY_ROOT, 'log', '--format=%ct', ...args], {
 		encoding: 'utf8',
 	})
 		.trim()
 		.split('\n')
 		.at(-1);
-	if (!/^\d{4}-\d{2}-\d{2}T/.test(printed ?? '')) {
+	if (!/^\d+$/.test(printed ?? '')) {
 		throw new Error(`git names no commit for ${what}: this check needs the repository history`);
 	}
-	return printed.slice(0, 10);
+	return new Date(Number(printed) * 1000).toISOString().slice(0, 10);
 };
 
 // A shallow clone has a first commit of its own, the oldest one it fetched, and
@@ -93,9 +99,9 @@ if (
 }
 
 /** The repository's first commit: the day the code was first published, as PyOctave. */
-const FIRST_COMMIT = commitDate(['--max-parents=0', 'HEAD'], 'the first commit');
+const FIRST_COMMIT = commitDay(['--max-parents=0', 'HEAD'], 'the first commit');
 /** The last commit that changed the library itself, which is what the software's `dateModified` claims. */
-const LIBRARY_MODIFIED = commitDate(['-1', '--', 'src'], 'the last change under src/');
+const LIBRARY_MODIFIED = commitDay(['-1', '--', 'src'], 'the last change under src/');
 
 /**
  * Whether `url` addresses a page of this site.
@@ -247,30 +253,32 @@ const sameAsOf = (node) => (Array.isArray(node.sameAs) ? node.sameAs : [node.sam
  * config's idea of the answer would agree with whatever the config says.
  *
  * @param {object[]} nodes Every node of one page's graph.
- * @returns {string[]} The defects, empty when the history is whole.
+ * @returns {string[]|undefined} The defects, empty when the history is whole;
+ *   undefined when the page lacks one of the three nodes, which is reported as
+ *   a missing node, so the page is not counted as read.
  */
 function softwareDefects(nodes) {
 	const app = nodeOfType(nodes, 'SoftwareApplication');
 	const code = nodeOfType(nodes, 'SoftwareSourceCode');
 	const site = nodeOfType(nodes, 'WebSite');
-	if (!app || !code || !site) return []; // reported as a missing node already
+	if (!app || !code || !site) return undefined;
 	const defects = [];
 	if (app.dateCreated !== FIRST_COMMIT) {
 		defects.push(
 			`SoftwareApplication dateCreated is ${JSON.stringify(app.dateCreated)}, ` +
-				`not ${FIRST_COMMIT}, the date of the repository's first commit`,
+				`not ${FIRST_COMMIT}, the UTC day of the repository's first commit`,
 		);
 	}
 	if (code.dateCreated !== FIRST_COMMIT) {
 		defects.push(
 			`SoftwareSourceCode dateCreated is ${JSON.stringify(code.dateCreated)}, ` +
-				`not ${FIRST_COMMIT}, the date of the repository's first commit`,
+				`not ${FIRST_COMMIT}, the UTC day of the repository's first commit`,
 		);
 	}
 	if (app.dateModified !== LIBRARY_MODIFIED) {
 		defects.push(
 			`SoftwareApplication dateModified is ${JSON.stringify(app.dateModified)}, ` +
-				`not ${LIBRARY_MODIFIED}, the date of the last commit under src/`,
+				`not ${LIBRARY_MODIFIED}, the UTC day of the last commit under src/`,
 		);
 	}
 	if (typeof app.codeRepository !== 'string' || !app.codeRepository) {
@@ -327,12 +335,13 @@ function softwareDefects(nodes) {
 const SOFTWARE_HERITAGE = 'https://archive.softwareheritage.org/browse/origin/?origin_url=';
 
 /**
- * The years of every role a Person node dates with both a start and an end,
- * wherever in the node it sits: the schools it was at, the occupations it
- * held, the bodies it belonged to.
+ * The years of every role a Person node dates with an end, wherever in the
+ * node it sits: the schools it was at, the occupations it held, the bodies it
+ * belonged to. A role dated by its end alone, a degree the node gives the
+ * year it was awarded, has no start.
  *
  * @param {object} person The Person node.
- * @returns {{start: string, end: string}[]} The years of each dated role.
+ * @returns {{start: string|undefined, end: string}[]} The years of each dated role.
  */
 function datedRoles(person) {
 	const roles = [];
@@ -342,8 +351,11 @@ function datedRoles(person) {
 			return;
 		}
 		if (!value || typeof value !== 'object') return;
-		if (typesOf(value).some((type) => /Role$/.test(String(type))) && value.startDate && value.endDate) {
-			roles.push({ start: String(value.startDate).slice(0, 4), end: String(value.endDate).slice(0, 4) });
+		if (typesOf(value).some((type) => /Role$/.test(String(type))) && value.endDate) {
+			roles.push({
+				start: value.startDate ? String(value.startDate).slice(0, 4) : undefined,
+				end: String(value.endDate).slice(0, 4),
+			});
 		}
 		Object.values(value).forEach(visit);
 	};
@@ -369,40 +381,91 @@ const textOf = (html) => {
 		.replace(/\s+/g, ' ');
 };
 
-/** How a page in each language writes the years a role ran: "from 2019 to 2023", "de 2019 a 2023". */
-const YEARS = { en: /\bfrom (\d{4}) to (\d{4})\b/g, es: /\bde (\d{4}) a (\d{4})\b/g };
+/** A year of the last century or this one, which is every year the page can date a role by. */
+const YEAR = String.raw`((?:19|20)\d{2})`;
 
 /**
- * What the About page in `lang` gets wrong about the years of the maintainer's
- * roles, against the Person node it carries.
+ * Every way a page writes the years a role ran, in either language and in any
+ * case: two years joined by a dash, the second written whole or by its last
+ * two digits ("2011-2018", "(2018–2019)", "2011-18"); "from 2019 to 2023"
+ * (until, through); "between 2019 and 2023"; "de 2019 a 2023" ("del 2019 al
+ * 2023"); "desde 2019 hasta 2023"; "entre 2019 y 2023". The dashes are every
+ * one Unicode has between the hyphen and the horizontal bar, and the minus
+ * sign. A year inside an identifier, an ORCID iD or a standard's number, is
+ * not read: the dash form wants no letter, digit, dot, colon, slash or hyphen
+ * on either side.
+ */
+const SPAN_FORMS = [
+	new RegExp(String.raw`(?<![\w.:/-])${YEAR}\s*[-\u2010-\u2015\u2212]\s*(\d{4}|\d{2})(?![\w.:/-])`, 'giu'),
+	new RegExp(String.raw`\bfrom\s+${YEAR}\s+(?:to|until|through)\s+${YEAR}\b`, 'giu'),
+	new RegExp(String.raw`\bbetween\s+${YEAR}\s+and\s+${YEAR}\b`, 'giu'),
+	new RegExp(String.raw`\bdel?\s+${YEAR}\s+al?\s+${YEAR}\b`, 'giu'),
+	new RegExp(String.raw`\bdesde\s+${YEAR}\s+hasta\s+${YEAR}\b`, 'giu'),
+	new RegExp(String.raw`\bentre\s+${YEAR}\s+y\s+${YEAR}\b`, 'giu'),
+];
+
+/**
+ * Every span of years `text` writes, once each, as the page writes it and as
+ * the two years it names. An end year written by its last two digits takes
+ * the century of the start, and a "span" that would end before it starts is
+ * not one.
  *
- * Every span of years the page writes has to be the years of a role the node
- * dates. The page also has to write at least one: a page that dates no role
- * the way the node does leaves this check nothing to hold, and a span written
- * some other way ("between 2019 and 2023") would pass unread. The page need not
- * date every role it names; what it says of today, it says without years.
+ * @param {string} text What the page says (`textOf`).
+ * @returns {{span: string, start: string, end: string}[]} The spans, in the order the forms find them.
+ */
+function spansOf(text) {
+	const spans = new Map();
+	for (const form of SPAN_FORMS) {
+		for (const [span, start, written] of text.matchAll(form)) {
+			const end = written.length === 2 ? `${start.slice(0, 2)}${written}` : written;
+			if (end < start) continue;
+			spans.set(span.toLowerCase(), { span, start, end });
+		}
+	}
+	return [...spans.values()];
+}
+
+/**
+ * What the About page gets wrong about the years of the maintainer's roles,
+ * against the Person node it carries.
+ *
+ * Every span of years the page writes, in any of the forms `SPAN_FORMS` reads,
+ * has to be the years of a role the node dates: its end year a role's end
+ * year, and its start year that role's start year where the node gives one.
+ * Where the node dates a role by its end alone, a span ending that year is
+ * held by its end year only, and the ok line says how many were. The page also
+ * has to write at least one span: a page that dates no role leaves this check
+ * nothing to hold. The page need not date every role it names; what it says
+ * of today, it says without years.
  *
  * @param {object} person The Person node of the page.
  * @param {string} text What the page says (`textOf`).
- * @param {'en'|'es'} lang The page's language.
- * @returns {{defects: string[], spans: number}} The defects, and how many distinct spans the page writes.
+ * @returns {{defects: string[], spans: number, endOnly: number}} The defects, how many distinct spans the
+ *   page writes, and how many of them only a role's end year holds.
  */
-function yearsDefects(person, text, lang) {
+function yearsDefects(person, text) {
 	const roles = datedRoles(person);
 	const defects = [];
-	const spans = new Set();
-	for (const [span, start, end] of text.matchAll(YEARS[lang])) {
-		spans.add(span);
-		if (!roles.some((role) => role.start === start && role.end === end)) {
-			defects.push(`the page says "${span}", and no role the Person node dates runs from ${start} to ${end}`);
+	const spans = spansOf(text);
+	let endOnly = 0;
+	for (const { span, start, end } of spans) {
+		const ending = roles.filter((role) => role.end === end);
+		if (ending.some((role) => role.start === start)) continue;
+		if (ending.some((role) => role.start === undefined)) {
+			endOnly += 1;
+			continue;
 		}
+		defects.push(
+			`the page says "${span}", and no role the Person node dates runs from ${start} to ${end} ` +
+				`or ends in ${end} with no start given`,
+		);
 	}
-	if (spans.size === 0) {
+	if (spans.length === 0) {
 		defects.push(
 			`the page writes the years of none of the ${roles.length} roles the Person node dates, so they cannot be held to it`,
 		);
 	}
-	return { defects, spans: spans.size };
+	return { defects, spans: spans.length, endOnly };
 }
 
 /** Each defect of the software's nodes, with the number of pages that carry it. */
@@ -691,8 +754,14 @@ const seen = {
 	datasetShown: 0,
 	datasetUnshown: 0,
 	corrected: 0,
-	about: 0,
+	history: 0,
 };
+
+/** The About pages found in each language, and how many of them are typed AboutPage. */
+const about = { en: { found: 0, typed: 0 }, es: { found: 0, typed: 0 } };
+
+/** Each language's name, as an ok line writes it. */
+const LANGUAGE = { en: 'English', es: 'Spanish' };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
 const LISTED = new Set(knownSlugs());
@@ -842,26 +911,34 @@ for (const file of files) {
 		if (!nodeOfType(nodes, type)) fail(`${route}: no ${type} node`);
 	}
 
-	for (const defect of softwareDefects(nodes)) {
+	const history = softwareDefects(nodes);
+	if (history) seen.history += 1;
+	for (const defect of history ?? []) {
 		siteNodeDefects.set(defect, (siteNodeDefects.get(defect) ?? 0) + 1);
 	}
 
 	// The About page says who maintains the library and how its numbers are
 	// made, and schema.org has a type for exactly that page.
 	if (slug === 'start/about') {
-		seen.about += 1;
+		about[lang].found += 1;
 		const typed = nodes.some(
 			(node) => node['@id'] === `${canonical}#article` && typesOf(node).includes('AboutPage'),
 		);
-		if (!typed) fail(`${route}: the About page's article node is not typed AboutPage`);
+		if (typed) about[lang].typed += 1;
+		else fail(`${route}: the About page's article node is not typed AboutPage`);
 		const person = nodeOfType(nodes, 'Person');
 		if (person) {
-			const { defects, spans } = yearsDefects(person, textOf(html), lang);
+			const { defects, spans, endOnly } = yearsDefects(person, textOf(html));
 			for (const defect of defects) fail(`${route}: ${defect}`);
 			if (defects.length === 0) {
+				const byEnd =
+					endOnly === 0
+						? ''
+						: `; ${endOnly} of them only by its end year, the node giving ` +
+							`${endOnly === 1 ? 'that role' : 'those roles'} no start`;
 				ok(
-					`the About page in ${lang === 'es' ? 'Spanish' : 'English'} writes ${spans} span${spans === 1 ? '' : 's'} ` +
-						'of years, each the years of a role the Person node dates',
+					`the About page in ${LANGUAGE[lang]} writes ${spans} span${spans === 1 ? '' : 's'} ` +
+						`of years, each the years of a role the Person node dates${byEnd}`,
 				);
 			}
 		}
@@ -1672,15 +1749,28 @@ if (errataAgree && seen.corrected > 0) {
 
 // Every page carries the same site-wide nodes, so a defect in them is on every
 // page at once: reported once, with the number of pages it was found on.
+// A page that lacks one of the software's nodes has failed by name above and
+// was not read here, so the summary speaks for every page only when it read
+// every page.
 for (const [defect, pages] of siteNodeDefects) fail(`${defect} (on ${pages} pages)`);
-if (siteNodeDefects.size === 0) {
+if (siteNodeDefects.size === 0 && seen.history === seen.pages) {
 	ok(
 		`the software's nodes on all ${seen.pages} pages give its history: created ${FIRST_COMMIT}, ` +
 			`library last changed ${LIBRARY_MODIFIED}, release notes, help, its former package and its archive`,
 	);
 }
-if (seen.about === 2) ok('checked the About page in both languages for the AboutPage type');
-else fail(`found ${seen.about} About pages, not the English one and its Spanish twin`);
+
+// One About page in each language, each typed AboutPage. A page that is not
+// typed has failed by its route above; the summary is printed only when both
+// pages are there and typed.
+if (about.en.found !== 1 || about.es.found !== 1) {
+	fail(
+		`found ${about.en.found} About page(s) in English and ${about.es.found} in Spanish, ` +
+			'not the English one and its Spanish twin',
+	);
+} else if (about.en.typed === 1 && about.es.typed === 1) {
+	ok('the About page in English and its Spanish twin are both typed AboutPage');
+}
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);
 ok(`checked ${seen.guides} guide pages for the learning-resource type and ${seen.api} API pages for APIReference`);

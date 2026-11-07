@@ -21,7 +21,9 @@ import { test } from 'node:test';
 
 import {
 	ABOUT_FILES,
+	ABOUT_TEXT,
 	aboutPage,
+	commitDay,
 	FIRST_COMMIT,
 	LIBRARY_MODIFIED,
 	page,
@@ -108,9 +110,9 @@ test('a software node that names no operating system, or one twice, fails', (t) 
 
 // The software's history and the About page. Every page carries the same
 // site-wide nodes, so a defect in them is one line with the number of pages it
-// stands on; the About page is asked for in both languages, typed as the page
-// about the maintainer, and every span of years it writes has to be the years
-// of a role the Person node dates.
+// stands on; the About page is asked for once in each language, typed as the
+// page about the maintainer, and every span of years it writes, in whatever
+// form, has to be the years of a role the Person node dates.
 
 /**
  * Build the two About pages and eight articles, nine of the ten edited since
@@ -153,8 +155,45 @@ test('a build whose software nodes give the whole history passes, and says what 
 				`library last changed ${LIBRARY_MODIFIED}, release notes, help, its former package and its archive`,
 		),
 	);
-	assert.match(ran.out, /ok {3}checked the About page in both languages for the AboutPage type/);
+	assert.match(ran.out, /ok {3}the About page in English and its Spanish twin are both typed AboutPage/);
 	assert.equal(ran.err, '');
+});
+
+test("the software's creation date is the UTC day of the first commit, not the day the committer's clock wrote", (t) => {
+	// The first commit was made at one in the morning two hours ahead of UTC,
+	// so the two days differ; if history ever made them agree, this test
+	// would prove nothing, and says so.
+	const local = commitDay('%cI', '--max-parents=0', 'HEAD');
+	assert.notEqual(local, FIRST_COMMIT, "the first commit's own day and its UTC day agree");
+	const ran = history(t, {
+		nodes: siteNodes().map((node) =>
+			node['@type'] === 'SoftwareApplication' || node['@type'] === 'SoftwareSourceCode'
+				? { ...node, dateCreated: local }
+				: node,
+		),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication dateCreated is "${local}", not ${FIRST_COMMIT}, ` +
+				"the UTC day of the repository's first commit \\(on 10 pages\\)",
+		),
+	);
+});
+
+test("a page without one of the software's nodes fails by name, and the history is not said of every page", (t) => {
+	const options = { datePublished: '2026-07-01', dateModified: '2026-10-01' };
+	const files = { [ABOUT_FILES.en]: aboutPage('en', options), [ABOUT_FILES.es]: aboutPage('es', options) };
+	for (let i = 2; i < 10; i += 1) files[`page-${i}/index.html`] = page(`page-${i}`, options);
+	files['page-2/index.html'] = page('page-2', {
+		...options,
+		nodes: siteNodes().filter((node) => node['@type'] !== 'SoftwareSourceCode'),
+	});
+	const ran = runCheck(t, files);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/page-2\/: no SoftwareSourceCode node/);
+	assert.doesNotMatch(ran.out, /give its history/);
 });
 
 test('a software node with no creation date, or source code created on another day, fails by name', (t) => {
@@ -167,7 +206,7 @@ test('a software node with no creation date, or source code created on another d
 		ran.err,
 		new RegExp(
 			`FAIL SoftwareApplication dateCreated is undefined, not ${FIRST_COMMIT}, ` +
-				"the date of the repository's first commit \\(on 10 pages\\)",
+				"the UTC day of the repository's first commit \\(on 10 pages\\)",
 		),
 	);
 	assert.match(ran.err, new RegExp(`FAIL SoftwareSourceCode dateCreated is "${dayBefore(FIRST_COMMIT)}"`));
@@ -184,7 +223,7 @@ test('a software node dated by a commit that did not change the library fails', 
 		ran.err,
 		new RegExp(
 			`FAIL SoftwareApplication dateModified is "${dayBefore(LIBRARY_MODIFIED)}", ` +
-				`not ${LIBRARY_MODIFIED}, the date of the last commit under src/ \\(on 10 pages\\)`,
+				`not ${LIBRARY_MODIFIED}, the UTC day of the last commit under src/ \\(on 10 pages\\)`,
 		),
 	);
 });
@@ -292,14 +331,28 @@ test('source code with no archive, or another archive than its repository at Sof
 });
 
 test('a build without the Spanish About page fails, and so does an About page typed as a plain article', (t) => {
+	const typed = /typed AboutPage$/m;
 	const missing = history(t, { about: { es: null } });
 	assert.equal(missing.status, 1);
-	assert.match(missing.err, /FAIL found 1 About pages, not the English one and its Spanish twin/);
+	assert.match(missing.err, /FAIL found 1 About page\(s\) in English and 0 in Spanish, not the English one and its Spanish twin/);
+	assert.doesNotMatch(missing.out, typed);
 	const plain = history(t, {
 		about: { en: aboutPage('en', { types: 'TechArticle', datePublished: '2026-07-01' }) },
 	});
 	assert.equal(plain.status, 1);
 	assert.match(plain.err, /FAIL \/start\/about\/: the About page's article node is not typed AboutPage/);
+	assert.doesNotMatch(plain.out, typed);
+});
+
+test('two English About pages are not the English one and its Spanish twin', (t) => {
+	// start/about.html is served at /start/about/ as well.
+	const options = { datePublished: '2026-07-01', dateModified: '2026-10-01' };
+	const files = { [ABOUT_FILES.en]: aboutPage('en', options), 'start/about.html': aboutPage('en', options) };
+	for (let i = 2; i < 10; i += 1) files[`page-${i}/index.html`] = page(`page-${i}`, options);
+	const ran = runCheck(t, files);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL found 2 About page\(s\) in English and 0 in Spanish/);
+	assert.doesNotMatch(ran.out, /typed AboutPage$/m);
 });
 
 test('an About page that dates the research role otherwise than the Person node fails, in either language', (t) => {
@@ -336,9 +389,79 @@ test('a Person node whose role moved, with the About page left as it was, fails'
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/start\/about\/: the page says "from 2019 to 2023", and no role the Person node dates runs from 2019 to 2023/,
+		/FAIL \/start\/about\/: the page says "from 2019 to 2023", and no role the Person node dates runs from 2019 to 2023 or ends in 2023 with no start given/,
 	);
 	assert.match(ran.err, /FAIL \/es\/start\/about\/: the page says "de 2019 a 2023"/);
+});
+
+/** Run the check on the About pages saying `en` and `es`, the fixture's own text where left out. */
+const saying = (t, { en = ABOUT_TEXT.en, es = ABOUT_TEXT.es } = {}) =>
+	history(t, {
+		about: {
+			en: aboutPage('en', { datePublished: '2026-07-01', text: en }),
+			es: aboutPage('es', { datePublished: '2026-07-01', text: es }),
+		},
+	});
+
+/** The failure a wrong span of `route`'s About page prints, up to the years. */
+const wrongSpan = (route, span) => new RegExp(`FAIL ${route}: the page says "${span}", and no role the Person node dates`);
+
+test('a wrong span beside right ones fails in every form a page writes years in, in any case', (t) => {
+	const ran = saying(t, {
+		en:
+			`${ABOUT_TEXT.en}<p>I studied at the Universidad de Alicante (2012-2018).</p>` +
+			'<p>From 2020 to 2021 I taught at the UPV, between 2012 and 2018 I mixed sound, ' +
+			'and in 2012-18 I toured.</p><p>I worked as an acoustics researcher at the UPV (2020\u20132023).</p>',
+		es:
+			`${ABOUT_TEXT.es}<p>Fui técnico de sonido desde 2012 hasta 2018, entre 2012 y 2018 ` +
+			'y del 2012 al 2018.</p>',
+	});
+	assert.equal(ran.status, 1);
+	for (const span of ['2012-2018', 'From 2020 to 2021', 'between 2012 and 2018', '2012-18', '2020\u20132023']) {
+		assert.match(ran.err, wrongSpan('/start/about/', span));
+	}
+	for (const span of ['desde 2012 hasta 2018', 'entre 2012 y 2018', 'del 2012 al 2018']) {
+		assert.match(ran.err, wrongSpan('/es/start/about/', span));
+	}
+	assert.doesNotMatch(ran.err, /the page says "(?:2018-2019|from 2019 to 2023|de 2019 a 2023)"/);
+});
+
+test('research years moved into a parenthesis fail though another span of the page is right', (t) => {
+	const ran = saying(t, {
+		en:
+			'<p>I worked as an acoustics researcher at the UPV (2020\u20132023).</p>' +
+			'<p>I was a sound technician from 2011 to 2018.</p>',
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/start\/about\/: the page says "2020\u20132023", and no role the Person node dates runs from 2020 to 2023 or ends in 2023 with no start given/,
+	);
+});
+
+test('a span ending the year a role the node dates by its end alone passes on its end year, and says so', (t) => {
+	const ran = saying(t);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		/ok {3}the About page in English writes 2 spans of years, each the years of a role the Person node dates; 1 of them only by its end year, the node giving that role no start/,
+	);
+	const moved = saying(t, { en: ABOUT_TEXT.en.replace('2018-2019', '2018-2020') });
+	assert.equal(moved.status, 1);
+	assert.match(
+		moved.err,
+		/FAIL \/start\/about\/: the page says "2018-2020", and no role the Person node dates runs from 2018 to 2020 or ends in 2020 with no start given/,
+	);
+});
+
+test("a year inside an identifier, an ORCID iD or a standard's number, is no span", (t) => {
+	const ran = saying(t, {
+		en:
+			`${ABOUT_TEXT.en}<p>ORCID 0000-0003-1250-6212; IEC 61672-1:2013, ISO 1996-2:2017 ` +
+			'and https://example.org/2011-2012/.</p>',
+	});
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /ok {3}the About page in English writes 2 spans of years/);
 });
 
 test('an About page that names a dated role without its years passes', (t) => {
@@ -364,18 +487,18 @@ test('an About page that writes the years of no dated role fails, so the years c
 		about: {
 			en: aboutPage('en', {
 				datePublished: '2026-07-01',
-				text: '<p>I worked as an acoustics researcher at the UPV between 2019 and 2023.</p>',
+				text: '<p>I worked as an acoustics researcher at the UPV for four years after my master.</p>',
 			}),
 		},
 	});
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/start\/about\/: the page writes the years of none of the 3 roles the Person node dates, so they cannot be held to it/,
+		/FAIL \/start\/about\/: the page writes the years of none of the 4 roles the Person node dates, so they cannot be held to it/,
 	);
 	assert.match(
 		ran.out,
-		/ok {3}the About page in Spanish writes 1 span of years, each the years of a role the Person node dates/,
+		/ok {3}the About page in Spanish writes 2 spans of years, each the years of a role the Person node dates/,
 	);
 });
 

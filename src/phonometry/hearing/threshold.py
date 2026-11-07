@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import FreeOrDiffuseField, NumericArrayLike
@@ -70,7 +71,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 #: Audiometric frequencies, in hertz (ISO 7029 Table 1 / ISO 389-7 Table 1).
-AUDIOMETRIC_FREQUENCIES_HZ: np.ndarray = read_only(
+AUDIOMETRIC_FREQUENCIES_HZ: NDArray[np.float64] = read_only(
     np.array(
         [
             125.0,
@@ -90,7 +91,7 @@ AUDIOMETRIC_FREQUENCIES_HZ: np.ndarray = read_only(
 )
 
 #: Median coefficients ``(a, b)`` of ``dHmd = a*(age-18)**b`` (ISO 7029 Table 1).
-_MEDIAN_MALE: np.ndarray = np.array(
+_MEDIAN_MALE: NDArray[np.float64] = np.array(
     [
         [2.50e-6, 3.841],
         [1.39e-4, 2.832],
@@ -106,7 +107,7 @@ _MEDIAN_MALE: np.ndarray = np.array(
     ],
     dtype=np.float64,
 )
-_MEDIAN_FEMALE: np.ndarray = np.array(
+_MEDIAN_FEMALE: NDArray[np.float64] = np.array(
     [
         [6.16e-4, 2.451],
         [3.98e-4, 2.568],
@@ -124,7 +125,7 @@ _MEDIAN_FEMALE: np.ndarray = np.array(
 )
 
 #: Upper-spread ``su`` polynomial coefficients c0..c5 (ISO 7029 Table 2, male).
-_SU_MALE: np.ndarray = np.array(
+_SU_MALE: NDArray[np.float64] = np.array(
     [
         [4.63, 0.645, -8.85e-2, 3.69e-3, -5.98e-5, 3.39e-7],
         [5.27, 0.710, -9.13e-2, 3.64e-3, -5.74e-5, 3.22e-7],
@@ -141,7 +142,7 @@ _SU_MALE: np.ndarray = np.array(
     dtype=np.float64,
 )
 #: Lower-spread ``sl`` polynomial coefficients c0..c5 (ISO 7029 Table 3, male).
-_SL_MALE: np.ndarray = np.array(
+_SL_MALE: NDArray[np.float64] = np.array(
     [
         [3.34, 0.131, -2.02e-2, 1.12e-3, -2.28e-5, 1.57e-7],
         [3.32, 0.230, -2.54e-2, 1.20e-3, -2.27e-5, 1.46e-7],
@@ -158,7 +159,7 @@ _SL_MALE: np.ndarray = np.array(
     dtype=np.float64,
 )
 #: Upper-spread ``su`` polynomial coefficients c0..c5 (ISO 7029 Table 4, female).
-_SU_FEMALE: np.ndarray = np.array(
+_SU_FEMALE: NDArray[np.float64] = np.array(
     [
         [5.05, 0.400, -4.60e-2, 1.73e-3, -2.75e-5, 1.71e-7],
         [5.01, 0.481, -4.88e-2, 1.80e-3, -2.81e-5, 1.67e-7],
@@ -175,7 +176,7 @@ _SU_FEMALE: np.ndarray = np.array(
     dtype=np.float64,
 )
 #: Lower-spread ``sl`` polynomial coefficients c0..c5 (ISO 7029 Table 5, female).
-_SL_FEMALE: np.ndarray = np.array(
+_SL_FEMALE: NDArray[np.float64] = np.array(
     [
         [3.64, 0.047, 2.28e-3, -6.68e-5, -8.72e-7, 2.30e-8],
         [3.11, 0.226, -7.71e-3, 9.83e-5, -7.11e-7, 9.02e-9],
@@ -199,11 +200,11 @@ SEXES: tuple[Sex, ...] = ("male", "female")
 
 #: Reference threshold of hearing, in dB, free-field then diffuse-field, at
 #: :data:`AUDIOMETRIC_FREQUENCIES_HZ` (ISO 389-7:2005 Table 1).
-_REFERENCE_FREE: np.ndarray = np.array(
+_REFERENCE_FREE: NDArray[np.float64] = np.array(
     [22.1, 11.4, 4.4, 2.4, 2.4, 2.4, -1.3, -5.8, -5.4, 4.3, 12.6],
     dtype=np.float64,
 )
-_REFERENCE_DIFFUSE: np.ndarray = np.array(
+_REFERENCE_DIFFUSE: NDArray[np.float64] = np.array(
     [22.1, 11.4, 3.8, 1.2, 0.8, 1.0, -1.5, -4.0, -3.8, 1.4, 6.8],
     dtype=np.float64,
 )
@@ -234,11 +235,11 @@ class AgeThresholdResult(OwnsArrays):
     age: float
     sex: Sex
     fractile: float
-    frequencies: np.ndarray
-    median: np.ndarray
-    spread_upper: np.ndarray
-    spread_lower: np.ndarray
-    threshold: np.ndarray
+    frequencies: NDArray[np.float64]
+    median: NDArray[np.float64]
+    spread_upper: NDArray[np.float64]
+    spread_lower: NDArray[np.float64]
+    threshold: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a distribution whose spectra do not all cover the same frequencies.
@@ -299,7 +300,9 @@ class AgeThresholdResult(OwnsArrays):
         )
 
 
-def _select(values: np.ndarray, frequencies: NumericArrayLike | None) -> np.ndarray:
+def _select(
+    values: NDArray[np.float64], frequencies: NumericArrayLike | None
+) -> NDArray[np.float64]:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
         return values.copy()
@@ -317,7 +320,7 @@ def _select(values: np.ndarray, frequencies: NumericArrayLike | None) -> np.ndar
     return values[idx]
 
 
-def _spread(coeffs: np.ndarray, u: float) -> np.ndarray:
+def _spread(coeffs: NDArray[np.float64], u: float) -> NDArray[np.float64]:
     """Evaluate the degree-5 spread polynomials (ascending powers) at ``u``."""
     powers = u ** np.arange(coeffs.shape[1], dtype=np.float64)
     return coeffs @ powers
@@ -391,7 +394,7 @@ def age_threshold(
 
 def reference_threshold(
     field: FreeOrDiffuseField = "free", frequencies: NumericArrayLike | None = None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Reference threshold of hearing (ISO 389-7:2005, Table 1).
 
     The sound pressure level, in dB, that corresponds to the audiometric zero
@@ -418,7 +421,7 @@ def reference_threshold(
 #: ISO 389-1:1998, Tables 1 and 2. The twenty-three frequencies the earphone
 #: reference levels are printed at, in hertz. They are the audiometric
 #: frequencies plus the intermediate ones an audiometer may offer.
-RETSPL_FREQUENCIES_HZ: np.ndarray = read_only(
+RETSPL_FREQUENCIES_HZ: NDArray[np.float64] = read_only(
     np.array(
         [
             125.0,
@@ -452,7 +455,7 @@ RETSPL_FREQUENCIES_HZ: np.ndarray = read_only(
 #: ISO 389-1:1998, Table 1: the Beyer DT 48 with a flat cushion, on an
 #: acoustic coupler to IEC 60303. Values rounded to the nearest half decibel,
 #: as the table's note says.
-_RETSPL_DT48: np.ndarray = np.array(
+_RETSPL_DT48: NDArray[np.float64] = np.array(
     [
         47.5,
         40.5,
@@ -483,7 +486,7 @@ _RETSPL_DT48: np.ndarray = np.array(
 
 #: ISO 389-1:1998, Table 1: the Telephonics TDH 39 with the MX 41/AR (or
 #: model 51) cushion, on the same coupler.
-_RETSPL_TDH39: np.ndarray = np.array(
+_RETSPL_TDH39: NDArray[np.float64] = np.array(
     [
         45.0,
         37.5,
@@ -515,7 +518,7 @@ _RETSPL_TDH39: np.ndarray = np.array(
 #: ISO 389-1:1998, Table 2: any other supra-aural earphone meeting the four
 #: requirements of 4.3, on an artificial ear to IEC 60318. The two models of
 #: 4.2 are excluded from it by the clause itself.
-_RETSPL_OTHER: np.ndarray = np.array(
+_RETSPL_OTHER: NDArray[np.float64] = np.array(
     [
         45.0,
         38.5,
@@ -554,7 +557,7 @@ _DT48: Final = "DT 48"
 _TDH39: Final = "TDH 39"
 _OTHER: Final = "other supra-aural"
 
-_RETSPL: Mapping[ReferenceEarphone, np.ndarray] = {
+_RETSPL: Mapping[ReferenceEarphone, NDArray[np.float64]] = {
     _DT48: _RETSPL_DT48,
     _TDH39: _RETSPL_TDH39,
     _OTHER: _RETSPL_OTHER,
@@ -575,8 +578,8 @@ EARPHONE_COUPLERS: Mapping[ReferenceEarphone, str] = MappingProxyType(
 
 
 def _select_retspl(
-    values: np.ndarray, frequencies: NumericArrayLike | None
-) -> np.ndarray:
+    values: NDArray[np.float64], frequencies: NumericArrayLike | None
+) -> NDArray[np.float64]:
     """``values`` at a requested subset of the ISO 389-1 frequencies."""
     if frequencies is None:
         return values.copy()
@@ -597,7 +600,7 @@ def _select_retspl(
 def earphone_reference_level(
     earphone: ReferenceEarphone = _TDH39,
     frequencies: NumericArrayLike | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
 
     The sound pressure level, in dB re 20 uPa, that an audiometer has to
@@ -625,7 +628,7 @@ def hearing_level_to_coupler_spl(
     earphone: ReferenceEarphone = _TDH39,
     *,
     frequencies: NumericArrayLike | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """An audiogram in dB HL as the level the coupler has to see, in dB SPL.
 
     Hearing level is defined against the audiometric zero, so the two differ

@@ -1,31 +1,35 @@
 // The Markdown copy of a page that has no docs/ mirror, as the page shows it.
 //
-// emit-page-markdown.mjs publishes a Markdown copy beside every page. Where
-// docs/ holds no mirror of the page (every Spanish page but the transplanted
-// ones), the copy is the page's own source with its frontmatter and its MDX
-// machinery taken out: its import and export statements and its component
-// tags, a wrapper keeping its children. That machinery was found by patterns
-// over the page as written, which read code as machinery too: the `import`
-// line of a Python example went as the page's own import, a `<NC-15` written in
-// a code span opened a component that ran to the next `/>`, and two blank lines
-// of an example closed up. The page is read here as the site renders it
-// (pageMarkup and pageParts of markdown-spans.mjs), so only what the page
-// renders as markup goes, and what it shows as code stays as it shows it.
+// emit-page-markdown.mjs publishes a Markdown copy beside every page but the
+// ones src/lib/page-markdown.mjs withholds (the landing pages, and the pages
+// that show their data through a component with no docs/ copy). Where docs/
+// holds no mirror of the page (every Spanish page but the transplanted ones,
+// and in English the API reference and the errata families), the copy is the
+// page's own source with its frontmatter and its MDX machinery taken out: its
+// import and export statements and its component tags, a wrapper keeping its
+// children. That machinery was found by patterns over the page as written,
+// which read code as machinery too: the `import` line of a Python example went
+// as the page's own import, a `<NC-15` written in a code span opened a
+// component that ran to the next `/>`, and two blank lines of an example
+// closed up. The page is read here as the site renders it (pageMarkup and
+// pageParts of markdown-spans.mjs), so only what the page renders as markup
+// goes, and what it shows as code stays as it shows it.
 //
 // What else the copy needs to read as the page does is written here too: the
 // page's title, which its source keeps in the frontmatter; its comments taken
 // out; a count the page prints from a data module, written as the number; a
 // link the page writes from the site's root, made absolute so that it leads
-// somewhere from a copy fetched on its own; a figure and a clip, written as an
-// image and a line where the copy used to drop them with their text; and the
-// References section the layout prints from the frontmatter.
+// somewhere from a copy fetched on its own; a figure, a clip and a fiche,
+// written as an image and a line where the copy used to drop them with their
+// text; and the References section the layout prints from the frontmatter.
+// copyDefects then reads the copy against the page on its own.
 //
-// Nothing here imports a dependency, so the tests run before the install.
+// Nothing here imports a dependency.
 
 import { codeLines } from '../../src/lib/markdown-fences.mjs';
 import { citationParts, noteParts, opening, sortedReferences } from '../../src/lib/references-format.mjs';
 import { mediaUrl } from '../../src/lib/media.mjs';
-import { frontmatterEnd, pageMarkup, pageParts } from './markdown-spans.mjs';
+import { EXPRESSION_BLANK, frontmatterEnd, pageMarkup, pageParts } from './markdown-spans.mjs';
 
 /** An import or an export statement of an `.mdx` page, on a line of its own. */
 const ESM = /^(?:import|export)\s.*$/gm;
@@ -38,13 +42,20 @@ const WRAPPER = /<\/?[A-Z][\w.]*\b[^>]*>/g;
 
 /**
  * A link the page writes from the site's root: the destination of a Markdown
- * link, or an `href` or `src` of a tag the page renders, that opens on one
- * slash. Two slashes open an address on another host, and stay.
+ * link, written bare or in `<...>`, or of a reference-style definition
+ * (`[g]: /x/`), or an `href` or `src` of a tag the page renders, quoted either
+ * way or, on an `.md` page, not at all, that opens on one slash. Two slashes
+ * open an address on another host, and stay.
  */
-const ROOT_RELATIVE = /(\]\(|\b(?:href|src)=")\/(?!\/)/g;
+const ROOT_RELATIVE = /(\]\(<?|\b(?:href|src)=["']?|^ {0,3}\[[^\]\n]+\]:[ \t]*<?)\/(?!\/)/gm;
 
-/** An expression that prints one name: `{totalChecks}`. */
-const NAME = /^\{\s*([A-Za-z_$][\w$]*)\s*\}$/;
+/**
+ * An expression that prints one name, `{totalChecks}`, with the blanks and
+ * comments around it read left to right as MDX reads them (EXPRESSION_BLANK):
+ * `{/* a count *\/ totalChecks}`, or `{// a count` with `totalChecks}` on the
+ * next line.
+ */
+const NAME = new RegExp(String.raw`^\{${EXPRESSION_BLANK}*([A-Za-z_$][\w$]*)${EXPRESSION_BLANK}*\}$`);
 
 /**
  * The page without its frontmatter, as Astro finds it, after a byte order mark
@@ -331,6 +342,48 @@ export function referencesMarkdown(references, lang, heading) {
   return `## ${heading}\n\n${entries.join('\n')}`;
 }
 
+/** `text` with the characters a regular expression reads as syntax escaped. */
+const literal = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** The text of a link or of an image's alt, one character at least, its escapes in. */
+const BRACKETED = String.raw`(?:\\.|[^\\\]\n])+`;
+
+/**
+ * What the copy prints for each component {@link COMPONENT_READINGS} marks
+ * `written`, as {@link copyDefects} finds it in the copy: a figure is an image
+ * with an alt, of a file the site serves; a clip and a fiche a line that opens
+ * on its word in either language and links the clip or the PDF the site
+ * serves; the list of catalogues one item per catalogue, linked to its page and
+ * followed by what it holds. Each is read from the copy as written, never from
+ * figureMarkdown or the emitter, and `noun` names it in a message. A page may
+ * link a catalogue in a list of its own, so the items of the list of
+ * catalogues are counted only on a page that renders one (`listed`).
+ * scripts/page-markdown.test.mjs holds the keys to the `written` readings, so a
+ * component the copy writes out cannot go unchecked.
+ */
+export const COPY_FORMS = Object.freeze({
+  ThemeImage: {
+    noun: ['figure', 'figures'],
+    pattern: (site) => new RegExp(String.raw`!\[${BRACKETED}\]\(${literal(site)}/media/[^)\s]+\)`, 'g'),
+  },
+  Video: {
+    noun: ['clip', 'clips'],
+    pattern: (site) =>
+      new RegExp(String.raw`\*\*(?:Video|Vídeo):\*\* \[${BRACKETED}\]\(${literal(site)}/media/[^)\s]+\.webm\)`, 'g'),
+  },
+  ReportPreview: {
+    noun: ['fiche', 'fiches'],
+    pattern: (site) =>
+      new RegExp(String.raw`\*\*(?:Report|Informe):\*\* \[${BRACKETED}\]\(${literal(site)}/media/[^)\s]+\.pdf\)`, 'g'),
+  },
+  CatalogueIndex: {
+    noun: ['catalogue', 'catalogues'],
+    listed: true,
+    pattern: (site) =>
+      new RegExp(String.raw`^- \[${BRACKETED}\]\(${literal(site)}/(?:es/)?reference/catalogues/[\w-]+/\): \S`, 'gm'),
+  },
+});
+
 /**
  * What a copy written from a page's source misses of the page, one sentence
  * each, or nothing when it misses nothing.
@@ -340,20 +393,37 @@ export function referencesMarkdown(references, lang, heading) {
  * pass by agreeing with itself:
  *
  * - the copy opens with `# <title>`;
- * - it holds no comment, and no link from the site's root, outside its code;
- * - no name the page imports and prints is left in braces outside its code;
+ * - it holds no comment outside its code;
+ * - it holds no link from the site's root outside its code, in any syntax: the
+ *   site's base path where no host comes before it;
+ * - no name the page imports and prints is left in an expression outside its
+ *   code;
+ * - it prints a figure, a clip and a fiche for each one the page renders, and
+ *   every catalogue for each list of them, in the forms {@link COPY_FORMS}
+ *   reads;
  * - every line of the page's code is in it, as many times as the page has it;
  * - a page that cites works ends with a section holding one entry per work,
  *   and every DOI among them.
  *
  * @param {string} copy The copy as written, without the lines above its title.
- * @param {{ source: string, kind: 'md' | 'mdx', title: string, references?: readonly { doi?: string }[], heading: string, firstLine?: number }} page
+ * @param {{
+ *   source: string,
+ *   kind: 'md' | 'mdx',
+ *   title: string,
+ *   references?: readonly { doi?: string }[],
+ *   heading: string,
+ *   site: string,
+ *   catalogues?: number,
+ *   firstLine?: number,
+ * }} page
  *   The page's source with its frontmatter out, its kind, its title and the
- *   works it cites, the heading of its References section, and the number of
+ *   works it cites, the heading of its References section, the address of the
+ *   site with its base path (`https://docs.jmrp.io/phonometry`), how many
+ *   catalogues a list of them holds in the page's language, and the number of
  *   the page's line `source` opens on, for the messages.
  * @returns {string[]}
  */
-export function copyDefects(copy, { source, kind, title, references = [], heading, firstLine = 1 }) {
+export function copyDefects(copy, { source, kind, title, references = [], heading, site, catalogues = 0, firstLine = 1 }) {
   const defects = [];
   const first = copy.slice(0, copy.indexOf('\n') === -1 ? copy.length : copy.indexOf('\n'));
   if (first !== `# ${title}`) defects.push(`it opens with ${JSON.stringify(first)}, not with the page's title`);
@@ -363,12 +433,37 @@ export function copyDefects(copy, { source, kind, title, references = [], headin
   }
   const shown = pageMarkup(copy, { kind: 'md' });
   if (shown.includes('{/*')) defects.push('it keeps a comment of the page written as {/* */}');
-  for (const found of shown.matchAll(ROOT_RELATIVE)) {
-    defects.push(`it links ${JSON.stringify(copy.slice(found.index, found.index + 60).split('\n')[0])} from the site's root`);
+  // The site's base path opening a path where no host or path comes before it:
+  // a link from the root in any syntax, a Markdown link, a definition, an
+  // attribute quoted or not, or a bare address. An address on this site or on
+  // another host (github.com/jmrplens/phonometry/...) has a character of its
+  // own before the base path.
+  const basePath = new URL(site).pathname.replace(/\/$/, '');
+  const rooted = new Set();
+  for (const found of shown.matchAll(ROOT_RELATIVE)) rooted.add(found.index + found[1].length);
+  if (basePath) {
+    for (const found of shown.matchAll(new RegExp(String.raw`(?<![\w.~%/-])${literal(basePath)}/`, 'g'))) rooted.add(found.index);
+  }
+  for (const at of [...rooted].sort((a, b) => a - b)) {
+    const line = copy.slice(copy.lastIndexOf('\n', at) + 1, at + 60).split('\n')[0];
+    defects.push(`it links ${JSON.stringify(line.slice(Math.max(0, line.length - 100)))} from the site's root`);
   }
   if (kind === 'mdx') {
     for (const name of pageImports(source).keys()) {
-      if (shown.includes(`{${name}}`)) defects.push(`it prints {${name}} where the page prints its value`);
+      if (new RegExp(String.raw`\{[^{}]*(?<![\w$])${literal(name)}(?![\w$])[^{}]*\}`).test(shown)) {
+        defects.push(`it prints {${name}} where the page prints its value`);
+      }
+    }
+    const rendered = pageMarkup(source, { kind });
+    for (const [component, { noun, pattern, listed = false }] of Object.entries(COPY_FORMS)) {
+      const tags = (rendered.match(new RegExp(String.raw`<${component}\b`, 'g')) ?? []).length;
+      if (listed && tags === 0) continue;
+      const expected = tags * (listed ? catalogues : 1);
+      const written = (shown.match(pattern(site)) ?? []).length;
+      if (written !== expected) {
+        const verb = listed ? 'lists' : 'renders';
+        defects.push(`it writes ${written} of the ${expected} ${noun[expected === 1 ? 0 : 1]} the page ${verb}`);
+      }
     }
   }
   const sourceLines = source.split('\n');

@@ -260,7 +260,7 @@ const SOURCE = [
   'x = np.zeros(3)',
   '```',
 ].join('\n');
-const PAGE = { source: SOURCE, kind: 'mdx', title: 'A page', references: REFERENCES, heading: 'References' };
+const PAGE = { source: SOURCE, kind: 'mdx', title: 'A page', references: REFERENCES, heading: 'References', site: BASE };
 const value = (name) => (name === 'totalChecks' ? 1897 : undefined);
 
 test('a copy written as the generator writes it misses nothing of its page', () => {
@@ -285,4 +285,146 @@ test('a copy that misses its title, keeps a comment or a link from the root, pri
   }
   const offset = copyDefects(good.replace('import numpy as np\n', ''), { ...PAGE, firstLine: 5 });
   assert.ok(offset.some((line) => /lost line 10 of the page's code/.test(line)), JSON.stringify(offset));
+});
+
+// What the copy writes for a figure, a clip, a fiche and the list of
+// catalogues: the check read none of it, so an emitter that dropped every one
+// of them again, with the text written for a reader who cannot see it, wrote
+// its 915 copies and passed. The check counts what the source renders against
+// what the copy prints, each read on its own.
+
+const MEDIA_SOURCE = [
+  "import ThemeImage from '../components/ThemeImage.astro';",
+  '',
+  'A figure:',
+  '',
+  '<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_flow.svg" alt="The flow, clipped to [0, 1]" />',
+  '',
+  '<Video name="anim_room" title="A room" description="The wave front spreads." />',
+  '',
+  '<ReportPreview name="iso717_airborne_example" title="ISO 717-1 report (PDF)" description="A fiche." />',
+  '',
+  'Write `<ThemeImage src="x.svg" alt="x" />` to show one.',
+  '',
+  '<CatalogueIndex lang="en" />',
+].join('\n');
+
+const CATALOGUE_LIST = [
+  `- [Solids](${BASE}/reference/catalogues/solids/): Elastic constants.`,
+  `- [Gases](${BASE}/reference/catalogues/gases/): Gas properties.`,
+].join('\n');
+
+/** A copy of MEDIA_SOURCE as the generator writes one, its media written out. */
+function mediaCopy(source = MEDIA_SOURCE) {
+  const expand = (tag) => (tag.startsWith('<CatalogueIndex') ? CATALOGUE_LIST : figureMarkdown(tag, { lang: 'en', base: BASE }));
+  return `# A page\n\n${stripMdx(source, { expand, origin: ORIGIN })}`;
+}
+
+const MEDIA_PAGE = { source: MEDIA_SOURCE, kind: 'mdx', title: 'A page', heading: 'References', site: BASE, catalogues: 2 };
+
+test('a copy that writes every figure, clip, fiche and catalogue its page renders misses none', () => {
+  assert.deepEqual(copyDefects(mediaCopy(), MEDIA_PAGE), []);
+  // A page that links a catalogue in a list of its own lists no catalogues.
+  const linked = `See also:\n\n- [Gases](${BASE}/reference/catalogues/gases/): Gas properties.`;
+  assert.deepEqual(copyDefects(`# A page\n\n${linked}`, { ...MEDIA_PAGE, source: linked }), []);
+});
+
+test('a copy that drops a figure, a clip, a fiche or a catalogue of its page is told so', () => {
+  const good = mediaCopy();
+  const cases = [
+    [good.replace(/^!\[.*$/m, ''), /writes 0 of the 1 figure the page renders/],
+    [good.replace(`${BASE}/media/sii_flow.svg`, 'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_flow.svg'), /writes 0 of the 1 figure/],
+    [good.replace(/!\[[^\]]*\]/, '![]'), /writes 0 of the 1 figure/],
+    [good.replace(/^\*\*Video:\*\*.*$/m, ''), /writes 0 of the 1 clip the page renders/],
+    [good.replace(/^\*\*Report:\*\*.*$/m, ''), /writes 0 of the 1 fiche the page renders/],
+    [good.replace(/^- \[Gases\].*$/m, ''), /writes 1 of the 2 catalogues the page lists/],
+    // The emitter of the review's plant: every figure, clip and fiche dropped.
+    [`# A page\n\n${stripMdx(MEDIA_SOURCE, { expand: (tag) => (tag.startsWith('<CatalogueIndex') ? CATALOGUE_LIST : undefined), origin: ORIGIN })}`, /writes 0 of the 1 figure/],
+  ];
+  for (const [copy, defect] of cases) {
+    const found = copyDefects(copy, MEDIA_PAGE);
+    assert.ok(found.some((line) => defect.test(line)), `${defect} in ${JSON.stringify(found)}`);
+  }
+});
+
+// A link from the site's root that the writer's pattern did not know stayed in
+// the copy, and the check, which read links with the same pattern, said
+// nothing: a reference-style definition, and an unquoted or single-quoted
+// attribute of a .md page.
+
+test("a link from the site's root is made absolute in every syntax a page writes one", () => {
+  const page = [
+    "See [the guide][g], <a href=/phonometry/x/>x</a> and <a href='/phonometry/y/'>y</a>.",
+    '',
+    '[g]: /phonometry/signals/levels/',
+    '  [h]: </phonometry/a b/>',
+  ].join('\n');
+  assert.equal(
+    stripMdx(page, { kind: 'md', origin: ORIGIN }),
+    [
+      `See [the guide][g], <a href=${ORIGIN}/phonometry/x/>x</a> and <a href='${ORIGIN}/phonometry/y/'>y</a>.`,
+      '',
+      `[g]: ${ORIGIN}/phonometry/signals/levels/`,
+      `  [h]: <${ORIGIN}/phonometry/a b/>`,
+    ].join('\n'),
+  );
+});
+
+test("a link from the site's root is found in the copy whatever its syntax, and an address on another host is not", () => {
+  const page = { source: 'Text.', kind: 'md', title: 'T', heading: 'References', site: BASE };
+  const rooted = [
+    '[g]: /phonometry/signals/levels/',
+    '<a href=/phonometry/x/>x</a>',
+    "<a href='/phonometry/x/'>x</a>",
+    'See /phonometry/start/ for more.',
+  ];
+  for (const line of rooted) {
+    const found = copyDefects(`# T\n\n${line}\n`, page);
+    assert.ok(found.some((defect) => /from the site's root/.test(defect)), `${line}: ${JSON.stringify(found)}`);
+  }
+  const elsewhere = [
+    'Its source is at https://github.com/jmrplens/phonometry/blob/main/docs/x.md.',
+    '![A figure](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/a.svg)',
+    `See ${BASE}/start/ and [it](${BASE}/start/).`,
+    'Write `/phonometry/start/` for it.',
+  ];
+  for (const line of elsewhere) assert.deepEqual(copyDefects(`# T\n\n${line}\n`, page), [], line);
+});
+
+// A name written between comments stopped the copy: the writer wrote a name
+// as its value only when it stood alone in its braces, and the check found a
+// name left in a copy only in that form. The page prints the value whatever
+// comments stand around the name, so the copy does, and an expression of
+// comments alone is still a comment.
+
+test('an expression is a comment only when it holds comments alone, and a name among comments is its value', () => {
+  const counts = (name) => (name === 'totalChecks' ? 1897 : undefined);
+  assert.equal(stripMdx('It runs {/* count */ totalChecks /* from the report */} checks.', { value: counts }), 'It runs 1897 checks.');
+  assert.equal(stripMdx('It runs {totalChecks /* x */} checks.', { value: counts }), 'It runs 1897 checks.');
+  assert.equal(stripMdx('Gone {/* a */ /* b */} here.', { value: counts }), 'Gone  here.');
+  assert.throws(() => stripMdx('A {/* a */ 1 + 1 /* b */} sum.', { value: counts }), /prints \{\/\* a \*\/ 1 \+ 1/);
+  const page = { source: SOURCE, kind: 'mdx', title: 'A page', heading: 'References', site: BASE };
+  for (const left of ['{/* c */ totalChecks}', '{ totalChecks.toLocaleString() }']) {
+    const found = copyDefects(`# A page\n\nIt runs ${left} checks.\n\n${SOURCE.split('\n').slice(4).join('\n')}`, page);
+    assert.ok(found.some((defect) => /prints \{totalChecks\} where the page prints its value/.test(defect)), `${left}: ${JSON.stringify(found)}`);
+  }
+});
+
+// MDX reads the comments of an expression left to right, a line comment
+// running to the end of its line, so a name beside one prints its value as
+// it does beside a block comment. The copy reads them with the reading the
+// shared reader gives an expression of comments alone.
+
+test('a name beside a line comment that ends its line is its value, the comments read left to right', () => {
+  const counts = (name) => (name === 'totalChecks' ? 1897 : undefined);
+  for (const written of [
+    '{// a note\ntotalChecks}',
+    '{totalChecks // a note\n}',
+    '{/* a */\n// b\ntotalChecks}',
+    '{// a /* b\ntotalChecks}',
+    '{/* see http://x */ totalChecks}',
+  ]) {
+    assert.equal(stripMdx(`It runs ${written} checks.`, { value: counts }), 'It runs 1897 checks.', JSON.stringify(written));
+  }
+  assert.equal(stripMdx('Gone {// a note\n} here.', { value: counts }), 'Gone  here.');
 });

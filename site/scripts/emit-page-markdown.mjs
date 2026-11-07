@@ -1,6 +1,9 @@
-// Publishes a clean markdown copy of every page next to its HTML, so an agent
-// can fetch one page as text instead of choosing between parsing the rendered
-// HTML and downloading the whole corpus.
+// Publishes a clean markdown copy of a page next to its HTML, so an agent can
+// fetch one page as text instead of choosing between parsing the rendered HTML
+// and downloading the whole corpus. Every page has one but the ones
+// src/lib/page-markdown.mjs withholds: the two landing pages, and the pages
+// that show their data through a component and have no copy in docs/ to stand
+// for it.
 //
 // Why this exists: a page's HTML is roughly 90% chrome. The sidebar alone is
 // ~76 kB on every one of the 442 pages, syntax highlighting adds hundreds of
@@ -22,7 +25,7 @@
 // page whose source renders its data through a component publishes no copy:
 // src/lib/page-markdown.mjs names those pages, and the head of each says so by
 // offering none.
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { glob } from "node:fs/promises";
@@ -99,6 +102,18 @@ const REFERENCES_HEADING = Object.fromEntries(
   }),
 );
 
+/**
+ * How many catalogue pages each language has, read off the content tree rather
+ * than from the list the overview writes (catalogueIndex), so that the copy
+ * check holds that list to the pages the site has.
+ */
+const CATALOGUE_PAGES = Object.fromEntries(
+  ["en", "es"].map((lang) => {
+    const folder = join(contentDir, ...(lang === "es" ? ["es"] : []), "reference", "catalogues");
+    return [lang, readdirSync(folder).filter((name) => /\.mdx?$/.test(name) && !/^index\./.test(name)).length];
+  }),
+);
+
 /** The one data module a page prints a count from, and the counts it exports. */
 const STATS_MODULE = join(siteRoot, "src", "data", "conformance-stats.mjs");
 
@@ -147,7 +162,17 @@ function sourceCopy(file, route) {
   if (!title) throw new Error(`${relative(siteRoot, file)} has no title for its Markdown copy to open with`);
   const heading = REFERENCES_HEADING[lang];
   const copy = [`# ${title}`, body, referencesMarkdown(frontmatter.references, lang, heading)].filter(Boolean).join("\n\n");
-  for (const defect of copyDefects(copy, { source, kind, title, references: frontmatter.references, heading, firstLine })) {
+  const checked = {
+    source,
+    kind,
+    title,
+    references: frontmatter.references,
+    heading,
+    site: SITE_URL,
+    catalogues: CATALOGUE_PAGES[lang],
+    firstLine,
+  };
+  for (const defect of copyDefects(copy, checked)) {
     defects.push(`${relative(siteRoot, file)}: ${defect}`);
   }
   return copy;

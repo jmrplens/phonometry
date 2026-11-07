@@ -2,9 +2,12 @@
 /**
  * Page actions: hand this page to something that reads text.
  *
- * Every page written as a file publishes a clean markdown copy of itself at
- * `<page>/index.md` (scripts/emit-page-markdown.mjs) and advertises it in the
- * head with `<link rel="alternate" type="text/markdown">`. That is the right
+ * Every page written as a file, but the ones src/lib/page-markdown.mjs
+ * withholds (the two landing pages, and the pages that show their data through
+ * a component with no copy in docs/ to stand for it), publishes a clean
+ * markdown copy of itself at `<page>/index.md` (scripts/emit-page-markdown.mjs)
+ * and advertises it in the head with `<link rel="alternate"
+ * type="text/markdown">`. That is the right
  * artifact for an agent, a reader pasting a page into a chat, or anyone who
  * wants the prose without ~90% chrome around it, and until now nothing on the
  * page said it existed: only a machine parsing the head could find it. This is
@@ -45,8 +48,10 @@
 import { bibtex } from '../data/citation.mjs';
 
 // The address of this page's markdown copy, or undefined where the generator
-// wrote none: the two splash pages, which are a component layout rather than
-// prose, and the synthesised 404. Head.astro withholds the `rel="alternate"`
+// wrote none: the pages src/lib/page-markdown.mjs withholds (the two splash
+// pages, which are a component layout rather than prose, and the pages that
+// show their data through a component with no copy in docs/) and the
+// synthesised 404. Head.astro withholds the `rel="alternate"`
 // link on exactly this test, and the whole control is withheld below.
 const { lang: routeLang, markdownCopy: markdownUrl } = Astro.locals.starlightRoute as {
   lang: string;

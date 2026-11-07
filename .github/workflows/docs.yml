@@ -280,7 +280,8 @@ jobs:
         working-directory: site
       # The postbuild writes each page's Markdown copy and stops the build on
       # a copy written from a page's source that misses its title, a line of
-      # its code, a count it prints, an absolute link or a work it cites
+      # its code, a count it prints, an absolute link, a figure, clip or fiche
+      # it renders, a catalogue it lists or a work it cites
       # (scripts/shared/page-twin.mjs, copyDefects).
       - name: Build site
         # The build's output is kept for the step after this one, which reads

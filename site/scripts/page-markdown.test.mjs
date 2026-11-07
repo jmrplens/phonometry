@@ -23,7 +23,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { DATA_COMPONENTS, hasMarkdownCopy, mirrorOf, routeOf, withheldRoutes } from '../src/lib/page-markdown.mjs';
-import { COMPONENT_READINGS } from './shared/page-twin.mjs';
+import { COMPONENT_READINGS, COPY_FORMS } from './shared/page-twin.mjs';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTENT = join(SITE, 'src', 'content', 'docs');
@@ -126,4 +126,9 @@ test('every component a page imports is read one way by the copy, and every read
   const stale = [...read].filter((name) => !imported.has(name)).sort();
   assert.deepEqual(stale, [], 'readings of components no page imports');
   for (const name of DATA_COMPONENTS) assert.equal(COMPONENT_READINGS[name], undefined, `${name} is read twice`);
+});
+
+test('every component the copy writes out is one the copy check counts', () => {
+  const written = Object.keys(COMPONENT_READINGS).filter((name) => COMPONENT_READINGS[name] === 'written').sort();
+  assert.deepEqual(Object.keys(COPY_FORMS).sort(), written, 'a component the copy writes out needs its form in COPY_FORMS');
 });

@@ -346,6 +346,16 @@ function firstOpened(text, at, end, kind, reads) {
 }
 
 /**
+ * One thing an expression holds that MDX renders as nothing, read left to
+ * right: a blank, a block comment, which ends at the first `*\/` after it
+ * opens, or a line comment that runs to the end of its line. A pattern's
+ * source, for the readers that build on it: an expression of these alone is
+ * a comment here, and page-twin.mjs reads the name a count is written as
+ * between them.
+ */
+export const EXPRESSION_BLANK = String.raw`(?:\s|\/\*(?:(?!\*\/)[\s\S])*\*\/|\/\/[^\n]*\n)`;
+
+/**
  * An expression that holds nothing but blanks and comments, which MDX renders
  * as nothing: `{/* a note *\/}`, two of them side by side, a line comment that
  * runs to the end of its line (`{// a note` and `}` on the next), or no
@@ -353,7 +363,7 @@ function firstOpened(text, at, end, kind, reads) {
  * opens, so an expression that opens and ends on a comment and holds a name
  * between them is no comment.
  */
-const ONLY_COMMENTS = /^\{(?:\s|\/\*(?:(?!\*\/)[\s\S])*\*\/|\/\/[^\n]*\n)*\}$/;
+const ONLY_COMMENTS = new RegExp(String.raw`^\{${EXPRESSION_BLANK}*\}$`);
 
 /**
  * What a part of a page that renders no markup is, by what opens it: a

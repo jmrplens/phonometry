@@ -712,18 +712,21 @@ export default defineConfig({
       defaultLocale: 'root',
       locales,
       head: [
-        // The frame, referrer and permissions headers come from the response
-        // header rule Cloudflare applies to these pages: a
-        // Content-Security-Policy of frame-ancestors 'self', X-Frame-Options,
-        // Referrer-Policy and Permissions-Policy. The rest of the policy
-        // travels here, as a meta tag the build writes: everything the site
-        // loads is first-party, and this pins that fact. Meta delivery cannot
-        // carry frame-ancestors or report-uri (ignored there by spec), which
-        // is why the edge sends the first. Inline scripts/styles stay allowed
-        // because a static build cannot mint per-response nonces: Starlight's
-        // theme bootstrap and Astro's island hydration are inline by design.
-        // 'wasm-unsafe-eval' is for Pagefind, whose search index is compiled
-        // WebAssembly fetched from this origin.
+        // The Cloudflare response header rule for docs.jmrp.io sends a whole
+        // Content-Security-Policy on every response, frame-ancestors 'none'
+        // and its report-uri included (meta delivery cannot carry either; the
+        // spec ignores them there), with X-Frame-Options: DENY,
+        // Referrer-Policy and Permissions-Policy. This meta policy stays
+        // beside it: a browser enforces both, and this one is the stricter on
+        // images, img-src 'self' data: where the edge's lets in four other
+        // origins, img.shields.io among them. Everything the site loads is
+        // first-party, and this pins that fact. It also holds wherever the
+        // build is served without that rule, a local preview included.
+        // Inline scripts/styles stay allowed because a static build cannot
+        // mint per-response nonces: Starlight's theme bootstrap and Astro's
+        // island hydration are inline by design. 'wasm-unsafe-eval' is for
+        // Pagefind, whose search index is compiled WebAssembly fetched from
+        // this origin.
         {
           tag: 'meta',
           attrs: {
@@ -745,9 +748,9 @@ export default defineConfig({
         // No preconnect to raw.githubusercontent.com: every figure, animation
         // and fiche is served from this origin now (scripts/stage-media.mjs),
         // so there is no third-party handshake left to warm.
-        // The same Cloudflare rule sends Referrer-Policy as a header; the tag
-        // gives the build the same policy wherever it is served without that
-        // rule, a local preview included.
+        // The Cloudflare response header rule sends Referrer-Policy on every
+        // response, with this same value; the tag gives the build that policy
+        // wherever it is served without the rule, a local preview included.
         { tag: 'meta', attrs: { name: 'referrer', content: 'strict-origin-when-cross-origin' } },
         // Machine-readable pointer to the LLM-oriented summary. It was only
         // mentioned in a robots.txt comment, which nothing parses.

@@ -2409,15 +2409,76 @@ class _CheckedInTime(_Hooking):
         require_choice(self.pace, "pace", _PACES)
 
 
+@dataclass(frozen=True)
+class _Checking:
+    """A record whose ``__post_init__`` checks its pace."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Delegating(_Checking):
+    """A record whose own ``__init__`` hands its value to the one
+    ``@dataclass`` wrote for ``_Checking``, which calls ``__post_init__``.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super().__init__(pace)
+
+
+class _PlainDelegating(_Checking):
+    """A class that is no record whose ``__init__`` hands its value on."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super().__init__(pace)
+
+
+class _NamedDelegating(_Checking):
+    """A class whose ``__init__`` calls a base's ``__init__`` by its name."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _Checking.__init__(self, pace)
+
+
+class _DelegatedTooLate(_Unhooked):
+    """A class whose ``__init__`` hands its value to one that calls no
+    ``__post_init__``: the one it writes never runs.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super().__init__(pace)
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+class _Unhanded(_Checking):
+    """A class whose ``__init__`` stores the value itself and hands nothing
+    on: the check of the record under it never runs.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        object.__setattr__(self, "pace", pace)
+
+
 def test_a_record_runs_a_post_init_only_when_its_init_calls_one() -> None:
     """The ``__init__`` a call runs, here the one ``@dataclass`` writes for the
     first record of the order, calls ``self.__post_init__`` only when that
     record had one when it was written: ``_CheckedTooLate`` never runs the
     check it writes, so a misspelt pace is never refused, and
-    ``_CheckedInTime`` runs its own.
+    ``_CheckedInTime`` runs its own. One written by hand runs what the
+    ``__init__`` it hands its values on to runs, through ``super()`` or by
+    the base's name: ``_Delegating`` and its two plain forms run the check
+    of ``_Checking``, ``_DelegatedTooLate`` hands them to one that runs
+    none, and ``_Unhanded`` hands them to none.
 
     The first ``__post_init__`` of the order was read as the one that runs,
-    so a check that never runs passed the choice as checked.
+    so a check that never runs passed the choice as checked; then only an
+    ``__init__`` that names ``__post_init__`` itself was read as running
+    one, so a choice ``_Delegating`` checks was reported as never checked.
     """
     assert ccl._post_init(_CheckedTooLate) is None
     assert ccl._post_init(_Unhooked) is None
@@ -2428,6 +2489,52 @@ def test_a_record_runs_a_post_init_only_when_its_init_calls_one() -> None:
         _CheckedInTime("medium")  # type: ignore[arg-type]
     unchecked = _CheckedTooLate("medium")  # type: ignore[arg-type]
     assert vars(unchecked)["pace"] == "medium"
+    check = inspect.unwrap(vars(_Checking)["__post_init__"])
+    pace = "Literal['fast', 'slow']"
+    for runs in (_Delegating, _PlainDelegating, _NamedDelegating):
+        found = ccl._post_init(runs)
+        assert found is check, runs
+        assert ccl._choice_verdict(found, "pace", pace, field=True) is None
+        with pytest.raises(ValueError, match="pace"):
+            runs("medium")  # type: ignore[arg-type]
+    for skipped in (_DelegatedTooLate, _Unhanded):
+        assert ccl._post_init(skipped) is None, skipped
+        assert vars(skipped("medium"))["pace"] == "medium"  # type: ignore[arg-type]
+
+
+class _PlainChecking(_Checking):
+    """A class that is no record over one whose check runs."""
+
+
+def _through_plain(pace: _Pace = "fast") -> _PlainChecking:
+    """Hand a pace to a class that is no record over one that checks it."""
+    return _PlainChecking(pace)
+
+
+def _through_in_time(pace: _Pace = "fast") -> _CheckedInTime:
+    """Hand a pace to a class that is no record and checks it itself."""
+    return _CheckedInTime(pace)
+
+
+def test_a_call_of_a_class_runs_the_init_its_order_gives() -> None:
+    """A call of ``_PlainChecking``, which writes no ``__init__``, runs the
+    one ``@dataclass`` wrote for ``_Checking``, and that one runs the check:
+    the pace it is handed is checked. The hook it calls is the one the class
+    called resolves: a call of ``_CheckedInTime`` runs the check it writes,
+    not the empty one of ``_Hooking``, whose ``__init__`` it runs.
+
+    The class's own ``__init__`` alone was read, so the call reached no
+    constructor and the pace was reported as never checked.
+    """
+    call = ast.parse("_PlainChecking(pace)", mode="eval").body
+    assert isinstance(call, ast.Call)
+    namespace: dict[str, object] = {"_PlainChecking": _PlainChecking}
+    assert ccl._callee(call, namespace, __name__) is vars(_Checking)["__init__"]
+    pace = "Literal['fast', 'slow']"
+    for through in (_through_plain, _through_in_time):
+        assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        with pytest.raises(ValueError, match="pace"):
+            through("medium")  # type: ignore[arg-type]
 
 
 def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:

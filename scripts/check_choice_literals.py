@@ -113,7 +113,7 @@ import re
 import sys
 import textwrap
 import typing
-from types import MappingProxyType
+from types import CodeType, MappingProxyType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from ast_scan import (
@@ -2019,8 +2019,37 @@ def _callee(
     One of the package's, or one of the module *home* the caller lives in. A
     method reaches its own class through ``self`` and ``cls``
     (:func:`_namespace`), and an object it holds through the annotation of
-    the field (``self.database.event_level(...)``).
+    the field (``self.database.event_level(...)``). A class is the
+    ``__init__`` a call of it runs (:func:`_runs_init`).
     """
+    return _function_of(_call_target(node, namespace), home)
+
+
+def _runs_init(cls: type) -> object:
+    """The ``__init__`` a call of *cls* runs: that of the first class of its
+    method resolution order with one of its own, so a class that is no
+    record over one runs the one ``@dataclass`` wrote for it.
+    """
+    # ``object``, last in every order, has an ``__init__`` of its own.
+    return next(
+        vars(owner)["__init__"] for owner in cls.__mro__ if "__init__" in vars(owner)
+    )
+
+
+def _function_of(target: object, home: str) -> FunctionType | None:
+    """The function of the package, or of module *home*, a call of *target* runs."""
+    target = getattr(target, "__func__", target)
+    if inspect.isclass(target):
+        target = _runs_init(target)
+    if inspect.isfunction(target) and (
+        target.__module__.startswith("phonometry") or target.__module__ == home
+    ):
+        return target
+    return None
+
+
+def _call_target(node: ast.Call, namespace: dict[str, object]) -> object | None:
+    """What a call names, looked up in *namespace* (:func:`_callee`)."""
     target: object | None = None
     function = node.func
     if isinstance(function, ast.Name):
@@ -2041,14 +2070,7 @@ def _callee(
             else None
         )
         target = getattr(held, function.attr, None) if held is not None else None
-    target = getattr(target, "__func__", target)
-    if inspect.isclass(target):
-        target = vars(target).get("__init__")
-    if inspect.isfunction(target) and (
-        target.__module__.startswith("phonometry") or target.__module__ == home
-    ):
-        return target
-    return None
+    return target
 
 
 def _arguments(
@@ -3226,21 +3248,51 @@ def _literal_shape(annotation: str) -> tuple[bool, bool]:
     return _is_literal(annotation), collection
 
 
-def _post_init(record: type) -> Callable[..., object] | None:
-    """The ``__post_init__`` a record runs, its own or the nearest base's.
-
-    It runs only when the ``__init__`` a call of the record runs calls it:
-    the one ``@dataclass`` writes does when the record it was written for
-    had one at the time, which a class that is no record over it does not
-    change, so ``Plain(_Count)``, over a record that has none, never runs the
-    ``__post_init__`` it writes.
+def _code_names(code: CodeType) -> set[str]:
+    """The attribute and global names a function's code reads, those of the
+    functions and lambdas written in it too.
     """
-    # ``object``, last in every order, has an ``__init__`` of its own.
-    runs = next(
-        vars(owner)["__init__"] for owner in record.__mro__ if "__init__" in vars(owner)
-    )
-    code = getattr(inspect.unwrap(runs), "__code__", None)
-    if code is None or "__post_init__" not in code.co_names:
+    names = set(code.co_names)
+    for constant in code.co_consts:
+        if isinstance(constant, CodeType):
+            names |= _code_names(constant)
+    return names
+
+
+def _runs_a_post_init(record: type) -> bool:
+    """Whether the ``__init__`` a call of *record* runs calls
+    ``self.__post_init__``.
+
+    That ``__init__`` is the one of the first class of the record's method
+    resolution order that has one of its own. The one ``@dataclass`` writes
+    calls the hook when the record it was written for had one at the time,
+    which a class that is no record over it does not change, so
+    ``Plain(_Count)``, over a record that has none, never runs the
+    ``__post_init__`` it writes. One written by hand that hands its values on
+    to another ``__init__`` (``super().__init__(...)``, or a base's called by
+    name) runs what that one runs, read on from the next class of the order
+    that has one; one that names neither calls none, as ``object``'s does.
+    """
+    for owner in record.__mro__:
+        init = vars(owner).get("__init__")
+        if init is None:
+            continue
+        code = getattr(inspect.unwrap(init), "__code__", None)
+        if code is None:
+            return False
+        names = _code_names(code)
+        if "__post_init__" in names:
+            return True
+        if "__init__" not in names:
+            return False
+    return False
+
+
+def _post_init(record: type) -> Callable[..., object] | None:
+    """The ``__post_init__`` a record runs, its own or the nearest base's,
+    when the ``__init__`` a call of it runs calls one (:func:`_runs_a_post_init`).
+    """
+    if not _runs_a_post_init(record):
         return None
     for owner in record.__mro__:
         check = vars(owner).get("__post_init__")
@@ -5312,7 +5364,8 @@ def _checks_of(
         ):
             sites.append((node, (_Check(every_path=True, validator=True),)))
             continue
-        callee = _callee(node, namespace, module_name)
+        called = _call_target(node, namespace)
+        callee = _function_of(called, module_name)
         if callee is None or depth >= _SPELLING_DEPTH:
             continue
         inner: list[_Check] = []
@@ -5332,7 +5385,13 @@ def _checks_of(
                     nontext=nontext,
                 )
             )
-        record = _record_constructor(callee)
+        # A call of a record, or of a class that is no record over one, runs
+        # the ``__post_init__`` the class called resolves.
+        record = (
+            called
+            if inspect.isclass(called) and dataclasses.is_dataclass(called)
+            else _record_constructor(callee)
+        )
         for parameter, handed in _arguments(node, callee, spread).items():
             value = _held(handed)
             keys_kept = _keeps_keys(value, target, options)

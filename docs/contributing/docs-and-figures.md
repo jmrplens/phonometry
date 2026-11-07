@@ -1675,3 +1675,28 @@ def plot_chain_geometry(chain, ax=None, **kwargs):  # of a class that is no reco
 
 **Exceptions.** The renderer is wrapped rather than the method where the method's file is fingerprinted by the GPU proof, as `FDTD2D`'s is. A plotting class that is no record, and a `plot_*` function a public module publishes, is listed in the test with an input it is drawn from, and the test fails on one it does not list or on a published function without the decorator.
 
+
+## What the build prints
+
+<a id="f69"></a>
+### F69. Leave the site build printing no warning
+
+**Why.** A build that passes says nothing about what it printed on the way, and a log of a thousand route lines is read by nobody. Three warnings rode in every build of the site that way: Astro's notice that the Markdown plugins were set through `markdown.remarkPlugins` and `markdown.rehypePlugins`, which it deprecates; KaTeX's report, twice per language, that it had no metrics for the µ written inside `\text{}` on the sound-strength page, which therefore took its glyph from a fallback font; and Starlight's lookup of a 404 entry the site does not have, printed glued to the end of a route line. The first two were ours to fix and stayed until an audit read the log by hand. The docs workflow keeps the build's output, and `site/scripts/check-build-output.mjs` fails on a warning of Astro's logger (which Vite and the integrations log through), on a line that says something is deprecated, on KaTeX's strict-mode report and on a process warning from Node, read from where it starts to the end of its line wherever on the line it starts. Fix what it names where it is printed from: the config, the page, the script.
+
+**Do**
+
+```text
+the formula writes the micro prefix as KaTeX knows it, \mu\text{Pa}, and the
+build prints nothing about it
+```
+
+**Don't**
+
+```text
+the formula writes the character µ inside \text{}, the page builds, and every
+build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
+```
+
+**Enforced by:** `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+
+**Exceptions.** A warning the site cannot silence is listed in `KNOWN` of the check, word for word as the build prints it from where its shape starts, with the reason; an entry the build no longer prints fails, so the list empties as the fixes land upstream. Today it holds Starlight's lookup of a 404 entry (Starlight 0.42.8 with Astro 7.4.4), which a page of the site's own would silence only by adding a page and its Spanish twin to every check that reads the build. The check reads the output of `pnpm build` alone: `pnpm install` and the checks after the build are not read. A warning printed in a shape the check does not know is not seen; a new shape is added to `WARNINGS` with a test.

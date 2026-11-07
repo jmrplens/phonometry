@@ -242,7 +242,13 @@ jobs:
         run: pnpm run check:render-spawns
         working-directory: site
       - name: Build site
-        run: pnpm install --frozen-lockfile && pnpm build
+        # The build's output is kept for the step after this one, which reads
+        # it for warnings. bash, so that pipefail hands a failed build its exit
+        # status through the tee.
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build 2>&1 | tee "$RUNNER_TEMP/site-build.log"
         working-directory: site
         env:
           # Starlight's lastUpdated and add-sitemap-lastmod.mjs each ask for the
@@ -255,6 +261,17 @@ jobs:
           GIT_CONFIG_COUNT: "1"
           GIT_CONFIG_KEY_0: diff.renames
           GIT_CONFIG_VALUE_0: "false"
+      - name: Check the build printed no warning
+        # A build that passes says nothing about what it printed on the way,
+        # and nobody reads a thousand route lines. Astro's notice that the
+        # Markdown plugins were set through deprecated keys, and KaTeX's that
+        # it had no glyph for the µ of a formula, rode in every build that way
+        # until an audit read the log by hand. This fails on a warning of
+        # Astro's logger, a deprecation notice, KaTeX's strict mode or a Node
+        # process warning, wherever on its line it is printed; the one the site
+        # cannot silence is listed in the check with its reason.
+        run: node scripts/check-build-output.mjs "$RUNNER_TEMP/site-build.log"
+        working-directory: site
 
       # Every page, component and script of the site type-checked in strict
       # mode. A catalogue row read through a field its table does not carry,

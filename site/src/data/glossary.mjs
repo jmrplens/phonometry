@@ -2159,8 +2159,8 @@ export const glossary = [
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "Weighted standardized facade level difference, loudspeaker method: $D_{2\\mathrm{m,n}T}$ measured with a loudspeaker and put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
-          es: "Diferencia de niveles estandarizada ponderada en fachada, método del altavoz: el $D_{2\\mathrm{m,n}T}$ medido con altavoz y pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice `ls` no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
+          en: "Weighted standardized facade level difference, loudspeaker method: $D_{2\\mathrm{m,n}T}$ measured with a loudspeaker and put through the ISO 717-1 reference-curve procedure. The $\\mathrm{ls}$ subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
+          es: "Diferencia de niveles estandarizada ponderada en fachada, método del altavoz: el $D_{2\\mathrm{m,n}T}$ medido con altavoz y pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice $\\mathrm{ls}$ no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
         },
       },
       {
@@ -3549,8 +3549,8 @@ export const glossary = [
         },
         guide: "devices/electroacoustics/swept-sine-distortion",
         definition: {
-          en: "Harmonic transfer function of order $n$: the impulse response that an exponential-sweep deconvolution places $L\\ln n$ seconds *before* the linear one, so a single sweep separates the linear response and every harmonic order into its own window. The distortion of order $n$ at excitation frequency $f$ is then read as $|H_n(nf)|/|H_1(f)|$.",
-          es: "Función de transferencia armónica de orden $n$: la respuesta al impulso que la deconvolución de un barrido exponencial sitúa $L\\ln n$ segundos *antes* de la lineal, de modo que un único barrido separa la respuesta lineal y cada orden armónico en su propia ventana. La distorsión de orden $n$ a la frecuencia de excitación $f$ se lee entonces como $|H_n(nf)|/|H_1(f)|$.",
+          en: "Harmonic transfer function of order $n$: the impulse response that an exponential-sweep deconvolution places $L\\ln n$ seconds before the linear one, so a single sweep separates the linear response and every harmonic order into its own window. The distortion of order $n$ at excitation frequency $f$ is then read as $|H_n(nf)|/|H_1(f)|$.",
+          es: "Función de transferencia armónica de orden $n$: la respuesta al impulso que la deconvolución de un barrido exponencial sitúa $L\\ln n$ segundos antes de la lineal, de modo que un único barrido separa la respuesta lineal y cada orden armónico en su propia ventana. La distorsión de orden $n$ a la frecuencia de excitación $f$ se lee entonces como $|H_n(nf)|/|H_1(f)|$.",
         },
       },
       {

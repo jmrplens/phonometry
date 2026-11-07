@@ -24,6 +24,12 @@
 // "G frequency weighting" was named over a card that said "Infrasound
 // weighting".
 //
+// A field is text with inline maths in `$...$` and nothing else: the card
+// prints the rest as typed, and the structured data quotes it. Two
+// definitions wrote Markdown, "*before*" for the harmonic transfer function
+// and "the `ls` subscript" for the loudspeaker facade rating, and the card
+// and the DefinedTerm both showed the asterisks and the backticks.
+//
 // A quantity that is a reduction, a difference or a loss is defined as that,
 // not as a level: RA, the A-weighted global sound reduction index of DB-HR,
 // was defined as "the A-weighted level a partition transmits", the opposite
@@ -225,6 +231,42 @@ test('every entry names its quantity in both languages, in words', () => {
 	}
 	assert.deepEqual(missing, [], missing.join('\n'));
 	assert.ok(TERMS.length > 0, 'the glossary has no terms');
+});
+
+/** Every string an entry holds, with the field it is in, in each language it is given in. */
+function* stringsOf(term) {
+	const walk = function* (value, where) {
+		if (typeof value === 'string') yield [where, value];
+		else if (Array.isArray(value)) for (const item of value) yield* walk(item, where);
+		else if (value !== null && typeof value === 'object') {
+			for (const [key, item] of Object.entries(value)) yield* walk(item, `${where}.${key}`);
+		}
+	};
+	for (const [field, value] of Object.entries(term)) yield* walk(value, field);
+}
+
+/** What a field writes outside its inline maths, which the card prints as typed. */
+const outsideMaths = (text) =>
+	text
+		.split(/(\$[^$]+\$)/)
+		.filter((_, i) => i % 2 === 0)
+		.join(' ');
+
+test('no field writes Markdown outside its maths, which neither the card nor the structured data reads', () => {
+	const marked = [];
+	for (const term of TERMS) {
+		for (const [where, text] of stringsOf(term)) {
+			const found = /[*`]/.exec(outsideMaths(text));
+			if (found) marked.push(`${term.id}.${where}: "${found[0]}" in "${text.slice(0, 70)}"`);
+		}
+	}
+	assert.deepEqual(marked, [], `fields that write Markdown:\n${marked.join('\n')}`);
+});
+
+test('the Markdown a field may not write is found beside its maths, and not inside it', () => {
+	assert.match(outsideMaths('places $L\\ln n$ seconds *before* the linear one'), /\*/);
+	assert.match(outsideMaths('The `ls` subscript of $D_{ls}$'), /`/);
+	assert.doesNotMatch(outsideMaths('the conjugate $G^*_{xy}$ of the cross spectrum'), /[*`]/);
 });
 
 test('no two entries share a quantity name in one language', () => {

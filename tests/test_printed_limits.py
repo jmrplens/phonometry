@@ -559,7 +559,6 @@ _FLAG_NAME = re.compile(
 _FLAG_TYPE = re.compile(r"\bbool\b|\bbool_\b")
 
 
-#: Packages whose dataclasses are rendering and validation helpers, not results.
 def _is_flag_field(field: dataclasses.Field[object]) -> bool:
     return bool(_FLAG_TYPE.search(str(field.type)) or _FLAG_NAME.match(field.name))
 

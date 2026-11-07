@@ -11,7 +11,9 @@
 // check reads it once per distinct value and says on how many pages it stands.
 // A malformed block takes out its own nodes and no others: the software node
 // and the `@id`s of the page's valid blocks are still read, as a consumer reads
-// them, so the count names every page that carries a value.
+// them, so the count names every page that carries a value. A block that parses
+// to `null`, an array or a bare value is read the same way, and does not stop
+// the check.
 //
 // Each test here writes a build of a few pages into a directory of its own and
 // runs the check on it the way CI does.
@@ -163,6 +165,18 @@ test('a malformed block on a page leaves the software node of its valid block co
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL \/page-0\/: an ld\+json block is not valid JSON/);
 	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
+});
+
+test('a block that parses to no JSON-LD object is reported as one that does not parse', (t) => {
+	// `null` parses, and reading its @context threw, so the check stopped before
+	// it reported the page or tallied any software node.
+	const ran = check(t, 10, 9, undefined, Array(10).fill('Windows, Linux, macOS'), [['null'], ['[]'], ['5']]);
+	assert.equal(ran.status, 1);
+	for (const page of [0, 1, 2]) {
+		assert.match(ran.err, new RegExp(`FAIL /page-${page}/: an ld\\+json block is not a JSON-LD object`));
+	}
+	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
+	assert.doesNotMatch(ran.err, /TypeError/);
 });
 
 test('a malformed block on a page leaves two nodes of its valid blocks that share an @id reported', (t) => {

@@ -242,6 +242,14 @@ for (const file of files) {
 			broken = true;
 			continue;
 		}
+		// `null`, an array or a bare value parses and is still no JSON-LD
+		// document, so it holds no node and is read as one that does not
+		// parse: reading its @context would stop the whole check here.
+		if (doc === null || typeof doc !== 'object' || Array.isArray(doc)) {
+			fail(`${route}: an ld+json block is not a JSON-LD object`);
+			broken = true;
+			continue;
+		}
 		if (doc['@context'] !== 'https://schema.org') {
 			fail(`${route}: an ld+json block declares @context ${JSON.stringify(doc['@context'])}`);
 		}

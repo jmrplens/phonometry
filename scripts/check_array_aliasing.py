@@ -1817,9 +1817,9 @@ class Reader:
                 self.index_names.add(target.id)
             if source is not None and self.builds_container(source):
                 self.container_names.add(target.id)
-            built = self.built_record(source)
-            if built is not None:
-                self.record_names[target.id] = built
+            match self.built_records(source):
+                case [built]:
+                    self.record_names[target.id] = built
             return
         if isinstance(target, ast.Tuple | ast.List):
             if (
@@ -1910,8 +1910,18 @@ class Reader:
 
     def built_records(self, node: ast.expr | None) -> list[ClassInfo]:
         """Each record class a call may build, if *node* is a call that
-        builds a record whichever path runs (:meth:`records_built`); ``cls``
-        in a method of a record is that record. No record for any other call.
+        builds a record whichever path runs; ``cls`` in a method of a record
+        is that record.
+
+        Every function or class the call may name is a class with no ``def``
+        of its name standing where the name was read (*pins*,
+        :meth:`Tree.resolve_top`), and each ``class`` statement of it the
+        call may build (:meth:`classes_built`) is a record: two records bound
+        to a name in two branches, or a class written in each, are each
+        built. A call that may run a function instead, one bound to the name
+        in another branch or a ``def`` that took the name from the class, or
+        build a class that is no record, builds none the guard can vouch
+        for. A name bound to a call that builds one record holds it.
         """
         if not isinstance(node, ast.Call):
             return []
@@ -1920,35 +1930,8 @@ class Reader:
         if isinstance(func, ast.Name) and func.id == "cls":
             return [owner] if owner is not None and owner.record else []
         pins: _Pins = {}
-        return self.records_built(self.callees(func, pins=pins), pins)
-
-    def built_record(self, node: ast.expr | None) -> ClassInfo | None:
-        """The record class a call builds, if *node* is a call that builds
-        that one record whichever path runs (:meth:`built_records`); none for
-        one that may build either of two.
-        """
-        built = self.built_records(node)
-        if not built or any(info is not built[0] for info in built):
-            return None
-        return built[0]
-
-    def records_built(
-        self, targets: Sequence[tuple[str, str]], pins: _Pins | None
-    ) -> list[ClassInfo]:
-        """Each record class a call that may name each of *targets* builds,
-        when it builds a record whichever path runs.
-
-        Every one of them is a class with no ``def`` of its name standing
-        where the name was read (*pins*, :meth:`Tree.resolve_top`), and each
-        ``class`` statement of it the call may build (:meth:`classes_built`)
-        is a record: two records bound to a name in two branches, or a class
-        written in each, are each built. A call that may run a function
-        instead, one bound to the name in another branch or a ``def`` that
-        took the name from the class, or build a class that is no record,
-        builds none the guard can vouch for.
-        """
         built: list[ClassInfo] = []
-        for key in targets:
+        for key in self.callees(func, pins=pins):
             if key not in self.tree.classes or _pinned_functions(pins, key):
                 return []
             for info in self.classes_built(key, pins):
@@ -1969,19 +1952,16 @@ class Reader:
             isinstance(found, ClassInfo) for found in held
         )
 
-    def copies_on_every_path(
-        self, targets: Sequence[tuple[str, str]], pins: _Pins | None
-    ) -> bool:
-        """Whether a call that may name each of *targets* builds a record
-        that copies whichever path runs: it builds a record on every path
-        (:meth:`records_built`, *pins* what stood where each name was read),
-        and each of them inherits :data:`MECHANISM`.
+    def copies_on_every_path(self, node: ast.expr) -> bool:
+        """Whether a call builds a record that copies whichever path runs:
+        it builds a record on every path (:meth:`built_records`), and each
+        of them inherits :data:`MECHANISM`.
 
         A copy handed to such a call is made twice whichever path runs; one
         handed to a call that may also run a function, or build a class that
         does not copy, may be what keeps the caller's array out on that path.
         """
-        built = self.records_built(targets, pins)
+        built = self.built_records(node)
         return bool(built) and all(self.tree.copies_arrays(info) for info in built)
 
     def classes_built(
@@ -2371,7 +2351,6 @@ class Reader:
                                 keywords,
                                 bound=False,
                                 pins=pins,
-                                alone=self.copies_on_every_path(resolved, pins),
                             )
                             for key in resolved
                         )
@@ -2432,7 +2411,6 @@ class Reader:
                             keywords,
                             bound=False,
                             pins=named,
-                            alone=self.copies_on_every_path(targets, named),
                         )
                         for key in targets
                     )
@@ -2508,12 +2486,10 @@ class Reader:
         *,
         bound: bool,
         pins: _Pins | None = None,
-        alone: bool = True,
     ) -> Value:
         """What a call to a function or a class of the package returns, each
         definition it reaches read (:meth:`reached`, *pins* what its name
-        stood for where it was read; *alone* when every function or class
-        the call may name is a record that copies, :meth:`copies_on_every_path`).
+        stood for where it was read).
 
         A function and a class of one name share a key: the class is what
         the call reaches unless *pins* holds a ``def`` of the key, which an
@@ -2523,18 +2499,21 @@ class Reader:
         ``class`` statement of the key the call may build
         (:meth:`classes_built`), the one an alias was bound to when a later
         one replaced it, and each read with its own fields. A copy handed to
-        a record that copies is made twice only when every class the call
-        may build or function it may run is a record that copies: on another
-        path the copy may be what keeps the caller's array out.
+        a public record that copies is made twice only when every class the
+        call may build or function it may run is a record that copies
+        (:meth:`copies_on_every_path`, asked only of a public record): on
+        another path the copy may be what keeps the caller's array out.
         """
         values: list[Value] = []
         if target in self.tree.classes and self.builds_class(target, pins):
             built = self.classes_built(target, pins)
             pinned = _pinned_functions(pins, target)
+            public = target in self.tree.public
             alone = (
-                alone
+                public
+                and self.findings is not None
                 and not pinned
-                and all(info.record and self.tree.copies_arrays(info) for info in built)
+                and self.copies_on_every_path(node)
             )
             values.extend(
                 self.constructor_sink(
@@ -2542,7 +2521,7 @@ class Reader:
                     node,
                     arguments,
                     keywords,
-                    public=target in self.tree.public,
+                    public=public,
                     alone=alone,
                 )
                 if info.record
@@ -3012,8 +2991,7 @@ class Reader:
             or any(argument is call for argument in record.args)
         ):
             return "it is not an argument of a record"
-        built = self.built_records(record)
-        if not built or not all(self.tree.copies_arrays(info) for info in built):
+        if not self.copies_on_every_path(record):
             return f"it is not an argument of a record that inherits {MECHANISM}"
         if not isinstance(parents.get(record), ast.Return):
             return "the record is not built in the return statement"

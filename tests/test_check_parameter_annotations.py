@@ -1747,6 +1747,142 @@ def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
     }
 
 
+def test_an_argument_past_the_named_parameters_reaches_the_vararg(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An argument written past a function's named positional parameters,
+    or after a ``*`` argument, may land in its ``*args``: the count handed
+    to ``_counted(1.0, n)`` or ``_counted(*head, n)`` is one of the
+    ``counts`` it validates.
+
+    A position was read against the named parameters alone, so both counts
+    fell out of the call and passed as ``int``.
+    """
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from ._internal.validation import require_count
+
+            __all__ = ["after_a_star", "past_the_places"]
+
+            def _counted(scale: float, *counts: int) -> int:
+                total = 0
+                for count in counts:
+                    total += require_count(count, "count")
+                return total
+
+            def past_the_places(n: int) -> int:
+                return _counted(1.0, n)
+
+            def after_a_star(n: int, head: tuple[float, ...] = (1.0,)) -> int:
+                return _counted(*head, n)
+            """,
+        },
+    )
+    assert refused == {
+        "past_the_places(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_counted(counts), require_count() takes it"
+        ],
+        "after_a_star(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_counted(counts), require_count() takes it"
+        ],
+    }
+
+
+#: Records whose ``__post_init__`` hands a field by its name, and the record
+#: itself, after a ``*`` argument.
+_BY_NAME_AFTER_A_STAR = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["Held", "Meter", "Stored", "run"]
+
+_PREFIX: tuple[str, ...] = ()
+
+def _hold(record: object, name: str) -> None:
+    require_count(getattr(record, name), name)
+
+def _store(record: object, *names: str) -> None:
+    for name in names:
+        object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+@dataclass(frozen=True)
+class Meter:
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        self._check(*_PREFIX, "n_positions")
+
+    def _check(self, name: str) -> None:
+        require_count(getattr(self, name), name)
+
+@dataclass(frozen=True)
+class Held:
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        _hold(*_PREFIX, self, "n_positions")
+
+@dataclass(frozen=True, kw_only=True)
+class Stored:
+    ix: int
+
+    def __post_init__(self) -> None:
+        _store(*_PREFIX, self, "ix")
+
+def run(sources: Sequence[Stored]) -> None:
+    return None
+"""
+
+
+def test_a_field_handed_by_name_after_a_star_is_followed_and_stored(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A field's name, or the record, written after a ``*`` argument may
+    fill any parameter from the star's place on, or the vararg:
+    ``self._check(*_PREFIX, "n_positions")`` hands the field to ``name``,
+    ``_hold(*_PREFIX, self, "n_positions")`` hands the record to ``record``
+    and the field to ``name``, and ``_store(*_PREFIX, self, "ix")`` stores
+    in ``ix`` what the validator returns.
+
+    The readers by name read each at its written place, past the star, so
+    the first two counts passed as ``int`` and the stored field was not
+    seen stored.
+    """
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _BY_NAME_AFTER_A_STAR},
+    )
+    reader = cpa.Reader(
+        overloads.Package(sorted(root.rglob("*.py")), root), handed_on=frozenset()
+    )
+    assert cpa.converted_fields(reader, "pkg.api.Stored") == {"ix"}
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter, f.constructor) for f in found) == [
+        ("Held", "n_positions", False),
+        ("Meter", "n_positions", False),
+        ("Stored", "ix", True),
+    ]
+    by_key = {(f.function, f.parameter): f.problem for f in found}
+    assert by_key["Meter", "n_positions"] == (
+        "annotated int, which refuses np.integer[Any], while handed by name "
+        "to Meter._check(name), require_count() takes it"
+    )
+    assert by_key["Held", "n_positions"] == (
+        "annotated int, which refuses np.integer[Any], while handed by name "
+        "to _hold(name), require_count() takes it"
+    )
+    assert by_key["Stored", "ix"].startswith(
+        "annotated int, which refuses np.integer[Any], while handed by name "
+        "to _store(names), require_count() takes it"
+    )
+
+
 def test_a_count_handed_to_a_public_function_that_takes_a_numpy_integer(
     tmp_path: pathlib.Path,
 ) -> None:

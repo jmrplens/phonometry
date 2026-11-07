@@ -2025,6 +2025,18 @@ def _filled(places: Sequence[str], positions: Sequence[int], spread: int) -> lis
     return filled
 
 
+def _past_the_places(positions: Sequence[int], places: int, spread: int | None) -> bool:
+    """Whether a call's argument at one of *positions* may land past a
+    function's *places* named positional parameters, in its ``*args``: one
+    written past them, or one after the call's first ``*`` argument (at
+    *spread*), which may land anywhere from the star's place on.
+    """
+    return any(
+        index >= places or (spread is not None and index > spread)
+        for index in positions
+    )
+
+
 def _handed_on_as(post_init: overloads.Function, place: int) -> str | None:
     """The parameter of ``__post_init__`` the generated ``__init__`` hands the
     ``InitVar`` at *place* among them to: the positional one of that place,
@@ -2554,7 +2566,9 @@ class Reader:
         A function handed the record itself reads the field off the
         parameter that holds it, by a name a parameter holds or by each name
         of a vararg it loops over: ``_hold_cells(self, "ix", "iy")`` reads
-        ``getattr(record, name)`` for each ``name`` of ``names``.
+        ``getattr(record, name)`` for each ``name`` of ``names``. A name or
+        the record written after a ``*`` argument may fill any parameter
+        from the star's place on (:func:`_filled`), or the vararg.
         """
         owner, _, field = name.partition(".")
         if owner not in _OWNERS or not field or field.startswith("{"):
@@ -2580,26 +2594,32 @@ class Reader:
         node = self.package.functions[reached].implementation
         if node is None:
             return
-        positional = _positional(node, bound=bound_self)
-        holder = owner if bound_self else _holder(call, positional, owner)
-        if holder is None:
+        positional = [argument.arg for argument in _positional(node, bound=bound_self)]
+        holders = [owner] if bound_self else _holders(call, positional, owner)
+        if not holders:
             return
-        received = [positional[index].arg for index in given if index < len(positional)]
+        spread = _first_star(call)
+        received = (
+            [positional[index] for index in given if index < len(positional)]
+            if spread is None
+            else _filled(positional, given, spread)
+        )
         received.extend(keywords)
         names = [(parameter, parameter) for parameter in dict.fromkeys(received)]
         vararg = node.args.vararg
-        if vararg is not None and any(index >= len(positional) for index in given):
+        if vararg is not None and _past_the_places(given, len(positional), spread):
             names.extend((vararg.arg, loop) for loop in _loops_over(node, vararg.arg))
         method = self.package.functions[reached]
-        for parameter, local in names:
-            for deeper, level, hops in self._known_routes(
-                method, _by_name(holder, local), target
-            ):
-                yield (
-                    f"handed by name to {method.qualname}({parameter}), {deeper}",
-                    level,
-                    hops + 1,
-                )
+        for holder in holders:
+            for parameter, local in names:
+                for deeper, level, hops in self._known_routes(
+                    method, _by_name(holder, local), target
+                ):
+                    yield (
+                        f"handed by name to {method.qualname}({parameter}), {deeper}",
+                        level,
+                        hops + 1,
+                    )
 
     @property
     def public_record_names(self) -> frozenset[str]:
@@ -2726,8 +2746,9 @@ class Reader:
         target: Target,
     ) -> Iterator[tuple[str, int, int]]:
         """What the function a parameter is handed to does with it, at each
-        parameter its position may fill (:func:`_filled`) or its keyword
-        names.
+        parameter its position may fill (:func:`_filled`), its ``*args`` when
+        the position may fall past the named ones (:func:`_past_the_places`),
+        or the parameter its keyword names.
         """
         callee = self.package.functions[reached]
         node = callee.implementation
@@ -2742,6 +2763,9 @@ class Reader:
             else _filled(positional, given, spread)
         )
         received.extend(keyword for keyword in keywords if keyword in parameters)
+        vararg = node.args.vararg
+        if vararg is not None and _past_the_places(given, len(positional), spread):
+            received.append(vararg.arg)
         bounds = self._bounds(callee)
         annotations = self.annotations
         for parameter in dict.fromkeys(received):
@@ -4934,16 +4958,23 @@ def _rebound(
 _SETATTR = 3
 
 
-def _holder(call: ast.Call, positional: Sequence[ast.arg], owner: str) -> str | None:
-    """The parameter of a function that a call hands the record to, by name.
+def _holders(call: ast.Call, positional: Sequence[str], owner: str) -> list[str]:
+    """The parameters of a function that a call may hand the record to, by name.
 
     ``_hold_cells(self, "ix", "iy")`` hands ``self`` to the parameter
-    ``record`` of ``_hold_cells(record, *names)``.
+    ``record`` of ``_hold_cells(record, *names)``. Written after a ``*``
+    argument, the record may fill any of *positional* from the star's place
+    on (:func:`_filled`).
     """
-    for index, value in enumerate(call.args):
-        if isinstance(value, ast.Name) and value.id == owner:
-            return positional[index].arg if index < len(positional) else None
-    return None
+    given = [
+        index
+        for index, value in enumerate(call.args)
+        if isinstance(value, ast.Name) and value.id == owner
+    ]
+    spread = _first_star(call)
+    if spread is None:
+        return [positional[index] for index in given if index < len(positional)]
+    return list(dict.fromkeys(_filled(positional, given, spread)))
 
 
 def _loops_over(node: ast.FunctionDef | ast.AsyncFunctionDef, name: str) -> list[str]:
@@ -4972,7 +5003,9 @@ def _handed_stores(
     record stores in ``ix`` and ``iy``. A name the function stores by is a
     text, a parameter filled by the call, or a loop name over its vararg;
     *looping* reads the call's own arguments when they are loop names of the
-    caller. A method called on ``self`` is read where it is called.
+    caller. A method called on ``self`` is read where it is called. After a
+    ``*`` argument, an argument may fill any place from the star's on, or
+    the vararg, and the record any parameter from there (:func:`_holders`).
     """
     if not any(
         isinstance(value, ast.Name) and value.id in _OWNERS for value in call.args
@@ -4984,16 +5017,19 @@ def _handed_stores(
     node = reader.package.functions[callee[0]].implementation
     if node is None:
         return set()
-    positional = _positional(node, bound=False)
+    positional = [argument.arg for argument in _positional(node, bound=False)]
     owners = {
-        holder
-        for owner in _OWNERS
-        if (holder := _holder(call, positional, owner)) is not None
+        holder for owner in _OWNERS for holder in _holders(call, positional, owner)
     }
     vararg = node.args.vararg
-    rest = call.args[len(positional) :]
+    spread = _first_star(call)
+    rest = [
+        value
+        for index, value in enumerate(call.args)
+        if _past_the_places([index], len(positional), spread)
+    ]
     by_vararg = set(_loops_over(node, vararg.arg)) if vararg is not None else set()
-    places = {argument.arg: index for index, argument in enumerate(positional)}
+    places = {name: index for index, name in enumerate(positional)}
     helper = reader.package.functions[callee[0]]
     stored: set[str] = set()
     for inner in ast.walk(node):
@@ -5013,12 +5049,13 @@ def _handed_stores(
             stored.add(field.value)
         elif isinstance(field, ast.Name) and field.id in by_vararg:
             handed.extend(rest)
-        elif (
-            isinstance(field, ast.Name)
-            and field.id in places
-            and places[field.id] < len(call.args)
-        ):
-            handed.append(call.args[places[field.id]])
+        elif isinstance(field, ast.Name) and field.id in places:
+            place = places[field.id]
+            if spread is not None and place >= spread:
+                # Past the star, any argument after it may fill the place.
+                handed.extend(call.args[spread + 1 :])
+            elif place < len(call.args):
+                handed.append(call.args[place])
         for value in handed:
             named = _field_named(value, looping)
             if named is not None:

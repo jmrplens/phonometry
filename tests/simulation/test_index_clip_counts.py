@@ -206,8 +206,7 @@ def _table_problems(text: str, language: str, wanted: set[str]) -> list[str]:
     problems = []
     if unlinked:
         problems.append(
-            "has rows whose first cell links no guide by its site address:"
-            f" {unlinked}"
+            f"has rows whose first cell links no guide by its site address: {unlinked}"
         )
     if foreign:
         problems.append(f"links guides of the other language: {foreign}")

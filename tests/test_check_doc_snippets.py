@@ -288,6 +288,19 @@ def test_a_page_that_fails_reports_the_failure_and_no_output(
     assert "boom" in failure
 
 
+def _failures(script: str, outputs: dict[int, str]) -> list[str]:
+    """What the output check reports for *script*, run as an English page,
+    whose prints wrote *outputs*, keyed by the line each print stands on.
+    """
+    page = check_doc_snippets._SITE / "page.mdx"
+    lines = {number: number for number in range(1, script.count("\n") + 2)}
+    written = {line: [(" ", [text])] for line, text in outputs.items()}
+    found: list[str] = check_doc_snippets.output_disagreements(
+        page, script, lines, written
+    )
+    return found
+
+
 def _disagreement(
     promised: str | list[str], written: str | list[str], **options: bool
 ) -> str:
@@ -479,8 +492,12 @@ def test_a_comment_may_open_on_the_word_the_print_s_label_opens_with() -> None:
     first, second = check_doc_snippets.promised_outputs(script)
     assert first.lines == ("10 dB-down window: 3.36 s",)
     assert second.lines == ("SEL over the window -3.36 dBFS",)
-    # A comment that opens on any other word is still prose about the line.
-    assert check_doc_snippets.promised_outputs('print(f"SEL {1}")  # the level\n') == []
+    # A comment that opens on any other word is prose about the line, unless
+    # the run shows the print writes that word first; this one writes "SEL".
+    prose = 'print(f"SEL {1}")  # the level\n'
+    (promise,) = check_doc_snippets.promised_outputs(prose)
+    assert promise.word == "the"
+    assert _failures(prose, {1: "SEL 1"}) == []
 
 
 def test_a_run_that_leaves_no_record_of_its_prints_is_reported(
@@ -497,3 +514,204 @@ def test_a_comma_the_print_itself_writes_is_read_as_written() -> None:
     row = "['01_pared_de_ladrillo', 'Pared de ladrillo', '', '', '0,025']"
     assert _disagreement(row, row, decimal_comma=True) == ""
     assert _disagreement("0,026", "0.025", decimal_comma=True) != ""
+
+
+def test_a_comment_that_names_its_value_is_read_from_after_the_last_equals() -> None:
+    """``LWA = 89.7 dB(A)`` states 89.7; arithmetic before the value is read past."""
+    script = "x = 89.7\nprint(x)  # LWA = 89.7 dB(A)\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert promise.lines == ("LWA = 89.7 dB(A)",)
+    assert _disagreement("LWA = 89.7 dB(A)", "89.7") == ""
+    assert "99.9" in _disagreement("LWA = 99.9 dB(A)", "89.7")
+    assert _disagreement("C3,4 = 2.31 dB at 1 kHz", "2.31") == ""
+    assert "2.32" in _disagreement("C3,4 = 2.32 dB at 1 kHz", "2.31")
+    assert _disagreement("Ld = 12 - 10 = 2.0 dB", "2.0") == ""
+    assert "2.1" in _disagreement("Ld = 12 - 10 = 2.1 dB", "2.0")
+
+
+def test_a_named_formula_with_no_value_is_not_read() -> None:
+    """``T_B = nperseg/fs`` names what the line computes; it states no output."""
+    assert _failures("print(2)  # T_B = nperseg/fs, in s\n", {1: "0.064"}) == []
+    assert _failures("print(2)  # Tw = K + C\n", {1: "179.13"}) == []
+
+
+def test_a_value_offered_as_an_example_is_held_like_any_other() -> None:
+    script = "print(90.9)  # e.g. 90.9 dB\nprint(0.73)  # p. ej. 0,73\n"
+    first, second = check_doc_snippets.promised_outputs(script)
+    assert (first.first, second.first) == (1, 2)
+    assert _disagreement("e.g. 90.9 dB re 1 pW", "90.9") == ""
+    assert "89.4" in _disagreement("e.g. 89.4 dB re 1 pW", "90.9")
+    assert _disagreement("p. ej. 0,73 (A)", "0.73", decimal_comma=True) == ""
+    assert _disagreement("p. ej. 0,62 (D)", "0.73", decimal_comma=True) != ""
+
+
+def test_a_comment_aligned_under_a_second_hash_is_read(tmp_path: pathlib.Path) -> None:
+    """``#            # [ 6.57 23.28] dB`` lines its output up under the code."""
+    code = "import numpy as np\nprint(np.array([6.57, 23.28]))\n#          # {} dB"
+    right = _page(tmp_path, code.format("[ 6.57 23.28]"), name="right.md")
+    assert check_doc_snippets.check_execution([right]) == []
+    wrong = _page(tmp_path, code.format("[ 9.99 23.28]"), name="wrong.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "9.99" in failure
+
+
+def test_a_comment_may_open_on_the_formula_a_print_writes_first() -> None:
+    """``(A.4) -0.638 0.035``: the print writes the formula's reference first."""
+    script = "print('(A.4)', -0.638, 0.035)  # (A.4) -0.638 0.035\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert promise.text == "(A.4) -0.638 0.035"
+    assert _disagreement("(A.4) -0.638 0.035", "(A.4) -0.638 0.035") == ""
+    assert "-0.640" in _disagreement("(A.4) -0.640 0.035", "(A.4) -0.638 0.035")
+    assert _disagreement("(A.5) -0.638 0.035", "(A.4) -0.638 0.035") != ""
+
+
+def test_an_empty_container_is_an_output() -> None:
+    script = "print(())  # ()\nprint((), [17])  # () [17]\n"
+    first, second = check_doc_snippets.promised_outputs(script)
+    assert (first.text, second.text) == ("()", "() [17]")
+    assert _disagreement("()", "()") == ""
+    assert "17" in _disagreement("()", "('17',)")
+    assert "19" in _disagreement("() [17]", "() [19]")
+
+
+def test_a_reference_row_beside_a_print_is_not_read() -> None:
+    """A row quoted from the source, opening on its name, is not the output."""
+    script = "print([52.0, 42.0])  # Long: 52 42 30 18\n"
+    assert _failures(script, {1: "[52. 41.]"}) == []
+
+
+def test_an_array_the_print_writes_short_is_reported() -> None:
+    """A value right after the last one printed is promised, not annotation."""
+    why = _disagreement("[0.52 0.7  0.8  0.89]", "[0.52 0.7  0.8 ]")
+    assert "0.89" in why
+    assert "3" in _disagreement("2 3 4", "2")
+    assert "40.0" in _disagreement("True 0.12 (40.0, 315.0)", "True 0.12")
+    # After the array closes, a number is annotation again.
+    said = "[0.52 0.7  0.8  0.89]  150 mm on the wall"
+    assert _disagreement(said, "[0.52 0.7  0.8  0.89]") == ""
+
+
+def test_a_tuple_the_print_writes_short_is_reported() -> None:
+    """A value inside a bracket still open at the last printed one is promised."""
+    assert "59225" in _disagreement("(5, 59225)", "(5,)")
+    assert "59225" in _disagreement("(5 bands, 59225 samples)", "(5,)")
+    assert _disagreement("(5 bands, 59225 samples)", "(5, 59225)") == ""
+
+
+def test_a_value_a_word_follows_after_the_printed_ones_is_annotation() -> None:
+    """A note in brackets or a unit with a figure in it is not a lost value."""
+    assert _disagreement("0.358  (0.458 with normal hearing)", "0.358") == ""
+    assert _disagreement("4.606 1/s", "4.606") == ""
+    assert _disagreement("1479.6, 0.03 % below water", "1479.6") == ""
+    # The value a comment opens on is promised whatever follows it.
+    assert "3" in _disagreement("3 rooms", "none")
+
+
+def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:
+    """The page's path, under the Spanish site, decides the decimal comma."""
+    script = "print(35.9)  # 35,9 m\n"
+    lines = {1: 1}
+    written = {1: [(" ", ["35.9"])]}
+    spanish = check_doc_snippets._SITE_ES / "page.mdx"
+    english = check_doc_snippets._SITE / "page.mdx"
+    assert (
+        check_doc_snippets.output_disagreements(spanish, script, lines, written) == []
+    )
+    (failure,) = check_doc_snippets.output_disagreements(
+        english, script, lines, written
+    )
+    assert "35" in failure
+
+
+def test_the_spanish_pages_run_with_the_english_and_the_mirror() -> None:
+    root = check_doc_snippets._ROOT
+    pages = [
+        check_doc_snippets._SITE / "start" / "page.mdx",
+        check_doc_snippets._SITE_ES / "start" / "page.mdx",
+        check_doc_snippets._DOCS / "start" / "page.md",
+        root / "llms-full.txt",
+    ]
+    runnable = check_doc_snippets._runnable(pages)
+    assert pages[0] in runnable
+    assert pages[1] in runnable
+    assert pages[2] in runnable
+    assert pages[3] not in runnable
+
+
+def test_a_comment_that_opens_on_the_word_the_print_writes_is_held(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A rating, a class name or a message the code writes is an output."""
+    code = 'name, value = "Wk", 15.9\nprint(name, value)  # {}'
+    right = _page(tmp_path, code.format("Wk 15.9"), name="right.md")
+    assert check_doc_snippets.check_execution([right]) == []
+    wrong = _page(tmp_path, code.format("Wk 16.9"), name="wrong.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "16.9" in failure
+
+
+def test_a_comment_on_a_word_the_print_does_not_write_is_prose(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The run settles it: a print that writes a number has no word to quote."""
+    page = _page(
+        tmp_path, "level = 2.5\nprint(level)  # the level of the room, 3 dB up"
+    )
+    assert check_doc_snippets.check_execution([page]) == []
+    (promise,) = check_doc_snippets.promised_outputs("print(x)  # the level\n")
+    assert promise.word == "the"
+
+
+def test_prints_share_lines_that_open_on_a_word_one_line_each(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Three prints, three lines: the last one the rating the third print writes."""
+    code = 'grade = "engineering"\nprint(3.7)\nprint(1.8)\nprint(grade)\n# {}\n# 1.8\n# engineering'
+    right = _page(tmp_path, code.format("3.7"), name="right.md")
+    assert check_doc_snippets.check_execution([right]) == []
+    wrong = _page(tmp_path, code.format("3.8"), name="wrong.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "wrong.md:5: " in failure
+    assert "3.8" in failure
+
+
+def test_a_message_quoted_over_more_lines_than_prints_goes_to_the_last() -> None:
+    """Lines that open on a word are not shared out unless one is left per print."""
+    script = (
+        "print(True)\n"
+        "print(message)\n"
+        "# Supply: 6 of 8 frequencies are above\n"
+        "# (188 Hz), where higher-order modes propagate\n"
+        "# describes the plane-wave mode only.\n"
+    )
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert promise.first == 2
+    assert promise.word == "Supply"
+    message = (
+        "Supply: 6 of 8 frequencies are above the first duct cut-on frequency "
+        "(188 Hz), where higher-order modes propagate and so on"
+    )
+    assert _disagreement(promise.lines[0], message) == ""
+
+
+def test_what_follows_an_arrow_may_be_a_note() -> None:
+    """``-> moderate (10 % < risk < 50 %)`` notes the line; it is not read."""
+    loop = ["male 1.62 1.22 37", "female 1.4 0.96 64"]
+    said = "male   1.62 1.22 37   -> moderate  (10 % < risk < 50 %)"
+    assert _disagreement(said, loop) == ""
+    assert "1.23" in _disagreement(said.replace("1.22", "1.23"), loop)
+    # An arrow between two printed values is read past like any punctuation.
+    assert _disagreement("4.9 -> 1.6 %", "4.9 1.6") == ""
+    assert _disagreement("4.9 -> 1.7 %", "4.9 1.6") != ""
+    # When the print writes the arrow, the comment quotes it.
+    assert _disagreement("1e-02 -> 6.7 dB", "1e-02 -> 6.7 dB") == ""
+    assert _disagreement("1e-02 -> 6.8 dB", "1e-02 -> 6.7 dB") != ""
+
+
+def test_a_symbol_before_an_approximately_sign_is_read_past() -> None:
+    """``ΔLta ≈ 11.1 dB`` opens on its value, given roughly by the ``≈``."""
+    script = "print(11.125, 6.0)  # \u0394Lta \u2248 11.1 dB -> Kt = 6 dB\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert promise.word is None
+    assert _failures(script, {1: "11.125 6.0"}) == []
+    assert _failures(script.replace("11.1 dB", "11.3 dB"), {1: "11.125 6.0"}) != []

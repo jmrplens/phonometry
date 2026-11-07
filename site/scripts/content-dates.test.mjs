@@ -21,6 +21,7 @@ import {
 	readFileSync,
 	renameSync,
 	rmSync,
+	symlinkSync,
 	utimesSync,
 	writeFileSync,
 } from 'node:fs';
@@ -667,8 +668,11 @@ test('each count in date-sources.json covers the files repo-stats.mjs counts for
 
 // --- The sitemap, stamped the way the build does it ----------------------
 
-/** Write a sitemap listing `routes` into the site's build and run the stamp. */
-function stamp(repo, routes) {
+/**
+ * Write a sitemap listing `routes` into the site's build and run the stamp,
+ * handing it the site as `siteRoot` spells it.
+ */
+function stamp(repo, routes, siteRoot = repo.site) {
 	const dist = join(repo.site, 'dist');
 	mkdirSync(dist, { recursive: true });
 	const urls = routes.map((route) => `<url><loc>${siteUrl}${basePath}/${route}</loc></url>`).join('');
@@ -681,7 +685,7 @@ function stamp(repo, routes) {
 		join(dist, 'sitemap-0.xml'),
 		`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
 	);
-	const ran = spawnSync(process.execPath, [STAMP, repo.site], { env: repo.env, encoding: 'utf8' });
+	const ran = spawnSync(process.execPath, [STAMP, siteRoot], { env: repo.env, encoding: 'utf8' });
 	const xml = readFileSync(join(dist, 'sitemap-0.xml'), 'utf8');
 	const lastmod = (route) =>
 		new RegExp(`<loc>${siteUrl}${basePath}/${route}</loc><lastmod>([^<]+)</lastmod>`).exec(xml)?.[1];
@@ -707,6 +711,28 @@ test('the sitemap gives a page the date of its last content change, and a sectio
 	assert.equal(ran.lastmod('section/'), '2026-01-01');
 	assert.equal(ran.lastmod('es/'), '2026-01-01');
 	assert.match(ran.out, /stamped 4 URLs/);
+});
+
+test('a site reached through a symbolic link is dated as the directory the link names', async (t) => {
+	const repo = repository(t);
+	repo.write('index.mdx', page());
+	repo.write('guide.mdx', page());
+	repo.commit(1);
+	repo.write('guide.mdx', page({ body: 'Edited.\n' }));
+	repo.commit(2);
+	// macOS hands out its temporary directory through such a link, and git
+	// names the work tree by the directory it points to.
+	const link = join(repo.root, 'link');
+	symlinkSync(repo.work, link, 'dir');
+	const site = join(link, 'site');
+	const dates = await loadContentDates({ siteRoot: site });
+	assert.equal(isoDay(dates.dateOf(join(site, 'src', 'content', 'docs', 'guide.mdx'))), '2026-01-02');
+	assert.equal(isoDay(dates.dateOf('src/content/docs/index.mdx')), '2026-01-01');
+	assert.equal(day(dates, 'guide.mdx'), '2026-01-02', 'the real path and the linked one are one page');
+	const ran = stamp(repo, ['', 'guide/'], site);
+	assert.equal(ran.status, 0, ran.err);
+	assert.equal(ran.lastmod(''), '2026-01-01');
+	assert.equal(ran.lastmod('guide/'), '2026-01-02');
 });
 
 test('a sitemap URL with no source fails the build, listed with every other one', async (t) => {

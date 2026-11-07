@@ -39,8 +39,8 @@
  * anything else to import.
  */
 import { spawn } from 'node:child_process';
-import { existsSync, statSync } from 'node:fs';
-import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { existsSync, realpathSync, statSync } from 'node:fs';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import {
   CONTENT_DIR,
@@ -494,6 +494,32 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
 const loaded = new Map();
 
 /**
+ * A path with every symbolic link on it resolved, as git names the files of
+ * its work tree: `git rev-parse --show-toplevel` answers with the real
+ * directory, so a site reached through a link (macOS's temporary directory
+ * is one) would otherwise give a pathspec that climbs out of the repository.
+ * A path that does not exist yet keeps its last parts as written, under its
+ * nearest ancestor that does.
+ *
+ * @param {string} path An absolute path.
+ * @returns {string}
+ */
+function realPath(path) {
+  const rest = [];
+  let at = path;
+  for (;;) {
+    try {
+      return join(realpathSync(at), ...rest);
+    } catch {
+      const parent = dirname(at);
+      if (parent === at) return path;
+      rest.unshift(basename(at));
+      at = parent;
+    }
+  }
+}
+
+/**
  * The dates of every page of a site, read once.
  *
  * @param {{ siteRoot?: string }} [options] The directory holding
@@ -510,7 +536,7 @@ const loaded = new Map();
  *   them a source dates.
  */
 export function loadContentDates({ siteRoot = process.cwd() } = {}) {
-  const root = resolve(siteRoot);
+  const root = realPath(resolve(siteRoot));
   if (!loaded.has(root)) loaded.set(root, readContentDates(root));
   return loaded.get(root);
 }
@@ -522,7 +548,7 @@ async function readContentDates(siteRoot) {
   }
   let repo;
   try {
-    repo = (await gitText(siteRoot, ['rev-parse', '--show-toplevel'])).trim();
+    repo = realPath((await gitText(siteRoot, ['rev-parse', '--show-toplevel'])).trim());
   } catch (error) {
     throw new Error(
       `content dates: ${siteRoot} is not in a git clone, and the date each page last changed ` +
@@ -562,7 +588,7 @@ async function readContentDates(siteRoot) {
     sourced,
     raised,
     dateOf(filePath) {
-      const absolute = isAbsolute(filePath) ? filePath : join(siteRoot, filePath);
+      const absolute = isAbsolute(filePath) ? realPath(filePath) : join(siteRoot, filePath);
       const key = relative(repo, absolute).split(sep).join('/');
       const date = dates.get(key);
       if (date) return date;

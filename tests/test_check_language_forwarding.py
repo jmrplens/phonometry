@@ -924,6 +924,48 @@ def test_a_class_body_reads_a_name_it_binds_later_in_its_module(
     ]
 
 
+def test_a_class_body_reads_the_module_s_name_past_a_type_checker_s_binding(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class body whose only binding of ``axis`` is under ``if
+    TYPE_CHECKING:`` never binds it, so a call of ``axis`` there, and an
+    alias of it, reach the module's helper, and the calls that drop the
+    language are refused.
+
+    The block's binding was taken for one that may have run, the only one of
+    the name in the body, so the body's ``axis`` stood for ``None`` and both
+    calls passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "figures.__init__": "",
+            "figures.devices": """
+            from typing import TYPE_CHECKING
+
+            from pkg.helpers import axis
+
+
+            class _Called:
+                if TYPE_CHECKING:
+                    axis = None
+                axis(None)
+
+
+            class _Aliased:
+                if TYPE_CHECKING:
+                    axis = None
+                kept = axis
+                kept(None)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("_Aliased.<class>", "pkg.helpers.axis"),
+        ("_Called.<class>", "pkg.helpers.axis"),
+    ]
+
+
 def test_a_partial_reads_its_names_where_it_is_built(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -1609,6 +1651,162 @@ def test_a_method_call_is_covered(tmp_path: pathlib.Path) -> None:
     assert [(f.line, f.helper) for f in found] == [
         (13, "pkg.results.Result.plot"),
         (16, "pkg.results.Result.plot"),
+    ]
+
+
+def test_a_method_a_class_inherits_is_read_from_the_base_its_statement_reads(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class's base is what its name stands for where the ``class``
+    statement reads it, so the ``plot`` a result inherits is that base's,
+    not that of a later class of the base's name.
+
+    A base was read as its module stood once it had run, so the call that
+    drops the language ``Shown.plot`` takes passed, and the one to
+    ``Plain.plot``, which takes none, was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.results": """
+            from __future__ import annotations
+
+
+            class _Late:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            class Shown(_Late):
+                pass
+
+
+            class _Late:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Early:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class Plain(_Early):
+                pass
+
+
+            class _Early:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            def shown() -> Shown:
+                return Shown()
+
+
+            def plain() -> Plain:
+                return Plain()
+            """,
+            "pkg.plots": """
+            from .results import plain, shown
+
+
+            def figure(ax, language="en"):
+                shown().plot(ax)
+                plain().plot(ax)
+            """,
+        },
+    )
+    assert [(f.line, f.helper) for f in found] == [(6, "pkg.results._Late.plot")]
+
+
+def test_a_method_a_class_inherits_comes_from_its_method_resolution_order(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class takes a method from the first class of its method resolution
+    order that defines it, and ``super()`` from the first after it:
+    ``Shown(_Left, _Right)``, both on ``_Base``, resolves ``_Left, _Right,
+    _Base``, so its ``plot`` and the one ``Relayed``'s ``super()`` reaches
+    are ``_Right.plot``, which takes the language. An attribute's class is
+    read the same way: ``Holder``'s ``result`` is the ``Shown`` that
+    ``_HoldsRight`` annotates, not the ``_Plain`` of ``_Holds``.
+
+    The bases were looked up depth first, ``_Left`` then its own base, and
+    ``super()`` read the first base alone, so the three calls reached a
+    ``plot`` that takes no language, and passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.results": """
+            from __future__ import annotations
+
+
+            class _Base:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Left(_Base):
+                pass
+
+
+            class _Right(_Base):
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            class Shown(_Left, _Right):
+                pass
+
+
+            class Relayed(_Left, _Right):
+                def plot(self, ax=None, *, language="en"):
+                    return super().plot(ax)
+
+
+            class _Plain:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Holds:
+                result: _Plain
+
+
+            class _HoldsLeft(_Holds):
+                pass
+
+
+            class _HoldsRight(_Holds):
+                result: Shown
+
+
+            class Holder(_HoldsLeft, _HoldsRight):
+                pass
+
+
+            def shown() -> Shown:
+                return Shown()
+
+
+            def holder() -> Holder:
+                return Holder()
+            """,
+            "pkg.plots": """
+            from .results import holder, shown
+
+
+            def figure(ax, language="en"):
+                shown().plot(ax)
+                holder().result.plot(ax)
+            """,
+        },
+    )
+    assert sorted((f.path, f.line, f.caller, f.helper) for f in found) == [
+        ("pkg/plots.py", 6, "figure", "pkg.results._Right.plot"),
+        ("pkg/plots.py", 7, "figure", "pkg.results._Right.plot"),
+        ("pkg/results.py", 25, "Relayed.plot", "pkg.results._Right.plot"),
     ]
 
 

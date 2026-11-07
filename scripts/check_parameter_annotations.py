@@ -773,6 +773,10 @@ class Annotations:
         #: The classes the members of :data:`NUMERIC_ARRAY_LIKE` name, by their
         #: dotted names: what an array-like of numbers is made of.
         self.numeric = self._numeric_classes()
+        #: What :func:`linearized` and :func:`_dataclass_fields` found, read
+        #: once for each class: neither changes once the package is read.
+        self.lines: dict[str, tuple[str, ...]] = {}
+        self.dataclass_fields: dict[str, dict[str, Field]] = {}
 
     def _numeric_classes(self) -> frozenset[str]:
         root = (
@@ -1997,6 +2001,56 @@ def _positional(
     return every[1:] if bound and every else every
 
 
+def _first_star(call: ast.Call) -> int | None:
+    """The place of a call's first ``*`` argument, if it has one."""
+    for index, argument in enumerate(call.args):
+        if isinstance(argument, ast.Starred):
+            return index
+    return None
+
+
+def _filled(places: Sequence[str], positions: Sequence[int], spread: int) -> list[str]:
+    """The names of *places* a call's arguments at *positions* may fill.
+
+    An argument past the first ``*`` argument (at *spread*) may fill any
+    place from the star's own on, as the star hands an unknown number of
+    values; one before it fills the place it is written in.
+    """
+    filled: list[str] = []
+    for index in positions:
+        if index > spread:
+            filled.extend(places[spread:])
+        elif index < len(places):
+            filled.append(places[index])
+    return filled
+
+
+def _past_the_places(positions: Sequence[int], places: int, spread: int | None) -> bool:
+    """Whether a call's argument at one of *positions* may land past a
+    function's *places* named positional parameters, in its ``*args``: one
+    written past them, or one after the call's first ``*`` argument (at
+    *spread*), which may land anywhere from the star's place on.
+    """
+    return any(
+        index >= places or (spread is not None and index > spread)
+        for index in positions
+    )
+
+
+def _handed_on_as(post_init: overloads.Function, place: int) -> str | None:
+    """The parameter of ``__post_init__`` the generated ``__init__`` hands the
+    ``InitVar`` at *place* among them to: the positional one of that place,
+    or ``*args`` past them.
+    """
+    node = post_init.implementation
+    if node is None:
+        return None
+    parameters = _positional(node, bound=True)
+    if place < len(parameters):
+        return parameters[place].arg
+    return node.args.vararg.arg if node.args.vararg is not None else None
+
+
 def _is_static(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     return any(
         isinstance(decorator, ast.Name) and decorator.id == "staticmethod"
@@ -2022,6 +2076,9 @@ class Reader:
         self._rebound: dict[int, frozenset[str]] = {}
         self._calls: dict[int, list[ast.Call]] = {}
         self._refusing: dict[int, frozenset[int]] = {}
+        #: The place of each call's first ``*`` argument (:func:`_first_star`),
+        #: read once for each call, as every route through it asks again.
+        self._stars: dict[ast.Call, int | None] = {}
         self._memo: dict[tuple[str, str, str, str], list[tuple[str, int, int]]] = {}
         self._active: set[tuple[str, str, str, str]] = set()
         self._cut = False
@@ -2043,22 +2100,23 @@ class Reader:
     def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
         return _type_bounds(function.implementation, self.owner(function))
 
-    def _method(self, owner: str, name: str, depth: int = 0) -> str | None:
-        """A method a class defines or takes from a class of the package it extends."""
+    def _method(self, owner: str, name: str) -> str | None:
+        """A method a class defines or takes from a class of the package it
+        extends: that of the first class of its method resolution order
+        (:func:`linearized`) that defines it.
+        """
+        functions = self.package.functions
         dotted = f"{owner}.{name}"
-        if dotted in self.package.functions or depth > _HIERARCHY:
-            return dotted if dotted in self.package.functions else None
-        found = self.annotations.classes.get(owner)
-        if found is None:
-            return None
-        module, node = found
-        for base in node.bases:
-            target = self.package.resolve(module, base)
-            if target is not None and target in self.annotations.classes:
-                method = self._method(target, name, depth + 1)
-                if method is not None:
-                    return method
-        return None
+        if dotted in functions:
+            return dotted
+        return next(
+            (
+                f"{later}.{name}"
+                for later in linearized(self.package, self.annotations, owner)[1:]
+                if f"{later}.{name}" in functions
+            ),
+            None,
+        )
 
     @property
     def public_names(self) -> frozenset[str]:
@@ -2078,18 +2136,19 @@ class Reader:
         return self._public
 
     def _inherited(self, owner: str, name: str) -> str | None:
-        """The method ``super().name`` reaches from a class: its bases' first."""
-        found = self.annotations.classes.get(owner)
-        if found is None:
-            return None
-        module, node = found
-        for base in node.bases:
-            target = self.package.resolve(module, base)
-            if target is not None and target in self.annotations.classes:
-                method = self._method(target, name)
-                if method is not None:
-                    return method
-        return None
+        """The method ``super().name`` reaches from a class: that of the
+        first class after it in its method resolution order
+        (:func:`linearized`) that defines it.
+        """
+        functions = self.package.functions
+        return next(
+            (
+                f"{later}.{name}"
+                for later in linearized(self.package, self.annotations, owner)[1:]
+                if f"{later}.{name}" in functions
+            ),
+            None,
+        )
 
     def _typed(self, target: Target) -> frozenset[str]:
         """The annotations of a callee's parameter that end a route of *target*.
@@ -2401,7 +2460,8 @@ class Reader:
         """Where a call takes the parameter leads through one callee it may reach.
 
         *given* is where the call takes it, by position and by keyword, and
-        the level it is read at.
+        the level it is read at. A position past the call's first ``*``
+        argument may be any place from the star's own on (:func:`_filled`).
         """
         positions, keywords, level = given
         ends = self._ends(target)
@@ -2419,11 +2479,20 @@ class Reader:
             if where is None or where in positions or keyword in keywords:
                 yield _ending(reached, target), level, 0
             return
+        stars = self._stars
+        if call in stars:
+            spread = stars[call]
+        else:
+            spread = stars[call] = _first_star(call)
         handed = (
-            self._constructed(reached, positions, keywords, target)
+            self._constructed(reached, (positions, spread), keywords, target)
             if reached in self.annotations.classes
             else self._handed(
-                reached, positions, keywords, bound=bound_self, target=target
+                reached,
+                (positions, spread),
+                keywords,
+                bound=bound_self,
+                target=target,
             )
         )
         for how, deeper, hops in handed:
@@ -2497,7 +2566,9 @@ class Reader:
         A function handed the record itself reads the field off the
         parameter that holds it, by a name a parameter holds or by each name
         of a vararg it loops over: ``_hold_cells(self, "ix", "iy")`` reads
-        ``getattr(record, name)`` for each ``name`` of ``names``.
+        ``getattr(record, name)`` for each ``name`` of ``names``. A name or
+        the record written after a ``*`` argument may fill any parameter
+        from the star's place on (:func:`_filled`), or the vararg.
         """
         owner, _, field = name.partition(".")
         if owner not in _OWNERS or not field or field.startswith("{"):
@@ -2523,26 +2594,32 @@ class Reader:
         node = self.package.functions[reached].implementation
         if node is None:
             return
-        positional = _positional(node, bound=bound_self)
-        holder = owner if bound_self else _holder(call, positional, owner)
-        if holder is None:
+        positional = [argument.arg for argument in _positional(node, bound=bound_self)]
+        holders = [owner] if bound_self else _holders(call, positional, owner)
+        if not holders:
             return
-        received = [positional[index].arg for index in given if index < len(positional)]
+        spread = _first_star(call)
+        received = (
+            [positional[index] for index in given if index < len(positional)]
+            if spread is None
+            else _filled(positional, given, spread)
+        )
         received.extend(keywords)
         names = [(parameter, parameter) for parameter in dict.fromkeys(received)]
         vararg = node.args.vararg
-        if vararg is not None and any(index >= len(positional) for index in given):
+        if vararg is not None and _past_the_places(given, len(positional), spread):
             names.extend((vararg.arg, loop) for loop in _loops_over(node, vararg.arg))
         method = self.package.functions[reached]
-        for parameter, local in names:
-            for deeper, level, hops in self._known_routes(
-                method, _by_name(holder, local), target
-            ):
-                yield (
-                    f"handed by name to {method.qualname}({parameter}), {deeper}",
-                    level,
-                    hops + 1,
-                )
+        for holder in holders:
+            for parameter, local in names:
+                for deeper, level, hops in self._known_routes(
+                    method, _by_name(holder, local), target
+                ):
+                    yield (
+                        f"handed by name to {method.qualname}({parameter}), {deeper}",
+                        level,
+                        hops + 1,
+                    )
 
     @property
     def public_record_names(self) -> frozenset[str]:
@@ -2603,26 +2680,33 @@ class Reader:
     def _constructed(
         self,
         record: str,
-        positions: list[int],
+        positions: tuple[list[int], int | None],
         keywords: list[str],
         target: Target,
     ) -> Iterator[tuple[str, int, int]]:
         """What a record built with its generated ``__init__`` does with a value.
 
         The argument fills the field of its keyword, or of its position in
-        the order the fields are declared (a keyword-only field takes no
-        position), and the record's ``__post_init__`` reads that field as
-        ``self.<field>``: a count handed to a record that validates it is
-        followed there as it is into a function.
+        the order the constructor takes the fields (:func:`init_fields`; a
+        keyword-only field takes no position, an ``InitVar`` takes its own,
+        and *positions* carries where a ``*`` argument spreads,
+        :func:`_filled`), and the record's ``__post_init__`` reads that
+        field as ``self.<field>``, or takes an ``InitVar`` as the parameter
+        of its place among them: a count handed to a record that validates
+        it is followed there as it is into a function.
         """
-        fields = record_fields(self.package, self.annotations, record)
-        positional = [field for field in fields.values() if field.positional]
-        received = [
-            positional[index].name for index in positions if index < len(positional)
-        ]
+        fields = init_fields(self.package, self.annotations, record)
+        positional = [field.name for field in fields.values() if field.positional]
+        given, spread = positions
+        received = (
+            [positional[index] for index in given if index < len(positional)]
+            if spread is None
+            else _filled(positional, given, spread)
+        )
         received.extend(keyword for keyword in keywords if keyword in fields)
         dotted = self._method(record, "__post_init__")
         post_init = self.package.functions[dotted] if dotted is not None else None
+        handed_on = [name for name, field in fields.items() if field.kind == _HANDED_ON]
         shown = record.rpartition(".")[2]
         annotations = self.annotations
         for name in dict.fromkeys(received):
@@ -2642,31 +2726,46 @@ class Reader:
                 continue
             if post_init is None:
                 continue
-            for deeper, level, hops in self._known_routes(
-                post_init, f"self.{name}", target
-            ):
+            read = (
+                _handed_on_as(post_init, handed_on.index(name))
+                if field.kind == _HANDED_ON
+                else f"self.{name}"
+            )
+            if read is None:
+                continue
+            for deeper, level, hops in self._known_routes(post_init, read, target):
                 yield f"handed to {shown}({name}), {deeper}", level, hops + 1
 
     def _handed(
         self,
         reached: str,
-        positions: list[int],
+        positions: tuple[list[int], int | None],
         keywords: list[str],
         *,
         bound: bool,
         target: Target,
     ) -> Iterator[tuple[str, int, int]]:
-        """What the function a parameter is handed to does with it."""
+        """What the function a parameter is handed to does with it, at each
+        parameter its position may fill (:func:`_filled`), its ``*args`` when
+        the position may fall past the named ones (:func:`_past_the_places`),
+        or the parameter its keyword names.
+        """
         callee = self.package.functions[reached]
         node = callee.implementation
         if node is None:
             return
         parameters = overloads._parameters(node)
-        positional = _positional(node, bound=bound)
-        received = [
-            positional[index].arg for index in positions if index < len(positional)
-        ]
+        positional = [argument.arg for argument in _positional(node, bound=bound)]
+        given, spread = positions
+        received = (
+            [positional[index] for index in given if index < len(positional)]
+            if spread is None
+            else _filled(positional, given, spread)
+        )
         received.extend(keyword for keyword in keywords if keyword in parameters)
+        vararg = node.args.vararg
+        if vararg is not None and _past_the_places(given, len(positional), spread):
+            received.append(vararg.arg)
         bounds = self._bounds(callee)
         annotations = self.annotations
         for parameter in dict.fromkeys(received):
@@ -4553,10 +4652,20 @@ _DATACLASS = frozenset({"dataclasses.dataclass"})
 #: The sentinel after which a record's fields are keyword-only.
 _KW_ONLY = frozenset({"dataclasses.KW_ONLY"})
 
-#: The annotations that make a class attribute something other than a field.
-_NOT_FIELDS = frozenset(
-    {"typing.ClassVar", "typing_extensions.ClassVar", "dataclasses.InitVar"}
-)
+#: The annotations that make a class attribute a class variable, no field.
+_CLASS_VARIABLES = frozenset({"typing.ClassVar", "typing_extensions.ClassVar"})
+
+#: The annotation of a pseudo-field the generated ``__init__`` takes and
+#: hands to ``__post_init__`` instead of storing it.
+_INIT_VARIABLE = "dataclasses.InitVar"
+
+#: What an entry of a record's fields is to its generated ``__init__``: a
+#: field it takes and stores, an ``InitVar`` it takes and hands on to
+#: ``__post_init__``, or one it does not take (``field(init=False)``, a
+#: ``ClassVar``), which keeps its place in the order all the same.
+_STORED = "stored"
+_HANDED_ON = "handed on"
+_NOT_TAKEN = "not taken"
 
 
 @dataclass(frozen=True)
@@ -4569,10 +4678,14 @@ class Field:
     module: str
     line: int
     name: str
+    #: Its annotation, the type an ``InitVar`` wraps for one.
     annotation: ast.expr
     #: Whether the generated ``__init__`` takes it by position too: not a
     #: field of a ``kw_only`` record, after ``KW_ONLY`` or ``field(kw_only=True)``.
     positional: bool = True
+    #: What it is to the generated ``__init__``: :data:`_STORED`,
+    #: :data:`_HANDED_ON` or :data:`_NOT_TAKEN`.
+    kind: str = _STORED
 
 
 def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -> bool:
@@ -4623,21 +4736,105 @@ def _keyword_only_record(
     )
 
 
-def record_fields(
-    package: overloads.Package, annotations: Annotations, record: str, depth: int = 0
+def _c3(head: str, sequences: list[list[str]]) -> tuple[str, ...] | None:
+    """The C3 merge Python builds a method resolution order with: *head*,
+    then each class that heads one of *sequences* and is in the tail of
+    none, the first such each time; ``None`` when no class qualifies, as
+    Python refuses such bases.
+    """
+    order = [head]
+    pending = [sequence for sequence in sequences if sequence]
+    while pending:
+        chosen = next(
+            (
+                sequence[0]
+                for sequence in pending
+                if not any(sequence[0] in other[1:] for other in pending)
+            ),
+            None,
+        )
+        if chosen is None:
+            return None
+        order.append(chosen)
+        pending = [
+            rest
+            for sequence in pending
+            if (rest := sequence[1:] if sequence[0] == chosen else sequence)
+        ]
+    return tuple(order)
+
+
+def linearized(
+    package: overloads.Package, annotations: Annotations, owner: str
+) -> tuple[str, ...]:
+    """The method resolution order of a class of the package, by dotted
+    names, the class first: the C3 merge of its bases' orders and the bases
+    themselves (:func:`_c3`), the bases of the package alone, read once for
+    each class. A class Python cannot linearize, or one reached again while
+    it is read, is the class alone.
+    """
+    lines = annotations.lines
+    found = lines.get(owner)
+    if found is not None:
+        return found
+    lines[owner] = (owner,)
+    entry = annotations.classes.get(owner)
+    if entry is None:
+        return lines[owner]
+    module, node = entry
+    bases = [
+        target
+        for base in node.bases
+        if (target := package.resolve(module, base)) is not None
+        and target in annotations.classes
+    ]
+    sequences = [list(linearized(package, annotations, base)) for base in bases]
+    found = _c3(owner, [*sequences, bases]) or (owner,)
+    lines[owner] = found
+    return found
+
+
+def _dataclass_fields(
+    package: overloads.Package, annotations: Annotations, record: str
 ) -> dict[str, Field]:
-    """The fields a record's ``__init__`` takes, its bases' first, by name."""
-    found = annotations.classes.get(record)
-    if found is None or depth > _HIERARCHY:
-        return {}
-    module, node = found
+    """Every entry of a class's ``__dataclass_fields__``, by name, in the
+    order its generated ``__init__`` takes them, those it does not take and
+    the ``InitVar`` it hands on included (:attr:`Field.kind`), read once for
+    each class.
+
+    A record's are what ``dataclasses`` builds: those of each class of its
+    method resolution order (:func:`linearized`) from the farthest to the
+    nearest, then its own, a field written again keeping the place it first
+    took, with the later writing's annotation and the way it is taken. A
+    class that is no record has the attribute of the first record of its own
+    order, and its generated ``__init__``.
+    """
+    held = annotations.dataclass_fields
+    found = held.get(record)
+    if found is not None:
+        return found
+    held[record] = {}
+    entry = annotations.classes.get(record)
+    if entry is None:
+        return held[record]
+    module, node = entry
+    line = linearized(package, annotations, record)
     fields: dict[str, Field] = {}
-    for base in node.bases:
-        target = package.resolve(module, base)
-        if target is not None and target in annotations.classes:
-            fields.update(record_fields(package, annotations, target, depth + 1))
     if not _is_dataclass(package, module, node):
+        later = next(
+            (
+                other
+                for other in line[1:]
+                if _is_dataclass(package, *annotations.classes[other])
+            ),
+            None,
+        )
+        if later is not None:
+            fields = _dataclass_fields(package, annotations, later)
+        held[record] = fields
         return fields
+    for later in reversed(line[1:]):
+        fields.update(_dataclass_fields(package, annotations, later))
     keyword_only = _keyword_only_record(package, module, node)
     for child in node.body:
         if not (
@@ -4651,21 +4848,55 @@ def record_fields(
             keyword_only = True
             continue
         base = written.value if isinstance(written, ast.Subscript) else written
-        if package.resolve(module, base) in _NOT_FIELDS:
-            continue
-        if _field_default_off(child, package, module):
-            fields.pop(child.target.id, None)
-            continue
+        wrapped = package.resolve(module, base)
+        kind = _STORED
+        annotation = written
+        if wrapped in _CLASS_VARIABLES or _field_default_off(child, package, module):
+            kind = _NOT_TAKEN
+        elif wrapped == _INIT_VARIABLE:
+            kind = _HANDED_ON
+            if isinstance(written, ast.Subscript):
+                annotation = written.slice
         own = _field_option(child, package, module, "kw_only")
         fields[child.target.id] = Field(
             record,
             module,
             child.lineno,
             child.target.id,
-            written,
+            annotation,
             positional=not (keyword_only if own is None else own),
+            kind=kind,
         )
+    held[record] = fields
     return fields
+
+
+def init_fields(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> dict[str, Field]:
+    """What a record's generated ``__init__`` takes, by name, in its order:
+    its fields (:func:`record_fields`) and each ``InitVar`` in the place it
+    holds among them, which the constructor hands on to ``__post_init__``.
+    """
+    return {
+        name: field
+        for name, field in _dataclass_fields(package, annotations, record).items()
+        if field.kind != _NOT_TAKEN
+    }
+
+
+def record_fields(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> dict[str, Field]:
+    """The fields a record's ``__init__`` takes and stores, by name, in the
+    order it takes them (:func:`_dataclass_fields`): an ``InitVar`` and a
+    field it does not take left out.
+    """
+    return {
+        name: field
+        for name, field in _dataclass_fields(package, annotations, record).items()
+        if field.kind == _STORED
+    }
 
 
 def public_records(
@@ -4727,16 +4958,23 @@ def _rebound(
 _SETATTR = 3
 
 
-def _holder(call: ast.Call, positional: Sequence[ast.arg], owner: str) -> str | None:
-    """The parameter of a function that a call hands the record to, by name.
+def _holders(call: ast.Call, positional: Sequence[str], owner: str) -> list[str]:
+    """The parameters of a function that a call may hand the record to, by name.
 
     ``_hold_cells(self, "ix", "iy")`` hands ``self`` to the parameter
-    ``record`` of ``_hold_cells(record, *names)``.
+    ``record`` of ``_hold_cells(record, *names)``. Written after a ``*``
+    argument, the record may fill any of *positional* from the star's place
+    on (:func:`_filled`).
     """
-    for index, value in enumerate(call.args):
-        if isinstance(value, ast.Name) and value.id == owner:
-            return positional[index].arg if index < len(positional) else None
-    return None
+    given = [
+        index
+        for index, value in enumerate(call.args)
+        if isinstance(value, ast.Name) and value.id == owner
+    ]
+    spread = _first_star(call)
+    if spread is None:
+        return [positional[index] for index in given if index < len(positional)]
+    return list(dict.fromkeys(_filled(positional, given, spread)))
 
 
 def _loops_over(node: ast.FunctionDef | ast.AsyncFunctionDef, name: str) -> list[str]:
@@ -4765,7 +5003,9 @@ def _handed_stores(
     record stores in ``ix`` and ``iy``. A name the function stores by is a
     text, a parameter filled by the call, or a loop name over its vararg;
     *looping* reads the call's own arguments when they are loop names of the
-    caller. A method called on ``self`` is read where it is called.
+    caller. A method called on ``self`` is read where it is called. After a
+    ``*`` argument, an argument may fill any place from the star's on, or
+    the vararg, and the record any parameter from there (:func:`_holders`).
     """
     if not any(
         isinstance(value, ast.Name) and value.id in _OWNERS for value in call.args
@@ -4777,16 +5017,19 @@ def _handed_stores(
     node = reader.package.functions[callee[0]].implementation
     if node is None:
         return set()
-    positional = _positional(node, bound=False)
+    positional = [argument.arg for argument in _positional(node, bound=False)]
     owners = {
-        holder
-        for owner in _OWNERS
-        if (holder := _holder(call, positional, owner)) is not None
+        holder for owner in _OWNERS for holder in _holders(call, positional, owner)
     }
     vararg = node.args.vararg
-    rest = call.args[len(positional) :]
+    spread = _first_star(call)
+    rest = [
+        value
+        for index, value in enumerate(call.args)
+        if _past_the_places([index], len(positional), spread)
+    ]
     by_vararg = set(_loops_over(node, vararg.arg)) if vararg is not None else set()
-    places = {argument.arg: index for index, argument in enumerate(positional)}
+    places = {name: index for index, name in enumerate(positional)}
     helper = reader.package.functions[callee[0]]
     stored: set[str] = set()
     for inner in ast.walk(node):
@@ -4806,12 +5049,13 @@ def _handed_stores(
             stored.add(field.value)
         elif isinstance(field, ast.Name) and field.id in by_vararg:
             handed.extend(rest)
-        elif (
-            isinstance(field, ast.Name)
-            and field.id in places
-            and places[field.id] < len(call.args)
-        ):
-            handed.append(call.args[places[field.id]])
+        elif isinstance(field, ast.Name) and field.id in places:
+            place = places[field.id]
+            if spread is not None and place >= spread:
+                # Past the star, any argument after it may fill the place.
+                handed.extend(call.args[spread + 1 :])
+            elif place < len(call.args):
+                handed.append(call.args[place])
         for value in handed:
             named = _field_named(value, looping)
             if named is not None:

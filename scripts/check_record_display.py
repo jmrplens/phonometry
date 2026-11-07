@@ -58,34 +58,18 @@ NAMED_TUPLE_CALLS: Mapping[str, str] = {
 EXEMPT: dict[tuple[str, str], str] = {}
 
 
-def _bases(tree: Tree, info: ClassInfo, name: str) -> list[ClassInfo]:
-    """Every class of the package a base of *info* may name: each one the
-    name may hold once its module has run (:meth:`Tree.resolve_all`), a
-    class a function writes under ``global`` among them; none when it names
-    none.
-    """
-    resolved = [
-        tree.classes[key]
-        for key in tree.resolve_all(info.module, name)
-        if key in tree.classes
-    ]
-    if resolved:
-        return resolved
-    local = tree.classes.get((info.module, name))
-    if local is not None:
-        return [local]
-    candidates = tree.class_by_name.get(name, [])
-    return candidates[:1] if len(candidates) == 1 else []
-
-
 def displays(tree: Tree, info: ClassInfo, seen: frozenset[str] = frozenset()) -> bool:
     """Whether a class inherits :data:`MECHANISM`, itself or through a base
-    every class of which its name may hold inherits it.
+    every class of which it may be inherits it: each class the base's name
+    stands for where the ``class`` statement reads it
+    (:meth:`Tree.base_classes`), so a base a later ``class`` of its name
+    replaces is the class it was then, one with a class in each branch of an
+    ``if`` is either, an alias is what it held there, and a class a function
+    writes under ``global`` may be it too.
     """
     if MECHANISM in info.bases:
         return True
-    for name in info.bases:
-        bases = _bases(tree, info, name)
+    for bases in tree.base_classes(info):
         keys = [f"{base.module}.{base.name}.{base.line}" for base in bases]
         if bases and all(
             key not in seen and displays(tree, base, seen | {key})
@@ -113,30 +97,43 @@ def records_without_display(
 ) -> list[Finding]:
     """Every public record a notebook would show as its raw ``repr``.
 
+    Each ``class`` statement of a public name is read, as a notebook may show
+    the one written in either branch of an ``if``, or one an alias keeps
+    after a later one replaced it.
     *tree* is the package already read from *files*, when the caller has it.
     """
     if tree is None:
         tree = Tree(files, root)
     found: list[Finding] = []
-    for key in sorted(tree.public):
-        info = tree.classes[key]
+    records = [
+        (key, info)
+        for key in sorted(tree.public)
+        for info in tree.class_definitions[key]
+    ]
+    for key, info in records:
         if not info.record:
             continue
         module, qualname = key
-        own = {
-            method
+        # The display methods this ``class`` statement defines, each
+        # ``def`` of them, which another class of its name does not lend it.
+        methods = {
+            method: [
+                definition
+                for definition in tree.definitions.get(
+                    (module, f"{qualname}.{method}"), []
+                )
+                if definition.owner is info
+            ]
             for method in NAMED_TUPLE_CALLS
-            if (module, f"{qualname}.{method}") in tree.functions
         }
+        own = {method for method, written in methods.items() if written}
         reason: str | None = None
         if "NamedTuple" in info.bases:
             missing = [
                 method
                 for method, call in NAMED_TUPLE_CALLS.items()
-                if method not in own
-                or not _calls(
-                    tree.functions[(module, f"{qualname}.{method}")].node, call
-                )
+                if not methods[method]
+                or not all(_calls(written.node, call) for written in methods[method])
             ]
             if missing:
                 reason = (

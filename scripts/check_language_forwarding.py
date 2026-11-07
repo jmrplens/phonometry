@@ -750,6 +750,8 @@ class Tree:
         self.functions: dict[ast.AST, Scope] = {}
         self.classes: dict[ast.AST, Class] = {}
         self.methods: dict[str, list[Scope]] = {}
+        #: What :meth:`linearization` found, read once for each class.
+        self._lines: dict[Class, tuple[Class, ...]] = {}
         self._slots: dict[tuple[Scope, bool], Slot | None] = {}
         self._aliasing: set[int] = set()
         self._computing: set[int] = set()
@@ -1040,40 +1042,82 @@ class Tree:
     # -- classes ----------------------------------------------------------
 
     def _bases(self, klass: Class) -> Iterator[Class]:
+        """Each base of *klass* that is a class of the tree: what its name
+        stands for where the ``class`` statement reads it (:meth:`resolve`),
+        so a base a later ``class`` of its name replaces is the class it was
+        when the statement ran.
+        """
         for base in klass.node.bases:
-            found = self.resolve(base, klass.scope, klass.module)
+            found = self.resolve(base, klass.scope, klass.module, base)
             if isinstance(found, Class):
                 yield found
 
-    def member(
-        self, klass: Class, name: str, seen: set[int] | None = None
-    ) -> Scope | None:
-        """The method *name* of *klass*, or of the first base of the tree with it."""
-        seen = set() if seen is None else seen
-        if id(klass) in seen:
-            return None
-        seen.add(id(klass))
-        node = klass.members.get(name)
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-            return self.functions[node]
-        for base in self._bases(klass):
-            found = self.member(base, name, seen)
-            if found is not None:
-                return found
+    def linearization(self, klass: Class) -> tuple[Class, ...]:
+        """The method resolution order of *klass*, the class first: the C3
+        merge Python builds of its bases' orders and the bases themselves,
+        those of the tree alone (:meth:`_bases`), read once for each class.
+        A class Python cannot linearize, or one reached again while it is
+        read, is the class alone.
+        """
+        found = self._lines.get(klass)
+        if found is not None:
+            return found
+        self._lines[klass] = (klass,)
+        bases = list(self._bases(klass))
+        order: list[Class] = [klass]
+        pending = [list(self.linearization(base)) for base in bases] + [bases]
+        pending = [sequence for sequence in pending if sequence]
+        while pending:
+            chosen = next(
+                (
+                    sequence[0]
+                    for sequence in pending
+                    if not any(
+                        sequence[0] is later for other in pending for later in other[1:]
+                    )
+                ),
+                None,
+            )
+            if chosen is None:
+                order = [klass]
+                break
+            order.append(chosen)
+            pending = [
+                rest
+                for sequence in pending
+                if (rest := sequence[1:] if sequence[0] is chosen else sequence)
+            ]
+        found = tuple(order)
+        self._lines[klass] = found
+        return found
+
+    def member(self, klass: Class, name: str, *, after: bool = False) -> Scope | None:
+        """The method *name* of *klass*: that of the first class of its
+        method resolution order (:meth:`linearization`) that defines it, or
+        with *after*, of the first after *klass*, as ``super()`` reads it.
+        """
+        for later in self.linearization(klass)[1 if after else 0 :]:
+            node = later.members.get(name)
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                return self.functions[node]
         return None
 
     def _field_type(self, klass: Class, name: str, depth: int) -> Class | None:
-        annotation = klass.fields.get(name)
-        if annotation is not None:
-            return self.annotation_type(annotation, klass.scope, klass.module, klass)
-        prop = klass.members.get(name)
-        if isinstance(prop, ast.FunctionDef | ast.AsyncFunctionDef):
-            return self.returns(self.functions[prop], klass)
-        for base in self._bases(klass):
-            if depth < _DEPTH:
-                found = self._field_type(base, name, depth + 1)
-                if found is not None:
-                    return found
+        """The class an attribute of *klass* holds: as the first class of its
+        method resolution order (:meth:`linearization`) that annotates it,
+        or defines it as a property, gives it.
+        """
+        if depth > _DEPTH:
+            return None
+        for later in self.linearization(klass):
+            annotation = later.fields.get(name)
+            if annotation is not None:
+                return self.annotation_type(
+                    annotation, later.scope, later.module, later
+                )
+            prop = later.members.get(name)
+            if isinstance(prop, ast.FunctionDef | ast.AsyncFunctionDef):
+                return self.returns(self.functions[prop], later)
         return None
 
     def annotation_type(
@@ -1283,13 +1327,18 @@ class Tree:
         if isinstance(base, Class):
             method = self.member(base, func.attr)
             return [self._callee(method, bound=False) if method else None]
-        receiver = self._receiver(func.value, scope)
+        receiver, after = self._receiver(func.value, scope)
         if receiver is not None:
-            method = self.member(receiver, func.attr)
+            method = self.member(receiver, func.attr, after=after)
             return [self._callee(method, bound=not method.static) if method else None]
         return [self._by_name(call, func.attr)]
 
-    def _receiver(self, expr: ast.expr, scope: Scope) -> Class | None:
+    def _receiver(self, expr: ast.expr, scope: Scope) -> tuple[Class | None, bool]:
+        """The class whose method a call on *expr* reaches, and whether it is
+        the method of the first class after it in its method resolution
+        order: ``super()`` in a method is the class the method is written in,
+        read past itself.
+        """
         if (
             isinstance(expr, ast.Call)
             and isinstance(expr.func, ast.Name)
@@ -1299,10 +1348,9 @@ class Tree:
             while current is not None and current.owner is None:
                 current = current.parent
             if current is None or current.owner is None:
-                return None
-            bases = list(self._bases(current.owner))
-            return bases[0] if bases else None
-        return self.type_of(expr, scope)
+                return None, False
+            return current.owner, True
+        return self.type_of(expr, scope), False
 
     def _callee(self, function: Scope, *, bound: bool) -> Callee | None:
         slot = self.slot(function, bound=bound)

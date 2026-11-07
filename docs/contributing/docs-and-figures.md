@@ -1618,3 +1618,26 @@ each page runs git log --follow on its own file while it renders its head
 **Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
 **Exceptions.** A file whose process does run once per build is listed in `ONCE_PER_BUILD` of the check, with the reason, the number of calls it holds and what it exports; a call the entry does not count, an export it does not name, which would hand the process to every page, and an entry that covers nothing, fail. The check reads what a page can run: everything under `site/src/`, `site/astro.config.mjs` and what those import from elsewhere in the site, found the way Vite finds them. The scripts the build runs before and after it renders start what they need, because each runs once. The check reads text, so that it needs no install: a module name built up at run time is not seen, a call under an alias is not counted, and it does not read the dependencies. The packages it knows to wrap `child_process` are a closed list, `SPAWNER`: a package not on it is not seen, and a new wrapper has to be added to it.
+
+## Printed outputs
+
+<a id="f67"></a>
+### F67. Write beside a print what it writes: its values first, in their order
+
+**Why.** The guides teach through the value a print writes, given in a comment at the end of the print's line or on the comment line under it: about 2,000 such comments on some 150 English pages, and as many again in Spanish and in the mirror. The snippet gate ran every one of them and judged only whether the page finished, so a change to a solver, a catalogue row or a rounding that moved a printed value would pass CI with the old value still in the comment, and a translator's edit to one twin's comment could leave the two languages promising different numbers.
+
+**Do**
+
+```python
+print(round(2 / 3, 2), 5)  # 0.67 m, 5 s: the second room
+```
+
+**Don't**
+
+```py
+print(round(2 / 3, 2), 5)  # 0.66 m, 5 s: a value the print does not write
+```
+
+**Enforced by:** `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py`
+
+**Exceptions.** A comment is an output when it opens like one: with a digit, a sign or a decimal point before one, a bracket or a quote around a value, `True`, `False`, `None`, `nan`, `inf`, an ellipsis or `~`, or with the word the print's own label opens with; a comment that opens on any other word, or on a bracket around words (`(n_samples,)`), describes the line and is not read. It is read at the end of the print's last line or on the comment line under it, and it goes on over the comment lines under that which open the same way or that an open bracket carries on to. Prints that follow one another with no comment of their own share the comment lines under the last of them, one each. The values are held, not the layout: a unit or a word may stand between two of them, a word or a number of the print's own string literal (its label) need not be repeated, a unit's power (`m/s^2`) and a symbol's index (`A(8)`) are not values, a number holds at the last digit it writes (`0.67` states `0.6666`, `1.0012e6` states `1001249`), `~` widens that to a unit of the digit, digits followed by an ellipsis (`55.350667...`) state the start of the printed ones, an ellipsis stands for the values it leaves out and the ones after it end a line, one value states an output that is that value throughout, and a Spanish page may write a decimal comma. A comment beside a print in a loop states the first lines it writes; a comment over several lines may instead state one line each, with its own note; a comment that quotes a message word for word may stop where its quotation does. Every edition runs and is held to its own run: the English page, the Spanish twin and the mirror. There is no list of excused comments and none is to be started: a comment the check misreads is taught to it, and a comment that is wrong is corrected in all three editions.

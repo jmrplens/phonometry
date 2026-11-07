@@ -1,19 +1,21 @@
 // Small builds for the tests of check-structured-data.mjs.
 //
 // The check reads a whole build, and some of what it asks is asked of the
-// whole site at once: the software's history on every page, the About page in
-// both languages, a share of pages edited since they were first published. A
-// test that hands it a build of a few pages has to give it all of that, or
-// every test fails on what it did not mean to test. So the pages are written
-// here, once, whole by default, and every test file of the check builds on
-// them: a check that adds a site-wide requirement adds it to this file, and
-// each suite keeps testing only its own defect.
+// whole site at once: the software node and its history on every page, the
+// site-wide block under its byte budget, the About page in both languages, a
+// share of pages edited since they were first published. A test that hands it
+// a build of a few pages has to give it all of that, or every test fails on
+// what it did not mean to test. So the pages are written here, once, whole by
+// default, and every test file of the check builds on them: a check that adds
+// a site-wide requirement adds it to this file, and each suite keeps testing
+// only its own defect.
 //
 // A page is data until the build is written: its article node, every node of
 // its graph and what it says, which a test changes in place before `check`
 // writes the build. Each page carries two ld+json blocks, as the built site
 // does: the site-wide nodes astro.config.mjs puts on every page, and the
-// page's own graph from Head.astro.
+// page's own graph from Head.astro. A page may carry further blocks, which a
+// test gives whole, or as written when it means one not to parse.
 //
 // Nothing here is installed: the tests run before the site's dependencies are.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -274,31 +276,48 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
 }
 
 /**
- * Write `built` as HTML files into a directory of their own, run the check on
- * them the way CI does, and say how it ended.
+ * Write `built` as HTML files into a directory of their own, and its
+ * `content` (path to text) as the content tree in another, run the check on
+ * the two the way CI does, and say how it ended. A build with no `content`
+ * gets an empty tree, so the check holds it to no page of the site's.
  *
  * Each page carries two blocks, as the built site does: the site-wide nodes
  * astro.config.mjs puts on every page, and the page's own graph from
- * Head.astro; what it says is the text of its `<main>`.
+ * Head.astro; what it says is the text of its `<main>`. The further blocks in
+ * a page's `blocks` follow, each in a block of its own: a document is written
+ * as JSON, a string as it is, so a test can hand the check one that does not
+ * parse.
  *
  * @param {import('node:test').TestContext} t The test, which removes the build when it ends.
- * @param {Record<string, {path: string, nodes: object[], text?: string}>|object[]} built The pages.
+ * @param {Record<string, {path: string, nodes: object[], text?: string, blocks?: (object|string)[]}>|object[]} built
+ *   The pages, and under `content` the pages of the content tree they are built from.
  * @returns {{status: number|null, out: string, err: string}} The check's exit status and what it printed.
  */
 export function check(t, built) {
 	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
-	t.after(() => rmSync(dist, { recursive: true, force: true }));
-	const script = (nodes) =>
-		`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes })}</script>`;
-	for (const { path, nodes, text = '' } of Object.values(built)) {
+	const tree = mkdtempSync(join(tmpdir(), 'check-structured-data-content-'));
+	t.after(() => {
+		rmSync(dist, { recursive: true, force: true });
+		rmSync(tree, { recursive: true, force: true });
+	});
+	const { content = {}, ...pages } = built;
+	for (const [path, text] of Object.entries(content)) {
+		mkdirSync(dirname(join(tree, path)), { recursive: true });
+		writeFileSync(join(tree, path), text);
+	}
+	const block = (body) => `<script type="application/ld+json">${body}</script>`;
+	const script = (nodes) => block(JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes }));
+	const further = (doc) => block(typeof doc === 'string' ? doc : JSON.stringify(doc));
+	for (const { path, nodes, text = '', blocks = [] } of Object.values(pages)) {
 		const site = nodes.filter((node) => SITE_TYPES.has(node['@type']));
 		const own = nodes.filter((node) => !SITE_TYPES.has(node['@type']));
 		mkdirSync(dirname(join(dist, path)), { recursive: true });
 		writeFileSync(
 			join(dist, path),
-			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head><body><main>${text}</main></body></html>`,
+			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head>` +
+				`<body><main>${text}</main>${blocks.map(further).join('')}</body></html>`,
 		);
 	}
-	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
+	const ran = spawnSync(process.execPath, [CHECK, dist, tree], { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };
 }

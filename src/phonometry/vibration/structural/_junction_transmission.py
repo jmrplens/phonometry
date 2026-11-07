@@ -186,9 +186,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Junction = Literal["X", "T1", "T2", "L"]
 
@@ -321,7 +322,7 @@ def _obliquity_sum(chi: float, sin2: NDArray[np.float64]) -> NDArray[np.float64]
     return np.asarray(first + second, dtype=np.float64)
 
 
-def _check_angle(angle_rad: ArrayLike) -> NDArray[np.float64]:
+def _check_angle(angle_rad: NumericArrayLike) -> NDArray[np.float64]:
     """Incidence angle(s) in radians, restricted to ``[0, pi/2]``."""
     theta = real_array(angle_rad, "angle_rad")
     if not np.all(np.isfinite(theta)):
@@ -334,7 +335,7 @@ def _check_angle(angle_rad: ArrayLike) -> NDArray[np.float64]:
 
 
 def corner_transmission_coefficient(
-    angle_rad: ArrayLike, chi: float, psi: float, junction: Junction = "X"
+    angle_rad: NumericArrayLike, chi: float, psi: float, junction: Junction = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission around a corner ``tau12(theta)`` (Hopkins Eq. 5.12).
 
@@ -366,7 +367,7 @@ def corner_transmission_coefficient(
 
 
 def straight_transmission_coefficient(
-    angle_rad: ArrayLike, chi: float, psi: float, junction: Junction = "X"
+    angle_rad: NumericArrayLike, chi: float, psi: float, junction: Junction = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission across a straight section ``tau13(theta)`` (Hopkins 5.13).
 
@@ -483,12 +484,12 @@ def angular_average_transmission_coefficient(
 
 
 def coupling_loss_factor(
-    transmission_coefficient: ArrayLike,
+    transmission_coefficient: NumericArrayLike,
     group_velocity: float,
     junction_length: float,
     plate_area: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""Coupling loss factor from a transmission coefficient (Hopkins Eq. 2.154).
 
@@ -604,7 +605,7 @@ def right_angle_transmission_coefficient(
 
 
 def point_connection_coupling_loss_factor(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     n_connections: int | np.integer[Any],
     *,
     thickness1_m: float,
@@ -693,7 +694,7 @@ def point_connection_coupling_loss_factor(
 
 
 def wave_vibration_reduction_index(
-    transmission_coefficient: ArrayLike,
+    transmission_coefficient: NumericArrayLike,
     critical_frequency_receiver: float,
 ) -> NDArray[np.float64]:
     r"""Vibration reduction index from a transmission coefficient (Hopkins 5.116).
@@ -847,7 +848,7 @@ def junction_transmission(
     wave_speed2: float,
     surface_density2: float,
     *,
-    angles_deg: ArrayLike | None = None,
+    angles_deg: NumericArrayLike | None = None,
 ) -> JunctionTransmissionResult:
     r"""Bending-wave transmission of a rigid perpendicular plate junction.
 

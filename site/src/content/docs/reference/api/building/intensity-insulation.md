@@ -82,13 +82,13 @@ supplied.
 
 ```python
 adaptation_term_kc(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     boundary_area: float,
     volume: float,
 ) -> np.ndarray
 
-adaptation_term_kc(frequencies: ArrayLike) -> np.ndarray
+adaptation_term_kc(frequencies: NumericArrayLike) -> np.ndarray
 ```
 
 Adaptation term `Kc` per ISO 15186-1:2000, Annex B.
@@ -127,8 +127,8 @@ $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Clause 3.10). Two forms are available:
 
 ```python
 intensity_element_normalized_difference(
-    lp1: ArrayLike,
-    l_in: ArrayLike,
+    lp1: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     n: int | np.integer[Any] = 1,
@@ -192,12 +192,12 @@ function implements the corrected per-unit form and warns when
 
 ```python
 intensity_sound_reduction(
-    lp1: ArrayLike,
-    l_in: ArrayLike,
+    lp1: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     area: float,
-    kc: ArrayLike | None = None,
+    kc: NumericArrayLike | None = None,
 ) -> IntensityReductionResult
 ```
 
@@ -301,8 +301,8 @@ IntensityElementNormalizedResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    fpi: ArrayLike | None = None,
-    residual_index: ArrayLike | None = None,
+    fpi: NumericArrayLike | None = None,
+    residual_index: NumericArrayLike | None = None,
 ) -> str
 ```
 
@@ -419,8 +419,8 @@ IntensityReductionResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    fpi: ArrayLike | None = None,
-    residual_index: ArrayLike | None = None,
+    fpi: NumericArrayLike | None = None,
+    residual_index: NumericArrayLike | None = None,
 ) -> str
 ```
 
@@ -478,7 +478,7 @@ and name the measurement standard in `measurement_standard`
 
 ```python
 limp_panel_reduction_index(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     surface_mass: float,
     area: float,
@@ -556,13 +556,13 @@ that range and nowhere else.
 
 ```python
 low_frequency_element_normalized_difference(
-    lp_surface: ArrayLike,
-    l_in: ArrayLike,
+    lp_surface: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     n_elements: int | np.integer[Any] = 1,
-    l_p: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    l_p: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyElementResult
 ```
@@ -609,13 +609,13 @@ disagree on the page, and this is the one that agrees with the physics.
 
 ```python
 low_frequency_intensity_reduction(
-    lp_surface: ArrayLike,
-    l_in: ArrayLike,
+    lp_surface: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     area: float,
-    l_p: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    l_p: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyIntensityResult
 ```
@@ -833,8 +833,8 @@ indicator itself is `None`.
 
 ```python
 subarea_intensity_level(
-    l_in: ArrayLike,
-    measurement_area: ArrayLike,
+    l_in: NumericArrayLike,
+    measurement_area: NumericArrayLike,
 ) -> SubareaIntensityLevel
 ```
 
@@ -897,8 +897,8 @@ unpacked by position.
 
 ```python
 surface_pressure_intensity_indicator(
-    lp: ArrayLike,
-    l_in: ArrayLike,
+    lp: NumericArrayLike,
+    l_in: NumericArrayLike,
 ) -> np.ndarray
 ```
 

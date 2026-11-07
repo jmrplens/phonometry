@@ -154,9 +154,9 @@ CENTRAL_TOLERANCE_PERCENT = (-11.0, 12.0, 6.0)
 
 ```python
 characteristic_phase_deviation(
-    phase_deviation_deg: ArrayLike,
+    phase_deviation_deg: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -282,7 +282,7 @@ NOMINAL_FREQUENCY_RANGE_HZ = {'Wb': (0.5, 80.0), 'Wc': (0.5, 80.0), 'Wd': (0.5, 
 
 ```python
 peak_deviation_percent(
-    characteristic_phase_deviation_deg: ArrayLike,
+    characteristic_phase_deviation_deg: NumericArrayLike,
 ) -> float
 ```
 
@@ -334,7 +334,7 @@ angles of two frequency components in the most unfavourable manner."
 ```python
 phase_tolerance_deg(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -715,9 +715,9 @@ UNCONSTRAINED_BELOW_PERCENT = -100.0
 ```python
 verify_phase_response(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    measured_phase_deg: ArrayLike,
+    measured_phase_deg: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> PhaseVerification
 ```
 
@@ -828,9 +828,9 @@ against a band the standard does not give.
 ```python
 verify_weighting(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    measured_factors: ArrayLike,
+    measured_factors: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     expanded_uncertainty_percent: float | None = None,
 ) -> WeightingVerification
 ```
@@ -887,7 +887,7 @@ WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT = 3.0
 ```python
 weighting_tolerance_percent(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 

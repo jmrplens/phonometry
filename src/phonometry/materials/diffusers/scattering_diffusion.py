@@ -50,10 +50,9 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import Real, ReportEngine
+    from ..._internal.types import NumericArrayLike, Real, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -365,7 +364,10 @@ class DiffusionSpectrum(OwnsArrays):
 
 
 def diffusion_spectrum(
-    diffusion: ArrayLike, *, frequencies: ArrayLike, normalized: ArrayLike | None = None
+    diffusion: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+    normalized: NumericArrayLike | None = None,
 ) -> DiffusionSpectrum:
     """Diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
 
@@ -413,10 +415,10 @@ def diffusion_spectrum(
 
 
 def directional_diffusion(
-    angles_deg: ArrayLike,
-    levels: ArrayLike,
+    angles_deg: NumericArrayLike,
+    levels: NumericArrayLike,
     *,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> DiffusionResult:
     """Diffusion coefficient of a polar response (ISO 17497-2, Formula (5)/(6)).
 
@@ -449,9 +451,9 @@ def directional_diffusion(
 # ISO 17497-2: directional and random-incidence diffusion (Clause 8).
 # ---------------------------------------------------------------------------
 def directional_diffusion_coefficient(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    area_weights: ArrayLike | None = None,
+    area_weights: NumericArrayLike | None = None,
 ) -> float:
     r"""Directional diffusion coefficient ``d_theta`` (ISO 17497-2, Formulas (5)/(6)).
 
@@ -493,8 +495,8 @@ def directional_diffusion_coefficient(
 
 
 def _diffusion_coefficient(
-    levels: ArrayLike,
-    area_weights: ArrayLike | None,
+    levels: NumericArrayLike,
+    area_weights: NumericArrayLike | None,
     *,
     weights_name: str,
 ) -> float:
@@ -546,8 +548,8 @@ def _diffusion_coefficient(
 
 
 def normalized_diffusion_coefficient(
-    d_theta: ArrayLike,
-    d_theta_reference: ArrayLike,
+    d_theta: NumericArrayLike,
+    d_theta_reference: NumericArrayLike,
 ) -> Real:
     r"""Normalised directional diffusion coefficient (ISO 17497-2, Formula (7)).
 
@@ -576,7 +578,7 @@ def normalized_diffusion_coefficient(
 
 
 def area_factors(
-    elevations: ArrayLike,
+    elevations: NumericArrayLike,
     *,
     delta_theta: float,
     delta_phi: float | None = None,
@@ -647,9 +649,9 @@ def area_factors(
 
 
 def random_incidence_diffusion(
-    directional_coefficients: ArrayLike,
+    directional_coefficients: NumericArrayLike,
     *,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> float:
     """Random-incidence diffusion coefficient ``d`` (ISO 17497-2, Clause 8.4).
 

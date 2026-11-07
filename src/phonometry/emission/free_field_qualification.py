@@ -134,9 +134,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 FreeFieldRoom = Literal["anechoic", "hemi-anechoic"]
 QualificationBandwidth = Literal["discrete-frequency", "broadband"]
@@ -290,7 +290,7 @@ def _nominal(k: int) -> float:
     return _NOMINAL_THIRDS_HZ[k - _LOWEST_K]
 
 
-def _lookup_bands(frequencies: ArrayLike) -> list[int]:
+def _lookup_bands(frequencies: NumericArrayLike) -> list[int]:
     """Band indices of one frequency or a 1-D array of them, for a table lookup."""
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1:
@@ -299,7 +299,7 @@ def _lookup_bands(frequencies: ArrayLike) -> list[int]:
     return [_band_index(float(f)) for f in freqs]
 
 
-def _band_indices(frequencies: ArrayLike) -> np.ndarray:
+def _band_indices(frequencies: NumericArrayLike) -> np.ndarray:
     """Band indices of a 1-D frequency axis, refusing two in one band."""
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
@@ -340,7 +340,7 @@ def _table_b1(k: int, room: str) -> float:
 
 
 def inverse_square_law_tolerance(
-    frequencies: ArrayLike, *, room: FreeFieldRoom
+    frequencies: NumericArrayLike, *, room: FreeFieldRoom
 ) -> np.ndarray:
     """Allowable deviation from the inverse square law per band (Table A.1).
 
@@ -363,7 +363,7 @@ def inverse_square_law_tolerance(
 
 
 def directionality_tolerance(
-    frequencies: ArrayLike, *, room: FreeFieldRoom
+    frequencies: NumericArrayLike, *, room: FreeFieldRoom
 ) -> np.ndarray:
     """Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
@@ -430,7 +430,7 @@ def _wavelength_m(frequency_hz: float, speed_of_sound: float) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _as_levels(value: ArrayLike, n_points: int, name: str) -> np.ndarray:
+def _as_levels(value: NumericArrayLike, n_points: int, name: str) -> np.ndarray:
     require_scalar(n_points, "n_points")
     arr = real_array(value, name)
     if arr.ndim == 1:
@@ -456,7 +456,7 @@ def _checked_targets(
     return named
 
 
-def _checked_positions(value: ArrayLike) -> np.ndarray:
+def _checked_positions(value: NumericArrayLike) -> np.ndarray:
     """An ``(N, 3)`` array of finite coordinates with at least two points."""
     positions = real_array(value, "value")
     if (
@@ -475,7 +475,7 @@ def _checked_positions(value: ArrayLike) -> np.ndarray:
     return positions
 
 
-def _checked_traverse_levels(value: ArrayLike, n_points: int) -> np.ndarray:
+def _checked_traverse_levels(value: NumericArrayLike, n_points: int) -> np.ndarray:
     """The levels of a traverse: finite, or ``nan`` where not measured."""
     levels = _as_levels(value, n_points, "levels")
     if np.any(np.isinf(levels)):
@@ -487,7 +487,7 @@ def _checked_traverse_levels(value: ArrayLike, n_points: int) -> np.ndarray:
     return levels
 
 
-def _checked_monitor(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
+def _checked_monitor(value: NumericArrayLike, levels: np.ndarray) -> np.ndarray:
     """The monitor readings, finite wherever Formula (1) reads them."""
     monitor = _as_levels(value, levels.shape[0], "monitor_levels")
     if monitor.shape != levels.shape:
@@ -507,7 +507,7 @@ def _checked_monitor(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     return monitor
 
 
-def _checked_background(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
+def _checked_background(value: NumericArrayLike, levels: np.ndarray) -> np.ndarray:
     """The background, per point or one row, finite at every measured point."""
     background = real_array(value, "value")
     if background.ndim == 1 and background.shape[0] == levels.shape[1]:
@@ -575,10 +575,10 @@ class MicrophoneTraverse(OwnsArrays):
         def __init__(
             self,
             *,
-            positions_m: ArrayLike,
-            levels: ArrayLike,
-            monitor_levels: ArrayLike | None = None,
-            background_levels: ArrayLike | None = None,
+            positions_m: NumericArrayLike,
+            levels: NumericArrayLike,
+            monitor_levels: NumericArrayLike | None = None,
+            background_levels: NumericArrayLike | None = None,
             name: str = "",
             targets: PathTarget | Sequence[PathTarget] = (),
         ) -> None: ...
@@ -610,13 +610,13 @@ class MicrophoneTraverse(OwnsArrays):
     @classmethod
     def along(
         cls,
-        direction: ArrayLike,
-        distances: ArrayLike,
-        levels: ArrayLike,
+        direction: NumericArrayLike,
+        distances: NumericArrayLike,
+        levels: NumericArrayLike,
         *,
-        start_m: ArrayLike = (0.0, 0.0, 0.0),
-        monitor_levels: ArrayLike | None = None,
-        background_levels: ArrayLike | None = None,
+        start_m: NumericArrayLike = (0.0, 0.0, 0.0),
+        monitor_levels: NumericArrayLike | None = None,
+        background_levels: NumericArrayLike | None = None,
         name: str = "",
         targets: Sequence[PathTarget] = (),
     ) -> MicrophoneTraverse:
@@ -910,7 +910,7 @@ def _chebyshev_centre(y: np.ndarray, inside: np.ndarray) -> np.ndarray:
     return np.asarray((hi + lo) / 2.0, dtype=np.float64)
 
 
-def _same_radii(given: ArrayLike, qualified: np.ndarray) -> bool:
+def _same_radii(given: NumericArrayLike, qualified: np.ndarray) -> bool:
     """Whether ``given`` holds the radii :func:`_evaluate` qualified."""
     radii = real_array(given, "given")
     return radii.shape == qualified.shape and bool(
@@ -1113,8 +1113,8 @@ def _prepared_traverses(
 
 
 def _placed_origin(
-    origin_m: ArrayLike | None,
-    source_box_m: ArrayLike | None,
+    origin_m: NumericArrayLike | None,
+    source_box_m: NumericArrayLike | None,
     positions: Sequence[np.ndarray],
     levels: Sequence[np.ndarray],
     tolerance: np.ndarray,
@@ -1183,10 +1183,10 @@ def _source_strengths(
 def inverse_square_law_deviations(
     traverses: Sequence[MicrophoneTraverse],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     room: FreeFieldRoom,
-    origin_m: ArrayLike | None = None,
-    source_box_m: ArrayLike | None = None,
+    origin_m: NumericArrayLike | None = None,
+    source_box_m: NumericArrayLike | None = None,
 ) -> InverseSquareLawResult:
     r"""Deviations from the inverse square law along the traverses of one source.
 
@@ -1385,7 +1385,7 @@ class SourceDirectionalityResult(OwnsArrays):
 
 
 def verify_source_directionality(
-    levels: ArrayLike, *, frequencies: ArrayLike, room: FreeFieldRoom
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike, room: FreeFieldRoom
 ) -> SourceDirectionalityResult:
     """May this source qualify an anechoic or hemi-anechoic room? (ISO 26101 Annex B).
 

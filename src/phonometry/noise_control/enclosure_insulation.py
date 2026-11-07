@@ -107,10 +107,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import BandFraction
+    from .._internal.types import BandFraction, NumericArrayLike
 
 Quantity = Literal["sound_power", "reciprocity"]
 
@@ -290,9 +290,9 @@ def _a_weighted_total(
 
 
 def _pair(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
-    frequencies: ArrayLike | None,
+    level_without: NumericArrayLike,
+    level_with: NumericArrayLike,
+    frequencies: NumericArrayLike | None,
     names: tuple[str, str],
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64] | None]:
     """The two spectra and their band centres, checked against each other.
@@ -527,10 +527,10 @@ class MethodEntry(RichDisplay):
 
 
 def _insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
+    level_without: NumericArrayLike,
+    level_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     a_weighted_without: float | None,
     a_weighted_with: float | None,
     quantity: Literal["sound_power", "sound_pressure", "reciprocity"],
@@ -592,10 +592,10 @@ def _insulation(
 
 
 def enclosure_sound_power_insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
+    level_without: NumericArrayLike,
+    level_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
     base_standard: SoundPowerStandard = _ISO_3744,
@@ -654,10 +654,10 @@ def enclosure_sound_power_insulation(
 
 
 def enclosure_sound_pressure_insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
+    level_without: NumericArrayLike,
+    level_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
     base_standard: SoundPressureStandard = _ISO_11201,
@@ -717,10 +717,10 @@ def enclosure_sound_pressure_insulation(
 
 
 def enclosure_reciprocity_insulation(
-    external_levels: ArrayLike,
-    internal_levels: ArrayLike,
+    external_levels: NumericArrayLike,
+    internal_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     fraction: BandFraction | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss measured from the outside in, Equation (5) of part 1.
@@ -763,10 +763,10 @@ def enclosure_reciprocity_insulation(
 
 
 def enclosure_artificial_source_insulation(
-    level_without_by_position: ArrayLike,
-    level_with_by_position: ArrayLike,
+    level_without_by_position: NumericArrayLike,
+    level_with_by_position: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     quantity: Literal["sound_power", "sound_pressure"] = "sound_power",
     condition: EnclosureCondition = "laboratory",
     fraction: BandFraction | np.integer[Any] = 3,
@@ -838,7 +838,7 @@ def enclosure_artificial_source_insulation(
 
 
 def weighted_enclosure_insulation(
-    insulation: ArrayLike,
+    insulation: NumericArrayLike,
     *,
     quantity: Quantity = "sound_power",
     fraction: BandFraction | np.integer[Any] = 3,
@@ -883,10 +883,10 @@ def weighted_enclosure_insulation(
 
 
 def estimated_a_weighted_enclosure_insulation(
-    spectrum_levels: ArrayLike,
-    insulation: ArrayLike,
+    spectrum_levels: NumericArrayLike,
+    insulation: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> float:
     r"""The A-weighted insulation an enclosure would give a stated spectrum.
 

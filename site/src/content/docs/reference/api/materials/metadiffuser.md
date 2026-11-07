@@ -35,12 +35,12 @@ reduced to the ISO 17497-2 directional diffusion coefficient.
 
 ```python
 metadiffuser_diffusion_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth_m: float,
     period_m: float,
-    angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
+    angles_deg: NumericArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     resonator_geometry: Literal['square', 'slit'] = 'slit',
@@ -88,7 +88,7 @@ metadiffuser_polar_response(
     *,
     depth_m: float,
     period_m: float,
-    angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
+    angles_deg: NumericArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     resonator_geometry: Literal['square', 'slit'] = 'slit',
@@ -131,7 +131,7 @@ with
 
 ```python
 metadiffuser_reflection(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth_m: float,

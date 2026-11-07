@@ -46,10 +46,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import FreeOrDiffuseField
+    from .._internal.types import FreeOrDiffuseField, NumericArrayLike
 
 __all__ = [
     "AUDIOMETRIC_FREQUENCIES_HZ",
@@ -300,7 +299,7 @@ class AgeThresholdResult(OwnsArrays):
         )
 
 
-def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
+def _select(values: np.ndarray, frequencies: NumericArrayLike | None) -> np.ndarray:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
         return values.copy()
@@ -328,7 +327,7 @@ def age_threshold(
     age: float,
     sex: Sex = "male",
     fractile: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> AgeThresholdResult:
     """Age-related hearing threshold distribution (ISO 7029:2017).
 
@@ -391,7 +390,7 @@ def age_threshold(
 
 
 def reference_threshold(
-    field: FreeOrDiffuseField = "free", frequencies: ArrayLike | None = None
+    field: FreeOrDiffuseField = "free", frequencies: NumericArrayLike | None = None
 ) -> np.ndarray:
     """Reference threshold of hearing (ISO 389-7:2005, Table 1).
 
@@ -575,7 +574,9 @@ EARPHONE_COUPLERS: Mapping[ReferenceEarphone, str] = MappingProxyType(
 )
 
 
-def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
+def _select_retspl(
+    values: np.ndarray, frequencies: NumericArrayLike | None
+) -> np.ndarray:
     """``values`` at a requested subset of the ISO 389-1 frequencies."""
     if frequencies is None:
         return values.copy()
@@ -595,7 +596,7 @@ def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndar
 
 def earphone_reference_level(
     earphone: ReferenceEarphone = _TDH39,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> np.ndarray:
     """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
 
@@ -620,10 +621,10 @@ def earphone_reference_level(
 
 
 def hearing_level_to_coupler_spl(
-    hearing_level: ArrayLike,
+    hearing_level: NumericArrayLike,
     earphone: ReferenceEarphone = _TDH39,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> np.ndarray:
     """An audiogram in dB HL as the level the coupler has to see, in dB SPL.
 

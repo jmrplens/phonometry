@@ -241,9 +241,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..fluids import Fluid
     from .reciprocity_calibration import ReciprocityCalibration
 
@@ -413,10 +414,10 @@ _J01 = float(special.jn_zeros(0, 1)[0])
 
 
 def _output_level_difference_db(
-    test_output_level: ArrayLike,
-    reference_output_level: ArrayLike,
-    test_monitor_level_db: ArrayLike | None = None,
-    reference_monitor_level_db: ArrayLike | None = None,
+    test_output_level: NumericArrayLike,
+    reference_output_level: NumericArrayLike,
+    test_monitor_level_db: NumericArrayLike | None = None,
+    reference_monitor_level_db: NumericArrayLike | None = None,
 ) -> NDArray[np.float64]:
     r""":math:`20\lg R_V`, the output of the test microphone re the reference.
 
@@ -438,7 +439,8 @@ def _output_level_difference_db(
 
 
 def _interchange_level_difference_db(
-    channel_difference: ArrayLike, interchanged_channel_difference: ArrayLike
+    channel_difference: NumericArrayLike,
+    interchanged_channel_difference: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r""":math:`20\lg R_V` from the two channel differences of Annex C.
 
@@ -454,10 +456,10 @@ def _interchange_level_difference_db(
 
 
 def _compared_level_db(
-    reference_level: ArrayLike,
-    output_level_difference: ArrayLike,
-    pressure_level_difference: ArrayLike = 0.0,
-    correction: ArrayLike = 0.0,
+    reference_level: NumericArrayLike,
+    output_level_difference: NumericArrayLike,
+    pressure_level_difference: NumericArrayLike = 0.0,
+    correction: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""The sensitivity level of the microphone under test.
 
@@ -474,7 +476,7 @@ def _compared_level_db(
     )
 
 
-def _wrapped_deg(phase_deg: ArrayLike) -> NDArray[np.float64]:
+def _wrapped_deg(phase_deg: NumericArrayLike) -> NDArray[np.float64]:
     """A phase or a difference of phases, in degrees, taken into the half-open
     interval from -180° (excluded) to 180° (included).
     """
@@ -512,7 +514,7 @@ def _interchange_phase_difference_deg(
 
 
 def _require_phase_pair(
-    reference_sensitivity_phase_deg: ArrayLike | None,
+    reference_sensitivity_phase_deg: NumericArrayLike | None,
     *,
     readings_given: bool,
     readings: str,
@@ -952,14 +954,14 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
 
 
 def environmental_sensitivity_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     static_pressure_kpa: float,
     temperature_c: float,
     relative_humidity_percent: float,
-    static_pressure_coefficient_db_per_kpa: ArrayLike,
-    temperature_coefficient_db_per_k: ArrayLike,
-    humidity_coefficient_db_per_percent: ArrayLike = 0.0,
+    static_pressure_coefficient_db_per_kpa: NumericArrayLike,
+    temperature_coefficient_db_per_k: NumericArrayLike,
+    humidity_coefficient_db_per_percent: NumericArrayLike = 0.0,
     reference_static_pressure_kpa: float = _REFERENCE_STATIC_PRESSURE_KPA,
     reference_temperature_c: float = _REFERENCE_TEMPERATURE_C,
     reference_relative_humidity_percent: float = _REFERENCE_RELATIVE_HUMIDITY_PERCENT,
@@ -1132,7 +1134,7 @@ def _table_a1_value(frequency: float) -> float:
 
 
 def jig_diameter_correction(
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> JigDiameterCorrection:
     r"""The corrections of IEC 61094-5:2016 Table A.1 for a type WS3 microphone
     against a type LS2aP reference in the jig of Figure A.4.
@@ -1426,7 +1428,7 @@ def _gap_ratio(
 
 
 def diameter_sound_field_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     reference_radius_m: float,
     test_diaphragm_radius_m: float,
@@ -1874,17 +1876,17 @@ def _frequencies_of(
 
 def _calibration(
     frequencies: NDArray[np.float64],
-    reference_sensitivity_level: ArrayLike,
+    reference_sensitivity_level: NumericArrayLike,
     output_level_differences: NDArray[np.float64],
     *,
     field: CalibrationField,
     excitation: Literal["simultaneous", "sequential"],
-    pressure_level_difference: ArrayLike,
-    corrections: Mapping[str, ArrayLike] | None,
+    pressure_level_difference: NumericArrayLike,
+    corrections: Mapping[str, NumericArrayLike] | None,
     reference_environment: EnvironmentalSensitivityCorrection | None,
     test_environment: EnvironmentalSensitivityCorrection | None,
-    reference_free_field_difference: ArrayLike | None,
-    expanded_uncertainty_db: ArrayLike | None,
+    reference_free_field_difference: NumericArrayLike | None,
+    expanded_uncertainty_db: NumericArrayLike | None,
     phases: _Phases | None = None,
 ) -> ComparisonCalibration:
     """Gather the corrections by name and build the result.
@@ -1893,7 +1895,7 @@ def _calibration(
     not taken for a pressure calibration by the free-field check below.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
-    named: dict[str, ArrayLike] = {}
+    named: dict[str, NumericArrayLike] = {}
     if reference_free_field_difference is not None:
         if field != "free":
             msg = (
@@ -1977,10 +1979,10 @@ class SimultaneousComparisonPhase(OwnsArrays):
     """
 
     _: KW_ONLY
-    reference_sensitivity_phase_deg: ArrayLike
-    channel_phase_difference_deg: ArrayLike
-    interchanged_channel_phase_difference_deg: ArrayLike | None = None
-    pressure_phase_difference_deg: ArrayLike | None = None
+    reference_sensitivity_phase_deg: NumericArrayLike
+    channel_phase_difference_deg: NumericArrayLike
+    interchanged_channel_phase_difference_deg: NumericArrayLike | None = None
+    pressure_phase_difference_deg: NumericArrayLike | None = None
 
 
 @dataclass(frozen=True)
@@ -2008,10 +2010,10 @@ class SequentialComparisonPhase(OwnsArrays):
     """
 
     _: KW_ONLY
-    reference_sensitivity_phase_deg: ArrayLike
-    reference_output_phase_deg: ArrayLike
-    test_output_phase_deg: ArrayLike
-    pressure_phase_difference_deg: ArrayLike | None = None
+    reference_sensitivity_phase_deg: NumericArrayLike
+    reference_output_phase_deg: NumericArrayLike
+    test_output_phase_deg: NumericArrayLike
+    pressure_phase_difference_deg: NumericArrayLike | None = None
 
 
 @dataclass(frozen=True)
@@ -2040,10 +2042,10 @@ class MonitorReadings(OwnsArrays):
     """
 
     _: KW_ONLY
-    reference_level: ArrayLike
-    test_level: ArrayLike
-    reference_phase_deg: ArrayLike | None = None
-    test_phase_deg: ArrayLike | None = None
+    reference_level: NumericArrayLike
+    test_level: NumericArrayLike
+    reference_phase_deg: NumericArrayLike | None = None
+    test_phase_deg: NumericArrayLike | None = None
 
     def __post_init__(self) -> None:
         """Refuse one phase without the other.
@@ -2059,7 +2061,7 @@ class MonitorReadings(OwnsArrays):
 
 
 def _pressure_phase(
-    pressure_phase_difference_deg: ArrayLike | None, count: int
+    pressure_phase_difference_deg: NumericArrayLike | None, count: int
 ) -> NDArray[np.float64]:
     r""":math:`\arg R_P` as a column, 0 when it is not given."""
     value = (
@@ -2178,18 +2180,18 @@ def _sequential_phases(
 
 
 def simultaneous_comparison(
-    reference_sensitivity_level: ArrayLike,
-    channel_difference: ArrayLike,
-    interchanged_channel_difference: ArrayLike | None = None,
+    reference_sensitivity_level: NumericArrayLike,
+    channel_difference: NumericArrayLike,
+    interchanged_channel_difference: NumericArrayLike | None = None,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: CalibrationField = "pressure",
-    pressure_level_difference: ArrayLike = 0.0,
-    corrections: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: NumericArrayLike = 0.0,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference: ArrayLike | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    reference_free_field_difference: NumericArrayLike | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
     phase: SimultaneousComparisonPhase | None = None,
 ) -> ComparisonCalibration:
     r"""Calibration by comparison with both microphones in the field at once
@@ -2342,19 +2344,19 @@ def simultaneous_comparison(
 
 
 def sequential_comparison(
-    reference_sensitivity_level: ArrayLike,
-    reference_output_level: ArrayLike,
-    test_output_level: ArrayLike,
+    reference_sensitivity_level: NumericArrayLike,
+    reference_output_level: NumericArrayLike,
+    test_output_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     monitor: MonitorReadings | None = None,
     field: CalibrationField = "pressure",
-    pressure_level_difference: ArrayLike = 0.0,
-    corrections: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: NumericArrayLike = 0.0,
+    corrections: Mapping[str, NumericArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference: ArrayLike | None = None,
-    expanded_uncertainty_db: ArrayLike | None = None,
+    reference_free_field_difference: NumericArrayLike | None = None,
+    expanded_uncertainty_db: NumericArrayLike | None = None,
     phase: SequentialComparisonPhase | None = None,
 ) -> ComparisonCalibration:
     r"""Calibration by comparison with the microphones put in the field in
@@ -3113,7 +3115,7 @@ def verify_jig_or_coupler(
     validation: ComparisonCalibration | ReciprocityCalibration,
     *,
     microphone: int | np.integer[Any] | None = None,
-    shared_standard_uncertainty_db: ArrayLike = 0.0,
+    shared_standard_uncertainty_db: NumericArrayLike = 0.0,
 ) -> JigCouplerVerification:
     r"""Does a jig or coupler give the same calibration as another way of
     calibrating the same microphone (IEC 61094-5:2016 6.7)?
@@ -3463,7 +3465,9 @@ def reflection_free_window_s(
 # ---------------------------------------------------------------------------
 
 
-def _complex_column(values: ArrayLike, name: str, count: int) -> NDArray[np.complex128]:
+def _complex_column(
+    values: NumericArrayLike, name: str, count: int
+) -> NDArray[np.complex128]:
     """A finite complex column of one value per frequency, a scalar spread over
     all.
 
@@ -3604,12 +3608,12 @@ class ImpedancePressureRatio(OwnsArrays):
 
 
 def impedance_pressure_ratio(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    reference_equivalent_volume_m3: ArrayLike,
-    test_equivalent_volume_m3: ArrayLike,
-    coupling_equivalent_volume_m3: ArrayLike | None = None,
-    coupling_impedance_pa_s_m3: ArrayLike | None = None,
+    reference_equivalent_volume_m3: NumericArrayLike,
+    test_equivalent_volume_m3: NumericArrayLike,
+    coupling_equivalent_volume_m3: NumericArrayLike | None = None,
+    coupling_impedance_pa_s_m3: NumericArrayLike | None = None,
 ) -> ImpedancePressureRatio:
     r"""The ratio of the sound pressures that the different acoustic
     impedances of two microphones cause (IEC 61094-5:2016 7.4 and 7.5).
@@ -3748,7 +3752,7 @@ _AIR_GAP_MASS_FRACTION = 1.0 / 12.0
 
 
 def air_gap_series_impedance_pa_s_m3(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     gap_length_m: float,
     gap_radius_m: float,
@@ -3882,7 +3886,7 @@ class RectangularPulse(RichDisplay):
         r""":math:`X(0) = 2ab`, the area of the pulse, in V·s."""
         return self.amplitude_v * self.duration_s
 
-    def spectrum_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def spectrum_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
         r""":math:`X(f)` of Formula (B.10), in V·s, the transform of the pulse
         centred on the time origin, where it is real.
 
@@ -3896,7 +3900,7 @@ class RectangularPulse(RichDisplay):
         # numpy's sinc is sin(pi x)/(pi x): with x = 2 f b it is (B.10) over 2ab.
         return self.area_v_s * np.sinc(frequencies * self.duration_s)
 
-    def level_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def level_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert X(f)/X(0)\rvert`, how far the spectrum has
         fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 
@@ -4170,7 +4174,7 @@ class TimeSelectiveResponse(OwnsArrays):
         """
         return 1.0 / self.window_length_s
 
-    def response_at(self, frequencies: ArrayLike) -> NDArray[np.complex128]:
+    def response_at(self, frequencies: NumericArrayLike) -> NDArray[np.complex128]:
         r""":math:`H(f)`, Formula (B.2) applied to the windowed response, at
         each frequency, complex, in the unit of the response times seconds
         (divided by the pulse's spectrum, in V·s, when there is one).
@@ -4188,7 +4192,9 @@ class TimeSelectiveResponse(OwnsArrays):
             _frequency_axis(frequencies),
         )
 
-    def record_response_at(self, frequencies: ArrayLike) -> NDArray[np.complex128]:
+    def record_response_at(
+        self, frequencies: NumericArrayLike
+    ) -> NDArray[np.complex128]:
         r""":math:`H(f)` of the whole record with no window, the reflections
         included: what the window takes away, for comparison.
 
@@ -4224,7 +4230,7 @@ class TimeSelectiveResponse(OwnsArrays):
             response = response / (pulse.spectrum_at(frequencies) * delay)
         return response
 
-    def level_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def level_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert H(f)\rvert`, in dB re 1 of the response's unit
         times a second.
 
@@ -4233,7 +4239,7 @@ class TimeSelectiveResponse(OwnsArrays):
         """
         return 20.0 * np.log10(np.abs(self.response_at(frequencies)))
 
-    def phase_deg_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def phase_deg_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
         r""":math:`\arg H(f)`, in degrees, with the time origin at the start of
         the record.
 
@@ -4288,7 +4294,7 @@ class TimeSelectiveResponse(OwnsArrays):
         ax: Axes | None = None,
         *,
         quantity: Literal["impulse", "response"] = "impulse",
-        frequencies: ArrayLike | None = None,
+        frequencies: NumericArrayLike | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -4325,7 +4331,7 @@ class TimeSelectiveResponse(OwnsArrays):
 
 
 def time_selective_response(
-    impulse_response: ArrayLike,
+    impulse_response: NumericArrayLike,
     fs: float,
     *,
     window_start_s: float,
@@ -4463,7 +4469,7 @@ class SteppedSineImpulseResponse(OwnsArrays):
 
 
 def stepped_sine_impulse_response(
-    response: ArrayLike, *, frequencies: ArrayLike
+    response: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> SteppedSineImpulseResponse:
     r"""The impulse response of a frequency response measured at linearly
     spaced frequencies (IEC 61094-8:2012 B.2, Formula (B.3)).

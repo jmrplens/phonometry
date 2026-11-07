@@ -47,7 +47,7 @@ from a straight line.
 
 ```python
 decay_curve(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     band: float | None = None,
     fraction: int | np.integer[Any] = 1,
@@ -145,7 +145,7 @@ filter_bandwidth(
 ) -> NDArray[np.float64]
 
 filter_bandwidth(
-    center: ArrayLike,
+    center: NumericArrayLike,
     fraction: int | np.integer[Any] = 1,
 ) -> float | NDArray[np.float64]
 ```
@@ -219,7 +219,7 @@ min_reliable_reverberation_time(
 ) -> NDArray[np.float64]
 
 min_reliable_reverberation_time(
-    bandwidth: ArrayLike,
+    bandwidth: NumericArrayLike,
     detector_time: float = 0.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -267,12 +267,12 @@ filtering is time-reversed, which is what
 
 ```python
 reverberation_time_standard_deviation(
-    reverberation_time: ArrayLike,
-    bandwidth: ArrayLike,
+    reverberation_time: NumericArrayLike,
+    bandwidth: NumericArrayLike,
     *,
     evaluation_range: float = 30.0,
-    decays: ArrayLike = 10,
-    positions: ArrayLike = 1,
+    decays: NumericArrayLike = 10,
+    positions: NumericArrayLike = 1,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -319,7 +319,7 @@ larger absolute uncertainty and a smaller relative one.
 
 ```python
 room_parameters(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int | np.integer[Any] = 1,

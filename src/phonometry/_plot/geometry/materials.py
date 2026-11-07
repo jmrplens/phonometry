@@ -56,9 +56,9 @@ from ._draft import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Rectangle
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...materials.absorbers.four_microphone import TransferMatrix
     from ...materials.absorbers.impedance_tube import ImpedanceTubeResult
     from ...materials.absorbers.layered import (
@@ -518,7 +518,7 @@ def plot_slit_absorber_geometry(
 # ---------------------------------------------------------------------------
 @closes_its_figures
 def plot_qrd_geometry(
-    depths: ArrayLike,
+    depths: NumericArrayLike,
     well_width: float,
     *,
     ax: Axes | None = None,

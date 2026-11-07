@@ -81,9 +81,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Boundary = Literal["simply_supported", "clamped"]
 Baffle = Literal["infinite", "perpendicular"]
@@ -233,7 +234,7 @@ def _sigma_below(
 
 
 def radiation_efficiency(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     length_x: float,
     length_y: float,
     critical_frequency: float,

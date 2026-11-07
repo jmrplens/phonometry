@@ -123,9 +123,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 #: The two plenum sidewall conditions of Vigran Section 9.2.3.2.
 Sidewalls = Literal["absorbing", "reflecting"]
@@ -219,9 +219,9 @@ def _require_split(value: float, name: str) -> float:
 
 
 def normalized_ceiling_attenuation(
-    level_source: ArrayLike,
-    level_receiving: ArrayLike,
-    absorption_area: ArrayLike,
+    level_source: NumericArrayLike,
+    level_receiving: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     reference_area: float = _A0_ISO,
 ) -> np.ndarray:
@@ -430,7 +430,7 @@ class CeilingAttenuationResult(OwnsArrays):
 
 
 def ceiling_attenuation_class(
-    attenuation: ArrayLike, *, frequencies: ArrayLike | None = None
+    attenuation: NumericArrayLike, *, frequencies: NumericArrayLike | None = None
 ) -> CeilingAttenuationResult:
     """Ceiling attenuation class CAC (ASTM E413-22 clause 5, via ASTM E1414).
 
@@ -579,15 +579,15 @@ class PlenumFlankingResult(OwnsArrays):
 
 @overload
 def plenum_flanking_reduction_index(
-    reduction_index_source: ArrayLike,
-    reduction_index_receiving: ArrayLike,
+    reduction_index_source: NumericArrayLike,
+    reduction_index_receiving: NumericArrayLike,
     *,
     ceiling_length: float,
     plenum_height_m: float,
     sidewalls: Sidewalls = ...,
-    frequencies: ArrayLike | None = ...,
-    attenuation_source_per_m: ArrayLike,
-    attenuation_receiving_per_m: ArrayLike,
+    frequencies: NumericArrayLike | None = ...,
+    attenuation_source_per_m: NumericArrayLike,
+    attenuation_receiving_per_m: NumericArrayLike,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
@@ -596,13 +596,13 @@ def plenum_flanking_reduction_index(
 
 @overload
 def plenum_flanking_reduction_index(
-    reduction_index_source: ArrayLike,
-    reduction_index_receiving: ArrayLike,
+    reduction_index_source: NumericArrayLike,
+    reduction_index_receiving: NumericArrayLike,
     *,
     ceiling_length: float,
     plenum_height_m: float,
     sidewalls: Sidewalls = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
@@ -610,15 +610,15 @@ def plenum_flanking_reduction_index(
 
 
 def plenum_flanking_reduction_index(
-    reduction_index_source: ArrayLike,
-    reduction_index_receiving: ArrayLike,
+    reduction_index_source: NumericArrayLike,
+    reduction_index_receiving: NumericArrayLike,
     *,
     ceiling_length: float,
     plenum_height_m: float,
     sidewalls: Sidewalls = "reflecting",
-    frequencies: ArrayLike | None = None,
-    attenuation_source_per_m: ArrayLike | None = None,
-    attenuation_receiving_per_m: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    attenuation_source_per_m: NumericArrayLike | None = None,
+    attenuation_receiving_per_m: NumericArrayLike | None = None,
     source_length: float | None = None,
     split_source: float = 0.5,
     split_receiving: float = 0.5,
@@ -778,7 +778,7 @@ def plenum_flanking_reduction_index(
 
 
 def partition_referenced_reduction_index(
-    reduction_index: ArrayLike, room_height_m: float, room_length: float
+    reduction_index: NumericArrayLike, room_height_m: float, room_length: float
 ) -> np.ndarray:
     r"""Refer ``Rcl`` to the partition area instead of the ceiling
     (Eq. (9.13)).

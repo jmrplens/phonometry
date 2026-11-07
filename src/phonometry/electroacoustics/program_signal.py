@@ -118,9 +118,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "SIMULATED_PROGRAM_SPECTRUM",
@@ -229,7 +230,7 @@ _BINDING_SLACK_DB = 1e-9
 _LIMIT_SLACK_DB = 1e-9
 
 
-def program_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]:
+def program_signal_filter(frequencies: NumericArrayLike) -> NDArray[np.complex128]:
     r"""The transfer function of the filter of IEC 60268-1:1985 Figure 2.
 
     The voltage across the 10 kohm output resistor over the e.m.f. of the
@@ -622,7 +623,7 @@ class ProgramSignalCheck(OwnsArrays):
 
 
 def check_program_signal(
-    band_levels: ArrayLike, *, frequencies: ArrayLike
+    band_levels: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> ProgramSignalCheck:
     r"""Is this one-third-octave spectrum the programme signal of IEC 60268-1?
 

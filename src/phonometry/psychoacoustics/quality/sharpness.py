@@ -26,9 +26,8 @@ from ...metrology import REFERENCE_VALUES
 from ..loudness.zwicker import ZwickerLoudness, loudness_zwicker
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
-
     from ..._internal.signal import Signal
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "sharpness_din",
@@ -144,7 +143,7 @@ def _k_din() -> float:
 
 
 def sharpness_din_from_specific(
-    specific: ArrayLike, method: Literal["din", "aures", "bismarck"] = "din"
+    specific: NumericArrayLike, method: Literal["din", "aures", "bismarck"] = "din"
 ) -> float:
     """Sharpness in acum from a specific-loudness pattern (DIN 45692 Eq. 1).
 
@@ -172,7 +171,7 @@ def sharpness_din_from_specific(
 
 
 def sharpness_din(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: int | np.integer[Any] | None = None,
     field: Literal["free", "diffuse"] = "free",
     method: Literal["din", "aures", "bismarck"] = "din",

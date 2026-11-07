@@ -45,7 +45,7 @@ the exact sinusoidal-component method.
 
 ```python
 loudness_moore_glasberg(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
@@ -86,7 +86,7 @@ calibrated so that `x` is the instantaneous sound pressure in pascals.
 
 ```python
 loudness_moore_glasberg_from_spectrum(
-    components: ArrayLike,
+    components: NumericArrayLike,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
     presentation: Literal['binaural', 'diotic', 'monaural'] = 'binaural',
@@ -124,7 +124,7 @@ A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
 
 ```python
 loudness_moore_glasberg_from_third_octave(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
     presentation: Literal['binaural', 'diotic', 'monaural'] = 'binaural',

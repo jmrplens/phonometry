@@ -78,7 +78,7 @@ positions with the energy mean of its equation (9), implemented by
 
 ```python
 characteristic_reception_plate_power(
-    blocked_force_level: ArrayLike,
+    blocked_force_level: NumericArrayLike,
     *,
     characteristic_mobility: float = 5e-06,
 ) -> np.ndarray
@@ -114,8 +114,8 @@ refers it to the actual receiver).
 
 ```python
 equivalent_blocked_force_level(
-    power_level: ArrayLike,
-    plate_mobility: ArrayLike,
+    power_level: NumericArrayLike,
+    plate_mobility: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -147,8 +147,8 @@ arithmetic mean of Re{Y} over the contact points, Formula 16).
 
 ```python
 equivalent_free_velocity_level(
-    power_level: ArrayLike,
-    plate_mobility: ArrayLike,
+    power_level: NumericArrayLike,
+    plate_mobility: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -181,7 +181,7 @@ combine through Formula (19) into $|Y_\mathrm{S,eq}| = v_\mathrm{f} / F_\mathrm{
 ## mean_free_velocity_level
 
 ```python
-mean_free_velocity_level(levels: ArrayLike) -> float
+mean_free_velocity_level(levels: NumericArrayLike) -> float
 ```
 
 Mean free velocity level over positions (ISO 9611:1996, equation (9)).
@@ -212,9 +212,9 @@ only the reference differs.
 
 ```python
 plate_loss_factor(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -242,13 +242,13 @@ ISO 10848 total loss factor.
 
 ```python
 reception_plate_power(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     mass_per_area: float,
     area: float,
     *,
-    frequency: ArrayLike,
-    loss_factor: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    frequency: NumericArrayLike,
+    loss_factor: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
 ) -> StructureBornePowerResult
 ```
 
@@ -285,8 +285,8 @@ quantities.
 
 ```python
 source_mobility_from_levels(
-    free_velocity_level: ArrayLike,
-    blocked_force_level: ArrayLike,
+    free_velocity_level: NumericArrayLike,
+    blocked_force_level: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -316,7 +316,7 @@ $(10^{-9}/10^{-6})^2 = 10^{-6}$.
 ## spatial_mean_velocity_level
 
 ```python
-spatial_mean_velocity_level(levels: ArrayLike) -> float
+spatial_mean_velocity_level(levels: NumericArrayLike) -> float
 ```
 
 Spatial-average velocity level over the plate (EN 15657, Formula 12).
@@ -344,12 +344,12 @@ per-position velocity levels.
 
 ```python
 structure_borne_power_level(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     mass_per_area: float,
     area: float,
-    loss_factor: ArrayLike,
+    loss_factor: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     reference_velocity: float = 1e-09,
 ) -> np.ndarray
 ```

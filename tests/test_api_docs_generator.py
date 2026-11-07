@@ -802,7 +802,7 @@ def test_a_type_parameter_reads_as_its_bound() -> None:
         "frequency: Sequence[float] | Sequence[np.floating[Any]] | "
         "Sequence[np.integer[Any]] | NDArray[Any]"
     ) in forms[1]
-    assert "frequency: ArrayLike" in forms[2]
+    assert "frequency: NumericArrayLike" in forms[2]
     assert re.search(r"frequency: [SVA]\b", rendered) is None, rendered
 
 

@@ -57,7 +57,7 @@ Osses/Fastl & Zwicker model, not that method.
 
 ```python
 fluctuation_strength(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> FluctuationStrengthResult
 ```

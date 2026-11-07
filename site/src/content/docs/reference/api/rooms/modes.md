@@ -73,23 +73,23 @@ MODE_KINDS = ('axial', 'tangential', 'oblique')
 
 ```python
 room_modal_density(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
     frequency: float | np.floating[Any] | np.integer[Any],
     speed_of_sound: float = 343.0,
 ) -> float
 
 room_modal_density(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
     frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 
 room_modal_density(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -124,23 +124,23 @@ between adjacent eigenfrequencies.
 
 ```python
 room_mode_count(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
     frequency: float | np.floating[Any] | np.integer[Any],
     speed_of_sound: float = 343.0,
 ) -> float
 
 room_mode_count(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
     frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 
 room_mode_count(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -176,8 +176,8 @@ fit below `f`; the exact enumeration is [`room_modes`](/phonometry/reference/api
 
 ```python
 room_mode_frequency(
-    orders: ArrayLike,
-    dimensions: ArrayLike,
+    orders: NumericArrayLike,
+    dimensions: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
@@ -209,7 +209,7 @@ $$
 
 ```python
 room_modes(
-    dimensions: ArrayLike,
+    dimensions: NumericArrayLike,
     *,
     max_frequency: float = 200.0,
     speed_of_sound: float = 343.0,
@@ -290,7 +290,9 @@ RoomModesResult.density(
     frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-RoomModesResult.density(frequency: ArrayLike) -> float | NDArray[np.float64]
+RoomModesResult.density(
+    frequency: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Modal density at `frequency` for this room (Long Equation (8.46)).

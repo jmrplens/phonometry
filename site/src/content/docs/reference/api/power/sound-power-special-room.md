@@ -77,9 +77,9 @@ the spectral character of 9.5.
 
 ```python
 check_special_room_reverberation(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     nominal_reverberation_time_s: float | None = None,
     surface_area: float | None = None,
@@ -162,10 +162,10 @@ but keeps it out of the verdict, the clause saying "should".
 
 ```python
 check_special_room_suitability(
-    measured_power_levels: ArrayLike,
-    calibrated_power_levels: ArrayLike | ReferenceSourceCalibration,
+    measured_power_levels: NumericArrayLike,
+    calibrated_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> SpecialRoomSuitabilityCheck
@@ -214,11 +214,11 @@ energy sum of its three one-third octave bands, exactly as
 
 ```python
 check_special_room_surfaces(
-    surface_absorption_coefficients: ArrayLike,
-    floor_absorption_coefficients: ArrayLike,
+    surface_absorption_coefficients: NumericArrayLike,
+    floor_absorption_coefficients: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    surface_areas_m2: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    surface_areas_m2: NumericArrayLike | None = None,
 ) -> SpecialRoomSurfaceCheck
 ```
 
@@ -254,7 +254,7 @@ and without them it is the plain mean of the surfaces.
 
 ```python
 reverberation_parameter(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     *,
     surface_area: float | None = None,
@@ -307,14 +307,14 @@ that volume too and nothing is read off the figure.
 
 ```python
 sound_power_special_room(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     nominal_reverberation_time_s: float,
-    background_levels: ArrayLike | None = None,
-    a_weighted_levels: ArrayLike | None = None,
-    a_weighted_background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    a_weighted_levels: NumericArrayLike | None = None,
+    a_weighted_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -367,13 +367,13 @@ Annex F total of the octave bands.
 
 ```python
 sound_power_special_room_comparison(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -425,8 +425,8 @@ needed, and the 300 m³ ceiling of 6.2 does not apply (NOTE).
 
 ```python
 special_room_background_correction(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -466,11 +466,11 @@ table, and that is what is applied.
 
 ```python
 special_room_source_locations(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_microphone_positions: int | np.integer[Any] = 6,
-    a_weighted_levels: ArrayLike | None = None,
+    a_weighted_levels: NumericArrayLike | None = None,
 ) -> SourceLocationPlan
 ```
 

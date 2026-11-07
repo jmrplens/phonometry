@@ -114,9 +114,9 @@ from ._sound_power_reverberation import _speed_of_sound
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "InDuctSoundPowerResult",
@@ -754,7 +754,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
 
 
-def _nominal_bands(frequencies: ArrayLike) -> np.ndarray:
+def _nominal_bands(frequencies: NumericArrayLike) -> np.ndarray:
     """The band axis, refused unless every entry is a nominal centre.
 
     The coefficients of Annex A, the A-weighting of Table C.1 and the
@@ -936,7 +936,7 @@ def _annex_a_coefficients(rows: _Rows, band: int) -> tuple[float, ...]:
 
 
 def flow_modal_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flow_velocity: float,
     duct_diameter_m: float,
     *,
@@ -1018,7 +1018,7 @@ def flow_modal_correction(
     )
 
 
-def in_duct_reproducibility(frequencies: ArrayLike) -> np.ndarray:
+def in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray:
     r"""Standard deviation of reproducibility :math:`\sigma_R` per band.
 
     Table 2 of ISO 5136:2003 for the sampling tube, 50 Hz to 10 kHz, which is
@@ -1072,7 +1072,7 @@ def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float,
     return c, rho * c
 
 
-def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
+def _position_levels(levels: NumericArrayLike, n_bands: int) -> np.ndarray:
     r"""The measured levels as ``(positions, bands)`` or a ``(bands,)`` average.
 
     A 2-D array is one row per circumferential microphone position, to be
@@ -1108,14 +1108,14 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
 
 
 def sound_power_in_duct(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     duct_diameter_m: float,
     flow_velocity: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     shield: MicrophoneShield = "sampling-tube",
-    microphone_correction: ArrayLike = 0.0,
-    shield_correction: ArrayLike = 0.0,
+    microphone_correction: NumericArrayLike = 0.0,
+    shield_correction: NumericArrayLike = 0.0,
     temperature_c: float = 20.0,
     static_pressure_kpa: float = 101.325,
 ) -> InDuctSoundPowerResult:

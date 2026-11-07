@@ -72,9 +72,9 @@ worked example in the source texts.
 ```python
 arau_puchades_reverberation_time(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
+    absorptions: Sequence[NumericArrayLike],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -110,9 +110,9 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 ```python
 eyring_reverberation_time(
     volume: float,
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -154,9 +154,9 @@ coefficient stays within the shared unit-error ceiling of 2.
 ```python
 fitzroy_reverberation_time(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
+    absorptions: Sequence[NumericArrayLike],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -193,7 +193,7 @@ must be below 1.
 
 ```python
 mean_absorption(
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
 ) -> float | NDArray[np.float64]
 ```
 
@@ -219,9 +219,9 @@ $\bar{\alpha} = A / S$.
 ```python
 millington_sette_reverberation_time(
     volume: float,
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```
@@ -263,10 +263,10 @@ this model's domain (use Sabine, or Eyring while the mean stays below 1).
 ```python
 reverberation_time_models(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
+    absorptions: Sequence[NumericArrayLike],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
-    frequencies: ArrayLike | None = None,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
+    frequencies: NumericArrayLike | None = None,
     speed_of_sound: float = 343.0,
 ) -> ReverberationModelResult
 ```
@@ -414,9 +414,9 @@ quantity.
 ```python
 sabine_reverberation_time(
     volume: float,
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
 ```

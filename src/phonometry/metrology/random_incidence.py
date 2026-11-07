@@ -149,9 +149,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 #: The three calibrations of the reference instrument a diffuse-field
 #: sensitivity is transferred from (Formulas (9), (10) and (11)).
@@ -770,7 +771,7 @@ def _plane_count(count: int, name: str) -> int:
 
 
 def directivity_factor(
-    levels: ArrayLike, *, reference_level: float | None = None
+    levels: NumericArrayLike, *, reference_level: float | None = None
 ) -> DirectivityFactor:
     r"""Directivity factor from readings in two or more planes
     (IEC 61183:1994, Formula (A.3)).
@@ -825,7 +826,7 @@ def directivity_factor(
 
 
 def axisymmetric_directivity_factor(
-    levels: ArrayLike, *, reference_level: float | None = None
+    levels: NumericArrayLike, *, reference_level: float | None = None
 ) -> DirectivityFactor:
     r"""Directivity factor of an instrument with rotational symmetry, from one
     plane (IEC 61183:1994, Formula (A.4)).
@@ -865,8 +866,8 @@ def axisymmetric_directivity_factor(
 
 
 def equal_area_directivity_factor(
-    horizontal_levels: ArrayLike,
-    vertical_levels: ArrayLike,
+    horizontal_levels: NumericArrayLike,
+    vertical_levels: NumericArrayLike,
     *,
     reference_level: float | None = None,
 ) -> DirectivityFactor:
@@ -931,7 +932,7 @@ def equal_area_directivity_factor(
 
 
 def _band_column(
-    values: ArrayLike, name: str, frequencies: NDArray[np.float64]
+    values: NumericArrayLike, name: str, frequencies: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     """A finite column of one value per band, a scalar spread over all of them.
 
@@ -949,7 +950,7 @@ def _band_column(
     return column
 
 
-def _frequency_axis(frequencies: ArrayLike) -> NDArray[np.float64]:
+def _frequency_axis(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """Positive, finite and strictly increasing frequencies.
 
     :raises ValueError: for anything else.
@@ -1046,10 +1047,10 @@ class RandomIncidenceSensitivity(OwnsArrays):
 
 
 def random_incidence_sensitivity(
-    free_field_level: ArrayLike,
-    directivity_index: ArrayLike,
+    free_field_level: NumericArrayLike,
+    directivity_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> RandomIncidenceSensitivity:
     r"""Random-incidence sensitivity level from the free-field sensitivity
     level and the directivity factor (IEC 61183:1994, Formulas (1) and (A.6)).
@@ -1233,15 +1234,15 @@ class DiffuseFieldSensitivity(OwnsArrays):
 
 
 def diffuse_field_sensitivity(
-    indicated_level: ArrayLike,
-    reference_indicated_level: ArrayLike,
+    indicated_level: NumericArrayLike,
+    reference_indicated_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_random_incidence_level: ArrayLike | None = None,
-    reference_free_field_level: ArrayLike | None = None,
-    reference_directivity_index: ArrayLike | None = None,
-    reference_pressure_level: ArrayLike | None = None,
-    reference_diffuse_pressure_difference_db: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    reference_random_incidence_level: NumericArrayLike | None = None,
+    reference_free_field_level: NumericArrayLike | None = None,
+    reference_directivity_index: NumericArrayLike | None = None,
+    reference_pressure_level: NumericArrayLike | None = None,
+    reference_diffuse_pressure_difference_db: NumericArrayLike | None = None,
 ) -> DiffuseFieldSensitivity:
     r"""Diffuse-field sensitivity level by comparison with a reference sound
     level meter (IEC 61183:1994, Formulas (8) to (11)).
@@ -1299,7 +1300,7 @@ def diffuse_field_sensitivity(
         ``reference_indicated_level`` holds a text or a value that is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
-    given: dict[Route, ArrayLike | None] = {
+    given: dict[Route, NumericArrayLike | None] = {
         "random_incidence": reference_random_incidence_level,
         "free": reference_free_field_level,
         "pressure": reference_pressure_level,

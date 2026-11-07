@@ -42,11 +42,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
-    from ..._internal.types import TwoPanels
+    from ..._internal.types import NumericArrayLike, TwoPanels
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
@@ -301,7 +300,7 @@ def _assemble_tonality(
 
 
 def tonality_ecma(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
     f_low: float | None = None,

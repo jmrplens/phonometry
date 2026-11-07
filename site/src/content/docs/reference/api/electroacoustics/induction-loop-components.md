@@ -153,8 +153,8 @@ electromagnetic exposure of IEC 62489-2 is outside this library.
 
 ```python
 agc_characteristic(
-    source_emf_levels: ArrayLike,
-    output_level: ArrayLike,
+    source_emf_levels: NumericArrayLike,
+    output_level: NumericArrayLike,
 ) -> AGCCharacteristic
 ```
 
@@ -253,9 +253,9 @@ The range 5.4.13.4 recommends, 32 dB, for comparison with `agc_range_db`.
 
 ```python
 amplifier_frequency_response(
-    output_current_a: ArrayLike,
+    output_current_a: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> AmplifierFrequencyResponse
 ```
 
@@ -340,7 +340,7 @@ The frequency response of an amplifier into its load (IEC 62489-1:2010 5.4.12).
 ### AmplifierFrequencyResponse.at()
 
 ```python
-AmplifierFrequencyResponse.at(frequency_hz: ArrayLike) -> np.ndarray
+AmplifierFrequencyResponse.at(frequency_hz: NumericArrayLike) -> np.ndarray
 ```
 
 The response at any frequency inside the measured range, in dB.
@@ -390,7 +390,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ## compliance_voltage
 
 ```python
-compliance_voltage(voltage_v: ArrayLike) -> float
+compliance_voltage(voltage_v: NumericArrayLike) -> float
 ```
 
 The compliance voltage of an amplifier (IEC 62489-1:2010 5.4.8).
@@ -588,7 +588,7 @@ loop_impedance(
     resistance_ohm: float,
     inductance_h: float,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> LoopImpedance
 ```
 
@@ -811,7 +811,7 @@ $U = I|Z|$, the $U_\mathrm{h}$ of E.3.
 ### LoopImpedance.at()
 
 ```python
-LoopImpedance.at(frequency_hz: ArrayLike) -> np.ndarray
+LoopImpedance.at(frequency_hz: NumericArrayLike) -> np.ndarray
 ```
 
 The magnitude of the impedance at any frequency, in ohms.
@@ -841,7 +841,7 @@ The frequency where the reactance equals the resistance, in hertz.
 ```python
 LoopImpedance.drive_voltage(
     current_a: float,
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -893,8 +893,8 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 max_output_current(
-    resistor_voltage_v: ArrayLike,
-    thd_percent: ArrayLike,
+    resistor_voltage_v: NumericArrayLike,
+    thd_percent: NumericArrayLike,
     *,
     load_resistance_ohm: float,
     rated_thd_percent: float,
@@ -990,10 +990,10 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 neck_loop_characteristics(
-    field_strength_level: ArrayLike,
-    impedance_ohm: ArrayLike,
+    field_strength_level: NumericArrayLike,
+    impedance_ohm: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     input_voltage_v: float,
 ) -> NeckLoopCharacteristics
 ```
@@ -1189,9 +1189,9 @@ Whether 400 mA/m is reached within the type's input voltage.
 
 ```python
 quadrature_phase_error(
-    phase_difference_deg: ArrayLike,
+    phase_difference_deg: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> QuadraturePhaseError
 ```
 
@@ -1299,9 +1299,9 @@ rectangular_loop_field(
     current_a: float,
     length_m: float,
     width_m: float,
-    x_m: ArrayLike,
-    y_m: ArrayLike,
-    z_m: ArrayLike,
+    x_m: NumericArrayLike,
+    y_m: NumericArrayLike,
+    z_m: NumericArrayLike,
     *,
     n_turns: int | np.integer[Any] = 1,
 ) -> LoopField

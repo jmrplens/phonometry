@@ -85,10 +85,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import GroundClass, RealScalar, RealValues
+    from ..._internal.types import GroundClass, NumericArrayLike, RealScalar, RealValues
 
 Averaging = Literal["energy", "arithmetic"]
 _AVERAGINGS: tuple[Averaging, ...] = ("energy", "arithmetic")
@@ -495,7 +495,7 @@ def power_law_wind_speed[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def power_law_wind_speed[V: RealValues, A2: ArrayLike](
+def power_law_wind_speed[V: RealValues, A2: NumericArrayLike](
     reference_speed_m_s: V,
     *,
     height_m: float,
@@ -515,7 +515,7 @@ def power_law_wind_speed[S1: RealScalar, V: RealValues](
 
 
 @overload
-def power_law_wind_speed[A1: ArrayLike, A2: ArrayLike](
+def power_law_wind_speed[A1: NumericArrayLike, A2: NumericArrayLike](
     reference_speed_m_s: A1,
     *,
     height_m: float,
@@ -525,11 +525,11 @@ def power_law_wind_speed[A1: ArrayLike, A2: ArrayLike](
 
 
 def power_law_wind_speed(
-    reference_speed_m_s: ArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
-    shear_exponent: ArrayLike,
+    shear_exponent: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""Wind speed at another height by the power law (Equation (K.1)).
 
@@ -576,7 +576,7 @@ def wind_shear_exponent[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def wind_shear_exponent[V: RealValues, A2: ArrayLike](
+def wind_shear_exponent[V: RealValues, A2: NumericArrayLike](
     speed_m_s: V, reference_speed_m_s: A2, *, height_m: float, reference_height_m: float
 ) -> NDArray[np.float64]: ...
 
@@ -588,7 +588,7 @@ def wind_shear_exponent[S1: RealScalar, V: RealValues](
 
 
 @overload
-def wind_shear_exponent[A1: ArrayLike, A2: ArrayLike](
+def wind_shear_exponent[A1: NumericArrayLike, A2: NumericArrayLike](
     speed_m_s: A1,
     reference_speed_m_s: A2,
     *,
@@ -598,8 +598,8 @@ def wind_shear_exponent[A1: ArrayLike, A2: ArrayLike](
 
 
 def wind_shear_exponent(
-    speed_m_s: ArrayLike,
-    reference_speed_m_s: ArrayLike,
+    speed_m_s: NumericArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
@@ -662,7 +662,7 @@ def logarithmic_wind_speed[V: RealValues](
 
 
 @overload
-def logarithmic_wind_speed[A: ArrayLike](
+def logarithmic_wind_speed[A: NumericArrayLike](
     reference_speed_m_s: A,
     *,
     height_m: float,
@@ -672,7 +672,7 @@ def logarithmic_wind_speed[A: ArrayLike](
 
 
 def logarithmic_wind_speed(
-    reference_speed_m_s: ArrayLike,
+    reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
@@ -742,9 +742,11 @@ class WindShearProfile(RichDisplay):
     def speed_at[V: RealValues](self, height_m: V) -> NDArray[np.float64]: ...
 
     @overload
-    def speed_at[A: ArrayLike](self, height_m: A) -> float | NDArray[np.float64]: ...
+    def speed_at[A: NumericArrayLike](
+        self, height_m: A
+    ) -> float | NDArray[np.float64]: ...
 
-    def speed_at(self, height_m: ArrayLike) -> float | NDArray[np.float64]:
+    def speed_at(self, height_m: NumericArrayLike) -> float | NDArray[np.float64]:
         """The power-law wind speed at ``height_m`` (Equation (K.1)), in m/s.
 
         :raises TypeError: if ``height_m`` holds a text or a value that is not a real
@@ -855,8 +857,8 @@ class _Bins:
 
 
 def _bin_keys(
-    wind_speeds_m_s: ArrayLike,
-    wind_directions_deg: ArrayLike | None,
+    wind_speeds_m_s: NumericArrayLike,
+    wind_directions_deg: NumericArrayLike | None,
     *,
     count: int,
     bin_width_m_s: float,
@@ -1072,12 +1074,12 @@ class BinnedSoundLevels(OwnsArrays):
 
 
 def bin_sound_levels(
-    levels: ArrayLike,
-    wind_speeds_m_s: ArrayLike,
+    levels: NumericArrayLike,
+    wind_speeds_m_s: NumericArrayLike,
     *,
-    wind_directions_deg: ArrayLike | None = None,
+    wind_directions_deg: NumericArrayLike | None = None,
     averaging: Averaging = "energy",
-    type_b_uncertainty_db: ArrayLike = 0.0,
+    type_b_uncertainty_db: NumericArrayLike = 0.0,
     bin_width_m_s: float = 1.0,
     sector_width_deg: float = 30.0,
 ) -> BinnedSoundLevels:
@@ -1363,13 +1365,13 @@ def _turbine_levels(
 
 
 def turbine_sound_levels(
-    total_levels: ArrayLike,
-    background_levels: ArrayLike,
+    total_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    total_uncertainty_db: ArrayLike = 0.0,
-    background_uncertainty_db: ArrayLike = 0.0,
-    wind_speeds_m_s: ArrayLike | None = None,
-    wind_directions_deg: ArrayLike | None = None,
+    total_uncertainty_db: NumericArrayLike = 0.0,
+    background_uncertainty_db: NumericArrayLike = 0.0,
+    wind_speeds_m_s: NumericArrayLike | None = None,
+    wind_directions_deg: NumericArrayLike | None = None,
 ) -> TurbineSoundLevels:
     r"""Subtract the background from the total, bin by bin (10.3.2, 11.7).
 
@@ -1453,7 +1455,7 @@ def turbine_sound_levels(
 
 
 def _optional_per_bin(
-    values: ArrayLike | None, bins: int, name: str
+    values: NumericArrayLike | None, bins: int, name: str
 ) -> NDArray[np.float64] | None:
     """A finite array with one value per bin, or ``None`` if not given."""
     require_scalar(bins, "bins")
@@ -1509,8 +1511,8 @@ class PredictedReceptorLevel(OwnsArrays):
 
 
 def predicted_receptor_level(
-    turbine_levels: ArrayLike,
-    sound_power_uncertainty_db: ArrayLike,
+    turbine_levels: NumericArrayLike,
+    sound_power_uncertainty_db: NumericArrayLike,
     *,
     prediction_model_uncertainty_db: float = PREDICTION_MODEL_UNCERTAINTY_DB,
     modeling_uncertainty_db: float = MODELING_UNCERTAINTY_DB,
@@ -1625,7 +1627,9 @@ class SoundRelevantTurbines(OwnsArrays):
         order = np.argsort(-self.predicted_levels, kind="stable")
         return tuple(int(i) for i in order if self.relevant[i])
 
-    def binning_wind_speed_m_s(self, turbine_wind_speeds_m_s: ArrayLike) -> float:
+    def binning_wind_speed_m_s(
+        self, turbine_wind_speeds_m_s: NumericArrayLike
+    ) -> float:
         """The binning wind speed: the arithmetic mean over the relevant turbines.
 
         :param turbine_wind_speeds_m_s: The wind speed derived from each
@@ -1663,7 +1667,9 @@ class SoundRelevantTurbines(OwnsArrays):
         )
 
 
-def sound_relevant_turbines(predicted_levels: ArrayLike) -> SoundRelevantTurbines:
+def sound_relevant_turbines(
+    predicted_levels: NumericArrayLike,
+) -> SoundRelevantTurbines:
     """Select the sound relevant turbines of a wind farm (9.3.2.3).
 
     The turbines are sorted by their predicted contribution at the receptor.
@@ -1754,14 +1760,14 @@ class LowFrequencyLevel(OwnsArrays):
 
 
 def wind_turbine_low_frequency_level(
-    sound_power_levels: ArrayLike,
+    sound_power_levels: NumericArrayLike,
     *,
-    distance: ArrayLike,
-    hub_height_m: ArrayLike,
-    frequencies: ArrayLike = LOW_FREQUENCY_BANDS_HZ,
-    ground_correction: ArrayLike | None = None,
-    air_attenuation_db_per_km: ArrayLike | None = None,
-    facade_insulation: ArrayLike | None = None,
+    distance: NumericArrayLike,
+    hub_height_m: NumericArrayLike,
+    frequencies: NumericArrayLike = LOW_FREQUENCY_BANDS_HZ,
+    ground_correction: NumericArrayLike | None = None,
+    air_attenuation_db_per_km: NumericArrayLike | None = None,
+    facade_insulation: NumericArrayLike | None = None,
     weighting: AOrZWeighting = "A",
 ) -> LowFrequencyLevel:
     r"""Low frequency sound level at a receptor (Annex C, Equation (C.1)).
@@ -1885,7 +1891,7 @@ def wind_turbine_low_frequency_level(
 
 
 def _per_band(
-    values: ArrayLike, bands: int, name: str, *, non_negative: bool = False
+    values: NumericArrayLike, bands: int, name: str, *, non_negative: bool = False
 ) -> NDArray[np.float64]:
     r"""A finite per-band array of the right length.
 
@@ -1943,10 +1949,10 @@ class SoundEmergence(OwnsArrays):
 
 
 def sound_emergence(
-    ambient_levels: ArrayLike,
-    background_levels: ArrayLike,
+    ambient_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    wind_speeds_m_s: ArrayLike | None = None,
+    wind_speeds_m_s: NumericArrayLike | None = None,
 ) -> SoundEmergence:
     r"""The emergence criterion of each wind speed class (Equation (J.1)).
 
@@ -1995,13 +2001,13 @@ def amplitude_modulation_adjustment[V: RealValues](
 
 
 @overload
-def amplitude_modulation_adjustment[A: ArrayLike](
+def amplitude_modulation_adjustment[A: NumericArrayLike](
     modulation_depth_db: A,
 ) -> float | NDArray[np.float64]: ...
 
 
 def amplitude_modulation_adjustment(
-    modulation_depth_db: ArrayLike,
+    modulation_depth_db: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""The amplitude modulation adjustment of Figure A.1, in dB.
 

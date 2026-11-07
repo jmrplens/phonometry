@@ -39,11 +39,11 @@ absorption_coefficient_uncertainty(
     volume: float,
     area: float,
     *,
-    speed_of_sound: ArrayLike,
-    t_a: ArrayLike,
-    u_a: ArrayLike,
-    t_b: ArrayLike,
-    u_b: ArrayLike,
+    speed_of_sound: NumericArrayLike,
+    t_a: NumericArrayLike,
+    u_a: NumericArrayLike,
+    t_b: NumericArrayLike,
+    u_b: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -101,12 +101,12 @@ base_plate_scattering(
     volume: float,
     area: float,
     *,
-    c1: ArrayLike,
-    t1: ArrayLike,
-    c3: ArrayLike,
-    t3: ArrayLike,
-    m1: ArrayLike = 0.0,
-    m3: ArrayLike = 0.0,
+    c1: NumericArrayLike,
+    t1: NumericArrayLike,
+    c3: NumericArrayLike,
+    t3: NumericArrayLike,
+    m1: NumericArrayLike = 0.0,
+    m3: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -232,7 +232,7 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 check_base_plate_scattering(
-    scattering: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    scattering: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> BasePlateScatteringCheck
 ```
 
@@ -266,12 +266,12 @@ random_incidence_absorption(
     volume: float,
     area: float,
     *,
-    c1: ArrayLike,
-    t1: ArrayLike,
-    c2: ArrayLike,
-    t2: ArrayLike,
-    m1: ArrayLike = 0.0,
-    m2: ArrayLike = 0.0,
+    c1: NumericArrayLike,
+    t1: NumericArrayLike,
+    c2: NumericArrayLike,
+    t2: NumericArrayLike,
+    m1: NumericArrayLike = 0.0,
+    m2: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -310,7 +310,9 @@ situation 2 adds the test sample, still without turntable rotation
 ## reverberation_time_uncertainty
 
 ```python
-reverberation_time_uncertainty(times: ArrayLike) -> NDArray[np.float64]
+reverberation_time_uncertainty(
+    times: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Standard uncertainty of a reverberation time (ISO 17497-1, Eq. (A.1)).
@@ -342,8 +344,8 @@ error of the mean.
 
 ```python
 scattering_coefficient(
-    alpha_spec: ArrayLike,
-    alpha_s: ArrayLike,
+    alpha_spec: NumericArrayLike,
+    alpha_s: NumericArrayLike,
     *,
     truncate_negative: bool = True,
 ) -> NDArray[np.float64]
@@ -381,10 +383,10 @@ results table is left to the caller.
 
 ```python
 scattering_coefficient_spectrum(
-    specular_absorption: ArrayLike,
-    random_absorption: ArrayLike,
+    specular_absorption: NumericArrayLike,
+    random_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     truncate_negative: bool = True,
 ) -> ScatteringResult
 ```
@@ -418,10 +420,10 @@ per-band specular `alpha_spec` (Eq. (4)) and random-incidence `alpha_s`
 
 ```python
 scattering_coefficient_uncertainty(
-    alpha_spec: ArrayLike,
-    alpha_s: ArrayLike,
-    u_alpha_spec: ArrayLike,
-    u_alpha_s: ArrayLike,
+    alpha_spec: NumericArrayLike,
+    alpha_s: NumericArrayLike,
+    u_alpha_spec: NumericArrayLike,
+    u_alpha_s: NumericArrayLike,
 ) -> ScatteringUncertainty
 ```
 
@@ -568,12 +570,12 @@ specular_absorption_coefficient(
     volume: float,
     area: float,
     *,
-    c3: ArrayLike,
-    t3: ArrayLike,
-    c4: ArrayLike,
-    t4: ArrayLike,
-    m3: ArrayLike = 0.0,
-    m4: ArrayLike = 0.0,
+    c3: NumericArrayLike,
+    t3: NumericArrayLike,
+    c4: NumericArrayLike,
+    t4: NumericArrayLike,
+    m3: NumericArrayLike = 0.0,
+    m4: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -612,7 +614,10 @@ apparent (specular) absorption includes the energy lost to scattering.
 ## speed_of_sound_iso17497
 
 ```python
-speed_of_sound_iso17497(*, temperature_c: ArrayLike) -> NDArray[np.float64]
+speed_of_sound_iso17497(
+    *,
+    temperature_c: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).

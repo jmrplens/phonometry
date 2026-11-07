@@ -64,7 +64,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import (
@@ -103,6 +103,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ._remote.client import Expected
 
 __all__ = [
@@ -540,7 +541,7 @@ class SignalSource(OwnsArrays):
             *,
             ix: int | np.integer[Any],
             iy: int | np.integer[Any],
-            samples: ArrayLike,
+            samples: NumericArrayLike,
             fs: float,
             amplitude: float = 1.0,
         ) -> None: ...
@@ -714,7 +715,7 @@ def _sigma_map(
 def _validate_sponge_damping(
     absorbing_layer_cells: int | np.integer[Any],
     absorbing_layer_reflection: float,
-    damping: ArrayLike,
+    damping: NumericArrayLike,
     ny: int,
     nx: int,
 ) -> tuple[int, float, NDArray[np.float64]]:
@@ -837,7 +838,7 @@ def _run_recording(
 
 
 def _validated_obstacle(
-    obstacle_mask: ArrayLike | None, ny: int, nx: int
+    obstacle_mask: NumericArrayLike | None, ny: int, nx: int
 ) -> NDArray[np.bool_] | None:
     """Validate the obstacle mask; ``None`` when absent or all open."""
     if obstacle_mask is None:
@@ -909,7 +910,7 @@ def _map_on_grid(name: str, field: Field2D, grid: tuple[int, int] | None) -> Non
         raise ValueError(msg)
 
 
-def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
+def _resolve_c_map(c: NumericArrayLike, shape: GridShape | None) -> Field2D:
     """Broadcast/validate the sound-speed spec into a positive 2D map.
 
     A ``shape`` is read whenever it is given: it spreads a scalar ``c`` over
@@ -933,7 +934,7 @@ def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
     return c_map
 
 
-def _resolve_rho_map(rho: ArrayLike, ny: int, nx: int) -> Field2D:
+def _resolve_rho_map(rho: NumericArrayLike, ny: int, nx: int) -> Field2D:
     """Broadcast/validate the density spec into a positive ``(ny, nx)`` map."""
     _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
@@ -1034,7 +1035,7 @@ def _real_objects(side: str, read: NDArray[np.object_]) -> NDArray[np.float64] |
         raise ValueError(msg) from None
 
 
-def _edge_impedance_profile(side: str, value: ArrayLike, n_edge: int) -> Field2D:
+def _edge_impedance_profile(side: str, value: NumericArrayLike, n_edge: int) -> Field2D:
     """Broadcast/validate one side's impedance into a positive 1D profile.
 
     :raises TypeError: for an impedance that is not a real number or an
@@ -1056,7 +1057,7 @@ def _edge_impedance_profile(side: str, value: ArrayLike, n_edge: int) -> Field2D
 
 
 def _validated_impedances(
-    edge_impedance: Mapping[Side, ArrayLike] | None,
+    edge_impedance: Mapping[Side, NumericArrayLike] | None,
     absorbing: tuple[Side, ...],
     ny: int,
     nx: int,
@@ -1131,7 +1132,7 @@ def _time_step(cfl: float, dx: float, c_max: float) -> float:
 
 
 def _acoustic_grid(
-    c: ArrayLike, shape: GridShape | None, cfl: float, dx: float
+    c: NumericArrayLike, shape: GridShape | None, cfl: float, dx: float
 ) -> tuple[Field2D, float, float]:
     """The sound-speed map, the grid spacing and the time step, checked on the host.
 
@@ -1166,18 +1167,18 @@ class _AcousticMedium:
 
 
 def _acoustic_medium(
-    c: ArrayLike,
+    c: NumericArrayLike,
     dx: float,
     *,
-    rho: ArrayLike,
+    rho: NumericArrayLike,
     cfl: float,
     absorbing_layer_cells: int | np.integer[Any],
     absorbing_sides: Side | Iterable[Side] | None,
     absorbing_layer_reflection: float,
-    damping: ArrayLike,
+    damping: NumericArrayLike,
     shape: GridShape | None,
-    edge_impedance: Mapping[Side, ArrayLike] | None,
-    obstacle_mask: ArrayLike | None,
+    edge_impedance: Mapping[Side, NumericArrayLike] | None,
+    obstacle_mask: NumericArrayLike | None,
 ) -> _AcousticMedium:
     """Check every argument of :class:`FDTD2D` that describes the medium.
 
@@ -1487,7 +1488,7 @@ class ContourProbe:
         ix1: int | np.integer[Any],
         iy0: int | np.integer[Any],
         iy1: int | np.integer[Any],
-        frequencies: ArrayLike,
+        frequencies: NumericArrayLike,
     ) -> None:
         if not isinstance(engine, FDTD2D):
             msg = f"'engine' must be an FDTD2D, got {type(engine).__name__}"
@@ -1794,17 +1795,17 @@ class FDTD2D:
     def __init__(
         self,
         *,
-        c: ArrayLike,
+        c: NumericArrayLike,
         dx: float,
-        rho: ArrayLike = 1.2,
+        rho: NumericArrayLike = 1.2,
         cfl: float = 0.6,
         absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: ArrayLike = 0.0,
+        damping: NumericArrayLike = 0.0,
         shape: GridShape | None = None,
-        edge_impedance: Mapping[Side, ArrayLike] | None = None,
-        obstacle_mask: ArrayLike | None = None,
+        edge_impedance: Mapping[Side, NumericArrayLike] | None = None,
+        obstacle_mask: NumericArrayLike | None = None,
         compute: Compute | None = None,
     ) -> None:
         medium = _acoustic_medium(
@@ -2097,7 +2098,7 @@ class FDTD2D:
         iy0: int | np.integer[Any],
         iy1: int | np.integer[Any],
         *,
-        frequencies: ArrayLike,
+        frequencies: NumericArrayLike,
     ) -> ContourProbe:
         r"""Record ``p`` and ``v_n`` phasors on a closed rectangular contour.
 
@@ -2767,17 +2768,17 @@ class FDTDRun(OwnsArrays):
         def __init__(
             self,
             *,
-            c: ArrayLike,
+            c: NumericArrayLike,
             dx: float,
             duration_s: float,
             sources: Sequence[AnySource],
             shape: GridShape | None = None,
-            rho: ArrayLike = 1.2,
+            rho: NumericArrayLike = 1.2,
             cfl: float = 0.6,
             recording: FDTDRecording | None = None,
             boundaries: FDTDBoundaries | None = None,
-            obstacle_mask: ArrayLike | None = None,
-            damping: ArrayLike = 0.0,
+            obstacle_mask: NumericArrayLike | None = None,
+            damping: NumericArrayLike = 0.0,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -2806,7 +2807,7 @@ class FDTDRun(OwnsArrays):
 
 
 def _held_map(
-    value: ArrayLike | None, dtype: type[np.generic] | None = np.float64
+    value: NumericArrayLike | None, dtype: type[np.generic] | None = np.float64
 ) -> object:
     """A real-valued map given as nested sequences, as the run's own read-only array.
 

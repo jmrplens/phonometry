@@ -41,13 +41,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from contextlib import AbstractContextManager
 
-    from numpy.typing import ArrayLike
     from reportlab.graphics.shapes import Drawing
     from reportlab.lib.colors import Color
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Flowable, Paragraph, Table
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .metadata import ReportMetadata
 
 #: Installation hints for the three soft dependencies of the report.
@@ -467,7 +467,7 @@ def band_table_header_style() -> ParagraphStyle:
     )
 
 
-def response_decades(frequencies: ArrayLike, where: str) -> float:
+def response_decades(frequencies: NumericArrayLike, where: str) -> float:
     """The decades a response curve spans, refusing a span too narrow to draw.
 
     The IEC 60268 fiches keep their response panel to the IEC 60263 scale by
@@ -555,7 +555,7 @@ def _require_column_widths(
         raise ValueError(msg)
 
 
-def _octave_grouping(band_centres: ArrayLike | None) -> int | None:
+def _octave_grouping(band_centres: NumericArrayLike | None) -> int | None:
     """Rows per octave in *band_centres*, or ``None`` when they are not bands.
 
     The thin rules of the accredited reports group a table by octave, so they
@@ -589,7 +589,7 @@ def band_table(
     n_data: int,
     extra_styles: list[Any] | None = None,
     *,
-    band_centres: ArrayLike | None,
+    band_centres: NumericArrayLike | None,
 ) -> Table:
     """Assemble a band table with the accredited styling.
 

@@ -209,21 +209,21 @@ adaptation term the input covered. Requires matplotlib
 
 ```python
 impact_improvement_adaptation_term(
-    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[False] = ...,
 ) -> int
 
 impact_improvement_adaptation_term(
-    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[True],
 ) -> float
 
 impact_improvement_adaptation_term(
-    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: bool = ...,
@@ -512,21 +512,21 @@ the `Axes`.
 
 ```python
 weighted_impact_improvement(
-    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[False] = ...,
 ) -> int
 
 weighted_impact_improvement(
-    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[True],
 ) -> float
 
 weighted_impact_improvement(
-    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: bool = ...,
@@ -573,7 +573,7 @@ the heavyweight floor, as A.2.2 prints.
 
 ```python
 weighted_impact_rating(
-    values_by_band: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    values_by_band: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> ImpactRatingResult
 ```
@@ -619,9 +619,9 @@ airborne problem, so no separate search is duplicated.
 
 ```python
 weighted_impact_rating_extended(
-    values_by_band: ArrayLike,
+    values_by_band: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     one_decimal: bool = False,
 ) -> ExtendedImpactRatingResult
 ```
@@ -661,7 +661,7 @@ as printed in A.2.2).
 
 ```python
 weighted_rating(
-    values_by_band: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    values_by_band: Mapping[int, float] | Mapping[float, float] | NumericArrayLike,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> WeightedRatingResult
 ```
@@ -698,9 +698,9 @@ No. 2. Input values are first reduced to one decimal place
 
 ```python
 weighted_rating_extended(
-    values_by_band: ArrayLike,
+    values_by_band: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     one_decimal: bool = False,
 ) -> ExtendedWeightedRatingResult
 ```
@@ -741,9 +741,9 @@ Annex B requires for the uncertainty of single-number values.
 
 ```python
 weighted_reduction_improvement(
-    delta_r: ArrayLike,
+    delta_r: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] = 'heavy_wall',
     one_decimal: bool = False,
 ) -> ReductionImprovementRating

@@ -222,7 +222,7 @@ and ducted propagation does not occur.
 
 ```python
 weston_propagation_loss(
-    range_m: ArrayLike,
+    range_m: NumericArrayLike,
     frequency_hz: float,
     water_depth: float,
     *,

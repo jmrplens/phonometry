@@ -9006,7 +9006,8 @@ def generate_headphones_programme_signal(output_dir: str) -> None:
     )
     bands = octave_filter(x, _HEADPHONE_FS, fraction=3, limits=[19.95, 19952.6])
     figure_2 = electroacoustics.check_program_signal(
-        frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
+        frequencies=np.asarray(bands.frequencies, dtype=np.float64),
+        band_levels=np.asarray(bands.levels),
     )
     clipped = electroacoustics.simulated_program_signal(
         _HEADPHONE_FS, 60.0, peak_to_rms=2.0, seed=2

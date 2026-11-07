@@ -81,10 +81,10 @@ source and building prediction standards (ISO 9611, EN 15657, EN 12354-5).
 
 ```python
 band_averaged_stiffness(
-    stiffness: ArrayLike,
+    stiffness: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    valid: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    valid: NumericArrayLike | None = None,
 ) -> BandAveragedStiffness
 ```
 
@@ -220,7 +220,7 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 base_transmissibility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass: float,
     stiffness: float,
     damping: float = 0.0,
@@ -264,8 +264,8 @@ limit $T \ll 1$.
 
 ```python
 blocking_force_ratio(
-    driving_point_stiffness: ArrayLike,
-    termination_stiffness: ArrayLike,
+    driving_point_stiffness: NumericArrayLike,
+    termination_stiffness: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -309,10 +309,10 @@ blocked transfer stiffness alone.
 
 ```python
 check_blocked_output(
-    input_acceleration_level: ArrayLike,
-    output_acceleration_level: ArrayLike,
+    input_acceleration_level: NumericArrayLike,
+    output_acceleration_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> LevelDifferenceCheck
 ```
 
@@ -359,10 +359,10 @@ For the indirect method the same 20 dB is the $|T| \le 0.1$ of
 ```python
 check_output_mass(
     output_mass_kg: float,
-    output_force_level: ArrayLike,
-    output_acceleration_level: ArrayLike,
+    output_force_level: NumericArrayLike,
+    output_acceleration_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> OutputMassCheck
 ```
 
@@ -409,10 +409,10 @@ lighter `m0`, or stiffer (more, or larger) force transducers. See
 
 ```python
 check_unwanted_input(
-    excitation_level: ArrayLike,
-    unwanted_level: ArrayLike,
+    excitation_level: NumericArrayLike,
+    unwanted_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> LevelDifferenceCheck
 ```
 
@@ -463,12 +463,12 @@ errata register.)
 
 ```python
 driving_point_stiffness(
-    input_force_n: ArrayLike,
-    input_acceleration_m_s2: ArrayLike,
+    input_force_n: NumericArrayLike,
+    input_acceleration_m_s2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    output_acceleration_m_s2: ArrayLike | None = None,
-    unwanted_acceleration_m_s2: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    output_acceleration_m_s2: NumericArrayLike | None = None,
+    unwanted_acceleration_m_s2: NumericArrayLike | None = None,
 ) -> DrivingPointStiffnessResult
 ```
 
@@ -822,11 +822,11 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 effective_blocking_mass(
-    force_n: ArrayLike,
-    first_acceleration_m_s2: ArrayLike,
-    second_acceleration_m_s2: ArrayLike,
+    force_n: NumericArrayLike,
+    first_acceleration_m_s2: NumericArrayLike,
+    second_acceleration_m_s2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     blocking_mass: float,
 ) -> EffectiveBlockingMass
 ```
@@ -965,10 +965,10 @@ Per frequency, whether it lies below the first line outside 1 dB.
 
 ```python
 indirect_transfer_stiffness_result(
-    transmissibility: ArrayLike,
+    transmissibility: NumericArrayLike,
     blocking_mass: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flange_mass: float = 0.0,
 ) -> TransferStiffnessResult
 ```
@@ -1090,7 +1090,7 @@ Requires matplotlib (the `[plot]` extra).
 ## loss_factor
 
 ```python
-loss_factor(stiffness: ArrayLike) -> np.ndarray
+loss_factor(stiffness: NumericArrayLike) -> np.ndarray
 ```
 
 Loss factor
@@ -1248,8 +1248,8 @@ REFERENCE_STIFFNESS_N_M = 1.0
 
 ```python
 transfer_stiffness_direct(
-    blocking_force: ArrayLike,
-    input_displacement: ArrayLike,
+    blocking_force: NumericArrayLike,
+    input_displacement: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -1278,10 +1278,10 @@ the input displacement phasor.
 
 ```python
 transfer_stiffness_indirect(
-    transmissibility: ArrayLike,
+    transmissibility: NumericArrayLike,
     blocking_mass: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flange_mass: float = 0.0,
 ) -> np.ndarray
 ```
@@ -1340,7 +1340,7 @@ $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
 
 ```python
 transfer_stiffness_level(
-    stiffness: ArrayLike,
+    stiffness: NumericArrayLike,
     *,
     reference: float = 1.0,
 ) -> np.ndarray
@@ -1371,10 +1371,10 @@ stiffness.
 
 ```python
 TransferStiffnessResult(
-    frequencies: ArrayLike,
-    transfer_stiffness: ArrayLike,
+    frequencies: NumericArrayLike,
+    transfer_stiffness: NumericArrayLike,
     blocking_mass: float | None = None,
-    transmissibility: ArrayLike | None = None,
+    transmissibility: NumericArrayLike | None = None,
 )
 ```
 

@@ -103,10 +103,9 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, BandValues
+    from ..._internal.types import BandFraction, BandValues, NumericArrayLike
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -1451,8 +1450,8 @@ def _match_bands(
 
 def _validated_extended_input(
     owner: str,
-    values_by_band: ArrayLike,
-    frequencies: ArrayLike | None,
+    values_by_band: NumericArrayLike,
+    frequencies: NumericArrayLike | None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Validate the extended-range input; return (measured, freqs, core_idx).
 
@@ -1495,9 +1494,9 @@ def _validated_extended_input(
 
 
 def weighted_rating_extended(
-    values_by_band: ArrayLike,
+    values_by_band: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     one_decimal: bool = False,
 ) -> ExtendedWeightedRatingResult:
     r"""Weighted rating with enlarged-range adaptation terms (ISO 717-1 An. B).
@@ -1575,9 +1574,9 @@ def weighted_rating_extended(
 
 
 def weighted_impact_rating_extended(
-    values_by_band: ArrayLike,
+    values_by_band: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     one_decimal: bool = False,
 ) -> ExtendedImpactRatingResult:
     r"""Weighted impact rating with ``CI,50-2500`` (ISO 717-2:2020 A.2.1).
@@ -2020,9 +2019,9 @@ class ReductionImprovementRating(RichDisplay):
 
 
 def weighted_reduction_improvement(
-    delta_r: ArrayLike,
+    delta_r: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     basic_element: BasicElement = "heavy_wall",
     one_decimal: bool = False,
 ) -> ReductionImprovementRating:

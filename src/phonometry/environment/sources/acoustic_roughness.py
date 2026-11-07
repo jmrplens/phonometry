@@ -98,10 +98,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandMapping
+    from ..._internal.types import BandMapping, NumericArrayLike
     from ...filters import OctaveFilterBank
 
 __all__ = [
@@ -219,7 +219,7 @@ def _band_edges(
 
 
 def _record(
-    roughness_um: ArrayLike, sample_spacing_m: float
+    roughness_um: NumericArrayLike, sample_spacing_m: float
 ) -> tuple[NDArray[np.float64], float]:
     """Validate a roughness record and its sampling interval."""
     record = require_finite_array(roughness_um, "roughness_um")
@@ -288,7 +288,7 @@ def _remove_one_pass(record: NDArray[np.float64], spacing: float) -> int:
 
 
 def remove_roughness_spikes(
-    roughness_um: ArrayLike, *, sample_spacing_m: float
+    roughness_um: NumericArrayLike, *, sample_spacing_m: float
 ) -> NDArray[np.float64]:
     r"""The record with its narrow upward spikes replaced by straight lines (7.2).
 
@@ -334,7 +334,7 @@ def remove_roughness_spikes(
 
 
 def curvature_processed_roughness(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
     curve_radius_m: float = _CURVE_RADIUS_M,
@@ -393,11 +393,11 @@ def curvature_processed_roughness(
 
 
 def redistributed_band_energies(
-    source_lower: ArrayLike,
-    source_upper: ArrayLike,
-    energies: ArrayLike,
-    target_lower: ArrayLike,
-    target_upper: ArrayLike,
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: NumericArrayLike,
+    target_upper: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""Band energies moved onto other bands in proportion to their overlap (Annex C).
 
@@ -495,8 +495,8 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         def __init__(
             self,
             *,
-            wavelengths_m: ArrayLike,
-            levels: ArrayLike,
+            wavelengths_m: NumericArrayLike,
+            levels: NumericArrayLike,
             record_length_m: float | None = None,
             n_segments: int | None = None,
             method: Literal["A", "B"] | None = None,
@@ -611,7 +611,7 @@ def _segments(record: NDArray[np.float64], samples: int) -> NDArray[np.float64]:
 
 
 def acoustic_roughness_spectrum(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
     spike_removal: bool = True,
@@ -810,7 +810,7 @@ def _settling_deficit_db(
 
 
 def filtered_roughness_spectrum(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
     spike_removal: bool = True,

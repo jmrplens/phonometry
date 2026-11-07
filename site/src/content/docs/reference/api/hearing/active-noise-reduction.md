@@ -78,11 +78,11 @@ Clause, formula and table numbers refer to ISO 4869-6:2019(E).
 
 ```python
 active_insertion_loss(
-    insertion_loss: ArrayLike | None = None,
+    insertion_loss: NumericArrayLike | None = None,
     *,
-    passive_levels: ArrayLike | None = None,
-    active_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    passive_levels: NumericArrayLike | None = None,
+    active_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ActiveInsertionLossResult
 ```
 
@@ -183,8 +183,8 @@ Draw the mean active insertion loss with its expanded uncertainty.
 
 ```python
 anr_total_attenuation(
-    reat: ArrayLike | RealEarAttenuationResult,
-    insertion_loss: ArrayLike | ActiveInsertionLossResult,
+    reat: NumericArrayLike | RealEarAttenuationResult,
+    insertion_loss: NumericArrayLike | ActiveInsertionLossResult,
 ) -> ANRTotalAttenuationResult
 ```
 
@@ -367,10 +367,10 @@ Draw the passive, active and total attenuation and the APV.
 
 ```python
 assess_anr_linearity(
-    external_levels: ArrayLike,
-    ear_levels: ArrayLike | None = None,
+    external_levels: NumericArrayLike,
+    ear_levels: NumericArrayLike | None = None,
     *,
-    ear_third_octave_levels: ArrayLike | None = None,
+    ear_third_octave_levels: NumericArrayLike | None = None,
 ) -> ANRLinearityResult
 ```
 

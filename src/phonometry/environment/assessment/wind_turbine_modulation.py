@@ -104,9 +104,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "AM_BLOCK_SAMPLES",
@@ -230,9 +231,9 @@ def _nominal_index(frequencies: NDArray[np.float64], centre: float) -> int:
 
 
 def amplitude_modulation_band_levels(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     band: int | np.integer[Any],
     weighting: Literal["A", "Z"],
 ) -> NDArray[np.float64]:
@@ -591,7 +592,7 @@ def _harmonic_line(
 
 
 def amplitude_modulation_block(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
 ) -> ModulationBlock:
@@ -796,10 +797,10 @@ class ModulationPeriod(OwnsArrays):
 
 
 def amplitude_modulation_period(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     modulation_frequency_range_hz: Sequence[float],
-    excluded_blocks: ArrayLike | None = None,
+    excluded_blocks: NumericArrayLike | None = None,
 ) -> ModulationPeriod:
     """Rate one 10 min period of 100 ms levels (IEC TS 61400-11-2, 13.6.3).
 
@@ -856,7 +857,7 @@ def amplitude_modulation_period(
     return ModulationPeriod(blocks=tuple(blocks))
 
 
-def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
+def _exclusion_flags(flags: NumericArrayLike, name: str) -> NDArray[np.bool_]:
     """Exclusion flags as booleans, refusing what only converts to them.
 
     ``True``/``False`` (or the integers 1 and 0) are flags; a string such as
@@ -966,12 +967,12 @@ class BinnedModulation(OwnsArrays):
 
 
 def bin_amplitude_modulation(
-    ratings_db: ArrayLike,
-    wind_speeds_m_s: ArrayLike,
+    ratings_db: NumericArrayLike,
+    wind_speeds_m_s: NumericArrayLike,
     *,
-    wind_directions_deg: ArrayLike | None = None,
+    wind_directions_deg: NumericArrayLike | None = None,
     bands: Iterable[int | np.integer[Any]] = (1, 2, 3),
-    excluded: ArrayLike | None = None,
+    excluded: NumericArrayLike | None = None,
     sector_width_deg: float = 30.0,
 ) -> BinnedModulation:
     """Bin 10 min AM ratings and pick the worst band per bin (13.6.4).

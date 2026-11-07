@@ -1370,7 +1370,8 @@ _NUMBER_PARTS = {"np.integer[Any]": "int", "np.floating[Any]": "float"}
 _ARRAYS = frozenset(
     {
         "ArrayLike",
-        "Signal | ArrayLike",
+        "NumericArrayLike",
+        "Signal | NumericArrayLike",
         "SignalInput",
         "Sequence[float]",
         "BandValues",

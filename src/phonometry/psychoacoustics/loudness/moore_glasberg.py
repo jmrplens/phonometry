@@ -46,10 +46,10 @@ from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
+    from ..._internal.types import NumericArrayLike
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
@@ -871,7 +871,7 @@ def _validate_conditions(field: object, presentation: object) -> None:
 
 
 def _as_components(
-    components: ArrayLike,
+    components: NumericArrayLike,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Split a sequence of (frequency, level) pairs into arrays and validate."""
     array = real_array(components, "components")
@@ -896,7 +896,7 @@ def _as_components(
 
 
 def loudness_moore_glasberg_from_spectrum(
-    components: ArrayLike,
+    components: NumericArrayLike,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
     presentation: Presentation = "binaural",
@@ -961,7 +961,7 @@ def _third_octave_components(
 
 
 def loudness_moore_glasberg_from_third_octave(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
     presentation: Presentation = "binaural",
@@ -1038,7 +1038,7 @@ def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
 
 
 def loudness_moore_glasberg(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",

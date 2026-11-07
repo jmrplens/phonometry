@@ -72,10 +72,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -277,7 +276,7 @@ def min_cumulative_duration_hours(n_workers: int | np.integer[Any]) -> float:
 # --------------------------------------------------------------------------- #
 # Energy helpers.
 # --------------------------------------------------------------------------- #
-def _sampling_std(levels: ArrayLike) -> float:
+def _sampling_std(levels: NumericArrayLike) -> float:
     """Sample standard deviation about the arithmetic mean (Eq C.12), dB.
 
     Used for the job/full-day sampling uncertainty ``u1`` (denominator ``N-1``).
@@ -335,10 +334,10 @@ class Task(RichDisplay):
         def __init__(
             self,
             *,
-            samples: ArrayLike,
+            samples: NumericArrayLike,
             duration_hours: float,
-            duration_observations_hours: ArrayLike | None = None,
-            duration_range_hours: ArrayLike | None = None,
+            duration_observations_hours: NumericArrayLike | None = None,
+            duration_range_hours: NumericArrayLike | None = None,
             label: str | None = None,
             instrument: InstrumentClass | None = None,
         ) -> None: ...
@@ -389,7 +388,7 @@ class Task(RichDisplay):
             object.__setattr__(self, "duration_range_hours", duration_range)
 
 
-def _floats(values: ArrayLike) -> tuple[float, ...]:
+def _floats(values: NumericArrayLike) -> tuple[float, ...]:
     """A sequence of numbers as a tuple of floats, flattened."""
     return tuple(float(value) for value in np.ravel(real_array(values, "values")))
 
@@ -884,7 +883,7 @@ def task_based_exposure(
 # Strategies 2 and 3: job-based (Clauses 10, C.3) and full-day (Clauses 11, C.4).
 # --------------------------------------------------------------------------- #
 def _sampled_exposure(
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     effective_duration_hours: float,
     instrument: InstrumentClass,
     u3: float,
@@ -944,7 +943,7 @@ def _sampled_exposure(
 
 
 def job_based_exposure(
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     effective_duration_hours: float,
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,
@@ -1012,7 +1011,7 @@ def job_based_exposure(
 
 
 def full_day_exposure(
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     effective_duration_hours: float,
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,

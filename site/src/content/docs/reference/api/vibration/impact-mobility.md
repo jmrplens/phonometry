@@ -246,7 +246,7 @@ lower `min_n_records` states that fewer were judged enough.
 
 ```python
 check_double_hit(
-    force_n: Signal | ArrayLike,
+    force_n: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     threshold_ratio: float = 0.1,
@@ -301,7 +301,7 @@ as several. The unfiltered force avoids both effects.
 
 ```python
 check_force_spectrum(
-    force_n: Signal | ArrayLike,
+    force_n: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     frequency_range_hz: tuple[float, float],
@@ -340,7 +340,7 @@ reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/phonometry/r
 
 ```python
 check_overload(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     full_scale: float,
@@ -370,13 +370,13 @@ Did one channel of the record stay below its full scale? (8.4)
 
 ```python
 check_response_decay(
-    response: Signal | ArrayLike,
+    response: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     exponential_window: bool = False,
     segment_s: float | None = None,
     start_s: float = 0.0,
-    force_n: Signal | ArrayLike | None = None,
+    force_n: Signal | NumericArrayLike | None = None,
 ) -> ResponseDecayCheck
 ```
 
@@ -644,7 +644,7 @@ Time of every sample of the record, in seconds.
 
 ```python
 energy_spectral_density(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> EnergySpectralDensity
 ```
@@ -793,9 +793,9 @@ damping away again.
 
 ```python
 exponential_window_correction(
-    apparent_damping_ratio: ArrayLike,
+    apparent_damping_ratio: NumericArrayLike,
     *,
-    damped_natural_frequency_hz: ArrayLike,
+    damped_natural_frequency_hz: NumericArrayLike,
     exponential_decay_rate_per_s: float,
 ) -> ExponentialWindowCorrection
 ```
@@ -1054,8 +1054,8 @@ HIGH_COHERENCE = 0.9
 
 ```python
 impact_mobility(
-    force_n: Signal | ArrayLike,
-    response: Signal | ArrayLike,
+    force_n: Signal | NumericArrayLike,
+    response: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     response_quantity: Literal['acceleration', 'velocity', 'displacement'] = 'acceleration',
@@ -1526,9 +1526,9 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 single_mode_fit(
-    frf: ArrayLike,
+    frf: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     band_hz: tuple[float, float],
     kind: Literal['accelerance', 'mobility', 'receptance'] = 'mobility',
     exponential_decay_rate_per_s: float = 0.0,
@@ -1628,7 +1628,9 @@ $\hat\zeta_r$ of Annex A, the window's included.
 ### SingleModeFitResult.corrected_frf()
 
 ```python
-SingleModeFitResult.corrected_frf(frequencies: ArrayLike) -> np.ndarray
+SingleModeFitResult.corrected_frf(
+    frequencies: NumericArrayLike,
+) -> np.ndarray
 ```
 
 The mode with the window taken out, of kind `kind` (Annex A).
@@ -1649,7 +1651,9 @@ and nothing else (Formula (A.2)).
 ### SingleModeFitResult.corrected_mobility()
 
 ```python
-SingleModeFitResult.corrected_mobility(frequencies: ArrayLike) -> np.ndarray
+SingleModeFitResult.corrected_mobility(
+    frequencies: NumericArrayLike,
+) -> np.ndarray
 ```
 
 The corrected mode as mobility, in m/(N·s).
@@ -1677,7 +1681,7 @@ Damped natural frequency $\omega_d / 2\pi$, in hertz.
 ### SingleModeFitResult.fitted_frf()
 
 ```python
-SingleModeFitResult.fitted_frf(frequencies: ArrayLike) -> np.ndarray
+SingleModeFitResult.fitted_frf(frequencies: NumericArrayLike) -> np.ndarray
 ```
 
 The fitted model at any frequencies, window included, of kind `kind`.
@@ -1719,9 +1723,9 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 verify_channel_match(
-    response: ArrayLike,
+    response: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     frequency_range_hz: tuple[float, float],
 ) -> ChannelMatchVerification
 ```

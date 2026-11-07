@@ -141,9 +141,10 @@ from ._shared import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .reference_sound_source import ReferenceSourceCalibration
 
 __all__ = [
@@ -197,7 +198,7 @@ _METHODS = ("direct", "comparison")
 
 
 def air_absorption_np_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -260,7 +261,7 @@ def _room_geometry(volume: float, surface_area: float) -> tuple[float, float]:
 
 
 def room_absorption_coefficient(
-    reverberation_time: ArrayLike, *, volume: float, surface_area: float
+    reverberation_time: NumericArrayLike, *, volume: float, surface_area: float
 ) -> NDArray[np.float64]:
     r"""Room absorption coefficient from the reverberation time (ISO 9295 Formula (5)).
 
@@ -289,7 +290,7 @@ def room_absorption_coefficient(
 
 
 def room_constant_from_reverberation_time(
-    reverberation_time: ArrayLike, *, volume: float, surface_area: float
+    reverberation_time: NumericArrayLike, *, volume: float, surface_area: float
 ) -> NDArray[np.float64]:
     r"""Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).
 
@@ -313,7 +314,7 @@ def room_constant_from_reverberation_time(
 
 
 def room_constant_from_air_absorption(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     volume: float,
     surface_area: float,
@@ -380,7 +381,7 @@ def room_constant_from_air_absorption(
 
 
 def min_analyzer_bandwidth(
-    tone_frequency_hz: ArrayLike,
+    tone_frequency_hz: NumericArrayLike,
     *,
     microphone_speed_m_s: float,
     speed_of_sound: float,
@@ -409,7 +410,7 @@ def min_analyzer_bandwidth(
     return np.asarray(2.0 * f * v / c, dtype=np.float64)
 
 
-def tone_level_from_sidebands(sideband_levels: ArrayLike) -> float:
+def tone_level_from_sidebands(sideband_levels: NumericArrayLike) -> float:
     r"""Total level of a tone from its sideband levels (ISO 9295 Formula (3)).
 
     :math:`L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}`,
@@ -432,7 +433,7 @@ def tone_level_from_sidebands(sideband_levels: ArrayLike) -> float:
 
 
 def free_field_absorption_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     radius: float,
     temperature_c: float,
@@ -588,7 +589,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
         return plot_high_frequency_sound_power(self, ax=ax, language=language, **kwargs)
 
 
-def _mean_band_level(levels: ArrayLike, name: str) -> NDArray[np.float64]:
+def _mean_band_level(levels: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Formula (1): the energy mean over the rows of a 2-D input."""
     arr = real_array(levels, name)
     if arr.ndim == _ORIENTATIONS_BY_BANDS:
@@ -599,7 +600,9 @@ def _mean_band_level(levels: ArrayLike, name: str) -> NDArray[np.float64]:
     return require_finite_array(arr, name)
 
 
-def _band_frequencies(frequencies: ArrayLike, n_bands: int) -> NDArray[np.float64]:
+def _band_frequencies(
+    frequencies: NumericArrayLike, n_bands: int
+) -> NDArray[np.float64]:
     """One positive frequency per band; :func:`_octave_advisory` says when one
     lies outside the octave, once the determination has checked everything.
     """
@@ -624,7 +627,7 @@ def _octave_advisory(freqs: NDArray[np.float64]) -> None:
         )
 
 
-def _per_band(value: ArrayLike, name: str, n_bands: int) -> NDArray[np.float64]:
+def _per_band(value: NumericArrayLike, name: str, n_bands: int) -> NDArray[np.float64]:
     """A scalar or one value per band, as one value per band."""
     arr = np.atleast_1d(real_array(value, name))
     if arr.ndim != 1 or arr.size not in (1, n_bands):
@@ -634,10 +637,10 @@ def _per_band(value: ArrayLike, name: str, n_bands: int) -> NDArray[np.float64]:
 
 
 def high_frequency_sound_power(
-    pressure_levels: ArrayLike,
+    pressure_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    room_constant: ArrayLike,
+    frequencies: NumericArrayLike,
+    room_constant: NumericArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     tonal: bool = False,
@@ -704,11 +707,11 @@ def high_frequency_sound_power(
 
 
 def high_frequency_sound_power_comparison(
-    pressure_levels: ArrayLike,
+    pressure_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_pressure_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    frequencies: NumericArrayLike,
+    reference_pressure_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     noise_bandwidth_hz: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,

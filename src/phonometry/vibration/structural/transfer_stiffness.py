@@ -85,10 +85,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -234,7 +234,7 @@ class TransferStiffnessWarning(PhonometryWarning):
     """Advisory when an ISO 10846 adequacy condition or a band count fails."""
 
 
-def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]:
+def _omega(frequency: NumericArrayLike, name: str = "frequency") -> NDArray[np.float64]:
     r"""Angular frequency :math:`\omega = 2\pi f` (rad/s); rejects f <= 0.
 
     *name* is the caller's own name for the frequency, for the message.
@@ -247,7 +247,7 @@ def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]
 
 
 def transfer_stiffness_level(
-    stiffness: ArrayLike, *, reference: float = REFERENCE_STIFFNESS_N_M
+    stiffness: NumericArrayLike, *, reference: float = REFERENCE_STIFFNESS_N_M
 ) -> np.ndarray:
     r"""Level of the dynamic transfer stiffness (ISO 10846-2/-3, 3.17).
 
@@ -284,7 +284,7 @@ def transfer_stiffness_level(
     return np.asarray(20.0 * np.log10(magnitude / reference), dtype=np.float64)
 
 
-def loss_factor(stiffness: ArrayLike) -> np.ndarray:
+def loss_factor(stiffness: NumericArrayLike) -> np.ndarray:
     r"""Loss factor
     :math:`\eta = \operatorname{Im}(k_{2,1}) / \operatorname{Re}(k_{2,1})`
     (ISO 10846-1, 3.8).
@@ -311,7 +311,7 @@ def loss_factor(stiffness: ArrayLike) -> np.ndarray:
 
 
 def transfer_stiffness_direct(
-    blocking_force: ArrayLike, input_displacement: ArrayLike
+    blocking_force: NumericArrayLike, input_displacement: NumericArrayLike
 ) -> np.ndarray:
     r"""Dynamic transfer stiffness by the direct method (ISO 10846-2).
 
@@ -338,10 +338,10 @@ def transfer_stiffness_direct(
 
 
 def transfer_stiffness_indirect(
-    transmissibility: ArrayLike,
+    transmissibility: NumericArrayLike,
     blocking_mass: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flange_mass: float = 0.0,
 ) -> np.ndarray:
     r"""Dynamic transfer stiffness by the indirect method (ISO 10846-3, Eq. 1).
@@ -391,8 +391,8 @@ def transfer_stiffness_indirect(
 
 
 def _indirect_stiffness(
-    frequency: ArrayLike,
-    transmissibility: ArrayLike,
+    frequency: NumericArrayLike,
+    transmissibility: NumericArrayLike,
     blocking_mass: float,
     flange_mass: float,
     name: str,
@@ -422,7 +422,7 @@ def _indirect_stiffness(
 
 
 def blocking_force_ratio(
-    driving_point_stiffness: ArrayLike, termination_stiffness: ArrayLike
+    driving_point_stiffness: NumericArrayLike, termination_stiffness: NumericArrayLike
 ) -> np.ndarray:
     r"""Ratio of the delivered force to the blocking force (ISO 10846-1, Eq. 6).
 
@@ -462,7 +462,7 @@ def blocking_force_ratio(
 
 
 def base_transmissibility(
-    frequency: ArrayLike, mass: float, stiffness: float, damping: float = 0.0
+    frequency: NumericArrayLike, mass: float, stiffness: float, damping: float = 0.0
 ) -> np.ndarray:
     r"""Transmissibility of a mass on an ideal resilient element (model).
 
@@ -520,10 +520,10 @@ class TransferStiffnessResult(OwnsArrays):
 
         def __init__(
             self,
-            frequencies: ArrayLike,
-            transfer_stiffness: ArrayLike,
+            frequencies: NumericArrayLike,
+            transfer_stiffness: NumericArrayLike,
             blocking_mass: float | None = None,
-            transmissibility: ArrayLike | None = None,
+            transmissibility: NumericArrayLike | None = None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -765,10 +765,10 @@ class TransferStiffnessResult(OwnsArrays):
 
 
 def indirect_transfer_stiffness_result(
-    transmissibility: ArrayLike,
+    transmissibility: NumericArrayLike,
     blocking_mass: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flange_mass: float = 0.0,
 ) -> TransferStiffnessResult:
     r"""Indirect-method transfer stiffness bundled as a :class:`TransferStiffnessResult`.
@@ -810,7 +810,7 @@ def indirect_transfer_stiffness_result(
 # ---------------------------------------------------------------------------
 
 
-def _frequency_axis(frequencies: ArrayLike, owner: str) -> NDArray[np.float64]:
+def _frequency_axis(frequencies: NumericArrayLike, owner: str) -> NDArray[np.float64]:
     """One-dimensional, finite, positive frequencies, in hertz."""
     freq = real_array(frequencies, "frequencies")
     if freq.ndim != 1 or freq.size == 0:
@@ -846,7 +846,7 @@ def _band_index(frequencies: NDArray[np.float64]) -> NDArray[np.int64]:
 
 
 def _as_flags(
-    value: ArrayLike, shape: tuple[int, ...], owner: str, name: str
+    value: NumericArrayLike, shape: tuple[int, ...], owner: str, name: str
 ) -> NDArray[np.bool_]:
     """A boolean mask with one flag per frequency."""
     flags = np.asarray(value)
@@ -993,7 +993,10 @@ class BandAveragedStiffness(OwnsArrays):
 
 
 def band_averaged_stiffness(
-    stiffness: ArrayLike, *, frequencies: ArrayLike, valid: ArrayLike | None = None
+    stiffness: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+    valid: NumericArrayLike | None = None,
 ) -> BandAveragedStiffness:
     r"""One-third-octave-band averages of a narrow-band stiffness (ISO 10846).
 
@@ -1044,9 +1047,9 @@ def band_averaged_stiffness(
 
 
 def _band_average(
-    frequencies: ArrayLike,
-    stiffness: ArrayLike,
-    valid: ArrayLike | None,
+    frequencies: NumericArrayLike,
+    stiffness: NumericArrayLike,
+    valid: NumericArrayLike | None,
     *,
     owner: str,
     quiet_up_to_hz: float | None = None,
@@ -1240,7 +1243,7 @@ class LevelDifferenceCheck(OwnsArrays):
 
 
 def _level_spectrum(
-    value: ArrayLike, shape: tuple[int, ...], owner: str, name: str
+    value: NumericArrayLike, shape: tuple[int, ...], owner: str, name: str
 ) -> NDArray[np.float64]:
     """A level spectrum, one level per frequency (or one row per direction)."""
     level = real_array(value, name)
@@ -1273,10 +1276,10 @@ def _warn_level_difference(
 
 
 def check_blocked_output(
-    input_acceleration_level: ArrayLike,
-    output_acceleration_level: ArrayLike,
+    input_acceleration_level: NumericArrayLike,
+    output_acceleration_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> LevelDifferenceCheck:
     r"""Is the output side blocked well enough for the stiffness to mean anything?
 
@@ -1335,10 +1338,10 @@ def check_blocked_output(
 
 
 def check_unwanted_input(
-    excitation_level: ArrayLike,
-    unwanted_level: ArrayLike,
+    excitation_level: NumericArrayLike,
+    unwanted_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> LevelDifferenceCheck:
     r"""Does the input move in the excitation direction alone, by 15 dB?
 
@@ -1543,10 +1546,10 @@ class OutputMassCheck(OwnsArrays):
 
 def check_output_mass(
     output_mass_kg: float,
-    output_force_level: ArrayLike,
-    output_acceleration_level: ArrayLike,
+    output_force_level: NumericArrayLike,
+    output_acceleration_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> OutputMassCheck:
     r"""Is the mass in front of the output force transducers light enough?
 
@@ -1790,11 +1793,11 @@ class EffectiveBlockingMass(OwnsArrays):
 
 
 def effective_blocking_mass(
-    force_n: ArrayLike,
-    first_acceleration_m_s2: ArrayLike,
-    second_acceleration_m_s2: ArrayLike,
+    force_n: NumericArrayLike,
+    first_acceleration_m_s2: NumericArrayLike,
+    second_acceleration_m_s2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     blocking_mass: float,
 ) -> EffectiveBlockingMass:
     r"""Effective mass of a blocking mass from one force and two accelerations.
@@ -2119,7 +2122,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
 
 
 def _acceleration_level(
-    value: ArrayLike, shape: tuple[int, ...], owner: str, name: str
+    value: NumericArrayLike, shape: tuple[int, ...], owner: str, name: str
 ) -> NDArray[np.float64]:
     """Level re 1 µm/s² of acceleration phasors, ``-inf`` where they are zero."""
     acceleration = np.abs(complex_array(value, name))
@@ -2135,12 +2138,12 @@ def _acceleration_level(
 
 
 def driving_point_stiffness(
-    input_force_n: ArrayLike,
-    input_acceleration_m_s2: ArrayLike,
+    input_force_n: NumericArrayLike,
+    input_acceleration_m_s2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    output_acceleration_m_s2: ArrayLike | None = None,
-    unwanted_acceleration_m_s2: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    output_acceleration_m_s2: NumericArrayLike | None = None,
+    unwanted_acceleration_m_s2: NumericArrayLike | None = None,
 ) -> DrivingPointStiffnessResult:
     r"""Dynamic driving-point stiffness of a resilient support (ISO 10846-5 Formula (3)).
 

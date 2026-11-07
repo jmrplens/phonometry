@@ -116,10 +116,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .._report.metadata import ReportMetadata
     from .declaration import DeclarationForm, NoiseEmissionDeclaration
 
@@ -179,10 +179,10 @@ class RoomEnvironment(OwnsArrays):
         def __init__(
             self,
             *,
-            absorption_area: ArrayLike | None = None,
-            reverberation_time: ArrayLike | None = None,
+            absorption_area: NumericArrayLike | None = None,
+            reverberation_time: NumericArrayLike | None = None,
             volume: float | None = None,
-            mean_absorption_coefficient: ArrayLike | None = None,
+            mean_absorption_coefficient: NumericArrayLike | None = None,
             room_surface: float | None = None,
         ) -> None: ...
 
@@ -627,8 +627,8 @@ class SoundPowerResult(OwnsArrays):
 
 
 def background_noise_correction(
-    source_levels: ArrayLike,
-    background_levels: ArrayLike,
+    source_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     grade: Grade = "engineering",
 ) -> np.ndarray:
     r"""Background-noise correction ``K1`` per band (ISO 3744:2010 Eq. 16).
@@ -673,7 +673,7 @@ def background_noise_correction(
 
 
 def _require_room_pair(
-    first: ArrayLike | None,
+    first: NumericArrayLike | None,
     second: float | None,
     first_name: str,
     second_name: str,
@@ -702,9 +702,9 @@ def _require_room_pair(
 
 
 def _room_absorption_area(
-    reverberation_time: ArrayLike | None,
+    reverberation_time: NumericArrayLike | None,
     volume: float | None,
-    mean_absorption_coefficient: ArrayLike | None,
+    mean_absorption_coefficient: NumericArrayLike | None,
     room_surface: float | None,
 ) -> NDArray[np.float64] | None:
     """Equivalent absorption area ``A`` from the room data, or ``None``.
@@ -762,7 +762,7 @@ def environmental_correction[S1: RealScalar, S2: RealScalar, S3: RealScalar](
 
 
 @overload
-def environmental_correction[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+def environmental_correction[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
     surface_area: float,
     *,
     absorption_area: V,
@@ -774,7 +774,7 @@ def environmental_correction[V: RealValues, A2: ArrayLike, A3: ArrayLike](
 
 
 @overload
-def environmental_correction[V: RealValues, A3: ArrayLike](
+def environmental_correction[V: RealValues, A3: NumericArrayLike](
     surface_area: float,
     *,
     absorption_area: None = None,
@@ -798,7 +798,11 @@ def environmental_correction[V: RealValues](
 
 
 @overload
-def environmental_correction[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+def environmental_correction[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
     surface_area: float,
     *,
     absorption_area: A1 | None = None,
@@ -812,10 +816,10 @@ def environmental_correction[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
 def environmental_correction(
     surface_area: float,
     *,
-    absorption_area: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    absorption_area: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: ArrayLike | None = None,
+    mean_absorption_coefficient: NumericArrayLike | None = None,
     room_surface: float | None = None,
 ) -> float | NDArray[np.float64]:
     r"""Environmental correction ``K2`` (ISO 3744:2010 Eq. A.2).
@@ -1051,7 +1055,7 @@ def _measurement_surface(
 
 
 def _surface_background_correction(
-    background_levels: ArrayLike | None,
+    background_levels: NumericArrayLike | None,
     levels: np.ndarray,
     mean_level: np.ndarray,
     grade: Grade,
@@ -1136,7 +1140,9 @@ def _k2_advisory(k2: np.ndarray, grade: Grade) -> None:
         )
 
 
-def _band_frequencies(frequencies: ArrayLike | None, n_bands: int) -> np.ndarray | None:
+def _band_frequencies(
+    frequencies: NumericArrayLike | None, n_bands: int
+) -> np.ndarray | None:
     """The band mid-band frequencies as an array, ``None`` when not given.
 
     :param frequencies: Band mid-band frequencies, in hertz, or ``None``.
@@ -1171,15 +1177,15 @@ def _a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> float:
 
 
 def sound_power_pressure(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: Surface,
     *,
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     n_reflecting_planes: int = 1,
-    background_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Grade = "engineering",
     sigma_omc_db: float = 0.0,
@@ -1459,7 +1465,7 @@ class SoundEnergyResult(OwnsArrays):
 
 
 def mean_single_event_level(
-    levels: ArrayLike, *, n_events: int | np.integer[Any] | None = None
+    levels: NumericArrayLike, *, n_events: int | np.integer[Any] | None = None
 ) -> np.ndarray:
     r"""Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 
@@ -1596,7 +1602,7 @@ def reference_atmosphere_correction(
 
 
 def _event_position_levels(
-    levels_positions: ArrayLike, n_events: int | np.integer[Any] | None
+    levels_positions: NumericArrayLike, n_events: int | np.integer[Any] | None
 ) -> tuple[np.ndarray, int | None]:
     """The ``(NM, NB)`` mean single event levels behind the three input forms.
 
@@ -1643,7 +1649,7 @@ def _event_position_levels(
 
 
 def sound_energy_pressure(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: Surface,
     *,
     radius: float | None = None,
@@ -1651,9 +1657,9 @@ def sound_energy_pressure(
     distance: float | None = None,
     n_reflecting_planes: int = 1,
     n_events: int | np.integer[Any] | None = None,
-    background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
     integration_time: float | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Grade = "engineering",
     sigma_omc_db: float = 0.0,

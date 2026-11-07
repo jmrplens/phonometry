@@ -139,10 +139,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "TurbineEnvironmentalCorrection",
@@ -260,7 +260,7 @@ def _round_half_up(value: float) -> int:
     return int(round_half_up(value))
 
 
-def _below_criterion(level_difference: ArrayLike) -> np.ndarray:
+def _below_criterion(level_difference: NumericArrayLike) -> np.ndarray:
     """Which background level differences are less than 3 dB (4.2)."""
     difference = real_array(level_difference, "level_difference")
     return np.asarray(
@@ -887,13 +887,13 @@ def turbine_background_correction[V: RealValues](
 
 
 @overload
-def turbine_background_correction[A: ArrayLike](
+def turbine_background_correction[A: NumericArrayLike](
     level_difference: A,
 ) -> float | NDArray[np.float64]: ...
 
 
 def turbine_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""Correction for background noise of Table 2 (clause 8.1).
 
@@ -1099,7 +1099,7 @@ def turbine_environmental_correction(
 
 
 def turbine_reference_source_correction(
-    sound_power_levels: ArrayLike,
+    sound_power_levels: NumericArrayLike,
     *,
     calibrated_level: float,
     machine_length_m: float,
@@ -1496,12 +1496,12 @@ class TurbineSoundPowerResult(OwnsArrays):
 
 
 def turbine_sound_power(
-    pressure_levels: ArrayLike,
+    pressure_levels: NumericArrayLike,
     *,
     surface_area: float,
-    background_levels: ArrayLike | None,
+    background_levels: NumericArrayLike | None,
     environmental_correction: float,
-    overhead_mask: ArrayLike | None = None,
+    overhead_mask: NumericArrayLike | None = None,
 ) -> TurbineSoundPowerResult:
     r"""Surface sound pressure level and sound power level of a turbine set (8.1 to 8.4).
 

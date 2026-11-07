@@ -72,11 +72,17 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import RealScalar, RealValues, ReportEngine, TwoPanels
+    from .._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+        TwoPanels,
+    )
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -499,7 +505,7 @@ class DecayCurve(OwnsArrays):
 
 
 def decay_curve(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     band: float | None = None,
     fraction: int | np.integer[Any] = 1,
@@ -594,7 +600,7 @@ def decay_curve(
 
 
 def room_parameters(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int | np.integer[Any] = 1,
@@ -721,13 +727,13 @@ def filter_bandwidth[V: RealValues](
 
 
 @overload
-def filter_bandwidth[A: ArrayLike](
+def filter_bandwidth[A: NumericArrayLike](
     center: A, fraction: int | np.integer[Any] = 1
 ) -> float | NDArray[np.float64]: ...
 
 
 def filter_bandwidth(
-    center: ArrayLike, fraction: int | np.integer[Any] = 1
+    center: NumericArrayLike, fraction: int | np.integer[Any] = 1
 ) -> float | NDArray[np.float64]:
     """Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
@@ -765,12 +771,12 @@ def filter_bandwidth(
 
 
 def reverberation_time_standard_deviation(
-    reverberation_time: ArrayLike,
-    bandwidth: ArrayLike,
+    reverberation_time: NumericArrayLike,
+    bandwidth: NumericArrayLike,
     *,
     evaluation_range: float = 30.0,
-    decays: ArrayLike = INTEGRATED_RESPONSE_DECAYS,
-    positions: ArrayLike = 1,
+    decays: NumericArrayLike = INTEGRATED_RESPONSE_DECAYS,
+    positions: NumericArrayLike = 1,
 ) -> float | NDArray[np.float64]:
     r"""Standard deviation of a measured reverberation time (7.1).
 
@@ -862,13 +868,13 @@ def min_reliable_reverberation_time[V: RealValues](
 
 
 @overload
-def min_reliable_reverberation_time[A: ArrayLike](
+def min_reliable_reverberation_time[A: NumericArrayLike](
     bandwidth: A, detector_time: float = 0.0
 ) -> float | NDArray[np.float64]: ...
 
 
 def min_reliable_reverberation_time(
-    bandwidth: ArrayLike, detector_time: float = 0.0
+    bandwidth: NumericArrayLike, detector_time: float = 0.0
 ) -> float | NDArray[np.float64]:
     r"""Shortest decay time a forward analysis can be trusted with (7.3).
 

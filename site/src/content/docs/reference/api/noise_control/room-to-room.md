@@ -126,11 +126,11 @@ not model.
 
 ```python
 room_to_room_transmission(
-    transmission_loss: ArrayLike,
+    transmission_loss: NumericArrayLike,
     partition_area: float,
-    receiving_absorption: ArrayLike,
+    receiving_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source: SourceRoom | None = None,
     include_partition_transmission: bool = False,
     criterion: DesignCriterion | None = None,
@@ -341,9 +341,9 @@ a hand calculation writes down, in that order.
 ```python
 SourceRoom(
     *,
-    level: ArrayLike | None = None,
-    power_level: ArrayLike | None = None,
-    room_constant: ArrayLike | None = None,
+    level: NumericArrayLike | None = None,
+    power_level: NumericArrayLike | None = None,
+    room_constant: NumericArrayLike | None = None,
     directivity: float = 1.0,
     model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = 'constant_power',
 )

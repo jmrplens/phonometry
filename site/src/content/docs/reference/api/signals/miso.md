@@ -58,12 +58,12 @@ $n_\mathrm{d} - (q-1)$ (Eqs. 9.98/9.99).
 
 ```python
 miso_coherence(
-    inputs: Signal | Iterable[Signal | ArrayLike] | ArrayLike,
-    output: Signal | ArrayLike,
+    inputs: Signal | Iterable[Signal | NumericArrayLike] | NumericArrayLike,
+    output: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -133,7 +133,7 @@ MISOCoherenceResult(
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
-    window: str | tuple[ArrayLike, ...],
+    window: str | tuple[str | NumericArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],

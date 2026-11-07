@@ -54,11 +54,11 @@ from .._internal.welch import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import ThreePanels
+    from .._internal.types import NumericArrayLike, ThreePanels
 
 __all__ = [
     "FrequencyResponseResult",
@@ -69,8 +69,8 @@ __all__ = [
 
 
 def _validate_pair(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate the input/output record pair of *owner*.
@@ -240,8 +240,8 @@ class FrequencyResponseResult(OwnsArrays):
 
 
 def transfer_function(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     estimator: Literal["H1", "H2"] = "H1",
@@ -350,8 +350,8 @@ class CoherenceResult(OwnsArrays):
 
 
 def coherence(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | np.integer[Any] | None = None,

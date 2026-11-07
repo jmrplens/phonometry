@@ -31,8 +31,8 @@ to verify the implementation.
 
 ```python
 coherence(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | np.integer[Any] | None = None,
@@ -169,8 +169,8 @@ Plot the Bode magnitude/phase and the coherence.
 
 ```python
 transfer_function(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     estimator: Literal['H1', 'H2'] = 'H1',

@@ -123,7 +123,7 @@ Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 
 ```python
 ARP866AAttenuation.path_attenuation(
-    path_length_m: float | ArrayLike,
+    path_length_m: float | NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -170,7 +170,7 @@ Plot the attenuation coefficient versus frequency.
 
 ```python
 attenuation_arp866a(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -237,7 +237,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 
 ```python
 band_attenuation_arp5534(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     path_length_m: float,
     *,
     temperature_c: float = 25.0,

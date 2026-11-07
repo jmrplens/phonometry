@@ -32,9 +32,10 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..materials.absorbers._airflow_resistance import StaticAirflowResult
     from ..materials.absorbers.biot import BiotWavesResult
     from ..materials.absorbers.four_microphone import TransferMatrix
@@ -1177,7 +1178,7 @@ def plot_diffuser_polar_response(
 
 def plot_transfer_matrix(
     matrix: TransferMatrix,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     characteristic_impedance: float,
     ax: Axes | None = None,
     language: Language = "en",

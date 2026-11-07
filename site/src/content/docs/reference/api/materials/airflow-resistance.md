@@ -289,8 +289,8 @@ The unit is pascal second per metre (Pa\*s/m), not Pa\*s/m2.
 
 ```python
 static_airflow_resistance(
-    velocities: ArrayLike,
-    pressure_drops_pa: ArrayLike,
+    velocities: NumericArrayLike,
+    pressure_drops_pa: NumericArrayLike,
     area: float,
     *,
     thickness_m: float | None = None,

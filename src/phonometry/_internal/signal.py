@@ -52,10 +52,11 @@ if TYPE_CHECKING:
     from typing import Concatenate
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, DTypeLike, NDArray
+    from numpy.typing import DTypeLike, NDArray
 
     from .._i18n import Language
     from ..io._chunks import BroadcastMetadata
+    from .types import NumericArrayLike
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -132,7 +133,7 @@ class Signal(RichDisplay):
 
         def __init__(
             self,
-            data: ArrayLike,
+            data: NumericArrayLike,
             fs: float,
             *,
             calibration_factor: float | None = None,

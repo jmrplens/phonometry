@@ -61,9 +61,9 @@ from .._internal.types import as_float_or_array
 from .._internal.validation import real_array
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "CAM_C",
@@ -93,10 +93,10 @@ def erb_bandwidth[V: RealValues](frequency: V) -> NDArray[np.float64]: ...
 
 
 @overload
-def erb_bandwidth[A: ArrayLike](frequency: A) -> float | NDArray[np.float64]: ...
+def erb_bandwidth[A: NumericArrayLike](frequency: A) -> float | NDArray[np.float64]: ...
 
 
-def erb_bandwidth(frequency: ArrayLike) -> float | NDArray[np.float64]:
+def erb_bandwidth(frequency: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Equivalent rectangular bandwidth of the auditory filter, Hz.
 
     :math:`\text{ERB}_N = 24.673 \, (0.004368 f + 1)` (Glasberg and Moore
@@ -126,10 +126,12 @@ def cam_from_frequency[V: RealValues](frequency: V) -> NDArray[np.float64]: ...
 
 
 @overload
-def cam_from_frequency[A: ArrayLike](frequency: A) -> float | NDArray[np.float64]: ...
+def cam_from_frequency[A: NumericArrayLike](
+    frequency: A,
+) -> float | NDArray[np.float64]: ...
 
 
-def cam_from_frequency(frequency: ArrayLike) -> float | NDArray[np.float64]:
+def cam_from_frequency(frequency: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""ERB_N number (Cam) of a frequency.
 
     :math:`i = 21.366 \log_{10}(0.004368 f + 1)` (Glasberg and Moore 1990;
@@ -161,10 +163,10 @@ def frequency_from_cam[V: RealValues](cam: V) -> NDArray[np.float64]: ...
 
 
 @overload
-def frequency_from_cam[A: ArrayLike](cam: A) -> float | NDArray[np.float64]: ...
+def frequency_from_cam[A: NumericArrayLike](cam: A) -> float | NDArray[np.float64]: ...
 
 
-def frequency_from_cam(cam: ArrayLike) -> float | NDArray[np.float64]:
+def frequency_from_cam(cam: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Frequency of an ERB_N number, the inverse of :func:`cam_from_frequency`.
 
     :math:`f = (10^{i / 21.366} - 1) / 0.004368`.

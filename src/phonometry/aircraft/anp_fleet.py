@@ -92,9 +92,10 @@ if TYPE_CHECKING:
     from importlib.resources.abc import Traversable
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .flight_performance import Aerodrome
     from .npd_atmosphere import RevisedNPDCurves
 
@@ -564,9 +565,9 @@ class ANPNPDCurves(OwnsArrays):
             metric: Metric,
             operation: OperationCode,
             power_parameter: str,
-            powers: ArrayLike,
-            distances_m: ArrayLike,
-            levels: ArrayLike,
+            powers: NumericArrayLike,
+            distances_m: NumericArrayLike,
+            levels: NumericArrayLike,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -601,7 +602,7 @@ class ANPNPDCurves(OwnsArrays):
         require_same_length(self, "powers", "levels", axis="power setting")
         require_same_length(self, "distances_m", ("levels", 1), axis="slant distance")
 
-    def level(self, power: float, distance_m: ArrayLike) -> NDArray[np.float64]:
+    def level(self, power: float, distance_m: NumericArrayLike) -> NDArray[np.float64]:
         """Interpolated NPD level ``L(P, d)`` (Doc 29 Eq. 4-3/4-4).
 
         :param power: Query engine power setting.
@@ -872,7 +873,7 @@ class ANPAircraft(RichDisplay):
 
     def event_level(
         self,
-        observer: ArrayLike,
+        observer: NumericArrayLike,
         operation: Operation,
         *,
         aerodrome: Aerodrome | None = None,
@@ -910,8 +911,8 @@ class ANPAircraft(RichDisplay):
         self,
         operation: Operation,
         *,
-        x: ArrayLike,
-        y: ArrayLike,
+        x: NumericArrayLike,
+        y: NumericArrayLike,
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
@@ -987,7 +988,7 @@ class ANPDatabase:
         npd: Mapping[
             tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
         ],
-        distances_m: ArrayLike,
+        distances_m: NumericArrayLike,
         profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
         spectral_classes: Mapping[str, SpectralClass] | None = None,
     ) -> None:
@@ -1607,7 +1608,7 @@ class ANPDatabase:
     def event_level(
         self,
         aircraft_id: str,
-        observer: ArrayLike,
+        observer: NumericArrayLike,
         operation: Operation,
         *,
         aerodrome: Aerodrome | None = None,
@@ -1682,8 +1683,8 @@ class ANPDatabase:
         aircraft_id: str,
         operation: Operation,
         *,
-        x: ArrayLike,
-        y: ArrayLike,
+        x: NumericArrayLike,
+        y: NumericArrayLike,
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",

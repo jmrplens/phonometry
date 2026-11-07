@@ -1811,7 +1811,7 @@ def test_a_published_field_type_is_published_too() -> None:
     from numpy.typing import ArrayLike, NDArray
 
     import phonometry
-    from phonometry._internal.types import BandFraction, WindowSpec
+    from phonometry._internal.types import BandFraction, NumericArrayLike, WindowSpec
 
     domains = {
         name
@@ -1835,6 +1835,7 @@ def test_a_published_field_type_is_published_too() -> None:
         "NDArray": NDArray,
         "Real": numbers.Real,
         "BandFraction": BandFraction,
+        "NumericArrayLike": NumericArrayLike,
         "WindowSpec": WindowSpec,
     }
 
@@ -1843,6 +1844,10 @@ def test_a_published_field_type_is_published_too() -> None:
         for argument in typing.get_args(annotation):
             yield from parts(argument)
 
+    # The protocols NumericArrayLike is spelt with, as numpy's ArrayLike is
+    # spelt with its own: a type checker reads them, and a caller hands over
+    # a number, a list or an array, never one of them by name.
+    spelling = {part for part in parts(NumericArrayLike) if inspect.isclass(part)}
     unresolved: list[str] = []
     unreachable: list[str] = []
     for domain in sorted(domains):
@@ -1864,7 +1869,7 @@ def test_a_published_field_type_is_published_too() -> None:
                 if field.startswith("_"):
                     continue
                 for part in parts(annotation):
-                    if not inspect.isclass(part):
+                    if not inspect.isclass(part) or part in spelling:
                         continue
                     module = getattr(part, "__module__", "")
                     if not module.startswith("phonometry."):

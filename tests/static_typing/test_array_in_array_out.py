@@ -3,7 +3,7 @@
 
 An array in, an array out: a number gives a ``float``, a sequence or an array
 an array, and an argument whose shape a type checker cannot know (an
-``ArrayLike``, a nested list) the union. The heads take their arguments as
+array-like of numbers, a nested list) the union. The heads take their arguments as
 type parameters bounded by the three forms, because mypy reads an argument
 whose type holds an explicit ``Any`` (a bare ``np.ndarray``, the
 ``dtype[Any]`` that ``np.array(...)`` returns, a shape written
@@ -28,11 +28,11 @@ from numpy.typing import NDArray
 from phonometry import emission, fluids, room, vibration
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from phonometry._internal.types import NumericArrayLike
 
 _ARRAY: NDArray[np.float64] = np.array([0.2, 0.3])
 _ANY_SHAPE: np.ndarray[tuple[Any, ...], np.dtype[np.float64]] = np.array([0.2, 0.3])
-_ARRAY_LIKE: ArrayLike = 0.2
+_ARRAY_LIKE: NumericArrayLike = 0.2
 _ZONES = vibration.ZoneBoundaries(a_b=1.0, b_c=2.0, c_d=3.0)
 
 
@@ -57,7 +57,7 @@ def test_arrays_read_as_an_array() -> None:
 
 
 def test_what_mypy_cannot_shape_reads_as_the_union() -> None:
-    """An ``ArrayLike`` or a nested list may be either."""
+    """An array-like of numbers or a nested list may be either."""
     assert_type(room.room_constant(100.0, _ARRAY_LIKE), float | NDArray[np.float64])
     assert_type(room.room_constant(100.0, [[0.2, 0.3]]), float | NDArray[np.float64])
 

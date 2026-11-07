@@ -72,9 +72,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "CNOSSOS_A_WEIGHTING",
@@ -518,8 +519,8 @@ class RoadEmissionCoefficients(RichDisplay):
             rolling_b: Mapping[RoadVehicleCode, tuple[float, ...]],
             propulsion_a: Mapping[RoadVehicleCode, tuple[float, ...]],
             propulsion_b: Mapping[RoadVehicleCode, tuple[float, ...]],
-            studded_a: ArrayLike,
-            studded_b: ArrayLike,
+            studded_a: NumericArrayLike,
+            studded_b: NumericArrayLike,
             junction_c: Mapping[
                 RoadVehicleCode, tuple[tuple[float, float], tuple[float, float]]
             ],
@@ -614,7 +615,7 @@ class RoadSurfaceCoefficients(RichDisplay):
             name: str,
             alpha: Mapping[RoadVehicleCode, tuple[float, ...]],
             beta: Mapping[RoadVehicleCode, float],
-            speed_range_kmh: ArrayLike | None,
+            speed_range_kmh: NumericArrayLike | None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -1353,7 +1354,7 @@ def road_source_power(
 
 
 def line_source_segment_power(
-    line_power: ArrayLike, length: float
+    line_power: NumericArrayLike, length: float
 ) -> NDArray[np.float64]:
     r"""Sound power of the point source representing a segment of source line.
 

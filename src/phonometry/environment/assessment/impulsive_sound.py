@@ -84,10 +84,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -303,7 +302,7 @@ class ImpulseProminenceResult(OwnsArrays):
 
 
 def predicted_prominence(
-    onset_rate: ArrayLike, level_difference: ArrayLike
+    onset_rate: NumericArrayLike, level_difference: NumericArrayLike
 ) -> np.ndarray:
     r"""Predicted prominence ``P`` of an impulse (NT ACOU 112, clause 7).
 
@@ -334,7 +333,7 @@ def predicted_prominence(
     return k1 * np.log10(orate) + k2 * np.log10(ld)
 
 
-def impulse_adjustment(prominence: ArrayLike) -> np.ndarray:
+def impulse_adjustment(prominence: NumericArrayLike) -> np.ndarray:
     r"""Adjustment ``KI`` to ``LAeq`` from the prominence (clause 8, Formula 2).
 
     :math:`K_\mathrm{I} = 1.8 \, (P - 5)` dB for :math:`P > 5`, else 0 dB. The
@@ -354,8 +353,8 @@ def impulse_adjustment(prominence: ArrayLike) -> np.ndarray:
 
 
 def impulse_prominence(
-    onset_rates: ArrayLike,
-    level_differences: ArrayLike,
+    onset_rates: NumericArrayLike,
+    level_differences: NumericArrayLike,
     *,
     assessment_period_minutes: float = _DEFAULT_ASSESSMENT_PERIOD_MINUTES,
 ) -> ImpulseProminenceResult:
@@ -418,9 +417,9 @@ def impulse_prominence(
 
 
 def rating_level(
-    laeq: ArrayLike,
-    adjustment: ArrayLike,
-    durations: ArrayLike,
+    laeq: NumericArrayLike,
+    adjustment: NumericArrayLike,
+    durations: NumericArrayLike,
     reference_time: float,
 ) -> float:
     r"""Rating level over a reference time interval (clause 8, Note 1).
@@ -884,7 +883,7 @@ def _onset_rate(
 
 
 def detect_onsets(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     dt: float,
     *,
     onset_rate_method: _OnsetRateMethod = "least_squares",

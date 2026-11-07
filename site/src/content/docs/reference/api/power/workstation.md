@@ -98,8 +98,8 @@ ISO 11202:2010 and its Amendment 1:2020, ISO 11203:1995 and its Amendment
 
 ```python
 background_noise_correction_at_workstation(
-    measured_level: ArrayLike,
-    background_level: ArrayLike,
+    measured_level: NumericArrayLike,
+    background_level: NumericArrayLike,
     *,
     grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> WorkstationBackgroundCorrection
@@ -186,15 +186,15 @@ emission_sound_pressure_level(
 emission_sound_pressure_level(
     measured_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
-    background_correction: ArrayLike = ...,
-    local_correction: ArrayLike = ...,
+    background_correction: NumericArrayLike = ...,
+    local_correction: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 emission_sound_pressure_level(
     measured_level: float | np.floating[Any] | np.integer[Any],
     *,
     background_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    local_correction: ArrayLike = ...,
+    local_correction: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 emission_sound_pressure_level(
@@ -205,10 +205,10 @@ emission_sound_pressure_level(
 ) -> NDArray[np.float64]
 
 emission_sound_pressure_level(
-    measured_level: ArrayLike,
+    measured_level: NumericArrayLike,
     *,
-    background_correction: ArrayLike = ...,
-    local_correction: ArrayLike = ...,
+    background_correction: NumericArrayLike = ...,
+    local_correction: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -325,7 +325,7 @@ environmental_ratio_from_absorption(
 environmental_ratio_from_absorption(
     absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     measurement_surface_m2: float,
-    directivity_index: ArrayLike = ...,
+    directivity_index: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_absorption(
@@ -335,9 +335,9 @@ environmental_ratio_from_absorption(
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_absorption(
-    absorption_area: ArrayLike,
+    absorption_area: NumericArrayLike,
     measurement_surface_m2: float,
-    directivity_index: ArrayLike = ...,
+    directivity_index: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -380,7 +380,7 @@ environmental_ratio_from_k2(
 
 environmental_ratio_from_k2(
     environmental_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    directivity_index: ArrayLike = ...,
+    directivity_index: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_k2(
@@ -389,8 +389,8 @@ environmental_ratio_from_k2(
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_k2(
-    environmental_correction: ArrayLike,
-    directivity_index: ArrayLike = ...,
+    environmental_correction: NumericArrayLike,
+    directivity_index: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -442,7 +442,7 @@ GRADE_2_MAX_K3 = 4.0
 
 ```python
 grade_from_local_correction(
-    local_correction: ArrayLike,
+    local_correction: NumericArrayLike,
 ) -> Literal['engineering', 'survey']
 ```
 
@@ -483,7 +483,7 @@ local_environmental_correction(
 ) -> NDArray[np.float64]
 
 local_environmental_correction(
-    ratio: ArrayLike,
+    ratio: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -545,7 +545,7 @@ NEGLIGIBLE_BACKGROUND_MARGIN_DB = 15.0
 ## operating_standard_deviation
 
 ```python
-operating_standard_deviation(levels: ArrayLike) -> float
+operating_standard_deviation(levels: NumericArrayLike) -> float
 ```
 
 Standard deviation of the operating and mounting conditions.
@@ -582,7 +582,10 @@ ISO 11200:2014 Annex B disagree with each other about that, and
 ## subinterval_level
 
 ```python
-subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float
+subinterval_level(
+    levels: NumericArrayLike,
+    durations_s: NumericArrayLike,
+) -> float
 ```
 
 One level for a cycle made of operating periods of different lengths.

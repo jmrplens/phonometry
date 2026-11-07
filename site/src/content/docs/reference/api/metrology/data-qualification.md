@@ -76,10 +76,10 @@ expectations.
 
 ```python
 level_crossing_rate(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    levels: ArrayLike | None = None,
+    levels: NumericArrayLike | None = None,
     nperseg: int | np.integer[Any] | None = None,
 ) -> LevelCrossingResult
 ```
@@ -184,7 +184,7 @@ Plot measured crossing rates against the Rice curve.
 
 ```python
 peak_statistics(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | np.integer[Any] | None = None,
@@ -267,7 +267,9 @@ as $r \to 0$ (Sec. 5.5.4).
 ### PeakStatisticsResult.peak_density()
 
 ```python
-PeakStatisticsResult.peak_density(z: ArrayLike) -> NDArray[np.float64]
+PeakStatisticsResult.peak_density(
+    z: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Peak probability density `w(z)` (B&P Eq. (5.217)).
@@ -289,7 +291,9 @@ Peak probability density `w(z)` (B&P Eq. (5.217)).
 ### PeakStatisticsResult.peak_exceedance()
 
 ```python
-PeakStatisticsResult.peak_exceedance(z: ArrayLike) -> NDArray[np.float64]
+PeakStatisticsResult.peak_exceedance(
+    z: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 $P[\text{peak} > z]$ at the record's irregularity
@@ -338,7 +342,7 @@ Plot the empirical peak exceedance against the Rice curves.
 
 ```python
 stationarity_test(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     n_segments: int | np.integer[Any] = 20,
@@ -470,7 +474,7 @@ Whether the count falls inside the acceptance region, `lower < trend_statistic <
 
 ```python
 trend_test(
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
     method: Literal['reverse_arrangements', 'runs'] = 'reverse_arrangements',
     alpha: float = 0.05,

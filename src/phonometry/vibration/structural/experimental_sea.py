@@ -91,10 +91,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction
+    from ..._internal.types import BandFraction, NumericArrayLike
 
 __all__ = [
     "PowerInjectionResult",
@@ -144,7 +144,7 @@ def bar_modal_density(length: float, longitudinal_wave_speed: float) -> float:
 
 
 def beam_modal_density(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     length: float,
     mass_per_length: float,
     bending_stiffness: float,
@@ -218,7 +218,7 @@ def ring_frequency(mean_radius: float, longitudinal_wave_speed: float) -> float:
 
 
 def cylindrical_shell_modal_density(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     area: float,
     thickness_m: float,
     mean_radius: float,
@@ -474,7 +474,7 @@ class PowerInjectionResult(OwnsArrays):
 
 
 def _broadcast_bands(
-    frequencies: ArrayLike, values: dict[str, ArrayLike]
+    frequencies: NumericArrayLike, values: dict[str, NumericArrayLike]
 ) -> tuple[NDArray[np.float64], dict[str, NDArray[np.float64]]]:
     """Validate a band axis and broadcast every named positive array onto it."""
     f = require_positive_array(frequencies, "frequencies")
@@ -493,14 +493,14 @@ def _broadcast_bands(
 
 
 def power_injection_clf(
-    energy1: ArrayLike,
-    energy2: ArrayLike,
-    internal_loss_factor1: ArrayLike,
-    internal_loss_factor2: ArrayLike,
-    modal_density1: ArrayLike,
-    modal_density2: ArrayLike,
+    energy1: NumericArrayLike,
+    energy2: NumericArrayLike,
+    internal_loss_factor1: NumericArrayLike,
+    internal_loss_factor2: NumericArrayLike,
+    modal_density1: NumericArrayLike,
+    modal_density2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> PowerInjectionResult:
     r"""Coupling loss factors from a single-drive energy measurement.
 
@@ -582,7 +582,10 @@ def power_injection_clf(
 
 
 def power_injection_matrix(
-    energies: ArrayLike, input_powers: ArrayLike, *, frequencies: ArrayLike
+    energies: NumericArrayLike,
+    input_powers: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
 ) -> PowerInjectionResult:
     """Full two-drive power-injection inversion (no reciprocity assumed).
 

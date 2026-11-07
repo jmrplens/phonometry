@@ -120,10 +120,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction
+    from ..._internal.types import BandFraction, NumericArrayLike
 
 Source = Literal["rubber_ball", "bang_machine"]
 
@@ -564,7 +563,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
 
 
 def check_heavy_impact_source(
-    force_exposure_level: ArrayLike, source: Source = "rubber_ball"
+    force_exposure_level: NumericArrayLike, source: Source = "rubber_ball"
 ) -> HeavyImpactSourceCheck:
     """Check a measured heavy impact source against its printed spectrum.
 
@@ -612,7 +611,7 @@ def _fast_peak_factor(c: np.ndarray) -> np.ndarray:
 
 
 def fast_reverberation_correction(
-    reverberation_time: ArrayLike, *, reference_time: float = _T0
+    reverberation_time: NumericArrayLike, *, reference_time: float = _T0
 ) -> np.ndarray:
     r"""Fast time-weighting reverberation correction (Formulae (4), (5), (6)).
 
@@ -726,11 +725,11 @@ class StandardizedMaxImpactResult(OwnsArrays):
 
 
 def standardized_max_impact_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     volume: float,
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     reference_time: float = _T0,
     reference_volume: float = _V0,
 ) -> StandardizedMaxImpactResult:
@@ -787,7 +786,7 @@ def standardized_max_impact_level(
     )
 
 
-def heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray:
+def heavy_impact_octave_levels(levels: NumericArrayLike) -> np.ndarray:
     r"""Combine one-third-octave maximum levels into octaves (Formula (20)).
 
     .. math::
@@ -903,9 +902,9 @@ def _round_half_up(value: float) -> int:
 
 
 def a_weighted_max_impact_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | Sequence[float] | None = None,
+    frequencies: NumericArrayLike | Sequence[float] | None = None,
     fraction: BandFraction | np.integer[Any] | None = None,
 ) -> AWeightedMaxImpactResult:
     r"""A-weighted maximum impact level ``XiA,Fmax`` (ISO 717-2:2020, (D.1)).

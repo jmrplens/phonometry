@@ -55,9 +55,9 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.typing import ColorType
     from mpl_toolkits.mplot3d.axes3d import Axes3D
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...emission.intensity import IntensityResult
 
 #: Luma threshold above which a point-index chip is light enough to carry
@@ -159,7 +159,7 @@ def _number_points(
 
 @closes_its_figures
 def plot_microphone_positions(
-    positions: ArrayLike,
+    positions: NumericArrayLike,
     *,
     ax: Axes3D | None = None,
     radius: float | None = None,

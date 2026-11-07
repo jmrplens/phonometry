@@ -332,10 +332,10 @@ The Table 2 Note 1 term $10 \log_{10}(x/25)$, in dB.
 
 ```python
 phase_mismatch_from_residual_index(
-    residual_index: ArrayLike,
+    residual_index: NumericArrayLike,
     spacing_m: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -378,10 +378,10 @@ angular unit $k d$ is expressed in; degrees are used here.
 
 ```python
 residual_index_from_phase_mismatch(
-    phase_mismatch_deg: ArrayLike,
+    phase_mismatch_deg: NumericArrayLike,
     spacing_m: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -429,7 +429,7 @@ residual_index_limits(
     device: Literal['probe', 'processor', 'instrument'] = 'instrument',
     *,
     spacing_m: float = 0.025,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ResidualIndexLimits
 ```
 
@@ -486,9 +486,9 @@ unpacked by position.
 
 ```python
 verify_intensity_class(
-    residual_index: ArrayLike,
+    residual_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     device: Literal['probe', 'processor', 'instrument'] = 'instrument',
     spacing_m: float = 0.025,
 ) -> IntensityInstrumentComplianceResult

@@ -61,7 +61,7 @@ atmospheric_parabolic_equation(
     profile: EffectiveSoundSpeedProfile,
     *,
     source_height_m: float,
-    impedance: ArrayLike | PorousMediumResult | None = None,
+    impedance: NumericArrayLike | PorousMediumResult | None = None,
     flow_resistivity_pa_s_m2: float | None = None,
     model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
     max_range: float = 1000.0,
@@ -136,7 +136,7 @@ atmospheric_ray_paths(
     profile: EffectiveSoundSpeedProfile,
     *,
     source_height_m: float,
-    launch_angles_deg: ArrayLike,
+    launch_angles_deg: NumericArrayLike,
     max_range: float = 1000.0,
     n_steps: int | np.integer[Any] = 2000,
 ) -> AtmosphericRayResult
@@ -331,7 +331,7 @@ Plot the effective sound-speed profile (height on the vertical axis).
 
 ```python
 EffectiveSoundSpeedProfile.speed_at(
-    height_m: ArrayLike,
+    height_m: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

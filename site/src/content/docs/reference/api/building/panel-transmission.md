@@ -217,7 +217,7 @@ named, where a `(Bx, Bz, Bxz)` tuple used to be unpacked by position.
 
 ```python
 double_wall_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass1: float,
     mass2: float,
     gap_m: float,
@@ -295,7 +295,7 @@ Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
 
 ```python
 mass_law_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass_per_area: float,
     *,
     incidence: Literal['normal', 'field'] = 'field',
@@ -483,7 +483,7 @@ $1.5 f_{1,1}$ (Bies, Sect. 7.2.4).
 
 ```python
 orthotropic_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass_per_area: float,
     *,
     critical_frequency_lower: float,
@@ -585,7 +585,7 @@ PLATEAU_MATERIALS = {'aluminium': (2.66, 29.0, 11.0), 'brick': (2.1, 37.0, 4.5),
 
 ```python
 plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     material: Literal['aluminium', 'brick', 'concrete', 'glass', 'lead', 'plaster', 'plywood', 'steel'] | PlateauMaterial,
     thickness_mm: float,
@@ -596,7 +596,7 @@ plateau_transmission_loss(
 ) -> SoundReductionResult
 
 plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     material: Literal['aluminium', 'brick', 'concrete', 'glass', 'lead', 'plaster', 'plywood', 'steel'] | PlateauMaterial,
     mass_per_area: float,
@@ -608,7 +608,7 @@ plateau_transmission_loss(
 ) -> SoundReductionResult
 
 plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     mass_per_area: float,
     plateau_height_db: float,
@@ -719,7 +719,7 @@ resonance is annotated when given.
 
 ```python
 single_panel_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass_per_area: float,
     *,
     critical_frequency: float | None = None,

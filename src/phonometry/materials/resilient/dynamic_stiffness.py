@@ -77,10 +77,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
     from ..._report.metadata import ReportMetadata
 
 
@@ -162,13 +162,13 @@ def apparent_dynamic_stiffness[V: RealValues](
 
 
 @overload
-def apparent_dynamic_stiffness[A: ArrayLike](
+def apparent_dynamic_stiffness[A: NumericArrayLike](
     resonant_frequency_hz: A, total_mass_per_area_kg_m2: float
 ) -> float | NDArray[np.float64]: ...
 
 
 def apparent_dynamic_stiffness(
-    resonant_frequency_hz: ArrayLike, total_mass_per_area_kg_m2: float
+    resonant_frequency_hz: NumericArrayLike, total_mass_per_area_kg_m2: float
 ) -> float | NDArray[np.float64]:
     r"""Apparent dynamic stiffness per unit area ``s't`` (Formula 4).
 
@@ -218,7 +218,7 @@ def enclosed_gas_stiffness[V: RealValues](
 
 
 @overload
-def enclosed_gas_stiffness[A: ArrayLike](
+def enclosed_gas_stiffness[A: NumericArrayLike](
     thickness_m: A,
     porosity: float,
     *,
@@ -227,7 +227,7 @@ def enclosed_gas_stiffness[A: ArrayLike](
 
 
 def enclosed_gas_stiffness(
-    thickness_m: ArrayLike,
+    thickness_m: NumericArrayLike,
     porosity: float,
     *,
     static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
@@ -368,13 +368,13 @@ def natural_frequency[V: RealValues](
 
 
 @overload
-def natural_frequency[A: ArrayLike](
+def natural_frequency[A: NumericArrayLike](
     dynamic_stiffness_n_m3: A, mass_per_area_kg_m2: float
 ) -> float | NDArray[np.float64]: ...
 
 
 def natural_frequency(
-    dynamic_stiffness_n_m3: ArrayLike, mass_per_area_kg_m2: float
+    dynamic_stiffness_n_m3: NumericArrayLike, mass_per_area_kg_m2: float
 ) -> float | NDArray[np.float64]:
     r"""Natural frequency ``f0`` of the resiliently supported floor (Formula 2).
 

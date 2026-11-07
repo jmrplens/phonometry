@@ -112,7 +112,7 @@ $n(f) = 2 L / c_\mathrm{L}$, independent of frequency.
 
 ```python
 beam_modal_density(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     length: float,
     mass_per_length: float,
     bending_stiffness: float,
@@ -146,7 +146,7 @@ other subsystem here, it *decreases* with frequency.
 
 ```python
 cylindrical_shell_modal_density(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     area: float,
     thickness_m: float,
     mean_radius: float,
@@ -237,14 +237,14 @@ $c_\mathrm{L} = \sqrt{E / (\rho (1 - \nu^2))}$.
 
 ```python
 power_injection_clf(
-    energy1: ArrayLike,
-    energy2: ArrayLike,
-    internal_loss_factor1: ArrayLike,
-    internal_loss_factor2: ArrayLike,
-    modal_density1: ArrayLike,
-    modal_density2: ArrayLike,
+    energy1: NumericArrayLike,
+    energy2: NumericArrayLike,
+    internal_loss_factor1: NumericArrayLike,
+    internal_loss_factor2: NumericArrayLike,
+    modal_density1: NumericArrayLike,
+    modal_density2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> PowerInjectionResult
 ```
 
@@ -295,10 +295,10 @@ time-averaged mean-square velocity in the band.
 
 ```python
 power_injection_matrix(
-    energies: ArrayLike,
-    input_powers: ArrayLike,
+    energies: NumericArrayLike,
+    input_powers: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> PowerInjectionResult
 ```
 

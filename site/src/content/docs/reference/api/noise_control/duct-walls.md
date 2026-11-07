@@ -463,7 +463,9 @@ Which of the two transmission losses it is follows from
 ### DuctWallSpectrum.values_at()
 
 ```python
-DuctWallSpectrum.values_at(frequencies: ArrayLike) -> NDArray[np.float64]
+DuctWallSpectrum.values_at(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 The row's value at each of *frequencies*, or a refusal.

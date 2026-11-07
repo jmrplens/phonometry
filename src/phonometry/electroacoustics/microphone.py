@@ -94,10 +94,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import ArrayRows, ReportEngine
+    from .._internal.types import ArrayRows, NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 NoiseWeighting = Literal["A", "468"]
@@ -827,7 +827,7 @@ def _resolve_noise_level(
 
 
 def _resolve_distortion(
-    distortion: tuple[ArrayLike, ArrayLike] | None,
+    distortion: tuple[NumericArrayLike, NumericArrayLike] | None,
 ) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Validate the optional THD-against-level curve, in (dB SPL, %) (14.2)."""
     if distortion is None:
@@ -884,10 +884,10 @@ def _resolve_polar(
 
 
 def microphone_characteristics(
-    response_db: ArrayLike,
+    response_db: NumericArrayLike,
     sensitivity_mv_per_pa: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     reference_frequency_hz: float = _REFERENCE_FREQUENCY,
     tolerance_db: float = 2.0,
     directivity: MicrophoneDirectivity = _DEFAULT_DIRECTIVITY,

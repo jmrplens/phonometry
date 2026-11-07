@@ -96,9 +96,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 Quantity = Literal["transmission", "insertion"]
 
@@ -379,7 +380,7 @@ def installation_case(number: int | np.integer[Any]) -> InstallationCase:
 
 
 def silencer_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""The background correction of Table 1, in decibels to subtract.
 
@@ -432,7 +433,7 @@ def silencer_background_correction(
     )
 
 
-def silencer_mean_sound_pressure_level(levels: ArrayLike) -> float:
+def silencer_mean_sound_pressure_level(levels: NumericArrayLike) -> float:
     r"""The mean level over the measuring points, Equation (2).
 
     .. math::
@@ -502,7 +503,7 @@ class ExtraneousCorrectionResult(RichDisplay):
 
 
 def extraneous_corrected_mean_level(
-    levels: ArrayLike, extraneous_levels: ArrayLike
+    levels: NumericArrayLike, extraneous_levels: NumericArrayLike
 ) -> ExtraneousCorrectionResult:
     r"""The mean level with the extraneous sound taken off, Equations (17) and (18).
 
@@ -583,7 +584,7 @@ def extraneous_corrected_mean_level(
 
 
 def transmission_level_difference(
-    source_levels: ArrayLike, receiver_levels: ArrayLike
+    source_levels: NumericArrayLike, receiver_levels: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The level difference across the silencer, Equation (1).
 
@@ -612,7 +613,7 @@ def transmission_level_difference(
 
 
 def insertion_level_difference(
-    levels_without: ArrayLike, levels_with: ArrayLike
+    levels_without: NumericArrayLike, levels_with: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The level difference the silencer made, Equation (3).
 
@@ -638,7 +639,7 @@ def insertion_level_difference(
 
 def reverberant_surface_area_m2(
     volume_m3: float,
-    reverberation_time_s: ArrayLike,
+    reverberation_time_s: NumericArrayLike,
     *,
     speed_of_sound: float = ISO11820_SPEED_OF_SOUND_M_S,
 ) -> NDArray[np.float64]:
@@ -676,10 +677,10 @@ def reverberant_surface_area_m2(
 
 
 def silencer_sound_power_level(
-    mean_level: ArrayLike,
+    mean_level: NumericArrayLike,
     *,
-    area: ArrayLike,
-    field_correction: ArrayLike = 0.0,
+    area: NumericArrayLike,
+    field_correction: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""A mean level read as a sound power, Equations (5), (7), (9) and (11).
 
@@ -837,10 +838,10 @@ def _per_band(
 def _loss(
     level_difference: NDArray[np.float64],
     *,
-    frequencies: ArrayLike | None,
-    source_area_m2: ArrayLike,
-    receiver_area_m2: ArrayLike,
-    field_correction_difference: ArrayLike,
+    frequencies: NumericArrayLike | None,
+    source_area_m2: NumericArrayLike,
+    receiver_area_m2: NumericArrayLike,
+    field_correction_difference: NumericArrayLike,
     names: tuple[str, str],
     quantity: InSituQuantity,
     case: InstallationCase | None,
@@ -884,13 +885,13 @@ def _loss(
 
 
 def in_situ_transmission_loss(
-    source_levels: ArrayLike,
-    receiver_levels: ArrayLike,
+    source_levels: NumericArrayLike,
+    receiver_levels: NumericArrayLike,
     *,
-    source_area_m2: ArrayLike,
-    receiver_area_m2: ArrayLike,
-    frequencies: ArrayLike | None = None,
-    field_correction_difference: ArrayLike = 0.0,
+    source_area_m2: NumericArrayLike,
+    receiver_area_m2: NumericArrayLike,
+    frequencies: NumericArrayLike | None = None,
+    field_correction_difference: NumericArrayLike = 0.0,
     case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult:
     r"""The transmission loss of a silencer in place, Equation (19).
@@ -959,13 +960,13 @@ def in_situ_transmission_loss(
 
 
 def in_situ_insertion_loss(
-    levels_without: ArrayLike,
-    levels_with: ArrayLike,
+    levels_without: NumericArrayLike,
+    levels_with: NumericArrayLike,
     *,
-    area_without_m2: ArrayLike,
-    area_with_m2: ArrayLike,
-    frequencies: ArrayLike | None = None,
-    field_correction_difference: ArrayLike = 0.0,
+    area_without_m2: NumericArrayLike,
+    area_with_m2: NumericArrayLike,
+    frequencies: NumericArrayLike | None = None,
+    field_correction_difference: NumericArrayLike = 0.0,
     case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult:
     r"""The insertion loss of a silencer in place, Equation (21).
@@ -1038,7 +1039,7 @@ def in_situ_insertion_loss(
     )
 
 
-def octave_levels_from_third_octave(levels: ArrayLike) -> NDArray[np.float64]:
+def octave_levels_from_third_octave(levels: NumericArrayLike) -> NDArray[np.float64]:
     r"""One-third-octave levels folded into octaves, 9.1.5.
 
     The energy sum of each consecutive group of three. Clause 9.1.5 permits
@@ -1189,7 +1190,7 @@ def measurement_distance_downstream_m(
 
 
 def velocity_pressure_pa(
-    total_pressure_pa: ArrayLike, static_pressure_pa: ArrayLike
+    total_pressure_pa: NumericArrayLike, static_pressure_pa: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The velocity pressure, Equation (27).
 
@@ -1213,7 +1214,7 @@ def velocity_pressure_pa(
 
 
 def flow_velocity_m_s(
-    velocity_pressure_pa: ArrayLike, density: float
+    velocity_pressure_pa: NumericArrayLike, density: float
 ) -> NDArray[np.float64]:
     r"""The flow velocity a velocity pressure stands for, Equation (28).
 

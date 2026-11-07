@@ -181,7 +181,7 @@ background_level_increase(
 
 background_level_increase(
     measured_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    background_level: ArrayLike,
+    background_level: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 background_level_increase(
@@ -190,8 +190,8 @@ background_level_increase(
 ) -> NDArray[np.float64]
 
 background_level_increase(
-    measured_level: ArrayLike,
-    background_level: ArrayLike,
+    measured_level: NumericArrayLike,
+    background_level: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -324,9 +324,9 @@ direct one.
 ```python
 check_small_roughness_deviations(
     roughness: AcousticRoughnessSpectrum,
-    noise_levels: ArrayLike,
+    noise_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_kmh: float,
     limit_db: Mapping[int, float] | Mapping[float, float] = mappingproxy({0.4: 17.1, 0.315: 15.0, 0.25: 13.0, 0.2: 11.0, 0.16: 9.0, 0.125: 7.0, 0.1: 4.9, 0.08: 2.9, 0.063: 0.9, 0.05: -1.1, 0.04: -3.2, 0.0315: -5.0, 0.025: -5.6, 0.02: -6.2, 0.016: -6.8, 0.0125: -7.4, 0.01: -8.0, 0.008: -8.6, 0.0063: -9.2, 0.005: -9.8, 0.004: -10.4, 0.00315: -11.0}),
 ) -> SmallRoughnessDeviation
@@ -374,8 +374,8 @@ speed.
 
 ```python
 impulsiveness_rise_speed(
-    times: ArrayLike,
-    levels: ArrayLike,
+    times: NumericArrayLike,
+    levels: NumericArrayLike,
 ) -> RiseSpeedResult
 ```
 
@@ -441,7 +441,7 @@ The smallest radius of curvature the test track may have, 6.2.2.
 
 ```python
 pass_by_measurement(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     start_s: float,
@@ -913,7 +913,7 @@ The rise speed $s = \max(s_j)$, in dB/s; `None` when no slope rises 10 dB.
 
 ```python
 rolling_stock_test(
-    run_levels: Mapping[str, ArrayLike],
+    run_levels: Mapping[str, NumericArrayLike],
     *,
     method: Literal['constant_speed', 'acceleration_maximum', 'acceleration_averaged', 'braking'] = 'constant_speed',
 ) -> RollingStockTestResult
@@ -1044,10 +1044,10 @@ not get there, and 8.7 NOTE 1 then reports the runs without a mean.
 roughness_comparability(
     roughness_1: AcousticRoughnessSpectrum,
     roughness_2: AcousticRoughnessSpectrum,
-    noise_levels_1: ArrayLike,
-    noise_levels_2: ArrayLike,
+    noise_levels_1: NumericArrayLike,
+    noise_levels_2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_kmh: float,
 ) -> RoughnessComparability
 ```
@@ -1248,8 +1248,8 @@ STATIONARY_END_POSITION_LENGTH_M = 11.780972450961723
 
 ```python
 stationary_test(
-    levels: ArrayLike,
-    lengths_m: ArrayLike,
+    levels: NumericArrayLike,
+    lengths_m: NumericArrayLike,
 ) -> StationaryTestResult
 ```
 
@@ -1279,7 +1279,10 @@ position are valid when they are no more than 3 dB apart (9.3).
 ## stationary_unit_level
 
 ```python
-stationary_unit_level(levels: ArrayLike, lengths_m: ArrayLike) -> float
+stationary_unit_level(
+    levels: NumericArrayLike,
+    lengths_m: NumericArrayLike,
+) -> float
 ```
 
 The length-weighted energy average of a stationary mesh, Formulae 1 to 3.

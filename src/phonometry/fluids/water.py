@@ -48,9 +48,9 @@ from .._internal.validation import (
 from ._state import Fluid
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "depth_to_absolute_pressure_pa",
@@ -343,7 +343,7 @@ def sea_water_sound_speed[S1: RealScalar, S2: RealScalar, S3: RealScalar](
 
 
 @overload
-def sea_water_sound_speed[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+def sea_water_sound_speed[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
     temperature_c: V,
     salinity_psu: A2,
     depth_m: A3,
@@ -354,7 +354,7 @@ def sea_water_sound_speed[V: RealValues, A2: ArrayLike, A3: ArrayLike](
 
 
 @overload
-def sea_water_sound_speed[S1: RealScalar, V: RealValues, A3: ArrayLike](
+def sea_water_sound_speed[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
     temperature_c: S1,
     salinity_psu: V,
     depth_m: A3,
@@ -376,7 +376,11 @@ def sea_water_sound_speed[S1: RealScalar, S2: RealScalar, V: RealValues](
 
 
 @overload
-def sea_water_sound_speed[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+def sea_water_sound_speed[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
     temperature_c: A1,
     salinity_psu: A2,
     depth_m: A3,
@@ -387,9 +391,9 @@ def sea_water_sound_speed[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
 
 
 def sea_water_sound_speed(
-    temperature_c: ArrayLike,
-    salinity_psu: ArrayLike,
-    depth_m: ArrayLike,
+    temperature_c: NumericArrayLike,
+    salinity_psu: NumericArrayLike,
+    depth_m: NumericArrayLike,
     *,
     model: SoundSpeedModel = "unesco",
     latitude_deg: float = 45.0,

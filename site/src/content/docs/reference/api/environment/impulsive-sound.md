@@ -64,7 +64,7 @@ the reported `LAeq` and the adjusted `LAeq` depend on calibration.
 
 ```python
 detect_onsets(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     dt: float,
     *,
     onset_rate_method: Literal['least_squares', 'upper_half'] = 'least_squares',
@@ -100,7 +100,7 @@ prominence `P`.
 ## impulse_adjustment
 
 ```python
-impulse_adjustment(prominence: ArrayLike) -> np.ndarray
+impulse_adjustment(prominence: NumericArrayLike) -> np.ndarray
 ```
 
 Adjustment `KI` to `LAeq` from the prominence (clause 8, Formula 2).
@@ -130,8 +130,8 @@ qualification (> 10 dB/s, clause 4.5) is enforced by
 
 ```python
 impulse_prominence(
-    onset_rates: ArrayLike,
-    level_differences: ArrayLike,
+    onset_rates: NumericArrayLike,
+    level_differences: NumericArrayLike,
     *,
     assessment_period_minutes: float = 30.0,
 ) -> ImpulseProminenceResult
@@ -345,7 +345,7 @@ A supplied level rise does not qualify as an impulse (clause 4.5).
 
 ```python
 impulsive_sound_adjustment(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     dt: float = 0.02,
@@ -524,8 +524,8 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 predicted_prominence(
-    onset_rate: ArrayLike,
-    level_difference: ArrayLike,
+    onset_rate: NumericArrayLike,
+    level_difference: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -559,9 +559,9 @@ dB/s and the level difference is the level rise over the onset in dB
 
 ```python
 rating_level(
-    laeq: ArrayLike,
-    adjustment: ArrayLike,
-    durations: ArrayLike,
+    laeq: NumericArrayLike,
+    adjustment: NumericArrayLike,
+    durations: NumericArrayLike,
     reference_time: float,
 ) -> float
 ```
@@ -597,7 +597,7 @@ $$
 
 ```python
 sound_pressure_level_history(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     dt: float = 0.02,

@@ -104,7 +104,7 @@ PROMINENT_TONALITY_TU_HMS = 0.4
 
 ```python
 tonality_ecma(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
     f_low: float | None = None,

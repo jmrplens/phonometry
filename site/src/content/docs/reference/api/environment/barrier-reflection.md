@@ -211,7 +211,7 @@ and when the sample rate is below the 44 kHz of 5.5.2.
 
 ```python
 check_reflection_grid_position(
-    time_delays_s: ArrayLike,
+    time_delays_s: NumericArrayLike,
     *,
     speed_of_sound: float,
     check: Literal['relative', 'grid'] = 'grid',
@@ -397,15 +397,15 @@ REFLECTION_GRID_SPACING_M = 0.4
 
 ```python
 reflection_index(
-    in_front_irs: Signal | ArrayLike | Sequence[Signal | ArrayLike],
-    free_field_irs: Signal | ArrayLike | Sequence[Signal | ArrayLike],
+    in_front_irs: Signal | NumericArrayLike | Sequence[Signal | NumericArrayLike],
+    free_field_irs: Signal | NumericArrayLike | Sequence[Signal | NumericArrayLike],
     fs: float | None = None,
     *,
     speed_of_sound: float,
-    window_length_s: float | ArrayLike = 0.006,
-    low_band_window_length_s: float | ArrayLike = 0.0079,
+    window_length_s: float | NumericArrayLike = 0.006,
+    low_band_window_length_s: float | NumericArrayLike = 0.0079,
     low_band_microphones: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] = (1, 2, 3, 4, 5, 6),
-    directivity_corrections: ArrayLike | None = None,
+    directivity_corrections: NumericArrayLike | None = None,
     lowest_band_hz: float = 200.0,
 ) -> ReflectionIndexResult
 ```
@@ -497,7 +497,7 @@ depends on the column and the factor alone: one call serves every
 
 ```python
 reflection_index_from_positions(
-    position_values: ArrayLike,
+    position_values: NumericArrayLike,
     *,
     lowest_band_hz: float = 200.0,
 ) -> ReflectionIndexResult
@@ -904,12 +904,12 @@ Draw $U_j$ band by band with the $U$ of $DL_{RI}$.
 
 ```python
 source_directivity_corrections(
-    microphone_irs: Signal | ArrayLike,
-    specular_irs: Signal | ArrayLike,
+    microphone_irs: Signal | NumericArrayLike,
+    specular_irs: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    window_length_s: float | ArrayLike = 0.006,
-    low_band_window_length_s: float | ArrayLike = 0.0079,
+    window_length_s: float | NumericArrayLike = 0.006,
+    low_band_window_length_s: float | NumericArrayLike = 0.0079,
 ) -> NDArray[np.float64]
 ```
 
@@ -946,8 +946,8 @@ placed on its own record's peak (5.5.6).
 
 ```python
 subtract_direct_sound(
-    in_front_ir: Signal | ArrayLike,
-    free_field_ir: Signal | ArrayLike,
+    in_front_ir: Signal | NumericArrayLike,
+    free_field_ir: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> DirectSoundSubtraction
 ```

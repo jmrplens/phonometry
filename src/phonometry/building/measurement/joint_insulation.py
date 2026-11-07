@@ -101,10 +101,9 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -186,9 +185,9 @@ _SINGLE_NUMBERS = ("r_s_w", "r_s_w_c", "r_s_w_ctr")
 
 
 def joint_sound_reduction_index(
-    l1: ArrayLike,
-    l2: ArrayLike,
-    absorption_area: ArrayLike,
+    l1: NumericArrayLike,
+    l2: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     joint_length_m: float,
 ) -> np.ndarray:
@@ -634,10 +633,10 @@ def _correct(
 
 
 def laboratory_joint_insulation(
-    r_s_prime: ArrayLike,
-    r_s_max: ArrayLike,
+    r_s_prime: NumericArrayLike,
+    r_s_max: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     joint_length_m: float | None = None,
     limit_at_max: bool = True,
 ) -> LaboratoryJointInsulationResult:
@@ -919,7 +918,7 @@ class GapWidthCheck(RichDisplay):
         return plot_gap_width_check(self, ax=ax, language=language, **kwargs)
 
 
-def check_gap_width(readings_mm: ArrayLike) -> GapWidthCheck:
+def check_gap_width(readings_mm: NumericArrayLike) -> GapWidthCheck:
     """Check the gap width read along the joint and average it (J.2.2).
 
     "Determine the gap width at a minimum of four positions, evenly
@@ -1091,7 +1090,7 @@ class JointGapSeries(OwnsArrays):
 
 
 def joint_gap_series(
-    gap_widths_mm: ArrayLike,
+    gap_widths_mm: NumericArrayLike,
     results: Sequence[LaboratoryJointInsulationResult],
     *,
     nominal_gap_mm: float = _DEFAULT_NOMINAL_GAP_MM,

@@ -194,7 +194,9 @@ $$
 ## combined_internal_levels
 
 ```python
-combined_internal_levels(levels: Sequence[ArrayLike]) -> NDArray[np.float64]
+combined_internal_levels(
+    levels: Sequence[NumericArrayLike],
+) -> NDArray[np.float64]
 ```
 
 Equation (43): two internal spectra at the same pipe wall, added.
@@ -289,7 +291,7 @@ cone makes the flow unstable in ways the standard does not model.
 
 ```python
 expander_noise(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     mass_flow: float,
     downstream_density: float,
@@ -470,7 +472,7 @@ IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K = 8314.0
 internal_spectrum(
     internal_level: float,
     peak_frequency: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -736,7 +738,7 @@ PIPE_SPEED_OF_SOUND_M_S = 5000.0
 
 ```python
 pipe_transmission_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     internal_diameter_m: float,
     wall_thickness_m: float,

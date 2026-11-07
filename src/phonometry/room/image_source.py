@@ -91,10 +91,10 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "ImageSourceResult",
@@ -112,7 +112,7 @@ _WALL_ORDER = ("x0", "xL", "y0", "yL", "z0", "zL")
 
 
 def _resolve_walls(
-    absorption: ArrayLike, n_freq: int | None
+    absorption: NumericArrayLike, n_freq: int | None
 ) -> tuple[NDArray[np.float64], int]:
     r"""Validate the absorption spec into a ``(6, n_bands)`` reflection map.
 
@@ -410,7 +410,7 @@ class ImageSourceResult(OwnsArrays):
 
 
 def _validate_point(
-    point: ArrayLike, dimensions: tuple[float, float, float], name: str
+    point: NumericArrayLike, dimensions: tuple[float, float, float], name: str
 ) -> NDArray[np.float64]:
     """Validate a 3-vector strictly inside the room box."""
     p = real_array(point, name)
@@ -433,7 +433,7 @@ def _validate_point(
 def _resolve_band_maps(
     reflection: NDArray[np.float64],
     n_alpha_bands: int,
-    air_attenuation_per_m: ArrayLike,
+    air_attenuation_per_m: NumericArrayLike,
     freq: np.ndarray | None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], int, bool]:
     """Resolve the per-band reflection map, air map, band count and flag.
@@ -578,16 +578,16 @@ def _sample_ir(
 
 def image_source_rir(
     dimensions: tuple[float, float, float],
-    source: ArrayLike,
-    receiver: ArrayLike,
-    absorption: ArrayLike,
+    source: NumericArrayLike,
+    receiver: NumericArrayLike,
+    absorption: NumericArrayLike,
     *,
     fs: int | np.integer[Any],
     max_order: int | np.integer[Any] = 20,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     duration_s: float | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ImageSourceResult:
     r"""Synthetic room impulse response of a shoebox by the image-source method.
 
@@ -754,13 +754,16 @@ def reflection_density[V: RealValues](
 
 
 @overload
-def reflection_density[A: ArrayLike](
+def reflection_density[A: NumericArrayLike](
     time: A, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
 ) -> float | NDArray[np.float64]: ...
 
 
 def reflection_density(
-    time: ArrayLike, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+    time: NumericArrayLike,
+    volume: float,
+    *,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
     r"""Temporal density of reflections :math:`dN/dt = 4 \pi c^3 t^2 / V`.
 

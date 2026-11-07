@@ -90,9 +90,10 @@ from ...materials import power_attenuation_from_alpha
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "AtmosphericAbsorptionWarning",
@@ -104,7 +105,7 @@ __all__ = [
 
 
 def air_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
@@ -167,7 +168,7 @@ def air_attenuation(
 
 
 def air_power_attenuation_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
@@ -242,8 +243,8 @@ class AtmosphericAttenuation(OwnsArrays):
 
         def __init__(
             self,
-            frequencies: ArrayLike,
-            attenuation_db_per_m: ArrayLike,
+            frequencies: NumericArrayLike,
+            attenuation_db_per_m: NumericArrayLike,
             temperature_c: float,
             relative_humidity_percent: float,
             static_pressure_kpa: float,
@@ -341,7 +342,7 @@ class AtmosphericAttenuation(OwnsArrays):
 
 
 def atmospheric_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,

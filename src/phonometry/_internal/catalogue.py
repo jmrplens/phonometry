@@ -87,7 +87,9 @@ from .validation import real_array
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .types import NumericArrayLike
 
 _REQUIRED = ("source", "about", "rows")
 
@@ -3039,7 +3041,7 @@ class BandedRow(CatalogueRow):
             self._band_field(band_hz), wanted_by=f"the {band_hz} Hz band"
         )
 
-    def values_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def values_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
         """The row's value at each of *frequencies*, or a refusal.
 
         The adapter for a function that takes one value per band by position

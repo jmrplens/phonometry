@@ -91,7 +91,9 @@ from .valves import (
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .._internal.types import NumericArrayLike
 
 Coefficient = Literal["Cv", "Kv"]
 Form = Literal["annex", "clause"]
@@ -945,7 +947,7 @@ def reference_transmission_loss(
 
 
 def transmission_loss_correction(
-    frequency: ArrayLike, ring: float
+    frequency: NumericArrayLike, ring: float
 ) -> NDArray[np.float64]:
     r"""Equations (16b) and (22b): how far the wall is from its ring.
 
@@ -1048,7 +1050,7 @@ def cavitation_transmission_loss(
 
 
 def _distribution(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     peak: float,
     shape: tuple[float, float, float],
 ) -> NDArray[np.float64]:
@@ -1061,7 +1063,9 @@ def _distribution(
     return np.asarray(-10.0 * np.log10(bracket) - offset, dtype=np.float64)
 
 
-def turbulent_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.float64]:
+def turbulent_distribution(
+    frequency: NumericArrayLike, peak: float
+) -> NDArray[np.float64]:
     r"""Equation (20a): how turbulent noise spreads over the bands.
 
     .. math::
@@ -1095,7 +1099,9 @@ def turbulent_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.floa
     return _distribution(frequency, peak, _TURBULENT_DISTRIBUTION)
 
 
-def cavitation_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.float64]:
+def cavitation_distribution(
+    frequency: NumericArrayLike, peak: float
+) -> NDArray[np.float64]:
     r"""Equation (20b): how cavitation noise spreads over the bands.
 
     .. math::
@@ -1125,7 +1131,7 @@ def cavitation_distribution(frequency: ArrayLike, peak: float) -> NDArray[np.flo
 
 
 def band_internal_levels(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     internal_level: float,
     *,
     turbulent_peak: float,
@@ -1503,7 +1509,7 @@ def valve_hydrodynamic_noise(
     pipe: LiquidPipe,
     *,
     strouhal_form: Form = "annex",
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HydrodynamicValveNoise:
     r"""The whole of Clauses 4 and 5, from the operating point to 1 m.
 
@@ -1735,7 +1741,7 @@ def stage_conditions(
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
     vapor_pressure_pa: float,
-    stage_coefficients: ArrayLike,
+    stage_coefficients: NumericArrayLike,
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]:
     r"""Equations (23a) to (24b) and (26): the differential, stage by stage.
@@ -1839,7 +1845,7 @@ def stage_conditions(
     )
 
 
-def combined_stage_level(levels: ArrayLike) -> float:
+def combined_stage_level(levels: NumericArrayLike) -> float:
     r"""Equation (27): the stages of a multistage trim, added.
 
     .. math::

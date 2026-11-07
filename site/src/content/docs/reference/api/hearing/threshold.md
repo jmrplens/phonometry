@@ -35,7 +35,7 @@ age_threshold(
     age: float,
     sex: Literal['male', 'female'] = 'male',
     fractile: float = 0.5,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> AgeThresholdResult
 ```
 
@@ -137,7 +137,7 @@ EARPHONE_COUPLERS = {'DT 48': 'IEC 60303 acoustic coupler', 'TDH 39': 'IEC 60303
 ```python
 earphone_reference_level(
     earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> np.ndarray
 ```
 
@@ -185,10 +185,10 @@ FIELDS = ('free', 'diffuse')
 
 ```python
 hearing_level_to_coupler_spl(
-    hearing_level: ArrayLike,
+    hearing_level: NumericArrayLike,
     earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> np.ndarray
 ```
 
@@ -221,7 +221,7 @@ is a decibel more in the coupler.
 ```python
 reference_threshold(
     field: Literal['free', 'diffuse'] = 'free',
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> np.ndarray
 ```
 

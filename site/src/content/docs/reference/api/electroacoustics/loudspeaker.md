@@ -55,16 +55,16 @@ the report never merely repeats a manufacturer number:
 
 ```python
 loudspeaker_characteristics(
-    spl: ArrayLike,
+    spl: NumericArrayLike,
     rated_impedance_ohm: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     input_voltage_v: float | None = None,
     distance: float = 1.0,
     sensitivity_band: tuple[float, float] | None = None,
     tolerance_db: float = 3.0,
-    impedance: tuple[ArrayLike, ArrayLike] | None = None,
-    distortion: SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None = None,
+    impedance: tuple[NumericArrayLike, NumericArrayLike] | None = None,
+    distortion: SweptSineDistortionResult | tuple[NumericArrayLike, NumericArrayLike] | None = None,
     directivity: LoudspeakerDirectivity = ...,
     ratings: LoudspeakerRatings = ...,
 ) -> LoudspeakerCharacteristics
@@ -285,7 +285,7 @@ sensitivity verdict when a requirement is given, and the footer.
 LoudspeakerDirectivity(
     *,
     piston: RadiatingPistonResult | None = None,
-    polar: Sequence[ArrayLike] | NDArray[Any] | None = None,
+    polar: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
     frequency: float | None = None,
     index: float | None = None,
 )
@@ -313,7 +313,7 @@ directivity of a radiating piston.
 ```python
 LoudspeakerRatings(
     *,
-    frequency_range: ArrayLike | None = None,
+    frequency_range: NumericArrayLike | None = None,
     noise_power: float | None = None,
     sinusoidal_power: float | None = None,
     resonance_frequency: float | None = None,

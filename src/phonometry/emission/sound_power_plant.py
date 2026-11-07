@@ -159,10 +159,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "PLANT_AIR_ABSORPTION_DB_PER_M",
@@ -330,7 +330,9 @@ _A_WEIGHTED_BANDS_HZ = tuple(float(f) for f in _CK_OCTAVE)
 # --------------------------------------------------------------------------- #
 
 
-def _octave_bands(frequencies: ArrayLike, name: str = "frequencies") -> np.ndarray:
+def _octave_bands(
+    frequencies: NumericArrayLike, name: str = "frequencies"
+) -> np.ndarray:
     """Nominal octave centres for the frequencies given, in increasing order.
 
     :raises ValueError: for a frequency that names no octave band of the
@@ -383,7 +385,7 @@ def _weather(
 
 
 def _directional_angles(
-    angle_deg: float | ArrayLike | None, bands: int
+    angle_deg: float | NumericArrayLike | None, bands: int
 ) -> np.ndarray | None:
     """The 3 dB angle of a directional microphone per band, or ``None``.
 
@@ -418,7 +420,7 @@ def _directional_angles(
 
 
 def plant_characteristic_height_m(
-    source_heights_m: ArrayLike, *, n_low_sources: int | np.integer[Any] = 0
+    source_heights_m: NumericArrayLike, *, n_low_sources: int | np.integer[Any] = 0
 ) -> float:
     r"""The characteristic height of the plant :math:`H`, 9.2 c) and NOTE 7.
 
@@ -521,13 +523,13 @@ def plant_background_correction[V: RealValues](
 
 
 @overload
-def plant_background_correction[A: ArrayLike](
+def plant_background_correction[A: NumericArrayLike](
     level_difference: A,
 ) -> float | NDArray[np.float64]: ...
 
 
 def plant_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""The background correction of Table 2, to subtract from the level measured.
 
@@ -569,7 +571,7 @@ def plant_background_correction(
 
 
 def plant_air_absorption_db_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -700,7 +702,7 @@ def plant_steady_reading(min_level: float, max_level: float) -> float:
 # --------------------------------------------------------------------------- #
 
 
-def _polygon(vertices: ArrayLike, name: str) -> np.ndarray:
+def _polygon(vertices: NumericArrayLike, name: str) -> np.ndarray:
     """A simple polygon as an ``(n, 2)`` array, the closing vertex dropped.
 
     :raises ValueError: for fewer than three vertices, a non-finite
@@ -717,7 +719,7 @@ def _polygon(vertices: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _vertex_array(vertices: ArrayLike, name: str) -> np.ndarray:
+def _vertex_array(vertices: NumericArrayLike, name: str) -> np.ndarray:
     """The vertices as an ``(n, 2)`` array of at least three, the closing
     vertex dropped.
 
@@ -1279,12 +1281,12 @@ class PlantMeasurementContour(OwnsArrays):
 
     def sound_power(
         self,
-        levels: ArrayLike,
+        levels: NumericArrayLike,
         *,
-        frequencies: ArrayLike,
+        frequencies: NumericArrayLike,
         microphone_height_m: float | None = None,
-        background_levels: ArrayLike | None = None,
-        directional_microphone_angle_deg: float | ArrayLike | None = None,
+        background_levels: NumericArrayLike | None = None,
+        directional_microphone_angle_deg: float | NumericArrayLike | None = None,
         temperature_c: float | None = None,
         relative_humidity_percent: float | None = None,
     ) -> PlantSoundPowerResult:
@@ -1357,8 +1359,8 @@ class PlantMeasurementContour(OwnsArrays):
 
 
 def plant_measurement_contour(
-    plant_outline_m: ArrayLike,
-    contour_m: ArrayLike,
+    plant_outline_m: NumericArrayLike,
+    contour_m: NumericArrayLike,
     *,
     characteristic_height_m: float,
     n_positions: int | np.integer[Any] | None = None,
@@ -1766,16 +1768,16 @@ class PlantSoundPowerResult(OwnsArrays):
 
 
 def plant_sound_power(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     measurement_area_m2: float,
     contour_length_m: float,
     microphone_height_m: float,
     mean_distance_m: float,
     plant_area_m2: float,
-    background_levels: ArrayLike | None = None,
-    directional_microphone_angle_deg: float | ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    directional_microphone_angle_deg: float | NumericArrayLike | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
 ) -> PlantSoundPowerResult:
@@ -2126,8 +2128,8 @@ def check_plant_measurement(
     contour: PlantMeasurementContour,
     sound_power: PlantSoundPowerResult | None = None,
     *,
-    measurement_time_s: float | ArrayLike | None = None,
-    leq_range_db: float | ArrayLike | None = None,
+    measurement_time_s: float | NumericArrayLike | None = None,
+    leq_range_db: float | NumericArrayLike | None = None,
 ) -> PlantMeasurementCheck:
     r"""May clause 10 be applied to this measurement? ISO 8297 1.2, 6, 7.1, 9 and 10.2.
 
@@ -2229,7 +2231,9 @@ def _require_same_geometry(
         raise ValueError(msg)
 
 
-def _measurement_time_row(measurement_time_s: float | ArrayLike) -> PlantRequirement:
+def _measurement_time_row(
+    measurement_time_s: float | NumericArrayLike,
+) -> PlantRequirement:
     """The row of 9.5.1: the shortest measurement time against one minute.
 
     :raises ValueError: for a time that is not positive and finite.
@@ -2242,7 +2246,7 @@ def _measurement_time_row(measurement_time_s: float | ArrayLike) -> PlantRequire
                 float(np.min(times)), ">=", _MIN_MEASUREMENT_TIME_S, "s")  # fmt: skip
 
 
-def _integrated_reading_row(leq_range_db: float | ArrayLike) -> PlantRequirement:
+def _integrated_reading_row(leq_range_db: float | NumericArrayLike) -> PlantRequirement:
     """The row of 9.5.3: the widest range of an integrated reading against 1 dB.
 
     :raises ValueError: for a range that is negative or not finite.

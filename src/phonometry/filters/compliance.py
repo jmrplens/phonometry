@@ -141,10 +141,9 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from .core import OctaveFilterBank
 
@@ -316,7 +315,7 @@ def _edition_spec(edition: object) -> dict[str, Any]:
 def class_limits(
     fraction: float,
     filter_class: int | np.integer[Any],
-    omega: ArrayLike,
+    omega: NumericArrayLike,
     *,
     edition: Edition = "2014",
 ) -> tuple[np.ndarray, np.ndarray]:

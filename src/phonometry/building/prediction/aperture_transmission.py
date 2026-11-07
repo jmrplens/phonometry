@@ -76,9 +76,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 #: Default speed of sound in air ``c0``, m/s (20 degC).
 _SPEED_OF_SOUND: float = 343.0
@@ -101,7 +101,7 @@ __all__ = [
 ]
 
 
-def transmission_loss_from_coefficient(tau: ArrayLike) -> np.ndarray:
+def transmission_loss_from_coefficient(tau: NumericArrayLike) -> np.ndarray:
     r"""Sound reduction index :math:`R = -10 \log_{10}(\tau)` from a transmission
     coefficient.
 
@@ -251,7 +251,7 @@ def _slit_end_correction(k_big: np.ndarray) -> np.ndarray:
 
 
 def slit_transmission_coefficient(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     width_m: float,
     depth: float,
     *,
@@ -378,7 +378,7 @@ def slit_resonance_frequencies(
 
 
 def circular_aperture_transmission_coefficient(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     radius: float,
     depth: float,
     *,
@@ -424,7 +424,7 @@ def circular_aperture_transmission_coefficient(
 
 
 def composite_transmission_loss(
-    areas: ArrayLike, reduction_indices: ArrayLike
+    areas: NumericArrayLike, reduction_indices: NumericArrayLike
 ) -> np.ndarray:
     r"""Composite sound reduction index of parallel elements (Hopkins
     Eq. 4.92).

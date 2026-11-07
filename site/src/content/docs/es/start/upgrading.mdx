@@ -1343,6 +1343,29 @@ fracción o el booleano que antes admitía, como en las filas de arriba. Un
 registro de resultado que valida un recuento o una fracción de banda guarda
 el `int` que lee, donde guardaba el entero de NumPy tal como se le dio.
 
+## Un parámetro que admite números rechaza un texto antes de que la llamada se ejecute
+
+Un parámetro que admite números se anotaba con el `ArrayLike` de NumPy, que
+admite cualquier `str` y cualquier `bytes`, así que
+`signals.leq("not a signal")` pasaba la comprobación de tipos de mypy y de
+pyright y solo la llamada lo rechazaba. Todo parámetro, campo y constructor
+declarado de ese tipo admite ahora `NumericArrayLike`: un número, una
+secuencia de números anidada a cualquier profundidad, o un array de NumPy, o
+cualquier objeto con un `__array__`, de tipo de dato numérico o booleano, y
+ningún texto. Una lista, una tupla, una lista anidada, un array de cualquier
+tipo de dato numérico y una Signal pasan la comprobación de tipos como
+antes, y las llamadas se ejecutan como se ejecutaban.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `signals.leq("not a signal")` pasaba la comprobación de tipos, y la llamada lanzaba `TypeError` | el comprobador de tipos lo rechaza, y la llamada lanza el mismo `TypeError` |
+| `levels: ArrayLike = load(); signals.leq(levels)` pasaba la comprobación de tipos | el comprobador de tipos lo rechaza, porque `ArrayLike` dice que puede haber un texto; se anota `levels` con lo que guarda, `NDArray[np.float64]`, `Sequence[float]` o `float` |
+| `view = memoryview(samples); signals.leq(view)` pasaba la comprobación de tipos | el comprobador de tipos lo rechaza, como rechaza un array de `ctypes` u otro objeto que ofrece sus números solo por el protocolo de búfer, mientras la llamada se ejecuta como se ejecutaba; se pasa `np.asarray(view)` |
+
+Las etiquetas de `environment.statistical_pass_by` (`vehicle_categories`) y
+los `sites` de los resúmenes de paisaje sonoro de `environment` conservan
+`ArrayLike`: admiten textos.
+
 ## Los veredictos son objetos de resultado, no diccionarios
 
 Las tres funciones `verify_*` de la 3.3.0 devolvían `dict[str, Any]` y ahora

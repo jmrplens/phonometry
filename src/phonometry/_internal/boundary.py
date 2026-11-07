@@ -37,7 +37,9 @@ import numpy as np
 from .validation import real_array
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .types import NumericArrayLike
 
 #: Decimal places a computed quantity is settled to before it is compared with
 #: a printed limit or rounded at a half: a nanodecibel, far below any printed
@@ -45,7 +47,7 @@ if TYPE_CHECKING:
 SETTLED_DECIMALS = 9
 
 
-def settled(value: ArrayLike) -> NDArray[np.float64]:
+def settled(value: NumericArrayLike) -> NDArray[np.float64]:
     """``value`` rounded to nine decimal places, for judging it against a limit.
 
     :param value: The computed quantity, any shape.
@@ -55,7 +57,9 @@ def settled(value: ArrayLike) -> NDArray[np.float64]:
     return np.round(real_array(value, "value"), SETTLED_DECIMALS)
 
 
-def settled_ratio(part: ArrayLike, whole: ArrayLike) -> NDArray[np.float64]:
+def settled_ratio(
+    part: NumericArrayLike, whole: NumericArrayLike
+) -> NDArray[np.float64]:
     """``part / whole`` settled, for judging a quantity on its own scale.
 
     A quantity whose size is the caller's, a sound power in watts or an
@@ -87,7 +91,9 @@ def settled_ratio(part: ArrayLike, whole: ArrayLike) -> NDArray[np.float64]:
     return settled(ratio)
 
 
-def settled_net_share(terms: ArrayLike, axis: int | None = None) -> NDArray[np.float64]:
+def settled_net_share(
+    terms: NumericArrayLike, axis: int | None = None
+) -> NDArray[np.float64]:
     """The signed sum of ``terms`` as a settled share of their magnitudes.
 
     The sign of an algebraic sum, a net sound power or a mean normal
@@ -106,7 +112,7 @@ def settled_net_share(terms: ArrayLike, axis: int | None = None) -> NDArray[np.f
     return settled_ratio(np.sum(values, axis=axis), np.sum(np.abs(values), axis=axis))
 
 
-def round_half_up(value: ArrayLike, decimals: int = 0) -> NDArray[np.float64]:
+def round_half_up(value: NumericArrayLike, decimals: int = 0) -> NDArray[np.float64]:
     """Round to ``decimals`` places with halves upwards (2,5 to 3, -2,5 to -2).
 
     The scaled value is settled before the half is judged, so 20,4 - 14,9 dB,
@@ -123,7 +129,7 @@ def round_half_up(value: ArrayLike, decimals: int = 0) -> NDArray[np.float64]:
 
 
 def round_half_away_from_zero(
-    value: ArrayLike, decimals: int = 0
+    value: NumericArrayLike, decimals: int = 0
 ) -> NDArray[np.float64]:
     """Round to ``decimals`` places with halves away from zero (-2,5 to -3).
 
@@ -137,7 +143,7 @@ def round_half_away_from_zero(
     return np.asarray(np.sign(scaled) * np.floor(np.abs(scaled) + 0.5) / scale)
 
 
-def round_half_even(value: ArrayLike, decimals: int = 0) -> NDArray[np.float64]:
+def round_half_even(value: NumericArrayLike, decimals: int = 0) -> NDArray[np.float64]:
     """Round to ``decimals`` places with halves to the even neighbour.
 
     Rule A of ISO 80000-1:2009 Annex B: 2,5 to 2 and 3,5 to 4. The scaled

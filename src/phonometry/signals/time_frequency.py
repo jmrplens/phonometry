@@ -74,11 +74,11 @@ from .spectra import _validate_scaling
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import WindowSpec
+    from .._internal.types import NumericArrayLike, WindowSpec
 
 __all__ = [
     "SpectrogramResult",
@@ -203,7 +203,7 @@ class SpectrogramResult(OwnsArrays):
 
 
 def spectrogram(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     window: WindowSpec = "hann",
@@ -392,7 +392,7 @@ class ZoomFFTResult(OwnsArrays):
 
 
 def zoom_fft(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f_min: float,

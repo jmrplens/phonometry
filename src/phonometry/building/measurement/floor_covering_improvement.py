@@ -76,10 +76,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 Quantity = Literal["ΔL", "ΔR", "Rs", "LI", "LI,norm"]
@@ -124,7 +124,7 @@ _RATING_FREQS = (
 )
 
 
-def _finite(values: ArrayLike, name: str) -> np.ndarray:
+def _finite(values: NumericArrayLike, name: str) -> np.ndarray:
     a = np.atleast_1d(real_array(values, name))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
@@ -133,7 +133,7 @@ def _finite(values: ArrayLike, name: str) -> np.ndarray:
 
 
 def acceleration_level(
-    acceleration: ArrayLike,
+    acceleration: NumericArrayLike,
     *,
     reference: float = _ACCELERATION_REFERENCE,
 ) -> np.ndarray:
@@ -271,10 +271,10 @@ class BackgroundCorrectedLevel(OwnsArrays):
 
 
 def background_corrected_level(
-    signal_and_background: ArrayLike,
-    background: ArrayLike,
+    signal_and_background: NumericArrayLike,
+    background: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> BackgroundCorrectedLevel:
     r"""Correct a measured level for background noise (ISO 16251-1 F. (2)).
 
@@ -534,11 +534,11 @@ def _rating(
 
 
 def impact_improvement(
-    bare: ArrayLike,
-    with_covering: ArrayLike,
+    bare: NumericArrayLike,
+    with_covering: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    background: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background: NumericArrayLike | None = None,
 ) -> FloorCoveringImprovementResult:
     r"""Improvement of impact sound insulation ``ΔL`` of a floor covering.
 
@@ -687,9 +687,9 @@ class OctaveBandSpectrum(OwnsArrays):
 
 
 def improvement_octave_bands(
-    improvement: ArrayLike,
+    improvement: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     quantity: Quantity = "ΔL",
 ) -> OctaveBandSpectrum:
     r"""Convert a one-third-octave improvement spectrum to octaves (F. (5)).

@@ -95,10 +95,10 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "SELDistribution",
@@ -143,7 +143,7 @@ _MIN_CLASSES = 2
 _EQUAL_PAIR = 2
 
 
-def _real_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _real_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A non-empty array of finite real numbers, any shape.
 
     :raises TypeError: for a complex or non-numeric input.
@@ -160,7 +160,7 @@ def _real_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
     return array
 
 
-def _probability_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _probability_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A non-empty array of finite, non-negative probabilities."""
     array = _real_array(values, name)
     if np.any(array < 0.0):
@@ -170,7 +170,7 @@ def _probability_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
 
 
 def _levels_and_probabilities(
-    levels: ArrayLike, probabilities: ArrayLike
+    levels: NumericArrayLike, probabilities: NumericArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The replica levels and their probabilities, flattened in the same order.
 
@@ -201,7 +201,7 @@ def _levels_and_probabilities(
 
 
 def frequency_weighted_sel(
-    band_levels: ArrayLike, weighting_db: ArrayLike
+    band_levels: NumericArrayLike, weighting_db: NumericArrayLike
 ) -> float | NDArray[np.float64]:
     r"""Frequency-weighted sound exposure level from band levels (Equation (5)).
 
@@ -250,7 +250,8 @@ def frequency_weighted_sel(
 
 
 def replica_probabilities(
-    absorption_probabilities: ArrayLike, excess_attenuation_probabilities: ArrayLike
+    absorption_probabilities: NumericArrayLike,
+    excess_attenuation_probabilities: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""Probability of occurrence of each replica atmosphere (Equation (14)).
 
@@ -292,8 +293,8 @@ def replica_probabilities(
 
 
 def long_term_sel(
-    levels: ArrayLike,
-    probabilities: ArrayLike,
+    levels: NumericArrayLike,
+    probabilities: NumericArrayLike,
     *,
     rating_adjustment: float = 0.0,
 ) -> float:
@@ -514,9 +515,11 @@ class SELDistribution(OwnsArrays):
     def class_density[V: RealValues](self, levels: V) -> NDArray[np.float64]: ...
 
     @overload
-    def class_density[A: ArrayLike](self, levels: A) -> float | NDArray[np.float64]: ...
+    def class_density[A: NumericArrayLike](
+        self, levels: A
+    ) -> float | NDArray[np.float64]: ...
 
-    def class_density(self, levels: ArrayLike) -> float | NDArray[np.float64]:
+    def class_density(self, levels: NumericArrayLike) -> float | NDArray[np.float64]:
         r"""The class density :math:`\rho(x)` before the turbulent spread
         (Equations (15), (16)), in 1/dB.
 
@@ -554,9 +557,11 @@ class SELDistribution(OwnsArrays):
     def density[V: RealValues](self, levels: V) -> NDArray[np.float64]: ...
 
     @overload
-    def density[A: ArrayLike](self, levels: A) -> float | NDArray[np.float64]: ...
+    def density[A: NumericArrayLike](
+        self, levels: A
+    ) -> float | NDArray[np.float64]: ...
 
-    def density(self, levels: ArrayLike) -> float | NDArray[np.float64]:
+    def density(self, levels: NumericArrayLike) -> float | NDArray[np.float64]:
         r"""The continuous density :math:`\rho^{*}(x)` (Equations (21), (23)), in 1/dB.
 
         :param levels: Level or levels ``x``, in dB.
@@ -580,9 +585,11 @@ class SELDistribution(OwnsArrays):
     def exceedance[V: RealValues](self, levels: V) -> NDArray[np.float64]: ...
 
     @overload
-    def exceedance[A: ArrayLike](self, levels: A) -> float | NDArray[np.float64]: ...
+    def exceedance[A: NumericArrayLike](
+        self, levels: A
+    ) -> float | NDArray[np.float64]: ...
 
-    def exceedance(self, levels: ArrayLike) -> float | NDArray[np.float64]:
+    def exceedance(self, levels: NumericArrayLike) -> float | NDArray[np.float64]:
         r"""Probability that the level exceeds ``x`` (Equation (24)).
 
         .. math::
@@ -614,11 +621,13 @@ class SELDistribution(OwnsArrays):
     def exceedance_level[V: RealValues](self, percent: V) -> NDArray[np.float64]: ...
 
     @overload
-    def exceedance_level[A: ArrayLike](
+    def exceedance_level[A: NumericArrayLike](
         self, percent: A
     ) -> float | NDArray[np.float64]: ...
 
-    def exceedance_level(self, percent: ArrayLike) -> float | NDArray[np.float64]:
+    def exceedance_level(
+        self, percent: NumericArrayLike
+    ) -> float | NDArray[np.float64]:
         r"""The ``n``-percent exceedance level :math:`L_{E,\mathrm{w},n}` (Equation (25)).
 
         The level exceeded with probability ``n / 100``: the root of
@@ -707,8 +716,8 @@ class SELDistribution(OwnsArrays):
 
 
 def sel_distribution(
-    levels: ArrayLike,
-    probabilities: ArrayLike,
+    levels: NumericArrayLike,
+    probabilities: NumericArrayLike,
     *,
     sigma_db: float = _TYPICAL_SIGMA_DB,
     n_subclasses: int | np.integer[Any] = _ANNEX_A_SUBCLASSES,

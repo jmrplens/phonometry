@@ -95,9 +95,9 @@ from .hearing_protectors import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "ANR_WITHIN_LABORATORY_UNCERTAINTY",
@@ -248,7 +248,7 @@ class ActiveInsertionLossResult(OwnsArrays):
         return plot_active_insertion_loss(self, ax=ax, language=language, **kwargs)
 
 
-def _levels(values: ArrayLike, name: str) -> np.ndarray:
+def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
     """A ``(subjects, ears, bands)`` grid of finite MIRE levels in dB.
 
     :param values: The levels.
@@ -277,7 +277,7 @@ def _levels(values: ArrayLike, name: str) -> np.ndarray:
 
 
 def _lower_ear_from_insertion_loss(
-    insertion_loss: ArrayLike,
+    insertion_loss: NumericArrayLike,
 ) -> tuple[np.ndarray | None, np.ndarray]:
     """The per-ear grid, if one was given, and the lower ear of each subject."""
     grid = real_array(insertion_loss, "insertion_loss")
@@ -303,7 +303,7 @@ def _lower_ear_from_insertion_loss(
 
 
 def _insertion_loss_from_levels(
-    passive_levels: ArrayLike, active_levels: ArrayLike
+    passive_levels: NumericArrayLike, active_levels: NumericArrayLike
 ) -> np.ndarray:
     """The insertion loss of each ear, passive minus active level (5.4.1)."""
     passive = _levels(passive_levels, "passive_levels")
@@ -317,7 +317,7 @@ def _insertion_loss_from_levels(
     return np.asarray(passive - active, dtype=np.float64)
 
 
-def _band_frequencies(frequencies: ArrayLike | None, count: int) -> np.ndarray:
+def _band_frequencies(frequencies: NumericArrayLike | None, count: int) -> np.ndarray:
     """The centre frequencies given, or the default grid for *count* bands."""
     require_scalar(count, "count")
     if frequencies is None:
@@ -333,11 +333,11 @@ def _band_frequencies(frequencies: ArrayLike | None, count: int) -> np.ndarray:
 
 
 def active_insertion_loss(
-    insertion_loss: ArrayLike | None = None,
+    insertion_loss: NumericArrayLike | None = None,
     *,
-    passive_levels: ArrayLike | None = None,
-    active_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    passive_levels: NumericArrayLike | None = None,
+    active_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ActiveInsertionLossResult:
     r"""The active insertion loss, its lower ear and its uncertainty (5.4, 5.5 b), A.2).
 
@@ -460,7 +460,7 @@ class ANRTotalAttenuationResult(OwnsArrays):
 
 
 def _passive_octaves(
-    reat: ArrayLike | RealEarAttenuationResult,
+    reat: NumericArrayLike | RealEarAttenuationResult,
 ) -> tuple[np.ndarray, np.ndarray]:
     """The passive attenuation grid and its octave bands.
 
@@ -526,7 +526,7 @@ def _interpolate_passive(
 
 
 def _lower_ear_thirds(
-    insertion_loss: ArrayLike | ActiveInsertionLossResult, thirds: np.ndarray
+    insertion_loss: NumericArrayLike | ActiveInsertionLossResult, thirds: np.ndarray
 ) -> np.ndarray:
     """The lower-ear active insertion loss on the bands the chain needs.
 
@@ -558,8 +558,8 @@ def _lower_ear_thirds(
 
 
 def anr_total_attenuation(
-    reat: ArrayLike | RealEarAttenuationResult,
-    insertion_loss: ArrayLike | ActiveInsertionLossResult,
+    reat: NumericArrayLike | RealEarAttenuationResult,
+    insertion_loss: NumericArrayLike | ActiveInsertionLossResult,
 ) -> ANRTotalAttenuationResult:
     r"""The total attenuation of an ANR earmuff, subject by subject (5.5).
 
@@ -729,10 +729,10 @@ class ANRLinearityResult(OwnsArrays):
 
 
 def assess_anr_linearity(
-    external_levels: ArrayLike,
-    ear_levels: ArrayLike | None = None,
+    external_levels: NumericArrayLike,
+    ear_levels: NumericArrayLike | None = None,
     *,
-    ear_third_octave_levels: ArrayLike | None = None,
+    ear_third_octave_levels: NumericArrayLike | None = None,
 ) -> ANRLinearityResult:
     r"""Up to what external level does the earmuff stay linear? (5.4.4).
 
@@ -793,7 +793,7 @@ def assess_anr_linearity(
         levels = real_array(ear_levels, "ear_levels")
     else:
         thirds = real_array(
-            cast("ArrayLike", ear_third_octave_levels), "ear_third_octave_levels"
+            cast("NumericArrayLike", ear_third_octave_levels), "ear_third_octave_levels"
         )
         if thirds.ndim < _GRID_RANK or thirds.shape[-1] != _LINEARITY_THIRDS:
             msg = (

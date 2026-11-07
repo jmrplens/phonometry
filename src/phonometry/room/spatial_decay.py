@@ -108,9 +108,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 Region = Literal["near", "middle", "far", "whole"]
 #: A region of :data:`Region` read at a conventional distance: all but the
@@ -356,7 +357,7 @@ class BackgroundMarginCheck(OwnsArrays):
 
 
 def check_background_margin(
-    levels: ArrayLike, background_levels: ArrayLike
+    levels: NumericArrayLike, background_levels: NumericArrayLike
 ) -> BackgroundMarginCheck:
     """Does the source stand clear of the background? 5.1.4.
 
@@ -470,7 +471,7 @@ class SpatialDecayResult(OwnsArrays):
 
 
 def sound_distribution_value(
-    levels: ArrayLike, sound_power_levels: ArrayLike
+    levels: NumericArrayLike, sound_power_levels: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The sound distribution value of a measured point, Equation (1).
 
@@ -501,7 +502,7 @@ def sound_distribution_value(
     return np.asarray(levels - power, dtype=np.float64)
 
 
-def reference_distribution_value(distances: ArrayLike) -> NDArray[np.float64]:
+def reference_distribution_value(distances: NumericArrayLike) -> NDArray[np.float64]:
     r"""The free-field reference curve, Equation (2).
 
     .. math::
@@ -527,7 +528,7 @@ def reference_distribution_value(distances: ArrayLike) -> NDArray[np.float64]:
 
 
 def floor_reference_value(
-    distances: ArrayLike,
+    distances: NumericArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -574,9 +575,9 @@ def floor_reference_value(
 
 
 def corrected_distribution_value(
-    distribution_levels: ArrayLike,
-    measured_reference_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    measured_reference_levels: NumericArrayLike,
+    distances: NumericArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -637,7 +638,7 @@ def corrected_distribution_value(
 
 
 def spectrum_distribution_value(
-    distribution_levels: ArrayLike, machine_power_levels: ArrayLike
+    distribution_levels: NumericArrayLike, machine_power_levels: NumericArrayLike
 ) -> float:
     r"""The curve collapsed onto one machine's spectrum, Equation (3).
 
@@ -671,9 +672,9 @@ def spectrum_distribution_value(
 
 
 def normalized_distribution_value(
-    distribution_levels: ArrayLike,
+    distribution_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> float:
     r"""The curve collapsed onto A-weighted pink noise, Equation (4).
 
@@ -768,7 +769,9 @@ def _regression(
     return numerator / denominator, float(np.mean(logs))
 
 
-def spatial_decay_rate(distribution_levels: ArrayLike, distances: ArrayLike) -> float:
+def spatial_decay_rate(
+    distribution_levels: NumericArrayLike, distances: NumericArrayLike
+) -> float:
     r"""The rate of spatial decay per distance doubling, Equation (5).
 
     .. math::
@@ -827,7 +830,7 @@ def spatial_decay_rate(distribution_levels: ArrayLike, distances: ArrayLike) -> 
 
 
 def level_excess(
-    distribution_levels: ArrayLike, distances: ArrayLike
+    distribution_levels: NumericArrayLike, distances: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The excess over a free field at each position, Equation (6).
 
@@ -849,7 +852,9 @@ def level_excess(
     return np.asarray(values - reference_distribution_value(radii), dtype=np.float64)
 
 
-def mean_level_excess(distribution_levels: ArrayLike, distances: ArrayLike) -> float:
+def mean_level_excess(
+    distribution_levels: NumericArrayLike, distances: NumericArrayLike
+) -> float:
     r"""The excess averaged over a distance range, Equation (7).
 
     .. math::
@@ -894,8 +899,8 @@ def mean_level_excess(distribution_levels: ArrayLike, distances: ArrayLike) -> f
 
 
 def level_excess_at(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
     distance: float,
 ) -> float:
     r"""The excess read off the regression line at one distance, Equation (8).
@@ -1055,8 +1060,8 @@ def _third_octave_index(frequency_hz: float) -> int:
 
 
 def spatial_decay_curve(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
     *,
     near_limit_m: float = TYPICAL_NEAR_LIMIT_M,
     far_limit_m: float = TYPICAL_FAR_LIMIT_M,

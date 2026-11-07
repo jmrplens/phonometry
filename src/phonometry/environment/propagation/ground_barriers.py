@@ -102,7 +102,7 @@ from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 from scipy.special import fresnel, wofz
 
 from ..._internal.frozen import OwnsArrays
@@ -127,7 +127,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
@@ -166,7 +166,7 @@ Real = NDArray[np.float64]
 # --------------------------------------------------------------------------- #
 def _normalized_ground_impedance(
     frequency: Real,
-    impedance: ArrayLike | PorousMediumResult | None,
+    impedance: NumericArrayLike | PorousMediumResult | None,
     flow_resistivity: float | None,
     model: str,
     fluid: Fluid,
@@ -210,12 +210,12 @@ def _normalized_ground_impedance(
     # Exactly one of the two is given, and flow_resistivity is not: the
     # impedance is.
     return _resolve_impedance_array(
-        cast("ArrayLike", impedance), frequency, "impedance"
+        cast("NumericArrayLike", impedance), frequency, "impedance"
     )
 
 
 def _resolve_impedance_array(
-    impedance: ArrayLike, frequency: Real, name: str
+    impedance: NumericArrayLike, frequency: Real, name: str
 ) -> Complex:
     r"""Broadcast a scalar/array normalized impedance to the frequency shape.
 
@@ -295,12 +295,12 @@ class SphericalGroundResult(OwnsArrays):
 
 
 def spherical_reflection_coefficient(
-    normalized_impedance: ArrayLike,
+    normalized_impedance: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
 ) -> Complex:
     r"""Spherical-wave reflection coefficient ``Q`` (Weyl-Van der Pol).
@@ -353,12 +353,12 @@ def spherical_reflection_coefficient(
 
 @overload
 def ground_effect(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
     *,
-    impedance: ArrayLike | PorousMediumResult,
+    impedance: NumericArrayLike | PorousMediumResult,
     model: Literal["delany_bazley", "miki"] = ...,
     fluid: Fluid = ...,
 ) -> SphericalGroundResult: ...
@@ -366,7 +366,7 @@ def ground_effect(
 
 @overload
 def ground_effect(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
@@ -378,12 +378,12 @@ def ground_effect(
 
 
 def ground_effect(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
     *,
-    impedance: ArrayLike | PorousMediumResult | None = None,
+    impedance: NumericArrayLike | PorousMediumResult | None = None,
     flow_resistivity_pa_s_m2: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     fluid: Fluid = ABSORBER_AIR,
@@ -477,7 +477,7 @@ def fresnel_number(
     source_to_edge: float,
     edge_to_receiver: float,
     direct_distance: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
 ) -> Real:
@@ -517,7 +517,7 @@ def fresnel_number(
     return np.asarray(2.0 * delta / lam, dtype=np.float64)
 
 
-def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
+def kurze_anderson_attenuation(fresnel_number: NumericArrayLike) -> Real:
     r"""Kurze-Anderson barrier attenuation (Bies Eq. (5.138); Kurze & Anderson, 1971).
 
     .. math::
@@ -901,7 +901,7 @@ def _validate_barrier_geometry(
 
 
 def barrier_insertion_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     barrier_distance: float,
     barrier_height_m: float,
@@ -910,7 +910,7 @@ def barrier_insertion_loss(
     *,
     method: Literal["kurze_anderson", "exact"] = "exact",
     thickness_m: float | None = None,
-    ground_impedance: ArrayLike | PorousMediumResult | None = None,
+    ground_impedance: NumericArrayLike | PorousMediumResult | None = None,
     ground_flow_resistivity_pa_s_m2: float | None = None,
     ground_model: Literal["delany_bazley", "miki"] = "delany_bazley",
     fluid: Fluid = ABSORBER_AIR,
@@ -1074,7 +1074,7 @@ class _ExactBarrierSetup:
     thickness: float | None
     receiver_distance: float
     fluid: Fluid
-    ground_impedance: ArrayLike | PorousMediumResult | None
+    ground_impedance: NumericArrayLike | PorousMediumResult | None
     ground_flow_resistivity: float | None
     ground_model: str
 

@@ -81,11 +81,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import RealScalar, RealValues, TwoPanels
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, TwoPanels
 
 Symbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J"]
 #: The symbol a row of Table A.1 is keyed by: every :data:`Symbol` but
@@ -313,7 +313,7 @@ def _warn_cut_short(name: str) -> None:
 
 
 def _band_exposure_levels(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float,
     limits: tuple[float, float] | None,
     fraction: int | np.integer[Any],
@@ -344,7 +344,7 @@ def _band_exposure_levels(
 
 @overload
 def sound_pressure_exposure_level(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: None,
@@ -354,7 +354,7 @@ def sound_pressure_exposure_level(
 
 @overload
 def sound_pressure_exposure_level(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: tuple[float, float] = _DEFAULT_BANDS,
@@ -363,7 +363,7 @@ def sound_pressure_exposure_level(
 
 
 def sound_pressure_exposure_level(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
@@ -429,13 +429,13 @@ def free_field_reference_level[V: RealValues](
 
 
 @overload
-def free_field_reference_level[A: ArrayLike](
+def free_field_reference_level[A: NumericArrayLike](
     level: A, distance: float
 ) -> float | NDArray[np.float64]: ...
 
 
 def free_field_reference_level(
-    level: ArrayLike, distance: float
+    level: NumericArrayLike, distance: float
 ) -> float | NDArray[np.float64]:
     r"""Free-field level at 10 m from one measured at another distance.
 
@@ -485,7 +485,7 @@ def free_field_reference_level(
 
 
 def directivity_energy_average(
-    levels: ArrayLike, *, axis: int | np.integer[Any] = -1
+    levels: NumericArrayLike, *, axis: int | np.integer[Any] = -1
 ) -> float | NDArray[np.float64]:
     r"""Average a free-field measurement over bearings around the source.
 
@@ -558,7 +558,7 @@ def reverberation_room_reference_level[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def reverberation_room_reference_level[V: RealValues, A2: ArrayLike](
+def reverberation_room_reference_level[V: RealValues, A2: NumericArrayLike](
     reverberation_room_level: V, absorption_area: A2
 ) -> NDArray[np.float64]: ...
 
@@ -570,13 +570,13 @@ def reverberation_room_reference_level[S1: RealScalar, V: RealValues](
 
 
 @overload
-def reverberation_room_reference_level[A1: ArrayLike, A2: ArrayLike](
+def reverberation_room_reference_level[A1: NumericArrayLike, A2: NumericArrayLike](
     reverberation_room_level: A1, absorption_area: A2
 ) -> float | NDArray[np.float64]: ...
 
 
 def reverberation_room_reference_level(
-    reverberation_room_level: ArrayLike, absorption_area: ArrayLike
+    reverberation_room_level: NumericArrayLike, absorption_area: NumericArrayLike
 ) -> float | NDArray[np.float64]:
     r"""Free-field reference level at 10 m from a reverberation-room measurement.
 
@@ -646,7 +646,7 @@ def sound_strength_from_power[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def sound_strength_from_power[V: RealValues, A2: ArrayLike](
+def sound_strength_from_power[V: RealValues, A2: NumericArrayLike](
     pressure_level: V, power_level: A2
 ) -> NDArray[np.float64]: ...
 
@@ -658,13 +658,13 @@ def sound_strength_from_power[S1: RealScalar, V: RealValues](
 
 
 @overload
-def sound_strength_from_power[A1: ArrayLike, A2: ArrayLike](
+def sound_strength_from_power[A1: NumericArrayLike, A2: NumericArrayLike](
     pressure_level: A1, power_level: A2
 ) -> float | NDArray[np.float64]: ...
 
 
 def sound_strength_from_power(
-    pressure_level: ArrayLike, power_level: ArrayLike
+    pressure_level: NumericArrayLike, power_level: NumericArrayLike
 ) -> float | NDArray[np.float64]:
     r"""Sound strength from the source's sound power level.
 
@@ -749,11 +749,11 @@ class SoundStrengthResult(OwnsArrays):
 
 
 def sound_strength(
-    ir: Signal | ArrayLike,
-    reference_ir: Signal | ArrayLike | None = None,
+    ir: Signal | NumericArrayLike,
+    reference_ir: Signal | NumericArrayLike | None = None,
     fs: float | None = None,
     *,
-    reference_level: ArrayLike | None = None,
+    reference_level: NumericArrayLike | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int | np.integer[Any] = 1,
 ) -> SoundStrengthResult:
@@ -821,7 +821,7 @@ def sound_strength(
             reference_ir, reference_fs, limits, fraction, "reference_ir"
         )
     else:
-        given = real_array(cast("ArrayLike", reference_level), "reference_level")
+        given = real_array(cast("NumericArrayLike", reference_level), "reference_level")
         try:
             reference = np.broadcast_to(given, levels.shape).astype(np.float64)
         except ValueError as exc:
@@ -944,8 +944,8 @@ class LateralEnergyResult(OwnsArrays):
 
 
 def early_lateral_energy_fraction(
-    ir: Signal | ArrayLike,
-    lateral_ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
+    lateral_ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     weighting: LateralWeighting = "squared",
@@ -1085,12 +1085,12 @@ class LateLateralResult(OwnsArrays):
 
 
 def late_lateral_sound_level(
-    ir: Signal | ArrayLike,
-    lateral_ir: Signal | ArrayLike,
-    reference_ir: Signal | ArrayLike | None = None,
+    ir: Signal | NumericArrayLike,
+    lateral_ir: Signal | NumericArrayLike,
+    reference_ir: Signal | NumericArrayLike | None = None,
     fs: float | None = None,
     *,
-    reference_level: ArrayLike | None = None,
+    reference_level: NumericArrayLike | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int | np.integer[Any] = 1,
 ) -> LateLateralResult:
@@ -1192,7 +1192,7 @@ def late_lateral_sound_level(
             )
             raise ValueError(msg)
     else:
-        given = real_array(cast("ArrayLike", reference_level), "reference_level")
+        given = real_array(cast("NumericArrayLike", reference_level), "reference_level")
         try:
             reference = np.broadcast_to(given, levels.shape).astype(np.float64)
         except ValueError as exc:
@@ -1209,7 +1209,7 @@ def late_lateral_sound_level(
     )
 
 
-def late_lateral_average(levels: ArrayLike) -> float:
+def late_lateral_average(levels: NumericArrayLike) -> float:
     r"""Frequency-average the late lateral level over its four octave bands.
 
     ISO 3382-1:2009, Equation (A.17):
@@ -1287,8 +1287,8 @@ class InterauralCorrelationResult(OwnsArrays):
 
 
 def interaural_cross_correlation(
-    left: Signal | ArrayLike,
-    right: Signal | ArrayLike,
+    left: Signal | NumericArrayLike,
+    right: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     window: tuple[float, float | None] = (0.0, None),
@@ -1529,7 +1529,7 @@ class StageSupportResult(OwnsArrays):
 
 
 def stage_support(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: tuple[float, float] | None = (250.0, 2000.0),
@@ -1829,7 +1829,7 @@ _TABLE_A1_ROW: Mapping[Symbol, RowSymbol] = MappingProxyType(
 
 
 def _band_positions(
-    frequency: ArrayLike, wanted: tuple[float, ...], name: str
+    frequency: NumericArrayLike, wanted: tuple[float, ...], name: str
 ) -> list[int]:
     """Where the named nominal bands sit on a measured band axis."""
     centres = real_array(frequency, name)
@@ -1860,7 +1860,7 @@ def _band_positions(
 
 
 def single_number_average(
-    symbol: Symbol, values: ArrayLike, *, frequencies: ArrayLike
+    symbol: Symbol, values: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> float:
     r"""The Table A.1 single number of one auditorium quantity.
 
@@ -1913,7 +1913,7 @@ def single_number_average(
 
 
 def octave_pair_averages(
-    values: ArrayLike, *, frequencies: ArrayLike
+    values: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> dict[str, float]:
     """The low, mid and high pair averages of ISO 3382-1:2009, A.5.
 
@@ -2037,7 +2037,7 @@ class PerceptibleDifference(OwnsArrays):
 
 
 def assess_perceptible_difference(
-    symbol: Symbol, first: ArrayLike, second: ArrayLike
+    symbol: Symbol, first: NumericArrayLike, second: NumericArrayLike
 ) -> PerceptibleDifference:
     """Would a listener hear the difference between two values? (Table A.1).
 
@@ -2087,10 +2087,12 @@ def min_receiver_positions[V: RealValues](seats: V) -> NDArray[np.float64]: ...
 
 
 @overload
-def min_receiver_positions[A: ArrayLike](seats: A) -> float | NDArray[np.float64]: ...
+def min_receiver_positions[A: NumericArrayLike](
+    seats: A,
+) -> float | NDArray[np.float64]: ...
 
 
-def min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]:
+def min_receiver_positions(seats: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Fewest microphone positions a hall of a given size wants (Table A.2).
 
     ISO 3382-1:2009, Table A.2 prints three pairs, 500 seats to 6 positions,
@@ -2127,7 +2129,7 @@ def min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]:
     return as_float_or_array(positions, like=(seats,))
 
 
-def gliding_directivity_deviation(levels: ArrayLike) -> NDArray[np.float64]:
+def gliding_directivity_deviation(levels: NumericArrayLike) -> NDArray[np.float64]:
     """Deviation of each gliding arc from the whole-turn reference (4.2.1).
 
     ISO 3382-1:2009, 4.2.1 qualifies a source by averaging its free-field

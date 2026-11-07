@@ -52,7 +52,7 @@ test an analyser, which this module is not.
 
 ```python
 amplitude_distribution(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     *,
     n_bins: int | np.integer[Any] = 101,
 ) -> AmplitudeDistribution
@@ -102,7 +102,7 @@ How often each velocity occurred in a stretch, Formula (11).
 ## band_sum_level
 
 ```python
-band_sum_level(levels: ArrayLike) -> float
+band_sum_level(levels: NumericArrayLike) -> float
 ```
 
 The sum level $\Sigma L$ of a spectrum, Annex B, Formula (B.3).
@@ -128,7 +128,7 @@ $10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 
 ```python
 centered_interval(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     duration_s: float = 4.0,
@@ -162,7 +162,7 @@ rather than cut, so it keeps its length.
 ## combined_event_velocity
 
 ```python
-combined_event_velocity(event_velocities_mm_s: ArrayLike) -> float
+combined_event_velocity(event_velocities_mm_s: NumericArrayLike) -> float
 ```
 
 The event value of every passage in one hour, Formula (10), in mm/s.
@@ -189,8 +189,8 @@ passage spread over the same hour: $v_{\mathrm{E\,ges}} = \sqrt{\sum v_{\mathrm{
 
 ```python
 elastic_insertion_loss(
-    levels_before: ArrayLike,
-    levels_after: ArrayLike,
+    levels_before: NumericArrayLike,
+    levels_after: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -222,7 +222,7 @@ two spectra.
 
 ```python
 evaluate_train_passage(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     t2_s: tuple[float, float],
@@ -328,7 +328,7 @@ is [`event_velocity`](/phonometry/reference/api/vibration/railway/#event_velocit
 
 ```python
 interval_rms(
-    values: ArrayLike,
+    values: NumericArrayLike,
     fs: float,
     *,
     interval_s: tuple[float, float],
@@ -363,7 +363,7 @@ Formula (4) and which is what a meter reading its display produces.
 
 ```python
 narrowband_psd(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     resolution_hz: float = 1.25,
@@ -406,10 +406,14 @@ NARROWBAND_RESOLUTION_HZ = 1.25
 ## passage_average_level
 
 ```python
-passage_average_level(levels: ArrayLike, *, axis: None = None) -> float
+passage_average_level(
+    levels: NumericArrayLike,
+    *,
+    axis: None = None,
+) -> float
 
 passage_average_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     axis: int | np.integer[Any],
 ) -> NDArray[np.float64]
@@ -439,7 +443,7 @@ $10 \lg \langle 10^{L/10} \rangle$, the level of
 ## passage_average_velocity
 
 ```python
-passage_average_velocity(interval_rms_mm_s: ArrayLike) -> float
+passage_average_velocity(interval_rms_mm_s: NumericArrayLike) -> float
 ```
 
 The energy average of r.m.s. values over repeated passages (Clause 9).
@@ -475,7 +479,7 @@ PASSAGE_BANDS_HZ = (4.0, 315.0)
 
 ```python
 passage_energy_spectral_density(
-    psd: ArrayLike,
+    psd: NumericArrayLike,
     duration_s: float,
 ) -> NDArray[np.float64]
 ```
@@ -508,7 +512,7 @@ all of its mean square. This returns the formula as printed.
 
 ```python
 running_acceleration_level(
-    acceleration_m_s2: ArrayLike,
+    acceleration_m_s2: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = 0.125,
@@ -537,7 +541,7 @@ The running acceleration level $L_{aF}(t)$ of Formula (3), in dB.
 
 ```python
 running_velocity_level(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = 0.125,
@@ -566,7 +570,7 @@ The running velocity level $L_{v\mathrm{F}}(t)$ of Formula (2), in dB.
 
 ```python
 running_velocity_rms(
-    velocity_mm_s: ArrayLike,
+    velocity_mm_s: NumericArrayLike,
     fs: float,
     *,
     time_constant_s: float = 0.125,
@@ -601,7 +605,7 @@ which is what Figure 3 draws, is 7 % and 0,9 % short.
 ## spectral_density_level
 
 ```python
-spectral_density_level(psd: ArrayLike) -> NDArray[np.float64]
+spectral_density_level(psd: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 The level of a power spectral density, as Figure 7 draws it, in dB.
@@ -644,9 +648,9 @@ THIRD_OCTAVE_LINES = {4.0: 1, 5.0: 1, 6.3: 1, 8.0: 2, 10.0: 2, 12.5: 2, 16.0: 3,
 
 ```python
 third_octaves_from_narrowband(
-    psd: ArrayLike,
+    psd: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> ThirdOctaveVelocities
 ```
 
@@ -810,7 +814,7 @@ VELOCITY_LEVEL_REFERENCE_MM_S = 5e-05
 
 ```python
 velocity_psd_from_voltage(
-    psd_v2_per_hz: ArrayLike,
+    psd_v2_per_hz: NumericArrayLike,
     *,
     sensitivity_v_per_mm_s: float,
     gain: float,

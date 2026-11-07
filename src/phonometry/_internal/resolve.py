@@ -61,9 +61,9 @@ import math
 from typing import Any, overload
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 from .signal import Signal
+from .types import NumericArrayLike
 from .utils import _typesignal
 from .validation import require_scalar
 
@@ -75,7 +75,7 @@ from .validation import require_scalar
 #: text: the samples reach the computation through ``_typesignal`` or
 #: :func:`resolve_samples`, which refuse text with a ``TypeError`` naming
 #: the parameter (rule A42 of the contributor guide).
-SignalInput = Signal | ArrayLike
+SignalInput = Signal | NumericArrayLike
 
 #: A sample rate as a caller hands it over: any positive number for most
 #: functions, and for the few that need a whole number of samples per second
@@ -318,7 +318,7 @@ def like_input(x: Signal, samples: np.ndarray, fs: float | None = ...) -> Signal
 
 @overload
 def like_input(
-    x: ArrayLike, samples: np.ndarray, fs: float | None = ...
+    x: NumericArrayLike, samples: np.ndarray, fs: float | None = ...
 ) -> np.ndarray: ...
 
 

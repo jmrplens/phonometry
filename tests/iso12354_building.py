@@ -34,7 +34,7 @@ import reference_data as ref
 from phonometry import building
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from phonometry._internal.types import NumericArrayLike
 
 #: Critical frequencies of the three constructions, in hertz.
 FC_FLOOR, FC_EXT, FC_INT = 76.8, 92.6, 128.4
@@ -159,7 +159,7 @@ def elements() -> dict[str, building.HomogeneousElement]:
 
 
 def airborne_paths(
-    situ: dict[str, building.InSituElementResult], delta_r: ArrayLike
+    situ: dict[str, building.InSituElementResult], delta_r: NumericArrayLike
 ) -> list[building.BandPath]:
     """The twelve flanking paths of the Annex L airborne example.
 
@@ -216,7 +216,7 @@ def airborne_paths(
 
 
 def impact_paths(
-    situ: dict[str, building.InSituElementResult], delta_l: ArrayLike
+    situ: dict[str, building.InSituElementResult], delta_l: NumericArrayLike
 ) -> list[building.BandPath]:
     """The four flanking impact paths of the Annex G example.
 

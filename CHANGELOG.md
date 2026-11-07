@@ -4769,6 +4769,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on a union of mappings a written `dict` needs one at a time that no
   overload splits; rule A58 of the contributor guide states both.
 
+- **A text where numbers go is a type error.** 2161 public parameters of
+  1099 functions and methods, 29 fields of public records and the
+  constructors those records declare took their numbers as numpy's
+  `ArrayLike`, which admits any `str` and any `bytes`, so
+  `signals.leq("not a signal")` type-checked in mypy and pyright and only the
+  call refused it. Each takes `NumericArrayLike` now, the array-like of
+  numbers that the choices beside numbers already took: a list, a tuple, a
+  nested list, a numpy array of a number or truth-value dtype and a Signal
+  type-check as before, while a text or a `bytes`, which the call refuses as
+  well, an array typed with a dtype that is no number, and a variable of
+  your own annotated `ArrayLike`, which may hold a text, are a type error.
+  So is a `memoryview`, a `ctypes` array or another object that offers its
+  numbers only through the buffer protocol, which the call still converts:
+  hand it as `np.asarray(view)`. The labels of
+  `environment.statistical_pass_by` and the sites of the soundscape
+  summaries keep `ArrayLike`, since they take texts. The API
+  reference shows the name, and its index page says once what it takes.
+  `scripts/check_parameter_annotations.py` fails on a public parameter, a
+  record field or a declared constructor that holds `ArrayLike` where
+  numbers go, and rule A65 of the contributor guide states it.
+
 - **A misspelt choice beside numbers is a type error.** The `initial_state`
   of `filters.time_weighting`, the `flow_resistivity` of
   `aircraft.terrain_screening_adjustment` and of `aircraft.RotorcraftGround`,

@@ -73,14 +73,14 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._report.metadata import ReportMetadata
 
-from numpy.typing import ArrayLike, NDArray
 
 from .._internal.frozen import OwnsArrays
-from .._internal.types import ReportEngine, as_float_or_array
+from .._internal.types import NumericArrayLike, ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
@@ -129,7 +129,7 @@ _MAX_ABSORPTION = 2.0
 _N_ROOM_AXES = 3
 
 
-Surface = tuple[float, ArrayLike]
+Surface = tuple[float, NumericArrayLike]
 
 
 # ---------------------------------------------------------------------------
@@ -212,7 +212,9 @@ def _accumulate_surfaces(
     return total_area, absorption_area, list(zip(areas, alphas, strict=True))
 
 
-def _air_term(air_attenuation_per_m: ArrayLike, volume: float) -> NDArray[np.float64]:
+def _air_term(
+    air_attenuation_per_m: NumericArrayLike, volume: float
+) -> NDArray[np.float64]:
     """Air absorption area ``4 m V`` (m2), validated finite and non-negative."""
     m = real_array(air_attenuation_per_m, "air_attenuation_per_m")
     if not np.all(np.isfinite(m)) or np.any(m < 0.0):
@@ -223,7 +225,7 @@ def _air_term(air_attenuation_per_m: ArrayLike, volume: float) -> NDArray[np.flo
 
 def _add_air(
     absorption_term: NDArray[np.float64],
-    air_attenuation_per_m: ArrayLike,
+    air_attenuation_per_m: NumericArrayLike,
     volume: float,
 ) -> NDArray[np.float64]:
     """Add the air term ``4 m V`` to an absorption term, band counts checked."""
@@ -294,7 +296,7 @@ def _reverberation_time(
     )
 
 
-def _coefficients(surfaces: Sequence[Surface]) -> tuple[ArrayLike, ...]:
+def _coefficients(surfaces: Sequence[Surface]) -> tuple[NumericArrayLike, ...]:
     """The absorption coefficient of every surface, as the caller gave it.
 
     What decides whether a prediction is one number or one per band, handed
@@ -328,7 +330,7 @@ def sabine_reverberation_time(
     volume: float,
     surfaces: Sequence[Surface],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
     r"""Sabine reverberation time :math:`T = k V / (A + 4 m V)`.
@@ -372,7 +374,7 @@ def eyring_reverberation_time(
     volume: float,
     surfaces: Sequence[Surface],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
     r"""Eyring (Norris-Eyring) reverberation time.
@@ -418,7 +420,7 @@ def millington_sette_reverberation_time(
     volume: float,
     surfaces: Sequence[Surface],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
     r"""Millington-Sette reverberation time.
@@ -485,8 +487,8 @@ def _axial_geometry(
 
 def _axial_eyring_times(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
-    air_attenuation_per_m: ArrayLike,
+    absorptions: Sequence[NumericArrayLike],
+    air_attenuation_per_m: NumericArrayLike,
     speed_of_sound: float,
 ) -> tuple[NDArray[np.float64], list[NDArray[np.float64]]]:
     """Per-axis Eyring reverberation times and their area weights ``S_i / S``.
@@ -537,9 +539,9 @@ def _axial_eyring_times(
 
 def fitzroy_reverberation_time(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
+    absorptions: Sequence[NumericArrayLike],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
     r"""Fitzroy reverberation time, the area-weighted arithmetic mean of axial times.
@@ -578,9 +580,9 @@ def fitzroy_reverberation_time(
 
 def arau_puchades_reverberation_time(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
+    absorptions: Sequence[NumericArrayLike],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
     r"""Arau-Puchades reverberation time, the area-weighted geometric mean of axial times.
@@ -784,10 +786,10 @@ class ReverberationModelResult(OwnsArrays):
 
 def reverberation_time_models(
     dimensions: Sequence[float],
-    absorptions: Sequence[ArrayLike],
+    absorptions: Sequence[NumericArrayLike],
     *,
-    air_attenuation_per_m: ArrayLike = 0.0,
-    frequencies: ArrayLike | None = None,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
+    frequencies: NumericArrayLike | None = None,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> ReverberationModelResult:
     """Predict the reverberation time of a rectangular room by all five models.

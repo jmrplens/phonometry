@@ -103,9 +103,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 Method = Literal["linear", "exponential"]
 
@@ -414,7 +415,7 @@ def indication_tolerance_percent(name: WeightingName) -> float:
 
 
 def weighting_tolerance_percent(
-    name: WeightingName, frequencies: ArrayLike
+    name: WeightingName, frequencies: NumericArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The Table 5 band around a weighting, region by region.
 
@@ -449,7 +450,7 @@ def weighting_tolerance_percent(
 
 
 def phase_tolerance_deg(
-    name: WeightingName, frequencies: ArrayLike
+    name: WeightingName, frequencies: NumericArrayLike
 ) -> NDArray[np.float64]:
     """The Table 5 characteristic phase-deviation band, region by region.
 
@@ -615,9 +616,9 @@ class WeightingVerification(OwnsArrays):
 
 def verify_weighting(
     name: WeightingName,
-    measured_factors: ArrayLike,
+    measured_factors: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     expanded_uncertainty_percent: float | None = None,
 ) -> WeightingVerification:
     """Verify a measured weighting response against ISO 8041-1 Tables 4 and 5.
@@ -767,7 +768,7 @@ def _require_a_third_octave_grid(frequencies: NDArray[np.float64], owner: str) -
 
 
 def characteristic_phase_deviation(
-    phase_deviation_deg: ArrayLike, *, frequencies: ArrayLike
+    phase_deviation_deg: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""The characteristic phase deviation of ISO 8041-1 Formula (6).
 
@@ -838,7 +839,9 @@ _PEAK_APPROXIMATION_LIMIT_DEG = 30.0
 _PEAK_DEVIATION_COEFFICIENT = 0.48
 
 
-def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> float:
+def peak_deviation_percent(
+    characteristic_phase_deviation_deg: NumericArrayLike,
+) -> float:
     r"""The peak-value deviation a phase response costs (Formula (H.4)).
 
     Annex H is normative, and (H.4) (folio 93) is the only worked number in
@@ -1090,7 +1093,10 @@ class PhaseVerification(OwnsArrays):
 
 
 def verify_phase_response(
-    name: WeightingName, measured_phase_deg: ArrayLike, *, frequencies: ArrayLike
+    name: WeightingName,
+    measured_phase_deg: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
 ) -> PhaseVerification:
     """Verify a measured phase response against the ISO 8041-1 Table 5 band.
 

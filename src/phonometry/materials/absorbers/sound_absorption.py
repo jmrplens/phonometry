@@ -75,10 +75,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -202,7 +202,7 @@ def _resolve_speed(
 
 
 def power_attenuation_from_alpha(
-    attenuation_db_per_m: ArrayLike,
+    attenuation_db_per_m: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""Air power attenuation coefficient ``m`` from the ISO 9613-1 ``alpha``.
 
@@ -278,12 +278,12 @@ def _validate_area_inputs(
 
 
 def _absorption_area(
-    t60: ArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     *,
     temperature_c: float,
     speed_of_sound: float | None,
-    m: ArrayLike,
+    m: NumericArrayLike,
     t_name: str = "t60",
     m_name: str = "m",
     climate_names: tuple[str, str] = ("temperature_c", "speed_of_sound"),
@@ -305,12 +305,12 @@ def _absorption_area(
 
 
 def absorption_area(
-    t60: ArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     *,
     temperature_c: float = 20.0,
     speed_of_sound: float | None = None,
-    m: ArrayLike = 0.0,
+    m: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""Equivalent sound absorption area of a room (ISO 354:2003, Eq. (5)/(7)).
 
@@ -346,8 +346,8 @@ def absorption_area(
 
 
 def absorption_coefficient(
-    t1: ArrayLike,
-    t2: ArrayLike,
+    t1: NumericArrayLike,
+    t2: NumericArrayLike,
     volume: float,
     sample_area: float,
     *,
@@ -355,8 +355,8 @@ def absorption_coefficient(
     temperature2_c: float | None = None,
     speed_of_sound1: float | None = None,
     speed_of_sound2: float | None = None,
-    m1: ArrayLike = 0.0,
-    m2: ArrayLike = 0.0,
+    m1: NumericArrayLike = 0.0,
+    m2: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""Sound absorption coefficient of a plane absorber (ISO 354:2003, Eq. (9)).
 
@@ -630,16 +630,16 @@ class SoundAbsorptionMeasurement(OwnsArrays):
 
 
 def measure_sound_absorption(
-    t_empty: ArrayLike,
-    t_specimen: ArrayLike,
+    t_empty: NumericArrayLike,
+    t_specimen: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     area: float,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
     speed_of_sound: float | None = None,
-    m: ArrayLike = 0.0,
+    m: NumericArrayLike = 0.0,
 ) -> SoundAbsorptionMeasurement:
     r"""Measure the sound absorption of a plane absorber (ISO 354:2003).
 

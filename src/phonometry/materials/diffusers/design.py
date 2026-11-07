@@ -64,7 +64,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
@@ -88,7 +88,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.projections.polar import PolarAxes
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
 
 #: Complex-valued complex128 array alias (per-well reflection coefficients).
 Complex = NDArray[np.complex128]
@@ -351,8 +351,8 @@ class DiffuserPolarResponse(OwnsArrays):
 
 
 def _resolve_reflection(
-    depths: ArrayLike | None,
-    reflection: ArrayLike | None,
+    depths: NumericArrayLike | None,
+    reflection: NumericArrayLike | None,
     frequency: float,
     speed_of_sound: float,
 ) -> Complex:
@@ -374,7 +374,7 @@ def _resolve_reflection(
             msg = "'reflection' values must be finite."
             raise ValueError(msg)
         return r
-    d = np.atleast_1d(real_array(cast("ArrayLike", depths), "depths"))
+    d = np.atleast_1d(real_array(cast("NumericArrayLike", depths), "depths"))
     if d.ndim != 1 or d.size < _MIN_WELLS:
         msg = "'depths' must be a 1-D sequence of at least two wells."
         raise ValueError(msg)
@@ -388,7 +388,7 @@ def _resolve_reflection(
 def _prepare_geometry(
     well_width: float,
     frequency: float,
-    angles_deg: ArrayLike,
+    angles_deg: NumericArrayLike,
     source_angle_deg: float,
     n_repetitions: int | np.integer[Any],
     speed_of_sound: float,
@@ -422,8 +422,8 @@ def predict_diffuser_polar_response(
     well_width: float,
     frequency: float,
     *,
-    depths: ArrayLike,
-    angles_deg: ArrayLike = ...,
+    depths: NumericArrayLike,
+    angles_deg: NumericArrayLike = ...,
     source_angle_deg: float = ...,
     n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
@@ -437,8 +437,8 @@ def predict_diffuser_polar_response(
     well_width: float,
     frequency: float,
     *,
-    reflection: ArrayLike,
-    angles_deg: ArrayLike = ...,
+    reflection: NumericArrayLike,
+    angles_deg: NumericArrayLike = ...,
     source_angle_deg: float = ...,
     n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
@@ -451,9 +451,9 @@ def predict_diffuser_polar_response(
     well_width: float,
     frequency: float,
     *,
-    depths: ArrayLike | None = None,
-    reflection: ArrayLike | None = None,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
+    depths: NumericArrayLike | None = None,
+    reflection: NumericArrayLike | None = None,
+    angles_deg: NumericArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     speed_of_sound: float = _C_DEFAULT,
@@ -536,11 +536,11 @@ def predict_diffuser_polar_response(
 
 def predicted_diffusion_spectrum(
     well_width: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    depths: ArrayLike,
+    depths: NumericArrayLike,
     reflection_of: None = None,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
+    angles_deg: NumericArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     speed_of_sound: float = _C_DEFAULT,

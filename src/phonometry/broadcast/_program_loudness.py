@@ -54,10 +54,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .._report.metadata import ReportMetadata
 
 from .._internal.frozen import OwnsArrays
@@ -357,7 +357,7 @@ class KWeightingResponse(OwnsArrays):
 def k_weighting_response(
     fs: float = _TABLE_RATE,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     n: int | np.integer[Any] = 512,
 ) -> KWeightingResponse:
     """K-weighting magnitude frequency response (BS.1770-5 Annex 1, Tables 1-2).
@@ -435,7 +435,7 @@ def channel_weight[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def channel_weight[V: RealValues, A2: ArrayLike](
+def channel_weight[V: RealValues, A2: NumericArrayLike](
     azimuth: V, elevation: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -447,13 +447,13 @@ def channel_weight[S1: RealScalar, V: RealValues](
 
 
 @overload
-def channel_weight[A1: ArrayLike, A2: ArrayLike](
+def channel_weight[A1: NumericArrayLike, A2: NumericArrayLike](
     azimuth: A1, elevation: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
 
 def channel_weight(
-    azimuth: ArrayLike, elevation: ArrayLike = 0.0
+    azimuth: NumericArrayLike, elevation: NumericArrayLike = 0.0
 ) -> float | NDArray[np.float64]:
     """Position-dependent channel weight ``Gi`` (BS.1770-5 Annex 3, Table 4).
 
@@ -491,7 +491,7 @@ def channel_weight(
     return as_float_or_array(np.where(side, 1.41, 1.0), like=(azimuth, elevation))
 
 
-def _resolve_weights(n_channels: int, weights: ArrayLike | None) -> np.ndarray:
+def _resolve_weights(n_channels: int, weights: NumericArrayLike | None) -> np.ndarray:
     """Return the per-channel weights, defaulting by channel count."""
     require_scalar(n_channels, "n_channels")
     if weights is None:
@@ -606,7 +606,7 @@ def _lra_distribution(short_term_loudness: np.ndarray) -> np.ndarray:
     return np.sort(stl[stl >= threshold])
 
 
-def loudness_range(short_term_loudness: ArrayLike) -> float:
+def loudness_range(short_term_loudness: NumericArrayLike) -> float:
     """Loudness range LRA of a short-term loudness series (EBU Tech 3342).
 
     The input is the ungated short-term loudness (3 s sliding window,
@@ -693,7 +693,7 @@ def true_peak_level(
 def integrated_loudness(
     x: SignalInput,
     fs: float | None = None,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> float:
     """Programme (integrated) loudness in LUFS (BS.1770-5 Annex 1).
 
@@ -729,7 +729,7 @@ def integrated_loudness(
 
 
 def _prepare_signal(
-    x: SignalInput, weights: ArrayLike | None
+    x: SignalInput, weights: NumericArrayLike | None
 ) -> tuple[np.ndarray, np.ndarray]:
     """Coerce to 2D float64, reject an empty signal, resolve weights.
 
@@ -987,7 +987,7 @@ def _lra_edges(short_term: np.ndarray) -> tuple[float, float]:
 def program_loudness(
     x: SignalInput,
     fs: float | None = None,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
     *,
     momentary_step: float = 0.01,
     short_term_step: float = 0.1,

@@ -84,7 +84,7 @@ One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 
 ```python
 ANPAircraft.event_level(
-    observer: ArrayLike,
+    observer: NumericArrayLike,
     operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     aerodrome: Aerodrome | None = None,
@@ -120,8 +120,8 @@ Single-event level at a receiver (see [`ANPDatabase.event_level`](/phonometry/re
 ANPAircraft.noise_contour(
     operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
     metric: Literal['exposure', 'maximum'] = 'exposure',
@@ -262,7 +262,7 @@ Spectral class of this aircraft's NPD for an operation.
 ANPDatabase(
     aircraft: Mapping[str, Mapping[str, str]],
     npd: Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
-    distances_m: ArrayLike,
+    distances_m: NumericArrayLike,
     profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
     spectral_classes: Mapping[str, SpectralClass] | None = None,
 )
@@ -300,7 +300,7 @@ Sorted list of aircraft identifiers in the database.
 ```python
 ANPDatabase.event_level(
     aircraft_id: str,
-    observer: ArrayLike,
+    observer: NumericArrayLike,
     operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     aerodrome: Aerodrome | None = None,
@@ -389,8 +389,8 @@ ANPDatabase.noise_contour(
     aircraft_id: str,
     operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
     metric: Literal['exposure', 'maximum'] = 'exposure',
@@ -691,9 +691,9 @@ ANPNPDCurves(
     metric: Literal['SEL', 'LAmax'],
     operation: Literal['A', 'D'],
     power_parameter: str,
-    powers: ArrayLike,
-    distances_m: ArrayLike,
-    levels: ArrayLike,
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
 )
 ```
 
@@ -720,7 +720,7 @@ with the parent database; copy them before mutating.
 ```python
 ANPNPDCurves.level(
     power: float,
-    distance_m: ArrayLike,
+    distance_m: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

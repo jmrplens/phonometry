@@ -73,7 +73,7 @@ ACCELERATION_LEVEL_REFERENCE_M_S2 = 1e-06
 
 ```python
 apply_band_limiting(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
@@ -116,7 +116,7 @@ and the switch-on transient is part of what they measure.
 
 ```python
 apply_weighting(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
@@ -154,7 +154,7 @@ negligible, as for any block frequency-domain filtering.
 ```python
 band_limiting_factors(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -184,7 +184,7 @@ Tables B.1 to B.9.
 ```python
 band_limiting_response(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> WeightingResponse
 ```
 
@@ -229,7 +229,7 @@ the standard cites it.
 ## combined_daily_exposure
 
 ```python
-combined_daily_exposure(partials: ArrayLike) -> float
+combined_daily_exposure(partials: NumericArrayLike) -> float
 ```
 
 Combine partial exposures into `A(8)` (ISO 5349-1/-2 Eq. (3)).
@@ -254,7 +254,7 @@ $A(8) = \sqrt{\sum_i A_i(8)^2}$.
 ## crest_factor
 
 ```python
-crest_factor(x: Signal | ArrayLike) -> float
+crest_factor(x: Signal | NumericArrayLike) -> float
 ```
 
 Crest factor of a weighted signal (ISO 2631-1 clause 6.2.1).
@@ -311,8 +311,8 @@ Eq. (2)), the term [`combined_daily_exposure`](/phonometry/reference/api/vibrati
 
 ```python
 daily_vibration_exposure(
-    total_values: ArrayLike,
-    durations_s: ArrayLike,
+    total_values: NumericArrayLike,
+    durations_s: NumericArrayLike,
     *,
     kind: Literal['hav', 'wbv'],
     labels: list[str] | tuple[str, ...] | None = None,
@@ -453,8 +453,8 @@ verdict against the limit value, and a footer identity/disclaimer block.
 
 ```python
 energy_equivalent_acceleration(
-    magnitudes: ArrayLike,
-    durations_s: ArrayLike,
+    magnitudes: NumericArrayLike,
+    durations_s: NumericArrayLike,
 ) -> float
 ```
 
@@ -567,7 +567,7 @@ The exposure limit value (ELV) of Article 3 for the kind and metric.
 ```python
 frequency_weighting(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> WeightingResponse
 ```
 
@@ -595,7 +595,10 @@ transition and upward step) of weighting `name` at `frequencies`.
 ## hav_daily_exposure
 
 ```python
-hav_daily_exposure(total_values: ArrayLike, durations_s: ArrayLike) -> float
+hav_daily_exposure(
+    total_values: NumericArrayLike,
+    durations_s: NumericArrayLike,
+) -> float
 ```
 
 Daily exposure `A(8)` for several operations (ISO 5349-1 Eq. (3)).
@@ -670,7 +673,7 @@ Advisory for out-of-range human-vibration measurement conditions.
 
 ```python
 motion_sickness_dose_value(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> float
 ```
@@ -701,7 +704,7 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 
 ```python
 mtvv(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -751,7 +754,7 @@ REFERENCE_DURATION_S = 28800.0
 
 ```python
 running_rms(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -783,7 +786,7 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
 ```python
 vibration_dose_value(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> float
 ```
@@ -813,9 +816,9 @@ m/s^1.75; more sensitive to peaks than the r.m.s. value.
 
 ```python
 vibration_total_value(
-    components: ArrayLike,
+    components: NumericArrayLike,
     *,
-    k: ArrayLike | None = None,
+    k: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -914,10 +917,10 @@ vector total `a_hv` instead (Annex, Part A, point 1).
 
 ```python
 weighted_acceleration(
-    band_accelerations: ArrayLike,
+    band_accelerations: NumericArrayLike,
     weighting: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> WeightedSpectrum
 ```
 
@@ -1009,7 +1012,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ```python
 weighting_factors(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

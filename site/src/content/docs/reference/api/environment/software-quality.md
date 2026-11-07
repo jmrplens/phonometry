@@ -302,7 +302,7 @@ place, and the differences go to [`level_difference_quantiles`](/phonometry/refe
 
 ```python
 level_difference_quantiles(
-    level_differences: ArrayLike,
+    level_differences: NumericArrayLike,
 ) -> LevelDifferenceQuantiles
 ```
 
@@ -511,7 +511,7 @@ RECOMMENDED_SAMPLE_RATIO = 0.01
 ## round_robin_precision
 
 ```python
-round_robin_precision(levels: ArrayLike) -> RoundRobinPrecision
+round_robin_precision(levels: NumericArrayLike) -> RoundRobinPrecision
 ```
 
 The precision of a method from a round robin of programs
@@ -661,7 +661,7 @@ uniform_sample_indices(
     n_points: int | np.integer[Any],
     sample_size: int | np.integer[Any],
     *,
-    horizontal_clearances_m: ArrayLike | None = None,
+    horizontal_clearances_m: NumericArrayLike | None = None,
 ) -> NDArray[np.intp]
 ```
 
@@ -701,9 +701,9 @@ than one point in a hundred is returned with a
 
 ```python
 verify_calculation_results(
-    computed_levels: ArrayLike,
-    lower_limits_db: ArrayLike,
-    upper_limits_db: ArrayLike,
+    computed_levels: NumericArrayLike,
+    lower_limits_db: NumericArrayLike,
+    upper_limits_db: NumericArrayLike,
     *,
     labels: Sequence[str] | None = None,
 ) -> CalculationVerification

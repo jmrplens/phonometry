@@ -66,7 +66,9 @@ from ..._internal.warnings import PhonometryWarning, warn_caller
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "AIR_CORRECTION_LIMIT",
@@ -352,8 +354,8 @@ def air_absorption_correction(
     *,
     volume: float,
     specimen_area_m2: float,
-    attenuation_with_per_m: ArrayLike,
-    attenuation_empty_per_m: ArrayLike,
+    attenuation_with_per_m: NumericArrayLike,
+    attenuation_empty_per_m: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""The correction 4.2.1 caps, as an absorption coefficient.
 
@@ -408,7 +410,7 @@ def air_absorption_correction(
 
 
 def reproducibility_uncertainty(
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> NDArray[np.float64]:
     """Table 1, the reproducibility between European laboratories.
 
@@ -443,7 +445,9 @@ def reproducibility_uncertainty(
     return np.asarray(out, dtype=np.float64)
 
 
-def _lowest_humidity(relative_humidity_percent: ArrayLike | None) -> float | None:
+def _lowest_humidity(
+    relative_humidity_percent: NumericArrayLike | None,
+) -> float | None:
     """The driest of the measurements, or ``None`` when no humidity was given.
 
     4.2.3 checks the humidity for each measurement and 4.2.2 puts a floor under
@@ -534,7 +538,7 @@ def check_ceiling_specimen(
     support_width_mm: float = 0.0,
     support_height_mm: float = 0.0,
     support_center_distance_m: float | None = None,
-    relative_humidity_percent: ArrayLike | None = None,
+    relative_humidity_percent: NumericArrayLike | None = None,
 ) -> CeilingSpecimenCheck:
     """Does the test arrangement meet the printed limits of clause 4?
 

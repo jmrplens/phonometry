@@ -405,7 +405,7 @@ was.
 
 ```python
 AbsorptionAreaSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -781,7 +781,9 @@ was.
 ### AbsorptionSpectrum.values_at()
 
 ```python
-AbsorptionSpectrum.values_at(frequencies: ArrayLike) -> NDArray[np.float64]
+AbsorptionSpectrum.values_at(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 The row's value at each of *frequencies*, or a refusal.

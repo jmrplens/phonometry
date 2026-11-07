@@ -91,7 +91,7 @@ ABSORPTION_RATIO_LIMIT = 0.99
 
 ```python
 airborne_insulation_rating(
-    sound_reduction_index: ArrayLike,
+    sound_reduction_index: NumericArrayLike,
     *,
     spectrum: Literal['road', 'railway'] = 'road',
 ) -> RoadDeviceRating
@@ -212,7 +212,7 @@ Clause 5.8 exceeds it (a reflection ratio of 0,99 itself is not limited).
 
 ```python
 sound_absorption_rating(
-    absorption_coefficients: ArrayLike,
+    absorption_coefficients: NumericArrayLike,
     *,
     spectrum: Literal['road', 'railway'] = 'road',
 ) -> RoadDeviceRating
@@ -251,7 +251,7 @@ print a category ladder, so a railway rating carries none.
 
 ```python
 sound_reflection_rating(
-    reflection_indices: ArrayLike,
+    reflection_indices: NumericArrayLike,
     *,
     lowest_band_hz: float = 200.0,
 ) -> RoadDeviceRating

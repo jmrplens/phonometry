@@ -65,7 +65,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -1057,7 +1056,7 @@ def standard_speech_spectra(
 
 
 def _as_band_vector(
-    values: ArrayLike, name: str, procedure: _BandProcedure | None = None
+    values: NumericArrayLike, name: str, procedure: _BandProcedure | None = None
 ) -> np.ndarray:
     """Validate and return a finite band vector of the procedure's length.
 
@@ -1153,11 +1152,11 @@ def _procedure_speech_spectrum(
 
 def speech_intelligibility_index(
     speech_spectrum: VocalEffort | NumericArrayLike,
-    noise_spectrum: ArrayLike | None = None,
+    noise_spectrum: NumericArrayLike | None = None,
     *,
-    threshold: ArrayLike | None = None,
+    threshold: NumericArrayLike | None = None,
     method: Method = "one-third-octave",
-    band_importance: ArrayLike | None = None,
+    band_importance: NumericArrayLike | None = None,
 ) -> SIIResult:
     """Speech Intelligibility Index (ANSI S3.5-1997, any of the four methods).
 

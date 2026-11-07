@@ -102,10 +102,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -283,8 +282,8 @@ class IntensityReductionResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        fpi: ArrayLike | None = None,
-        residual_index: ArrayLike | None = None,
+        fpi: NumericArrayLike | None = None,
+        residual_index: NumericArrayLike | None = None,
     ) -> str:
         """Render an ISO 15186-1 intensity sound-insulation report to a PDF.
 
@@ -414,8 +413,8 @@ class IntensityElementNormalizedResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        fpi: ArrayLike | None = None,
-        residual_index: ArrayLike | None = None,
+        fpi: NumericArrayLike | None = None,
+        residual_index: NumericArrayLike | None = None,
     ) -> str:
         """Render an ISO 15186-1 element-normalized insulation report to a PDF.
 
@@ -510,7 +509,7 @@ def _positive_area(value: float, name: str) -> float:
 
 @overload
 def adaptation_term_kc(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     boundary_area: float,
     volume: float,
@@ -518,11 +517,11 @@ def adaptation_term_kc(
 
 
 @overload
-def adaptation_term_kc(frequencies: ArrayLike) -> np.ndarray: ...
+def adaptation_term_kc(frequencies: NumericArrayLike) -> np.ndarray: ...
 
 
 def adaptation_term_kc(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     boundary_area: float | None = None,
     volume: float | None = None,
@@ -578,8 +577,8 @@ def adaptation_term_kc(
 
 
 def surface_pressure_intensity_indicator(
-    lp: ArrayLike,
-    l_in: ArrayLike,
+    lp: NumericArrayLike,
+    l_in: NumericArrayLike,
 ) -> np.ndarray:
     r"""Surface pressure-intensity indicator ``FpI`` (ISO 15186-1, Formula (10)).
 
@@ -633,8 +632,8 @@ class SubareaIntensityLevel(OwnsArrays):
 
 
 def subarea_intensity_level(
-    l_in: ArrayLike,
-    measurement_area: ArrayLike,
+    l_in: NumericArrayLike,
+    measurement_area: NumericArrayLike,
 ) -> SubareaIntensityLevel:
     r"""Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
 
@@ -712,12 +711,12 @@ def subarea_intensity_level(
 
 
 def intensity_sound_reduction(
-    lp1: ArrayLike,
-    l_in: ArrayLike,
+    lp1: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     area: float,
-    kc: ArrayLike | None = None,
+    kc: NumericArrayLike | None = None,
 ) -> IntensityReductionResult:
     r"""Intensity sound reduction index per ISO 15186-1:2000 (Formula (7)).
 
@@ -799,8 +798,8 @@ def intensity_sound_reduction(
 
 
 def intensity_element_normalized_difference(
-    lp1: ArrayLike,
-    l_in: ArrayLike,
+    lp1: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     n: int | np.integer[Any] = 1,
@@ -924,7 +923,7 @@ _ANNEX_A_MIN_AREA = 1.0
 
 
 def limp_panel_reduction_index(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     surface_mass: float,
     area: float,
@@ -1085,7 +1084,7 @@ def _low_frequency_limit(*, absorbing_specimen_surface: bool) -> float:
 
 
 def _low_frequency_qualification(
-    l_p: ArrayLike | None,
+    l_p: NumericArrayLike | None,
     l_in: np.ndarray,
     *,
     owner: str,
@@ -1107,7 +1106,7 @@ def _low_frequency_qualification(
 
 
 def _check_low_frequency_bands(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     band_count: int,
     *,
     owner: str,
@@ -1258,13 +1257,13 @@ class LowFrequencyIntensityResult(OwnsArrays):
 
 
 def low_frequency_intensity_reduction(
-    lp_surface: ArrayLike,
-    l_in: ArrayLike,
+    lp_surface: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     area: float,
-    l_p: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    l_p: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyIntensityResult:
     r"""Intensity sound reduction index at low frequencies (ISO 15186-3:2002).
@@ -1462,13 +1461,13 @@ class LowFrequencyElementResult(OwnsArrays):
 
 
 def low_frequency_element_normalized_difference(
-    lp_surface: ArrayLike,
-    l_in: ArrayLike,
+    lp_surface: NumericArrayLike,
+    l_in: NumericArrayLike,
     *,
     measurement_area: float,
     n_elements: int | np.integer[Any] = 1,
-    l_p: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    l_p: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyElementResult:
     r"""Element normalized level difference at low frequencies (ISO 15186-3).

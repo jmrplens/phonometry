@@ -331,27 +331,30 @@ def test_an_alias_of_the_narrow_union_is_read_through(tmp_path: pathlib.Path) ->
     assert sorted(refused) == ["peak(x)", "rms(x)"]
 
 
-def test_the_signal_alias_spelled_with_array_like_is_let_through(
+def test_the_signal_alias_spelled_with_the_numeric_array_like_is_let_through(
     tmp_path: pathlib.Path,
 ) -> None:
     refused = _refused(
         tmp_path,
-        api="""
-        from ._resolve import SignalInput
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+            from ._resolve import SignalInput
 
-        __all__ = ["peak"]
+            __all__ = ["peak"]
 
-        def peak(x: SignalInput) -> float:
-            return float(np.max(np.asarray(x)))
-        """,
-        _resolve="""
-        from numpy.typing import ArrayLike
+            def peak(x: SignalInput) -> float:
+                return float(np.max(np.asarray(x)))
+            """,
+            "_resolve": """
+            from ._internal.types import NumericArrayLike
 
-        class Signal:
-            pass
+            class Signal:
+                pass
 
-        SignalInput = Signal | ArrayLike
-        """,
+            SignalInput = Signal | NumericArrayLike
+            """,
+        },
     )
     assert refused == {}
 
@@ -359,7 +362,14 @@ def test_the_signal_alias_spelled_with_array_like_is_let_through(
 def test_what_the_rule_leaves_alone_is_let_through(tmp_path: pathlib.Path) -> None:
     refused = _refused(
         tmp_path,
-        api="""
+        _validation="""
+        def require_positive(value: float, name: str) -> float:
+            return float(np.asarray(value))
+        """,
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+        from ._internal.types import NumericArrayLike
         from ._validation import require_positive
 
         __all__ = ["Result", "pair", "number", "bounded", "records", "converted"]
@@ -379,7 +389,7 @@ def test_what_the_rule_leaves_alone_is_let_through(tmp_path: pathlib.Path) -> No
         def records(layers: Sequence[str]) -> np.ndarray:
             return np.asarray(layers)
 
-        def converted(levels: ArrayLike) -> np.ndarray:
+        def converted(levels: NumericArrayLike) -> np.ndarray:
             return np.asarray(levels)
 
         def _private(levels: list[float]) -> np.ndarray:
@@ -392,10 +402,7 @@ def test_what_the_rule_leaves_alone_is_let_through(tmp_path: pathlib.Path) -> No
             def _hidden(self, levels: list[float]) -> None:
                 np.asarray(levels)
         """,
-        _validation="""
-        def require_positive(value: float, name: str) -> float:
-            return float(np.asarray(value))
-        """,
+        },
     )
     assert refused == {}
 
@@ -421,6 +428,7 @@ def test_a_vararg_converted_one_argument_at_a_time_is_refused(
     """A vararg's annotation types each argument, which a loop takes in turn."""
     refused = _refused(
         tmp_path,
+        part="array",
         api="""
         __all__ = ["cascade", "stacked", "widened"]
 
@@ -449,6 +457,7 @@ def test_each_parameter_a_loop_over_a_literal_takes_is_followed(
     """``for v in (a, b)`` takes each parameter as it is, in a pair or alone."""
     refused = _refused(
         tmp_path,
+        part="array",
         api="""
         __all__ = ["columns", "report"]
 
@@ -670,6 +679,7 @@ def test_an_overload_head_narrower_than_its_implementation_is_refused(
 ) -> None:
     refused = _refused(
         tmp_path,
+        part="array",
         api="""
         __all__ = ["weighted", "doubled"]
 
@@ -1006,30 +1016,32 @@ def test_an_overload_head_a_none_selects_is_left_alone(
         tmp_path,
         **{
             "_internal.validation": _VALIDATION,
+            "_internal.types": _NUMERIC_TYPES,
             "api": """
+            from ._internal.types import NumericArrayLike
             from ._internal.validation import require_count
 
             __all__ = ["average", "average_narrow"]
 
             @overload
-            def average(levels: ArrayLike, *, axis: None = None) -> float: ...
+            def average(levels: NumericArrayLike, *, axis: None = None) -> float: ...
             @overload
             def average(
-                levels: ArrayLike, *, axis: int | np.integer[Any]
+                levels: NumericArrayLike, *, axis: int | np.integer[Any]
             ) -> np.ndarray: ...
             def average(
-                levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
+                levels: NumericArrayLike, *, axis: int | np.integer[Any] | None = None
             ) -> float | np.ndarray:
                 if axis is not None:
                     require_count(axis, "axis", at_least=None)
                 return float(np.mean(np.asarray(levels)))
 
             @overload
-            def average_narrow(levels: ArrayLike, *, axis: None = None) -> float: ...
+            def average_narrow(levels: NumericArrayLike, *, axis: None = None) -> float: ...
             @overload
-            def average_narrow(levels: ArrayLike, *, axis: int) -> np.ndarray: ...
+            def average_narrow(levels: NumericArrayLike, *, axis: int) -> np.ndarray: ...
             def average_narrow(
-                levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
+                levels: NumericArrayLike, *, axis: int | np.integer[Any] | None = None
             ) -> float | np.ndarray:
                 if axis is not None:
                     require_count(axis, "axis", at_least=None)
@@ -4867,6 +4879,148 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
         "sets Literal['auto'] beside Sequence[str]"
     )
     assert len(refused["headed(state)"]) == 1
+
+
+def test_an_array_of_numbers_written_as_numpy_array_like_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """numpy's ``ArrayLike`` admits any ``str`` and any ``bytes`` where numbers go.
+
+    ``signals.leq("not a signal")`` type-checked, so a parameter that takes
+    numbers is refused when it holds ``ArrayLike``: at the top or beside a
+    ``Signal``, inside a container or a tuple, behind an alias, as the bound
+    of a type parameter of the function or of its class, on an overload
+    head, in a record's field and in the constructor a record declares.
+    The package's ``NumericArrayLike``, numpy's own array types and the
+    arguments a ``Callable`` hands to a caller's function pass, and so does
+    a private helper.
+    """
+    refused = _refused(
+        tmp_path,
+        part="text",
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+            from collections.abc import Callable
+            from dataclasses import dataclass
+
+            from ._internal.types import NumericArrayLike
+
+            class Signal: ...
+
+            Input = Signal | ArrayLike
+            Rows = Sequence[ArrayLike] | NDArray[Any]
+
+            __all__ = [
+                "written", "beside", "aliased", "rows", "window", "bound",
+                "Filter", "headed", "Field", "Built", "numeric", "typed",
+                "called", "Signal",
+            ]
+
+            def written(x: ArrayLike) -> None: ...
+
+            def beside(x: Signal | ArrayLike | None = None) -> None: ...
+
+            def aliased(x: Input) -> None: ...
+
+            def rows(values: Rows) -> None: ...
+
+            def window(window: str | tuple[str | ArrayLike, ...]) -> None: ...
+
+            def bound[A: ArrayLike](values: A) -> A: ...
+
+            class Filter[A: ArrayLike]:
+                def apply(self, x: A) -> A: ...
+
+            @overload
+            def headed(x: Signal) -> Signal: ...
+            @overload
+            def headed(x: ArrayLike) -> np.ndarray: ...
+            def headed(x: Signal | NumericArrayLike) -> object: ...
+
+            @dataclass(frozen=True)
+            class Field:
+                levels: ArrayLike
+
+            @dataclass(frozen=True, kw_only=True)
+            class Built:
+                levels: NDArray[np.float64]
+
+                if TYPE_CHECKING:
+
+                    def __init__(self, *, levels: ArrayLike) -> None: ...
+
+            def numeric(x: Signal | NumericArrayLike) -> None: ...
+
+            def typed(x: NDArray[np.float64] | np.ndarray[Any, Any]) -> None: ...
+
+            def called(
+                statistic: Callable[[ArrayLike], float], x: NumericArrayLike
+            ) -> None: ...
+
+            def _helper(x: ArrayLike) -> None: ...
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "Built.__init__(levels)",
+        "Field(levels)",
+        "Filter.apply(x)",
+        "aliased(x)",
+        "beside(x)",
+        "bound(values)",
+        "headed(x)",
+        "rows(values)",
+        "window(window)",
+        "written(x)",
+    ]
+    assert refused["written(x)"] == [
+        "holds ArrayLike, which admits any str and any bytes, so a text "
+        "type-checks where the numbers go and only the call refuses it; take "
+        "NumericArrayLike"
+    ]
+    assert len(refused["headed(x)"]) == 1
+
+
+def test_an_array_of_labels_is_let_through_by_its_exemption_alone(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A parameter that takes labels keeps ``ArrayLike`` with a reason, and only it.
+
+    An entry of ``TEXT_ARRAYS`` lets its parameter through; one that matches
+    no finding is stale, whether its function went or its parameter now
+    takes numbers.
+    """
+    root = _package(
+        tmp_path,
+        api="""
+        __all__ = ["summary", "levels"]
+
+        def summary(scores: Sequence[float], sites: ArrayLike) -> None: ...
+
+        def levels(values: ArrayLike) -> None: ...
+        """,
+    )
+    findings = [
+        f for f in cpa.findings_in(sorted(root.rglob("*.py")), root) if f.part == "text"
+    ]
+    assert sorted(f.function for f in findings) == ["levels", "summary"]
+    path = findings[0].path
+    monkeypatch.setattr(
+        cpa,
+        "TEXT_ARRAYS",
+        {
+            (path, "summary", "sites"): "the site of each response, any label",
+            (path, "summary", "scores"): "a parameter that takes numbers now",
+            (path, "gone", "sites"): "a function that no longer exists",
+        },
+    )
+    found, stale = cpa.judged(findings)
+    assert [(f.function, f.parameter) for f in found] == [("levels", "values")]
+    assert [key for table, key in stale if table == "TEXT_ARRAYS"] == [
+        (path, "gone", "sites"),
+        (path, "summary", "scores"),
+    ]
 
 
 def test_a_generic_alias_is_read_with_the_arguments_it_is_given(

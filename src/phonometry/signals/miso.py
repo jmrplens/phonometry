@@ -85,10 +85,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels, WindowSpec
+    from .._internal.types import NumericArrayLike, TwoPanels, WindowSpec
 
 __all__ = [
     "MISOCoherenceResult",
@@ -113,8 +113,8 @@ _MIN_INPUT_RECORDS = 2
 
 
 def _records(
-    inputs: Signal | Iterable[Signal | ArrayLike] | ArrayLike,
-) -> Signal | Sequence[Signal | ArrayLike] | ArrayLike:
+    inputs: Signal | Iterable[Signal | NumericArrayLike] | NumericArrayLike,
+) -> Signal | Sequence[Signal | NumericArrayLike] | NumericArrayLike:
     """The input records in a form each check below can read in full.
 
     A generator, a ``map`` or a ``dict`` view of records is read once into a
@@ -132,8 +132,8 @@ def _records(
 
 
 def _resolve_miso_fs(
-    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
-    output: Signal | ArrayLike,
+    inputs: Signal | Sequence[Signal | NumericArrayLike] | NumericArrayLike,
+    output: Signal | NumericArrayLike,
     fs: float | None,
 ) -> float:
     """The one rate of a MISO measurement, from whichever side knows it.
@@ -144,7 +144,7 @@ def _resolve_miso_fs(
     against each other, and two rates would mis-time every phase in the
     result.
     """
-    carrier: Signal | ArrayLike
+    carrier: Signal | NumericArrayLike
     if isinstance(inputs, (Signal, np.ndarray)) or not isinstance(inputs, Sequence):
         carrier = inputs
     else:
@@ -169,14 +169,14 @@ def _resolve_miso_fs(
 
 
 def _validate_inputs(
-    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
-    output: Signal | ArrayLike,
+    inputs: Signal | Sequence[Signal | NumericArrayLike] | NumericArrayLike,
+    output: Signal | NumericArrayLike,
 ) -> tuple[list[NDArray[np.float64]], NDArray[np.float64]]:
     """Validate the input records and the output, all one-dimensional.
 
     Accepts a sequence of 1-D arrays or a 2-D ``(q, n)`` array of inputs.
     """
-    rows: list[Signal | ArrayLike]
+    rows: list[Signal | NumericArrayLike]
     if isinstance(inputs, Signal):
         # A multichannel Signal *is* the set of input records: the q channels
         # of one recording are exactly what the model calls x1..xq. Its
@@ -602,8 +602,8 @@ class MISOCoherenceResult(OwnsArrays):
 
 
 def miso_coherence(
-    inputs: Signal | Iterable[Signal | ArrayLike] | ArrayLike,
-    output: Signal | ArrayLike,
+    inputs: Signal | Iterable[Signal | NumericArrayLike] | NumericArrayLike,
+    output: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,

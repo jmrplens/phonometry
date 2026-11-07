@@ -65,10 +65,10 @@ from ._shared import _TOLERANCE
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandMapping
+    from ..._internal.types import BandMapping, NumericArrayLike
 
 Direction = Literal["vertical", "lateral"]
 
@@ -171,7 +171,9 @@ def _intervals(distances: NDArray[np.float64]) -> NDArray[np.float64]:
     return upper - lower
 
 
-def _response_magnitudes(responses: ArrayLike, band_count: int) -> NDArray[np.float64]:
+def _response_magnitudes(
+    responses: NumericArrayLike, band_count: int
+) -> NDArray[np.float64]:
     """The responses as positive, finite magnitudes, one column per band.
 
     Formula 1 divides each by the direct response, so none may be zero, and a
@@ -195,7 +197,7 @@ def _response_magnitudes(responses: ArrayLike, band_count: int) -> NDArray[np.fl
     return matrix
 
 
-def _excitation_grid(distances: ArrayLike) -> NDArray[np.float64]:
+def _excitation_grid(distances: NumericArrayLike) -> NDArray[np.float64]:
     """The excitation positions as the grid Formula 1 sums over.
 
     6.7 and Figure 2 put the direct response at the accelerometer, position
@@ -223,7 +225,7 @@ def _excitation_grid(distances: ArrayLike) -> NDArray[np.float64]:
 
 
 def _measurement(
-    distances: ArrayLike, responses: ArrayLike, band_count: int
+    distances: NumericArrayLike, responses: NumericArrayLike, band_count: int
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The grid and the responses of a set of measurements, checked together.
 
@@ -271,10 +273,10 @@ class TrackDecayRate(OwnsArrays):
             self,
             *,
             direction: Direction,
-            frequencies: ArrayLike,
-            decay_rates_db_per_m: ArrayLike,
-            distances: ArrayLike | None = None,
-            responses: ArrayLike | None = None,
+            frequencies: NumericArrayLike,
+            decay_rates_db_per_m: NumericArrayLike,
+            distances: NumericArrayLike | None = None,
+            responses: NumericArrayLike | None = None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -406,10 +408,10 @@ class TrackDecayRate(OwnsArrays):
 
 
 def track_decay_rate(
-    responses: ArrayLike,
+    responses: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    distances: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    distances: NumericArrayLike | None = None,
     sleeper_spacing_m: float = _DEFAULT_SLEEPER_SPACING_M,
     direction: Direction = "vertical",
 ) -> TrackDecayRate:
@@ -446,7 +448,7 @@ def track_decay_rate(
     """
     require_choice(direction, "direction", ("vertical", "lateral"))
     frequencies = require_positive_array(frequencies, "frequencies")
-    grid: ArrayLike = (
+    grid: NumericArrayLike = (
         track_decay_excitation_positions(sleeper_spacing_m=sleeper_spacing_m)
         if distances is None
         else distances

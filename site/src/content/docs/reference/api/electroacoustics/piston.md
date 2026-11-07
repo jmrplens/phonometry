@@ -88,7 +88,7 @@ piston_directivity(
 
 piston_directivity(
     ka: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    theta: ArrayLike,
+    theta: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 piston_directivity(
@@ -97,8 +97,8 @@ piston_directivity(
 ) -> NDArray[np.float64]
 
 piston_directivity(
-    ka: ArrayLike,
-    theta: ArrayLike,
+    ka: NumericArrayLike,
+    theta: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -127,9 +127,9 @@ $D(0) = 1$.
 
 ```python
 piston_directivity_pattern(
-    ka: ArrayLike,
+    ka: NumericArrayLike,
     *,
-    angles_rad: ArrayLike | None = None,
+    angles_rad: NumericArrayLike | None = None,
 ) -> PistonDirectivity
 ```
 
@@ -166,7 +166,7 @@ piston_reactance(
     x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-piston_reactance(x: ArrayLike) -> float | NDArray[np.float64]
+piston_reactance(x: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 Piston reactance function $X_1(x) = 2 H_1(x) / x$ (`H1` Struve
@@ -200,7 +200,7 @@ piston_resistance(
     x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-piston_resistance(x: ArrayLike) -> float | NDArray[np.float64]
+piston_resistance(x: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 Piston resistance function $R_1(x) = 1 - 2 J_1(x) / x$.
@@ -295,8 +295,8 @@ plot_piston_geometry(
     radius: float,
     *,
     ax: Axes | None = ...,
-    angles_rad: ArrayLike,
-    directivity: ArrayLike,
+    angles_rad: NumericArrayLike,
+    directivity: NumericArrayLike,
     lobe_label: str | None = ...,
     language: Literal['en', 'es'] = ...,
     **kwargs: Any,
@@ -344,11 +344,11 @@ normalised far-field lobe is overlaid on the radiation side.
 ```python
 radiating_piston(
     radius: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-    angles_rad: ArrayLike | None = None,
+    angles_rad: NumericArrayLike | None = None,
 ) -> RadiatingPistonResult
 ```
 

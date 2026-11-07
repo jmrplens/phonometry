@@ -72,10 +72,10 @@ of meshed Schroeder-type diffusers against the library's Fraunhofer model
 ContourPhasors(
     *,
     frequency: float,
-    positions: ArrayLike,
-    normals: ArrayLike,
-    pressure: ArrayLike,
-    normal_velocity: ArrayLike,
+    positions: NumericArrayLike,
+    normals: NumericArrayLike,
+    pressure: NumericArrayLike,
+    normal_velocity: NumericArrayLike,
     segment: float,
 )
 ```
@@ -119,7 +119,7 @@ identical simulation without the scatterer and subtract its
 ```python
 far_field_from_contour(
     contour: ContourPhasors,
-    angles_deg: ArrayLike,
+    angles_deg: NumericArrayLike,
     *,
     distance: float | None = None,
     origin: tuple[float, float] = (0.0, 0.0),

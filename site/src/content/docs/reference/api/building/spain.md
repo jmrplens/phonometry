@@ -142,9 +142,9 @@ for a reverberation time), and the rounded value is compared with the limit.
 
 ```python
 d2m_nt_a(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     spectrum: Literal['pink', 'railway'] = 'pink',
 ) -> DBHRGlobalIndexResult
 ```
@@ -181,9 +181,9 @@ For a road-traffic or aircraft dominant site the quantity is
 
 ```python
 d2m_nt_atr(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     spectrum: Literal['traffic', 'aircraft'] = 'traffic',
 ) -> DBHRGlobalIndexResult
 ```
@@ -316,10 +316,10 @@ DB_HR_FREQUENCIES_HZ = (100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 
 
 ```python
 db_hr_global_index(
-    band_values: ArrayLike,
+    band_values: NumericArrayLike,
     spectrum: Literal['pink', 'traffic', 'railway', 'aircraft'] = 'pink',
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     name: str | None = None,
 ) -> DBHRGlobalIndexResult
 ```
@@ -622,9 +622,9 @@ A single DB-HR performance requirement.
 
 ```python
 dnt_a(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DBHRGlobalIndexResult
 ```
 
@@ -650,9 +650,9 @@ A-weighted standardized level difference `DnT,A` (Formula (A.7)).
 
 ```python
 ra(
-    reduction_index: ArrayLike,
+    reduction_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DBHRGlobalIndexResult
 ```
 
@@ -678,9 +678,9 @@ A-weighted global sound reduction index `RA` for pink noise.
 
 ```python
 ra_tr(
-    reduction_index: ArrayLike,
+    reduction_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DBHRGlobalIndexResult
 ```
 

@@ -63,11 +63,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
-    from ..._internal.types import TwoPanels
+    from ..._internal.types import NumericArrayLike, TwoPanels
 
 __all__ = [
     "PileStrikeResult",
@@ -105,7 +105,7 @@ def single_strike_sel(pressure_pa: SignalInput, fs: float | None = None) -> floa
     return sound_exposure_level(pressure_pa, fs)
 
 
-def cumulative_sel(single_sels: ArrayLike) -> float:
+def cumulative_sel(single_sels: NumericArrayLike) -> float:
     r"""Cumulative sound exposure level over N strikes (ISO 18406
     Formulae 8-9).
 

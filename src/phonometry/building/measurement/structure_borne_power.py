@@ -80,10 +80,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 
@@ -137,7 +136,7 @@ _FREE_VELOCITY_REFERENCE: float = 5.0e-8
 _MOBILITY_LEVEL_CONSTANT = (_REFERENCE_VELOCITY / _REFERENCE_FORCE) ** 2
 
 
-def spatial_mean_velocity_level(levels: ArrayLike) -> float:
+def spatial_mean_velocity_level(levels: NumericArrayLike) -> float:
     r"""Spatial-average velocity level over the plate (EN 15657, Formula 12).
 
     :math:`L_\mathrm{v} = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)`,
@@ -154,7 +153,7 @@ def spatial_mean_velocity_level(levels: ArrayLike) -> float:
 
 
 def plate_loss_factor(
-    reverberation_time: ArrayLike, *, frequency: ArrayLike
+    reverberation_time: NumericArrayLike, *, frequency: NumericArrayLike
 ) -> np.ndarray:
     r"""Plate loss factor :math:`\eta = 2.2 / (f\, T_\mathrm{s})` (EN 15657, Formula 13).
 
@@ -173,12 +172,12 @@ def plate_loss_factor(
 
 
 def structure_borne_power_level(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     mass_per_area: float,
     area: float,
-    loss_factor: ArrayLike,
+    loss_factor: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     reference_velocity: float = _REFERENCE_VELOCITY,
 ) -> np.ndarray:
     r"""Structure-borne power injected into the reception plate (EN 15657, Formula 14).
@@ -391,13 +390,13 @@ class StructureBornePowerResult(OwnsArrays):
 
 
 def reception_plate_power(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     mass_per_area: float,
     area: float,
     *,
-    frequency: ArrayLike,
-    loss_factor: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    frequency: NumericArrayLike,
+    loss_factor: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
 ) -> StructureBornePowerResult:
     r"""Reception-plate injected structure-borne sound power (EN 15657, clause 7).
 
@@ -450,8 +449,8 @@ def reception_plate_power(
 
 
 def equivalent_blocked_force_level(
-    power_level: ArrayLike,
-    plate_mobility: ArrayLike,
+    power_level: NumericArrayLike,
+    plate_mobility: NumericArrayLike,
 ) -> np.ndarray:
     r"""Equivalent blocked force level, squared (UNE-EN 15657:2018, Formula 15).
 
@@ -500,7 +499,7 @@ def equivalent_blocked_force_level(
 
 
 def characteristic_reception_plate_power(
-    blocked_force_level: ArrayLike,
+    blocked_force_level: NumericArrayLike,
     *,
     characteristic_mobility: float = _CHARACTERISTIC_PLATE_MOBILITY,
 ) -> np.ndarray:
@@ -535,8 +534,8 @@ def characteristic_reception_plate_power(
 
 
 def equivalent_free_velocity_level(
-    power_level: ArrayLike,
-    plate_mobility: ArrayLike,
+    power_level: NumericArrayLike,
+    plate_mobility: NumericArrayLike,
 ) -> np.ndarray:
     r"""Equivalent free velocity level of the source (UNE-EN 15657:2018, Formula 18).
 
@@ -586,8 +585,8 @@ def equivalent_free_velocity_level(
 
 
 def source_mobility_from_levels(
-    free_velocity_level: ArrayLike,
-    blocked_force_level: ArrayLike,
+    free_velocity_level: NumericArrayLike,
+    blocked_force_level: NumericArrayLike,
 ) -> np.ndarray:
     r"""Equivalent source mobility magnitude (UNE-EN 15657:2018, Formula 19).
 
@@ -630,7 +629,7 @@ def source_mobility_from_levels(
     )
 
 
-def mean_free_velocity_level(levels: ArrayLike) -> float:
+def mean_free_velocity_level(levels: NumericArrayLike) -> float:
     r"""Mean free velocity level over positions (ISO 9611:1996, equation (9)).
 
     :math:`\overline{L}_{vx} = 10 \log_{10}\left[ \frac{1}{N} \sum 10^{L_{vxi}/10}

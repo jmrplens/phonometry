@@ -83,11 +83,11 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
 
 __all__ = [
     "EQResponseResult",
@@ -616,9 +616,9 @@ class ParametricEQ:
     def filter(self, x: Signal) -> Signal: ...
 
     @overload
-    def filter(self, x: ArrayLike) -> np.ndarray: ...
+    def filter(self, x: NumericArrayLike) -> np.ndarray: ...
 
-    def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
+    def filter(self, x: Signal | NumericArrayLike) -> Signal | np.ndarray:
         """Apply the EQ cascade to a signal.
 
         :param x: Input signal (1D or 2D ``[channels, samples]``), or a
@@ -708,7 +708,7 @@ def parametric_eq(
 
 @overload
 def parametric_eq(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     sections: EQSection | Sequence[EQSection],
@@ -716,7 +716,7 @@ def parametric_eq(
 
 
 def parametric_eq(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     sections: EQSection | Sequence[EQSection],

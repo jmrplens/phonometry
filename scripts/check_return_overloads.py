@@ -280,7 +280,7 @@ EXEMPT: dict[tuple[str, str], str] = {
     ),
     (
         "src/phonometry/room/steady_field.py",
-        "steady_state_spl (overload room_constant: ArrayLike)",
+        "steady_state_spl (overload room_constant: NumericArrayLike)",
     ): (
         "four arguments broadcast into the result (sound_power_level, "
         "distance, the absorption measure, directivity) on each of the "
@@ -289,7 +289,7 @@ EXEMPT: dict[tuple[str, str], str] = {
     ),
     (
         "src/phonometry/room/steady_field.py",
-        "steady_state_spl (overload absorption_area: ArrayLike)",
+        "steady_state_spl (overload absorption_area: NumericArrayLike)",
     ): (
         "the head for the absorption area, the other measure of the "
         "room_constant head: the same four arguments broadcast (see that "

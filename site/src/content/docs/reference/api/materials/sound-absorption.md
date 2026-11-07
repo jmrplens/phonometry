@@ -61,12 +61,12 @@ correction); a caller holding ISO 9613-1 `alpha` values can convert them with
 
 ```python
 absorption_area(
-    t60: ArrayLike,
+    t60: NumericArrayLike,
     volume: float,
     *,
     temperature_c: float = 20.0,
     speed_of_sound: float | None = None,
-    m: ArrayLike = 0.0,
+    m: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -98,8 +98,8 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 
 ```python
 absorption_coefficient(
-    t1: ArrayLike,
-    t2: ArrayLike,
+    t1: NumericArrayLike,
+    t2: NumericArrayLike,
     volume: float,
     sample_area: float,
     *,
@@ -107,8 +107,8 @@ absorption_coefficient(
     temperature2_c: float | None = None,
     speed_of_sound1: float | None = None,
     speed_of_sound2: float | None = None,
-    m1: ArrayLike = 0.0,
-    m2: ArrayLike = 0.0,
+    m1: NumericArrayLike = 0.0,
+    m2: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -165,16 +165,16 @@ Advisory for out-of-range or non-physical ISO 354 absorption inputs.
 
 ```python
 measure_sound_absorption(
-    t_empty: ArrayLike,
-    t_specimen: ArrayLike,
+    t_empty: NumericArrayLike,
+    t_specimen: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     area: float,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
     speed_of_sound: float | None = None,
-    m: ArrayLike = 0.0,
+    m: NumericArrayLike = 0.0,
 ) -> SoundAbsorptionMeasurement
 ```
 
@@ -221,7 +221,7 @@ with-specimen climates differ.
 
 ```python
 power_attenuation_from_alpha(
-    attenuation_db_per_m: ArrayLike,
+    attenuation_db_per_m: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

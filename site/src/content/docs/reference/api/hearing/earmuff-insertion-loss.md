@@ -80,12 +80,12 @@ ATF_FRONT_TO_RANDOM_INDEX = {500.0: 1.7, 630.0: 2.2, 800.0: 2.8, 1000.0: 3.2, 12
 
 ```python
 check_plane_progressive_wave(
-    end_face_levels: ArrayLike,
+    end_face_levels: NumericArrayLike,
     *,
-    facing_levels: ArrayLike | None = None,
-    facing_away_levels: ArrayLike | None = None,
-    front_to_rear_index: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    facing_levels: NumericArrayLike | None = None,
+    facing_away_levels: NumericArrayLike | None = None,
+    front_to_rear_index: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> PlaneProgressiveWaveCheck
 ```
 
@@ -127,12 +127,12 @@ not a condition judged here.
 
 ```python
 check_random_incidence_field(
-    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    directional_levels: ArrayLike | None = None,
-    front_to_random_index: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    directional_levels: NumericArrayLike | None = None,
+    front_to_random_index: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck
 ```
 
@@ -179,11 +179,11 @@ unjudged.
 
 ```python
 earmuff_insertion_loss(
-    open_levels: ArrayLike,
-    occluded_levels: ArrayLike,
+    open_levels: NumericArrayLike,
+    occluded_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    isolation_cup_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    isolation_cup_levels: NumericArrayLike | None = None,
     fixture_uncertainty_db: float = 0.3,
     sound_field_uncertainty_db: float = 0.5,
     equipment_uncertainty_db: float = 0.2,
@@ -688,10 +688,10 @@ RANDOM_INCIDENCE_VARIATION_LIMITS = ((5.0, 5.0), (4.0, 4.0))
 
 ```python
 verify_fixture_isolation(
-    open_levels: ArrayLike,
-    cup_levels: ArrayLike,
+    open_levels: NumericArrayLike,
+    cup_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FixtureIsolationVerification
 ```
 

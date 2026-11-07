@@ -171,9 +171,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "CERTIFIED_RESULT_TOLERANCE_DB",
@@ -455,7 +456,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
 
 def level_difference_quantiles(
-    level_differences: ArrayLike,
+    level_differences: NumericArrayLike,
 ) -> LevelDifferenceQuantiles:
     r"""The 0,1- and 0,9-quantiles of a sample of level differences
     (ISO 17534-1:2015, C.4).
@@ -498,7 +499,7 @@ def uniform_sample_indices(
     n_points: int | np.integer[Any],
     sample_size: int | np.integer[Any],
     *,
-    horizontal_clearances_m: ArrayLike | None = None,
+    horizontal_clearances_m: NumericArrayLike | None = None,
 ) -> NDArray[np.intp]:
     r"""The single points of a uniform random sample (ISO 17534-1:2015, C.2).
 
@@ -636,7 +637,7 @@ def contour_sample_chainages_m(
 # --------------------------------------------------------------------------- #
 # 4.5.2 and A.3: the precision of a method across programs
 # --------------------------------------------------------------------------- #
-def _level_matrix(levels: ArrayLike) -> NDArray[np.float64]:
+def _level_matrix(levels: NumericArrayLike) -> NDArray[np.float64]:
     """A round robin's levels as a float64 matrix C.4 can rank, or a refusal.
 
     The shared matrix guard names ``levels`` when numpy cannot read it
@@ -767,7 +768,7 @@ class RoundRobinPrecision(OwnsArrays):
         )
 
 
-def round_robin_precision(levels: ArrayLike) -> RoundRobinPrecision:
+def round_robin_precision(levels: NumericArrayLike) -> RoundRobinPrecision:
     r"""The precision of a method from a round robin of programs
     (ISO 17534-1:2015, 4.5.2 and A.3).
 
@@ -944,9 +945,9 @@ class CalculationVerification(OwnsArrays):
 
 
 def verify_calculation_results(
-    computed_levels: ArrayLike,
-    lower_limits_db: ArrayLike,
-    upper_limits_db: ArrayLike,
+    computed_levels: NumericArrayLike,
+    lower_limits_db: NumericArrayLike,
+    upper_limits_db: NumericArrayLike,
     *,
     labels: Sequence[str] | None = None,
 ) -> CalculationVerification:

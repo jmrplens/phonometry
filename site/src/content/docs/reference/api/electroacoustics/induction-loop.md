@@ -193,7 +193,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 assess_background_noise(
-    noise_levels: ArrayLike,
+    noise_levels: NumericArrayLike,
     *,
     noise_is_tonal: bool = False,
 ) -> BackgroundNoiseAssessment
@@ -308,7 +308,7 @@ operator".
 ## band_limit_response
 
 ```python
-band_limit_response(frequencies: ArrayLike) -> np.ndarray
+band_limit_response(frequencies: NumericArrayLike) -> np.ndarray
 ```
 
 The theoretical response of the band limiting of the pink noise, in dB.
@@ -386,7 +386,7 @@ own zero crossings.
 ## field_strength
 
 ```python
-field_strength(level: ArrayLike) -> np.ndarray
+field_strength(level: NumericArrayLike) -> np.ndarray
 ```
 
 The magnetic field strength of a level in dB re 400 mA/m, in A/m.
@@ -412,7 +412,7 @@ prints 566 mA/m, which is $400\sqrt{2}$).
 ## field_strength_level
 
 ```python
-field_strength_level(field_strength_a_per_m: ArrayLike) -> np.ndarray
+field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray
 ```
 
 The magnetic field strength level, in dB re 400 mA/m (IEC 60118-4:2014 3.1).
@@ -439,7 +439,7 @@ $$
 
 ```python
 field_strength_meter(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: int | np.integer[Any],
     *,
     weighting: Literal['Z', 'A'] = 'Z',
@@ -733,7 +733,9 @@ The smallest margin, in dB: negative when the requirement fails.
 ## magnetic_flux_density
 
 ```python
-magnetic_flux_density(field_strength_a_per_m: ArrayLike) -> np.ndarray
+magnetic_flux_density(
+    field_strength_a_per_m: NumericArrayLike,
+) -> np.ndarray
 ```
 
 The magnetic flux density in air of a field strength (IEC 60118-4:2014 E.6).
@@ -836,7 +838,7 @@ choice and is not part of the points.
 ## telecoil_response
 
 ```python
-telecoil_response(angle_deg: ArrayLike) -> np.ndarray
+telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray
 ```
 
 The relative response of a telecoil off its axis, in dB (IEC 60118-4:2014 E.2).
@@ -931,13 +933,13 @@ first doubling.
 
 ```python
 verify_induction_loop_system(
-    field_strength_levels: ArrayLike,
+    field_strength_levels: NumericArrayLike,
     *,
     specified_level: float = 0.0,
-    frequencies: ArrayLike | None = None,
-    response_db: ArrayLike | None = None,
-    background_noise_levels: ArrayLike | None = None,
-    system_noise_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    response_db: NumericArrayLike | None = None,
+    background_noise_levels: NumericArrayLike | None = None,
+    system_noise_levels: NumericArrayLike | None = None,
     noise_is_tonal: bool = False,
 ) -> InductionLoopVerification
 ```
@@ -1002,13 +1004,13 @@ off is also assessed against the recommendations of 7.2
 
 ```python
 verify_small_volume_system(
-    field_strength_levels: ArrayLike,
+    field_strength_levels: NumericArrayLike,
     *,
     layout: Literal['refuge_small', 'refuge_large', 'counter', 'refuge_useful_volume', 'counter_useful_volume'],
-    heights_m: ArrayLike | None = None,
-    standing_area_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
-    response_db: ArrayLike | None = None,
+    heights_m: NumericArrayLike | None = None,
+    standing_area_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    response_db: NumericArrayLike | None = None,
 ) -> InductionLoopVerification
 ```
 

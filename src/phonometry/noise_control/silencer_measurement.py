@@ -104,9 +104,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "CIRCULAR_CUT_ON_COEFFICIENT",
@@ -404,10 +405,10 @@ def _raise_band_mismatch(counts: dict[str, int]) -> None:
 
 
 def substitution_insertion_loss(
-    substitution_level: ArrayLike,
-    object_level: ArrayLike,
+    substitution_level: NumericArrayLike,
+    object_level: NumericArrayLike,
     *,
-    reverberation_times: tuple[ArrayLike, ArrayLike] | None = None,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = None,
 ) -> NDArray[np.float64]:
     r"""The insertion loss of the two test series, band by band.
 
@@ -470,7 +471,7 @@ def substitution_insertion_loss(
     return np.asarray(difference + 10.0 * np.log10(t2 / t1), dtype=np.float64)
 
 
-def octave_insertion_loss(insertion_loss: ArrayLike) -> NDArray[np.float64]:
+def octave_insertion_loss(insertion_loss: NumericArrayLike) -> NDArray[np.float64]:
     r"""ISO 11691 Equation (2): three one-third octaves into their octave.
 
     .. math::
@@ -558,7 +559,7 @@ def microphone_spread_limit(frequency: float) -> float:
     return ISO7235_SPREAD_LIMITS[-1][1]
 
 
-def microphone_positions_required(levels: ArrayLike, frequency: float) -> int:
+def microphone_positions_required(levels: NumericArrayLike, frequency: float) -> int:
     """ISO 7235 6.2.1: three microphone positions, or five.
 
     :param levels: The band levels measured at the three key positions, in
@@ -694,7 +695,7 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
 
 
 def open_end_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     area: float,
     *,
     solid_angle_sr: float = 2.0 * math.pi,
@@ -756,7 +757,7 @@ def open_end_transmission_loss(
 
 
 def open_end_reflection_coefficient(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     area: float,
     *,
     solid_angle_sr: float = 2.0 * math.pi,
@@ -798,7 +799,7 @@ def open_end_reflection_coefficient(
 
 
 def measured_transmission_loss(
-    insertion_loss: ArrayLike, open_end_loss: ArrayLike
+    insertion_loss: NumericArrayLike, open_end_loss: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""ISO 7235 Equation (6): the transmission loss of an air-terminal unit.
 
@@ -835,9 +836,9 @@ def measured_transmission_loss(
 
 
 def flow_noise_power_level(
-    pressure_level: ArrayLike,
-    open_end_loss: ArrayLike,
-    room_correction: ArrayLike,
+    pressure_level: NumericArrayLike,
+    open_end_loss: NumericArrayLike,
+    room_correction: NumericArrayLike,
 ) -> NDArray[np.float64]:
     r"""ISO 7235 Equation (7): the sound power of the flow noise.
 
@@ -1178,10 +1179,10 @@ def pressure_loss_coefficient(
 
 
 def average_pressure_loss_coefficient(
-    object_static_pressure_pa: ArrayLike,
-    object_dynamic_pressure_pa: ArrayLike,
-    substitution_static_pressure_pa: ArrayLike,
-    substitution_dynamic_pressure_pa: ArrayLike,
+    object_static_pressure_pa: NumericArrayLike,
+    object_dynamic_pressure_pa: NumericArrayLike,
+    substitution_static_pressure_pa: NumericArrayLike,
+    substitution_dynamic_pressure_pa: NumericArrayLike,
 ) -> float:
     r"""ISO 7235 Equation (18): the substitution method, averaged.
 
@@ -1278,7 +1279,7 @@ def upstream_straight_length(area: float) -> float:
 
 
 def duct_sound_power_level(
-    room_sound_power_level: ArrayLike, end_reflection_loss: ArrayLike
+    room_sound_power_level: NumericArrayLike, end_reflection_loss: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""ISO 5135 Equation (1): back from the room to the duct.
 
@@ -1405,7 +1406,9 @@ class OperatingLine(OwnsArrays):
         return plot_operating_line(self, ax=ax, language=language, **kwargs)
 
 
-def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
+def fit_operating_line(
+    duty: NumericArrayLike, levels: NumericArrayLike
+) -> OperatingLine:
     r"""ISO 5135 5.5.2: the least-squares line through the test points.
 
     The abscissa is the logarithm of the duty, which is the volume flow rate

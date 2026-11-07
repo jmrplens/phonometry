@@ -128,7 +128,7 @@ bending_stress(
 ) -> NDArray[np.float64]
 
 bending_stress(
-    peak_velocity_m_s: ArrayLike,
+    peak_velocity_m_s: NumericArrayLike,
     *,
     dynamic_modulus_pa: float,
     density: float,
@@ -302,7 +302,7 @@ FOUNDATION_FREQUENCIES_HZ = (1.0, 10.0, 50.0, 100.0)
 ```python
 foundation_guideline_curve(
     building_class: Literal['commercial', 'residential', 'sensitive'],
-    frequency: ArrayLike | None = None,
+    frequency: NumericArrayLike | None = None,
 ) -> GuidelineCurve
 ```
 
@@ -350,7 +350,7 @@ guideline_velocity(
 
 guideline_velocity(
     building_class: Literal['commercial', 'residential', 'sensitive'],
-    frequency: ArrayLike | None = None,
+    frequency: NumericArrayLike | None = None,
     *,
     location: Literal['foundation', 'top_floor'] = 'foundation',
     duration: Literal['short_term', 'long_term'] = 'short_term',

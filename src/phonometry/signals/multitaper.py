@@ -43,10 +43,11 @@ from .spectra import _validate_confidence, _validate_scaling
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "MultitaperSpectralDensityResult",
@@ -378,7 +379,7 @@ def _chi2_interval_pointwise(
 
 
 def multitaper_psd(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     time_half_bandwidth: float = 4.0,

@@ -81,10 +81,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine, TwoPanels
+    from ..._internal.types import NumericArrayLike, ReportEngine, TwoPanels
     from ..._report.metadata import ReportMetadata
 
 
@@ -157,7 +157,7 @@ FRF_UNITS: Mapping[FrfKind, str] = MappingProxyType(
 )
 
 
-def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]:
+def _omega(frequency: NumericArrayLike, name: str = "frequency") -> NDArray[np.float64]:
     r"""Angular frequency :math:`\omega = 2 \pi f` (rad/s); rejects f <= 0.
 
     *name* is the caller's own name for the frequency, for the message.
@@ -190,7 +190,11 @@ def _from_receptance(
 
 
 def convert_frf(
-    value: ArrayLike, source: FrfKind, target: FrfKind, *, frequency: ArrayLike
+    value: NumericArrayLike,
+    source: FrfKind,
+    target: FrfKind,
+    *,
+    frequency: NumericArrayLike,
 ) -> np.ndarray:
     r"""Convert a frequency-response function between any two kinds (Table 1).
 
@@ -274,7 +278,7 @@ def convert_frf(
 
 
 def sdof_receptance(
-    frequency: ArrayLike, mass: float, stiffness: float, damping: float
+    frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
 ) -> np.ndarray:
     r"""Receptance of a viscously damped SDOF resonator (closed form).
 
@@ -299,7 +303,7 @@ def sdof_receptance(
 
 
 def sdof_mobility(
-    frequency: ArrayLike, mass: float, stiffness: float, damping: float
+    frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
 ) -> np.ndarray:
     r"""Mobility of a viscously damped SDOF resonator: :math:`Y = j \omega H`.
 
@@ -314,7 +318,7 @@ def sdof_mobility(
 
 
 def sdof_accelerance(
-    frequency: ArrayLike, mass: float, stiffness: float, damping: float
+    frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
 ) -> np.ndarray:
     r"""Accelerance of a viscously damped SDOF resonator: :math:`A = -\omega^2 H`.
 
@@ -478,10 +482,10 @@ class RigidMassCalibrationResult(OwnsArrays):
 
 
 def verify_rigid_mass_calibration(
-    frf: ArrayLike,
+    frf: NumericArrayLike,
     mass: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     quantity: Quantity = "accelerance",
 ) -> RigidMassCalibrationResult:
     r"""Verify an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
@@ -529,7 +533,7 @@ def verify_rigid_mass_calibration(
 
 
 def random_error_percent(
-    coherence: ArrayLike, n_averages: int | np.integer[Any]
+    coherence: NumericArrayLike, n_averages: int | np.integer[Any]
 ) -> np.ndarray:
     r"""Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
 
@@ -743,7 +747,7 @@ class MobilityResult(OwnsArrays):
 
 
 def sdof_mobility_result(
-    frequency: ArrayLike, mass: float, stiffness: float, damping: float
+    frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
 ) -> MobilityResult:
     """SDOF driving-point mobility bundled as a :class:`MobilityResult`.
 

@@ -231,7 +231,7 @@ for (const path of ['/reference/conformance/', '/es/reference/conformance/']) {
 			const image = (element) => before(element)?.backgroundImage ?? '';
 			const mask = (element) => {
 				const box = before(element);
-				return box ? box.maskImage || box.webkitMaskImage || 'none' : '';
+				return box ? box.maskImage || box.getPropertyValue('-webkit-mask-image') || 'none' : '';
 			};
 			const row = document.querySelector('tr[data-verdict] > td:first-child');
 			const legend = document.querySelector('.legend-entry[data-mark]');

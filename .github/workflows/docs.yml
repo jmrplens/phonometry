@@ -260,6 +260,10 @@ jobs:
       # mode. A catalogue row read through a field its table does not carry,
       # or a DOM lookup that can come back null, used to reach the reader as a
       # silently empty cell; this refuses them before anything is published.
+      # A hint fails it too (check:types passes --minimumFailingSeverity
+      # hint): a deprecated API or a binding nothing reads is only a hint, and
+      # 132 of them had gathered in a log that passed, every one printed with
+      # the label "warning" over a summary that counted none.
       # The TypeScript it runs on is pinned to 6.x in package.json: the native
       # compiler of 7.x does not yet expose the API astro check drives.
       - name: Check the types of every page and component

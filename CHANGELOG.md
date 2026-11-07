@@ -2304,6 +2304,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The documentation site's type check fails on a hint, and the site has
+  none.** `pnpm run check:types` passed with 132 hints: 127 uses in
+  `site/src/content.config.ts` of zod helpers that Astro 7 and zod 4
+  deprecate (`z` imported from `astro:content`, `z.string().url()`,
+  `z.ZodIssueCode`, `.merge()`), four bindings in the site's scripts that
+  nothing read, and one read of the deprecated `webkitMaskImage`, each printed
+  with the label "warning" over a summary that counted none. They are gone,
+  and the check runs `astro check --minimumFailingSeverity hint`, so a new one
+  fails the docs workflow.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with

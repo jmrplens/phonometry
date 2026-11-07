@@ -20,7 +20,7 @@
 //
 // Usage: node scripts/check-math-render.mjs [--dist dist] [--sources ../docs ../site]
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -91,7 +91,7 @@ function delimiterProblems(sourceDirs) {
       // the site reads one, over the lines of its block (shared/page-prose.mjs).
       const shown = shownLines(lines, code, { mdx });
       const read = pageLines(shown, { kind });
-      lines.forEach((line, index) => {
+      lines.forEach((_line, index) => {
         if (code[index]) return;
         const trimmed = strayDelimiter(shown[index], read[index].rest);
         if (trimmed === null) return;

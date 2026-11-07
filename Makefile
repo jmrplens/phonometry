@@ -807,8 +807,10 @@ api-docs:
 
 # Transplant docs/ERRATA.md and docs/ERRATA.es.md into their Starlight pages:
 # one page per document family under site/src/content/docs/{,es/}reference/errata/,
-# and the index there, below the hand-written introduction it keeps. CI fails
-# if this drifts (see the `site-reports` job in python-app.yml).
+# and the index there, below the hand-written introduction it keeps. It writes
+# nothing and fails when a family corrects a work no page cites, which the
+# bibliography then cannot name (rule F59). CI fails on that, and if the pages
+# drift (see the `site-reports` job in python-app.yml).
 site-reports:
 	$(PYTHON) scripts/generate_site_reports.py
 

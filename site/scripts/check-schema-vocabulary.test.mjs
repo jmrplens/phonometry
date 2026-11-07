@@ -6,8 +6,8 @@
 // learned to accept a property outside its domain would stay green there for
 // good. The defects that prompted it are replayed here and must fail, their
 // corrected shapes must pass, and each rule (supertypes, references, untyped
-// nodes, literals, roles, the exceptions, the nodes another site publishes)
-// has a case of its own. The cases run on the committed vocabulary, so a
+// nodes, literals, roles, the JSON-LD keywords, the exceptions, the Person
+// node jmrp.io publishes) has a case of its own. The cases run on the committed vocabulary, so a
 // regenerated file that lost a relation the site relies on fails here too,
 // and the command itself is run on builds of one page to read its exit
 // status.
@@ -30,12 +30,12 @@ import {
 	loadVocabulary,
 } from './check-schema-vocabulary.mjs';
 import { VOCABULARY_PATH, compactVocabulary, serializeVocabulary } from './generate-schema-vocabulary.mjs';
+import { personId } from '../src/data/site.mjs';
 import { referenceNode } from '../src/lib/citations.mjs';
 
 const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-schema-vocabulary.mjs');
 const vocabulary = loadVocabulary();
 const ORIGIN = 'https://docs.jmrp.io/phonometry';
-const PERSON_ID = 'https://jmrp.io/#person';
 
 /**
  * The software node as the site publishes it, carrying the two properties
@@ -339,10 +339,10 @@ test("a node with properties and no type anywhere fails, unless its @id is anoth
 	assert.deepEqual(failuresOf(context), {});
 });
 
-test('on the node another site publishes, and every node in it, only a range fails; the rest is reported', () => {
+test('on the Person node jmrp.io publishes, and every node in it, only a range fails; the rest is reported', () => {
 	const person = (extra) => ({
 		'@type': 'Person',
-		'@id': PERSON_ID,
+		'@id': personId,
 		name: 'A maintainer',
 		inLanguage: 'en',
 		dateModifed: '2026-10-29',
@@ -362,6 +362,118 @@ test('on the node another site publishes, and every node in it, only a range fai
 	]);
 	assert.deepEqual(failuresOf(onePage([person({ alumniOf: { '@type': 'Place', name: 'A city' } })])), {
 		outOfRange: ['Person.alumniOf = Place (range EducationalOrganization|Organization)'],
+	});
+});
+
+test('a top-level node this site writes fails on every finding whatever its @id; only the Person node does not', () => {
+	// A head block keyed by a standards body's address or a DOI is still
+	// this site's writing; only the Person node is spliced from jmrp.io.
+	const outside =
+		'ItemList.inLanguage (domain BroadcastService|CommunicateAction|CreativeWork|Event|LinkRole|PronounceableText|WriteAction)';
+	const list = (id) => onePage([{ '@type': 'ItemList', '@id': id, inLanguage: 'en' }]);
+	for (const id of ['https://www.iso.org/standard/1.html', 'https://doi.org/10.1000/x', `${ORIGIN}/x/#list`]) {
+		assert.deepEqual(failuresOf(list(id)), { outsideDomain: [outside] }, id);
+		assert.deepEqual(reported('elsewhere', list(id)), [], id);
+	}
+	const topic = {
+		'@type': 'Thing',
+		'@id': 'http://www.wikidata.org/entity/Q82811',
+		subjectOf: { '@type': 'CreativeWork', volumeNumber: '3' },
+	};
+	assert.deepEqual(failuresOf(onePage([topic])), {
+		outsideDomain: ['CreativeWork.volumeNumber (domain PublicationVolume)'],
+	});
+});
+
+test("a node with no type is still held to what does not depend on one, whoever's its @id is", () => {
+	const holding = (isPartOf) => onePage([{ '@type': 'TechArticle', isPartOf }]);
+	const foreign = holding({ '@id': 'https://example.org/#journal', dateModifed: 'x', hasPart: { '@type': 'Place' } });
+	assert.deepEqual(failuresOf(foreign), {
+		unknownProperty: ['<https://example.org/#journal>.dateModifed'],
+		outOfRange: ['<https://example.org/#journal>.hasPart = Place (range CreativeWork)'],
+	});
+	assert.deepEqual(reported('unresolvedReference', foreign), ['TechArticle.isPartOf -> https://example.org/#journal']);
+	assert.deepEqual(failuresOf(holding({ name: 'A journal', dateModifed: 'x' })), {
+		unknownProperty: ['TechArticle.isPartOf.dateModifed'],
+		untypedNode: ['TechArticle.isPartOf = a node {name, dateModifed}'],
+	});
+	// On the Person node, a value outside its range fails in a node with no
+	// type as it does in a typed one.
+	const person = {
+		'@type': 'Person',
+		'@id': personId,
+		knowsAbout: { name: 'A topic', subjectOf: { '@type': 'Place', name: 'A city' } },
+	};
+	assert.deepEqual(failuresOf(onePage([person])), {
+		outOfRange: ['Person.knowsAbout.subjectOf = Place (range CreativeWork|Event)'],
+	});
+});
+
+test('a value object is a literal whatever datatype its @type names, and holds no node', () => {
+	assert.deepEqual(
+		failuresOf(
+			onePage([
+				{
+					'@type': 'CreativeWork',
+					dateModified: { '@value': '2026-11-07', '@type': 'http://www.w3.org/2001/XMLSchema#date' },
+					datePublished: { '@value': '2026-01-06', '@type': 'xsd:date' },
+					text: { '@value': { name: 'x', notAProperty: 1 }, '@type': '@json' },
+				},
+			]),
+		),
+		{},
+	);
+	assert.deepEqual(failuresOf(onePage([{ '@type': 'ItemList', dateModified: { '@value': '2026-11-07', '@type': 'xsd:date' } }])), {
+		outsideDomain: ['ItemList.dateModified (domain CreativeWork|DataFeedItem)'],
+	});
+});
+
+test('the members of a @list or a @set are held to the range one by one, and the list is no node', () => {
+	const members = [{ '@type': 'TechArticle' }, { '@type': 'Place', name: 'A city' }];
+	const outOfRange = { outOfRange: ['CollectionPage.hasPart = Place (range CreativeWork)'] };
+	for (const hasPart of [{ '@list': members }, { '@set': members }, [{ '@list': members }], members]) {
+		assert.deepEqual(failuresOf(onePage([{ '@type': 'CollectionPage', hasPart }])), outOfRange, JSON.stringify(hasPart));
+	}
+	assert.deepEqual(
+		failuresOf(
+			onePage([
+				{
+					'@type': 'CollectionPage',
+					keywords: { '@list': ['acoustics', 'noise'] },
+					hasPart: { '@list': [{ '@type': 'TechArticle', volumeNumber: '3' }] },
+				},
+			]),
+		),
+		{ outsideDomain: ['TechArticle.volumeNumber (domain PublicationVolume)'] },
+	);
+});
+
+test('under @reverse, the node held is the subject, checked against the domain, and its holder against the range', () => {
+	const website = (reverse) => onePage([{ '@type': 'WebSite', '@id': `${ORIGIN}/#website`, '@reverse': reverse }]);
+	assert.deepEqual(failuresOf(website({ isPartOf: [{ '@type': 'WebPage', name: 'A page' }, { '@type': 'TechArticle' }] })), {});
+	assert.deepEqual(failuresOf(website({ volumeNumber: { '@type': 'Place', name: 'A city' } })), {
+		outsideDomain: ['Place.volumeNumber (domain PublicationVolume), by @reverse'],
+		outOfRange: ['Place.volumeNumber = WebSite (range Integer|Text), by @reverse'],
+	});
+	assert.deepEqual(failuresOf(website({ partOfWebsite: { '@type': 'WebPage' } })), {
+		unknownProperty: ['WebSite.@reverse.partOfWebsite'],
+	});
+	assert.deepEqual(failuresOf(website({ isPartOf: { name: 'A page', dateModifed: 'x' } })), {
+		unknownProperty: ['WebSite.@reverse.isPartOf.dateModifed'],
+		untypedNode: ['WebSite.@reverse.isPartOf = a node {name, dateModifed}'],
+	});
+});
+
+test('what a node groups under @nest is its own, and an @included node is a node of the graph', () => {
+	const outside =
+		'ItemList.inLanguage (domain BroadcastService|CommunicateAction|CreativeWork|Event|LinkRole|PronounceableText|WriteAction)';
+	assert.deepEqual(failuresOf(onePage([{ '@type': 'TechArticle', '@nest': { inLanguage: 'en', wordCount: 3 } }])), {});
+	assert.deepEqual(
+		failuresOf(onePage([{ '@type': 'ItemList', '@nest': [{ numberOfItems: 2, '@nest': { inLanguage: 'en' } }] }])),
+		{ outsideDomain: [outside] },
+	);
+	assert.deepEqual(failuresOf(onePage([{ '@type': 'WebSite', '@included': [{ '@type': 'ItemList', inLanguage: 'en' }] }])), {
+		outsideDomain: [outside],
 	});
 });
 

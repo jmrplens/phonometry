@@ -17,7 +17,8 @@
 // The site-wide graph is one block on the pages of both languages, so its
 // descriptions, feature list and keywords are held to carry each text in
 // English and in Spanish, the feature list one entry per topic that teaches,
-// and no placeholder; its requirements are held to pyproject.toml, whatever floors and markers the
+// and no placeholder or bare area name ("files") among the keywords; its
+// requirements are held to pyproject.toml, whatever floors and markers the
 // file gives (scripts/shared/requirement-defects.test.mjs holds the sentence
 // to the lines that give each Python a floor of its own), and every API page
 // to the release and the Python it documents.
@@ -34,7 +35,7 @@ import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
 import { glossaryTermSet } from '../src/lib/glossary-structured-data.mjs';
-import { en as homeEn } from '../src/data/home.ts';
+import { en as homeEn, es as homeEs } from '../src/data/home.ts';
 import { dependencies, extras, softwareRequirements } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { domainIds, topics } from '../src/data/topics.mjs';
@@ -1118,6 +1119,46 @@ test('a placeholder published as a standard or as a keyword fails, in either lan
 	assert.equal(joined.status, 1);
 	assert.match(joined.err, new RegExp(`FAIL SoftwareApplication keywords publish "${placeholder}" as a keyword`));
 	assert.match(joined.err, /FAIL SoftwareApplication keywords hold no keyword in Spanish/);
+	assert.match(joined.err, /FAIL SoftwareApplication keywords publish "files", the name of an area that says nothing about acoustics on its own/);
+});
+
+test('the name of an area that says nothing about acoustics, published as a keyword, fails in either language', (t) => {
+	const replaced = [homeEn, homeEs].flatMap(({ coverage }) => coverage.areas.filter((area) => area.keyword));
+	assert.ok(replaced.length >= 2, 'no area of the landing pages gives a keyword of its own; update this test');
+	const names = new Map(replaced.map((area) => [area.keyword, area.name.toLowerCase()]));
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.keywords = node.keywords.map((keyword) =>
+					names.has(keyword?.['@value']) ? { ...keyword, '@value': names.get(keyword['@value']) } : keyword,
+				);
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	for (const area of replaced) {
+		assert.match(
+			ran.err,
+			new RegExp(
+				`FAIL SoftwareApplication keywords publish "${RegExp.escape(area.name.toLowerCase())}", the name of an area ` +
+					'that says nothing about acoustics on its own \\(on 10 pages\\)',
+			),
+		);
+	}
+	assert.match(ran.err, /keywords publish "files"/);
+	assert.match(ran.err, /keywords publish "archivos"/);
+	// The check names the Files topic itself, so a keywords list that names
+	// it in either language fails whatever the landing page's rows declare.
+	const bare = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.keywords = [...node.keywords, { '@value': 'Archivos', '@language': 'es' }];
+			},
+		}),
+	});
+	assert.equal(bare.status, 1);
+	assert.match(bare.err, /FAIL SoftwareApplication keywords publish "archivos", the name of an area that says nothing about acoustics on its own/);
+	assert.doesNotMatch(bare.err, /keywords publish "files"/);
 });
 
 test('requirements typed by hand, as every page published them, fail and name what they leave out', (t) => {

@@ -57,13 +57,14 @@
 // has to be one text in English and one in Spanish, each tagged and each the
 // text src/data/scope.mjs writes; the feature list has to give, in each
 // language, one entry per topic in the order src/data/topics.mjs lists them,
-// opening with the topic's own label there; and no feature or keyword may
-// publish the placeholder. The software's requirements are held to
-// pyproject.toml, as src/data/repo-stats.mjs reads it: the Python it requires,
-// every requirement as one phrase with its versions and the Python its marker
-// limits it to, and every extra by name (scripts/shared/requirement-defects.mjs).
-// Every API page has to name the release in VERSION and the Python
-// pyproject.toml requires.
+// opening with the topic's own label there; no feature or keyword may
+// publish the placeholder, and no keyword the bare name of an area whose row
+// gives a keyword in its place ("files"). The software's requirements are held
+// to pyproject.toml, as src/data/repo-stats.mjs reads it: the Python it
+// requires, every requirement as one phrase with its versions and the Python
+// its marker limits it to, and every extra by name
+// (scripts/shared/requirement-defects.mjs). Every API page has to name the
+// release in VERSION and the Python pyproject.toml requires.
 //
 // The About page is held to the Person node it carries: every span of years
 // the page writes, "(2011-2018)", "from 2019 to 2023", "de 2019 a 2023" or any
@@ -394,6 +395,26 @@ const LANGUAGES = ['en', 'es'];
 /** What the landing page's standards cell says, in each language, of an area no standard governs. */
 const PLACEHOLDERS = [homeEn.coverage.noStandard, homeEs.coverage.noStandard];
 
+/**
+ * The topics whose label says nothing about acoustics on its own: "Files" is
+ * a word every program has. Named here, not read off the keyword the landing
+ * page's row gives in its place, so that a row that loses its keyword fails
+ * the check instead of taking the label off the list.
+ */
+const GENERIC_TOPICS = ['io'];
+
+/**
+ * The area names, in lower case and in both languages, that are not keywords
+ * on their own: those of the topics above, and of every row of either landing
+ * page that gives a keyword in its place. The site published "files" before.
+ */
+const BARE_LABELS = new Set([
+	...GENERIC_TOPICS.flatMap((id) => LANGUAGES.map((lang) => topics.find((topic) => topic.id === id).label[lang].toLowerCase())),
+	...[homeEn, homeEs].flatMap(({ coverage }) =>
+		coverage.areas.filter((area) => area.keyword).map((area) => area.name.toLowerCase()),
+	),
+]);
+
 /** The label of each topic that teaches, in the order the navigation lists them, by language. */
 const TOPIC_LABELS = Object.fromEntries(
 	LANGUAGES.map((lang) => [lang, domainIds.map((id) => topics.find((topic) => topic.id === id).label[lang])]),
@@ -490,8 +511,9 @@ function featureDefects(featureList) {
 
 /**
  * What the software node's keywords get wrong: each is a text, tagged with a
- * language of the site where it is written in words, and none is the
- * placeholder an area with no governing standard shows.
+ * language of the site where it is written in words, none is the
+ * placeholder an area with no governing standard shows, and none is the bare
+ * name of an area whose row gives a keyword in its place.
  *
  * @param {unknown} keywords The node's `keywords`.
  * @returns {string[]} The defects.
@@ -516,6 +538,11 @@ function keywordDefects(keywords) {
 	);
 	for (const placeholder of PLACEHOLDERS) {
 		if (texts.includes(placeholder.toLowerCase())) defects.push(`SoftwareApplication keywords publish "${placeholder}" as a keyword`);
+	}
+	for (const label of BARE_LABELS) {
+		if (texts.includes(label)) {
+			defects.push(`SoftwareApplication keywords publish "${label}", the name of an area that says nothing about acoustics on its own`);
+		}
 	}
 	return defects;
 }

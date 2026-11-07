@@ -63,6 +63,12 @@ def _outer() -> ast.FunctionDef:
     return function
 
 
+def _line(node: ast.AST) -> int:
+    """The line a binding node the scanner hands back is written on."""
+    assert isinstance(node, ast.stmt | ast.expr)
+    return node.lineno
+
+
 def _calls(root: ast.AST, name: str) -> list[ast.Call]:
     calls = [
         node
@@ -360,6 +366,49 @@ def test_a_default_holds_no_binding_of_its_scope_before_any_has_run() -> None:
     assert ast_scan.live_bindings(tree, [first, second], early) == [first, second]
 
 
+def test_a_default_holds_no_binding_only_the_type_checker_makes() -> None:
+    """A binding an ``if TYPE_CHECKING:`` block holds never runs, so a default
+    read after it holds none of the scope's bindings, at the top of a module
+    and in a class body, even where nothing else binds the name; what reads
+    annotations through :func:`ast_scan.live_bindings` still finds it.
+
+    :func:`ast_scan.held_before` kept the block's binding whenever it was the
+    only one, as :func:`ast_scan.live_bindings` does, so a caller that handed
+    it every binding of the name read ``open`` as the import the type
+    checker reads instead of the builtin.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                from os.path import exists as open
+
+            def read(path, opener=open):
+                return opener(path)
+
+            class Reader:
+                if TYPE_CHECKING:
+                    from os.path import exists as open
+
+                def read(self, path, opener=open):
+                    return opener(path)
+            """
+        )
+    )
+    reader = next(node for node in tree.body if isinstance(node, ast.ClassDef))
+    for scope in (tree, reader):
+        (binding,) = ast_scan.bindings_by_name(scope)["open"]
+        function = next(
+            node for node in scope.body if isinstance(node, ast.FunctionDef)
+        )
+        default = function.args.defaults[0]
+        assert ast_scan.held_before(tree, [binding], default) == []
+        assert ast_scan.live_bindings(tree, [binding], default) == [binding]
+    ast_scan.forget_trees()
+
+
 def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
     """The ``def``s of *name* in *source* the name may hold, by the number
     each returns: at the call stored in *call* (the one call of *name* when
@@ -375,11 +424,12 @@ def _held_at(source: str, name: str, *, call: str | None = None) -> list[int]:
             if isinstance(node, ast.Call) and getattr(node.func, "id", "") == name
         )
     live = ast_scan.live_bindings(tree, bindings, point)
-    values = []
+    values: list[int] = []
     for binding in live:
         returned = binding.body[0]
         assert isinstance(returned, ast.Return)
         assert isinstance(returned.value, ast.Constant)
+        assert isinstance(returned.value.value, int)
         values.append(returned.value.value)
     return values
 
@@ -882,7 +932,7 @@ def test_a_module_name_stands_for_what_a_function_binds_it_to_under_global() -> 
     assert sorted(inside) == ["extra", "read"]
     assert [type(node).__name__ for node in inside["read"]] == ["Name", "FunctionDef"]
     standing = ast_scan.standing_bindings(tree)
-    assert [(type(node).__name__, node.lineno) for node in standing["read"]] == [
+    assert [(type(node).__name__, _line(node)) for node in standing["read"]] == [
         ("Name", 3), ("Name", 7), ("FunctionDef", 13),
     ]  # fmt: skip
     assert [type(node).__name__ for node in standing["extra"]] == ["ImportFrom"]
@@ -942,9 +992,9 @@ def test_a_binding_left_out_stands_neither_at_the_top_nor_under_global() -> None
         for node in ast.walk(child)
     }
     standing = ast_scan.standing_bindings(tree, left_out)
-    assert [node.lineno for node in standing["read"]] == [2, 12]
+    assert [_line(node) for node in standing["read"]] == [2, 12]
     assert standing["extra"] == []
-    assert [node.lineno for node in ast_scan.standing_bindings(tree)["read"]] == [
+    assert [_line(node) for node in ast_scan.standing_bindings(tree)["read"]] == [
         2, 5, 10, 12,
     ]  # fmt: skip
 
@@ -987,11 +1037,11 @@ def test_a_binding_for_the_type_checker_stands_beside_none_that_runs() -> None:
         if isinstance(node, ast.FunctionDef) and node.name == "swap"
     )
     either = ast_scan.bindings_by_name(tree)["either"]
-    assert [node.lineno for node in ast_scan.bindings_from(tree, either, swap)] == [12]
+    assert [_line(node) for node in ast_scan.bindings_from(tree, either, swap)] == [12]
     standing = ast_scan.standing_bindings(tree)
-    assert [node.lineno for node in standing["beside"]] == [2]
-    assert [node.lineno for node in standing["alone"]] == [6]
-    assert [node.lineno for node in standing["either"]] == [12]
+    assert [_line(node) for node in standing["beside"]] == [2]
+    assert [_line(node) for node in standing["alone"]] == [6]
+    assert [_line(node) for node in standing["either"]] == [12]
     assert "inside" not in standing
     left_out = ast_scan.for_the_type_checker(tree)
     assert ast_scan.standing_bindings(tree, left_out)["alone"] == []
@@ -1023,13 +1073,13 @@ def test_a_reader_of_annotations_reads_the_block_and_not_its_else() -> None:
         )
     )
     program = ast_scan.standing_bindings(tree)
-    assert [node.lineno for node in program["Mode"]] == [5]
-    assert [node.lineno for node in program["lazy"]] == [13]
-    assert [node.lineno for node in program["swapped"]] == [14]
+    assert [_line(node) for node in program["Mode"]] == [5]
+    assert [_line(node) for node in program["lazy"]] == [13]
+    assert [_line(node) for node in program["swapped"]] == [14]
     read = ast_scan.standing_bindings(tree, annotations=True)
-    assert [node.lineno for node in read["Mode"]] == [3]
-    assert [node.lineno for node in read["lazy"]] == [8, 13]
-    assert [node.lineno for node in read["swapped"]] == [9, 14]
+    assert [_line(node) for node in read["Mode"]] == [3]
+    assert [_line(node) for node in read["lazy"]] == [8, 13]
+    assert [_line(node) for node in read["swapped"]] == [9, 14]
 
 
 def test_the_body_of_a_function_s_if_type_checking_block_is_emptied() -> None:
@@ -1132,7 +1182,14 @@ def test_a_test_on_type_checking_says_which_branch_runs(
     assert id(written[runs]) not in ast_scan.for_the_type_checker(tree)
     assert id(written[runs]) in ast_scan.for_the_program(tree)
     assert id(written[never]) not in ast_scan.for_the_program(tree)
-    assert [line.targets[0].id for line in ast_scan.what_runs(statement)] == [runs]
+    running = ast_scan.what_runs(statement)
+    names = [
+        line.targets[0].id
+        for line in running
+        if isinstance(line, ast.Assign) and isinstance(line.targets[0], ast.Name)
+    ]
+    assert len(running) == 1
+    assert names == [runs]
 
     tree = ast.parse(f"held = first if {test} else second\n")
     read = {
@@ -1256,6 +1313,75 @@ def test_a_scope_read_as_a_tree_of_its_own_reads_the_flag_of_its_module() -> Non
     ast_scan.forget_trees()
 
 
+@pytest.mark.parametrize(
+    ("prelude", "test", "alone", "in_its_module"),
+    [
+        ("TYPE_CHECKING = True\n", "TYPE_CHECKING", True, False),
+        ("import typing as t\n", "t.TYPE_CHECKING", False, True),
+    ],
+    ids=["module-rebinds-the-flag", "module-names-typing-otherwise"],
+)
+def test_a_scope_read_before_its_module_reads_the_module_s_flag_once_it_is_read(
+    prelude: str, test: str, *, alone: bool, in_its_module: bool
+) -> None:
+    """A function read as a tree of its own before its module reads its own
+    bindings, as a fragment does; once the module is read, the function reads
+    what the module binds the flag to, whatever it was asked before.
+
+    What the function's blocks never run, and which of its two classes of
+    one name stands, were kept from the first reading, so a guard that read
+    a function before its module took the block of a module that binds
+    ``TYPE_CHECKING = True`` for one that never runs, and ran the block of
+    one that imports ``typing as t``, for as long as it ran.
+    """
+    tree = ast.parse(
+        prelude
+        + textwrap.dedent(
+            f"""
+            def f():
+                held = 1
+                if {test}:
+                    held = 2
+                class Box:
+                    def size(self):
+                        return 1
+                if {test}:
+                    class Box:
+                        def size(self):
+                            return 2
+                return held, 3 if {test} else 4
+            """
+        )
+    )
+    function = next(node for node in tree.body if isinstance(node, ast.FunctionDef))
+    first, second = ast_scan.bindings_by_name(function)["held"]
+    returned = function.body[-1]
+    assert isinstance(returned, ast.Return)
+    assert isinstance(returned.value, ast.Tuple)
+    read, chosen = returned.value.elts
+    assert isinstance(chosen, ast.IfExp)
+    sizes = [
+        node
+        for node in ast.walk(function)
+        if isinstance(node, ast.FunctionDef) and node.name == "size"
+    ]
+
+    def reads_the_flag() -> bool:
+        never = id(second) in ast_scan.for_the_type_checker(function)
+        runs = id(chosen.orelse) in ast_scan.for_the_program(function)
+        held = ast_scan.live_bindings(function, [first, second], read)
+        standing = ast_scan.live_class_members(function, sizes)
+        assert runs is never
+        assert held == ([first] if never else [first, second])
+        assert standing == (sizes[:1] if never else sizes)
+        return never
+
+    assert reads_the_flag() is alone
+    ast_scan.for_the_type_checker(tree)
+    assert reads_the_flag() is in_its_module
+    ast_scan.forget_trees()
+
+
 def test_what_a_function_never_runs_is_emptied_in_every_form() -> None:
     """The negated test keeps its body and loses its ``else``, and a conditional
     expression loses the branch that never runs, in a lambda or a comprehension of
@@ -1316,6 +1442,7 @@ def test_a_type_parameter_hides_the_module_name_of_its_spelling() -> None:
         )
     )
     first, box = tree.body[1], tree.body[2]
+    assert isinstance(box, ast.ClassDef)
     in_first, in_body, in_method, in_own, in_plain = _calls(tree, "T")
     assert ast_scan.binding_of(tree, in_first, "T") == ("binding", first)
     assert ast_scan.binding_of(tree, in_body, "T") == ("binding", box)

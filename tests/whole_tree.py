@@ -20,12 +20,21 @@ as any other, and the mark works on one test as it does on a module.
 
 What makes a test one is what it reads, so that is what this plugin checks.
 While a test sets up and runs, it counts the files of the repository's own
-trees (:data:`TREES`) the test opens, the files the higher-scoped fixtures it
-uses opened when they were set up included, and an unmarked test that opened
-:data:`LIMIT` of them or more fails, saying how many and from which trees. A
-test that reads the tree to find what it then runs through the library, so
-that the kernel or a floor dependency decides its verdict, stays in those
-jobs: it stands in :data:`RUNS_THE_LIBRARY` with its reason.
+trees (:data:`TREES`) the test opens, the files each fixture it was given
+opened in the setup it was given included, when that setup is cached past
+the test: a fixture of a wider scope, or one a parametrization with a scope
+of its own caches. The fixtures are those pytest resolved for the test, the
+ones it names and the ones it or a fixture asks for by name with
+``request.getfixturevalue``, and every one each of them reached in its own
+setup, as a parameter or by name, set up there or taken from its cache, so
+the one of a wider scope that a fixture of a narrower scope overrides and
+asks for under its own name counts too. Each is read as the definition it
+is, so of two fixtures of one name written in one place, the one that
+overrides the other keeps a count of its own. An unmarked test that opened
+:data:`LIMIT` of them or more fails, saying how many and from which trees.
+A test that reads the tree to find what it then runs through the library,
+so that the kernel or a floor dependency decides its verdict, stays in
+those jobs: it stands in :data:`RUNS_THE_LIBRARY` with its reason.
 
 The count leaves out a file the import system opens, so that importing a
 module of the package for the first time is no read of it, and a file the
@@ -35,13 +44,14 @@ lists the tree's names without opening its files, or a test that takes what
 a guard's own cache kept from an earlier test of its worker without opening
 anything. ``linecache``, which :func:`inspect.getsource` reads through, is
 emptied before each test, so a source read that way is seen. In the two jobs
-that pass the option no marked test runs, so what a guard's cache holds there
-an unmarked test read, and the first one to read it fails.
+that pass the option no marked test runs, so what a guard's cache holds
+there an unmarked test read, and the first one to read it fails.
 """
 
 from __future__ import annotations
 
 import contextlib
+import functools
 import linecache
 import os
 import re
@@ -53,7 +63,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterator
+    from collections.abc import Callable, Generator, Iterable, Iterator
     from types import FrameType
 
 #: The mark a test that reads the whole repository carries, and the option
@@ -116,7 +126,13 @@ class TreeReads:
 
     :meth:`audit` is an audit hook (:func:`sys.addaudithook`): the ``open``
     event comes with the path of every file the process opens, whichever
-    way it is opened. A file counts while :meth:`counting` holds a set for it.
+    way it is opened. A file counts for every set :meth:`counting` holds
+    while it is opened: the test's, and each fixture's being set up, so a
+    fixture set up inside another's setup counts for that one too.
+
+    A fixture is keyed by its definition, the :class:`pytest.FixtureDef`
+    pytest made of it, which two fixtures of one name written in one place
+    (``@pytest.fixture(name=...)`` on two functions) do not share.
     """
 
     def __init__(self, root: Path) -> None:
@@ -124,8 +140,38 @@ class TreeReads:
         self._package = root / "src" / "phonometry"
         self._sets: list[set[str]] = []
         self._library: dict[str, bool] = {}
-        #: What each higher-scoped fixture opened, by ``(baseid, name)``.
-        self.fixtures: dict[tuple[str, str], set[str]] = {}
+        #: What each fixture cached past a test opened in the last setup of
+        #: it, which is the one a test that uses it is given.
+        self.fixtures: dict[pytest.FixtureDef[object], set[str]] = {}
+        #: The fixtures each of them reached in that setup: those it takes as
+        #: parameters and those it asked for by name, set up there or taken
+        #: from their cache (:meth:`asked`), the one of a wider scope it
+        #: overrides among them when it asked for its own name.
+        self.reached: dict[
+            pytest.FixtureDef[object], tuple[pytest.FixtureDef[object], ...]
+        ] = {}
+
+    def forget(self, fixturedef: pytest.FixtureDef[object]) -> None:
+        """Let go of what a fixture's earlier setup, cached past its test, opened."""
+        self.fixtures.pop(fixturedef, None)
+        self.reached.pop(fixturedef, None)
+
+    def asked(
+        self,
+        asker: pytest.FixtureDef[object] | None,
+        found: pytest.FixtureDef[object] | None,
+    ) -> None:
+        """Note that the fixture *asker* asked for *found* by name.
+
+        A fixture asked for once it is resolved comes from what the test's
+        request holds, with no setup to see, so the ask itself is what
+        :func:`_recording` reports here.
+        """
+        if asker is None or found is None or found is asker:
+            return
+        held = self.reached.get(asker)
+        if held is not None and found not in held:
+            self.reached[asker] = (*held, found)
 
     @contextlib.contextmanager
     def counting(self, opened: set[str]) -> Iterator[None]:
@@ -161,7 +207,8 @@ class TreeReads:
             or self._opened_by_the_import_system_or_the_package(sys._getframe(1))
         ):
             return
-        self._sets[-1].add(relative.as_posix())
+        for opened in self._sets:
+            opened.add(relative.as_posix())
 
     def _opened_by_the_import_system_or_the_package(
         self, frame: FrameType | None
@@ -182,28 +229,54 @@ class TreeReads:
         return False
 
     def read_by(self, item: pytest.Item) -> set[str]:
-        """The files *item* opened, and those its higher-scoped fixtures opened."""
+        """The files *item* opened, and those the fixtures it was given opened.
+
+        The fixtures are the ones its request resolved, each the one pytest
+        gave it under its name: those it names, and those it or a fixture
+        asked for by name with ``request.getfixturevalue``, which the names
+        it was collected with leave out. Then each fixture any of them
+        reached in its setup (:attr:`reached`), the one of a wider scope an
+        override asks for under its own name among them, as far as they go.
+        """
         nothing: set[str] = set()
         own = item.stash.get(_OPENED, nothing)
         opened = set(own)
-        for name in getattr(item, "fixturenames", ()):
-            mine = [
-                baseid
-                for baseid, argname in self.fixtures
-                if argname == name and _within(item.nodeid, baseid)
-            ]
-            if mine:
-                opened |= self.fixtures[(max(mine, key=len), name)]
+        request = getattr(item, "_request", None)
+        given: Iterable[pytest.FixtureDef[object]] = getattr(
+            request, "_fixture_defs", {}
+        ).values()
+        waiting = list(given)
+        seen = set(waiting)
+        while waiting:
+            fixturedef = waiting.pop()
+            opened |= self.fixtures.get(fixturedef, nothing)
+            for further in self.reached.get(fixturedef, ()):
+                if further not in seen:
+                    seen.add(further)
+                    waiting.append(further)
         return opened
 
 
-def _within(nodeid: str, baseid: str) -> bool:
-    """Whether a fixture defined at *baseid* reaches the test *nodeid*."""
-    return (
-        not baseid
-        or nodeid == baseid
-        or nodeid.startswith((f"{baseid}/", f"{baseid}::"))
-    )
+def _recording(
+    original: Callable[[pytest.FixtureRequest, str], object],
+) -> Callable[[pytest.FixtureRequest, str], object]:
+    """``FixtureRequest.getfixturevalue`` that reports what a fixture asked for.
+
+    A fixture's own request asking for a name, whether pytest sets the
+    fixture up for it or hands it from what the test already resolved,
+    reaches the definition pytest gave it (:meth:`TreeReads.asked`). The
+    test's request belongs to no fixture, and reports nothing.
+    """
+
+    @functools.wraps(original)
+    def getfixturevalue(self: pytest.FixtureRequest, argname: str) -> object:
+        value = original(self, argname)
+        _READS.asked(
+            getattr(self, "_fixturedef", None), self._fixture_defs.get(argname)
+        )
+        return value
+
+    return getfixturevalue
 
 
 def key(nodeid: str) -> str:
@@ -232,6 +305,9 @@ def judged(item: pytest.Item, opened: set[str]) -> str | None:
 
 _READS = TreeReads(ROOT)
 _HOOKED: list[bool] = []
+#: What reports a fixture's asks for the life of the process, as the audit
+#: hook, which cannot be removed, does.
+_PATCHED = pytest.MonkeyPatch()
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -251,6 +327,11 @@ def pytest_configure(config: pytest.Config) -> None:
     del config
     if not _HOOKED:
         sys.addaudithook(_READS.audit)
+        _PATCHED.setattr(
+            pytest.FixtureRequest,
+            "getfixturevalue",
+            _recording(pytest.FixtureRequest.getfixturevalue),
+        )
         _HOOKED.append(True)
 
 
@@ -284,12 +365,41 @@ def pytest_runtest_call(item: pytest.Item) -> Generator[None, None, None]:
 def pytest_fixture_setup(
     fixturedef: pytest.FixtureDef[object], request: pytest.FixtureRequest
 ) -> Generator[None, object, object]:
-    del request
-    if fixturedef.scope == "function":
+    # The scope the value is cached at, which a parametrization with a scope
+    # of its own sets: a setup for one test alone runs in that test's setup,
+    # whose count takes what it opens, and what an earlier setup cached past
+    # its test opened is no longer what a test is given.
+    if request.scope == "function":
+        _READS.forget(fixturedef)
         return (yield)
-    opened = _READS.fixtures.setdefault((fixturedef.baseid, fixturedef.argname), set())
-    with _READS.counting(opened):
-        return (yield)
+    # Each setup counts afresh: a fixture with parameters is set up once for
+    # each, and the test given one setup reads that one alone.
+    opened: set[str] = set()
+    _READS.fixtures[fixturedef] = opened
+    _READS.reached[fixturedef] = ()
+    # The fixtures pytest resolved for the test, shared by every request of
+    # it: those the fixture takes as parameters are there before its setup
+    # runs, and those it asks for by name, its own name among them, appear
+    # while it runs, before pytest puts the fixture itself there. One it
+    # asks for once resolved appears in neither: the ask reports it.
+    resolved: dict[str, pytest.FixtureDef[object]] = request._fixture_defs
+    before = set(resolved)
+    try:
+        with _READS.counting(opened):
+            return (yield)
+    finally:
+        names = (
+            *fixturedef.argnames,
+            *(name for name in resolved if name not in before),
+        )
+        reached = (resolved.get(name) for name in names)
+        _READS.reached[fixturedef] = tuple(
+            dict.fromkeys(
+                found
+                for found in (*_READS.reached.get(fixturedef, ()), *reached)
+                if found is not None and found is not fixturedef
+            )
+        )
 
 
 @pytest.hookimpl(wrapper=True)

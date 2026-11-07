@@ -1267,6 +1267,402 @@ def test_an_alias_of_a_def_holds_it_whatever_a_later_class_binds_the_name_to(
     }
 
 
+def test_a_call_that_may_reach_a_def_or_the_class_of_its_name_reads_both(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``make`` bound to a saved ``def BandRecord`` in one branch and to the
+    record class of that name in the other builds the record on one of the
+    two paths, at the top of a module and read from another module; and
+    ``built``, bound to a saved ``def Spectrum`` that hands back its argument
+    in one branch and to a record of that name that copies in the other,
+    hands back the caller's array on the first path, whatever the second
+    does.
+
+    A function and a class of one name share one key, and the ``def`` an
+    alias pinned there made the call a call of the ``def`` alone, so the
+    record the other branch builds kept the caller's arrays and passed. The
+    record that copies takes nothing away from what the ``def`` returns, so
+    reading the class alone at such a call would pass ``BandResult`` the
+    caller's array unseen.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        def BandRecord(frequencies, levels):
+            return np.array(frequencies)
+
+        saved = BandRecord
+
+        @dataclass(frozen=True)
+        class BandRecord:
+            frequencies: NDArray[np.float64]
+            levels: NDArray[np.float64]
+
+        if os.environ.get("RATING"):
+            make = saved
+        else:
+            make = BandRecord
+
+        def through_either(frequencies, levels):
+            return make(frequencies, levels)
+
+        def through_the_saved_def(frequencies, levels):
+            return saved(frequencies, levels)
+        """,
+        importer="""
+        from . import rating
+
+        def through_an_attribute(frequencies, levels):
+            return rating.make(frequencies, levels)
+        """,
+        owning="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays
+        from .results import BandResult
+
+        def Spectrum(frequencies):
+            return frequencies
+
+        handing_back = Spectrum
+
+        @dataclass(frozen=True)
+        class Spectrum(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        if os.environ.get("RATING"):
+            built = handing_back
+        else:
+            built = Spectrum
+
+        def through_either_spectrum(frequencies, levels):
+            f = built(frequencies)
+            return BandResult(frequencies=f, levels=None)
+
+        def through_the_copying_record(frequencies, levels):
+            f = Spectrum(frequencies)
+            return BandResult(frequencies=f, levels=None)
+        """,
+    )
+    assert found == {
+        ("through_either", "BandRecord.frequencies", "frequencies"),
+        ("through_either", "BandRecord.levels", "levels"),
+        ("through_an_attribute", "BandRecord.frequencies", "frequencies"),
+        ("through_an_attribute", "BandRecord.levels", "levels"),
+        ("through_either_spectrum", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_class_an_alias_holds_is_read_with_its_own_fields(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``saved``, bound to a ``class Kept`` before a later one of the name
+    replaced it, builds the class it was bound to, and ``copying`` likewise;
+    a name with a ``class Either`` in each branch of an ``if`` builds either.
+
+    A key held one class, the last ``class`` statement of it, so the guard
+    read each of these with the fields and bases of the last: the record
+    that keeps the caller's array passed, a copy it needs was refused as
+    made twice, and the other way round for the record that copies.
+    """
+    found = _findings(
+        tmp_path,
+        kept="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only_copy
+
+        @dataclass(frozen=True)
+        class Kept:
+            frequencies: NDArray[np.float64]
+
+        saved = Kept
+
+        @dataclass(frozen=True)
+        class Kept(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        def through_the_kept_class(frequencies):
+            return saved(frequencies)
+
+        def a_copy_the_kept_class_needs(frequencies):
+            return saved(read_only_copy(frequencies))
+
+        def a_copy_the_last_class_makes(frequencies):
+            return Kept(read_only_copy(frequencies))
+        """,
+        owned="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only_copy
+
+        @dataclass(frozen=True)
+        class Owned(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        copying = Owned
+
+        @dataclass(frozen=True)
+        class Owned:
+            frequencies: NDArray[np.float64]
+
+        def through_the_copying_class(frequencies):
+            return copying(frequencies)
+
+        def a_copy_made_twice(frequencies):
+            return copying(read_only_copy(frequencies))
+        """,
+        either="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only_copy
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class Either:
+                frequencies: NDArray[np.float64]
+        else:
+            @dataclass(frozen=True)
+            class Either(OwnsArrays):
+                frequencies: NDArray[np.float64]
+
+        def through_either_class(frequencies):
+            return Either(frequencies)
+
+        def a_copy_one_class_needs(frequencies):
+            return Either(read_only_copy(frequencies))
+        """,
+    )
+    assert found == {
+        ("through_the_kept_class", "Kept.frequencies", "frequencies"),
+        ("a_copy_the_last_class_makes", "Kept.frequencies (copied twice)", ""),
+        ("a_copy_made_twice", "Owned.frequencies (copied twice)", ""),
+        ("through_either_class", "Either.frequencies", "frequencies"),
+    }
+
+
+def test_a_copy_is_made_twice_only_where_every_path_of_the_call_copies(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name that may run a function handing back its argument, or build a
+    record that does not copy, as well as a record that copies, needs the
+    copy it is handed on the other path; one whose every function or class
+    is a record that copies copies twice: the record alone, either of two
+    records that copy, bound in two branches, or a class written in each
+    branch that copies in both, called by its name or as a module's
+    attribute, and handed the copy itself or a name bound to it.
+
+    Each record that copies a call may build was held to the copy alone, so
+    ``make(read_only_copy(f))`` was refused as a copy made twice where
+    ``make`` is a saved ``def`` in one branch, or another record in the
+    other, and dropping the copy would hand that path the caller's array.
+    Then a copy was refused only where the call named one key that built
+    one ``class`` statement, so one handed to either of two records that
+    both copy passed, and so did one bound to a name first.
+    """
+    found = _findings(
+        tmp_path,
+        owning="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only_copy
+
+        def Spectrum(frequencies):
+            return frequencies
+
+        handing_back = Spectrum
+
+        @dataclass(frozen=True)
+        class Spectrum(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Plain:
+            frequencies: NDArray[np.float64]
+
+        if os.environ.get("RATING"):
+            built = handing_back
+            record = Plain
+        else:
+            built = Spectrum
+            record = Spectrum
+
+        def beside_a_function(frequencies):
+            return built(read_only_copy(frequencies))
+
+        def beside_a_record_that_keeps(frequencies):
+            return record(read_only_copy(frequencies))
+
+        def alone(frequencies):
+            return Spectrum(read_only_copy(frequencies))
+        """,
+        copying="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays, read_only_copy
+
+        @dataclass(frozen=True)
+        class First(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Second(OwnsArrays):
+            frequencies: NDArray[np.float64]
+
+        if os.environ.get("RATING"):
+            either = First
+
+            @dataclass(frozen=True)
+            class Shown(OwnsArrays):
+                frequencies: NDArray[np.float64]
+        else:
+            either = Second
+
+            @dataclass(frozen=True)
+            class Shown(OwnsArrays):
+                frequencies: NDArray[np.float64]
+
+        def either_record(frequencies):
+            return either(read_only_copy(frequencies))
+
+        def either_class_statement(frequencies):
+            return Shown(read_only_copy(frequencies))
+
+        def bound_copy_to_either_record(frequencies):
+            f = read_only_copy(frequencies)
+            return either(frequencies=f)
+
+        def bound_copy_to_either_class_statement(frequencies):
+            f = read_only_copy(frequencies)
+            return Shown(frequencies=f)
+        """,
+        elsewhere="""
+        from . import copying
+        from ._internal.frozen import read_only_copy
+
+        def either_record_of_the_module(frequencies):
+            return copying.either(read_only_copy(frequencies))
+
+        def either_class_statement_of_the_module(frequencies):
+            return copying.Shown(read_only_copy(frequencies))
+        """,
+    )
+    assert found == {
+        ("alone", "Spectrum.frequencies (copied twice)", ""),
+        ("either_record", "First.frequencies (copied twice)", ""),
+        ("either_record", "Second.frequencies (copied twice)", ""),
+        ("either_class_statement", "Shown.frequencies (copied twice)", ""),
+        ("either_record_of_the_module", "First.frequencies (copied twice)", ""),
+        ("either_record_of_the_module", "Second.frequencies (copied twice)", ""),
+        (
+            "either_class_statement_of_the_module",
+            "Shown.frequencies (copied twice)",
+            "",
+        ),
+        ("bound_copy_to_either_record", "First.frequencies (copied twice, as f)", ""),
+        (
+            "bound_copy_to_either_record",
+            "Second.frequencies (copied twice, as f)",
+            "",
+        ),
+        (
+            "bound_copy_to_either_class_statement",
+            "Shown.frequencies (copied twice, as f)",
+            "",
+        ),
+    }
+
+
+def test_a_call_reads_the_def_or_class_its_function_defines_where_it_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``def`` a function writes after a ``class`` of its name is what the
+    name calls from there on, and one written in a branch beside a class in
+    the other may be.
+
+    The name was read as the class whenever the function defined one of it,
+    so what the ``def`` hands back, the caller's array, never reached the
+    record built from it.
+    """
+    found = _findings(
+        tmp_path,
+        local="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import OwnsArrays
+        from .results import BandResult
+
+        def through_a_later_def(frequencies, levels):
+            @dataclass(frozen=True)
+            class Keep(OwnsArrays):
+                frequencies: NDArray[np.float64]
+
+            def Keep(frequencies):
+                return frequencies
+
+            f = Keep(frequencies)
+            return BandResult(frequencies=f, levels=None)
+
+        def through_either_branch(frequencies, levels):
+            if levels is None:
+                @dataclass(frozen=True)
+                class Local(OwnsArrays):
+                    frequencies: NDArray[np.float64]
+            else:
+                def Local(frequencies):
+                    return frequencies
+            f = Local(frequencies)
+            return BandResult(frequencies=f, levels=None)
+
+        def through_a_later_class(frequencies, levels):
+            def Owned(frequencies):
+                return frequencies
+
+            @dataclass(frozen=True)
+            class Owned(OwnsArrays):
+                frequencies: NDArray[np.float64]
+
+            f = Owned(frequencies)
+            return BandResult(frequencies=f.frequencies, levels=None)
+        """,
+    )
+    assert found == {
+        ("through_a_later_def", "BandResult.frequencies", "frequencies"),
+        ("through_either_branch", "BandResult.frequencies", "frequencies"),
+    }
+
+
 def test_an_argument_after_a_starred_one_may_reach_any_place_from_its_own_on(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -2153,6 +2549,86 @@ def test_a_helper_that_returns_positions_selects_a_copy(
 
 
 @pytest.mark.parametrize(
+    ("helpers", "call"),
+    [
+        (
+            """
+            def _head(n):
+                return np.arange(n)
+
+            class _head:
+                def __init__(self, n):
+                    self.row = 0
+
+                def __index__(self):
+                    return self.row
+            """,
+            "_head(3)",
+        ),
+        (
+            """
+            def _head(n):
+                return np.arange(n)
+
+            if os.environ.get("ROW"):
+                class _head:
+                    def __init__(self, n):
+                        self.row = 0
+
+                    def __index__(self):
+                        return self.row
+            """,
+            "_head(3)",
+        ),
+        (
+            """
+            from . import rows
+            """,
+            "rows._head(3)",
+        ),
+    ],
+    ids=["class-replaces-it", "class-in-a-branch", "from-another-module"],
+)
+def test_a_helper_a_class_of_its_name_may_stand_for_selects_a_view(
+    tmp_path: pathlib.Path, helpers: str, call: str
+) -> None:
+    """A call of a helper that returns positions, where a ``class`` of its
+    name that indexes as one number may stand instead, may select a row,
+    which is a view.
+
+    The call was read as the helper alone, so the record kept the caller's
+    array with no finding.
+    """
+    found = _findings(
+        tmp_path,
+        rows="""
+        import numpy as np
+
+        def _head(n):
+            return np.arange(n)
+
+        class _head:
+            def __init__(self, n):
+                self.row = 0
+
+            def __index__(self):
+                return self.row
+        """,
+        head=f"""
+        import os
+
+        import numpy as np
+
+        from .results import BandResult
+        {textwrap.indent(textwrap.dedent(helpers), " " * 8)}
+        def head(frequencies):
+            return BandResult(frequencies=frequencies[{call}], levels=None)
+        """,
+    )
+    assert found == {("head", "BandResult.frequencies", "frequencies")}
+
+
+@pytest.mark.parametrize(
     "body",
     [
         "kept = dict(bands).copy()['a']",
@@ -2321,6 +2797,274 @@ def test_a_listed_record_and_a_named_tuple_are_held_to_it(
         """,
     )
     assert found == {"BandResult", "Listed", "Pair"}
+
+
+def test_each_class_statement_of_a_public_record_is_held_to_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``class Kept`` that a later one of the name replaced is still built
+    by hand through ``saved``, and a ``class Either`` in one branch of an
+    ``if`` is the record whenever that branch runs.
+
+    Only the last ``class`` statement of a name was read, so a record that
+    does not copy passed beside one of its name that does.
+    """
+    found = _unequipped(
+        tmp_path,
+        kept="""
+        from dataclasses import dataclass
+
+        import numpy as np
+
+        from ._internal.frozen import OwnsArrays
+
+        @dataclass(frozen=True)
+        class Kept:
+            frequencies: np.ndarray
+
+        saved = Kept
+
+        @dataclass(frozen=True)
+        class Kept(OwnsArrays):
+            frequencies: np.ndarray
+        """,
+        either="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+
+        from ._internal.frozen import OwnsArrays
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class Either:
+                frequencies: np.ndarray
+
+            @dataclass(frozen=True)
+            class Both(OwnsArrays):
+                frequencies: np.ndarray
+        else:
+            @dataclass(frozen=True)
+            class Either(OwnsArrays):
+                frequencies: np.ndarray
+
+            @dataclass(frozen=True)
+            class Both(OwnsArrays):
+                frequencies: np.ndarray
+        """,
+    )
+    assert found == {"BandResult", "Kept", "Either"}
+
+
+#: Records whose base is read where their ``class`` statement reads it: a
+#: base with a class in each branch of an ``if``, one that copies and one
+#: that does not; one a later class of its name replaces after the record,
+#: either way round; and one an alias holds, bound again after the record,
+#: either way round.
+_BASES = """
+import os
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays, read_only_copy
+
+if os.environ.get("BANDS"):
+    @dataclass(frozen=True)
+    class _Either:
+        pass
+else:
+    @dataclass(frozen=True)
+    class _Either(OwnsArrays):
+        pass
+
+@dataclass(frozen=True)
+class OnEither(_Either):
+    frequencies: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Late:
+    pass
+
+@dataclass(frozen=True)
+class BeforeTheCopy(_Late):
+    frequencies: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Late(OwnsArrays):
+    pass
+
+@dataclass(frozen=True)
+class _Early(OwnsArrays):
+    pass
+
+@dataclass(frozen=True)
+class BeforeThePlainOne(_Early):
+    frequencies: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Early:
+    pass
+
+@dataclass(frozen=True)
+class _Plain:
+    pass
+
+base = _Plain
+
+@dataclass(frozen=True)
+class ThroughAnAlias(base):
+    frequencies: NDArray[np.float64]
+
+base = _Late
+
+shown = _Late
+
+@dataclass(frozen=True)
+class ThroughACopyingAlias(shown):
+    frequencies: NDArray[np.float64]
+
+shown = _Plain
+
+def build_on_either(frequencies):
+    return OnEither(frequencies)
+
+def build_before_the_copy(frequencies):
+    return BeforeTheCopy(frequencies)
+
+def build_through_an_alias(frequencies):
+    return ThroughAnAlias(frequencies)
+
+def build_through_a_copying_alias(frequencies):
+    return ThroughACopyingAlias(frequencies)
+
+def a_copy_the_record_makes(frequencies):
+    return BeforeThePlainOne(read_only_copy(frequencies))
+"""
+
+
+def test_a_record_s_base_is_the_class_its_statement_reads(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record copies through its base only when every class the base's
+    name may stand for where its ``class`` statement reads it copies: not a
+    base with a plain class in one branch, nor one a class that copies
+    replaced only after the record, nor an alias bound to such a class only
+    after it; and a record built on a base that copies, or on an alias of
+    one, still copies when a plain class takes the name later.
+
+    A base was every class of the package of its bare name, and the record
+    copied when any one of them did, so the first two passed, by hand and
+    from a factory; an alias was no class at all, so a record built on an
+    alias of a class that copies was refused, and the one built on an alias
+    of a plain class was refused only for that reason.
+    """
+    assert _unequipped(tmp_path / "a", bases=_BASES) == {
+        "BandResult",
+        "OnEither",
+        "BeforeTheCopy",
+        "ThroughAnAlias",
+    }
+    assert _findings(tmp_path / "b", bases=_BASES) == {
+        ("build_on_either", "OnEither.frequencies", "frequencies"),
+        ("build_before_the_copy", "BeforeTheCopy.frequencies", "frequencies"),
+        ("build_through_an_alias", "ThroughAnAlias.frequencies", "frequencies"),
+        ("a_copy_the_record_makes", "BeforeThePlainOne.frequencies (copied twice)", ""),
+    }
+
+
+def test_a_base_s_fields_copies_and_attributes_are_those_of_the_class_it_reads(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The fields a record inherits are those of the base its ``class``
+    statement reads, here the second of two classes of the name, and a
+    field a base's ``__post_init__`` copies or seals is the record's own
+    only when every class the base may be does so; an attribute annotated in
+    a plain base is read from the class that stood.
+
+    A base was every class of the package of its name: the fields came from
+    the first, so ``Shaped(frequencies)`` filled a text field; a field one
+    branch's class copied or sealed counted as copied or sealed on both; and
+    an attribute's annotation came from the first class that had it.
+    """
+    found = _findings(
+        tmp_path,
+        fields="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        @dataclass(frozen=True)
+        class _Shape:
+            label: str
+
+        @dataclass(frozen=True)
+        class _Shape:
+            frequencies: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Shaped(_Shape):
+            note: str = ""
+
+        def build_shaped(frequencies):
+            return Shaped(frequencies)
+        """,
+        owned="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import read_only_copy
+        from .results import BandResult
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class _Kept:
+                data: NDArray[np.float64]
+
+                def __post_init__(self):
+                    object.__setattr__(self, "data", read_only_copy(self.data))
+        else:
+            @dataclass(frozen=True)
+            class _Kept:
+                data: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Kept(_Kept):
+            levels: NDArray[np.float64]
+
+        def build_kept(data, levels):
+            return Kept(data, levels)
+
+        def passed_on(record: Kept):
+            return BandResult(frequencies=record.data, levels=None)
+        """,
+        held="""
+        import numpy as np
+
+        class _Holder:
+            sos: float
+
+        class _Holder:
+            sos: np.ndarray
+
+        class Bank(_Holder):
+            def __init__(self, sos):
+                self.sos = np.asarray(sos)
+        """,
+    )
+    assert found == {
+        ("build_shaped", "Shaped.frequencies", "frequencies"),
+        ("build_kept", "Kept.data", "data"),
+        ("build_kept", "Kept.levels", "levels"),
+        ("passed_on", "BandResult.frequencies", "record"),
+        ("Bank.__init__", "self.sos", "sos"),
+    }
 
 
 def test_a_record_that_copies_takes_the_caller_s_array_as_it_is(
@@ -3076,6 +3820,310 @@ def test_the_handover_named_outside_a_function_is_refused(
     """
     found = _handovers(tmp_path, body)
     assert {sink for _, sink in found} == {"handed_over(...): " + reason}
+
+
+#: A ``def`` and a class of one name, each standing where a call reaches the
+#: name: the class a record that keeps what it is given, saved beside the
+#: ``def`` that writes into its array, and a record that copies, replaced by
+#: a ``def`` that keeps the array; and a name bound to that record in one
+#: branch and to a function that keeps the array in the other.
+_RECORD_OR_DEF = """
+import os
+from dataclasses import dataclass
+
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+def fill(frames, n):
+    frames[0] = 1.0
+
+saved = fill
+
+@dataclass(frozen=True)
+class fill:
+    frames: NDArray[np.float64]
+    n: int
+
+if os.environ.get("RUN"):
+    writer = saved
+else:
+    writer = fill
+
+@dataclass(frozen=True)
+class Box(OwnsArrays):
+    frames: NDArray[np.float64]
+    times: NDArray[np.float64]
+
+_KEPT = []
+
+def keep_it(frames, times):
+    _KEPT.append(frames)
+    return frames
+
+if os.environ.get("RUN"):
+    make = Box
+else:
+    make = keep_it
+
+def Box(frames, times):
+    _KEPT.append(frames)
+    return frames
+"""
+
+
+@pytest.mark.parametrize(
+    ("body", "reason"),
+    [
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                writer(frames, n)
+                return Run(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "frames is read where it may be kept",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return Box(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "it is not an argument of a record that inherits OwnsArrays",
+        ),
+        (
+            """
+            def run(n):
+                frames = np.zeros((n, 3))
+                return make(frames=handed_over(frames), times=np.arange(n))
+            """,
+            "it is not an argument of a record that inherits OwnsArrays",
+        ),
+    ],
+    ids=["class-beside-a-saved-def", "def-after-the-record", "record-or-a-function"],
+)
+def test_a_handover_reads_every_def_and_class_a_call_may_reach(
+    tmp_path: pathlib.Path, body: str, reason: str
+) -> None:
+    """A call that may build the class a saved ``def`` shares its name with
+    may keep the array; a call of the name a later ``def`` took from a record
+    that copies runs the ``def``, which builds no record; and a call of a
+    name bound to that record in one branch and to a function in the other
+    may run the function.
+
+    Each was read as one of the two: the saved ``def`` alone wrote into the
+    array, and the record class was what the other two built, whatever the
+    name held where it was read, so all three handovers passed.
+    """
+    found = _handovers(tmp_path, _RECORD_OR_DEF + textwrap.dedent(body))
+    assert len(found) == 1, found
+    ((function, sink),) = found
+    assert function == "run"
+    assert sink.startswith("handed_over(...): " + reason), sink
+
+
+#: Two records that copy bound to one name in two branches, a record that
+#: copies written in each branch, and a name bound to a record that copies in
+#: one branch and to one that keeps what it is given in the other.
+_EITHER_RECORD = """
+import os
+from dataclasses import dataclass
+
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+@dataclass(frozen=True)
+class Other(OwnsArrays):
+    frames: NDArray[np.float64] | None
+    times: NDArray[np.float64]
+
+if os.environ.get("RUN"):
+    either = Run
+    mixed = Run
+
+    @dataclass(frozen=True)
+    class Shown(OwnsArrays):
+        frames: NDArray[np.float64] | None
+        times: NDArray[np.float64]
+else:
+    either = Other
+    mixed = _Plain
+
+    @dataclass(frozen=True)
+    class Shown(OwnsArrays):
+        frames: NDArray[np.float64] | None
+        times: NDArray[np.float64]
+"""
+
+
+@pytest.mark.parametrize(
+    ("name", "refused"),
+    [
+        ("either", None),
+        ("Shown", None),
+        ("mixed", "it is not an argument of a record that inherits OwnsArrays"),
+    ],
+    ids=["two-records-that-copy", "a-class-in-each-branch", "one-that-keeps-it"],
+)
+def test_a_handover_to_a_record_that_copies_whichever_path_runs_passes(
+    tmp_path: pathlib.Path, name: str, refused: str | None
+) -> None:
+    """An array handed over to either of two records that copy, bound to one
+    name in two branches, or to a class that copies written in each branch,
+    goes into a record that copies whichever path runs; one that may go into
+    a record that keeps what it is given is refused.
+
+    The check took a call for the argument of a record only where it named
+    one key that built one ``class`` statement, so it refused the first two
+    as well.
+    """
+    body = f"""
+    def run(n):
+        frames = np.zeros((n, 3))
+        return {name}(frames=handed_over(frames), times=np.arange(n))
+    """
+    found = _handovers(tmp_path, _EITHER_RECORD + textwrap.dedent(body))
+    assert found == (
+        set() if refused is None else {("run", f"handed_over(...): {refused}")}
+    )
+
+
+#: What a factory defines of its own: a record that copies, and the list a
+#: ``def`` of the record's name keeps what it is given in.
+_LOCAL_RECORD = """
+from dataclasses import dataclass
+
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+_KEPT = []
+"""
+
+
+@pytest.mark.parametrize(
+    ("body", "refused"),
+    [
+        (
+            """
+            def run(n):
+                @dataclass(frozen=True)
+                class Box(OwnsArrays):
+                    frames: NDArray[np.float64]
+
+                def Box(frames):
+                    _KEPT.append(frames)
+                    return frames
+
+                frames = np.zeros(n)
+                return Box(frames=handed_over(frames))
+            """,
+            "run",
+        ),
+        (
+            """
+            def run(n):
+                if n > 1:
+                    @dataclass(frozen=True)
+                    class Box(OwnsArrays):
+                        frames: NDArray[np.float64]
+                else:
+                    def Box(frames):
+                        _KEPT.append(frames)
+                        return frames
+                frames = np.zeros(n)
+                return Box(frames=handed_over(frames))
+            """,
+            "run",
+        ),
+        (
+            """
+            def factory():
+                @dataclass(frozen=True)
+                class Box(OwnsArrays):
+                    frames: NDArray[np.float64]
+
+                def Box(frames):
+                    _KEPT.append(frames)
+                    return frames
+
+                def run(n):
+                    frames = np.zeros(n)
+                    return Box(frames=handed_over(frames))
+
+                return run
+            """,
+            "factory.run",
+        ),
+        (
+            """
+            def run(n):
+                def Box(frames):
+                    _KEPT.append(frames)
+                    return frames
+
+                @dataclass(frozen=True)
+                class Box(OwnsArrays):
+                    frames: NDArray[np.float64]
+
+                frames = np.zeros(n)
+                return Box(frames=handed_over(frames))
+            """,
+            None,
+        ),
+        (
+            """
+            def factory():
+                def Box(frames):
+                    _KEPT.append(frames)
+                    return frames
+
+                @dataclass(frozen=True)
+                class Box(OwnsArrays):
+                    frames: NDArray[np.float64]
+
+                def run(n):
+                    frames = np.zeros(n)
+                    return Box(frames=handed_over(frames))
+
+                return run
+            """,
+            None,
+        ),
+    ],
+    ids=[
+        "def-after-the-class",
+        "one-in-each-branch",
+        "around-def-after-the-class",
+        "class-after-the-def",
+        "around-class-after-the-def",
+    ],
+)
+def test_a_handover_reads_the_def_or_class_its_function_defines(
+    tmp_path: pathlib.Path, body: str, refused: str | None
+) -> None:
+    """A ``def`` a function writes after a ``class`` of its name, or in the
+    branch beside it, may be what the name calls where the record is built,
+    and it keeps the array; so may one the function around it writes, from
+    the ``def`` of the function that calls it on. A ``class`` written after
+    the ``def`` replaces it there.
+
+    The name was read as the class whenever the function defined one of it,
+    so the handover passed where the ``def`` stands.
+    """
+    found = _handovers(tmp_path, _LOCAL_RECORD + textwrap.dedent(body))
+    if refused is None:
+        assert found == set()
+        return
+    assert found == {
+        (
+            refused,
+            "handed_over(...): it is not an argument of a record that inherits "
+            "OwnsArrays",
+        )
+    }
 
 
 def test_a_record_exemption_silences_its_class_and_goes_stale_without_it(

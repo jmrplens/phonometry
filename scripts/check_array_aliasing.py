@@ -573,6 +573,8 @@ class ClassInfo:
     #: through ``read_only`` or ``read_only_copy``: a copy nobody can write
     #: into, which a result may share without sharing anyone's edits.
     sealed: dict[str, bool] = field(default_factory=dict)
+    #: The ``class`` statement read, one of several a key may have.
+    node: ast.ClassDef | None = None
 
 
 @dataclass
@@ -593,10 +595,13 @@ class FunctionInfo:
     parent: FunctionInfo | None = None
 
 
-#: What a function of a module, read by its name at the top of the module
-#: where a ``def`` or a ``class`` of it stands, stood for there, by its key:
-#: each ``def`` that stood, none for a ``class`` (:meth:`Tree._bound_at_top`).
-_Pins = dict[tuple[str, str], list[FunctionInfo]]
+#: What a name read where a ``def`` or a ``class`` of it stands, at the top of
+#: a module or in a function that defines it, stood for there, by its key:
+#: each ``def`` that stood, and each ``class`` statement that did, as the
+#: class that statement makes (:meth:`Tree.stood_for`). A function and a
+#: class of one name share a key, and so do two ``class`` statements of it,
+#: so a name read in two places, or in a branch of each, may hold several.
+_Pins = dict[tuple[str, str], list[FunctionInfo | ClassInfo]]
 
 
 def _merge_pins(into: _Pins | None, found: _Pins) -> None:
@@ -610,6 +615,14 @@ def _merge_pins(into: _Pins | None, found: _Pins) -> None:
             for definition in definitions
             if all(definition is not other for other in held)
         )
+
+
+def _pinned_functions(
+    pins: _Pins | None, target: tuple[str, str]
+) -> list[FunctionInfo]:
+    """The definitions of *target* that stood where its name was read (*pins*)."""
+    held = pins.get(target, []) if pins is not None else []
+    return [found for found in held if isinstance(found, FunctionInfo)]
 
 
 def _is_record_decorator(node: ast.expr) -> bool:
@@ -645,6 +658,12 @@ class Tree:
         self.paths: dict[str, str] = {}
         self.packages: set[str] = set()
         self.classes: dict[tuple[str, str], ClassInfo] = {}
+        #: Every ``class`` statement of each class, by the key of
+        #: :attr:`classes`, as :attr:`definitions` holds a function's: one
+        #: written in each branch of an ``if``, or one a later one replaces
+        #: after an alias took it, is a class of its own, with its own fields
+        #: and bases. :attr:`classes` holds the last.
+        self.class_definitions: dict[tuple[str, str], list[ClassInfo]] = {}
         self.class_by_name: dict[str, list[ClassInfo]] = {}
         self.functions: dict[tuple[str, str], FunctionInfo] = {}
         #: Every definition of each function, by the key of :attr:`functions`:
@@ -666,6 +685,8 @@ class Tree:
         #: The key of :attr:`functions` or :attr:`classes` of each ``def``
         #: and ``class`` statement of the package.
         self.qualnames: dict[ast.AST, tuple[str, str]] = {}
+        #: The function or the class each of those statements makes.
+        self.made_by: dict[ast.AST, FunctionInfo | ClassInfo] = {}
         #: What :meth:`resolve_top` and :meth:`live_definitions` found, read
         #: once for each name, as every pass of the fixed point asks again.
         self.top_cache: dict[
@@ -676,6 +697,14 @@ class Tree:
             tuple[str, str], tuple[tuple[tuple[str, str], ...], _Pins]
         ] = {}
         self.live_cache: dict[tuple[str, str], list[FunctionInfo]] = {}
+        #: What :meth:`base_classes`, :meth:`copies_arrays`,
+        #: :meth:`record_fields` and :meth:`attribute_annotation` found, read
+        #: once for each ``class`` statement: none of them changes once the
+        #: package is read.
+        self.base_cache: dict[ast.AST | None, tuple[tuple[ClassInfo, ...], ...]] = {}
+        self.copies_cache: dict[ast.AST | None, bool] = {}
+        self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
+        self.attribute_cache: dict[tuple[ast.AST | None, str], str | None] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
         self.exported: dict[str, tuple[str, ...]] = {}
@@ -810,6 +839,7 @@ class Tree:
                     record,
                     tuple(_base_name(b) for b in node.bases),
                     node.lineno,
+                    node=node,
                 )
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(
@@ -826,7 +856,9 @@ class Tree:
                         info.fields.append((item.target.id, annotation))
                         info.attributes[item.target.id] = annotation
                 self.classes[(module, qualname)] = info
+                self.class_definitions.setdefault((module, qualname), []).append(info)
                 self.qualnames[node] = (module, qualname)
+                self.made_by[node] = info
                 self.class_by_name.setdefault(node.name, []).append(info)
                 self._read_body(module, node.body, qualname, info, parent=parent)
             elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
@@ -843,6 +875,7 @@ class Tree:
                 )
                 self.functions[(module, qualname)] = function
                 self.qualnames[node] = (module, qualname)
+                self.made_by[node] = function
                 self.definitions.setdefault((module, qualname), []).append(function)
                 if owner is not None and not owner.record:
                     # ``self.p: Field2D = ...`` in a method annotates the
@@ -1038,8 +1071,12 @@ class Tree:
 
         A ``def`` of a function at the top of the module goes into *pins*
         under its key, as the definition the name stands for where it was
-        read; a ``class`` there of a function's name adds none, since a call
-        of it makes an instance.
+        read, and a ``class`` there goes in as the class that statement
+        makes, which a call of it makes an instance of (:meth:`stood_for`):
+        a name read in two places, an alias bound to a ``def`` in one branch
+        and to the ``class`` of its name in the other, holds both, and one
+        bound before a later ``class`` of its name replaced the class holds
+        the class it was bound to.
         """
         if assignment_target(statement) is not None:
             return self.aliased(module, statement, depth, pins=pins)
@@ -1054,11 +1091,29 @@ class Tree:
             definition.parent is None and definition.owner is None
             for definition in definitions
         ):
-            _merge_pins(
-                pins,
-                {key: [found for found in definitions if found.node is statement]},
-            )
+            _merge_pins(pins, {key: self.stood_for(key, statement)})
         return (key,)
+
+    def classes_stood(
+        self, key: tuple[str, str], pins: _Pins | None
+    ) -> list[ClassInfo]:
+        """The classes a name of *key* may stand for: each ``class``
+        statement of it that stood where the name was read (*pins*), or
+        every one of the key when none was pinned there, as each may stand.
+        """
+        held = pins.get(key, []) if pins is not None else []
+        stood = [found for found in held if isinstance(found, ClassInfo)]
+        return stood or list(self.class_definitions.get(key, []))
+
+    def stood_for(
+        self, key: tuple[str, str], statement: ast.AST
+    ) -> list[FunctionInfo | ClassInfo]:
+        """The function or the class one ``def`` or ``class`` *statement* of
+        *key* makes: what a name it binds stands for where that statement
+        stood.
+        """
+        made = self.made_by.get(statement)
+        return [made] if made is not None and self.qualnames[statement] == key else []
 
     def aliased(
         self, module: str, target: ast.AST, depth: int = 0, *, pins: _Pins | None = None
@@ -1115,7 +1170,9 @@ class Tree:
         its imports read, and what its assignments of a dotted name name
         (:meth:`aliased`). A parameter, or any other binding that may hold
         it there, stands for what the guard cannot tell, and so the name
-        stands for nothing of the package.
+        stands for nothing of the package. Each ``def`` and ``class`` of a
+        name a class takes that stands there goes into *pins*
+        (:meth:`stood_for`).
         """
         if depth > _DEPTH or name in own_names(scope).parameters:
             return ()
@@ -1134,6 +1191,8 @@ class Tree:
                 key in self.functions or key in self.classes
             ):
                 found.append(key)
+                if key in self.classes:
+                    _merge_pins(pins, {key: self.stood_for(key, node)})
             else:
                 return ()
         return tuple(dict.fromkeys(found))
@@ -1207,64 +1266,197 @@ class Tree:
             return target[0]
         return None
 
+    def base_classes(self, info: ClassInfo) -> tuple[tuple[ClassInfo, ...], ...]:
+        """The classes of the package each base of one ``class`` statement
+        may be, in the order of its bases (:meth:`classes_read`), read once
+        for each statement.
+        """
+        node = info.node
+        if node in self.base_cache:
+            return self.base_cache[node]
+        bases = node.bases if node is not None else []
+        found = tuple([self.classes_read(info, base) for base in bases])
+        self.base_cache[node] = found
+        return found
+
+    def classes_read(self, info: ClassInfo, base: ast.expr) -> tuple[ClassInfo, ...]:
+        """The classes of the package one base of the ``class`` statement of
+        *info* may be: what its name stands for where the statement reads it
+        (:meth:`named_at`), each ``class`` statement of it that stood there
+        (:meth:`classes_stood`).
+
+        A base a later ``class`` of its name replaces is the class it was
+        when the statement ran, one with a class in each branch of an ``if``
+        is either, and an alias is what it was bound to there. A name one
+        statement alone binds at the top of the module stands for what that
+        statement binds wherever a statement there reads it, so it is read
+        as the module stands once it has run (:meth:`resolve_all`, read once
+        for each name). A name the guard cannot follow there is the module's
+        own class of it, or the one class of the package of that name.
+        """
+        target = base.value if isinstance(base, ast.Subscript) else base
+        pins: _Pins = {}
+        if (
+            isinstance(target, ast.Name)
+            and info.node is not None
+            and "." not in self.qualnames[info.node][1]
+            and len(self.top_bindings[info.module].get(target.id, ())) == 1
+        ):
+            keys = self.resolve_all(info.module, target.id, pins=pins)
+        else:
+            keys = self.named_at(info.module, target, pins=pins)
+        # Each key is a class of its own, and each of its statements stood once.
+        found = tuple(
+            [
+                stood
+                for key in keys
+                if key in self.classes
+                for stood in self.classes_stood(key, pins)
+            ]
+        )
+        if found:
+            return found
+        name = _base_name(base)
+        local = self.class_definitions.get((info.module, name), [])
+        if local:
+            return tuple(local)
+        candidates = self.class_by_name.get(name, [])
+        return tuple(candidates) if len(candidates) == 1 else ()
+
     def record_fields(self, info: ClassInfo) -> list[tuple[str, str]]:
-        """The constructor's fields of a record, the inherited ones first."""
+        """The constructor's fields of a record, the inherited ones first:
+        those of the records each base may be where the ``class`` statement
+        reads it (:meth:`base_classes`), a field one of them annotates as able
+        to hold an array taking that annotation. The list is the tree's own,
+        read once for each statement: a caller reads it and leaves it whole.
+        """
+        node = info.node
+        if not info.bases:
+            return info.fields
+        if node in self.fields_cache:
+            return self.fields_cache[node]
+        # A class a function writes under ``global`` may be its own base:
+        # while it is read, it lends its own fields alone.
+        self.fields_cache[node] = info.fields
         fields: list[tuple[str, str]] = []
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                if candidate.record:
-                    fields.extend(self.record_fields(candidate))
-                    break
+        for classes in self.base_classes(info):
+            inherited: dict[str, str] = {}
+            for candidate in classes:
+                if not candidate.record:
+                    continue
+                for name, annotation in self.record_fields(candidate):
+                    held = inherited.get(name)
+                    if held is None or (
+                        not self.holds_array(held) and self.holds_array(annotation)
+                    ):
+                        inherited[name] = annotation
+            fields.extend(inherited.items())
         names = {name for name, _ in info.fields}
-        return [f for f in fields if f[0] not in names] + info.fields
+        found = [f for f in fields if f[0] not in names] + info.fields
+        self.fields_cache[node] = found
+        return found
 
     def copies_arrays(self, info: ClassInfo) -> bool:
         """Whether a record inherits :data:`MECHANISM`, itself or through a
-        record it extends, and so copies every array it is built with.
+        base every class of which it may be where the ``class`` statement
+        reads it (:meth:`base_classes`) is a record that copies, and so
+        copies every array it is built with.
         """
         if MECHANISM in info.bases:
             return True
-        return any(
-            candidate.record and self.copies_arrays(candidate)
-            for base in info.bases
-            for candidate in self.class_by_name.get(base, [])
+        node = info.node
+        if not info.bases:
+            return False
+        if node in self.copies_cache:
+            return self.copies_cache[node]
+        # A class a function writes under ``global`` may be its own base:
+        # while it is read, it copies nothing.
+        self.copies_cache[node] = False
+        copies = any(
+            classes
+            and all(
+                candidate.record and self.copies_arrays(candidate)
+                for candidate in classes
+            )
+            for classes in self.base_classes(info)
         )
+        self.copies_cache[node] = copies
+        return copies
 
-    def owns(self, info: ClassInfo, name: str) -> bool:
+    def owns(
+        self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
+    ) -> bool:
         """Whether a record copies a field itself: every field of one that
-        inherits :data:`MECHANISM`, or one its own or a base's
-        ``__post_init__`` copies.
+        inherits :data:`MECHANISM`, or one its own ``__post_init__`` copies,
+        or that of every record a base may be (:meth:`base_classes`).
         """
         if info.owned.get(name) or self.copies_arrays(info):
             return True
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                if candidate.record and self.owns(candidate, name):
-                    return True
+        if not info.bases:
+            return False
+        seen = seen | {info.node}
+        for classes in self.base_classes(info):
+            if classes and all(
+                candidate.record
+                and candidate.node not in seen
+                and self.owns(candidate, name, seen)
+                for candidate in classes
+            ):
+                return True
         return False
 
-    def seals(self, info: ClassInfo, name: str) -> bool:
-        """Whether a record publishes a field as a read-only copy of its own."""
+    def seals(
+        self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
+    ) -> bool:
+        """Whether a record publishes a field as a read-only copy of its own,
+        itself or through every record a base may be (:meth:`base_classes`).
+        """
         if self.copies_arrays(info) or (
             info.sealed.get(name) and self.owns(info, name)
         ):
             return True
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                if candidate.record and self.seals(candidate, name):
-                    return True
+        if not info.bases:
+            return False
+        seen = seen | {info.node}
+        for classes in self.base_classes(info):
+            if classes and all(
+                candidate.record
+                and candidate.node not in seen
+                and self.seals(candidate, name, seen)
+                for candidate in classes
+            ):
+                return True
         return False
 
     def attribute_annotation(self, info: ClassInfo, name: str) -> str | None:
-        """The annotation of an attribute of a class, looked up its bases too."""
+        """The annotation of an attribute of a class, looked up its bases
+        too, each the classes it may be where the ``class`` statement reads
+        it (:meth:`base_classes`): the first base that annotates it, and of
+        the classes that base may be, one that annotates it as able to hold
+        an array when one does.
+        """
         if name in info.attributes:
             return info.attributes[name]
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                found = self.attribute_annotation(candidate, name)
-                if found is not None:
-                    return found
-        return None
+        if not info.bases:
+            return None
+        key = (info.node, name)
+        if key in self.attribute_cache:
+            return self.attribute_cache[key]
+        # A class a function writes under ``global`` may be its own base:
+        # while it is read, it annotates nothing more.
+        self.attribute_cache[key] = None
+        annotation: str | None = None
+        for classes in self.base_classes(info):
+            found = [
+                held
+                for candidate in classes
+                if (held := self.attribute_annotation(candidate, name)) is not None
+            ]
+            if found:
+                annotation = next((a for a in found if self.holds_array(a)), found[0])
+                break
+        self.attribute_cache[key] = annotation
+        return annotation
 
 
 def _inside(module: str, package: str) -> bool:
@@ -1766,9 +1958,9 @@ class Reader:
                 self.index_names.add(target.id)
             if source is not None and self.builds_container(source):
                 self.container_names.add(target.id)
-            built = self.built_record(source)
-            if built is not None:
-                self.record_names[target.id] = built
+            match self.built_records(source):
+                case [built]:
+                    self.record_names[target.id] = built
             return
         if isinstance(target, ast.Tuple | ast.List):
             if (
@@ -1857,19 +2049,69 @@ class Reader:
                 return self.tree.holds_array(ast.unparse(argument.annotation))
         return True
 
-    def built_record(self, node: ast.expr | None) -> ClassInfo | None:
-        """The record class a call builds, if *node* is such a call."""
+    def built_records(self, node: ast.expr | None) -> list[ClassInfo]:
+        """Each record class a call may build, if *node* is a call that
+        builds a record whichever path runs; ``cls`` in a method of a record
+        is that record.
+
+        Every function or class the call may name is a class with no ``def``
+        of its name standing where the name was read (*pins*,
+        :meth:`Tree.resolve_top`), and each ``class`` statement of it the
+        call may build (:meth:`classes_built`) is a record: two records bound
+        to a name in two branches, or a class written in each, are each
+        built. A call that may run a function instead, one bound to the name
+        in another branch or a ``def`` that took the name from the class, or
+        build a class that is no record, builds none the guard can vouch
+        for. A name bound to a call that builds one record holds it.
+        """
         if not isinstance(node, ast.Call):
-            return None
+            return []
         func = node.func
         owner = self.function.owner
         if isinstance(func, ast.Name) and func.id == "cls":
-            return owner if owner is not None and owner.record else None
-        for key in self.callees(func):
-            info = self.tree.classes.get(key)
-            if info is not None and info.record:
-                return info
-        return None
+            return [owner] if owner is not None and owner.record else []
+        pins: _Pins = {}
+        built: list[ClassInfo] = []
+        for key in self.callees(func, pins=pins):
+            if key not in self.tree.classes or _pinned_functions(pins, key):
+                return []
+            for info in self.classes_built(key, pins):
+                if not info.record:
+                    return []
+                built.append(info)
+        return built
+
+    def builds_class(self, target: tuple[str, str], pins: _Pins | None) -> bool:
+        """Whether a call that reaches *target* may make an instance of the
+        class of that key: there is one, and what stood where the name was
+        read (*pins*) holds no ``def`` of it, or holds the class beside them.
+        """
+        if target not in self.tree.classes:
+            return False
+        held = pins.get(target, []) if pins is not None else []
+        return not _pinned_functions(pins, target) or any(
+            isinstance(found, ClassInfo) for found in held
+        )
+
+    def copies_on_every_path(self, node: ast.expr) -> bool:
+        """Whether a call builds a record that copies whichever path runs:
+        it builds a record on every path (:meth:`built_records`), and each
+        of them inherits :data:`MECHANISM`.
+
+        A copy handed to such a call is made twice whichever path runs; one
+        handed to a call that may also run a function, or build a class that
+        does not copy, may be what keeps the caller's array out on that path.
+        """
+        built = self.built_records(node)
+        return bool(built) and all(self.tree.copies_arrays(info) for info in built)
+
+    def classes_built(
+        self, target: tuple[str, str], pins: _Pins | None
+    ) -> list[ClassInfo]:
+        """The classes of *target* a call that may make an instance of one
+        (:meth:`builds_class`) may build (:meth:`Tree.classes_stood`).
+        """
+        return self.tree.classes_stood(target, pins)
 
     def resolve_name(
         self, name: str, node: ast.AST | None = None, *, pins: _Pins | None = None
@@ -1915,20 +2157,32 @@ class Reader:
     ) -> tuple[tuple[str, str], ...]:
         """What *name* may stand for in *scope*, which binds it itself.
 
-        A function or a class it defines; what each of its imports of the
-        name that may have run before *node* reads (:meth:`Tree.imported`),
-        when *scope* is this function, or what any of them reads, when it is
-        one around it; and so for an assignment of a dotted name to it
-        (:meth:`Tree.bound_in`). Nothing of the package for any other
-        binding, a parameter or an assignment of anything else, nor for a
-        name it both defines and binds otherwise, which may stand for either
-        at a call.
+        A function or a class it defines, and for a class each ``def`` and
+        ``class`` of the name that may stand where *node* reads it
+        (:func:`ast_scan.live_bindings`: in a function written in *scope*,
+        any from that function's ``def`` on) pinned in *pins*
+        (:meth:`Tree.stood_for`), as a ``def`` and a ``class`` of one name
+        share a key; what each of its imports of the name that may have run before
+        *node* reads (:meth:`Tree.imported`), and so for an assignment of a
+        dotted name to it (:meth:`Tree.bound_in`). Nothing of the package for
+        any other binding, a parameter or an assignment of anything else,
+        nor for a name it both defines and binds otherwise, which may stand
+        for either at a call.
         """
         how = own_names(scope.node).how(name)
         if how == "definition":
             own = (self.module, f"{scope.qualname}.{name}")
-            known = own in self.tree.functions or own in self.tree.classes
-            return (own,) if known else ()
+            if own not in self.tree.functions and own not in self.tree.classes:
+                return ()
+            # A function alone of its name is read where the call runs
+            # (:meth:`reached`); a class needs the statement that stood.
+            if pins is not None and own in self.tree.classes:
+                made = bindings_by_name(scope.node).get(name, [])
+                if node is not None:
+                    made = live_bindings(scope.node, made, node)
+                for statement in made:
+                    _merge_pins(pins, {own: self.tree.stood_for(own, statement)})
+            return (own,)
         if how == "binding":
             point = node if scope is self.function else None
             return self.tree.bound_in(self.module, scope.node, name, point, pins=pins)
@@ -1961,11 +2215,17 @@ class Reader:
 
     def reached_by(self, func: ast.expr, call: ast.AST) -> list[FunctionInfo]:
         """Every definition a call can reach (:meth:`reached`), when each
-        function it may name is a function of the package; none otherwise.
+        function it may name is a function of the package; none otherwise,
+        nor when it may make an instance of a class of a function's name
+        (:meth:`builds_class`).
         """
         pins: _Pins = {}
         targets = self.callees(func, pins=pins)
-        if any(target not in self.tree.functions for target in targets):
+        if any(
+            target not in self.tree.functions
+            or (target in self.tree.classes and self.builds_class(target, pins))
+            for target in targets
+        ):
             return []
         return [
             found
@@ -1975,10 +2235,17 @@ class Reader:
 
     def selects_positions(self, func: ast.expr) -> bool:
         """Whether every function of the package a call may name returns a
-        mask or positions on every return of its own.
+        mask or positions on every return of its own, and none of them is a
+        class of a function's name the call may make an instance of
+        (:meth:`builds_class`), which may index as one number.
         """
-        targets = self.callees(func)
-        return bool(targets) and all(key in self.tree.positions for key in targets)
+        pins: _Pins = {}
+        targets = self.callees(func, pins=pins)
+        return bool(targets) and all(
+            key in self.tree.positions
+            and not (key in self.tree.classes and self.builds_class(key, pins))
+            for key in targets
+        )
 
     # -- what kind of thing a name holds ----------------------------------
     def indexes(self, node: ast.expr) -> bool:
@@ -2219,7 +2486,12 @@ class Reader:
                     return union(
                         *(
                             self.apply(
-                                key, node, arguments, keywords, bound=False, pins=pins
+                                key,
+                                node,
+                                arguments,
+                                keywords,
+                                bound=False,
+                                pins=pins,
                             )
                             for key in resolved
                         )
@@ -2274,7 +2546,12 @@ class Reader:
                 return union(
                     *(
                         self.apply(
-                            key, node, arguments, keywords, bound=False, pins=named
+                            key,
+                            node,
+                            arguments,
+                            keywords,
+                            bound=False,
+                            pins=named,
                         )
                         for key in targets
                     )
@@ -2357,15 +2634,43 @@ class Reader:
 
         A function and a class of one name share a key: the class is what
         the call reaches unless *pins* holds a ``def`` of the key, which an
-        alias bound before the class keeps.
+        alias bound before the class keeps, and both are when *pins* holds
+        the class beside it (:meth:`builds_class`), an alias bound to the
+        ``def`` in one branch and to the class in another. The class is each
+        ``class`` statement of the key the call may build
+        (:meth:`classes_built`), the one an alias was bound to when a later
+        one replaced it, and each read with its own fields. A copy handed to
+        a public record that copies is made twice only when every class the
+        call may build or function it may run is a record that copies
+        (:meth:`copies_on_every_path`, asked only of a public record): on
+        another path the copy may be what keeps the caller's array out.
         """
-        if target in self.tree.classes and not (pins and pins.get(target)):
-            info = self.tree.classes[target]
-            if info.record:
-                return self.constructor_sink(
-                    info, node, arguments, keywords, public=target in self.tree.public
+        values: list[Value] = []
+        if target in self.tree.classes and self.builds_class(target, pins):
+            built = self.classes_built(target, pins)
+            pinned = _pinned_functions(pins, target)
+            public = target in self.tree.public
+            alone = (
+                public
+                and self.findings is not None
+                and not pinned
+                and self.copies_on_every_path(node)
+            )
+            values.extend(
+                self.constructor_sink(
+                    info,
+                    node,
+                    arguments,
+                    keywords,
+                    public=public,
+                    alone=alone,
                 )
-            return _CLEAN
+                if info.record
+                else _CLEAN
+                for info in built
+            )
+            if not pinned:
+                return values[0] if len(values) == 1 else union(_CLEAN, *values)
         spread = next(
             (
                 index
@@ -2374,10 +2679,10 @@ class Reader:
             ),
             None,
         )
-        values = [
+        values.extend(
             self._returned_by(function, arguments, keywords, bound=bound, spread=spread)
             for function in self.reached(target, node, pins=pins)
-        ]
+        )
         return union(*values) if values else _CLEAN
 
     def _returned_by(
@@ -2419,11 +2724,12 @@ class Reader:
     ) -> list[FunctionInfo]:
         """Every definition of *target* a call of it written here can reach.
 
-        A function at the top of a module whose name was read at the top of
-        its module on the way to the call, by the call itself or by an alias
-        the call reaches, is each definition that stood where it was read
-        (*pins*, :meth:`Tree.resolve_top`), so an alias holds what its value
-        named where it was bound. Otherwise one of a module, or of a class,
+        A function whose name was read where a ``def`` of it stands, at the
+        top of its module or in a function that defines it, on the way to the
+        call, by the call itself or by an alias the call reaches, is each
+        definition that stood where it was read (*pins*,
+        :meth:`Tree.resolve_top`), so an alias holds what its value named
+        where it was bound. Otherwise one of a module, or of a class,
         is each definition the name may hold once the module has run
         (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
         either, and a later one in a block that holds an earlier one
@@ -2438,9 +2744,9 @@ class Reader:
         if not definitions:
             found = self.tree.functions.get(target)
             return [found] if found is not None else []
+        if pins is not None and target in pins:
+            return _pinned_functions(pins, target)
         if all(definition.parent is None for definition in definitions):
-            if pins is not None and target in pins:
-                return pins[target]
             if target[0] == self.module and all(d.owner is None for d in definitions):
                 return _live(self.tree.modules[self.module], definitions, call)
             return self.tree.live_definitions(target)
@@ -2463,14 +2769,20 @@ class Reader:
         keywords: dict[str | None, Value],
         *,
         public: bool,
+        alone: bool = True,
     ) -> Value:
-        """Report what a record keeps, and return the record as a value."""
+        """Report what a record keeps, and return the record as a value.
+
+        A copy handed to a record that copies is reported only when every
+        class the call may build is a record that copies, and no function it
+        may run hands its argument back instead (*alone*, :meth:`apply`).
+        """
         fields = self.tree.record_fields(info)
         annotations = dict(fields)
         if self.tree.copies_arrays(info):
             # Every array it is built with, however it is passed, is replaced
             # by a copy of its own: the record carries nothing of the caller.
-            if public and self.findings is not None:
+            if public and alone and self.findings is not None:
                 self.copied_twice(info, node, fields)
             return Fields(tuple((name, _CLEAN) for name, _ in fields))
         kept: dict[str, Value] = {}
@@ -2660,8 +2972,9 @@ class Reader:
         Read: an operand of arithmetic or of a comparison, a truth test, a
         number in an f-string, its size or shape, a method or a numpy
         function whose result is a new array, an index into something else,
-        a builtin that reads it, a record that copies it, and a function of
-        the package whose parameter is used the same way. A view of it
+        a builtin that reads it, a record that copies it whichever path of
+        the call runs (:meth:`built_records`), and a function of the package
+        whose parameter is used the same way. A view of it
         (indexing, ``.T``, ``read_only``, ``np.asarray``) is followed to its
         own use. Anything else is not.
         """
@@ -2768,9 +3081,9 @@ class Reader:
             ):
                 return self.harmless(call, parents, depth)
             return True
-        info = self.built_record(call)
-        if info is not None:
-            return self.tree.copies_arrays(info)
+        built = self.built_records(call)
+        if built:
+            return all(self.tree.copies_arrays(info) for info in built)
         if depth >= 3:
             return False
         # Every definition the call can reach only reads what it is given.
@@ -2802,8 +3115,8 @@ class Reader:
         ``handed_over(name)`` lets the record keep the array without a copy,
         which is right only when nothing else can reach it, now or later.
         That is proved here from the syntax alone: the call is an argument of
-        a record that inherits :data:`MECHANISM`, built in the ``return``
-        statement, so nothing of the function runs after the record holds the
+        a record that inherits :data:`MECHANISM` whichever path of the call
+        runs (:meth:`built_records`), built in the ``return`` statement, so nothing of the function runs after the record holds the
         array; the name is bound once, in the function's own scope, to an
         array a numpy allocation makes (:data:`_NUMPY_FRESH`, or ``None`` in
         one branch of a conditional); and every other read of it only writes
@@ -2819,8 +3132,7 @@ class Reader:
             or any(argument is call for argument in record.args)
         ):
             return "it is not an argument of a record"
-        info = self.built_record(record)
-        if info is None or not self.tree.copies_arrays(info):
+        if not self.copies_on_every_path(record):
             return f"it is not an argument of a record that inherits {MECHANISM}"
         if not isinstance(parents.get(record), ast.Return):
             return "the record is not built in the return statement"
@@ -2989,8 +3301,14 @@ class Reader:
         return None
 
     def tree_public(self, info: ClassInfo) -> bool:
-        """Whether a record class reaches a caller."""
-        return any(self.tree.classes.get(key) is info for key in self.tree.public)
+        """Whether a record class, any ``class`` statement of its key,
+        reaches a caller.
+        """
+        return any(
+            found is info
+            for key in self.tree.public
+            for found in self.tree.class_definitions[key]
+        )
 
     def setattr_sink(
         self, node: ast.Call, arguments: list[Value], env: dict[str, Value]
@@ -3609,10 +3927,11 @@ def find_positions(tree: Tree) -> None:
             break
         tree.positions = found
     # What the pass above learnt of the records' own copies was read without
-    # the summaries; it is read again on them.
-    for info in tree.classes.values():
-        info.owned.clear()
-        info.sealed.clear()
+    # the summaries; it is read again on them, for every class statement.
+    for infos in tree.class_definitions.values():
+        for info in infos:
+            info.owned.clear()
+            info.sealed.clear()
     tree.typed_cache.clear()
 
 
@@ -3668,9 +3987,10 @@ def findings_in(
     # What each record's ``__post_init__`` copies, read once more on the
     # final summaries so that a factory is not held to a copy the record
     # already makes.
-    for info in tree.classes.values():
-        info.owned.clear()
-        info.sealed.clear()
+    for infos in tree.class_definitions.values():
+        for info in infos:
+            info.owned.clear()
+            info.sealed.clear()
     for function in tree.every_definition():
         if function.node.name == "__post_init__":
             Reader(tree, function, summaries, None).run()
@@ -3697,32 +4017,35 @@ def records_without_mechanism(
     has to copy for itself. One that inherits :data:`MECHANISM`, directly or
     through a record it extends, does; any other public record with a field
     annotated as something that can hold an array is reported, at its class.
+    Each ``class`` statement of a public name is read, as a caller may build
+    the one written in either branch of an ``if``, or one an alias keeps
+    after a later one replaced it.
     *tree* is the package already read from *files*, when the caller has it.
     """
     if tree is None:
         tree = Tree(files, root)
     found: list[Finding] = []
     for key in sorted(tree.public):
-        info = tree.classes[key]
-        if not info.record or tree.copies_arrays(info):
-            continue
-        annotations = dict(tree.record_fields(info)) | info.attributes
-        holding = sorted(
-            name
-            for name, annotation in annotations.items()
-            if tree.holds_array(annotation)
-        )
-        if holding:
-            found.append(
-                Finding(
-                    tree.paths[key[0]],
-                    key[1],
-                    info.line,
-                    f"{info.name} can hold an array ({', '.join(holding)}) and "
-                    f"does not inherit {MECHANISM}",
-                    (),
-                )
+        for info in tree.class_definitions[key]:
+            if not info.record or tree.copies_arrays(info):
+                continue
+            annotations = dict(tree.record_fields(info)) | info.attributes
+            holding = sorted(
+                name
+                for name, annotation in annotations.items()
+                if tree.holds_array(annotation)
             )
+            if holding:
+                found.append(
+                    Finding(
+                        tree.paths[key[0]],
+                        key[1],
+                        info.line,
+                        f"{info.name} can hold an array ({', '.join(holding)}) "
+                        f"and does not inherit {MECHANISM}",
+                        (),
+                    )
+                )
     return found
 
 

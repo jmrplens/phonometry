@@ -152,6 +152,19 @@ test('plain text drops the marks a reader does not see and keeps the underscores
   );
 });
 
+test('plain text reads a code span as the page does, whatever its run of backticks holds', () => {
+  // A span of two backticks holds a backtick of its own, and the space that
+  // pads it on both sides is not the code's (CommonMark 0.31.2, 6.1).
+  assert.equal(plainText(['The ``a`b`` key.']), 'The a`b key.');
+  assert.equal(plainText(['The `` `rows` `` key.']), 'The `rows` key.');
+  // What a span holds is code, not emphasis or a link.
+  assert.equal(plainText(['The `*_rows_*` and `[a](b)` keys.']), 'The *_rows_* and [a](b) keys.');
+  // A span runs over the lines of its paragraph.
+  assert.equal(plainText(['The `two', 'lines` key.']), 'The two lines key.');
+  // An escaped backtick opens nothing, and a run no later run closes stays text.
+  assert.equal(plainText(['A \\`tick and ``one`.']), 'A \\`tick and ``one`.');
+});
+
 // ---------------------------------------------------------------------------
 // Naming the datasets
 // ---------------------------------------------------------------------------

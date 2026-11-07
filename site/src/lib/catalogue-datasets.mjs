@@ -31,6 +31,7 @@
  * serves the rows on the page and nowhere else.
  */
 
+import { inlineSpans } from '../../scripts/shared/markdown-spans.mjs';
 import { referenceStub } from './citations.mjs';
 import { printedTables } from './catalogue-sources.mjs';
 import { prose } from './markdown-fences.mjs';
@@ -48,22 +49,54 @@ const SECTION_HEADING = /^##\s+(.+?)\s*#*\s*$/;
 const NOT_PROSE = /^\s*(?:import\s|<|#)/;
 
 /**
+ * The first character of the private use area, from which each code span of a
+ * paragraph takes a character of its own to hold its place while the marks
+ * around it are read.
+ */
+const SPAN_PLACE = 0xe000;
+
+/**
+ * What a code span shows: the text between its runs of backticks, a space
+ * taken off each end when it has one on both and is not all spaces
+ * (CommonMark 0.31.2, 6.1).
+ */
+function codeOf(text, start, end) {
+  let run = 0;
+  while (text[start + run] === '`') run += 1;
+  const code = text.slice(start + run, end - run);
+  return code.length > 1 && code.startsWith(' ') && code.endsWith(' ') && /[^ ]/.test(code)
+    ? code.slice(1, -1)
+    : code;
+}
+
+/**
  * A paragraph as a reader sees it: inline code without its backticks, a link
  * as its text, emphasis without its marks, every run of blanks one space.
  *
- * An underscore marks emphasis only where it opens or closes a word, as
- * CommonMark reads it, so `snake_case` written outside code keeps its own.
+ * The code spans are read as the page reads them, through
+ * site/scripts/shared/markdown-spans.mjs, and what they hold is code: no mark
+ * inside one is read as emphasis or a link. An underscore marks emphasis only
+ * where it opens or closes a word, as CommonMark reads it, so `snake_case`
+ * written outside code keeps its own.
  *
  * @param {string[]} lines The paragraph's lines.
  * @returns {string}
  */
 export function plainText(lines) {
-  return lines
-    .join(' ')
-    .replace(/`([^`]*)`/g, '$1')
+  const text = lines.join(' ');
+  const codes = [];
+  let marked = '';
+  let done = 0;
+  for (const [start, end] of inlineSpans(text)) {
+    marked += text.slice(done, start) + String.fromCharCode(SPAN_PLACE + codes.length);
+    codes.push(codeOf(text, start, end));
+    done = end;
+  }
+  return (marked + text.slice(done))
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/(\*{1,2})(\S(?:.*?\S)?)\1/g, '$2')
     .replace(/(?<![\p{L}\p{N}_])_(\S(?:.*?\S)?)_(?![\p{L}\p{N}_])/gu, '$1')
+    .replace(/[\ue000-\uf8ff]/g, (place) => codes[place.charCodeAt(0) - SPAN_PLACE] ?? place)
     .replace(/\s+/g, ' ')
     .trim();
 }

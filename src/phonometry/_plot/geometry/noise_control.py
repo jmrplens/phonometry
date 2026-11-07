@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
@@ -499,6 +500,7 @@ def _require_silencer_keys(
         require_choice(key, "geometry", allowed)
 
 
+@closes_its_figures
 def plot_silencer_geometry(
     kind: SilencerKind,
     geometry: Mapping[SilencerDimension, float],
@@ -841,6 +843,8 @@ def _note_under(ax: Axes, width: float, note: str) -> None:
     )
 
 
+# SilencerChain is no record, so its method is not wrapped as it is made.
+@closes_its_figures
 def plot_silencer_chain_geometry(
     chain: SilencerChain,
     ax: Axes | None = None,
@@ -900,6 +904,7 @@ def plot_silencer_chain_geometry(
 # ---------------------------------------------------------------------------
 # Plenum chamber section.
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_plenum_geometry(
     exit_area: float,
     line_of_sight: float,

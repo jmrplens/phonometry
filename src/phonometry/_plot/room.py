@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
+from .._internal.figures import closes_its_figures
 from .._internal.validation import real_array, require_choice, require_scalar
 from .common import (
     _C_EDGE,
@@ -1247,6 +1248,7 @@ def plot_excitation(
 ) -> Axes: ...
 
 
+@closes_its_figures
 def plot_excitation(
     x: ArrayLike,
     fs: float,

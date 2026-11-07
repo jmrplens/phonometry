@@ -2304,6 +2304,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A `.plot()` that raises leaves no figure behind.** A plot makes its
+  figure before it draws, so a keyword matplotlib refuses, as
+  `result.plot(colour="red")` for `color`, raised from the drawing and left
+  the half-drawn figure open: a notebook showed it under the traceback, and
+  pyplot held it until the kernel ended. Every figure a plot opened is now
+  closed when it raises, for the `plot` and `plot_*` methods of every
+  result, the geometry views of `FDTD2D` and `SilencerChain`, the 24
+  `plot_*` functions the domains publish, from
+  `building.plot_aperture_geometry` to `vibration.plot_plate_geometry`, and
+  the response a filter bank draws for its `ResponsePlot` when the file
+  cannot be written; an axes the caller handed it, and its figure, stay the
+  caller's (style rule F68).
+
 - **`dir()` and tab completion of a domain offer what it publishes.** The
   root already answered `dir(phonometry)` with its published names, but no
   domain did: `phonometry.filters.` completed to 49 names, among them

@@ -288,9 +288,9 @@ across blocks, so concatenated block outputs equal a single continuous call.
 ### TimeWeighting.process()
 
 ```python
-TimeWeighting.process(
-    x: Signal | ArrayLike,
-) -> TimeWeightedEnvelope | np.ndarray
+TimeWeighting.process(x: Signal) -> TimeWeightedEnvelope
+
+TimeWeighting.process(x: ArrayLike) -> np.ndarray
 ```
 
 Apply time weighting to a block, continuing from the previous block.
@@ -402,7 +402,9 @@ Initialize the weighting filter.
 ### WeightingFilter.filter()
 
 ```python
-WeightingFilter.filter(x: Signal | ArrayLike) -> Signal | np.ndarray
+WeightingFilter.filter(x: Signal) -> Signal
+
+WeightingFilter.filter(x: ArrayLike) -> np.ndarray
 ```
 
 Apply the weighting filter to a signal.

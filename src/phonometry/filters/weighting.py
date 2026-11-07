@@ -624,6 +624,12 @@ class WeightingFilter:
         """Check whether ``zi`` must be (re)allocated for *x_proc*."""
         return _sos_state_mismatch(self.zi, x_proc)
 
+    @overload
+    def filter(self, x: Signal) -> Signal: ...
+
+    @overload
+    def filter(self, x: ArrayLike) -> np.ndarray: ...
+
     def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
         """Apply the weighting filter to a signal.
 
@@ -697,6 +703,18 @@ def _cached_weighting_filter(
     a caller that builds the class directly does not pay the fit twice either.
     """
     return WeightingFilter(fs, curve, high_accuracy=high_accuracy)
+
+
+@overload
+def _as_envelope(
+    x: Signal, mean_square: np.ndarray, fs: float, mode: Mode
+) -> TimeWeightedEnvelope: ...
+
+
+@overload
+def _as_envelope(
+    x: ArrayLike, mean_square: np.ndarray, fs: float, mode: Mode
+) -> np.ndarray: ...
 
 
 def _as_envelope(
@@ -1072,6 +1090,12 @@ class TimeWeighting:
         self.fs = fs
         self.mode: Mode = mode
         self._state: np.ndarray | None = None
+
+    @overload
+    def process(self, x: Signal) -> TimeWeightedEnvelope: ...
+
+    @overload
+    def process(self, x: ArrayLike) -> np.ndarray: ...
 
     def process(self, x: Signal | ArrayLike) -> TimeWeightedEnvelope | np.ndarray:
         """Apply time weighting to a block, continuing from the previous block.

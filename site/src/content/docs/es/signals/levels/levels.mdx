@@ -203,6 +203,12 @@ argumento `calibration_factor` explícito prevalece sobre el del objeto; un
 `fs` explícito que discrepe del objeto lanza un error en vez de imponerse en
 silencio.
 
+Un registro 1D da un nivel y uno 2D da uno por canal, así que un comprobador
+de tipos lee lo que devuelven `leq` y los demás niveles de esta página como
+`float | NDArray[np.float64]`: lo decide la forma de `x`, y ningún tipo dice
+qué forma tiene un registro. Cuando un código con tipos tiene un registro 1D,
+`float(signals.leq(x))` nombra el único número.
+
 ## Niveles percentiles (LN)
 
 `ln_levels` calcula niveles estadísticos a partir de la envolvente con

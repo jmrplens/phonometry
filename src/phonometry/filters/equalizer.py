@@ -612,6 +612,12 @@ class ParametricEQ:
             self.zi: NDArray[np.float64] = np.array([])
             self._steady_ic = steady_ic
 
+    @overload
+    def filter(self, x: Signal) -> Signal: ...
+
+    @overload
+    def filter(self, x: ArrayLike) -> np.ndarray: ...
+
     def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
         """Apply the EQ cascade to a signal.
 

@@ -55,9 +55,10 @@ const titleOf = new Map(
 );
 
 /**
- * Inline maths in a notation string, as HTML. The notation is written the way
+ * Inline maths in a field of the glossary, as HTML. A field is written the way
  * the page reads it, `$L_{Aeq}$, SEL`, so the text between the delimiters is
- * text and only the delimited runs are typeset.
+ * text and only the delimited runs are typeset. Every field the card shows
+ * goes through it: printed as typed, "(unit of $x$)²/Hz" kept its dollar signs.
  */
 function notation(source: string): string {
 	return source
@@ -182,13 +183,13 @@ const t =
 										<span class="qualifier" set:html={`(${notation(term.qualifierText)})`} />
 									)}
 								</h3>
-								{term.unitText && <span class="unit">{term.unitText}</span>}
+								{term.unitText && <span class="unit" set:html={notation(term.unitText)} />}
 							</header>
 							<p class="definition" set:html={notation(term.definitionText)} />
 							<footer>
 								<span class="standard">
-									{t.definedIn}: {term.standardText}
-									{term.clauseText && <>, {term.clauseText}</>}
+									{t.definedIn}: <Fragment set:html={notation(term.standardText ?? '')} />
+									{term.clauseText && <>, <Fragment set:html={notation(term.clauseText)} /></>}
 								</span>
 								{term.href && (
 									<a class="guide" href={term.href}>

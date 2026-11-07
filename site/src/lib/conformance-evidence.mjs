@@ -20,6 +20,14 @@
  *   many checks are based on the standards the page implements, and in which
  *   domains of the report.
  *
+ * The standard a check is based on is not always a standard on the page: the
+ * report names the speech guide's reference program by the working group
+ * that keeps it, the Chen and Millero equation by the body that adopted it,
+ * a directive by its number. The page cites each as what it is, a web page,
+ * an article, a report, and the line counts the checks of whatever work the
+ * document resolves to, so a check the guide's own sources verify is never
+ * left out because of the kind of work they are.
+ *
  * A standard a check names is the work a page cites when the two designations
  * name the same document and edition: the punctuation of the year, a
  * "Recommendation" in front, an edition or a reaffirmation written after a
@@ -27,7 +35,14 @@
  * a standard with no year means the one edition the pages cite. Every other
  * pairing is written out in `SAME_WORKS` with the reason it is one work, the
  * national edition of an international standard for instance, and an entry
- * that no check needs any more is refused, like one that pairs nothing. A
+ * that no check needs any more is refused, like one that pairs nothing, one
+ * the designations already make, a second one for the same document, one
+ * that sends a document away from the work its designation names, and one
+ * that adds beside that work another than an amendment of it: either would
+ * move its checks onto a guide that does not implement it. A pairing of a
+ * document the designations resolve to no work rests on the reason it gives,
+ * read in review, since the true ones share no designation (BS 5969 is
+ * IEC 651, the UNESCO equation an article). A
  * standard the checks are based on that resolves to no work, or to two,
  * fails the build: the Dataset would otherwise name fewer standards than its
  * values come from, and nothing would say so.
@@ -40,6 +55,7 @@
  * Nothing here starts a process or reads a file: the report and the pages are
  * handed in, so a test can hand in its own.
  */
+import { authorDate } from './author-date.mjs';
 import { referenceId } from './citations.mjs';
 
 /** The relation of a document a citation names in passing (scripts/conformance/references.py). */
@@ -74,6 +90,40 @@ export function documentKey(designation, year) {
 
 /** The key without its edition, for a check that cites a standard with no year. */
 const undated = (key) => key.replace(/:.*$/, '');
+
+/** The key of a page reference that has one: a standard's designation, a report's number. */
+const workKey = (ref) => {
+  const designation = ref?.type === 'standard' ? ref.designation : ref?.type === 'report' ? ref.number : undefined;
+  return designation === undefined ? undefined : documentKey(designation, ref.year);
+};
+
+/** The words of a name up to its first comma, which sets off an edition, a volume or a gloss. */
+const beforeComma = (text) => String(text).split(',')[0].trim();
+
+/**
+ * The name the "Verified by" line gives a work: the one a reader finds it
+ * under on the page, and never one with a comma in it, since commas are what
+ * separate the works in the line. A standard is its designation and a report
+ * its number, each up to the first comma ("ICAO Annex 16, Vol. I, 8th ed." is
+ * "ICAO Annex 16"; the edition stays when the designation writes it with a
+ * colon, so ISO 389-1:1998 and ISO 389-7:2005 stay apart); an article or a
+ * book is its authors and year, as its header chip names it
+ * (src/lib/author-date.mjs); a web page or a report with no number, which no
+ * chip names, is its title up to the first comma.
+ *
+ * @param {object} ref A page reference.
+ * @param {'en' | 'es'} lang
+ * @returns {string}
+ */
+export function workName(ref, lang = 'en') {
+  if (ref.type === 'standard') return beforeComma(ref.designation);
+  if (ref.type === 'report' && ref.number) return beforeComma(ref.number);
+  if (ref.type === 'article' || ref.type === 'book') {
+    const named = authorDate(ref.authors, ref.year, lang === 'es');
+    if (named) return named;
+  }
+  return beforeComma(ref.title);
+}
 
 /**
  * Standards a check cites under one designation and a page under another, and
@@ -238,16 +288,21 @@ function isWork(ref, work) {
  * @param {string} options.reportPath The report page's path in that language,
  *   "/phonometry/reference/conformance/".
  * @param {readonly { document: string, works: readonly object[], reason: string }[]} [options.sameWorks]
+ * @param {'en' | 'es'} [options.lang] The pages' language, which names an
+ *   article's two authors with "&" or "y".
  * @returns {{
  *   governing: object[],
- *   verifiedBy: (references: object[] | undefined) => ({ checks: number, designations: string[], domains: { id: string, title: string, checks: number, path: string }[] } | undefined),
+ *   verifiedBy: (references: object[] | undefined) => ({ checks: number, works: string[], domains: { id: string, title: string, checks: number, path: string }[] } | undefined),
  * }} `governing` holds one page reference per work, in the order the report
- *   first names them.
+ *   first names them. `verifiedBy` gives the works by the name the line
+ *   gives them (`workName`).
  * @throws {Error} Listing every document that resolves to no work or to
  *   several, and every entry of `sameWorks` that names a document no check is
- *   based on, picks no work, gives no reason or is not needed.
+ *   based on, names one a second time, picks no work, gives no reason, is not
+ *   needed, leaves out the work the designations already join it to, or adds
+ *   beside it a work that does not amend it.
  */
-export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath, sameWorks = SAME_WORKS }) {
+export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath, sameWorks = SAME_WORKS, lang = 'en' }) {
   // Every work the pages cite once, by `@id`, with each key it answers to.
   const works = new Map();
   for (const page of pages) {
@@ -260,11 +315,11 @@ export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath
   // report cites a directive the way a page cites it as a report.
   const byKey = new Map();
   for (const [id, ref] of works) {
-    const designation = ref.type === 'standard' ? ref.designation : ref.type === 'report' ? ref.number : undefined;
-    if (designation === undefined) continue;
-    for (const key of [documentKey(designation, ref.year), `~${undated(documentKey(designation, ref.year))}`]) {
-      if (!byKey.has(key)) byKey.set(key, new Set());
-      byKey.get(key).add(id);
+    const key = workKey(ref);
+    if (key === undefined) continue;
+    for (const answer of [key, `~${undated(key)}`]) {
+      if (!byKey.has(answer)) byKey.set(answer, new Set());
+      byKey.get(answer).add(id);
     }
   }
 
@@ -279,8 +334,11 @@ export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath
   const documents = governingDocuments(report);
   const problems = [];
   const resolved = new Map();
-  const listed = new Map(sameWorks.map((entry) => [entry.document, entry]));
+  const listed = new Map();
   for (const entry of sameWorks) {
+    // A second entry for one document would replace the first without a word.
+    if (listed.has(entry.document)) problems.push(`SAME_WORKS pairs ${entry.document} twice`);
+    else listed.set(entry.document, entry);
     if (typeof entry.reason !== 'string' || entry.reason.trim() === '') {
       problems.push(`SAME_WORKS pairs ${entry.document} and says no reason it is the work it names`);
     }
@@ -303,6 +361,31 @@ export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath
       const ids = picked.flat();
       if (found.length === 1 && ids.length === 1 && found[0] === ids[0]) {
         problems.push(`SAME_WORKS pairs ${key}, which the designations already join to the work it names`);
+      } else if (found.length > 0 && !found.some((id) => ids.includes(id))) {
+        // The designations name the document's work and the entry another:
+        // its checks would move to a guide that does not implement it. A
+        // pairing may add an amendment to the work found (a standard and
+        // its amendment, cited as two), or pick one of several, never leave
+        // every one of them out.
+        const named = found.map((id) => works.get(id)?.designation ?? id).join(', ');
+        problems.push(`SAME_WORKS pairs ${key} with what the pages cite as other works than ${named}, the work its designation already names`);
+      } else if (found.length > 0) {
+        // A work added beside the one found is an amendment of it, its key
+        // the found work's key and more after a "/" or a "+"; any other
+        // work would take the document's checks to a guide that implements
+        // that work and not this one.
+        const keys = found.map((id) => workKey(works.get(id))).filter((found) => found !== undefined);
+        const amends = (id) => {
+          const key = workKey(works.get(id));
+          return key !== undefined && keys.some((base) => key.length > base.length && key.startsWith(base) && '/+'.includes(key[base.length]));
+        };
+        const named = found.map((id) => works.get(id)?.designation ?? id).join(', ');
+        for (const id of ids.filter((id) => !found.includes(id) && !amends(id))) {
+          const extra = works.get(id)?.designation ?? id;
+          problems.push(
+            `SAME_WORKS pairs ${key} with ${extra} beside ${named}, which its designation already names, and ${extra} amends none of them`,
+          );
+        }
       }
       resolved.set(key, ids);
     } else if (found.length !== 1) {
@@ -348,12 +431,15 @@ export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath
     governing,
     verifiedBy(references) {
       const checks = new Map();
-      const designations = [];
+      const named = [];
       for (const ref of references ?? []) {
-        if (ref.type !== 'standard' || ref.implemented === false) continue;
+        // A work the page reads and does not implement verifies nothing on
+        // it; whatever else it cites is counted by what the join made of it.
+        if (ref.implemented === false) continue;
         const based = checksOf.get(referenceId(ref, bibliographyUrl));
         if (!based) continue;
-        if (!designations.includes(ref.designation)) designations.push(ref.designation);
+        const name = workName(ref, lang);
+        if (!named.includes(name)) named.push(name);
         for (const [check, domain] of based) checks.set(check, domain);
       }
       if (checks.size === 0) return undefined;
@@ -361,7 +447,7 @@ export function conformanceEvidence({ report, pages, bibliographyUrl, reportPath
       for (const domain of checks.values()) perDomain.set(domain, (perDomain.get(domain) ?? 0) + 1);
       return {
         checks: checks.size,
-        designations,
+        works: named,
         domains: [...perDomain]
           .sort(([a], [b]) => order.indexOf(a) - order.indexOf(b))
           .map(([id, count]) => ({ id, title: titles.get(id) ?? id, checks: count, path: `${reportPath}#${id}` })),

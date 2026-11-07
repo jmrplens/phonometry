@@ -1,6 +1,6 @@
 // The join of the conformance report with the pages and the works they cite
 // (src/lib/conformance-evidence.mjs), on reports and pages small enough to
-// read, and once on the real ones.
+// read.
 //
 // The real report and the real pages only ever hand the join the documents
 // the checks cite today, written the way they are written today, so a branch
@@ -85,7 +85,7 @@ test('a page is verified by the checks of the standards it implements, counted o
   );
   assert.deepEqual(joined.verifiedBy([standard('ISO 1:2000', 2000), standard('ISO 2:2010', 2010)]), {
     checks: 3,
-    designations: ['ISO 1:2000', 'ISO 2:2010'],
+    works: ['ISO 1:2000', 'ISO 2:2010'],
     domains: [
       { id: 'a', title: 'The a domain', checks: 2, path: `${REPORT_PATH}#a` },
       { id: 'b', title: 'The b domain', checks: 1, path: `${REPORT_PATH}#b` },
@@ -185,4 +185,136 @@ test('a standard and its amendment, cited by the pages as two works, are both wh
   const joined = evidence([check('a/1', 'a', [['IEC 60118-4', '2014+A1']])], [base, amendment], { sameWorks });
   assert.deepEqual(joined.governing.map((ref) => ref.designation), ['IEC 60118-4:2014', 'IEC 60118-4:2014/AMD1:2017']);
   assert.equal(joined.verifiedBy([amendment])?.checks, 1);
+});
+
+test('a work the page cites that is no standard is verified by the checks of the standard the report names it by', () => {
+  // The report names the speech guide's reference program by the working
+  // group that keeps it, the Chen and Millero equation by the body that
+  // adopted it, and a directive by its number: a web page, an article and a
+  // report on the page, each verified by the checks of the document it is.
+  const kit = {
+    type: 'web',
+    authors: ['Pavlovic, C.'],
+    organization: 'Acoustical Society of America, Working Group S3-79',
+    title: "C program developer's kit for the Speech Intelligibility Index (SII.C)",
+    url: 'https://www.sii.to/html/programs.html',
+  };
+  const article = {
+    type: 'article',
+    authors: ['Chen, C.-T.', 'Millero, F. J.'],
+    year: 1977,
+    title: 'Speed of sound in seawater at high pressures',
+    journal: 'The Journal of the Acoustical Society of America',
+    doi: '10.1121/1.381646',
+  };
+  const directive = { type: 'report', organization: 'European Parliament', year: 2002, title: 'Directive on vibration', number: 'Directive 2002/44/EC' };
+  const handbook = {
+    type: 'report',
+    organization: 'American Society of Heating, Refrigerating and Air-Conditioning Engineers',
+    year: 2019,
+    title: 'ASHRAE handbook: HVAC applications (SI edition), Chapter 49, Noise and vibration control',
+  };
+  const sameWorks = [
+    { document: 'ASA WG S3-79', works: [{ type: 'web', url: kit.url }], reason: 'The kit.' },
+    { document: 'UNESCO', works: [{ type: 'article', doi: article.doi }], reason: 'The equation.' },
+    { document: 'ASHRAE 2019', works: [{ type: 'report', year: 2019 }], reason: 'The handbook.' },
+  ];
+  const checks = [
+    check('a/1', 'a', [['ANSI S3.5', '1997']]),
+    check('a/2', 'a', [['ASA WG S3-79']]),
+    check('a/3', 'a', [['ASA WG S3-79']]),
+    check('b/1', 'b', [['UNESCO']]),
+    check('c/1', 'c', [['Directive 2002/44/EC']]),
+    check('d/1', 'd', [['ASHRAE 2019']]),
+  ];
+  const pages = [standard('ANSI S3.5-1997 (R2017)', 1997), kit, article, directive, handbook];
+  const joined = evidence(checks, pages, { sameWorks });
+  assert.deepEqual(joined.verifiedBy([standard('ANSI S3.5-1997 (R2017)', 1997), kit]), {
+    checks: 3,
+    works: ['ANSI S3.5-1997 (R2017)', "C program developer's kit for the Speech Intelligibility Index (SII.C)"],
+    domains: [{ id: 'a', title: 'The a domain', checks: 3, path: `${REPORT_PATH}#a` }],
+  });
+  assert.deepEqual(joined.verifiedBy([article])?.works, ['Chen & Millero 1977']);
+  assert.deepEqual(joined.verifiedBy([directive])?.works, ['Directive 2002/44/EC']);
+  assert.deepEqual(joined.verifiedBy([handbook])?.works, ['ASHRAE handbook: HVAC applications (SI edition)']);
+  // A Spanish page names the authors the way its header chips do.
+  const spanish = conformanceEvidence({
+    report: report(checks),
+    pages: [{ id: 'es/topic/guide', references: pages }],
+    bibliographyUrl: BIBLIOGRAPHY,
+    reportPath: REPORT_PATH,
+    sameWorks,
+    lang: 'es',
+  });
+  assert.deepEqual(spanish.verifiedBy([article])?.works, ['Chen y Millero 1977']);
+  // What the page only reads verifies nothing, whatever kind of work it is.
+  assert.equal(joined.verifiedBy([{ ...directive, implemented: false }]), undefined);
+});
+
+test('the line names each work without a comma, since commas are what separate them', () => {
+  const annex = standard('ICAO Annex 16, Vol. I, 8th ed.', 2017, { organization: 'International Civil Aviation Organization' });
+  const manual = standard('Doc 9501, 3rd ed.', 2018, { organization: 'International Civil Aviation Organization' });
+  const arp = standard('SAE ARP 5534, reaffirmed 2021', 2013, { organization: 'SAE International' });
+  const gum = standard('JCGM 100:2008, the GUM', 2008, { organization: 'Joint Committee for Guides in Metrology' });
+  const joined = evidence(
+    [
+      check('a/1', 'a', [['ICAO Annex 16', '2017']]),
+      check('a/2', 'a', [['Doc 9501', '2018']]),
+      check('a/3', 'a', [['SAE ARP 5534', '2013']]),
+      check('b/1', 'b', [['JCGM 100', '2008']]),
+    ],
+    [annex, manual, arp, gum],
+  );
+  const named = joined.verifiedBy([annex, manual, arp, gum])?.works;
+  assert.deepEqual(named, ['ICAO Annex 16', 'Doc 9501', 'SAE ARP 5534', 'JCGM 100:2008']);
+  assert.ok(named.every((name) => !name.includes(',')), named.join(' | '));
+});
+
+test('a pairing that sends a standard away from the work its designation joins, or a second pairing of it, fails', () => {
+  const pages = [standard('ISO 3745:2012', 2012), standard('ISO 3744:2010', 2010)];
+  const checks = [check('a/1', 'a', [['ISO 3745', '2012']]), check('b/1', 'b', [['ISO 3744', '2010']])];
+  const join = (sameWorks) => evidence(checks, pages, { sameWorks });
+  assert.throws(
+    () => join([{ document: 'ISO 3745:2012', works: [{ designation: 'ISO 3744:2010' }], reason: 'r' }]),
+    /SAME_WORKS pairs ISO 3745:2012 with what the pages cite as other works than ISO 3745:2012, the work its designation already names/,
+  );
+  assert.throws(
+    () =>
+      join([
+        { document: 'ISO 3744:2010', works: [{ designation: 'ISO 3744:2010' }, { designation: 'ISO 3745:2012' }], reason: 'first' },
+        { document: 'ISO 3744:2010', works: [{ designation: 'ISO 3745:2012' }], reason: 'second' },
+      ]),
+    /SAME_WORKS pairs ISO 3744:2010 twice/,
+  );
+});
+
+test('a pairing may add to the work its designation names only an amendment of it, which its checks then verify', () => {
+  const base = standard('ISO 3745:2012', 2012);
+  const amendment = standard('ISO 3745:2012/Amd 1:2017', 2017);
+  const other = standard('ISO 3744:2010', 2010);
+  const checks = [check('a/1', 'a', [['ISO 3745', '2012']]), check('b/1', 'b', [['ISO 3744', '2010']])];
+  const join = (sameWorks) => evidence(checks, [base, amendment, other], { sameWorks });
+  // The work its designation names and its amendment, cited as two works,
+  // is what a pairing may add a work for.
+  const amended = join([
+    { document: 'ISO 3745:2012', works: [{ designation: 'ISO 3745:2012' }, { designation: 'ISO 3745:2012/Amd 1:2017' }], reason: 'r' },
+  ]);
+  assert.equal(amended.verifiedBy([amendment])?.checks, 1);
+  // Another standard beside it would put the checks of ISO 3744 on a guide
+  // that implements ISO 3745 alone.
+  assert.throws(
+    () => join([{ document: 'ISO 3744:2010', works: [{ designation: 'ISO 3744:2010' }, { designation: 'ISO 3745:2012' }], reason: 'r' }]),
+    /SAME_WORKS pairs ISO 3744:2010 with ISO 3745:2012 beside ISO 3744:2010, which its designation already names, and ISO 3745:2012 amends none of them/,
+  );
+});
+
+test('a pairing that picks one of the editions a standard with no year names may add to it only an amendment of that edition', () => {
+  const pages = [standard('ISO 717-1:2020', 2020), standard('ISO 717-1:2013', 2013), standard('ISO 3745:2012', 2012)];
+  const checks = [check('a/1', 'a', [['ISO 717-1']]), check('b/1', 'b', [['ISO 3745', '2012']])];
+  const join = (works) => evidence(checks, pages, { sameWorks: [{ document: 'ISO 717-1', works, reason: 'r' }] });
+  assert.equal(join([{ designation: 'ISO 717-1:2020' }]).verifiedBy([standard('ISO 717-1:2020', 2020)])?.checks, 1);
+  assert.throws(
+    () => join([{ designation: 'ISO 717-1:2020' }, { designation: 'ISO 3745:2012' }]),
+    /SAME_WORKS pairs ISO 717-1 with ISO 3745:2012 beside ISO 717-1:2020, ISO 717-1:2013, which its designation already names, and ISO 3745:2012 amends none of them/,
+  );
 });

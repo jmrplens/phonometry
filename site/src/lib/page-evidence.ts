@@ -31,6 +31,7 @@ export function pageEvidence(lang: 'en' | 'es') {
 				.map((page) => ({ id: page.id, references: page.data.references })),
 			bibliographyUrl: `${SITE}${BASE}${prefix}/reference/bibliography/`,
 			reportPath: `${BASE}${prefix}/reference/conformance/`,
+			lang,
 		};
 	});
 }

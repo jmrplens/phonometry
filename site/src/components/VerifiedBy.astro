@@ -54,7 +54,7 @@ function listParts(items: string[]) {
   return new Intl.ListFormat(words.listLocale, { type: 'conjunction' }).formatToParts(items);
 }
 
-const designations = verified ? listParts(verified.designations).map((part) => part.value).join('') : '';
+const works = verified ? listParts(verified.works).map((part) => part.value).join('') : '';
 const domainParts = verified
   ? (() => {
       let next = 0;
@@ -69,7 +69,7 @@ const attribute = { [VERIFIED_BY_ATTRIBUTE]: String(verified?.checks ?? '') };
 {
   verified && (
     <p class="verified-by" {...attribute}>
-      {words.lead(verified.checks)} {designations}:{' '}
+      {words.lead(verified.checks)} {works}:{' '}
       {domainParts.map((part) =>
         'domain' in part && part.domain ? (
           <Fragment>

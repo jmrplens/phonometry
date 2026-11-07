@@ -21,6 +21,10 @@
  * compiled the page; a regular expression over the text gets them at the
  * moment a data module can still use them, and the cost of that choice is
  * bounded by the shape of the prop list, which `ReportPreview.astro` fixes.
+ * The text is read as the site renders it (`pageMarkup`), so a tag quoted in a
+ * fence, a code span, a comment or an expression, written behind a backslash
+ * or in the frontmatter, declares nothing: a guide that only shows how to write
+ * the tag does not show the fiche, and the index would send its reader there.
  *
  * The pairing is checked rather than assumed: a fiche a guide declares and the
  * repository does not ship, or a fiche that ships and no guide shows, is a
@@ -31,6 +35,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 
 /** The repository root, found the way `repo-stats.mjs` finds it. */
 function findRoot() {
@@ -113,7 +119,7 @@ function collect(root) {
   const found = new Map();
   for (const path of pages(root)) {
     const text = readFileSync(path, 'utf8');
-    for (const match of text.matchAll(/<ReportPreview\b([^>]*?)\/>/gs)) {
+    for (const match of pageMarkup(text).matchAll(/<ReportPreview\b([^>]*?)\/>/gs)) {
       const [tag] = match;
       const name = prop(tag, 'name');
       if (!name || found.has(name)) continue;

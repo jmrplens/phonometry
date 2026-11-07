@@ -12,7 +12,10 @@ second past its closing run.
 
 from __future__ import annotations
 
+import json
 import pathlib
+import shutil
+import subprocess
 import sys
 
 import pytest
@@ -32,6 +35,7 @@ from markdown_spans import (
     inline_spans,
     inside_quotation,
     lines_read_whole,
+    page_markup,
     quote_depth,
     replace_inline_spans_by_block,
 )
@@ -462,3 +466,229 @@ def test_the_marks_of_a_quotation_are_read_by_their_columns(
         depth,
         inside,
     )
+
+
+#: The tag each case of the page markup writes, in a place that renders it or not.
+_TAG = '<Video name="a" />'
+
+
+@pytest.mark.parametrize(
+    ("page", "kind"),
+    [
+        pytest.param(f"---\ndescription: '{_TAG}'\n---\n", "mdx", id="frontmatter"),
+        pytest.param(f"```mdx\n{_TAG}\n```\n", "mdx", id="a fence of backticks"),
+        pytest.param(f"~~~\n{_TAG}\n~~~\n", "mdx", id="a fence of tildes"),
+        pytest.param(
+            f"- item\n\n  ```\n  {_TAG}\n  ```\n", "mdx", id="a fence in a list item"
+        ),
+        pytest.param(f"Embed it with `{_TAG}` here.\n", "mdx", id="a code span"),
+        pytest.param(
+            f"Embed it with\n`{_TAG}`\nhere.\n", "mdx", id="a code span on its own line"
+        ),
+        pytest.param(f"{{/* {_TAG} */}}\n", "mdx", id="an MDX comment"),
+        pytest.param(f"{{/*\n{_TAG}\n*/}}\n", "mdx", id="an MDX comment over lines"),
+        pytest.param(f"$$\n{_TAG}\n$$\n", "mdx", id="display maths"),
+        pytest.param(f"<!-- {_TAG} -->\n", "md", id="an HTML comment"),
+        pytest.param(f"Text.\n\n    {_TAG}\n", "md", id="indented code"),
+        pytest.param(f"Write \\{_TAG} here.\n", "mdx", id="an escaped tag"),
+        pytest.param(f"Write \\{_TAG} here.\n", "md", id="an escaped tag on a md page"),
+        pytest.param(
+            f"<code>{{'{_TAG}'}}</code>\n", "mdx", id="a string in an expression"
+        ),
+        pytest.param(
+            f"Text {{'{_TAG}'}} here.\n", "mdx", id="an expression in a paragraph"
+        ),
+        pytest.param(
+            f"\n---\ndescription: '{_TAG}'\n---\n",
+            "mdx",
+            id="frontmatter after a blank line",
+        ),
+        pytest.param(
+            f"\n \n---\ndescription: '{_TAG}'\n---\n",
+            "mdx",
+            id="frontmatter after blank lines",
+        ),
+        pytest.param(
+            f"﻿---\ndescription: '{_TAG}'\n---\n",
+            "mdx",
+            id="frontmatter after a byte order mark",
+        ),
+        pytest.param(
+            f"+++\ndescription = '{_TAG}'\n+++\n", "mdx", id="TOML frontmatter"
+        ),
+    ],
+)
+def test_a_tag_the_page_does_not_render_is_blanked(page: str, kind: str) -> None:
+    """A tag quoted in code, a comment, maths or the frontmatter is gone, the lines kept."""
+    shown = page_markup(page, kind=kind)
+    assert "<Video" not in shown
+    assert shown.count("\n") == page.count("\n")
+
+
+@pytest.mark.parametrize(
+    ("page", "kind"),
+    [
+        pytest.param(f"Text.\n\n{_TAG}\n", "mdx", id="a tag alone"),
+        pytest.param('<Video\n  name="a"\n/>\n', "mdx", id="a tag over lines"),
+        pytest.param(
+            f"A clip, {_TAG}, in a paragraph.\n", "mdx", id="a tag in a paragraph"
+        ),
+        pytest.param(
+            f"---\ntitle: A\n---\n\n{_TAG}\n", "mdx", id="a tag after the frontmatter"
+        ),
+        pytest.param(
+            f"Use `code` and then\n{_TAG}\n", "mdx", id="a tag after a code span"
+        ),
+        pytest.param(f"Text.\n\n    {_TAG}\n", "mdx", id="indented on an mdx page"),
+        pytest.param(
+            f"Write \\\\{_TAG} here.\n", "mdx", id="behind an escaped backslash"
+        ),
+    ],
+)
+def test_a_tag_the_page_renders_stands_where_it_is_written(
+    page: str, kind: str
+) -> None:
+    shown = page_markup(page, kind=kind)
+    assert [line.find("<Video") for line in shown.split("\n")] == [
+        line.find("<Video") for line in page.split("\n")
+    ]
+
+
+@pytest.mark.parametrize(
+    ("tag", "kind"),
+    [
+        pytest.param(
+            '<Video alt="from $20" name="a" caption="to $30" />',
+            "mdx",
+            id="two dollar signs among its attributes",
+        ),
+        pytest.param(
+            '<Video alt="a `b" name="a" caption="c` d" />',
+            "mdx",
+            id="two backticks among its attributes",
+        ),
+        pytest.param(
+            '<Video\n  alt="from $20" name="a" caption="to $30"\n/>',
+            "mdx",
+            id="dollar signs on a line of a tag over lines",
+        ),
+        pytest.param(
+            '<Video name="a" caption={`a ${b}`} />',
+            "mdx",
+            id="a template literal in an expression of its own",
+        ),
+        pytest.param(
+            '<span title="a `b">c</span> and `d`',
+            "md",
+            id="a raw HTML tag on a md page",
+        ),
+    ],
+)
+def test_a_tag_the_page_renders_is_read_whole(tag: str, kind: str) -> None:
+    """No span or expression opens inside a tag the page renders: what it
+    holds between its quotes is its own, as the site's parser reads it.
+    """
+    page = f"Text.\n\n{tag}\n"
+    shown = page_markup(page, kind=kind)
+    opened = tag.split(" and ")[0]
+    assert opened in shown, shown
+
+
+def test_what_opens_first_wins_between_a_tag_a_span_and_an_expression() -> None:
+    """A span written before a tag holds the tag, a tag holds what it writes,
+    and the spans and expressions after it are read again from its end.
+    """
+    written = [
+        ('`<Video name="a" />`', False),
+        (" ", True),
+        ('<Video alt="`" name="b" />', True),
+        (" ", True),
+        ("{x}", False),
+        (" ", True),
+        ("`c`", False),
+        (" ", True),
+        ("\\$", False),
+        ("d ", True),
+        ("$e$", False),
+        ("\n", True),
+    ]
+    page = "".join(piece for piece, _ in written)
+    shown = "".join(piece if kept else " " * len(piece) for piece, kept in written)
+    assert page_markup(page) == shown
+
+
+def test_a_frontmatter_that_never_closes_is_read_as_the_page() -> None:
+    page = f"---\n{_TAG}\n"
+    assert page_markup(page) == page
+
+
+_NODE = shutil.which("node")
+_SITE_READER = _ROOT / "site" / "scripts" / "shared" / "markdown-spans.mjs"
+#: The shapes where the two languages could part: the cases above, a line end
+#: of two characters, a character outside the basic plane in what is blanked,
+#: and a tag in a row of a table.
+_MARKUP_CASES = (
+    f"Write \\{_TAG} here.\n",
+    f"Write \\\\{_TAG} here.\n",
+    f"<code>{{'{_TAG}'}}</code>\n",
+    f"\ufeff---\ndescription: '{_TAG}'\n---\n",
+    f"\n \n---\ndescription: '{_TAG}'\n---\n",
+    f"+++\ndescription = '{_TAG}'\n+++\n",
+    '<Video alt="from $20" name="a" caption="to $30" />\n',
+    '<Video\n  alt="from $20" name="a" caption="to $30"\n/>\n',
+    '<Video name="a" caption={`a ${b}`} />\n',
+    '<span title="a `b">c</span> and `d`\n',
+    'a\r\n`b`\r\n<Video name="a" />\r\n',
+    "Text `\U0001d465` and {'\U0001d466'} then $\U0001d467$.\n",
+    '| a | <Video name="a" /> |\n|---|---|\n| `b` | {c} |\n',
+)
+
+
+def _in_code_units(text: str, shown: str) -> str:
+    """*shown* as JavaScript holds it: a blanked character outside the basic plane
+    is one space here and two there, as each language keeps the columns of its
+    own strings.
+
+    :param text: The page.
+    :param shown: What :func:`page_markup` makes of it.
+    """
+    return "".join(
+        "  " if blanked == " " and ord(char) > 0xFFFF else blanked
+        for char, blanked in zip(text, shown, strict=True)
+    )
+
+
+@pytest.mark.whole_tree
+@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+def test_the_site_reads_the_markup_of_every_page_as_the_scripts_do() -> None:
+    """``pageMarkup`` of the site and :func:`page_markup` give the same page: every
+    page of the site as its own kind, and the cases above as both.
+    """
+    paths = sorted((_ROOT / "site" / "src" / "content").rglob("*.md*"))
+    pages = [
+        *((path.read_text(encoding="utf-8"), path.suffix[1:]) for path in paths),
+        *((case, kind) for case in _MARKUP_CASES for kind in ("md", "mdx")),
+    ]
+    script = (
+        f"import {{pageMarkup}} from {json.dumps(_SITE_READER.as_uri())};"
+        "let input = '';"
+        "for await (const chunk of process.stdin) input += chunk;"
+        "process.stdout.write(JSON.stringify(JSON.parse(input).map("
+        "  ([text, kind]) => pageMarkup(text, {kind}))));"
+    )
+    ran = subprocess.run(
+        [str(_NODE), "--input-type=module", "-e", script],
+        input=json.dumps(pages),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=300,
+        check=True,
+    )
+    javascript = json.loads(ran.stdout)
+    differ = [
+        f"{kind}: {text[:80]!r}"
+        for (text, kind), other in zip(pages, javascript, strict=True)
+        if _in_code_units(text, page_markup(text, kind=kind)) != other
+    ]
+    assert (len(paths) > 400, differ) == (True, [])

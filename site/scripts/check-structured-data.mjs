@@ -242,6 +242,14 @@ for (const file of files) {
 			broken = true;
 			continue;
 		}
+		// `null`, an array or a bare value parses and is still no JSON-LD
+		// document, so it holds no node and is read as one that does not
+		// parse: reading its @context would stop the whole check here.
+		if (doc === null || typeof doc !== 'object' || Array.isArray(doc)) {
+			fail(`${route}: an ld+json block is not a JSON-LD object`);
+			broken = true;
+			continue;
+		}
 		if (doc['@context'] !== 'https://schema.org') {
 			fail(`${route}: an ld+json block declares @context ${JSON.stringify(doc['@context'])}`);
 		}
@@ -254,8 +262,14 @@ for (const file of files) {
 			nodes.push(node);
 		}
 	}
-	if (broken) continue;
 
+	// What a page's valid blocks say holds whatever its other blocks do: a
+	// consumer reads each block as a document of its own, so a malformed one
+	// takes its own nodes out and leaves the others published. The two
+	// readings below need nothing else, and they are made before a malformed
+	// block ends the page. Everything after them asks for a node the page has
+	// to carry, which the malformed block may have held.
+	//
 	// An `@id` names one thing. Two nodes sharing one on a page is a merge
 	// conflict a consumer resolves by picking whichever it read last.
 	const ids = nodes.map((node) => node['@id']).filter(Boolean);
@@ -263,14 +277,15 @@ for (const file of files) {
 	if (duplicated.length > 0) {
 		fail(`${route}: ${[...new Set(duplicated)].join(', ')} defined more than once`);
 	}
-
-	for (const type of SITE_NODES) {
-		if (!nodeOfType(nodes, type)) fail(`${route}: no ${type} node`);
-	}
 	const software = nodeOfType(nodes, 'SoftwareApplication');
 	if (software) {
 		const platforms = JSON.stringify(software.operatingSystem ?? null);
 		platformLists.set(platforms, (platformLists.get(platforms) ?? 0) + 1);
+	}
+	if (broken) continue;
+
+	for (const type of SITE_NODES) {
+		if (!nodeOfType(nodes, type)) fail(`${route}: no ${type} node`);
 	}
 
 	// The error page is not an article and must not be indexed as one, which is

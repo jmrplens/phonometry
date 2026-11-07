@@ -9,6 +9,11 @@
 // The software node names its operating systems one per entry, as jmrp.io does
 // for the same `@id`: the site-wide graph is the same on every page, so the
 // check reads it once per distinct value and says on how many pages it stands.
+// A malformed block takes out its own nodes and no others: the software node
+// and the `@id`s of the page's valid blocks are still read, as a consumer reads
+// them, so the count names every page that carries a value. A block that parses
+// to `null`, an array or a bare value is read the same way, and does not stop
+// the check.
 //
 // Each test here writes a build of a few pages into a directory of its own and
 // runs the check on it the way CI does.
@@ -34,8 +39,10 @@ const PLATFORMS = ['Linux', 'macOS', 'Windows'];
  * The built HTML of one page that gives the check nothing else to report.
  *
  * `operatingSystem` is what the software node names; null leaves the property out.
+ * `blocks` are the further ld+json blocks the page carries after its graph, each
+ * as written, so a test can put a malformed one beside it.
  */
-function page(slug, datePublished, dateModified, operatingSystem = PLATFORMS) {
+function page(slug, datePublished, dateModified, operatingSystem = PLATFORMS, blocks = []) {
 	const url = `${ORIGIN}/${slug}/`;
 	const graph = [
 		...['Person', 'WebSite', 'SoftwareSourceCode'].map((type) => ({ '@type': type })),
@@ -72,16 +79,19 @@ function page(slug, datePublished, dateModified, operatingSystem = PLATFORMS) {
 		},
 	];
 	const block = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
-	return `<!doctype html><html><head><script type="application/ld+json">${block}</script></head></html>`;
+	const scripts = [block, ...blocks].map((body) => `<script type="application/ld+json">${body}</script>`);
+	return `<!doctype html><html><head>${scripts.join('')}</head></html>`;
 }
 
 /**
  * Build `pages` pages, the first `dated` of them published on `published`, and run the check on them.
  *
  * `platforms` gives the software node's `operatingSystem` on each page, by its
- * index; a page past its end names the default platforms.
+ * index; a page past its end names the default platforms. `blocks` gives, by the
+ * same index, the further ld+json blocks a page carries; a page past its end
+ * carries none.
  */
-function check(t, pages, dated, published = '2026-07-01', platforms = []) {
+function check(t, pages, dated, published = '2026-07-01', platforms = [], blocks = []) {
 	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
 	t.after(() => rmSync(dist, { recursive: true, force: true }));
 	for (let i = 0; i < pages; i += 1) {
@@ -90,7 +100,7 @@ function check(t, pages, dated, published = '2026-07-01', platforms = []) {
 		const operatingSystem = i < platforms.length ? platforms[i] : PLATFORMS;
 		writeFileSync(
 			join(dir, 'index.html'),
-			page(`page-${i}`, i < dated ? published : '2026-10-01', '2026-10-01', operatingSystem),
+			page(`page-${i}`, i < dated ? published : '2026-10-01', '2026-10-01', operatingSystem, blocks[i] ?? []),
 		);
 	}
 	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
@@ -148,4 +158,31 @@ test('a software node that names no operating system, or one twice, fails', (t) 
 	assert.match(ran.err, /FAIL 1 page\(s\): the software node's operatingSystem is \[\]/);
 	assert.match(ran.err, /FAIL 1 page\(s\): the software node's operatingSystem is \["Linux","Linux"\]/);
 	assert.match(ran.out, /ok {3}the software node names its 3 operating systems one per entry on 7 pages/);
+});
+
+test('a malformed block on a page leaves the software node of its valid block counted', (t) => {
+	const ran = check(t, 10, 9, undefined, Array(10).fill('Windows, Linux, macOS'), [['{"@context": ']]);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/page-0\/: an ld\+json block is not valid JSON/);
+	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
+});
+
+test('a block that parses to no JSON-LD object is reported as one that does not parse', (t) => {
+	// `null` parses, and reading its @context threw, so the check stopped before
+	// it reported the page or tallied any software node.
+	const ran = check(t, 10, 9, undefined, Array(10).fill('Windows, Linux, macOS'), [['null'], ['[]'], ['5']]);
+	assert.equal(ran.status, 1);
+	for (const page of [0, 1, 2]) {
+		assert.match(ran.err, new RegExp(`FAIL /page-${page}/: an ld\\+json block is not a JSON-LD object`));
+	}
+	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
+	assert.doesNotMatch(ran.err, /TypeError/);
+});
+
+test('a malformed block on a page leaves two nodes of its valid blocks that share an @id reported', (t) => {
+	const twin = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Thing', '@id': `${ORIGIN}/#thing` });
+	const ran = check(t, 10, 9, undefined, [], [[twin, twin, '{']]);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/page-0\/: an ld\+json block is not valid JSON/);
+	assert.match(ran.err, /FAIL \/page-0\/: .*\/#thing defined more than once/);
 });

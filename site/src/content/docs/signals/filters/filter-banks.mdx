@@ -688,14 +688,17 @@ where that package began. Code written for it changes in these places:
 | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)` | `bands = filters.nominal_frequencies(3)`, then `bands.frequencies`, `bands.lower_edges`, `bands.upper_edges` and `bands.labels` |
 | `normalizedfreq(3)` | `filters.normalized_frequencies(3)` |
 | `filter_type=`, `ripple=`, `attenuation=` | `design=filters.FilterDesign(filter_type=..., ripple=..., attenuation=...)` |
+| `filter_type="cheby2"` or `"ellip"` with the default `attenuation`, 60 dB | the default has been 72 dB since 3.1, which makes the default `cheby2` bank class 1; `design=filters.FilterDesign(filter_type=..., attenuation=60.0)` gives the old numbers |
 | `calibration_factor=`, `dbfs=` | `calibration=filters.LevelCalibration(factor=..., dbfs=...)` |
 | `show=`, `plot_file=` | `response_plot=filters.ResponsePlot(show=..., file=...)` |
 
 The transition package `pyoctaveband` pins `phonometry>=3.0.0,<4`, so
 `import pyoctaveband` works on 3.x only: code moves to the names above by
 changing its import, not by updating that package.
-[Upgrading](/phonometry/start/upgrading/) lists every other change between the
-two.
+[Upgrading from 3.3 to 4.0](/phonometry/start/upgrading/) lists the rest of
+what 4.0 changed, and the
+[changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) what 3.0
+to 3.3 changed after PyOctaveBand 2.0.0.
 
 ## What this guide covers
 

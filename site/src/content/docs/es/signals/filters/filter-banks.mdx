@@ -1,6 +1,6 @@
 ---
 title: "Bancos de filtros de octava y de fracción de octava"
-description: "Niveles por bandas de octava y de fracción de octava en Python: matemáticas de banda, parámetros de octave_filter, EQ paramétrico y filtrado de fase cero."
+description: "Niveles por bandas de octava y fracción de octava en Python: matemáticas de banda, parámetros de octave_filter, EQ paramétrico, señales por banda y fase cero."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -724,14 +724,17 @@ estos puntos:
 | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)` | `bands = filters.nominal_frequencies(3)`, y después `bands.frequencies`, `bands.lower_edges`, `bands.upper_edges` y `bands.labels` |
 | `normalizedfreq(3)` | `filters.normalized_frequencies(3)` |
 | `filter_type=`, `ripple=`, `attenuation=` | `design=filters.FilterDesign(filter_type=..., ripple=..., attenuation=...)` |
+| `filter_type="cheby2"` o `"ellip"` con la `attenuation` por defecto, 60 dB | desde la 3.1 vale 72 dB, lo que hace de clase 1 el banco `cheby2` por defecto; `design=filters.FilterDesign(filter_type=..., attenuation=60.0)` da los números de antes |
 | `calibration_factor=`, `dbfs=` | `calibration=filters.LevelCalibration(factor=..., dbfs=...)` |
 | `show=`, `plot_file=` | `response_plot=filters.ResponsePlot(show=..., file=...)` |
 
 El paquete de transición `pyoctaveband` fija `phonometry>=3.0.0,<4`, así que
 `import pyoctaveband` solo funciona en la 3.x: el código pasa a los nombres de
 arriba cambiando su import, no actualizando ese paquete.
-[Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) recoge todos
-los demás cambios entre las dos.
+[Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) recoge el
+resto de lo que cambió en la 4.0, y el
+[registro de cambios](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) lo
+que cambió de la 3.0 a la 3.3 después de PyOctaveBand 2.0.0.
 
 ## Qué cubre esta guía
 

@@ -55,7 +55,8 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -82,6 +83,8 @@ from .spectra import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -462,6 +465,11 @@ class MISOCoherenceResult(OwnsArrays):
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"resolution_bandwidth": "Hz"}
+    )
 
     frequencies: NDArray[np.float64]
     n_inputs: int

@@ -57,7 +57,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite, log10
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import check_engine, require_choice, require_scalar
@@ -65,7 +66,7 @@ from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -348,6 +349,9 @@ class ImpactPredictionResult(RichDisplay):
     :ivar delta_l_w: Weighted covering improvement ``ΔLw``, in dB.
     :ivar k_correction: Flanking correction ``K``, in dB (Table 1).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"ln_w_eq": "dB"})
 
     l_prime_n_w: float
     ln_w_eq: float

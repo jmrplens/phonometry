@@ -76,7 +76,7 @@ import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -551,6 +551,16 @@ class WeightedRatingResult(OwnsArrays):
         have one, so the promise ended in the renderer's ``AttributeError``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "measured": "dB",
+            "rating": "dB",
+            "shifted_reference": "dB",
+            "unfavorable_sum": "dB",
+        }
+    )
+
     rating: int
     c: int
     ctr: int
@@ -693,6 +703,16 @@ class ImpactRatingResult(OwnsArrays):
     :ivar quantity: Always ``"impact"`` (ISO 717-2), selecting the impact
         labels of the ISO 717 Annex C report.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "measured": "dB",
+            "rating": "dB",
+            "shifted_reference": "dB",
+            "unfavorable_sum": "dB",
+        }
+    )
 
     rating: int
     ci: int
@@ -1264,6 +1284,11 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         range (after the one-decimal reduction of Clause 4.4), in dB.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"measured": "dB", "rating": "dB"}
+    )
+
     rating: float
     c: float
     ctr: float
@@ -1340,6 +1365,11 @@ class ExtendedImpactRatingResult(OwnsArrays):
     :ivar measured: The measured impact levels over the full enlarged range
         (after the one-decimal reduction of Clause 4.3), in dB.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"measured": "dB", "rating": "dB"}
+    )
 
     rating: float
     ci: float

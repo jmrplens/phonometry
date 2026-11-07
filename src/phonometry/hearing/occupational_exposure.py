@@ -47,7 +47,7 @@ from __future__ import annotations
 from dataclasses import KW_ONLY, dataclass, field, replace
 from math import isfinite, log10, sqrt
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -491,6 +491,16 @@ class ExposureResult(RichDisplay):
     :ivar upper_limit: :math:`L_\mathrm{EX,8h} + U`, the value 95 % of readings fall
         below.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "combined_standard_uncertainty": "dB",
+            "expanded_uncertainty": "dB",
+            "lex_8h": "dB",
+            "u3": "dB",
+        }
+    )
 
     lex_8h: float
     combined_standard_uncertainty: float

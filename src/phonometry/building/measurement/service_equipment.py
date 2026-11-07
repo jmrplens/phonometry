@@ -140,7 +140,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, cast
 
 import numpy as np
 
@@ -1178,6 +1178,11 @@ class ServiceEquipmentResult(OwnsArrays):
     :ivar reproducibility_db: The Table 2 standard deviation of each band, in
         dB.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"ratings": "dB", "unrounded_ratings": "dB"}
+    )
 
     frequencies: np.ndarray
     fraction: BandFraction

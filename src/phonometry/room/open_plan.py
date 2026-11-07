@@ -33,7 +33,8 @@ STI > 0.20 in all positions" (Clause 6.3).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -48,6 +49,7 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -117,6 +119,11 @@ class OpenPlanResult(OwnsArrays):
         on, in metres, retained so :meth:`plot_geometry` can draw the
         line.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"d2s": "dB", "rd": "m", "rp": "m"}
+    )
 
     d2s: float
     lp_as_4m: float

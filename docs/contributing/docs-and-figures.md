@@ -1301,7 +1301,7 @@ class RoomVerdict:
 <a id="f55"></a>
 ### F55. Let a record field's unit read from its name, or declare it in `_display_units`
 
-**Why.** A renamed bare field (`frequencies`, `insertion_loss`) would have lost the unit its old suffix showed. A bare level shows dB, a loudness level phon, and a field whose name misreads its number declares `_display_units`.
+**Why.** A renamed bare field (`frequencies`, `insertion_loss`) would have lost the unit its old suffix showed. A bare level shows dB, a loudness level phon, and a field whose name misreads its number declares `_display_units`. A field whose name says no unit at all, as the `edt`, `t20` and `c80` of `RoomAcousticsResult` or the `a_div` of `OutdoorAttenuation`, showed its number bare: 157 of them in the results of `tests/result_factories.py`, until each record declared them.
 
 **Do**
 
@@ -1326,9 +1326,9 @@ class ReflectionResult(RichDisplay):
     reflection_index: float   # shown in dB by the head-noun reading
 ```
 
-**Enforced by:** `tests/test_record_display.py::test_every_unit_a_record_names_is_needed_and_shown`, `tests/test_record_display.py::test_no_public_field_that_holds_no_number_is_shown_in_a_unit`, `tests/test_record_display.py::test_every_public_field_ending_in_a_unit_shows_it`, `tests/test_record_display.py::test_a_number_its_name_misreads_shows_its_own_unit`
+**Enforced by:** `tests/test_record_display.py::test_every_unit_a_record_names_is_needed_and_shown`, `tests/test_record_display.py::test_no_public_field_that_holds_no_number_is_shown_in_a_unit`, `tests/test_record_display.py::test_every_public_field_ending_in_a_unit_shows_it`, `tests/test_record_display.py::test_a_number_its_name_misreads_shows_its_own_unit`, `tests/test_record_display.py::test_every_number_a_result_shows_has_its_unit_or_a_reason`
 
-**Exceptions.** An entry must name a real field and say something the name does not. A truth value, a text, a complex factor or a nested record shows no unit. A bare axis name has its one unit (frequencies in Hz, levels in dB, times in s); a loudness level is in phon. A name that ends in a symbol's subscript rather than a unit goes in `_SYMBOL_NAMES` of `tests/test_record_display.py` (`a_atm`). A unit suffix the display does not spell yet goes in `_UNITS` of `phonometry._internal.display`, or a public field that ends in it shows no unit and `test_every_public_field_ending_in_a_unit_shows_it` fails.
+**Exceptions.** An entry must name a real field and say something the name does not. A number a result of `tests/result_factories.py` shows with no unit, a pure number or a quantity in the unit of what it was given, stands in `_SHOWN_WITHOUT_A_UNIT` of `tests/test_record_display.py` under its reason, and an entry that comes to show a unit fails as stale. A truth value, a text, a complex factor or a nested record shows no unit. A bare axis name has its one unit (frequencies in Hz, levels in dB, times in s); a loudness level is in phon. A name that ends in a symbol's subscript rather than a unit goes in `_SYMBOL_NAMES` of `tests/test_record_display.py` (`a_atm`). A unit suffix the display does not spell yet goes in `_UNITS` of `phonometry._internal.display`, or a public field that ends in it shows no unit and `test_every_public_field_ending_in_a_unit_shows_it` fails.
 
 ## Catalogues
 

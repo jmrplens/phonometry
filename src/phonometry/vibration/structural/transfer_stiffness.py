@@ -76,7 +76,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -906,6 +906,11 @@ class BandAveragedStiffness(OwnsArrays):
     :ivar line_counts: Number of narrow-band lines averaged in each band.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"center_frequencies": "Hz", "nominal_frequencies": "Hz", "stiffness": "N/m"}
+    )
+
     nominal_frequencies: np.ndarray
     center_frequencies: np.ndarray
     stiffness: np.ndarray
@@ -1699,6 +1704,11 @@ class EffectiveBlockingMass(OwnsArrays):
         in kg.
     :ivar blocking_mass: The mass ``m2`` of the block, in kg.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"blocking_mass": "kg"}
+    )
 
     frequencies: np.ndarray
     effective_mass_kg: np.ndarray

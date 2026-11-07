@@ -61,7 +61,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -604,6 +604,11 @@ class RainfallReferenceCorrection(OwnsArrays):
     :ivar correction: :math:`\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} -
         L_{I\mathrm{c,ref}}`, in dB (Formula (I.3)).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"structural_reverberation_time": "s"}
+    )
 
     frequencies: np.ndarray
     l_i_reference: np.ndarray

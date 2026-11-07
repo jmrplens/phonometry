@@ -122,16 +122,21 @@ def _factories() -> list[tuple[str, Callable[[], object]]]:
 
 
 @pytest.fixture(scope="module")
-def real_results() -> dict[str, object]:
-    """The records the factories build, by factory name."""
-    built: dict[str, object] = {}
+def built_results() -> dict[str, object]:
+    """What each factory builds, by factory name: a record or a tuple of them."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        for name, factory in _factories():
-            result = factory()
-            if hasattr(result, "_repr_html_"):
-                built[name] = result
-    return built
+        return {name: factory() for name, factory in _factories()}
+
+
+@pytest.fixture(scope="module")
+def real_results(built_results: dict[str, object]) -> dict[str, object]:
+    """The records the factories build, by factory name."""
+    return {
+        name: result
+        for name, result in built_results.items()
+        if hasattr(result, "_repr_html_")
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -889,6 +894,354 @@ def test_every_unit_a_record_names_is_needed_and_shown(cls: type) -> None:
         assert display._unit_in(record, name, 1.0) == unit
 
 
+#: The numbers the results of ``tests/result_factories.py`` show with no
+#: unit, each read from its docstring, keyed by the reason and listed as
+#: ``Class.field``: a pure number, or a quantity in the unit of the record or
+#: the quantity it was given, which no table can name for every call.
+_SHOWN_WITHOUT_A_UNIT: dict[str, tuple[str, ...]] = {
+    "a count": (
+        "AcousticRoughnessSpectrum.n_segments",
+        "BandAveragedStiffness.line_counts",
+        "BinnedModulation.counts",
+        "BinnedModulation.nonzero_counts",
+        "BinnedSoundLevels.counts",
+        "CapillaryTube.n_tubes",
+        "CoherenceCheck.min_n_records",
+        "CoherenceCheck.n_impacts",
+        "CoherentOutputSpectrumResult.n_averages",
+        "CoherentOutputSpectrumResult.n_segments",
+        "CrossSpectralDensityResult.n_averages",
+        "CrossSpectralDensityResult.n_segments",
+        "DiffuserPolarResponse.n_repetitions",
+        "HardWalledRoomCheck.n_orientations",
+        "HardWalledSoundPowerResult.n_microphone_positions",
+        "HardWalledSoundPowerResult.n_source_positions",
+        "ImpactMobilityResult.n_impacts",
+        "LoopField.n_turns",
+        "MISOCoherenceResult.n_averages",
+        "MISOCoherenceResult.n_inputs",
+        "MISOCoherenceResult.n_segments",
+        "MethodASummary.counts",
+        "MethodBSummary.counts",
+        "MonteCarloResult.n_trials",
+        "PlantMeasurementContour.n_positions",
+        "PleasantnessEventfulness.respondent_counts",
+        "SELDistribution.n_subclasses",
+        "SourceLocationPlan.additional_room_locations",
+        "SourceLocationPlan.n_a_weighted_source_locations",
+        "SourceLocationPlan.n_microphone_positions",
+        "SourceLocationPlan.source_locations",
+        "SourceRanking.mentions",
+        "SourceRanking.participants",
+        "SpecialRoomSoundPowerResult.n_microphone_positions",
+        "SpecialRoomSoundPowerResult.n_source_positions",
+        "SynchronousAverageResult.n_averages",
+        "TurbineMicrophoneArray.n_turbine_boxes",
+        "TurbineMicrophoneArray.positions_per_box",
+    ),
+    "a number of samples": (
+        "CoherentOutputSpectrumResult.nperseg",
+        "CrossSpectralDensityResult.nperseg",
+        "DirectSoundSubtraction.shift_samples",
+        "EnvelopeSpectrumResult.nfft",
+        "LifterResult.nfft",
+        "MISOCoherenceResult.nperseg",
+        "SynchronousAverageResult.samples_per_period",
+        "WindowMetricsResult.n",
+    ),
+    "an index, a number or a class": (
+        "BinnedModulation.bands",
+        "BinnedModulation.selected_bands",
+        "CorrectionUncertaintyVerification.clause",
+        "CouplerParameterUncertainty.microphone",
+        "EcmaLoudness.last_evaluated_block",
+        "FilterPeriodicVerification.filter_class",
+        "FilterPeriodicVerification.fraction",
+        "FreeFieldParameterUncertainty.microphone",
+        "MethodASummary.part",
+        "NeckLoopVerification.neck_loop_type",
+        "RoomModesResult.orders",
+        "ServiceEquipmentResult.fraction",
+        "SoundLevelMeterPeriodicVerification.meter_class",
+        "SoundPowerIntensityResult.fraction",
+        "SoundscapeCorrelation.x_ranks",
+        "SoundscapeCorrelation.y_ranks",
+        "SourceRanking.highest_ranks",
+        "SourceRanking.lowest_ranks",
+        "SourceRanking.median_ranks",
+        "SourceRanking.rank_ranges",
+        "TimeInvarianceResult.fraction",
+    ),
+    "a sign, +1 or -1": (
+        "IntensityResult.direction",
+        "IntensityResult.total_direction",
+    ),
+    "texts or indices, which an empty one cannot show": (
+        "BinauralIndicators.not_implemented",
+        "InverseSquareLawResult.traverse_targets",
+        "MISOCoherenceResult.order",
+        "PlantMeasurementContour.omitted_positions",
+        "RiseSpeedResult.slopes",
+        "SELDistribution.replicas",
+    ),
+    "a ratio, a coefficient or a factor": (
+        "ApertureTransmissionResult.transmission_coefficient",
+        "CoherentOutputSpectrumResult.overlap",
+        "CoherentOutputSpectrumResult.snr",
+        "CorrectionUncertaintyBudget.divisors",
+        "CouplerCheck.broadband_margin",
+        "CouplerCheck.length_to_diameter_ratio",
+        "CrossSpectralDensityResult.overlap",
+        "DiffuseFieldAbsorptionResult.absorption",
+        "DiffuserPolarResponse.coefficient",
+        "DiffusionResult.coefficient",
+        "DirectSoundSubtraction.amplitude_factor",
+        "DirectivityFactor.gamma",
+        "DirectivityFactor.largest_element_fraction",
+        "DirectivityFactor.weights",
+        "DoubleHitCheck.threshold_ratio",
+        "EQResponseResult.sos",
+        "EnvelopeResult.decimation_factor",
+        "ExponentialWindowCorrection.apparent_damping_ratio",
+        "FieldIndicators.f4",
+        "FreeFieldCheck.reflecting_plane_absorption_coefficient",
+        "HardWalledRoomCheck.max_absorption_coefficient",
+        "HeatConductionCorrection.heat_capacity_ratio",
+        "HeatConductionCorrection.length_to_diameter_ratio",
+        "HeatConductionCorrection.x",
+        "ImpedanceTubeResult.absorption",
+        "LayeredAbsorberResult.absorption",
+        "LifterResult.cepstrum",
+        "LimitingTestSignalCheck.peak_to_rms",
+        "MISOCoherenceResult.overlap",
+        "ModulationBlock.prominence",
+        "ModulationDistortionResult.d2",
+        "ModulationDistortionResult.d3",
+        "ModulationDistortionResult.smpte",
+        "PathContribution.energy_fraction",
+        "PistonDirectivity.directivity",
+        "PistonDirectivity.ka",
+        "RadiationEfficiencyResult.radiation_efficiency",
+        "RainfallReferenceCorrection.loss_factor",
+        "RainfallReferenceCorrection.reference_loss_factor",
+        "ReciprocityAirAttenuation.water_vapor_mole_fraction",
+        "ReciprocityMicrophone.loss_factor",
+        "ReflectionIndexResult.position_values",
+        "ReflectionIndexUncertainty.expanded_uncertainty",
+        "RoomAcousticsResult.d50",
+        "STIResult.mtf",
+        "STIResult.mti",
+        "STIResult.sti",
+        "ShapedSweepResult.magnitude",
+        "SpecialRoomReverberationCheck.climate_product_change",
+        "SpecialRoomReverberationCheck.reverberation_parameter",
+        "SpecialRoomSurfaceCheck.floor_absorption",
+        "SpecialRoomSurfaceCheck.mean_absorption",
+        "SpecialRoomSurfaceCheck.surface_absorption",
+        "StatisticalPassByResult.weighting_factors",
+        "SweptSineDistortionResult.distortion_ratios",
+        "SweptSineDistortionResult.thd_ratio",
+        "SynchronousAverageResult.comb_response",
+        "TimeSelectiveResponse.taper_fraction",
+        "VibrationMeterVerification.measured_response",
+        "WaveMotionCorrection.speed_of_sound_ratio",
+        "WindShearProfile.shear_exponent",
+        "WindowMetricsResult.coherent_gain",
+        "WindowMetricsResult.taps",
+    ),
+    "a coherence or a correlation": (
+        "CoherenceCheck.coherence",
+        "CoherenceCheck.min_coherence",
+        "CoherentOutputSpectrumResult.coherence",
+        "CoherentOutputSpectrumResult.coherence_bias",
+        "CrossSpectralDensityResult.coherence",
+        "FrequencyResponseResult.coherence",
+        "ImpactMobilityResult.coherence",
+        "MISOCoherenceResult.multiple_coherence",
+        "MISOCoherenceResult.ordinary_coherence",
+        "MISOCoherenceResult.partial_coherence",
+        "SoundscapeCorrelation.coefficient",
+    ),
+    "a probability or a confidence": (
+        "CorrectionUncertaintyBudget.coverage",
+        "MethodBSummary.confidence",
+        "MonteCarloResult.coverage",
+        "SELDistribution.probabilities",
+        "SoundscapeCorrelation.p_value",
+    ),
+    "a coverage factor": (
+        "ComparisonUncertaintyBudget.coverage_factor",
+        "ExposureResult.coverage_factor",
+        "HardWalledSoundPowerResult.coverage_factor",
+        "InSituSoundPowerResult.coverage_factor",
+        "PassByUncertainty.coverage_factor",
+        "ReciprocityUncertaintyBudget.coverage_factor",
+        "ReferenceSourceCalibration.coverage_factor",
+        "ReflectionIndexUncertainty.coverage_factor",
+        "SpecialRoomSoundPowerResult.coverage_factor",
+    ),
+    "degrees of freedom": (
+        "CorrectionUncertaintyBudget.dofs",
+        "SoundscapeCorrelation.degrees_of_freedom",
+        "UncertaintyResult.effective_dof",
+    ),
+    "a normalized random error": (
+        "CoherentOutputSpectrumResult.random_error",
+        "CoherentOutputSpectrumResult.snr_random_error",
+        "CrossSpectralDensityResult.magnitude_random_error",
+        "MISOCoherenceResult.coherent_output_random_error",
+        "MISOCoherenceResult.multiple_coherence_random_error",
+    ),
+    "a test statistic": (
+        "SoundscapeCorrelation.t_statistic",
+    ),
+    "a statistic of answers on a scale": (
+        "MethodASummary.maxima",
+        "MethodASummary.medians",
+        "MethodASummary.minima",
+        "MethodASummary.ranges",
+        "MethodBSummary.confidence_lower",
+        "MethodBSummary.confidence_upper",
+        "MethodBSummary.means",
+        "MethodBSummary.medians",
+        "MethodBSummary.standard_deviations",
+        "PleasantnessEventfulness.attribute_values",
+        "PleasantnessEventfulness.eventfulness",
+        "PleasantnessEventfulness.pleasantness",
+        "PleasantnessEventfulness.respondent_eventfulness",
+        "PleasantnessEventfulness.respondent_pleasantness",
+    ),
+    "a weighted vibration severity KB, a number": (
+        "GuideValues.a_o",
+        "GuideValues.a_r",
+        "GuideValues.a_u",
+        "PeopleAssessment.kb_fmax",
+        "PeopleAssessment.kb_ftr",
+        "TrainPassage.kbf_max",
+        "VibrationMeterReading.kbf",
+        "VibrationMeterReading.kbf_max",
+        "VibrationMeterReading.kbf_takt_rms",
+        "VibrationMeterReading.takt_maxima",
+    ),
+    "samples of an excitation the library made, in full scale": (
+        "ShapedSweepResult.signal",
+    ),
+    "in the unit of the record or quantity it was given": (
+        "AcousticCenter.intercept",
+        "AcousticCenter.inverse_readings",
+        "AcousticCenter.slope",
+        "CoherentOutputSpectrumResult.coherent_psd",
+        "CoherentOutputSpectrumResult.noise_psd",
+        "CoherentOutputSpectrumResult.output_psd",
+        "ConformanceVerification.deviation",
+        "ConformanceVerification.lower_limit",
+        "ConformanceVerification.max_uncertainty",
+        "ConformanceVerification.uncertainty",
+        "ConformanceVerification.upper_limit",
+        "CrossSpectralDensityResult.magnitude",
+        "DirectSoundSubtraction.aligned_free_field",
+        "DirectSoundSubtraction.in_front",
+        "DirectSoundSubtraction.residual",
+        "EnvelopeResult.envelope",
+        "EnvelopeResult.signal",
+        "EnvelopeSpectrumResult.amplitude",
+        "EnvelopeSpectrumResult.envelope",
+        "ImpulseResponseResult.ir",
+        "MISOCoherenceResult.coherent_output_spectra",
+        "MISOCoherenceResult.noise_psd",
+        "MISOCoherenceResult.output_psd",
+        "ModulationDistortionResult.carrier_amplitude",
+        "ModulationDistortionResult.sideband_amplitudes",
+        "MonteCarloResult.interval",
+        "MonteCarloResult.samples",
+        "MonteCarloResult.standard_uncertainty",
+        "MonteCarloResult.value",
+        "OverloadCheck.full_scale",
+        "OverloadCheck.x",
+        "PhaseDecompositionResult.magnitude",
+        "ResponseDecayCheck.response",
+        "RigidMassCalibrationResult.measured",
+        "RoadDeviceRating.values",
+        "SoundscapeCorrelation.x",
+        "SoundscapeCorrelation.y",
+        "SteppedSineImpulseResponse.impulse_response",
+        "SweptSineDistortionResult.harmonic_irs",
+        "SynchronousAverageResult.period_waveform",
+        "SynchronousAverageResult.residual",
+        "SynchronousAverageResult.residual_rms",
+        "TimeSelectiveResponse.impulse_response",
+        "TrackDecayRate.responses",
+        "UncertaintyResult.combined_uncertainty",
+        "UncertaintyResult.contributions",
+        "UncertaintyResult.sensitivities",
+        "UncertaintyResult.value",
+        "VectorChangeResult.final",
+        "VectorChangeResult.initial",
+        "VectorChangeResult.magnitude",
+    ),
+}  # fmt: skip
+
+
+def _numbers_shown(
+    record: object, depth: int = 0
+) -> Iterator[tuple[object, str, object]]:
+    """Each field of *record* the table shows as a number, records held included.
+
+    A field the record names the unit of in ``_display_units`` was read by
+    hand when the entry was written, and is left out.
+    """
+    own = getattr(type(record), "_display_units", {})
+    for name, value in display._fields(record):
+        if display._is_record(value):
+            if depth < display.MAX_NESTED:
+                yield from _numbers_shown(value, depth + 1)
+        elif value is not None and display.holds_a_quantity(value) and name not in own:
+            yield record, name, value
+
+
+def test_every_number_a_result_shows_has_its_unit_or_a_reason(
+    built_results: dict[str, object],
+) -> None:
+    """A dimensional field of a result shows its unit in the table.
+
+    The table reads a unit from the end of a field's name, from the names the
+    library gives one quantity everywhere, and from a record's
+    ``_display_units``; a field none of them reaches shows its number bare,
+    as the decay times and clarities of ``RoomAcousticsResult`` and the
+    attenuations of ``OutdoorAttenuation`` did. Every number a result shows
+    without a unit is listed above with the reason, and an entry that no
+    longer shows bare is stale.
+    """
+    listed = {
+        entry: reason
+        for reason, entries in _SHOWN_WITHOUT_A_UNIT.items()
+        for entry in entries
+    }
+    assert len(listed) == sum(map(len, _SHOWN_WITHOUT_A_UNIT.values()))
+    bare: set[str] = set()
+    classes: dict[str, set[str]] = collections.defaultdict(set)
+    records = [
+        record
+        for result in built_results.values()
+        for record in (
+            result
+            if isinstance(result, tuple) and not display._is_record(result)
+            else (result,)
+        )
+        if display._is_record(record)
+    ]
+    for result in records:
+        for record, name, value in _numbers_shown(result):
+            cls = type(record)
+            classes[cls.__qualname__].add(cls.__module__)
+            if not display._unit_in(record, name, value):
+                bare.add(f"{cls.__qualname__}.{name}")
+    assert not [name for name, modules in classes.items() if len(modules) > 1]
+    unlisted = sorted(bare - set(listed))
+    assert not unlisted, f"{len(unlisted)} numbers shown without a unit: {unlisted}"
+    assert not sorted(set(listed) - bare), "listed, but shown with a unit or gone"
+
+
 #: The words that spell a unit and nothing else, at the end of a field's name.
 _UNIT_WORDS = frozenset(
     {
@@ -1058,3 +1411,34 @@ def test_a_named_tuple_held_in_a_field_is_a_record() -> None:
         ("first", "1", ""),
         ("second_db", "2", "dB"),
     ]
+
+
+@pytest.mark.parametrize(
+    ("factory", "field", "unit"),
+    [
+        (result_factories._airborne_insulation, "dnt", "dB"),
+        (result_factories._impact_insulation, "li", "dB"),
+        (result_factories._sound_power, "surface_area", "m\N{SUPERSCRIPT TWO}"),
+        (result_factories._reverb_power, "absorption_area", "m\N{SUPERSCRIPT TWO}"),
+        (result_factories._reverb_power, "speed_of_sound", "m/s"),
+        (
+            result_factories._high_frequency_power,
+            "room_constant",
+            "m\N{SUPERSCRIPT TWO}",
+        ),
+    ],
+)
+def test_a_quantity_the_library_names_one_way_shows_its_unit(
+    factory: Callable[[], object], field: str, unit: str
+) -> None:
+    """A speed of sound, an area or a room constant is in one unit wherever it is.
+
+    The library names a speed of sound ``speed_of_sound``, a measurement
+    surface ``surface_area``, an equivalent absorption area
+    ``absorption_area`` and a room constant ``room_constant`` in every
+    record, always in m/s, m² and m²; and in ``building`` ``dnt`` is the
+    standardized level difference and ``li`` the impact level, both in dB.
+    The table showed every one of them bare.
+    """
+    record = factory()
+    assert display._unit_in(record, field, getattr(record, field)) == unit

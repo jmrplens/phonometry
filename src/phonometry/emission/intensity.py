@@ -234,9 +234,15 @@ class IntensityResult(OwnsArrays):
     """
 
     #: The bias correction is the linear factor :math:`k\Delta r/\sin(k\Delta r)`
-    #: the intensity is multiplied by, not a level.
+    #: the intensity is multiplied by, not a level; the intensities are in
+    #: W/m² and the usable bandwidth in Hz, which their names do not say.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
-        {"bias_correction": ""}
+        {
+            "bias_correction": "",
+            "intensity": "W/m²",
+            "max_valid_frequency": "Hz",
+            "total_intensity": "W/m²",
+        }
     )
 
     frequencies: np.ndarray | None
@@ -473,6 +479,11 @@ class FieldIndicators(OwnsArrays):
     ``frequencies`` carries the band centres; with 1D per-position input they
     are scalars and ``frequencies`` is ``None``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"f2": "dB", "f3": "dB"}
+    )
 
     f2: float | np.ndarray
     f3: float | np.ndarray

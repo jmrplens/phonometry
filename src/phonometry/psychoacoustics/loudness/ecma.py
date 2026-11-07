@@ -58,7 +58,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -66,6 +67,8 @@ from scipy import signal
 from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -328,6 +331,17 @@ class EcmaLoudness(OwnsArrays):
     0 <= l <= 56 transient blocks that Formulae (115) and (117) leave out,
     and the blocks after l_end, are kept, as ``loudness_vs_time`` keeps them.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "bark": "Bark_HMS",
+            "basis_loudness_vs_time": "sone_HMS",
+            "loudness": "sone_HMS",
+            "loudness_vs_time": "sone_HMS",
+            "specific_loudness": "sone_HMS/Bark_HMS",
+        }
+    )
 
     loudness: float
     specific_loudness: np.ndarray

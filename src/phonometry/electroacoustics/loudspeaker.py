@@ -49,7 +49,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -73,6 +74,7 @@ from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
@@ -497,6 +499,18 @@ class LoudspeakerCharacteristics(OwnsArrays):
     :ivar directivity_index: Directivity index at :attr:`polar_frequency`,
         in dB (23.3), or ``None``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "distance": "m",
+            "effective_range": "Hz",
+            "impedance_frequencies": "Hz",
+            "polar_frequency": "Hz",
+            "sensitivity_band": "Hz",
+            "thd_frequencies": "Hz",
+        }
+    )
 
     frequencies: NDArray[np.float64]
     spl: NDArray[np.float64]

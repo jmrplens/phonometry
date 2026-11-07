@@ -52,7 +52,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import KW_ONLY, dataclass, fields
 from enum import Enum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 import numpy as np
 
@@ -1115,6 +1115,17 @@ class RoadEmissionResult(OwnsArrays):
     :ivar source_height_m: Height of the equivalent point source above the road
         surface, in m (0,05 m, fixed by 2.2.1).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "line_power": "dB",
+            "propulsion": "dB",
+            "rolling": "dB",
+            "total_line_power": "dB",
+            "vehicle_power": "dB",
+        }
+    )
 
     frequencies: NDArray[np.float64]
     categories: tuple[RoadVehicleCategory, ...]

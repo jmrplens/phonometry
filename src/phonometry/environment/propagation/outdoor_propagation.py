@@ -44,7 +44,8 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -66,6 +67,7 @@ from .air_absorption import air_attenuation
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -351,6 +353,18 @@ class OutdoorAttenuation(OwnsArrays):
     :ivar d_omega: Solid-angle directivity index ``DOmega`` (Eq. (11)), in dB;
         non-zero only for the alternative ground method of 7.3.2.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "a_atm": "dB",
+            "a_bar": "dB",
+            "a_div": "dB",
+            "a_gr": "dB",
+            "a_total": "dB",
+            "d_omega": "dB",
+        }
+    )
 
     frequencies: NDArray[np.float64]
     a_div: NDArray[np.float64]

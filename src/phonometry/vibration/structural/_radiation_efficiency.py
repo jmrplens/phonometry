@@ -63,7 +63,8 @@ with ``L1`` the smaller and ``L2`` the larger plate dimension.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -77,6 +78,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -140,6 +143,11 @@ class RadiationEfficiencyResult(OwnsArrays):
     :ivar boundary: Boundary condition (``"simply_supported"`` / ``"clamped"``).
     :ivar baffle: Baffle orientation (``"infinite"`` / ``"perpendicular"``).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"critical_frequency": "Hz", "length_x": "m", "length_y": "m"}
+    )
 
     frequencies: np.ndarray
     radiation_efficiency: np.ndarray

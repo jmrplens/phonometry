@@ -87,7 +87,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, cast, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
 
 import numpy as np
 
@@ -122,7 +123,7 @@ from .ratings import (
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -186,6 +187,11 @@ class AirborneInsulationResult(OwnsArrays):
     :ivar receiver_low_frequency: The same for ``l2`` and, through Clause 10.4,
         for ``t2``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"t0": "s", "t2": "s"}
+    )
 
     d: np.ndarray
     dnt: np.ndarray
@@ -336,6 +342,11 @@ class ImpactInsulationResult(OwnsArrays):
         did to ``li`` and, through Clause 10.4, to ``t2``; ``None`` when the
         receiving room was not under 25 m³ or carried no corner measurements.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"t0": "s", "t2": "s"}
+    )
 
     l_n_t: np.ndarray
     l_n: np.ndarray | None

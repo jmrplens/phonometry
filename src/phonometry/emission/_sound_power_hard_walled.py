@@ -102,7 +102,7 @@ import math
 from dataclasses import dataclass
 from itertools import pairwise
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
 
 import numpy as np
 
@@ -354,6 +354,11 @@ class HardWalledSoundPowerResult(OwnsArrays):
     ``sound_power_level_a`` / ``sound_energy_level_a`` are the Annex B totals
     of the level that was determined (``NaN`` for the other).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"sigma_r0": "dB", "sigma_r0_a": "dB"}
+    )
 
     frequencies: np.ndarray
     sound_power_level: np.ndarray

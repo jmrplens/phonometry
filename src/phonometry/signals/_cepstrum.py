@@ -67,7 +67,8 @@ remedy, exactly like the ``oversample`` padding of
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -83,6 +84,8 @@ from ..io._resolve import resolve_fs
 from .spectra import _positive, _validate_signal
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -355,6 +358,11 @@ class LifterResult(OwnsArrays):
     :ivar fs: Sample rate of the analysed record, in Hz.
     :ivar nfft: FFT length used.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"cutoff": "s", "quefrencies": "s"}
+    )
 
     frequencies: NDArray[np.float64]
     spectrum_db: NDArray[np.float64]

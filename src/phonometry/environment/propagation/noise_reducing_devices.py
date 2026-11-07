@@ -75,7 +75,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -277,6 +277,11 @@ class RoadDeviceRating(OwnsArrays):
         ``DLα`` and ``DL_R``, which sum all eighteen, and the lowest reliable
         band :math:`m` for ``DL_RI``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"rating": "dB", "reported": "dB", "weights": "dB"}
+    )
 
     rating: float
     reported: int

@@ -115,6 +115,11 @@ class EnvelopeResult(OwnsArrays):
     :ivar antialias: Whether the decimation was anti-alias filtered.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"instantaneous_frequency": "Hz"}
+    )
+
     times: NDArray[np.float64]
     envelope: NDArray[np.float64]
     phase_rad: NDArray[np.float64]

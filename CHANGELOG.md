@@ -2306,6 +2306,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A record's table shows the unit of every field that has one.** The
+  notebook table reads a field's unit from its name, and `speed_of_sound`,
+  `surface_area`, `absorption_area` and `room_constant`, which the library
+  names one way in every record, always in m/s, m², m² and m², were shown
+  bare, as were the standardized level difference `dnt` and the impact level
+  `li` of `building`, in dB. Each now shows its unit, and so do the fields
+  whose names say none, which 63 records now declare: the decay times,
+  clarities and centre time of `RoomAcousticsResult`, the ratings of
+  ISO 717, the attenuation terms of `OutdoorAttenuation`, `LEX,8h` and its
+  uncertainties, the loudness, roughness, fluctuation strength and tonality
+  of the psychoacoustic results and the airflow resistances among 157 such
+  fields. A test holds every number the results show to a unit or to a
+  reason it has none.
+
 - **`help()` names the values every choice takes.** A choice written once
   and reused is a type alias the package does not publish, and the
   annotations are read as text, so `help(filters.octave_filter)` and a

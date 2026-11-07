@@ -64,7 +64,8 @@ is :func:`phonometry.signals.multitaper.multitaper_psd`.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -82,6 +83,8 @@ from .._internal.validation import (
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -628,6 +631,11 @@ class CrossSpectralDensityResult(OwnsArrays):
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"resolution_bandwidth": "Hz"}
+    )
+
     frequencies: NDArray[np.float64]
     csd: NDArray[np.complex128]
     magnitude: NDArray[np.float64]
@@ -853,6 +861,11 @@ class CoherentOutputSpectrumResult(OwnsArrays):
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"resolution_bandwidth": "Hz"}
+    )
 
     frequencies: NDArray[np.float64]
     output_psd: NDArray[np.float64]

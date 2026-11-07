@@ -31,7 +31,8 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -54,6 +55,7 @@ from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
 
@@ -577,6 +579,9 @@ class ImpedanceTubeResult(OwnsArrays):
 
     :ivar shape: One of ``"circular"``, ``"rectangular"`` or ``"square"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"x1": "m"})
 
     frequencies: Real
     reflection: Complex

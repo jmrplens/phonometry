@@ -468,6 +468,11 @@ class BandUncertainty(RichDisplay):
     :ivar upper_limit: ``True`` for the ``σR95`` upper limit (Annex D Table D.1).
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"uncertainties": "dB"}
+    )
+
     measurand: Literal["airborne", "impact", "impact_reduction"]
     situation: Literal["A", "B", "C"]
     frequencies: tuple[float, ...]

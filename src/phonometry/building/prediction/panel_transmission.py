@@ -88,7 +88,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, get_args, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, get_args, overload
 
 import numpy as np
 from scipy.integrate import quad
@@ -320,6 +320,16 @@ class SoundReductionResult(OwnsArrays):
         carries the lower bound ``fc1`` and the pair spans the flattened
         coincidence range.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "critical_frequency": "Hz",
+            "mass1": "kg/m²",
+            "mass2": "kg/m²",
+            "resonance_frequency": "Hz",
+        }
+    )
 
     frequencies: np.ndarray
     transmission_loss: np.ndarray

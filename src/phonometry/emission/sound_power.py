@@ -76,7 +76,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -113,7 +113,7 @@ from ._shared import (
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -392,6 +392,11 @@ class SoundPowerResult(OwnsArrays):
 
     :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"uncertainty": "dB"}
+    )
 
     frequencies: np.ndarray | None
     sound_power_level: np.ndarray
@@ -1363,6 +1368,11 @@ class SoundEnergyResult(OwnsArrays):
 
     :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"uncertainty": "dB"}
+    )
 
     frequencies: np.ndarray | None
     sound_energy_level: np.ndarray

@@ -1365,7 +1365,9 @@ LENGTH_SYMBOL_PACKAGES = ("phonometry.materials",)
 #: Symbols that say decibel inside one package only, read as the first word of
 #: a name or as its head (``min_multi_junction_kij``, ``max_k3``). In
 #: ``building`` the sound reduction index :math:`R` (``r_s_w``), a level
-#: difference :math:`D` (``d_2m_nt``), the C, Ctr and CI of ISO 717, the
+#: difference :math:`D` (``d_2m_nt``), the standardized level difference
+#: :math:`D_{nT}` (``dnt``) and the impact level :math:`L_i` (``li``), which
+#: the notebook table reads as levels too, the C, Ctr and CI of ISO 717, the
 #: spectrum adaptation terms of a rating, and the vibration reduction index
 #: :math:`K_{ij}` of EN ISO 12354-1 with the path indices :math:`K_{Ff}`,
 #: :math:`K_{Fd}` and :math:`K_{Df}` (``k_ij``, ``k_ff``, ``kij``). In
@@ -1378,7 +1380,9 @@ LENGTH_SYMBOL_PACKAGES = ("phonometry.materials",)
 #: weighting function (``c_db`` of the underwater weighting is its gain) and a
 #: ``c1`` a sound speed.
 PACKAGE_DECIBEL_SYMBOLS: dict[str, frozenset[str]] = {
-    "phonometry.building": frozenset({"r", "d", "c", "ctr", "ci", "k", "kij"}),
+    "phonometry.building": frozenset(
+        {"r", "d", "dnt", "li", "c", "ctr", "ci", "k", "kij"}
+    ),
     "phonometry.emission": frozenset({"c1", "c2", "c3", "k1", "k2", "k3"}),
 }
 

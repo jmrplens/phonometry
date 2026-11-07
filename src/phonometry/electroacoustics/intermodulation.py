@@ -28,7 +28,8 @@ and the tones are assumed to fall on (or very near) FFT bins.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -43,6 +44,8 @@ from .distortion import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -117,6 +120,11 @@ class ModulationDistortionResult(OwnsArrays):
         ``sideband_frequencies`` (zero for a product that falls outside
         the analysis band or cannot be separated from a primary tone).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"f_high": "Hz", "f_low": "Hz", "sideband_frequencies": "Hz"}
+    )
 
     d2: float
     d3: float

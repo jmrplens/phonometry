@@ -60,7 +60,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, cast, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -81,6 +82,8 @@ from .scattering_diffusion import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
 
@@ -287,6 +290,11 @@ class DiffuserPolarResponse(OwnsArrays):
         ``reflection`` surfaces have no drawable well profile).
     :ivar n_repetitions: Number of repeated periods of the prediction.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"frequency": "Hz", "well_width": "m"}
+    )
 
     frequency: float
     angles_deg: Real

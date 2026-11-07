@@ -251,6 +251,10 @@ around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
 ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening
 conditions* (Table 1).
+ISO 389-1:1998, *Reference zero for the calibration of audiometric equipment –
+Reference equivalent threshold sound pressure levels for pure tones and
+supra-aural earphones*: the audiometric zero of section 3, on an IEC 60303
+coupler (Table 1) and on an IEC 60318 artificial ear (Table 2).
 
 **Not covered.** This page stops at the age component. Combining it with a
 noise-induced shift into a real audiogram is **ISO 1999**:2013 clause 6.1

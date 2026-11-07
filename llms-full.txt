@@ -12602,6 +12602,13 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
   [BOE consolidated text](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397).
   The source of the day noise index $L_\mathrm{d}$ that Table 2.1 of DB-HR is read
   against.
+- Instituto de Ciencias de la Construcción Eduardo Torroja (CSIC). *Catálogo
+  informático de elementos constructivos (CEC)*. Código Técnico de la
+  Edificación.
+  [codigotecnico.org](https://www.codigotecnico.org/Programas/CatalogoElementosConstructivos.html).
+  The building code's catalogue of construction elements, whose correction of
+  a catalogued window's RA and RA,tr by its total area the window section
+  implements.
 
 ## Standards
 
@@ -39809,6 +39816,11 @@ libsndfile under the LGPL, which the base install deliberately avoids.
   The `bext` chunk this page reads and writes field by field: originator,
   the sample-accurate since-midnight time reference, CodingHistory, and the
   five EBU R 128 loudness values of version 2.
+- European Broadcasting Union. (1999). *Format for CodingHistory field in
+  Broadcast Wave Format files, BWF* (EBU R 98).
+  [EBU](https://tech.ebu.ch/publications/r098).
+  The grammar of the CodingHistory line every written chunk carries, and of
+  the line a conversion appends to it.
 - International Telecommunication Union. (2025). *Long-form file format for
   the international exchange of audio programme materials with metadata*
   (Recommendation ITU-R BS.2088-2).
@@ -48269,6 +48281,10 @@ around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
 ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening
 conditions* (Table 1).
+ISO 389-1:1998, *Reference zero for the calibration of audiometric equipment –
+Reference equivalent threshold sound pressure levels for pure tones and
+supra-aural earphones*: the audiometric zero of section 3, on an IEC 60303
+coupler (Table 1) and on an IEC 60318 artificial ear (Table 2).
 
 **Not covered.** This page stops at the age component. Combining it with a
 noise-induced shift into a real audiogram is **ISO 1999**:2013 clause 6.1
@@ -52448,6 +52464,13 @@ mechanisms are in play, compute both.
   [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
   The articulation-band experiments that the band-importance function of
   section 1 descends from.
+- Pavlovic, C. (Acoustical Society of America, Working Group S3-79). *C
+  program developer's kit for the Speech Intelligibility Index (SII.C)*.
+  Support site for the Speech Intelligibility Index.
+  [sii.to](https://www.sii.to/html/programs.html).
+  The working group's reference implementation of ANSI S3.5-1997 and its test
+  cases: the equivalent masking spectrum of clause 5.4 and the SII with a
+  hearing loss of clause 6 are checked against it.
 
 ## Standards
 

@@ -318,6 +318,13 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
   [BOE consolidated text](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397).
   The source of the day noise index $L_\mathrm{d}$ that Table 2.1 of DB-HR is read
   against.
+- Instituto de Ciencias de la Construcción Eduardo Torroja (CSIC). *Catálogo
+  informático de elementos constructivos (CEC)*. Código Técnico de la
+  Edificación.
+  [codigotecnico.org](https://www.codigotecnico.org/Programas/CatalogoElementosConstructivos.html).
+  The building code's catalogue of construction elements, whose correction of
+  a catalogued window's RA and RA,tr by its total area the window section
+  implements.
 
 ## Standards
 

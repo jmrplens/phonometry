@@ -49,14 +49,18 @@ _HS_CP, _HS_CS, _HS_RHO = ALUMINUM.c_p, ALUMINUM.c_s, ALUMINUM.rho
 # this dx).
 _HS_DX = 0.001
 _HS_SRC_W = 8e-6  # Gaussian source width [s]
+#: When the pulse peaks, GaussianPulse's default centre of four half-widths
+#: [s]: the fronts the clip marks leave the source then, not at t = 0.
+_HS_T0 = 4.0 * _HS_SRC_W
 # Domain and view. The view is the 0.6 x 0.3 m block of the still figure,
 # centred on the impact; the simulated domain is 1.1 x 0.45 m so that the
 # sponges, and the corner where a sponge meets the free surface, stay off
 # screen. That corner is the one place this solver is weak -- the page says
 # so -- because a sponge absorbs a grazing surface wave far less well than
-# a body wave. Here the Rayleigh train first reaches a sponge at 148 us of
-# the 164 us captured, 0.13 m outside the frame, and anything it sends back
-# would need another 45 us to re-enter the view.
+# a body wave. Here the peak of the Rayleigh train, which leaves the source
+# when the pulse peaks at 32 us, reaches a sponge 0.13 m outside the frame
+# at 180 us, after the 164 us captured, and anything it sent back would need
+# another 45 us to re-enter the view.
 _HS_NY, _HS_NX = 450, 1100
 _HS_SPONGE = 120
 _HS_HALF = 300  # view half-width and depth [cells]
@@ -195,7 +199,7 @@ class _HsPanel:
     """The artists of one field panel of the halfspace clip that move.
 
     :ivar im: The field image.
-    :ivar arcs: The P and S arcs, dotted at ``c t`` round the impact.
+    :ivar arcs: The P and S arcs, dotted at ``c (t - t0)`` round the impact.
     :ivar labels: The P and S letters riding the arcs.
     :ivar mark: The two Rayleigh markers on the surface.
     :ivar r_lab: The Rayleigh letter beside the right-hand marker.
@@ -379,7 +383,7 @@ def _hs_place_fronts(panel: _HsPanel, r_p: float, r_s: float) -> None:
 
 
 def _hs_place_rayleigh(panel: _HsPanel, r_r: float) -> None:
-    """Put the Rayleigh markers and letter at ``c_R t`` while they are in the view."""
+    """Put the Rayleigh markers and letter at ``c_R (t - t0)`` while they are in the view."""
     half = _HS_HALF * _HS_DX
     inside = 0.02 < r_r < half
     panel.mark.set_data(([-r_r, r_r] if inside else []), ([0.0, 0.0] if inside else []))
@@ -396,11 +400,13 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     train that stays on the surface at 2897.3 m/s, the root of the exact
     characteristic equation. The still figure this clip sits beside already
     measures the two body speeds, because its dotted arcs are drawn at the
-    exact c_P t and c_S t radii; what one frame cannot show is the third
-    wave, whose speed is not separable from S in a single picture and whose
-    defining property -- it stays on the surface while the body fronts leave
-    -- is a statement about persistence. The arcs are kept here and stay
-    locked to the fronts as they expand. The lower panel repeats the run with the top side
+    exact c_P (t - t0) and c_S (t - t0) radii, t0 = 32 us being the peak of
+    the pulse; what one frame cannot show is the third wave, whose speed is
+    not separable from S in a single picture and whose defining property --
+    it stays on the surface while the body fronts leave -- is a statement
+    about persistence. The arcs are kept here, at the same radii, and stay
+    locked to the fronts as they expand; before t0 there is no front, and
+    none is drawn. The lower panel repeats the run with the top side
     left at the solver default, a shear-free rigid wall: the same material,
     the same hit, the same two body fronts, and no surface train anywhere
     -- which is what makes the boundary condition, not the aluminium, the
@@ -518,7 +524,10 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     def update(k: int) -> tuple[Any, ...]:
         kf = min(k, n_active - 1)
         t = float(times[kf])
-        r_p, r_s, r_r = _HS_CP * t, _HS_CS * t, c_r * t
+        # Each front is where the pulse's peak has travelled since it left the
+        # source at t0, so no radius grows before then.
+        since_peak = max(t - _HS_T0, 0.0)
+        r_p, r_s, r_r = _HS_CP * since_peak, _HS_CS * since_peak, c_r * since_peak
         for row in range(2):
             ims[row].set_data((vy_free, vy_rigid)[row][kf])
             _hs_place_fronts(panels[row], r_p, r_s)
@@ -532,11 +541,15 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
         return (*ims, *marks, *r_labs, *v_txts, speeds, scale_txt, t_txt)
 
     # The poster is grabbed mid-flight rather than at the end of the hold:
-    # by the last frame every wave has left the view and the default poster
-    # is an empty field. 95 us is where the Rayleigh train is still inside
-    # the right edge (it leaves at 103 us) and both body fronts sit on their
-    # arcs. `fields/pillar_hall._poster_ss_for` carries the same number so
-    # that `make posters` agrees with a full render.
+    # by the last frame the surface train and the compressional front have
+    # left the view, the shear front is going out through the bottom corners,
+    # and the default poster is an almost empty field. 95 us is where the
+    # peak of the Rayleigh train is still 0.12 m inside the right edge (it
+    # leaves at 135 us, 32 us of pulse delay and 104 us of travel), the shear
+    # front sits on its arc 13 mm ahead of it and the compressional front is
+    # crossing the two bottom corners. `fields/pillar_hall._poster_ss_for`
+    # carries the same number so that `make posters` agrees with a full
+    # render.
     poster_frame = 95.0e-6 / (5.0 * 0.6 * _HS_DX / (_HS_CP * float(np.sqrt(2.0))))
     _render_clip(
         fig,

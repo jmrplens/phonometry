@@ -210,7 +210,7 @@ class OctaveFilterResult(OwnsArrays):
     ) -> Axes:
         """Plot the band levels against their band centres.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :raises ValueError: when the call that made this result asked for no
@@ -382,7 +382,7 @@ class OctaveSpectrogramResult(OwnsArrays):
     ) -> Axes:
         """Draw the levels as one raster over time and band centre, with a colour bar.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

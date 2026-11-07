@@ -1279,7 +1279,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         :class:`~phonometry.emission.intensity.FieldIndicators` that
         :func:`~phonometry.emission.field_indicators` returns.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

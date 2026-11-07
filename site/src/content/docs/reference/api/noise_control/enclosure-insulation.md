@@ -442,7 +442,7 @@ EnclosureInsulationResult.plot(
 
 Draw the two runs and the difference between them.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

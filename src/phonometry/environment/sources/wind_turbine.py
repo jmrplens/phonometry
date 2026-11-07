@@ -418,8 +418,8 @@ class WindTurbineTonalityResult(OwnsArrays):
         :raises ValueError: If ``language`` is not one of the supported
             languages, or if ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 

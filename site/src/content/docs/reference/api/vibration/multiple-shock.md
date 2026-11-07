@@ -388,7 +388,7 @@ MultipleShockResult.plot(
 Plot the injury-probability curve with this assessment's
 $R$.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### MultipleShockResult.report()
@@ -447,7 +447,7 @@ moderate band matching the Annex C worked example.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the injury-probability chart, so both are required (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the injury-probability chart, so both are required (the `[report]` and `[plot]` extras). |
 
 ## response_peaks
 

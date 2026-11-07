@@ -417,7 +417,7 @@ class CabinInsulationResult(OwnsArrays):
     ) -> Axes:
         """Draw the two levels and the difference between them.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

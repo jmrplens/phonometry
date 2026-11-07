@@ -391,7 +391,7 @@ class Signal(RichDisplay):
         square over a stated time weighting, and
         :func:`~phonometry.filters.time_weighting` is what produces one.
         Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         :raises TypeError: if ``scale`` is not a text.
         """

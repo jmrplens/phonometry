@@ -244,7 +244,7 @@ class ZwickerLoudness(OwnsArrays):
         """Plot the specific loudness N'(z) over Bark (see :mod:`phonometry._plot.psychoacoustics`).
 
         Adds a loudness-vs-time panel when the time-varying trace is
-        present.  Requires matplotlib (``pip install "phonometry[plot]"``);
+        present.  Requires matplotlib (the ``[plot]`` extra);
         returns the :class:`~matplotlib.axes.Axes`, or a tuple of two for a
         time-varying result drawn without ``ax``.
         """
@@ -291,8 +291,8 @@ class ZwickerLoudness(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 

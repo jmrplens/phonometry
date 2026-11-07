@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy import signal
 
+from .._internal.extras import install_hint
 from .._internal.json_input import writing_beside
 from .._internal.validation import require_scalar
 from .frequencies import _format_nominal_freq
@@ -216,7 +217,7 @@ def _showfilter(
     try:
         import matplotlib.pyplot as plt
     except ImportError as exc:
-        msg = 'Plotting requires matplotlib. Install it with: pip install "phonometry[plot]"'
+        msg = f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
         raise ImportError(msg) from exc
 
     wn = 8192

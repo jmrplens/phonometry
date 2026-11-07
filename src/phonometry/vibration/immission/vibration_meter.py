@@ -581,7 +581,7 @@ class VibrationMeterVerification(OwnsArrays):
     ) -> Axes:
         """Draw the deviation against the tolerance band it is judged by.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -869,7 +869,7 @@ class VibrationMeterReading(OwnsArrays):
     ) -> Axes:
         r"""Draw :math:`KB_\mathrm{F}(t)` with its maximum and the clock maxima on it.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1116,7 +1116,7 @@ class AssessmentVelocity(OwnsArrays):
     ) -> Axes:
         """Draw the weighted velocity against its guideline value.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

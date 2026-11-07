@@ -698,7 +698,7 @@ class ReactiveSilencerResult(OwnsArrays):
     ) -> Axes:
         """Plot the transmission (and insertion) loss against frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -715,7 +715,7 @@ class ReactiveSilencerResult(OwnsArrays):
         A named device is drawn from its ``geometry``; a result assembled by a
         :class:`SilencerChain` is drawn from that ``chain``, duct by duct.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -773,7 +773,7 @@ class ReactiveSilencerResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install "phonometry[report]"``).
+            not installed (the ``[report]`` extra).
         """
         from .._i18n import check_language
 
@@ -1381,7 +1381,7 @@ class SilencerChain:
         joins the run, carrying its label and, when the analysis grid resolves
         one, the frequency at which it comes closest to shorting the duct.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

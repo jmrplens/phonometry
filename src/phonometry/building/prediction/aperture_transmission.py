@@ -209,7 +209,7 @@ class ApertureTransmissionResult(OwnsArrays):
     ) -> Axes:
         """Plot the aperture sound reduction index ``R(f)``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -223,7 +223,7 @@ class ApertureTransmissionResult(OwnsArrays):
     ) -> Axes:
         """Draw the wall-aperture cross-section to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

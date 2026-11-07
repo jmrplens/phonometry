@@ -154,7 +154,7 @@ class STOIResult(OwnsArrays):
 
         For STOI this is the mean correlation per one-third-octave band; for
         ESTOI, whose index mixes the bands, it is the spectral correlation per
-        analysis segment. Requires matplotlib (``pip install "phonometry[plot]"``);
+        analysis segment. Requires matplotlib (the ``[plot]`` extra);
         returns the :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language

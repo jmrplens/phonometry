@@ -471,7 +471,7 @@ InSituAbsorptionResult.plot(
 
 Plot the in-situ absorption spectrum `alpha(f)`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 ### InSituAbsorptionResult.plot_geometry()
@@ -487,7 +487,7 @@ InSituAbsorptionResult.plot_geometry(
 
 Draw the measurement set-up to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## ISO13472_SPEED_OF_SOUND_M_S

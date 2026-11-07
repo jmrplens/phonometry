@@ -330,7 +330,7 @@ Plot the sound absorption coefficient `alpha_s` versus frequency.
 
 Draws `alpha_s` over the one-third-octave band axis (ISO 354). Values
 above 1,0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 **Parameters**
@@ -384,4 +384,4 @@ here).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |

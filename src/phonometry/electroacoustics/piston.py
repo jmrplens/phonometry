@@ -323,7 +323,7 @@ class PistonDirectivity(OwnsArrays):
         Draws the directivity in dB against the polar angle: one curve per
         ``ka`` value as a single family (still one concept, the directivity
         pattern). A polar axes is created when ``ax`` is ``None``. Requires
-        matplotlib (``pip install "phonometry[plot]"``).
+        matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing (polar) axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -520,7 +520,7 @@ class RadiatingPistonResult(OwnsArrays):
 
         Reproduces the classic Beranek & Mellow figure: ``R1`` rising to 1 and
         ``X1`` peaking then decaying, over the ``ka`` range of the result.
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
@@ -540,7 +540,7 @@ class RadiatingPistonResult(OwnsArrays):
     ) -> Axes:
         """Draw the baffled piston to scale, with its directivity lobe.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

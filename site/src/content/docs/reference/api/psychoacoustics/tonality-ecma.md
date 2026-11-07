@@ -84,7 +84,7 @@ EcmaTonality.plot(
 Plot the average specific tonality T'(z) (see `phonometry._plot.psychoacoustics`).
 
 Adds a tonality-vs-time panel. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 ## PROMINENT_TONALITY_TU_HMS
 

@@ -448,7 +448,7 @@ class HeatConductionCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the modulus curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_heat_conduction_correction
@@ -639,7 +639,7 @@ class CapillaryTubeImpedance(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the real-part curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_capillary_tube_impedance
@@ -1218,7 +1218,7 @@ class CouplerTransferImpedance(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the heat-conduction curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_coupler_transfer_impedance
@@ -1680,7 +1680,7 @@ class WaveMotionCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the correction curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_wave_motion_correction
@@ -1909,7 +1909,7 @@ class CouplerCheck(RichDisplay):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_coupler_check
@@ -2100,7 +2100,7 @@ class CouplerParameterUncertainty(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the first component's curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_parameter_uncertainty

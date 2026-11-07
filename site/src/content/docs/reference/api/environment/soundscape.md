@@ -371,7 +371,7 @@ Plot the median of each item per site, with its range as a bar.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the median markers of the first site; the other sites keep their own colour and style. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## MethodBSummary
 
@@ -434,7 +434,7 @@ Plot the mean of each scale per site with its confidence interval.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the mean markers of the first site; the other sites keep their own colour and style. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## pearson_correlation
 
@@ -627,7 +627,7 @@ ones at 45 degrees, and every site a point.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the site markers. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## QuestionnaireScale
 
@@ -762,7 +762,7 @@ Plot the pairs, as ranks for Spearman, with the coefficient.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the scatter markers. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## SoundscapeDataCollection
 
@@ -905,7 +905,7 @@ Plot the median rank of each source per site, with its range.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the bars of the first site; the other sites keep their own colour and style. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## spearman_rank_correlation
 

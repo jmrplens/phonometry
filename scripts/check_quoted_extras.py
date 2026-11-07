@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Refuse an install command whose extras are not quoted.
+r"""Refuse an install command whose extras are not quoted, and one the package spells itself.
 
 zsh, the default shell on macOS, reads the brackets of an extras requirement
 as a glob and stops with "no matches found" before pip runs, so every install
@@ -21,6 +21,15 @@ or a variable inside included
 with its reason: the tests, which are not published; and a line that shows
 zsh's own "no matches found", which is the failure shown on purpose (a rule's
 counterexample).
+
+Inside the package, ``src/phonometry``, an install command is refused
+anywhere but ``src/phonometry/_internal/extras.py``, quoted or not: a
+message for a missing soft dependency takes its hint from there, which
+gives the conda-forge packages beside the pip command, and a docstring names
+the extra (the ``[plot]`` extra) rather than a command. A pip command alone,
+followed in a conda environment, installs the extra's dependencies from PyPI
+beside conda-forge's NumPy. The command is read across a line break, as a
+docstring or a message wraps it.
 
 Exit status 0 when every command is quoted, 1 otherwise. Standard library
 only, so it runs in a job that installs nothing.
@@ -45,6 +54,13 @@ COMMAND = re.compile(
 #: A line that ends inside an install command, before its requirement: its
 #: last word is the program, the subcommand or an option.
 _OPEN_END = re.compile(r"(?:\bpip3?|\binstall|\badd|(?<!\S)--?[\w-]+)\s*$")
+
+#: Any install command, its extras quoted or not.
+_INSTALL = re.compile(r"\b(?:pip3?|uv\s+pip|uv|pipx)\s+(?:install|add)\b")
+
+#: The package, where an install command comes from one module only.
+_PACKAGE = "src/phonometry/"
+_HINTS = "src/phonometry/_internal/extras.py"
 
 #: The failure shown on purpose: zsh's own message.
 _SHOWN = "no matches found"
@@ -122,6 +138,26 @@ def problems(text: str, label: str) -> list[str]:
     return found
 
 
+def spelled_in_the_package(text: str, label: str) -> list[str]:
+    """Each install command *text* spells itself, when *label* is a file of the package.
+
+    The package spells an install command only in :data:`_HINTS`, whose
+    hints give the conda-forge packages beside pip; a command anywhere else
+    in it is named as ``label:line: command``, by the line it starts on.
+    """
+    if not label.startswith(_PACKAGE) or label == _HINTS:
+        return []
+    found = []
+    for match in _INSTALL.finditer(text):
+        line = text.count("\n", 0, match.start()) + 1
+        command = " ".join(match.group(0).split())
+        found.append(
+            f"{label}:{line}: {command} spelled outside {_HINTS}, "
+            "which gives the conda-forge packages beside it"
+        )
+    return found
+
+
 def tracked_files(root: pathlib.Path) -> list[pathlib.Path]:
     """The tracked text files under *root* a reader may copy a command from.
 
@@ -146,7 +182,7 @@ def tracked_files(root: pathlib.Path) -> list[pathlib.Path]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Name every install command with unquoted extras; 0 when there is none.
+    """Name every install command with unquoted extras, or spelled outside the hints; 0 when none is.
 
     :raises SystemExit: for arguments this command does not take.
     :raises subprocess.CalledProcessError: when the root is not a git checkout.
@@ -161,18 +197,18 @@ def main(argv: list[str] | None = None) -> int:
         help="the checkout to read (default: this one)",
     )
     args = parser.parse_args(argv)
-    found = [
-        problem
-        for path in tracked_files(args.root)
-        for problem in problems(
-            path.read_text(encoding="utf-8", errors="replace"),
-            path.relative_to(args.root).as_posix(),
-        )
-    ]
+    found: list[str] = []
+    for path in tracked_files(args.root):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        label = path.relative_to(args.root).as_posix()
+        found += problems(text, label) + spelled_in_the_package(text, label)
     for line in found:
         sys.stdout.write(f"::error::{line}\n")
     if not found:
-        sys.stdout.write("Every install command quotes its extras.\n")
+        sys.stdout.write(
+            "Every install command quotes its extras, and the package spells "
+            f"one only in {_HINTS}.\n"
+        )
     return 1 if found else 0
 
 

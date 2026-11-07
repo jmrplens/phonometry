@@ -422,7 +422,7 @@ def render_human_vibration_report(
         does not carry one value per operation label.
     :raises ImportError: If reportlab or matplotlib is not installed. The
         fiche always embeds the contribution chart, so both are required
-        (``pip install "phonometry[report,plot]"``).
+        (the ``[report]`` and ``[plot]`` extras).
     """
     try:
         from reportlab.lib import colors

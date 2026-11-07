@@ -412,7 +412,7 @@ class OutdoorAttenuation(OwnsArrays):
     ) -> Axes:
         """Plot the stacked per-band attenuation terms with the total.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -473,7 +473,7 @@ class OutdoorAttenuation(OwnsArrays):
             is unknown, or a supplied ``source_emission`` sound power does not
             match the number of frequency bands.
         :raises ImportError: If reportlab or matplotlib is not installed
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

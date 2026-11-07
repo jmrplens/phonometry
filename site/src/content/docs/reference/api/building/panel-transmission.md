@@ -838,7 +838,7 @@ SoundReductionResult.plot(
 
 Plot the predicted sound reduction index `R(f)`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### SoundReductionResult.plot_geometry()
@@ -854,7 +854,7 @@ SoundReductionResult.plot_geometry(
 
 Draw the mass-spring-mass cross-section to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Raises**

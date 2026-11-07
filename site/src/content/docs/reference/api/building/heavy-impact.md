@@ -177,7 +177,7 @@ AWeightedMaxImpactResult.plot(
 
 Plot the band levels, their A-weighted contributions and the rating.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## check_heavy_impact_source
@@ -418,7 +418,7 @@ HeavyImpactSourceCheck.plot(
 
 Plot the measured `LFE` against the printed tolerance band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### HeavyImpactSourceCheck.tolerance_db
@@ -659,5 +659,5 @@ StandardizedMaxImpactResult.plot(
 
 Plot `Li,Fmax` and `L'i,Fmax,V,T` per band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.

@@ -620,7 +620,7 @@ OutdoorAttenuation.plot(
 
 Plot the stacked per-band attenuation terms with the total.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### OutdoorAttenuation.report()
@@ -674,7 +674,7 @@ the total attenuation `A`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or a supplied `source_emission` sound power does not match the number of frequency bands. |
-| ImportError | If reportlab or matplotlib is not installed (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or matplotlib is not installed (the `[report]` and `[plot]` extras). |
 
 ## predicted_receiver_level
 

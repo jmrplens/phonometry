@@ -217,7 +217,7 @@ def render_static_airflow_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab or matplotlib is not installed. The fiche
         always embeds the fitted ``dp(u)`` curve, so both are required
-        (``pip install "phonometry[report,plot]"``).
+        (the ``[report]`` and ``[plot]`` extras).
     """
     del verbose  # uniform signature; the airflow-resistance fiche has one layout
     pairs = (

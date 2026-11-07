@@ -2304,6 +2304,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A message for a missing extra names the conda command beside pip's.**
+  `.plot()` without matplotlib, `.report()` without reportlab, svglib or
+  matplotlib, a compressed audio file or a FLAC target without soundfile, a
+  video without matplotlib and a torch or CuPy device without its library
+  said only `pip install "phonometry[plot]"` and the like, which in a conda
+  environment installs matplotlib and eight of its dependencies from PyPI
+  beside conda-forge's NumPy. Each now ends with both commands, for example
+  `pip install "phonometry[plot]" (conda: conda install -c conda-forge
+  matplotlib-base)`, built in one place from the conda-forge packages that
+  bring each extra: `matplotlib-base` for `[plot]`, `reportlab svglib` for
+  `[report]`, `pysoundfile` for `[audio]`, `numba` for `[perf]` and
+  `pytorch array-api-compat` for `[torch]`, with no index URL for the CPU
+  build. Writing or converting to FLAC without soundfile says "Writing FLAC
+  requires python-soundfile" where it said "Reading FLAC", and the
+  soundfile message names the `[audio]` extra once. A soundfile that
+  imports without its libsndfile, as soundfile 0.14.0 from PyPI does in
+  Pyodide, raised the loader's `OSError: sndfile library not found`; it now
+  raises the same `ImportError` as a missing extra, with the loader's
+  reason in it. Docstrings name the extra (the `[plot]` extra) instead of a
+  pip command, and `scripts/check_quoted_extras.py` refuses an install
+  command spelled anywhere in the package but the module that builds the
+  hints (style rule A64).
+
 - **A traceback names a warning by the package that publishes it.** Fourteen
   published warnings, the root `PhonometryWarning` among them, were written in
   private modules and carried them as their `__module__`, so under

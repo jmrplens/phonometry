@@ -244,7 +244,7 @@ class ReverberationSoundPowerResult(OwnsArrays):
     ) -> Axes:
         """Plot the LW spectrum with the A-weighted total annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -296,7 +296,7 @@ class ReverberationSoundPowerResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install "phonometry[report]"``).
+            not installed (the ``[report]`` extra).
         """
         from .._i18n import check_language
 
@@ -1101,7 +1101,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
     ) -> Axes:
         """Plot the LJ spectrum with the A-weighted total annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language

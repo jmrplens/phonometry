@@ -360,7 +360,7 @@ StaticAirflowResult.plot(
 
 Plot the fitted `dp(u)` curve with the evaluation point.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### StaticAirflowResult.report()
@@ -417,7 +417,7 @@ place (mm/s).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the fitted `dp(u)` curve, so both are required (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the fitted `dp(u)` curve, so both are required (the `[report]` and `[plot]` extras). |
 
 ## thermal_boundary_layer_thickness
 

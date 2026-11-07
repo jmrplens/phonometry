@@ -219,7 +219,7 @@ class TimeInvarianceResult(OwnsArrays):
     ) -> Axes:
         """Plot every band's deviation from Formula (17), one line per rate.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

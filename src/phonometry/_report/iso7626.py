@@ -166,7 +166,7 @@ def render_mobility_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab or matplotlib is not installed. The fiche
         always embeds the mobility spectrum, so both are required
-        (``pip install "phonometry[report,plot]"``).
+        (the ``[report]`` and ``[plot]`` extras).
     """
     del verbose  # uniform signature; the mobility fiche has one body layout
     header_pairs = (

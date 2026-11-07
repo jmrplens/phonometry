@@ -136,7 +136,7 @@ def render_material_fiche(
 
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed. The fiche always embeds the result's plot, so both are
-        required (``pip install "phonometry[report,plot]"``).
+        required (the ``[report]`` and ``[plot]`` extras).
     """
     try:
         from reportlab.lib import colors

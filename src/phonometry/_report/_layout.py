@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.extras import install_hint
 from .._internal.json_input import writing_beside
 from .._internal.validation import (
     real_array,
@@ -51,16 +52,15 @@ if TYPE_CHECKING:
 
 #: Installation hints for the three soft dependencies of the report.
 _REPORTLAB_HINT = (
-    "Rendering a report requires reportlab. Install it with: "
-    'pip install "phonometry[report]"'
+    f"Rendering a report requires reportlab. Install it with: {install_hint('report')}"
 )
 _MATPLOTLIB_HINT = (
     "Rendering the report figure requires matplotlib. Install it with: "
-    'pip install "phonometry[plot]"'
+    f"{install_hint('plot')}"
 )
 _SVGLIB_HINT = (
     "Embedding the report figure as vector graphics requires svglib. Install "
-    'it with: pip install "phonometry[report]"'
+    f"it with: {install_hint('report')}"
 )
 
 #: Accent and light shades used for the header row and the zebra striping,

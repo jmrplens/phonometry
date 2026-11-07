@@ -418,7 +418,7 @@ Draw the configured domain before running it.
 Domain extent, obstacles, sponge layers, impedance and rigid edges
 and the added sources, with optional probe cells previewed; no
 time stepping happens. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

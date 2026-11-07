@@ -269,7 +269,7 @@ ReverberationSoundEnergyResult.plot(
 
 Plot the LJ spectrum with the A-weighted total annotated.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## ReverberationSoundPowerResult
@@ -323,7 +323,7 @@ ReverberationSoundPowerResult.plot(
 
 Plot the LW spectrum with the A-weighted total annotated.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### ReverberationSoundPowerResult.report()
@@ -373,7 +373,7 @@ and the speed of sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ## sound_energy_comparison
 

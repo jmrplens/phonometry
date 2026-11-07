@@ -1393,7 +1393,7 @@ class OperatingLine(OwnsArrays):
     ) -> Axes:
         """Plot the measured points and the line fitted through them.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.noise_control import plot_operating_line

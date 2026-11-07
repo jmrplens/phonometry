@@ -37,6 +37,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final, Literal
 
+from .._internal.extras import install_hint
 from .._internal.json_input import escaped
 from .._internal.programs import past_the_working_directory
 from ._video_quality import ENCODER_QUALITY, GIF_PALETTE, Quality
@@ -206,7 +207,7 @@ def find_ffmpeg() -> str:
     try:
         import matplotlib as mpl
     except ImportError as exc:  # pragma: no cover - the base install has no plot
-        msg = 'Writing a video requires matplotlib. Install it with: pip install "phonometry[plot]"'
+        msg = f"Writing a video requires matplotlib. Install it with: {install_hint('plot')}"
         raise ImportError(msg) from exc
     named = str(mpl.rcParams["animation.ffmpeg_path"])
     found = shutil.which(named)

@@ -423,7 +423,7 @@ class SoundReductionResult(OwnsArrays):
     ) -> Axes:
         """Plot the predicted sound reduction index ``R(f)``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -437,7 +437,7 @@ class SoundReductionResult(OwnsArrays):
     ) -> Axes:
         """Draw the mass-spring-mass cross-section to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :raises ValueError: If the result does not retain its geometry.

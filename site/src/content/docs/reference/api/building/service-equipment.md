@@ -246,7 +246,7 @@ BackgroundDurationCheck.plot(
 
 Plot each duration against the 30 s of 7.6 and the tolerance accepted.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -325,7 +325,7 @@ CalibrationDeviationResult.plot(
 
 Plot each reading against the window the earlier calibrations leave it.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -678,7 +678,7 @@ InstrumentAgreementCheck.plot(
 
 Plot each calculated-less-instrument difference against 2 dB.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -789,7 +789,7 @@ MeasurementDisturbanceCheck.plot(
 
 Plot each period's maximum-to-equivalent difference against 5 dB.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -920,7 +920,7 @@ PositionSpreadCheck.plot(
 
 Plot the readings against the spread the stage allows.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1148,7 +1148,7 @@ ServiceEquipmentBackgroundResult.plot(
 Plot measured, background and corrected band levels.
 
 Bands held at 2,2 dB are marked as upper limits. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 **Parameters**
 
@@ -1268,7 +1268,7 @@ ServiceEquipmentPositionCheck.plot(
 
 Plot the room in plan with the positions and their clearances.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1422,7 +1422,7 @@ Plot the band spectrum through each step of the method.
 The average, the background, the corrected level and, when formed, the
 standardized one, with the bands the background limits marked and the
 A-weighted single numbers in the title. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 **Parameters**
 
@@ -1572,7 +1572,7 @@ VaryingBackgroundCheck.plot(
 
 Plot the equipment level against the background maximum, per band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

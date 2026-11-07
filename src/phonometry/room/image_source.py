@@ -366,7 +366,7 @@ class ImageSourceResult(OwnsArrays):
 
         Stems the per-image amplitudes (in dB re the direct sound), coloured by
         reflection order, with the :math:`1 / r` free-field envelope overlaid.
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -385,7 +385,7 @@ class ImageSourceResult(OwnsArrays):
     ) -> Axes:
         """Draw the image-source lattice in plan view (x-y), to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

@@ -151,15 +151,58 @@ def test_main_names_each_command_and_fails(
     )
 
 
+# Joined at run time, as _EXTRA is, so this file spells no command itself.
+_PIP = "pip" + " install"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        f'Install it with: {_PIP} "phonometry[plot]"\n',
+        f"Requires matplotlib (``{_PIP} phonometry``).\n",
+        f"e.g. {_PIP} cupy-cuda12x\n",
+        f'Requires matplotlib (``{_PIP.split()[0]}\n        install "phonometry[plot]"``).\n',
+        f"python -m {_PIP} numba\n",
+        "uv" + ' add "phonometry[plot]"\n',
+    ],
+)
+def test_the_package_spells_no_install_command_outside_its_hints(text: str) -> None:
+    """A message takes its command from the hints, and a docstring names the extra."""
+    (problem,) = cqe.spelled_in_the_package(text, "src/phonometry/io/_backends.py")
+    assert problem.startswith("src/phonometry/io/_backends.py:1: ")
+
+
+@pytest.mark.parametrize(
+    ("text", "label"),
+    [
+        (f'{_PIP} "phonometry[plot]"\n', "src/phonometry/_internal/extras.py"),
+        (f'{_PIP} "phonometry[plot]"\n', "docs/start/install.md"),
+        (f'{_PIP} "phonometry[plot]"\n', "stub/src/pyoctaveband/__init__.py"),
+        ("Requires matplotlib (the ``[plot]`` extra).\n", "src/phonometry/a.py"),
+        (
+            "install ffmpeg (conda install ffmpeg, brew install ffmpeg)\n",
+            "src/phonometry/a.py",
+        ),
+    ],
+)
+def test_the_hints_a_page_and_a_named_extra_pass(text: str, label: str) -> None:
+    assert cqe.spelled_in_the_package(text, label) == []
+
+
+def test_a_command_spelled_in_the_package_is_named_by_the_line_it_starts_on() -> None:
+    text = (
+        f'"""Doc.\n\nRequires matplotlib (``{_PIP.split()[0]}\n    install x``)."""\n'
+    )
+    (problem,) = cqe.spelled_in_the_package(text, "src/phonometry/a.py")
+    assert problem.startswith("src/phonometry/a.py:3: pip install spelled outside")
+
+
 @pytest.mark.whole_tree
 def test_the_repository_quotes_every_install_command() -> None:
     root = pathlib.Path(__file__).resolve().parents[1]
-    found = [
-        problem
-        for path in cqe.tracked_files(root)
-        for problem in cqe.problems(
-            path.read_text(encoding="utf-8", errors="replace"),
-            path.relative_to(root).as_posix(),
-        )
-    ]
+    found = []
+    for path in cqe.tracked_files(root):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        label = path.relative_to(root).as_posix()
+        found += cqe.problems(text, label) + cqe.spelled_in_the_package(text, label)
     assert not found, "\n".join(found)

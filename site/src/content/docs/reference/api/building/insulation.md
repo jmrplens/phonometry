@@ -229,7 +229,7 @@ AirborneInsulationResult.plot(
 
 Plot the per-band insulation quantities (`DnT`, `D`, `R'`).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### AirborneInsulationResult.report()
@@ -275,7 +275,7 @@ verdict row and a footer with the identity block and disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 | TypeError | if `quantity` is not a text. |
 
 ## energy_average_level
@@ -441,7 +441,7 @@ Plot the per-band façade insulation profile (ISO 16283-3).
 
 Draws the standardized level difference and any other available
 quantities (`D2m`, `D2m,n`, `R'`) against frequency. Requires
-matplotlib (`pip install "phonometry[plot]"`); returns the
+matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### FacadeInsulationResult.report()
@@ -488,7 +488,7 @@ and a footer with the identity block and disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, or the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 | TypeError | if `quantity` is not a text. |
 
 ## impact_insulation
@@ -601,7 +601,7 @@ ImpactInsulationResult.plot(
 
 Plot the per-band impact levels (`L'nT` and, if present, `L'n`).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### ImpactInsulationResult.report()
@@ -647,7 +647,7 @@ disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2 rating needs. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 | TypeError | if `quantity` is not a text. |
 
 ## ReportMetadata

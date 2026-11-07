@@ -381,7 +381,7 @@ PrecisionIntensityResult.plot(
 
 Plot the `LW` spectrum; non-applicable bands are hatched/greyed.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### PrecisionIntensityResult.report()
@@ -454,7 +454,7 @@ fields; the fiche prints them verbatim in its footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or a supplied `indicators`, `criteria` or `residual_index` does not span the result's bands. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 | TypeError | if `residual_index` holds a text or a value that is not a real number. |
 
 ### PrecisionIntensityResult.sound_power
@@ -701,7 +701,7 @@ SoundPowerIntensityResult.plot(
 
 Plot the LW spectrum; non-positive bands are hatched as unusable.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### SoundPowerIntensityResult.report()
@@ -749,7 +749,7 @@ indicators (`FpI`, `F+/-`) and the Annex B qualification criteria.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ### SoundPowerIntensityResult.sound_power
 

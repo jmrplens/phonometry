@@ -310,7 +310,7 @@ class DiffuserPolarResponse(OwnsArrays):
     ) -> PolarAxes:
         """Plot the predicted polar response with the diffusion coefficient annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the polar
+        Requires matplotlib (the ``[plot]`` extra); returns the polar
         axes it drew on and never calls ``plt.show``.
 
         :return: The polar axes.
@@ -327,7 +327,7 @@ class DiffuserPolarResponse(OwnsArrays):
     ) -> Axes:
         """Draw the well profile of the predicted surface to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :raises ValueError: If the response was predicted from an explicit

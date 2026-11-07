@@ -121,7 +121,7 @@ DecayCurve.plot(
 
 Plot the decay curve with optional straight T-fit overlays.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`. Pass `fits=False` to omit the
 EDT/T20/T30 fit lines.
 
@@ -427,7 +427,7 @@ Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
 Invalid bands are hatched and greyed. With `ax` given, only the
 decay-times panel is drawn on it. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes` it drew on, or the tuple of two without `ax`.
 
 ### RoomAcousticsResult.report()
@@ -482,7 +482,7 @@ band (the box names that band, the verdict line does not).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ### RoomAcousticsResult.t20_valid
 

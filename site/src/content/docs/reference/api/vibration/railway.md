@@ -762,7 +762,7 @@ TrainPassage.plot(
 
 Draw the running level with the three stretches marked on it.
 
-Requires matplotlib (`pip install "phonometry[plot]"`). The spectra of
+Requires matplotlib (the `[plot]` extra). The spectra of
 Figure 6 are `plot_spectrum`.
 
 **Parameters**

@@ -238,7 +238,7 @@ WallTieCouplingResult.plot(
 
 Plot `eta_ij(f)` against the rigid-connection ceiling.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## WallTieStiffness

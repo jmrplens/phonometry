@@ -182,7 +182,7 @@ class RadiationEfficiencyResult(OwnsArrays):
     ) -> Axes:
         """Plot the radiation efficiency ``sigma(f)`` on log-log axes.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -197,7 +197,7 @@ class RadiationEfficiencyResult(OwnsArrays):
     ) -> Axes:
         """Draw the baffled plate to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

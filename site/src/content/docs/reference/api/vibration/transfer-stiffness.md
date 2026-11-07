@@ -204,7 +204,7 @@ BandAveragedStiffness.plot(
 
 Plot the band levels, with the undetermined bands marked.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -701,7 +701,7 @@ DrivingPointStiffnessResult.plot(
 
 Plot the driving-point stiffness level with the 6.2 threshold and $f_\mathrm{UL}$.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -806,7 +806,7 @@ DrivingPointUncertainty.plot(
 
 Plot the contribution of each input quantity, with `u` and `U`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -929,7 +929,7 @@ EffectiveBlockingMass.plot(
 
 Plot the deviation from `m2` with the 1 dB tolerance and `f3`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1075,7 +1075,7 @@ LevelDifferenceCheck.plot(
 
 Plot the level difference against its limit, failures marked.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1224,7 +1224,7 @@ OutputMassCheck.plot(
 
 Plot the mass limit over frequency against the mass in place.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1443,7 +1443,7 @@ TransferStiffnessResult.plot(
 
 Plot the transfer-stiffness level `L_k(f)`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### TransferStiffnessResult.report()
@@ -1500,7 +1500,7 @@ no pass/fail verdict.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown, or `valid` marks every line as failing its adequacy conditions (there is then no value to report). |
-| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `L_k(f)` spectrum, so both are required (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `L_k(f)` spectrum, so both are required (the `[report]` and `[plot]` extras). |
 
 ### TransferStiffnessResult.to()
 

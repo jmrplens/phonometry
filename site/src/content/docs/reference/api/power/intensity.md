@@ -233,7 +233,7 @@ supplied to [`field_indicators`](/phonometry/reference/api/power/intensity/#fiel
 
 Requires per-band data (call [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) with 2D
 `(positions, bands)` arrays and `frequencies`) and matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -355,7 +355,7 @@ IntensityResult.plot(
 Plot Lp vs LI per band with the pressure-intensity index.
 
 Requires per-band data (call `sound_intensity(..., fraction=...)`)
-and matplotlib (`pip install "phonometry[plot]"`); returns the
+and matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### IntensityResult.plot_geometry()
@@ -371,7 +371,7 @@ IntensityResult.plot_geometry(
 
 Draw the p-p probe with its spacer to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## plot_pp_probe_geometry

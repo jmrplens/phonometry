@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -69,12 +70,12 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 #: Audiometric frequencies of ISO 1999, in hertz (clause 6.3.1, Table 1).
-_NIPTS_FREQUENCIES: np.ndarray = read_only(
+_NIPTS_FREQUENCIES: NDArray[np.float64] = read_only(
     np.array([500.0, 1000.0, 2000.0, 3000.0, 4000.0, 6000.0], dtype=np.float64)
 )
 
 #: Table 1 columns ``u``, ``v`` and ``L0`` (dB) for the median NIPTS N50.
-_UVL0: np.ndarray = np.array(
+_UVL0: NDArray[np.float64] = np.array(
     [
         [-0.033, 0.110, 93.0],
         [-0.020, 0.070, 89.0],
@@ -87,7 +88,7 @@ _UVL0: np.ndarray = np.array(
 )
 
 #: Table 3 columns ``Xu``, ``Yu``, ``Xl``, ``Yl`` for the spreads du and dl.
-_XY: np.ndarray = np.array(
+_XY: NDArray[np.float64] = np.array(
     [
         [0.044, 0.016, 0.033, 0.002],
         [0.022, 0.016, 0.020, 0.000],
@@ -186,11 +187,11 @@ class NIPTSResult(OwnsArrays):
     l_ex: float
     exposure_duration_years: float
     fractile: float
-    frequencies: np.ndarray
-    median: np.ndarray
-    value: np.ndarray
-    spread_upper: np.ndarray
-    spread_lower: np.ndarray
+    frequencies: NDArray[np.float64]
+    median: NDArray[np.float64]
+    value: NDArray[np.float64]
+    spread_upper: NDArray[np.float64]
+    spread_lower: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a prediction whose spectra do not all cover the same frequencies.
@@ -354,10 +355,10 @@ class HTLANResult(OwnsArrays):
     l_ex: float
     exposure_duration_years: float
     fractile: float
-    frequencies: np.ndarray
-    htla: np.ndarray
-    nipts: np.ndarray
-    threshold: np.ndarray
+    frequencies: NDArray[np.float64]
+    htla: NDArray[np.float64]
+    nipts: NDArray[np.float64]
+    threshold: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a threshold whose three components cover different frequencies.
@@ -488,7 +489,9 @@ class HTLANResult(OwnsArrays):
         )
 
 
-def _select(values: np.ndarray, frequencies: NumericArrayLike | None) -> np.ndarray:
+def _select(
+    values: NDArray[np.float64], frequencies: NumericArrayLike | None
+) -> NDArray[np.float64]:
     """Return ``values`` for a requested frequency subset, or all of them."""
     if frequencies is None:
         return values
@@ -508,7 +511,7 @@ def _select(values: np.ndarray, frequencies: NumericArrayLike | None) -> np.ndar
 
 def _nipts_components(
     l_ex: float, exposure_duration_years: float
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Median N50 and the spreads du, dl at every audiometric frequency."""
     u, v, l0 = _UVL0[:, 0], _UVL0[:, 1], _UVL0[:, 2]
     # L_EX,8h deemed equal to L0 where it is smaller, so the effect is zero.
@@ -608,7 +611,7 @@ def nipts(
 
 def age_and_noise_threshold(
     htla: NumericArrayLike, nipts_value: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Combine the age and noise components by Formula (1) (clause 6.1).
 
     :math:`H' = H + N - H N / 120`, the hearing threshold level associated

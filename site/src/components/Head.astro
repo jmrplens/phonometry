@@ -176,7 +176,8 @@ const articleType = isApiPage
 // the overview of the catalogues is the DataCatalog that lists them
 // (src/lib/catalogue-datasets.mjs says what a dataset carries and why it
 // claims no licence). A catalogue page's article names its datasets as its
-// `mainEntity`; the datasets themselves are nodes of the page's graph.
+// `mainEntity`; the datasets themselves are nodes of the page's graph, each
+// dated as the page is.
 const catalogueCatalog =
   isCataloguePage(entryId) || isCatalogueOverview ? await catalogueOverview(lang) : undefined;
 const dataCatalog = catalogueCatalog
@@ -201,6 +202,7 @@ const datasets =
           twinUrl: `${SITE}${BASE}${lang === 'en' ? '/es' : ''}/${slug}/`,
           bibliographyUrl,
           dataCatalog,
+          dateModified: modified,
         }),
       )
     : [];

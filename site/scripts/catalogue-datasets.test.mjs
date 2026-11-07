@@ -342,6 +342,21 @@ test('a dataset names its sources, its catalogue and its twin, and claims no lic
   assert.equal(spanish.isBasedOn, undefined);
 });
 
+test("a dataset is dated as its page is, and says no date its page does not give", () => {
+  const options = {
+    dataset: { key: 'solids', name: 'N', description: 'D' },
+    catalogue: { columns: [], rows: [] },
+    references: [],
+    lang: 'en',
+    pageUrl: PAGE,
+    twinUrl: TWIN,
+    bibliographyUrl: BIBLIOGRAPHY,
+    dataCatalog: CATALOG,
+  };
+  assert.equal(datasetNode({ ...options, dateModified: '2026-10-29' }).dateModified, '2026-10-29');
+  assert.equal('dateModified' in datasetNode(options), false);
+});
+
 test('the overview lists a dataset by its type, address, name and table', () => {
   assert.deepEqual(datasetStub({ key: 'solids', name: 'Catalogue of solids' }, PAGE), {
     '@type': 'Dataset',

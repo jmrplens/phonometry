@@ -23,7 +23,9 @@
  *   - the works it is based on are the entries of the page's `references`
  *     whose `tables` it prints (src/lib/catalogue-sources.mjs), each named
  *     with the short node the page's article names it with, so the dataset
- *     says whose numbers these are read on its own.
+ *     says whose numbers these are read on its own;
+ *   - its date is the page's `dateModified`, the day the page's content last
+ *     changed: the dataset is the page's text and the rows the page renders.
  *
  * And what it leaves out is decided: no `license`, because these rows are
  * transcribed from works that keep their own rights and the site can grant
@@ -284,9 +286,23 @@ const tableFragment = (key) => `catalogue-${key}`;
  * @param {string} options.bibliographyUrl The bibliography of the page's language.
  * @param {{'@id': string, name: string, url: string}} options.dataCatalog
  *   The overview of the catalogues, in the page's language.
+ * @param {string} [options.dateModified] The day the page's content last
+ *   changed, its article's `dateModified`. A dataset is the page's text and
+ *   the rows the page renders, so it changed when its page did; with no day
+ *   for the page, it says none.
  * @returns {Record<string, unknown> & {'@id': string}}
  */
-export function datasetNode({ dataset, catalogue, references, lang, pageUrl, twinUrl, bibliographyUrl, dataCatalog }) {
+export function datasetNode({
+  dataset,
+  catalogue,
+  references,
+  lang,
+  pageUrl,
+  twinUrl,
+  bibliographyUrl,
+  dataCatalog,
+  dateModified,
+}) {
   const sources = catalogueSources(references, catalogue);
   return {
     '@type': 'Dataset',
@@ -301,6 +317,7 @@ export function datasetNode({ dataset, catalogue, references, lang, pageUrl, twi
     },
     variableMeasured: variablesMeasured(catalogue.columns, lang),
     ...(sources.length > 0 ? { isBasedOn: sources.map((ref) => referenceStub(ref, bibliographyUrl)) } : {}),
+    ...(dateModified ? { dateModified } : {}),
   };
 }
 

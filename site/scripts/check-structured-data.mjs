@@ -344,6 +344,8 @@ const seen = {
 	cited: 0,
 	citing: 0,
 	datasetBasis: 0,
+	datasetDated: 0,
+	datasetUndated: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -582,9 +584,9 @@ for (const file of files) {
 	// (src/lib/catalogue-datasets.mjs). Read here off what was built: each
 	// dataset is the article's main entity, points at its table on the page,
 	// names the variables its columns hold and the works its rows were read
-	// from, and claims no licence over rows other works printed. The count
-	// across the pages, every catalogue the generator writes once in each
-	// language, is checked after the loop.
+	// from, is dated as its page, and claims no licence over rows other works
+	// printed. The count across the pages, every catalogue the generator
+	// writes once in each language, is checked after the loop.
 	if (CATALOGUE_PAGES.has(slug)) {
 		cataloguePagesSeen[lang] += 1;
 		const datasets = nodes.filter((node) => typesOf(node).includes('Dataset'));
@@ -633,6 +635,17 @@ for (const file of files) {
 			const overview = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${CATALOGUE_OVERVIEW}/#article`;
 			if (dataset.includedInDataCatalog?.['@id'] !== overview) {
 				fail(`${at}: the dataset is included in ${dataset.includedInDataCatalog?.['@id']}, not ${overview}`);
+			}
+			// A dataset is its page's text and the rows the page renders, so it
+			// changed when its page did: it carries the article's dateModified.
+			if (typeof dataset.dateModified !== 'string' || dataset.dateModified !== article.dateModified) {
+				fail(
+					`${at}: the dataset's dateModified is ${JSON.stringify(dataset.dateModified)}, not its page's ` +
+						`${JSON.stringify(article.dateModified)}`,
+				);
+				seen.datasetUndated += 1;
+			} else {
+				seen.datasetDated += 1;
 			}
 			const twinKey = lang === 'en' ? 'workTranslation' : 'translationOfWork';
 			datasetTwins.push({ at, lang, key, twin: dataset[twinKey]?.['@id'] });
@@ -1012,6 +1025,9 @@ for (const lang of ['en', 'es']) {
 		);
 	} else if (datasetTwins.length > 0) {
 		ok(`each of the ${datasetTwins.length} datasets names its twin in the other language`);
+	}
+	if (seen.datasetDated > 0 && seen.datasetUndated === 0) {
+		ok(`each of the ${seen.datasetDated} datasets is dated as the page that renders it`);
 	}
 	if (seen.datasetBasis > 0) {
 		ok(`the datasets name each of the ${seen.datasetBasis} works they are based on where they cite it`);

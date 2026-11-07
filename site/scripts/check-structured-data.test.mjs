@@ -537,6 +537,8 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 			},
 			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
 			isBasedOn: [stub(book(url))],
+			// The day page() says the page was last edited.
+			dateModified: '2026-10-01',
 		}));
 		const catalogue = page(pageSlug, lang, {
 			mainEntity: datasets.map((node) => ({ '@id': node['@id'] })),
@@ -567,6 +569,7 @@ test('a build whose every catalogue is a dataset of its page, listed by the over
 	assert.match(ran.out, new RegExp(`ok {3}each of the ${count} catalogues is a Dataset of one en catalogue page`));
 	assert.match(ran.out, new RegExp(`the DataCatalog lists the ${count} datasets of its language`));
 	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets names its twin in the other language`));
+	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets is dated as the page that renders it`));
 });
 
 test('a catalogue page that publishes no Dataset fails, and so does the count', (t) => {
@@ -611,6 +614,18 @@ test('a dataset that names its band columns by their band, or leaves a column ou
 	assert.match(ran.err, /absorption: the dataset's variableMeasured names no variable for Absorption coefficient/);
 	assert.match(ran.err, /absorption: variables named by a band alone: 63 Hz, 125 Hz/);
 	assert.match(ran.err, /solids: the dataset's variableMeasured names no variable for Densidad/);
+});
+
+test('a dataset with no date, or another date than its page, fails', (t) => {
+	const built = catalogueBuild();
+	delete datasetOf(built, 'en', 'gases').dateModified;
+	// The rows changed after the page last did, and the page was never told.
+	datasetOf(built, 'es', 'fluids').dateModified = '2026-10-29';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /solids\/ gases: the dataset's dateModified is undefined, not its page's "2026-10-01"/);
+	assert.match(ran.err, /solids\/ fluids: the dataset's dateModified is "2026-10-29", not its page's "2026-10-01"/);
+	assert.doesNotMatch(ran.out, /datasets is dated as the page that renders it/);
 });
 
 test('a dataset whose url points at no table on its page fails', (t) => {

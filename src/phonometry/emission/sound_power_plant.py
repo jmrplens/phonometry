@@ -332,7 +332,7 @@ _A_WEIGHTED_BANDS_HZ = tuple(float(f) for f in _CK_OCTAVE)
 
 def _octave_bands(
     frequencies: NumericArrayLike, name: str = "frequencies"
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Nominal octave centres for the frequencies given, in increasing order.
 
     :raises ValueError: for a frequency that names no octave band of the
@@ -386,7 +386,7 @@ def _weather(
 
 def _directional_angles(
     angle_deg: float | NumericArrayLike | None, bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """The 3 dB angle of a directional microphone per band, or ``None``.
 
     :raises ValueError: for an angle that is not in (0°, 90°].
@@ -702,7 +702,7 @@ def plant_steady_reading(min_level: float, max_level: float) -> float:
 # --------------------------------------------------------------------------- #
 
 
-def _polygon(vertices: NumericArrayLike, name: str) -> np.ndarray:
+def _polygon(vertices: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A simple polygon as an ``(n, 2)`` array, the closing vertex dropped.
 
     :raises ValueError: for fewer than three vertices, a non-finite
@@ -719,7 +719,7 @@ def _polygon(vertices: NumericArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _vertex_array(vertices: NumericArrayLike, name: str) -> np.ndarray:
+def _vertex_array(vertices: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """The vertices as an ``(n, 2)`` array of at least three, the closing
     vertex dropped.
 
@@ -742,7 +742,7 @@ def _vertex_array(vertices: NumericArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _require_simple(polygon: np.ndarray, scale: float, name: str) -> None:
+def _require_simple(polygon: NDArray[np.float64], scale: float, name: str) -> None:
     """Reject a polygon two of whose edges that are not neighbours touch.
 
     Each edge is held against every later edge but the next one, and the
@@ -760,24 +760,30 @@ def _require_simple(polygon: np.ndarray, scale: float, name: str) -> None:
                 raise ValueError(msg)
 
 
-def _signed_area(vertices: np.ndarray) -> float:
+def _signed_area(vertices: NDArray[np.float64]) -> float:
     """Shoelace area, positive for counter-clockwise vertices."""
     x, y = vertices[:, 0], vertices[:, 1]
     return 0.5 * float(np.sum(x * np.roll(y, -1) - np.roll(x, -1) * y))
 
 
-def _edges(vertices: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _edges(
+    vertices: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Start and end of each edge of a closed polygon."""
     return vertices, np.roll(vertices, -1, axis=0)
 
 
-def _cross(u: np.ndarray, v: np.ndarray) -> np.ndarray:
+def _cross(u: NDArray[np.float64], v: NDArray[np.float64]) -> NDArray[np.float64]:
     """z component of the cross product of 2-D vectors (broadcasting)."""
     return np.asarray(u[..., 0] * v[..., 1] - u[..., 1] * v[..., 0])
 
 
 def _segments_touch(
-    p1: np.ndarray, p2: np.ndarray, q1: np.ndarray, q2: np.ndarray, scale: float
+    p1: NDArray[np.float64],
+    p2: NDArray[np.float64],
+    q1: NDArray[np.float64],
+    q2: NDArray[np.float64],
+    scale: float,
 ) -> bool:
     """Whether two closed segments share a point, within the drawing tolerance."""
     tol = _GEOMETRY_TOLERANCE * scale
@@ -797,8 +803,8 @@ def _segments_touch(
 
 
 def _point_segment_distance(
-    points: np.ndarray, starts: np.ndarray, ends: np.ndarray
-) -> np.ndarray:
+    points: NDArray[np.float64], starts: NDArray[np.float64], ends: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Distance from each point to each segment, shape ``(points, segments)``."""
     d = ends - starts
     length2 = np.sum(d * d, axis=1)
@@ -808,7 +814,9 @@ def _point_segment_distance(
     return np.asarray(np.hypot(*(points[:, None, :] - nearest).T).T, dtype=np.float64)
 
 
-def _inside(points: np.ndarray, polygon: np.ndarray) -> np.ndarray:
+def _inside(
+    points: NDArray[np.float64], polygon: NDArray[np.float64]
+) -> NDArray[np.bool_]:
     """Even-odd test of each point against a polygon (boundary undecided)."""
     x, y = points[:, 0][:, None], points[:, 1][:, None]
     xi, yi = polygon[:, 0][None], polygon[:, 1][None]
@@ -820,7 +828,7 @@ def _inside(points: np.ndarray, polygon: np.ndarray) -> np.ndarray:
     return np.asarray(crossings % 2 == 1)
 
 
-def _convex_hull(points: np.ndarray) -> np.ndarray:
+def _convex_hull(points: NDArray[np.float64]) -> NDArray[np.float64]:
     """Counter-clockwise convex hull (Andrew's monotone chain)."""
     pts = sorted(
         {(real_number(p[0], "points"), real_number(p[1], "points")) for p in points}
@@ -847,7 +855,10 @@ def _convex_hull(points: np.ndarray) -> np.ndarray:
 
 
 def _stretch_inside_hull(
-    a: np.ndarray, b: np.ndarray, hull: np.ndarray, tol: float
+    a: NDArray[np.float64],
+    b: NDArray[np.float64],
+    hull: NDArray[np.float64],
+    tol: float,
 ) -> tuple[float, float] | None:
     """The part of segment ``ab`` strictly inside a convex hull, as the
     parameters ``(t_low, t_high)`` of ``a + t (b - a)``.
@@ -877,7 +888,9 @@ def _stretch_inside_hull(
     return t_low, t_high
 
 
-def _largest_pair_angle_deg(a: np.ndarray, b: np.ndarray, hull: np.ndarray) -> float:
+def _largest_pair_angle_deg(
+    a: NDArray[np.float64], b: NDArray[np.float64], hull: NDArray[np.float64]
+) -> float:
     r"""The largest angle two vertices of a convex hull subtend at any point
     of segment ``ab``, in degrees.
 
@@ -930,7 +943,10 @@ def _largest_pair_angle_deg(a: np.ndarray, b: np.ndarray, hull: np.ndarray) -> f
 
 
 def _ray_hits(
-    origin: np.ndarray, direction: np.ndarray, starts: np.ndarray, ends: np.ndarray
+    origin: NDArray[np.float64],
+    direction: NDArray[np.float64],
+    starts: NDArray[np.float64],
+    ends: NDArray[np.float64],
 ) -> bool:
     """Whether a ray from ``origin`` meets any of the segments."""
     d = ends - starts
@@ -943,7 +959,9 @@ def _ray_hits(
     return bool(np.any(hits))
 
 
-def _aspect_angle_deg(point: np.ndarray, polygon: np.ndarray) -> float:
+def _aspect_angle_deg(
+    point: NDArray[np.float64], polygon: NDArray[np.float64]
+) -> float:
     """The angle a polygon subtends at a point outside it, in degrees.
 
     The directions to the vertices, sorted, cut the circle into gaps; a gap
@@ -966,7 +984,9 @@ def _aspect_angle_deg(point: np.ndarray, polygon: np.ndarray) -> float:
     return math.degrees(2.0 * math.pi - unseen)
 
 
-def _walk(contour: np.ndarray, count: int) -> tuple[np.ndarray, np.ndarray]:
+def _walk(
+    contour: NDArray[np.float64], count: int
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """``count`` equidistant points along a closed contour from its first
     vertex, and the unit normal at each pointing into the contour.
 
@@ -1091,7 +1111,7 @@ class PlantMeasurementContour(OwnsArrays):
                     raise ValueError(msg)
 
     @cached_property
-    def _layout(self) -> tuple[np.ndarray, np.ndarray]:
+    def _layout(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Every position of the layout and its inward normal."""
         points, normals = _walk(self.contour_m, self.n_positions)
         return read_only(points), read_only(normals)

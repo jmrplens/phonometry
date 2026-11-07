@@ -425,6 +425,118 @@ def test_a_fixture_asked_for_by_name_or_set_up_inside_another_counts(
     assert _refused(done, whole_tree.LIMIT) == 13
 
 
+def test_a_fixture_asked_for_once_resolved_counts_for_a_later_test(
+    tmp_path: Path,
+) -> None:
+    """A module fixture that asks by name for one the test resolved before
+    it, directly or through a fixture that takes it, counts it for each
+    later test that takes the first from its cache.
+
+    Asking for a resolved name hands it from the test's request with no
+    setup, which left no trace: the test that resolved both failed, and the
+    next one, given only the cached fixture, counted none of the files.
+    """
+    _plant(
+        tmp_path,
+        "test_resolved.py",
+        f"""
+        @pytest.fixture(scope="module")
+        def first():
+            return _read({whole_tree.LIMIT})
+
+        @pytest.fixture(scope="module")
+        def kept(request):
+            return request.getfixturevalue("first")
+
+        def test_both(first, kept):
+            assert kept
+
+        def test_kept_only(kept):
+            assert kept
+
+        @pytest.fixture(scope="module")
+        def later():
+            return _read({whole_tree.LIMIT})
+
+        @pytest.fixture(scope="module")
+        def middle(later):
+            return later
+
+        @pytest.fixture(scope="module")
+        def held(request):
+            return request.getfixturevalue("middle")
+
+        def test_both_through_a_fixture(middle, held):
+            assert held
+
+        def test_held_only(held):
+            assert held
+        """,
+    )
+
+    done = _run(tmp_path)
+
+    assert done.returncode == pytest.ExitCode.TESTS_FAILED, done.stdout + done.stderr
+    assert "4 failed in " in done.stdout, done.stdout
+    assert _refused(done, whole_tree.LIMIT) == 4
+
+
+def test_two_fixtures_of_one_name_written_in_one_place_count_apart(
+    tmp_path: Path,
+) -> None:
+    """Of two fixtures given one name in one module, or in one class, the one
+    that overrides the other and takes it as a parameter counts what the
+    other opened for each test.
+
+    The count kept one record for a name and the place it is written in, so
+    the override's setup, which runs after the one it takes, replaced the
+    other's record with its own, which opened nothing, and the second test
+    of each, which takes the override from its cache, passed.
+    """
+    _plant(
+        tmp_path,
+        "test_one_place.py",
+        f"""
+        @pytest.fixture(scope="module", name="tree")
+        def _a_wide():
+            return _read({whole_tree.LIMIT})
+
+        @pytest.fixture(scope="module", name="tree")
+        def _b_narrow(tree):
+            return tree
+
+        def test_first(tree):
+            assert tree
+
+        def test_second(tree):
+            assert tree
+
+        class TestOneClass:
+            @pytest.fixture(scope="class", name="kept")
+            @classmethod
+            def _a_wide(cls):
+                return _read({whole_tree.LIMIT})
+
+            @pytest.fixture(scope="class", name="kept")
+            @classmethod
+            def _b_narrow(cls, kept):
+                return kept
+
+            def test_first(self, kept):
+                assert kept
+
+            def test_second(self, kept):
+                assert kept
+        """,
+    )
+
+    done = _run(tmp_path)
+
+    assert done.returncode == pytest.ExitCode.TESTS_FAILED, done.stdout + done.stderr
+    assert "4 failed in " in done.stdout, done.stdout
+    assert _refused(done, whole_tree.LIMIT) == 4
+
+
 def test_a_marked_test_passes_and_the_option_leaves_it_out(tmp_path: Path) -> None:
     """Marked one by one or by its module's ``pytestmark``, it is deselected."""
     _plant(

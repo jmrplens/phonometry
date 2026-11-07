@@ -1820,9 +1820,12 @@ def _chk_iso10847_receiver_correction_is_a_pressure_doubling() -> Outcome:
         unit="dB",
         expected_label=(
             "6 dB in every band, the 20 lg 2 of a pressure doubling as the "
-            "page prints it"
+            "page prints it, and the advisory of the NOTE to ISO 10847 8.2.2"
         ),
-        computed_label=f"max absolute departure {worst:.3f} dB over the three bands",
+        computed_label=(
+            f"max absolute departure {worst:.3f} dB over the three bands"
+            + ("" if advised else ", with no advisory")
+        ),
     )
 
 

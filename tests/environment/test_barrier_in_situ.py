@@ -11,7 +11,9 @@ pieces of geometry.
 
 from __future__ import annotations
 
+import importlib
 import math
+import pathlib
 import warnings
 
 import numpy as np
@@ -20,6 +22,7 @@ from reference_data import barrier_in_situ as oracle
 from reference_data import rounding
 
 from phonometry import environment
+from phonometry.environment.propagation import barrier_in_situ
 from phonometry.environment.propagation.barrier_in_situ import (
     CLOSE_SOURCE_DISTANCE_M,
     CLOUD_COVER_CLASSES,
@@ -764,3 +767,34 @@ def test_the_divergence_rates_are_printed_in_a_textbook_too() -> None:
     # line. Definition 3.10 of ISO 10847 states the same two in words.
     assert POINT_SOURCE_DIVERGENCE_DB == 6.0
     assert LINE_SOURCE_DIVERGENCE_DB == 3.0
+
+
+#: The two conformance rows that mix a hemi-free-field receiver with a facade
+#: one, and so wait for the advisory of the NOTE to 8.2.2 along with the 6 dB.
+_MIXING_ROWS = (
+    "_chk_iso10847_receiver_correction",
+    "_chk_iso10847_receiver_correction_is_a_pressure_doubling",
+)
+
+
+@pytest.mark.parametrize("row", _MIXING_ROWS)
+def test_a_mixing_row_names_the_advisory_it_waits_for(
+    row: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A row that fails for want of the advisory says so: its expected column
+    # names the advisory, and its computed column says none came, so that a
+    # failing row does not print a departure of 0.000 dB as its whole answer.
+    monkeypatch.syspath_prepend(
+        str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
+    )
+    rows = importlib.import_module("conformance.domains.in_situ_measurement")
+    check = getattr(rows, row)
+    advised = check()
+    assert advised.passed
+    assert "advisory" in advised.expected
+    assert "advisory" not in advised.computed
+    monkeypatch.setattr(barrier_in_situ, "warn_caller", lambda *_a, **_k: None)
+    unadvised = check()
+    assert not unadvised.passed
+    assert unadvised.expected == advised.expected
+    assert unadvised.computed.endswith(", with no advisory")

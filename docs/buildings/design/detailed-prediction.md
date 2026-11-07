@@ -469,8 +469,9 @@ of the energy, and the four flanking paths the rest.*
   The physical background of every term of the detailed model: radiation
   efficiency, structural reverberation time, the equivalent absorption length
   and the statistical-energy-analysis footing of the path summation.
-- Vigran, T. E. (2008). *Building acoustics*. Taylor & Francis.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
   The homogeneous-element transmission model and the impact-level closed form
   behind Annex B of both parts.
 

@@ -257,8 +257,10 @@ Use the G frequency weighting of ISO 7196:1995, which rates infrasound the way A
   (ISO 7196:1995). [iso.org catalogue](https://www.iso.org/standard/13813.html).
   The G-weighting pole/zero definition (Table 1), verified against every
   Table 2 nominal response value (0.25 Hz to 315 Hz).
-- American National Standards Institute. (1983). *Specification for Sound
-  Level Meters* (ANSI S1.4-1983). The historical B weighting: Appendix C
+- American National Standards Institute. (1983). *Specification for sound
+  level meters* (ANSI S1.4-1983).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
+  The historical B weighting: Appendix C
   analytic definition (Formula C2), Table IV design goals and Table V
   tolerance limits checked by `verify_weighting_class` in section 3.
 - International Electrotechnical Commission. (1990). *Filters for the
@@ -281,7 +283,7 @@ Use the G frequency weighting of ISO 7196:1995, which rates infrasound the way A
 ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
 infrasound measurements*: the G-weighting pole/zero definition (Table 1),
 verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).
-ANSI S1.4-1983, *Specification for Sound Level Meters*: the historical B
+ANSI S1.4-1983, *Specification for sound level meters*: the historical B
 weighting (Appendix C, Tables IV and V). IEC 61012:1990, *Filters for the
 measurement of audible sound in the presence of ultrasound*: the AU
 weighting (Tables 1 and 2, subclause 2.2). IEC 537:1976 (withdrawn),

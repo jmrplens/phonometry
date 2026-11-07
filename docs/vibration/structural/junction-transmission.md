@@ -463,8 +463,10 @@ consistency check the reader makes, not one the library automates.
 
 ## References
 
-- Cremer, L., Heckl, M., & Ungar, E. E. (1973). *Structure-borne sound* (1st
-  ed.). Springer.
+- Cremer, L., Heckl, M., & Ungar, E. E. (1973). *Structure-borne sound:
+  Structural vibrations and sound radiation at audio frequencies* (1st ed.).
+  Springer.
+  [doi:10.1007/978-3-662-10118-6](https://doi.org/10.1007/978-3-662-10118-6).
 - Craik, R. J. M. (1996). *Sound transmission through buildings using
   statistical energy analysis*. Gower.
 - Hopkins, C. (2007). *Sound insulation* (Section 5.2.1.3).

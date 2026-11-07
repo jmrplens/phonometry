@@ -288,8 +288,8 @@ piling campaign's weighted exposure falls below a criterion.
   3026, SSC Pacific.
   The band-pass filter form and the audiogram equation both criteria sets
   adopt.
-- Ainslie, M. A. (2010). *Principles of Sonar Performance Modelling*.
-  Springer/Praxis.
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
   [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
   The orca audiogram of section 2 (Equation 11.159, after Wensveen &
   Van Roij 2007) and the orca-versus-salmon worked example.

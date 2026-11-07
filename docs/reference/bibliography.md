@@ -208,7 +208,7 @@ it; the list grows as guides gain their References sections.
 - International Telecommunication Union. (2023). *Algorithms to measure
   audio programme loudness and true-peak audio level* (Recommendation
   ITU-R BS.1770-5).
-  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770).
+  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770/en).
   The K-weighting, channel weights, gating and true-peak algorithms.
   Cited by [Programme loudness & true peak](../devices/broadcast/program-loudness.md).
 - European Broadcasting Union. (2023). *Loudness normalisation and permitted

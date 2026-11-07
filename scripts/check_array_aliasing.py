@@ -697,6 +697,14 @@ class Tree:
             tuple[str, str], tuple[tuple[tuple[str, str], ...], _Pins]
         ] = {}
         self.live_cache: dict[tuple[str, str], list[FunctionInfo]] = {}
+        #: What :meth:`base_classes`, :meth:`copies_arrays`,
+        #: :meth:`record_fields` and :meth:`attribute_annotation` found, read
+        #: once for each ``class`` statement: none of them changes once the
+        #: package is read.
+        self.base_cache: dict[ast.AST | None, tuple[tuple[ClassInfo, ...], ...]] = {}
+        self.copies_cache: dict[ast.AST | None, bool] = {}
+        self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
+        self.attribute_cache: dict[tuple[ast.AST | None, str], str | None] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
         self.exported: dict[str, tuple[str, ...]] = {}
@@ -1258,64 +1266,197 @@ class Tree:
             return target[0]
         return None
 
+    def base_classes(self, info: ClassInfo) -> tuple[tuple[ClassInfo, ...], ...]:
+        """The classes of the package each base of one ``class`` statement
+        may be, in the order of its bases (:meth:`classes_read`), read once
+        for each statement.
+        """
+        node = info.node
+        if node in self.base_cache:
+            return self.base_cache[node]
+        bases = node.bases if node is not None else []
+        found = tuple([self.classes_read(info, base) for base in bases])
+        self.base_cache[node] = found
+        return found
+
+    def classes_read(self, info: ClassInfo, base: ast.expr) -> tuple[ClassInfo, ...]:
+        """The classes of the package one base of the ``class`` statement of
+        *info* may be: what its name stands for where the statement reads it
+        (:meth:`named_at`), each ``class`` statement of it that stood there
+        (:meth:`classes_stood`).
+
+        A base a later ``class`` of its name replaces is the class it was
+        when the statement ran, one with a class in each branch of an ``if``
+        is either, and an alias is what it was bound to there. A name one
+        statement alone binds at the top of the module stands for what that
+        statement binds wherever a statement there reads it, so it is read
+        as the module stands once it has run (:meth:`resolve_all`, read once
+        for each name). A name the guard cannot follow there is the module's
+        own class of it, or the one class of the package of that name.
+        """
+        target = base.value if isinstance(base, ast.Subscript) else base
+        pins: _Pins = {}
+        if (
+            isinstance(target, ast.Name)
+            and info.node is not None
+            and "." not in self.qualnames[info.node][1]
+            and len(self.top_bindings[info.module].get(target.id, ())) == 1
+        ):
+            keys = self.resolve_all(info.module, target.id, pins=pins)
+        else:
+            keys = self.named_at(info.module, target, pins=pins)
+        # Each key is a class of its own, and each of its statements stood once.
+        found = tuple(
+            [
+                stood
+                for key in keys
+                if key in self.classes
+                for stood in self.classes_stood(key, pins)
+            ]
+        )
+        if found:
+            return found
+        name = _base_name(base)
+        local = self.class_definitions.get((info.module, name), [])
+        if local:
+            return tuple(local)
+        candidates = self.class_by_name.get(name, [])
+        return tuple(candidates) if len(candidates) == 1 else ()
+
     def record_fields(self, info: ClassInfo) -> list[tuple[str, str]]:
-        """The constructor's fields of a record, the inherited ones first."""
+        """The constructor's fields of a record, the inherited ones first:
+        those of the records each base may be where the ``class`` statement
+        reads it (:meth:`base_classes`), a field one of them annotates as able
+        to hold an array taking that annotation. The list is the tree's own,
+        read once for each statement: a caller reads it and leaves it whole.
+        """
+        node = info.node
+        if not info.bases:
+            return info.fields
+        if node in self.fields_cache:
+            return self.fields_cache[node]
+        # A class a function writes under ``global`` may be its own base:
+        # while it is read, it lends its own fields alone.
+        self.fields_cache[node] = info.fields
         fields: list[tuple[str, str]] = []
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                if candidate.record:
-                    fields.extend(self.record_fields(candidate))
-                    break
+        for classes in self.base_classes(info):
+            inherited: dict[str, str] = {}
+            for candidate in classes:
+                if not candidate.record:
+                    continue
+                for name, annotation in self.record_fields(candidate):
+                    held = inherited.get(name)
+                    if held is None or (
+                        not self.holds_array(held) and self.holds_array(annotation)
+                    ):
+                        inherited[name] = annotation
+            fields.extend(inherited.items())
         names = {name for name, _ in info.fields}
-        return [f for f in fields if f[0] not in names] + info.fields
+        found = [f for f in fields if f[0] not in names] + info.fields
+        self.fields_cache[node] = found
+        return found
 
     def copies_arrays(self, info: ClassInfo) -> bool:
         """Whether a record inherits :data:`MECHANISM`, itself or through a
-        record it extends, and so copies every array it is built with.
+        base every class of which it may be where the ``class`` statement
+        reads it (:meth:`base_classes`) is a record that copies, and so
+        copies every array it is built with.
         """
         if MECHANISM in info.bases:
             return True
-        return any(
-            candidate.record and self.copies_arrays(candidate)
-            for base in info.bases
-            for candidate in self.class_by_name.get(base, [])
+        node = info.node
+        if not info.bases:
+            return False
+        if node in self.copies_cache:
+            return self.copies_cache[node]
+        # A class a function writes under ``global`` may be its own base:
+        # while it is read, it copies nothing.
+        self.copies_cache[node] = False
+        copies = any(
+            classes
+            and all(
+                candidate.record and self.copies_arrays(candidate)
+                for candidate in classes
+            )
+            for classes in self.base_classes(info)
         )
+        self.copies_cache[node] = copies
+        return copies
 
-    def owns(self, info: ClassInfo, name: str) -> bool:
+    def owns(
+        self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
+    ) -> bool:
         """Whether a record copies a field itself: every field of one that
-        inherits :data:`MECHANISM`, or one its own or a base's
-        ``__post_init__`` copies.
+        inherits :data:`MECHANISM`, or one its own ``__post_init__`` copies,
+        or that of every record a base may be (:meth:`base_classes`).
         """
         if info.owned.get(name) or self.copies_arrays(info):
             return True
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                if candidate.record and self.owns(candidate, name):
-                    return True
+        if not info.bases:
+            return False
+        seen = seen | {info.node}
+        for classes in self.base_classes(info):
+            if classes and all(
+                candidate.record
+                and candidate.node not in seen
+                and self.owns(candidate, name, seen)
+                for candidate in classes
+            ):
+                return True
         return False
 
-    def seals(self, info: ClassInfo, name: str) -> bool:
-        """Whether a record publishes a field as a read-only copy of its own."""
+    def seals(
+        self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
+    ) -> bool:
+        """Whether a record publishes a field as a read-only copy of its own,
+        itself or through every record a base may be (:meth:`base_classes`).
+        """
         if self.copies_arrays(info) or (
             info.sealed.get(name) and self.owns(info, name)
         ):
             return True
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                if candidate.record and self.seals(candidate, name):
-                    return True
+        if not info.bases:
+            return False
+        seen = seen | {info.node}
+        for classes in self.base_classes(info):
+            if classes and all(
+                candidate.record
+                and candidate.node not in seen
+                and self.seals(candidate, name, seen)
+                for candidate in classes
+            ):
+                return True
         return False
 
     def attribute_annotation(self, info: ClassInfo, name: str) -> str | None:
-        """The annotation of an attribute of a class, looked up its bases too."""
+        """The annotation of an attribute of a class, looked up its bases
+        too, each the classes it may be where the ``class`` statement reads
+        it (:meth:`base_classes`): the first base that annotates it, and of
+        the classes that base may be, one that annotates it as able to hold
+        an array when one does.
+        """
         if name in info.attributes:
             return info.attributes[name]
-        for base in info.bases:
-            for candidate in self.class_by_name.get(base, []):
-                found = self.attribute_annotation(candidate, name)
-                if found is not None:
-                    return found
-        return None
+        if not info.bases:
+            return None
+        key = (info.node, name)
+        if key in self.attribute_cache:
+            return self.attribute_cache[key]
+        # A class a function writes under ``global`` may be its own base:
+        # while it is read, it annotates nothing more.
+        self.attribute_cache[key] = None
+        annotation: str | None = None
+        for classes in self.base_classes(info):
+            found = [
+                held
+                for candidate in classes
+                if (held := self.attribute_annotation(candidate, name)) is not None
+            ]
+            if found:
+                annotation = next((a for a in found if self.holds_array(a)), found[0])
+                break
+        self.attribute_cache[key] = annotation
+        return annotation
 
 
 def _inside(module: str, package: str) -> bool:

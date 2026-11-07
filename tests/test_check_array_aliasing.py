@@ -2857,6 +2857,216 @@ def test_each_class_statement_of_a_public_record_is_held_to_it(
     assert found == {"BandResult", "Kept", "Either"}
 
 
+#: Records whose base is read where their ``class`` statement reads it: a
+#: base with a class in each branch of an ``if``, one that copies and one
+#: that does not; one a later class of its name replaces after the record,
+#: either way round; and one an alias holds, bound again after the record,
+#: either way round.
+_BASES = """
+import os
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays, read_only_copy
+
+if os.environ.get("BANDS"):
+    @dataclass(frozen=True)
+    class _Either:
+        pass
+else:
+    @dataclass(frozen=True)
+    class _Either(OwnsArrays):
+        pass
+
+@dataclass(frozen=True)
+class OnEither(_Either):
+    frequencies: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Late:
+    pass
+
+@dataclass(frozen=True)
+class BeforeTheCopy(_Late):
+    frequencies: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Late(OwnsArrays):
+    pass
+
+@dataclass(frozen=True)
+class _Early(OwnsArrays):
+    pass
+
+@dataclass(frozen=True)
+class BeforeThePlainOne(_Early):
+    frequencies: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Early:
+    pass
+
+@dataclass(frozen=True)
+class _Plain:
+    pass
+
+base = _Plain
+
+@dataclass(frozen=True)
+class ThroughAnAlias(base):
+    frequencies: NDArray[np.float64]
+
+base = _Late
+
+shown = _Late
+
+@dataclass(frozen=True)
+class ThroughACopyingAlias(shown):
+    frequencies: NDArray[np.float64]
+
+shown = _Plain
+
+def build_on_either(frequencies):
+    return OnEither(frequencies)
+
+def build_before_the_copy(frequencies):
+    return BeforeTheCopy(frequencies)
+
+def build_through_an_alias(frequencies):
+    return ThroughAnAlias(frequencies)
+
+def build_through_a_copying_alias(frequencies):
+    return ThroughACopyingAlias(frequencies)
+
+def a_copy_the_record_makes(frequencies):
+    return BeforeThePlainOne(read_only_copy(frequencies))
+"""
+
+
+def test_a_record_s_base_is_the_class_its_statement_reads(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record copies through its base only when every class the base's
+    name may stand for where its ``class`` statement reads it copies: not a
+    base with a plain class in one branch, nor one a class that copies
+    replaced only after the record, nor an alias bound to such a class only
+    after it; and a record built on a base that copies, or on an alias of
+    one, still copies when a plain class takes the name later.
+
+    A base was every class of the package of its bare name, and the record
+    copied when any one of them did, so the first two passed, by hand and
+    from a factory; an alias was no class at all, so a record built on an
+    alias of a class that copies was refused, and the one built on an alias
+    of a plain class was refused only for that reason.
+    """
+    assert _unequipped(tmp_path / "a", bases=_BASES) == {
+        "BandResult",
+        "OnEither",
+        "BeforeTheCopy",
+        "ThroughAnAlias",
+    }
+    assert _findings(tmp_path / "b", bases=_BASES) == {
+        ("build_on_either", "OnEither.frequencies", "frequencies"),
+        ("build_before_the_copy", "BeforeTheCopy.frequencies", "frequencies"),
+        ("build_through_an_alias", "ThroughAnAlias.frequencies", "frequencies"),
+        ("a_copy_the_record_makes", "BeforeThePlainOne.frequencies (copied twice)", ""),
+    }
+
+
+def test_a_base_s_fields_copies_and_attributes_are_those_of_the_class_it_reads(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The fields a record inherits are those of the base its ``class``
+    statement reads, here the second of two classes of the name, and a
+    field a base's ``__post_init__`` copies or seals is the record's own
+    only when every class the base may be does so; an attribute annotated in
+    a plain base is read from the class that stood.
+
+    A base was every class of the package of its name: the fields came from
+    the first, so ``Shaped(frequencies)`` filled a text field; a field one
+    branch's class copied or sealed counted as copied or sealed on both; and
+    an attribute's annotation came from the first class that had it.
+    """
+    found = _findings(
+        tmp_path,
+        fields="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        @dataclass(frozen=True)
+        class _Shape:
+            label: str
+
+        @dataclass(frozen=True)
+        class _Shape:
+            frequencies: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Shaped(_Shape):
+            note: str = ""
+
+        def build_shaped(frequencies):
+            return Shaped(frequencies)
+        """,
+        owned="""
+        import os
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import read_only_copy
+        from .results import BandResult
+
+        if os.environ.get("BANDS"):
+            @dataclass(frozen=True)
+            class _Kept:
+                data: NDArray[np.float64]
+
+                def __post_init__(self):
+                    object.__setattr__(self, "data", read_only_copy(self.data))
+        else:
+            @dataclass(frozen=True)
+            class _Kept:
+                data: NDArray[np.float64]
+
+        @dataclass(frozen=True)
+        class Kept(_Kept):
+            levels: NDArray[np.float64]
+
+        def build_kept(data, levels):
+            return Kept(data, levels)
+
+        def passed_on(record: Kept):
+            return BandResult(frequencies=record.data, levels=None)
+        """,
+        held="""
+        import numpy as np
+
+        class _Holder:
+            sos: float
+
+        class _Holder:
+            sos: np.ndarray
+
+        class Bank(_Holder):
+            def __init__(self, sos):
+                self.sos = np.asarray(sos)
+        """,
+    )
+    assert found == {
+        ("build_shaped", "Shaped.frequencies", "frequencies"),
+        ("build_kept", "Kept.data", "data"),
+        ("build_kept", "Kept.levels", "levels"),
+        ("passed_on", "BandResult.frequencies", "record"),
+        ("Bank.__init__", "self.sos", "sos"),
+    }
+
+
 def test_a_record_that_copies_takes_the_caller_s_array_as_it_is(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -345,6 +345,72 @@ def test_each_class_statement_of_a_public_record_is_read(
     }
 
 
+def test_a_base_is_the_class_its_statement_reads(tmp_path: pathlib.Path) -> None:
+    """A record's base is what its name stands for where the record's
+    ``class`` statement reads it: a plain class a class with the table
+    replaces only after the record gives no table, one with the table that
+    a plain class replaces after it gives it, and an alias of either holds
+    the class it was bound to there.
+
+    A base was read as the module stood once it had run, so each record was
+    held to the class that took the base's name after it.
+    """
+    refused = _refused(
+        tmp_path,
+        results="""
+        from dataclasses import dataclass
+
+        from ._internal.display import RichDisplay
+
+        class _Late:
+            pass
+
+        @dataclass(frozen=True)
+        class BeforeTheTable(_Late):
+            level: float
+
+        class _Late(RichDisplay):
+            pass
+
+        class _Early(RichDisplay):
+            pass
+
+        @dataclass(frozen=True)
+        class BeforeThePlainOne(_Early):
+            level: float
+
+        class _Early:
+            pass
+
+        class _Plain:
+            pass
+
+        class _Table(RichDisplay):
+            pass
+
+        base = _Plain
+
+        @dataclass(frozen=True)
+        class ThroughAPlainAlias(base):
+            level: float
+
+        base = _Table
+
+        shown = _Table
+
+        @dataclass(frozen=True)
+        class ThroughAShownAlias(shown):
+            level: float
+
+        shown = _Plain
+        """,
+    )
+    assert refused == {
+        "BeforeTheTable": "BeforeTheTable does not inherit RichDisplay",
+        "ThroughAPlainAlias": "ThroughAPlainAlias does not inherit RichDisplay",
+    }
+
+
 def test_a_private_record_is_held_only_once_a_public_module_lists_it(
     tmp_path: pathlib.Path,
 ) -> None:

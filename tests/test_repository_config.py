@@ -478,6 +478,27 @@ def test_no_workflow_runs_on_the_moving_ubuntu_label() -> None:
     )
 
 
+def test_every_workflow_that_runs_pip_turns_its_version_notice_off() -> None:
+    """pip says nothing in a job's log about its own newer releases.
+
+    Four jobs of every pull request printed "A new release of pip is
+    available" whenever the runner's pip, or the pip of a fresh venv, lagged
+    the newest one, a notice about the tool rather than the build. The setting
+    sits in the workflow's own ``env``, so a job added later inherits it.
+    """
+    missing = []
+    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        if "pip install" not in text and "-m pip" not in text:
+            continue
+        workflow_env = yaml.safe_load(text).get("env") or {}
+        if str(workflow_env.get("PIP_DISABLE_PIP_VERSION_CHECK")) != "1":
+            missing.append(path.name)
+    assert missing == [], (
+        f'these workflows run pip without PIP_DISABLE_PIP_VERSION_CHECK: "1" in their env: {missing}'
+    )
+
+
 def _config_time_filters(options: Mapping[str, str | Sequence[str]]) -> list[str]:
     """Every warning filter pytest resolves while it reads its configuration.
 

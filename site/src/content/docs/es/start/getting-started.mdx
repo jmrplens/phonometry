@@ -72,6 +72,13 @@ lo que obtiene una instalación simple. numba solo acelera la ponderación
 temporal `impulse`, de modo que si necesitas la última versión de NumPy el
 mismo día que sale, instala `phonometry[plot,report]` y deja fuera `[perf]`.
 
+numba guarda el núcleo compilado en disco, junto al paquete o bajo tu directorio
+personal, para que un proceso posterior lo cargue en lugar de compilarlo de
+nuevo. Donde ninguno de los dos admite escritura, como en una cuenta de servicio
+o un usuario de contenedor sin directorio personal, lo compila una vez en cada
+proceso; apunta `NUMBA_CACHE_DIR` a un directorio con permiso de escritura para
+conservarlo.
+
 `[full]` deja fuera `[torch]` a propósito: los wheels de torch que sirve PyPI
 para Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU
 de NVIDIA, instala primero torch desde el índice de CPU de PyTorch y después

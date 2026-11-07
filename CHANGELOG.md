@@ -2304,6 +2304,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **With `[perf]`, every package imports where numba can write no cache.**
+  The impulse time weighting and the BS.468-4 quasi-peak chain are compiled
+  by numba with an on-disk cache, and numba refuses that decoration with
+  `RuntimeError: cannot cache function ...: no locator available` where
+  neither the package directory, `NUMBA_CACHE_DIR` nor the home directory
+  is writable: for a service account, `nobody`, or a container user with no
+  home over a read-only install. The decoration runs at import, so 15 of
+  the 21 domain packages failed to import there, on numba 0.60.0 and
+  0.68.1 alike, and a cache warmed by root did not help. The kernels now
+  compile without the cache in that case, once per process on their first
+  call, and getting-started says to point `NUMBA_CACHE_DIR` at a writable
+  directory to keep it.
+
 - **A WAV file reads from a file system that cannot be memory-mapped.**
   `io.read` asks SciPy to map every linear WAV but a 24-bit one, and
   JupyterLite's notebook folder (`/drive`) refuses the map, so reading a

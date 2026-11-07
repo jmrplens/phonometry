@@ -171,6 +171,12 @@ one minor behind what a plain install gets. numba only makes the `impulse` time
 weighting faster, so if you need the newest NumPy the day it ships, install
 `phonometry[plot,report]` and leave `[perf]` out.
 
+numba keeps the compiled kernel on disk, beside the package or under your home
+directory, so a later process loads it instead of compiling it again. Where
+neither is writable, as for a service account or a container user with no home,
+it compiles the kernel once in each process instead; point `NUMBA_CACHE_DIR` at
+a writable directory to keep it.
+
 `[full]` leaves `[torch]` out on purpose: the torch wheels PyPI serves on Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
 install torch from PyTorch's CPU index first, then the extra, which keeps

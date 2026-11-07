@@ -103,7 +103,8 @@ class TestNortonProblem610:
     """The single-drive inversion against the printed answers."""
 
     @pytest.fixture(scope="class")
-    def result(self) -> PowerInjectionResult:
+    @classmethod
+    def result(cls) -> PowerInjectionResult:
         e_1, e_2, n_1, n_2 = _problem_610_inputs()
         return power_injection_clf(
             frequencies=_BAND,

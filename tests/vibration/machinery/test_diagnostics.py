@@ -59,7 +59,8 @@ class TestNortonProblem85:
     """Bearing fault frequencies against the printed answers to problem 8.5."""
 
     @pytest.fixture(scope="class")
-    def result(self) -> FaultFrequencyResult:
+    @classmethod
+    def result(cls) -> FaultFrequencyResult:
         return bearing_fault_frequencies(**_P85)  # type: ignore[arg-type]
 
     @pytest.mark.parametrize(

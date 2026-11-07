@@ -167,7 +167,7 @@ def _band_rows(
     classification. The margin is taken against the achieved class, the one the
     boxed result states.
     """
-    from ..filters.frequencies import _format_nominal_freq
+    from .._internal.bands import _format_nominal_freq
 
     header_style = band_table_header_style()
     cls = result.reference_class()

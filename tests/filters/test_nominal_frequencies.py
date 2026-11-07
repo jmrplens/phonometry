@@ -11,14 +11,12 @@ import pytest
 from phonometry import filters
 from phonometry._internal.bands import (
     _extended_preferred,
+    _format_nominal_freq,
     _iec_e3_round,
+    _infer_band_fraction,
     _nominal_freq_for_band,
 )
-from phonometry.filters.frequencies import (
-    _format_nominal_freq,
-    _infer_band_fraction,
-    nominal_frequencies,
-)
+from phonometry.filters.frequencies import nominal_frequencies
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

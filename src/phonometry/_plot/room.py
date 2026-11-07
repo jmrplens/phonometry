@@ -302,8 +302,7 @@ def _band_labels(
     """
     if frequency is None:
         return [_t("Broadband", language)] * count, False
-    from .._internal.bands import _nominal_freq_for_band
-    from ..filters.frequencies import _infer_band_fraction
+    from .._internal.bands import _infer_band_fraction, _nominal_freq_for_band
 
     centers = real_array(frequency, "frequency")
     fraction = _infer_band_fraction(centers)

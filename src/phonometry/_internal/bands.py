@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .validation import real_array
 from .warnings import warn_caller
 
 if TYPE_CHECKING:
@@ -29,6 +30,10 @@ if TYPE_CHECKING:
     from .warnings import PhonometryWarning
 
 __all__ = ["PREFERRED_FREQUENCIES", "bands_held"]
+
+# One kilohertz in hertz: the boundary at which a nominal-frequency label
+# switches to the abbreviated "k" form, and the Hz-to-kHz divisor.
+_HZ_PER_KHZ = 1000
 
 # IEC 61260-1 Annex E.3: a most-significant digit of 1-4 keeps three
 # significant figures, one of 5-9 keeps two.
@@ -126,6 +131,29 @@ def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:
         extended = _extended_preferred(frac)
         return min(extended, key=lambda f: abs(np.log(f / exact_freq)))
     return _iec_e3_round(exact_freq)
+
+
+def _infer_band_fraction(frequency: np.ndarray) -> int:
+    """Octave (1) or one-third-octave (3) from adjacent band-centre ratios.
+
+    Distinguishes the two IEC 61260 band structures by the ratio of adjacent
+    mid-band centres (2 for octaves, 2**(1/3) ~ 1.26 for one-third octaves).
+    Fewer than two bands cannot be told apart, so octave (1) is returned as the
+    conventional default. Shared by the room-acoustics plot renderer and the
+    report fiches so they classify a band set identically.
+    """
+    freq = real_array(frequency, "frequency")
+    # The fewest values the step below can work with, not a quantity.
+    if freq.size < 2:  # noqa: PLR2004
+        return 1
+    return 1 if float(freq[1] / freq[0]) > _OCTAVE_SPACING_MIN_RATIO else 3
+
+
+def _format_nominal_freq(f: float) -> str:
+    """Format a nominal frequency as a human-readable label string."""
+    if f >= _HZ_PER_KHZ:
+        return f"{f / _HZ_PER_KHZ:g}k"
+    return f"{f:g}"
 
 
 def _band_name(label: str) -> str:

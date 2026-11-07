@@ -25,6 +25,11 @@ moment it asks for a module whose lock the first thread holds, which in a real
 interleaving is the deadlock, the probe records the race and stops that
 import. The main thread then carries on, and the import completes, so one run
 reports every race the package can lose, not only the first.
+
+An import a function makes once its module is loaded, as a renderer's ``from
+..signals.levels import _REF_PRESSURE`` when a record draws, has no module
+being imported above it; the probe takes the module whose function runs the
+statement for its importer, so :func:`watch` reports the races a call loses.
 """
 
 from __future__ import annotations
@@ -33,6 +38,7 @@ from __future__ import annotations
 # three functions this probe wraps, looked up on it at each import.
 import _frozen_importlib as bootstrap
 import importlib
+import inspect
 import json
 import sys
 import threading
@@ -114,7 +120,7 @@ class _Probe:
         if threading.get_ident() in self.racers:
             return self.find_and_load_unlocked(name, import_)
         stack = self.stack()
-        importer = stack[-2] if len(stack) > 1 else ""
+        importer = stack[-2] if len(stack) > 1 else _caller()
         # A module can come back here while it is loading, as a parent of its
         # own import or through an import cycle: the outer call keeps it held.
         outer = name in self.held
@@ -181,10 +187,37 @@ class _Probe:
         bootstrap._lock_unlock_module = self.wrapped_lock_unlock_module
 
 
+def _caller() -> str:
+    """The module of phonometry whose code runs an import no other import holds.
+
+    The import statement runs in a frame of that module, under the frames of
+    the import system and of this probe, none of which belongs to phonometry.
+    ``""`` when no frame does: the import comes from the probe's caller.
+    """
+    frame = inspect.currentframe()
+    while frame is not None:
+        name = frame.f_globals.get("__name__", "")
+        if name.startswith("phonometry."):
+            return str(name)
+        frame = frame.f_back
+    return ""
+
+
 def _top(module: str) -> str:
     """The top-level package of phonometry *module* is in, ``""`` for the root."""
     parts = module.split(".")
     return parts[1] if len(parts) > 1 else ""
+
+
+def watch() -> list[dict[str, str]]:
+    """Put the probe in place from here on, and return the list of its races.
+
+    The list fills as the process imports: run what the test drives, then read
+    it. The probe stays in place until the process ends.
+    """
+    probe = _Probe()
+    probe.install()
+    return probe.races
 
 
 def main(package: str) -> int:

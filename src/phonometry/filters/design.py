@@ -11,11 +11,11 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy import signal
 
+from .._internal.bands import _format_nominal_freq
 from .._internal.extras import install_hint
 from .._internal.figures import closes_its_figures
 from .._internal.json_input import writing_beside
 from .._internal.validation import require_scalar
-from .frequencies import _format_nominal_freq
 
 if TYPE_CHECKING:
     import os

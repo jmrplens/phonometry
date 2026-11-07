@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.bands import (
-    _OCTAVE_SPACING_MIN_RATIO,
     PREFERRED_FREQUENCIES,
+    _format_nominal_freq,
     _nominal_freq_for_band,
     bands_held,
 )
@@ -36,10 +36,6 @@ __all__ = [
     "nominal_frequencies",
     "normalized_frequencies",
 ]
-
-# One kilohertz in hertz: the boundary at which a nominal-frequency label
-# switches to the abbreviated "k" form, and the Hz-to-kHz divisor.
-_HZ_PER_KHZ = 1000
 
 
 @dataclass(frozen=True)
@@ -248,29 +244,6 @@ def _genfreqs(
         bands.upper_edges[keep],
         [label for label, kept in zip(bands.labels, keep, strict=True) if kept],
     )
-
-
-def _infer_band_fraction(frequency: np.ndarray) -> int:
-    """Octave (1) or one-third-octave (3) from adjacent band-centre ratios.
-
-    Distinguishes the two IEC 61260 band structures by the ratio of adjacent
-    mid-band centres (2 for octaves, 2**(1/3) ~ 1.26 for one-third octaves).
-    Fewer than two bands cannot be told apart, so octave (1) is returned as the
-    conventional default. Shared by the room-acoustics plot renderer and the
-    report fiche so they classify a band set identically.
-    """
-    freq = real_array(frequency, "frequency")
-    # The fewest values the step below can work with, not a quantity.
-    if freq.size < 2:  # noqa: PLR2004
-        return 1
-    return 1 if float(freq[1] / freq[0]) > _OCTAVE_SPACING_MIN_RATIO else 3
-
-
-def _format_nominal_freq(f: float) -> str:
-    """Format a nominal frequency as a human-readable label string."""
-    if f >= _HZ_PER_KHZ:
-        return f"{f / _HZ_PER_KHZ:g}k"
-    return f"{f:g}"
 
 
 def normalized_frequencies(fraction: int | np.integer[Any]) -> list[float]:

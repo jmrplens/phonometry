@@ -31,7 +31,9 @@
     "export computes, and on a text that is not the one its export reads. Keys beginning",
     "with an underscore are notes to the build; the test",
     "reads \"_via\", which maps each module the pages reach and are not dated by to the",
-    "source or count that stands for it, or to the reason it moves no page."
+    "source or count that stands for it, or to the reason it moves no page. A reason given",
+    "for repo-stats.mjs or conformance-stats.mjs, which read the repository as the site",
+    "builds, names in backticks each export of it the pages take, and stands for those alone."
   ],
   "entries": [
     {
@@ -41,7 +43,10 @@
       "_via": {
         "site/src/lib/page-evidence.ts": "verifiedBy",
         "site/src/data/conformance-stats.mjs": "verifiedBy",
-        "site/src/components/Head.astro": "the works the bibliography page's structured data defines in full, read from every page's references: data for machines, which no reader of a page reads",
+        "site/src/lib/bibliography-works.ts": "the works the bibliography page's structured data defines in full, read from every page's references, and the works an errata page's structured data says it corrects: data for machines, which no reader of a page reads",
+        "site/src/data/repo-stats.mjs": "`version` and `targetPlatform`, the release and the Python an API page's structured data names, data for machines, and `version` again in the BibTeX entry citation.mjs builds, which the page actions hold in an attribute to copy, the same on every page and no part of any one: no reader of a page reads either as its text",
+        "site/src/lib/catalogue-pages.ts": "the catalogue pages the structured data of a catalogue page and of the catalogue overview names: data for machines, which no reader of a page reads",
+        "site/src/generated/catalogues.mjs": "the columns the Dataset of a catalogue page says it measures: data for machines, which no reader of a page reads",
         "site/src/data/topics.mjs": "the navigation the sidebar, the breadcrumbs, a topic's mark beside its title and a topic's own section list draw, which moves no page's date, as a page's sidebar entry does not",
         "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from: navigation, which moves no page's date",
         "site/src/lib/content-dates.mjs": "the dates themselves, which read every page's references to date each one by its own line, and which the footer and the structured data print",

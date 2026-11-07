@@ -1009,7 +1009,11 @@ const REPO = resolve(SITE, '..');
  * code, not by the pages it reads. A "_via" key that none of the entry's
  * pages reaches, or that "sources" already names, is wrong too. And an
  * export of a module that reads the repository at build time (`reads`)
- * that the pages import has to be dated by what it is read from.
+ * that the pages import has to be dated by what it is read from, unless
+ * the reason "_via" gives that module names it in backticks: a reason stands
+ * for the exports it names, each read where the pages take it and found to
+ * move no page, and for no other, and one that names an export the pages do
+ * not take is wrong too.
  *
  * Every page is also drawn in the layout (`layoutComponents`), so what the
  * layout reaches is on every page: the entry that lists the whole content
@@ -1095,11 +1099,23 @@ function auditDateSources(site = SITE, reads = READS) {
 				problems.push(`${where}: "_via" dates ${module} by ${why}, which is neither a source nor a count of the entry`);
 			}
 		}
+		// A reason (a sentence) stands for the exports it names in backticks, and
+		// for no other: an export the pages take later is dated by what it is read
+		// from until a reason names it too, and a name no page takes is stale.
 		for (const [module, exports] of Object.entries(reads)) {
 			const names = imported[index].get(module) ?? new Set();
-			for (const name of names.has('*') ? Object.keys(exports) : names) {
+			const taken = names.has('*') ? Object.keys(exports) : [...names];
+			const reason = typeof via[module] === 'string' && /\s/.test(via[module]) ? via[module] : '';
+			const reasoned = (name) => reason.includes(`\`${name}\``);
+			for (const name of Object.keys(exports)) {
+				if (reasoned(name) && !taken.includes(name)) {
+					problems.push(`${where}: "_via" gives ${module} a reason for ${name}, which its pages do not take`);
+				}
+			}
+			for (const name of taken) {
 				const from = exports[name];
 				if (from === undefined) problems.push(`${where}: its pages show ${name} of ${module}, and the test does not say what that is read from`);
+				else if (reasoned(name)) continue;
 				else if (from === 'count' && !Object.hasOwn(entry.counts, name)) {
 					problems.push(`${where}: its pages show ${name} of ${module}, a count the entry does not carry`);
 				} else if (from === 'text' && !Object.hasOwn(entry.texts, name)) {
@@ -1242,6 +1258,19 @@ test('what the layout shows of other files is on every page, and the entry of th
 	assert.deepEqual(audit(reads, { ...tree, _via: { 'site/src/data/stats.mjs': 'line' } }), []);
 	assert.deepEqual(audit({ 'site/src/data/stats.mjs': { report: ['docs/other.json'] } }, { ...tree, _via: { 'site/src/data/stats.mjs': 'line' } }), [
 		'entry 1 (site/src/content/docs/): its pages show report of site/src/data/stats.mjs, read from docs/other.json, which "sources" does not name',
+	]);
+	// A reason stands for the exports it names, each read where the pages take
+	// it: the head of every page may name a release no reader sees. An export it
+	// does not name is dated by what it is read from, and one it names that no
+	// page takes is a reason left behind.
+	const other = { 'site/src/data/stats.mjs': { report: ['docs/other.json'], total: ['docs/other.json'] } };
+	const reasoned = (reason) => audit(other, { ...tree, _via: { 'site/src/data/stats.mjs': reason } });
+	assert.deepEqual(reasoned('`report`, data for machines, which no reader of a page reads'), []);
+	assert.deepEqual(reasoned('data for machines, which no reader of a page reads'), [
+		'entry 1 (site/src/content/docs/): its pages show report of site/src/data/stats.mjs, read from docs/other.json, which "sources" does not name',
+	]);
+	assert.deepEqual(reasoned('`report` and `total`, data for machines, which no reader of a page reads'), [
+		'entry 1 (site/src/content/docs/): "_via" gives site/src/data/stats.mjs a reason for total, which its pages do not take',
 	]);
 	// The whole tree's entry is the layout's, and no page's own: the page that
 	// reaches nothing through its own file is not listed for nothing.

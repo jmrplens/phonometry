@@ -97,6 +97,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import BandFraction, NumericArrayLike
@@ -248,15 +249,15 @@ class SoundPowerIntensityResult(OwnsArrays):
         {"partial_power": "W"}
     )
 
-    frequencies: np.ndarray | None
-    partial_power: np.ndarray
-    surface_pressure_intensity_index: np.ndarray | None
-    repeatability: np.ndarray | None
-    pressure_residual_index: np.ndarray | None
+    frequencies: NDArray[np.float64] | None
+    partial_power: NDArray[np.float64]
+    surface_pressure_intensity_index: NDArray[np.float64] | None
+    repeatability: NDArray[np.float64] | None
+    pressure_residual_index: NDArray[np.float64] | None
     surface_area: float
     fraction: BandFraction
     grade: Grade
-    repeatability_limit_db: np.ndarray | None = None
+    repeatability_limit_db: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -321,17 +322,17 @@ class SoundPowerIntensityResult(OwnsArrays):
         self.__dict__["_achieved_grade"] = self._grade_per_band()
 
     @property
-    def partial_power_level(self) -> np.ndarray:
+    def partial_power_level(self) -> NDArray[np.float64]:
         r"""The magnitude level :math:`10 \log_{10}(|P_i|/P_0)` (Eq. 8), per segment and band."""
         return _level_magnitude(np.asarray(self.partial_power, dtype=np.float64))
 
     @property
-    def sound_power(self) -> np.ndarray:
+    def sound_power(self) -> NDArray[np.float64]:
         r"""The signed band total :math:`P = \sum P_i` (Eq. 6), in watts."""
         return np.asarray(np.sum(self.partial_power, axis=0), dtype=np.float64)
 
     @property
-    def negative_band(self) -> np.ndarray:
+    def negative_band(self) -> NDArray[np.bool_]:
         """Per band, whether the net sound power is not positive (clause 9.2).
 
         The sign is judged on the settled share of the gross power, so partial
@@ -343,7 +344,7 @@ class SoundPowerIntensityResult(OwnsArrays):
         )
 
     @property
-    def sound_power_level(self) -> np.ndarray:
+    def sound_power_level(self) -> NDArray[np.float64]:
         r"""The band level :math:`10 \log_{10}(P/P_0)` (Eq. 13), ``NaN`` where :math:`P \le 0`."""
         with np.errstate(divide="ignore", invalid="ignore"):
             level = np.where(
@@ -355,12 +356,12 @@ class SoundPowerIntensityResult(OwnsArrays):
         return np.asarray(level, dtype=np.float64)
 
     @property
-    def negative_partial_power_index(self) -> np.ndarray:
+    def negative_partial_power_index(self) -> NDArray[np.float64]:
         r"""The negative-partial-power indicator :math:`F_{+/-}` (Eq. A.2), per band."""
         return _negative_partial_power_index(self.partial_power)
 
     @property
-    def dynamic_capability_index(self) -> np.ndarray | None:
+    def dynamic_capability_index(self) -> NDArray[np.float64] | None:
         r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade, or ``None``."""
         if self.pressure_residual_index is None:
             return None
@@ -372,7 +373,7 @@ class SoundPowerIntensityResult(OwnsArrays):
             dtype=np.float64,
         )
 
-    def _grade_per_band(self) -> np.ndarray | None:
+    def _grade_per_band(self) -> NDArray[np.object_] | None:
         fpi = self.surface_pressure_intensity_index
         dpi0 = self.pressure_residual_index
         if fpi is None or dpi0 is None or self.repeatability is None:
@@ -389,18 +390,18 @@ class SoundPowerIntensityResult(OwnsArrays):
         )
 
     @property
-    def achieved_grade(self) -> np.ndarray | None:
+    def achieved_grade(self) -> NDArray[np.object_] | None:
         r"""The per-band class Annex B grants (clause 8.4), or ``None``.
 
         One of ``'engineering'``, ``'survey'`` and ``'none'`` per band, read
         from the indicators, the repeatability and :math:`\delta_{pI0}`
         against criteria 1 to 3.
         """
-        grade: np.ndarray | None = self.__dict__["_achieved_grade"]
+        grade: NDArray[np.object_] | None = self.__dict__["_achieved_grade"]
         return None if grade is None else grade.copy()
 
     @property
-    def a_weighting_omitted_bands(self) -> np.ndarray | None:
+    def a_weighting_omitted_bands(self) -> NDArray[np.bool_] | None:
         """The bands clause 10.6 b keeps out of the A-weighted total, or ``None``."""
         return _a_weighting_omission(
             self.surface_pressure_intensity_index,
@@ -490,7 +491,7 @@ class SoundPowerIntensityResult(OwnsArrays):
         )
 
 
-def _level_magnitude(values: np.ndarray) -> np.ndarray:
+def _level_magnitude(values: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Magnitude level :math:`10 \log_{10}(|P_i|/P_0)` in dB, with a tiny-floor
     guard for zeros.
     """
@@ -498,7 +499,9 @@ def _level_magnitude(values: np.ndarray) -> np.ndarray:
     return np.asarray(10.0 * np.log10(guarded / _W0), dtype=np.float64)
 
 
-def _as_2d(name: str, arr: NumericArrayLike, n_seg: int, n_bands: int) -> np.ndarray:
+def _as_2d(
+    name: str, arr: NumericArrayLike, n_seg: int, n_bands: int
+) -> NDArray[np.float64]:
     a = np.atleast_2d(real_array(arr, name))
     if a.shape == (1, n_seg) and n_bands != n_seg:
         a = a.T  # a 1D (N_seg,) input arrives as (1, N_seg)
@@ -516,7 +519,7 @@ def _validate_scan(
     areas: NumericArrayLike,
     frequencies: NumericArrayLike | None,
     fraction: BandFraction | np.integer[Any],
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate an ISO 9614-2 scan and normalise its arrays.
 
     Returns the signed normal intensity as ``(N_seg, N_bands)`` and the segment
@@ -629,7 +632,7 @@ def sound_power_intensity(
     n_bands = intensity.shape[1]
 
     # --- partial powers, using the mean of the two sweeps when available -----
-    repeatability: np.ndarray | None = None
+    repeatability: NDArray[np.float64] | None = None
     if normal_intensity_2 is not None:
         scan2 = _as_2d("normal_intensity_2", normal_intensity_2, n_seg, n_bands)
         pi1 = intensity * seg[:, None]
@@ -660,7 +663,7 @@ def sound_power_intensity(
     guarded_abs = np.maximum(abs_total, np.finfo(float).tiny)
     lw_magnitude = 10.0 * np.log10(guarded_abs / _W0)
 
-    fpi: np.ndarray | None = None
+    fpi: NDArray[np.float64] | None = None
     if pressure_levels is not None:
         lp = _as_2d("pressure_levels", pressure_levels, n_seg, n_bands)
         # Eq. A.1: area-weighted surface pressure level [Lp].
@@ -673,12 +676,12 @@ def sound_power_intensity(
     # Eq. A.2: negative-partial-power indicator F+/-.
     f_plus_minus = _negative_partial_power_index(partial_power)
 
-    dpi0_arr: np.ndarray | None = None
+    dpi0_arr: NDArray[np.float64] | None = None
     if pressure_residual_index is not None:
         dpi0_arr = np.broadcast_to(
             real_array(pressure_residual_index, "pressure_residual_index"), (n_bands,)
         )
-    s_arr: np.ndarray | None = None
+    s_arr: NDArray[np.float64] | None = None
     if repeatability_limit is not None:
         s_arr = np.broadcast_to(
             real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
@@ -731,7 +734,9 @@ def sound_power_intensity(
     return result
 
 
-def _negative_partial_power_index(partial_power: np.ndarray) -> np.ndarray:
+def _negative_partial_power_index(
+    partial_power: NDArray[np.float64],
+) -> NDArray[np.float64]:
     r"""The negative-partial-power indicator :math:`F_{+/-}` (Eq. A.2), per band."""
     total = np.abs(np.sum(partial_power, axis=0))
     guarded = np.maximum(total, np.finfo(float).tiny)
@@ -743,15 +748,15 @@ def _negative_partial_power_index(partial_power: np.ndarray) -> np.ndarray:
 
 
 def _classify(
-    fpi: np.ndarray,
-    f_plus_minus: np.ndarray,
-    repeatability: np.ndarray,
-    dpi0: np.ndarray,
-    negative_band: np.ndarray,
-    frequencies: np.ndarray | None,
+    fpi: NDArray[np.float64],
+    f_plus_minus: NDArray[np.float64],
+    repeatability: NDArray[np.float64],
+    dpi0: NDArray[np.float64],
+    negative_band: NDArray[np.bool_],
+    frequencies: NDArray[np.float64] | None,
     fraction: int,
-    repeatability_limit: float | np.ndarray | None,
-) -> np.ndarray:
+    repeatability_limit: float | NDArray[np.float64] | None,
+) -> NDArray[np.object_]:
     """Per-band class ('engineering'/'survey'/'none') from Annex B criteria."""
     n_bands = fpi.shape[0]
     if repeatability_limit is not None:
@@ -794,12 +799,12 @@ def _classify(
 
 
 def _a_weighting_omission(
-    fpi: np.ndarray | None,
-    ld: np.ndarray | None,
-    f_plus_minus: np.ndarray,
+    fpi: NDArray[np.float64] | None,
+    ld: NDArray[np.float64] | None,
+    f_plus_minus: NDArray[np.float64],
     grade: Grade,
-    negative_band: np.ndarray,
-) -> np.ndarray | None:
+    negative_band: NDArray[np.bool_],
+) -> NDArray[np.bool_] | None:
     r"""Bands to omit from the A-weighted total (ISO 9614-2:1996 clause 10.6 b).
 
     Clause 10.6 b requires the contribution of the bands in which criteria 1
@@ -822,10 +827,10 @@ def _a_weighting_omission(
 
 
 def _a_weighted_total(
-    sound_power_level: np.ndarray,
-    negative_band: np.ndarray,
-    omitted: np.ndarray | None,
-    frequencies: np.ndarray | None,
+    sound_power_level: NDArray[np.float64],
+    negative_band: NDArray[np.bool_],
+    omitted: NDArray[np.bool_] | None,
+    frequencies: NDArray[np.float64] | None,
     n_bands: int,
 ) -> float:
     r"""A-weighted band sum over determinable, qualified bands (clause 10.6 b).
@@ -881,10 +886,10 @@ class PrecisionFieldIndicators(OwnsArrays):
     ``fs`` is the field-non-uniformity indicator (= F4, Eq. B.8).
     """
 
-    ft: np.ndarray | None
-    f_pi_unsigned: np.ndarray
-    f_pi_signed: np.ndarray
-    fs: np.ndarray
+    ft: NDArray[np.float64] | None
+    f_pi_unsigned: NDArray[np.float64]
+    f_pi_signed: NDArray[np.float64]
+    fs: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject indicators that do not all span the same bands.
@@ -948,13 +953,13 @@ class PrecisionCriteria(OwnsArrays):
     """
 
     indicators: PrecisionFieldIndicators
-    scan_intensity_level_1: np.ndarray | None = None
-    scan_intensity_level_2: np.ndarray | None = None
-    frequencies: np.ndarray | None = None
-    repeatability_limit_db: np.ndarray | None = None
-    pressure_residual_index: np.ndarray | None = None
-    field_nonuniformity_1: np.ndarray | None = None
-    field_nonuniformity_2: np.ndarray | None = None
+    scan_intensity_level_1: NDArray[np.float64] | None = None
+    scan_intensity_level_2: NDArray[np.float64] | None = None
+    frequencies: NDArray[np.float64] | None = None
+    repeatability_limit_db: NDArray[np.float64] | None = None
+    pressure_residual_index: NDArray[np.float64] | None = None
+    field_nonuniformity_1: NDArray[np.float64] | None = None
+    field_nonuniformity_2: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject readings that do not span the bands of the indicators.
@@ -1022,7 +1027,7 @@ class PrecisionCriteria(OwnsArrays):
             _table_1_repeatability_db(self.frequencies)
 
     @property
-    def criterion_1_limit_db(self) -> np.ndarray | None:
+    def criterion_1_limit_db(self) -> NDArray[np.float64] | None:
         """The criterion-1 limit ``s`` per band, in dB.
 
         The caller's :attr:`repeatability_limit_db`, or ISO 9614-3 Table 1 read
@@ -1037,7 +1042,7 @@ class PrecisionCriteria(OwnsArrays):
         return _table_1_repeatability_db(self.frequencies)
 
     @property
-    def criterion_1(self) -> np.ndarray | None:
+    def criterion_1(self) -> NDArray[np.bool_] | None:
         r"""Scan repeatability :math:`\lvert L_{I_\mathrm{n}}(1) - L_{I_\mathrm{n}}(2) \rvert \le s/2` (Eq. C.1).
 
         Judged settled, so a difference on the limit in decimal is on it.
@@ -1051,7 +1056,7 @@ class PrecisionCriteria(OwnsArrays):
         return np.asarray(settled(np.abs(l1 - l2) - s / 2.0) <= 0.0, dtype=bool)
 
     @property
-    def criterion_2(self) -> np.ndarray | None:
+    def criterion_2(self) -> NDArray[np.bool_] | None:
         r"""Dynamic capability :math:`L_\mathrm{d} = \delta_{pI0} - K \ge F_{pI_\mathrm{n}}^{\mathrm{signed}}` (Eq. C.2)."""
         if self.pressure_residual_index is None:
             return None
@@ -1059,19 +1064,19 @@ class PrecisionCriteria(OwnsArrays):
         return np.asarray(ld >= self.indicators.f_pi_signed, dtype=bool)
 
     @property
-    def criterion_3(self) -> np.ndarray:
+    def criterion_3(self) -> NDArray[np.bool_]:
         r""":math:`F_{pI_\mathrm{n}}^{\mathrm{signed}} - F_{pI_\mathrm{n}}^{\mathrm{unsigned}} \le 3` dB (Eq. C.3)."""
         indicators = self.indicators
         difference = indicators.f_pi_signed - indicators.f_pi_unsigned
         return np.asarray(difference <= _F_PI_DIFF_LIMIT, dtype=bool)
 
     @property
-    def criterion_4(self) -> np.ndarray:
+    def criterion_4(self) -> NDArray[np.bool_]:
         r"""Field non-uniformity :math:`F_\mathrm{S} \le 2` (Eq. C.4)."""
         return np.asarray(self.indicators.fs <= _FS_LIMIT, dtype=bool)
 
     @property
-    def criterion_5(self) -> np.ndarray | None:
+    def criterion_5(self) -> NDArray[np.bool_] | None:
         r"""Scan-density convergence :math:`0.83 \le F_\mathrm{S}(1)/F_\mathrm{S}(2) \le 1.2` (Eq. C.5).
 
         Judged settled: 2,46 / 2,05 is 1,2 in decimal and a last bit over it
@@ -1087,7 +1092,7 @@ class PrecisionCriteria(OwnsArrays):
         )
 
     @property
-    def qualified(self) -> np.ndarray | None:
+    def qualified(self) -> NDArray[np.bool_] | None:
         """Whether each band qualifies as a final result (C.1.6.2).
 
         Criteria 1 to 3 with the field non-uniformity accepted through
@@ -1116,7 +1121,7 @@ class PrecisionCriteria(OwnsArrays):
         raise TypeError(msg)
 
 
-def _table_1_repeatability_db(frequencies: np.ndarray) -> np.ndarray:
+def _table_1_repeatability_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """The criterion-1 limit ``s`` of ISO 9614-3 Table 1 at each band centre, in dB."""
     nominal = [round(real_number(f, "frequencies")) for f in frequencies]
     return np.array([_sigma_r0_9614_3(f) for f in nominal], dtype=np.float64)
@@ -1136,7 +1141,7 @@ def _check_report_bands(
     against another band's level, which is the one error an accredited sheet
     must not make, so it is refused here rather than rendered.
     """
-    arrays: list[tuple[str, np.ndarray]] = []
+    arrays: list[tuple[str, NDArray[np.float64] | NDArray[np.bool_]]] = []
     if indicators is not None:
         arrays += [
             (f"indicators.{name}", np.asarray(values))
@@ -1196,8 +1201,8 @@ class PrecisionIntensityResult(OwnsArrays):
     and the clause 9.2 flag are not fields.
     """
 
-    frequencies: np.ndarray | None
-    partial_power: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    partial_power: NDArray[np.float64]
     surface_area: float
     _: KW_ONLY
     temperature_c: float = 23.0
@@ -1247,12 +1252,12 @@ class PrecisionIntensityResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def sound_power(self) -> np.ndarray:
+    def sound_power(self) -> NDArray[np.float64]:
         r"""The signed band total :math:`P = \sum P_i` (Eq. 8), in watts."""
         return np.asarray(np.sum(self.partial_power, axis=0), dtype=np.float64)
 
     @property
-    def not_applicable_band(self) -> np.ndarray:
+    def not_applicable_band(self) -> NDArray[np.bool_]:
         """Per band, whether the net sound power is not positive (clause 9.2).
 
         Judged on the settled share of the gross power, as in ISO 9614-2.
@@ -1262,7 +1267,7 @@ class PrecisionIntensityResult(OwnsArrays):
         )
 
     @property
-    def sound_power_level(self) -> np.ndarray:
+    def sound_power_level(self) -> NDArray[np.float64]:
         r"""The band level :math:`L_W = 10 \log_{10}(P/P_0)` (Eq. 9), ``NaN`` where :math:`P \le 0`."""
         with np.errstate(divide="ignore", invalid="ignore"):
             level = np.where(
@@ -1274,7 +1279,7 @@ class PrecisionIntensityResult(OwnsArrays):
         return np.asarray(level, dtype=np.float64)
 
     @property
-    def sound_power_level_normalized(self) -> np.ndarray:
+    def sound_power_level_normalized(self) -> NDArray[np.float64]:
         """``LW0``, the band level normalized to 23 deg C and 101 325 Pa (Eq. 10)."""
         norm = 15.0 * np.log10(
             (self.static_pressure_pa / 101325.0)
@@ -1476,7 +1481,7 @@ def precision_field_indicators(
         )  # Eq. B.8
     fs = np.asarray(fs, dtype=np.float64)
 
-    ft: np.ndarray | None = None
+    ft: NDArray[np.float64] | None = None
     if time_window_intensity is not None:
         win = np.atleast_2d(real_array(time_window_intensity, "time_window_intensity"))
         if win.shape[-1] != i_n.shape[-1]:
@@ -1500,8 +1505,8 @@ def precision_field_indicators(
 
 
 def _checked_band_centres(
-    frequencies: NumericArrayLike | None, f_pi_signed: np.ndarray, n_bands: int
-) -> np.ndarray | None:
+    frequencies: NumericArrayLike | None, f_pi_signed: NDArray[np.float64], n_bands: int
+) -> NDArray[np.float64] | None:
     """The band centres validated against the indicator's band axis.
 
     Split out of :func:`precision_qualification`, which was one branch past
@@ -1520,7 +1525,9 @@ def _checked_band_centres(
     return freqs
 
 
-def _spread_over_bands(value: NumericArrayLike, n_bands: int, name: str) -> np.ndarray:
+def _spread_over_bands(
+    value: NumericArrayLike, n_bands: int, name: str
+) -> NDArray[np.float64]:
     """Put a field non-uniformity on the band axis without inventing values.
 
     A bare number states one figure that holds for every band, so it is spread
@@ -1653,9 +1660,9 @@ def precision_qualification(
 
 
 def _precision_a_weighted_total(
-    lw: np.ndarray,
-    not_applicable: np.ndarray,
-    frequencies: np.ndarray | None,
+    lw: NDArray[np.float64],
+    not_applicable: NDArray[np.bool_],
+    frequencies: NDArray[np.float64] | None,
     n_bands: int,
 ) -> float:
     """A-weighted total over the applicable bands (ISO 9614-3 clause 9.2 / 4.3).

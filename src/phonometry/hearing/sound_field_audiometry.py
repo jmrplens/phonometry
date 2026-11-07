@@ -86,6 +86,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -146,7 +147,7 @@ SOUND_FIELD_AMBIENT_BANDS_HZ: tuple[float, ...] = (
 #: hearing threshold level to be measured when it is not 0 dB. Footnote b says
 #: they should be lower when narrow-band noise is the test signal, and prints
 #: no figure for how much, so they are the table as printed.
-SOUND_FIELD_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType(
+SOUND_FIELD_AMBIENT_LIMITS_DB: Mapping[float, NDArray[np.float64]] = MappingProxyType(
     {
         125.0: read_only(
             np.array(
@@ -220,7 +221,7 @@ INCIDENCE_CORRECTION_FREQUENCIES_HZ: tuple[float, ...] = (
 #: :data:`INCIDENCE_CORRECTION_FREQUENCIES_HZ`, keyed by the angle of
 #: incidence in degrees (45 or 90). Informative (Annex B), from Shaw and
 #: Vaillancourt (1985).
-INCIDENCE_CORRECTIONS: Mapping[float, np.ndarray] = MappingProxyType(
+INCIDENCE_CORRECTIONS: Mapping[float, NDArray[np.float64]] = MappingProxyType(
     {
         45.0: read_only(
             np.array(
@@ -286,7 +287,9 @@ _DIFFUSE_POSITIONS: tuple[SoundFieldPosition, ...] = (
 )
 
 
-def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
+def _at_most(
+    values: NDArray[np.float64], bound: NDArray[np.float64] | float
+) -> NDArray[np.bool_]:
     """Per element, whether ``values`` is at or below ``bound``.
 
     A last-bit excess from the subtraction of two levels is forgiven, and a
@@ -299,7 +302,9 @@ def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values <= np.asarray(bound) + _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _band_values(values: NumericArrayLike, count: int | None, name: str) -> np.ndarray:
+def _band_values(
+    values: NumericArrayLike, count: int | None, name: str
+) -> NDArray[np.float64]:
     """A one-dimensional array of finite decibel values, one per band.
 
     :param values: The values.
@@ -324,8 +329,8 @@ def _frequency_axis(
     frequencies: NumericArrayLike | None,
     count: int,
     owner: str,
-    default: np.ndarray | tuple[float, ...],
-) -> np.ndarray:
+    default: NDArray[np.float64] | tuple[float, ...],
+) -> NDArray[np.float64]:
     """The frequencies of the test signals, or a default of the right length.
 
     :param frequencies: The caller's frequencies in hertz, or ``None``.
@@ -370,7 +375,7 @@ def _position_grid[P: str](
     count: int,
     name: str,
     clause: str,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The levels at the named positions, one row per position.
 
     :param levels: The levels keyed by position name.
@@ -398,8 +403,8 @@ def _position_grid[P: str](
 
 
 def _allowable_variation(
-    index: np.ndarray, limits: tuple[tuple[float, float], ...]
-) -> np.ndarray:
+    index: NDArray[np.float64], limits: tuple[tuple[float, float], ...]
+) -> NDArray[np.float64]:
     """The allowable field variation per band by a Table 1, or NaN below it.
 
     :param index: The front-to-random sensitivity index per band, in dB.
@@ -473,11 +478,11 @@ class DiffuseSoundFieldCheck(OwnsArrays):
     of the six positions on their own.
     """
 
-    frequencies: np.ndarray
-    position_deviation_db: np.ndarray
-    left_right_difference: np.ndarray
-    directional_variation_db: np.ndarray
-    front_to_random_index: np.ndarray | None
+    frequencies: NDArray[np.float64]
+    position_deviation_db: NDArray[np.float64]
+    left_right_difference: NDArray[np.float64]
+    directional_variation_db: NDArray[np.float64]
+    front_to_random_index: NDArray[np.float64] | None
     standard: Literal["ISO 8253-2 5.3", "ISO 4869-3 5.2.2"]
     positions: tuple[SoundFieldPosition, ...] = _DIFFUSE_POSITIONS
 
@@ -497,7 +502,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def allowable_variation_db(self) -> np.ndarray:
+    def allowable_variation_db(self) -> NDArray[np.float64]:
         """What the Table 1 allows the directional variation per band, in dB.
 
         :return: The allowance, or NaN where it is not judged: below 500 Hz,
@@ -513,7 +518,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
         return np.where(self.directional_required, allowed, np.nan)
 
     @property
-    def uniform(self) -> np.ndarray:
+    def uniform(self) -> NDArray[np.bool_]:
         """Per band, whether all six positions stay within ±2,5 dB.
 
         :return: One boolean per band.
@@ -526,7 +531,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
         )
 
     @property
-    def balanced(self) -> np.ndarray:
+    def balanced(self) -> NDArray[np.bool_]:
         """Per band, whether right and left differ by 3 dB at most.
 
         :return: One boolean per band.
@@ -534,7 +539,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
         return _at_most(self.left_right_difference, _LEFT_RIGHT_TOLERANCE_DB)
 
     @property
-    def directional_required(self) -> np.ndarray:
+    def directional_required(self) -> NDArray[np.bool_]:
         """Per band, whether the directional test applies (500 Hz and up).
 
         :return: One boolean per band.
@@ -542,7 +547,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
         return np.asarray(self.frequencies >= _DIRECTIONAL_FROM_HZ, dtype=bool)
 
     @property
-    def directional_judged(self) -> np.ndarray:
+    def directional_judged(self) -> NDArray[np.bool_]:
         """Per band, whether the directional test was judged.
 
         :return: ``True`` where a suitable microphone's reading was given,
@@ -554,7 +559,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
         return np.asarray(~self.directional_required | judged, dtype=bool)
 
     @property
-    def diffuse(self) -> np.ndarray:
+    def diffuse(self) -> NDArray[np.bool_]:
         """Per band, whether the directional variation stays within Table 1.
 
         Bands the test does not reach, below 500 Hz, count as meeting it; a
@@ -617,7 +622,7 @@ def _diffuse_field_check(
     directional_levels: NumericArrayLike | None,
     front_to_random_index: NumericArrayLike | None,
     frequencies: NumericArrayLike | None,
-    default_frequencies: np.ndarray | tuple[float, ...],
+    default_frequencies: NDArray[np.float64] | tuple[float, ...],
     standard: Literal["ISO 8253-2 5.3", "ISO 4869-3 5.2.2"],
     owner: str,
 ) -> DiffuseSoundFieldCheck:
@@ -668,11 +673,11 @@ def _diffuse_field_check(
 def _directional_variation(
     directional_levels: NumericArrayLike | None,
     front_to_random_index: NumericArrayLike | None,
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
     *,
     limits: tuple[tuple[float, float], ...],
     standard: str,
-) -> tuple[np.ndarray, np.ndarray | None]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64] | None]:
     """The directional test: the spread of the readings and the index per band.
 
     Per band, from 500 Hz up: the largest less the smallest level a
@@ -721,7 +726,7 @@ def _front_to_random_index(
     count: int,
     limits: tuple[tuple[float, float], ...],
     standard: str,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The microphone's front-to-random sensitivity index, one per band.
 
     :raises ValueError: for a single index below the table's last row, or an
@@ -839,9 +844,9 @@ class FreeSoundFieldCheck(OwnsArrays):
     """
 
     field: Literal["free", "quasi-free"]
-    frequencies: np.ndarray
-    lateral_deviation_db: np.ndarray
-    axis_difference: np.ndarray
+    frequencies: NDArray[np.float64]
+    lateral_deviation_db: NDArray[np.float64]
+    axis_difference: NDArray[np.float64]
     loudspeaker_distance_m: float
     positions: tuple[LateralPosition, ...] = _LATERAL_POSITIONS
 
@@ -887,7 +892,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         return 20.0 * math.log10((r + d) / (r - d))
 
     @property
-    def lateral_tolerance_db(self) -> np.ndarray:
+    def lateral_tolerance_db(self) -> NDArray[np.float64]:
         """The tolerance of the four lateral positions per band, in dB.
 
         :return: ±1 dB up to and including 4 kHz and ±2 dB above for a free
@@ -902,7 +907,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         )
 
     @property
-    def uniform(self) -> np.ndarray:
+    def uniform(self) -> NDArray[np.bool_]:
         """Per band, whether all four lateral positions stay within tolerance.
 
         :return: One boolean per band.
@@ -915,7 +920,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         )
 
     @property
-    def left_right_difference(self) -> np.ndarray:
+    def left_right_difference(self) -> NDArray[np.float64]:
         """The difference between the right and left positions, in dB.
 
         :return: Its absolute value per band.
@@ -925,7 +930,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         return np.asarray(np.abs(right - left), dtype=np.float64)
 
     @property
-    def balanced(self) -> np.ndarray:
+    def balanced(self) -> NDArray[np.bool_]:
         """Per band, whether right and left differ by 3 dB at most above 4 kHz.
 
         5.2 b) asks it of a free field above 4 kHz only; below, and for a
@@ -941,7 +946,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         )
 
     @property
-    def inverse_distance_deviation_db(self) -> np.ndarray:
+    def inverse_distance_deviation_db(self) -> NDArray[np.float64]:
         """The axial difference less what the inverse distance law gives, in dB.
 
         :return: One value per band.
@@ -949,7 +954,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         return self.axis_difference - self.inverse_distance_difference
 
     @property
-    def follows_inverse_distance_law(self) -> np.ndarray:
+    def follows_inverse_distance_law(self) -> NDArray[np.bool_]:
         """Per band, whether the axial difference is within ±1 dB of the law.
 
         :return: One boolean per band.
@@ -967,7 +972,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         return self.loudspeaker_distance_m >= _MINIMUM_LOUDSPEAKER_DISTANCE_M
 
     @property
-    def compliant(self) -> np.ndarray:
+    def compliant(self) -> NDArray[np.bool_]:
         """Per band, whether every positional requirement is met.
 
         :return: One boolean per band.
@@ -978,7 +983,7 @@ class FreeSoundFieldCheck(OwnsArrays):
         )
 
     @property
-    def usable_frequencies(self) -> np.ndarray:
+    def usable_frequencies(self) -> NDArray[np.float64]:
         """The frequencies at which the field meets its requirements, in hertz.
 
         For a quasi-free field this is its usable frequency range (5.4).
@@ -1203,7 +1208,7 @@ def check_quasi_free_sound_field(
 
 def incidence_correction(
     frequencies: NumericArrayLike, *, incidence_angle_deg: float
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """How much louder the nearer ear is with the loudspeaker off axis (Table B.1).
 
     The increase in sound pressure level at the ear closest to the

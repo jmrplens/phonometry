@@ -17,16 +17,21 @@
  *   page cites it with, so the Dataset can name each one the way the
  *   bibliography defines it (src/lib/citations.mjs, `referenceStub`);
  * - `verifiedBy(references)` is what a page's "Verified by" line states: how
- *   many checks are based on the standards the page implements, and in which
- *   domains of the report.
+ *   many checks are based on the works the page implements, named as the
+ *   line names them, and in which domains of the report.
  *
  * The standard a check is based on is not always a standard on the page: the
  * report names the speech guide's reference program by the working group
  * that keeps it, the Chen and Millero equation by the body that adopted it,
  * a directive by its number. The page cites each as what it is, a web page,
  * an article, a report, and the line counts the checks of whatever work the
- * document resolves to, so a check the guide's own sources verify is never
- * left out because of the kind of work they are.
+ * document resolves to.
+ *
+ * What the join reads are the documents the report files as standards. A
+ * book, an article, a report or a web page the report names is a source of
+ * the numbers, and the line does not count it, even on a page that cites it;
+ * a standard the report filed under one of those kinds would be left out of
+ * the line and of the Dataset with nothing to say so.
  *
  * A standard a check names is the work a page cites when the two designations
  * name the same document and edition: the punctuation of the year, a

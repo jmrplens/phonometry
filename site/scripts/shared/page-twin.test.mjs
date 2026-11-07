@@ -355,6 +355,7 @@ test('a copy that drops a figure, a clip, a fiche or a catalogue of its page is 
 test("a link from the site's root is made absolute in every syntax a page writes one", () => {
   const page = [
     "See [the guide][g], <a href=/phonometry/x/>x</a> and <a href='/phonometry/y/'>y</a>.",
+    'Also [this]( /phonometry/z/) and [that](</phonometry/a b/>).',
     '',
     '[g]: /phonometry/signals/levels/',
     '  [h]: </phonometry/a b/>',
@@ -363,6 +364,7 @@ test("a link from the site's root is made absolute in every syntax a page writes
     stripMdx(page, { kind: 'md', origin: ORIGIN }),
     [
       `See [the guide][g], <a href=${ORIGIN}/phonometry/x/>x</a> and <a href='${ORIGIN}/phonometry/y/'>y</a>.`,
+      `Also [this]( ${ORIGIN}/phonometry/z/) and [that](<${ORIGIN}/phonometry/a b/>).`,
       '',
       `[g]: ${ORIGIN}/phonometry/signals/levels/`,
       `  [h]: <${ORIGIN}/phonometry/a b/>`,
@@ -376,6 +378,7 @@ test("a link from the site's root is found in the copy whatever its syntax, and 
     '[g]: /phonometry/signals/levels/',
     '<a href=/phonometry/x/>x</a>',
     "<a href='/phonometry/x/'>x</a>",
+    '<img src="https://docs.jmrp.io/phonometry/media/a.svg" srcset="/phonometry/media/a.svg 2x" alt="A" />',
     'See /phonometry/start/ for more.',
   ];
   for (const line of rooted) {

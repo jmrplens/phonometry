@@ -42,12 +42,13 @@ const WRAPPER = /<\/?[A-Z][\w.]*\b[^>]*>/g;
 
 /**
  * A link the page writes from the site's root: the destination of a Markdown
- * link, written bare or in `<...>`, or of a reference-style definition
- * (`[g]: /x/`), or an `href` or `src` of a tag the page renders, quoted either
- * way or, on an `.md` page, not at all, that opens on one slash. Two slashes
- * open an address on another host, and stay.
+ * link, written bare or in `<...>` and after white space or not, or of a
+ * reference-style definition (`[g]: /x/`), or an `href` or `src` of a tag the
+ * page renders, quoted either way or, on an `.md` page, not at all, that opens
+ * on one slash. Two slashes open an address on another host, and stay. Any
+ * other form stays as written, and copyDefects finds it.
  */
-const ROOT_RELATIVE = /(\]\(<?|\b(?:href|src)=["']?|^ {0,3}\[[^\]\n]+\]:[ \t]*<?)\/(?!\/)/gm;
+const ROOT_RELATIVE = /(\]\([ \t]*<?|\b(?:href|src)=["']?|^ {0,3}\[[^\]\n]+\]:[ \t]*<?)\/(?!\/)/gm;
 
 /**
  * An expression that prints one name, `{totalChecks}`, with the blanks and

@@ -252,7 +252,7 @@ for await (const file of glob("**/*.{md,mdx}", { cwd: contentDir })) {
 
 if (defects.length) {
   throw new Error(
-    `${defects.length} things the Markdown copies written from a page's source miss of their page ` +
+    `${defects.length} thing${defects.length === 1 ? "" : "s"} the Markdown copies written from a page's source miss of their page ` +
       `(scripts/shared/page-twin.mjs, copyDefects):\n  ${defects.join("\n  ")}`,
   );
 }

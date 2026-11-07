@@ -14,10 +14,9 @@ from __future__ import annotations
 
 import json
 import pathlib
-import shutil
-import subprocess
 import sys
 
+import node_script
 import pytest
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -622,7 +621,6 @@ def test_a_frontmatter_that_never_closes_is_read_as_the_page() -> None:
     assert page_markup(page) == page
 
 
-_NODE = shutil.which("node")
 _SITE_READER = _ROOT / "site" / "scripts" / "shared" / "markdown-spans.mjs"
 #: The shapes where the two languages could part: the cases above, a line end
 #: of two characters, a character outside the basic plane in what is blanked,
@@ -659,7 +657,9 @@ def _in_code_units(text: str, shown: str) -> str:
 
 
 @pytest.mark.whole_tree
-@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.skipif(
+    node_script.NODE is None, reason="no JavaScript engine to compare with"
+)
 def test_the_site_reads_the_markup_of_every_page_as_the_scripts_do() -> None:
     """``pageMarkup`` of the site and :func:`page_markup` give the same page: every
     page of the site as its own kind, and the cases above as both.
@@ -676,16 +676,7 @@ def test_the_site_reads_the_markup_of_every_page_as_the_scripts_do() -> None:
         "process.stdout.write(JSON.stringify(JSON.parse(input).map("
         "  ([text, kind]) => pageMarkup(text, {kind}))));"
     )
-    ran = subprocess.run(
-        [str(_NODE), "--input-type=module", "-e", script],
-        input=json.dumps(pages),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=300,
-        check=True,
-    )
-    javascript = json.loads(ran.stdout)
+    javascript = node_script.answer(script, pages, timeout=300)
     differ = [
         f"{kind}: {text[:80]!r}"
         for (text, kind), other in zip(pages, javascript, strict=True)

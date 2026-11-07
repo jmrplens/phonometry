@@ -19,10 +19,9 @@ from __future__ import annotations
 import json
 import pathlib
 import re
-import shutil
-import subprocess
 import sys
 
+import node_script
 import pytest
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -392,7 +391,6 @@ def test_a_display_block_is_read_through_the_marks_of_its_containers(
     assert display_math_parts(lines) == parts
 
 
-_NODE = shutil.which("node")
 _SITE_READER = _ROOT / "site" / "src" / "lib" / "markdown-fences.mjs"
 #: The cases above where two readings part, as whole pages.
 _CASES = (
@@ -484,7 +482,9 @@ def _pages() -> list[str]:
 
 
 @pytest.mark.whole_tree
-@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.skipif(
+    node_script.NODE is None, reason="no JavaScript engine to compare with"
+)
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
     """Which lines are code, and every block with its line, info string and
@@ -502,15 +502,7 @@ def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
         f"  fences(text, {options}).map((f) => [f.line, f.info, f.body, f.language]),"
         "])));"
     )
-    ran = subprocess.run(
-        [str(_NODE), "--input-type=module", "-e", script],
-        input=json.dumps(pages),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=120,
-        check=True,
-    )
+    javascript = node_script.answer(script, pages, timeout=120)
     python = [
         [
             list(code_lines(text.splitlines(), kind=kind)),
@@ -518,7 +510,6 @@ def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
         ]
         for text in pages
     ]
-    javascript = json.loads(ran.stdout)
     differ = [
         text[:80]
         for text, one, other in zip(pages, python, javascript, strict=True)
@@ -528,7 +519,9 @@ def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
 
 
 @pytest.mark.whole_tree
-@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.skipif(
+    node_script.NODE is None, reason="no JavaScript engine to compare with"
+)
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
     """Each line's role and what the walk leaves of it, on each kind of page."""
@@ -542,15 +535,7 @@ def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
         f"  pageLines(splitLines(text), {{kind: {json.dumps(kind)}}})"
         "    .map((line) => [line.role, line.rest, line.item]))));"
     )
-    ran = subprocess.run(
-        [str(_NODE), "--input-type=module", "-e", script],
-        input=json.dumps(pages),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=300,
-        check=True,
-    )
+    javascript = node_script.answer(script, pages, timeout=300)
     python = [
         [
             [line.role, line.rest, line.item]
@@ -560,7 +545,7 @@ def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
     ]
     differ = [
         text[:80]
-        for text, one, other in zip(pages, python, json.loads(ran.stdout), strict=True)
+        for text, one, other in zip(pages, python, javascript, strict=True)
         if one != other
     ]
     assert differ == []
@@ -595,7 +580,9 @@ _MARKED = (
 
 
 @pytest.mark.whole_tree
-@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to compare with")
+@pytest.mark.skipif(
+    node_script.NODE is None, reason="no JavaScript engine to compare with"
+)
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_reads_the_marks_of_a_quotation_as_the_scripts_do(kind: str) -> None:
     """How many quotation marks open a line, and what they leave of it, read
@@ -614,19 +601,11 @@ def test_the_site_reads_the_marks_of_a_quotation_as_the_scripts_do(kind: str) ->
         "process.stdout.write(JSON.stringify(JSON.parse(input).map((line) => "
         f"  quotationMarks(line, {{kind: {json.dumps(kind)}}}))));"
     )
-    ran = subprocess.run(
-        [str(_NODE), "--input-type=module", "-e", script],
-        input=json.dumps(lines),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=120,
-        check=True,
-    )
+    javascript = node_script.answer(script, lines, timeout=120)
     python = [list(quotation_marks(line, kind=kind)) for line in lines]
     differ = [
         line
-        for line, one, other in zip(lines, python, json.loads(ran.stdout), strict=True)
+        for line, one, other in zip(lines, python, javascript, strict=True)
         if one != other
     ]
     assert differ == []

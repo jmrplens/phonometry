@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import require_count, require_positive_array
 from ..common import (
     _C_EDGE,
@@ -207,6 +208,7 @@ def plot_image_source_geometry(
 # ---------------------------------------------------------------------------
 # Open-plan measurement line (plan view).
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_open_plan_geometry(
     positions: ArrayLike,
     *,

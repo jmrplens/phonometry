@@ -307,6 +307,7 @@ Each rule on a page has the same parts:
 | [F65](docs-and-figures.md#f65) | Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own | `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py` |
 | [F66](docs-and-figures.md#f66) | Start a process from the site's source once per build, never once per page | `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F67](docs-and-figures.md#f67) | Write beside a print what it writes: its values first, in their order | `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py` |
+| [F68](docs-and-figures.md#f68) | Close the figure a plot made when it raises, through `closes_its_figures` | `tests/test_plot_errors.py` |
 
 ### Prose, commits and pull requests
 

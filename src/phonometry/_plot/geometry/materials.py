@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -203,6 +204,7 @@ def _draw_plate_holes(
         )
 
 
+@closes_its_figures
 def plot_absorber_stack(
     layers: Sequence[Layer] | Layer,
     *,
@@ -350,6 +352,7 @@ def _draw_resonator(
     return body_w, body_d
 
 
+@closes_its_figures
 def plot_helmholtz_resonator_geometry(
     resonator: HelmholtzResonator,
     *,
@@ -407,6 +410,7 @@ def plot_helmholtz_resonator_geometry(
     return ax
 
 
+@closes_its_figures
 def plot_slit_absorber_geometry(
     resonators: Sequence[HelmholtzResonator] | HelmholtzResonator,
     *,
@@ -512,6 +516,7 @@ def plot_slit_absorber_geometry(
 # ---------------------------------------------------------------------------
 # QRD well profile.
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_qrd_geometry(
     depths: ArrayLike,
     well_width: float,
@@ -743,6 +748,7 @@ def _nominal_bore(diameter_m: float | None, fallback: float) -> float:
     return real_number(diameter_m, "diameter_m") if diameter_m is not None else fallback
 
 
+@closes_its_figures
 def plot_impedance_tube_geometry(
     *,
     ax: Axes | None = None,
@@ -862,6 +868,7 @@ def plot_impedance_tube_geometry(
     return ax
 
 
+@closes_its_figures
 def plot_transmission_tube_geometry(
     *,
     ax: Axes | None = None,
@@ -1091,6 +1098,7 @@ def _draw_metadiffuser_well(
         )
 
 
+@closes_its_figures
 def plot_metadiffuser_panel_geometry(
     wells: Sequence[Any],
     *,
@@ -1319,6 +1327,7 @@ def plot_transfer_matrix_geometry(
 # ---------------------------------------------------------------------------
 # In-situ absorption set-up (source over the road, microphone below).
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_in_situ_geometry(
     *,
     ax: Axes | None = None,
@@ -1460,6 +1469,7 @@ def plot_in_situ_result_geometry(
 # ---------------------------------------------------------------------------
 # Dynamic stiffness rig (resonance method).
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_dynamic_stiffness_rig(
     *,
     ax: Axes | None = None,
@@ -1556,6 +1566,7 @@ def plot_dynamic_stiffness_rig(
 _RECEIVER_ARC_HALF_SPAN_DEG = 90.0
 
 
+@closes_its_figures
 def plot_goniometer_geometry(
     *,
     ax: Axes | None = None,

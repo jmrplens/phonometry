@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import require_positive
 from ..common import (
     _C_PRIMARY,
@@ -86,6 +87,7 @@ def plot_aperture_geometry(
 ) -> Axes: ...
 
 
+@closes_its_figures
 def plot_aperture_geometry(
     depth: float,
     *,
@@ -208,6 +210,7 @@ def plot_aperture_result_geometry(
 # ---------------------------------------------------------------------------
 # Composite facade elevation.
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_facade_elements(
     elements: Sequence[FacadeElement],
     *,
@@ -319,6 +322,7 @@ def plot_facade_result_geometry(
 _LEAF_DENSITY = 700.0
 
 
+@closes_its_figures
 def plot_double_wall_geometry(
     mass1: float,
     mass2: float,

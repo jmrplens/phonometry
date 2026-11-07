@@ -49,6 +49,7 @@ import dataclasses
 import datetime as dt
 import enum
 import html
+import inspect
 import itertools
 import os
 import re
@@ -57,6 +58,8 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
+
+from .figures import closes_its_figures, is_plotting_method
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -977,15 +980,22 @@ class RichDisplay:
     record class, which a ``_repr_pretty_`` inherited from this base would
     come after, so each subclass is given the method in its own namespace as
     it is created; ``repr()`` keeps the dataclass's.
+
+    The ``plot`` and ``plot_*`` methods a subclass writes are wrapped as it
+    is created too, by :func:`~phonometry._internal.figures.closes_its_figures`,
+    so a plot that raises closes the figures it opened.
     """
 
     __slots__ = ()
 
     def __init_subclass__(cls, **kwargs: object) -> None:
-        """Put :meth:`_repr_pretty_` in the subclass's own namespace."""
+        """Put :meth:`_repr_pretty_` in the subclass's own namespace, and wrap its plots."""
         super().__init_subclass__(**kwargs)
         if "_repr_pretty_" not in vars(cls):
             type.__setattr__(cls, "_repr_pretty_", RichDisplay._repr_pretty_)
+        for name, member in list(vars(cls).items()):
+            if is_plotting_method(name) and inspect.isfunction(member):
+                type.__setattr__(cls, name, closes_its_figures(member))
 
     def _repr_html_(self) -> str:
         """The table Jupyter, JupyterLab, VS Code and Colab render."""

@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import (
     real_array,
     require_count,
@@ -101,6 +102,7 @@ def plot_piston_geometry(
 ) -> Axes: ...
 
 
+@closes_its_figures
 def plot_piston_geometry(
     radius: float,
     *,
@@ -243,6 +245,7 @@ def plot_piston_result_geometry(
     )
 
 
+@closes_its_figures
 def plot_sound_reinforcement_geometry(
     talker_distance: float,
     microphone_distance: float,

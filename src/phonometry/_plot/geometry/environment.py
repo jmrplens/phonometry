@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import real_number, require_non_negative, require_positive
 from ..common import (
     _C_MUTED,
@@ -61,6 +62,7 @@ def _t(text: str, language: Language = "en") -> str:
 # ---------------------------------------------------------------------------
 # Barrier section (source, screen, receiver over ground).
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_barrier_geometry(
     *,
     ax: Axes | None = None,

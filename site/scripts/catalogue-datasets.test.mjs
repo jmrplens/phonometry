@@ -120,6 +120,28 @@ test('a later catalogue takes the heading after the one before it and the paragr
   assert.deepEqual(sections[0], { key: 'absorption', heading: 'Before the first', lead: 'What the first catalogue holds.' });
 });
 
+test('a catalogue tag the page quotes rather than renders is no section', () => {
+  // A tag in a code span, a comment or an expression, or behind a backslash,
+  // is text the page shows or hides, and renders no table.
+  const sections = catalogueSections(
+    [
+      'The page renders `<Catalogues catalogue="gases" />` for the gases.',
+      '',
+      '{/* <Catalogues catalogue="fluids" /> */}',
+      '',
+      '\\<Catalogues catalogue="carpets" />',
+      '',
+      'Prose.',
+      '',
+      '<Catalogues catalogue="solids" lang="en" />',
+    ].join('\n'),
+  );
+  assert.deepEqual(
+    sections.map(({ key }) => key),
+    ['solids'],
+  );
+});
+
 test('a later catalogue under no heading of its own has none, and a subheading is not a section', () => {
   const sections = catalogueSections(
     [

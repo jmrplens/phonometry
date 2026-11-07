@@ -49,12 +49,12 @@
  * serves the rows on the page and nowhere else.
  */
 
-import { inlineParts } from '../../scripts/shared/markdown-spans.mjs';
+import { inlineParts, pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { referenceStub } from './citations.mjs';
 import { printedTables } from './catalogue-sources.mjs';
 import { flowOf, MDX_TAG, NOT_INLINE_ROLES, pageLines, splitLines } from './markdown-fences.mjs';
 
-/** The catalogues a page renders, in its source. */
+/** The catalogues a page renders, in what it renders of its source (`pageMarkup`). */
 const CATALOGUE_TAG = /<Catalogues\s+catalogue="(\w+)"/;
 
 /**
@@ -266,7 +266,10 @@ function asRead(field, { text, markup }) {
  * the first one before it whatever heading comes between them.
  *
  * The page is read in blocks, as the site reads it (`pageLines`): code is not
- * read, its ESM (`import`) neither, and a `##` inside a fence is not a heading. A paragraph or a heading
+ * read, its ESM (`import`) neither, and a `##` inside a fence is not a heading.
+ * A catalogue is a `<Catalogues>` tag the site renders (`pageMarkup`), so one
+ * quoted in a code span, a comment or an expression, or written behind a
+ * backslash, is no section. A paragraph or a heading
  * counts only where it stands on the page itself, outside any list, quotation,
  * aside (`:::note`) or component (`<Aside>`), so what those hold never
  * describes a dataset. A heading ends the paragraph above it, with no blank
@@ -279,6 +282,9 @@ function asRead(field, { text, markup }) {
  */
 export function catalogueSections(body) {
   const lines = splitLines(body);
+  // Each line as the site renders it: every part that renders no tag blanked,
+  // the lines and the columns where the page writes them.
+  const rendered = splitLines(pageMarkup(body));
   const sections = [];
   let heading;
   let lead;
@@ -307,7 +313,7 @@ export function catalogueSections(body) {
       endParagraph();
       return;
     }
-    const tag = CATALOGUE_TAG.exec(line.text);
+    const tag = CATALOGUE_TAG.exec(rendered[index] ?? '');
     if (tag) {
       endParagraph();
       sections.push({

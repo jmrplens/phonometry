@@ -1999,19 +1999,13 @@ def _positional(
 
 def _first_star(call: ast.Call) -> int | None:
     """The place of a call's first ``*`` argument, if it has one."""
-    return next(
-        (
-            index
-            for index, argument in enumerate(call.args)
-            if isinstance(argument, ast.Starred)
-        ),
-        None,
-    )
+    for index, argument in enumerate(call.args):
+        if isinstance(argument, ast.Starred):
+            return index
+    return None
 
 
-def _filled(
-    places: Sequence[str], positions: Sequence[int], spread: int | None
-) -> list[str]:
+def _filled(places: Sequence[str], positions: Sequence[int], spread: int) -> list[str]:
     """The names of *places* a call's arguments at *positions* may fill.
 
     An argument past the first ``*`` argument (at *spread*) may fill any
@@ -2020,7 +2014,7 @@ def _filled(
     """
     filled: list[str] = []
     for index in positions:
-        if spread is not None and index > spread:
+        if index > spread:
             filled.extend(places[spread:])
         elif index < len(places):
             filled.append(places[index])
@@ -2052,6 +2046,9 @@ class Reader:
         self._rebound: dict[int, frozenset[str]] = {}
         self._calls: dict[int, list[ast.Call]] = {}
         self._refusing: dict[int, frozenset[int]] = {}
+        #: The place of each call's first ``*`` argument (:func:`_first_star`),
+        #: read once for each call, as every route through it asks again.
+        self._stars: dict[ast.Call, int | None] = {}
         self._memo: dict[tuple[str, str, str, str], list[tuple[str, int, int]]] = {}
         self._active: set[tuple[str, str, str, str]] = set()
         self._cut = False
@@ -2437,7 +2434,6 @@ class Reader:
         positions, keywords, level = given
         ends = self._ends(target)
         reached, bound_self = callee
-        spread = _first_star(call)
         if reached == "builtins.isinstance":
             if 0 in positions and self._admits(function, call, target):
                 accepted = sorted(
@@ -2451,6 +2447,11 @@ class Reader:
             if where is None or where in positions or keyword in keywords:
                 yield _ending(reached, target), level, 0
             return
+        stars = self._stars
+        if call in stars:
+            spread = stars[call]
+        else:
+            spread = stars[call] = _first_star(call)
         handed = (
             self._constructed(reached, (positions, spread), keywords, target)
             if reached in self.annotations.classes
@@ -2655,7 +2656,12 @@ class Reader:
         """
         fields = record_fields(self.package, self.annotations, record)
         positional = [field.name for field in fields.values() if field.positional]
-        received = _filled(positional, *positions)
+        given, spread = positions
+        received = (
+            [positional[index] for index in given if index < len(positional)]
+            if spread is None
+            else _filled(positional, given, spread)
+        )
         received.extend(keyword for keyword in keywords if keyword in fields)
         dotted = self._method(record, "__post_init__")
         post_init = self.package.functions[dotted] if dotted is not None else None
@@ -2702,7 +2708,12 @@ class Reader:
             return
         parameters = overloads._parameters(node)
         positional = [argument.arg for argument in _positional(node, bound=bound)]
-        received = _filled(positional, *positions)
+        given, spread = positions
+        received = (
+            [positional[index] for index in given if index < len(positional)]
+            if spread is None
+            else _filled(positional, given, spread)
+        )
         received.extend(keyword for keyword in keywords if keyword in parameters)
         bounds = self._bounds(callee)
         annotations = self.annotations

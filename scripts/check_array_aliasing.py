@@ -685,6 +685,8 @@ class Tree:
         #: The key of :attr:`functions` or :attr:`classes` of each ``def``
         #: and ``class`` statement of the package.
         self.qualnames: dict[ast.AST, tuple[str, str]] = {}
+        #: The function or the class each of those statements makes.
+        self.made_by: dict[ast.AST, FunctionInfo | ClassInfo] = {}
         #: What :meth:`resolve_top` and :meth:`live_definitions` found, read
         #: once for each name, as every pass of the fixed point asks again.
         self.top_cache: dict[
@@ -848,6 +850,7 @@ class Tree:
                 self.classes[(module, qualname)] = info
                 self.class_definitions.setdefault((module, qualname), []).append(info)
                 self.qualnames[node] = (module, qualname)
+                self.made_by[node] = info
                 self.class_by_name.setdefault(node.name, []).append(info)
                 self._read_body(module, node.body, qualname, info, parent=parent)
             elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
@@ -864,6 +867,7 @@ class Tree:
                 )
                 self.functions[(module, qualname)] = function
                 self.qualnames[node] = (module, qualname)
+                self.made_by[node] = function
                 self.definitions.setdefault((module, qualname), []).append(function)
                 if owner is not None and not owner.record:
                     # ``self.p: Field2D = ...`` in a method annotates the
@@ -1100,15 +1104,8 @@ class Tree:
         *key* makes: what a name it binds stands for where that statement
         stood.
         """
-        made: list[FunctionInfo | ClassInfo] = [
-            found for found in self.definitions.get(key, []) if found.node is statement
-        ]
-        made.extend(
-            found
-            for found in self.class_definitions.get(key, [])
-            if found.node is statement
-        )
-        return made
+        made = self.made_by.get(statement)
+        return [made] if made is not None and self.qualnames[statement] == key else []
 
     def aliased(
         self, module: str, target: ast.AST, depth: int = 0, *, pins: _Pins | None = None
@@ -1165,8 +1162,9 @@ class Tree:
         its imports read, and what its assignments of a dotted name name
         (:meth:`aliased`). A parameter, or any other binding that may hold
         it there, stands for what the guard cannot tell, and so the name
-        stands for nothing of the package. Each ``def`` and ``class`` that
-        stands there goes into *pins* (:meth:`stood_for`).
+        stands for nothing of the package. Each ``def`` and ``class`` of a
+        name a class takes that stands there goes into *pins*
+        (:meth:`stood_for`).
         """
         if depth > _DEPTH or name in own_names(scope).parameters:
             return ()
@@ -1185,7 +1183,8 @@ class Tree:
                 key in self.functions or key in self.classes
             ):
                 found.append(key)
-                _merge_pins(pins, {key: self.stood_for(key, node)})
+                if key in self.classes:
+                    _merge_pins(pins, {key: self.stood_for(key, node)})
             else:
                 return ()
         return tuple(dict.fromkeys(found))
@@ -1929,7 +1928,11 @@ class Reader:
         pins: _Pins = {}
         built: list[ClassInfo] = []
         for key in self.callees(func, pins=pins):
-            if not self.builds_class(key, pins) or _pinned_functions(pins, key):
+            if (
+                key not in self.tree.classes
+                or not self.builds_class(key, pins)
+                or _pinned_functions(pins, key)
+            ):
                 return None
             for info in self.classes_built(key, pins):
                 if not info.record:
@@ -2003,11 +2006,12 @@ class Reader:
     ) -> tuple[tuple[str, str], ...]:
         """What *name* may stand for in *scope*, which binds it itself.
 
-        A function or a class it defines, each ``def`` and ``class`` of the
-        name that may stand where *node* reads it (:func:`ast_scan.live_bindings`:
-        in a function written in *scope*, any from that function's ``def``
-        on) pinned in *pins* (:meth:`Tree.stood_for`), as a ``def`` and a
-        ``class`` of one name share a key; what each of its imports of the name that may have run before
+        A function or a class it defines, and for a class each ``def`` and
+        ``class`` of the name that may stand where *node* reads it
+        (:func:`ast_scan.live_bindings`: in a function written in *scope*,
+        any from that function's ``def`` on) pinned in *pins*
+        (:meth:`Tree.stood_for`), as a ``def`` and a ``class`` of one name
+        share a key; what each of its imports of the name that may have run before
         *node* reads (:meth:`Tree.imported`), and so for an assignment of a
         dotted name to it (:meth:`Tree.bound_in`). Nothing of the package for
         any other binding, a parameter or an assignment of anything else,
@@ -2019,7 +2023,9 @@ class Reader:
             own = (self.module, f"{scope.qualname}.{name}")
             if own not in self.tree.functions and own not in self.tree.classes:
                 return ()
-            if pins is not None:
+            # A function alone of its name is read where the call runs
+            # (:meth:`reached`); a class needs the statement that stood.
+            if pins is not None and own in self.tree.classes:
                 made = bindings_by_name(scope.node).get(name, [])
                 if node is not None:
                     made = live_bindings(scope.node, made, node)
@@ -2492,9 +2498,10 @@ class Reader:
         the caller's array out.
         """
         values: list[Value] = []
-        if self.builds_class(target, pins):
+        if target in self.tree.classes and self.builds_class(target, pins):
             built = self.classes_built(target, pins)
             pinned = _pinned_functions(pins, target)
+            alone = alone and len(built) == 1 and not pinned
             values.extend(
                 self.constructor_sink(
                     info,
@@ -2502,14 +2509,14 @@ class Reader:
                     arguments,
                     keywords,
                     public=target in self.tree.public,
-                    alone=alone and len(built) == 1 and not pinned,
+                    alone=alone,
                 )
                 if info.record
                 else _CLEAN
                 for info in built
             )
             if not pinned:
-                return union(*values) if values else _CLEAN
+                return values[0] if len(values) == 1 else union(_CLEAN, *values)
         spread = next(
             (
                 index

@@ -2304,6 +2304,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A WAV file reads from a file system that cannot be memory-mapped.**
+  `io.read` asks SciPy to map every linear WAV but a 24-bit one, and
+  JupyterLite's notebook folder (`/drive`) refuses the map, so reading a
+  16-bit or float WAV there raised `OSError: [Errno 43] No such device`
+  until the file was copied to `/tmp`. A refused map is now read without
+  one, to the same samples; some network and FUSE mounts refuse it too.
+
 - **A message for a missing extra names the conda command beside pip's.**
   `.plot()` without matplotlib, `.report()` without reportlab, svglib or
   matplotlib, a compressed audio file or a FLAC target without soundfile, a

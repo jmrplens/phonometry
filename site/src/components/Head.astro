@@ -28,6 +28,7 @@ import {
 import { bibliographyWorks, referencesOfEveryPage } from '../lib/bibliography-works';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
+import { targetPlatform, version } from '../data/repo-stats.mjs';
 import { personId as PERSON_ID, siteUrl } from '../data/site.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../lib/fallback-routes.mjs';
 import { catalogueOverview, cataloguePages } from '../lib/catalogue-pages';
@@ -292,6 +293,11 @@ const article =
           ? {
               programmingModel: 'Library API',
               executableLibraryName: 'phonometry',
+              // The release the page documents and the Python it runs on,
+              // from VERSION and pyproject.toml through repo-stats.mjs: the
+              // reference is generated from the code of this release.
+              assemblyVersion: version,
+              targetPlatform,
             }
           : {}),
         // The two language versions are one work, not two pages competing for

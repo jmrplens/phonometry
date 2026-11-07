@@ -1,5 +1,4 @@
-// The failures of the structured data that only the built site can show, on
-// builds small enough to read.
+// The failures of the structured data that only the built site can show.
 //
 // Each page's `datePublished` falls back to its `dateModified` when
 // src/lib/page-dates.mjs has no date for it, and a page added and never edited
@@ -10,151 +9,48 @@
 // The software node names its operating systems one per entry, as jmrp.io does
 // for the same `@id`: the site-wide graph is the same on every page, so the
 // check reads it once per distinct value and says on how many pages it stands.
-// A malformed block takes out its own nodes and no others: the software node
-// and the `@id`s of the page's valid blocks are still read, as a consumer reads
-// them, so the count names every page that carries a value. A block that parses
-// to `null`, an array or a bare value is read the same way, and does not stop
-// the check.
-// The same block is held to a byte budget: most of it is the Person spliced
-// from jmrp.io, which grows when jmrp.io changes and never in a diff here.
-//
-// The real build only ever hands the check the works the guides cite today,
-// named the way citations.mjs names them today, so a branch of the check that
-// stopped seeing a bare reference, an anonymous publisher, a Spanish standard
-// paired with the wrong English one or a page naming a work otherwise than the
-// bibliography would stay green there for good.
 //
 // The glossary's terms are each held to the entry of src/data/glossary.mjs
 // they are built from, and the real build only ever hands the check a
 // glossary that passes.
 //
-// Each test here writes a build into a directory of its own: the two
-// bibliographies and one guide in each language, every cited work named as the
-// bibliography names it, and as many plain pages besides as a test asks for.
-// It puts one defect into that build, runs the check on it the way CI does, and
-// reads the exit status and the lines it printed. The pages, the site-wide
-// nodes and the writing of the build come from
-// shared/structured-data-fixture.mjs, which every suite of the check shares.
+// The site-wide graph is one block on the pages of both languages, so its
+// descriptions, feature list and keywords are held to carry each text in
+// English and in Spanish, the feature list one entry per topic that teaches,
+// and no placeholder; its requirements are held to pyproject.toml, and every
+// API page to the release and the Python it documents.
+//
+// Each test here writes a build of a few pages into a directory of its own and
+// runs the check on it the way CI does. The pages come from
+// shared/structured-data-fixture.mjs, whole unless a test breaks them, so the
+// checks the whole site answers for elsewhere pass on every build here: a
+// test takes a build, changes what it tests in place, and runs the check.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { topicForSlug } from '../src/data/topics.mjs';
-import { catalogues } from '../src/generated/catalogues.mjs';
-import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
-import { variablesMeasured } from '../src/lib/catalogue-datasets.mjs';
 import { glossaryTermSet } from '../src/lib/glossary-structured-data.mjs';
+import { en as homeEn } from '../src/data/home.ts';
+import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
+import { domainIds, topics } from '../src/data/topics.mjs';
 import {
 	ABOUT_TEXT,
 	aboutPage,
-	build as wholeBuild,
+	apiPage,
+	build,
 	check,
 	commitDay,
 	FIRST_COMMIT,
 	LIBRARY_MODIFIED,
 	ORIGIN,
 	page,
-	SITE,
 	SITE_TYPES,
 	siteNodes,
+	TARGET_PLATFORM,
+	VERSION,
 } from './shared/structured-data-fixture.mjs';
-
-const EN = `${ORIGIN}/reference/bibliography/`;
-const ES = `${ORIGIN}/es/reference/bibliography/`;
-
-/** A guide the navigation tree lists, so its trail and section are the tree's. */
-const GUIDE = knownSlugs().find((slug) => topicForSlug(slug)?.isDomain && slug.split('/').length === 3);
-
-const ISO = {
-	'@type': 'Organization',
-	'@id': `${EN}#org-iso`,
-	name: 'International Organization for Standardization',
-	alternateName: 'ISO',
-	url: 'https://www.iso.org/',
-};
-const SPAIN = { '@type': 'Organization', '@id': `${EN}#org-es-jefatura-del-estado`, name: 'Jefatura del Estado' };
-
-/** A standard's full node on the bibliography at `url`. */
-const standard = (url, designation, catalogue) => ({
-	'@id': `${url}#std-${designation.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-	'@type': 'CreativeWork',
-	name: `Acoustics, ${designation}`,
-	url: `https://www.iso.org/standard/${catalogue}.html`,
-	alternateName: designation,
-	identifier: designation,
-	genre: 'Technical standard',
-	publisher: { '@id': ISO['@id'] },
-});
-const book = (url) => ({
-	'@id': `${url}#doi-10-1000-book`,
-	'@type': 'Book',
-	name: 'A book',
-	identifier: { '@type': 'PropertyValue', propertyID: 'DOI', value: '10.1000/book' },
-	sameAs: 'https://doi.org/10.1000/book',
-	author: [{ '@type': 'Person', name: 'Roe, R.' }],
-	publisher: { '@type': 'Organization', name: 'A Press' },
-});
-const law = (url) => ({
-	'@id': `${url}#std-ley-37-2003`,
-	'@type': 'CreativeWork',
-	name: 'Ley del Ruido',
-	url: 'https://www.boe.es/eli/es/l/2003/11/17/37/con',
-	alternateName: 'Ley 37/2003',
-	identifier: 'Ley 37/2003',
-	genre: 'Technical standard',
-	publisher: { '@id': SPAIN['@id'] },
-});
-
-/** What a page says of a work at its first reference (citations.mjs, `STUB_FIELDS`). */
-const stub = (node) =>
-	Object.fromEntries(
-		['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs']
-			.filter((key) => node[key] !== undefined)
-			.map((key) => [key, node[key]]),
-	);
-
-/**
- * A build the check has nothing to report on: the two bibliographies and a
- * guide in each language, where every cited work is named as the bibliography
- * names it, then plain English pages up to `pages` in all.
- *
- * The first `dated` pages, in that order, are published on `published` and the
- * rest on the day of their last edit, 2026-10-01. `platforms` gives the
- * software node's `operatingSystem` on each page by the same index; a page
- * past its end names the default platforms.
- */
-function build({ pages = 4, base: extra = {}, ...options } = {}) {
-	const base = {};
-	for (const [lang, url] of [
-		['en', EN],
-		['es', ES],
-	]) {
-		const iso1 = standard(url, 'ISO 1:2000', 1);
-		const iso2 = standard(url, 'ISO 2:2010', 2);
-		const works = [iso1, iso2, book(url), law(url)];
-		if (lang === 'es') {
-			for (const work of works.filter((node) => node.genre === 'Technical standard')) {
-				work.sameAs = work['@id'].replace(ES, EN);
-			}
-		}
-		const bibliography = page('reference/bibliography', lang);
-		// Copies, so a test that takes a field off a body takes it off its own build only.
-		bibliography.nodes.push({ ...ISO }, { ...SPAIN }, ...works);
-		base[`${lang}/bibliography`] = bibliography;
-
-		base[`${lang}/guide`] = page(GUIDE, lang, {
-			isBasedOn: [stub(iso1)],
-			citation: [{ '@id': iso1['@id'] }, stub(iso2), stub(book(url))],
-			about: [{ '@id': SITE.software }, { '@id': iso1['@id'] }],
-		});
-	}
-	return wholeBuild({ pages, ...options, base: { ...base, ...extra } });
-}
-
-/** The node with `id` among a built page's nodes. */
-const nodeAt = (built, key, id) => built[key].nodes.find((node) => node['@id'] === id);
 
 test('a build where most pages have been edited since they were added passes', (t) => {
 	const ran = check(t, build({ pages: 10, dated: 9 }));
@@ -209,41 +105,6 @@ test('a software node that names no operating system, or one twice, fails', (t) 
 	assert.match(ran.out, /ok {3}the software node names its 3 operating systems one per entry on 7 pages/);
 });
 
-test('a malformed block on a page leaves the software node of its valid block counted', (t) => {
-	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/6'].blocks = ['{"@context": '];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-6\/: an ld\+json block is not valid JSON/);
-	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
-});
-
-test('a block that parses to no JSON-LD object is reported as one that does not parse', (t) => {
-	// `null` parses, and reading its @context threw, so the check stopped before
-	// it reported the page or tallied any software node.
-	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/6'].blocks = ['null'];
-	built['page/7'].blocks = ['[]'];
-	built['page/8'].blocks = ['5'];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	for (const page of [6, 7, 8]) {
-		assert.match(ran.err, new RegExp(`FAIL /page-${page}/: an ld\\+json block is not a JSON-LD object`));
-	}
-	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
-	assert.doesNotMatch(ran.err, /TypeError/);
-});
-
-test('a malformed block on a page leaves two nodes of its valid blocks that share an @id reported', (t) => {
-	const twin = { '@context': 'https://schema.org', '@type': 'Thing', '@id': `${ORIGIN}/#thing` };
-	const built = build({ pages: 10, dated: 9 });
-	built['page/6'].blocks = [twin, twin, '{'];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-6\/: an ld\+json block is not valid JSON/);
-	assert.match(ran.err, /FAIL \/page-6\/: .*\/#thing defined more than once/);
-});
-
 // The software's history and the About page. Every page carries the same
 // site-wide nodes, so a defect in them is one line with the number of pages it
 // stands on; the About page is asked for once in each language, typed as the
@@ -251,16 +112,15 @@ test('a malformed block on a page leaves two nodes of its valid blocks that shar
 // form, has to be the years of a role the Person node dates.
 
 /**
- * Build ten pages, the bibliographies and guides every build of this file
- * holds, the two About pages and plain articles, all edited since they were
- * first published, and run the check on them.
+ * Build the two About pages and eight articles, all ten edited since they
+ * were first published, and run the check on them.
  *
  * `nodes`, when given, are the site-wide nodes of every page. `about` replaces
  * an About page by its language: another page to build instead, or null to
  * leave it out.
  */
 function history(t, { nodes, about = {} } = {}) {
-	const built = build({ pages: 10 });
+	const built = build();
 	for (const [lang, entry] of Object.entries(about)) {
 		if (entry === null) delete built[`${lang}/about`];
 		else built[`${lang}/about`] = entry;
@@ -327,11 +187,11 @@ test("the software's creation date is the UTC day of the first commit, not the d
 });
 
 test("a page without one of the software's nodes fails by name, and the history is not said of every page", (t) => {
-	const built = build({ pages: 10 });
-	built['page/6'].nodes = built['page/6'].nodes.filter((node) => node['@type'] !== 'SoftwareSourceCode');
+	const built = build();
+	built['page/2'].nodes = built['page/2'].nodes.filter((node) => node['@type'] !== 'SoftwareSourceCode');
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-6\/: no SoftwareSourceCode node/);
+	assert.match(ran.err, /FAIL \/page-2\/: no SoftwareSourceCode node/);
 	assert.doesNotMatch(ran.out, /give its history/);
 });
 
@@ -617,661 +477,6 @@ test('an About page that writes the years of no dated role fails, so the years c
 		ran.out,
 		/ok {3}the About page in Spanish writes 2 spans of years, each the years of a role the Person node dates/,
 	);
-});
-
-test('the fixture names a guide the navigation tree lists', () => {
-	assert.ok(GUIDE, 'no three-segment guide under a domain topic in src/data/topics.mjs');
-});
-
-test('a build where every cited work is named, and named as the bibliography names it, passes', (t) => {
-	const ran = check(t, build());
-	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /ok {3}every one of the 2 works pages are based on is named at its first reference in isBasedOn/);
-	assert.match(ran.out, /ok {3}each of the 6 stubs that name a work on a page says what the bibliography says of it/);
-	assert.match(ran.out, /each of the 3 Spanish standards names the English node it is/);
-	assert.match(ran.out, /\n0 failing check\(s\)\./);
-});
-
-test('a first reference in isBasedOn that is a bare @id fails', (t) => {
-	const built = build();
-	built['en/guide'].article.isBasedOn = [{ '@id': `${EN}#std-iso-1-2000` }];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL 1 page\(s\) give 1 work\(s\) they are based on as a bare @id/);
-});
-
-test('a cited work that nothing on the page names fails', (t) => {
-	const built = build();
-	built['es/guide'].article.citation[2] = { '@id': `${ES}#doi-10-1000-book` };
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL 1 page\(s\) point at 1 cited work\(s\) that nothing on the page names/);
-});
-
-test('a stub typed as something other than a work names nothing', (t) => {
-	const built = build();
-	built['en/guide'].article.citation[2]['@type'] = 'Organization';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL 1 page\(s\) point at 1 cited work\(s\) that nothing on the page names/);
-	assert.match(ran.err, /FAIL 1 work\(s\) are named on 1 page\(s\) other than as the bibliography defines them: @type on 1/);
-});
-
-test('a page that names a work otherwise than the bibliography fails, field by field', (t) => {
-	const built = build();
-	// Another catalogue address for the standard, and another book's title.
-	built['en/guide'].article.isBasedOn[0].url = 'https://www.iso.org/standard/9.html';
-	built['es/guide'].article.citation[2].name = 'Another book';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL 2 work\(s\) are named on 2 page\(s\) other than as the bibliography defines them: name on 1, url on 1/,
-	);
-});
-
-test("a work described in a catalogue page's words about its own rows fails, in either language", (t) => {
-	const built = build();
-	const id = (url) => book(url)['@id'];
-	nodeAt(built, 'en/bibliography', id(EN)).description = 'Table 4.1: the source of the rows of this catalogue that cite it.';
-	nodeAt(built, 'es/bibliography', id(ES)).description = 'Tabla 4.1: fuente de las filas de este catálogo que la citan.';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	for (const route of ['/reference/bibliography/', '/es/reference/bibliography/']) {
-		assert.match(
-			ran.err,
-			new RegExp(`FAIL ${route}: 1 of the 1 works it describes take the words of a catalogue page about its own rows: #doi-10-1000-book`),
-		);
-	}
-
-	// Named, the catalogue is a fact about the work wherever it is read.
-	const named = build();
-	nodeAt(named, 'en/bibliography', id(EN)).description = 'Table 4.1: the source of the rows of the catalogue of solids that cite it.';
-	nodeAt(named, 'es/bibliography', id(ES)).description = 'Tabla 4.1: fuente de las filas del catálogo de sólidos que la citan.';
-	const passed = check(t, named);
-	assert.equal(passed.status, 0, passed.err);
-	assert.match(passed.out, /ok {3}\/es\/reference\/bibliography\/: none of the 1 works it describes is described as one catalogue page's rows/);
-});
-
-test('a stub claiming a sameAs the bibliography does not give fails', (t) => {
-	const built = build();
-	built['en/guide'].article.citation[2].sameAs = 'https://doi.org/10.1000/another';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /other than as the bibliography defines them: sameAs on 1/);
-});
-
-test('a standard whose publisher has no identity of its own fails, anonymous or off the bibliography', (t) => {
-	const anonymous = build();
-	nodeAt(anonymous, 'en/bibliography', `${EN}#std-iso-2-2010`).publisher = {
-		'@type': 'Organization',
-		name: 'International Organization for Standardization',
-	};
-	let ran = check(t, anonymous);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL \/reference\/bibliography\/: 1 of 3 standards name a publisher with no identity of its own under .*#org-: International Organization for Standardization \(1\)/,
-	);
-
-	const elsewhere = build();
-	nodeAt(elsewhere, 'es/bibliography', `${ES}#std-iso-2-2010`).publisher = { '@id': 'https://example.org/#iso' };
-	ran = check(t, elsewhere);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: 1 of 3 standards name a publisher with no identity/);
-});
-
-test('a standards body without its official site fails, and only the Spanish state issuers go without', (t) => {
-	const built = build();
-	delete nodeAt(built, 'en/bibliography', ISO['@id']).url;
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/reference\/bibliography\/: 1 of the bodies its standards name carry no https url[^\n]*: iso/);
-	// The Spanish state issuer carries no url in every build here, and passes.
-	assert.doesNotMatch(ran.err, /es-jefatura-del-estado/);
-});
-
-test('a Spanish standard that names no English one, a missing one or another one fails', (t) => {
-	const untied = build();
-	delete nodeAt(untied, 'es/bibliography', `${ES}#std-iso-2-2010`).sameAs;
-	let ran = check(t, untied);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: 1 of 3 standards name no English node as the same work \(first: ISO 2:2010\)/);
-
-	const dangling = build();
-	nodeAt(dangling, 'es/bibliography', `${ES}#std-iso-2-2010`).sameAs = `${EN}#std-iso-2-2099`;
-	ran = check(t, dangling);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: 1 sameAs point at English standards \/reference\/bibliography\/ does not define/);
-
-	// A real English node, but another standard: ISO 2:2010 is not ISO 1:2000.
-	const wrong = build();
-	nodeAt(wrong, 'es/bibliography', `${ES}#std-iso-2-2010`).sameAs = `${EN}#std-iso-1-2000`;
-	ran = check(t, wrong);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL \/es\/reference\/bibliography\/: 1 standards name as the same work an English standard whose designation carries other numbers \(first: ISO 2:2010 as ISO 1:2000\)/,
-	);
-});
-
-test('a build where no page says what it is based on fails rather than passing on nothing', (t) => {
-	const built = build();
-	for (const key of ['en/guide', 'es/guide']) {
-		const { article } = built[key];
-		article.citation[0] = article.isBasedOn[0];
-		delete article.isBasedOn;
-	}
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL no page says what it is based on: the citation properties changed under this check/);
-});
-
-test('a bibliography that defines no standard fails rather than passing on nothing', (t) => {
-	const built = build();
-	for (const node of built['es/bibliography'].nodes) delete node.genre;
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL the bibliography defines 3 standards in English and 0 in Spanish/);
-});
-
-test('a build where no page names a cited work fails rather than passing on nothing', (t) => {
-	const built = build();
-	for (const key of ['en/guide', 'es/guide']) {
-		const { article } = built[key];
-		delete article.isBasedOn;
-		delete article.citation;
-		article.about = { '@id': SITE.software };
-	}
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL no page names a cited work: the citation markup changed under this check/);
-});
-
-test('the site-wide block within its byte budget passes, and says its size and how much of it the Person is', (t) => {
-	const ran = check(t, build());
-	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /ok {3}the site-wide ld\+json block is \d+ bytes on 6 pages, within its budget of \d+; the Person is \d+ of them/);
-});
-
-test('a site-wide block over its byte budget fails, and says how much of it the Person is', (t) => {
-	// A Person spliced from jmrp.io with every link listed twice over: the
-	// growth no page of this repository shows in a diff.
-	const built = build();
-	const links = Array.from({ length: 600 }, (_, i) => `https://example.org/profiles/maintainer-${i}`);
-	for (const { nodes } of Object.values(built)) {
-		nodes.find((node) => node['@type'] === 'Person').sameAs = links;
-	}
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL 6 page\(s\): the site-wide ld\+json block is \d+ bytes, over its budget of \d+; the Person spliced from jmrp\.io is \d+ of them/,
-	);
-});
-
-test('a build with no site-wide block fails rather than passing the budget on nothing', (t) => {
-	const built = build();
-	for (const entry of Object.values(built)) entry.nodes = entry.nodes.filter((node) => node['@type'] !== 'Person');
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL no page carries the site-wide ld\+json block/);
-});
-
-// ---------------------------------------------------------------------------
-// The catalogues as datasets
-// ---------------------------------------------------------------------------
-
-/** The catalogue page every dataset of the fixture sits on: one page may hold several. */
-const CATALOGUE_PAGE = 'reference/catalogues/solids';
-
-/**
- * A build whose every catalogue is a Dataset of a catalogue page in each
- * language, listed by that language's overview: the pages of `build()` and,
- * per language, the overview and one catalogue page that holds all the
- * datasets with a table for each.
- *
- * @param {{pageSlug?: string, overviewSlug?: string}} [at] Where the catalogue
- *   page and the overview sit, which a test moves to a route topics.mjs does
- *   not list.
- */
-function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/catalogues' } = {}) {
-	const built = build();
-	for (const [lang, url] of [
-		['en', EN],
-		['es', ES],
-	]) {
-		const prefix = lang === 'es' ? '/es' : '';
-		const twin = lang === 'es' ? '' : '/es';
-		const pageUrl = `${ORIGIN}${prefix}/${pageSlug}/`;
-		const overviewUrl = `${ORIGIN}${prefix}/${overviewSlug}/`;
-		const datasets = Object.keys(catalogues).map((key) => ({
-			'@type': 'Dataset',
-			'@id': `${pageUrl}#dataset-${key}`,
-			name: `Catalogue ${key}`,
-			description: `The rows of ${key}.`,
-			url: `${pageUrl}#catalogue-${key}`,
-			inLanguage: lang,
-			includedInDataCatalog: { '@type': 'DataCatalog', '@id': `${overviewUrl}#article`, name: 'Catalogues', url: overviewUrl },
-			[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
-				'@id': `${ORIGIN}${twin}/${pageSlug}/#dataset-${key}`,
-			},
-			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
-			isBasedOn: [stub(book(url))],
-			// The day page() says the page was last edited.
-			dateModified: '2026-10-01',
-		}));
-		const catalogue = page(pageSlug, lang, {
-			mainEntity: datasets.map((node) => ({ '@id': node['@id'] })),
-			citation: [stub(book(url))],
-		});
-		catalogue.nodes.push(...datasets);
-		// The page shows what its datasets say: the first is named by its
-		// title, every later one by the heading of its section, and each is
-		// described by the paragraph above its table.
-		catalogue.text =
-			`<h1 id="_top">${datasets[0].name}</h1>` +
-			datasets
-				.map(
-					(node, i) =>
-						`${i > 0 ? `<h2 id="h-${i}">${node.name}</h2>` : ''}<p>${node.description}</p>` +
-						`<section id="${node.url.split('#')[1]}"></section>`,
-				)
-				.join('');
-		built[`${lang}/catalogue`] = catalogue;
-		built[`${lang}/overview`] = page(overviewSlug, lang, {
-			'@type': ['TechArticle', 'DataCatalog'],
-			name: 'Catalogues',
-			dataset: datasets.map((node) => ({ '@type': 'Dataset', '@id': node['@id'], name: node.name, url: node.url })),
-		});
-	}
-	return built;
-}
-
-/** The dataset of `key` on the catalogue page of `lang`. */
-const datasetOf = (built, lang, key) =>
-	built[`${lang}/catalogue`].nodes.find((node) => node['@id']?.endsWith(`#dataset-${key}`));
-
-test('a build whose every catalogue is a dataset of its page, listed by the overview, passes', (t) => {
-	const ran = check(t, catalogueBuild());
-	assert.equal(ran.status, 0, ran.err);
-	const count = Object.keys(catalogues).length;
-	assert.match(ran.out, new RegExp(`ok {3}each of the ${count} catalogues is a Dataset of one en catalogue page`));
-	assert.match(ran.out, new RegExp(`the DataCatalog lists the ${count} datasets of its language`));
-	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets names its twin in the other language`));
-	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets is dated as the page that renders it`));
-	assert.match(
-		ran.out,
-		new RegExp(`each of the ${count * 2} datasets is named by a heading of its page and described by a paragraph of it`),
-	);
-});
-
-test('a catalogue page that publishes no Dataset fails, and so does the count', (t) => {
-	const built = catalogueBuild();
-	const catalogue = built['es/catalogue'];
-	catalogue.nodes = catalogue.nodes.filter((node) => node['@type'] !== 'Dataset');
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/es\/reference\/catalogues\/solids\/: a catalogue page publishes no Dataset/);
-	assert.match(ran.err, /FAIL the es catalogue pages publish 0 of the 24 catalogues as a Dataset; none is solids/);
-});
-
-test('a dataset that claims a licence or a download over the rows fails', (t) => {
-	const built = catalogueBuild();
-	datasetOf(built, 'en', 'carpets').license = 'https://creativecommons.org/licenses/by/4.0/';
-	datasetOf(built, 'es', 'solids').contentUrl = 'https://example.org/solids.json';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /solids\/ carpets: the dataset claims license over rows other works printed/);
-	assert.match(ran.err, /solids\/ solids: the dataset claims contentUrl over rows other works printed/);
-});
-
-test('a dataset whose source is a bare @id, or that names none, fails', (t) => {
-	const built = catalogueBuild();
-	datasetOf(built, 'en', 'gases').isBasedOn = [{ '@id': stub(book(EN))['@id'] }];
-	delete datasetOf(built, 'en', 'fluids').isBasedOn;
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /gases: the dataset is based on \S+#doi-10-1000-book without naming it/);
-	assert.match(ran.err, /fluids: the dataset names no work it is based on/);
-});
-
-test('a dataset that names its band columns by their band, or leaves a column out, fails', (t) => {
-	const built = catalogueBuild();
-	datasetOf(built, 'en', 'absorption').variableMeasured = catalogues.absorption.columns.map((column) => ({
-		'@type': 'PropertyValue',
-		name: column.heading,
-	}));
-	datasetOf(built, 'es', 'solids').variableMeasured.splice(0, 1);
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /absorption: the dataset's variableMeasured names no variable for Absorption coefficient/);
-	assert.match(ran.err, /absorption: variables named by a band alone: 63 Hz, 125 Hz/);
-	assert.match(ran.err, /solids: the dataset's variableMeasured names no variable for Densidad/);
-});
-
-test('a dataset with no date, or another date than its page, fails', (t) => {
-	const built = catalogueBuild();
-	delete datasetOf(built, 'en', 'gases').dateModified;
-	// The rows changed after the page last did, and the page was never told.
-	datasetOf(built, 'es', 'fluids').dateModified = '2026-10-29';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /solids\/ gases: the dataset's dateModified is undefined, not its page's "2026-10-01"/);
-	assert.match(ran.err, /solids\/ fluids: the dataset's dateModified is "2026-10-29", not its page's "2026-10-01"/);
-	assert.doesNotMatch(ran.out, /datasets is dated as the page that renders it/);
-});
-
-test('a dataset whose url points at no table on its page fails', (t) => {
-	const built = catalogueBuild();
-	const catalogue = built['en/catalogue'];
-	catalogue.text = catalogue.text.replace('<section id="catalogue-plateau"></section>', '');
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /plateau: the dataset's url points at #catalogue-plateau, and the page holds no such table/);
-});
-
-test('an overview that is not a DataCatalog, or lists other datasets than the pages publish, fails', (t) => {
-	const built = catalogueBuild();
-	const english = built['en/overview'].article;
-	english['@type'] = 'TechArticle';
-	english.dataset.pop();
-	built['es/overview'].article.dataset[0].name = 'Otro nombre';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /\/reference\/catalogues\/: the overview of the catalogues is typed "TechArticle", not a DataCatalog/);
-	assert.match(ran.err, /\/reference\/catalogues\/: the DataCatalog leaves out 1, lists 0 no catalogue page publishes/);
-	assert.match(ran.err, /\/es\/reference\/catalogues\/: the DataCatalog leaves out 0, lists 0 no catalogue page publishes and names 1/);
-});
-
-test("an article whose mainEntity is not its page's datasets fails", (t) => {
-	const built = catalogueBuild();
-	built['en/catalogue'].article.mainEntity.pop();
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /\/reference\/catalogues\/solids\/: the article's mainEntity is /);
-});
-
-test("a dataset that takes the page's description on a page of several catalogues fails", (t) => {
-	const built = catalogueBuild();
-	// The page's description speaks of every catalogue the page renders.
-	datasetOf(built, 'en', 'absorption').description = built['en/catalogue'].article.description;
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/\/reference\/catalogues\/solids\/ absorption: the dataset takes the page's description, which speaks of all 24 catalogues it renders/,
-	);
-});
-
-test('a dataset whose name is no heading of its page, or whose description no paragraph of it, fails', (t) => {
-	const built = catalogueBuild();
-	// What a reader of the page's source took for text, and the page shows otherwise.
-	datasetOf(built, 'en', 'gases').description = 'The rows of \\*gases\\*.';
-	datasetOf(built, 'es', 'fluids').name = 'Catalogue <abbr>fluids</abbr>';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/reference\/catalogues\/solids\/ gases: the dataset's description is no paragraph of its page: "The rows of \\\\\*gases\\\\\*\."/);
-	assert.match(ran.err, /FAIL \/es\/reference\/catalogues\/solids\/ fluids: the dataset's name, "Catalogue <abbr>fluids<\/abbr>", is no heading of its page/);
-	assert.doesNotMatch(ran.out, /datasets is named by a heading of its page/);
-});
-
-/** An aside as the site renders one, `:::note[title]` or `<Aside title>` alike, holding one paragraph. */
-const renderedAside = (title, paragraph) =>
-	`<aside aria-label="${title}" class="starlight-aside starlight-aside--note">` +
-	`<p class="starlight-aside__title" aria-hidden="true">${title}</p>` +
-	`<div class="starlight-aside__content"><p>${paragraph}</p></div></aside>`;
-
-test('a dataset described by the lines of an admonition, its markers with them, fails', (t) => {
-	const built = catalogueBuild();
-	const catalogue = built['en/catalogue'];
-	catalogue.text = catalogue.text.replace(
-		'<p>The rows of gases.</p>',
-		`<p>The rows of gases.</p>${renderedAside('Where the rows come from', 'The book prints them in three parts.')}`,
-	);
-	// What a reader makes of `:::note[...]`, its paragraph and `:::` when it
-	// takes the lines of the admonition for a paragraph.
-	datasetOf(built, 'en', 'gases').description = ':::note[Where the rows come from] The book prints them in three parts. :::';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/reference\/catalogues\/solids\/ gases: the dataset's description is no paragraph of its page: ":::note\[Where/);
-});
-
-test("a dataset described by the paragraph an aside holds passes: keeping it out is the page reader's part", (t) => {
-	const built = catalogueBuild();
-	const catalogue = built['en/catalogue'];
-	catalogue.text = catalogue.text.replace(
-		'<p>The rows of gases.</p>',
-		`<p>The rows of gases.</p>${renderedAside('Where the rows come from', 'The book prints them in three parts.')}`,
-	);
-	// What a reader makes of `<Aside title="...">`, its paragraph and
-	// `</Aside>`: the component's tags are markup it drops.
-	datasetOf(built, 'en', 'gases').description = 'The book prints them in three parts.';
-	const ran = check(t, built);
-	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /datasets is named by a heading of its page and described by a paragraph of it/);
-});
-
-test("a dataset's text is what its page shows, with the typographer's quotes and the page's character references read back", (t) => {
-	const built = catalogueBuild();
-	datasetOf(built, 'en', 'gases').description = 'The book\'s rows of gases & "air", in three parts...';
-	const catalogue = built['en/catalogue'];
-	catalogue.text = catalogue.text.replace(
-		'<p>The rows of gases.</p>',
-		'<p>The book\u2019s rows of\n<em>gases</em> &#x26; \u201cair\u201d, in three parts\u2026</p>',
-	);
-	const ran = check(t, built);
-	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /datasets is named by a heading of its page and described by a paragraph of it/);
-});
-
-test('catalogue pages and an overview at a route topics.mjs does not list fail, rather than leave nothing to check', (t) => {
-	// The catalogue routes moved, and nothing told the check: every dataset
-	// assertion above would read no page, and the count after them none.
-	const ran = check(t, catalogueBuild({ pageSlug: 'reference/tables/solids', overviewSlug: 'reference/tables' }));
-	assert.equal(ran.status, 1);
-	const count = Object.keys(catalogues).length;
-	for (const prefix of ['', '/es']) {
-		assert.match(
-			ran.err,
-			new RegExp(
-				`FAIL ${prefix}/reference/tables/solids/: publishes ${count} catalogue dataset\\(s\\) and holds ${count} catalogue ` +
-					'table\\(s\\) .*and is not a catalogue page of catalogueSlugs',
-			),
-		);
-		assert.match(ran.err, new RegExp(`FAIL ${prefix}/reference/tables/: publishes a DataCatalog, and is not the overview`));
-	}
-});
-
-// ---------------------------------------------------------------------------
-// The errata pages and the works they correct
-// ---------------------------------------------------------------------------
-
-/** The family page of the fixture, the one page under the errata index that corrects a work. */
-const ERRATA_FAMILY = 'reference/errata/iso-1';
-
-/** A page of the content tree as scripts/generate_site_reports.py writes it, with what it corrects. */
-const errataSource = (title, corrects = []) =>
-	`---\ntitle: "${title}"\n${corrects.length > 0 ? `corrects:\n${corrects.map((fragment) => `  - "${fragment}"\n`).join('')}` : ''}---\n\nThe page.\n`;
-
-/** The `about` of an errata family page in `lang` naming `fragments` of its bibliography, as the build writes it. */
-const aboutNaming = (built, lang, fragments) => {
-	const url = lang === 'es' ? ES : EN;
-	return [{ '@id': SITE.software }, ...fragments.map((fragment) => stub(nodeAt(built, `${lang}/bibliography`, `${url}#${fragment}`)))];
-};
-
-/**
- * A build with the errata registry in both languages: the pages of `build()`
- * and, per language, the registry's index, one family page whose `about` names
- * the standard it corrects beside the software, and the page of properties
- * that are not errata, which corrects nothing; and the content tree the three
- * are built from, the family page's `corrects` listing that standard.
- */
-function errataBuild() {
-	const built = build();
-	built.content = {};
-	for (const lang of ['en', 'es']) {
-		const prefix = lang === 'es' ? 'es/' : '';
-		for (const slug of ['reference/errata', ERRATA_FAMILY, 'reference/errata/not-errata']) {
-			built[`${lang}/${slug}`] = page(slug, lang, {
-				about: slug === ERRATA_FAMILY ? aboutNaming(built, lang, ['std-iso-1-2000']) : { '@id': SITE.software },
-			});
-		}
-		built.content[`${prefix}reference/errata/index.mdx`] = errataSource('Errata');
-		built.content[`${prefix}${ERRATA_FAMILY}.md`] = errataSource('Errata in ISO 1', ['std-iso-1-2000']);
-		built.content[`${prefix}reference/errata/not-errata.md`] = errataSource('Not errata');
-	}
-	return built;
-}
-
-/** Take the errata pages of `lang` out of `built`, but those at `keep`. */
-const unbuildErrata = (built, lang, keep = []) => {
-	for (const key of Object.keys(built)) {
-		const slug = key.slice(lang.length + 1);
-		if (key.startsWith(`${lang}/reference/errata`) && !keep.includes(slug)) delete built[key];
-	}
-};
-
-test('a build whose every errata family page names the work it corrects passes', (t) => {
-	const ran = check(t, errataBuild());
-	assert.equal(ran.status, 0, ran.err);
-	assert.match(
-		ran.out,
-		/ok {3}each of the 2 errata family pages names in about, in order, the works its corrects lists, 2 in all/,
-	);
-});
-
-test('an errata family page naming fewer works than its corrects lists fails', (t) => {
-	// What a regression that keeps the first work of each page builds: every
-	// page still names a work, and the six editions of ISO 12354 come to one.
-	const built = errataBuild();
-	built.content[`${ERRATA_FAMILY}.md`] = errataSource('Errata in ISO 1', ['std-iso-1-2000', 'std-iso-2-2010']);
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		new RegExp(
-			'FAIL 1 errata page\\(s\\) name in about other works than their corrects lists, or in another order ' +
-				`\\(first: /reference/errata/iso-1/ names 1 work\\(s\\) and its corrects lists 2; at position 2 it names nothing ` +
-				`where corrects lists ${RegExp.escape(EN)}#std-iso-2-2010\\)`,
-		),
-	);
-	assert.match(ran.err, /FAIL the en errata family pages name 1 work\(s\) in about, and their corrects list 2/);
-});
-
-test('an errata family page naming its works in another order, or one its corrects does not list, fails', (t) => {
-	const built = errataBuild();
-	built.content[`es/${ERRATA_FAMILY}.md`] = errataSource('Errata en ISO 1', ['std-iso-2-2010', 'std-iso-1-2000']);
-	built[`es/${ERRATA_FAMILY}`].article.about = aboutNaming(built, 'es', ['std-iso-1-2000', 'std-iso-2-2010']);
-	built[`en/${ERRATA_FAMILY}`].article.about = aboutNaming(built, 'en', ['std-iso-1-2000', 'std-iso-2-2010']);
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL 2 errata page\(s\) name in about other works than their corrects lists, or in another order/);
-	assert.match(
-		ran.err,
-		new RegExp(
-			`/es/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 2; at position 1 it names ${RegExp.escape(ES)}#std-iso-1-2000 where corrects lists ${RegExp.escape(ES)}#std-iso-2-2010`,
-		),
-	);
-	assert.match(
-		ran.err,
-		new RegExp(
-			`/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 1; at position 2 it names ${RegExp.escape(EN)}#std-iso-2-2010 where corrects lists nothing`,
-		),
-	);
-	assert.match(ran.err, /FAIL the en errata family pages name 2 work\(s\) in about, and their corrects list 1/);
-});
-
-test('an errata page of the content tree the build does not hold, or one built from no page, fails', (t) => {
-	// A family page that stopped being built would leave every count above
-	// agreeing with a build that has one page fewer.
-	const built = errataBuild();
-	built.content['reference/errata/iso-2.md'] = errataSource('Errata in ISO 2', ['std-iso-2-2010']);
-	built['es/reference/errata/iso-3'] = page('reference/errata/iso-3', 'es', { about: aboutNaming(built, 'es', ['std-iso-2-2010']) });
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL the en build holds 2 of the 3 errata pages under .*reference\/errata \(first missing: iso-2\)/);
-	assert.match(ran.err, /FAIL \/es\/reference\/errata\/iso-3\/: an errata page with no page under .*es\/reference\/errata to say what it corrects/);
-});
-
-test('an errata index of the content tree the build does not hold fails', (t) => {
-	const built = errataBuild();
-	unbuildErrata(built, 'es');
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL the es errata index is under .*es\/reference\/errata and the build does not hold it/);
-	assert.match(ran.err, /FAIL the es build holds 0 of the 2 errata pages under .*es\/reference\/errata \(first missing: iso-1, not-errata\)/);
-});
-
-test('a corrects field written in a shape the check cannot read fails', (t) => {
-	// Read as nothing, the field would let the page name no work at all.
-	const built = errataBuild();
-	built.content[`${ERRATA_FAMILY}.md`] = '---\ntitle: "Errata in ISO 1"\ncorrects: ["std-iso-1-2000"]\n---\n';
-	built.content[`es/${ERRATA_FAMILY}.md`] = '---\ntitle: "Errata en ISO 1"\ncorrects:\n  - std-iso-1-2000\n---\n';
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL .*reference\/errata\/iso-1\.md: corrects is written in a shape this check cannot read: corrects: \["std-iso-1-2000"\]/);
-	assert.match(ran.err, /FAIL .*es\/reference\/errata\/iso-1\.md: a line of corrects this check cannot read: - std-iso-1-2000/);
-});
-
-test('an errata family page whose about names the software alone fails', (t) => {
-	const built = errataBuild();
-	built[`es/${ERRATA_FAMILY}`].article.about = { '@id': SITE.software };
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL 1 errata page\(s\) name no work they correct in about, only the software \(first: \/es\/reference\/errata\/iso-1\/\)/,
-	);
-});
-
-test('the page of properties that are not errata fails when it names a work it corrects', (t) => {
-	const built = errataBuild();
-	built['en/reference/errata/not-errata'].article.about = [
-		{ '@id': SITE.software },
-		stub(nodeAt(built, 'en/bibliography', `${EN}#std-iso-2-2010`)),
-	];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL \/reference\/errata\/not-errata\/: the page of properties that are not errata corrects nothing and names 1 work\(s\) in about/,
-	);
-});
-
-test("an errata page that names a corrected work on the other language's bibliography fails", (t) => {
-	const built = errataBuild();
-	built[`es/${ERRATA_FAMILY}`].article.about = [
-		{ '@id': SITE.software },
-		stub(nodeAt(built, 'en/bibliography', `${EN}#std-iso-1-2000`)),
-	];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(
-		ran.err,
-		/FAIL \/es\/reference\/errata\/iso-1\/: the errata page names 1 work\(s\) it corrects on another language's bibliography/,
-	);
-});
-
-test("an errata page whose about opens with a work, or names what is not one, fails", (t) => {
-	const built = errataBuild();
-	const { article } = built[`en/${ERRATA_FAMILY}`];
-	article.about = [article.about[1], { '@id': SITE.software }, { '@id': SITE.person }];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/reference\/errata\/iso-1\/: the errata page's about opens with .*#std-iso-1-2000, not the software/);
-	assert.match(ran.err, /FAIL \/reference\/errata\/iso-1\/: the errata page's about names 2 thing\(s\) that are not a cited work/);
-});
-
-test('an errata index built without its family pages or the page of properties that are not errata fails', (t) => {
-	// The routes moved under the check: every errata assertion would read
-	// nothing, and the build pass.
-	const built = errataBuild();
-	unbuildErrata(built, 'es', ['reference/errata']);
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL the es errata index was built with no family page under it/);
-	assert.match(ran.err, /FAIL the es errata index was built without reference\/errata\/not-errata, the page of properties that are not errata/);
 });
 
 // The glossary. The real build only ever hands the check a glossary that
@@ -1738,4 +943,228 @@ test('an errata content tree checked out with CRLF line endings is read as the L
 		ran.out,
 		/ok {3}each of the 2 errata family pages names in about, in order, the works its corrects lists, 2 in all/,
 	);
+});
+
+// The site-wide graph in both languages. Every page carries the same block, so
+// each defect is one line with the number of pages it stands on; a Spanish page
+// used to describe the software in English, list eleven of the thirteen
+// topics, publish "no governing standard" as a standard and state two of the
+// package's five optional extras.
+
+/** The site-wide nodes with the one of each type in `changes` changed by its function, on a copy. */
+function changedAll(changes) {
+	return siteNodes().map((node) => {
+		const change = changes[node['@type']];
+		if (!change) return node;
+		const copy = structuredClone(node);
+		change(copy);
+		return copy;
+	});
+}
+
+/** The label of each topic that teaches, in the order the navigation lists them, in `lang`. */
+const topicLabels = (lang) => domainIds.map((id) => topics.find((topic) => topic.id === id).label[lang]);
+
+test('a build whose site-wide nodes speak both languages passes, and says what it read', (t) => {
+	const ran = history(t);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		new RegExp(
+			'ok {3}the site-wide nodes on all 10 pages describe the site and the software in English and in Spanish, ' +
+				`list one feature for each of the ${domainIds.length} topics that teach in each language, ` +
+				'publish no placeholder as a standard or a keyword, and state every requirement and extra of pyproject.toml',
+		),
+	);
+	assert.equal(ran.err, '');
+	// A build with no API page has no release to answer for.
+	assert.doesNotMatch(ran.out, /name the release/);
+});
+
+test('descriptions in English alone, as every page published them, fail on both nodes', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			WebSite: (node) => {
+				node.description = siteDescriptions.en;
+			},
+			SoftwareApplication: (node) => {
+				node.description = softwareDescriptions.en;
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL WebSite description is not one text in English and one in Spanish, each tagged with its language: "Acoustic measurement toolkit/);
+	assert.match(ran.err, /FAIL SoftwareApplication description is not one text in English and one in Spanish, each tagged with its language: "Acoustic measurement, analysis/);
+	assert.match(ran.err, /\(on 10 pages\)/);
+	assert.doesNotMatch(ran.out, /speak|in English and in Spanish, list/);
+});
+
+test('a Spanish description that is the English text, or any other than scope.mjs writes, fails', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.description = [
+					{ '@value': softwareDescriptions.en, '@language': 'en' },
+					{ '@value': softwareDescriptions.en, '@language': 'es' },
+				];
+			},
+			WebSite: (node) => {
+				node.description[1]['@value'] = siteDescriptions.es.replace('Python', 'Phyton');
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL SoftwareApplication description in Spanish is the English text: "Acoustic measurement, analysis/);
+	assert.match(ran.err, /FAIL WebSite description in Spanish is not the Spanish text src\/data\/scope\.mjs writes: "Biblioteca de medición acústica en Phyton/);
+});
+
+test('a feature list in English alone and eleven areas long, as every page published it, fails', (t) => {
+	const eleven = featureLists.en.filter((feature) => !/^(?:Fluids|Elastic solids):/.test(feature));
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.featureList = eleven;
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL SoftwareApplication featureList has 11 entries tagged with no language of the site/);
+	assert.match(
+		ran.err,
+		new RegExp(`FAIL SoftwareApplication featureList in Spanish has 0 entries, not one for each of the ${domainIds.length} topics that teach`),
+	);
+});
+
+test('a feature list that leaves out a topic in one language fails, naming the topic', (t) => {
+	const [, fluids] = topicLabels('es');
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.featureList = node.featureList.filter(
+					(feature) => !(feature['@language'] === 'es' && feature['@value'].startsWith(`${fluids}:`)),
+				);
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(`FAIL SoftwareApplication featureList in Spanish has ${domainIds.length - 1} entries, not one for each of the ${domainIds.length} topics that teach`),
+	);
+	assert.match(ran.err, new RegExp(`entry 2 opens with "${topicLabels('es')[2]}", not with "${fluids}", the topic topics\\.mjs lists there`));
+	assert.doesNotMatch(ran.err, /featureList in English/);
+});
+
+test('a feature in another order than the navigation, or another text than scope.mjs writes, fails', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				const english = node.featureList.filter((feature) => feature['@language'] === 'en');
+				[english[0], english[1]] = [english[1], english[0]];
+				const spanish = node.featureList.filter((feature) => feature['@language'] === 'es');
+				spanish[3] = { ...spanish[3], '@value': `${spanish[3]['@value']} Y más.` };
+				node.featureList = [...english, ...spanish];
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`entry 1 opens with "${topicLabels('en')[1]}", not with "${topicLabels('en')[0]}"`));
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL SoftwareApplication featureList in Spanish is not the list src/data/scope\\.mjs builds from ' +
+				`the landing page: entry 4 is "${topicLabels('es')[3]}: `,
+		),
+	);
+});
+
+test('a placeholder published as a standard or as a keyword fails, in either language', (t) => {
+	const placeholder = homeEn.coverage.noStandard;
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				const last = node.featureList.findIndex((feature) => feature['@language'] === 'es') - 1;
+				node.featureList[last] = {
+					...node.featureList[last],
+					'@value': `${node.featureList[last]['@value']} Standards implemented: ${placeholder}.`,
+				};
+				node.keywords = [...node.keywords, { '@value': 'sin norma que la rija', '@language': 'es' }];
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`FAIL SoftwareApplication featureList states "${placeholder}" as a standard`));
+	assert.match(ran.err, /FAIL SoftwareApplication keywords publish "sin norma que la rija" as a keyword/);
+	// One text of keywords delimited by commas, as every page published them.
+	const joined = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.keywords = `acoustics, Python, signal analysis, files, ISO 717-1, ${placeholder}`;
+			},
+		}),
+	});
+	assert.equal(joined.status, 1);
+	assert.match(joined.err, new RegExp(`FAIL SoftwareApplication keywords publish "${placeholder}" as a keyword`));
+	assert.match(joined.err, /FAIL SoftwareApplication keywords hold no keyword in Spanish/);
+});
+
+test('requirements typed by hand, as every page published them, fail and name what they leave out', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL SoftwareApplication softwareRequirements leaves out numpy>=2\.0\.2, scipy>=1\.14\.0, the extra perf, the extra plot, the extra report, the extra audio, the extra torch and the extra full, which pyproject\.toml gives/,
+	);
+	const none = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				delete node.softwareRequirements;
+			},
+		}),
+	});
+	assert.equal(none.status, 1);
+	assert.match(none.err, /FAIL SoftwareApplication softwareRequirements is undefined, not a text naming what pyproject\.toml requires/);
+});
+
+test('every API page names the release and the Python it documents, and the check says so', (t) => {
+	const ran = check(
+		t,
+		build({ base: { a: apiPage('signals/levels'), b: apiPage('filters/banks'), c: apiPage('room/acoustics') } }),
+	);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, new RegExp(`ok {3}all 3 API pages name the release ${RegExp.escape(VERSION)} and ${RegExp.escape(TARGET_PLATFORM)}`));
+});
+
+test('an API page that names no release, another release or another Python fails, with the pages it stands on', (t) => {
+	const unnamed = apiPage('filters/banks');
+	delete unnamed.article.assemblyVersion;
+	delete unnamed.article.targetPlatform;
+	const ran = check(
+		t,
+		build({
+			base: {
+				right: apiPage('signals/levels'),
+				unnamed,
+				old: apiPage('room/acoustics', { assemblyVersion: '3.3.0' }),
+				python: apiPage('underwater/propagation', { targetPlatform: 'Python >= 3.11' }),
+			},
+		}),
+	);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL 1 API page\\(s\\) name the release undefined and the platform undefined, ' +
+				`not ${RegExp.escape(VERSION)}, from VERSION, and ${RegExp.escape(TARGET_PLATFORM)}, from pyproject\\.toml`,
+		),
+	);
+	assert.match(ran.err, /FAIL 1 API page\(s\) name the release "3\.3\.0" and the platform "Python >= 3\.12"/);
+	assert.match(ran.err, /FAIL 1 API page\(s\) name the release "[^"]+" and the platform "Python >= 3\.11"/);
+	assert.doesNotMatch(ran.out, /name the release/);
 });

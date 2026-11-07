@@ -531,7 +531,7 @@ def _shard_folders() -> dict[str, str]:
 def _shard_members() -> dict[str, list[str]]:
     """Shard slug -> guide routes, at the finest grouping the tree offers.
 
-    The index groups by the ten topics a reader recognises, but several of
+    The index groups by the topics a reader recognises, but several of
     those are large enough that a whole-topic shard blows the fetch budget on
     its own. Most topics are already subdivided in the tree (octave filtering,
     levels and weighting, and so on), each subgroup with its own overview page,

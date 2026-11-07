@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 import child_process
 import conftest
+import node_script
 import pinned_stack
 import pytest
 import yaml
@@ -690,8 +691,6 @@ _PYTHON_STATEMENTS = (
     "site/src/content/docs/es/start/getting-started.mdx",
     "site/src/content/docs/start/index.md",
     "site/src/content/docs/es/start/index.md",
-    "site/src/data/home.ts",
-    "site/astro.config.mjs",
 )
 
 #: The installation instructions, which name every floor.
@@ -757,6 +756,73 @@ def test_the_pages_a_reader_installs_from_state_the_oldest_python(name: str) -> 
     floor = _MODULE.python_floor(_pyproject())
     text = (_ROOT / name).read_text(encoding="utf-8")
     assert floor in _stated_floors(text)
+
+
+#: The site's files that state the oldest Python, each with the module it
+#: reads it from and the name it imports: the landing page writes the floor
+#: into its sentences, and astro.config.mjs hands the requirements to the
+#: software node. src/data/repo-stats.mjs reads both from pyproject.toml.
+_SITE_PYTHON_READERS = {
+    "site/src/data/home.ts": ("./repo-stats.mjs", "pythonFloor"),
+    "site/astro.config.mjs": ("./src/data/repo-stats.mjs", "softwareRequirements"),
+}
+
+#: What src/data/repo-stats.mjs gives the site, as Node imports it.
+_SITE_PYTHON = (
+    "import { pathToFileURL } from 'node:url';"
+    "let input = '';"
+    "for await (const chunk of process.stdin) input += chunk;"
+    "const stats = await import(pathToFileURL(JSON.parse(input)).href);"
+    "process.stdout.write(JSON.stringify("
+    "  [stats.pythonFloor, stats.targetPlatform, stats.softwareRequirements]));"
+)
+
+
+@pytest.mark.skipif(
+    node_script.NODE is None, reason="no JavaScript engine to ask the site"
+)
+def test_the_site_reads_the_oldest_python_from_requires_python() -> None:
+    """The floor, the platform of the API pages and the software node's
+    requirements, as the site's module gives them, state requires-python.
+
+    src/data/repo-stats.mjs reads pyproject.toml with no package of the
+    site's, so Node imports it here as the build does.
+    """
+    floor = _MODULE.python_floor(_pyproject())
+    module = _ROOT / "site" / "src" / "data" / "repo-stats.mjs"
+    stated, platform, requirements = node_script.answer(
+        _SITE_PYTHON, str(module), timeout=60
+    )
+    assert stated == floor
+    assert _stated_floors(str(platform)) == [floor]
+    # The sentence opens with the floor; a requirement of its own for a later
+    # Python, behind a marker, may name that Python after it.
+    assert _stated_floors(str(requirements))[:1] == [floor]
+
+
+@pytest.mark.parametrize(("name", "reader"), sorted(_SITE_PYTHON_READERS.items()))
+def test_the_site_states_the_oldest_python_it_reads_from_pyproject(
+    name: str, reader: tuple[str, str]
+) -> None:
+    """The site's files name no Python of their own: they import it."""
+    module, imported = reader
+    text = (_ROOT / name).read_text(encoding="utf-8")
+    imports = re.findall(r"import \{([^}]*)\} from '([^']+)'", text)
+    assert any(
+        source == module and imported in re.split(r"[\s,]+", names)
+        for names, source in imports
+    ), f"{name} does not import {imported} from {module}"
+    assert _stated_floors(text) == []
+
+
+def test_the_landing_page_writes_the_floor_it_imports_in_both_languages() -> None:
+    """Each language's install sentence names the floor the page imports."""
+    text = (_ROOT / "site" / "src" / "data" / "home.ts").read_text(encoding="utf-8")
+    for phrase in (
+        "Python ${pythonFloor} or newer",
+        "Python ${pythonFloor} o posterior",
+    ):
+        assert phrase in text, phrase
 
 
 #: How the installation instructions spell each floored distribution.

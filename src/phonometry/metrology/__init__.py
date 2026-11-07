@@ -389,3 +389,8 @@ __all__ = [
     "verify_sound_calibrator",
     "verify_sound_level_meter_periodic",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.metrology.`` offers alone."""
+    return sorted(__all__)

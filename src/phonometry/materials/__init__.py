@@ -544,3 +544,8 @@ __all__ = [
     "weighted_absorption_from_third_octave",
     "weighted_coefficient_uncertainty",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.materials.`` offers alone."""
+    return sorted(__all__)

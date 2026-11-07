@@ -178,3 +178,8 @@ __all__ = [
     "tone_correction",
     "verify_aircraft_noise_system",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.aircraft.`` offers alone."""
+    return sorted(__all__)

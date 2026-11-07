@@ -86,3 +86,8 @@ __all__ = [
     "write_elastic_fdtd_animation",
     "write_fdtd_animation",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.simulation.`` offers alone."""
+    return sorted(__all__)

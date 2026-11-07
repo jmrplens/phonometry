@@ -2306,6 +2306,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **`dir()` and tab completion of a domain offer what it publishes.** The
+  root already answered `dir(phonometry)` with its published names, but no
+  domain did: `phonometry.filters.` completed to 49 names, among them
+  `annotations` from the `__future__` import and the submodules it imports
+  from, `core` and `design` included, which are no address of anything.
+  Each of the 21 domain packages now lists its `__all__` alone; the
+  submodules stay importable. The catalogues read their data files as files
+  of the package, where `importlib.resources.files("phonometry.solids.data")`
+  imported each data directory, which has no `__init__.py`, as a namespace
+  package: ten of them sat in `sys.modules`, and in the completion of their
+  domain, once the packages were imported and the ANP database read.
+
 - **With `[perf]`, every package imports where numba can write no cache.**
   The impulse time weighting and the BS.468-4 quasi-peak chain are compiled
   by numba with an on-disk cache, and numba refuses that decoration with

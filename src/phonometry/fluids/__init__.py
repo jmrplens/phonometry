@@ -81,3 +81,8 @@ __all__ = [
     "sea_water_density",
     "sea_water_sound_speed",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.fluids.`` offers alone."""
+    return sorted(__all__)

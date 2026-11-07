@@ -95,3 +95,8 @@ __all__ = [
     "WeightingClassLimits",
     "weighting_filter",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.filters.`` offers alone."""
+    return sorted(__all__)

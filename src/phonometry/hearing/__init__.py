@@ -254,3 +254,8 @@ __all__ = [
     "verify_fixture_isolation",
     "VIBROTACTILE_HEARING_LEVELS",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.hearing.`` offers alone."""
+    return sorted(__all__)

@@ -422,3 +422,8 @@ __all__ = [
     "verify_reference_source_drift",
     "verify_source_directionality",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.emission.`` offers alone."""
+    return sorted(__all__)

@@ -177,6 +177,8 @@ class ImpulseResponseResult(OwnsArrays):
     :func:`phonometry.speech.sti_from_impulse_response`. Indexing,
     ``len(result)`` and the ``size``/``ndim``/``shape``/``dtype`` attributes
     forward to ``ir``.
+
+    :ivar method: One of ``"spectral"``, ``"farina"``, ``"mls"`` or ``"golay"``.
     """
 
     ir: NDArray[np.float64]
@@ -251,6 +253,8 @@ class ImpulseResponseResult(OwnsArrays):
         With ``ax`` given, only the decay panel is drawn on it. Requires
         matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_impulse_response

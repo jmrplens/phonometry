@@ -114,8 +114,11 @@ WEIGHTING_GUIDANCE: tuple[Guidance, ...] = ("nmfs-2024", "nmfs-2018", "southall-
 class WeightingParameters(RichDisplay):
     """Auditory weighting and exposure function parameters for one group.
 
-    :ivar group: Hearing-group code as used by its own guidance version.
-    :ivar guidance: The guidance version the row comes from.
+    :ivar group: Hearing-group code as used by its own guidance version. One of
+        ``"LF"``, ``"MF"``, ``"HF"``, ``"VHF"``, ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``,
+        ``"SI"``, ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
+    :ivar guidance: The guidance version the row comes from. One of ``"nmfs-2024"``,
+        ``"nmfs-2018"`` or ``"southall-2019"``.
     :ivar description: Plain-language name of the hearing group.
     :ivar a: Low-frequency exponent ``a``.
     :ivar b: High-frequency exponent ``b``.
@@ -422,8 +425,11 @@ class ExposureCriteria(RichDisplay):
     unweighted ("flat"), as every source states. ``None`` means the criterion
     is not published by that guidance version.
 
-    :ivar group: Hearing-group code.
-    :ivar guidance: The guidance version.
+    :ivar group: Hearing-group code. One of ``"LF"``, ``"MF"``, ``"HF"``, ``"VHF"``,
+        ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``, ``"SI"``, ``"PCW"``, ``"OCW"``,
+        ``"PCA"`` or ``"OCA"``.
+    :ivar guidance: The guidance version. One of ``"nmfs-2024"``, ``"nmfs-2018"`` or
+        ``"southall-2019"``.
     :ivar impulsive: Whether these are the impulsive-noise criteria.
     :ivar tts_sel: Weighted TTS-onset sound exposure level, in dB.
     :ivar injury_sel: Weighted injury-onset (PTS / AUD INJ) SEL, in dB.
@@ -561,7 +567,8 @@ def _check_guidance(guidance: object) -> Guidance:
 def hearing_groups(guidance: Guidance = "nmfs-2024") -> tuple[HearingGroup, ...]:
     """Hearing-group codes defined by a guidance version.
 
-    :param guidance: One of :data:`WEIGHTING_GUIDANCE`.
+    :param guidance: One of :data:`WEIGHTING_GUIDANCE`. One of ``"nmfs-2024"``,
+        ``"nmfs-2018"`` or ``"southall-2019"``.
     :return: The group codes, in the order the source tabulates them.
     :raises ValueError: If the version is unknown.
     :raises TypeError: if ``guidance`` is not a text.
@@ -574,8 +581,11 @@ def weighting_parameters(
 ) -> WeightingParameters:
     """Weighting/exposure parameters of one hearing group.
 
-    :param group: Hearing-group code as used by ``guidance``, as written.
-    :param guidance: One of :data:`WEIGHTING_GUIDANCE`.
+    :param group: Hearing-group code as used by ``guidance``, as written. One of
+        ``"LF"``, ``"MF"``, ``"HF"``, ``"VHF"``, ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``,
+        ``"SI"``, ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
+    :param guidance: One of :data:`WEIGHTING_GUIDANCE`. One of ``"nmfs-2024"``,
+        ``"nmfs-2018"`` or ``"southall-2019"``.
     :return: The :class:`WeightingParameters` row.
     :raises TypeError: If ``group`` or ``guidance`` is not a text.
     :raises ValueError: If the version or the group is unknown.
@@ -615,8 +625,11 @@ class AuditoryWeightingResult(OwnsArrays):
         :math:`E(f) = K + C - W(f)`, in dB (the frequency-dependent
         TTS-onset level).
     :ivar parameters: The :class:`WeightingParameters` used.
-    :ivar guidance: The guidance version.
-    :ivar group: Hearing-group code.
+    :ivar guidance: The guidance version. One of ``"nmfs-2024"``, ``"nmfs-2018"`` or
+        ``"southall-2019"``.
+    :ivar group: Hearing-group code. One of ``"LF"``, ``"MF"``, ``"HF"``, ``"VHF"``,
+        ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``, ``"SI"``, ``"PCW"``, ``"OCW"``,
+        ``"PCA"`` or ``"OCA"``.
     :ivar weighted_tts_onset: :math:`T_\mathrm{w} = K + C`, the minimum of the
         exposure function, in dB.
     """
@@ -665,7 +678,10 @@ class AuditoryWeightingResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the weighting function versus frequency."""
+        """Plot the weighting function versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_auditory_weighting
 
@@ -697,7 +713,9 @@ def auditory_weighting(
     """Auditory weighting function ``W(f)`` of a marine-mammal hearing group.
 
     :param frequency_hz: Frequency or frequencies, in Hz (strictly positive).
-    :param group: Hearing-group code as used by ``guidance``.
+    :param group: Hearing-group code as used by ``guidance``. One of ``"LF"``, ``"MF"``,
+        ``"HF"``, ``"VHF"``, ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``, ``"SI"``,
+        ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
     :param guidance: ``"nmfs-2024"`` (default, current), ``"nmfs-2018"`` or
         ``"southall-2019"``.
     :return: An :class:`AuditoryWeightingResult`.
@@ -744,7 +762,9 @@ def exposure_criteria(
 ) -> ExposureCriteria:
     """Published TTS and injury onset criteria of a hearing group.
 
-    :param group: Hearing-group code as used by ``guidance``.
+    :param group: Hearing-group code as used by ``guidance``. One of ``"LF"``, ``"MF"``,
+        ``"HF"``, ``"VHF"``, ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``, ``"SI"``,
+        ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
     :param guidance: ``"nmfs-2024"`` (default), ``"nmfs-2018"`` or
         ``"southall-2019"``.
     :param impulsive: Return the impulsive-noise criteria (dual metric: a
@@ -817,8 +837,11 @@ class WeightedExposureResult(OwnsArrays):
     :ivar tts_peak_margin: ``peak_spl - tts_peak_spl``, in dB (or ``None``):
         the peak-SPL half of the dual metric on the TTS side, which can trip
         ``exceeds_tts`` on its own.
-    :ivar guidance: The guidance version.
-    :ivar group: Hearing-group code.
+    :ivar guidance: The guidance version. One of ``"nmfs-2024"``, ``"nmfs-2018"`` or
+        ``"southall-2019"``.
+    :ivar group: Hearing-group code. One of ``"LF"``, ``"MF"``, ``"HF"``, ``"VHF"``,
+        ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``, ``"SI"``, ``"PCW"``, ``"OCW"``,
+        ``"PCA"`` or ``"OCA"``.
     :ivar impulsive: Whether the impulsive criteria were compared against.
 
     The published criteria (:attr:`criteria`) are read from the guidance, the
@@ -932,7 +955,10 @@ class WeightedExposureResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the unweighted and weighted band spectra with the criteria."""
+        """Plot the unweighted and weighted band spectra with the criteria.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_weighted_exposure
 
@@ -1141,7 +1167,9 @@ def weighted_exposure(
         returns for bands narrower than its FFT bin spacing; such a band adds
         nothing to the energy sum. Both input arrays are copied, so the result
         never aliases the caller's data.
-    :param group: Hearing-group code as used by ``guidance``.
+    :param group: Hearing-group code as used by ``guidance``. One of ``"LF"``, ``"MF"``,
+        ``"HF"``, ``"VHF"``, ``"PW"``, ``"OW"``, ``"PA"``, ``"OA"``, ``"SI"``,
+        ``"PCW"``, ``"OCW"``, ``"PCA"`` or ``"OCA"``.
     :param guidance: ``"nmfs-2024"`` (default), ``"nmfs-2018"`` or
         ``"southall-2019"``.
     :param impulsive: Compare against the impulsive criteria (the default, the

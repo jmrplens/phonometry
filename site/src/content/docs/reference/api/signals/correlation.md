@@ -183,7 +183,7 @@ Normalizations:
 | `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the correlation values come out in Pa². The normalized `coefficient` divides them out and does not move. |
 | `y` | Second signal, same length, or `None` for autocorrelation. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the correlation values come out in Pa². The normalized `coefficient` divides them out and does not move. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
-| `normalization` | See above (default `'unbiased'`). |
+| `normalization` | See above (default `'unbiased'`). One of `"biased"`, `"unbiased"` or `"coefficient"`. |
 | `max_lag` | Largest lag magnitude to keep, in seconds (default: the full `N-1` samples). |
 
 **Returns:** A [`CorrelationResult`](/phonometry/reference/api/signals/correlation/#correlationresult).
@@ -450,7 +450,7 @@ interval (Eq. 8.130).
 | `y` | Delayed record, 1-D, same length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, though a delay is scale-free: the Signal is taken here for the rate it carries, and nothing in the result moves with the factor. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `method` | `'gcc'` (default), `'direct'` or `'phase'`. |
-| `weighting` | GCC weighting (default `'phat'`; ignored otherwise). |
+| `weighting` | GCC weighting (default `'phat'`; ignored otherwise). One of `"none"`, `"roth"`, `"scot"`, `"phat"` or `"ml"`. |
 | `window` | Welch taper for `'gcc'`/`'phase'`, a scipy window name or a tuple of a name and its parameters (default Hann). |
 | `nperseg` | Welch segment length for `'gcc'`/`'phase'` (`None` picks the shared default). |
 | `overlap` | Welch overlap fraction for `'gcc'`/`'phase'`. |
@@ -495,7 +495,7 @@ Time-delay estimate between two records.
 | `delay` | Estimated delay $\hat{\tau}_0$ of the second record relative to the first, in seconds (positive: `y` lags `x`). |
 | `delay_samples` | The same delay in (fractional) samples. |
 | `method` | `'direct'`, `'gcc'` or `'phase'`. |
-| `weighting` | GCC weighting name (`None` unless `method='gcc'`). |
+| `weighting` | GCC weighting name (`None` unless `method='gcc'`). One of `"none"`, `"roth"`, `"scot"`, `"phat"` or `"ml"`. |
 | `lags` | Lag axis of [`correlation`](/phonometry/reference/api/signals/correlation/#correlation), in seconds. |
 | `correlation` | The correlation function whose peak was located: the correlation coefficient $\hat{\rho}_{xy}(\tau)$ for `'direct'`, the weighted GCC $\hat{R}_\psi(\tau)$ (normalized to unit peak magnitude) for `'gcc'`, and the unweighted equivalent for `'phase'` (whose estimate comes from Eq. 5.101b, not from this curve). |
 | `peak_correlation` | Plain correlation coefficient $\hat{\rho}_{xy}$ at the estimated delay (rounded to the nearest sample), the quantity entering the B&P error formulas, whatever the method. |

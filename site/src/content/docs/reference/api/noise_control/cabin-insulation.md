@@ -171,7 +171,7 @@ ISO 3741 correction 6.4 asks for, and a margin under
 | `cabin_levels` | $(L_p)_{\text{cabin}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `method` | `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 | `room_background_levels` | Background in the room per band, in decibels, for the correction of 7.2.2. |
 | `cabin_background_levels` | Background inside the cabin per band, in decibels, for the correction of 6.4. |
 | `a_weighted_room_level` | $(L_{pA})_{\text{room}}$, in decibels. |
@@ -215,7 +215,7 @@ The sound pressure insulation of a cabin, band by band.
 | `a_weighted_insulation` | $D'_{p\mathrm{A}}$ of Equation (3), in decibels, or `None`. Defined only for the actual-noise method. |
 | `internal_noise_level` | $L_{pA}$ of 6.7, in decibels, or `None` when the cabin has no integral source. |
 | `method` | `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
 Whether the answer carries the prime (`apparent`) is read from the
 method, so it is not a field.
@@ -289,7 +289,7 @@ for that method and ratio, so it is read from them and is not a field.
 
 | Name | Description |
 | :--- | :--- |
-| `method` | The method the statement is about. |
+| `method` | The method the statement is about. One of `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
 | `volume_ratio` | $V_{\text{room}} / V_{\text{cabin}}$. |
 
 ### CabinUncertainty.excess_standard_deviation_db
@@ -842,7 +842,7 @@ answer to that objection.
 | :--- | :--- |
 | `insulation` | $D_p$ or $D'_p$ over the 16 one-third-octave rating bands or the 5 octave ones, in decibels. |
 | `method` | The method the spectrum was measured by, `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`, as [`cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) takes it. It decides whether the rating is $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** The rating, as a [`WeightedCabinInsulation`](/phonometry/reference/api/noise_control/cabin-insulation/#weightedcabininsulation).
 

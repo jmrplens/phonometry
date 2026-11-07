@@ -268,6 +268,8 @@ class JointOpenBandRating(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_joint_open_band_rating
@@ -519,6 +521,8 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         curve over the rating range, as the diagram of Figure J.7. Requires
         matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_lab_joint_insulation
@@ -794,6 +798,8 @@ class JointTestElementCheck(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_joint_test_element_check
@@ -903,6 +909,8 @@ class GapWidthCheck(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_gap_width_check
@@ -1052,6 +1060,7 @@ class JointGapSeries(OwnsArrays):
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :raises TypeError: if ``quantity`` is not a text.
         """
         from ..._i18n import check_language
@@ -1071,6 +1080,8 @@ class JointGapSeries(OwnsArrays):
         Every result must hold whole octaves of one-third-octave bands.
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_joint_gap_octaves
@@ -1227,6 +1238,8 @@ class JointGapSeriesCheck(RichDisplay):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_joint_gap_series_check

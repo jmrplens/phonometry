@@ -402,6 +402,8 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     of the room, which :attr:`source_size_recommended` reads and
     :attr:`passes` leaves out, the clause saying "should" where 6.2, 6.3 and
     6.6 say "shall".
+
+    :ivar method: One of ``"direct"`` or ``"comparison"``.
     """
 
     frequencies: np.ndarray
@@ -1318,6 +1320,8 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     and ``background_requirement_met_a`` the 4 dB test of 6.5 read from it.
     ``sigma_r0`` is Table 5 per band (``NaN`` at 63 Hz) and ``sigma_r0_a`` its
     A-weighted row; the uncertainty properties follow Formulae (12) and (13).
+
+    :ivar method: One of ``"direct"`` or ``"comparison"``.
     """
 
     frequencies: np.ndarray

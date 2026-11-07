@@ -45,7 +45,8 @@ class SoundSpeedProfile(OwnsArrays):
     :ivar depths: Depths, in metres (increasing downward).
     :ivar speeds_of_sound: Sound speed at each depth, in m/s.
     :ivar gradient_per_s: Vertical sound-speed gradient ``dc/dz``, in (m/s)/m.
-    :ivar model: The equation used.
+    :ivar model: The equation used. One of ``"unesco"``, ``"del_grosso"``,
+        ``"mackenzie"`` or ``"medwin"``.
     """
 
     depths: NDArray[np.float64]
@@ -95,7 +96,10 @@ class SoundSpeedProfile(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the sound-speed profile (speed vs depth, depth increasing down)."""
+        """Plot the sound-speed profile (speed vs depth, depth increasing down).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_sound_speed_profile
 
@@ -118,7 +122,8 @@ def sound_speed_profile(
     :param temperatures_c: Temperature per depth, in °C (array or a scalar
         broadcast to every depth).
     :param salinities: Salinity per depth, in PSU (array or scalar).
-    :param model: Sound-speed equation (see :func:`sea_water_sound_speed`).
+    :param model: Sound-speed equation (see :func:`sea_water_sound_speed`). One of
+        ``"unesco"``, ``"del_grosso"``, ``"mackenzie"`` or ``"medwin"``.
     :param latitude: Latitude for the depth→pressure conversion, in degrees.
     :return: A :class:`SoundSpeedProfile`.
     :raises ValueError: If the inputs are invalid.

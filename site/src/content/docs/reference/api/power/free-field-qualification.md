@@ -577,7 +577,7 @@ Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
 | `origin_fitted` | `True` when the origin was searched inside `source_box_m`. |
 | `source_box_m` | The box the test source occupies, `(2, 3)` rows of lower and upper corner, or `None` for a fixed origin. |
 | `traverse_names` | The label of each traverse as given, `""` when none was. |
-| `traverse_targets` | What each traverse was selected towards (A.3.3 a) to e)), as given. |
+| `traverse_targets` | What each traverse was selected towards (A.3.3 a) to e)), as given. Each one of `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` or `"unique features"`. |
 | `positions_m` | The measurement points of each traverse, `(N, 3)`. |
 | `distances` | The distance $r_i$ of each point from the origin, in metres. |
 | `levels` | $L_{pi}$ of each traverse after the stability correction of Formula (1), `(N, NF)`, `nan` where not measured. |
@@ -669,7 +669,7 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 | `monitor_levels` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
 | `background_levels` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
 | `name` | A label for the traverse (the path it follows: a dihedral corner, the nearest wall, a door). |
-| `targets` | What the path is selected towards, among the five of the amended ISO 3745 A.3.3 a) to e): `"dihedral corner"`, `"trihedral corner"`, `"boundary center"` (the centre of the most uniform boundary surface), `"closest boundary"` and `"unique features"` (a door, a window, a ventilation opening). One path may serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an empty tuple names none. |
+| `targets` | What the path is selected towards, among the five of the amended ISO 3745 A.3.3 a) to e): `"dihedral corner"`, `"trihedral corner"`, `"boundary center"` (the centre of the most uniform boundary surface), `"closest boundary"` and `"unique features"` (a door, a window, a ventilation opening). One path may serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an empty tuple names none. Each one of `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` or `"unique features"`. |
 
 ### MicrophoneTraverse.along()
 
@@ -702,7 +702,7 @@ A traverse laid out along a straight line from `start_m`.
 | `monitor_levels` | As for the class. |
 | `background_levels` | As for the class. |
 | `name` | As for the class. |
-| `targets` | As for the class. |
+| `targets` | As for the class. Each one of `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` or `"unique features"`. |
 
 **Returns:** The traverse.
 
@@ -765,7 +765,7 @@ Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The one-third octave mid-band frequencies, in hertz. |
-| `room` | The room type the source is to qualify. |
+| `room` | The room type the source is to qualify. One of `"anechoic"` or `"hemi-anechoic"`. |
 | `mean_level` | The arithmetic mean of the decibel levels per band. |
 | `max_positive_deviation_db` | The largest level above the mean. |
 | `max_negative_deviation_db` | The largest level below the mean, a negative number. |

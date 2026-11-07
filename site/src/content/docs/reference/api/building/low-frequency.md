@@ -350,6 +350,12 @@ Plot the three low-frequency bands, default against corner and LF.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## LowFrequencyWarning
 
 An ISO 16283 low-frequency requirement the measurement does not meet.

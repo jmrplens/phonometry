@@ -230,6 +230,12 @@ AtmosphericPEResult.plot(
 
 Plot the relative-level field over the range-height plane.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## AtmosphericRayResult
 
 ```python
@@ -271,6 +277,12 @@ AtmosphericRayResult.plot(
 
 Plot the curved ray paths (height on the vertical axis).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## EffectiveSoundSpeedProfile
 
 ```python
@@ -308,6 +320,12 @@ EffectiveSoundSpeedProfile.plot(
 ```
 
 Plot the effective sound-speed profile (height on the vertical axis).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### EffectiveSoundSpeedProfile.speed_at()
 

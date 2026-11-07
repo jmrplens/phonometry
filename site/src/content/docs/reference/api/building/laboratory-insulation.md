@@ -244,6 +244,12 @@ automatic rating to be available (16 or 5 bands) and matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### LaboratoryAirborneInsulationResult.report()
 
 ```python
@@ -328,6 +334,12 @@ Delegates to the weighted impact-rating plot. Requires the automatic
 rating to be available (16 or 5 bands) and matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### LaboratoryImpactInsulationResult.report()
 

@@ -126,3 +126,9 @@ For STOI this is the mean correlation per one-third-octave band; for
 ESTOI, whose index mixes the bands, it is the spectral correlation per
 analysis segment. Requires matplotlib (the `[plot]` extra);
 returns the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

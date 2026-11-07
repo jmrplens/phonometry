@@ -233,6 +233,12 @@ FlyoverResult.plot(
 
 Plot the per-segment contributions to the event level.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## impedance_adjustment
 
 ```python
@@ -329,7 +335,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | `x` | Grid x coordinates, in metres. |
 | `y` | Grid y coordinates, in metres. |
 | `reference_speed_m_s` | NPD reference speed, in m/s. |
-| `mounting` | Engine mounting. |
+| `mounting` | Engine mounting. One of `"wing"`, `"fuselage"` or `"propeller"`. |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `atmosphere` | Aerodrome air temperature and pressure, an [`AerodromeAtmosphere`](/phonometry/reference/api/aeroacoustics/airport-noise/#aerodromeatmosphere) (impedance adjustment). |
 | `segments` | What each segment is doing, a [`FlightSegmentState`](/phonometry/reference/api/aeroacoustics/airport-noise/#flightsegmentstate) (see [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level)). |
@@ -406,6 +412,12 @@ NoiseContourResult.plot(
 ```
 
 Plot filled noise contours over the ground plane.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## npd_curve
 
@@ -514,6 +526,12 @@ NPDLevelResult.plot(
 ```
 
 Plot the interpolated level versus slant distance (log axis).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## start_of_roll_directivity
 

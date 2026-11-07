@@ -228,6 +228,12 @@ WindTurbineTonalityResult.plot(
 
 Plot the narrowband spectrum with the critical band and masking level.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### WindTurbineTonalityResult.report()
 
 ```python

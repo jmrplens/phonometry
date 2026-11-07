@@ -222,6 +222,12 @@ Plot the radiation efficiency `sigma(f)` on log-log axes.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### RadiationEfficiencyResult.plot_geometry()
 
 ```python
@@ -237,6 +243,12 @@ Draw the baffled plate to scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RadiationEfficiencyResult.radiation_index
 

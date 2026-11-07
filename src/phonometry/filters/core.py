@@ -213,6 +213,7 @@ class OctaveFilterResult(OwnsArrays):
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :raises ValueError: when the call that made this result asked for no
             level, because there is then nothing to draw.
         """

@@ -113,6 +113,12 @@ BottomLossResult.plot(
 
 Plot the bottom loss versus grazing angle with the critical angle.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## critical_angle
 
 ```python

@@ -499,7 +499,9 @@ def guide_values(
 ) -> GuideValues:
     r"""The guide values of Table 1 for one area, time of day and kind of source.
 
-    :param area: The row of Table 1, as :data:`GUIDE_VALUES` keys it.
+    :param area: The row of Table 1, as :data:`GUIDE_VALUES` keys it. One of
+        ``"industrial"``, ``"commercial"``, ``"mixed"``, ``"residential"`` or
+        ``"sensitive"``.
     :param time_of_day: ``"day"`` (default) or ``"night"``.
     :param source: ``"general"`` (default), ``"road"`` or ``"railway"``, for
         which Table 1 applies as printed; ``"urban_railway"``, the surface
@@ -607,7 +609,9 @@ def construction_guide_values(
         to 78.
     :param stage: ``"I"`` (default), ``"II"`` or ``"III"``.
     :param area: The area the site is in; a commercial or industrial one has
-        an :math:`A_\mathrm{o}` of 6 rather than 5, and ``"sensitive"`` is refused.
+        an :math:`A_\mathrm{o}` of 6 rather than 5, and ``"sensitive"`` is refused. One
+        of ``"industrial"``, ``"commercial"``, ``"mixed"``, ``"residential"`` or
+        ``"sensitive"``.
     :return: The three values, as a :class:`GuideValues`.
     :raises ValueError: For a duration that is not a whole number of days
         from 1 to 78, an unknown stage, an unknown area or a sensitive one.
@@ -961,7 +965,9 @@ class PeopleAssessment(RichDisplay):
     :ivar kb_fmax: :math:`KB_\mathrm{Fmax}` as assessed.
     :ivar kb_ftr: :math:`KB_\mathrm{FTr}`, or ``None`` when it was not needed.
     :ivar guide: The three guide values it was held to.
-    :ivar source: The kind of source the rules were read for.
+    :ivar source: The kind of source the rules were read for. One of ``"general"``,
+        ``"road"``, ``"railway"``, ``"urban_railway"``, ``"quarry_blasting"``,
+        ``"road_existing"`` or ``"induced_seismic"``.
     :ivar rare_short_events: Whether the immission is at most three short
         events a day, such as blasting, which 6.5.1 judges on :math:`A_\mathrm{o}`
         alone.

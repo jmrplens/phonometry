@@ -229,6 +229,12 @@ Plot the insertion loss versus frequency.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### BarrierInsertionLoss.plot_geometry()
 
 ```python
@@ -244,6 +250,12 @@ Draw the source-barrier-receiver section to scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### BarrierInsertionLoss.report()
 
@@ -571,3 +583,9 @@ Plot the excess attenuation $\Delta L$ versus frequency.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

@@ -441,7 +441,10 @@ class NPDLevelResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the interpolated level versus slant distance (log axis)."""
+        """Plot the interpolated level versus slant distance (log axis).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_npd_level
 
@@ -805,7 +808,10 @@ class FlyoverResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-segment contributions to the event level."""
+        """Plot the per-segment contributions to the event level.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_flyover
 
@@ -1560,7 +1566,10 @@ class NoiseContourResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot filled noise contours over the ground plane."""
+        """Plot filled noise contours over the ground plane.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_noise_contour
 
@@ -1596,7 +1605,8 @@ def noise_contour(
     :param x: Grid x coordinates, in metres.
     :param y: Grid y coordinates, in metres.
     :param reference_speed_m_s: NPD reference speed, in m/s.
-    :param mounting: Engine mounting.
+    :param mounting: Engine mounting. One of ``"wing"``, ``"fuselage"`` or
+        ``"propeller"``.
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     :param atmosphere: Aerodrome air temperature and pressure, an
         :class:`AerodromeAtmosphere` (impedance adjustment).

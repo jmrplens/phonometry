@@ -352,13 +352,15 @@ class HeadphoneClassification(RichDisplay):
     """The classification of a headphone by IEC 60268-7:2010 Clause 4.
 
     :ivar principle: The principle of the transducer, a key of
-        :data:`TRANSDUCER_PRINCIPLES`.
+        :data:`TRANSDUCER_PRINCIPLES`. One of ``"D"``, ``"E"``, ``"F"``, ``"M"``,
+        ``"P"`` or ``"S"``.
     :ivar earphone_type: The type of earphone, a key of
-        :data:`EARPHONE_TYPES`.
+        :data:`EARPHONE_TYPES`. One of ``"C"``, ``"E"``, ``"H"``, ``"I"``, ``"M"``,
+        ``"S"`` or ``"T"``.
     :ivar coupling: The acoustic coupling to the ear canal, a key of
-        :data:`ACOUSTIC_COUPLINGS`.
+        :data:`ACOUSTIC_COUPLINGS`. One of ``"L"`` or ``"S"``.
     :ivar radiation: The radiation to the external environment, a key of
-        :data:`BACK_RADIATIONS`.
+        :data:`BACK_RADIATIONS`. One of ``"C"`` or ``"O"``.
     :ivar impedance_ohm: The impedance, in ohms, as coded by
         :func:`impedance_code`.
     :ivar n_channels: The number of channels, 1 to 9.

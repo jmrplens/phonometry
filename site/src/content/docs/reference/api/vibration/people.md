@@ -332,7 +332,7 @@ is not applicable to an especially sensitive area, a hospital for one;
 | :--- | :--- |
 | `duration_days` | $D$, a whole number of working days from 1 to 78. |
 | `stage` | `"I"` (default), `"II"` or `"III"`. |
-| `area` | The area the site is in; a commercial or industrial one has an $A_\mathrm{o}$ of 6 rather than 5, and `"sensitive"` is refused. |
+| `area` | The area the site is in; a commercial or industrial one has an $A_\mathrm{o}$ of 6 rather than 5, and `"sensitive"` is refused. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
 
 **Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues).
 
@@ -385,7 +385,7 @@ The guide values of Table 1 for one area, time of day and kind of source.
 
 | Name | Description |
 | :--- | :--- |
-| `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. |
+| `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
 | `source` | `"general"` (default), `"road"` or `"railway"`, for which Table 1 applies as printed; `"urban_railway"`, the surface line of a public transport system, for which 6.5.3.3 raises $A_\mathrm{u}$ and $A_\mathrm{r}$ by the factor 1,5; or `"quarry_blasting"`, blasts on working days with the neighbours warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day, for which 6.5.1 lets a mixed or residential area take the daytime $A_\mathrm{o}$ of row 1, which is 6. The draft of 2023 has no `"urban_railway"` and adds `"road_existing"`, an existing road by an existing building, whose $A_\mathrm{u}$ and $A_\mathrm{r}$ its neighbours must put up with exceeded by up to 50 % (6.5.2), and `"induced_seismic"`, which the daytime $A_\mathrm{o}$ bounds by night as well (6.5.1.3). |
 | `edition` | `"1999"` (default), DIN 4150-2:1999-06, or `"2023"`, E DIN 4150-2:2023-08, whose Table 1 has the night $A_\mathrm{u}$ of a mixed area at 0,1. |
@@ -577,7 +577,7 @@ built to comply with an immission the standard fails.
 | `kb_fmax` | $KB_\mathrm{Fmax}$ as assessed. |
 | `kb_ftr` | $KB_\mathrm{FTr}$, or `None` when it was not needed. |
 | `guide` | The three guide values it was held to. |
-| `source` | The kind of source the rules were read for. |
+| `source` | The kind of source the rules were read for. One of `"general"`, `"road"`, `"railway"`, `"urban_railway"`, `"quarry_blasting"`, `"road_existing"` or `"induced_seismic"`. |
 | `rare_short_events` | Whether the immission is at most three short events a day, such as blasting, which 6.5.1 judges on $A_\mathrm{o}$ alone. |
 
 ### PeopleAssessment.criterion

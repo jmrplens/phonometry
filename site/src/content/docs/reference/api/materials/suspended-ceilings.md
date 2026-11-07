@@ -151,7 +151,7 @@ pass an arrangement the clause fails.
 | Name | Description |
 | :--- | :--- |
 | `area` | The specimen area as built, in square metres. |
-| `mounting` | The mounting letter the arrangement uses. |
+| `mounting` | The mounting letter the arrangement uses. One of `"A"`, `"B"`, `"E"` or `"J"`. |
 | `depth_mm` | The overall depth of construction, in millimetres, for a type E mounting, or `None` for the others. |
 | `deflection_mm` | The largest deflection of the specimen, in millimetres. |
 | `substructure_width_mm` | The substructure profile width, in millimetres. |
@@ -296,7 +296,7 @@ substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
 | Name | Description |
 | :--- | :--- |
 | `area` | The specimen area as built, in square metres. |
-| `mounting` | The mounting letter, `"E"` by default. |
+| `mounting` | The mounting letter, `"E"` by default. One of `"A"`, `"B"`, `"E"` or `"J"`. |
 | `depth_mm` | The overall depth of construction, in millimetres, required for a type E mounting. |
 | `deflection_mm` | The largest deflection of the specimen, in millimetres. |
 | `substructure_width_mm` | The substructure profile width, in millimetres. |

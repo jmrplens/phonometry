@@ -167,7 +167,7 @@ One single-number rating of a road traffic noise reducing device.
 | :--- | :--- |
 | `rating` | The rating before rounding, in dB. `DLα` (EN 1793-1), `DL_R` (EN 1793-2) or `DL_RI` (EN 1793-5), depending on `quantity`. |
 | `reported` | The same rating rounded to the nearest integer, which is what a test report carries and what the category is read off. |
-| `category` | The Annex A category of the reported value, `"A1"` to `"A5"` for absorption or `"B1"` to `"B4"` for insulation, or `None` for a railway rating and for reflection, whose standards print no ladder. |
+| `category` | The Annex A category of the reported value, `"A1"` to `"A5"` for absorption or `"B1"` to `"B4"` for insulation, or `None` for a railway rating and for reflection, whose standards print no ladder. One of `"A1"`, `"A2"`, `"A3"`, `"A4"`, `"A5"`, `"B1"`, `"B2"`, `"B3"` or `"B4"`. |
 | `quantity` | `"absorption"`, `"insulation"` or `"reflection"`. |
 | `spectrum` | `"road"` (EN 1793-3) or `"railway"` (EN 16272-3-1). |
 | `frequencies` | The eighteen band centre frequencies, in Hz. |
@@ -190,6 +190,12 @@ Plot the per-band input against the spectrum that weights it.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## RoadDeviceWarning
 

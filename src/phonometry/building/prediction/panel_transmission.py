@@ -222,7 +222,7 @@ def field_incidence_correction(fraction: BandFraction | np.integer[Any] = 3) -> 
     """Field-incidence mass-law correction ``dB`` (Bies Eq. 7.42).
 
     :param fraction: The band set, 3 for one-third octaves (5.5 dB) or 1 for
-        octaves (4.0 dB).
+        octaves (4.0 dB). One of ``1`` or ``3``.
     :return: The correction subtracted from the normal-incidence mass law, dB.
     :raises ValueError: for a band set other than 1 or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
@@ -252,7 +252,7 @@ def mass_law_transmission_loss(
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
     :param incidence: ``"normal"`` or ``"field"`` (Default: ``"field"``).
     :param fraction: The band set of the field correction, 3 for one-third
-        octaves or 1 for octaves.
+        octaves or 1 for octaves. One of ``1`` or ``3``.
     :param field_correction: Explicit field-incidence correction, in dB
         (>= 0), overriding the band table (Default: ``None``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
@@ -377,7 +377,7 @@ class SoundReductionResult(OwnsArrays):
         :param fraction: Band set forwarded to
             :func:`phonometry.building.weighted_rating`, 3 for one-third
             octaves or 1 for octaves (Default: ``None``, read from the number
-            of values).
+            of values). One of ``1`` or ``3``.
         :return: The :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`.
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float).
@@ -425,6 +425,8 @@ class SoundReductionResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_sound_reduction
@@ -440,6 +442,7 @@ class SoundReductionResult(OwnsArrays):
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
@@ -502,7 +505,7 @@ def single_panel_transmission_loss(
         used to compute ``fc`` when *critical_frequency* is not given.
     :param loss_factor: Total loss factor ``eta`` (> 0, Default: 0.01).
     :param fraction: The band set of the field correction, 3 for one-third
-        octaves or 1 for octaves.
+        octaves or 1 for octaves. One of ``1`` or ``3``.
     :param coincidence_model: ``"sharp"`` (Default, Bies Eq. 7.44 above ``fc``
         with the interpolated bridge from :math:`f_\mathrm{c}/2`) or ``"cremer"``
         (Norton Eq. 3.110, mass law right up to ``fc``).
@@ -791,7 +794,9 @@ def plateau_transmission_loss(
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param material: A key into :data:`PLATEAU_MATERIALS`, or a
-        :class:`~phonometry.solids.PlateauMaterial` row (Default: ``None``).
+        :class:`~phonometry.solids.PlateauMaterial` row (Default: ``None``). One of
+        ``"aluminium"``, ``"brick"``, ``"concrete"``, ``"glass"``, ``"lead"``,
+        ``"plaster"``, ``"plywood"`` or ``"steel"``.
     :param thickness_mm: Panel thickness, in **millimetres** (> 0), used with
         *material* to get the surface density.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
@@ -1313,7 +1318,8 @@ def orthotropic_transmission_loss(
         ``None`` and only by ``method="integral"``, but validated on both
         routes.
     :param fraction: The band set of the field correction of the Heckl
-        mass-law branch, 3 for one-third octaves or 1 for octaves.
+        mass-law branch, 3 for one-third octaves or 1 for octaves. One of ``1`` or
+        ``3``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"orthotropic-integral"``
@@ -1494,7 +1500,7 @@ def double_wall_transmission_loss(
     :param tie_stiffness_per_area: Stiffness per unit area :math:`N k / S` of a
         connection array bridging the cavity, in N/m^3 (>= 0, Default: 0).
     :param fraction: The band set of the field correction, 3 for one-third
-        octaves or 1 for octaves.
+        octaves or 1 for octaves. One of ``1`` or ``3``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"double-wall"``).

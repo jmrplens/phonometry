@@ -442,6 +442,12 @@ FlightProfile.plot(
 
 Plot the profile's height and thrust against distance along the track.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### FlightProfile.true_airspeed_kt
 
 *property*

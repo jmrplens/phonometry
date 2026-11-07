@@ -335,6 +335,12 @@ density (Long Equation (8.46)). The Schroeder frequency, when known,
 is marked on both. Requires matplotlib
 (the `[plot]` extra).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### RoomModesResult.surface_area
 
 *property*

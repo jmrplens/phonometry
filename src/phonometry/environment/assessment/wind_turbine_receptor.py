@@ -2041,7 +2041,8 @@ class WindTurbineRatingLevel(RichDisplay):
     :ivar adjustments: The three candidate adjustments, keyed
         ``"tonal"``, ``"amplitude_modulation"`` and ``"impulsive"``, in dB.
     :ivar governing: The adjustment applied, the most severe of the three, or
-        ``None`` when all three are zero.
+        ``None`` when all three are zero. One of ``"tonal"``, ``"amplitude_modulation"``
+        or ``"impulsive"``.
     :ivar rating_level: :math:`L_\mathrm{r} = L_\mathrm{eq} + K`, in dB.
     """
 

@@ -189,7 +189,7 @@ frequency, which for long thin shells can be substantial.
 | `thickness_m` | Wall thickness `t`, in m (> 0). |
 | `mean_radius` | Mean shell radius `a_m`, in m (> 0). |
 | `longitudinal_wave_speed` | Plate wave speed `cL`, in m/s (> 0). |
-| `fraction` | The analysis band set, 1 for octaves (Default, $F = 1.414$) or 3 for one-third octaves ($F = 1.122$). |
+| `fraction` | The analysis band set, 1 for octaves (Default, $F = 1.414$) or 3 for one-third octaves ($F = 1.122$). One of `1` or `3`. |
 
 **Returns:** The modal density `n(f)`, in modes per hertz.
 

@@ -339,6 +339,12 @@ Plot the radiated sound power level per band.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### VibrationSoundPowerResult.report()
 
 ```python

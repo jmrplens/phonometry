@@ -135,7 +135,7 @@ Sea water at one point of the ocean.
 | `salinity_psu` | Practical salinity `S`, dimensionless (default 35, the salinity of the standard ocean). |
 | `depth_m` | Depth below the surface, in metres (default 0). |
 | `latitude_deg` | Latitude, in degrees, for the depth-to-pressure conversions (default 45). |
-| `sound_speed_model` | Which of the four fits to use; see the module docstring. |
+| `sound_speed_model` | Which of the four fits to use; see the module docstring. One of `"unesco"`, `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
 
 **Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that point.
 

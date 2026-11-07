@@ -1053,7 +1053,14 @@ class FreeFieldParameterUncertainty(OwnsArrays):
     :ivar frequencies: The frequencies, in Hz.
     :ivar component_uncertainties_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_3_TABLE_1`, in dB at each
-        frequency.
+        frequency. Keyed by any of ``"series_impedance"``, ``"voltage_ratio"``,
+        ``"cross_talk"``, ``"noise"``, ``"distortion"``, ``"reflections"``,
+        ``"frequency"``, ``"receiver_shield"``, ``"transmitter_shield"``,
+        ``"distance"``, ``"static_pressure"``, ``"temperature"``,
+        ``"relative_humidity"``, ``"standing_waves"``, ``"air_attenuation"``,
+        ``"acoustic_centers"``, ``"polarizing_voltage"``, ``"plane_wave_deviation"``,
+        ``"mathematical_manipulations"``, ``"rounding"``, ``"repeatability"``,
+        ``"static_pressure_corrections"`` or ``"temperature_corrections"``.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 

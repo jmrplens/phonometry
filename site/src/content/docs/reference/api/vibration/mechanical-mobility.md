@@ -113,7 +113,7 @@ the name used here).
 | `value` | The (complex) FRF value(s) of kind *source*. |
 | `frequency` | Frequency `f`, in hertz (scalar or array, broadcast with *value*). |
 | `source` | The FRF kind of *value*: one of `"receptance"`, `"mobility"`, `"accelerance"`, `"dynamic_stiffness"`, `"impedance"` or `"apparent_mass"`. |
-| `target` | The FRF kind to convert to (same set). |
+| `target` | The FRF kind to convert to (same set). One of `"receptance"`, `"mobility"`, `"accelerance"`, `"dynamic_stiffness"`, `"impedance"` or `"apparent_mass"`. |
 
 **Returns:** The FRF value(s) of kind *target*, as a complex array.
 
@@ -181,6 +181,12 @@ Plot the mobility magnitude `|Y(f)|`.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### MobilityResult.report()
 
 ```python
@@ -244,6 +250,12 @@ The force-per-motion kinds are element-wise reciprocals, i.e. the
 (`driving_point=False`), `to("impedance")` returns the free
 impedance $1/Y_{ij}$, not the blocked matrix impedance of Table 1
 (which does not invert element-wise).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `target` | One of `"receptance"`, `"mobility"`, `"accelerance"`, `"dynamic_stiffness"`, `"impedance"` or `"apparent_mass"`. |
 
 **Raises**
 
@@ -379,6 +391,12 @@ no `ax` a two-panel figure is drawn and its two axes returned as a tuple; with
 `ax` the deviation diagnostic is drawn on it and that axes returned.
 
 Requires matplotlib (the `[plot]` extra).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RigidMassCalibrationResult.relative_deviation
 

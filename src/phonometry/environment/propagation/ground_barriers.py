@@ -283,6 +283,8 @@ class SphericalGroundResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_spherical_ground
@@ -768,6 +770,8 @@ class BarrierInsertionLoss(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_barrier_insertion_loss
@@ -783,6 +787,8 @@ class BarrierInsertionLoss(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_barrier_result_geometry

@@ -440,6 +440,12 @@ Plot `tau(theta)` versus incidence angle for this junction.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### JunctionTransmissionResult.plot_geometry()
 
 ```python
@@ -455,6 +461,12 @@ Draw the plate-junction cross-section to scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## JunctionWaveParameters
 
@@ -668,7 +680,7 @@ covered.
 | `angle_rad` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
 | `chi` | Wave parameter `chi` (Eq. 5.10, > 0). |
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
-| `junction` | `"X"` or `"T1"` (the only junctions with a straight section). |
+| `junction` | `"X"` or `"T1"` (the only junctions with a straight section). One of `"X"`, `"T1"`, `"T2"` or `"L"`. |
 
 **Returns:** `tau13(theta)` (same shape as *angle*).
 

@@ -1895,7 +1895,8 @@ def wheel_roughness(
 ) -> WavelengthSpectrum:
     """Wheel roughness ``L_r,VEH`` of Table G-1a.
 
-    :param brake: The :class:`BrakeType` of digit 3 of the vehicle descriptor.
+    :param brake: The :class:`BrakeType` of digit 3 of the vehicle descriptor. One of
+        ``"c"``, ``"k"`` or ``"n"``.
     :return: The wavelengths in mm and the levels in dB, as a
         :class:`WavelengthSpectrum`.
     :raises ValueError: If the brake type is not tabulated.
@@ -1922,7 +1923,7 @@ def rail_roughness(
     to be supplied by the Member State.
 
     :param roughness: The :class:`RailRoughnessClass` of digit 2 of the track
-        descriptor.
+        descriptor. One of ``"E"``, ``"M"``, ``"N"`` or ``"B"``.
     :return: The wavelengths in mm and the levels in dB, as a
         :class:`WavelengthSpectrum`.
     :raises ValueError: If the class carries no spectrum in Table G-1b.
@@ -2016,7 +2017,9 @@ def track_transfer(
 ) -> NDArray[np.float64]:
     """Track transfer function ``L_H,TR,i`` of Table G-3a, in dB per axle.
 
-    :param track: A :class:`TrackTransferClass` member or its column code.
+    :param track: A :class:`TrackTransferClass` member or its column code. One of
+        ``"M/S"``, ``"M/M"``, ``"M/H"``, ``"B/S"``, ``"B/M"``, ``"B/H"``, ``"W"`` or
+        ``"D"``.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the column is not tabulated.
     :raises TypeError: if ``track`` is not a text.
@@ -2098,7 +2101,10 @@ def traction_sound_power(
     :math:`L_{W,0,\mathrm{const},i} = L_{W,0,\mathrm{idling},i}`, so this
     one table serves both running conditions.
 
-    :param vehicle: A :class:`TractionVehicle` member or its description.
+    :param vehicle: A :class:`TractionVehicle` member or its description. One of
+        ``"diesel locomotive, c. 800 kW"``, ``"diesel locomotive, c. 2 200 kW"``,
+        ``"diesel multiple unit"``, ``"electric locomotive"`` or
+        ``"electric multiple unit"``.
     :return: The 24 band levels at source height A and at source height B,
         as a :class:`RailSourceSpectra`.
     :raises ValueError: If the vehicle is not tabulated.
@@ -2164,7 +2170,8 @@ def aerodynamic_sound_power(
 def bridge_transfer(bridge: BridgeType | BridgeTypeName) -> NDArray[np.float64]:
     """Bridge transfer function ``L_H,bridge,i`` of Table G-7, in dB per axle.
 
-    :param bridge: A :class:`BridgeType` member or its column label.
+    :param bridge: A :class:`BridgeType` member or its column label. One of
+        ``"+10 dB(A)"`` or ``"+15 dB(A)"``.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the column is not tabulated.
     :raises TypeError: if ``bridge`` is not a text.
@@ -2760,7 +2767,10 @@ class RailwayEmissionResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-metre line power of the two equivalent source heights."""
+        """Plot the per-metre line power of the two equivalent source heights.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_cnossos_rail_emission
 

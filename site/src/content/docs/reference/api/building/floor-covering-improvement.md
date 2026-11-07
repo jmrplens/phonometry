@@ -254,6 +254,12 @@ Plot the improvement spectrum `ΔL` (with `ΔLw` when available).
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### FloorCoveringImprovementResult.report()
 
 ```python
@@ -369,7 +375,7 @@ each octave.
 | :--- | :--- |
 | `improvement` | Improvement `ΔL` per one-third-octave band, in dB. |
 | `frequencies` | The matching one-third-octave centre frequencies, in Hz; must contain whole octave triplets (centre / centre·2^(±1/3)). |
-| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. |
+| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. One of `"ΔL"`, `"ΔR"`, `"Rs"`, `"LI"` or `"LI,norm"`. |
 
 **Returns:** An [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) with the octave centres (`.frequencies`) and the octave values (`.values`).
 

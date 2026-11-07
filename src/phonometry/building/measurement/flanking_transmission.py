@@ -385,7 +385,7 @@ class VibrationReductionResult(OwnsArrays):
         single number is averaged over, 3 for one-third octaves or 1 for
         octaves, as :meth:`octave_bands` states it (``fraction=1``); ``None``
         (the default, and what :func:`vibration_reduction_index` leaves) reads
-        it from the spacing of the frequencies each time.
+        it from the spacing of the frequencies each time. One of ``1`` or ``3``.
 
     ``single_number`` and ``bracketed`` are read from the fields, the
     0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
@@ -493,6 +493,8 @@ class VibrationReductionResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_vibration_reduction
@@ -812,7 +814,10 @@ class FlankingLevelDifferenceResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot ``Dn,f`` against the shifted ISO 717-1 reference curve."""
+        """Plot ``Dn,f`` against the shifted ISO 717-1 reference curve.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         if self.rating is None:
             msg = (
                 "No single-number rating is available to plot (need 16 "
@@ -896,7 +901,10 @@ class FlankingImpactLevelResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot ``Ln,f`` against the shifted ISO 717-2 reference curve."""
+        """Plot ``Ln,f`` against the shifted ISO 717-2 reference curve.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         if self.rating is None:
             msg = (
                 "No single-number rating is available to plot (need 16 "
@@ -985,7 +993,8 @@ def normalized_flanking_level_difference(
     :param reference_area: ``A0``, in m² (default 10 m²).
     :param fraction: Band set passed to
         :func:`phonometry.building.weighted_rating`, 3 for one-third octaves
-        or 1 for octaves; read from the number of bands when ``None``.
+        or 1 for octaves; read from the number of bands when ``None``. One of ``1`` or
+        ``3``.
     :return: A :class:`FlankingLevelDifferenceResult`; the single-number
         rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
@@ -1032,7 +1041,8 @@ def normalized_flanking_impact_level(
     :param reference_area: ``A0``, in m² (default 10 m²).
     :param fraction: Band set passed to
         :func:`phonometry.building.weighted_impact_rating`, 3 for one-third
-        octaves or 1 for octaves; read from the number of bands when ``None``.
+        octaves or 1 for octaves; read from the number of bands when ``None``. One of
+        ``1`` or ``3``.
     :return: A :class:`FlankingImpactLevelResult`; the single-number rating is
         formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.

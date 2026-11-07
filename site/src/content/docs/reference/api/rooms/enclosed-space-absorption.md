@@ -278,6 +278,12 @@ Plot the reverberation time over the octave bands.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ReverberationResult.report()
 
 ```python

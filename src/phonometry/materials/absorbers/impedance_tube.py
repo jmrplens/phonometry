@@ -574,6 +574,8 @@ class ImpedanceTubeResult(OwnsArrays):
     they were not supplied to :func:`two_microphone_impedance`; the spacing
     and ``x1`` are always there, because the reduction cannot run without
     them.
+
+    :ivar shape: One of ``"circular"``, ``"rectangular"`` or ``"square"``.
     """
 
     frequencies: Real
@@ -659,6 +661,8 @@ class ImpedanceTubeResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_impedance_tube
@@ -673,6 +677,8 @@ class ImpedanceTubeResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_impedance_tube_result_geometry

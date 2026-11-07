@@ -71,6 +71,12 @@ AmbientNoiseResult.plot(
 
 Plot the composite spectrum and its components versus frequency.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## ocean_ambient_noise
 
 ```python

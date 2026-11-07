@@ -474,6 +474,12 @@ Plot the in-situ absorption spectrum `alpha(f)`.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### InSituAbsorptionResult.plot_geometry()
 
 ```python
@@ -489,6 +495,12 @@ Draw the measurement set-up to scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## ISO13472_SPEED_OF_SOUND_M_S
 

@@ -300,7 +300,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | `'hemisphere'` (only shape with a coordinate table). |
+| `surface` | `'hemisphere'` (only shape with a coordinate table). One of `"hemisphere"` or `"box"`. |
 | `radius` | Hemisphere radius `r`, in metres. |
 | `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `tones` | Engineering grade over one plane only: True reads Table B.1 of ISO 3744, False its Table B.2. The survey grade and the arrays for two and three planes have one table each and do not read it. |
@@ -662,6 +662,12 @@ per-position mean single event levels directly; `integration_time` is
 the interval $T$ of the single event levels, in seconds, or `None`
 when no background correction needed it.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `grade` | One of `"engineering"` or `"survey"`. |
+
 ### SoundEnergyResult.plot()
 
 ```python
@@ -677,6 +683,12 @@ Plot the LJ spectrum with the A-weighted total annotated.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## SoundPowerResult
 
@@ -712,6 +724,12 @@ evaluated per band per clause 8.4). `uncertainty` is the expanded
 uncertainty
 $U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ (95 %, ISO 3744
 clause 9.5).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `grade` | One of `"engineering"` or `"survey"`. |
 
 ### SoundPowerResult.declare()
 
@@ -778,6 +796,12 @@ Plot the LW spectrum with the A-weighted total annotated.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SoundPowerResult.report()
 

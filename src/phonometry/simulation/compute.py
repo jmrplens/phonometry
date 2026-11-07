@@ -293,9 +293,10 @@ class RunProvenance(RichDisplay):
     """Where a run actually stepped, recorded by the result.
 
     :ivar host: The node the run went to, or ``None`` for this machine.
-    :ivar device: The device that stepped the fields.
+    :ivar device: The device that stepped the fields. One of ``"cpu"``, ``"cupy"``,
+        ``"torch:cpu"``, ``"torch:cuda"`` or ``"torch:mps"``.
     :ivar device_index: Which GPU, ``0`` where there is one.
-    :ivar dtype: The dtype of the fields.
+    :ivar dtype: The dtype of the fields. One of ``"float64"`` or ``"float32"``.
     :ivar phonometry_version: The version of the phonometry that ran the
         steps (``phonometry.__version__``); on a node, the client's own, whose
         package the node runs.

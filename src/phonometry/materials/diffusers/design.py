@@ -313,6 +313,7 @@ class DiffuserPolarResponse(OwnsArrays):
         Requires matplotlib (the ``[plot]`` extra); returns the polar
         axes it drew on and never calls ``plt.show``.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :return: The polar axes.
         :raises ValueError: If *ax* is not a polar axes.
         """
@@ -330,6 +331,7 @@ class DiffuserPolarResponse(OwnsArrays):
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :raises ValueError: If the response was predicted from an explicit
             ``reflection`` sequence, which has no well profile to draw.
         """

@@ -110,7 +110,7 @@ area they sit in (Article 24.1).
 
 | Name | Description |
 | :--- | :--- |
-| `area_type` | Acoustic area type letter, or an alias. |
+| `area_type` | Acoustic area type letter, or an alias. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 
 **Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `LK,x`.
 
@@ -166,6 +166,12 @@ ActivityAssessment.plot(
 ```
 
 Plot the per-period indices against their RD 1367/2007 limits.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ActivityAssessment.report()
 
@@ -272,12 +278,12 @@ derived from `operating_days`: the reported daily level then represents
 | :--- | :--- |
 | `measurements` | Noise phases keyed by evaluation period (`"day"`, `"evening"`, `"night"`). Periods that are absent are not assessed. |
 | `limits` | The applicable limit row, from [`activity_limits`](/phonometry/reference/api/environment/spain/#activity_limits) or [`adjacent_premises_limits`](/phonometry/reference/api/environment/spain/#adjacent_premises_limits). |
-| `long_term_levels` | Annual `LK,x` per period, in dB, when known. |
+| `long_term_levels` | Annual `LK,x` per period, in dB, when known. Keyed by any of `"day"`, `"evening"` or `"night"`. |
 | `operating_days` | Number of days a year the activity operates; used to derive `LK,x` from the daily `LKeq,x` when `long_term_levels` is not given. |
 | `year_days` | Days in the year considered (default 365). |
 | `closed_level` | Level, in dB, representing a day on which the activity does not operate (default 0 dB, as in the Spanish worked literature). |
 | `new_activity` | Whether the annual criterion applies. |
-| `period_hours` | Period durations `T`, in hours, overriding [`RD1367_PERIOD_HOURS`](/phonometry/reference/api/environment/spain/#rd1367_period_hours). |
+| `period_hours` | Period durations `T`, in hours, overriding [`RD1367_PERIOD_HOURS`](/phonometry/reference/api/environment/spain/#rd1367_period_hours). Keyed by any of `"day"`, `"evening"` or `"night"`. |
 
 **Returns:** An [`ActivityAssessment`](/phonometry/reference/api/environment/spain/#activityassessment).
 
@@ -416,7 +422,7 @@ cultural buildings.
 
 | Name | Description |
 | :--- | :--- |
-| `building_use` | `"residential"`, `"sanitary"` (alias `"hospital"`) or `"educational"`. |
+| `building_use` | `"residential"`, `"sanitary"` (alias `"hospital"`) or `"educational"`. One of `"residential"`, `"sanitary"`, `"educational"`, `"cultural"`, `"dwelling"`, `"health"`, `"hospital"`, `"hospitalario"` or `"housing"`. |
 | `room_type` | `"living"` (living areas), `"bedrooms"`, `"classrooms"` or `"reading_rooms"`. |
 
 **Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
@@ -446,7 +452,7 @@ values (Article 23.1).
 
 | Name | Description |
 | :--- | :--- |
-| `area_type` | Acoustic area type letter, or an alias. |
+| `area_type` | Acoustic area type letter, or an alias. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 
 **Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
 
@@ -548,7 +554,7 @@ or below it (Article 25.1 a iii).
 
 | Name | Description |
 | :--- | :--- |
-| `area_type` | Acoustic area type letter, or an alias. |
+| `area_type` | Acoustic area type letter, or an alias. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 
 **Returns:** The `LAmax` limit, in dB.
 
@@ -634,7 +640,7 @@ numeric objective: footnote (2) refers it to the adjoining areas.
 
 | Name | Description |
 | :--- | :--- |
-| `area_type` | Acoustic area type: the letter `"e"`, `"a"`, `"d"`, `"c"` or `"b"`, or an alias such as `"residential"`. |
+| `area_type` | Acoustic area type: the letter `"e"`, `"a"`, `"d"`, `"c"` or `"b"`, or an alias such as `"residential"`. One of `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"cultural"`, `"educational"`, `"entertainment"`, `"industrial"`, `"recreational"`, `"residential"`, `"sanitary"`, `"sanitary_educational_cultural"` or `"tertiary"`. |
 | `urbanization` | `"existing"` (default) for areas already urbanised on 24 October 2007, or `"new"` for the rest (5 dB stricter). |
 
 **Returns:** The applicable [`RegulationLimits`](/phonometry/reference/api/environment/spain/#regulationlimits) for the index `Lx`.
@@ -932,6 +938,12 @@ TonalCorrectionResult.plot(
 
 Plot the band spectrum with the emergent-tone differences `Lt`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## total_correction
 
 ```python
@@ -975,7 +987,7 @@ Indoor vibration quality objective `Law`, in dB (Annex II Table C).
 
 | Name | Description |
 | :--- | :--- |
-| `building_use` | `"residential"`, `"sanitary"` (alias `"hospital"`) or `"educational"`. |
+| `building_use` | `"residential"`, `"sanitary"` (alias `"hospital"`) or `"educational"`. One of `"residential"`, `"sanitary"`, `"educational"`, `"cultural"`, `"dwelling"`, `"health"`, `"hospital"`, `"hospitalario"` or `"housing"`. |
 
 **Returns:** The `Law` objective, in dB.
 

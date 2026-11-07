@@ -385,6 +385,12 @@ WestonPropagationResult.plot(
 
 Plot the composite loss with each regime's law and the boundaries.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### WestonPropagationResult.regime
 
 *property*

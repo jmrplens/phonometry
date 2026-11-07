@@ -243,6 +243,12 @@ accumulate into the total loop gain, with the 0 dB oscillation
 threshold of Equation (18.16) and the required stability margin
 marked. Requires matplotlib (the `[plot]` extra).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## open_microphone_correction
 
 ```python

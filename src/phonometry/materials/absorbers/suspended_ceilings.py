@@ -207,7 +207,8 @@ class CeilingSpecimenCheck(RichDisplay):
     pass an arrangement the clause fails.
 
     :ivar area: The specimen area as built, in square metres.
-    :ivar mounting: The mounting letter the arrangement uses.
+    :ivar mounting: The mounting letter the arrangement uses. One of ``"A"``, ``"B"``,
+        ``"E"`` or ``"J"``.
     :ivar depth_mm: The overall depth of construction, in millimetres, for a
         type E mounting, or ``None`` for the others.
     :ivar deflection_mm: The largest deflection of the specimen, in
@@ -573,7 +574,8 @@ def check_ceiling_specimen(
     (:data:`SUBSTRUCTURE_SPACING_M`).
 
     :param area: The specimen area as built, in square metres.
-    :param mounting: The mounting letter, ``"E"`` by default.
+    :param mounting: The mounting letter, ``"E"`` by default. One of ``"A"``, ``"B"``,
+        ``"E"`` or ``"J"``.
     :param depth_mm: The overall depth of construction, in millimetres,
         required for a type E mounting.
     :param deflection_mm: The largest deflection of the specimen, in

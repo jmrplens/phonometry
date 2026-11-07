@@ -352,6 +352,8 @@ class IntensityResult(OwnsArrays):
         Requires per-band data (call ``sound_intensity(..., fraction=...)``)
         and matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_intensity
@@ -366,6 +368,8 @@ class IntensityResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_intensity_result_geometry
@@ -748,7 +752,7 @@ def sound_intensity(
     :param density: Air density, in kg/m^3. Default 1.204 (20 degC).
     :param speed_of_sound: Speed of sound, in m/s. Default 343.0.
     :param fraction: ``None`` (broadband only), 1 (octave bands) or
-        3 (one-third octave bands).
+        3 (one-third octave bands). One of ``1`` or ``3``.
     :param limits: [f_min, f_max] band limits in Hz, a sequence or an array
         of the two (default [12, 20000], as in
         :func:`phonometry.filters.nominal_frequencies`, trimmed to the bands

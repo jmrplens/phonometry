@@ -825,7 +825,8 @@ def write(
         whole number of samples per second, so a fractional rate, given or
         a Signal's own, is refused.
     :param subtype: Target sample format (see above); ``None`` picks
-        ``FLOAT`` for float data and the matching depth for integer data.
+        ``FLOAT`` for float data and the matching depth for integer data. One of
+        ``"PCM_16"``, ``"PCM_24"``, ``"PCM_32"``, ``"FLOAT"`` or ``"DOUBLE"``.
     :param bext: The broadcast provenance chunk (EBU Tech 3285; see
         :mod:`phonometry.io._bext`). ``None`` carries the
         :class:`Signal`'s own provenance when it has one and writes no

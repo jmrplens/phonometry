@@ -445,6 +445,8 @@ class RoomModesResult(OwnsArrays):
         density (Long Equation (8.46)). The Schroeder frequency, when known,
         is marked on both. Requires matplotlib
         (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_room_modes

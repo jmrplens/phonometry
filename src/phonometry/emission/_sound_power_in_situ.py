@@ -393,6 +393,8 @@ class InSituSoundPowerResult(OwnsArrays):
         otherwise is cross-hatched and named as that. Requires
         matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_in_situ_sound_power

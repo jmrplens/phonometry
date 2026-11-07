@@ -101,7 +101,7 @@ and the switch-on transient is part of what they measure.
 | :--- | :--- |
 | `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is applied. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is applied. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The band-limited acceleration signal, same length as input.
 
@@ -138,7 +138,7 @@ negligible, as for any block frequency-domain filtering.
 | :--- | :--- |
 | `x` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The frequency-weighted acceleration signal, same length as input.
 
@@ -168,7 +168,7 @@ Tables B.1 to B.9.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Band centre frequencies, in hertz. |
 
 **Returns:** Band-limiting factor per frequency.
@@ -214,7 +214,7 @@ the standard cites it.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is wanted. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is wanted. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which to evaluate, in hertz (> 0). |
 
 **Returns:** A [`WeightingResponse`](/phonometry/reference/api/vibration/exposure/#weightingresponse) with `band_limiting` true and `.plot()`.
@@ -391,6 +391,12 @@ Plot the partial exposures against the EAV / ELV thresholds.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### DailyVibrationExposure.report()
 
@@ -574,7 +580,7 @@ transition and upward step) of weighting `name` at `frequencies`.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which to evaluate, in hertz (> 0). |
 
 **Returns:** A [`WeightingResponse`](/phonometry/reference/api/vibration/exposure/#weightingresponse) with `.plot()`.
@@ -939,7 +945,7 @@ comparing against the tabulated factors; a nominal label (e.g.
 | :--- | :--- |
 | `band_accelerations` | r.m.s. acceleration $a_i$ per band, in m/s2. |
 | `frequencies` | Band centre frequencies, in hertz (true one-third-octave centres $10^{n/10}$ for table-conformant band values). |
-| `weighting` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `weighting` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** A [`WeightedSpectrum`](/phonometry/reference/api/vibration/exposure/#weightedspectrum) with `.plot()`.
 
@@ -971,7 +977,7 @@ A weighted one-third-octave acceleration spectrum and its `a_w`.
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in hertz. |
 | `band_accelerations` | Unweighted r.m.s. acceleration per band, in m/s2. |
-| `weighting_name` | Weighting applied (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `weighting_name` | Weighting applied (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `weighting_factors` | Weighting factor `W_i` per band. |
 | `weighted` | Weighted band contribution `W_i*a_i`, in m/s2. |
 | `overall` | Overall weighted r.m.s. acceleration `a_w`, in m/s2. |
@@ -992,6 +998,12 @@ Plot the unweighted and weighted band spectra with `a_w`.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## weighting_factors
 
 ```python
@@ -1010,7 +1022,7 @@ magnitude array (the `W_i` of ISO 2631-1 Eq. (9) / ISO 5349-1 Eq. (A.1)).
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Band centre frequencies, in hertz. |
 
 **Returns:** Weighting factor per frequency.
@@ -1049,7 +1061,7 @@ A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 
 | Name | Description |
 | :--- | :--- |
-| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the response was evaluated, in Hz. |
 | `response` | Complex weighting $H(j2\pi f)$ per frequency. |
 | `magnitude` | Weighting factor $\lvert H \rvert$ per frequency. |
@@ -1071,3 +1083,9 @@ Plot the weighting factor (dB) versus frequency.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

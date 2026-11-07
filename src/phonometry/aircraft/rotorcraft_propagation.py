@@ -296,7 +296,8 @@ def ground_effect_adjustment(
         of heliports; the guidance's own suggestions, concrete
         :math:`\sigma = 65 \times 10^6` for city areas and grass
         :math:`\sigma = 200 \times 10^3` for rural areas (§A.4.3), can be
-        passed as numeric values.
+        passed as numeric values. One of ``"A"``, ``"B"``, ``"C"``, ``"D"``, ``"E"``,
+        ``"F"``, ``"G"`` or ``"H"``.
     :return: The adjustment ``ΔLg`` per band, in dB (added to the level).
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``flow_resistivity``, ``horizontal_distance_m``,
@@ -457,7 +458,10 @@ class MeanGroundPlaneResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the terrain section and the fitted mean ground plane."""
+        """Plot the terrain section and the fitted mean ground plane.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_mean_ground_plane
 
@@ -757,7 +761,10 @@ class TerrainScreeningResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the section geometry: terrain, line of sight and sound path."""
+        """Plot the section geometry: terrain, line of sight and sound path.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_terrain_screening
 
@@ -814,7 +821,8 @@ def terrain_screening_adjustment(
     :param heights_m: Terrain heights ``z(d)``, in metres.
     :param flow_resistivity: Ground flow resistivity: a value in Pa·s/m², a
         CNOSSOS class letter, or one value per profile segment (shape
-        ``(M−1,)``) averaged per sub-path by Eq. 41.
+        ``(M−1,)``) averaged per sub-path by Eq. 41. One of ``"A"``, ``"B"``, ``"C"``,
+        ``"D"``, ``"E"``, ``"F"``, ``"G"`` or ``"H"``.
     :return: A :class:`TerrainScreeningResult`.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``flow_resistivity`` is neither a class letter nor numbers (a

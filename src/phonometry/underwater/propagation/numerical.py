@@ -485,7 +485,10 @@ class NormalModeResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the propagation loss versus range (loss increasing downward)."""
+        """Plot the propagation loss versus range (loss increasing downward).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_normal_modes
 
@@ -849,7 +852,10 @@ class RayTraceResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the ray paths (depth increasing downward)."""
+        """Plot the ray paths (depth increasing downward).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_ray_trace
 
@@ -1168,7 +1174,10 @@ class EigenrayResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the arrival structure (per-path loss stems against delay)."""
+        """Plot the arrival structure (per-path loss stems against delay).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_eigenrays
 
@@ -1776,7 +1785,8 @@ class GaussianBeamResult(OwnsArrays):
         flat across it otherwise.
     :ivar absorption_model: The seawater absorption model applied along the
         beams, or ``None`` when the run propagated without volume absorption
-        (the default).
+        (the default). One of ``"francois-garrison"``, ``"ainslie-mccolm"`` or
+        ``"thorp"``.
     :ivar absorption_db_per_km: The absorption coefficient :math:`\alpha`
         actually applied, in dB/km (0.0 when ``absorption_model`` is ``None``),
         as :func:`~phonometry.underwater.propagation.closed_form.seawater_absorption`
@@ -1899,7 +1909,10 @@ class GaussianBeamResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the propagation-loss field (depth increasing downward)."""
+        """Plot the propagation-loss field (depth increasing downward).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_gaussian_beams
 
@@ -3681,7 +3694,10 @@ class ParabolicEquationResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the propagation-loss field (depth increasing downward)."""
+        """Plot the propagation-loss field (depth increasing downward).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_parabolic_equation
 

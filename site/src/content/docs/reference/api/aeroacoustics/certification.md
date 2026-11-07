@@ -195,6 +195,12 @@ EPNLResult.plot(
 
 Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### EPNLResult.report()
 
 ```python

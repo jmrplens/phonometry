@@ -184,6 +184,8 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
         automatic rating to be available (16 or 5 bands) and matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         if self.rating is None:
             msg = (
@@ -309,6 +311,8 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
         rating to be available (16 or 5 bands) and matplotlib
         (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         if self.rating is None:
             msg = (

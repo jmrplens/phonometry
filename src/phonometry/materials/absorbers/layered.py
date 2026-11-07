@@ -300,6 +300,8 @@ class LayeredAbsorberResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_layered_absorber
@@ -314,6 +316,8 @@ class LayeredAbsorberResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_layered_absorber_geometry
@@ -344,6 +348,8 @@ class DiffuseFieldAbsorptionResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_diffuse_field_absorption
@@ -916,7 +922,8 @@ def diffuse_field_absorption(
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
     :param n_quadrature_points: Gauss-Legendre order (default 64).
-    :param termination: As in :func:`layered_absorber`.
+    :param termination: As in :func:`layered_absorber`. One of ``"rigid"`` or
+        ``"free"``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,

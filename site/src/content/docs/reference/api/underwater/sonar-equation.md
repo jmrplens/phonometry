@@ -182,13 +182,13 @@ merit works for both sonar modes: the active figure of merit returned by
 | :--- | :--- |
 | `figure_of_merit` | Maximum allowable one-way propagation loss, in dB. |
 | `frequency_hz` | Acoustic frequency, in Hz. |
-| `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). |
+| `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). One of `"spherical"`, `"cylindrical"` or `"practical"`. |
 | `transition_range` | Transition range for the `"practical"` law, in m. |
 | `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `depth` | Depth, in metres. |
 | `ph` | Acidity (default 8). |
-| `model` | Absorption model (see [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption)). |
+| `model` | Absorption model (see [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption)). One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
 | `max_range` | Upper bound of the search, in metres. |
 | `n_points` | Number of ranges kept on the returned loss curve. |
 
@@ -303,8 +303,8 @@ Detection range obtained by inverting a propagation-loss law.
 | `range_m` | Range grid over which the loss was evaluated, in metres. |
 | `propagation_loss` | Propagation loss at each range, in dB. |
 | `absorption_db_per_km` | Absorption coefficient $\alpha$, in dB/km. |
-| `law` | The spreading law used. |
-| `model` | The absorption model used. |
+| `law` | The spreading law used. One of `"spherical"`, `"cylindrical"` or `"practical"`. |
+| `model` | The absorption model used. One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
 
 ### DetectionRangeResult.plot()
 
@@ -318,6 +318,12 @@ DetectionRangeResult.plot(
 ```
 
 Plot the propagation loss against the figure of merit.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## passive_sonar_equation
 
@@ -402,3 +408,9 @@ SonarEquationResult.plot(
 ```
 
 Plot signal excess versus propagation loss with the detection limit.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

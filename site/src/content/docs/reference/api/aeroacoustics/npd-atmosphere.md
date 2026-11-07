@@ -205,6 +205,12 @@ NPDAtmosphereIncrement.plot(
 
 Plot the increment against slant distance.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### NPDAtmosphereIncrement.plot_attenuation()
 
 ```python
@@ -306,3 +312,9 @@ RevisedNPDCurves.plot(
 ```
 
 Plot the revised curves over the original ones against slant distance.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

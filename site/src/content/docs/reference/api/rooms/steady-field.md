@@ -451,3 +451,9 @@ Plot direct, reverberant and total SPL against distance.
 Marks the critical distance `rc` where the direct and reverberant
 fields cross. Requires matplotlib (the `[plot]` extra);
 returns the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

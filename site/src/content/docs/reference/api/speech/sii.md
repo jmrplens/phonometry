@@ -68,7 +68,7 @@ Build the plottable band table of an ANSI S3.5-1997 band procedure.
 
 | Name | Description |
 | :--- | :--- |
-| `method` | The band procedure, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods). |
+| `method` | The band procedure, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods). One of `"critical-band"`, `"equally-contributing"`, `"one-third-octave"` or `"octave"`. |
 
 **Returns:** A frozen [`SIIProcedure`](/phonometry/reference/api/speech/sii/#siiprocedure) carrying the band centre frequencies, band limits, band-importance function, reference internal noise spectrum level and normal-effort standard speech spectrum level of that procedure.
 
@@ -103,7 +103,7 @@ plottable view of the tabulated constants and runs none of the SII maths.
 
 | Name | Description |
 | :--- | :--- |
-| `method` | The procedure name, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods). |
+| `method` | The procedure name, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods). One of `"critical-band"`, `"equally-contributing"`, `"one-third-octave"` or `"octave"`. |
 | `frequencies` | Nominal band centre frequencies, in hertz. |
 | `band_edges` | Band limits, in hertz; one value more than the number of bands, so band `i` runs from `band_edges[i]` to `band_edges[i+1]`. |
 | `band_importance` | Band-importance function `Ii` for average speech material. It sums to one, except for the equally-contributing procedure, whose printed 0.0588 per band sums to 0.9996. |
@@ -170,7 +170,7 @@ Result of a Speech Intelligibility Index computation (ANSI S3.5-1997).
 | `disturbance` | Equivalent disturbance spectrum level `Di` (clause 5.6). |
 | `masking` | Equivalent masking spectrum level `Zi` (clause 5.4). |
 | `level_distortion` | Per-band level-distortion factor `Li` in [0, 1] (clause 5.7), unity until the speech spectrum level rises above the standard normal-effort spectrum by more than 10 dB. |
-| `method` | The band procedure used, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods). |
+| `method` | The band procedure used, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods). One of `"critical-band"`, `"equally-contributing"`, `"one-third-octave"` or `"octave"`. |
 
 **Raises**
 
@@ -193,6 +193,12 @@ Plot the per-band audibility weighted by importance, with the SII.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SIIResult.report()
 

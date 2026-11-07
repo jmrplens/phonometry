@@ -337,7 +337,8 @@ class EnclosureInsulationResult(OwnsArrays):
     :ivar condition: ``"laboratory"`` (part 1) or ``"in-situ"`` (part 2).
     :ivar source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
     :ivar base_standard: The standard the levels were determined by.
-    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves.
+    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves. One of ``1``
+        or ``3``.
     """
 
     frequencies: NDArray[np.float64] | None
@@ -417,7 +418,9 @@ class EnclosureTestEnvironmentCheck(RichDisplay):
     stored beside them: an answer cannot be built against another limit.
 
     :ivar base_standard: The standard asked about, one of the keys of
-        :data:`TEST_ENVIRONMENT_REQUIREMENTS`.
+        :data:`TEST_ENVIRONMENT_REQUIREMENTS`. One of ``"ISO 3743-1"``, ``"ISO 3744"``,
+        ``"ISO 3746"``, ``"ISO 3747"``, ``"ISO 9614-1"``, ``"ISO 9614-2"``,
+        ``"ISO 11201"``, ``"ISO 11202"`` or ``"ISO 11204"``.
     :ivar actual_area_ratio: The :math:`S_V/S` of the room and the measurement
         surface given.
     :ivar mean_absorption_coefficient: The :math:`\alpha` the answer was read
@@ -616,11 +619,13 @@ def enclosure_sound_power_insulation(
     :param a_weighted_with: The same with the enclosure, in decibels.
     :param base_standard: The standard the sound power came from, one of
         those Table 1 of either part lists for a sound power (default
-        ``"ISO 3744"``).
+        ``"ISO 3744"``). One of ``"ISO 3741"``, ``"ISO 3742"``, ``"ISO 3743-2"``,
+        ``"ISO 3743-1"``, ``"ISO 3744"``, ``"ISO 3746"``, ``"ISO 3747"``,
+        ``"ISO 9614-1"`` or ``"ISO 9614-2"``.
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult`.
     :raises ValueError: For spectra that do not match, non-finite values, half
         an A-weighted pair, an unknown base standard, condition, source kind or
@@ -678,11 +683,12 @@ def enclosure_sound_pressure_insulation(
     :param a_weighted_with: The same with the enclosure, in decibels.
     :param base_standard: The standard the pressure levels came from, one of
         those Table 1 of either part lists for a sound pressure level
-        (default ``"ISO 11201"``).
+        (default ``"ISO 11201"``). One of ``"ISO 11201"``, ``"ISO 11202"`` or
+        ``"ISO 11204"``.
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult`.
     :raises ValueError: For spectra that do not match, non-finite values, half
         an A-weighted pair, an unknown base standard, condition, source kind or
@@ -732,7 +738,7 @@ def enclosure_reciprocity_insulation(
         that field, per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult` whose
         quantity is ``"reciprocity"``.
     :raises ValueError: For spectra that do not match, non-finite values or an
@@ -787,7 +793,7 @@ def enclosure_artificial_source_insulation(
         ``"sound_pressure"`` for Equation (3).
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: The averaged insertion loss, as an
         :class:`EnclosureInsulationResult`.
     :raises ValueError: For arrays that are not two-dimensional and matched,
@@ -851,7 +857,7 @@ def weighted_enclosure_insulation(
         than trimmed, because which bands it holds is the caller's to say.
     :param quantity: ``"sound_power"`` (default) or ``"reciprocity"``.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: The rating, as a :class:`WeightedEnclosureInsulation`.
     :raises ValueError: For a spectrum that does not carry the rating bands.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
@@ -996,7 +1002,9 @@ def check_enclosure_test_environment(
     rather than a number the annex does not give.
 
     :param base_standard: One of the columns of Table C.1, as
-        :data:`TEST_ENVIRONMENT_REQUIREMENTS` keys them.
+        :data:`TEST_ENVIRONMENT_REQUIREMENTS` keys them. One of ``"ISO 3743-1"``,
+        ``"ISO 3744"``, ``"ISO 3746"``, ``"ISO 3747"``, ``"ISO 9614-1"``,
+        ``"ISO 9614-2"``, ``"ISO 11201"``, ``"ISO 11202"`` or ``"ISO 11204"``.
     :param mean_absorption_coefficient: :math:`\alpha` of the room,
         dimensionless.
     :param room_surface_area_m2: :math:`S_V`, the total area of the room's

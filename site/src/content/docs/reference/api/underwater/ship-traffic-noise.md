@@ -56,7 +56,7 @@ Predicted underwater source-level spectrum of a ship.
 | :--- | :--- |
 | `speed_kt` | Vessel speed, in knots (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
 | `length_m` | Vessel length, in metres (used by `"jomopans-echo"` and `"randi"`; ignored by `"wales-heitmeyer"`). |
-| `vessel_class` | JOMOPANS-ECHO vessel class (see [`VESSEL_CLASSES`](/phonometry/reference/api/underwater/ship-traffic-noise/#vessel_classes)); used only by `"jomopans-echo"`. |
+| `vessel_class` | JOMOPANS-ECHO vessel class (see [`VESSEL_CLASSES`](/phonometry/reference/api/underwater/ship-traffic-noise/#vessel_classes)); used only by `"jomopans-echo"`. One of `"bulker"`, `"containership"`, `"cruise"`, `"dredger"`, `"fishing"`, `"government/research"`, `"naval"`, `"other"`, `"passenger"`, `"recreational"`, `"tanker"`, `"tug"` or `"vehicle carrier"`. |
 | `model` | `"jomopans-echo"` (default), `"randi"` or `"wales-heitmeyer"`. |
 | `frequencies` | Frequencies, in Hz; defaults to the decidecade bands 10 Hz-31.5 kHz of the JOMOPANS-ECHO validation range. |
 
@@ -92,8 +92,8 @@ Predicted ship source-level spectrum.
 | `frequencies` | Frequencies, in Hz. |
 | `source_psd` | Source pressure spectral-density level, in dB re 1 µPa²/Hz at 1 m (equivalent monopole). |
 | `band_level` | Decidecade-band source level, in dB re 1 µPa m (`source_psd` plus $10 \log_{10}(0.231 f)$). |
-| `model` | The model used. |
-| `vessel_class` | The vessel class (JOMOPANS-ECHO only; else `None`). |
+| `model` | The model used. One of `"jomopans-echo"`, `"randi"` or `"wales-heitmeyer"`. |
+| `vessel_class` | The vessel class (JOMOPANS-ECHO only; else `None`). One of `"bulker"`, `"containership"`, `"cruise"`, `"dredger"`, `"fishing"`, `"government/research"`, `"naval"`, `"other"`, `"passenger"`, `"recreational"`, `"tanker"`, `"tug"` or `"vehicle carrier"`. |
 | `speed_kt` | Speed used, in knots (`None` if the model ignores it). |
 | `length_m` | Length used, in metres (`None` if the model ignores it). |
 
@@ -109,6 +109,12 @@ ShipTrafficSpectrum.plot(
 ```
 
 Plot the predicted source spectral-density level versus frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## VESSEL_CLASSES
 

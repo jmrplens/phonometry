@@ -308,6 +308,12 @@ otherwise is cross-hatched and named as that. Requires
 matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### InSituSoundPowerResult.sigma_r0
 
 *property*

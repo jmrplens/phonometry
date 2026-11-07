@@ -842,7 +842,8 @@ class REATSoundFieldCheck(OwnsArrays):
         What Table 1 allows the spread (:attr:`allowable_variation_db`) is
         read from it, not stored, so a check cannot be built against another
         allowance.
-    :ivar positions: The position names, in row order.
+    :ivar positions: The position names, in row order. Each one of ``"front"``,
+        ``"back"``, ``"left"``, ``"right"``, ``"up"`` or ``"down"``.
 
     4.2.2 b) is a requirement of the clause, not an option: a check made
     without the rotation leaves it unjudged whenever a band reaches 500 Hz,

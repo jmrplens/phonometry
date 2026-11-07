@@ -367,6 +367,8 @@ class LiningImprovementResult(RichDisplay):
         system's own resonance marked, the analogue of Figures D.2 and D.3.
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_lining_improvement

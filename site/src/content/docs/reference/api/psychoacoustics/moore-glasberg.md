@@ -182,6 +182,12 @@ pattern is that of a single ear before binaural inhibition; the total
 `loudness` already includes the binaural summation.  `field` and
 `presentation` echo the listening conditions.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `presentation` | One of `"binaural"`, `"diotic"` or `"monaural"`. |
+
 ### MooreGlasbergLoudness.plot()
 
 ```python
@@ -197,3 +203,9 @@ Plot the specific loudness N'(i) over the ERB-number scale.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.  See `phonometry._plot.psychoacoustics`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

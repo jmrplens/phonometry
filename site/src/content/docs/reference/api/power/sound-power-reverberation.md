@@ -256,6 +256,12 @@ single event level of one event; `integration_time` is the interval
 $T$ of the single event levels, in seconds, or `None` when no
 background correction needed it.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `method` | One of `"direct"` or `"comparison"`. |
+
 ### ReverberationSoundEnergyResult.plot()
 
 ```python
@@ -271,6 +277,12 @@ Plot the LJ spectrum with the A-weighted total annotated.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## ReverberationSoundPowerResult
 
@@ -310,6 +322,12 @@ computed only when `frequencies` are supplied (`NaN` for several bands
 without them; equal to `LW` for a single band). `method` is `'direct'`
 or `'comparison'`.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `method` | One of `"direct"` or `"comparison"`. |
+
 ### ReverberationSoundPowerResult.plot()
 
 ```python
@@ -325,6 +343,12 @@ Plot the LW spectrum with the A-weighted total annotated.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ReverberationSoundPowerResult.report()
 

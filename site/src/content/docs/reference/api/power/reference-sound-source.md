@@ -232,7 +232,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | `background_levels` | Background levels, per position or one spectrum, for the ISO 3745 correction; `None` applies none. |
 | `max_levels` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels`. |
 | `conditions` | The [`CalibrationConditions`](/phonometry/reference/api/power/reference-sound-source/#calibrationconditions) of the air during the calibration, whose temperature and static pressure enter $C_1$ and the Annex A $C_2$ and whose $a(f)$ enters $C_3$; `None` (default) takes the reference meteorological conditions of clause 4 with no air absorption. |
-| `radiation` | Radiation character for the Annex A $C_2$. |
+| `radiation` | Radiation character for the Annex A $C_2$. One of `"monopole"`, `"dipole"` or `"unknown"`. |
 | `knee_frequency_hz` | Knee frequency for a monopole or a dipole. |
 | `c2` | The manufacturer's $C_2$, scalar or per band, which 8.4 prefers to Annex A; overrides `radiation`. A calibration made with it cannot be read at the conditions of a test, since only the manufacturer gives $C_2$ there (see [`ReferenceSourceCalibration.sound_power_level_at`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibrationsound_power_level_at)). |
 | `intensity_sound_power_level` | Sound power levels from sound intensity per band (ISO 9614-3, Annex B), `nan` outside 50 Hz to 315 Hz; `None` applies no Annex B. |
@@ -273,7 +273,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 | `frequencies` | Nominal mid-band frequencies, in hertz. |
 | `environment` | `"hemi-anechoic"` or `"reverberation-room"`. |
 | `arrangement` | In a hemi-anechoic room, `"paths"` (meridional or spiral) or `"fixed"` (20 discrete positions or coaxial circular paths); ignored in a reverberation room. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** $\sigma_R$ per band, in dB.
 
@@ -490,7 +490,7 @@ measurement Table B.1 refuses.
 | `expanded_uncertainty_db` | $k \sigma_R$ of Table 2 per band. |
 | `coverage_factor` | $k$. |
 | `arrangement` | `"paths"` or `"fixed"`. |
-| `radiation` | The radiation character whose Annex A $C_2$ the calibration used, or `None` when it used the manufacturer's value. |
+| `radiation` | The radiation character whose Annex A $C_2$ the calibration used, or `None` when it used the manufacturer's value. One of `"monopole"`, `"dipole"` or `"unknown"`. |
 | `knee_frequency_hz` | The knee frequency of that $C_2$, or `None`. |
 | `intensity_sound_power_level` | The sound power level determined by sound intensity per band (Annex B), or `None`. |
 | `room_qualification` | The [`FreeFieldCheck`](/phonometry/reference/api/power/free-field-qualification/#freefieldcheck) of the room, or `None` when none was given. |
@@ -611,7 +611,7 @@ calibrated.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal mid-band frequencies, in hertz. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius; `None` (default), with `static_pressure_kpa`, reads the reference conditions. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, given together with `temperature_c`. |
 

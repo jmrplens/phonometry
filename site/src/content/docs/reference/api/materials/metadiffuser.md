@@ -216,6 +216,12 @@ Plot the per-well and face-averaged absorption spectra.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### MetadiffuserResult.plot_geometry()
 
 ```python
@@ -231,6 +237,12 @@ Draw the panel cross-section to scale (slits and resonators).
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## MetadiffuserWell
 

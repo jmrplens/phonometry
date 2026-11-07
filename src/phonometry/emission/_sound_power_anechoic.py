@@ -285,6 +285,8 @@ class PrecisionSoundPowerResult(OwnsArrays):
     (Eq. 24/25) and ``uncertainty_bands`` the
     per-band value (``NaN`` without ``frequencies``).
     ``sound_power_level_a`` is the A-weighted total ``LWA`` (Eq. C.1).
+
+    :ivar surface: One of ``"sphere"`` or ``"hemisphere"``.
     """
 
     frequencies: np.ndarray | None
@@ -376,6 +378,8 @@ class PrecisionSoundPowerResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_power

@@ -451,7 +451,7 @@ One of the twenty installations of Figure 1, with its area rules.
 | :--- | :--- |
 | `number` | The case number Figure 1 prints, 1 to 20. |
 | `source_side` | What stands on the source side: `"duct"`, `"diffuse_room"`, `"non_diffuse_room"`, `"open_space"`, or `"any"` for the four insertion cases, whose source side is not part of the case. |
-| `receiver_side` | The same for the receiver side. |
+| `receiver_side` | The same for the receiver side. One of `"duct"`, `"diffuse_room"`, `"non_diffuse_room"` or `"open_space"`. |
 | `quantity` | `"transmission"` for cases 1 to 16, `"insertion"` for 17 to 20. |
 | `source_area_rule` | How 9.1.3 or 9.1.4 says to read $S_2$, the source side of a transmission case, or $S_\mathrm{II}$, the run without the silencer of an insertion one, in the clause's own words. |
 | `receiver_area_rule` | The same for $S_1$ or $S_\mathrm{I}$. |

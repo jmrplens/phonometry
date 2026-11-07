@@ -763,7 +763,9 @@ class SIIResult(OwnsArrays):
     :ivar level_distortion: Per-band level-distortion factor ``Li`` in [0, 1]
         (clause 5.7), unity until the speech spectrum level rises above the
         standard normal-effort spectrum by more than 10 dB.
-    :ivar method: The band procedure used, one of :data:`SII_METHODS`.
+    :ivar method: The band procedure used, one of :data:`SII_METHODS`. One of
+        ``"critical-band"``, ``"equally-contributing"``, ``"one-third-octave"`` or
+        ``"octave"``.
     :raises ValueError: If the per-band quantities disagree, ``method`` is not
         one of :data:`SII_METHODS`, or any quantity is not finite.
     """
@@ -865,6 +867,8 @@ class SIIResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.speech import plot_sii
@@ -1275,7 +1279,9 @@ class SIIProcedure(OwnsArrays):
     :meth:`plot`. Build it with :func:`sii_procedure`; the frozen instance is a
     plottable view of the tabulated constants and runs none of the SII maths.
 
-    :ivar method: The procedure name, one of :data:`SII_METHODS`.
+    :ivar method: The procedure name, one of :data:`SII_METHODS`. One of
+        ``"critical-band"``, ``"equally-contributing"``, ``"one-third-octave"`` or
+        ``"octave"``.
     :ivar frequencies: Nominal band centre frequencies, in hertz.
     :ivar band_edges: Band limits, in hertz; one value more than the number of
         bands, so band ``i`` runs from ``band_edges[i]`` to ``band_edges[i+1]``.
@@ -1386,7 +1392,9 @@ class SIIProcedure(OwnsArrays):
 def sii_procedure(method: Method = "one-third-octave") -> SIIProcedure:
     """Build the plottable band table of an ANSI S3.5-1997 band procedure.
 
-    :param method: The band procedure, one of :data:`SII_METHODS`.
+    :param method: The band procedure, one of :data:`SII_METHODS`. One of
+        ``"critical-band"``, ``"equally-contributing"``, ``"one-third-octave"`` or
+        ``"octave"``.
     :return: A frozen :class:`SIIProcedure` carrying the band centre
         frequencies, band limits, band-importance function, reference internal
         noise spectrum level and normal-effort standard speech spectrum level

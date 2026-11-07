@@ -457,7 +457,9 @@ def _overall_weighting(p: _WParams, s: Complex) -> Complex:
 class WeightingResponse(OwnsArrays):
     r"""A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 
-    :ivar name: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :ivar name: Weighting name (one of :data:`WEIGHTING_NAMES`). One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :ivar frequencies: Frequencies at which the response was evaluated, in Hz.
     :ivar response: Complex weighting :math:`H(j2\pi f)` per frequency.
     :ivar magnitude: Weighting factor :math:`\lvert H \rvert` per frequency.
@@ -485,6 +487,8 @@ class WeightingResponse(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_vibration_weighting
@@ -528,7 +532,9 @@ def frequency_weighting(
     Evaluates the overall weighting (band limiting, acceleration-velocity
     transition and upward step) of weighting ``name`` at ``frequencies``.
 
-    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`). One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: Frequencies at which to evaluate, in hertz (> 0).
     :return: A :class:`WeightingResponse` with ``.plot()``.
     :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
@@ -565,7 +571,8 @@ def band_limiting_response(
     the standard cites it.
 
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`) whose
-        band-limiting pair is wanted.
+        band-limiting pair is wanted. One of ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``,
+        ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or ``"Wm"``.
     :param frequencies: Frequencies at which to evaluate, in hertz (> 0).
     :return: A :class:`WeightingResponse` with ``band_limiting`` true and
         ``.plot()``.
@@ -584,7 +591,9 @@ def band_limiting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     magnitude array, which is the "Band-limiting Factor" column of
     Tables B.1 to B.9.
 
-    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`). One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: Band centre frequencies, in hertz.
     :return: Band-limiting factor per frequency.
     :raises TypeError: if ``name`` is not a text.
@@ -599,7 +608,9 @@ def weighting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     Convenience wrapper over :func:`frequency_weighting` returning only the
     magnitude array (the ``W_i`` of ISO 2631-1 Eq. (9) / ISO 5349-1 Eq. (A.1)).
 
-    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`). One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: Band centre frequencies, in hertz.
     :return: Weighting factor per frequency.
     :raises TypeError: if ``name`` is not a text.
@@ -627,7 +638,9 @@ def apply_weighting(
     :param fs: Sampling frequency, in hertz (> 0). Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`). One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :return: The frequency-weighted acceleration signal, same length as input.
     :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
@@ -663,7 +676,8 @@ def apply_band_limiting(
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`) whose
-        band-limiting pair is applied.
+        band-limiting pair is applied. One of ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``,
+        ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or ``"Wm"``.
     :return: The band-limited acceleration signal, same length as input.
     :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
@@ -700,7 +714,9 @@ class WeightedSpectrum(OwnsArrays):
 
     :ivar frequencies: Band centre frequencies, in hertz.
     :ivar band_accelerations: Unweighted r.m.s. acceleration per band, in m/s2.
-    :ivar weighting_name: Weighting applied (one of :data:`WEIGHTING_NAMES`).
+    :ivar weighting_name: Weighting applied (one of :data:`WEIGHTING_NAMES`). One of
+        ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"``
+        or ``"Wm"``.
     :ivar weighting_factors: Weighting factor ``W_i`` per band.
     :ivar weighted: Weighted band contribution ``W_i*a_i``, in m/s2.
     :ivar overall: Overall weighted r.m.s. acceleration ``a_w``, in m/s2.
@@ -751,6 +767,8 @@ class WeightedSpectrum(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_weighted_spectrum
@@ -785,7 +803,9 @@ def weighted_acceleration(
     :param frequencies: Band centre frequencies, in hertz (true
         one-third-octave centres :math:`10^{n/10}` for table-conformant
         band values).
-    :param weighting: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :param weighting: Weighting name (one of :data:`WEIGHTING_NAMES`). One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :return: A :class:`WeightedSpectrum` with ``.plot()``.
     :raises ValueError: if the inputs differ in length, are empty or carry
         non-finite values.
@@ -1424,6 +1444,8 @@ class DailyVibrationExposure(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_daily_exposure

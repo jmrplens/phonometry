@@ -799,7 +799,8 @@ def measured_insertion_loss_indirect(
     :param frequencies: Nominal band centres, in hertz.
     :param receiver_type_before: ``"hemi_free_field"`` (default) or
         ``"reflecting_surface"``, for the substitute site.
-    :param receiver_type_after: The same for the barrier site.
+    :param receiver_type_after: The same for the barrier site. One of
+        ``"hemi_free_field"`` or ``"reflecting_surface"``.
     :return: The insertion loss, as a :class:`MeasuredBarrierInsertionLoss`.
     :raises ValueError: For levels that do not match band for band, a band
         centre that is not strictly positive, or an unknown receiver type.

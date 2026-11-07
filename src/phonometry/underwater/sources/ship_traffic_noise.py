@@ -206,8 +206,12 @@ class ShipTrafficSpectrum(OwnsArrays):
         at 1 m (equivalent monopole).
     :ivar band_level: Decidecade-band source level, in dB re 1 µPa m
         (``source_psd`` plus :math:`10 \log_{10}(0.231 f)`).
-    :ivar model: The model used.
-    :ivar vessel_class: The vessel class (JOMOPANS-ECHO only; else ``None``).
+    :ivar model: The model used. One of ``"jomopans-echo"``, ``"randi"`` or
+        ``"wales-heitmeyer"``.
+    :ivar vessel_class: The vessel class (JOMOPANS-ECHO only; else ``None``). One of
+        ``"bulker"``, ``"containership"``, ``"cruise"``, ``"dredger"``, ``"fishing"``,
+        ``"government/research"``, ``"naval"``, ``"other"``, ``"passenger"``,
+        ``"recreational"``, ``"tanker"``, ``"tug"`` or ``"vehicle carrier"``.
     :ivar speed_kt: Speed used, in knots (``None`` if the model ignores it).
     :ivar length_m: Length used, in metres (``None`` if the model ignores it).
     """
@@ -249,7 +253,10 @@ class ShipTrafficSpectrum(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the predicted source spectral-density level versus frequency."""
+        """Plot the predicted source spectral-density level versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.underwater import plot_ship_traffic_spectrum
 
@@ -273,7 +280,10 @@ def ship_source_spectrum(
     :param length_m: Vessel length, in metres (used by ``"jomopans-echo"`` and
         ``"randi"``; ignored by ``"wales-heitmeyer"``).
     :param vessel_class: JOMOPANS-ECHO vessel class (see :data:`VESSEL_CLASSES`);
-        used only by ``"jomopans-echo"``.
+        used only by ``"jomopans-echo"``. One of ``"bulker"``, ``"containership"``,
+        ``"cruise"``, ``"dredger"``, ``"fishing"``, ``"government/research"``,
+        ``"naval"``, ``"other"``, ``"passenger"``, ``"recreational"``, ``"tanker"``,
+        ``"tug"`` or ``"vehicle carrier"``.
     :param model: ``"jomopans-echo"`` (default), ``"randi"`` or
         ``"wales-heitmeyer"``.
     :param frequencies: Frequencies, in Hz; defaults to the decidecade bands

@@ -232,7 +232,8 @@ class PredictionDetailCheck(RichDisplay):
     The verdicts are read from the three levels and the row of Table E.1 the
     category selects, so they are not fields.
 
-    :ivar category: The category asked about.
+    :ivar category: The category asked about. One of ``"1"``, ``"2a"``, ``"2b"`` or
+        ``"2c"``.
     :ivar room_detail: The level of Table 1 the room is described at.
     :ivar fitting_detail: The level of Table 2 the fittings are described at.
     :ivar source_detail: The level of Table 3 the sources are described at.

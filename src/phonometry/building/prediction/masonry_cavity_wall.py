@@ -192,7 +192,8 @@ def wall_tie_stiffness_per_area(ties_per_area: float, tie: WallTie | float) -> f
     :param ties_per_area: Number of ties per unit area :math:`n = N/S`, in
         1/m^2 (> 0).
     :param tie: A name from :data:`WALL_TIE_STIFFNESS`, or an explicit dynamic
-        stiffness ``k`` of one tie, in N/m (> 0).
+        stiffness ``k`` of one tie, in N/m (> 0). One of ``"butterfly"``,
+        ``"double_triangle"``, ``"vertical_twist"`` or ``"vertical_twist_100mm"``.
     :return: The stiffness per unit area :math:`n k`, in N/m^3.
     :raises ValueError: for a non-positive input or an unknown tie name.
     :raises TypeError: if ``tie`` or ``ties_per_area`` is not a single number.
@@ -273,6 +274,8 @@ class WallTieCouplingResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_wall_tie_coupling
@@ -314,7 +317,8 @@ def wall_tie_coupling_loss_factor(
     :param ties_per_area: Number of ties per unit area ``n``, in 1/m^2 (> 0).
     :param tie: A name from :data:`WALL_TIE_STIFFNESS`, an explicit dynamic
         stiffness ``k`` in N/m, or ``None`` for a rigid connection
-        (:math:`Y_\mathrm{c} = 0`, the screw/nail/bolt limit).
+        (:math:`Y_\mathrm{c} = 0`, the screw/nail/bolt limit). One of ``"butterfly"``,
+        ``"double_triangle"``, ``"vertical_twist"`` or ``"vertical_twist_100mm"``.
     :return: A :class:`WallTieCouplingResult`.
     :raises ValueError: for a non-positive input or an unknown tie name.
     :raises TypeError: if ``mass1``, ``mass2``, ``tie`` or ``ties_per_area`` is not a

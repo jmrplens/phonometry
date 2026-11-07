@@ -1019,10 +1019,10 @@ The classification of a headphone by IEC 60268-7:2010 Clause 4.
 
 | Name | Description |
 | :--- | :--- |
-| `principle` | The principle of the transducer, a key of [`TRANSDUCER_PRINCIPLES`](/phonometry/reference/api/electroacoustics/headphones/#transducer_principles). |
-| `earphone_type` | The type of earphone, a key of [`EARPHONE_TYPES`](/phonometry/reference/api/electroacoustics/headphones/#earphone_types). |
-| `coupling` | The acoustic coupling to the ear canal, a key of [`ACOUSTIC_COUPLINGS`](/phonometry/reference/api/electroacoustics/headphones/#acoustic_couplings). |
-| `radiation` | The radiation to the external environment, a key of [`BACK_RADIATIONS`](/phonometry/reference/api/electroacoustics/headphones/#back_radiations). |
+| `principle` | The principle of the transducer, a key of [`TRANSDUCER_PRINCIPLES`](/phonometry/reference/api/electroacoustics/headphones/#transducer_principles). One of `"D"`, `"E"`, `"F"`, `"M"`, `"P"` or `"S"`. |
+| `earphone_type` | The type of earphone, a key of [`EARPHONE_TYPES`](/phonometry/reference/api/electroacoustics/headphones/#earphone_types). One of `"C"`, `"E"`, `"H"`, `"I"`, `"M"`, `"S"` or `"T"`. |
+| `coupling` | The acoustic coupling to the ear canal, a key of [`ACOUSTIC_COUPLINGS`](/phonometry/reference/api/electroacoustics/headphones/#acoustic_couplings). One of `"L"` or `"S"`. |
+| `radiation` | The radiation to the external environment, a key of [`BACK_RADIATIONS`](/phonometry/reference/api/electroacoustics/headphones/#back_radiations). One of `"C"` or `"O"`. |
 | `impedance_ohm` | The impedance, in ohms, as coded by [`impedance_code`](/phonometry/reference/api/electroacoustics/headphones/#impedance_code). |
 | `n_channels` | The number of channels, 1 to 9. |
 

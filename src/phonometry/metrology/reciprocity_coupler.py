@@ -1798,7 +1798,7 @@ class CouplerCheck(RichDisplay):
         frequency; ``None`` otherwise. It binds only the approximation.
     :ivar lowest_frequency_hz: The lowest frequency of the calibration, in Hz.
     :ivar heat_conduction_method: The method the calibration uses for
-        :math:`E_V`.
+        :math:`E_V`. One of ``"exact"`` or ``"approximation"``.
     :ivar temperature_c: The temperature, in °C.
     :ivar static_pressure_pa: The static pressure, in Pa.
     :ivar relative_humidity_percent: The relative humidity, in %.
@@ -1970,7 +1970,7 @@ def check_coupler(
     :param relative_humidity_percent: The relative humidity, in %.
     :param gas: Another gas than air, or ``None``.
     :param heat_conduction_method: The method the calibration uses for
-        :math:`E_V`.
+        :math:`E_V`. One of ``"exact"`` or ``"approximation"``.
     :return: The :class:`CouplerCheck`.
     :raises ValueError: for frequencies that are not positive and increasing,
         fewer than two microphones, or an unknown method.
@@ -2057,7 +2057,19 @@ class CouplerParameterUncertainty(OwnsArrays):
     :ivar frequencies: The frequencies, in Hz.
     :ivar component_uncertainties_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_2_TABLE_1`, in dB at each
-        frequency.
+        frequency. Keyed by any of ``"series_impedance"``, ``"voltage_ratio"``,
+        ``"cross_talk"``, ``"noise"``, ``"distortion"``, ``"frequency"``,
+        ``"receiver_ground_shield"``, ``"transmitter_ground_shield"``,
+        ``"coupler_length"``, ``"coupler_diameter"``, ``"coupler_volume"``,
+        ``"coupler_surface_area"``, ``"leakage"``, ``"capillary_tube_dimensions"``,
+        ``"static_pressure"``, ``"temperature"``, ``"relative_humidity"``,
+        ``"front_cavity_depth"``, ``"front_cavity_volume"``, ``"equivalent_volume"``,
+        ``"resonance_frequency"``, ``"loss_factor"``, ``"diaphragm_compliance"``,
+        ``"diaphragm_mass"``, ``"diaphragm_resistance"``, ``"front_cavity_thread"``,
+        ``"polarizing_voltage"``, ``"heat_conduction_theory"``, ``"excess_volume"``,
+        ``"viscosity_losses"``, ``"radial_wave_motion"``, ``"rounding"``,
+        ``"repeatability"``, ``"static_pressure_corrections"`` or
+        ``"temperature_corrections"``.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
@@ -2265,7 +2277,7 @@ def coupler_parameter_uncertainty(
         the static pressure, the temperature or the humidity could not move
         them with it, and an uncertainty on any of the three is refused.
     :param heat_conduction_method: The method for :math:`E_V` (Default:
-        ``"exact"``).
+        ``"exact"``). One of ``"exact"`` or ``"approximation"``.
     :return: The :class:`CouplerParameterUncertainty`, with a component for
         each parameter given a non-zero uncertainty.
     :raises ValueError: for other than three microphones, a microphone index

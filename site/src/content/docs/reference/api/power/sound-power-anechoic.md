@@ -282,6 +282,12 @@ $U = k\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$
 per-band value (`NaN` without `frequencies`).
 `sound_power_level_a` is the A-weighted total `LWA` (Eq. C.1).
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `surface` | One of `"sphere"` or `"hemisphere"`. |
+
 ### PrecisionSoundPowerResult.plot()
 
 ```python
@@ -297,6 +303,12 @@ Plot the precision `LW` spectrum with the A-weighted total.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### PrecisionSoundPowerResult.report()
 

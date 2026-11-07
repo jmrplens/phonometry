@@ -431,6 +431,8 @@ class FloorCoveringImprovementResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_floor_covering_improvement
@@ -701,7 +703,8 @@ def improvement_octave_bands(
         must contain whole octave triplets (centre / centre·2^(±1/3)).
     :param quantity: What the values are, for the record and its plot:
         ``"ΔL"`` (Default), ``"ΔR"`` or ``"Rs"``, the three quantities folded
-        into octaves by this average of transmitted power.
+        into octaves by this average of transmitted power. One of ``"ΔL"``, ``"ΔR"``,
+        ``"Rs"``, ``"LI"`` or ``"LI,norm"``.
     :return: An :class:`OctaveBandSpectrum` with the octave centres
         (``.frequencies``) and the octave values (``.values``).
     :raises ValueError: The thirds do not group into complete octave triplets,

@@ -171,6 +171,12 @@ present.  Requires matplotlib (the `[plot]` extra);
 returns the `Axes`, or a tuple of two for a
 time-varying result drawn without `ax`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ZwickerLoudness.report()
 
 ```python

@@ -493,6 +493,12 @@ Plot the scattering coefficient `s` versus frequency.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### ScatteringResult.report()
 
 ```python

@@ -238,6 +238,12 @@ system's own resonance marked, the analogue of Figures D.2 and D.3.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## weighted_lining_improvement
 
 ```python

@@ -125,6 +125,12 @@ Requires matplotlib (the `[plot]` extra); returns the
 `Axes`. Pass `fits=False` to omit the
 EDT/T20/T30 fit lines.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## filter_bandwidth
 
 ```python
@@ -429,6 +435,12 @@ Invalid bands are hatched and greyed. With `ax` given, only the
 decay-times panel is drawn on it. Requires matplotlib
 (the `[plot]` extra); returns the
 `Axes` it drew on, or the tuple of two without `ax`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RoomAcousticsResult.report()
 

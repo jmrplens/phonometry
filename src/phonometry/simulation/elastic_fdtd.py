@@ -1063,12 +1063,16 @@ class ElasticFDTD2D:
         :param absorbing_layer_cells: Thickness of the absorbing (sponge)
             layer, in cells (default 0, no layer).
         :param absorbing_sides: Which sides absorb, as
-            :class:`ElasticFDTD2D` takes them.
+            :class:`ElasticFDTD2D` takes them. One of ``"left"``, ``"right"``, ``"top"``
+            or ``"bottom"``. Each one of ``"left"``, ``"right"``, ``"top"`` or
+            ``"bottom"``.
         :param absorbing_layer_reflection: Target round-trip amplitude
             reflection of the sponge layer.
         :param damping: Bulk amplitude decay rate [1/s], a scalar or an
             ``(ny, nx)`` map.
-        :param free_sides: Sides carrying a traction-free surface.
+        :param free_sides: Sides carrying a traction-free surface. One of ``"left"``,
+            ``"right"``, ``"top"`` or ``"bottom"``. Each one of ``"left"``, ``"right"``,
+            ``"top"`` or ``"bottom"``.
         :param obstacle_mask: Boolean ``(ny, nx)`` map of rigid cells.
         :param compute: Where the engine steps (:class:`Compute`).
         :return: The configured stepping engine.
@@ -1519,6 +1523,7 @@ class ElasticFDTD2D:
         live: a NumPy array by default, the backend's own array on another
         device; :meth:`numpy_field` gives NumPy copies of the stored fields.
 
+        :param field: One of ``"p"``, ``"vx"`` or ``"vy"``.
         :raises TypeError: if ``field`` is not a text.
         :raises ValueError: if ``field`` is not ``"p"``, ``"vx"`` or ``"vy"``.
         """
@@ -1618,9 +1623,11 @@ class ElasticFDTDResult(OwnsArrays):
         ``snapshot_decimation``, in the dtype the run stepped in, or ``None``
         when no snapshots were requested.
     :ivar snapshot_times: Time of each snapshot [s], or ``None``.
-    :ivar snapshot_field: The field recorded in ``snapshots``.
+    :ivar snapshot_field: The field recorded in ``snapshots``. One of ``"p"``, ``"vx"``
+        or ``"vy"``.
     :ivar obstacle_mask: Boolean map of rigid cells, or ``None``.
-    :ivar free_sides: Sides carrying a traction-free surface.
+    :ivar free_sides: Sides carrying a traction-free surface. Each one of ``"left"``,
+        ``"right"``, ``"top"`` or ``"bottom"``.
     :ivar snapshot_decimation: Every how many cells a snapshot keeps along
         each axis (1 keeps every cell).
     :ivar provenance: Where the run stepped (:class:`RunProvenance`).

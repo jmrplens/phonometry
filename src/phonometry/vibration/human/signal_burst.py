@@ -181,11 +181,15 @@ class SawtoothBurstTest(RichDisplay):
     """One application's row of ISO 8041-1 Table 6 (folio 17).
 
     :ivar application: The application key, as :data:`SAWTOOTH_BURST_TESTS`
-        files it.
+        files it. One of ``"hand-arm"``, ``"whole-body"`` or
+        ``"low-frequency-whole-body"``.
     :ivar weightings: The frequency weightings the application is tested with,
-        in Table 6 order.
+        in Table 6 order. Each one of ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``,
+        ``"Wh"``, ``"Wj"``, ``"Wk"`` or ``"Wm"``.
     :ivar band_limiting_weighting: The weighting whose Table 3 corners are the
-        band-limiting response of this application's band-limiting row.
+        band-limiting response of this application's band-limiting row. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :ivar angular_frequency_rad_s: The saw-tooth angular frequency, in radians
         per second, which is what the table prints.
     :ivar start_time_s: When the first burst starts, in seconds.
@@ -548,7 +552,8 @@ def sawtooth_burst(
     :attr:`SawtoothBurstTest.max_fall_time_s`, and that allowance describes
     the laboratory rig, not this record.
 
-    :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`.
+    :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`. One of
+        ``"hand-arm"``, ``"whole-body"`` or ``"low-frequency-whole-body"``.
     :param n_cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
         for the continuous row.
     :param fs: Sampling frequency, in hertz. Finite, positive, and above twice
@@ -681,9 +686,11 @@ def signal_burst_indications(
     ISO 2631-1 Eq. (4) with the 1 s integration time this clause implies, in
     the linear and the exponential average of Annex D.
 
-    :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`.
+    :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`. One of
+        ``"hand-arm"``, ``"whole-body"`` or ``"low-frequency-whole-body"``.
     :param name: A weighting of that application, or :data:`BAND_LIMITING` for
-        the band-limiting row.
+        the band-limiting row. One of ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``,
+        ``"Wh"``, ``"Wj"``, ``"Wk"``, ``"Wm"`` or ``"band-limiting"``.
     :param n_cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
         for the continuous row.
     :param fs: Sampling frequency, in hertz. Finite, positive, and above twice
@@ -740,14 +747,17 @@ def signal_burst_indications(
 class SignalBurstVerification(OwnsArrays):
     """A meter's signal-burst indications against ISO 8041-1 Tables 7 to 9.
 
-    :ivar application: The application whose table was used.
+    :ivar application: The application whose table was used. One of ``"hand-arm"``,
+        ``"whole-body"`` or ``"low-frequency-whole-body"``.
     :ivar weighting: The row that was graded, a weighting name or
-        :data:`BAND_LIMITING`.
+        :data:`BAND_LIMITING`. One of ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``,
+        ``"Wh"``, ``"Wj"``, ``"Wk"``, ``"Wm"`` or ``"band-limiting"``.
     :ivar amplitude_m_s2: The zero-to-peak amplitude of the test signal the
         printed responses were scaled by.
     :ivar cycle_counts: The burst lengths that were graded, in printed order,
         with ``None`` for the continuous row.
-    :ivar quantities: The columns that were graded, in printed order.
+    :ivar quantities: The columns that were graded, in printed order. Each one of
+        ``"rms"``, ``"vdv"``, ``"mtvv_linear"``, ``"mtvv_exponential"`` or ``"msdv"``.
     :ivar measured: The indications as supplied, one row per burst length and
         one column per quantity.
 
@@ -926,8 +936,11 @@ def verify_signal_burst_response(
     degree one in the signal, so ``amplitude_m_s2`` scales the printed side
     exactly.
 
-    :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`.
-    :param name: A weighting of that application, or :data:`BAND_LIMITING`.
+    :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`. One of
+        ``"hand-arm"``, ``"whole-body"`` or ``"low-frequency-whole-body"``.
+    :param name: A weighting of that application, or :data:`BAND_LIMITING`. One of
+        ``"Wb"``, ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"``,
+        ``"Wm"`` or ``"band-limiting"``.
     :param measured: The indications, keyed by burst length (``None`` for the
         continuous row) and then by printed column name. Every row has to
         report the same columns, so that the verdict is a rectangle rather

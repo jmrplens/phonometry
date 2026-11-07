@@ -131,7 +131,7 @@ the ambiguity is registered in `docs/ERRATA.md`.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** `|H(f_ref)| / |H_BL(f_ref)|`, dimensionless.
 
@@ -227,7 +227,7 @@ The Table 2 indication tolerance at the reference frequency.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The permitted deviation of the indication, in per cent.
 
@@ -349,7 +349,7 @@ r.m.s.-only meter is not graded on phase at all.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
 **Returns:** The permitted deviation, in degrees, infinite in the two tails.
@@ -381,7 +381,7 @@ One measured phase response against the ISO 8041-1 Table 5 phase band.
 
 | Name | Description |
 | :--- | :--- |
-| `weighting` | The weighting the response was measured for. |
+| `weighting` | The weighting the response was measured for. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | The frequencies it was measured at. |
 | `measured_phase_deg` | The measured phase, as supplied. |
 | `design_phase_deg` | The design-goal phase of Formula (H.1) at the same frequencies, on the branch Tables B.1 to B.9 print. |
@@ -507,7 +507,7 @@ expected indication is the product of the two.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 
 **Returns:** The weighted acceleration, in metres per second squared.
 
@@ -764,7 +764,7 @@ this function does not perform.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | The frequencies the phase was measured at, in hertz, strictly ascending and at least two of them. |
 | `measured_phase_deg` | The measured phase at each frequency, in degrees, on the continuous branch Tables B.1 to B.9 print. |
 
@@ -860,7 +860,7 @@ by [`MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/inst
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | The frequencies the response was measured at, in hertz. |
 | `measured_factors` | The measured weighting factors, linear and not in decibels, one per frequency. |
 | `expanded_uncertainty_percent` | The testing laboratory's actual expanded uncertainty of the deviation measurement, in per cent and already expanded with `k = 2`. `None` (the default) compares the bare deviation, which is the right reading only for a measurement whose uncertainty has been shown to be negligible. |
@@ -897,7 +897,7 @@ The Table 5 band around a weighting, region by region.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). |
+| `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
 **Returns:** `(lower, upper)` percentages, elementwise, lower first and signed as Table 5 prints them: `lower` is negative (`-11.0` in the central region) and `upper` positive (`12.0`). `lower` is [`UNCONSTRAINED_BELOW_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#unconstrained_below_percent) (`-100.0`) outside the two outer transition frequencies, where the standard sets no lower limit at all.
@@ -929,7 +929,7 @@ One measured weighting response against its ISO 8041-1 tolerances.
 
 | Name | Description |
 | :--- | :--- |
-| `weighting` | The weighting the response was measured for. |
+| `weighting` | The weighting the response was measured for. One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | The frequencies it was measured at. |
 | `measured` | The measured weighting factors, as supplied. |
 | `design` | The design-goal factors of ISO 8041-1 Table 3 at the same frequencies. |

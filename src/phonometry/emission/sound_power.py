@@ -389,6 +389,8 @@ class SoundPowerResult(OwnsArrays):
     uncertainty
     :math:`U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` (95 %, ISO 3744
     clause 9.5).
+
+    :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
 
     frequencies: np.ndarray | None
@@ -483,6 +485,8 @@ class SoundPowerResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_power
@@ -934,7 +938,8 @@ def measurement_positions(
     Coordinates are scaled by ``radius`` and returned as an ``(N, 3)`` array of
     Cartesian ``(x, y, z)`` in metres, in the order of the position numbers.
 
-    :param surface: ``'hemisphere'`` (only shape with a coordinate table).
+    :param surface: ``'hemisphere'`` (only shape with a coordinate table). One of
+        ``"hemisphere"`` or ``"box"``.
     :param radius: Hemisphere radius ``r``, in metres.
     :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param tones: Engineering grade over one plane only: True reads Table B.1
@@ -1348,6 +1353,8 @@ class SoundEnergyResult(OwnsArrays):
     per-position mean single event levels directly; ``integration_time`` is
     the interval :math:`T` of the single event levels, in seconds, or ``None``
     when no background correction needed it.
+
+    :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
 
     frequencies: np.ndarray | None
@@ -1431,6 +1438,8 @@ class SoundEnergyResult(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_energy

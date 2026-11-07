@@ -237,6 +237,12 @@ the time weighting and nothing else. Needs a calibrated record to
 mean dB SPL, and says so rather than drawing a number counted from
 nothing.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### TimeWeightedEnvelope.shape
 
 *property*

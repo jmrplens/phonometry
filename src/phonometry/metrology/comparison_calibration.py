@@ -2713,7 +2713,11 @@ def comparison_uncertainty_budget(
         standard uncertainty in dB or a :class:`~phonometry.metrology.Quantity`.
         A type checker pairs the keys with ``field``: those of Table D.1 with
         ``"pressure"``, those of Table 2 with ``"free"``, and only the ones both
-        tables list with a field held in a variable.
+        tables list with a field held in a variable. Keyed by any of ``"reference"``,
+        ``"capacitance"``, ``"non_linearity"``, ``"impedance"``,
+        ``"polarizing_voltage"``, ``"repeatability"``, ``"drift"``, ``"rounding"``,
+        ``"source_stability"``, ``"positioning"``, ``"alignment"``, ``"free_field"``,
+        ``"non_plane_wave"`` or ``"environment"``.
     :param frequency_hz: The frequency the budget is for, in Hz.
     :param field: ``"pressure"`` (Table D.1, default) or ``"free"``
         (Table 2).

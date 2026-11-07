@@ -366,7 +366,7 @@ def reference_source_reproducibility(
         spiral) or ``"fixed"`` (20 discrete positions or coaxial circular
         paths); ignored in a reverberation room.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :return: :math:`\sigma_R` per band, in dB.
     :raises ValueError: for a band outside Table 2 or an unknown option.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
@@ -461,7 +461,8 @@ class ReferenceSourceCalibration(OwnsArrays):
     :ivar coverage_factor: :math:`k`.
     :ivar arrangement: ``"paths"`` or ``"fixed"``.
     :ivar radiation: The radiation character whose Annex A :math:`C_2` the
-        calibration used, or ``None`` when it used the manufacturer's value.
+        calibration used, or ``None`` when it used the manufacturer's value. One of
+        ``"monopole"``, ``"dipole"`` or ``"unknown"``.
     :ivar knee_frequency_hz: The knee frequency of that :math:`C_2`, or
         ``None``.
     :ivar intensity_sound_power_level: The sound power level determined
@@ -631,7 +632,7 @@ class ReferenceSourceCalibration(OwnsArrays):
 
         :param frequencies: Nominal mid-band frequencies, in hertz.
         :param fraction: The band set, 3 for one-third octaves (default) or 1
-            for octaves.
+            for octaves. One of ``1`` or ``3``.
         :param temperature_c: Air temperature at the test, in degrees Celsius;
             ``None`` (default), with ``static_pressure_kpa``, reads the
             reference conditions.
@@ -929,7 +930,8 @@ def reference_source_calibration(
         :math:`C_1` and the Annex A :math:`C_2` and whose :math:`a(f)` enters
         :math:`C_3`; ``None`` (default) takes the reference meteorological
         conditions of clause 4 with no air absorption.
-    :param radiation: Radiation character for the Annex A :math:`C_2`.
+    :param radiation: Radiation character for the Annex A :math:`C_2`. One of
+        ``"monopole"``, ``"dipole"`` or ``"unknown"``.
     :param knee_frequency_hz: Knee frequency for a monopole or a dipole.
     :param c2: The manufacturer's :math:`C_2`, scalar or per band, which
         8.4 prefers to Annex A; overrides ``radiation``. A calibration made

@@ -390,6 +390,12 @@ vector when supplied to the solver, and the air
 hand-built matrix (for example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) is
 unchanged.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `shape` | One of `"circular"`, `"rectangular"` or `"square"`. |
+
 ### TransferMatrix.absorption_hard_backed()
 
 ```python
@@ -520,6 +526,12 @@ Draw the four-microphone tube to scale (dimensioned side view).
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 **Raises**
 

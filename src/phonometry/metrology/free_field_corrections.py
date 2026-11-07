@@ -1710,7 +1710,9 @@ def correction_uncertainty_budget(
 
     :param stated_uncertainties_db: The value of each of the 15 components, in dB, keyed by
         the descriptor of Table I.1, ``"a1"`` to ``"a15"``. A component taken
-        as negligible is given as 0, as Table I.2 gives a6 and a13.
+        as negligible is given as 0, as Table I.2 gives a6 and a13. Keyed by any of
+        ``"a1"``, ``"a2"``, ``"a3"``, ``"a4"``, ``"a5"``, ``"a6"``, ``"a7"``, ``"a8"``,
+        ``"a9"``, ``"a10"``, ``"a11"``, ``"a12"``, ``"a13"``, ``"a14"`` or ``"a15"``.
     :param repeatability_dof: The degrees of freedom of the repeatability
         (a15), from the number of repeat measurements: 2 in Tables I.2 and
         I.3.

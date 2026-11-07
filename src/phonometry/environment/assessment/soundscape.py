@@ -936,7 +936,9 @@ def pleasantness_eventfulness(
         respondent, or a 2-D array ``(respondents, 8)`` in that order. ``NaN``
         marks a blank answer. A row may also be a statistic of a group of
         answers, such as a site's medians, which is why a value between two
-        boxes is accepted here; anything outside 1 to 5 is not a scale value.
+        boxes is accepted here; anything outside 1 to 5 is not a scale value. Keyed by
+        any of ``"pleasant"``, ``"chaotic"``, ``"vibrant"``, ``"uneventful"``,
+        ``"calm"``, ``"annoying"``, ``"eventful"`` or ``"monotonous"``.
     :param sites: The site of each respondent, any labels; ``None`` puts
         every respondent at one site named ``"all"``.
     :param central_tendency: ``"median"`` (default) or ``"mean"``.

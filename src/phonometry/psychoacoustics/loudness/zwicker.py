@@ -247,6 +247,8 @@ class ZwickerLoudness(OwnsArrays):
         present.  Requires matplotlib (the ``[plot]`` extra);
         returns the :class:`~matplotlib.axes.Axes`, or a tuple of two for a
         time-varying result drawn without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_zwicker_loudness

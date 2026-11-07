@@ -294,7 +294,8 @@ class BinauralMetric(RichDisplay):
     :ivar symbol: The metric, as Table D.1 prints it (``"LAeq,T"``,
         ``"N5"``...).
     :ivar parameter: The row of Table D.1 it belongs to, a key of
-        :data:`BINAURAL_PARAMETERS`.
+        :data:`BINAURAL_PARAMETERS`. One of ``"sound_pressure_level"``, ``"loudness"``,
+        ``"sharpness"``, ``"tonality"``, ``"roughness"`` or ``"fluctuation_strength"``.
     :ivar left: The value at the left ear.
     :ivar right: The value at the right ear.
     :ivar unit: Its unit.
@@ -338,7 +339,9 @@ class BinauralIndicators(RichDisplay):
         the order of the table.
     :ivar not_implemented: Every metric of a requested row that the library
         does not compute, keyed by its symbol, with the reason.
-    :ivar parameters: The rows of Table D.1 that were requested.
+    :ivar parameters: The rows of Table D.1 that were requested. Each one of
+        ``"sound_pressure_level"``, ``"loudness"``, ``"sharpness"``, ``"tonality"``,
+        ``"roughness"`` or ``"fluctuation_strength"``.
     :ivar fs: The sampling frequency of the recording, in Hz.
     :ivar duration_s: Its duration, in s.
     :ivar field: The sound field the loudness and hearing-model metrics
@@ -416,7 +419,9 @@ class BinauralIndicators(RichDisplay):
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param parameter: The row to draw, a key of
-            :data:`BINAURAL_PARAMETERS`; ``None`` draws the first one computed.
+            :data:`BINAURAL_PARAMETERS`; ``None`` draws the first one computed. One of
+            ``"sound_pressure_level"``, ``"loudness"``, ``"sharpness"``, ``"tonality"``,
+            ``"roughness"`` or ``"fluctuation_strength"``.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the left-ear bars.
         :return: The axes. Requires matplotlib (the ``[plot]`` extra).
@@ -663,7 +668,11 @@ def binaural_indicators(
         (default) or ``"diffuse"``, passed to the loudness and the
         hearing-model metrics.
     :param parameters: The rows of Table D.1 to compute, keys of
-        :data:`BINAURAL_PARAMETERS`; all of them by default.
+        :data:`BINAURAL_PARAMETERS`; all of them by default. One of
+        ``"sound_pressure_level"``, ``"loudness"``, ``"sharpness"``, ``"tonality"``,
+        ``"roughness"`` or ``"fluctuation_strength"``. Each one of
+        ``"sound_pressure_level"``, ``"loudness"``, ``"sharpness"``, ``"tonality"``,
+        ``"roughness"`` or ``"fluctuation_strength"``.
     :return: A :class:`BinauralIndicators`.
     :raises ValueError: for a recording that is not two channels, an unknown
         field or row, or a loudness exceeded 95 % of the time of zero, which

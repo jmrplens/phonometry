@@ -64,12 +64,12 @@ $\mathrm{PL} = \text{spreading} + \alpha R$ versus range.
 | :--- | :--- |
 | `range_m` | Range(s) from the source, in metres (scalar or array). |
 | `frequency_hz` | Acoustic frequency, in Hz. |
-| `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). |
+| `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). One of `"spherical"`, `"cylindrical"` or `"practical"`. |
 | `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `depth` | Depth, in metres. |
 | `ph` | Acidity (default 8). |
-| `model` | Absorption model (see [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption)). |
+| `model` | Absorption model (see [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption)). One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
 | `transition_range` | Transition range for the `"practical"` law, in m. |
 
 **Returns:** A [`PropagationLossResult`](/phonometry/reference/api/underwater/closed-form/#propagationlossresult).
@@ -108,8 +108,8 @@ Propagation loss versus range (closed-form).
 | `absorption` | Volume-absorption contribution per range, in dB. |
 | `frequency` | The acoustic frequency, in Hz. |
 | `absorption_db_per_km` | The absorption coefficient $\alpha$, in dB/km. |
-| `law` | The spreading law used. |
-| `model` | The absorption model used. |
+| `law` | The spreading law used. One of `"spherical"`, `"cylindrical"` or `"practical"`. |
+| `model` | The absorption model used. One of `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
 
 ### PropagationLossResult.plot()
 
@@ -123,6 +123,12 @@ PropagationLossResult.plot(
 ```
 
 Plot the propagation loss versus range with its two contributions.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## seawater_absorption
 

@@ -1148,7 +1148,8 @@ class ServiceEquipmentResult(OwnsArrays):
     :attr:`frequencies`.
 
     :ivar frequencies: Nominal band centres, in Hz.
-    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves.
+    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves. One of ``1``
+        or ``3``.
     :ivar quantity: The Table 1 quantity: ``"Smax"``, ``"Fmax"`` or ``"eq"``.
     :ivar a_weighting_range: ``"restricted"`` (50 Hz to 5 000 Hz; octave
         63 Hz to 4 000 Hz) or ``"extended"`` (25 Hz to 10 000 Hz; octave
@@ -1377,7 +1378,7 @@ def service_equipment_level(
         ``"eq"``. It names the single numbers and nothing else.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves. 6 asks for the weighted values from one-third-octave bands;
-        octave results are optional.
+        octave results are optional. One of ``1`` or ``3``.
     :param background_levels: Background band levels, in dB, one per band or one
         row per microphone position (energy-averaged over the positions, as the
         2004 edition says in so many words and the draft leaves implicit).

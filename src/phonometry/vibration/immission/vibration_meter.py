@@ -421,7 +421,8 @@ def kb_weighting_response(
     r"""The KB frequency weighting, Formula (4).
 
     :param frequencies: Frequencies, in hertz.
-    :param working_range: See :func:`band_limitation_response`.
+    :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
+        ``"railway"``.
     :return: The complex response :math:`H_{B\mathrm{Soll}}`, whose magnitude
         is Formula (6).
     :raises ValueError: For a non-positive frequency or an unknown range.
@@ -439,7 +440,8 @@ def response_tolerance_percent(
     r"""The limits of Tables 2 and 3 at each frequency, in per cent.
 
     :param frequencies: Frequencies, in hertz.
-    :param working_range: See :func:`band_limitation_response`.
+    :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
+        ``"railway"``.
     :return: ``(lower, upper)``, lower first and signed: the deviation
         allowed below the design response as a negative percentage and above
         it as a positive one, so that a deviation keeps to them when
@@ -484,7 +486,8 @@ class VibrationMeterVerification(OwnsArrays):
         as supplied, which footnote a of Table 3 reads.
     :ivar weighting: ``"kb"`` or ``"Z"`` (unweighted), which design response
         the deviation is against.
-    :ivar working_range: The working range the limits were read for.
+    :ivar working_range: The working range the limits were read for. One of
+        ``"building"`` or ``"railway"``.
     :ivar reference_frequency_hz: The frequency both responses were
         normalised at.
 
@@ -621,7 +624,8 @@ def verify_vibration_meter(
         frequencies, in any consistent unit: only its shape is graded.
     :param weighting: ``"kb"`` for the weighted response of Formula (4), the
         default, or ``"Z"`` for none, the band limitation of Formula (3) alone.
-    :param working_range: See :func:`band_limitation_response`.
+    :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
+        ``"railway"``.
     :param reference_frequency_hz: The reference frequency of 5.2.10, in
         hertz (default 16 Hz).
     :return: The comparison, as a :class:`VibrationMeterVerification`.
@@ -680,7 +684,8 @@ def kb_signal(
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
     :param fs: Sampling frequency, in hertz.
-    :param working_range: See :func:`band_limitation_response`.
+    :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
+        ``"railway"``.
     :return: :math:`KB(t)`, one value per sample.
     :raises ValueError: For a bad record, a rate that cannot carry the working
         range, or an unknown range.
@@ -712,7 +717,8 @@ def kbf_signal(
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
     :param fs: Sampling frequency, in hertz.
-    :param working_range: See :func:`band_limitation_response`.
+    :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
+        ``"railway"``.
     :param time_constant_s: The averaging time constant, in seconds. The
         standard fixes it at 0,125 s and the parameter exists so a comparison
         with another time weighting can be written down, not so a meter can
@@ -839,7 +845,8 @@ class VibrationMeterReading(OwnsArrays):
     :ivar fs: The sampling frequency the record was read at.
     :ivar measuring_time_s: :math:`T_M`, the length of the record.
     :ivar averaging_time_s: :math:`T_m`, the whole clock intervals in it.
-    :ivar working_range: The working range the chain was built for.
+    :ivar working_range: The working range the chain was built for. One of
+        ``"building"`` or ``"railway"``.
     """
 
     peak_velocity_mm_s: float
@@ -905,7 +912,8 @@ def measure_vibration_immission(
     :param velocity_mm_s: The measured velocity, in millimetres per second
         (1-D).
     :param fs: Sampling frequency, in hertz.
-    :param working_range: See :func:`band_limitation_response`.
+    :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
+        ``"railway"``.
     :param takt_duration_s: The clock interval, in seconds (default 30 s).
     :return: The displayed quantities, as a :class:`VibrationMeterReading`.
     :raises ValueError: For a bad record, a rate that cannot carry the working
@@ -946,7 +954,8 @@ def assessment_weighting_response(
 
     :param frequencies: Frequencies, in hertz.
     :param building_class: The row of DIN 4150-3:1999-02 Table 1, as
-        :data:`ASSESSMENT_GUIDE_VALUES_MM_S` keys it.
+        :data:`ASSESSMENT_GUIDE_VALUES_MM_S` keys it. One of ``"commercial"``,
+        ``"residential"`` or ``"sensitive"``.
     :return: The target magnitude, dimensionless, 1 below 10 Hz.
     :raises ValueError: For a non-positive frequency or an unknown class.
     :raises TypeError: if ``building_class`` is not a text, or ``frequencies`` holds a
@@ -986,7 +995,8 @@ def assessment_weighting_taps(
     :param fs: Sampling frequency, in hertz. Table E.1 requires the Nyquist
         frequency to be above 315 Hz where the meter reaches that far, and
         this refuses a rate below 630 Hz for the same reason.
-    :param building_class: See :func:`assessment_weighting_response`.
+    :param building_class: See :func:`assessment_weighting_response`. One of
+        ``"commercial"``, ``"residential"`` or ``"sensitive"``.
     :param n_taps: Length of the filter, odd. The default resolves the 10 Hz
         corner of the target with room to spare, at half a second of taps.
     :return: The filter coefficients.
@@ -1041,7 +1051,8 @@ def assessment_velocity(
         (1-D). Annex E filters the unweighted signal, which has already been
         band-limited by 5.2.3.
     :param fs: Sampling frequency, in hertz.
-    :param building_class: See :func:`assessment_weighting_response`.
+    :param building_class: See :func:`assessment_weighting_response`. One of
+        ``"commercial"``, ``"residential"`` or ``"sensitive"``.
     :param n_taps: See :func:`assessment_weighting_taps`.
     :return: ``v_Bn(t)``, one value per sample.
     :raises ValueError: For a bad record, a rate below 630 Hz, or an unknown
@@ -1062,7 +1073,8 @@ class AssessmentVelocity(OwnsArrays):
 
     :ivar assessment_velocity_mm_s: :math:`|v_{Bn}|_\mathrm{max}`, the peak
         of the weighted velocity, in millimetres per second.
-    :ivar building_class: The row of DIN 4150-3 Table 1 that was used.
+    :ivar building_class: The row of DIN 4150-3 Table 1 that was used. One of
+        ``"commercial"``, ``"residential"`` or ``"sensitive"``.
     :ivar velocity_mm_s: The weighted velocity itself, one value per sample.
     :ivar fs: The sampling frequency the record was read at.
 
@@ -1143,7 +1155,8 @@ def assess_short_term_vibration(
     :param velocity_mm_s: The measured velocity at the foundation, in
         millimetres per second (1-D).
     :param fs: Sampling frequency, in hertz.
-    :param building_class: See :func:`assessment_weighting_response`.
+    :param building_class: See :func:`assessment_weighting_response`. One of
+        ``"commercial"``, ``"residential"`` or ``"sensitive"``.
     :param n_taps: See :func:`assessment_weighting_taps`.
     :return: The comparison, as an :class:`AssessmentVelocity`.
     :raises ValueError: For a bad record, a rate below 630 Hz, or an unknown

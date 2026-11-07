@@ -1272,6 +1272,7 @@ def plot_excitation(
     :param kind: ``"sweep"`` (default) or ``"mls"``.
     :param ax: Existing axes for the top (time-domain) panel, or ``None`` for a
         fresh two-panel figure.
+    :param language: The language of the labels: ``"en"`` or ``"es"``.
     :param kwargs: Forwarded to the time-domain ``plot`` call.
     :return: The time-domain axes (``ax`` given) or the tuple of two axes.
     :raises ValueError: for an unknown ``kind``, or an empty signal.

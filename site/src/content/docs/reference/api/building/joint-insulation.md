@@ -211,6 +211,12 @@ Plot the readings with their average and the 0,3 mm band.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### GapWidthCheck.spread_mm
 
 *property*
@@ -394,6 +400,12 @@ $b_\mathrm{n} + 3$ marked. Requires matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 **Raises**
 
 | Exception | When |
@@ -416,6 +428,12 @@ Plot $R_\mathrm{s}$ in octave bands at every gap width, as Figure J.9.
 Every result must hold whole octaves of one-third-octave bands.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### JointGapSeries.single_number()
 
@@ -506,6 +524,12 @@ Plot the measured gap widths against the three widths J.4 asks for.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### JointGapSeriesCheck.tolerance_mm
 
 *property*
@@ -568,6 +592,12 @@ Plot the open-band single numbers beside the bands taken as open.
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## JointTestElementCheck
 
 ```python
@@ -622,6 +652,12 @@ Plot the length and width of the joint against their bounds.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### JointTestElementCheck.width_ok
 
@@ -789,6 +825,12 @@ and $R_\mathrm{s,max}$, and the shifted ISO 717-1 reference
 curve over the rating range, as the diagram of Figure J.7. Requires
 matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### LaboratoryJointInsulationResult.r_s_w
 

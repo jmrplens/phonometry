@@ -363,6 +363,12 @@ the laboratory is normalized by. Requires matplotlib
 (the `[plot]` extra); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## RainfallSoundResult
 
 ```python
@@ -432,6 +438,12 @@ Plot the sound intensity level per band, normalized when available.
 
 Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RainfallSoundResult.sound_power_levels()
 
@@ -552,6 +564,12 @@ Every quantity is drawn as its deviation from the nominal value in
 units of its tolerance, so the three share one axis and the window is
 -1 to 1. Requires matplotlib (the `[plot]` extra);
 returns the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RainGeneratorVerification.rate_deviation_mm_h
 

@@ -100,7 +100,7 @@ stays empty, is in the module docstring; each metric carries its method.
 | `fs` | Sampling frequency, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
 | `calibration_factor` | Multiplier from the recorded units to pascals, the same for both channels. An explicit value wins over the one a Signal carries; a bare array with neither is taken to be in pascals. |
 | `field` | The sound field the recording was equalized for, `"free"` (default) or `"diffuse"`, passed to the loudness and the hearing-model metrics. |
-| `parameters` | The rows of Table D.1 to compute, keys of [`BINAURAL_PARAMETERS`](/phonometry/reference/api/environment/soundscape-binaural/#binaural_parameters); all of them by default. |
+| `parameters` | The rows of Table D.1 to compute, keys of [`BINAURAL_PARAMETERS`](/phonometry/reference/api/environment/soundscape-binaural/#binaural_parameters); all of them by default. One of `"sound_pressure_level"`, `"loudness"`, `"sharpness"`, `"tonality"`, `"roughness"` or `"fluctuation_strength"`. Each one of `"sound_pressure_level"`, `"loudness"`, `"sharpness"`, `"tonality"`, `"roughness"` or `"fluctuation_strength"`. |
 
 **Returns:** A [`BinauralIndicators`](/phonometry/reference/api/environment/soundscape-binaural/#binauralindicators).
 
@@ -147,7 +147,7 @@ Annex D, Table D.1).
 | :--- | :--- |
 | `metrics` | Every metric computed, keyed by its Table D.1 symbol, in the order of the table. |
 | `not_implemented` | Every metric of a requested row that the library does not compute, keyed by its symbol, with the reason. |
-| `parameters` | The rows of Table D.1 that were requested. |
+| `parameters` | The rows of Table D.1 that were requested. Each one of `"sound_pressure_level"`, `"loudness"`, `"sharpness"`, `"tonality"`, `"roughness"` or `"fluctuation_strength"`. |
 | `fs` | The sampling frequency of the recording, in Hz. |
 | `duration_s` | Its duration, in s. |
 | `field` | The sound field the loudness and hearing-model metrics assumed, `"free"` or `"diffuse"`. |
@@ -172,7 +172,7 @@ representative value marked.
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `parameter` | The row to draw, a key of [`BINAURAL_PARAMETERS`](/phonometry/reference/api/environment/soundscape-binaural/#binaural_parameters); `None` draws the first one computed. |
+| `parameter` | The row to draw, a key of [`BINAURAL_PARAMETERS`](/phonometry/reference/api/environment/soundscape-binaural/#binaural_parameters); `None` draws the first one computed. One of `"sound_pressure_level"`, `"loudness"`, `"sharpness"`, `"tonality"`, `"roughness"` or `"fluctuation_strength"`. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the left-ear bars. |
 
@@ -249,7 +249,7 @@ One metric of Table D.1 at both ears (ISO/TS 12913-3 D.2).
 | Name | Description |
 | :--- | :--- |
 | `symbol` | The metric, as Table D.1 prints it (`"LAeq,T"`, `"N5"`...). |
-| `parameter` | The row of Table D.1 it belongs to, a key of [`BINAURAL_PARAMETERS`](/phonometry/reference/api/environment/soundscape-binaural/#binaural_parameters). |
+| `parameter` | The row of Table D.1 it belongs to, a key of [`BINAURAL_PARAMETERS`](/phonometry/reference/api/environment/soundscape-binaural/#binaural_parameters). One of `"sound_pressure_level"`, `"loudness"`, `"sharpness"`, `"tonality"`, `"roughness"` or `"fluctuation_strength"`. |
 | `left` | The value at the left ear. |
 | `right` | The value at the right ear. |
 | `unit` | Its unit. |

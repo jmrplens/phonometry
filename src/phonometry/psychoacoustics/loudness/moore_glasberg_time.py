@@ -386,6 +386,8 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
     time); the standard itself reports only the peak long-term loudness
     (clause 9), the percentiles are provided as a convenience.  ``field`` and
     ``presentation`` echo the listening conditions.
+
+    :ivar presentation: One of ``"binaural"``, ``"diotic"`` or ``"monaural"``.
     """
 
     times: np.ndarray
@@ -510,6 +512,8 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
 
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.  See :mod:`phonometry._plot.psychoacoustics`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_moore_glasberg_time_loudness

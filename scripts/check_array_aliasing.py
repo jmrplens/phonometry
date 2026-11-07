@@ -159,6 +159,7 @@ from typing import TYPE_CHECKING, TypeGuard
 from ast_scan import (
     COMPOUND_STATEMENTS,
     ROOT,
+    argument_places,
     assigned_value,
     assignment_target,
     binding_of,
@@ -2839,16 +2840,9 @@ class Reader:
             )
             if not pinned:
                 return values[0] if len(values) == 1 else union(_CLEAN, *values)
-        spread = next(
-            (
-                index
-                for index, argument in enumerate(node.args)
-                if isinstance(argument, ast.Starred)
-            ),
-            None,
-        )
+        places = argument_places(node.args)
         values.extend(
-            self._returned_by(function, arguments, keywords, bound=bound, spread=spread)
+            self._returned_by(function, arguments, keywords, bound=bound, places=places)
             for function in self.reached(target, node, pins=pins)
         )
         return union(*values) if values else _CLEAN
@@ -2860,11 +2854,11 @@ class Reader:
         keywords: dict[str | None, Value],
         *,
         bound: bool,
-        spread: int | None = None,
+        places: Sequence[tuple[int, bool]] = (),
     ) -> Value:
         """What one definition returns of the arguments given to it, bound
-        to its own parameters (:func:`bind`, *spread* the place of the first
-        ``*`` argument).
+        to its own parameters (:func:`bind`, *places* where each argument
+        may land, :func:`ast_scan.argument_places`).
 
         A function defined in this one, or in one around it (a sibling
         helper), is read as it was where it is defined, so what it returns of
@@ -2878,13 +2872,13 @@ class Reader:
             returned, closure = held
             mapping: dict[str, Value] = {label: frozenset({label}) for label in closure}
             mapping.update(
-                bind(function, arguments, keywords, bound=bound, spread=spread)
+                bind(function, arguments, keywords, bound=bound, places=places)
             )
             return substitute(returned, mapping)
         summary = self.summaries.get(function.node)
         if summary is None or not flat(summary.value):
             return _CLEAN
-        mapping = bind(function, arguments, keywords, bound=bound, spread=spread)
+        mapping = bind(function, arguments, keywords, bound=bound, places=places)
         return substitute(summary.value, mapping)
 
     def reached(
@@ -2942,11 +2936,12 @@ class Reader:
         """Report what a record keeps, and return the record as a value.
 
         An argument given by its place fills each field that place may hold
-        (:func:`_places_reached`), and one that may fall past the last of
-        them is read as spread over the record, as a ``*`` argument is. A
-        copy handed to a record that copies is reported only when every
-        class the call may build is a record that copies, and no function it
-        may run hands its argument back instead (*alone*, :meth:`apply`).
+        (:func:`_places_reached`), a ``*`` argument each field its items may
+        fill, and one that may fall past the last of them is read as spread
+        over the record. A copy handed to a record that copies is reported
+        only when every class the call may build is a record that copies,
+        and no function it may run hands its argument back instead (*alone*,
+        :meth:`apply`).
         """
         fields = self.tree.record_fields(info)
         annotations = dict(fields)
@@ -2965,10 +2960,8 @@ class Reader:
         places = _places_reached(self.tree.positional_orders(info), node.args)
         for index, value in enumerate(arguments):
             names, past = places[index]
-            if isinstance(node.args[index], ast.Starred) or past:
+            if past:
                 spilled.append(value)
-            if isinstance(node.args[index], ast.Starred):
-                continue
             for filled in names:
                 keep(filled, value)
         for name, value in keywords.items():
@@ -4119,28 +4112,23 @@ def _places_reached(
     (:meth:`Tree.positional_orders`), and whether it may fall past the last
     of them in one.
 
-    From the first ``*`` argument on, the number of values the call hands is
-    unknown: an argument written after it may fill any place from the
-    star's own on, as :func:`bind` reads it for a function.
+    A ``*`` argument, and every argument after one, may fill any field from
+    the lowest place it may take on (:func:`ast_scan.argument_places`), the
+    star its items one each: ``Rec(x, *rest)`` hands ``rest`` every field
+    after the first, and ``Rec(*head, 1, value)`` hands ``value`` none of
+    the first. Only an argument whose lowest place is past the last field
+    of an order may fall past them.
     """
-    spread = next(
-        (
-            index
-            for index, argument in enumerate(arguments)
-            if isinstance(argument, ast.Starred)
-        ),
-        None,
-    )
     reached: list[tuple[tuple[str, ...], bool]] = []
-    for index in range(len(arguments)):
+    for lowest, spread in argument_places(arguments):
         names: dict[str, None] = {}
         past = False
         for order in orders:
-            if spread is not None and index > spread:
-                names.update(dict.fromkeys(order[spread:]))
-            elif index < len(order):
-                names[order[index]] = None
-            past = past or index >= len(order)
+            if spread:
+                names.update(dict.fromkeys(order[lowest:]))
+            elif lowest < len(order):
+                names[order[lowest]] = None
+            past = past or lowest >= len(order)
         reached.append((tuple(names), past))
     return reached
 
@@ -4151,13 +4139,15 @@ def bind(
     keywords: dict[str | None, Value],
     *,
     bound: bool,
-    spread: int | None = None,
+    places: Sequence[tuple[int, bool]] = (),
 ) -> dict[str, Value]:
     """What each parameter of *function* receives from one call.
 
-    From *spread*, the place of the first ``*`` argument, on, the number of
-    values the call hands is unknown: that argument and every one after it
-    may land in any place from its own on, or in ``*args``, and a place they
+    *places* says where each argument may land
+    (:func:`ast_scan.argument_places`); with none given, each fills its own
+    place. From the first ``*`` argument on, the number of values the call
+    hands is unknown: that argument and every one after it may land in any
+    place from the lowest it may take on, or in ``*args``, and a place they
     may leave unfilled is one a keyword or ``**options`` may fill. A place an
     explicit keyword fills is that keyword's alone.
     """
@@ -4170,10 +4160,11 @@ def bind(
     beyond: list[Value] = []
     maybe: set[str] = set()
     for index, value in enumerate(arguments):
-        if spread is not None and index >= spread:
-            for name in positional[spread:]:
+        lowest, spread = places[index] if index < len(places) else (index, False)
+        if spread:
+            for name in positional[lowest:]:
                 mapping[name] = union(mapping.get(name, _CLEAN), value)
-            maybe.update(positional[spread:])
+            maybe.update(positional[lowest:])
             beyond.append(value)
         elif index < len(positional):
             mapping[positional[index]] = value

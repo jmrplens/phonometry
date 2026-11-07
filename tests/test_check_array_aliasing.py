@@ -3274,7 +3274,8 @@ def test_an_argument_after_a_star_may_fill_any_place_from_the_star_s_on(
     """The ``*`` argument hands an unknown number of values, so an argument
     written after it may fill any field from the star's place on: with
     nothing in ``head`` it fills ``first``, with one ``label``, with two
-    ``data``.
+    ``data``. The star's own items fill the fields from its place on, the
+    same two among them.
 
     It was read at its written place alone, the text ``label``, so the two
     fields that may keep the caller's array passed.
@@ -3298,9 +3299,96 @@ def test_an_argument_after_a_star_may_fill_any_place_from_the_star_s_on(
         """,
     )
     assert found == {
-        ("build_spread", "Spread(*...)", "head"),
-        ("build_spread", "Spread.first", "values"),
-        ("build_spread", "Spread.data", "values"),
+        ("build_spread", "Spread.first", "head, values"),
+        ("build_spread", "Spread.data", "head, values"),
+    }
+
+
+#: Calls whose ``*`` argument fills the fields or parameters from its lowest
+#: place on, and whose arguments after it never fill one before theirs.
+_LOWEST_PLACES = """
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import read_only_copy
+from .results import BandResult
+
+@dataclass(frozen=True)
+class _Rec:
+    a: NDArray[np.float64]
+    b: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class Trailing:
+    data: NDArray[np.float64] | None = None
+    label: str = ""
+    other: str = ""
+
+@dataclass(frozen=True)
+class Copied:
+    data: NDArray[np.float64] | None = None
+    label: str = ""
+
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+def _second(x, rest):
+    rec = _Rec(x, *rest)
+    return rec.b
+
+def _first(rest):
+    rec = _Rec(*rest)
+    return rec.a
+
+def _picked(first, label=None, data=None):
+    return first
+
+def build_second(x, rest):
+    return BandResult(frequencies=_second(x, rest), levels=None)
+
+def build_first(rest):
+    return BandResult(frequencies=_first(rest), levels=None)
+
+def build_trailing(head, values):
+    return Trailing(*head, 1, values)
+
+def build_picked(head, values):
+    return BandResult(frequencies=_picked(*head, None, values), levels=None)
+
+def build_copied(rest):
+    return Copied(*rest)
+"""
+
+
+def test_a_star_fills_each_place_from_the_lowest_it_may_take_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``*`` argument hands its items to the places from its own on, and
+    none to those before: ``_Rec(x, *rest)`` keeps an item of ``rest`` in
+    ``b``, and ``_Rec(*rest)`` in ``a`` too, so the field a helper hands
+    back carries ``rest``. An argument after a star never fills a place
+    before the plain arguments written ahead of it allow: in
+    ``Trailing(*head, 1, values)`` and ``_picked(*head, None, values)``
+    the array lands in the second place or a later one, never in ``data``
+    or ``first``, which only an item of ``head`` may fill. A field the
+    record copies keeps nothing of the star.
+
+    The star was kept in no field, only spread over the fields an argument
+    had already filled, so the two fields it alone filled carried nothing
+    and the caller's array went back unseen; every argument after a star
+    was read from the star's own place on, so ``values`` was refused as
+    kept in ``data`` and handed back as ``first``; and the star was read as
+    spread over the record, so ``Copied(*rest)`` was refused though the
+    record copies its one array.
+    """
+    found = _findings(tmp_path, lowest=_LOWEST_PLACES)
+    assert found == {
+        ("build_second", "BandResult.frequencies", "rest"),
+        ("build_first", "BandResult.frequencies", "rest"),
+        ("build_trailing", "Trailing.data", "head"),
+        ("build_picked", "BandResult.frequencies", "head"),
     }
 
 

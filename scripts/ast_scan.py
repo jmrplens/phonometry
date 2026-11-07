@@ -250,6 +250,31 @@ def parameters(
     return found
 
 
+def argument_places(arguments: Sequence[ast.expr]) -> list[tuple[int, bool]]:
+    """Where each argument a call gives by its place may land among the
+    places of what it calls: the lowest place it may fill, and whether it
+    may fill any place from there on.
+
+    A ``*`` argument hands an unknown number of values, none among them, so
+    the lowest place of an argument is the number of plain arguments written
+    before it, and a ``*`` argument, and every argument after one, may fill
+    any place from its lowest on, past the named ones too: ``f(*head, 1,
+    value)`` hands ``value`` the second place or a later one, never the
+    first. An argument with no ``*`` argument at or before it fills its own
+    place alone.
+    """
+    places: list[tuple[int, bool]] = []
+    plain = 0
+    spread = False
+    for argument in arguments:
+        starred = isinstance(argument, ast.Starred)
+        spread = spread or starred
+        places.append((plain, spread))
+        if not starred:
+            plain += 1
+    return places
+
+
 def _opening(scope: ast.AST) -> list[ast.AST]:
     """The nodes a scope runs as its own, before any scope inside it is left out.
 

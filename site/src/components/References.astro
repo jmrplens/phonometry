@@ -12,8 +12,9 @@
  * The citations themselves (author position, year, title, source, DOI, note,
  * order) are worded in src/lib/references-format.mjs, which says where they
  * depart from APA 7 and why. The page's Markdown copy prints the same section
- * from the same module (src/lib/agent-md/page.mjs), so the two cannot word an
- * entry differently; this component only decides the markup.
+ * from the same module (referencesMarkdown in scripts/shared/page-twin.mjs), so
+ * the two cannot word an entry differently; this component only decides the
+ * markup.
  */
 import { citationParts, noteParts, opening, sortedReferences } from '../lib/references-format.mjs';
 import { referenceAnchors, type Reference } from '../lib/reference-chips';

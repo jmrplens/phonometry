@@ -483,11 +483,7 @@ export function inlineParts(text, { kind = 'mdx' } = {}) {
  * @returns {string} The page, as many lines long as it was.
  */
 export function pageMarkup(text, { kind = 'mdx' } = {}) {
-  const head = frontmatterEnd(text);
-  const body = blank(text.slice(0, head)) + text.slice(head);
-  const lines = body.split('\n');
-  const walked = pageLines(lines, { kind });
-  const prose = lines.map((line, index) => (NOT_INLINE_ROLES.has(walked[index].role) ? blank(line) : line)).join('\n');
+  const { prose, walked } = readPage(text, kind);
   let shown = '';
   let done = 0;
   for (const [start, end] of unrendered(prose, kind, walked)) {
@@ -495,4 +491,48 @@ export function pageMarkup(text, { kind = 'mdx' } = {}) {
     done = end;
   }
   return shown + prose.slice(done);
+}
+
+/**
+ * The page with its frontmatter blanked, its lines walked once, and the lines
+ * no inline span reaches (code and display maths) blanked too.
+ */
+function readPage(text, kind) {
+  const head = frontmatterEnd(text);
+  const body = blank(text.slice(0, head)) + text.slice(head);
+  const lines = body.split('\n');
+  const walked = pageLines(lines, { kind });
+  const prose = lines.map((line, index) => (NOT_INLINE_ROLES.has(walked[index].role) ? blank(line) : line)).join('\n');
+  return { head, lines, walked, prose };
+}
+
+/**
+ * Every part of a page that it does not render as markup or as prose, each
+ * with what it is, in the order the page writes them: the one reading
+ * {@link pageMarkup} blanks, kept apart by kind for a reader that has to treat
+ * them differently, as the Markdown copy of a page does (it takes a comment
+ * out, resolves an expression and leaves code alone).
+ *
+ * `what` is `frontmatter`; `code`, a line of a fence or of indented code, or an
+ * inline code span; `maths`, a line of a display block or an inline maths span;
+ * `escape`, a backslash and the character it escapes; `comment`; and
+ * `expression`, on an `.mdx` page. The indexes are those of `text`.
+ *
+ * @param {string} text The page as written, its frontmatter in.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {Array<{ start: number, end: number, what: 'frontmatter' | 'code' | 'maths' | 'escape' | 'comment' | 'expression' }>}
+ */
+export function pageParts(text, { kind = 'mdx' } = {}) {
+  const { head, lines, walked, prose } = readPage(text, kind);
+  const parts = head ? [{ start: 0, end: head, what: 'frontmatter' }] : [];
+  let at = 0;
+  lines.forEach((line, index) => {
+    const { role } = walked[index];
+    if (NOT_INLINE_ROLES.has(role) && line !== '') {
+      parts.push({ start: at, end: at + line.length, what: role.startsWith('maths') ? 'maths' : 'code' });
+    }
+    at += line.length + 1;
+  });
+  for (const [start, end, what] of unrendered(prose, kind, walked)) parts.push({ start, end, what });
+  return parts.sort((a, b) => a.start - b.start);
 }

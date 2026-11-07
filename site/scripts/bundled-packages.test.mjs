@@ -47,10 +47,10 @@ test("a manifest that lists nothing bundles every package", () => {
 
 test("the site's own manifest keeps its renderers as imports and bundles astro's dependencies", () => {
 	const bundled = packagesNotListedIn(SITE_MANIFEST);
-	for (const name of ['astro', 'katex', 'satori', 'sharp', '@astrojs/starlight']) {
+	for (const name of ['astro', 'katex', 'satori', 'sharp', '@astrojs/starlight', 'yaml']) {
 		assert.ok(!bundled.test(name), `${name} is the site's own and should stay an import`);
 	}
-	for (const name of ['cookie', 'zod', 'yaml', 'picomatch']) {
+	for (const name of ['cookie', 'zod', 'devalue', 'picomatch']) {
 		assert.ok(bundled.test(name), `${name} is astro's, not the site's, and should be bundled`);
 	}
 });

@@ -18,7 +18,10 @@ const contentDates = await loadContentDates();
 
 /**
  * The routes `scripts/emit-page-markdown.mjs` publishes a markdown copy for:
- * one per file in the docs collection, minus the splash pages.
+ * one per file in the docs collection, minus the pages src/lib/page-markdown.mjs
+ * withholds (the two splash pages, and the pages that render their data
+ * through a component with no copy in docs/ to stand for it), which therefore
+ * offer no copy in their head or their page actions either.
  *
  * Membership is what decides, rather than the address of the page, because the
  * two do not agree everywhere. Starlight gives every English page a route in

@@ -2,7 +2,7 @@
  * A page's bibliography as APA 7 citations, in either language, for the two
  * places that print it: the References section of the page
  * (src/components/References.astro) and the References section of its
- * Markdown copy (src/lib/agent-md/page.mjs).
+ * Markdown copy (referencesMarkdown in scripts/shared/page-twin.mjs).
  *
  * Both read the typed `references` list of the page frontmatter (schema in
  * src/content.config.ts). The copy used to have no references at all, and a

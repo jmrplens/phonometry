@@ -58,33 +58,27 @@ solver to verify the assumptions it rests on.
 Those cross-checks are not only arguments: twenty-four of the animations in
 this documentation are output from these two solvers, nineteen from the
 acoustic one and five from the elastic one, and twenty-one of them are filed
-on the guides whose physics they settle rather than here. Room modes growing
-on and off resonance appear in
-[room acoustics](../buildings/rooms/room-acoustics.md)
-and [reverberation prediction](../buildings/rooms/reverberation-prediction.md),
-which also carries the hall of columns that turns one wavefront into a mixed
-field and the same absorption placed two ways; barrier diffraction at two
-wavelengths in
-[outdoor propagation](../environment/propagation/outdoor-propagation.md)
-and [ground effect and barriers](../environment/propagation/ground-barriers.md);
-downwind and upwind refraction in
-[atmospheric refraction](../environment/propagation/atmospheric-refraction.md);
-the ground-effect lobe pattern in outdoor propagation and in
-[airport noise](../aircraft/airport-noise.md); the standing-wave and
-transmission tubes in [the impedance tube](../materials/absorbers/impedance-tube.md);
-the open duct end radiating at two frequencies in
-[measuring a silencer](../devices/noise-control/silencer-measurement.md);
-a duct driven below and above its first cut-on in
-[duct-borne noise](../devices/noise-control/duct-path.md);
-the QRD and metadiffuser panels in
-[diffusers](../materials/diffusers/diffusers.md) and
-[metadiffusers](../materials/diffusers/metadiffusers.md); the slit
-absorber in [metamaterial absorbers](../materials/absorbers/metamaterial-absorbers.md);
-the expansion chamber and the quarter-wave side branch in
-[silencers](../devices/noise-control/silencers.md);
-the wall aperture in [panel sound insulation](../buildings/design/panel-sound-insulation.md);
-and the SOFAR duct and the critical grazing angle over two seabeds in
-[underwater propagation](../underwater/underwater-propagation.md).
+on the guides whose physics they settle rather than here. The acoustic
+solver's animations are on these guides:
+
+| Guide | What its animations show |
+|---|---|
+| [Room acoustics](../buildings/rooms/room-acoustics.md) | room modes growing on and off resonance |
+| [Reverberation prediction](../buildings/rooms/reverberation-prediction.md) | the same room modes, the hall of columns that turns one wavefront into a mixed field, and the same absorption placed two ways |
+| [Outdoor propagation](../environment/propagation/outdoor-propagation.md) | barrier diffraction at two wavelengths, and the ground-effect lobe pattern |
+| [Ground effect and barriers](../environment/propagation/ground-barriers.md) | barrier diffraction at two wavelengths |
+| [Atmospheric refraction](../environment/propagation/atmospheric-refraction.md) | downwind and upwind refraction |
+| [Airport noise](../aircraft/airport-noise.md) | the ground-effect lobe pattern |
+| [Impedance tube](../materials/absorbers/impedance-tube.md) | the virtual impedance tube and the virtual transmission tube |
+| [Measuring a silencer](../devices/noise-control/silencer-measurement.md) | the open duct end radiating at two frequencies |
+| [Duct-borne noise](../devices/noise-control/duct-path.md) | a duct driven below and above its first cut-on |
+| [Diffusers](../materials/diffusers/diffusers.md) | a flat panel beside a QRD |
+| [Metadiffusers](../materials/diffusers/metadiffusers.md) | the metadiffuser beside the QRD it mimics |
+| [Metamaterial absorbers](../materials/absorbers/metamaterial-absorbers.md) | the slit absorber |
+| [Silencers](../devices/noise-control/silencers.md) | the expansion chamber and the quarter-wave side branch |
+| [Panel sound insulation](../buildings/design/panel-sound-insulation.md) | the wall aperture |
+| [Underwater propagation](../underwater/underwater-propagation.md) | the SOFAR duct, and the critical grazing angle over two seabeds |
+
 Three of the elastic solver's five are on guides too: the bending packet
 entering an L-junction, on
 [junction transmission](../vibration/structural/junction-transmission.md),

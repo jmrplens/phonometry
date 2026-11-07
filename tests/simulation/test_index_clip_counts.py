@@ -4,13 +4,15 @@
 The overview says, in English and in Spanish, how many of the
 documentation's animations the two solvers made, how many each made, how
 many of them sit on the guides whose physics they settle rather than in the
-simulation section, and how many of the elastic solver's are among those.
-Each count is taken here from where it is decided: a clip of the acoustic
-solver is one ``scripts/figures/registry.py`` names ``anim_fdtd_*``, one of
-the elastic solver ``anim_elastic_*``, and a clip is on a guide when a page
-of the overview's language outside the simulation section embeds it. A clip
-added, dropped or moved leaves the overview failing until it says the new
-count, and a Spanish page that embeds other clips than its English twin
+simulation section, and how many of the elastic solver's are among those,
+and it gives a table of the guides that carry the acoustic solver's clips.
+Each count and each row is taken here from where it is decided: a clip of
+the acoustic solver is one ``scripts/figures/registry.py`` names
+``anim_fdtd_*``, one of the elastic solver ``anim_elastic_*``, and a clip is
+on a guide when a page of the overview's language outside the simulation
+section embeds it. A clip added, dropped or moved leaves the overview
+failing until it says the new count and tables the guides that carry the
+clips now, and a Spanish page that embeds other clips than its English twin
 fails on its own.
 """
 
@@ -59,6 +61,11 @@ _PAGES = [
 ]
 #: A clip a page embeds: the ``name`` of its ``Video`` component.
 _EMBEDDED = re.compile(r"\bname=\"(anim_(?:fdtd|elastic)_[a-z0-9_]+)\"")
+#: A row of the overview's table of the guides that carry the acoustic
+#: solver's clips: its first cell links the guide by its site address.
+_GUIDE_ROW = re.compile(
+    r"^\| \[[^\]]+\]\(/phonometry/(?:es/)?([a-z0-9/-]+)/\) \|", re.MULTILINE
+)
 #: Any clip a page embeds, the solvers' or not.
 _VIDEO = re.compile(r"<Video\b[^>]*?\bname=\"([^\"]+)\"", re.DOTALL)
 
@@ -87,6 +94,18 @@ def _on_guides(language: str) -> set[str]:
             continue
         found.update(_EMBEDDED.findall(page.read_text(encoding="utf-8")))
     return found
+
+
+def _guides_with(prefix: str, language: str) -> set[str]:
+    """The route of every page of *language* outside the simulation section that embeds a clip named *prefix*."""
+    routes: set[str] = set()
+    for page, relative in _pages(language):
+        if relative.parts[0] == "simulation":
+            continue
+        clips = _EMBEDDED.findall(page.read_text(encoding="utf-8"))
+        if any(clip.startswith(prefix) for clip in clips):
+            routes.add(relative.with_suffix("").as_posix())
+    return routes
 
 
 def _phrases(language: str) -> list[str]:
@@ -136,6 +155,21 @@ def test_each_spanish_page_embeds_the_clips_of_its_english_twin() -> None:
             )
     assert not differ, (
         "a Spanish page embeds other clips than its English twin:\n" + "\n".join(differ)
+    )
+
+
+@pytest.mark.parametrize(("page", "language"), _PAGES)
+def test_the_overview_tables_each_guide_that_carries_an_acoustic_clip_once(
+    page: str, language: str
+) -> None:
+    """The overview's table of guides names, once each, the guides that embed an acoustic solver clip."""
+    rows = _GUIDE_ROW.findall((_DOCS / page).read_text(encoding="utf-8"))
+    repeated = sorted({route for route in rows if rows.count(route) > 1})
+    assert not repeated, f"{page} gives these guides more than one row: {repeated}"
+    wanted = _guides_with("anim_fdtd_", language)
+    assert set(rows) == wanted, (
+        f"{page} tables {sorted(set(rows) - wanted)} that embed no acoustic"
+        f" solver clip, and leaves out {sorted(wanted - set(rows))} that do"
     )
 
 

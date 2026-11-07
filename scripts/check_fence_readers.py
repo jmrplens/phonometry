@@ -179,6 +179,11 @@ EXEMPT: dict[tuple[str, str], str] = {
         "block, written out as a page writes it, to see the shared reader "
         "step over it; it reads no fence itself"
     ),
+    ("site/scripts/shared/page-twin.test.mjs", "<script>"): (
+        "a test of the Markdown copy of a page hands it a page that holds a "
+        "fenced example, written out as a page writes it, to see the copy keep "
+        "the example's lines; it reads no fence itself"
+    ),
 }
 
 #: The strings the name read at a node stands for.

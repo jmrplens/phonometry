@@ -20,6 +20,7 @@ import { glob } from "node:fs/promises";
 import { hasMarkdownCopy, routeOf } from "../src/lib/page-markdown.mjs";
 import { basePath, siteUrl } from "../src/data/site.mjs";
 import { catalogueSlugs } from "../src/data/topics.mjs";
+import { stripFrontmatter, stripMdx } from "./shared/page-twin.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
@@ -29,29 +30,6 @@ const docsDir = join(repoRoot, "docs");
 const outDir = process.env.ASTRO_OUT_DIR ?? join(siteRoot, "dist");
 const SITE_URL = `${siteUrl}${basePath}`;
 
-/** Strip YAML frontmatter and return the body. */
-function stripFrontmatter(text) {
-  if (!text.startsWith("---")) return text;
-  const end = text.indexOf("\n---", 3);
-  return end === -1 ? text : text.slice(text.indexOf("\n", end + 1) + 1);
-}
-
-/**
- * Remove the MDX-only constructs that are noise as text: import statements,
- * expression containers, and self-closing component tags. Component tags that
- * wrap content keep their children, since that is real prose.
- */
-function stripMdx(text) {
-  return text
-    .replace(/^import\s.+?$/gm, "")
-    .replace(/^export\s.+?$/gm, "")
-    // Self-closing components: <ThemeImage ... />, <Video ... />
-    .replace(/<[A-Z][\w.]*\b[^>]*\/>/g, "")
-    // Opening and closing tags of wrapper components, keeping the children.
-    .replace(/<\/?[A-Z][\w.]*\b[^>]*>/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 /**
  * The overview of the published catalogues lists them through a component
@@ -162,14 +140,17 @@ for await (const file of glob("**/*.{md,mdx}", { cwd: contentDir })) {
   // the transplanted documents is published in Spanish.
   const mirror = isSpanish && !isTransplanted ? undefined : docsMirror.get(route);
 
+  // The page's own source, read as the site renders it (shared/page-twin.mjs):
+  // the import line of a code example and a tag written in a code span stay.
   const raw = mirror
     ? readFileSync(mirror, "utf8")
-    : stripMdx(
-        stripFrontmatter(readFileSync(abs, "utf8")).replace(
-          /<CatalogueIndex lang="(en|es)" \/>/g,
-          (_, lang) => catalogueIndex(lang),
-        ),
-      );
+    : stripMdx(stripFrontmatter(readFileSync(abs, "utf8")), {
+        kind: file.endsWith(".mdx") ? "mdx" : "md",
+        expand: (tag) => {
+          const index = tag.match(/^<CatalogueIndex lang="(en|es)" \/>$/);
+          return index ? catalogueIndex(index[1]) : undefined;
+        },
+      });
   // A transplanted document sits at the root of docs/, not at its route, so
   // its relative links resolve from there: `ERRATA.es.md` beside `ERRATA.md`
   // is the Spanish registry, not a page under reference/.

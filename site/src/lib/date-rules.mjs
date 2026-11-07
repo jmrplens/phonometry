@@ -30,9 +30,11 @@
  * each dated by the rule above; and a count, which is all some pages show
  * of a directory or a registry, moves only with a commit that changed it: a
  * count of files with one that changed how many there are, a count of the
- * lines of a file that match a pattern with one that changed how many do. The build fails on a page or a source that HEAD does not have,
- * and site/scripts/content-dates.test.mjs fails on a page that imports data
- * or a component built from it without being listed.
+ * lines of a file that match a pattern with one that changed how many do.
+ * The build fails on a page or a source that HEAD does not have, and
+ * site/scripts/content-dates.test.mjs fails on a page that reaches data
+ * without being listed, and on an entry that leaves out a module its pages
+ * reach.
  */
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -218,11 +220,13 @@ export function readDateSources(file, { topics = domainIds } = {}) {
       if (typeof set.lines !== 'string' || set.lines === '') {
         throw new Error(`${where}: counts.${name}.lines is the pattern of the lines it counts.`);
       }
+      let invalid = null;
       try {
-        new RegExp(set.lines, 'm');
+        RegExp(set.lines, 'm');
       } catch (error) {
-        throw new Error(`${where}: counts.${name}.lines: ${error.message}`);
+        invalid = error.message;
       }
+      if (invalid !== null) throw new Error(`${where}: counts.${name}.lines: ${invalid}`);
       return { file: path, lines: set.lines };
     };
     const counts = Object.fromEntries(

@@ -22,8 +22,10 @@
 // Each test here writes a build into a directory of its own: the two
 // bibliographies and one guide in each language, every cited work named as the
 // bibliography names it, and as many plain pages besides as a test asks for.
-// It puts one defect into that build, runs the check on it the way CI does, and
-// reads the exit status and the lines it printed.
+// Beside it go the conformance report and the pages' frontmatter the build was
+// made from, which the check joins to say what the report's Dataset has to be
+// based on. It puts one defect into that build, runs the check on it the way
+// CI does, and reads the exit status and the lines it printed.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
@@ -172,6 +174,15 @@ const stub = (node) =>
 			.map((key) => [key, node[key]]),
 	);
 
+/** The day the report's rows last changed, which its banner prints and its Dataset gives. */
+const DATA_DAY = '2026-09-15';
+
+/** The banner line of the report page that names the commit and the day its rows are of (Conformance.astro). */
+const provenance = (day) =>
+	'<p class="banner-provenance" data-report-provenance>Generated for phonometry <b data-report-library>4.0.0</b>; ' +
+	'its rows last changed in commit <a href="https://github.com/jmrplens/phonometry/commit/abc"><code data-report-commit="abc">abc</code></a>, ' +
+	`on <time datetime="${day}">${day}</time>.</p>`;
+
 /** What the report's Dataset says in each language. */
 const REPORT_TEXT = {
 	en: { name: 'The report', description: 'Checks.', technique: 'Comparison.', column: ['Standard', 'The standard'] },
@@ -195,14 +206,44 @@ function reportPage(lang, work) {
 		description: text.description,
 		inLanguage: lang,
 		version: LIBRARY,
-		dateModified: '2026-09-15',
+		dateModified: DATA_DAY,
 		license: 'https://opensource.org/license/MIT',
 		measurementTechnique: text.technique,
 		variableMeasured: [{ '@type': 'PropertyValue', name: text.column[0], description: text.column[1] }],
 		isBasedOn: ['https://github.com/jmrplens/phonometry/blob/main/scripts/conformance_report.py', stub(work)],
 	};
+	report.body = provenance(DATA_DAY);
 	return report;
 }
+
+/** A standard as a guide's frontmatter cites it, the one the bibliography's `standard()` node defines. */
+const cited = (designation, year) => ({
+	type: 'standard',
+	organization: 'International Organization for Standardization',
+	year,
+	title: `Acoustics, ${designation}`,
+	designation,
+});
+
+/**
+ * What the build was made from, as far as the report's Dataset goes: the
+ * conformance report, whose checks are based on the standards `documents`
+ * names (each `[designation, edition]`), and the frontmatter of the guide in
+ * each language, which cites ISO 1:2000 and ISO 2:2010. By default the checks
+ * are based on ISO 2:2010 alone, the one work the Dataset of `build()` names.
+ */
+const sources = (documents = [['ISO 2', '2010']]) => ({
+	report: {
+		library: LIBRARY,
+		domains: [{ id: 'domain', title: 'A domain' }],
+		checks: documents.map(([designation, edition], i) => ({
+			id: `domain/${i}`,
+			domain: 'domain',
+			reference: { documents: [{ kind: 'standard', designation, edition }] },
+		})),
+	},
+	references: [cited('ISO 1:2000', 2000), cited('ISO 2:2010', 2010)],
+});
 
 /**
  * A build the check has nothing to report on: the two bibliographies, a
@@ -264,21 +305,31 @@ const SITE_TYPES = new Set(['Person', 'WebSite', 'SoftwareApplication', 'Softwar
  * astro.config.mjs puts on every page, and the page's own graph from
  * Head.astro.
  */
-function check(t, built) {
-	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
-	t.after(() => rmSync(dist, { recursive: true, force: true }));
+function check(t, built, from = sources()) {
+	const root = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
+	t.after(() => rmSync(root, { recursive: true, force: true }));
+	const dist = join(root, 'dist');
 	const script = (nodes) =>
 		`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes })}</script>`;
-	for (const { path, nodes } of Object.values(built)) {
+	for (const { path, nodes, body = '' } of Object.values(built)) {
 		const site = nodes.filter((node) => SITE_TYPES.has(node['@type']));
 		const own = nodes.filter((node) => !SITE_TYPES.has(node['@type']));
 		mkdirSync(dirname(join(dist, path)), { recursive: true });
 		writeFileSync(
 			join(dist, path),
-			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head><body></body></html>`,
+			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head><body>${body}</body></html>`,
 		);
 	}
-	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
+	// The report and the pages the build was made from: JSON is YAML, so the
+	// frontmatter is written as JSON.
+	const report = join(root, 'conformance.json');
+	writeFileSync(report, JSON.stringify(from.report));
+	const content = join(root, 'content');
+	for (const path of ['guide.mdx', 'es/guide.mdx']) {
+		mkdirSync(dirname(join(content, path)), { recursive: true });
+		writeFileSync(join(content, path), `---\ntitle: A guide\nreferences: ${JSON.stringify(from.references)}\n---\n\nText.\n`);
+	}
+	const ran = spawnSync(process.execPath, [CHECK, dist, `--report=${report}`, `--content=${content}`], { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };
 }
 
@@ -522,7 +573,8 @@ test('a report whose Dataset is its main entity, versioned, dated by its data, b
 		ran.out,
 		new RegExp(
 			`ok {3}the conformance report's Dataset is the main entity of both report pages, versioned ${LIBRARY.replace(/\./g, '\\.')}, ` +
-				'dated by its data, based on 1 named works in English and 1 in Spanish, and written in each page\'s language \\(5 texts\\)',
+				'dated by the day its rows last changed, based on the 1 work its checks are based on in each language, named, ' +
+				'and written in each page\'s language \\(5 texts\\)',
 		),
 	);
 });
@@ -611,4 +663,65 @@ test('a build with no conformance report fails rather than passing on nothing', 
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL no page at \/reference\/conformance\/ was found: build the site first/);
+});
+
+test('a report Dataset that leaves out a work its checks are based on fails, and names it', (t) => {
+	// The checks are based on ISO 1:2000 and ISO 2:2010, and the Dataset of
+	// either page names ISO 2:2010 alone.
+	const ran = check(t, build(), sources([['ISO 1', '2000'], ['ISO 2', '2010']]));
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: it leaves out 1 of the 2 works its checks are based on: #std-iso-1-2000/,
+	);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: it leaves out 1 of the 2 works/);
+});
+
+test('a report Dataset that names a work no check is based on fails, and names it', (t) => {
+	const built = build();
+	built['en/report'].article.mainEntity.isBasedOn.push(stub(standard(EN, 'ISO 1:2000', 1)));
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: it names 1 work no check is based on: #std-iso-1-2000/,
+	);
+	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/conformance\//);
+});
+
+test('report Datasets that name a different number of works in the two languages fail', (t) => {
+	const built = build();
+	for (const [key, url] of [['en/report', EN], ['es/report', ES]]) {
+		const iso1 = standard(url, 'ISO 1:2000', 1);
+		if (key === 'es/report') iso1.sameAs = iso1['@id'].replace(ES, EN);
+		if (key === 'en/report') built[key].article.mainEntity.isBasedOn.push(stub(iso1));
+	}
+	const ran = check(t, built, sources([['ISO 1', '2000'], ['ISO 2', '2010']]));
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the conformance report's Dataset names 2 works in English and 1 in Spanish/);
+});
+
+test('a report Dataset dated by the page and not by the day its rows last changed fails', (t) => {
+	const built = build();
+	// The page's own date, 2026-10-01, the variant that would date the data by
+	// a change to how the rows are drawn.
+	built['en/report'].article.mainEntity.dateModified = '2026-10-01';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: its dateModified is 2026-10-01, and the page says its rows last changed on 2026-09-15/,
+	);
+	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/conformance\//);
+});
+
+test('a report page that prints no day its rows last changed fails', (t) => {
+	const built = build();
+	built['es/report'].body = '';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the page prints no day its rows last changed \(\[data-report-provenance\] with a <time datetime>\)/,
+	);
 });

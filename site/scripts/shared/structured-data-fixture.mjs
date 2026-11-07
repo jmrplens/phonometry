@@ -19,7 +19,10 @@
 // glossary writes its terms in one of its own; a test gives each whole, or as
 // written when it means one not to parse.
 //
-// Nothing here is installed: the tests run before the site's dependencies are.
+// Nothing here imports a package, but the check these pages are handed to
+// reads a page's frontmatter with @astrojs/markdown-remark
+// (src/lib/page-references.mjs), so its tests run after the site's
+// dependencies are installed.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

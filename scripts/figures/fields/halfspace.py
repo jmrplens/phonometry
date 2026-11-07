@@ -59,9 +59,10 @@ _HS_T0 = 4.0 * _HS_SRC_W
 # so -- because a sponge absorbs a grazing surface wave far less well than
 # a body wave. Here the peak of the Rayleigh train, which leaves the source
 # when the pulse peaks at 32 us, reaches a sponge 0.13 m outside the frame
-# at 180 us, and the train's leading lobe, 12 us ahead of the peak, at
-# 169 us; anything either sent back would need another 45 us to re-enter
-# the view, 214 us at the earliest, past the 196 us captured.
+# at 180 us, and the train's leading lobe, whose front is above a fifth of
+# the colour scale about 19 us ahead of the peak, from 161 us; anything
+# either sent back along the surface would need another 45 us to re-enter
+# the view, 206 us at the earliest, past the 196 us captured.
 _HS_NY, _HS_NX = 450, 1100
 _HS_SPONGE = 120
 _HS_HALF = 300  # view half-width and depth [cells]

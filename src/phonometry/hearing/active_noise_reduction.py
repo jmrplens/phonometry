@@ -95,6 +95,7 @@ from .hearing_protectors import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -181,7 +182,7 @@ _STEP_READING_DB = 0.05
 _LINEARITY_THIRDS = 3
 
 
-def _default_bands(count: int, owner: str) -> np.ndarray:
+def _default_bands(count: int, owner: str) -> NDArray[np.float64]:
     """The band axis of an insertion-loss grid, by how many bands it has.
 
     :param count: The number of bands.
@@ -224,13 +225,13 @@ class ActiveInsertionLossResult(OwnsArrays):
     :ivar n_subjects: The number of test subjects :math:`N`.
     """
 
-    insertion_loss: np.ndarray
-    per_ear_insertion_loss: np.ndarray | None
-    mean_insertion_loss: np.ndarray
-    standard_deviation_db: np.ndarray
-    standard_uncertainty_db: np.ndarray
-    expanded_uncertainty_db: np.ndarray
-    frequencies: np.ndarray
+    insertion_loss: NDArray[np.float64]
+    per_ear_insertion_loss: NDArray[np.float64] | None
+    mean_insertion_loss: NDArray[np.float64]
+    standard_deviation_db: NDArray[np.float64]
+    standard_uncertainty_db: NDArray[np.float64]
+    expanded_uncertainty_db: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     n_subjects: int
 
     def plot(
@@ -248,7 +249,7 @@ class ActiveInsertionLossResult(OwnsArrays):
         return plot_active_insertion_loss(self, ax=ax, language=language, **kwargs)
 
 
-def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
+def _levels(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A ``(subjects, ears, bands)`` grid of finite MIRE levels in dB.
 
     :param values: The levels.
@@ -278,7 +279,7 @@ def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
 
 def _lower_ear_from_insertion_loss(
     insertion_loss: NumericArrayLike,
-) -> tuple[np.ndarray | None, np.ndarray]:
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64]]:
     """The per-ear grid, if one was given, and the lower ear of each subject."""
     grid = real_array(insertion_loss, "insertion_loss")
     if grid.ndim == _PER_EAR_RANK:
@@ -304,7 +305,7 @@ def _lower_ear_from_insertion_loss(
 
 def _insertion_loss_from_levels(
     passive_levels: NumericArrayLike, active_levels: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The insertion loss of each ear, passive minus active level (5.4.1)."""
     passive = _levels(passive_levels, "passive_levels")
     active = _levels(active_levels, "active_levels")
@@ -317,7 +318,9 @@ def _insertion_loss_from_levels(
     return np.asarray(passive - active, dtype=np.float64)
 
 
-def _band_frequencies(frequencies: NumericArrayLike | None, count: int) -> np.ndarray:
+def _band_frequencies(
+    frequencies: NumericArrayLike | None, count: int
+) -> NDArray[np.float64]:
     """The centre frequencies given, or the default grid for *count* bands."""
     require_scalar(count, "count")
     if frequencies is None:
@@ -382,7 +385,7 @@ def active_insertion_loss(
         ``passive_levels`` holds a text or a value that is not a real number.
     """
     levels_given = passive_levels is not None or active_levels is not None
-    per_ear: np.ndarray | None
+    per_ear: NDArray[np.float64] | None
     if insertion_loss is not None and not levels_given:
         per_ear, lower = _lower_ear_from_insertion_loss(insertion_loss)
     elif (
@@ -434,12 +437,12 @@ class ANRTotalAttenuationResult(OwnsArrays):
     :ivar snr: The SNR at 84 %.
     """
 
-    total_octave_attenuation: np.ndarray
-    total_third_octave_attenuation: np.ndarray
-    reat_third_octave_attenuation: np.ndarray
-    insertion_loss: np.ndarray
-    frequencies: np.ndarray
-    third_octave_frequencies: np.ndarray
+    total_octave_attenuation: NDArray[np.float64]
+    total_third_octave_attenuation: NDArray[np.float64]
+    reat_third_octave_attenuation: NDArray[np.float64]
+    insertion_loss: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    third_octave_frequencies: NDArray[np.float64]
     assumed_protection: AssumedProtectionResult
     hml: HMLRatingResult
     snr: SNRRatingResult
@@ -461,7 +464,7 @@ class ANRTotalAttenuationResult(OwnsArrays):
 
 def _passive_octaves(
     reat: NumericArrayLike | RealEarAttenuationResult,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The passive attenuation grid and its octave bands.
 
     :param reat: A result of :func:`real_ear_attenuation`, or its grid.
@@ -500,8 +503,8 @@ def _passive_octaves(
 
 
 def _interpolate_passive(
-    grid: np.ndarray, octaves: np.ndarray, thirds: np.ndarray
-) -> np.ndarray:
+    grid: NDArray[np.float64], octaves: NDArray[np.float64], thirds: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """5.5 a): linear in frequency between the octaves, the ends extended.
 
     Linear in hertz, between the nominal centre frequencies, as ISO's
@@ -526,8 +529,9 @@ def _interpolate_passive(
 
 
 def _lower_ear_thirds(
-    insertion_loss: NumericArrayLike | ActiveInsertionLossResult, thirds: np.ndarray
-) -> np.ndarray:
+    insertion_loss: NumericArrayLike | ActiveInsertionLossResult,
+    thirds: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """The lower-ear active insertion loss on the bands the chain needs.
 
     :param insertion_loss: A result of :func:`active_insertion_loss`, or its
@@ -652,12 +656,12 @@ class ANRLinearityResult(OwnsArrays):
     :ivar increments_db: The step at the ear for each step outside, in dB.
     """
 
-    external_levels: np.ndarray
-    ear_levels: np.ndarray
-    increments_db: np.ndarray
+    external_levels: NDArray[np.float64]
+    ear_levels: NDArray[np.float64]
+    increments_db: NDArray[np.float64]
 
     @property
-    def linear(self) -> np.ndarray:
+    def linear(self) -> NDArray[np.bool_]:
         """Per ear and step, whether the step at the ear is 5 dB ± 1 dB.
 
         :return: A ``(ears, steps)`` boolean grid.

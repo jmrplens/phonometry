@@ -62643,6 +62643,12 @@ its own sample rate and, when calibrated, its `calibration_factor`. An
 explicit `calibration_factor` argument overrides the object's; an explicit
 `fs` that disagrees with the object's raises instead of silently winning.
 
+A 1D record gives one level and a 2D one gives one per channel, so a type
+checker reads what `leq` and the other levels on this page return as
+`float | NDArray[np.float64]`: the shape of `x` decides, and no type says
+which shape a record has. Where typed code holds a 1D record,
+`float(signals.leq(x))` names the one number.
+
 ## Percentile levels (LN)
 
 `ln_levels` computes statistical levels from the time-weighted envelope:

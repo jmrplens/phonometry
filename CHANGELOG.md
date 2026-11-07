@@ -2306,6 +2306,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A filter object types a Signal in as a Signal out, and an array in as an
+  array out.** `WeightingFilter.filter` and `ParametricEQ.filter` returned
+  `Signal | ndarray`, and `TimeWeighting.process` `TimeWeightedEnvelope |
+  ndarray`, whatever they were handed, so `y: NDArray[np.float64] =
+  wf.filter(x)` was a type error in mypy and pyright where
+  `filters.weighting_filter(x, fs)` typed the same call as an array. Each
+  method now has the overload heads of its function, and
+  `scripts/check_return_overloads.py` refuses a return that names a record
+  of the package and an array, or a tuple of each, without a head for each.
+  The levels guide shows `float(signals.leq(x))` for the one level of a 1D
+  record, whose type the shape of the input decides.
+
 - **Every public name has a type a type checker knows.** pyright's
   `--verifytypes` read 99.2% of the installed package: 137 of its 18 689
   public names had a type checkers may infer differently and 8 had none it

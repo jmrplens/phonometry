@@ -1288,9 +1288,11 @@ jobs:
   # making one or calling one that does, typed plain Axes, Any, or panels
   # none of which is polar. A function of a number or an array of them is the
   # same case: a return naming a single value and an array needs heads that
-  # return each alone. It reads the annotations through the package's
-  # aliases and imports and follows calls across modules. Static and
-  # dependency-free, so it runs on its own.
+  # return each alone, and so is one that takes a Signal or an array and
+  # names a record of the package and an array (Signal | ndarray, a
+  # TimeWeightedEnvelope or an array, a pair of each). It reads the
+  # annotations through the package's aliases and imports and follows calls
+  # across modules. Static and dependency-free, so it runs on its own.
   return-overloads:
     name: Every return an argument decides is overloaded on it
     runs-on: ubuntu-latest

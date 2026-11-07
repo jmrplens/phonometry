@@ -1954,6 +1954,133 @@ def test_heads_overloaded_on_something_else_still_need_both_cases(
     }
 
 
+_RECORD = """
+from numpy.typing import ArrayLike
+
+
+class Signal:
+    pass
+
+
+class Envelope:
+    pass
+"""
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        "Signal | np.ndarray",
+        "np.ndarray | Signal",
+        "Envelope | NDArray[np.float64]",
+        "Optional[Signal] | np.ndarray",
+        "Union[Signal, np.ndarray]",
+        "tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]",
+        "tuple[Signal, ...] | tuple[np.ndarray, ...]",
+        "'Signal | np.ndarray'",
+    ],
+)
+def test_a_record_or_an_array_without_overloads_is_refused(
+    tmp_path: pathlib.Path, returns: str
+) -> None:
+    """A Signal in, a Signal out, an array in, an array out: written as one union."""
+    refused = _refused(
+        tmp_path,
+        weighting=_RECORD
+        + f"""
+
+class Filter:
+    def filter(self, x: Signal | ArrayLike) -> {returns}:
+        raise NotImplementedError
+""",
+    )
+    assert refused == {
+        "Filter.filter": f"returns {returns}, and no overload says "
+        "which argument decides between the record and the array"
+    }
+
+
+def test_heads_that_say_the_record_and_the_array_let_the_union_through(
+    tmp_path: pathlib.Path,
+) -> None:
+    """One head for the Signal, one for the array, and the union stays below them."""
+    assert not _refused(
+        tmp_path,
+        weighting=_RECORD
+        + """
+
+class Filter:
+    @overload
+    def filter(self, x: Signal) -> Signal: ...
+    @overload
+    def filter(self, x: ArrayLike) -> np.ndarray: ...
+    def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
+        raise NotImplementedError
+
+
+@overload
+def bands(x: Signal) -> tuple[Signal, Signal]: ...
+@overload
+def bands(x: ArrayLike) -> tuple[np.ndarray, np.ndarray]: ...
+def bands(
+    x: Signal | ArrayLike,
+) -> tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]:
+    raise NotImplementedError
+""",
+    )
+
+
+def test_heads_that_never_return_the_array_leave_the_record_union_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A head for the Signal alone refuses every caller who hands an array in."""
+    refused = _refused(
+        tmp_path,
+        weighting=_RECORD
+        + """
+
+@overload
+def weighted(x: Signal) -> Signal: ...
+@overload
+def weighted(x: Signal, fs: float) -> Signal: ...
+def weighted(x: Signal | ArrayLike, fs: float | None = None) -> Signal | np.ndarray:
+    raise NotImplementedError
+""",
+    )
+    assert refused == {
+        "weighted": "returns Signal | np.ndarray, and no overload head returns the array"
+    }
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        # A class of another package is no record of this one.
+        "datetime.date | np.ndarray",
+        # A record beside a value, or beside a sequence that is no array.
+        "Signal | float",
+        "Signal | list[float]",
+        # A tuple that mixes a record and an array is one case, not two.
+        "tuple[Signal, np.ndarray] | None",
+    ],
+)
+def test_a_union_that_is_not_a_record_or_an_array_is_let_through(
+    tmp_path: pathlib.Path, returns: str
+) -> None:
+    refused = _refused(
+        tmp_path,
+        weighting=_RECORD
+        + f"""
+import datetime
+
+
+def weighted(x: object) -> {returns}:
+    raise NotImplementedError
+""",
+    )
+    assert not refused
+
+
 @pytest.mark.whole_tree
 def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""

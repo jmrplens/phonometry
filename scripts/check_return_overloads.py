@@ -10,7 +10,9 @@ is a type error for a call that cannot return anything but an ``Axes``. A
 function of a number or an array of them is the same case:
 ``room.room_constant(100.0, 0.2)`` returns a ``float`` and
 ``room.room_constant(100.0, alphas)`` an array, and ``float | NDArray`` on
-its own makes the caller narrow both. The remedy is ``typing.overload``
+its own makes the caller narrow both; so is a function of a ``Signal`` or an
+array, which returns a ``Signal`` for the one and an array for the other.
+The remedy is ``typing.overload``
 heads, one per case of the argument that decides, each with the one type it
 returns; the union stays on the implementation, which a caller never sees,
 and on a last head that takes whatever the others do not (an ``ArrayLike``
@@ -34,6 +36,12 @@ ones included, because a public method returns what its renderer returns:
   that the union head is the one left for the inputs whose shape a type
   checker cannot know (mypy's ``overload-cannot-match`` keeps it behind the
   heads it would otherwise shadow);
+* a return annotation that is a union of a record of the package (a class
+  it defines, ``Signal`` or ``TimeWeightedEnvelope``) with a numpy array, or
+  of a tuple of records with a tuple of arrays, is held to the same: a
+  function that takes a ``Signal`` or an array hands a record back for the
+  one and an array for the other, and ``WeightingFilter.filter`` said
+  ``Signal | ndarray`` for either while ``weighting_filter`` was overloaded;
 * a function that reaches a polar axes, by making one (``projection="polar"``
   in a call or in a ``subplot_kw`` mapping, ``polar=True``, or either of them
   computed, which may be polar), by calling a
@@ -116,6 +124,11 @@ SOURCE = ROOT / "src" / "phonometry"
 #: function (an overload head's as :func:`head_key` writes it), each with the
 #: reason.
 EXEMPT: dict[tuple[str, str], str] = {
+    ("src/phonometry/filters/core.py", "OctaveFilterResult.require_bands"): (
+        "the result's own bands decide, not an argument: they are the "
+        "Signals of a bank that filtered a Signal and the arrays of one that "
+        "filtered an array, and the method takes nothing to overload on"
+    ),
     (
         "src/phonometry/psychoacoustics/loudness/zwicker.py",
         "ZwickerLoudness.plot (overload ax: None)",
@@ -1279,6 +1292,51 @@ class Package:
                 several.append(ast.unparse(member))
         return single, several
 
+    def _record_or_array(self, module: str, node: ast.expr) -> str | None:
+        """``"record"``, ``"array"`` or ``None``: what one member of a union stands for.
+
+        A class of the package is a record (a ``Signal``, a
+        ``TimeWeightedEnvelope``), a numpy array is an array, and a ``tuple``
+        of them is what every item it holds is, so that a pair of bands
+        (``tuple[Signal, Signal]`` beside ``tuple[np.ndarray, np.ndarray]``) is
+        read as the pair of records or of arrays it is.
+        """
+        base = node.value if isinstance(node, ast.Subscript) else node
+        dotted = self.resolve(module, base)
+        if dotted in self.classes:
+            return "record"
+        if dotted in _ARRAYS:
+            return "array"
+        if not (isinstance(node, ast.Subscript) and dotted in _SEVERAL):
+            return None
+        items = node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+        kinds = {
+            self._record_or_array(where, member)
+            for item in items
+            if not (isinstance(item, ast.Constant) and item.value is Ellipsis)
+            for where, member in self.members(module, item)
+        }
+        return kinds.pop() if len(kinds) == 1 else None
+
+    def records(
+        self, module: str, node: ast.expr | None
+    ) -> tuple[list[str], list[str]]:
+        """The records of the package, and the arrays, a return annotation names.
+
+        A function that takes a ``Signal`` or an array hands a ``Signal``, or
+        a record built from one, back for the one and an array for the other
+        (:meth:`_record_or_array`), through the package's aliases.
+        """
+        record: list[str] = []
+        several: list[str] = []
+        for where, member in self.members(module, node):
+            kind = self._record_or_array(where, member)
+            if kind == "record":
+                record.append(ast.unparse(member))
+            elif kind == "array":
+                several.append(ast.unparse(member))
+        return record, several
+
     def call_target(
         self, function: Function, func: ast.expr, call: ast.AST | None = None
     ) -> str | None:
@@ -1972,6 +2030,13 @@ def reaching_polar(package: Package) -> set[str]:
     return reached
 
 
+def _tells_apart(shapes: Sequence[tuple[list[str], list[str]]]) -> bool:
+    """Whether some head returns the one case alone and another the other alone."""
+    return any(one and not other for one, other in shapes) and any(
+        other and not one for one, other in shapes
+    )
+
+
 def tells_a_value_from_an_array(package: Package, function: Function) -> bool:
     """Whether a function's heads say both cases: one the value alone, one the array.
 
@@ -1979,17 +2044,29 @@ def tells_a_value_from_an_array(package: Package, function: Function) -> bool:
     too, so that every function the gate takes as overloaded on the shape of
     its input has its runtime called there.
     """
-    shapes = [package.values(function.module, head.returns) for head in function.heads]
-    return any(single and not several for single, several in shapes) and any(
-        several and not single for single, several in shapes
+    return _tells_apart(
+        [package.values(function.module, head.returns) for head in function.heads]
     )
 
 
-def _scalar_findings(package: Package, function: Function, path: str) -> list[Finding]:
-    """A single value or an array, where an overload should say which.
+#: The two unions a function's argument decides between and :func:`_case_findings`
+#: reads: what reads each case off a return annotation, and the words for each.
+_CASES: tuple[tuple[str, str, str], ...] = (
+    ("values", "the value", "the array"),
+    ("records", "the record", "the array"),
+)
 
-    The union is the implementation's, and a last-resort head's when the
-    other heads tell the two cases apart; anywhere else it is a finding. An
+
+def _case_findings(
+    package: Package, function: Function, path: str, case: tuple[str, str, str]
+) -> list[Finding]:
+    """Two cases in one union, where an overload should say which.
+
+    The cases are a single value or an array (``room_constant``), or a
+    record of the package or an array (``weighting_filter`` hands a
+    ``Signal`` back for a ``Signal`` and an array for an array). The union
+    is the implementation's, and a last-resort head's when the other heads
+    tell the two cases apart; anywhere else it is a finding. An
     implementation that returns the union needs heads that return each case
     between them: a type checker reads only the heads, so heads that never
     return the array refuse every caller who hands one in. Where the
@@ -1999,9 +2076,11 @@ def _scalar_findings(package: Package, function: Function, path: str) -> list[Fi
     ``room_constant`` or ``absorption_area``) has one such head per route,
     so it is not always the last.
     """
+    reader, one, other = case
+    read = getattr(package, reader)
     module = function.module
-    shapes = [package.values(module, head.returns) for head in function.heads]
-    says_both = tells_a_value_from_an_array(package, function)
+    shapes = [read(module, head.returns) for head in function.heads]
+    says_both = _tells_apart(shapes)
     found: list[Finding] = []
     for head, (single, several) in zip(function.heads, shapes, strict=True):
         if head.returns is None or not (single and several):
@@ -2013,13 +2092,13 @@ def _scalar_findings(package: Package, function: Function, path: str) -> list[Fi
                     head.lineno,
                     head_key(function.qualname, head, function.heads),
                     f"an overload head returns {ast.unparse(head.returns)}, and "
-                    "no other head returns the value alone and the array alone",
+                    f"no other head returns {one} alone and {other} alone",
                 )
             )
     implementation = function.implementation
     if implementation is None or implementation.returns is None:
         return found
-    single, several = package.values(module, implementation.returns)
+    single, several = read(module, implementation.returns)
     if not (single and several):
         return found
     returns = ast.unparse(implementation.returns)
@@ -2030,11 +2109,11 @@ def _scalar_findings(package: Package, function: Function, path: str) -> list[Fi
                 implementation.lineno,
                 function.qualname,
                 f"returns {returns}, and no overload says which argument "
-                "decides between the value and the array",
+                f"decides between {one} and {other}",
             )
         )
     elif not (any(value for value, _ in shapes) and any(array for _, array in shapes)):
-        missing = "the array" if any(value for value, _ in shapes) else "the value"
+        missing = other if any(value for value, _ in shapes) else one
         found.append(
             Finding(
                 path,
@@ -2067,7 +2146,8 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                         else "an overload head returns a union",
                     )
                 )
-        found.extend(_scalar_findings(package, function, path))
+        for case in _CASES:
+            found.extend(_case_findings(package, function, path, case))
         implementation = function.implementation
         if implementation is None or implementation.returns is None:
             continue
@@ -2146,7 +2226,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "typing.overload head per case, each returning the one type it "
             "gives (Axes for a given ax, a tuple of Axes for none; PolarAxes "
             "where the axes is polar; a float for numbers and an NDArray for "
-            "a sequence or an array, with a last head taking ArrayLike), and "
+            "a sequence or an array, with a last head taking ArrayLike; a "
+            "Signal, or the record built from one, for a Signal and an NDArray "
+            "for an array), and "
             "keep the union on the implementation; a polar axes the function "
             "always returns is annotated PolarAxes. A return the data decide, "
             "not an argument, goes in EXEMPT at the top of "

@@ -381,7 +381,12 @@ record-display:
 # A function of a number or an array of them is the same case: it fails on a
 # return that names a single value and an array (float | NDArray, a grade or
 # an array of grades) with no heads, and on a head that returns that union
-# unless its siblings return the value alone and the array alone.
+# unless its siblings return the value alone and the array alone. So is a
+# function that takes a Signal or an array and returns a record of the
+# package or an array (Signal | ndarray, a TimeWeightedEnvelope or an array,
+# a tuple of either): the record and the array each need a head; the method
+# forms of the weighting filter, the EQ cascade and the time weighting had
+# none while their functions did.
 # Annotations are read through the package's aliases and imports, and a
 # projection through the module constant that holds it. On the tree it was
 # written against it found 74 such plots, one of which (_plot_one_quantity)

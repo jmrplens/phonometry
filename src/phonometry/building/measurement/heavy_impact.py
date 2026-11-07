@@ -120,6 +120,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, NumericArrayLike
@@ -352,9 +353,9 @@ class HeavyImpactSourceLimits(OwnsArrays):
         {"lower": "dB", "upper": "dB"}
     )
 
-    frequencies: np.ndarray
-    lower: np.ndarray
-    upper: np.ndarray
+    frequencies: NDArray[np.float64]
+    lower: NDArray[np.float64]
+    upper: NDArray[np.float64]
 
 
 def heavy_impact_source_limits(
@@ -476,7 +477,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
     """
 
     source: Source
-    measured: np.ndarray
+    measured: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject an unknown source or a measurement of another length.
@@ -502,22 +503,22 @@ class HeavyImpactSourceCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def frequencies(self) -> np.ndarray:
+    def frequencies(self) -> NDArray[np.float64]:
         """Octave-band centre frequencies, in Hz."""
         return np.asarray(_SPECS[self.source].frequencies, dtype=np.float64)
 
     @property
-    def nominal(self) -> np.ndarray:
+    def nominal(self) -> NDArray[np.float64]:
         """Printed nominal ``LFE`` per band, in dB re 1 N."""
         return np.asarray(_SPECS[self.source].force_exposure_level, dtype=np.float64)
 
     @property
-    def tolerance_db(self) -> np.ndarray:
+    def tolerance_db(self) -> NDArray[np.float64]:
         """Printed tolerance per band, in dB."""
         return np.asarray(_SPECS[self.source].tolerance_db, dtype=np.float64)
 
     @property
-    def deviation(self) -> np.ndarray:
+    def deviation(self) -> NDArray[np.float64]:
         """``measured - nominal`` per band, in dB."""
         return np.asarray(
             np.asarray(self.measured, dtype=np.float64) - self.nominal,
@@ -525,7 +526,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
         )
 
     @property
-    def within_tolerance(self) -> np.ndarray:
+    def within_tolerance(self) -> NDArray[np.bool_]:
         """Per-band boolean mask of conforming bands."""
         return np.asarray(np.abs(self.deviation) <= self.tolerance_db, dtype=bool)
 
@@ -592,7 +593,7 @@ def check_heavy_impact_source(
     return HeavyImpactSourceCheck(source=spec.name, measured=measured)
 
 
-def _fast_peak_factor(c: np.ndarray) -> np.ndarray:
+def _fast_peak_factor(c: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""``g(C)``: peak of the Fast-weighted response of a decaying burst.
 
     The bracket of ISO 16283-2:2020 Formula (4) is ``g(C)/g(C0)`` with
@@ -612,7 +613,7 @@ def _fast_peak_factor(c: np.ndarray) -> np.ndarray:
 
 def fast_reverberation_correction(
     reverberation_time: NumericArrayLike, *, reference_time: float = _T0
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Fast time-weighting reverberation correction (Formulae (4), (5), (6)).
 
     The term :math:`10 \log_{10}[g(C)/g(C_0)]` subtracted in ISO 16283-2:2020
@@ -663,13 +664,13 @@ class StandardizedMaxImpactResult(OwnsArrays):
         in seconds.
     """
 
-    frequencies: np.ndarray | None
-    measured: np.ndarray
-    standardized: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    measured: NDArray[np.float64]
+    standardized: NDArray[np.float64]
     volume_term: float
-    reverberation_correction: np.ndarray
+    reverberation_correction: NDArray[np.float64]
     volume: float
-    reverberation_time: np.ndarray
+    reverberation_time: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a standardization whose per-band columns disagree.
@@ -765,7 +766,7 @@ def standardized_max_impact_level(
     if t.shape != li.shape:
         msg = "'reverberation_time' must be a scalar or match 'levels'."
         raise ValueError(msg)
-    freqs: np.ndarray | None = None
+    freqs: NDArray[np.float64] | None = None
     if frequencies is not None:
         freqs = require_finite_array(frequencies, "frequencies")
         require_equal_shapes(
@@ -786,7 +787,7 @@ def standardized_max_impact_level(
     )
 
 
-def heavy_impact_octave_levels(levels: NumericArrayLike) -> np.ndarray:
+def heavy_impact_octave_levels(levels: NumericArrayLike) -> NDArray[np.float64]:
     r"""Combine one-third-octave maximum levels into octaves (Formula (20)).
 
     .. math::
@@ -831,11 +832,11 @@ class AWeightedMaxImpactResult(OwnsArrays):
         an integer, in dB.
     """
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     fraction: BandFraction
-    levels: np.ndarray
-    a_weighting: np.ndarray
-    corrected: np.ndarray
+    levels: NDArray[np.float64]
+    a_weighting: NDArray[np.float64]
+    corrected: NDArray[np.float64]
     unrounded: float
     rating: int
 

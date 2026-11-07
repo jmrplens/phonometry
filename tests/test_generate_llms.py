@@ -19,9 +19,13 @@ wrong file against itself and passed.
 
 from __future__ import annotations
 
+import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -29,6 +33,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import generate_llms as llms
+
+if TYPE_CHECKING:
+    from guard_caches import FreshCaches
 
 
 def _shard_of_links(line: str) -> str:
@@ -107,3 +114,210 @@ def test_the_contributor_guide_stays_out_of_llms() -> None:
     """
     routes = [route for _, route in llms._routes()]
     assert not any(route.startswith("contributing") for route in routes)
+
+
+# The index lists every English page of the site and says what each is about.
+#
+# It used to name the pages docs/ mirrors and a hand-kept few, each by its
+# title alone: the 96 errata families, the catalogues, the task index and the
+# start and reference section pages were in the sitemap and nowhere in
+# llms.txt, and a reader of the index chose among 300 pages by title.
+
+_SITE = llms.SITE_URL
+
+
+def _page(title: str, description: str, body: str = "") -> str:
+    return f'---\ntitle: "{title}"\ndescription: "{description}"\n---\n\n{body}\n'
+
+
+def test_the_content_routes_are_named_as_the_site_names_them(
+    tmp_path: Path, fresh_caches: FreshCaches
+) -> None:
+    for name in (
+        "index.mdx",
+        "start/index.md",
+        "a/index.mdx",
+        "a/b.mdx",
+        "es/a/b.mdx",
+        "es/index.mdx",
+    ):
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_text(_page("T", "D"), encoding="utf-8")
+    fresh_caches(llms, CONTENT=tmp_path)
+    assert llms._content_routes() == {"", "start", "a", "a/b"}
+
+
+def test_a_page_the_index_does_not_link_stops_the_run(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(llms, "_content_routes", lambda: {"", "a", "b/c"})
+    with pytest.raises(
+        SystemExit, match=r"links no line to 1 English page\(s\) of the site: b/c\."
+    ):
+        llms._check_index_covers_the_site(
+            f"- [A]({_SITE}/a/): about a\n- [C](https://example.org/b/c/)\n"
+        )
+    llms._check_index_covers_the_site(
+        f"- [A]({_SITE}/a/): about a\n- [C]({_SITE}/b/c/) (3 rows): c\n"
+    )
+
+
+@pytest.mark.whole_tree
+def test_the_committed_index_links_every_english_page_of_the_site() -> None:
+    llms._check_index_covers_the_site((ROOT / "llms.txt").read_text(encoding="utf-8"))
+
+
+#: The sections of the index whose lines are not a page and what it is about:
+#: hand-written lines with words of their own, counts, shards and the API.
+_UNDESCRIBED = {
+    "Evidence and provenance",
+    "Source and metadata",
+    "Errata by source",
+    "Full text",
+    "Spanish",
+    "Markdown copies",
+    "Optional",
+}
+
+
+@pytest.mark.whole_tree
+def test_every_page_line_says_what_the_page_is_about() -> None:
+    section = ""
+    described: set[str] = set()
+    for line in (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            section = line[3:]
+            continue
+        found = re.match(
+            rf"- \[[^\]]*\]\({re.escape(_SITE)}/([^)]*?)/?\)( \(\d+ rows?\))?: ", line
+        )
+        if section in _UNDESCRIBED or not line.startswith("- ["):
+            continue
+        assert found, f"{section}: a line that says nothing of its page: {line}"
+        route = found.group(1)
+        assert line[found.end() :].startswith(llms._description(route)), (section, line)
+        described.add(route)
+    assert {route for _, route in llms._routes()} <= described
+
+
+def test_an_errata_line_counts_the_entries_of_its_page(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    errata = tmp_path / "reference" / "errata"
+    errata.mkdir(parents=True)
+    (errata / "index.mdx").write_text(_page("Errata", "All of them"), encoding="utf-8")
+    fence = "`" * 3
+    two = (
+        "## ISO 1, Table 2\n\nText.\n\n"
+        + f"{fence}md\n## not an entry\n{fence}\n\n## ISO 1, Annex B\n"
+    )
+    (errata / "iso-1.md").write_text(
+        _page("Errata in ISO 1", "Two", two), encoding="utf-8"
+    )
+    (errata / "iso-2.md").write_text(
+        _page("Errata in ISO 2", "One", "## ISO 2, clause 3\n"), encoding="utf-8"
+    )
+    monkeypatch.setattr(llms, "CONTENT", tmp_path)
+    lines = llms._errata_section()
+    assert f"- [Errata in ISO 1]({_SITE}/reference/errata/iso-1/): 2 entries" in lines
+    assert f"- [Errata in ISO 2]({_SITE}/reference/errata/iso-2/): 1 entry" in lines
+    assert not any(
+        "/reference/errata/index/" in line or "/reference/errata/)" in line
+        for line in lines[4:]
+    )
+
+
+def test_a_catalogue_line_counts_the_rows_it_tables(
+    tmp_path: Path, fresh_caches: FreshCaches
+) -> None:
+    data = tmp_path / "catalogues.mjs"
+    rows: dict[str, dict[str, list[dict[str, str]]]] = {
+        "a": {"columns": [], "rows": [{}] * 3},
+        "b": {"columns": [], "rows": [{}] * 2},
+    }
+    data.write_text(
+        "// Auto-generated.\nexport const catalogues = "
+        + json.dumps(rows, indent=2)
+        + ";\n",
+        encoding="utf-8",
+    )
+    pages = tmp_path / "content" / "reference" / "catalogues"
+    pages.mkdir(parents=True)
+    body = '<Catalogues catalogue="a" lang="en" />\n\nAlso `<Catalogues catalogue="b" />` in code.\n\n<Catalogues catalogue="b" lang="en" />'
+    (pages / "both.mdx").write_text(
+        _page("Catalogue of both", "Two tables.", body), encoding="utf-8"
+    )
+    fresh_caches(llms, CONTENT=tmp_path / "content", CATALOGUE_DATA=data, ROOT=tmp_path)
+    lines = llms._catalogue_section()
+    assert (
+        f"- [Catalogue of both]({_SITE}/reference/catalogues/both/) (5 rows): Two tables."
+        in lines
+    )
+    (pages / "both.mdx").write_text(
+        _page("X", "Y", '<Catalogues catalogue="c" />'), encoding="utf-8"
+    )
+    with pytest.raises(SystemExit, match=r"tables \['c'\]"):
+        llms._catalogue_section()
+
+
+def test_the_index_is_held_to_its_budget() -> None:
+    llms._check_index_budget("x" * llms.LLMS_TXT_LIMIT_BYTES)
+    with pytest.raises(SystemExit, match=r"over the 200000-byte budget"):
+        llms._check_index_budget("x" * (llms.LLMS_TXT_LIMIT_BYTES + 1))
+    committed = (ROOT / "llms.txt").read_bytes()
+    assert len(committed) <= llms.LLMS_TXT_LIMIT_BYTES
+
+
+_NODE = shutil.which("node")
+
+
+@pytest.mark.whole_tree
+@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to ask the site")
+def test_the_pages_without_a_copy_are_the_ones_the_site_withholds() -> None:
+    """The sentence of the index names the pages the site's own rule withholds."""
+    module = ROOT / "site" / "src" / "lib" / "page-markdown.mjs"
+    script = (
+        f"import {{ withheldRoutes }} from {json.dumps(module.as_uri())};"
+        f"const routes = withheldRoutes({{ contentDir: {json.dumps(str(llms.CONTENT))}, "
+        f"docsDir: {json.dumps(str(llms.DOCS))} }});"
+        "process.stdout.write(JSON.stringify([...routes].sort()));"
+    )
+    ran = subprocess.run(
+        [str(_NODE), "--input-type=module", "-e", script],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=300,
+        check=False,
+    )
+    assert ran.returncode == 0, ran.stderr
+    site = json.loads(ran.stdout)
+    assert sorted(llms._withheld_routes()) == site
+    assert len(site) > 2
+
+
+def test_the_copies_sentence_names_the_withheld_pages_by_kind(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    withheld = {
+        "",
+        "es",
+        "reference/catalogues/solids",
+        "es/reference/catalogues/solids",
+        "reference/catalogues/gases",
+        "es/reference/catalogues/gases",
+        "reference/reports",
+        "es/reference/reports",
+        "es/reference/glossary",
+    }
+    monkeypatch.setattr(llms, "_withheld_routes", lambda: frozenset(withheld))
+    sentence = llms._copies_sentence()
+    assert (
+        f"`<page>/index.md`, for example {_SITE}/start/getting-started/index.md"
+        in sentence
+    )
+    assert sentence.endswith(
+        "The 9 pages that show their data through a component publish none and are read on the "
+        'page itself: the two landing pages, the 2 catalogues and the "Report fiches" page in '
+        'both languages and the Spanish "Glossary" page.'
+    )

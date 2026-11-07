@@ -16,8 +16,12 @@ so the same drift cannot happen quietly again.
 Three kinds of artifact are produced:
 
 ``llms.txt``
-    The index. Every page, grouped by area, plus the evidence pages, the
-    Spanish tree and the API reference as an Optional section.
+    The index. Every English page of the site, grouped by area and each with
+    what its own description says it is about, plus the evidence pages, one
+    line per errata family with its entry count and per published catalogue
+    with its row count, where the Markdown copies are, the Spanish tree and
+    the API reference as an Optional section. Every English page is linked
+    (see :func:`_check_index_covers_the_site`).
 ``llms/llms-<area>.txt``
     One shard per documented area, each small enough to survive a single fetch.
     ``llms-full.txt`` is roughly 291k tokens, so a client that truncates at a
@@ -50,7 +54,7 @@ import tomllib
 from typing import TYPE_CHECKING
 
 from markdown_fences import NOT_INLINE_ROLES, code_lines, page_lines
-from markdown_spans import blank_inline_spans_by_block
+from markdown_spans import blank_inline_spans_by_block, page_markup
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -169,6 +173,38 @@ DOI = "10.5281/zenodo.21215280"
 #: page's H2 headings rather than refused (see :func:`_page_parts`).
 SHARD_LIMIT_BYTES = 200_000
 
+#: The budget of ``llms.txt`` itself. It lists every English page with what
+#: the page is about, the errata by source and the catalogues, and an index is
+#: read whole: it is fetched first, by clients that cut a response at a few
+#: hundred kilobytes, and a cut index loses the end of its list without saying
+#: so. Enforced as the shards are (see :func:`_check_index_budget`).
+LLMS_TXT_LIMIT_BYTES = 200_000
+
+#: The components that render a page's data rather than wrap its prose,
+#: ``DATA_COMPONENTS`` of ``site/src/lib/page-markdown.mjs``. A page that renders
+#: one and has no copy in docs/ publishes no Markdown copy, and the index says
+#: which pages those are (see :func:`_withheld_routes`).
+DATA_COMPONENTS = (
+    "Catalogues",
+    "Conformance",
+    "ErrataFamily",
+    "Glossary",
+    "Home",
+    "ReportIndex",
+)
+
+#: The documents at the root of docs/ published at a route of their own
+#: (``TRANSPLANTED`` of ``site/src/lib/page-markdown.mjs``).
+TRANSPLANTED = {
+    "CONFORMANCE": "reference/conformance",
+    "ERRATA": "reference/errata",
+    "ERRATA.es": "es/reference/errata",
+}
+
+#: The data every catalogue page tables, written by
+#: ``scripts/generate_catalogue_data.py`` and committed.
+CATALOGUE_DATA = ROOT / "site" / "src" / "generated" / "catalogues.mjs"
+
 #: The title of the upgrade guide's shard, in its head and in the index.
 UPGRADING_TITLE = "Upgrading from 3.3 to 4.0"
 
@@ -219,6 +255,109 @@ START_ROUTES = (
 
 #: The start page that travels in a shard of its own (see :func:`build_shards`).
 UPGRADING_ROUTE = "start/upgrading"
+
+
+def _content_routes() -> set[str]:
+    """Every English route of the site source, as the docs collection names them.
+
+    A file's route is its path under ``src/content/docs`` without the
+    extension, an ``index`` file standing for its folder and the root one for
+    the landing page (``routeOf`` of ``site/src/lib/page-markdown.mjs``).
+    """
+    routes = set()
+    for path in CONTENT.rglob("*.md*"):
+        relative = path.relative_to(CONTENT).with_suffix("").as_posix()
+        if relative.split("/")[0] == "es":
+            continue
+        routes.add(re.sub(r"(?:^|/)index$", "", relative))
+    return routes
+
+
+def _source_of(route: str) -> pathlib.Path:
+    """The site page a route is built from, in either language."""
+    for candidate in (
+        *(CONTENT / f"{route}{ext}" for ext in (".md", ".mdx")),
+        *(CONTENT / route / f"index{ext}" for ext in (".md", ".mdx")),
+    ):
+        if route and candidate.is_file():
+            return candidate
+    if not route and (CONTENT / "index.mdx").is_file():
+        return CONTENT / "index.mdx"
+    msg = f"generate_llms.py: no site page for the route {route!r}"
+    raise SystemExit(msg)
+
+
+def _frontmatter_field(path: pathlib.Path, name: str) -> str:
+    """One scalar of a page's frontmatter, written on its own line.
+
+    The site's pages write their title and description on one line each,
+    double-quoted, single-quoted or bare; a page without the field stops the
+    run, since every line of the index that names a page says what it is
+    about from it.
+    """
+    text = path.read_text(encoding="utf-8")
+    head = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
+    found = head and re.search(
+        rf"""^{name}:[ \t]*(?:"((?:[^"\\]|\\.)*)"|'([^']*)'|(\S.*?))[ \t]*$""",
+        head.group(1),
+        re.MULTILINE,
+    )
+    if not found:
+        msg = f"generate_llms.py: {path.relative_to(ROOT)} has no frontmatter {name}"
+        raise SystemExit(msg)
+    double, single, bare = found.groups()
+    if double is not None:
+        return re.sub(r"\\(.)", r"\1", double)
+    return single if single is not None else bare
+
+
+def _description(route: str) -> str:
+    """What a page is about, as its own meta description says."""
+    return _frontmatter_field(_source_of(route), "description")
+
+
+def _mirror_of(route: str) -> pathlib.Path | None:
+    """The docs/ file a route's Markdown copy is written from, or None.
+
+    The rule of ``mirrorOf`` in ``site/src/lib/page-markdown.mjs``: a
+    transplanted document's route is that document, a Spanish route has no
+    mirror, and an English one has the page at its path or its folder's
+    ``index.md``.
+    """
+    for document, published in TRANSPLANTED.items():
+        if published == route:
+            return DOCS / f"{document}.md"
+    if route == "es" or route.startswith("es/"):
+        return None
+    for candidate in (DOCS / f"{route}.md", DOCS / route / "index.md"):
+        if route and candidate.is_file():
+            return candidate
+    return None
+
+
+@functools.cache
+def _withheld_routes() -> frozenset[str]:
+    """The routes, in both languages, that publish no Markdown copy.
+
+    The rule of ``withheldRoutes`` in ``site/src/lib/page-markdown.mjs``: an
+    ``.mdx`` page that renders one of :data:`DATA_COMPONENTS` and has no copy in
+    docs/. A tag counts where the page renders it, read through
+    :func:`markdown_spans.page_markup`, the reading the site's ``pageMarkup``
+    is held to; a test holds the two sets equal.
+    """
+    tag = re.compile(rf"<(?:{'|'.join(DATA_COMPONENTS)})\b")
+    withheld = set()
+    for path in sorted(CONTENT.rglob("*.mdx")):
+        relative = path.relative_to(CONTENT).with_suffix("").as_posix()
+        route = re.sub(r"(?:^|/)index$", "", relative)
+        if _mirror_of(route) is not None:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if any(f"<{name}" in text for name in DATA_COMPONENTS) and tag.search(
+            page_markup(text, kind="mdx")
+        ):
+            withheld.add(route)
+    return frozenset(withheld)
 
 
 def _check_areas_cover_the_tree() -> None:
@@ -864,15 +1003,33 @@ def _route_files() -> dict[str, str]:
 
 
 def _page_entry(route: str) -> str | None:
-    """The index line of one page, or None when it has no mirror page."""
+    """The index line of one page, or None when it has no mirror page.
+
+    The line says what the page is about with the page's own meta
+    description, so that a reader of the index can choose a page without
+    fetching it.
+    """
     name = _route_files().get(route)
     if name is None:
         return None
-    return f"- [{_page_title(DOCS / name)}]({SITE_URL}/{route}/)"
+    return _site_entry(_page_title(DOCS / name), route)
+
+
+def _site_entry(label: str, route: str) -> str:
+    """The index line of a site page: its label linked, then what it is about."""
+    return f"- [{label}]({SITE_URL}/{route}/): {_description(route)}"
 
 
 def _start_section() -> list[str]:
-    lines = ["## Start here", ""]
+    # The section's own page and the task index have no mirror page, so they
+    # are listed by their site title, as the guides index is.
+    tasks = "start/tasks"
+    lines = [
+        "## Start here",
+        "",
+        _site_entry("Overview", "start"),
+        _site_entry(_frontmatter_field(_source_of(tasks), "title"), tasks),
+    ]
     for route in START_ROUTES:
         entry = _page_entry(route)
         if entry is None:
@@ -886,8 +1043,8 @@ def _start_section() -> list[str]:
         lines.append(entry)
     return [
         *lines,
-        f"- [Guides index]({SITE_URL}/start/guides/)",
-        f"- [Glossary of quantities]({SITE_URL}/reference/glossary/)",
+        _site_entry("Guides index", "start/guides"),
+        _site_entry("Glossary of quantities", "reference/glossary"),
         "",
     ]
 
@@ -898,7 +1055,7 @@ def _area_section(
     """One topic of the index: its overview, then its guides, run by shard."""
     lines = [f"## {dict(AREAS).get(slug, 'Other guides')}", ""]
     if slug != "other":
-        lines.append(f"- [Overview]({SITE_URL}/{slug}/)")
+        lines.append(_site_entry("Overview", slug))
     shard_of = {
         route: shard for shard, members in _shard_members().items() for route in members
     }
@@ -925,7 +1082,7 @@ def _area_section(
                 f"### {_shard_label(group)}",
                 "",
                 (
-                    f"- [Overview]({SITE_URL}/{folder}/) · "
+                    f"{_site_entry('Overview', folder)} · "
                     + _full_text_links(shard_files.get(group, (group,)))
                 ),
             ]
@@ -947,6 +1104,7 @@ def _reference_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
             f"reference in {_shard_urls(shard_files, 'reference')}."
         ),
         "",
+        _site_entry("Overview", "reference"),
     ]
     lines += [
         entry
@@ -999,6 +1157,161 @@ def _provenance_section() -> list[str]:
         "- [Licence: MIT](https://opensource.org/license/MIT)",
         "",
     ]
+
+
+def _count(number: int, noun: str) -> str:
+    """``1 entry``, ``2 entries``, ``260 rows``."""
+    if number == 1:
+        return f"1 {noun}"
+    return f"{number} {noun[:-1]}ies" if noun.endswith("y") else f"{number} {noun}s"
+
+
+def _headings(path: pathlib.Path) -> int:
+    """How many ``##`` headings a page has outside its code: one per errata entry."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    kind = "mdx" if path.suffix == ".mdx" else "md"
+    return sum(
+        1
+        for line, code in zip(lines, code_lines(lines, kind=kind), strict=True)
+        if not code and line.startswith("## ")
+    )
+
+
+def _errata_section() -> list[str]:
+    """One line per family page of the errata register, with its entry count."""
+    families = sorted(
+        path
+        for path in (CONTENT / "reference" / "errata").glob("*.md*")
+        if path.stem != "index"
+    )
+    lines = [
+        "## Errata by source",
+        "",
+        (
+            "The errata register has one page per document family, each with "
+            "the defects found in that family's printed text, the evidence and "
+            f"what the library does about each (index: {SITE_URL}/reference/errata/)."
+        ),
+        "",
+    ]
+    for path in families:
+        route = path.relative_to(CONTENT).with_suffix("").as_posix()
+        title = _frontmatter_field(path, "title")
+        lines.append(
+            f"- [{title}]({SITE_URL}/{route}/): {_count(_headings(path), 'entry')}"
+        )
+    lines.append("")
+    return lines
+
+
+@functools.cache
+def _catalogue_rows() -> dict[str, int]:
+    """The rows of each published catalogue, read from the data its pages table.
+
+    The file is a JavaScript module that exports one object literal written as
+    JSON (``scripts/generate_catalogue_data.py``), so its body after the export
+    parses as JSON; a module of any other shape stops the run.
+    """
+    text = CATALOGUE_DATA.read_text(encoding="utf-8")
+    found = re.search(
+        r"^export const catalogues = (\{.*\});\s*\Z", text, re.DOTALL | re.MULTILINE
+    )
+    if found is None:
+        msg = (
+            f"generate_llms.py: {CATALOGUE_DATA.relative_to(ROOT)} is not the "
+            "`export const catalogues = {...};` module generate_catalogue_data.py writes"
+        )
+        raise SystemExit(msg)
+    data = json.loads(found.group(1))
+    return {name: len(catalogue["rows"]) for name, catalogue in data.items()}
+
+
+def _catalogue_section() -> list[str]:
+    """One line per published catalogue page, with the rows it tables."""
+    rows = _catalogue_rows()
+    pages = sorted(
+        path
+        for path in (CONTENT / "reference" / "catalogues").glob("*.md*")
+        if path.stem != "index"
+    )
+    lines = [
+        "## Published catalogues",
+        "",
+        (
+            "Every value the library reads off a printed page, one page per "
+            "catalogue, each row with the book, the table and the page it came "
+            f"from (index: {SITE_URL}/reference/catalogues/)."
+        ),
+        "",
+    ]
+    for path in pages:
+        route = path.relative_to(CONTENT).with_suffix("").as_posix()
+        shown = page_markup(path.read_text(encoding="utf-8"), kind="mdx")
+        names = re.findall(r'<Catalogues\b[^>]*\bcatalogue="([^"]+)"', shown)
+        unknown = [name for name in names if name not in rows]
+        if not names or unknown:
+            msg = (
+                f"generate_llms.py: {path.relative_to(ROOT)} tables "
+                f"{unknown or 'no catalogue'} of {CATALOGUE_DATA.relative_to(ROOT)}"
+            )
+            raise SystemExit(msg)
+        title = _frontmatter_field(path, "title")
+        count = _count(sum(rows[name] for name in names), "row")
+        lines.append(
+            f"- [{title}]({SITE_URL}/{route}/) ({count}): {_description(route)}"
+        )
+    lines.append("")
+    return lines
+
+
+def _joined(items: list[str]) -> str:
+    """``a``, ``a and b``, ``a, b and c``."""
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def _copies_sentence() -> str:
+    """Where a page's Markdown copy is, and which pages publish none.
+
+    The pages that publish none are named from :func:`_withheld_routes`, by
+    kind: the landing pages, the catalogues, and any other page by its English
+    title and the languages it is withheld in.
+    """
+    withheld = _withheld_routes()
+    kinds: list[str] = []
+    if {"", "es"} <= withheld:
+        kinds.append("the two landing pages")
+    catalogue = re.compile(r"(?:es/)?reference/catalogues/[^/]+")
+    catalogues = {r.removeprefix("es/") for r in withheld if catalogue.fullmatch(r)}
+    others: dict[str, set[str]] = {}
+    for route in sorted(withheld - {"", "es"}):
+        if not catalogue.fullmatch(route):
+            language = "es" if route.startswith("es/") else "en"
+            others.setdefault(route.removeprefix("es/"), set()).add(language)
+    both = [f"the {len(catalogues)} catalogues"] if catalogues else []
+    both += [
+        f'the "{_frontmatter_field(_source_of(r), "title")}" page'
+        for r, langs in others.items()
+        if langs == {"en", "es"}
+    ]
+    if both:
+        kinds.append(f"{_joined(both)} in both languages")
+    for language, name in (("es", "Spanish"), ("en", "English")):
+        titles = [
+            f'"{_frontmatter_field(_source_of(r), "title")}"'
+            for r, langs in others.items()
+            if langs == {language}
+        ]
+        if titles:
+            kinds.append(
+                f"the {name} {_joined(titles)} page{'s' if len(titles) > 1 else ''}"
+            )
+    return (
+        "Every page listed here has a Markdown copy beside it at "
+        f"`<page>/index.md`, for example {SITE_URL}/start/getting-started/index.md, "
+        "and so does its Spanish twin under `/es/`. The "
+        f"{len(withheld)} pages that show their data through a component "
+        f"publish none and are read on the page itself: {_joined(kinds)}."
+    )
 
 
 def _topic_shards(shard_slugs: tuple[str, ...]) -> list[str]:
@@ -1077,6 +1390,10 @@ def _closing_sections() -> list[str]:
             "parity by a build check."
         ),
         "",
+        "## Markdown copies",
+        "",
+        _copies_sentence(),
+        "",
         "## Optional",
         "",
         (
@@ -1107,6 +1424,8 @@ def build_llms_txt(version: str, shard_files: Mapping[str, tuple[str, ...]]) -> 
         lines += _area_section(slug, routes, shard_files)
     lines += _reference_section(shard_files)
     lines += _provenance_section()
+    lines += _errata_section()
+    lines += _catalogue_section()
     lines += _full_text_section(shard_files)
     lines += _closing_sections()
     return "\n".join(lines)
@@ -1572,6 +1891,37 @@ def _check_readme_covers_the_mirror() -> None:
         )
 
 
+def _check_index_covers_the_site(llms_txt: str) -> None:
+    """Every English page of the site but the landing page is linked from the index.
+
+    The index used to name the pages docs/ mirrors and a hand-kept few, so the
+    96 errata families, the catalogues, the task index and two section pages
+    were in the sitemap and nowhere in the file an agent reads first. The set
+    is the site's own (:func:`_content_routes`), read without a build, as this
+    runs in ``make llms`` and in CI before any build.
+    """
+    linked = set(re.findall(rf"\]\({re.escape(SITE_URL)}/((?:[^)\s]*?))/?\)", llms_txt))
+    missing = sorted(route for route in _content_routes() - {""} if route not in linked)
+    if missing:
+        msg = (
+            f"generate_llms.py: llms.txt links no line to {len(missing)} English "
+            "page(s) of the site: " + ", ".join(missing) + ". List each where its "
+            "section of the index belongs."
+        )
+        raise SystemExit(msg)
+
+
+def _check_index_budget(llms_txt: str) -> None:
+    """Fail when ``llms.txt`` is over :data:`LLMS_TXT_LIMIT_BYTES`."""
+    size = len(llms_txt.encode("utf-8"))
+    if size > LLMS_TXT_LIMIT_BYTES:
+        msg = (
+            f"generate_llms.py: llms.txt is {size} bytes, over the "
+            f"{LLMS_TXT_LIMIT_BYTES}-byte budget of an index a client reads whole"
+        )
+        raise SystemExit(msg)
+
+
 def _check_shard_budget(sizes: dict[str, int]) -> None:
     """Fail the run if any shard exceeds :data:`SHARD_LIMIT_BYTES`.
 
@@ -1611,6 +1961,8 @@ def main() -> None:
         version,
         {slug: _part_names(slug, len(parts)) for slug, parts in shards.items()},
     )
+    _check_index_covers_the_site(llms)
+    _check_index_budget(llms)
     (ROOT / "llms.txt").write_text(llms, encoding="utf-8")
     (ROOT / "llms-full.txt").write_text(build_llms_full(llms), encoding="utf-8")
 

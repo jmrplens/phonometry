@@ -693,7 +693,7 @@ class SELDistribution(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the primary artist.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         :raises ValueError: If ``view`` is not one of the three names above.
         :raises TypeError: if ``view`` is not a text.
         """

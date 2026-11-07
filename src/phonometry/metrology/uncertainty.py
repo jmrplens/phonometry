@@ -370,7 +370,7 @@ class UncertaintyResult(OwnsArrays):
     ) -> Axes:
         """Plot the uncertainty budget (per-input contributions).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -412,7 +412,7 @@ class MonteCarloResult(OwnsArrays):
 
         Needs the raw output sample, so call ``monte_carlo(...,
         keep_samples=True)``. Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

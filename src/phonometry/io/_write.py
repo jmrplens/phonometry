@@ -1011,7 +1011,7 @@ def _write_flac(
     from ._backends import _import_soundfile
     from ._flac import embed_flac_bext, flac_bext_block
 
-    sf = _import_soundfile("FLAC")
+    sf = _import_soundfile("FLAC", action="Writing")
     implied = _PASSTHROUGH_SUBTYPES.get(data.dtype)
     out: np.ndarray
     if implied == "PCM_32":

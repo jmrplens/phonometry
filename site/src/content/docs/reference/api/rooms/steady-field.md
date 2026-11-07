@@ -449,5 +449,5 @@ SteadyFieldResult.plot(
 Plot direct, reverberant and total SPL against distance.
 
 Marks the critical distance `rc` where the direct and reverberant
-fields cross. Requires matplotlib (`pip install "phonometry[plot]"`);
+fields cross. Requires matplotlib (the `[plot]` extra);
 returns the `Axes`.

@@ -449,7 +449,7 @@ compared with.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the curve of the microphone under test. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 
@@ -564,7 +564,7 @@ $u_\mathrm{c}$, $k$ and $U$.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `barh`. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### ComparisonUncertaintyBudget.standard
 
@@ -780,7 +780,7 @@ against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the correction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### DiameterSoundFieldCorrection.separation_change_db
 
@@ -953,7 +953,7 @@ Plot $C_\mathrm{env}$ and its three terms against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the $C_\mathrm{env}$ curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### EnvironmentalSensitivityCorrection.static_pressure_term_db
 
@@ -1063,7 +1063,7 @@ Plot the region in a plane through the axis, as Figure B.1 draws it.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the boundary of the region. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### FreeFieldRegion.rod_clearance_m
 
@@ -1257,7 +1257,7 @@ or $\arg R_P$, against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the curve of $R_P$. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 
@@ -1463,7 +1463,7 @@ frequencies the validation does not cover as dashed vertical lines.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the difference curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## JigDiameterCorrection
 
@@ -1520,7 +1520,7 @@ Plot the corrections with their expanded uncertainty.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the correction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### JigDiameterCorrection.standard_uncertainty_db
 
@@ -1732,7 +1732,7 @@ frequencies of interest.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the spectrum. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 
@@ -2198,7 +2198,7 @@ Plot the impulse response against time.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### SteppedSineImpulseResponse.times
 
@@ -2413,7 +2413,7 @@ $H(f)$ with and without the window.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the windowed curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 

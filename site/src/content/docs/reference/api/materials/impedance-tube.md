@@ -197,7 +197,7 @@ ImpedanceTubeResult.plot(
 
 Plot the absorption spectrum `alpha(f)` with `|r|` overlaid.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### ImpedanceTubeResult.plot_geometry()
@@ -213,7 +213,7 @@ ImpedanceTubeResult.plot_geometry(
 
 Draw the two-microphone tube to scale (dimensioned side view).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### ImpedanceTubeResult.report()
@@ -261,7 +261,7 @@ to the normal-incidence coefficient reported here).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## ImpedanceTubeWarning
 

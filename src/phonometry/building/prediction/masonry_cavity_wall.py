@@ -271,7 +271,7 @@ class WallTieCouplingResult(OwnsArrays):
     ) -> Axes:
         """Plot ``eta_ij(f)`` against the rigid-connection ceiling.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

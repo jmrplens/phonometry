@@ -437,7 +437,7 @@ class SurveyAirborneResult(OwnsArrays):
 
         Delegates to the weighted-rating plot. Requires the automatic rating
         (5 octave or 16 one-third-octave bands) and matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         if self.rating is None:
@@ -484,8 +484,8 @@ class SurveyAirborneResult(OwnsArrays):
             5 octave or 16 one-third-octave bands, and ``R'`` needs ``area``
             and ``volume``).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         _validate_report_request(engine, language)
@@ -589,8 +589,8 @@ class SurveyImpactResult(OwnsArrays):
             single-number rating (the survey needs 5 octave or 16
             one-third-octave bands).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         _validate_report_request(engine, language)
         if self.rating is None:
@@ -689,8 +689,8 @@ class SurveyFacadeResult(OwnsArrays):
             single-number rating (the survey needs 5 octave or 16
             one-third-octave bands).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         _validate_report_request(engine, language)
         if self.rating is None:

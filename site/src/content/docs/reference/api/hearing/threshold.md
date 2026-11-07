@@ -111,7 +111,7 @@ AgeThresholdResult.plot(
 
 Plot the median threshold with the fractile band over frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## AUDIOMETRIC_FREQUENCIES_HZ

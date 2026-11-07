@@ -232,7 +232,7 @@ Draw output level against input level, as Figure A.1.
 The span of `agc_range_db` is shaded, with the 3 dB output band
 it is taken over.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -376,7 +376,7 @@ AmplifierFrequencyResponse.plot(
 
 Draw the response against frequency, 0 dB at 1 kHz (5.4.12.3).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -759,7 +759,7 @@ the ordinate the level of one component in dB re 400 mA/m, with the
 0 dB reference and the plus or minus 3 dB band of IEC 60118-4:2014
 8.4.3 around it.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -878,7 +878,7 @@ Draw the magnitude of the impedance against frequency.
 The resistance is drawn as a floor and the corner frequency marked,
 where the magnitude has risen to $\sqrt{2}$ times the resistance.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -975,7 +975,7 @@ MaxOutputCurrent.plot(
 
 Draw the distortion against the load current, with the rated THD.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -1080,7 +1080,7 @@ NeckLoopCharacteristics.plot(
 
 Draw the frequency response on the jig, 0 dB at 1 kHz.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -1162,7 +1162,7 @@ NeckLoopVerification.plot(
 
 Draw each measured value as a share of its limit.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -1281,7 +1281,7 @@ QuadraturePhaseError.plot(
 
 Draw the deviation from 90 degrees against frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

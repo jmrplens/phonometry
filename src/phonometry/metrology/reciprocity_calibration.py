@@ -333,7 +333,7 @@ class ReciprocityCalibration(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the curve of the first microphone.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_reciprocity_calibration
@@ -822,7 +822,7 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the expanded-uncertainty curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_reciprocity_budget

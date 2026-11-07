@@ -347,7 +347,7 @@ LowFrequencyResult.plot(
 
 Plot the three low-frequency bands, default against corner and LF.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## LowFrequencyWarning

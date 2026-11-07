@@ -549,7 +549,7 @@ hollow, as 4.3 forbids using it, and a result of
 (4.4). The title names the clause and its verdict above the clause's
 heading.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -720,7 +720,7 @@ a diamond at the result nearest its limit. Each requirement's own
 [`SoundLevelMeterPeriodicRequirement.plot`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirementplot) draws its results one
 by one.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

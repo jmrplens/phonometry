@@ -333,7 +333,7 @@ The upper panel stems every enumerated mode at its frequency, coloured
 axial / tangential / oblique; the lower panel draws the smooth modal
 density (Long Equation (8.46)). The Schroeder frequency, when known,
 is marked on both. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 ### RoomModesResult.surface_area
 

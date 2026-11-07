@@ -389,7 +389,7 @@ DailyVibrationExposure.plot(
 
 Plot the partial exposures against the EAV / ELV thresholds.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 ### DailyVibrationExposure.report()
@@ -441,7 +441,7 @@ verdict against the limit value, and a footer identity/disclaimer block.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the contribution chart, so both are required (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the contribution chart, so both are required (the `[report]` and `[plot]` extras). |
 
 ## energy_equivalent_acceleration
 
@@ -989,7 +989,7 @@ WeightedSpectrum.plot(
 
 Plot the unweighted and weighted band spectra with `a_w`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 ## weighting_factors
@@ -1069,5 +1069,5 @@ WeightingResponse.plot(
 
 Plot the weighting factor (dB) versus frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.

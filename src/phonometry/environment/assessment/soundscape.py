@@ -721,7 +721,7 @@ class MethodASummary(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the median markers of the first site;
             the other sites keep their own colour and style.
-        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
+        :return: The axes. Requires matplotlib (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_method_a_summary
@@ -891,7 +891,7 @@ class PleasantnessEventfulness(OwnsArrays):
             of their site.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the site markers.
-        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
+        :return: The axes. Requires matplotlib (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_pleasantness_eventfulness
@@ -1071,7 +1071,7 @@ class SoundscapeCorrelation(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the scatter markers.
-        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
+        :return: The axes. Requires matplotlib (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_soundscape_correlation
@@ -1386,7 +1386,7 @@ class MethodBSummary(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the mean markers of the first site; the
             other sites keep their own colour and style.
-        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
+        :return: The axes. Requires matplotlib (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_method_b_summary
@@ -1525,7 +1525,7 @@ class SourceRanking(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the bars of the first site; the other
             sites keep their own colour and style.
-        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
+        :return: The axes. Requires matplotlib (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_source_ranking

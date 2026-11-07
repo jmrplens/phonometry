@@ -127,7 +127,7 @@ Draws the band-importance function `Ii` as a step over the band
 limits, so procedures with different band counts and widths can be
 overlaid on the same logarithmic frequency axis and compared directly.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 **Parameters**
@@ -191,7 +191,7 @@ SIIResult.plot(
 
 Plot the per-band audibility weighted by importance, with the SII.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### SIIResult.report()
@@ -235,7 +235,7 @@ fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is not a supported language. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## speech_intelligibility_index
 
@@ -377,7 +377,7 @@ one-third-octave bands (160 Hz to 8000 Hz) on a categorical band axis;
 each vocal effort in `vocal_efforts` is one labelled line, so the
 whole spectrum lifting with vocal effort reads at a glance.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 **Parameters**

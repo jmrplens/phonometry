@@ -294,7 +294,7 @@ DirectSoundSubtraction.plot(
 
 Draw the record, the aligned direct sound and what is left.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -703,7 +703,7 @@ ReflectionFrequencyLimit.plot(
 
 Draw the limit at each microphone and what sets it.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -775,7 +775,7 @@ ReflectionGridCheck.plot(
 
 Draw each microphone's deviation against the 25 mm tolerance.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -838,7 +838,7 @@ ReflectionIndexResult.plot(
 
 Draw the index per band, each grid position and the rating.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

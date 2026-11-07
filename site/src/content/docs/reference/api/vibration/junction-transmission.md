@@ -437,7 +437,7 @@ JunctionTransmissionResult.plot(
 
 Plot `tau(theta)` versus incidence angle for this junction.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### JunctionTransmissionResult.plot_geometry()
@@ -453,7 +453,7 @@ JunctionTransmissionResult.plot_geometry(
 
 Draw the plate-junction cross-section to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## JunctionWaveParameters

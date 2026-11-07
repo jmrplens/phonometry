@@ -138,7 +138,7 @@ class OpenPlanResult(OwnsArrays):
 
         Redraws the Clause 6.2 regression line from ``d2s`` and
         ``lp_as_4m`` and marks the distraction and privacy distances.
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -152,7 +152,7 @@ class OpenPlanResult(OwnsArrays):
     ) -> Axes:
         """Draw the measurement line to scale, rD and rP marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -213,7 +213,7 @@ class OpenPlanResult(OwnsArrays):
         :raises ImportError: If reportlab or, for the embedded spatial-decay
             chart, matplotlib is not installed. The fiche embeds the result's
             own plot whenever the regression is defined, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from .._i18n import check_language
 

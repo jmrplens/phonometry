@@ -344,7 +344,7 @@ measurement statement, an optional requirement verdict and a footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `part` is not 2, 3 or 4, or the result has no single-number rating (the band count is neither 16 nor 5). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## FlankingLevelDifferenceResult
 
@@ -418,7 +418,7 @@ measurement statement, an optional requirement verdict and a footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `part` is not 2, 3 or 4, or the result has no single-number rating (the band count is neither 16 nor 5). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## modal_density
 
@@ -646,7 +646,7 @@ The bound $3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))$ is drawn ac
 shaded, where the elements are strongly coupled and `Kij` may not be
 relevant, and a band where the inequality does not hold is marked.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -890,7 +890,7 @@ VibrationReductionResult.plot(
 
 Plot `Kij` against frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### VibrationReductionResult.report()
@@ -933,7 +933,7 @@ excluded from the single number.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or the result carries no band centre frequencies. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ### VibrationReductionResult.single_number
 

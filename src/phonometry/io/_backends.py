@@ -34,10 +34,11 @@ from __future__ import annotations
 
 import os
 from dataclasses import replace
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
 import numpy as np
 
+from .._internal.extras import install_hint
 from .._internal.json_input import escaped
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._audio_file import open_audio, require_regular_audio
@@ -118,8 +119,6 @@ _SUBTYPE_BITS = {
     "DOUBLE": 64,
 }
 
-_AUDIO_EXTRA_HINT = 'Install the [audio] extra with: pip install "phonometry[audio]"'
-
 
 def _sniff(path: str | os.PathLike[str]) -> str | None:
     """Identify a file by its magic bytes: ``None`` for the WAV family.
@@ -145,14 +144,32 @@ def _sniff(path: str | os.PathLike[str]) -> str | None:
     raise ValueError(msg)
 
 
-def _import_soundfile(format_name: str) -> ModuleType:
-    """Import python-soundfile or explain which extra provides it."""
+def _import_soundfile(
+    format_name: str, *, action: Literal["Reading", "Writing"] = "Reading"
+) -> ModuleType:
+    """Import python-soundfile, or say how to install the extra that brings it.
+
+    A soundfile that imports without the libsndfile it loads is no soundfile
+    at all here: soundfile 0.14.0 from PyPI in Pyodide, or a wheel built for a
+    platform it ships no libsndfile for, raises its loader's ``OSError``
+    while it imports, and the caller is told what a missing extra tells.
+
+    :param format_name: The container or codec the file holds, as a message
+        names it.
+    :param action: Whether the caller reads the file or writes it.
+    :raises ImportError: when soundfile is not installed, or its libsndfile
+        does not load.
+    """
+    hint = f"Install it with: {install_hint('audio')}"
     try:
         import soundfile
     except ImportError as exc:
+        msg = f"{action} {format_name} requires python-soundfile. {hint}"
+        raise ImportError(msg) from exc
+    except OSError as exc:
         msg = (
-            f"Reading {format_name} requires python-soundfile, which "
-            f"phonometry ships as the [audio] extra. {_AUDIO_EXTRA_HINT}"
+            f"{action} {format_name} requires python-soundfile with its "
+            f"libsndfile library, which did not load ({exc}). {hint}"
         )
         raise ImportError(msg) from exc
     # soundfile ships no py.typed, so mypy sees the import as Any; the

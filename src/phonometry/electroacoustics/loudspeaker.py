@@ -679,8 +679,8 @@ class LoudspeakerCharacteristics(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 
@@ -739,7 +739,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
             result carries no data for ``quantity``, or ``ax`` is not a polar
             axes for ``"directivity"``.
         :raises ImportError: If matplotlib is not installed
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         require_choice(

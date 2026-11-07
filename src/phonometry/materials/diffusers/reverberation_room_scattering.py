@@ -441,7 +441,7 @@ class ScatteringResult(OwnsArrays):
     ) -> Axes:
         """Plot the scattering coefficient ``s`` versus frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language
@@ -488,8 +488,8 @@ class ScatteringResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 
@@ -696,7 +696,7 @@ class BasePlateScatteringCheck(OwnsArrays):
     ) -> Axes:
         r"""Draw :math:`s_\mathrm{base}` against the stepped limit of Table 1.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

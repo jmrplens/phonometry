@@ -432,7 +432,7 @@ PhaseVerification.plot(
 
 Draw the characteristic phase deviation inside the Table 5 band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -649,7 +649,7 @@ RunningRMSDecayVerification.plot(
 
 Draw the measured decay time against the printed interval.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -969,7 +969,7 @@ WeightingVerification.plot(
 
 Draw the measured response inside the tolerance band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

@@ -809,7 +809,7 @@ class JunctionTransmissionResult(OwnsArrays):
     ) -> Axes:
         """Plot ``tau(theta)`` versus incidence angle for this junction.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -824,7 +824,7 @@ class JunctionTransmissionResult(OwnsArrays):
     ) -> Axes:
         """Draw the plate-junction cross-section to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

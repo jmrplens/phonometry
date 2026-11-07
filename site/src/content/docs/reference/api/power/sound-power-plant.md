@@ -294,7 +294,7 @@ Plot each part's $L_W$ and their total, band by band.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the total's bars. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### PartialPlantContributions.relative_part_levels
 
@@ -748,7 +748,7 @@ Plot how far each requirement is inside or outside its limit.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the bars. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### PlantMeasurementCheck.requirement()
 
@@ -904,7 +904,7 @@ directions, in the manner of Figure 1.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the position markers. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### PlantMeasurementContour.position_spacing_m
 
@@ -1168,7 +1168,7 @@ built from, with $L_{W\mathrm{A}}$ in the title.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the band bars. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### PlantSoundPowerResult.sound_power_level
 

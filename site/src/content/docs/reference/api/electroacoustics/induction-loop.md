@@ -178,7 +178,7 @@ AmplifierOverloadVerification.plot(
 
 Draw the loop voltage along the sweep against the compliance voltage.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -275,7 +275,7 @@ BackgroundNoiseAssessment.plot(
 
 Draw the noise at each point against the 47, 32 and 22 dB lines.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -510,7 +510,7 @@ FieldStrengthReading.plot(
 
 Draw the meter reading against time, with the 0 dB reference.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -570,7 +570,7 @@ Draw the worst margin of every requirement as a bar.
 
 A requirement is met when its bar stands at or above zero.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -713,7 +713,7 @@ LoopRequirement.plot(
 
 Draw each judged value against its limits.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

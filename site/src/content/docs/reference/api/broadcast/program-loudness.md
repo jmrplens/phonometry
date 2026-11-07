@@ -286,7 +286,7 @@ Draws the combined K-weighting magnitude (dB) on a logarithmic
 frequency axis, with the two stages (the +4 dB shelf and the RLB
 high-pass) as light companion curves.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
 
 **Parameters**
@@ -433,7 +433,7 @@ ProgramLoudnessResult.plot(
 Plot momentary and short-term loudness over time, with the
 integrated loudness and the loudness range annotated.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -484,7 +484,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `tolerance` is not `"qc"`/`"live"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 | TypeError | if `tolerance` is not a text. |
 
 ## true_peak_level

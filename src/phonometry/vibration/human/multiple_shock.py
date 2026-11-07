@@ -619,7 +619,7 @@ class MultipleShockResult(OwnsArrays):
         r"""Plot the injury-probability curve with this assessment's
         :math:`R`.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -679,7 +679,7 @@ class MultipleShockResult(OwnsArrays):
             is unknown.
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the injury-probability chart, so both are
-            required (``pip install "phonometry[report,plot]"``).
+            required (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

@@ -252,7 +252,7 @@ The three foundation curves of Table 1 against frequency, and the
 measured velocity as a point, so the margin is read rather than
 computed.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

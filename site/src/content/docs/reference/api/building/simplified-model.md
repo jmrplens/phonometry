@@ -93,7 +93,7 @@ AirbornePredictionResult.plot(
 
 Plot the per-path shares of the transmitted energy.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### AirbornePredictionResult.report()
@@ -149,7 +149,7 @@ flanking construction and the model assumptions is recorded in
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or `language` is not supported. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## BuildingPredictionWarning
 
@@ -444,7 +444,7 @@ ImpactPredictionResult.plot(
 
 Plot the Formula 21 terms and the resulting `L'n,w`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### ImpactPredictionResult.report()
@@ -502,7 +502,7 @@ of the flanking construction and the model assumptions is recorded in
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or `language` is not supported. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## junction_min_vibration_reduction
 

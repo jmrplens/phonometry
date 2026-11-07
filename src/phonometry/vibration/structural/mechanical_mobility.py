@@ -460,7 +460,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         no ``ax`` a two-panel figure is drawn and its two axes returned as a tuple; with
         ``ax`` the deviation diagnostic is drawn on it and that axes returned.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_rigid_mass_calibration
@@ -671,7 +671,7 @@ class MobilityResult(OwnsArrays):
     ) -> Axes:
         """Plot the mobility magnitude ``|Y(f)|``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -718,7 +718,7 @@ class MobilityResult(OwnsArrays):
             is unknown.
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the mobility spectrum, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

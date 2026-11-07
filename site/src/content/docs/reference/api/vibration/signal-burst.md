@@ -312,7 +312,7 @@ SignalBurstVerification.plot(
 
 Draw the deviations against the printed tolerance band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

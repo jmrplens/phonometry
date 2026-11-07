@@ -590,7 +590,7 @@ class WeightingVerification(OwnsArrays):
     ) -> Axes:
         """Draw the measured response inside the tolerance band.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1062,7 +1062,7 @@ class PhaseVerification(OwnsArrays):
     ) -> Axes:
         """Draw the characteristic phase deviation inside the Table 5 band.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1424,7 +1424,7 @@ class RunningRMSDecayVerification(RichDisplay):
     ) -> Axes:
         """Draw the measured decay time against the printed interval.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

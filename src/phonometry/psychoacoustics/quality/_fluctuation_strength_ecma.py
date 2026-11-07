@@ -308,7 +308,7 @@ class EcmaFluctuationStrength(OwnsArrays):
 
         Draws the time-dependent fluctuation strength F(l50) and a
         specific-fluctuation-strength heatmap. Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_ecma_fluctuation_strength

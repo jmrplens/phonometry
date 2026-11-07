@@ -204,7 +204,7 @@ Plot the output histogram with the coverage interval marked.
 
 Needs the raw output sample, so call `monte_carlo(...,
 keep_samples=True)`. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -382,7 +382,7 @@ UncertaintyResult.plot(
 
 Plot the uncertainty budget (per-input contributions).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

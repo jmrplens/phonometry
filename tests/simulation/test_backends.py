@@ -623,15 +623,17 @@ def test_torch_absent_is_an_import_error_that_says_so(
 
 
 #: How to install torch for each device, as the compute guide says: the CPU
-#: wheels first for torch:cpu, so that pip does not bring PyPI's CUDA build.
-#: No punctuation touches the index URL, which is copied with the command.
+#: wheels first for torch:cpu, so that pip does not bring PyPI's CUDA build,
+#: and the conda-forge packages after, which need no index URL. No
+#: punctuation touches the index URL, which is copied with the command.
+_CONDA_TORCH = "(conda: conda install -c conda-forge pytorch array-api-compat)"
 _TORCH_INSTALL: dict[Device, str] = {
     "torch:cpu": (
         "pip install torch --index-url https://download.pytorch.org/whl/cpu "
-        'and then pip install "phonometry[torch]"'
+        f'and then pip install "phonometry[torch]" {_CONDA_TORCH}'
     ),
-    "torch:cuda": 'pip install "phonometry[torch]"',
-    "torch:mps": 'pip install "phonometry[torch]"',
+    "torch:cuda": f'pip install "phonometry[torch]" {_CONDA_TORCH}',
+    "torch:mps": f'pip install "phonometry[torch]" {_CONDA_TORCH}',
 }
 
 

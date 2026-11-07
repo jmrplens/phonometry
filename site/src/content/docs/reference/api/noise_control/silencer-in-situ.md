@@ -889,7 +889,7 @@ SilencerInSituResult.plot(
 
 Draw the level difference and the loss it becomes.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

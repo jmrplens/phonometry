@@ -282,7 +282,7 @@ class AbsorptionUncertaintyResult(OwnsArrays):
     ) -> Axes:
         """Plot the quantity with its ``±U`` uncertainty ribbon (band quantities).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

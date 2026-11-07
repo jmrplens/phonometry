@@ -265,7 +265,7 @@ FacadePredictionResult.plot_geometry(
 
 Draw the composite facade elevation, element areas to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ### FacadePredictionResult.report()
@@ -321,7 +321,7 @@ supplies the target `D2m,nT,w`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `language` is not supported, or the result lacks the ISO 717-1 single-number ratings (build it on the 5 octave or 16 one-third-octave bands). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## outdoor_attenuation
 

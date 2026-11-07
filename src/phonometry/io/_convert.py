@@ -265,7 +265,7 @@ def _stream_to_flac(
 
     *named* is the caller's name for the file, which a refusal gives.
     """
-    sf = _import_soundfile("FLAC")
+    sf = _import_soundfile("FLAC", action="Writing")
     with sf.SoundFile(
         os.fspath(target),
         "w",

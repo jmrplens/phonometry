@@ -218,7 +218,7 @@ from ..room.modes import RoomModesResult  # at module level in src/phonometry/_p
 <a id="a10"></a>
 ### A10. Import matplotlib inside the function that draws, never at module scope
 
-**Why.** matplotlib is a soft dependency: importing phonometry and computing must work without it, and `.plot()` without it must fail with the install command (`pip install "phonometry[plot]"`), not a bare `ModuleNotFoundError`.
+**Why.** matplotlib is a soft dependency: importing phonometry and computing must work without it, and `.plot()` without it must fail with the install command, pip's and conda's ([A64](#a64)), not a bare `ModuleNotFoundError`.
 
 **Do**
 
@@ -1814,3 +1814,33 @@ Where the order cannot be kept by hand, the call holds its advisories. A functio
 **Enforced by:** `tests/refusal_order.py`, `tests/test_refusal_order.py`, `tests/test_refusals_before_advisories.py`
 
 **Exceptions.** None. NumPy's warnings count too when they are shown at a line of the package; silence the operation with `np.errstate` once the library has said what it has to say.
+
+<a id="a64"></a>
+### A64. Take the install command of a missing extra from `install_hint`, which names pip and conda
+
+**Why.** A message for a missing soft dependency is copied and run as written. Eleven of them said only `pip install "phonometry[plot]"` and the like, and in a conda environment that command installs matplotlib and eight of its dependencies from PyPI beside conda-forge's NumPy. Each was spelled where it was raised, so the extra was named twice in one ("ships as the [audio] extra. Install the [audio] extra with"), the FLAC writers said "Reading FLAC", and the docstrings repeated the pip command 439 times. `install_hint(*extras)` in `src/phonometry/_internal/extras.py` builds the hint from one table of the conda-forge packages that bring each extra (`matplotlib-base`, not `matplotlib`, which pulls a GUI toolkit; `pysoundfile`, conda-forge's name for python-soundfile), so every message gives both commands, and a docstring names the extra.
+
+**Do**
+
+```python
+from phonometry._internal.extras import install_hint
+
+
+def draw() -> None:
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError as exc:
+        msg = f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
+        raise ImportError(msg) from exc
+    plt.subplots()
+```
+
+**Don't**
+
+```py
+msg = 'Plotting requires matplotlib. Install it with: pip install "phonometry[plot]"'
+```
+
+**Enforced by:** `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py::test_the_package_spells_no_install_command_outside_its_hints`, `tests/test_install_hints.py`
+
+**Exceptions.** `src/phonometry/_internal/extras.py` itself, which spells the commands. A library no extra brings, CuPy's wheel for the CUDA version, takes `package_hint(pip_package, conda_package)` from the same module. The check reads the text of every file of the package, so a command split between two string literals escapes it, which review catches.

@@ -2043,7 +2043,7 @@ class FDTD2D:
         Domain extent, obstacles, sponge layers, impedance and rigid edges
         and the added sources, with optional probe cells previewed; no
         time stepping happens. Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

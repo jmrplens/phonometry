@@ -610,7 +610,7 @@ PeopleAssessment.plot(
 
 Draw the two assessment quantities against the three guide values.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

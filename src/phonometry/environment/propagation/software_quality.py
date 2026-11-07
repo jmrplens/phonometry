@@ -444,7 +444,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the line of sample points.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_level_difference_quantiles
@@ -755,7 +755,7 @@ class RoundRobinPrecision(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the histogram bars.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         :raises TypeError: for ``width`` or ``align``, which the plot sets
             itself: each bar covers the class it counts.
         """
@@ -933,7 +933,7 @@ class CalculationVerification(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the line of result markers.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_calculation_verification

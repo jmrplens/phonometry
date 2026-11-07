@@ -264,7 +264,7 @@ class StaticAirflowResult(RichDisplay):
     ) -> Axes:
         """Plot the fitted ``dp(u)`` curve with the evaluation point.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -326,7 +326,7 @@ class StaticAirflowResult(RichDisplay):
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the fitted ``dp(u)`` curve, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

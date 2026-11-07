@@ -1746,7 +1746,7 @@ and not a sound pressure level: an `L_p` is defined on a mean
 square over a stated time weighting, and
 [`time_weighting`](/phonometry/reference/api/filters/weighting/#time_weighting) is what produces one.
 Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
 
 **Raises**

@@ -160,7 +160,7 @@ BandUncertainty.plot(
 
 Plot the per-band standard uncertainty spectrum.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 ## COVERAGE_FACTORS

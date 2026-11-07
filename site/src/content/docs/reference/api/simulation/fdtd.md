@@ -229,6 +229,13 @@ construction; sponge layers and per-cell real impedances turn selected
 sides into absorbing or locally reacting boundaries. Sources are soft
 (additive) pressure injections.
 
+The three fields are arrays of the library the engine steps on, not
+NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a tensor
+on PyTorch, typed `Any` for a type checker since no one array type
+covers the three. Reading one in place keeps it on the device, and
+`numpy_field` gives a NumPy copy of it, typed as an array of
+floats, on every device.
+
 **Parameters**
 
 | Name | Description |

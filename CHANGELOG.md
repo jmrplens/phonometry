@@ -2332,6 +2332,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   default to an empty read-only mapping that its signature shows, where it
   showed `...`. The score is 100%, and a CI job holds the wheel to it.
 
+- **The FDTD engines say what their fields are.** `FDTD2D.p`, `vx` and
+  `vy`, and the stresses and velocities of `ElasticFDTD2D` with its
+  synthetic pressure, are arrays of the library the engine steps on, a
+  NumPy array, a CuPy array or a PyTorch tensor, which a type checker reads
+  as `Any`; the class docstrings and the API reference said only their
+  shapes. Each now says so, and points to `numpy_field`, which gives a
+  NumPy copy typed as an array of floats on every device.
+
 - **Two threads importing two domains no longer deadlock.** After a plain
   `import phonometry`, a thread pool that read `phonometry.electroacoustics`
   and `phonometry.vibration` raised `_DeadlockError` in one of its two

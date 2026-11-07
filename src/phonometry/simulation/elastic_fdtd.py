@@ -839,6 +839,14 @@ class ElasticFDTD2D:
     et al. (2007) effective parameters (Eqs. 7.37-7.39) that make internal
     interfaces converge to the physical traction continuity.
 
+    The five fields, the synthetic pressure :attr:`p` and what
+    :meth:`collocated` returns are arrays of the library the engine steps
+    on, not NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a
+    tensor on PyTorch, typed ``Any`` for a type checker since no one array
+    type covers the three. Reading one in place keeps it on the device, and
+    :meth:`numpy_field` gives a NumPy copy of a stored field, typed as an
+    array of floats, on every device.
+
     :param c_p: P-wave speed map [m/s], shape ``(ny, nx)``. A scalar with an
         explicit ``shape`` is also accepted.
     :param c_s: S-wave speed map [m/s]; scalar or ``(ny, nx)`` array.
@@ -993,10 +1001,20 @@ class ElasticFDTD2D:
         self._rho_y = backend.asarray(rho_y)
         self._mu_c = backend.asarray(mu_c)
 
+        #: Normal stress along x at the cell centres [Pa], shape ``(ny, nx)``,
+        #: an array of the backend: ``numpy_field("txx")`` is its NumPy copy.
         self.txx: DeviceArray = backend.zeros((ny, nx))
+        #: Normal stress along y at the cell centres [Pa], shape ``(ny, nx)``,
+        #: an array of the backend.
         self.tyy: DeviceArray = backend.zeros((ny, nx))
+        #: Shear stress at the interior corners [Pa], shape
+        #: ``(ny - 1, nx - 1)``, an array of the backend.
         self.txy: DeviceArray = backend.zeros((ny - 1, nx - 1))
+        #: Particle velocity at the interior x-faces [m/s], shape
+        #: ``(ny, nx - 1)``, an array of the backend.
         self.vx: DeviceArray = backend.zeros((ny, nx - 1))
+        #: Particle velocity at the interior y-faces [m/s], shape
+        #: ``(ny - 1, nx)``, an array of the backend.
         self.vy: DeviceArray = backend.zeros((ny - 1, nx))
         self._div = backend.zeros((ny, nx))
         self._dvx = backend.zeros((ny, nx))

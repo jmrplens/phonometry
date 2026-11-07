@@ -1725,6 +1725,13 @@ class FDTD2D:
     sides into absorbing or locally reacting boundaries. Sources are soft
     (additive) pressure injections.
 
+    The three fields are arrays of the library the engine steps on, not
+    NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a tensor
+    on PyTorch, typed ``Any`` for a type checker since no one array type
+    covers the three. Reading one in place keeps it on the device, and
+    :meth:`numpy_field` gives a NumPy copy of it, typed as an array of
+    floats, on every device.
+
     :param c: Sound-speed map [m/s], shape ``(ny, nx)``. A scalar with an
         explicit ``shape`` is also accepted.
     :param dx: Grid spacing [m] (square cells).
@@ -1858,8 +1865,14 @@ class FDTD2D:
         self._rho_x = backend.asarray(rho_x)
         self._rho_y = backend.asarray(rho_y)
 
+        #: Pressure at the cell centres [Pa], shape ``(ny, nx)``, an array of
+        #: the backend: ``numpy_field("p")`` is its NumPy copy.
         self.p: _backends.DeviceArray = backend.zeros((ny, nx))
+        #: Particle velocity at the interior x-faces [m/s], shape
+        #: ``(ny, nx - 1)``, an array of the backend.
         self.vx: _backends.DeviceArray = backend.zeros((ny, nx - 1))
+        #: Particle velocity at the interior y-faces [m/s], shape
+        #: ``(ny - 1, nx)``, an array of the backend.
         self.vy: _backends.DeviceArray = backend.zeros((ny - 1, nx))
         self._div = backend.zeros((ny, nx))
         self._sources: list[Source] = []

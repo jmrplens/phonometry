@@ -95,7 +95,7 @@ function absolutize(text, fromRoute) {
     // would send a Spanish reader to the English documentation's root.
     .filter((line) => !/^← \[[^\]]*\]\((?:\.\.\/)*README\.md\)\s*$/.test(line))
     .join("\n")
-    .replace(/\]\(((?:\.\.\/)*[\w./-]+)\.md(#[\w-]+)?\)/g, (whole, target, anchor = "") => {
+    .replace(/\]\(((?:\.\.\/)*[\w./-]+)\.md(#[\w-]+)?\)/g, (_whole, target, anchor = "") => {
       const base = target.replace(/^.*\//, "");
       if (base === "README") return `](${SITE_URL}/${anchor})`;
       if (base === "CONTRIBUTING") {

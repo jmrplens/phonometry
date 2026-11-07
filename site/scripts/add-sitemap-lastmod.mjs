@@ -101,7 +101,7 @@ function stampSitemap(file) {
 	let changed = 0;
 	const out = xml.replace(/<url>[\s\S]*?<\/url>/g, (block) => {
 		if (block.includes("<lastmod>")) return block;
-		return block.replace(/<loc>([^<]+)<\/loc>/, (locMatch, loc) => {
+		return block.replace(/<loc>([^<]+)<\/loc>/, (_locMatch, loc) => {
 			changed++;
 			return `<loc>${loc}</loc><lastmod>${lastmodFor(loc)}</lastmod>`;
 		});

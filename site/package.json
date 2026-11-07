@@ -21,7 +21,7 @@
     "check:social-card-titles": "node scripts/check-social-card-titles.mjs",
     "check:social-cards": "node scripts/check-social-cards.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
-    "check:types": "astro check",
+    "check:types": "astro check --minimumFailingSeverity hint",
     "check:visual": "node scripts/with-preview.mjs -- sh -c 'node scripts/check-contrast.mjs && node scripts/check-home-headings.mjs && node scripts/check-lang-suggest.mjs && node scripts/check-page-chips.mjs && node scripts/check-reference-pages.mjs'",
     "dev": "astro dev",
     "html-validate": "html-validate 'dist/**/*.html'",

@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { docsLoader, i18nLoader } from '@astrojs/starlight/loaders';
 import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
 import { topicSchema } from 'starlight-sidebar-topics/schema';
@@ -15,7 +16,7 @@ const referenceBase = {
   /** Publication year. A string admits "n.d." and ranges such as "2016-2017". */
   year: z.union([z.number().int(), z.string().min(1)]).optional(),
   /** Canonical landing page (publisher catalogue, store record, project page). */
-  url: z.string().url().optional(),
+  url: z.url().optional(),
   /** Bare DOI, e.g. "10.1201/9781315372150". */
   doi: z
     .string()
@@ -117,7 +118,7 @@ const references = z
         !ref.organization
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: [i],
           message: `references[${i}] (${ref.type}) needs "authors" or "organization"`,
         });
@@ -126,7 +127,7 @@ const references = z
         const designated = ref.type === 'standard' || (ref.type === 'report' && Boolean(ref.number));
         if (!designated) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: [i, 'implemented'],
             message:
               `references[${i}] (${ref.type}) carries "implemented", which only a standard or a ` +
@@ -135,7 +136,7 @@ const references = z
         }
         if (ref.primary) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: [i],
             message: `references[${i}] is marked both "primary: true" and "implemented: false"`,
           });
@@ -228,7 +229,7 @@ const conformanceCheck = z
     for (const side of ['expected', 'computed'] as const) {
       if (check[side].value !== undefined && check[side].record !== undefined) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: [side],
           message: `${check.id}: a side is one number or a set of named ones, not both`,
         });
@@ -313,7 +314,7 @@ export const collections = {
         // registry's index outranks it on a search for the registry
         // (src/components/SearchWeight.astro).
         searchWeight: z.number().min(0).max(10).optional(),
-      }).merge(topicSchema),
+      }).extend(topicSchema.shape),
     }),
   }),
   i18n: defineCollection({

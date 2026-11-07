@@ -151,7 +151,7 @@ export const en: HomeContent = {
 	what: {
 		title: 'What this is',
 		body: [
-			'phonometry is a Python library for acoustic measurement, analysis and prediction. You give it a signal, a measured spectrum or a set of geometrical and material inputs; it gives you the quantity the standard defines, with the intermediate terms still visible.',
+			'phonometry (published as PyOctaveBand until 3.0.0) is a Python library for acoustic measurement, analysis and prediction. You give it a signal, a measured spectrum or a set of geometrical and material inputs; it gives you the quantity the standard defines, with the intermediate terms still visible.',
 			'Every result is a typed, frozen dataclass. It carries the inputs it was computed from, it draws its own figure with a one-line <code>.plot()</code> in English or Spanish, and where a standard defines a reporting format it renders a one-page PDF fiche with <code>.report()</code>.',
 			`It is written and maintained by one person, published under the MIT licence on <a href="https://pypi.org/project/phonometry/">PyPI</a>, archived with a <a href="https://doi.org/${DOI}">DOI on Zenodo</a>, and currently at version ${version}. It needs Python ${pythonFloor} or newer with NumPy and SciPy. Optional extras add the rest: <code>[plot]</code> for the figures, <code>[perf]</code> for the faster impulse ballistics, <code>[report]</code> for the PDF fiches, <code>[audio]</code> for the audio formats beyond uncompressed WAV, <code>[full]</code> for all four, and <code>[torch]</code>, outside <code>[full]</code>, for running the FDTD simulations on PyTorch.`,
 		],
@@ -327,7 +327,7 @@ export const es: HomeContent = {
 	what: {
 		title: 'Qué es',
 		body: [
-			'phonometry es una biblioteca de Python para medición, análisis y predicción acústica. Le das una señal, un espectro medido o un conjunto de datos geométricos y de materiales, y te devuelve la magnitud que define la norma, con los términos intermedios a la vista.',
+			'phonometry (publicada como PyOctaveBand hasta la 3.0.0) es una biblioteca de Python para medición, análisis y predicción acústica. Le das una señal, un espectro medido o un conjunto de datos geométricos y de materiales, y te devuelve la magnitud que define la norma, con los términos intermedios a la vista.',
 			'Cada resultado es un dataclass tipado y congelado (<code>frozen</code>). Conserva los datos de entrada con los que se calculó, dibuja su propia figura con un <code>.plot()</code> de una línea en inglés o en español y, cuando una norma define un formato de informe, genera una ficha PDF de una página con <code>.report()</code>.',
 			`La escribe y la mantiene una sola persona, se publica con licencia MIT en <a href="https://pypi.org/project/phonometry/">PyPI</a>, se archiva con <a href="https://doi.org/${DOI}">DOI en Zenodo</a> y va por la versión ${version}. Necesita Python ${pythonFloor} o posterior con NumPy y SciPy. Los extras opcionales añaden el resto: <code>[plot]</code> para las figuras, <code>[perf]</code> para acelerar la ponderación temporal de impulso, <code>[report]</code> para las fichas PDF, <code>[audio]</code> para los formatos de audio más allá del WAV sin comprimir, <code>[full]</code> para los cuatro, y <code>[torch]</code>, fuera de <code>[full]</code>, para calcular las simulaciones FDTD con PyTorch.`,
 		],

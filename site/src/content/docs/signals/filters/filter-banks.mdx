@@ -1,6 +1,6 @@
 ---
-title: "Filter Banks"
-description: "Fractional-octave band mathematics, the octave_filter parameters, the parametric EQ, band decomposition and zero-phase filtering."
+title: "Octave and Fractional-Octave Filter Banks"
+description: "Octave and fractional-octave band levels in Python: band mathematics, the octave_filter parameters, the parametric EQ, band signals and zero-phase filtering."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -45,6 +45,8 @@ references:
     siteName: "Center for Computer Research in Music and Acoustics (CCRMA), Stanford University"
     url: "https://ccrma.stanford.edu/~jos/filters/"
     note: "A free online-book companion treatment of digital-filter design and analysis, from pole-zero geometry to filter stability."
+sidebar:
+  label: "Filter Banks"
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -68,6 +70,15 @@ five architectures differ is
 [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/), and
 what "class 1" means for the result is
 [Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
+
+## How do I compute octave or one-third-octave band levels in Python?
+
+`result = filters.octave_filter(x, fs, fraction=3)` filters a signal `x`
+sampled at `fs` hertz into one-third-octave bands (`fraction=1` gives octaves):
+`result.levels` holds the level of each band in decibels and
+`result.frequencies` the exact mid-band frequency of each.
+[Section 2](#2-what-a-call-gives-back) calls it on a 1 kHz tone over noise
+and draws the spectrum the result holds.
 
 ## 1. Fractional octave bands: the math
 
@@ -662,6 +673,29 @@ plt.show()
 ```
 
 </details>
+
+## Coming from PyOctaveBand
+
+phonometry was published as PyOctaveBand until 3.0.0, and this filter bank is
+where that package began. Code written for it changes in these places:
+
+| PyOctaveBand | phonometry 4.0 |
+| --- | --- |
+| `from pyoctaveband import octavefilter` | `from phonometry import filters` |
+| `spl, freq = octavefilter(x, fs, fraction=3)` | `result = filters.octave_filter(x, fs, fraction=3)`, then `result.levels` and `result.frequencies` |
+| `spl, freq, xb = octavefilter(x, fs, fraction=3, sigbands=True)` | the same call with `sigbands=True`, then `result.bands` for the band signals |
+| `spl, freq = bank.filter(x)` on an `OctaveFilterBank` | `result = bank.filter(x)`, read the same way |
+| `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)` | `bands = filters.nominal_frequencies(3)`, then `bands.frequencies`, `bands.lower_edges`, `bands.upper_edges` and `bands.labels` |
+| `normalizedfreq(3)` | `filters.normalized_frequencies(3)` |
+| `filter_type=`, `ripple=`, `attenuation=` | `design=filters.FilterDesign(filter_type=..., ripple=..., attenuation=...)` |
+| `calibration_factor=`, `dbfs=` | `calibration=filters.LevelCalibration(factor=..., dbfs=...)` |
+| `show=`, `plot_file=` | `response_plot=filters.ResponsePlot(show=..., file=...)` |
+
+The transition package `pyoctaveband` pins `phonometry>=3.0.0,<4`, so
+`import pyoctaveband` works on 3.x only: code moves to the names above by
+changing its import, not by updating that package.
+[Upgrading](/phonometry/start/upgrading/) lists every other change between the
+two.
 
 ## What this guide covers
 

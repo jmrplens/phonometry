@@ -1727,11 +1727,13 @@ def test_a_method_a_class_inherits_comes_from_its_method_resolution_order(
     order that defines it, and ``super()`` from the first after it:
     ``Shown(_Left, _Right)``, both on ``_Base``, resolves ``_Left, _Right,
     _Base``, so its ``plot`` and the one ``Relayed``'s ``super()`` reaches
-    are ``_Right.plot``, which takes the language.
+    are ``_Right.plot``, which takes the language. An attribute's class is
+    read the same way: ``Holder``'s ``result`` is the ``Shown`` that
+    ``_HoldsRight`` annotates, not the ``_Plain`` of ``_Holds``.
 
     The bases were looked up depth first, ``_Left`` then its own base, and
-    ``super()`` read the first base alone, so both reached ``_Base.plot``,
-    which takes none, and the two calls that drop the language passed.
+    ``super()`` read the first base alone, so the three calls reached a
+    ``plot`` that takes no language, and passed.
     """
     found = _dropped(
         tmp_path,
@@ -1763,20 +1765,47 @@ def test_a_method_a_class_inherits_comes_from_its_method_resolution_order(
                     return super().plot(ax)
 
 
+            class _Plain:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Holds:
+                result: _Plain
+
+
+            class _HoldsLeft(_Holds):
+                pass
+
+
+            class _HoldsRight(_Holds):
+                result: Shown
+
+
+            class Holder(_HoldsLeft, _HoldsRight):
+                pass
+
+
             def shown() -> Shown:
                 return Shown()
+
+
+            def holder() -> Holder:
+                return Holder()
             """,
             "pkg.plots": """
-            from .results import shown
+            from .results import holder, shown
 
 
             def figure(ax, language="en"):
                 shown().plot(ax)
+                holder().result.plot(ax)
             """,
         },
     )
     assert sorted((f.path, f.line, f.caller, f.helper) for f in found) == [
         ("pkg/plots.py", 6, "figure", "pkg.results._Right.plot"),
+        ("pkg/plots.py", 7, "figure", "pkg.results._Right.plot"),
         ("pkg/results.py", 25, "Relayed.plot", "pkg.results._Right.plot"),
     ]
 

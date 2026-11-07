@@ -1538,11 +1538,13 @@ __all__ = [
     "Diamond",
     "Hidden",
     "Kinded",
+    "Plain",
     "Relayed",
     "checked",
     "diamond",
     "hidden",
     "kinded",
+    "plain",
     "relayed",
 ]
 
@@ -1616,6 +1618,10 @@ class Hidden(_Unset):
     def __post_init__(self) -> None:
         object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
 
+class Plain(_Count, _Height):
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
 def diamond(n_positions: int) -> Diamond:
     return Diamond(n_positions, 1.0)
 
@@ -1630,6 +1636,9 @@ def kinded(n_positions: int) -> Kinded:
 
 def hidden(n_positions: int) -> Hidden:
     return Hidden(n_positions)
+
+def plain(n_positions: int) -> Plain:
+    return Plain(n_positions)
 """
 
 
@@ -1645,13 +1654,16 @@ def test_a_record_reads_its_bases_in_its_method_resolution_order(
     ``_Base``, runs the ``__post_init__`` of ``_Checking``, and so does the
     ``super()`` of ``Relayed``. A ``ClassVar`` and a field the constructor
     does not take hold their place: a field a later class writes of the name
-    takes it, before the fields after it.
+    takes it, before the fields after it. A class that is no record takes
+    the constructor of the first record of its order: ``Plain(_Count,
+    _Height)`` takes ``n_positions`` alone.
 
     Each base's own order was read whole, the last base's first, so
-    ``Diamond`` read ``height_m, n_positions``; the bases were looked up
-    depth first, so ``Checked`` and ``Relayed`` ran the ``__post_init__`` of
-    ``_Base``, which validates nothing; and the ``ClassVar`` and the field
-    left out held no place: the five counts passed as ``int``.
+    ``Diamond`` read ``height_m, n_positions`` and ``Plain`` the fields of
+    both its bases; the bases were looked up depth first, so ``Checked``
+    and ``Relayed`` ran the ``__post_init__`` of ``_Base``, which validates
+    nothing; and the ``ClassVar`` and the field left out held no place: the
+    six counts passed as ``int``.
     """
     refused = _refused(
         tmp_path,
@@ -1678,6 +1690,10 @@ def test_a_record_reads_its_bases_in_its_method_resolution_order(
         "hidden(n_positions)": [
             "annotated int, which refuses np.integer[Any], while handed to "
             "Hidden(n_positions), require_count() takes it"
+        ],
+        "plain(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Plain(n_positions), require_count() takes it"
         ],
     }
 
@@ -1752,11 +1768,12 @@ def test_an_argument_past_the_named_parameters_reaches_the_vararg(
 ) -> None:
     """An argument written past a function's named positional parameters,
     or after a ``*`` argument, may land in its ``*args``: the count handed
-    to ``_counted(1.0, n)`` or ``_counted(*head, n)`` is one of the
-    ``counts`` it validates.
+    to ``_counted(1.0, 0.0, n)`` or ``_counted(*head, n)`` is one of the
+    ``counts`` it validates, the second though it is written in the place of
+    ``offset``.
 
     A position was read against the named parameters alone, so both counts
-    fell out of the call and passed as ``int``.
+    fell out of the call or into a float, and passed as ``int``.
     """
     refused = _refused(
         tmp_path,
@@ -1767,14 +1784,14 @@ def test_an_argument_past_the_named_parameters_reaches_the_vararg(
 
             __all__ = ["after_a_star", "past_the_places"]
 
-            def _counted(scale: float, *counts: int) -> int:
+            def _counted(scale: float, offset: float, *counts: int) -> int:
                 total = 0
                 for count in counts:
                     total += require_count(count, "count")
                 return total
 
             def past_the_places(n: int) -> int:
-                return _counted(1.0, n)
+                return _counted(1.0, 0.0, n)
 
             def after_a_star(n: int, head: tuple[float, ...] = (1.0,)) -> int:
                 return _counted(*head, n)
@@ -1807,9 +1824,12 @@ _PREFIX: tuple[str, ...] = ()
 def _hold(record: object, name: str) -> None:
     require_count(getattr(record, name), name)
 
-def _store(record: object, *names: str) -> None:
+def _store(record: object, unit: str = "", scale: float = 1.0, *names: str) -> None:
     for name in names:
         object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+def _store_one(record: object, name: str) -> None:
+    object.__setattr__(record, name, require_count(getattr(record, name), name))
 
 @dataclass(frozen=True)
 class Meter:
@@ -1831,9 +1851,11 @@ class Held:
 @dataclass(frozen=True, kw_only=True)
 class Stored:
     ix: int
+    iy: int
 
     def __post_init__(self) -> None:
         _store(*_PREFIX, self, "ix")
+        _store_one(*_PREFIX, self, "iy")
 
 def run(sources: Sequence[Stored]) -> None:
     return None
@@ -1847,11 +1869,13 @@ def test_a_field_handed_by_name_after_a_star_is_followed_and_stored(
     fill any parameter from the star's place on, or the vararg:
     ``self._check(*_PREFIX, "n_positions")`` hands the field to ``name``,
     ``_hold(*_PREFIX, self, "n_positions")`` hands the record to ``record``
-    and the field to ``name``, and ``_store(*_PREFIX, self, "ix")`` stores
-    in ``ix`` what the validator returns.
+    and the field to ``name``, and ``_store(*_PREFIX, self, "ix")`` and
+    ``_store_one(*_PREFIX, self, "iy")`` store in ``ix`` and ``iy`` what the
+    validator returns, the name reaching ``names`` from the place of
+    ``scale`` and ``name`` from that of ``record``.
 
     The readers by name read each at its written place, past the star, so
-    the first two counts passed as ``int`` and the stored field was not
+    the first two counts passed as ``int`` and the stored fields were not
     seen stored.
     """
     root = _package(
@@ -1861,12 +1885,13 @@ def test_a_field_handed_by_name_after_a_star_is_followed_and_stored(
     reader = cpa.Reader(
         overloads.Package(sorted(root.rglob("*.py")), root), handed_on=frozenset()
     )
-    assert cpa.converted_fields(reader, "pkg.api.Stored") == {"ix"}
+    assert cpa.converted_fields(reader, "pkg.api.Stored") == {"ix", "iy"}
     found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
     assert sorted((f.function, f.parameter, f.constructor) for f in found) == [
         ("Held", "n_positions", False),
         ("Meter", "n_positions", False),
         ("Stored", "ix", True),
+        ("Stored", "iy", True),
     ]
     by_key = {(f.function, f.parameter): f.problem for f in found}
     assert by_key["Meter", "n_positions"] == (
@@ -1880,6 +1905,10 @@ def test_a_field_handed_by_name_after_a_star_is_followed_and_stored(
     assert by_key["Stored", "ix"].startswith(
         "annotated int, which refuses np.integer[Any], while handed by name "
         "to _store(names), require_count() takes it"
+    )
+    assert by_key["Stored", "iy"].startswith(
+        "annotated int, which refuses np.integer[Any], while handed by name "
+        "to _store_one(name), require_count() takes it"
     )
 
 

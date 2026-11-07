@@ -126,8 +126,8 @@ if TYPE_CHECKING:
     from matplotlib.image import AxesImage
     from numpy.typing import NDArray
 
-    from ..io._video import VideoOptions, VideoRequest
-    from ..io._video_encoders import EncoderChoice, FFmpeg, VideoEncoderError
+    from .._internal.video import VideoOptions, VideoRequest
+    from .._internal.video_encoders import EncoderChoice, FFmpeg, VideoEncoderError
     from ._backends import Backend, DeviceArray
     from ._remote.client import RemoteFunction
     from .compute import RunProvenance
@@ -358,7 +358,12 @@ def _preflight(request: VideoRequest, size: tuple[int, int]) -> _Encoding:
     :raises VideoEncoderError: when it does not run, has no encoder that
         writes this video at this size, or lacks the encoder the caller named.
     """
-    from ..io._video_encoders import VideoEncoderError, choose, describe, find_ffmpeg
+    from .._internal.video_encoders import (
+        VideoEncoderError,
+        choose,
+        describe,
+        find_ffmpeg,
+    )
 
     options = request.video
     ffmpeg = describe(find_ffmpeg())
@@ -552,8 +557,8 @@ def _render(
     from matplotlib import style
     from matplotlib.animation import FuncAnimation
 
+    from .._internal.video import encode
     from .._plot import simulation as plot
-    from ..io._video import encode
 
     fps = _DEFAULT_FPS if request.video.fps is None else request.video.fps
     with contextlib.closing(frames), style.context("default"):
@@ -635,7 +640,7 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
     :raises FileNotFoundError: when the directory of *path* does not exist
         or cannot be reached.
     """
-    from ..io._video import video_options, video_request
+    from .._internal.video import video_options, video_request
 
     checked = _require_run(run, kind)
     drawn = _frame_or_default(frame)
@@ -723,7 +728,7 @@ def _encoding_here[R: (FDTDRun, ElasticRun)](call: _CheckedCall[R]) -> _Encoding
     :raises VideoEncoderError: when it does not run, has no encoder that
         writes this video, or the directory of ``path`` does not take a file.
     """
-    from ..io._video import require_writable
+    from .._internal.video import require_writable
 
     encoding = _preflight(call.request, call.drawn.size)
     require_writable(call.request)
@@ -752,7 +757,7 @@ class _PartialFile:
     """The hidden file beside ``path`` a node's video goes into, before it takes ``path``'s place.
 
     It is made as the video written here makes its own
-    (:func:`~phonometry.io._video.made_partial`): readable by its owner alone
+    (:func:`~phonometry._internal.video.made_partial`): readable by its owner alone
     where it replaces a file, before any byte goes in, and given the old
     file's bits by :meth:`keep_bits` once whole. A failure of this machine's
     disk, to create the file, to write the bytes or to close it (a directory
@@ -770,12 +775,12 @@ class _PartialFile:
         self._made = False
 
     def _failure(self, exc: OSError) -> VideoEncoderError:
-        from ..io._video import disk_failure
+        from .._internal.video import disk_failure
 
         return disk_failure(self._target, exc)
 
     def _opened(self) -> BinaryIO:
-        from ..io._video import made_partial
+        from .._internal.video import made_partial
 
         if self._handle is None:
             try:
@@ -828,7 +833,7 @@ class _PartialFile:
 
         :raises VideoEncoderError: when the disk refuses either.
         """
-        from ..io._video import keep_bits
+        from .._internal.video import keep_bits
 
         keep_bits(self.path, self._target, self._mode)
 
@@ -875,8 +880,8 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
         instead, after :func:`~._remote.client.run_remote` raised the one
         :class:`ComputeFallbackWarning`.
     """
-    from ..io._video import settle
-    from ..io._video_encoders import VideoEncoderError
+    from .._internal.video import settle
+    from .._internal.video_encoders import VideoEncoderError
     from ._remote.client import ArraySpec, Expected, StreamSpec, run_remote
     from ._video_job import CONTAINER_HEADS, video_byte_cap
 

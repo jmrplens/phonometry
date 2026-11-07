@@ -40,6 +40,13 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.air_absorption import (
+    _EIGHT_686,
+    _KELVIN,
+    _exact_midband,
+    _pure_tone_terms,
+    _validate,
+)
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     real_array,
@@ -50,13 +57,6 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
-)
-from ..environment.propagation.air_absorption import (
-    _EIGHT_686,
-    _KELVIN,
-    _exact_midband,
-    _pure_tone_terms,
-    _validate,
 )
 from .certification import NOY_BANDS_HZ
 

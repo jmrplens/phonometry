@@ -225,7 +225,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
     base-ten values behind them, so the per-band table is labelled with the
     nominal frequency (125 Hz, not the exact 125.89... Hz).
     """
-    from ..filters.frequencies import _nominal_freq_for_band
+    from .._internal.bands import _nominal_freq_for_band
 
     nominal = _nominal_freq_for_band(exact_freq, real_number(fraction, "fraction"))
     if nominal >= _HZ_PER_KHZ:

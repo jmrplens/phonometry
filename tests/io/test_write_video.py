@@ -433,7 +433,7 @@ def test_an_interrupt_once_the_video_is_finished_leaves_no_partial_file(
     Only the rename's own refusal keeps the finished file, at the name its
     message gives; an interrupt there left it under its hidden name.
     """
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     target = tmp_path / "kept.webm"
@@ -475,7 +475,7 @@ def test_a_video_left_at_its_partial_name_is_named_by_its_escapes(
     tmp_path: Path, mark: str
 ) -> None:
     """The partial file is named after the caller's file, so it is escaped as that name is."""
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     path = tmp_path / f"w{mark}.webm"
     partial = tmp_path / f".w{mark}.webm.0123.partial"
@@ -494,8 +494,8 @@ def test_what_ffmpeg_wrote_is_quoted_with_its_unprintable_characters_escaped(
     tmp_path: Path,
 ) -> None:
     """ffmpeg names the file it writes as it was given, the caller's name in it."""
-    from phonometry.io import _video as pipe_module
-    from phonometry.io._video_encoders import FFmpeg
+    from phonometry._internal import video as pipe_module
+    from phonometry._internal.video_encoders import FFmpeg
 
     request = pipe_module.video_request(tmp_path / "w.webm", io.VideoOptions())
     ffmpeg = FFmpeg(path="ffmpeg", version="", encoders=frozenset())
@@ -518,7 +518,7 @@ def test_what_ffmpeg_wrote_is_quoted_with_its_unprintable_characters_escaped(
 
 
 def test_two_writes_to_one_path_never_share_a_partial_file(tmp_path: Path) -> None:
-    from phonometry.io._video import video_request
+    from phonometry._internal.video import video_request
 
     request = video_request(tmp_path / "w.webm", io.VideoOptions())
     first, second = request.new_partial(), request.new_partial()
@@ -533,8 +533,8 @@ def test_two_writes_to_one_path_never_share_a_partial_file(tmp_path: Path) -> No
 def test_an_ffmpeg_that_cannot_be_started_is_an_encoder_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from phonometry.io import _video as pipe_module
-    from phonometry.io import _video_encoders as ve
+    from phonometry._internal import video as pipe_module
+    from phonometry._internal import video_encoders as ve
 
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
     described = ve.describe(str(fake.launcher))
@@ -559,8 +559,8 @@ def test_the_pipe_starts_ffmpeg_without_a_console_window(
 ) -> None:
     import subprocess
 
-    from phonometry.io import _video as pipe_module
-    from phonometry.io import _video_encoders as ve
+    from phonometry._internal import video as pipe_module
+    from phonometry._internal import video_encoders as ve
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     seen: list[object] = []
@@ -634,7 +634,7 @@ def test_ffmpeg_is_known_while_it_encodes_and_forgotten_once_it_exits(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """The ffmpeg of a video is tracked from its start until it has exited, whether it finished or failed."""
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
     running: list[int] = []
@@ -656,7 +656,7 @@ def test_stopping_the_running_encoders_ends_each_of_them(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """What a process about to end at once calls: every ffmpeg still running is stopped, and waited for."""
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     # Stands for an ffmpeg that has its last frame and goes on encoding.
     encoder = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
@@ -672,7 +672,7 @@ def test_stopping_the_running_encoders_ends_each_of_them(
 def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recwarn: pytest.WarningsRecorder
 ) -> None:
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     class Unstartable(threading.Thread):
         def start(self) -> None:
@@ -702,7 +702,7 @@ def test_an_interrupt_before_the_reader_starts_stops_ffmpeg(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recwarn: pytest.WarningsRecorder
 ) -> None:
     """An interrupt between ffmpeg's start and its reader's reaches the caller, and stops ffmpeg."""
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     class Interrupted(threading.Thread):
         def start(self) -> None:
@@ -735,7 +735,7 @@ def test_an_interrupt_as_the_reader_starts_never_closes_its_pipe_under_it(
     then waited for, or before the reader is scheduled, which then finds its
     pipe closed and stops.
     """
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     entered, go = threading.Event(), threading.Event()
     readers: list[threading.Thread] = []
@@ -786,8 +786,8 @@ def test_the_last_words_are_copied_whole_while_the_reader_still_reads(
     ffmpeg is stopped, so the reader may still be appending a line while
     the error copies the last ones.
     """
-    from phonometry.io import _video as pipe_module
-    from phonometry.io._video_encoders import FFmpeg
+    from phonometry._internal import video as pipe_module
+    from phonometry._internal.video_encoders import FFmpeg
 
     first_in, released, late_in = (
         threading.Event(),
@@ -899,7 +899,7 @@ def test_an_interrupt_while_ffmpeg_finishes_stops_it(
     The interrupt reaches the caller as it is, ffmpeg is stopped rather than
     left writing, and no hidden file is left beside the path.
     """
-    from phonometry.io import _video as pipe_module
+    from phonometry._internal import video as pipe_module
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     aborted: list[bool] = []
@@ -1064,7 +1064,7 @@ def test_a_bad_path_or_combination_starts_nothing(
 def test_an_encoder_that_writes_a_codec_the_container_holds_is_accepted(
     tmp_path: Path, name: str, video: io.VideoOptions
 ) -> None:
-    from phonometry.io._video import video_request
+    from phonometry._internal.video import video_request
 
     assert video_request(tmp_path / name, video).video is video
 
@@ -1173,7 +1173,7 @@ def test_a_partial_file_the_directory_will_not_make_starts_no_ffmpeg(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """The file is made before ffmpeg starts, and its refusal names the path."""
-    from phonometry.io import _video
+    from phonometry._internal import video as _video
 
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
     target = tmp_path / "clip.webm"
@@ -1198,7 +1198,7 @@ def test_a_disk_that_refuses_the_finished_video_s_bits_leaves_what_was_there(
     """The old file's bits are given and the video flushed before the rename;
     a disk that refuses either is the write's failure, naming the path.
     """
-    from phonometry.io import _video
+    from phonometry._internal import video as _video
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     target = tmp_path / "clip.webm"

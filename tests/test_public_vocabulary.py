@@ -730,7 +730,7 @@ class _Module:
 _SHARED_HELPER_MODULES = (
     "phonometry._internal.validation",
     "phonometry._internal.utils",
-    "phonometry.io._resolve",
+    "phonometry._internal.resolve",
 )
 
 

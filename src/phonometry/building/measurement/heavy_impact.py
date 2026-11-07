@@ -104,6 +104,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 from ..._internal.validation import (
     real_array,
     require_band_fraction,
@@ -114,7 +115,6 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -445,7 +445,7 @@ def impact_force_exposure_level(
     """
     rate = resolve_fs(force_n, fs, name="force_n")
     # calibrate=False: a Signal may carry a digital-to-pascal factor and
-    # this record is a force in newtons. See phonometry.io._resolve.
+    # this record is a force in newtons. See phonometry._internal.resolve.
     f = require_finite_array(
         resolve_samples(force_n, calibrate=False, name="force_n"), "force_n"
     )

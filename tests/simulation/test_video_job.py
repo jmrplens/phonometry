@@ -24,8 +24,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
 from phonometry import io
+from phonometry._internal.video_encoders import FFMPEG_NAMES, describe
 from phonometry.io import VideoOptions
-from phonometry.io._video_encoders import FFMPEG_NAMES, describe
 from phonometry.simulation import (
     FDTD2D,
     AnimationFrame,
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
     from matplotlib.image import FigureImage
 
-    from phonometry.io._video_encoders import Container
+    from phonometry._internal.video_encoders import Container
 
 #: The ``src`` this test module belongs to, so a subprocess imports the code
 #: under test and not whatever an editable install points at.

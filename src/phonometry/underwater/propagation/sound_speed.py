@@ -15,13 +15,17 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+
+# Imported to run, not only to type: typing.get_type_hints resolves the
+# model field of SoundSpeedProfile in this module's namespace.
+from ..._internal.types import SoundSpeedModel  # noqa: TC001
 from ..._internal.validation import (
     real_array,
     require_above_absolute_zero_array,
     require_ranks,
     require_same_length,
 )
-from ...fluids.water import SoundSpeedModel, sea_water_sound_speed
+from ...fluids import sea_water_sound_speed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

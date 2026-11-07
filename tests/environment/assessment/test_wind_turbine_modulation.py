@@ -24,8 +24,8 @@ import pytest
 from reference_data import wind_turbine_receptor as ref
 
 from phonometry import environment as env
+from phonometry._internal import weighting_tables
 from phonometry.environment.assessment import wind_turbine_modulation as wtm
-from phonometry.filters import weighting_compliance
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -251,7 +251,7 @@ def test_already_weighted_bands_are_summed_without_weighting_again() -> None:
 
 
 def test_the_a_weighting_is_iec_61672_table_3() -> None:
-    table = {row[0]: row[1] for row in weighting_compliance._WEIGHTING_TABLE3}
+    table = {row[0]: row[1] for row in weighting_tables.WEIGHTING_TABLE3}
     for frequency, value in wtm._A_WEIGHTING_DB.items():
         assert table[frequency] == pytest.approx(value)
 

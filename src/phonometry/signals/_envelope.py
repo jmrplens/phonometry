@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import like_input, require_signal_rate, resolve_fs
 from .._internal.types import own_window
 from .._internal.validation import (
     real_array,
@@ -65,8 +66,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import like_input, require_signal_rate, resolve_fs
-from .spectra import _positive, _validate_signal
+from .._internal.welch import _positive, _validate_signal
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -75,8 +75,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import TwoPanels, WindowSpec
-    from ..io._signal import Signal
 
 Kind = Literal["magnitude", "squared"]
 

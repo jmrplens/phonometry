@@ -9,12 +9,14 @@ import numpy as np
 import pytest
 
 from phonometry import filters
-from phonometry.filters.frequencies import (
+from phonometry._internal.bands import (
     _extended_preferred,
-    _format_nominal_freq,
     _iec_e3_round,
-    _infer_band_fraction,
     _nominal_freq_for_band,
+)
+from phonometry.filters.frequencies import (
+    _format_nominal_freq,
+    _infer_band_fraction,
     nominal_frequencies,
 )
 
@@ -240,7 +242,7 @@ def test_annex_e34_worked_rounding_examples() -> None:
     """
     from reference_data import IEC61260_E34_EXAMPLES
 
-    from phonometry.filters.frequencies import _iec_e3_round
+    from phonometry._internal.bands import _iec_e3_round
 
     for raw, printed in IEC61260_E34_EXAMPLES:
         assert _iec_e3_round(raw) == printed

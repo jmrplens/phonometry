@@ -102,7 +102,8 @@ from numpy.lib.stride_tricks import sliding_window_view
 from scipy import signal
 from scipy.interpolate import PchipInterpolator
 
-from ...io._resolve import apply_calibration, resolve_fs
+from ..._internal.loudness_statistics import FLUCTUATION_SETTLING_FRAMES
+from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -111,8 +112,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.signal import Signal
     from ..._internal.types import TwoPanels
-    from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
@@ -148,7 +149,6 @@ _DELTA_F = _R_TILDE / _SB_TILDE  # 0.7324 Hz DFT resolution
 _N_K = 49  # DFT bins k = 0..48 used for the HSA (Clause 9.1.4)
 _R_S50 = 50.0  # interpolated rate r_s50 (Clause 9.1.11)
 _DZ = 0.5  # critical-band overlap dz (Clause 9.1.13)
-_TRANSIENT = 36  # discard l50 in [0, 35] (Clause 9.1.12/9.1.14)
 _MIN_INTERP_BLOCKS = 2  # fewest block-time knots pchip can interpolate (9.1.11)
 _TAU = 0.75  # smoothing time constant tau (Formula 168) [s]
 
@@ -945,10 +945,18 @@ def _aggregate(
     f_time: np.ndarray,
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """F'(z), F(l50) and the single value F (Clauses 9.1.12-9.1.14)."""
-    kept = f_time[_TRANSIENT:] if f_time.shape[0] > _TRANSIENT else f_time
+    kept = (
+        f_time[FLUCTUATION_SETTLING_FRAMES:]
+        if f_time.shape[0] > FLUCTUATION_SETTLING_FRAMES
+        else f_time
+    )
     f_spec = np.mean(kept, axis=0) if kept.shape[0] else np.zeros(_CBF)
     f_vs_time = _DZ * np.sum(f_time, axis=1)  # Formula 169
-    kept_time = f_vs_time[_TRANSIENT:] if f_vs_time.size > _TRANSIENT else f_vs_time
+    kept_time = (
+        f_vs_time[FLUCTUATION_SETTLING_FRAMES:]
+        if f_vs_time.size > FLUCTUATION_SETTLING_FRAMES
+        else f_vs_time
+    )
     f_single = float(np.percentile(kept_time, 90)) if kept_time.size else 0.0
     return f_single, np.asarray(f_spec, dtype=np.float64), f_vs_time
 

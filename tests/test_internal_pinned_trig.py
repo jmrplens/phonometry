@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The pinned ``sin``, ``tan``, ``atan`` and ``hypot`` are correctly rounded.
 
-``_pinned_trig`` answers with the double nearest the exact value, which has
+``pinned_trig`` answers with the double nearest the exact value, which has
 one definition and no platform in it. These tests hold it to that on inputs
 where glibc itself is not correctly rounded (the values were computed at 400
 bits with an independent arbitrary-precision library), check ``hypot`` against
@@ -29,8 +29,8 @@ from trig_oracle import (
     is_correctly_rounded_tangent,
 )
 
-from phonometry.filters import _pinned_trig, _weighting_design
-from phonometry.filters._pinned_trig import (
+from phonometry._internal import pinned_trig
+from phonometry._internal.pinned_trig import (
     _atan_scalar,
     _fixed_argument,
     _hypot_scalar,
@@ -42,6 +42,7 @@ from phonometry.filters._pinned_trig import (
     pinned_sin,
     pinned_tan,
 )
+from phonometry.filters import _weighting_design
 from phonometry.filters.weighting import (
     _analog_weighting_zpk,
     _fit_band,
@@ -464,7 +465,7 @@ def test_a_spent_precision_budget_is_refused_rather_than_guessed(
     The budget is never spent in practice, since 1200 bits decide every
     double these routines take; the refusal is what stands behind that.
     """
-    monkeypatch.setattr(_pinned_trig, "_LAST_PRECISION", 0)
+    monkeypatch.setattr(pinned_trig, "_LAST_PRECISION", 0)
     with pytest.raises(ArithmeticError, match=rf"pinned {name} could not round"):
         routine(0.5)  # type: ignore[operator]
 
@@ -478,7 +479,7 @@ def test_a_first_pass_too_short_to_decide_hands_over_to_a_longer_one(
     """Started at four bits, every routine doubles its way to the same double."""
     arguments = [0.5, 1.25, -2.75, 3.0e-5, 1000.5]
     expected = [routine(x) for x in arguments]  # type: ignore[operator]
-    monkeypatch.setattr(_pinned_trig, "_FIRST_PRECISION", 4)
+    monkeypatch.setattr(pinned_trig, "_FIRST_PRECISION", 4)
     got = [routine(x) for x in arguments]  # type: ignore[operator]
     assert [v.hex() for v in got] == [v.hex() for v in expected]
 

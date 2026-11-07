@@ -111,6 +111,8 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.kernels import compiled
+from .._internal.resolve import SignalInput, resolve_fs, resolve_samples
+from .._internal.signal import Signal
 from .._internal.validation import (
     real_number,
     require_1d_signal,
@@ -119,10 +121,8 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
 )
-from ..filters.weighting import weighting_filter
-from ..io._resolve import SignalInput, resolve_fs, resolve_samples
-from ..io._signal import Signal
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..filters import weighting_filter
+from ..metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -694,7 +694,7 @@ def _burst_percent(
     :param ballistics: The three time constants of the chain.
     :return: The reading, in percent of the steady 5 kHz reading.
     """
-    from ..signals._test_signals import tone_burst
+    from ..signals import tone_burst
 
     burst = tone_burst(
         fs,

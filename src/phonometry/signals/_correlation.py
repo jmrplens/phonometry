@@ -57,6 +57,13 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import (
+    like_input,
+    require_signal_rate,
+    resolve_fs,
+    resolve_pair_fs,
+)
+from .._internal.signal import Signal
 from .._internal.validation import (
     real_number,
     require_choice,
@@ -66,22 +73,15 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import (
-    like_input,
-    require_signal_rate,
-    resolve_fs,
-    resolve_pair_fs,
-)
-from ..io._signal import Signal
-from ._test_signals import _fractional_advance
-from .spectra import (
-    _coherence_from_spectra,
+from .._internal.welch import (
     _noverlap_samples,
     _positive,
     _validate_signal,
     _validate_welch_params,
     _welch_pair,
 )
+from ._test_signals import _fractional_advance
+from .spectra import _coherence_from_spectra
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

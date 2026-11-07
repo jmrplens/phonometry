@@ -10,9 +10,9 @@ from pathlib import Path
 import pytest
 
 from phonometry import io
-from phonometry.io import _video_encoders as ve
-from phonometry.io._video import video_request
-from phonometry.io._video_quality import GIF_PALETTE
+from phonometry._internal import video_encoders as ve
+from phonometry._internal.video import video_request
+from phonometry._internal.video_quality import GIF_PALETTE
 from phonometry.simulation import (
     AnimationFrame,
     _video_job,

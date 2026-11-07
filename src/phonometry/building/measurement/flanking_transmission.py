@@ -76,6 +76,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.bands import _OCTAVE_SPACING_MIN_RATIO
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
@@ -88,7 +89,6 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...filters.frequencies import _OCTAVE_SPACING_MIN_RATIO
 from .ratings import (
     ImpactRatingResult,
     WeightedRatingResult,

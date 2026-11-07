@@ -563,7 +563,7 @@ def _chk_iso3382_1_third_octave_mid() -> Outcome:
 
 def _nominal_third_octave(centre: float) -> float:
     """The nominal one-third-octave centre nearest an exact band centre."""
-    from phonometry.filters.frequencies import _nominal_freq_for_band
+    from phonometry._internal.bands import _nominal_freq_for_band
 
     return float(_nominal_freq_for_band(centre, 3.0))
 
@@ -1357,7 +1357,7 @@ def _chk_iso10140_1_curing_example() -> Outcome:
     "frequencies of the nominal bands, to 0,1 dB",
 )
 def _chk_iso10140_1_table_k2() -> Outcome:
-    from phonometry.filters.weighting_compliance import _analytic_weighting_db
+    from phonometry._internal.weighting_tables import _analytic_weighting_db
 
     # The library's IEC 61672-1:2013 Annex E design goal at the exact base-ten
     # midband frequency of each nominal band (100 Hz is band 20), rounded to

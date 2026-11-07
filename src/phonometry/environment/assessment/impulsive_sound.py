@@ -65,6 +65,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -77,8 +78,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning, warn_caller
-from ...io._resolve import SignalInput, resolve_fs, resolve_samples
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     import os
@@ -746,7 +746,7 @@ def sound_pressure_level_history(
         an ``x`` that is not one channel (a 1-D series).
     :raises TypeError: if ``dt`` or ``fs`` is not a single number.
     """
-    from ...filters.weighting import time_weighting, weighting_filter
+    from ...filters import time_weighting, weighting_filter
 
     fs = resolve_fs(x, fs, name="x")
     x = require_1d_signal(resolve_samples(x, name="x"), "x")
@@ -796,7 +796,7 @@ def _equivalent_level(
     calibration_offset: float,
 ) -> float:
     """A-weighted equivalent continuous level ``LAeq`` of the interval, in dB."""
-    from ...filters.weighting import weighting_filter
+    from ...filters import weighting_filter
 
     weighted = np.asarray(weighting_filter(signal, fs, weighting="A"), dtype=np.float64)
     mean_square = float(np.mean(weighted**2))

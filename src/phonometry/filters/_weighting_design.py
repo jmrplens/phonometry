@@ -100,17 +100,17 @@ output:
   and the Windows runtime each round a fraction of inputs differently, and
   the fit amplifies the difference), for routines spelled in arithmetic IEEE
   754 pins: ``log`` and ``log10`` in
-  :mod:`~phonometry.filters._pinned_log`, ``exp`` and ``pow`` in
-  :mod:`~phonometry.filters._pinned_exp` (both glibc's own routines, bit for
+  :mod:`~phonometry._internal.pinned_log`, ``exp`` and ``pow`` in
+  :mod:`~phonometry._internal.pinned_exp` (both glibc's own routines, bit for
   bit), and ``sin``, ``tan``, ``atan`` and the magnitude of a complex root,
-  correctly rounded, in :mod:`~phonometry.filters._pinned_trig`. No routine
+  correctly rounded, in :mod:`~phonometry._internal.pinned_trig`. No routine
   of the C library is left in the fit; :func:`_scalar_arctan` says what the
   last of them cost. No library step is left after it either: the
   second-order sections SciPy's ``zpk2sos`` formed through the BLAS, pairing
   roots by numpy's complex magnitude, are :func:`second_order_sections`, and
   the BS.468-4 prototype's poles, which ``numpy.roots`` took from LAPACK, are
   the correctly rounded roots of
-  :mod:`~phonometry.filters._pinned_roots`. What is left of ``numpy`` on the
+  :mod:`~phonometry._internal.pinned_roots`. What is left of ``numpy`` on the
   path is arithmetic IEEE 754 pins, and ``sqrt``, which the standard
   correctly rounds and which does not move.
 
@@ -152,6 +152,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .._internal.pinned_complex import complex_product, complex_quotient
+from .._internal.pinned_exp import pinned_exp, pinned_pow
+from .._internal.pinned_log import pinned_log, pinned_log10
+from .._internal.pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
 from .._internal.validation import (
     complex_number,
     exactly_nonzero,
@@ -160,9 +164,6 @@ from .._internal.validation import (
     real_number,
     require_count,
 )
-from ._pinned_exp import pinned_exp, pinned_pow
-from ._pinned_log import pinned_log, pinned_log10
-from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
 
 
 def _log_of(value: float) -> float:
@@ -540,7 +541,7 @@ def _residual_db(
 
 
 def _scalar_arctan(values: np.ndarray) -> np.ndarray:
-    """``arctan`` elementwise, correctly rounded, from :mod:`~phonometry.filters._pinned_trig`.
+    """``arctan`` elementwise, correctly rounded, from :mod:`~phonometry._internal.pinned_trig`.
 
     It maps the warped grid back to real frequencies for the target curve, so
     it runs once per design, on the 257 grid points, and reaches every
@@ -599,7 +600,7 @@ def _scalar_pow(values: np.ndarray, exponent: float) -> np.ndarray:
     ``numpy.power`` with a floating exponent is dispatched like the
     transcendentals and moves with the kernel, and a Python ``**`` on floats
     is the C library's ``pow``. This is glibc's routine spelled in
-    :mod:`~phonometry.filters._pinned_exp`; the Lawson update raises to the
+    :mod:`~phonometry._internal.pinned_exp`; the Lawson update raises to the
     power :data:`_LAWSON_EXPONENT`, and the routine returns its base unchanged
     when that power is one, as glibc does.
 
@@ -628,7 +629,7 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     went first because it is the one taken most (once per grid point per
     factor per Levenberg-Marquardt step, three quarters of a million values
     per design, where the elementwise loop had multiplied the cost of a
-    design by about four). :func:`~phonometry.filters._pinned_log.pinned_log`
+    design by about four). :func:`~phonometry._internal.pinned_log.pinned_log`
     spells glibc's own routine and returns :func:`math.log`'s bits on every
     input the fit produces: verified over the 91 658 333 distinct values the
     whole corpus evaluates, zero mismatches, so the shipped coefficients, the
@@ -645,7 +646,7 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
 
 
 def _scalar_exp(values: np.ndarray) -> np.ndarray:
-    """``exp`` elementwise: glibc's routine, spelled in :mod:`~phonometry.filters._pinned_exp`.
+    """``exp`` elementwise: glibc's routine, spelled in :mod:`~phonometry._internal.pinned_exp`.
 
     The reason is the one :func:`_scalar_log` gives; the proof that it moves
     no shipped coefficient is in that module.
@@ -657,7 +658,7 @@ def _scalar_exp(values: np.ndarray) -> np.ndarray:
 
 
 def _scalar_tan(values: np.ndarray) -> np.ndarray:
-    """``tan`` elementwise, correctly rounded, from :mod:`~phonometry.filters._pinned_trig`.
+    """``tan`` elementwise, correctly rounded, from :mod:`~phonometry._internal.pinned_trig`.
 
     The reason is the one :func:`_scalar_log` gives. glibc's own ``tan`` is
     correctly rounded on every argument the corpus feeds it, so the correctly
@@ -1140,60 +1141,6 @@ def _analog_db(
         return np.asarray(top - _log_distance2(poles, at))
 
     return np.asarray(_DB_PER_LOG * (shape(omega) - shape(omega_ref)[0]))
-
-
-def complex_product(factors: list[tuple[float, float]]) -> tuple[float, float]:
-    r"""``numpy.prod`` of complex numbers, in real arithmetic, one rounding per operation.
-
-    numpy multiplies a complex array left to right, each step
-    :math:`(a_r b_r - a_i b_i) + \mathrm{j}(a_r b_i + a_i b_r)`, and the loop
-    it runs a product through is plain C a compiler may contract: numpy built
-    with clang fuses each of those into a multiply-add wherever the processor
-    has one, on every 64-bit ARM and on x86-64 from AVX2 on, and numpy built
-    with GCC does not. The product a design took through it moved by its last
-    bit between Linux and the macOS and Windows builds, and so did the A
-    weighting at 48 kHz. These are numpy's steps in the order numpy takes
-    them, each a separately rounded Python ``float`` operation, which no
-    compiler contracts, so the answer is the unfused one everywhere.
-
-    :param factors: The complex numbers as ``(real, imaginary)`` pairs.
-    :return: Their product as a pair, ``(1.0, 0.0)`` for none.
-    """
-    if not factors:
-        return 1.0, 0.0
-    real, imaginary = factors[0]
-    for factor_real, factor_imaginary in factors[1:]:
-        real, imaginary = (
-            real * factor_real - imaginary * factor_imaginary,
-            real * factor_imaginary + imaginary * factor_real,
-        )
-    return real, imaginary
-
-
-def complex_quotient(
-    numerator: tuple[float, float], denominator: tuple[float, float]
-) -> tuple[float, float]:
-    """numpy's complex division, Smith's algorithm, in real arithmetic.
-
-    The same steps numpy's loop takes, in the same order, each rounded once,
-    for the reason :func:`complex_product` gives: numpy's loop is C that clang
-    contracts into multiply-adds. The denominator is never zero here, since
-    every root the design maps lies in the closed left half plane and is
-    taken away from a positive ``2 fs``.
-
-    :param numerator: ``(real, imaginary)``.
-    :param denominator: ``(real, imaginary)``, not zero.
-    :return: The quotient as a pair.
-    """
-    real, imaginary = numerator
-    below_real, below_imaginary = denominator
-    if math.fabs(below_real) >= math.fabs(below_imaginary):
-        ratio = below_imaginary / below_real
-        scale = 1.0 / (below_real + below_imaginary * ratio)
-        return (real + imaginary * ratio) * scale, (imaginary - real * ratio) * scale
-    ratio = below_real / below_imaginary
-    scale = 1.0 / (below_imaginary + below_real * ratio)
-    return (real * ratio + imaginary) * scale, (imaginary * ratio - real) * scale
 
 
 def _mapped_roots(roots: np.ndarray, fs2: float) -> np.ndarray:

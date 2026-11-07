@@ -83,6 +83,7 @@ from .._internal.boundary import round_half_even
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_sum
+from .._internal.sound_power import ROOM_ABSORPTION_ESTIMATES, _a_weighting_corrections
 from .._internal.validation import (
     require_band_fraction,
     require_choice,
@@ -92,7 +93,6 @@ from .._internal.validation import (
     require_positive,
 )
 from .._internal.warnings import PhonometryWarning, warn_caller
-from ..emission._shared import ROOM_ABSORPTION_ESTIMATES, _a_weighting_corrections
 from ._insulation_shared import (
     MANDATORY_BAND_RANGE_HZ,
     PREFERRED_BAND_RANGE_HZ,

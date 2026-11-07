@@ -34,8 +34,8 @@ from typing import TYPE_CHECKING, Any, ClassVar
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs
 from .._internal.validation import real_number, require_ranks, require_same_length
-from ..io._resolve import resolve_fs
 from .distortion import (
     _amplitude_spectrum,
     _positive,
@@ -50,8 +50,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import WindowSpec
-    from ..io._signal import Signal
 
 __all__ = [
     "ModulationDistortionResult",

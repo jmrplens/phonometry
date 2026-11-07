@@ -73,7 +73,7 @@ from ..._internal.catalogue import (
     take,
 )
 from ..._internal.validation import require_choice
-from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
+from ...materials import ABSORBER_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

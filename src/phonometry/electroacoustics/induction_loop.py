@@ -533,7 +533,7 @@ def field_strength_meter(
         array where a count goes, or ``x`` holds a text or a value that is not a real
         number.
     """
-    from ..filters.weighting import time_weighting, weighting_filter
+    from ..filters import time_weighting, weighting_filter
 
     record = require_finite_array(x, "x")
     rate = require_count(fs, "fs")
@@ -594,7 +594,7 @@ def band_limit_response(frequencies: ArrayLike) -> np.ndarray:
 
 def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.ndarray:
     """``n`` samples of the pink noise of 6.4 at an RMS of ``rms``."""
-    from ..signals._test_signals import noise_signal
+    from ..signals import noise_signal
 
     settle = round(_NOISE_SETTLING_S * fs)
     raw = noise_signal(

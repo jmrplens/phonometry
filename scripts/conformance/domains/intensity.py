@@ -22,7 +22,7 @@ import numpy as np
 import reference_data as ref
 
 import phonometry as ph
-from phonometry.environment.propagation.air_absorption import _pure_tone_terms
+from phonometry._internal.air_absorption import _pure_tone_terms
 
 from ..registry import (
     Outcome,

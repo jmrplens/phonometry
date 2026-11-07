@@ -18,6 +18,7 @@
 # written (whitespace collapsed), and the reason. A line excuses one
 # comparison: a function that writes the same comparison twice lists it
 # twice, so a third copy added later is refused.
+_internal/bands.py	_iec_e3_round	msd < _ANNEX_E3_MSD_THRESHOLD	the leading digit of an exact mid-band frequency, 1000 G^(x/b), a power of the octave ratio, irrational, which no decimal quantity can equal (its callers, which the guard read in filters/frequencies.py, are in other modules now)
 _internal/rays.py	_advance_one_step_sloping	h > 0.0	numerical algorithm internal (the range left to a ray in the integrator step, set to exactly 0 once spent), no verdict
 _internal/rays.py	_advance_one_step_sloping	h > 0.0	numerical algorithm internal (the range left to a ray in the integrator step, set to exactly 0 once spent), no verdict
 aircraft/airport_noise.py	_attenuation_geometry	q < 0.0	ECAC Doc 29: behind or ahead of a segment the end-point geometry is used, which agrees with the segment's at its ends

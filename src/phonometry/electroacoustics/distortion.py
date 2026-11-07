@@ -36,6 +36,8 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.itu_r_468 import itu_r_468_prototype
+from .._internal.resolve import apply_calibration, resolve_fs
 from .._internal.validation import (
     real_array,
     real_number,
@@ -45,16 +47,14 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..filters.weighting import _itu_r_468_prototype
-from ..io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import WindowSpec
-    from ..io._signal import Signal
 
 __all__ = [
     "HarmonicDistortionResult",
@@ -138,7 +138,7 @@ def _validate_signal(
     """Validate the record and, unless exempted, present it in pascals.
 
     ``calibrate=False`` is for the quantities referenced to digital full
-    scale rather than to 20 uPa: see :mod:`phonometry.io._resolve`.
+    scale rather than to 20 uPa: see :mod:`phonometry._internal.resolve`.
     """
     sig = real_array(x, "x")
     if sig.ndim != 1:
@@ -598,7 +598,7 @@ def weighting_bs468(frequencies: ArrayLike) -> NDArray[np.float64]:
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequencies' must be finite and non-negative."
         raise ValueError(msg)
-    poles, gain = _itu_r_468_prototype()
+    poles, gain = itu_r_468_prototype()
     p = np.asarray(poles, dtype=np.complex128)
     s = 2j * np.pi * f
     # The pole axis is appended, so any input shape survives the product.
@@ -689,7 +689,7 @@ def weighted_thd(
     if weighting == "468":
         weighted_rms = _weighted_rms_468(np.asarray(residual[sl]), fs_v)
     else:
-        from ..filters.weighting import weighting_filter
+        from ..filters import weighting_filter
 
         weighted = weighting_filter(residual, fs_v, weighting=weighting)
         weighted_rms = float(np.sqrt(np.mean(weighted[sl] ** 2)))

@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
+from .._internal.resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .._internal.validation import real_array, real_number, require_scalar
 from .._internal.warnings import PhonometryWarning, warn_caller
-from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .reference_values import REFERENCE_VALUES
 from .sound_calibrator import _designation, _fluctuation_limit_db
 
 if TYPE_CHECKING:
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
     from .sound_calibrator import CalibratorClass
 
 __all__ = [
@@ -208,7 +208,7 @@ def _validate_reference_stability(
     signal_arr: np.ndarray, fs: float, max_fluctuation_db: float
 ) -> None:
     """Warn if the F-weighted level of the recording fluctuates too much."""
-    from ..filters.weighting import time_weighting
+    from ..filters import time_weighting
 
     # The integrator attack lasts ~8*tau (1 s for F); we need at least
     # another second of settled envelope to assess the fluctuation.

@@ -104,7 +104,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from .resilient_layers import TAPPING_HAMMER_MASS_KG
 
 __all__ = [

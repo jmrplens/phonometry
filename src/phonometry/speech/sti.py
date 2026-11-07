@@ -37,12 +37,13 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
-    from ..io._signal import Signal
 from scipy import signal
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import apply_calibration, resolve_fs, resolve_pair_fs
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     check_engine,
@@ -53,10 +54,8 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning, warn_caller
-from ..filters.core import OctaveFilterBank
-from ..filters.frequencies import nominal_frequencies
-from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..filters import OctaveFilterBank, nominal_frequencies
+from ..metrology import REFERENCE_VALUES
 
 __all__ = [
     "STIResult",

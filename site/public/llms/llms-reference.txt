@@ -1525,8 +1525,8 @@ platforms the CI matrix runs.
 ## What phonometry pins
 
 The deterministic design path answers each door in kind, in
-`filters._weighting_design` and the pinned modules beside it,
-`filters._pinned_log`, `filters._pinned_exp` and `filters._pinned_trig`:
+`filters._weighting_design` and the pinned modules it reads,
+`_internal.pinned_log`, `_internal.pinned_exp` and `_internal.pinned_trig`:
 
 - **Its own reductions.** Every sum the fit compares or solves with is folded
   pairwise in a shape fixed by the code, and the normal equations are solved
@@ -1787,14 +1787,14 @@ held by the CI test.
 
 The full engineering account lives with the code, in the module docstrings of
 [`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),
-[`filters/_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_log.py),
-[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py),
-[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py)
+[`_internal/pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_log.py),
+[`_internal/pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_exp.py),
+[`_internal/pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_trig.py)
 and
-[`filters/_pinned_roots.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_roots.py),
+[`_internal/pinned_roots.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_roots.py),
 and the tests that hold it are in
 [`tests/filters/test_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_weighting_design.py)
-and the four `tests/filters/test_pinned_*.py` beside it.
+and the four `tests/test_internal_pinned_*.py`.
 
 ## See also
 

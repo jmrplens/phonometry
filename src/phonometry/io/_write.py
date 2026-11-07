@@ -78,6 +78,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from .._internal.json_input import escaped, writing_beside
+from .._internal.signal import Signal
 from .._internal.validation import (
     real_array,
     refuse_text,
@@ -95,7 +96,6 @@ from ._bext import (
 )
 from ._chunks import _RF64_SIZE_SENTINEL, BroadcastMetadata
 from ._sidecar import put_sidecar, sidecar_file, writable_sidecar
-from ._signal import Signal
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

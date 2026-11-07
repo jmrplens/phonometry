@@ -111,9 +111,9 @@ def test_the_attenuation_grid_is_checked(grid: object, match: str) -> None:
 
 def test_the_a_weighting_matches_the_librarys_own_iec_table() -> None:
     """The eight values are IEC 61672-1 Table 3, not a second copy of it."""
-    from phonometry.filters.weighting_compliance import _WEIGHTING_TABLE3
+    from phonometry._internal.weighting_tables import WEIGHTING_TABLE3
 
-    printed = {row[0]: row[1] for row in _WEIGHTING_TABLE3}
+    printed = {row[0]: row[1] for row in WEIGHTING_TABLE3}
     assert [printed[f] for f in hearing.PROTECTOR_OCTAVE_BANDS_HZ] == list(
         hearing.PROTECTOR_A_WEIGHTING
     )

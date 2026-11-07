@@ -42,14 +42,14 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ...io._resolve import apply_calibration, resolve_fs
+from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ...io._signal import Signal
+    from ..._internal.signal import Signal
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
@@ -62,7 +62,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from ..erb_scale import (
     CAM_C,
     ERB_C1_HZ,

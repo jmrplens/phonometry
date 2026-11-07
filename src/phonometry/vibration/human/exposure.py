@@ -67,6 +67,7 @@ from scipy import signal as sig
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -80,8 +81,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning, warn_caller
-from ...io._resolve import SignalInput, resolve_fs, resolve_samples
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import os

@@ -63,7 +63,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
-from ...io._resolve import apply_calibration, resolve_fs
+from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ...io._signal import Signal
+    from ..._internal.signal import Signal
 
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
@@ -83,7 +83,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from .moore_glasberg import (
     _ERB_C1,
     _ERB_C2,

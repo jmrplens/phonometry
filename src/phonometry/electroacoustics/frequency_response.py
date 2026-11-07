@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import apply_calibration, resolve_pair_fs
 
 # Shared Welch-core defaults and helpers (single source of truth for the
 # segment policy across the spectral estimators).
@@ -42,8 +43,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import apply_calibration, resolve_pair_fs
-from ..signals.spectra import (
+from .._internal.welch import (
     _DEFAULT_OVERLAP,
     _MIN_SAMPLES,
     _default_nperseg,
@@ -57,8 +57,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import ThreePanels
-    from ..io._signal import Signal
 
 __all__ = [
     "FrequencyResponseResult",

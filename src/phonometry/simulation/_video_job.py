@@ -32,14 +32,14 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Final, get_args
 
 from .._internal.validation import require_choice
-from ..io._video import stop_running_encoders
-from ..io._video_encoders import Container
+from .._internal.video import stop_running_encoders
+from .._internal.video_encoders import Container
 from .video import write_elastic_fdtd_animation, write_fdtd_animation
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
-    from ..io._video import VideoOptions
+    from .._internal.video import VideoOptions
     from ._remote.node import NodeStream
     from .compute import Compute
     from .elastic_fdtd import ElasticFDTDResult, ElasticRun

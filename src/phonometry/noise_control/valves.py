@@ -76,7 +76,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning, warn_caller
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping, Sequence
@@ -1469,7 +1469,7 @@ class AerodynamicValveNoise(OwnsArrays):
 
 def _third_octave_bands() -> NDArray[np.float64]:
     """Table 5's 33 one-third-octave band centres, 12,5 Hz to 20 kHz."""
-    from ..filters.frequencies import normalized_frequencies
+    from ..filters import normalized_frequencies
 
     return np.asarray(normalized_frequencies(3), dtype=np.float64)
 

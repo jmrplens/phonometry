@@ -83,7 +83,7 @@ def _a_weighting(frequencies: np.ndarray) -> np.ndarray | None:
     module-level domain import.
     """
     try:
-        from ..emission._shared import _a_weighting_corrections
+        from .._internal.sound_power import _a_weighting_corrections
 
         return np.asarray(
             _a_weighting_corrections(real_array(frequencies, "frequencies")),

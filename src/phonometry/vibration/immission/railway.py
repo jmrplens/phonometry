@@ -62,7 +62,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from .vibration_meter import (
     KB_TIME_CONSTANT_S,
     _exponential_running_rms,

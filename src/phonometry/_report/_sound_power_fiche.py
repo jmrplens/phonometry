@@ -154,7 +154,8 @@ def nominal_bands(
     """
     if frequencies is None:
         return None, 0
-    from ..filters.frequencies import _infer_band_fraction, _nominal_freq_for_band
+    from .._internal.bands import _nominal_freq_for_band
+    from ..filters.frequencies import _infer_band_fraction
 
     freqs = real_array(frequencies, "frequencies")
     fraction = (

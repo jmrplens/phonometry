@@ -151,7 +151,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
     mid-band frequencies (IEC 61260), not the exact base-ten centre, so the
     table is labelled with the nominal frequency (125, not 125.89...).
     """
-    from ..filters.frequencies import _nominal_freq_for_band
+    from .._internal.bands import _nominal_freq_for_band
 
     nominal = _nominal_freq_for_band(exact_freq, real_number(fraction, "fraction"))
     return f"{nominal:g}"

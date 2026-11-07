@@ -73,6 +73,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -80,8 +81,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import resolve_fs
-from .spectra import _positive, _validate_signal
+from .._internal.welch import _positive, _validate_signal
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -90,8 +90,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import TwoPanels
-    from ..io._signal import Signal
 
 Kind = Literal["power", "real", "complex"]
 Mode = Literal["lowpass", "highpass"]

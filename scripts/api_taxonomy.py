@@ -526,6 +526,11 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # phonometry/filters/_warnings.py that both can import, and documented with
     # the bank.
     "FilterBankWarning": "phonometry.filters.core",
+    # The ISO 9613-1 advisory is raised by the terms of Eq. (5), which the
+    # aircraft and sound power modules read too, so it is written in the
+    # private phonometry/_internal/air_absorption.py beside them, published by
+    # phonometry.environment, and documented with the air attenuation.
+    "AtmosphericAbsorptionWarning": "phonometry.environment.propagation.air_absorption",
     # The fluid state type and its diagnostics are defined in the private
     # phonometry/fluids/_state.py and published by the package, which is where
     # they are documented.

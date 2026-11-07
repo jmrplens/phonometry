@@ -95,6 +95,12 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, given_repr
+from ..._internal.resolve import (
+    SignalInput,
+    resolve_fs,
+    resolve_pair_fs,
+    resolve_samples,
+)
 from ..._internal.validation import (
     complex_array,
     complex_number,
@@ -117,7 +123,6 @@ from ..._internal.warnings import (
     published_by,
     warn_caller,
 )
-from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_samples
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
 if TYPE_CHECKING:
@@ -227,7 +232,7 @@ def _record(value: SignalInput, name: str) -> NDArray[np.float64]:
     """One record, 1-D, finite, long enough for a spectrum."""
     # calibrate=False: a Signal may carry a digital-to-pascal factor, and
     # these records are forces in N and motions, not pressures. See
-    # phonometry.io._resolve.
+    # phonometry._internal.resolve.
     record = np.asarray(
         resolve_samples(value, calibrate=False, name=name), dtype=np.float64
     )

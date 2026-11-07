@@ -713,6 +713,24 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
     return int(number)
 
 
+def require_str(value: object, name: str) -> str:
+    """Require *value* to be a string before a choice check compares it.
+
+    A choice check compares the text as written, so a non-string would
+    otherwise reach it as a value no option equals and be refused as the
+    wrong value rather than the wrong type.
+
+    :param value: The value to validate.
+    :param name: Parameter name used in the error message.
+    :return: The validated string.
+    :raises TypeError: for a non-string value.
+    """
+    if not isinstance(value, str):
+        msg = f"'{name}' must be a string; got {type(value).__name__}."
+        raise TypeError(msg)
+    return value
+
+
 def require_choice[T](value: object, name: str, options: tuple[T, ...]) -> T:
     """Require *value* to be one of *options*.
 

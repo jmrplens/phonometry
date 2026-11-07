@@ -67,7 +67,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...materials.absorbers.porous import ABSORBER_AIR
+from ...materials import ABSORBER_AIR
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

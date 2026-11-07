@@ -2953,7 +2953,7 @@ def plot_service_equipment_positions(
     from matplotlib.patches import Rectangle
 
     from .._i18n import format_number, localize_axes
-    from .geometry._draft import _chip
+    from .geometry import _draft
 
     if ax is None:
         figure = _import_pyplot().figure(figsize=_POSITIONS_FIGURE_SIZE_IN)
@@ -3019,7 +3019,7 @@ def plot_service_equipment_positions(
             va="center",
             fontsize="small",
             zorder=7,
-            bbox=_chip(ax, 0.2),
+            bbox=_draft._chip(ax, 0.2),
         )
     if sources.size:
         ax.plot(
@@ -3111,7 +3111,7 @@ def plot_calibration_deviation(
     :return: The axes.
     """
     from .._i18n import format_number, localize_axes
-    from .geometry._draft import _chip
+    from .geometry import _draft
 
     ax = ax if ax is not None else _new_axes()
     previous = np.asarray(result.previous_levels, dtype=np.float64)
@@ -3173,7 +3173,7 @@ def plot_calibration_deviation(
             va="center",
             fontsize="small",
             zorder=7,
-            bbox=_chip(ax, 0.2),
+            bbox=_draft._chip(ax, 0.2),
         )
     ax.set_xticks(np.concatenate((x_previous, x_levels)))
     ax.set_xticklabels(_calibration_names(previous.size, levels.size, language))

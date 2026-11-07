@@ -58,6 +58,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.json_input import escaped, writing_beside
+from .._internal.signal import Signal
 from .._internal.validation import require_choice
 from ._audio_file import require_regular_audio
 from ._backends import _FLAC_NAME, _import_soundfile, _sniff, info
@@ -70,7 +71,6 @@ from ._chunks import (
 )
 from ._flac import embed_flac_bext, read_flac_bext
 from ._sidecar import put_sidecar, sidecar_bytes, writable_sidecar
-from ._signal import Signal
 from ._write import (
     _SUBTYPE_BITS,
     _SUBTYPE_SPEC,

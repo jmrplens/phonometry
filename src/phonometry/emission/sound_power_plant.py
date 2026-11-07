@@ -137,6 +137,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.sound_power import _CK_OCTAVE, _a_weighting_corrections
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_at_most,
@@ -152,12 +153,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import warn_caller
-from ._shared import (
-    _CK_OCTAVE,
-    _S0,
-    SoundPowerWarning,
-    _a_weighting_corrections,
-)
+from ._shared import _S0, SoundPowerWarning
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -619,7 +615,7 @@ def plant_air_absorption_db_per_m(
         return np.array(
             [PLANT_AIR_ABSORPTION_DB_PER_M[float(b)] for b in bands], dtype=np.float64
         )
-    from ..aircraft.atmospheric_absorption import attenuation_arp866a
+    from ..aircraft import attenuation_arp866a
 
     alpha = np.zeros_like(bands)
     covered = bands >= _ISO3891_LOWEST_BAND_HZ

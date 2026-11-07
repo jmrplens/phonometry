@@ -59,6 +59,7 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.resolve import resolve_fs
 from .._internal.types import as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     real_array,
@@ -67,8 +68,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning, advisories_held, warn_caller
-from ..io._resolve import resolve_fs
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..metrology import REFERENCE_VALUES
 from ._shared import (
     noise_power,
     onset_index,
@@ -84,8 +84,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import RealScalar, RealValues, TwoPanels
-    from ..io._signal import Signal
 
 Symbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J"]
 #: The symbol a row of Table A.1 is keyed by: every :data:`Symbol` but

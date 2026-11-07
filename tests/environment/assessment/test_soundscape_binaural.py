@@ -30,6 +30,7 @@ import pytest
 from reference_data import ISO12913_3_TABLE_D1
 
 from phonometry import environment, io, psychoacoustics, signals
+from phonometry._internal.loudness_statistics import FLUCTUATION_SETTLING_FRAMES
 from phonometry.environment.assessment import soundscape_binaural as sb
 from phonometry.filters.weighting import weighting_filter
 
@@ -274,7 +275,7 @@ def test_fluctuation_percentiles_leave_out_the_settling_frames(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """F10 and F50 are taken over the frames ECMA-418-2 keeps for its F."""
-    settling = sb._FLUCTUATION_SETTLING_FRAMES
+    settling = FLUCTUATION_SETTLING_FRAMES
     series = np.concatenate([np.full(settling, 100.0), np.arange(1.0, 101.0)])
 
     class _Fake:

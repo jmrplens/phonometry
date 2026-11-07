@@ -557,10 +557,9 @@ _FLAG_NAME = re.compile(
 )
 #: A field type that holds one: a bool, an optional bool, an array of them.
 _FLAG_TYPE = re.compile(r"\bbool\b|\bbool_\b")
+
+
 #: Packages whose dataclasses are rendering and validation helpers, not results.
-_PRIVATE_PACKAGES = ("phonometry._internal", "phonometry._plot", "phonometry._report")
-
-
 def _is_flag_field(field: dataclasses.Field[object]) -> bool:
     return bool(_FLAG_TYPE.search(str(field.type)) or _FLAG_NAME.match(field.name))
 
@@ -576,7 +575,7 @@ def _flag_fields() -> set[str]:
         f"{cls.__module__}.{cls.__qualname__}.{field.name}"
         for cls in _dataclasses()
         if not cls.__name__.startswith("_")
-        and not cls.__module__.startswith(_PRIVATE_PACKAGES)
+        and not stored_verdicts.is_private_helper(cls)
         for field in dataclasses.fields(cls)
         if _is_flag_field(field)
     }
@@ -684,7 +683,7 @@ _STATED_FLAGS = {
     "phonometry.filters.weighting.TimeWeightedEnvelope.calibrated": _INPUT,
     "phonometry.hearing.audiometry.AscendingThresholdResult.shortened": _CALLER,
     "phonometry.io._chunks.WavChunks.has_ixml": _FILE,
-    "phonometry.io._signal.SignalOrigin.lossy": _FILE,
+    "phonometry._internal.signal.SignalOrigin.lossy": _FILE,
     "phonometry.io._wav.AudioFileInfo.has_ixml": _FILE,
     "phonometry.io._wav.AudioFileInfo.lossy": _FILE,
     "phonometry.materials.absorbers.slow_sound.CriticalCouplingResult.converged": (

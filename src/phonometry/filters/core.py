@@ -12,6 +12,13 @@ from scipy import signal
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, owned_members, read_only
+from .._internal.resolve import (
+    like_input,
+    refuse_foreign_rate,
+    resolve_fs,
+    resolve_samples,
+)
+from .._internal.signal import Signal
 from .._internal.utils import (
     _ZI_NDIM_MULTICHANNEL,
     _downsamplingfactor,
@@ -29,14 +36,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import advisories_held, warn_caller
-from ..io._resolve import (
-    like_input,
-    refuse_foreign_rate,
-    resolve_fs,
-    resolve_samples,
-)
-from ..io._signal import Signal
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..metrology import REFERENCE_VALUES
 from ._warnings import FilterBankWarning
 from .design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs

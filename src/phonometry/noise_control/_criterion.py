@@ -144,7 +144,7 @@ def rating_of(result: CriterionCarrier) -> NCResult | RCResult:
 
     :raises ValueError: if the carrier's ``criterion`` is not a known family.
     """
-    from ..room.noise_criteria import noise_criterion, room_criterion
+    from ..room import noise_criterion, room_criterion
 
     family = require_choice(result.criterion, "criterion", CRITERION_FAMILIES)
     if family == "NC":
@@ -152,12 +152,34 @@ def rating_of(result: CriterionCarrier) -> NCResult | RCResult:
     return room_criterion(result.received_level, frequencies=result.frequencies)
 
 
+def _criterion_curve_at(
+    family: str, index: float, frequencies: ArrayLike
+) -> np.ndarray:
+    """An NC or RC curve resampled onto an arbitrary octave-band grid.
+
+    Design sheets compare a received spectrum band by band with the criterion
+    curve, so the curve has to be read at the analysis bands rather than at the
+    ten bands of Table 1. Each requested frequency takes the value of the
+    nearest Table 1 band on a logarithmic frequency scale.
+
+    :param family: ``"NC"`` or ``"RC"``.
+    :param index: The curve designation (e.g. ``45`` for NC 45).
+    :param frequencies: Band centre frequencies to sample at, in hertz.
+    :return: The curve levels at ``frequencies``, in dB.
+    """
+    from ..room import NC_OCTAVE_BANDS_HZ, nc_curve, rc_curve
+
+    curve = nc_curve(index) if family == "NC" else rc_curve(index)
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
+    return np.array(
+        [curve[int(np.argmin(np.abs(np.log2(NC_OCTAVE_BANDS_HZ / f))))] for f in freqs]
+    )
+
+
 def curve_of(result: CriterionCarrier) -> np.ndarray | None:
     """The design criterion curve at the analysis bands, or ``None``."""
     if result.target is None:
         return None
-    from ..room.noise_criteria import _criterion_curve_at
-
     return _criterion_curve_at(result.criterion, result.target, result.frequencies)
 
 

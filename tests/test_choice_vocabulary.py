@@ -127,7 +127,7 @@ _FIELD_EXEMPT = {
     "phonometry.hearing.sound_field_audiometry.FreeSoundFieldCheck.field": (
         _QUASI_FREE
     ),
-    "phonometry.io._resolve.require_signal_rate(field)": _RECORD_FIELD,
+    "phonometry._internal.resolve.require_signal_rate(field)": _RECORD_FIELD,
     "phonometry.simulation.elastic_fdtd.ElasticFDTD2D.collocated(field)": (
         _SIMULATION_FIELD
     ),

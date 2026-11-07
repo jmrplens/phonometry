@@ -16,19 +16,18 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.resolve import apply_calibration
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     require_finite_array,
     require_scalar,
 )
-from ..filters.core import OctaveFilterBank
-from ..filters.frequencies import nominal_frequencies
-from ..io._resolve import apply_calibration
+from ..filters import OctaveFilterBank, nominal_frequencies
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 #: Onset threshold: the direct sound starts where the squared IR first
 #: rises to within 20 dB of its maximum (trigger point per ISO 3382-1:2009,

@@ -528,6 +528,13 @@ markers = [
     "whole_tree: reads the repository whole, a guard, a census or a generator run over the package, the scripts, the documentation, the site or the committed figures",
 ]
 filterwarnings = [
+    # The clip-frame audit, the figure checks, the doc-snippet runner and the
+    # process-exit tests fork on purpose, so a child shares what its parent
+    # computed. Python 3.12 and later warn at a fork while another thread
+    # lives, and under pytest one always does: the faulthandler watchdog of
+    # faulthandler_timeout, and under -n the xdist worker's own thread, so a
+    # filter around one fork would race the other threads' warnings anyway.
+    "ignore:This process \\(pid=\\d+\\) is multi-threaded, use of fork\\(\\) may lead to deadlocks in the child:DeprecationWarning",
     # 4.0 carries no deprecated names: the aliases the 3.x layout left behind
     # were removed with the shims that served them. The rule stays as a guard,
     # so the day a deprecation is introduced the suite fails instead of

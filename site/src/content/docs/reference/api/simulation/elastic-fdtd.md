@@ -229,6 +229,14 @@ onto the corners (zero whenever any neighbour is a fluid), the Moczo
 et al. (2007) effective parameters (Eqs. 7.37-7.39) that make internal
 interfaces converge to the physical traction continuity.
 
+The five fields, the synthetic pressure `p` and what
+`collocated` returns are arrays of the library the engine steps
+on, not NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a
+tensor on PyTorch, typed `Any` for a type checker since no one array
+type covers the three. Reading one in place keeps it on the device, and
+`numpy_field` gives a NumPy copy of a stored field, typed as an
+array of floats, on every device.
+
 **Parameters**
 
 | Name | Description |

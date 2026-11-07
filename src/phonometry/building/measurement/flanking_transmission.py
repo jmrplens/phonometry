@@ -189,7 +189,7 @@ _OCTAVE_CENTRES = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000
 _OCTAVE_STEP_THRESHOLD = _OCTAVE_SPACING_MIN_RATIO
 
 
-def _as_1d(values: NumericArrayLike, name: str) -> np.ndarray:
+def _as_1d(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce to a finite 1-D float array."""
     data = np.atleast_1d(real_array(values, name))
     if data.ndim != 1:
@@ -214,7 +214,7 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _positive_array(values: NumericArrayLike, name: str) -> np.ndarray:
+def _positive_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a 1-D array of positive, finite values."""
     data = _as_1d(values, name)
     if np.any(data <= 0.0):
@@ -229,7 +229,7 @@ def _positive_array(values: NumericArrayLike, name: str) -> np.ndarray:
 def velocity_level_difference(
     source_level: NumericArrayLike,
     receive_level: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Velocity level difference :math:`D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},j}` (Formula (8)).
 
     :param source_level: Average velocity level ``Lv,i`` of the excited
@@ -255,7 +255,7 @@ def velocity_level_difference(
 def direction_averaged_level_difference(
     dv_ij: NumericArrayLike,
     dv_ji: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Direction-averaged velocity level difference (Formula (11)).
 
     :math:`\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})` with
@@ -288,7 +288,7 @@ def total_loss_factor(
     structural_reverberation_time: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Total loss factor :math:`\eta = 2.2 / (f \, T_\mathrm{s})` (Clause 7.3.1).
 
     :param frequencies: Band centre frequency ``f``, in Hz, per band.
@@ -312,7 +312,7 @@ def equivalent_absorption_length(
     *,
     frequencies: NumericArrayLike,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Equivalent absorption length ``aj`` (Formula (12)).
 
     .. math::
@@ -345,7 +345,9 @@ def equivalent_absorption_length(
     )
 
 
-def _broadcast(values: np.ndarray, n_bands: int, name: str) -> np.ndarray:
+def _broadcast(
+    values: NDArray[np.float64], n_bands: int, name: str
+) -> NDArray[np.float64]:
     """Broadcast a scalar-per-band array to ``n_bands``, or validate the count."""
     require_scalar(n_bands, "n_bands")
     values = real_array(values, name)
@@ -392,9 +394,9 @@ class VibrationReductionResult(OwnsArrays):
     fields.
     """
 
-    frequencies: np.ndarray | None
-    k_ij: np.ndarray
-    modal_overlap: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None
+    k_ij: NDArray[np.float64]
+    modal_overlap: NDArray[np.float64] | None = None
     fraction: BandFraction | None = None
 
     def __post_init__(self) -> None:
@@ -426,7 +428,7 @@ class VibrationReductionResult(OwnsArrays):
             )
 
     @property
-    def bracketed(self) -> np.ndarray | None:
+    def bracketed(self) -> NDArray[np.bool_] | None:
         """Per band, whether the modal overlap is below 0,25 (ISO 10848-4 Clause 9).
 
         ``None`` when no modal overlap was supplied.
@@ -471,12 +473,12 @@ class VibrationReductionResult(OwnsArrays):
             raise ValueError(msg)
         groups = self.k_ij.reshape(-1, 3)
         oct_k = -10.0 * np.log10(np.mean(10.0 ** (-groups / 10.0), axis=1))
-        oct_f: np.ndarray | None = None
+        oct_f: NDArray[np.float64] | None = None
         if self.frequencies is not None:
             freq_groups = self.frequencies.reshape(-1, 3)
             _validate_octave_triples(freq_groups)
             oct_f = freq_groups[:, 1]
-        oct_overlap: np.ndarray | None = None
+        oct_overlap: NDArray[np.float64] | None = None
         if self.modal_overlap is not None:
             oct_overlap = np.min(np.asarray(self.modal_overlap).reshape(-1, 3), axis=1)
         return VibrationReductionResult(
@@ -544,7 +546,7 @@ class VibrationReductionResult(OwnsArrays):
         )
 
 
-def _validate_octave_triples(freq_groups: np.ndarray) -> None:
+def _validate_octave_triples(freq_groups: NDArray[np.float64]) -> None:
     r"""Require each frequency triple to be the thirds of one octave band.
 
     Each group of three one-third-octave centres must open on an octave
@@ -570,7 +572,7 @@ def _validate_octave_triples(freq_groups: np.ndarray) -> None:
             raise ValueError(msg)
 
 
-def _detect_fraction(frequencies: np.ndarray | None) -> int:
+def _detect_fraction(frequencies: NDArray[np.float64] | None) -> int:
     """1 (octaves) when consecutive centres step by ~2, else 3 (one-third octaves)."""
     # The fewest values the step below can work with, not a quantity.
     if frequencies is None or frequencies.size < 2:  # noqa: PLR2004
@@ -580,10 +582,10 @@ def _detect_fraction(frequencies: np.ndarray | None) -> int:
 
 
 def _single_number_kij(
-    frequencies: np.ndarray | None,
-    k_ij: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    k_ij: NDArray[np.float64],
     *,
-    bracketed: np.ndarray | None = None,
+    bracketed: NDArray[np.bool_] | None = None,
     fraction: int = 3,
 ) -> float | None:
     """Arithmetic-mean ``K̄ij`` (Annex A), or ``None``.
@@ -706,7 +708,7 @@ def vibration_reduction_index(
         a_i = np.full(dv.size, s_i / _REFERENCE_LENGTH, dtype=np.float64)
         a_j = np.full(dv.size, s_j / _REFERENCE_LENGTH, dtype=np.float64)
 
-    m: np.ndarray | None = None
+    m: NDArray[np.float64] | None = None
     if modal_overlap is not None:
         m = _positive_array(modal_overlap, "modal_overlap")
         m = _broadcast(m, dv.size, "modal_overlap")
@@ -733,7 +735,7 @@ def vibration_reduction_index_from_flanking(
     absorption_length_j: NumericArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Indirect ``Kij`` from the normalized flanking level difference.
 
     ISO 10848-1:2006, Clause 4.3.1 Note 2 (unnumbered):
@@ -808,7 +810,7 @@ class FlankingLevelDifferenceResult(OwnsArrays):
         ``None`` when the band count is neither 16 nor 5.
     """
 
-    d_n_f: np.ndarray
+    d_n_f: NDArray[np.float64]
     rating: WeightedRatingResult | None
 
     def plot(
@@ -895,7 +897,7 @@ class FlankingImpactLevelResult(OwnsArrays):
         when the band count is neither 16 nor 5.
     """
 
-    l_n_f: np.ndarray
+    l_n_f: NDArray[np.float64]
     rating: ImpactRatingResult | None
 
     def plot(
@@ -1066,7 +1068,7 @@ def normalized_flanking_impact_level(
 
 
 def _maybe_rating(
-    values: np.ndarray, fraction: BandFraction | np.integer[Any] | None
+    values: NDArray[np.float64], fraction: BandFraction | np.integer[Any] | None
 ) -> WeightedRatingResult | None:
     """Form the ISO 717-1 rating when the band count is 16 or 5, else ``None``."""
     if values.size in (16, 5):
@@ -1324,7 +1326,7 @@ def modal_overlap_factor(
     structural_reverberation_time: NumericArrayLike,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Modal overlap factor :math:`M = 2.2 \cdot n / T_\mathrm{s}` (Part 4, F. (6)).
 
     With the modal density ``n`` from :func:`modal_density`. Part 4 prefers
@@ -1356,7 +1358,7 @@ def band_mode_count(
     critical_frequency: float,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""In-band mode count :math:`N = B \cdot n` (Part 4, Formula (4)).
 
     With the one-third-octave bandwidth approximation

@@ -577,7 +577,8 @@ class ClassInfo:
     #: Every field the ``class`` statement writes, in the order written, with
     #: its annotation and how the constructor takes it: :data:`_BY_PLACE`,
     #: :data:`_BY_KEYWORD` (``kw_only``, or after ``KW_ONLY``) or
-    #: :data:`_NOT_TAKEN` (``field(init=False)``), which keeps its place.
+    #: :data:`_NOT_TAKEN` (``field(init=False)``, and a ``ClassVar``), which
+    #: keeps its place.
     declared: list[tuple[str, str, str]] = field(default_factory=list)
     #: The ``class`` statement read, one of several a key may have.
     node: ast.ClassDef | None = None
@@ -592,6 +593,11 @@ _NOT_TAKEN = "not taken"
 #: One order a record's constructor may take its fields in: each field's
 #: name, annotation and how the constructor takes it.
 _Order = tuple[tuple[str, str, str], ...]
+
+#: One way the bases of the classes a ``class`` statement is built on may be
+#: read: for each statement reached, keyed by its node, the class each base
+#: the guard follows is, in the order of its bases.
+_World = dict[ast.AST | None, tuple[ClassInfo, ...]]
 
 
 @dataclass
@@ -721,8 +727,13 @@ class Tree:
         self.base_cache: dict[ast.AST | None, tuple[tuple[ClassInfo, ...], ...]] = {}
         self.copies_cache: dict[ast.AST | None, bool] = {}
         self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
-        self.orders_cache: dict[tuple[ast.AST | None, bool], tuple[_Order, ...]] = {}
+        self.orders_cache: dict[ast.AST | None, tuple[_Order, ...]] = {}
         self.places_cache: dict[ast.AST | None, tuple[tuple[str, ...], ...]] = {}
+        #: What :meth:`worlds` and :meth:`linearizations` found, read once
+        #: for each ``class`` statement, and the statements being read.
+        self.worlds_cache: dict[ast.AST | None, tuple[_World, ...]] = {}
+        self.worlds_active: set[ast.AST | None] = set()
+        self.lines_cache: dict[ast.AST | None, tuple[tuple[ClassInfo, ...], ...]] = {}
         self.attribute_cache: dict[tuple[ast.AST | None, str], str | None] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
@@ -867,6 +878,11 @@ class Tree:
                     ):
                         annotation = ast.unparse(item.annotation)
                         if annotation.startswith(("ClassVar", "typing.ClassVar")):
+                            # No field, but it holds its place in the order:
+                            # a field a later class writes of its name takes it.
+                            info.declared.append(
+                                (item.target.id, annotation, _NOT_TAKEN)
+                            )
                             continue
                         if annotation in {"KW_ONLY", "dataclasses.KW_ONLY"}:
                             keyword_only = True
@@ -1384,46 +1400,91 @@ class Tree:
         self.fields_cache[node] = found
         return found
 
-    def field_orders(self, info: ClassInfo, *, own: bool = True) -> tuple[_Order, ...]:
+    def worlds(self, info: ClassInfo) -> tuple[_World, ...]:
+        """Each way the bases of a class, and of every class it is built on,
+        may be read (:data:`_World`), read once for each statement.
+
+        A base is each class it may be where its ``class`` statement reads
+        it (:meth:`base_classes`), and a statement reached through two bases
+        is one class, its bases read one way on both: a way that reads them
+        two ways is none. A base the guard cannot follow is left out, and so
+        is one being read: a class a function writes under ``global`` may be
+        its own base, which then lends nothing the class does not write.
+        """
+        node = info.node
+        found = self.worlds_cache.get(node)
+        if found is not None:
+            return found
+        self.worlds_active.add(node)
+        lent = [
+            [
+                (candidate, world)
+                for candidate in classes
+                if candidate.node not in self.worlds_active
+                for world in self.worlds(candidate)
+            ]
+            for classes in self.base_classes(info)
+        ]
+        self.worlds_active.discard(node)
+        ways: list[_World] = []
+        for chosen in itertools.product(*(choices for choices in lent if choices)):
+            world: _World = {node: tuple(candidate for candidate, _ in chosen)}
+            if all(
+                _same_classes(world.setdefault(key, bases), bases)
+                for _, inner in chosen
+                for key, bases in inner.items()
+            ):
+                ways.append(world)
+        found = tuple(ways) or ({node: ()},)
+        self.worlds_cache[node] = found
+        return found
+
+    def linearizations(self, info: ClassInfo) -> tuple[tuple[ClassInfo, ...], ...]:
+        """The method resolution order a class may have, the class first,
+        one for each way its bases may be read (:meth:`worlds`) that Python
+        can linearize (:func:`_c3`), read once for each statement.
+        """
+        node = info.node
+        found = self.lines_cache.get(node)
+        if found is None:
+            lines: dict[tuple[int, ...], tuple[ClassInfo, ...]] = {}
+            for world in self.worlds(info):
+                line = _linearized(info, world, {})
+                if line is not None:
+                    lines.setdefault(tuple(map(id, line)), line)
+            found = tuple(lines.values()) or ((info,),)
+            self.lines_cache[node] = found
+        return found
+
+    def field_orders(self, info: ClassInfo) -> tuple[_Order, ...]:
         """Every order the constructor of a record may take its fields in,
         each field with its annotation and how it is taken (:data:`_Order`),
         read once for each statement.
 
-        The order is the one ``dataclasses`` builds: the fields each base
-        lends, those of the last base first, then the class's own, and a
-        field written again keeps the place it first took, with the later
-        writing's annotation and the way it takes it. A base is each class it
-        may be where the ``class`` statement reads it (:meth:`base_classes`),
-        so a base with a class in each branch of an ``if`` gives an order for
-        each, and one the guard cannot follow lends none. A class that is no
-        record lends what its own bases lend, its annotations being no fields
-        (*own* false).
+        The order is the one ``dataclasses`` builds: the fields of each
+        class of the method resolution order (:meth:`linearizations`) taken
+        from the farthest to the nearest, then the class's own, a field
+        written again keeping the place it first took, with the later
+        writing's annotation and the way it takes it. A class that is no
+        record lends the fields of the first record of its own order, its
+        annotations being no fields, and one that cannot be linearized lends
+        none. A way of reading the bases gives an order of its own, so a base
+        with a class in each branch of an ``if`` gives an order for each.
         """
-        key = (info.node, own)
-        found = self.orders_cache.get(key)
+        node = info.node
+        found = self.orders_cache.get(node)
         if found is not None:
             return found
-        written: _Order = tuple(info.declared) if own else ()
-        # A class a function writes under ``global`` may be its own base:
-        # while it is read, it lends its own fields alone.
-        self.orders_cache[key] = (written,)
-        lent = [
-            tuple(
-                dict.fromkeys(
-                    order
-                    for candidate in classes
-                    for order in self.field_orders(candidate, own=candidate.record)
-                )
-            )
-            or ((),)
-            for classes in self.base_classes(info)
-        ]
         orders: dict[_Order, None] = {}
-        for chosen in itertools.product(*lent):
+        for world in self.worlds(info):
+            lines: dict[ast.AST | None, tuple[ClassInfo, ...] | None] = {}
+            lent: dict[ast.AST | None, dict[str, tuple[str, str]]] = {}
+            line = _linearized(info, world, lines)
             merged: dict[str, tuple[str, str]] = {}
-            for order in (*reversed(chosen), written):
-                for name, annotation, taken in order:
-                    merged[name] = (annotation, taken)
+            for later in reversed(line[1:]) if line is not None else ():
+                merged.update(_lent_fields(later, world, lines, lent))
+            for name, annotation, taken in info.declared:
+                merged[name] = (annotation, taken)
             orders[
                 tuple(
                     (name, annotation, taken)
@@ -1431,7 +1492,7 @@ class Tree:
                 )
             ] = None
         found = tuple(orders)
-        self.orders_cache[key] = found
+        self.orders_cache[node] = found
         return found
 
     def positional_orders(self, info: ClassInfo) -> tuple[tuple[str, ...], ...]:
@@ -1520,10 +1581,9 @@ class Tree:
 
     def attribute_annotation(self, info: ClassInfo, name: str) -> str | None:
         """The annotation of an attribute of a class, looked up its bases
-        too, each the classes it may be where the ``class`` statement reads
-        it (:meth:`base_classes`): the first base that annotates it, and of
-        the classes that base may be, one that annotates it as able to hold
-        an array when one does.
+        too: in each method resolution order the class may have
+        (:meth:`linearizations`), the first class that annotates it, and of
+        those, one that annotates it as able to hold an array when one does.
         """
         if name in info.attributes:
             return info.attributes[name]
@@ -1532,19 +1592,15 @@ class Tree:
         key = (info.node, name)
         if key in self.attribute_cache:
             return self.attribute_cache[key]
-        # A class a function writes under ``global`` may be its own base:
-        # while it is read, it annotates nothing more.
-        self.attribute_cache[key] = None
-        annotation: str | None = None
-        for classes in self.base_classes(info):
-            found = [
-                held
-                for candidate in classes
-                if (held := self.attribute_annotation(candidate, name)) is not None
-            ]
-            if found:
-                annotation = next((a for a in found if self.holds_array(a)), found[0])
-                break
+        found = [
+            later.attributes[name]
+            for line in self.linearizations(info)
+            if (later := next((c for c in line[1:] if name in c.attributes), None))
+            is not None
+        ]
+        annotation = (
+            next((a for a in found if self.holds_array(a)), found[0]) if found else None
+        )
         self.attribute_cache[key] = annotation
         return annotation
 
@@ -3953,6 +4009,106 @@ def _constant_strings(
             out.extend(found)
         return tuple(out)
     return None
+
+
+def _same_classes(held: Sequence[ClassInfo], bases: Sequence[ClassInfo]) -> bool:
+    """Whether two readings of a statement's bases are the same classes."""
+    return len(held) == len(bases) and all(
+        one is other for one, other in zip(held, bases, strict=True)
+    )
+
+
+def _c3(
+    head: ClassInfo, sequences: list[list[ClassInfo]]
+) -> tuple[ClassInfo, ...] | None:
+    """The C3 merge Python builds a method resolution order with: *head*,
+    then each class that heads one of *sequences* and is in the tail of
+    none, the first such each time; ``None`` when no class qualifies, as
+    Python refuses such bases.
+    """
+    order = [head]
+    pending = [sequence for sequence in sequences if sequence]
+    while pending:
+        chosen = next(
+            (
+                sequence[0]
+                for sequence in pending
+                if not any(
+                    sequence[0] is later for other in pending for later in other[1:]
+                )
+            ),
+            None,
+        )
+        if chosen is None:
+            return None
+        order.append(chosen)
+        pending = [
+            rest
+            for sequence in pending
+            if (rest := sequence[1:] if sequence[0] is chosen else sequence)
+        ]
+    return tuple(order)
+
+
+def _linearized(
+    info: ClassInfo,
+    world: _World,
+    lines: dict[ast.AST | None, tuple[ClassInfo, ...] | None],
+) -> tuple[ClassInfo, ...] | None:
+    """The method resolution order of a class in one way of reading the
+    bases (:data:`_World`): its own, then the C3 merge of its bases' orders
+    and the bases themselves (:func:`_c3`), each class read once in *lines*.
+    ``None`` for one Python cannot linearize.
+    """
+    node = info.node
+    if node in lines:
+        return lines[node]
+    # A statement reached again while it is read is none Python can build.
+    lines[node] = None
+    bases = world.get(node, ())
+    sequences: list[list[ClassInfo]] = []
+    for base in bases:
+        line = _linearized(base, world, lines)
+        if line is None:
+            return None
+        sequences.append(list(line))
+    found = _c3(info, [*sequences, list(bases)])
+    lines[node] = found
+    return found
+
+
+def _lent_fields(
+    info: ClassInfo,
+    world: _World,
+    lines: dict[ast.AST | None, tuple[ClassInfo, ...] | None],
+    lent: dict[ast.AST | None, dict[str, tuple[str, str]]],
+) -> dict[str, tuple[str, str]]:
+    """The fields one class of a method resolution order lends a record,
+    by name, in their order, each with its annotation and how it is taken:
+    what ``dataclasses`` reads as the class's ``__dataclass_fields__``, read
+    once for each class in *lent*.
+
+    A record's are those of its own order, from the farthest class to the
+    nearest, then its own; a class that is no record has the attribute of
+    the first record of its own order, and lends that record's fields.
+    """
+    node = info.node
+    if node in lent:
+        return lent[node]
+    lent[node] = {}
+    line = _linearized(info, world, lines)
+    merged: dict[str, tuple[str, str]] = {}
+    if line is not None and not info.record:
+        later = next((other for other in line[1:] if other.record), None)
+        if later is not None:
+            merged = _lent_fields(later, world, lines, lent)
+    elif line is not None:
+        for later in reversed(line[1:]):
+            merged.update(_lent_fields(later, world, lines, lent))
+        for name, annotation, taken in info.declared:
+            merged[name] = (annotation, taken)
+    lent[node] = merged
+    return merged
 
 
 def _places_reached(

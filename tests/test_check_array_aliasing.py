@@ -3304,6 +3304,137 @@ def test_an_argument_after_a_star_may_fill_any_place_from_the_star_s_on(
     }
 
 
+#: Records whose constructor takes the fields of their bases in their method
+#: resolution order, which reading each base's own order whole, the last
+#: base's first, does not give.
+_RESOLUTION_ORDERS = """
+from dataclasses import dataclass
+from typing import ClassVar
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays
+
+@dataclass(frozen=True)
+class _Note:
+    note: str
+
+@dataclass(frozen=True)
+class _Data:
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class _Left(_Note, _Data):
+    pass
+
+@dataclass(frozen=True)
+class _Right(_Note):
+    pass
+
+@dataclass(frozen=True)
+class Diamond(_Left, _Right):
+    pass
+
+@dataclass(frozen=True)
+class OwnedDiamond(_Left, _Right, OwnsArrays):
+    pass
+
+@dataclass(frozen=True)
+class _Pair(_Data, _Note):
+    pass
+
+@dataclass(frozen=True)
+class Again(_Pair, _Data):
+    pass
+
+@dataclass(frozen=True)
+class _Kinds:
+    kind: ClassVar[str] = "band"
+    label: str = ""
+
+@dataclass(frozen=True)
+class Kinded(_Kinds):
+    kind: NDArray[np.float64] | None = None
+
+def build_diamond(values):
+    return Diamond(values, "x")
+
+def build_diamond_copy(values):
+    return OwnedDiamond(values.copy(), "x")
+
+def build_diamond_label_copy(values):
+    return OwnedDiamond("x", values.copy())
+
+def build_again(values):
+    return Again("x", values)
+
+def build_kinded(values):
+    return Kinded(values)
+"""
+
+
+def test_a_record_takes_its_bases_fields_in_its_method_resolution_order(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``dataclasses`` reads the fields of each class of the record's method
+    resolution order, from the farthest to the nearest: ``Diamond(_Left,
+    _Right)``, ``_Left`` built on ``_Note`` and ``_Data`` and ``_Right`` on
+    ``_Note``, resolves ``_Left, _Right, _Note, _Data`` and takes ``data``
+    first; ``Again(_Pair, _Data)`` takes ``note`` first, ``_Data`` coming
+    after ``_Pair``. A ``ClassVar`` is no field but holds its place: a field
+    a later class writes of its name takes it, before the fields after it.
+
+    Each base's own order was read whole, the last base's first, so
+    ``Diamond`` read ``note, data`` and ``Again`` read ``data, note``, and
+    the ``ClassVar`` held no place: the caller's array filled a text, and a
+    copy handed to the place of ``data`` passed while one handed to the
+    text was refused as made twice.
+    """
+    found = _findings(tmp_path, orders=_RESOLUTION_ORDERS)
+    assert found == {
+        ("build_diamond", "Diamond.data", "values"),
+        ("build_diamond_copy", "OwnedDiamond.data (copied twice)", ""),
+        ("build_again", "Again.data", "values"),
+        ("build_kinded", "Kinded.kind", "values"),
+    }
+
+
+def test_an_attribute_takes_the_annotation_of_its_resolution_order(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class reads an attribute from the first class of its method
+    resolution order that annotates it: ``Holder(_Left, _Right)``, both on
+    ``_Base``, resolves ``_Left, _Right, _Base``, so ``cache`` is the array
+    ``_Right`` annotates, and a method storing the caller's array there
+    keeps it.
+
+    The bases were read depth first, ``_Left`` then its own base, so
+    ``cache`` was the text ``_Base`` annotates and the array passed.
+    """
+    found = _findings(
+        tmp_path,
+        holder="""
+        import numpy as np
+        from numpy.typing import NDArray
+
+        class _Base:
+            cache: str | None = None
+
+        class _Left(_Base):
+            pass
+
+        class _Right(_Base):
+            cache: NDArray[np.float64] | None = None
+
+        class Holder(_Left, _Right):
+            def keep(self, values):
+                self.cache = values
+        """,
+    )
+    assert found == {("Holder.keep", "self.cache", "values")}
+
+
 def test_a_record_that_copies_takes_the_caller_s_array_as_it_is(
     tmp_path: pathlib.Path,
 ) -> None:

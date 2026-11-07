@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -230,7 +231,7 @@ _TABLE3: dict[int, dict[str, tuple[float, float, float, float, float, float]]] =
 }
 
 
-def _finite_bands(values: NumericArrayLike, name: str) -> np.ndarray:
+def _finite_bands(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Return ``values`` as a finite float array, or raise."""
     a = real_array(values, name)
     if not np.all(np.isfinite(a)):
@@ -254,17 +255,17 @@ def _normalization_term(volume: float) -> float:
     return float(10.0 * np.log10(_A0 * _T0 / (_SABINE * _positive(volume, "volume"))))
 
 
-def _rate(values: np.ndarray) -> WeightedRatingResult | None:
+def _rate(values: NDArray[np.float64]) -> WeightedRatingResult | None:
     """ISO 717-1 rating when the band count is 5 (octave) or 16 (third)."""
     return weighted_rating(values) if values.size in (16, 5) else None
 
 
-def _rate_impact(values: np.ndarray) -> ImpactRatingResult | None:
+def _rate_impact(values: NDArray[np.float64]) -> ImpactRatingResult | None:
     """ISO 717-2 rating when the band count is 5 (octave) or 16 (third)."""
     return weighted_impact_rating(values) if values.size in (16, 5) else None
 
 
-def reverberation_index(t: NumericArrayLike, *, t0: float = _T0) -> np.ndarray:
+def reverberation_index(t: NumericArrayLike, *, t0: float = _T0) -> NDArray[np.float64]:
     r"""Reverberation index :math:`k = 10 \log_{10}(T/T_0)` (ISO 10052, Cl. 3.3).
 
     :param t: Receiving-room reverberation time per band, in seconds.
@@ -309,7 +310,7 @@ _SURVEY_ROOMS: tuple[SurveyRoom, ...] = get_args(SurveyRoom)
 @overload
 def estimate_reverberation_index(
     volume: float, room: SurveyRoom, *, weighted: Literal[False] = False
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 @overload
@@ -321,12 +322,12 @@ def estimate_reverberation_index(
 @overload
 def estimate_reverberation_index(
     volume: float, room: SurveyRoom, *, weighted: bool = ...
-) -> np.ndarray | float: ...
+) -> NDArray[np.float64] | float: ...
 
 
 def estimate_reverberation_index(
     volume: float, room: SurveyRoom, *, weighted: bool = False
-) -> np.ndarray | float:
+) -> NDArray[np.float64] | float:
     r"""Estimate the reverberation index from room type and volume (Clause 6.5).
 
     In a control survey the reverberation time need not be measured: the
@@ -404,10 +405,10 @@ class SurveyAirborneResult(OwnsArrays):
         ``None`` when ``r_prime`` is unavailable or off the band count.
     """
 
-    d: np.ndarray
-    d_nt: np.ndarray
-    d_n: np.ndarray | None
-    r_prime: np.ndarray | None
+    d: NDArray[np.float64]
+    d_nt: NDArray[np.float64]
+    d_n: NDArray[np.float64] | None
+    r_prime: NDArray[np.float64] | None
     rating: WeightedRatingResult | None
     r_prime_rating: WeightedRatingResult | None
 
@@ -527,9 +528,9 @@ class SurveyImpactResult(OwnsArrays):
         (ISO 717-2), or ``None`` off the 5/16-band count.
     """
 
-    l_i: np.ndarray
-    l_nt: np.ndarray
-    l_n: np.ndarray | None
+    l_i: NDArray[np.float64]
+    l_nt: NDArray[np.float64]
+    l_n: NDArray[np.float64] | None
     rating: ImpactRatingResult | None
 
     def __post_init__(self) -> None:
@@ -631,9 +632,9 @@ class SurveyFacadeResult(OwnsArrays):
         (ISO 717-1), or ``None`` off the 5/16-band count.
     """
 
-    d_2m: np.ndarray
-    d_2m_nt: np.ndarray
-    d_2m_n: np.ndarray | None
+    d_2m: NDArray[np.float64]
+    d_2m_nt: NDArray[np.float64]
+    d_2m_n: NDArray[np.float64] | None
     rating: WeightedRatingResult | None
 
     def __post_init__(self) -> None:
@@ -737,12 +738,12 @@ class SurveyServiceEquipmentResult(OwnsArrays):
     # banded ones, so these quantities are a single weighted number as often
     # as they are one value per band, and this module builds them both ways.
     # Requiring a band axis would refuse the survey's ordinary global reading.
-    l_xy: np.ndarray
-    l_xy_nt: np.ndarray
-    l_xy_n: np.ndarray | None
+    l_xy: NDArray[np.float64]
+    l_xy_nt: NDArray[np.float64]
+    l_xy_n: NDArray[np.float64] | None
 
 
-def _validate_index(k: NumericArrayLike, n_bands: int) -> np.ndarray:
+def _validate_index(k: NumericArrayLike, n_bands: int) -> NDArray[np.float64]:
     """Coerce the reverberation index to a finite per-band array."""
     kk = _finite_bands(k, "reverberation_index")
     if kk.shape != (n_bands,):
@@ -830,8 +831,8 @@ def survey_airborne_insulation(
         msg = "'area' requires 'volume' to compute R'."
         raise ValueError(msg)
 
-    d_n: np.ndarray | None = None
-    r_prime: np.ndarray | None = None
+    d_n: NDArray[np.float64] | None = None
+    r_prime: NDArray[np.float64] | None = None
     if volume is not None:
         v = _positive(volume, "volume")
         d_n = d + k + _normalization_term(v)
@@ -879,7 +880,7 @@ def survey_impact_insulation(
     k = _validate_index(reverberation_index, int(l_i.size))
 
     l_nt = l_i - k
-    l_n: np.ndarray | None = None
+    l_n: NDArray[np.float64] | None = None
     if volume is not None:
         l_n = l_i - k - _normalization_term(_positive(volume, "volume"))
 
@@ -925,7 +926,7 @@ def survey_facade_insulation(
 
     d_2m = out - l2_bands
     d_2m_nt = d_2m + k
-    d_2m_n: np.ndarray | None = None
+    d_2m_n: NDArray[np.float64] | None = None
     if volume is not None:
         d_2m_n = d_2m + k + _normalization_term(_positive(volume, "volume"))
 
@@ -984,7 +985,7 @@ def survey_service_equipment_level(
         raise ValueError(msg)
 
     l_xy_nt = l_xy - k
-    l_xy_n: np.ndarray | None = None
+    l_xy_n: NDArray[np.float64] | None = None
     if volume is not None:
         l_xy_n = l_xy - k - _normalization_term(_positive(volume, "volume"))
 

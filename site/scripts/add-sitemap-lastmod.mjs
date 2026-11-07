@@ -30,7 +30,8 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { basePath, siteUrl } from "../src/data/site.mjs";
-import { CONTENT_DIR, isoDay, loadContentDates } from "../src/lib/content-dates.mjs";
+import { loadContentDates } from "../src/lib/content-dates.mjs";
+import { CONTENT_DIR, isoDay } from "../src/lib/date-rules.mjs";
 
 const siteRoot = resolve(
 	process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), ".."),

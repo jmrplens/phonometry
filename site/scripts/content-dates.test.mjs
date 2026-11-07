@@ -5,7 +5,8 @@
 // failure that went back to leaving the dates empty, would stay unnoticed
 // there for good. Each test here writes a repository of its own with the
 // commits a case needs, dated a day apart, and reads the dates
-// src/lib/content-dates.mjs gives it; the last ones run
+// src/lib/content-dates.mjs gives it under the rule src/lib/date-rules.mjs
+// states; the last ones run
 // scripts/add-sitemap-lastmod.mjs on such a repository the way the build
 // does, and read its exit status and the sitemap it wrote.
 //
@@ -13,6 +14,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import {
+	chmodSync,
 	mkdirSync,
 	mkdtempSync,
 	readdirSync,
@@ -23,21 +25,21 @@ import {
 	writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative, resolve } from 'node:path';
+import { delimiter, dirname, join, relative, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
+import { domainIds } from '../src/data/topics.mjs';
+import { loadContentDates } from '../src/lib/content-dates.mjs';
 import {
 	DATE_SOURCES,
 	DATELESS_KEYS,
-	filesAtHead,
 	frontmatterOnly,
 	isoDay,
-	loadContentDates,
 	readDateSources,
 	readIgnoreRevs,
-} from '../src/lib/content-dates.mjs';
+} from '../src/lib/date-rules.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const STAMP = join(HERE, 'add-sitemap-lastmod.mjs');
@@ -352,6 +354,40 @@ test('a blobless clone fetches the page versions it needs in batches, never one 
 	assert.equal(packs() - before, dates.rounds, 'one fetch per round, and no version fetched alone');
 });
 
+test('the dates are read once for a site, so a second load and every page\'s date start no process', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', page());
+	repo.write('b.mdx', page({ title: 'B' }));
+	repo.commit(1);
+	repo.write('a.mdx', page({ description: 'Described.' }));
+	repo.commit(2);
+	// A git first on the PATH that notes each run and hands it to the real one,
+	// so what is counted is processes, whichever call of the module started them.
+	const shims = join(repo.root, 'shims');
+	mkdirSync(shims);
+	const real = spawnSync('sh', ['-c', 'command -v git'], { encoding: 'utf8' }).stdout.trim();
+	const log = join(shims, 'calls');
+	writeFileSync(log, '');
+	writeFileSync(join(shims, 'git'), `#!/bin/sh\nprintf '%s\\n' "$*" >> '${log}'\nexec '${real}' "$@"\n`);
+	chmodSync(join(shims, 'git'), 0o755);
+	const path = process.env.PATH;
+	process.env.PATH = `${shims}${delimiter}${path}`;
+	t.after(() => {
+		process.env.PATH = path;
+	});
+	const calls = () => readFileSync(log, 'utf8').split('\n').filter(Boolean).length;
+
+	const first = await loadContentDates({ siteRoot: repo.site });
+	const reading = calls();
+	assert.ok(reading > 0, 'the count sees the git the dates are read with');
+	for (let i = 0; i < 50; i += 1) {
+		const again = await loadContentDates({ siteRoot: repo.site });
+		assert.equal(again, first, 'every page gets the one reading');
+		assert.equal(day(again, i % 2 ? 'a.mdx' : 'b.mdx'), '2026-01-01');
+	}
+	assert.equal(calls(), reading, 'no page after the first starts a process');
+});
+
 // --- Pages built from other files ----------------------------------------
 
 test('a page is dated by a source that its description-only commit also changed', async (t) => {
@@ -475,6 +511,29 @@ test('date-sources.json takes paths from the repository root, and an entry with 
 	assert.throws(read({ entries: [{ sources: ['a.json'] }] }), /entry 1 names no page/);
 });
 
+test('a count written over {topic} takes one directory per topic the navigation teaches', (t) => {
+	const root = mkdtempSync(join(tmpdir(), 'content-dates-'));
+	t.after(() => rmSync(root, { recursive: true, force: true }));
+	const file = join(root, DATE_SOURCES);
+	const index = ':(exclude,glob)site/src/content/docs/**/index.*';
+	writeFileSync(
+		file,
+		JSON.stringify({
+			entries: [{ pages: ['site/src/content/docs/index.mdx'], counts: { guides: ['site/src/content/docs/{topic}/', index] } }],
+		}),
+	);
+	const guides = (options) => readDateSources(file, options)[0].counts.guides;
+	assert.deepEqual(guides({ topics: ['signals', 'io'] }), [
+		'site/src/content/docs/signals/',
+		'site/src/content/docs/io/',
+		index,
+	]);
+	// A topic added to the navigation is counted the day it is added, here and
+	// in src/data/repo-stats.mjs alike, with no list of folders to keep.
+	assert.deepEqual(guides(), [...domainIds.map((id) => `site/src/content/docs/${id}/`), index]);
+	assert.throws(() => guides({ topics: [] }), /\{topic\} in counts\.guides, and the navigation teaches no topic/);
+});
+
 test('the day a page was published is its first commit\'s day in UTC, as the day it changed is', async (t) => {
 	const repo = repository(t);
 	repo.write('late.mdx', page());
@@ -556,6 +615,18 @@ function sitePages(dir = join(SITE, 'src', 'content', 'docs'), out = []) {
 const REPO = resolve(SITE, '..');
 const repoPath = (file) => relative(REPO, file).split('\\').join('/');
 
+/**
+ * The files of HEAD some pathspecs match, matched the way src/lib/content-dates.mjs
+ * matches a count: as `git log` matches them, by a diff from the empty tree.
+ */
+function filesAtHead(repo, pathspecs) {
+	const git = (args, input) => spawnSync('git', args, { cwd: repo, input, encoding: 'utf8' });
+	const empty = git(['hash-object', '-t', 'tree', '--stdin'], '').stdout.trim();
+	const listed = git(['diff-tree', '-r', '-z', '--name-only', '--no-renames', empty, 'HEAD', '--', ...pathspecs]);
+	assert.equal(listed.status, 0, listed.stderr);
+	return listed.stdout.split('\0').filter(Boolean);
+}
+
 test('every page that renders data from outside its file is listed in date-sources.json, and no other', () => {
 	const entries = readDateSources(join(SITE, DATE_SOURCES));
 	const listed = (path) => entries.some((entry) => entry.pages.some((spec) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec)));
@@ -590,7 +661,7 @@ test('each count in date-sources.json covers the files repo-stats.mjs counts for
 			t.diagnostic(`${name}: uncommitted changes under its files, not compared`);
 			continue;
 		}
-		assert.equal((await filesAtHead(REPO, set)).length, stats[name], `${name}: ${set.join(' ')}`);
+		assert.equal(filesAtHead(REPO, set).length, stats[name], `${name}: ${set.join(' ')}`);
 	}
 });
 

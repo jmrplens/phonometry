@@ -50,6 +50,14 @@ const ONCE_PER_BUILD = new Map([
 			why: 'reads the docs tree in one pass on the first page that asks; scripts/page-dates.test.mjs counts the processes',
 		},
 	],
+	[
+		'src/lib/content-dates.mjs',
+		{
+			calls: 1,
+			exports: ['loadContentDates'],
+			why: 'reads the history of the docs tree once per site root, when routeData.ts loads, and every page reads that one result; scripts/content-dates.test.mjs counts the processes',
+		},
+	],
 ]);
 
 /** A file a page can run: code in any spelling, a component, a page with imports. */

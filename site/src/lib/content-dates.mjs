@@ -9,33 +9,11 @@
  * as the day its content last changed, in its footer, in its structured data
  * and in the sitemap crawlers read to decide what to fetch again.
  *
- * The rule: a commit moves a page's date unless
- *
- * - every change it made to the file is inside the frontmatter keys `title`,
- *   `description` or `sidebar` (search snippets and navigation, not the text
- *   of the page), or a mode change that left the content as it was;
- * - it moved the file without changing it: the page reached its new address
- *   with the same blob, and its history carries on at the old one;
- * - or it is listed in `site/date-ignore-revs.txt`, which names the
- *   mechanical sweeps the first rule cannot see (one that rewrote the lead
- *   sentence of every API page along with its description).
- *
- * The commit that created a page always counts, listed or not: no page is
- * older than its first version.
- *
- * Some pages are built from data outside their own file: the landing page
- * states the conformance counts and the release, the conformance report
- * renders `docs/conformance.json`, a catalogue page renders its table.
- * Their file can stand still while what a reader sees changes, so
- * `site/date-sources.json` lists them with the files they are built from,
- * and such a page is dated by the newest of its own date and theirs. Every
- * commit to a source counts, since a source is data rather than a page with
- * frontmatter; a source inside the content tree stands for the pages there,
- * each dated by the rule above; and a count of files, which is all some
- * pages show of a directory, moves only with a commit that changed how many
- * there are. The build fails on a page or a source that HEAD does not have,
- * and site/scripts/content-dates.test.mjs fails on a page that imports data
- * or a component built from it without being listed.
+ * Which commits move a date is src/lib/date-rules.mjs's rule: not one that
+ * changed only a page's title, description or sidebar entry, moved it
+ * unchanged, or is listed in `site/date-ignore-revs.txt`; and a page
+ * `site/date-sources.json` lists is dated by what it is built from too.
+ * This module reads the history that rule is applied to.
  *
  * How it is read. The docs job checks out with `filter: blob:none`: every
  * commit and tree, no historical blob. A `git log -p` over the content tree
@@ -53,25 +31,26 @@
  * dates need no blob. Every git call streams its output, and any failure
  * throws: a build that cannot read the dates stops instead of publishing
  * guesses.
+ *
+ * It reads the history once per site root: routeData.ts asks for it as the
+ * build starts, and every page gets that one reading. So it gives out the
+ * reading and nothing else, which is what keeps git off every page that
+ * imports it, and the rule, the paths and the day live in date-rules.mjs for
+ * anything else to import.
  */
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 
-/** The content collection, relative to the site root. */
-export const CONTENT_DIR = 'src/content/docs';
-
-/** The commits that move no date, relative to the site root. */
-export const IGNORE_REVS = 'date-ignore-revs.txt';
-
-/** The pages built from data outside their file, and that data; relative to the site root. */
-export const DATE_SOURCES = 'date-sources.json';
-
-/** The frontmatter keys whose changes move no date. */
-export const DATELESS_KEYS = Object.freeze(['title', 'description', 'sidebar']);
-
-const DATELESS = new Set(DATELESS_KEYS);
-const SHA = /^[0-9a-f]{40}$/;
+import {
+  CONTENT_DIR,
+  DATE_SOURCES,
+  FULL_SHA,
+  IGNORE_REVS,
+  frontmatterOnly,
+  readDateSources,
+  readIgnoreRevs,
+} from './date-rules.mjs';
 
 /**
  * Run git in `cwd` and hand its stdout to `onData` chunk by chunk.
@@ -157,156 +136,6 @@ function nulFields(onField) {
 }
 
 /**
- * The frontmatter and the body of a page, line endings normalised.
- *
- * @param {string} text
- * @returns {{ head: string | null, body: string }}
- */
-function splitPage(text) {
-  const normal = text.replace(/\r\n?/g, '\n');
-  // The closing fence is a line of its own, so a `---` at the end of a
-  // description line does not close the frontmatter early.
-  const match = /^---[ \t]*\n(?:([\s\S]*?)\n)?---[ \t]*(?:\n|$)/.exec(normal);
-  if (!match) return { head: null, body: normal };
-  return { head: match[1] ?? '', body: normal.slice(match[0].length) };
-}
-
-/**
- * The frontmatter with the dateless keys taken out: each top-level key with
- * the lines that continue it (a folded description, the fields of `sidebar`),
- * trailing blank lines dropped, so the same text before and after a commit
- * means the commit changed nothing else up there. A comment at column 0 is a
- * block of its own and counts like any other key.
- *
- * @param {string} head
- * @returns {string}
- */
-function datedFrontmatter(head) {
-  const blocks = [];
-  for (const line of head.split('\n')) {
-    const key = /^([A-Za-z_][\w-]*)\s*:/.exec(line);
-    if (key || line.startsWith('#') || blocks.length === 0) {
-      blocks.push({ key: key?.[1] ?? null, lines: [line] });
-    } else {
-      blocks.at(-1).lines.push(line);
-    }
-  }
-  return blocks
-    .filter((block) => !DATELESS.has(block.key))
-    .map((block) => block.lines.join('\n').replace(/\s+$/, ''))
-    .join('\n');
-}
-
-/**
- * Whether going from `before` to `after` changed only the dateless keys of
- * the frontmatter (or nothing at all).
- *
- * @param {string} before The page as it was.
- * @param {string} after The page as the commit left it.
- * @returns {boolean}
- */
-export function frontmatterOnly(before, after) {
-  const a = splitPage(before);
-  const b = splitPage(after);
-  if (a.body !== b.body) return false;
-  if (a.head === null || b.head === null) return a.head === b.head;
-  return datedFrontmatter(a.head) === datedFrontmatter(b.head);
-}
-
-/**
- * The commits `site/date-ignore-revs.txt` lists: one full 40-character SHA
- * per line, `#` starting a comment, blank lines ignored.
- *
- * @param {string} file
- * @returns {Set<string>}
- */
-export function readIgnoreRevs(file) {
-  const revs = new Set();
-  if (!existsSync(file)) return revs;
-  readFileSync(file, 'utf8')
-    .split('\n')
-    .forEach((raw, index) => {
-      const line = raw.replace(/#.*/, '').trim();
-      if (line === '') return;
-      if (!SHA.test(line)) {
-        throw new Error(
-          `${file}:${index + 1}: "${line}" is not a full 40-character commit SHA ` +
-            '(abbreviated ones can grow ambiguous as the history does).',
-        );
-      }
-      revs.add(line);
-    });
-  return revs;
-}
-
-/**
- * The entries of `site/date-sources.json`: each names pages (`pages`), the
- * files they are built from (`sources`) and the sets of files they count
- * (`counts`, each a list of git pathspecs under the name of the number the
- * page shows). Paths are from the repository root, as git names them, and
- * one ending in `/` is a directory. Keys that begin with an underscore are
- * notes. No file means no page has sources.
- *
- * @param {string} file
- * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[]> }>}
- */
-export function readDateSources(file) {
-  if (!existsSync(file)) return [];
-  let data;
-  try {
-    data = JSON.parse(readFileSync(file, 'utf8'));
-  } catch (error) {
-    throw new Error(`${file}: ${error.message}`);
-  }
-  if (!Array.isArray(data?.entries)) throw new Error(`${file}: no "entries" list.`);
-  return data.entries.map((entry, index) => {
-    const where = `${file}, entry ${index + 1}`;
-    const unknown = Object.keys(entry ?? {}).filter(
-      (key) => !key.startsWith('_') && !['pages', 'sources', 'counts'].includes(key),
-    );
-    if (unknown.length > 0) throw new Error(`${where}: unknown key(s) ${unknown.join(', ')}.`);
-    const paths = (value, key, { magic = false } = {}) => {
-      const list = value ?? [];
-      const bad = Array.isArray(list)
-        ? list.filter(
-            (path) =>
-              typeof path !== 'string' ||
-              path === '' ||
-              path.startsWith('/') ||
-              path.split('/').includes('..') ||
-              (!magic && path.startsWith(':')),
-          )
-        : [list];
-      if (bad.length > 0) {
-        throw new Error(
-          `${where}: "${key}" takes paths from the repository root` +
-            `${magic ? ' or git pathspecs' : ''}, not ${JSON.stringify(bad[0])}.`,
-        );
-      }
-      return list;
-    };
-    const pages = paths(entry.pages, 'pages');
-    const sources = paths(entry.sources, 'sources');
-    const counted = entry.counts ?? {};
-    if (typeof counted !== 'object' || Array.isArray(counted) || counted === null) {
-      throw new Error(`${where}: "counts" maps the name of each number to its pathspecs.`);
-    }
-    const counts = Object.fromEntries(
-      Object.entries(counted).map(([name, set]) => {
-        const specs = paths(set, `counts.${name}`, { magic: true });
-        if (specs.length === 0) throw new Error(`${where}: no pathspec for the count ${name}.`);
-        return [name, specs];
-      }),
-    );
-    if (pages.length === 0) throw new Error(`${where} names no page.`);
-    if (sources.length === 0 && Object.keys(counts).length === 0) {
-      throw new Error(`${where} names no source.`);
-    }
-    return { pages, sources, counts };
-  });
-}
-
-/**
  * The history of some paths from trees alone: each commit, newest first, with
  * the files it changed under them and their old and new blob ids.
  *
@@ -329,7 +158,7 @@ async function readHistory(repo, pathspecs) {
       meta = null;
     } else if (token.startsWith(':')) {
       meta = token;
-    } else if (SHA.test(token)) {
+    } else if (FULL_SHA.test(token)) {
       commits.push({ sha: token, date: null, changes: [] });
       expectDate = true;
     } else if (token !== '') {
@@ -562,7 +391,7 @@ async function resolveDates({ repo, pathspec, ignore, pages }) {
  * @param {string[]} pathspecs
  * @returns {Promise<string[]>}
  */
-export async function filesAtHead(repo, pathspecs) {
+async function filesAtHead(repo, pathspecs) {
   const empty = (await gitText(repo, ['hash-object', '-t', 'tree', '--stdin'], { input: '' })).trim();
   const files = [];
   const listing = nulFields((path) => path && files.push(path));
@@ -742,15 +571,4 @@ async function readContentDates(siteRoot) {
       return statSync(absolute).mtime;
     },
   };
-}
-
-/**
- * The day a date falls on in UTC, as `YYYY-MM-DD`: the form the sitemap and
- * the structured data publish, and the day the footer shows.
- *
- * @param {Date} date
- * @returns {string}
- */
-export function isoDay(date) {
-  return date.toISOString().slice(0, 10);
 }

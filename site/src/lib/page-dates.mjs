@@ -13,9 +13,9 @@
  * carries that date to the file's new path. All of it is read in one pass over
  * the docs tree, on the first page that asks, and every page after that is
  * answered from the map. The day is the commit's day in UTC, as the modified
- * date's is (src/lib/content-dates.mjs): on the day its committer wrote, a page
- * committed after midnight in a later time zone would be published the day
- * after the day it says it last changed.
+ * date's is (`isoDay` in src/lib/date-rules.mjs): on the day its committer
+ * wrote, a page committed after midnight in a later time zone would be
+ * published the day after the day it says it last changed.
  *
  * It used to be one `git log --follow` per page, and that was wrong twice. It
  * was slow: a synchronous process per page stops the event loop, so the build's
@@ -38,7 +38,7 @@ import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 
-import { isoDay } from './content-dates.mjs';
+import { isoDay } from './date-rules.mjs';
 
 /** Where the docs collection lives, from the repository's root. */
 const DOCS_TREE = 'site/src/content/docs';

@@ -9,10 +9,13 @@
     "the content tree stands for its pages, each dated by the page rule. \"counts\" names",
     "each number of files a page shows after the src/data/repo-stats.mjs export that",
     "computes it, with the git pathspecs of those files, and only a commit that changed",
-    "how many there are moves the page. The build fails on a page or a source HEAD does",
-    "not have, and site/scripts/content-dates.test.mjs fails on a page that imports data,",
-    "or a component built from it, without an entry here, and on a count whose files are",
-    "not the ones repo-stats.mjs counts. Keys beginning with an underscore are notes."
+    "how many there are moves the page. A pathspec of a count that holds {topic} stands",
+    "for one per topic the navigation teaches (domainIds in src/data/topics.mjs, the",
+    "topics repo-stats.mjs counts the guides under), so a topic is counted the day it is",
+    "added. The build fails on a page or a source HEAD does not have, and",
+    "site/scripts/content-dates.test.mjs fails on a page that imports data, or a",
+    "component built from it, without an entry here, and on a count whose files are not",
+    "the ones repo-stats.mjs counts. Keys beginning with an underscore are notes."
   ],
   "entries": [
     {
@@ -27,16 +30,7 @@
       ],
       "counts": {
         "guides": [
-          "site/src/content/docs/aircraft/",
-          "site/src/content/docs/buildings/",
-          "site/src/content/docs/devices/",
-          "site/src/content/docs/environment/",
-          "site/src/content/docs/materials/",
-          "site/src/content/docs/perception/",
-          "site/src/content/docs/signals/",
-          "site/src/content/docs/simulation/",
-          "site/src/content/docs/underwater/",
-          "site/src/content/docs/vibration/",
+          "site/src/content/docs/{topic}/",
           ":(exclude,glob)site/src/content/docs/**/index.*"
         ],
         "apiPages": [

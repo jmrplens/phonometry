@@ -24,10 +24,11 @@ const literal = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** A module that reaches for child_process and calls it once, the way the listed ones do. */
 const ONE_CALL = `import { execFileSync } from 'node:child_process';\nexecFileSync('git', ['log']);\n`;
 
-/** The two files the list names, each as it should be. */
+/** The files the list names, each as it should be. */
 const LISTED = {
 	'astro.config.mjs': `${ONE_CALL}export default {};\n`,
 	'src/lib/page-dates.mjs': `${ONE_CALL}export function firstPublished() {}\n`,
+	'src/lib/content-dates.mjs': `import { spawn } from 'node:child_process';\nspawn('git', ['log']);\nexport function loadContentDates() {}\n`,
 };
 
 /**
@@ -52,7 +53,7 @@ test('a site where only the listed files start a process passes', (t) => {
 		'src/lib/quiet.mjs': `export const quiet = /a/.exec('a');\n`,
 	});
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /read 4 files a page can run; 2 reach for a process/);
+	assert.match(ran.out, /read 5 files a page can run; 3 reach for a process/);
 	assert.match(ran.out, /\n0 failing check\(s\)\./);
 	assert.equal(ran.err, '');
 });
@@ -159,7 +160,7 @@ test('a path from the root that leaves the site, or names no file, is read as no
 		'src/components/Head.astro': `---\nconst a = '/../outside/sp.mjs';\nconst b = '/no/such/page/';\n---\n`,
 	});
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /read 3 files a page can run; 2 reach for a process/);
+	assert.match(ran.out, /read 4 files a page can run; 3 reach for a process/);
 });
 
 test('the helper of a listed file handed to every page fails, though the call it counts is still one', (t) => {
@@ -241,5 +242,8 @@ test('a second call in a listed file fails', (t) => {
 test('a listed file with no calls left fails, and so does one that is gone', (t) => {
 	const ran = check(t, { 'astro.config.mjs': `export default {};\n` });
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL 2 entries of ONCE_PER_BUILD that cover nothing:\s+astro\.config\.mjs\s+src\/lib\/page-dates\.mjs/);
+	assert.match(
+		ran.err,
+		/FAIL 3 entries of ONCE_PER_BUILD that cover nothing:\s+astro\.config\.mjs\s+src\/lib\/page-dates\.mjs\s+src\/lib\/content-dates\.mjs/,
+	);
 });

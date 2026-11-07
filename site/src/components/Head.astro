@@ -18,6 +18,7 @@ import { getCollection } from 'astro:content';
 import { breadcrumbsFor } from '../lib/breadcrumbs.mjs';
 import { topicForSlug } from '../data/topics.mjs';
 import { firstPublished } from '../lib/page-dates.mjs';
+import { isoDay } from '../lib/date-rules.mjs';
 import { citationsFor, referenceId, referenceNode } from '../lib/citations.mjs';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
@@ -137,9 +138,9 @@ const bibliographyUrl = `${SITE}${BASE}${lang === 'es' ? '/es' : ''}/reference/b
 // src/lib/content-dates.mjs, so it is the day the footer shows and the
 // sitemap's <lastmod> carries. `datePublished` is the commit that ADDED the
 // page. They used to be the same value, which claimed every page was published
-// on the day it was last edited.
-const modified =
-  route?.lastUpdated instanceof Date ? route.lastUpdated.toISOString().slice(0, 10) : undefined;
+// on the day it was last edited. Both are days in UTC, from the `isoDay` of
+// src/lib/date-rules.mjs that the first-publication dates and the sitemap use.
+const modified = route?.lastUpdated instanceof Date ? isoDay(route.lastUpdated) : undefined;
 const published = firstPublished(route?.entry?.filePath ?? '') ?? modified;
 
 // The hub pages exist to enumerate their children, and schema.org has a type

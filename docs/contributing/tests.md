@@ -671,3 +671,32 @@ def test_the_shipped_pages_pass() -> None:  # opens 932 pages of docs/ and site/
 **Enforced by:** `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests (numba-jitted kernel)`, `CI: Library tests at the dependency floors`
 
 **Exceptions.** A test that reads the tree to find what it then runs through the library, so that the kernel or a floor dependency decides its verdict, stays unmarked and stands in `RUNS_THE_LIBRARY` of `tests/whole_tree.py` with its reason. A file the package opens itself, as the remote runner ships its own modules, and a file the import system opens are not counted. The count does not see a file a child process reads, a test that lists names without opening files, or one that takes what a guard's own cache kept from an earlier test of its worker; a test that reads a smaller part of a tree whole, such as the 85 rows of the conformance package, is marked by review.
+
+<a id="t27"></a>
+### T27. Mark a test that asks git about the repository `git_checkout`
+
+**Why.** A tree unpacked from a source archive, GitHub's "Source code" download or a packager's export, holds every file of the repository and no `.git`, and git refuses to answer there: 21 tests failed in such a tree with `CalledProcessError` from `git ls-files` (2026-11-07). A test that asks git about the repository, which files it tracks, what their attributes are, what the last commit holds, carries the `git_checkout` mark, on itself or as its module's `pytestmark`, and `tests/git_checkout.py` skips it, saying why, where the repository has no `.git`. Every CI job runs from a checkout, where such a test passes with the mark or without it, so the plugin also notes the git commands each test starts while it sets up and runs, those its higher-scoped fixtures started included, and fails an unmarked test that ran git on the repository, naming the command. A git a test runs on a repository of its own under `tmp_path`, or one that asks no repository anything (`git init`, `git --version`), needs no mark.
+
+**Do**
+
+```python
+import pytest
+
+
+@pytest.mark.git_checkout
+def test_every_install_command_quotes_its_extras() -> None:
+    import check_quoted_extras
+
+    assert check_quoted_extras.main() == 0
+```
+
+**Don't**
+
+```py
+def test_every_install_command_quotes_its_extras() -> None:  # git ls-files inside the guard, unmarked
+    assert check_quoted_extras.main() == 0
+```
+
+**Enforced by:** `tests/git_checkout.py`, `tests/test_git_checkout.py`
+
+**Exceptions.** A helper that asks git about the repository and takes its refusal as an answer, so that a test reaching it runs the same in a tree with no `.git`, stands in `TOLERATES_NO_CHECKOUT` of `tests/git_checkout.py`, keyed `"path::function"` by the code that starts git, with its reason: today only `generate_llms._ignored_paths`, which lists what git ignores under `docs/` with `check=False`. The check reads the program and arguments the `subprocess.Popen` audit event carries, so it does not see a git that a child process starts, such as a script run with `sys.executable` that runs git in turn, a git run through a shell, or a test that takes what a helper's own cache kept from an earlier test of its worker. On Windows the event carries one command line, which the check leaves unread; every test it would judge there runs on Linux and macOS too. A run of the suite from a `git ls-files` export, with no `.git`, finds what the check cannot see.

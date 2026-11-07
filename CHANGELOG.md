@@ -2308,7 +2308,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with
   `CalledProcessError` from `git ls-files`. They carry a `git_checkout` mark now
-  and are skipped outside a checkout, saying why; every other test runs.
+  and are skipped outside a checkout, saying why; every other test runs. A
+  test that runs git on the repository without the mark fails in every run,
+  naming the command, so a new one cannot pass in a checkout and fail only
+  in an archive.
 
 - **A filter object types a Signal in as a Signal out, and an array in as an
   array out.** `WeightingFilter.filter` and `ParametricEQ.filter` returned

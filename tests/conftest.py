@@ -17,10 +17,13 @@ import pytest
 # second `conftest.py` would share this one's module name; and the count of
 # the repository's files each test opens, with --without-whole-tree, which
 # leaves out the tests that read the repository whole (tests/whole_tree.py);
+# and the git commands each test runs on the repository, with the skip of the
+# tests that ask git about it where there is no .git (tests/git_checkout.py);
 # and the order of a refusal and an advisory, which fails a test whose
 # awaited refusal came after a library warning (tests/refusal_order.py).
 pytest_plugins = (
     "engine_fixtures",
+    "git_checkout",
     "hang_guard",
     "matplotlib_guard",
     "refusal_order",
@@ -101,26 +104,6 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool 
     if pinned_stack.declares(collection_path.read_text(encoding="utf-8")):
         return True
     return None
-
-
-#: Why a test that asks git about the repository is skipped outside a checkout.
-_NOT_A_CHECKOUT = "not a git checkout, so there is nothing to ask git about"
-
-
-def _skip_outside_a_checkout(config: pytest.Config, items: list[pytest.Item]) -> None:
-    """Skip the tests marked ``git_checkout`` in a tree that git does not track.
-
-    A source archive unpacked by a packager has every file of the repository
-    but no ``.git``, and ``git ls-files`` refuses it, so those tests would
-    fail on the tree rather than on the code. ``.git`` is a directory in a
-    clone and a file in a linked worktree; either is a checkout.
-    """
-    if (config.rootpath / ".git").exists():
-        return
-    skip = pytest.mark.skip(reason=_NOT_A_CHECKOUT)
-    for item in items:
-        if item.get_closest_marker("git_checkout") is not None:
-            item.add_marker(skip)
 
 
 #: The longest id a test may have [characters]. pytest writes the id of the
@@ -251,10 +234,8 @@ def pytest_collection_modifyitems(
     """Move the known-heavy modules to the front of the dispatch order.
 
     The sort is stable, so relative order inside every module (and among all
-    remaining modules) is untouched. Outside a git checkout the tests that ask
-    git about the repository are skipped first.
+    remaining modules) is untouched.
     """
-    _skip_outside_a_checkout(config, items)
     rank = {}
     for item in items:
         path = item.nodeid.split("::", 1)[0]

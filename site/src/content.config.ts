@@ -335,9 +335,9 @@ export const collections = {
         // (src/components/SearchWeight.astro).
         searchWeight: z.number().min(0).max(10).optional(),
         // The works an errata page corrects, each by the fragment of its
-        // `@id` on the bibliography of the page's language (`std-iso-3743-1-
-        // 2010`, src/lib/citations.mjs, referenceId). The same generator
-        // writes it on every page of a document family, and
+        // `@id` on the bibliography of the page's language
+        // (`std-iso-3743-1-2010`, src/lib/citations.mjs, referenceId). The
+        // same generator writes it on every page of a document family, and
         // src/components/Head.astro names each work in the page's `about`,
         // beside the software. It is not `references`: those also make the
         // References section, the header chips and the search tokens of the

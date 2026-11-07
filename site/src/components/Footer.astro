@@ -25,8 +25,10 @@ const projectsText = lang === 'es' ? 'Todos los proyectos' : 'All projects';
 // What changed in each release, and what has changed since the last one. The
 // site is built from the main branch, so a page can describe what no release
 // carries yet; the changelog's Unreleased section says what that is. The
-// release notes are the changelog's section of each version, which the release
-// workflow publishes with it (scripts/release_notes.py).
+// release workflow writes the notes of each release it publishes from the
+// changelog's section of that version (scripts/release_notes.py). The releases
+// up to 4.0.0rc1 came before it, and the notes of none of them hold that
+// section: from 2.0.0 on they link the changelog and list the pull requests.
 const releaseNotes = {
 	href: 'https://github.com/jmrplens/phonometry/releases',
 	text: lang === 'es' ? 'Notas de versión' : 'Release notes',

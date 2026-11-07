@@ -86,6 +86,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -295,8 +296,8 @@ _BAND_MATCH = 0.06
 
 
 def _band_indices(
-    frequencies: np.ndarray, targets: tuple[float, ...]
-) -> np.ndarray | None:
+    frequencies: NDArray[np.float64], targets: tuple[float, ...]
+) -> NDArray[np.intp] | None:
     """Indices of ``targets`` in ``frequencies``, or ``None`` if one is absent."""
     indices: list[int] = []
     for target in targets:
@@ -309,9 +310,9 @@ def _band_indices(
 
 def _table_values(
     table: Mapping[float, float],
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     missing: Callable[[float, int], str],
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The values of a band table at every given band, or a ``ValueError``.
 
     ``missing(frequency_hz, matches)`` words the error for a band the table
@@ -363,7 +364,9 @@ def _not_in_correction(frequency_hz: float, matches: int) -> str:
     )
 
 
-def _a_weighted(levels: np.ndarray, frequencies: np.ndarray) -> float | None:
+def _a_weighted(
+    levels: NDArray[np.float64], frequencies: NDArray[np.float64]
+) -> float | None:
     r"""Formula (K.2) over the 18 bands, or ``None`` when one is missing."""
     idx = _band_indices(frequencies, _RAIN_BANDS_HZ)
     if idx is None:
@@ -418,8 +421,8 @@ class RainGeneratorVerification(OwnsArrays):
 
     rain_type: RainType
     rainfall_rate_mm_h: float
-    drop_diameters_mm: np.ndarray | None
-    fall_velocities_m_s: np.ndarray | None
+    drop_diameters_mm: NDArray[np.float64] | None
+    fall_velocities_m_s: NDArray[np.float64] | None
 
     def __post_init__(self) -> None:
         """Reject a rain type the table does not print.
@@ -521,7 +524,7 @@ class RainGeneratorVerification(OwnsArrays):
         )
 
 
-def _share_of(values: np.ndarray, centre: float, half_width: float) -> float:
+def _share_of(values: NDArray[np.float64], centre: float, half_width: float) -> float:
     """The share of *values* within ``centre ± half_width``, bounds included."""
     within = np.abs(values - centre) <= half_width * (1.0 + _BOUND_SLACK)
     return float(np.mean(within))
@@ -610,14 +613,14 @@ class RainfallReferenceCorrection(OwnsArrays):
         {"structural_reverberation_time": "s"}
     )
 
-    frequencies: np.ndarray
-    l_i_reference: np.ndarray
-    structural_reverberation_time: np.ndarray
-    loss_factor: np.ndarray
-    reference_loss_factor: np.ndarray
-    l_i_m_reference: np.ndarray
-    l_ic_reference: np.ndarray
-    correction: np.ndarray
+    frequencies: NDArray[np.float64]
+    l_i_reference: NDArray[np.float64]
+    structural_reverberation_time: NDArray[np.float64]
+    loss_factor: NDArray[np.float64]
+    reference_loss_factor: NDArray[np.float64]
+    l_i_m_reference: NDArray[np.float64]
+    l_ic_reference: NDArray[np.float64]
+    correction: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject columns of different lengths.
@@ -758,12 +761,12 @@ class RainfallSoundResult(OwnsArrays):
         dB, or ``None``.
     """
 
-    frequencies: np.ndarray
-    l_i: np.ndarray
+    frequencies: NDArray[np.float64]
+    l_i: NDArray[np.float64]
     l_ia: float | None
     method: Literal["pressure", "intensity"]
-    correction: np.ndarray | None = None
-    l_i_norm: np.ndarray | None = None
+    correction: NDArray[np.float64] | None = None
+    l_i_norm: NDArray[np.float64] | None = None
     l_ia_norm: float | None = None
 
     def __post_init__(self) -> None:
@@ -812,7 +815,7 @@ class RainfallSoundResult(OwnsArrays):
             quantity="LI,norm" if normalized else "LI",
         )
 
-    def sound_power_levels(self, specimen_area_m2: float) -> np.ndarray:
+    def sound_power_levels(self, specimen_area_m2: float) -> NDArray[np.float64]:
         r"""Sound power level radiated by the whole specimen, per band.
 
         :math:`L_W = L_I + 10 \log_{10}(S/S_0)` (the NOTE to Formula (K.2)),
@@ -844,10 +847,10 @@ class RainfallSoundResult(OwnsArrays):
 
 
 def _normalized(
-    frequencies: np.ndarray,
-    l_i: np.ndarray,
+    frequencies: NDArray[np.float64],
+    l_i: NDArray[np.float64],
     reference: RainfallReferenceCorrection | NumericArrayLike | None,
-) -> tuple[np.ndarray | None, np.ndarray | None, float | None]:
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None, float | None]:
     """``(ΔLIc, LInorm, LIAnorm)`` by Formula (K.5), or three ``None``."""
     if reference is None:
         return None, None, None

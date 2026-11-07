@@ -3227,7 +3227,21 @@ def _literal_shape(annotation: str) -> tuple[bool, bool]:
 
 
 def _post_init(record: type) -> Callable[..., object] | None:
-    """The ``__post_init__`` a record runs, its own or the nearest base's."""
+    """The ``__post_init__`` a record runs, its own or the nearest base's.
+
+    It runs only when the ``__init__`` a call of the record runs calls it:
+    the one ``@dataclass`` writes does when the record it was written for
+    had one at the time, which a class that is no record over it does not
+    change, so ``Plain(_Count)``, over a record that has none, never runs the
+    ``__post_init__`` it writes.
+    """
+    # ``object``, last in every order, has an ``__init__`` of its own.
+    runs = next(
+        vars(owner)["__init__"] for owner in record.__mro__ if "__init__" in vars(owner)
+    )
+    code = getattr(inspect.unwrap(runs), "__code__", None)
+    if code is None or "__post_init__" not in code.co_names:
+        return None
     for owner in record.__mro__:
         check = vars(owner).get("__post_init__")
         if check is not None:

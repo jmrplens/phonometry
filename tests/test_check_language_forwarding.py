@@ -1936,6 +1936,75 @@ def test_a_keyword_reaches_no_positional_only_language(
     assert sorted(f.caller for f in found) == ["by_keyword", "by_mapping"]
 
 
+def test_a_call_of_a_class_runs_the_init_its_order_gives(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a class runs the ``__init__`` of the first class of its
+    method resolution order that has one of its own: ``@dataclass`` writes
+    ``Rec`` one, whichever spelling of the decorator it is, so a call of
+    ``Rec`` runs no ``_Labelled.__init__`` and has no language to hand it.
+    ``Plain``, and a dataclass told ``init=False``, run the one
+    ``_Labelled`` writes, and drop the language it takes.
+
+    The ``__init__`` was looked up by name through the bases, so ``Rec``
+    was read as calling ``_Labelled.__init__`` and refused for a language
+    its constructor does not take.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            import dataclasses as dc
+            from dataclasses import dataclass
+
+
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+
+
+            @dataclass(frozen=True)
+            class Rec(_Labelled):
+                value: float = 0.0
+
+
+            @dc.dataclass(frozen=True)
+            class Dotted(_Labelled):
+                value: float = 0.0
+
+
+            @dc.dataclass(frozen=True, init=False)
+            class Unwritten(_Labelled):
+                value: float = 0.0
+
+
+            class Plain(_Labelled):
+                pass
+
+
+            def plot_rec(ax, *, language="en"):
+                return Rec(1.0)
+
+
+            def plot_dotted(ax, *, language="en"):
+                return Dotted(1.0)
+
+
+            def plot_unwritten(ax, *, language="en"):
+                return Unwritten(1.0)
+
+
+            def plot_plain(ax, *, language="en"):
+                return Plain(1.0)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_plain", "pkg.records._Labelled.__init__"),
+        ("plot_unwritten", "pkg.records._Labelled.__init__"),
+    ]
+
+
 _EXEMPTED = """
 from .helpers import axis
 

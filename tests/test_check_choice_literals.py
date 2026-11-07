@@ -2372,6 +2372,64 @@ class _KeysSkipAPace:
             require_choice(self.sides, "sides", _PACES)
 
 
+@dataclass(frozen=True)
+class _Unhooked:
+    """A record with no ``__post_init__``: the ``__init__`` written for it
+    calls none.
+    """
+
+    pace: _Pace = "fast"
+
+
+class _CheckedTooLate(_Unhooked):
+    """A class that is no record over one that has no ``__post_init__``: the
+    one it writes never runs.
+    """
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Hooking:
+    """A record whose ``__init__`` calls ``self.__post_init__``."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        pass
+
+
+class _CheckedInTime(_Hooking):
+    """A class that is no record over one whose ``__init__`` calls
+    ``self.__post_init__``: its own runs.
+    """
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+def test_a_record_runs_a_post_init_only_when_its_init_calls_one() -> None:
+    """The ``__init__`` a call runs, here the one ``@dataclass`` writes for the
+    first record of the order, calls ``self.__post_init__`` only when that
+    record had one when it was written: ``_CheckedTooLate`` never runs the
+    check it writes, so a misspelt pace is never refused, and
+    ``_CheckedInTime`` runs its own.
+
+    The first ``__post_init__`` of the order was read as the one that runs,
+    so a check that never runs passed the choice as checked.
+    """
+    assert ccl._post_init(_CheckedTooLate) is None
+    assert ccl._post_init(_Unhooked) is None
+    assert ccl._post_init(_CheckedInTime) is inspect.unwrap(
+        vars(_CheckedInTime)["__post_init__"]
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _CheckedInTime("medium")  # type: ignore[arg-type]
+    unchecked = _CheckedTooLate("medium")  # type: ignore[arg-type]
+    assert vars(unchecked)["pace"] == "medium"
+
+
 def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:
     """``Pace | Mapping[Side, Pace | float]`` takes a pace as one value, a side
     as each key and a pace as each value: a check of one part says nothing of

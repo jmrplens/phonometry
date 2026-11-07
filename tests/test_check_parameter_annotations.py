@@ -1442,6 +1442,88 @@ def test_a_count_and_its_items_handed_to_a_generated_constructor_are_followed(
     ]
 
 
+def test_an_argument_fills_the_place_the_constructor_or_function_gives_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record on two bases takes the last base's fields first, as
+    ``dataclasses`` builds the constructor, so ``Both(1.0, n_positions)``
+    hands the count to ``n_positions``; and an argument written after a
+    ``*`` argument may fill any place from the star's on, of a record or of
+    a function, so with nothing to spread the count lands in the first.
+
+    The bases' fields were read in the order of the bases, so the count
+    filled ``height_m``; and an argument after a star was read at its
+    written place alone, so it filled ``height_m`` or ``scale``: the three
+    counts a validator takes passed as ``int``.
+    """
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["Both", "Spread", "after_a_star", "spread", "two_bases"]
+
+            @dataclass(frozen=True)
+            class _Counted:
+                n_positions: int
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(
+                        self, "n_positions", require_count(self.n_positions, "n")
+                    )
+
+            @dataclass(frozen=True)
+            class _Height:
+                height_m: float
+
+            @dataclass(frozen=True)
+            class Both(_Counted, _Height):
+                pass
+
+            @dataclass(frozen=True)
+            class Spread:
+                n_positions: int = 1
+                height_m: float = 0.0
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(
+                        self, "n_positions", require_count(self.n_positions, "n")
+                    )
+
+            def _counted(n: int = 1, scale: float = 1.0) -> int:
+                return require_count(n, "n")
+
+            def two_bases(n_positions: int) -> Both:
+                return Both(1.0, n_positions)
+
+            def after_a_star(n_positions: int, head: tuple[float, ...] = ()) -> Spread:
+                return Spread(*head, n_positions)
+
+            def spread(n: int, head: tuple[float, ...] = ()) -> int:
+                return _counted(*head, n)
+            """,
+        },
+    )
+    assert refused == {
+        "two_bases(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Both(n_positions), require_count() takes it"
+        ],
+        "after_a_star(n_positions)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "Spread(n_positions), require_count() takes it"
+        ],
+        "spread(n)": [
+            "annotated int, which refuses np.integer[Any], while handed to "
+            "_counted(n), require_count() takes it"
+        ],
+    }
+
+
 def test_a_count_handed_to_a_public_function_that_takes_a_numpy_integer(
     tmp_path: pathlib.Path,
 ) -> None:

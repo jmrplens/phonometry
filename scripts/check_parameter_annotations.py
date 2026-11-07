@@ -1997,6 +1997,36 @@ def _positional(
     return every[1:] if bound and every else every
 
 
+def _first_star(call: ast.Call) -> int | None:
+    """The place of a call's first ``*`` argument, if it has one."""
+    return next(
+        (
+            index
+            for index, argument in enumerate(call.args)
+            if isinstance(argument, ast.Starred)
+        ),
+        None,
+    )
+
+
+def _filled(
+    places: Sequence[str], positions: Sequence[int], spread: int | None
+) -> list[str]:
+    """The names of *places* a call's arguments at *positions* may fill.
+
+    An argument past the first ``*`` argument (at *spread*) may fill any
+    place from the star's own on, as the star hands an unknown number of
+    values; one before it fills the place it is written in.
+    """
+    filled: list[str] = []
+    for index in positions:
+        if spread is not None and index > spread:
+            filled.extend(places[spread:])
+        elif index < len(places):
+            filled.append(places[index])
+    return filled
+
+
 def _is_static(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     return any(
         isinstance(decorator, ast.Name) and decorator.id == "staticmethod"
@@ -2401,11 +2431,13 @@ class Reader:
         """Where a call takes the parameter leads through one callee it may reach.
 
         *given* is where the call takes it, by position and by keyword, and
-        the level it is read at.
+        the level it is read at. A position past the call's first ``*``
+        argument may be any place from the star's own on (:func:`_filled`).
         """
         positions, keywords, level = given
         ends = self._ends(target)
         reached, bound_self = callee
+        spread = _first_star(call)
         if reached == "builtins.isinstance":
             if 0 in positions and self._admits(function, call, target):
                 accepted = sorted(
@@ -2420,10 +2452,14 @@ class Reader:
                 yield _ending(reached, target), level, 0
             return
         handed = (
-            self._constructed(reached, positions, keywords, target)
+            self._constructed(reached, (positions, spread), keywords, target)
             if reached in self.annotations.classes
             else self._handed(
-                reached, positions, keywords, bound=bound_self, target=target
+                reached,
+                (positions, spread),
+                keywords,
+                bound=bound_self,
+                target=target,
             )
         )
         for how, deeper, hops in handed:
@@ -2603,23 +2639,23 @@ class Reader:
     def _constructed(
         self,
         record: str,
-        positions: list[int],
+        positions: tuple[list[int], int | None],
         keywords: list[str],
         target: Target,
     ) -> Iterator[tuple[str, int, int]]:
         """What a record built with its generated ``__init__`` does with a value.
 
         The argument fills the field of its keyword, or of its position in
-        the order the fields are declared (a keyword-only field takes no
-        position), and the record's ``__post_init__`` reads that field as
-        ``self.<field>``: a count handed to a record that validates it is
-        followed there as it is into a function.
+        the order the constructor takes the fields (:func:`record_fields`; a
+        keyword-only field takes no position, and *positions* carries where
+        a ``*`` argument spreads, :func:`_filled`), and the record's
+        ``__post_init__`` reads that field as ``self.<field>``: a count
+        handed to a record that validates it is followed there as it is into
+        a function.
         """
         fields = record_fields(self.package, self.annotations, record)
-        positional = [field for field in fields.values() if field.positional]
-        received = [
-            positional[index].name for index in positions if index < len(positional)
-        ]
+        positional = [field.name for field in fields.values() if field.positional]
+        received = _filled(positional, *positions)
         received.extend(keyword for keyword in keywords if keyword in fields)
         dotted = self._method(record, "__post_init__")
         post_init = self.package.functions[dotted] if dotted is not None else None
@@ -2650,22 +2686,23 @@ class Reader:
     def _handed(
         self,
         reached: str,
-        positions: list[int],
+        positions: tuple[list[int], int | None],
         keywords: list[str],
         *,
         bound: bool,
         target: Target,
     ) -> Iterator[tuple[str, int, int]]:
-        """What the function a parameter is handed to does with it."""
+        """What the function a parameter is handed to does with it, at each
+        parameter its position may fill (:func:`_filled`) or its keyword
+        names.
+        """
         callee = self.package.functions[reached]
         node = callee.implementation
         if node is None:
             return
         parameters = overloads._parameters(node)
-        positional = _positional(node, bound=bound)
-        received = [
-            positional[index].arg for index in positions if index < len(positional)
-        ]
+        positional = [argument.arg for argument in _positional(node, bound=bound)]
+        received = _filled(positional, *positions)
         received.extend(keyword for keyword in keywords if keyword in parameters)
         bounds = self._bounds(callee)
         annotations = self.annotations
@@ -4626,13 +4663,17 @@ def _keyword_only_record(
 def record_fields(
     package: overloads.Package, annotations: Annotations, record: str, depth: int = 0
 ) -> dict[str, Field]:
-    """The fields a record's ``__init__`` takes, its bases' first, by name."""
+    """The fields a record's ``__init__`` takes, by name, in the order it
+    takes them: those its bases lend, the last base's first as
+    ``dataclasses`` reads the bases in reverse, then its own; a field
+    written again keeps the place it first took.
+    """
     found = annotations.classes.get(record)
     if found is None or depth > _HIERARCHY:
         return {}
     module, node = found
     fields: dict[str, Field] = {}
-    for base in node.bases:
+    for base in reversed(node.bases):
         target = package.resolve(module, base)
         if target is not None and target in annotations.classes:
             fields.update(record_fields(package, annotations, target, depth + 1))

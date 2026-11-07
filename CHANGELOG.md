@@ -2340,7 +2340,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `io.VideoEncoderError` and `io.FFmpegNotFoundError`
   `phonometry._internal.video_encoders`, and
   `environment.AtmosphericAbsorptionWarning`, in a traceback and a repr,
-  `phonometry.environment`. A `Signal` or a `VideoOptions` pickled under
+  `phonometry.environment`. A `Signal` or a `SignalOrigin` pickled under
   4.0.0rc1 names a module of `phonometry.io` that no longer exists, so it
   no longer unpickles and has to be built again.
 

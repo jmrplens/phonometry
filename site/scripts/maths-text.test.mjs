@@ -3,10 +3,11 @@
 // The glossary's structured data and its symbol index carry the notation as
 // plain text, and the step that writes it used to drop every command it met
 // and turn the rest of the TeX into punctuation: nine terms whose symbol is a
-// Greek letter had an empty name, "$K_{2\mathrm{A}} \le 4$ dB" read
-// "K2A  4 dB", the thin space in "$2{,}2/(f\,\eta)$" became a comma beside a
-// decimal comma, and "$10^{-5}$" read "10-5". None of it showed on the page,
-// where KaTeX typesets the same strings, so nothing noticed.
+// Greek letter had an empty name, "$10\log_{10}B$" read "1010B",
+// "$K_{2\mathrm{A}} \le 4$ dB" read "K2A  4 dB", the thin space in
+// "$2{,}2/(f\,\eta)$" became a comma beside a decimal comma, and "$10^{-5}$"
+// read "10-5". None of it showed on the page, where KaTeX typesets the same
+// strings, so nothing noticed.
 //
 // These tests pin what each construction becomes and then run the step over
 // every string of the glossary, in both languages, for the defects that class
@@ -17,7 +18,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { plainText } from '../src/lib/maths-text.mjs';
+import { GREEK, plainText } from '../src/lib/maths-text.mjs';
 
 test('each construction the glossary writes reads as the text it stands for', () => {
 	const cases = [
@@ -28,6 +29,9 @@ test('each construction the glossary writes reads as the text it stands for', ()
 		['$C_{\\mathrm{I},50\\text{–}2500}$', 'CI,50–2500'],
 		// A Greek letter is the letter, and TeX swallows the space after it.
 		['$\\tau$', 'τ'],
+		// \mu is the Greek letter, U+03BC, as it is for TeX, and not the
+		// micro sign U+00B5 that looks like it.
+		['$\\mu$', '\u03bc'],
 		['$\\Delta R_\\mathrm{w}$', 'ΔRw'],
 		['$\\alpha R$', 'αR'],
 		// A relation or an operator is spaced, a unary sign is not.
@@ -44,6 +48,10 @@ test('each construction the glossary writes reads as the text it stands for', ()
 		['$1/\\cos^2\\varphi$', '1/cos² φ'],
 		['$-10\\log_{10}(1 - 10^{-0,1\\Delta L_p})$', '-10 log10(1 - 10^(-0,1ΔLp))'],
 		['$x^{1.75}$', 'x^1.75'],
+		// A prime is a superscript in TeX, and reads as the prime itself.
+		['$x^{\\prime}$', 'x′'],
+		['$R^\\prime$', 'R′'],
+		['$x^{\\prime\\prime}$', 'x′′'],
 		// A function name keeps clear of the number or letter beside it.
 		['$R = -10\\log_{10}\\tau$', 'R = -10 log10 τ'],
 		['$10\\log_{10}B$', '10 log10 B'],
@@ -62,6 +70,19 @@ test('a command with no text form stops the build with its name instead of vanis
 	assert.throws(() => plainText('$\\left( x \\right)$'), /no text form for \\left/);
 	assert.throws(() => plainText('$\\constructor$'), /no text form for \\constructor/);
 	assert.throws(() => plainText('$L_{p$'), /unbalanced brace/);
+	// A backslash with nothing after it is no command, and says so in the
+	// step's own words rather than as an error from inside it.
+	assert.throws(() => plainText('$a\\$'), /^Error: maths-text: a lone backslash ends "a\\"/);
+	assert.throws(() => plainText('$L_\\$'), /^Error: maths-text: a lone backslash ends "L_\\"/);
+});
+
+test('every Greek letter is written as a character of the Greek block, not as one that looks like it', () => {
+	// \mu was the micro sign U+00B5 once, which a reader looking for μ does
+	// not find.
+	const outside = Object.entries(GREEK)
+		.filter(([, letter]) => !/^[\u0370-\u03FF]$/u.test(letter))
+		.map(([name, letter]) => `\\${name}: U+${letter.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`);
+	assert.deepEqual(outside, []);
 });
 
 /** Every string of the glossary that is written to be read, in both languages. */

@@ -10,12 +10,14 @@
  *
  * A command stands for a character, a word or some space, and it is replaced
  * by that, never dropped. Dropping commands is what the glossary's own copy of
- * this step used to do, and the structured data read wrong in four ways: the
- * nine terms whose whole symbol is a Greek letter had an empty name,
- * "$K_{2\mathrm{A}} \le 4$ dB" read "K2A  4 dB", the thin space `\,` came out
- * as a comma beside a decimal comma ("2,2/(f,ηtot)"), and `10^{-5}` read
- * "10-5", the exponent glued to its base. So a command missing from the tables
- * below stops the build with its name, rather than leaving a hole in the text.
+ * this step used to do, and the structured data read wrong in five ways: every
+ * Greek letter went, so the nine terms whose whole symbol is one had an empty
+ * name; every named function went, so "$R = -10\log_{10}\tau$" read
+ * "R = -1010"; "$K_{2\mathrm{A}} \le 4$ dB" read "K2A  4 dB"; the thin space
+ * `\,` came out as a comma beside a decimal comma ("2,2/(f,tot)", where the η
+ * went too); and `10^{-5}` read "10-5", the exponent glued to its base. So a
+ * command missing from the tables below stops the build with its name, rather
+ * than leaving a hole in the text.
  *
  * What the text keeps of the typesetting:
  * - a subscript is written after its base, as the codes are ("LAeq");
@@ -42,7 +44,7 @@
 export const GREEK = Object.freeze({
 	alpha: 'α', beta: 'β', gamma: 'γ', Gamma: 'Γ', delta: 'δ', Delta: 'Δ',
 	epsilon: 'ε', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', vartheta: 'ϑ',
-	Theta: 'Θ', iota: 'ι', kappa: 'κ', lambda: 'λ', Lambda: 'Λ', mu: 'µ', nu: 'ν',
+	Theta: 'Θ', iota: 'ι', kappa: 'κ', lambda: 'λ', Lambda: 'Λ', mu: 'μ', nu: 'ν',
 	xi: 'ξ', Xi: 'Ξ', pi: 'π', Pi: 'Π', rho: 'ρ', varrho: 'ϱ', sigma: 'σ',
 	Sigma: 'Σ', tau: 'τ', upsilon: 'υ', phi: 'φ', varphi: 'φ', Phi: 'Φ', chi: 'χ',
 	psi: 'ψ', Psi: 'Ψ', omega: 'ω', Omega: 'Ω',
@@ -136,19 +138,38 @@ function closing(tex, open) {
 	throw new Error(`maths-text: an unbalanced brace in "${tex}"`);
 }
 
+/** The primes, which are superscripts already: `x^{\prime}` is x′, as `x'` is. */
+const PRIMES = new Set(['′', '″', '‴']);
+
 /**
- * A superscript as text: in superscript characters when each has one, and
- * after a caret otherwise, in brackets unless it is a single word or number.
+ * A superscript as text: a prime as itself, in superscript characters when
+ * each has one, and after a caret otherwise, in brackets unless it is a
+ * single word or number.
  *
  * @param {string} text The superscript, already read as text.
  * @returns {string} What follows the base.
  */
 function superscript(text) {
 	const characters = [...text];
+	if (characters.length > 0 && characters.every((character) => PRIMES.has(character))) return text;
 	if (characters.length > 0 && characters.every((character) => Object.hasOwn(SUPERSCRIPT, character))) {
 		return characters.map((character) => SUPERSCRIPT[character]).join('');
 	}
 	return /^[\p{L}\p{N}.,′']+$/u.test(text) ? `^${text}` : `^(${text})`;
+}
+
+/**
+ * The control sequence that starts at a backslash: a control word, the
+ * letters after it, or a control symbol, the one character after it.
+ *
+ * @param {string} tex The formula.
+ * @param {number} at Index of the backslash.
+ * @returns {[string, string]} The sequence as written, and its name.
+ */
+function controlSequence(tex, at) {
+	const match = /^\\([a-zA-Z]+|[\s\S])/.exec(tex.slice(at));
+	if (match === null) throw new Error(`maths-text: a lone backslash ends "${tex}"`);
+	return [match[0], match[1]];
 }
 
 /**
@@ -186,8 +207,7 @@ function atomsOf(tex, script) {
 			i = end + 1;
 			return inner;
 		}
-		const token =
-			tex[i] === '\\' ? /^\\(?:[a-zA-Z]+|[\s\S])/.exec(tex.slice(i))[0] : String.fromCodePoint(tex.codePointAt(i));
+		const token = tex[i] === '\\' ? controlSequence(tex, i)[0] : String.fromCodePoint(tex.codePointAt(i));
 		i += token.length;
 		// `L_\mathrm{eq}`: a command taken as an argument brings its own
 		// arguments with it, as TeX reads it.
@@ -206,7 +226,7 @@ function atomsOf(tex, script) {
 	while (i < tex.length) {
 		const character = tex[i];
 		if (character === '\\') {
-			const [command, name] = /^\\([a-zA-Z]+|[\s\S])/.exec(tex.slice(i));
+			const [command, name] = controlSequence(tex, i);
 			i += command.length;
 			// TeX reads the spaces after a control word as the end of its name.
 			if (/^[a-zA-Z]/.test(name)) while (/\s/.test(tex[i] ?? '')) i += 1;

@@ -369,7 +369,7 @@ def _warn_when_the_procedure_is_required(
     )
 
 
-def corner_level(corner_levels: NumericArrayLike) -> np.ndarray:
+def corner_level(corner_levels: NumericArrayLike) -> NDArray[np.float64]:
     r"""Corner sound pressure level :math:`L_\mathrm{Corner}` per band.
 
     Two shapes are accepted, and they are the two the standards describe.
@@ -433,7 +433,7 @@ def corner_level(corner_levels: NumericArrayLike) -> np.ndarray:
 
 def low_frequency_level(
     level: NumericArrayLike, corner: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Combine the default and corner levels into :math:`L_\mathrm{LF}`.
 
     Part 1 Formula (13), Part 2 Formula (16) and Part 3 Formula (5), which are
@@ -603,13 +603,13 @@ class LowFrequencyResult(OwnsArrays):
         }
     )
 
-    frequencies: np.ndarray
-    levels: np.ndarray
-    reverberation_time: np.ndarray | None
-    low_frequency_bands: np.ndarray
-    l_default: np.ndarray
-    l_corner: np.ndarray
-    l_lf: np.ndarray
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
+    reverberation_time: NDArray[np.float64] | None
+    low_frequency_bands: NDArray[np.float64]
+    l_default: NDArray[np.float64]
+    l_corner: NDArray[np.float64]
+    l_lf: NDArray[np.float64]
     volume: float
     reverberation_63_octave: float | None
 
@@ -630,7 +630,7 @@ class LowFrequencyResult(OwnsArrays):
         return plot_low_frequency_procedure(self, ax=ax, language=language, **kwargs)
 
 
-def _low_frequency_indices(frequencies: np.ndarray) -> np.ndarray:
+def _low_frequency_indices(frequencies: NDArray[np.float64]) -> NDArray[np.intp]:
     """Locate the 50 Hz, 63 Hz and 80 Hz bands in a band-centre vector.
 
     Matched by nominal centre within :data:`_BAND_MATCH_RTOL`, so a caller who
@@ -672,9 +672,9 @@ def _substituted_reverberation(
     room: str,
     procedure: LowFrequencyProcedure,
     reverberation_time: NumericArrayLike | None,
-    levels: np.ndarray,
-    indices: np.ndarray,
-) -> np.ndarray | None:
+    levels: NDArray[np.float64],
+    indices: NDArray[np.intp],
+) -> NDArray[np.float64] | None:
     """Clause 10.4's reverberation times, or ``None`` where it does not apply.
 
     Clause 10.4 of ISO 16283-1 and -2, and Clause 8.4 of ISO 16283-3, put the

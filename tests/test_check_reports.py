@@ -146,3 +146,28 @@ def test_unreadable_fiche_fails() -> None:
     problem = cr.pdf_problem(_fiche_pdf("Rw = 34 dB"), b"not a pdf at all")
     assert problem is not None
     assert "could not extract text" in problem
+
+
+def test_a_fiche_named_outside_a_component_the_page_renders_is_not_shown() -> None:
+    """Only a ``ReportPreview`` the page renders shows a fiche: one quoted in a
+    fence, a code span or a comment, or written in the frontmatter, shows none,
+    and a fiche named only there is one no reader sees.
+    """
+    page = (
+        "---\n"
+        "description: 'Shows <ReportPreview name=\"frontmatter\" /> here'\n"
+        "---\n"
+        "\n"
+        "```mdx\n"
+        '<ReportPreview name="fenced" />\n'
+        "```\n"
+        "\n"
+        'Embed it with `<ReportPreview name="spanned" />` in the guide.\n'
+        "\n"
+        '{/* <ReportPreview name="commented" /> */}\n'
+        "\n"
+        "<ReportPreview\n"
+        '  name="shown"\n'
+        "/>\n"
+    )
+    assert cr.shown_fiches(page) == {"shown"}

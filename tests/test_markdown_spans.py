@@ -32,6 +32,7 @@ from markdown_spans import (
     inline_spans,
     inside_quotation,
     lines_read_whole,
+    page_markup,
     quote_depth,
     replace_inline_spans_by_block,
 )
@@ -462,3 +463,65 @@ def test_the_marks_of_a_quotation_are_read_by_their_columns(
         depth,
         inside,
     )
+
+
+#: The tag each case of the page markup writes, in a place that renders it or not.
+_TAG = '<Video name="a" />'
+
+
+@pytest.mark.parametrize(
+    ("page", "kind"),
+    [
+        pytest.param(f"---\ndescription: '{_TAG}'\n---\n", "mdx", id="frontmatter"),
+        pytest.param(f"```mdx\n{_TAG}\n```\n", "mdx", id="a fence of backticks"),
+        pytest.param(f"~~~\n{_TAG}\n~~~\n", "mdx", id="a fence of tildes"),
+        pytest.param(
+            f"- item\n\n  ```\n  {_TAG}\n  ```\n", "mdx", id="a fence in a list item"
+        ),
+        pytest.param(f"Embed it with `{_TAG}` here.\n", "mdx", id="a code span"),
+        pytest.param(
+            f"Embed it with\n`{_TAG}`\nhere.\n", "mdx", id="a code span on its own line"
+        ),
+        pytest.param(f"{{/* {_TAG} */}}\n", "mdx", id="an MDX comment"),
+        pytest.param(f"{{/*\n{_TAG}\n*/}}\n", "mdx", id="an MDX comment over lines"),
+        pytest.param(f"$$\n{_TAG}\n$$\n", "mdx", id="display maths"),
+        pytest.param(f"<!-- {_TAG} -->\n", "md", id="an HTML comment"),
+        pytest.param(f"Text.\n\n    {_TAG}\n", "md", id="indented code"),
+    ],
+)
+def test_a_tag_the_page_does_not_render_is_blanked(page: str, kind: str) -> None:
+    """A tag quoted in code, a comment, maths or the frontmatter is gone, the lines kept."""
+    shown = page_markup(page, kind=kind)
+    assert "<Video" not in shown
+    assert shown.count("\n") == page.count("\n")
+
+
+@pytest.mark.parametrize(
+    ("page", "kind"),
+    [
+        pytest.param(f"Text.\n\n{_TAG}\n", "mdx", id="a tag alone"),
+        pytest.param('<Video\n  name="a"\n/>\n', "mdx", id="a tag over lines"),
+        pytest.param(
+            f"A clip, {_TAG}, in a paragraph.\n", "mdx", id="a tag in a paragraph"
+        ),
+        pytest.param(
+            f"---\ntitle: A\n---\n\n{_TAG}\n", "mdx", id="a tag after the frontmatter"
+        ),
+        pytest.param(
+            f"Use `code` and then\n{_TAG}\n", "mdx", id="a tag after a code span"
+        ),
+        pytest.param(f"Text.\n\n    {_TAG}\n", "mdx", id="indented on an mdx page"),
+    ],
+)
+def test_a_tag_the_page_renders_stands_where_it_is_written(
+    page: str, kind: str
+) -> None:
+    shown = page_markup(page, kind=kind)
+    assert [line.find("<Video") for line in shown.split("\n")] == [
+        line.find("<Video") for line in page.split("\n")
+    ]
+
+
+def test_a_frontmatter_that_never_closes_is_read_as_the_page() -> None:
+    page = f"---\n{_TAG}\n"
+    assert page_markup(page) == page

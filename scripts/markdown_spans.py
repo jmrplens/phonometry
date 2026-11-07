@@ -329,6 +329,49 @@ def blank_inline_spans_by_block(
     )
 
 
+def _frontmatter_lines(lines: Sequence[str]) -> int:
+    """How many lines of a page its frontmatter takes, both fences in, 0 with none.
+
+    Its fences stand at the first column, as Astro reads them, and one that
+    never closes is no frontmatter.
+    """
+    if not lines or lines[0].rstrip() != "---":
+        return 0
+    closing = next((n for n in range(1, len(lines)) if lines[n].rstrip() == "---"), 0)
+    return closing + 1 if closing else 0
+
+
+def page_markup(text: str, *, kind: str = "mdx") -> str:
+    """*text* with every part of the page that renders no tag blanked.
+
+    A component a page renders, a ``<Video>`` or a ``<ReportPreview>``, is one
+    written outside its frontmatter, its code, fenced or indented, its display
+    maths, its inline code and maths spans and its comments. Quoted in any of
+    those it is text the page shows or hides, and a reader that looks for a
+    component in the page as written counts it as one the page embeds. Each of
+    them is blanked here as the site reads it: the frontmatter by its fences,
+    the blocks by one walk of the page (:func:`markdown_fences.page_lines`)
+    and the spans and comments by block (:func:`blank_inline_spans_by_block`).
+    Every character blanked but a line end becomes a space, so a tag found in
+    the result stands at the line and the column where the page writes it.
+
+    :param text: The page as written, its frontmatter in.
+    :param kind: ``"md"`` or ``"mdx"``, the page's kind.
+    :return: The page, as many lines long as it was.
+    """
+    lines = text.split("\n")
+    head = _frontmatter_lines(lines)
+    body = [" " * len(line) for line in lines[:head]] + lines[head:]
+    walked = list(page_lines(body, kind=kind))
+    prose = [
+        " " * len(line) if read.role in NOT_INLINE_ROLES else line
+        for line, read in zip(body, walked, strict=True)
+    ]
+    return blank_inline_spans_by_block(
+        "\n".join(prose), "`$", kind, kind=kind, walked=walked
+    )
+
+
 def lines_read_whole(lines: Sequence[str], read: Callable[[str], str]) -> list[str]:
     """*lines* joined, handed to *read* as one text, and split back, a line each.
 

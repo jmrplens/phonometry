@@ -1,0 +1,93 @@
+---
+/**
+ * The line under a guide's title that says which conformance checks verify
+ * it: how many checks of the report are based on the standards the page
+ * implements, against which of them, and in which domains of the report, each
+ * a link to its section, which the report opens on arrival.
+ *
+ * Guides used to say that the library is verified in CI, and 21 of 186 linked
+ * the report at all, at its top, above 111 closed sections. A reader who
+ * wanted the checks behind the page in front of them had to search the report
+ * for each standard by hand. The join is made once per language and build
+ * (src/lib/page-evidence.ts, src/lib/conformance-evidence.mjs), from the
+ * page's own `references` frontmatter and the documents each check cites in
+ * docs/conformance.json, so the line cannot name a standard the page does
+ * not implement, nor a domain that checks none of them.
+ *
+ * Like the header chips, which summarise the bibliography, the line
+ * summarises another document: the page's date follows its own text
+ * (src/lib/content-dates.mjs), not the report's.
+ *
+ * A page whose standards no check is based on renders nothing and carries no
+ * `data-verified-by` (src/lib/page-markdown.mjs), which is how a reader of the
+ * built page tells the two apart.
+ */
+import { pageEvidence } from '../lib/page-evidence';
+import { VERIFIED_BY_ATTRIBUTE } from '../lib/page-markdown.mjs';
+
+const { entry, lang } = Astro.locals.starlightRoute;
+const locale = lang.startsWith('es') ? 'es' : 'en';
+
+const evidence = await pageEvidence(locale);
+const verified = evidence.verifiedBy((entry.data as { references?: object[] }).references);
+
+const words =
+  locale === 'es'
+    ? {
+        lead: (n: number) => `Verificado por ${n} ${n === 1 ? 'comprobación' : 'comprobaciones'} de conformidad frente a`,
+        domain: (n: number) => `${n} en`,
+        listLocale: 'es',
+      }
+    : {
+        lead: (n: number) => `Verified by ${n} conformance ${n === 1 ? 'check' : 'checks'} against`,
+        domain: (n: number) => `${n} in`,
+        listLocale: 'en-GB',
+      };
+
+/**
+ * A list as the page's language joins it ("A, B and C", "A, B e IEC ..."),
+ * cut into its items and the words between them so each item can carry its
+ * own markup. The list is formatted from the words a reader sees, so the
+ * Spanish conjunction is the one the next item calls for.
+ */
+function listParts(items: string[]) {
+  return new Intl.ListFormat(words.listLocale, { type: 'conjunction' }).formatToParts(items);
+}
+
+const designations = verified ? listParts(verified.designations).map((part) => part.value).join('') : '';
+const domainParts = verified
+  ? (() => {
+      let next = 0;
+      return listParts(verified.domains.map((domain) => `${words.domain(domain.checks)} ${domain.title}`)).map(
+        (part) => (part.type === 'element' ? { domain: verified.domains[next++] } : { text: part.value }),
+      );
+    })()
+  : [];
+const attribute = { [VERIFIED_BY_ATTRIBUTE]: String(verified?.checks ?? '') };
+---
+
+{
+  verified && (
+    <p class="verified-by" {...attribute}>
+      {words.lead(verified.checks)} {designations}:{' '}
+      {domainParts.map((part) =>
+        'domain' in part && part.domain ? (
+          <Fragment>
+            {words.domain(part.domain.checks)}{' '}<a href={part.domain.path}>{part.domain.title}</a>
+          </Fragment>
+        ) : (
+          part.text
+        ),
+      )}.
+    </p>
+  )
+}
+
+<style>
+  .verified-by {
+    margin: 0.35rem 0 0;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+    line-height: 1.5;
+  }
+</style>

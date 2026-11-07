@@ -541,7 +541,7 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 		const domainRows = byDomain.get(domain.id) ?? [];
 		const green = domain.passing === domain.checks;
 		return (
-			<details class="conformance-domain" data-domain-section={domain.id} open={!green}>
+			<details class="conformance-domain" id={domain.id} data-domain-section={domain.id} open={!green}>
 				{/*
 					Decorative mark: the tally beside it already says how many
 					passed. It is an empty child of its own and not the summary's

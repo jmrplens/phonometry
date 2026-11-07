@@ -17,8 +17,10 @@
 // The site-wide graph is one block on the pages of both languages, so its
 // descriptions, feature list and keywords are held to carry each text in
 // English and in Spanish, the feature list one entry per topic that teaches,
-// and no placeholder; its requirements are held to pyproject.toml, and every
-// API page to the release and the Python it documents.
+// and no placeholder; its requirements are held to pyproject.toml, whatever floors and markers the
+// file gives (scripts/shared/requirement-defects.test.mjs holds the sentence
+// to the lines that give each Python a floor of its own), and every API page
+// to the release and the Python it documents.
 //
 // Each test here writes a build of a few pages into a directory of its own and
 // runs the check on it the way CI does. The pages come from
@@ -33,6 +35,7 @@ import { test } from 'node:test';
 import { glossary } from '../src/data/glossary.mjs';
 import { glossaryTermSet } from '../src/lib/glossary-structured-data.mjs';
 import { en as homeEn } from '../src/data/home.ts';
+import { dependencies, extras, softwareRequirements } from '../src/data/repo-stats.mjs';
 import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { domainIds, topics } from '../src/data/topics.mjs';
 import {
@@ -962,6 +965,15 @@ function changedAll(changes) {
 	});
 }
 
+/** A requirement as a failure line names it: pyproject.toml's text without spaces, its marker in brackets. */
+const asWritten = ({ text }) => {
+	const [requirement, marker] = text.split(';').map((part) => part.replace(/\s+/g, ''));
+	return marker ? `${requirement} (${marker})` : requirement;
+};
+
+/** "a", "a and b", "a, b and c", as a failure line lists what it names. */
+const listed = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`);
+
 /** The label of each topic that teaches, in the order the navigation lists them, in `lang`. */
 const topicLabels = (lang) => domainIds.map((id) => topics.find((topic) => topic.id === id).label[lang]);
 
@@ -1117,9 +1129,17 @@ test('requirements typed by hand, as every page published them, fail and name wh
 		}),
 	});
 	assert.equal(ran.status, 1);
+	// Every requirement and every extra pyproject.toml gives, read from it, so
+	// the test holds whichever floors the file sets and whatever markers it
+	// writes them behind.
+	const named = [...dependencies.map(asWritten), ...extras.map((extra) => `the extra ${extra.name}`)];
+	assert.ok(named.length > 2, 'pyproject.toml gives no requirement or no extra; update this test');
 	assert.match(
 		ran.err,
-		/FAIL SoftwareApplication softwareRequirements leaves out numpy>=2\.0\.2, scipy>=1\.14\.0, the extra perf, the extra plot, the extra report, the extra audio, the extra torch and the extra full, which pyproject\.toml gives/,
+		new RegExp(
+			`FAIL SoftwareApplication softwareRequirements leaves out ${RegExp.escape(listed(named))}, ` +
+				'which pyproject\\.toml gives \\(on 10 pages\\)',
+		),
 	);
 	const none = history(t, {
 		nodes: changedAll({
@@ -1130,6 +1150,27 @@ test('requirements typed by hand, as every page published them, fail and name wh
 	});
 	assert.equal(none.status, 1);
 	assert.match(none.err, /FAIL SoftwareApplication softwareRequirements is undefined, not a text naming what pyproject\.toml requires/);
+});
+
+test('a requirement stated with a version longer than the one pyproject.toml gives fails, naming it', (t) => {
+	const [first] = dependencies;
+	const floor = ` ${first.clauses[0].version}`;
+	assert.ok(softwareRequirements.includes(floor), softwareRequirements);
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.softwareRequirements = softwareRequirements.replace(floor, `${floor}0`);
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication softwareRequirements leaves out ${RegExp.escape(asWritten(first))}, ` +
+				'which pyproject\\.toml gives \\(on 10 pages\\)',
+		),
+	);
 });
 
 test('every API page names the release and the Python it documents, and the check says so', (t) => {

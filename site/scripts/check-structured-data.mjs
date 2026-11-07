@@ -60,8 +60,10 @@
 // opening with the topic's own label there; and no feature or keyword may
 // publish the placeholder. The software's requirements are held to
 // pyproject.toml, as src/data/repo-stats.mjs reads it: the Python it requires,
-// every requirement with its versions, and every extra by name. Every API page
-// has to name the release in VERSION and the Python pyproject.toml requires.
+// every requirement as one phrase with its versions and the Python its marker
+// limits it to, and every extra by name (scripts/shared/requirement-defects.mjs).
+// Every API page has to name the release in VERSION and the Python
+// pyproject.toml requires.
 //
 // The About page is held to the Person node it carries: every span of years
 // the page writes, "(2011-2018)", "from 2019 to 2023", "de 2019 a 2023" or any
@@ -90,6 +92,7 @@ import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
+import { requirementDefects } from './shared/requirement-defects.mjs';
 
 import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
 
@@ -402,9 +405,6 @@ const shown = (value) => {
 	return text === undefined ? 'undefined' : text.length > 120 ? `${text.slice(0, 117)}...` : text;
 };
 
-/** "a", "a and b", "a, b and c". */
-const listed = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`);
-
 /** Whether `value` is a text JSON-LD tags with one of the site's languages. */
 const isTagged = (value) =>
 	value !== null &&
@@ -521,38 +521,6 @@ function keywordDefects(keywords) {
 }
 
 /**
- * What the software node's requirements leave out of pyproject.toml: the
- * Python it requires, each requirement with every version of its clauses and
- * of its Python marker, and every extra by name. The words around them are
- * the site's; what is held is that each of these is there, with its versions.
- *
- * @param {unknown} requirements The node's `softwareRequirements`.
- * @returns {string[]} The defects.
- */
-function requirementDefects(requirements) {
-	if (typeof requirements !== 'string' || !requirements) {
-		return [`SoftwareApplication softwareRequirements is ${shown(requirements)}, not a text naming what pyproject.toml requires`];
-	}
-	const spaceless = requirements.replace(/\s+/g, '').toLowerCase();
-	const missing = [];
-	const python = `python${requiresPython.replace(/\s+/g, '')}`.toLowerCase();
-	if (!spaceless.includes(python)) missing.push(`requires-python ${requiresPython}`);
-	for (const { text, name, clauses, marker } of dependencies) {
-		const versions = [...clauses.map((clause) => `${clause.operator}${clause.version}`), ...(marker ? [marker.version] : [])];
-		const head = `${name}${clauses[0] ? `${clauses[0].operator}${clauses[0].version}` : ''}`.toLowerCase();
-		if (!spaceless.includes(head) || !versions.every((version) => spaceless.includes(version.toLowerCase()))) {
-			missing.push(text.split(';')[0].replace(/\s+/g, ''));
-		}
-	}
-	for (const extra of extras) {
-		if (!new RegExp(`\\b${RegExp.escape(extra.name)}\\b`).test(requirements)) missing.push(`the extra ${extra.name}`);
-	}
-	return missing.length === 0
-		? []
-		: [`SoftwareApplication softwareRequirements leaves out ${listed(missing)}, which pyproject.toml gives`];
-}
-
-/**
  * What the site-wide nodes get wrong about the two languages and the package,
  * one sentence per defect, so the same defect on every page is reported once.
  *
@@ -570,7 +538,7 @@ function languageDefects(nodes) {
 		...descriptionDefects('SoftwareApplication', app.description, softwareDescriptions),
 		...featureDefects(app.featureList),
 		...keywordDefects(app.keywords),
-		...requirementDefects(app.softwareRequirements),
+		...requirementDefects(app.softwareRequirements, { requiresPython, dependencies, extras }),
 	];
 }
 

@@ -124,7 +124,7 @@ _RATING_FREQS = (
 )
 
 
-def _finite(values: NumericArrayLike, name: str) -> np.ndarray:
+def _finite(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     a = np.atleast_1d(real_array(values, name))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
@@ -136,7 +136,7 @@ def acceleration_level(
     acceleration: NumericArrayLike,
     *,
     reference: float = _ACCELERATION_REFERENCE,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Vibratory acceleration level ``La`` (ISO 16251-1 Formula (1)).
 
     :math:`L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_0)` dB.
@@ -332,11 +332,11 @@ class FloorCoveringImprovementResult(OwnsArrays):
         and the 6 dB of Formula (2), so it is not a field.
     """
 
-    frequencies: np.ndarray
-    improvement: np.ndarray
+    frequencies: NDArray[np.float64]
+    improvement: NDArray[np.float64]
     delta_lw: int | None
     ci_delta: int | None = None
-    background_margin_db: np.ndarray | None = None
+    background_margin_db: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject an improvement spectrum whose columns cover different bands.
@@ -406,7 +406,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def limited(self) -> np.ndarray:
+    def limited(self) -> NDArray[np.bool_]:
         r"""Per band, whether a position reached the 1.3 dB limit of measurement.
 
         ``True`` where the smallest margin over the background fell below the
@@ -500,7 +500,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
         )
 
 
-def _rating_slice(frequencies: np.ndarray) -> np.ndarray | None:
+def _rating_slice(frequencies: NDArray[np.float64]) -> NDArray[np.intp] | None:
     """Indices of the 16 rating bands 100-3150 Hz within ``frequencies``.
 
     Clause 6.3 measures over 18 bands 100-5000 Hz (optionally extended down
@@ -520,7 +520,7 @@ def _rating_slice(frequencies: np.ndarray) -> np.ndarray | None:
 
 
 def _rating(
-    improvement: np.ndarray, frequencies: np.ndarray
+    improvement: NDArray[np.float64], frequencies: NDArray[np.float64]
 ) -> tuple[int | None, int | None]:
     """``(ΔLw, CI,Δ)`` over the 100-3150 Hz sub-range, or ``(None, None)``."""
     idx = _rating_slice(frequencies)
@@ -587,7 +587,7 @@ def impact_improvement(
         )
         raise ValueError(msg)
 
-    margin: np.ndarray | None = None
+    margin: NDArray[np.float64] | None = None
     if background is not None:
         lb = _finite(background, "background")
         if lb.shape not in ((n_bands,), l0.shape):
@@ -649,8 +649,8 @@ class OctaveBandSpectrum(OwnsArrays):
 
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"values": "dB"})
 
-    frequencies: np.ndarray
-    values: np.ndarray
+    frequencies: NDArray[np.float64]
+    values: NDArray[np.float64]
     quantity: Quantity
 
     def __post_init__(self) -> None:
@@ -744,7 +744,7 @@ def improvement_octave_bands(
     )
 
 
-def _octave_centres(freqs: np.ndarray) -> list[float]:
+def _octave_centres(freqs: NDArray[np.float64]) -> list[float]:
     """The octave centres (…125, 250, 500…) present among one-third-octave freqs."""
     octaves = [
         31.5,

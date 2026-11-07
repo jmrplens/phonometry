@@ -75,6 +75,9 @@ export const LIBRARY_MODIFIED = commitDay('%ct', '-1', '--', 'src');
 /** The platforms the software node names when a test does not say otherwise. */
 export const PLATFORMS = ['Linux', 'macOS', 'Windows'];
 
+/** The software's DOI, which names every version of the library and no report. */
+export const SOFTWARE_DOI = '10.5281/zenodo.0000001';
+
 /** The release the API pages document, as VERSION names it. */
 export const VERSION = readFileSync(join(REPOSITORY_ROOT, 'VERSION'), 'utf8').trim();
 
@@ -172,6 +175,7 @@ export function siteNodes(operatingSystem = PLATFORMS) {
 			'@type': 'SoftwareApplication',
 			'@id': SITE.software,
 			name: 'phonometry',
+			identifier: { '@type': 'PropertyValue', propertyID: 'DOI', value: SOFTWARE_DOI },
 			alternateName: 'PyOctaveBand',
 			codeRepository: REPOSITORY,
 			releaseNotes: `${REPOSITORY}/releases`,
@@ -329,8 +333,9 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
  * `content` (path to text) as the content tree in another, run the check on
  * the two the way CI does, and say how it ended. A build with no `content`
  * gets an empty tree, so the check holds it to no page of the site's; its
- * `glossary`, when it gives one, is the glossary entries it was made from, in
- * the shape src/data/glossary.mjs exports them.
+ * `report`, when it gives one, is the conformance report it was made from,
+ * and its `glossary` the glossary entries, in the shape src/data/glossary.mjs
+ * exports them.
  *
  * Each page carries two blocks, as the built site does: the site-wide nodes
  * astro.config.mjs puts on every page, and the page's own graph from
@@ -342,20 +347,31 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
  * @param {import('node:test').TestContext} t The test, which removes the build when it ends.
  * @param {Record<string, {path: string, nodes: object[], text?: string, blocks?: (object|string)[]}>|object[]} built
  *   The pages, under `content` the pages of the content tree they are built from, and under
- *   `glossary` the glossary entries.
+ *   `report` the conformance report and `glossary` the glossary entries.
  * @returns {{status: number|null, out: string, err: string}} The check's exit status and what it printed.
  */
 export function check(t, built) {
-	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
-	const tree = mkdtempSync(join(tmpdir(), 'check-structured-data-content-'));
-	t.after(() => {
-		rmSync(dist, { recursive: true, force: true });
-		rmSync(tree, { recursive: true, force: true });
-	});
-	const { content = {}, glossary, ...pages } = built;
+	const root = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
+	t.after(() => rmSync(root, { recursive: true, force: true }));
+	const dist = join(root, 'dist');
+	const tree = join(root, 'content');
+	mkdirSync(dist);
+	mkdirSync(tree);
+	const { content = {}, report, glossary, ...pages } = built;
 	for (const [path, text] of Object.entries(content)) {
 		mkdirSync(dirname(join(tree, path)), { recursive: true });
 		writeFileSync(join(tree, path), text);
+	}
+	const args = [CHECK, dist, tree];
+	if (report !== undefined) {
+		const file = join(root, 'conformance.json');
+		writeFileSync(file, JSON.stringify(report));
+		args.push(`--report=${file}`);
+	}
+	if (glossary !== undefined) {
+		const file = join(root, 'glossary.mjs');
+		writeFileSync(file, `export const glossary = ${JSON.stringify(glossary)};\n`);
+		args.push(`--glossary=${file}`);
 	}
 	const block = (body) => `<script type="application/ld+json">${body}</script>`;
 	const script = (nodes) => block(JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes }));
@@ -369,14 +385,6 @@ export function check(t, built) {
 			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head>` +
 				`<body><main>${text}</main>${blocks.map(further).join('')}</body></html>`,
 		);
-	}
-	const args = [CHECK, dist, tree];
-	if (glossary !== undefined) {
-		const folder = mkdtempSync(join(tmpdir(), 'check-structured-data-glossary-'));
-		t.after(() => rmSync(folder, { recursive: true, force: true }));
-		const file = join(folder, 'glossary.mjs');
-		writeFileSync(file, `export const glossary = ${JSON.stringify(glossary)};\n`);
-		args.push(`--glossary=${file}`);
 	}
 	const ran = spawnSync(process.execPath, args, { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };

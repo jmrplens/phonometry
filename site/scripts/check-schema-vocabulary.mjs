@@ -28,10 +28,23 @@
 //   its reason, and an exception that no page uses any more;
 // - a node value whose types, and their supertypes, are all outside the
 //   property's `rangeIncludes`. A bare `{"@id"}` reference is resolved to the
-//   types its node has on the same page, else anywhere in the build;
+//   types its node has on the same page, else anywhere in the build, and
+//   each member of a `@list` or a `@set` is held to the range on its own;
 // - a node with properties and no `@type`. One that only adds properties to
 //   a node typed elsewhere, by its `@id`, is held to that node's types, on
-//   the same page first, then anywhere in the build.
+//   the same page first, then anywhere in the build. One whose `@id` names a
+//   node of another site, which this build cannot type, does not fail for
+//   that, and is still held to all that does not depend on a type: each of
+//   its properties must be one schema.org defines, and each node value must
+//   be in its range.
+//
+// The JSON-LD keywords are read the way a JSON-LD processor reads them. A
+// value object (`@value`) is a literal, whatever datatype its `@type` names,
+// and holds no node. A property under `@reverse` states the node under it as
+// the subject, so that node's types are held to the domain, and the node
+// that carries the map as the value, so its types are held to the range.
+// What a node groups under `@nest` is its own, and an `@included` node is a
+// node of the graph.
 //
 // Two shapes are accepted on purpose, as the Schema Markup Validator accepts
 // them: a literal (text, a number, a date or an `@value` object) stands for
@@ -47,9 +60,10 @@
 // this site's next build with nothing changed here. On that node, and on
 // every node nested in it, a value outside its range still fails, as it
 // does in jmrp.io's own check, but the other findings are reported and do
-// not fail, so that change cannot stop this site from deploying. A node is
-// another site's when the top-level node it sits in has an `@id` that is
-// neither a page of this site nor this project's repository (OWN_ORIGINS).
+// not fail, so that change cannot stop this site from deploying. The check
+// knows the node by its `@id`, `personId` in src/data/site.mjs, the one each
+// page's head names the maintainer by. Every other node is this site's
+// writing, whatever its `@id`, and fails on every finding.
 //
 // It is ported from the check jmrp.io runs on its own build, against the same
 // release. That one fails on a range and only warns on a domain; all three
@@ -63,7 +77,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { basePath, siteUrl } from '../src/data/site.mjs';
+import { basePath, personId, siteUrl } from '../src/data/site.mjs';
 import { VOCABULARY_PATH } from './generate-schema-vocabulary.mjs';
 import { isRedirectStub, reporter, walk as walkBuild } from './shared/dist-pages.mjs';
 
@@ -178,15 +192,66 @@ export function jsonLdBlocks(html) {
 /**
  * @typedef {{via: string | undefined, owner: string | null,
  *   parent: Record<string, unknown> | undefined}} Position Where a node sits:
- *   the property it is the value of (undefined at the top), the `@id` of the
- *   top-level node it sits in (null when that node has none, so this page
- *   wrote it), and the node it is the value of.
+ *   the property it is the value of (undefined at the top, `@reverse.name`
+ *   under a `@reverse` map), the `@id` of the top-level node it sits in (null
+ *   when that node has none), and the node it is the value of.
  */
 
+/** Whether `value` is a JSON object: not null, not an array. */
+const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+
 /**
- * Calls `fn` on every object node under `value`, depth first, with where it
- * sits. Each member of a `@graph` is a top-level node, and so is the block
- * itself when it has no `@graph`; `@context` is not data and is not entered.
+ * The properties a node states, as `[name, value]` pairs: its keys that are
+ * not keywords, and those it groups under `@nest`, which are as much its own.
+ *
+ * @param {Record<string, unknown>} node A JSON-LD node.
+ * @returns {[string, unknown][]} Its properties.
+ */
+function properties(node) {
+	const out = [];
+	for (const [key, value] of Object.entries(node)) {
+		if (key === '@nest') {
+			for (const nested of [value].flat()) if (isObject(nested)) out.push(...properties(nested));
+		} else if (!key.startsWith('@')) {
+			out.push([key, value]);
+		}
+	}
+	return out;
+}
+
+/**
+ * The properties a node is the value of, from its `@reverse` map, as
+ * `[name, subjects]` pairs.
+ *
+ * @param {Record<string, unknown>} node A JSON-LD node.
+ * @returns {[string, unknown][]} Each reverse property and the nodes it
+ *   names as its subjects.
+ */
+const reverseProperties = (node) =>
+	isObject(node['@reverse']) ? Object.entries(node['@reverse']).filter(([key]) => !key.startsWith('@')) : [];
+
+/**
+ * The single values a property's value holds: the items of an array and the
+ * members of a `@list` or a `@set`, unwrapped to the values in them.
+ *
+ * @param {unknown} value A property's value.
+ * @returns {unknown[]} Each value on its own.
+ */
+function members(value) {
+	if (Array.isArray(value)) return value.flatMap(members);
+	if (isObject(value) && ('@list' in value || '@set' in value)) return members(value['@list'] ?? value['@set']);
+	return [value];
+}
+
+/**
+ * Calls `fn` on every node under `value`, depth first, with where it sits.
+ * Each member of a `@graph` is a top-level node, and so is the block itself
+ * when it has no `@graph`. The other keywords are read as JSON-LD reads them:
+ * a value object is a literal and holds no node; a `@list` or a `@set` is no
+ * node, and its members sit where it sits; a property under `@nest` is the
+ * node's own; a node under `@reverse` is the value of `@reverse.name`; and an
+ * `@included` node sits at the top, written by the source of the node that
+ * includes it. `@context` is not data and is not entered.
  *
  * @param {unknown} value A parsed block, or any part of one.
  * @param {(node: Record<string, unknown>, position: Position) => void} fn The
@@ -199,19 +264,23 @@ function visit(value, fn, position) {
 		for (const item of value) visit(item, fn, position);
 		return;
 	}
-	if (!value || typeof value !== 'object') return;
+	if (!isObject(value) || '@value' in value) return;
+	if ('@list' in value || '@set' in value) {
+		visit(value['@list'] ?? value['@set'], fn, position);
+		return;
+	}
 	const here = position ?? {
 		via: undefined,
 		owner: typeof value['@id'] === 'string' ? value['@id'] : null,
 		parent: undefined,
 	};
 	fn(value, here);
-	for (const [key, child] of Object.entries(value)) {
-		if (key === '@context') continue;
-		if (key === '@graph') visit(child, fn);
-		else if (key.startsWith('@')) visit(child, fn, here);
-		else visit(child, fn, { via: key, owner: here.owner, parent: value });
+	for (const [key, child] of properties(value)) visit(child, fn, { via: key, owner: here.owner, parent: value });
+	for (const [key, child] of reverseProperties(value)) {
+		visit(child, fn, { via: `@reverse.${key}`, owner: here.owner, parent: value });
 	}
+	if ('@graph' in value) visit(value['@graph'], fn);
+	if ('@included' in value) visit(value['@included'], fn, { via: undefined, owner: here.owner, parent: undefined });
 }
 
 /**
@@ -290,22 +359,49 @@ function flag(ctx, kind, key) {
 }
 
 /**
+ * Whether a node of `types` sits outside `domain`: none of its types, nor
+ * their supertypes, is in it. A node of no known type, and a property with
+ * no domain, are never outside.
+ *
+ * @param {string[]} types The node's types.
+ * @param {string[]} domain The property's `domainIncludes`.
+ * @param {ReturnType<typeof createVocabulary>} vocabulary The lookups.
+ * @returns {boolean} Whether the property may not sit on the node.
+ */
+const outsideOf = (types, domain, vocabulary) =>
+	types.length > 0 && domain.length > 0 && types.every((t) => domain.every((d) => !vocabulary.isA(t, d)));
+
+/**
+ * Whether a node of `types` may be the value of a property of `range`: one of
+ * its types is in it, through a supertype if need be, or is a Role, which
+ * stands in for the value it qualifies.
+ *
+ * @param {string[]} types The value's types.
+ * @param {string[]} range The property's `rangeIncludes`.
+ * @param {ReturnType<typeof createVocabulary>} vocabulary The lookups.
+ * @returns {boolean} Whether the value fits.
+ */
+const inRange = (types, range, vocabulary) =>
+	types.some((t) => vocabulary.isA(t, 'Role') || range.some((r) => vocabulary.isA(t, r)));
+
+/**
  * Holds the properties of one node to the vocabulary, as a node of `own`.
  *
  * @param {Record<string, unknown>} node The node.
- * @param {string[]} own Its types, or those its `@id` has elsewhere.
+ * @param {string[]} own Its types, or those its `@id` has elsewhere; empty
+ *   when no type is known, and then nothing is held to a domain.
  * @param {string | undefined} via The property the node is the value of.
  * @param {object} ctx The lookups, the page, the findings to add to, and
  *   whether the node is another site's.
+ * @param {string} [where] How the findings name the node; its types by
+ *   default.
  * @returns {number} How many properties were held to the vocabulary.
  */
-function checkNode(node, own, via, ctx) {
+function checkNode(node, own, via, ctx, where = own.join('+')) {
 	const { vocabulary, found, file } = ctx;
-	const where = own.join('+');
 	const isRole = own.some((t) => vocabulary.isA(t, 'Role'));
 	let checked = 0;
-	for (const [key, value] of Object.entries(node)) {
-		if (key.startsWith('@')) continue;
+	for (const [key, value] of properties(node)) {
 		const label = `${where}.${key}`;
 		const property = vocabulary.property(key);
 		if (!property) {
@@ -317,25 +413,66 @@ function checkNode(node, own, via, ctx) {
 		// Role, and the Role holds `hasOccupation` again with the Occupation.
 		const qualified = isRole && key === via;
 		const { domain, supersededBy } = property;
-		if (
-			!qualified &&
-			domain.length > 0 &&
-			own.every((t) => domain.every((d) => !vocabulary.isA(t, d)))
-		) {
+		if (!qualified && outsideOf(own, domain, vocabulary)) {
 			if (DOMAIN_EXCEPTIONS.has(label)) note(found.excepted, label, file);
 			else flag(ctx, 'outsideDomain', `${label} (domain ${domain.join('|')})`);
 		}
 		if (supersededBy) note(found.superseded, `${label} -> ${supersededBy.join('|')}`, file);
 		checkValues(label, value, property.range, ctx);
 	}
+	for (const [key, subjects] of reverseProperties(node)) {
+		const label = `${where}.@reverse.${key}`;
+		const property = vocabulary.property(key);
+		if (!property) {
+			flag(ctx, 'unknownProperty', label);
+			continue;
+		}
+		checked += 1;
+		if (property.supersededBy) note(found.superseded, `${label} -> ${property.supersededBy.join('|')}`, file);
+		checkReverse(label, key, property, subjects, own, where, ctx);
+	}
 	return checked;
 }
 
 /**
- * Holds a property's node values to its range.
+ * Holds a property stated under `@reverse` to the vocabulary. Each node under
+ * it is the property's subject, so its types are held to the domain; the node
+ * that carries the map is the property's value, so its types are held to the
+ * range. The findings name the property the way schema.org reads it, from
+ * the subject, and say it came through `@reverse`.
+ *
+ * @param {string} label `Type.@reverse.property`, for a reference that
+ *   resolves to no typed node.
+ * @param {string} key The property.
+ * @param {{range: string[], domain: string[]}} property Its terms.
+ * @param {unknown} subjects The nodes under it.
+ * @param {string[]} own The types of the node that carries the map.
+ * @param {string} where How the findings name that node.
+ * @param {object} ctx The lookups, the page, and the findings to add to.
+ * @returns {void}
+ */
+function checkReverse(label, key, property, subjects, own, where, ctx) {
+	const { vocabulary, found, file } = ctx;
+	const { domain, range } = property;
+	for (const item of members(subjects)) {
+		const types = valueTypes(item, ctx.pageIds, ctx.siteIds);
+		if (types === null) note(found.unresolvedReference, `${label} -> ${item['@id']}`, file);
+		const subject = `${types?.join('+') || 'an untyped node'}.${key}`;
+		if (types && outsideOf(types, domain, vocabulary)) {
+			flag(ctx, 'outsideDomain', `${subject} (domain ${domain.join('|')}), by @reverse`);
+		}
+		if (own.length > 0 && range.length > 0 && !inRange(own, range, vocabulary)) {
+			note(found.outOfRange, `${subject} = ${where} (range ${range.join('|')}), by @reverse`, file);
+		}
+	}
+}
+
+/**
+ * Holds a property's node values to its range, each member of an array, a
+ * `@list` or a `@set` on its own.
  *
  * @param {string} label `Type.property`, as the findings name it.
- * @param {unknown} value The property's value, one or an array.
+ * @param {unknown} value The property's value.
  * @param {string[]} range Its `rangeIncludes`; empty checks nothing.
  * @param {object} ctx The lookups, the page, and the findings to add to.
  * @returns {void}
@@ -343,15 +480,16 @@ function checkNode(node, own, via, ctx) {
 function checkValues(label, value, range, ctx) {
 	if (range.length === 0) return;
 	const { vocabulary, found, file } = ctx;
-	for (const item of [value].flat(Infinity)) {
+	for (const item of members(value)) {
 		const types = valueTypes(item, ctx.pageIds, ctx.siteIds);
 		if (types === null) {
 			note(found.unresolvedReference, `${label} -> ${item['@id']}`, file);
 			continue;
 		}
 		if (types.length === 0) continue;
-		const fits = types.some((t) => vocabulary.isA(t, 'Role') || range.some((r) => vocabulary.isA(t, r)));
-		if (!fits) note(found.outOfRange, `${label} = ${types.join('+')} (range ${range.join('|')})`, file);
+		if (!inRange(types, range, vocabulary)) {
+			note(found.outOfRange, `${label} = ${types.join('+')} (range ${range.join('|')})`, file);
+		}
 	}
 }
 
@@ -381,13 +519,13 @@ export const FAILING = {
 export const REPORTED = {
 	superseded: 'a property schema.org has superseded and still defines',
 	unresolvedReference: 'a reference to an @id of this site that no page types',
-	elsewhere: 'a finding on a node another site publishes, which does not fail here',
+	elsewhere: 'a finding on the Person node jmrp.io publishes, which does not fail here',
 };
 
 /**
- * The failing kinds reported rather than failed on a node another site
- * publishes, each with how its report names it. A value outside its range
- * is not among them: it fails wherever it is.
+ * The failing kinds reported rather than failed on the Person node, and on
+ * every node in it, each with how its report names it. A value outside its
+ * range is not among them: it fails wherever it is.
  */
 const ELSEWHERE = {
 	unknownType: 'a type schema.org does not define',
@@ -399,7 +537,8 @@ const ELSEWHERE = {
 /**
  * Where this project mints `@id`s: the pages of the site, and the
  * repository, whose `#software` and `#source-code` nodes astro.config.mjs
- * writes.
+ * writes. A node with no type whose `@id` is outside them is another site's
+ * to type, and a reference to one is counted rather than listed.
  */
 const OWN_ORIGINS = [`${siteUrl}${basePath}`, 'https://github.com/jmrplens/phonometry'];
 
@@ -446,7 +585,7 @@ export function checkVocabulary(pages, vocabulary) {
 				siteIds,
 				file: page.file,
 				found,
-				elsewhere: position.owner !== null && !isOwnId(position.owner),
+				elsewhere: position.owner === personId,
 			};
 			const own = typesOf(node);
 			for (const t of own) if (!vocabulary.knowsType(t)) flag(ctx, 'unknownType', `@type ${t}`);
@@ -454,19 +593,27 @@ export function checkVocabulary(pages, vocabulary) {
 				checked += checkNode(node, own, position.via, ctx);
 				return;
 			}
-			const properties = Object.keys(node).filter((key) => !key.startsWith('@'));
-			if (properties.length === 0) return;
+			const stated = [
+				...properties(node).map(([key]) => key),
+				...reverseProperties(node).map(([key]) => `@reverse.${key}`),
+			];
+			if (stated.length === 0) return;
 			// A node with properties and no type of its own adds them to the
 			// node its @id names, so it is held to that node's types.
 			const id = typeof node['@id'] === 'string' ? node['@id'] : undefined;
 			const named = id === undefined ? undefined : (pageIds.get(id) ?? siteIds.get(id));
 			if (named) {
 				checked += checkNode(node, [...named], position.via, ctx);
-			} else if (id !== undefined && !isOwnId(id)) {
+				return;
+			}
+			// With no type known, what does not depend on one still holds: each
+			// property must be defined, and each node value in its range.
+			checked += checkNode(node, [], position.via, ctx, id === undefined ? slot(position) : `<${id}>`);
+			if (id !== undefined && !isOwnId(id)) {
 				// Another site types that node; this build cannot see how.
 				note(found.unresolvedReference, `${slot(position)} -> ${id}`, page.file);
 			} else {
-				flag(ctx, 'untypedNode', `${slot(position)} = ${id ?? 'a node'} {${properties.join(', ')}}`);
+				flag(ctx, 'untypedNode', `${slot(position)} = ${id ?? 'a node'} {${stated.join(', ')}}`);
 			}
 		});
 	}

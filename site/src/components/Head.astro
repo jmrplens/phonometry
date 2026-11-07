@@ -21,12 +21,11 @@ import { firstPublished } from '../lib/page-dates.mjs';
 import { citationsFor, referenceId, referenceNode } from '../lib/citations.mjs';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
-import { siteUrl } from '../data/site.mjs';
+import { personId as PERSON_ID, siteUrl } from '../data/site.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../lib/fallback-routes.mjs';
 
 const SITE = import.meta.env.SITE ?? siteUrl;
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
-const PERSON_ID = 'https://jmrp.io/#person';
 const WEBSITE_ID = `${SITE}${BASE}/#website`;
 const SOFTWARE_ID = 'https://github.com/jmrplens/phonometry#software';
 const SOCIAL_IMAGE = `${SITE}${BASE}/og-image.png`;

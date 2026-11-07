@@ -576,9 +576,13 @@ def biot_surface_impedance(waves: BiotWavesResult, thickness_m: float) -> Comple
     z2f = (r_coef + q_coef / mu2) * d2 / (phi * omega)
     z1s = (p_coef + q_coef * mu1) * d1 / omega
     z2s = (p_coef + q_coef * mu2) * d2 / omega
-    denominator = (1.0 - phi + phi * mu2) * (z1s - (1.0 - phi) * z1f * mu1) * np.tan(
-        d2 * length
-    ) + (1.0 - phi + phi * mu1) * ((1.0 - phi) * z2f * mu2 - z2s) * np.tan(d1 * length)
+    # tan saturates to j as a lossy layer grows thick; NumPy's own routine on
+    # Windows overflows on the way there, and says so.
+    with np.errstate(over="ignore"):
+        tan_1, tan_2 = np.tan(d1 * length), np.tan(d2 * length)
+    denominator = (1.0 - phi + phi * mu2) * (z1s - (1.0 - phi) * z1f * mu1) * tan_2 + (
+        1.0 - phi + phi * mu1
+    ) * ((1.0 - phi) * z2f * mu2 - z2s) * tan_1
     return np.asarray(
         -1j * (z1s * z2f * mu2 - z2s * z1f * mu1) / denominator,
         dtype=np.complex128,

@@ -2304,6 +2304,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A complex tangent that saturates says nothing on Windows either.**
+  `tanh(z)` tends to 1 as the real part of `z` grows and `tan(z)` to `j` as
+  its imaginary part does, which NumPy on Linux and macOS returns without a
+  word; NumPy on Windows passes through an exponential that overflows there
+  and warned "overflow encountered in tanh" (or `tan`) from the library's
+  line, an error under `python -W error`: the layered absorber of a very
+  resistive layer, the slit's effective properties at high frequency and
+  the coupler's heat-conduction correction for the last rows of IEC
+  61094-2 Table A.1, as the Windows test cells showed, and Maekawa's barrier
+  ratio for a large Fresnel number, the Biot layer's impedance of a thick
+  layer and the capillary tube's impedance of a long tube, which take the
+  same tangent of an argument that grows with an input. Each saturates
+  quietly now, to the same values.
+
 - **A `.plot()` that raises leaves no figure behind.** A plot makes its
   figure before it draws, so a keyword matplotlib refuses, as
   `result.plot(colour="red")` for `color`, raised from the drawing and left

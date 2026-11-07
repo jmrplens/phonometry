@@ -573,7 +573,10 @@ def _surface_admittance(
     for kind, a, b in reversed(terms):
         if kind == _FLUID:
             zx, kxd = a, b
-            t = np.tan(kxd)
+            # tan saturates to j as a lossy layer grows thick; NumPy's own
+            # routine on Windows overflows on the way there, and says so.
+            with np.errstate(over="ignore"):
+                t = np.tan(kxd)
             g = (g + 1j * t / zx) / (1.0 + 1j * zx * t * g)
         else:
             g = g / (1.0 + a * g)

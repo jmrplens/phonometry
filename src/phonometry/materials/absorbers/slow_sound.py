@@ -235,8 +235,11 @@ def slit_effective_properties(
     omega = 2.0 * np.pi * f
     x_rho = (h / 2.0) * np.sqrt(1j * omega * rho0 / eta)
     x_kap = (h / 2.0) * np.sqrt(1j * omega * pr * rho0 / eta)
-    rho_s = rho0 / (1.0 - np.tanh(x_rho) / x_rho)
-    kap_s = (gamma * p0) / (1.0 + (gamma - 1.0) * np.tanh(x_kap) / x_kap)
+    # tanh saturates to 1 as the boundary layers thin; NumPy's own routine on
+    # Windows passes through an exponential that overflows there, and says so.
+    with np.errstate(over="ignore"):
+        rho_s = rho0 / (1.0 - np.tanh(x_rho) / x_rho)
+        kap_s = (gamma * p0) / (1.0 + (gamma - 1.0) * np.tanh(x_kap) / x_kap)
     return EffectiveFluidProperties(
         effective_density=np.asarray(rho_s, dtype=np.complex128),
         bulk_modulus=np.asarray(kap_s, dtype=np.complex128),

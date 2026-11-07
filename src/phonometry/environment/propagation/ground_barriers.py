@@ -553,7 +553,9 @@ def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
     n_clipped = np.maximum(n, _MAEKAWA_ILLUMINATED_LIMIT)
     x = np.sqrt(2.0 * np.pi * n_clipped.astype(np.complex128))
     # x / tanh(x) is real for both real and imaginary x; take the real part.
-    with np.errstate(divide="ignore", invalid="ignore"):
+    # tanh saturates to 1 for a large Fresnel number, where NumPy's own
+    # routine on Windows overflows on the way, and says so.
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
         ratio = np.where(np.abs(x) < _X_OVER_TANH_EPS, 1.0 + 0.0j, x / np.tanh(x))
     delta = 5.0 + 20.0 * np.log10(np.abs(ratio))
     delta = np.where(n <= _MAEKAWA_ILLUMINATED_LIMIT, 0.0, delta)

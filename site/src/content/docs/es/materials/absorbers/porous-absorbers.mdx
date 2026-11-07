@@ -904,7 +904,7 @@ spaced = materials.layered_absorber(
 thick = materials.layered_absorber(bands_gap, [materials.PorousLayer(thickness_m=0.15, medium=med_gap)])
 print(np.round(flat.absorption, 2))     # [0.09 0.26 0.62 0.94]  50 mm en la pared
 print(np.round(spaced.absorption, 2))   # [0.44 0.78 0.9  0.77]  50 mm + cámara 100 mm
-print(np.round(thick.absorption, 2))    # [0.52 0.71 0.8  0.89]  150 mm en la pared
+print(np.round(thick.absorption, 2))    # [0.52 0.7  0.8  0.89]  150 mm en la pared
 ```
 
 A 250 Hz la capa de 50 mm sobre una cámara de 100 mm supera a 150 mm de manta
@@ -1181,7 +1181,7 @@ print(round(float(z_perf.real[0]) / rho_c, 4))   # 0.0925, 16 veces menor
 
 # Una membrana es reactancia pura salvo que se aporte una resistencia de fijación.
 print(np.round(materials.membrane_impedance(f_peak, surface_density=2.0), 1))
-# [0.+8513.6j]
+# [0.+8513.7j]
 
 # La interacción de Fok: los orificios apretados acortan el tapón efectivo.
 print(round(materials.perforation_end_correction(0.05), 3))   # 0.575 frente a 0.85

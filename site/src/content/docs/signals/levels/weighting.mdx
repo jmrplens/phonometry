@@ -177,7 +177,7 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
 ```
 
@@ -266,8 +266,8 @@ print(f"energy sum of the A-weighted bands "
       f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
 print(f"LAeq of the same signal          "
       f"{signals.laeq(band_source, fs):.2f} dB")
-# energy sum of the A-weighted bands 62.84 dB
-# LAeq of the same signal            62.79 dB
+# energy sum of the A-weighted bands 62.85 dB
+# LAeq of the same signal          62.81 dB
 ```
 
 The **table** route is the one you are forced into when the data arrives as

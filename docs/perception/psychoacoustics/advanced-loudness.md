@@ -307,7 +307,7 @@ t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = psychoacoustics.loudness_ecma(x, fs, field="free")
-print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.985 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz

@@ -123,7 +123,7 @@ rng = np.random.default_rng(0)
 n = np.arange(fs)
 ir = rng.standard_normal(fs) * np.exp(-6.9078 * n / fs / 0.9)
 res = speech.sti_from_impulse_response(ir, fs, snr=15.0)
-print(round(res.sti, 3), res.rating)      # 0.583 E
+print(round(res.sti, 3), res.rating)      # 0.584 E
 
 # One line: the per-band MTI bars with the STI and its rating in the title.
 res.plot()

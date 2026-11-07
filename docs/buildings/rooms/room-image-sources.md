@@ -115,7 +115,7 @@ freqs = [250.0, 500.0, 1000.0, 2000.0]
 alpha = np.array([[0.10, 0.15, 0.25, 0.40]] * 6)     # (6 walls, 4 bands)
 res = room.image_source_rir((7.0, 5.0, 3.0), (2.0, 1.6, 1.5), (5.2, 3.4, 1.7),
                             alpha, fs=48000, max_order=12, frequencies=freqs)
-print(res.ir.shape)                                  # (4 bands, n_samples)
+print(res.ir.shape)                                  # (4, 12207): 4 bands of n_samples each
 print(np.round(np.sum(res.ir ** 2, axis=1), 4))      # more absorption -> less energy
 ```
 

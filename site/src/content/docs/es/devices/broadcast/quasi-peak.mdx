@@ -105,8 +105,8 @@ burst = signals.tone_burst(fs, 5000.0, 25, amplitude=0.285,
                            n_repetitions=16, repetition_rate=10.0,
                            post_silence=0.5)
 result = broadcast.quasi_peak_meter(burst.signal, fs)
-print(round(result.reading, 4))                            # 0.5872   voltios
-print(round(result.level, 2), result.level_unit)        # -2.41 dBqps
+print(round(result.reading, 4))                            # 0.591    voltios
+print(round(result.level, 2), result.level_unit)        # -2.35 dBqps
 ```
 
 <ThemeImage
@@ -261,13 +261,13 @@ ponderación) y lee cada uno frente a la lectura permanente de la misma cadena.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.255
 row = report.stimuli[0]
-print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
+print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.85
 ```
 
 Las once ventanas se cumplen a 32, 44,1, 48, 96 y 192 kHz. El peor margen es de
-0,259 dB, en la celda de 100 ráfagas por segundo cuyo límite superior es el
+0,255 dB, en la celda de 100 ráfagas por segundo cuyo límite superior es el
 techo físico. Entre esas cinco frecuencias ninguna lectura se mueve más de
 0,080 dB, es decir el 4,2 % de su propia ventana, y por eso no muerde aquí la
 preocupación clásica de que un seguidor de picos lea la mayor *muestra* en
@@ -277,7 +277,7 @@ desaparecido hace mucho antes de tomar ningún máximo.
 
 También se informa de `deviation_db`, frente a la columna de *referencia*, y el
 informe lo llama por su nombre: una cota de regresión autoimpuesta, no
-conformidad. La peor es de 0,140 dB, a 10 ráfagas por segundo. La fila de
+conformidad. La peor es de 0,148 dB, a 10 ráfagas por segundo. La fila de
 referencia está impresa con dos cifras significativas en nueve de las once
 celdas, así que su propio cuanto es de 0,027 a 0,108 dB y nada más ajustado que
 eso significaría algo.

@@ -144,7 +144,8 @@ result = filters.octave_filter(signal, fs=fs, fraction=3)
 print(f"Bands: {result.frequencies}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
 print(f"SPL [dB]: {result.levels}")
-# SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — 90.71 dB at 100 Hz and 90.95 dB at 1 kHz
+# SPL [dB]: [46.77640002 47.81719048 48.93133762 ...]
+# the 100 Hz band reads 90.71 dB and the 1 kHz band 90.94 dB
 ```
 
 **The band frequencies come out as numbers, not as the labels on an analyser.**
@@ -160,7 +161,7 @@ narrowing it is usually worth doing; see [Filter
 Banks](/phonometry/signals/filters/filter-banks/) for the grid.
 
 **Read the spectrum before trusting it.** Two of the 33 bands hold the signal:
-90.71 dB at 100 Hz and 90.95 dB at 1 kHz, both within 0.3 dB of 90.97 dB, the
+90.71 dB at 100 Hz and 90.94 dB at 1 kHz, both within 0.3 dB of 90.97 dB, the
 level of a unit-amplitude sine read as pascals ($20\log_{10}(0.7071/20\,\mu
 \mathrm{Pa})$). That agreement is the check that the bank is doing arithmetic
 you can defend; the small deficit at 100 Hz is the decimated band filter's
@@ -296,7 +297,7 @@ filtered = filters.octave_filter(
 )
 spl, bands = filtered.levels, filtered.frequencies
 print(f"{bands[9]} Hz: {spl[9]:.2f} dB SPL, {bands[19]}: {spl[19]:.2f} dB SPL")
-# 100 Hz: 90.71 dB SPL, 1k: 90.95 dB SPL
+# 100 Hz: 90.71 dB SPL, 1k: 90.94 dB SPL
 ```
 
 Two things are worth noticing. The calibrated levels are **the same numbers as
@@ -327,7 +328,7 @@ the broadband pressure:
 weighted = filters.weighting_filter(cal * recording, fs, weighting="A")
 laeq = 10 * np.log10(np.mean(weighted ** 2) / (2e-5) ** 2)
 print(f"LAeq = {laeq:.2f} dB(A)")
-# LAeq = 91.03 dB(A)
+# LAeq = 91.02 dB(A)
 ```
 
 The unweighted level of the same second is 93.98 dB: A weighting takes almost

@@ -198,7 +198,7 @@ bank = filters.OctaveFilterBank(fs, fraction=1, limits=[31.5, 500.0])
 filtered = bank.filter(force, sigbands=True, calculate_level=False)
 freqs, bands = filtered.frequencies, filtered.bands
 lfe = [building.impact_force_exposure_level(b, fs) for b in bands]
-print([round(v, 1) for v in lfe])   # [-1.4, 14.0, 22.1, 20.2, 17.1]
+print([round(v, 1) for v in lfe])   # [-6.7, 14.6, 23.0, 21.2, 18.2]
 
 # Those five go to the conformance check; this synthetic half-sine is not a
 # rubber ball, so it does not conform:
@@ -313,12 +313,12 @@ li_fmax = [65.3, 64.5, 58.0, 55.8]           # energy-averaged over ball positio
 t = [1.43, 3.70, 3.10, 2.38]                 # receiving-room reverberation time
 
 res = building.standardized_max_impact_level(li_fmax, 41.4, t, frequencies=freqs)
-print(res.volume_term)                        # 10 lg(41.4/50) = -0.8 dB
+print(res.volume_term)                        # -0.82 dB, which is 10 lg(41.4/50)
 print(building.fast_reverberation_correction([0.5]))   # exactly 0 dB at T = T0
 res.plot()   # measured and standardized spectra (needs matplotlib)
 
 # One-third-octave measurements combine into octaves with Formula (20):
-print(building.heavy_impact_octave_levels([60.0] * 6))   # +10 lg 3 dB per octave
+print(building.heavy_impact_octave_levels([60.0] * 6))   # [64.77 64.77]: 60 dB + 10 lg 3 per octave
 ```
 
 ## Measuring in the field (ISO 16283-2:2020, Clauses 6 to 9)

@@ -489,7 +489,7 @@ meta = materials.metadiffuser_diffusion_spectrum(bandas, pozos, depth_m=0.02,
 qrd = materials.predicted_diffusion_spectrum(
     0.07, bandas, depths=profundidades, n_repetitions=6, include_obliquity=False)
 print(np.round(meta.normalized, 2))
-# [0.   0.   0.   0.01 0.08 0.12 0.32 0.17 0.24 0.12 0.06]
+# [0.   0.   0.   0.01 0.08 0.11 0.32 0.17 0.24 0.12 0.06]
 print(np.round(qrd.normalized, 2))
 # [-0.    0.    0.02  0.39  0.29  0.09  0.32 -0.    0.04  0.14  0.  ]
 ```

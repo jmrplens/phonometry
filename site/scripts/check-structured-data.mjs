@@ -967,6 +967,38 @@ function errataContent(lang) {
 }
 const errataPages = { en: errataContent('en'), es: errataContent('es') };
 
+/** The route of the conformance report, without its locale. */
+const REPORT = 'reference/conformance';
+
+/**
+ * The library the committed report was generated for: what the report's
+ * Dataset has to give as its `version`. Read from the artefact, not from the
+ * code that writes the Dataset.
+ */
+const REPORT_LIBRARY = JSON.parse(readFileSync(join(here, '..', '..', 'docs', 'conformance.json'), 'utf8')).library;
+
+/** Every DOI a node gives as its `identifier`, whichever shape it uses. */
+const doisOf = (node) =>
+	[node?.identifier ?? []]
+		.flat()
+		.map((id) => (typeof id === 'object' ? id?.value : id))
+		.filter((value) => typeof value === 'string' && /^10\.\S+$/.test(value));
+
+/** The texts of the report's Dataset a reader of its language reads. */
+const datasetTexts = (dataset) => ({
+	name: dataset.name,
+	description: dataset.description,
+	measurementTechnique: dataset.measurementTechnique,
+	...Object.fromEntries(
+		[dataset.variableMeasured ?? []]
+			.flat()
+			.flatMap((variable, i) => [
+				[`variableMeasured[${i}].name`, variable?.name],
+				[`variableMeasured[${i}].description`, variable?.description],
+			]),
+	),
+});
+
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
@@ -994,6 +1026,7 @@ const seen = {
 	history: 0,
 	languages: 0,
 	definedTerms: 0,
+	reports: 0,
 };
 
 /** The About pages found in each language, and how many of them are typed AboutPage. */
@@ -1429,6 +1462,8 @@ const errataSeen = {
 const errataWithoutWorks = [];
 /** Errata family pages whose `about` names other works than their `corrects`, with what differs. */
 const errataMisnamed = [];
+/** The Dataset each language's conformance report is about, for the check across the two. */
+const reportDatasets = new Map();
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -1891,6 +1926,53 @@ for (const file of files) {
 			fail(`${route}: the DataCatalog claims ${DATASET_CLAIMS.filter((field) => article[field] !== undefined).join(', ')}`);
 		}
 		listedDatasets[lang] = { route, listed };
+	}
+
+	// The conformance report is a Dataset, and the article that renders it is
+	// about it. It used to be a block of its own in the page's frontmatter, in
+	// English on both pages, with no version and no date, the software's DOI as
+	// its identifier and the script that writes it as the one thing it was
+	// based on. Now it is the article's main entity, says which library it was
+	// generated for and the day its data last changed, which can be no later
+	// than the page's own, and names the standards its values are quoted from,
+	// each as a named work, so its licence is read as covering the report.
+	if (slug === REPORT) {
+		seen.reports += 1;
+		const dataset = article.mainEntity;
+		const problems = [];
+		if (!dataset || typeof dataset !== 'object' || !typesOf(dataset).includes('Dataset')) {
+			problems.push('the article has no Dataset as its mainEntity');
+		} else {
+			if (dataset['@id'] !== `${canonical}#dataset`) problems.push(`its @id is ${dataset['@id']}, not ${canonical}#dataset`);
+			if (dataset.inLanguage !== lang) problems.push(`its inLanguage is ${JSON.stringify(dataset.inLanguage)}, not ${lang}`);
+			if (dataset.version !== REPORT_LIBRARY) {
+				problems.push(`its version is ${JSON.stringify(dataset.version)}, and docs/conformance.json was generated for ${REPORT_LIBRARY}`);
+			}
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dataset.dateModified ?? ''))) {
+				problems.push(`its dateModified is ${JSON.stringify(dataset.dateModified)}, not a day`);
+			} else if (article.dateModified && dataset.dateModified > article.dateModified) {
+				problems.push(`its data changed on ${dataset.dateModified}, after the page's own last change, ${article.dateModified}`);
+			}
+			const software = nodeOfType(nodes, 'SoftwareApplication');
+			const borrowed = doisOf(dataset).filter((doi) => doisOf(software).includes(doi));
+			if (borrowed.length > 0) problems.push(`it gives the software's DOI ${borrowed.join(', ')} as its own identifier`);
+			const basis = [dataset.isBasedOn ?? []].flat().filter((item) => typeof item === 'object');
+			const works = basis.filter((item) => isCitedWork(item?.['@id']) && isNamed(item));
+			if (works.length === 0) problems.push('it names no standard it is based on');
+			const unnamed = basis.length - works.length;
+			if (unnamed > 0) problems.push(`${unnamed} of what it is based on is not a work the bibliography defines, named`);
+			reportDatasets.set(lang, { route, dataset, works: works.length });
+		}
+		// The block of its own the page used to carry, kept beside the main
+		// entity, would describe the report twice, the second time with what the
+		// first one no longer says.
+		const loose = nodes.filter((node) => typesOf(node).includes('Dataset')).length;
+		if (loose > 0) {
+			problems.push(
+				`${loose === 1 ? 'a Dataset' : `${loose} Datasets`} of its own beside the article, which says what the report is a second time`,
+			);
+		}
+		for (const problem of problems) fail(`${route}: the conformance report's Dataset: ${problem}`);
 	}
 
 	// The bibliography page defines every work in full, and names each
@@ -2486,6 +2568,30 @@ if (
 			`standard and clause write and keeps the same of its entry, and its own ` +
 			`guide's article node, which all ${glossarySubjects.length} resolve to in this build`,
 	);
+}
+
+// The report's Dataset in the two languages: the Spanish page used to name
+// it, describe its technique and its eight columns in English. Every text a
+// reader reads has to be the page's own, so none is the same in both.
+{
+	const en = reportDatasets.get('en');
+	const es = reportDatasets.get('es');
+	if (seen.reports === 0) {
+		fail(`no page at /${REPORT}/ was found: build the site first`);
+	} else if (en && es) {
+		const english = datasetTexts(en.dataset);
+		const spanish = datasetTexts(es.dataset);
+		const same = Object.keys(english).filter((key) => typeof english[key] !== 'string' || english[key] === spanish[key]);
+		if (same.length > 0) {
+			fail(`${es.route}: the conformance report's Dataset says in English what the English page says: ${same.join(', ')}`);
+		} else {
+			ok(
+				`the conformance report's Dataset is the main entity of both report pages, versioned ${REPORT_LIBRARY}, ` +
+					`dated by its data, based on ${en.works} named works in English and ${es.works} in Spanish, and ` +
+					`written in each page's language (${Object.keys(english).length} texts)`,
+			);
+		}
+	}
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

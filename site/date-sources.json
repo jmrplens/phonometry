@@ -57,13 +57,17 @@
       }
     },
     {
-      "_why": "The conformance report is the report itself, rendered.",
+      "_why": "The conformance report is the report itself, rendered, with the releases it was archived with.",
       "pages": [
         "site/src/content/docs/reference/conformance.mdx",
         "site/src/content/docs/es/reference/conformance.mdx"
       ],
-      "sources": ["docs/conformance.json", "site/src/components/Conformance.astro"],
-      "_via": { "site/src/components/Conformance.astro": "docs/conformance.json" }
+      "sources": ["docs/conformance.json", "site/src/components/Conformance.astro", "site/src/data/releases.mjs"],
+      "_via": {
+        "site/src/components/Conformance.astro": "docs/conformance.json",
+        "site/src/data/topics.mjs": "reached through the dates the report reads its last commit from (src/lib/date-rules.mjs counts the guides under its topics), and the report shows none of it",
+        "site/src/generated/api-sidebar.mjs": "reached through topics.mjs on the same path, and the report shows none of it"
+      }
     },
     {
       "_why": "These guides quote the conformance counts, as the summary banner prints them and conformance-stats.mjs reads them.",

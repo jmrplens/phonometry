@@ -23,9 +23,14 @@ import {
   correctedWorks,
   englishStandardIds,
   referenceNode,
+  referenceStub,
   standardsBody,
 } from '../lib/citations.mjs';
 import { bibliographyWorks, referencesOfEveryPage } from '../lib/bibliography-works';
+import { pageEvidence } from '../lib/page-evidence';
+import { conformanceDataset } from '../lib/conformance-dataset.mjs';
+import { loadContentDates } from '../lib/content-dates.mjs';
+import { report as conformanceReport } from '../data/conformance-stats.mjs';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
 import { targetPlatform, version } from '../data/repo-stats.mjs';
@@ -228,12 +233,37 @@ const datasetIds = datasets.map((dataset) => ({ '@id': dataset['@id'] }));
 // page node to that list instead of leaving two disconnected nodes. A
 // catalogue page's main entity is its catalogue, or its two on the page that
 // renders two.
-const mainEntity =
+const pageEntity =
   slug === 'start/guides'
     ? { '@id': `${canonical}#areas` }
     : datasetIds.length > 1
       ? datasetIds
       : datasetIds[0];
+
+// The conformance report page is about the report, and the report is a
+// Dataset (src/lib/conformance-dataset.mjs): it is the article's main
+// entity, in the page's language, dated by the last commit of the data it
+// renders, handing out its files at that commit, and naming every standard
+// its checks quote. Those standards are
+// joined to the works the pages cite by src/lib/conformance-evidence.mjs
+// (src/lib/page-evidence.ts), which fails the build on one it cannot name.
+const isConformanceReport = slug === 'reference/conformance';
+let reportDataset: object | undefined;
+if (isConformanceReport && !is404) {
+  const evidence = await pageEvidence(lang);
+  const data = (await loadContentDates()).sourceCommit('docs/conformance.json');
+  reportDataset = conformanceDataset({
+    lang,
+    canonical,
+    report: conformanceReport,
+    modified: isoDay(data.date),
+    commit: data.sha,
+    standards: evidence.governing.map((ref) => referenceStub(ref, bibliographyUrl)),
+    personId: PERSON_ID,
+    softwareId: SOFTWARE_ID,
+  });
+}
+const mainEntity = pageEntity ?? reportDataset;
 
 // Word count of the page source, with the machinery that is not prose (MDX
 // imports, component tags, fenced code) stripped first. An approximation, but

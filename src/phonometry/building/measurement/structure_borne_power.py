@@ -80,6 +80,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -154,7 +155,7 @@ def spatial_mean_velocity_level(levels: NumericArrayLike) -> float:
 
 def plate_loss_factor(
     reverberation_time: NumericArrayLike, *, frequency: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Plate loss factor :math:`\eta = 2.2 / (f\, T_\mathrm{s})` (EN 15657, Formula 13).
 
     Estimated from the plate's structural reverberation time; identical to the
@@ -179,7 +180,7 @@ def structure_borne_power_level(
     *,
     frequency: NumericArrayLike,
     reference_velocity: float = _REFERENCE_VELOCITY,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Structure-borne power injected into the reception plate (EN 15657, Formula 14).
 
     The power a resonant reception plate dissipates, expressed as a level re
@@ -264,12 +265,12 @@ class StructureBornePowerResult(OwnsArrays):
     :ivar area: Plate area ``S``, in m^2.
     """
 
-    power_level: np.ndarray
-    velocity_level: np.ndarray
-    loss_factor: np.ndarray
+    power_level: NDArray[np.float64]
+    velocity_level: NDArray[np.float64]
+    loss_factor: NDArray[np.float64]
     mass_per_area: float
     area: float
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a plate result whose per-band quantities disagree.
@@ -451,7 +452,7 @@ def reception_plate_power(
 def equivalent_blocked_force_level(
     power_level: NumericArrayLike,
     plate_mobility: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Equivalent blocked force level, squared (UNE-EN 15657:2018, Formula 15).
 
     :math:`L_\mathrm{Fb,eq} = L_\mathrm{Ws,low}
@@ -502,7 +503,7 @@ def characteristic_reception_plate_power(
     blocked_force_level: NumericArrayLike,
     *,
     characteristic_mobility: float = _CHARACTERISTIC_PLATE_MOBILITY,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Characteristic reception-plate power level (UNE-EN 15657:2018, Formula 17).
 
     :math:`L_\mathrm{Wsn} = L_\mathrm{Fb,eq} + 10 \log_{10}(|Y_{\mathrm{R},\infty,\mathrm{low}}|/Y_0)`
@@ -536,7 +537,7 @@ def characteristic_reception_plate_power(
 def equivalent_free_velocity_level(
     power_level: NumericArrayLike,
     plate_mobility: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Equivalent free velocity level of the source (UNE-EN 15657:2018, Formula 18).
 
     :math:`L_\mathrm{vf,eq} = L_\mathrm{Ws,high} + 10 \log_{10}\left( |Y_\mathrm{R,high,eq}|^2 /
@@ -587,7 +588,7 @@ def equivalent_free_velocity_level(
 def source_mobility_from_levels(
     free_velocity_level: NumericArrayLike,
     blocked_force_level: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Equivalent source mobility magnitude (UNE-EN 15657:2018, Formula 19).
 
     :math:`|Y_\mathrm{S,eq}|^2 / Y_0^2 = 10^{(L_\mathrm{vf,eq} - L_\mathrm{Fb,eq})/10} \cdot

@@ -103,6 +103,26 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool 
     return None
 
 
+#: Why a test that asks git about the repository is skipped outside a checkout.
+_NOT_A_CHECKOUT = "not a git checkout, so there is nothing to ask git about"
+
+
+def _skip_outside_a_checkout(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """Skip the tests marked ``git_checkout`` in a tree that git does not track.
+
+    A source archive unpacked by a packager has every file of the repository
+    but no ``.git``, and ``git ls-files`` refuses it, so those tests would
+    fail on the tree rather than on the code. ``.git`` is a directory in a
+    clone and a file in a linked worktree; either is a checkout.
+    """
+    if (config.rootpath / ".git").exists():
+        return
+    skip = pytest.mark.skip(reason=_NOT_A_CHECKOUT)
+    for item in items:
+        if item.get_closest_marker("git_checkout") is not None:
+            item.add_marker(skip)
+
+
 #: The longest id a test may have [characters]. pytest writes the id of the
 #: running test into the PYTEST_CURRENT_TEST environment variable, and Windows
 #: holds no variable longer than 32767 characters: a parametrized case whose id
@@ -231,8 +251,10 @@ def pytest_collection_modifyitems(
     """Move the known-heavy modules to the front of the dispatch order.
 
     The sort is stable, so relative order inside every module (and among all
-    remaining modules) is untouched.
+    remaining modules) is untouched. Outside a git checkout the tests that ask
+    git about the repository are skipped first.
     """
+    _skip_outside_a_checkout(config, items)
     rank = {}
     for item in items:
         path = item.nodeid.split("::", 1)[0]

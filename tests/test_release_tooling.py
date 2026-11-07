@@ -254,6 +254,7 @@ def _good_dist(tmp_path: pathlib.Path, version: str = "2.0.0") -> pathlib.Path:
     return dist
 
 
+@pytest.mark.git_checkout
 def test_a_build_that_holds_the_package_passes(tmp_path: pathlib.Path) -> None:
     assert artifacts.dist_problems(_good_dist(tmp_path), "2.0.0", _TRACKED) == []
 
@@ -313,6 +314,7 @@ def test_a_file_git_does_not_track_is_reported_in_the_sdist(
     ]
 
 
+@pytest.mark.git_checkout
 @pytest.mark.parametrize("member", ["tests/test_packaging.py", "setup.py"])
 def test_a_file_setuptools_packs_by_default_is_reported(
     tmp_path: pathlib.Path, member: str
@@ -481,6 +483,7 @@ def test_an_sdist_that_does_not_declare_or_carry_the_licence_is_reported(
     assert expected in problems[0]
 
 
+@pytest.mark.git_checkout
 def test_a_stray_file_in_the_build_directory_is_reported(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -512,6 +515,7 @@ def test_a_build_file_that_is_no_regular_file_is_reported(
     ]
 
 
+@pytest.mark.git_checkout
 def test_git_tracks_the_package_data_the_wheel_has_to_carry() -> None:
     tracked = artifacts.tracked_package_files()
     assert "phonometry/__init__.py" in tracked
@@ -583,6 +587,7 @@ def test_the_sbom_script_rewrites_the_file(tmp_path: pathlib.Path) -> None:
 # ==========================================================================
 # The installed package
 # ==========================================================================
+@pytest.mark.git_checkout
 def test_the_checkout_is_not_taken_for_the_installed_wheel() -> None:
     """Here phonometry comes from src, which is exactly what the check refuses.
 
@@ -672,6 +677,7 @@ def test_a_tracked_file_a_checkout_could_write_with_crlf_is_reported(
     ]
 
 
+@pytest.mark.git_checkout
 def test_what_setuptools_packs_beside_the_package_is_checked_out_with_lf(
     tmp_path: pathlib.Path,
 ) -> None:

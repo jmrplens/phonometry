@@ -219,6 +219,7 @@ def test_tracked_reports_a_file_that_is_there_and_untracked(
     assert _tracked(["never-written.svg"], tmp_path) == set()
 
 
+@pytest.mark.git_checkout
 def test_pinned_pypi_links_are_tracked_by_git() -> None:
     """Existing in the tree is not enough: the tag carries only what is tracked.
 
@@ -230,8 +231,6 @@ def test_pinned_pypi_links_are_tracked_by_git() -> None:
     images, the animation posters) is committed today, and this is what says
     so at the release commit rather than after the upload.
     """
-    if not (_ROOT / ".git").exists():
-        pytest.skip("not a git checkout, so there is nothing to ask git about")
     paths = sorted(
         {match["path"] for match in _REPO_URL.finditer(_committed_pypi_readme())}
     )

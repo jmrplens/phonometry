@@ -804,6 +804,7 @@ def test_a_count_wrapped_at_a_windows_line_end_is_found() -> None:
 RETIRED_FIGURE = 523
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_the_retired_figure_is_published_nowhere() -> None:
     """The release gate: no tracked file states the figure as a count of standards.

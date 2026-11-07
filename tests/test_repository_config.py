@@ -909,6 +909,7 @@ def _mypypath_settings_in(name: str, text: str) -> list[str]:
     return found
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_every_stated_type_check_is_bare_mypy() -> None:
     """CI, ``make lint`` and every page run the type check as plain ``mypy``.
@@ -937,6 +938,7 @@ def test_every_stated_type_check_is_bare_mypy() -> None:
     )
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_no_stated_place_sets_a_search_path_for_mypy() -> None:
     """``MYPYPATH`` is ``mypy_path`` by another name, and mypy searches it first.
@@ -1151,6 +1153,7 @@ def test_bare_mypy_checks_every_root_the_gate_needs() -> None:
     assert not missing, f"[tool.mypy] files no longer reaches {missing}"
 
 
+@pytest.mark.git_checkout
 def test_bare_mypy_reads_every_tracked_file_under_the_roots(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

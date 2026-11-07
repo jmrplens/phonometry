@@ -181,6 +181,7 @@ def test_an_import_spelled_in_compatibility_characters_is_seen(
     assert found == [f"scripts/example.py: ['{module}']"]
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_no_tracked_file_names_an_old_gpu_setting() -> None:
     found = old_settings_named(_tracked_texts())
@@ -274,6 +275,7 @@ def test_the_changelog_and_this_guard_may_name_one() -> None:
     assert old_settings_named([("CHANGELOG.md", text), (_THIS, text)]) == []
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_the_reading_step_reads_the_tracked_files_that_name_one() -> None:
     """A scan that read no file would find no setting: the files known to name one are read.
@@ -287,6 +289,7 @@ def test_the_reading_step_reads_the_tracked_files_that_name_one() -> None:
         assert "CHANGELOG.md" in read
 
 
+@pytest.mark.git_checkout
 def test_the_scan_reaches_the_folders_a_setting_could_hide_in() -> None:
     tracked = _tracked_names()
     for folder in (

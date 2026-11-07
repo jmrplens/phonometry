@@ -720,6 +720,7 @@ def _tracked_text() -> list[Path]:
     ]
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_every_statement_of_the_oldest_python_names_requires_python() -> None:
     """Wherever the tree says "Python 3.N or newer", N is the requires-python floor.

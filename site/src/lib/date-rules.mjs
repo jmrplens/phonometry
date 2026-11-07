@@ -27,9 +27,10 @@
  * and such a page is dated by the newest of its own date and theirs. Every
  * commit to a source counts, since a source is data rather than a page with
  * frontmatter; a source inside the content tree stands for the pages there,
- * each dated by the rule above; and a count of files, which is all some
- * pages show of a directory, moves only with a commit that changed how many
- * there are. The build fails on a page or a source that HEAD does not have,
+ * each dated by the rule above; and a count, which is all some pages show
+ * of a directory or a registry, moves only with a commit that changed it: a
+ * count of files with one that changed how many there are, a count of the
+ * lines of a file that match a pattern with one that changed how many do. The build fails on a page or a source that HEAD does not have,
  * and site/scripts/content-dates.test.mjs fails on a page that imports data
  * or a component built from it without being listed.
  */
@@ -141,20 +142,30 @@ export function readIgnoreRevs(file) {
 }
 
 /**
+ * A count of the lines of one file that match a pattern: how many entries
+ * a registry holds, say, where each entry opens with a heading.
+ *
+ * @typedef {{ file: string, lines: string }} LineCount
+ */
+
+/**
  * The entries of `site/date-sources.json`: each names pages (`pages`), the
- * files they are built from (`sources`) and the sets of files they count
- * (`counts`, each a list of git pathspecs under the name of the number the
- * page shows). Paths are from the repository root, as git names them, and
- * one ending in `/` is a directory. A pathspec of a count that holds
- * `{topic}` stands for one per topic, so a count over the topic directories
- * follows the navigation the way `src/data/repo-stats.mjs` does and needs no
- * list of folders kept beside it. Keys that begin with an underscore are
- * notes. No file means no page has sources.
+ * files they are built from (`sources`) and the numbers they show of other
+ * files (`counts`, under the name of each number). A count is either a list
+ * of git pathspecs, whose number is how many files they match, or
+ * `{ "file": path, "lines": pattern }`, whose number is how many lines of
+ * that file the regular expression matches, read with the `m` flag. Paths
+ * are from the repository root, as git names them, and one ending in `/` is
+ * a directory. A pathspec of a count that holds `{topic}` stands for one
+ * per topic, so a count over the topic directories follows the navigation
+ * the way `src/data/repo-stats.mjs` does and needs no list of folders kept
+ * beside it. Keys that begin with an underscore are notes. No file means no
+ * page has sources.
  *
  * @param {string} file
  * @param {{ topics?: readonly string[] }} [options] What `{topic}` stands
  *   for: the topics the navigation teaches unless a caller says otherwise.
- * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[]> }>}
+ * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[] | LineCount> }>}
  */
 export function readDateSources(file, { topics = domainIds } = {}) {
   if (!existsSync(file)) return [];
@@ -197,8 +208,26 @@ export function readDateSources(file, { topics = domainIds } = {}) {
     if (typeof counted !== 'object' || Array.isArray(counted) || counted === null) {
       throw new Error(`${where}: "counts" maps the name of each number to its pathspecs.`);
     }
+    const lineCount = (name, set) => {
+      const unknownKeys = Object.keys(set).filter((key) => !['file', 'lines'].includes(key));
+      if (unknownKeys.length > 0) {
+        throw new Error(`${where}: unknown key(s) ${unknownKeys.join(', ')} in counts.${name}.`);
+      }
+      const [path] = paths([set.file], `counts.${name}.file`);
+      if (path.endsWith('/')) throw new Error(`${where}: counts.${name}.file names a file, not ${JSON.stringify(path)}.`);
+      if (typeof set.lines !== 'string' || set.lines === '') {
+        throw new Error(`${where}: counts.${name}.lines is the pattern of the lines it counts.`);
+      }
+      try {
+        new RegExp(set.lines, 'm');
+      } catch (error) {
+        throw new Error(`${where}: counts.${name}.lines: ${error.message}`);
+      }
+      return { file: path, lines: set.lines };
+    };
     const counts = Object.fromEntries(
       Object.entries(counted).map(([name, set]) => {
+        if (typeof set === 'object' && set !== null && !Array.isArray(set)) return [name, lineCount(name, set)];
         const specs = paths(set, `counts.${name}`, { magic: true }).flatMap((spec) => {
           if (!spec.includes(TOPIC)) return [spec];
           if (topics.length === 0) {

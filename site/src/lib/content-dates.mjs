@@ -27,10 +27,12 @@
  * in one request per round: a page is dated by its newest change most of the
  * time, and a page whose newest changes were frontmatter-only asks for twice
  * as many pairs in each round that follows, so a run of n such commits costs
- * about log2(n) requests. The sources are read from trees alone too: their
- * dates need no blob. Every git call streams its output, and any failure
- * throws: a build that cannot read the dates stops instead of publishing
- * guesses.
+ * about log2(n) requests. The sources and the counts of files are read from
+ * trees alone too: their dates need no blob. A count of the lines of a file
+ * reads the versions of that one file, newest first and in the same doubling
+ * rounds, until one changed the number. Every git call streams its output,
+ * and any failure throws: a build that cannot read the dates stops instead
+ * of publishing guesses.
  *
  * It reads the history once per site root: routeData.ts asks for it as the
  * build starts, and every page gets that one reading. So it gives out the
@@ -402,6 +404,43 @@ async function filesAtHead(repo, pathspecs) {
   return files;
 }
 
+/** The blob id git writes for the side of a change where the file is absent. */
+const NO_BLOB = /^0+$/;
+
+/**
+ * The date a count of the lines of one file last changed: the newest commit
+ * whose version of the file has a different number of matching lines from
+ * the version before it. A rewrap or an edit inside an entry leaves the
+ * number the page shows, and so its date. The versions are read newest
+ * first, in rounds that each ask for twice as many commits as the last, so
+ * the usual case, where the newest commit to the file is the one that
+ * changed the count, costs one request for one version.
+ *
+ * @param {string} repo
+ * @param {{ file: string, lines: string }} count
+ * @returns {Promise<Date | undefined>}
+ */
+async function lineCountDate(repo, { file, lines }) {
+  const changes = (await readHistory(repo, [file])).flatMap((commit) =>
+    commit.changes.filter((change) => change.path === file).map((change) => ({ date: commit.date, change })),
+  );
+  const pattern = new RegExp(lines, 'gm');
+  const counted = new Map();
+  const count = (oid) => (NO_BLOB.test(oid) ? 0 : counted.get(oid));
+  for (let next = 0, budget = 1; next < changes.length; next += budget, budget *= 2) {
+    const batch = changes.slice(next, next + budget);
+    const wanted = [...new Set(batch.flatMap(({ change }) => [change.from, change.to]))].filter(
+      (oid) => !NO_BLOB.test(oid) && !counted.has(oid),
+    );
+    if (wanted.length > 0) {
+      for (const [oid, text] of await readBlobs(repo, wanted)) counted.set(oid, text.match(pattern)?.length ?? 0);
+    }
+    const moved = batch.find(({ change }) => count(change.from) !== count(change.to));
+    if (moved !== undefined) return moved.date;
+  }
+  return undefined;
+}
+
 /** Whether a path from site/date-sources.json names `path`: the file, or a directory holding it. */
 const names = (spec, path) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec);
 
@@ -455,12 +494,18 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
     }
   }
 
-  // A count moves only with a commit that added or deleted more files than
-  // the other: a move inside the set, or an edit, leaves the number shown.
+  // A count of files moves only with a commit that added or deleted more
+  // files than the other: a move inside the set, or an edit, leaves the
+  // number shown. A count of lines moves only with a commit that changed it.
   const sets = new Map(
     entries.flatMap((entry) => Object.values(entry.counts)).map((set) => [JSON.stringify(set), set]),
   );
   for (const [key, set] of sets) {
+    if (!Array.isArray(set)) {
+      if (!(await filesAtHead(repo, [set.file])).includes(set.file)) throw stale(`the counted file ${set.file}`);
+      newest.set(key, await lineCountDate(repo, set));
+      continue;
+    }
     if ((await filesAtHead(repo, set)).length === 0) throw stale(`the counted files ${set.join(' ')}`);
     for (const commit of await readHistory(repo, set)) {
       const added = commit.changes.filter((change) => change.status === 'A').length;

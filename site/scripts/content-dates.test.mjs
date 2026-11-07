@@ -452,6 +452,43 @@ test('a count moves the page only with a commit that changed how many files ther
 	assert.equal(day(dates, 'a.mdx'), '2026-01-02');
 });
 
+test('a count of lines moves the page only with a commit that changed how many lines match', async (t) => {
+	const repo = repository(t);
+	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
+	repo.write('a.mdx', page());
+	repo.write('b.mdx', page());
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two'));
+	repo.commit(1);
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two', 'Three'));
+	repo.commit(2, 'an entry more: the count changes');
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two', 'Three').replace('What the source prints.', 'What the source\nprints.'));
+	repo.commit(3, 'a line rewrapped inside an entry: the count stays');
+	repo.writeFile('docs/ERRATA.md', registry('Uno', 'Two', 'Three'));
+	repo.commit(4, 'an entry retitled: the count stays');
+	repo.writeFile('docs/ERRATA.md', `${registry('Uno', 'Two', 'Three')}\n### A subsection\n\n##Not a heading\n`);
+	repo.commit(5, 'lines the pattern does not match');
+	repo.sources({ pages: ['site/src/content/docs/a.mdx'], counts: { errataEntries: { file: 'docs/ERRATA.md', lines: '^## .+$' } } });
+	repo.commit(6, 'the list, for the clone below');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-02', 'the commit that added an entry');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-01', 'a page that does not show the count');
+
+	// The docs job's clone has no old version of the file: they are fetched
+	// newest first, one request per round, each round asking for twice as many
+	// commits as the last (here the newest, then the two before it, then the
+	// one that added the entry), never one version at a time.
+	repo.git('config', 'uploadpack.allowFilter', 'true');
+	repo.git('config', 'uploadpack.allowAnySHA1InWant', 'true');
+	const clone = join(repo.root, 'blobless');
+	const ran = spawnSync('git', ['clone', '-q', '--filter=blob:none', `file://${repo.work}`, clone], { env: repo.env, encoding: 'utf8' });
+	assert.equal(ran.status, 0, ran.stderr);
+	const packs = () => readdirSync(join(clone, '.git', 'objects', 'pack')).filter((name) => name.endsWith('.promisor')).length;
+	const before = packs();
+	const fromClone = await loadContentDates({ siteRoot: join(clone, 'site') });
+	assert.equal(day(fromClone, 'a.mdx'), '2026-01-02');
+	assert.equal(packs() - before, 3, 'one fetch per round');
+});
+
 test('a directory of the content tree stands for its pages, each dated by the page rule', async (t) => {
 	const repo = repository(t);
 	repo.write('errata/index.mdx', page({ title: 'Errata' }));
@@ -476,6 +513,7 @@ test('a page, a source or a count that HEAD does not have fails the build', asyn
 		[{ pages: ['site/src/content/docs/gone.mdx'], sources: ['site/src/data/table.json'] }, /the page\(s\) site\/src\/content\/docs\/gone\.mdx, which HEAD does not have/],
 		[{ pages: ['site/src/content/docs/a.mdx'], sources: ['site/src/data/renamed.json'] }, /the source site\/src\/data\/renamed\.json, which HEAD does not have/],
 		[{ pages: ['site/src/content/docs/a.mdx'], counts: { fiches: [':(glob)site/fiches/*.pdf'] } }, /the counted files :\(glob\)site\/fiches\/\*\.pdf, which HEAD does not have/],
+		[{ pages: ['site/src/content/docs/a.mdx'], counts: { entries: { file: 'docs/GONE.md', lines: '^## ' } } }, /the counted file docs\/GONE\.md, which HEAD does not have/],
 		[{ pages: ['site/src/data/table.json'], sources: ['site/src/data/table.json'] }, /as a page, and pages are under site\/src\/content\/docs\//],
 	];
 	for (const [entry, message] of cases) {
@@ -508,6 +546,13 @@ test('date-sources.json takes paths from the repository root, and an entry with 
 	assert.throws(read({ entries: [{ pages, sources: [':(glob)*.json'] }] }), /"sources" takes paths/);
 	assert.throws(read({ entries: [{ pages, counts: [['a/']] }] }), /"counts" maps the name of each number/);
 	assert.throws(read({ entries: [{ pages, counts: { fiches: [] } }] }), /no pathspec for the count fiches/);
+	const entries = { file: 'docs/ERRATA.md', lines: '^## .+$' };
+	assert.deepEqual(read({ entries: [{ pages, counts: { entries } }] })(), [{ pages, sources: [], counts: { entries } }]);
+	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, file: 'docs/' } } }] }), /counts\.entries\.file names a file, not "docs\/"/);
+	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, file: '../ERRATA.md' } } }] }), /"counts\.entries\.file" takes paths from the repository root/);
+	assert.throws(read({ entries: [{ pages, counts: { entries: { file: 'docs/ERRATA.md' } } }] }), /counts\.entries\.lines is the pattern of the lines it counts/);
+	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, lines: '(' } } }] }), /counts\.entries\.lines: Invalid regular expression/);
+	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, glob: '*' } } }] }), /unknown key\(s\) glob in counts\.entries/);
 	assert.throws(read({ entries: [{ pages }] }), /entry 1 names no source/);
 	assert.throws(read({ entries: [{ sources: ['a.json'] }] }), /entry 1 names no page/);
 });
@@ -649,11 +694,25 @@ test('every page that renders data from outside its file is listed in date-sourc
 	assert.deepEqual(needless, [], `${DATE_SOURCES} lists pages that render no data from outside their file`);
 });
 
-test('each count in date-sources.json covers the files repo-stats.mjs counts for the same number', async (t) => {
+test('each count in date-sources.json is the number the page shows: files as repo-stats.mjs counts them, lines as conformance-stats.mjs does', async (t) => {
 	const stats = await import(pathToFileURL(join(SITE, 'src', 'data', 'repo-stats.mjs')).href);
+	const conformance = await import(pathToFileURL(join(SITE, 'src', 'data', 'conformance-stats.mjs')).href);
 	const counts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.counts));
-	assert.ok(counts.length > 0, 'the landing page counts guides, API pages and fiches');
+	assert.ok(counts.some(([, set]) => Array.isArray(set)), 'the landing page counts guides, API pages and fiches');
+	assert.ok(counts.some(([, set]) => !Array.isArray(set)), 'the guide on why phonometry counts the errata entries');
 	for (const [name, set] of counts) {
+		if (!Array.isArray(set)) {
+			assert.equal(typeof conformance[name], 'number', `${name} is no number src/data/conformance-stats.mjs exports`);
+			const head = spawnSync('git', ['show', `HEAD:${set.file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });
+			assert.equal(head.status, 0, head.stderr);
+			const dirty = spawnSync('git', ['status', '--porcelain', '--', set.file], { cwd: REPO, encoding: 'utf8' });
+			if (dirty.stdout.trim() !== '') {
+				t.diagnostic(`${name}: uncommitted changes to ${set.file}, not compared`);
+				continue;
+			}
+			assert.equal(head.stdout.match(new RegExp(set.lines, 'gm'))?.length ?? 0, conformance[name], `${name}: ${set.file} ${set.lines}`);
+			continue;
+		}
 		assert.equal(typeof stats[name], 'number', `${name} is no number src/data/repo-stats.mjs exports`);
 		// The comparison is at HEAD, which is what the dates read; a file added
 		// or deleted and not committed yet would make it meaningless.
@@ -663,6 +722,37 @@ test('each count in date-sources.json covers the files repo-stats.mjs counts for
 			continue;
 		}
 		assert.equal(filesAtHead(REPO, set).length, stats[name], `${name}: ${set.join(' ')}`);
+	}
+});
+
+test('the landing page moves with a commit that changes only how its numbers are computed', async (t) => {
+	// The site's own entry for the landing page, on a history where nothing it
+	// counts changes and only the module that computes the numbers does: the
+	// guides went from 163 to 168 that way, by a change to the topics
+	// repo-stats.mjs counts, with no guide added or removed.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const landing = raw.entries.find((entry) => entry.pages.includes('site/src/content/docs/index.mdx'));
+	/** A file each pathspec matches: a topic's guide, an API page, a fiche. */
+	const instance = (spec) =>
+		spec
+			.replace(/^:\([^)]*\)/, '')
+			.replaceAll('{topic}', domainIds[0])
+			.replaceAll('**/', '')
+			.replaceAll('*', 'one')
+			.replace(/\/$/, '/one.mdx');
+	for (const module of ['site/src/data/repo-stats.mjs', 'site/src/data/conformance-stats.mjs']) {
+		const repo = repository(t);
+		for (const spec of landing.pages) repo.writeFile(spec, page());
+		for (const spec of landing.sources) repo.writeFile(spec.endsWith('/') ? `${spec}One.astro` : spec, 'one\n');
+		for (const set of Object.values(landing.counts)) {
+			for (const spec of set.filter((spec) => !spec.startsWith(':(exclude'))) repo.writeFile(instance(spec), 'one\n');
+		}
+		repo.writeFile(module, 'export const counted = 1;\n');
+		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [landing] }));
+		repo.commit(1);
+		repo.writeFile(module, 'export const counted = 2;\n');
+		repo.commit(2, `${module} counts another way`);
+		assert.equal(day(await repo.dates(), 'index.mdx'), '2026-01-02', `a commit to ${module} alone`);
 	}
 });
 

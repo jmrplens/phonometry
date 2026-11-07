@@ -7,24 +7,29 @@
     "Paths are from the repository root, and one ending in / is a directory.",
     "In \"sources\", every commit that changed a file counts, except that a directory of",
     "the content tree stands for its pages, each dated by the page rule. \"counts\" names",
-    "each number of files a page shows after the src/data/repo-stats.mjs export that",
-    "computes it, with the git pathspecs of those files, and only a commit that changed",
-    "how many there are moves the page. A pathspec of a count that holds {topic} stands",
-    "for one per topic the navigation teaches (domainIds in src/data/topics.mjs, the",
-    "topics repo-stats.mjs counts the guides under), so a topic is counted the day it is",
-    "added. The build fails on a page or a source HEAD does not have, and",
+    "each number a page shows of other files after the export that computes it, and",
+    "only a commit that changed that number moves the page. A list of git pathspecs is",
+    "a number of files, named after its src/data/repo-stats.mjs export; a pathspec that",
+    "holds {topic} stands for one per topic the navigation teaches (domainIds in",
+    "src/data/topics.mjs, the topics repo-stats.mjs counts the guides under). An object",
+    "{\"file\": path, \"lines\": pattern} is the number of lines of that file the pattern",
+    "matches, named after its src/data/conformance-stats.mjs export: an edit inside an",
+    "entry leaves it, a new entry moves it. The build fails on a page or a source HEAD",
+    "does not have, and",
     "site/scripts/content-dates.test.mjs fails on a page that imports data, or a",
     "component built from it, without an entry here, and on a count whose files are not",
     "the ones repo-stats.mjs counts. Keys beginning with an underscore are notes."
   ],
   "entries": [
     {
-      "_why": "The landing page states the conformance counts, the release, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show.",
+      "_why": "The landing page states the conformance counts, the release, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show. repo-stats.mjs and conformance-stats.mjs compute the numbers, so every commit to them can change one the page shows: the guides went from 163 to 168 by a change to how repo-stats.mjs picks the topics it counts, with no guide added.",
       "pages": ["site/src/content/docs/index.mdx", "site/src/content/docs/es/index.mdx"],
       "sources": [
         ".github/badges/conformance-summary.svg",
         "VERSION",
         "site/src/data/home.ts",
+        "site/src/data/repo-stats.mjs",
+        "site/src/data/conformance-stats.mjs",
         "site/src/components/home/",
         "site/src/generated/catalogues.mjs"
       ],
@@ -49,22 +54,23 @@
       "sources": ["docs/conformance.json", "site/src/components/Conformance.astro"]
     },
     {
-      "_why": "These guides quote the conformance counts, as the summary banner prints them.",
+      "_why": "These guides quote the conformance counts, as the summary banner prints them and conformance-stats.mjs reads them.",
       "pages": [
         "site/src/content/docs/start/getting-started.mdx",
         "site/src/content/docs/es/start/getting-started.mdx",
         "site/src/content/docs/signals/metrology/compliance-verification.mdx",
         "site/src/content/docs/es/signals/metrology/compliance-verification.mdx"
       ],
-      "sources": [".github/badges/conformance-summary.svg"]
+      "sources": [".github/badges/conformance-summary.svg", "site/src/data/conformance-stats.mjs"]
     },
     {
-      "_why": "This guide quotes the conformance counts and the number of errata entries.",
+      "_why": "This guide quotes the conformance counts and the number of errata entries, which conformance-stats.mjs counts as the second-level headings of docs/ERRATA.md. That number is all the page shows of the registry, so a commit that rewraps or corrects an entry leaves the page's date where it is, and one that adds an entry moves it.",
       "pages": [
         "site/src/content/docs/start/why-phonometry.mdx",
         "site/src/content/docs/es/start/why-phonometry.mdx"
       ],
-      "sources": [".github/badges/conformance-summary.svg", "docs/ERRATA.md"]
+      "sources": [".github/badges/conformance-summary.svg", "site/src/data/conformance-stats.mjs"],
+      "counts": { "errataEntries": { "file": "docs/ERRATA.md", "lines": "^## .+$" } }
     },
     {
       "_why": "The glossary is its data module, rendered.",

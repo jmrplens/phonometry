@@ -33,8 +33,8 @@
 # node with make node-image, and check there that ffmpeg -version names the
 # new release and that a libsvtav1 encode reports SVT-AV1 4. A build with
 # another SVT-AV1 major waits until the clips' setting is calibrated on it.
-ARG FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-30-13-08/ffmpeg-n9.0.2-17-g2a571b6068-linux64-gpl-9.0.tar.xz
-ARG FFMPEG_SHA256=68ee646831adaae2495618346f3bba94ff207ff83bbd34d643e7004730d66269
+ARG FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-31-12-59/ffmpeg-n9.0.2-39-g7adfbe40dc-linux64-gpl-9.0.tar.xz
+ARG FFMPEG_SHA256=73e29a56974ae5a651133a04584c7483b21afe941e17dc91d79814a758b608d3
 
 FROM nvidia/cuda:13.3.1-runtime-ubuntu24.04@sha256:63da350831208559df18c7b8f3e0d5d1c984eaa815cdde690aacd6606cd0cb11 AS gpu
 ARG FFMPEG_URL

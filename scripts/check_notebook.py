@@ -30,6 +30,7 @@ its ``plot`` and ``report`` extras installed in the same environment.
 from __future__ import annotations
 
 import argparse
+import ast
 import base64
 import os
 import pathlib
@@ -70,7 +71,15 @@ def _result(outputs: Outputs) -> dict[str, Any]:
 
 
 def _imports(outputs: Outputs) -> str:
-    version = _result(outputs)["text/plain"]
+    # The kernel shows the version as Python would echo it, the repr of a str.
+    shown = _result(outputs)["text/plain"]
+    try:
+        version = ast.literal_eval(shown)
+    except (ValueError, SyntaxError):
+        version = None
+    if not isinstance(version, str):
+        msg = f"the import cell shows no version string: {shown[:200]!r}"
+        raise NotebookError(msg)
     return f"phonometry {version} imports in the kernel"
 
 

@@ -544,10 +544,12 @@ filterwarnings = [
     # so the day a deprecation is introduced the suite fails instead of
     # logging, and it costs nothing while nothing matches it.
     "error:.*is deprecated since phonometry.*:DeprecationWarning",
-    # A class-scoped fixture written as an instance method runs once per
-    # class on an instance no test sees, and pytest 10 refuses it. pytest 9.2
-    # only warns, with a PytestRemovedIn10Warning, a DeprecationWarning named
-    # here by its builtin class and its message (pytest 9.1 wrote it in the
-    # singular), so the test that uses such a fixture fails at its setup.
-    "error:Class-scoped fixtures? defined as instance methods? (is|are) deprecated:DeprecationWarning",
+    # A fixture of class, module, package or session scope written as an
+    # instance method runs once for its scope on an instance no test sees, and
+    # pytest 10 refuses it. pytest 9.2 only warns, for each of the four scopes,
+    # with a PytestRemovedIn10Warning, a DeprecationWarning named here by its
+    # builtin class and its message, which starts with the scope's name
+    # (pytest 9.1 warned for class scope alone, in the singular), so the test
+    # that uses such a fixture fails at its setup.
+    "error:(Class|Module|Package|Session)-scoped fixtures? defined as instance methods? (is|are) deprecated:DeprecationWarning",
 ]

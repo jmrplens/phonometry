@@ -696,6 +696,13 @@ const READS = {
 		fiches: 'count',
 		catalogueRows: ['site/src/generated/catalogues.mjs'],
 		catalogueCount: ['site/src/generated/catalogues.mjs'],
+		requiresPython: ['pyproject.toml'],
+		pythonFloor: ['pyproject.toml'],
+		targetPlatform: ['pyproject.toml'],
+		installCommand: ['pyproject.toml'],
+		dependencies: ['pyproject.toml'],
+		extras: ['pyproject.toml'],
+		softwareRequirements: ['pyproject.toml'],
 	},
 	'site/src/data/conformance-stats.mjs': {
 		passingChecks: [BANNER, 'docs/conformance.json'],

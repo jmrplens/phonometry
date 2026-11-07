@@ -24,6 +24,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { catalogues } from '../generated/catalogues.mjs';
+import { domainIds } from './topics.mjs';
 
 /**
  * The repository root, found by walking up until `VERSION` appears. The same
@@ -97,20 +98,13 @@ export const version = (() => {
   }
 })();
 
-//: The topics the guides live under. Reference and the API reference are not
+//: The topics the guides live under: every topic that teaches, read from the
+//: navigation data rather than listed here, the way
+//: `site/scripts/check-guides-index.mjs` reads them, so this count and the one
+//: the guides index states are taken over the same topics and a new topic is
+//: counted the day it is added. Reference and the API reference are not
 //: guides, and neither is Start, which is the front door to them.
-const GUIDE_TOPICS = [
-  'aircraft',
-  'buildings',
-  'devices',
-  'environment',
-  'materials',
-  'perception',
-  'signals',
-  'simulation',
-  'underwater',
-  'vibration',
-];
+const GUIDE_TOPICS = domainIds;
 
 /** Topic guides, without the topic and subgroup overviews. */
 export const guides = GUIDE_TOPICS.reduce(

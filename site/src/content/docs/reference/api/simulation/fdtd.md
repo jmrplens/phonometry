@@ -38,15 +38,16 @@ proof (`gpu-parity.lock`) found every field, snapshot and contour phasor
 bit-identical to NumPy's over the scenarios of both engines, and the energy
 within 1.79e-16 relative over them, because the GPU sums it in another
 order; the guide on where a simulation runs names the hardware it was
-measured on. Runs on torch's CPU device, and float32 runs on NumPy, agree
-with NumPy in float64 within the tolerance that guide publishes for each
-device and dtype. Each of these bounds is the worst over that scenario
-matrix (grids of up to 64 by 48 cells, up to 120 steps), not a promise about
-any run: float32 rounding grows with the number of steps. An acoustic run
-of 8085 steps on a 200 by 300 cell grid, driven by a 1 kHz `CWSource`,
-differed by 8.0e-06 relative at its probe (4.0e-06 with a Gaussian pulse),
-on NumPy and on torch's CPU device alike. A float32 run on CuPy, and any run
-on torch's CUDA device, is not measured yet.
+measured on. Runs on torch's CPU device, runs on torch's MPS device (float32
+only), and float32 runs on NumPy, agree with NumPy in float64 within the
+tolerance that guide publishes for each device and dtype. Each of these
+bounds is the worst over that scenario matrix (grids of up to 64 by 48
+cells, up to 120 steps), not a promise about any run: float32 rounding grows
+with the number of steps. An acoustic run of 8085 steps on a 200 by 300 cell
+grid, driven by a 1 kHz `CWSource`, differed by 8.0e-06 relative at its
+probe (4.0e-06 with a Gaussian pulse), on NumPy and on torch's CPU device
+alike. A float32 run on CuPy, and any run on torch's CUDA device, is not
+measured yet.
 
 Validated against analytic oracles: the eigenfrequencies of a rigid
 rectangular box and of an effectively 1D tube, the numerical dispersion
@@ -143,7 +144,7 @@ The accumulated contour phasors at one tracked frequency.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the frequency is not tracked or nothing has been accumulated yet. |
+| ValueError | If the frequency is past a float's range, is not tracked, or nothing has been accumulated yet. |
 | TypeError | If `frequency` is not one real number: an array, a text or a complex number, which a lookup through `float` would read as the number it spells or as its real part. |
 
 ### ContourProbe.reset()
@@ -250,7 +251,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
+| ValueError | for an argument out of its range, a `dx`, a `cfl` and a fastest speed of `c` that give a time step past a float's range (zero or infinite), a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation, unless `fallback=True`. |
 
@@ -469,7 +470,7 @@ returned and only the final state is kept (read it with
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
-| ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, or that waveform returns a number too large for a float. |
+| ValueError | if `n_steps` is not a whole number of 0 or more, `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more, the frames would take more bytes than a NumPy array can hold, or that waveform returns a number too large for a float. |
 
 ### FDTD2D.step()
 
@@ -545,8 +546,8 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
-| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed; and, as the run steps, for that waveform returning a number too large for a float. |
+| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)`; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, a hosts file that cannot be read or is malformed, or snapshots that would take more bytes than a NumPy array can hold in the run's dtype, refused before the run steps; and, as the run steps, for that waveform returning a number too large for a float. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation, unless `fallback=True`. |
@@ -724,9 +725,10 @@ One acoustic FDTD simulation: the domain, its sources and what it records.
 Every argument is checked when the run is built, the grid's included:
 the time step, the density, the sponge and the damping, the impedance
 edges, the obstacle, and the sources and the probes on the grid. A run
-that builds is one [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) can step, here or on a node,
-and a bad argument raises where the run is written, with the class and
-the words the function always raised. The sources are held as a tuple
+that builds is one [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) can step here; one that
+cannot travel to a node is refused when the function is called, and a
+bad argument raises where the run is written, with the class and the
+words the function always raised. The sources are held as a tuple
 and each array as the run's own read-only copy, so nothing the caller
 changes afterwards reaches a checked run.
 
@@ -751,7 +753,7 @@ changes afterwards reaches a checked run.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a medium (`c`, `rho`, `damping`) that holds a complex number or a text, or an `obstacle_mask` that is not boolean. |
-| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
+| ValueError | If an argument is out of its range, a `dx`, a `cfl` and a fastest speed of `c` give a time step past a float's range (zero or infinite), a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, a source, a probe or the obstacle does not fit the grid, or the `duration_s` covers more steps than the record holds: its time axis or its probe history would take more bytes than a NumPy array can hold. |
 
 ## GaussianPulse
 

@@ -354,12 +354,12 @@ def _d_elastic_fluid_solid(s: SVG, th: Theme) -> None:
     )
     caps = (
         (
-            ("$V = (Z_2−Z_1)/(Z_2+Z_1)$ = 0.938", th.fg, True),
+            ("$V = (Z_2−Z_1)/(Z_2+Z_1)$ = 0.939", th.fg, True),
             ("no shear is excited, so the steel", th.muted, False),
             ("acts as a liquid of its $ρ$ and $c_P$", th.muted, False),
         ),
         (
-            ("critical angles 14.5° and 27.5°", th.fg, True),
+            ("critical angles 14.4° and 27.7°", th.fg, True),
             ("between them P is evanescent and", th.muted, False),
             ("the shear wave carries the power", th.muted, False),
         ),
@@ -518,7 +518,7 @@ def _d_immersed_plate_tl(s: SVG, th: Theme) -> None:
     pulse and the two probes, all at their true heights. Right, what the two
     probes record and why the 65 us gate separates the incident pulse from
     its plate reflection exactly, plus the half-wave resonance that makes the
-    plate transparent at 295 kHz.
+    plate transparent at 297.9 kHz.
     """
     import math
 
@@ -626,7 +626,7 @@ def _d_immersed_plate_tl(s: SVG, th: Theme) -> None:
     s.text(
         618,
         550,
-        "$f_n = n c_P / (2h)$ = 295 kHz for 10 mm of steel",
+        "$f_n = n c_P / (2h)$ = 297.9 kHz for 10 mm of steel",
         13,
         th.accent,
         bold=True,

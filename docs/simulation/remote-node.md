@@ -8,17 +8,20 @@ record, `FDTDRun` or `ElasticRun`, is the one a run here takes, built and
 checked here; the call is the same, `fdtd_simulation(run, compute=...)` or
 `elastic_fdtd_simulation(run, compute=...)`; and so is the record it returns.
 Only those two functions, and the two video writers that take the same runs,
-go to a node. An engine built directly, `FDTD2D` or `ElasticFDTD2D`, steps in
-this process, where its fields are yours to read and write between steps, and
-it refuses a request that names a host.
+`write_fdtd_animation` and `write_elastic_fdtd_animation`, go to a node. An
+engine built directly, `FDTD2D` or `ElasticFDTD2D`, steps in this process,
+where its fields are yours to read and write between steps, and it refuses a
+request that names a host.
 
 This page says what happens when a run goes to a node, how to name one, how
 to set up a Docker node or a Python node, what can go wrong and what each
 error says, how to follow a run, what each side trusts of the other, and when
 a run there gives the numbers a run here gives. The device itself, NumPy,
 CuPy or torch, is chosen as [Where a simulation runs](compute.md) explains,
-and all of it holds on a node. [Where heavy work runs](where-it-runs.md) maps
-the devices, the nodes and the encoders in one place.
+and it holds on a node that has that library: section 3 says what the image
+holds, and section 4 what a Python node needs.
+[Where heavy work runs](where-it-runs.md) maps the devices, the nodes and the
+encoders in one place.
 
 ## 1. What happens when a run goes to a node
 
@@ -29,10 +32,14 @@ raises without a host. The function then refuses a run that cannot travel
 (section 5 says which), and the hosts file must name the node.
 
 Then one `ssh` process carries the whole run. There is no server to install
-or keep running on the node: its ssh server is all it needs. The run travels
-as data, field by field, never as code, and the node builds it again with the
-library's constructors, so it checks itself again there. The video writers
-travel too, their run, frame and video options as records: see
+or keep running on the node: its ssh server is all it needs. This machine
+needs phonometry and an OpenSSH client, and no CuPy, torch, ffmpeg or
+matplotlib: a run that falls back steps on NumPy, and only a video writer that
+falls back needs ffmpeg and matplotlib here. The run travels as data, field by
+field, never as code, and the node builds it again with the library's
+constructors, so it checks itself again there. The video writers travel too,
+called as `write_fdtd_animation(path, run, compute=...)`, their run, frame and
+video options as records: see section 5 of
 [Writing animations and FDTD runs to video](../io/videos.md).
 
 The node runs your own phonometry, as installed here, whatever is installed
@@ -44,13 +51,22 @@ the others, but never one used in the last ten minutes or one a run still
 holds, so a long run keeps its package however many others come and go.
 
 The node runs the function on the device asked for, with no fallback of its
-own, and sends back the probe histories and the snapshots, which are read here
-into arrays sized from your request; a video writer sends its video's bytes
-instead of snapshots. `result.provenance.host` names the node and
+own, and sends back the probe histories and, when the run records them
+(`snapshot_every` of its `FDTDRecording` or `ElasticRecording`), the
+snapshots, which are read here into arrays sized from your request and
+allocated before the connection opens. On a large grid the snapshots are most
+of what crosses the link and of the memory this machine needs:
+`snapshot_decimation`, section 7 of [Where a simulation runs](compute.md), and
+`dtype="float32"` shrink them, while the probe histories stay float64. A video
+writer sends its video's bytes instead of snapshots.
+
+`result.provenance.host` names the node and
 `result.provenance.package_sha256` the package that ran, and
 `result.provenance.phonometry_version` is your own version, which the job
-carries: from its cache the node cannot name the package it runs. The rest of
-the provenance is the node's: its NumPy, its array library, its GPU.
+carries: from its cache the node cannot name the package it runs.
+`device_index` is the one you asked for, and the rest of the provenance is the
+node's: its NumPy, its array library, its CUDA, its GPU. Section 5 of
+[Where a simulation runs](compute.md) lists every field.
 
 ## 2. Naming a node: the hosts file
 
@@ -92,16 +108,17 @@ python = "venvs/node/bin/python"    # relative to the home directory there
 | `label` | how messages and the log name the node | its name |
 | `timeout_s` | the longest a run there may take, in seconds | no limit |
 
-A name holds letters, digits, `.`, `_` and `-`, and starts with a letter or a
-digit. A name with a dot goes in quotes in its table's header, because TOML
-reads a bare dot as a table inside another: `[hosts."nas.local"]` names the
-node `nas.local`, which `Compute(host="nas.local")` asks for, where
-`[hosts.nas.local]` would be a table `local` inside a node `nas`. A key the
-table does not list, an `image` for a Python node or a
-`python` for a Docker one, or a `python` path that starts with `~` raises
-`ValueError` naming the file: the client quotes the path in the command it
-sends, so the node's shell would never expand the `~`. A file saved with a
-byte-order mark, as Windows Notepad saves UTF-8, reads like any other.
+A name holds up to 64 characters, each a letter, a digit, `.`, `_` or `-`, and
+starts with a letter or a digit. A name with a dot goes in quotes in its
+table's header, because TOML reads a bare dot as a table inside another:
+`[hosts."nas.local"]` names the node `nas.local`, which
+`Compute(host="nas.local")` asks for, where `[hosts.nas.local]` would be a
+table `local` inside a node `nas`. A key the table does not list, an `image`
+for a Python node or a `python` for a Docker one, or a `python` path that
+starts with `~` raises `ValueError` naming the file: the client quotes the
+path in the command it sends, so the node's shell would never expand the `~`.
+A file saved with a byte-order mark, as Windows Notepad saves UTF-8, reads
+like any other.
 
 **What ssh needs.** The client runs the `ssh` of your machine, OpenSSH 7.6 or
 newer, and a run never asks for anything: ssh runs in batch mode. It is the
@@ -149,9 +166,20 @@ print(res.provenance.host, res.provenance.gpu)   # nas, and the card's name
 ```
 
 `elastic_fdtd_simulation(ElasticRun(...), compute=request)` goes to the node
-the same way. A whole script can name the node once, with a `use()` block or
-with the `PHONOMETRY_COMPUTE` environment variable, whose grammar is
-`device[:index][@host][,option...]`:
+the same way. A whole script can name the node once, with a
+`simulation.use()` block or with the `PHONOMETRY_COMPUTE` environment
+variable; section 3 of [Where a simulation runs](compute.md) says which wins
+when more than one names a placement. A `use()` block holds its request for
+every call inside it that passes no `compute=`:
+
+```py
+with simulation.use(request):
+    res = simulation.fdtd_simulation(run)
+```
+
+The variable's grammar is `device[:index][@host][,option...]`. It has no
+`timeout_s` option, so a run it sends to a node takes the hosts file's
+`timeout_s`, when the file gives one:
 
 ```bash
 PHONOMETRY_COMPUTE=cupy@nas python study.py
@@ -199,8 +227,9 @@ libraries its figures need, the DejaVu fonts the figures are drawn with, and
 ffmpeg, a static build the Dockerfile pins by URL and SHA-256, with SVT-AV1,
 NVENC, VP9 and dav1d, so a node needs no ffmpeg of its own. The GPU build
 adds the CUDA runtime and CuPy 14.2.0, the release the GPU proof of
-[Where a simulation runs](compute.md) ran on. Each base image is pinned
-by digest.
+[Where a simulation runs](compute.md) ran on. Neither build holds torch, and
+the CPU build holds no CuPy: a torch device takes a Python node or an image of
+your own. Each base image is pinned by digest.
 
 Each run gets a container of its own, removed when the run ends, with no
 network, running as your user on the node, so whatever it writes is yours. Its
@@ -248,16 +277,17 @@ with no activation script first, so the environment must work without one.
 
 A node that writes videos
 ([Writing animations and FDTD runs to video](../io/videos.md)) needs two things more:
-matplotlib in that environment, at the version the library's `plot` extra
-asks for, and ffmpeg on the `PATH` the command ssh runs there sees. The
-Docker image of section 3 holds both.
+matplotlib in that environment, 3.10.7 or later as the library's `plot`
+extra asks (`~/venvs/node/bin/pip install "matplotlib>=3.10.7"`), and ffmpeg
+on the `PATH` the command ssh runs there sees. The Docker image of section 3
+holds both.
 
 ## 5. When something goes wrong
 
 | What went wrong | What is raised | When |
 |---|---|---|
 | an argument of the run | `TypeError` or `ValueError` | when the run is built, as for a run here |
-| a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, or a whole number outside the range of an int64 | `TypeError`, naming the source or the field | when the function is called, before the hosts file is read |
+| a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, a subclass of one of the library's records, a whole number outside the range of an int64, a number or an array of floats wider than 64 bits (a `longdouble`), or a `Fraction` or a `Decimal` the run keeps as given, such as `dx=Fraction(1, 100)` | `TypeError`, naming the source or the field | when the function is called, before the hosts file is read |
 | a host the file does not name, or no hosts file | `KeyError` | before ssh starts |
 | a hosts file that is a named pipe, a device or a directory, holds more than 1 MiB, cannot be read or is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
 | no ssh client on `PATH`, even on Windows with one in the working directory, Pyodide, a package that cannot be read from disk or holds a file no node would write, or a job too long for the header a node reads (a run of several thousand point sources) | `ComputeRemoteError` | before ssh starts |
@@ -278,10 +308,13 @@ standard error as a note too.
 
 With `fallback=True` a `ComputeRemoteError` becomes a `ComputeFallbackWarning`,
 whose message carries the error, and the run steps on NumPy here, in the dtype
-asked for; its provenance says so, with no host and the device `"cpu"`. Every
-`ComputeRemoteError` falls back, those raised here before ssh starts
-included; a wrong argument, an unknown host or a malformed hosts file raises
-with or without it.
+asked for; its provenance says so, with no host and the device `"cpu"`. A
+video writer that falls back also draws and encodes here, so it needs ffmpeg
+and matplotlib on this machine: without matplotlib it raises `ImportError`,
+and without ffmpeg `io.FFmpegNotFoundError`. Every `ComputeRemoteError` falls
+back, those raised here before ssh starts included; a wrong argument, a run
+that cannot travel, an unknown host or a malformed hosts file raises with or
+without it.
 
 Warnings the run raises on the node are raised here, at the line of your code
 that called the function, with their own class: phonometry's as published,
@@ -395,14 +428,16 @@ publish too.
 
 ## What this guide covers
 
-**Covered.** Running `fdtd_simulation` and `elastic_fdtd_simulation` on
-another machine over SSH, on a Docker node built from the repository's image
-or on a Python environment, with or without a GPU; the hosts file that names
-a node, and the `host` of `Compute` and of `PHONOMETRY_COMPUTE`; what the
-client and the node check, each of what the other sends; the errors a remote
-run raises, the fallback to NumPy here, the warnings the node raises, progress
-on the `phonometry.simulation` logger, timeouts and interrupts; and when a
-remote run gives the numbers of a run here.
+**Covered.** Running `fdtd_simulation`, `elastic_fdtd_simulation` and the
+two video writers, `write_fdtd_animation` and `write_elastic_fdtd_animation`,
+on another machine over SSH, on a Docker node running the image built from the
+repository's Dockerfile or on a Python environment, with or without a GPU; the
+hosts file that names a node, and the `host` of `Compute` and of
+`PHONOMETRY_COMPUTE`; what the client and the node check, each of what the
+other sends; the errors a remote run raises, the fallback to NumPy here, the
+warnings the node raises, progress on the `phonometry.simulation` logger,
+timeouts and interrupts; and when a remote run gives the numbers of a run
+here.
 
 **Not covered.** An engine built directly, `FDTD2D` or `ElasticFDTD2D`,
 steps in this process and does not go to a node, and a node runs the two
@@ -418,24 +453,30 @@ here: `io.write_video` runs on this machine only.
 - [Where a simulation runs: NumPy, CuPy and torch](compute.md): the devices
   a run steps on, here or on a node, and what is promised about the numbers
   on each.
+- [Where heavy work runs: CPU or GPU, here or on a node](where-it-runs.md):
+  the devices, the nodes and the encoders in one place.
 - [2D FDTD wave simulation](fdtd-simulation.md): the acoustic run, its
   sources, probes and boundaries.
 - [Elastic waves and fluid-solid coupling](elastic-waves.md): the elastic
   run, which goes to a node the same way.
+- [Writing animations and FDTD runs to video](../io/videos.md): the two
+  writers, and in section 5 the video of a run made on a node.
 - API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
   [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
+  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](https://docs.jmrp.io/phonometry/reference/api/simulation/video/).
 
 ## Quick answers
 
 ### How do I run a simulation on another machine?
 
 Name the machine in a hosts file, give it the node image
-(`make node-image HOST=nas`) or a Python environment with NumPy and SciPy, and
-pass `compute=simulation.Compute(device="cupy", host="nas")` to
-`fdtd_simulation` or `elastic_fdtd_simulation`, or set
-`PHONOMETRY_COMPUTE=cupy@nas`. The run, the call and the result are those of a
-run here, and `result.provenance.host` names the node.
+(`make node-image HOST=nas`) or a Python environment with NumPy, SciPy and,
+for this GPU request, CuPy, and pass
+`compute=simulation.Compute(device="cupy", host="nas")` to `fdtd_simulation`
+or `elastic_fdtd_simulation`, or set `PHONOMETRY_COMPUTE=cupy@nas`. The run,
+the call and the result are those of a run here, and `result.provenance.host`
+names the node.
 
 ### Does a remote run give the same numbers?
 
@@ -448,9 +489,11 @@ compare with NumPy's.
 ### What does the node need?
 
 An ssh server you can log in to with a key, on Linux or macOS with a POSIX
-login shell, and either Docker with the node image (and, for a GPU, the
-NVIDIA driver and the NVIDIA Container Toolkit) or a Python 3.12 or later with
-NumPy and SciPy at the library's floors (and CuPy or torch for a GPU). To
-write videos, a Python node also needs matplotlib, and ffmpeg on its
-`PATH`; the Docker image holds both. phonometry itself need not be installed there:
-the client sends its own.
+login shell, and either Docker with the node image (and, for a GPU, the NVIDIA
+driver and the NVIDIA Container Toolkit) or a Python 3.12 or later with NumPy
+and SciPy at the library's floors (and CuPy or torch for a GPU). To write
+videos, a Python node also needs matplotlib, and ffmpeg on its `PATH`; the
+Docker image holds both. phonometry itself need not be installed there: the
+client sends its own. This machine needs phonometry and an OpenSSH client, and
+no CuPy, torch, ffmpeg or matplotlib: a run that falls back steps on NumPy,
+and only a video writer that falls back needs ffmpeg and matplotlib here.

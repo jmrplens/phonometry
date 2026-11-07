@@ -182,7 +182,7 @@ export const en: HomeContent = {
 	},
 	coverage: {
 		title: 'What it covers',
-		lead: `Eleven documentation areas over nineteen import namespaces: ${guides} guides and ${apiPages} API reference pages. Each row links to the area overview; the designations are the standards actually implemented there, not a reading list.`,
+		lead: `Eleven documentation areas over twenty-one import namespaces; in all, ${guides} guides and ${apiPages} API reference pages. Each row links to the area overview; the designations are the standards actually implemented there, not a reading list.`,
 		headers: ['Area', 'Standards implemented'],
 		areas: [
 			{
@@ -337,7 +337,7 @@ export const es: HomeContent = {
 	},
 	coverage: {
 		title: 'Qué abarca',
-		lead: `Once áreas, ${guides} guías y ${apiPages} páginas de referencia de la API. Cada fila enlaza al índice del área; las designaciones son las normas realmente implementadas ahí, no una lista de lecturas.`,
+		lead: `Once áreas de documentación sobre veintiún espacios de nombres de importación; en total, ${guides} guías y ${apiPages} páginas de referencia de la API. Cada fila enlaza al índice del área; las designaciones son las normas realmente implementadas ahí, no una lista de lecturas.`,
 		headers: ['Área', 'Normas implementadas'],
 		areas: [
 			{

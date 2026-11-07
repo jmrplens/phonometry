@@ -190,8 +190,8 @@ def _mode_conversion_fields() -> tuple[Any, Any, Any, Any]:
     """The three oblique-incidence runs, cached.
 
     One sustained 200 kHz beam in water on a steel half-space, at 10, 20
-    and 35 degrees: below the P critical angle (14.5 deg), between the two
-    (14.5 and 27.5 deg) and beyond the S critical angle.
+    and 35 degrees: below the P critical angle (14.4 deg), between the two
+    (14.4 and 27.7 deg) and beyond the S critical angle.
 
     **What this scene can and cannot say.** It shows the regimes, and it is
     the only picture of them in the corpus: two departing beams, then one
@@ -250,14 +250,14 @@ def animate_elastic_mode_conversion(output_dir: str) -> None:
     water leaves behind a reflected beam and *two* transmitted waves in the
     steel, compressional and shear, each refracting by Snell's law at its
     own speed and so at its own angle. At 10 degrees both propagate: the
-    slower SV wave plunges at 22.1 degrees from the normal and the faster P
-    wave, which Snell's law bends further out, at 43.8. At 20
-    degrees, past the P critical angle of 14.5, the P wave is gone --
+    slower SV wave plunges at 21.9 degrees from the normal and the faster P
+    wave, which Snell's law bends further out, at 44.4. At 20
+    degrees, past the P critical angle of 14.4, the P wave is gone --
     nothing leaves at its angle, only a skin hugging the contact that dies
     within a wavelength -- and the shear beam alone carries the transmitted
     power, which is why the reflection is 0.918 and not the 1.000 an
     equivalent fluid bottom would return. At 35 degrees, past the shear
-    critical angle of 27.5, both are evanescent and the reflection is total
+    critical angle of 27.7, both are evanescent and the reflection is total
     but phase-shifted. Each panel measures its own |V| by running the scene
     twice, once with the steel and once with the water continued through
     it, and subtracting the two probe traces.
@@ -440,7 +440,7 @@ def animate_elastic_mode_conversion(output_dir: str) -> None:
         0.5,
         0.030,
         T(
-            "critical angles: 14.5° (P), 27.5° (SV). Dashed: the "
+            "critical angles: 14.4° (P), 27.7° (SV). Dashed: the "
             "Snell direction of each transmitted wave"
         ),
         ha="center",

@@ -42,7 +42,7 @@ _HS_CP, _HS_CS, _HS_RHO = ALUMINUM.c_p, ALUMINUM.c_s, ALUMINUM.rho
 # Mesh rule dx = min(smallest geometric dimension / 4, shortest wavelength
 # / 8). The block has no feature smaller than itself; the source is a
 # Gaussian of width 8 us, whose spectrum is 20 dB down at 60.4 kHz, and the
-# slowest wave of interest is the Rayleigh train at 2921 m/s, so
+# slowest wave of interest is the Rayleigh train at 2897 m/s, so
 # lambda / 8 = 48 mm / 8 = 6.0 mm. The grid runs at 1 mm, six times finer,
 # because a free surface carries the most dispersive part of the scheme and
 # the page itself asks for 15-20 cells per Rayleigh wavelength there (48 at
@@ -62,7 +62,7 @@ _HS_SPONGE = 120
 _HS_HALF = 300  # view half-width and depth [cells]
 _HS_FPS = 40
 # How far a front has to have travelled [m] before its letter is put on it.
-# The Rayleigh train runs at 0.93 of the shear speed, so at first the S and
+# The Rayleigh train runs at 0.935 of the shear speed, so at first the S and
 # R letters, and the P letter with them, sit on top of one another round the
 # source; at 0.08 m the three stand apart.
 _HS_LABEL_FROM = 0.08
@@ -101,7 +101,7 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     row, Gaussian pulse of width 8 us, sponges left, right and bottom --
     differing only in whether the top side is declared ``free``. Free, the
     stress-imaging surface carries a Rayleigh train; rigid, the default
-    shear-free clamped wall supports no surface wave at all, which is the
+    shear-free rigid wall supports no surface wave at all, which is the
     guide's claim that the boundary condition and not the material is the
     cause.
 
@@ -130,7 +130,7 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     n_active = int(np.ceil(1.2 * corner / _HS_CS / (every * dt)))
     src_ix = _HS_NX // 2
     # Surface probes 0.15 m apart, both inside the view: the Rayleigh
-    # arrival separates between them by 0.15 / c_R = 51.4 us, which is the
+    # arrival separates between them by 0.15 / c_R = 51.8 us, which is the
     # speed measurement drawn under each panel.
     probe_cols = (src_ix + 150, src_ix + 300)
     rows = slice(0, _HS_HALF, 2)
@@ -401,7 +401,7 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     defining property -- it stays on the surface while the body fronts leave
     -- is a statement about persistence. The arcs are kept here and stay
     locked to the fronts as they expand. The lower panel repeats the run with the top side
-    left at the solver default, a clamped rigid wall: the same material,
+    left at the solver default, a shear-free rigid wall: the same material,
     the same hit, the same two body fronts, and no surface train anywhere
     -- which is what makes the boundary condition, not the aluminium, the
     reason a Rayleigh wave exists.
@@ -417,7 +417,7 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     # its own run. Two reasons, and the panels say so. The source blob is
     # orders of magnitude above the fronts it launches, so a scale set on the
     # whole run leaves the wavefronts invisible; and a vertical force *on* a
-    # clamped surface nearly cancels against its own image, so the rigid run
+    # rigid wall nearly cancels against its own image, so the rigid run
     # radiates far less than the free one and a shared scale would bury it.
     # The probe traces below keep one shared scale, which is where the
     # comparison stays quantitative: the missing surface arrival is a missing
@@ -467,7 +467,7 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     v_txts = [panel.v_txt for panel in panels]
     verdicts = [
         T(f"surface train: {c_meas:.0f} m/s measured, {c_r:.0f} m/s exact"),
-        T("only P and S: a clamped wall carries no surface wave"),
+        T("only P and S: a rigid wall carries no surface wave"),
     ]
     # The Spanish of the rigid-run verdict is wider than the
     # height-limited field panel (it ran ~150 px past the right spine),

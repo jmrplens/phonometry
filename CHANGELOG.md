@@ -115,11 +115,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   are that device's arrays, `numpy_field(field)` gives a NumPy copy on any
   device, and a result holds NumPy arrays whatever stepped. After
   construction the engines touch their fields only with Array API standard
-  operations, and NumPy's numbers did not move: the NumPy path is held bit
-  for bit to SHA-256 digests of every number the engine scenarios give,
-  taken from the engines as they were (`engine-digests.json`, checked in
-  one CI job on Ubuntu 24.04 and its C library, glibc 2.39, with NumPy's
-  AVX-512 kernels switched off). On CuPy in float64
+  operations, and NumPy's numbers did not move: a frozen copy of the engines
+  as they were proved the new engines equal to it bit for bit on every
+  runner, and the NumPy path is held bit for bit to SHA-256 digests of
+  every number the engine scenarios give, taken from the new engines
+  (`engine-digests.json`, checked in one CI job on Ubuntu 24.04 and its C
+  library, glibc 2.39, with NumPy's AVX-512 kernels switched off). On CuPy in float64
   every field, snapshot and contour phasor came out bit-identical to NumPy's
   on an NVIDIA GeForce RTX 4060 with CuPy 14.2.0, and the energy within
   1.79e-16 relative; `gpu-parity.lock` records that proof with a fingerprint
@@ -2295,6 +2296,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The audio-files guide shows it beside `pick` and `crop`.
 
 ### Fixed
+
+- **A count given as a `Decimal`, a `Fraction` or a complex number is refused by
+  the kinds of number a count takes.** Every whole-number argument checked as
+  a count, an order, a number of storeys, stages or events among them, refused
+  `Decimal('2')` with `must be a whole number`, which 2 is. The `TypeError` now
+  says that a count is an `int`, a NumPy integer or a whole float and names the
+  kind it got; a bool, a text or an array keeps the message it had.
+- **A `Decimal` or a `Fraction` steps an FDTD run as the float it reads as.**
+  A `Decimal` on a source of `simulation.FDTDRun` or `simulation.ElasticRun`
+  (the `amplitude`, `half_width_s` or `t0` of a `GaussianPulse`, the
+  `frequency` or `amplitude` of a `CWSource`, the `fs` or `amplitude` of a
+  `SignalSource`, the `amplitude` of a `PlaneWaveSource`, an `ExplosionSource`
+  or a `ForceSource`) built the run and then stopped its first step with
+  Python's `unsupported operand type(s)`, and a `Decimal` or a `Fraction` as a
+  `cfl`, an `absorbing_layer_reflection` or a `ramp_cycles` stopped the run or
+  the engine where it was built with NumPy's `ufunc 'isfinite' not supported`
+  or its `log`, none of which names the input. A source now holds each number
+  as the float its check read, so the run steps as the one given that float
+  and travels to a node, which refused a `Decimal` or a `Fraction` on a source;
+  the Courant number and the sponge's reflection are read the same way, and an
+  edge impedance written as a `Decimal` steps as one written as a `Fraction`,
+  where it was refused as no real number. The `frequency` and the `segment`
+  of a hand-built `simulation.ContourPhasors` are read the same way too, where
+  a `Decimal` or a `Fraction` was refused with NumPy's `isfinite` message. A
+  Python integer or a `Fraction` too large for a float, which `float()`
+  refused with Python's own `OverflowError` wherever a run, a source, a
+  material or an engine read one number or a map, now raises `ValueError`
+  naming the input, and so does a long double that large as a `ramp_cycles`,
+  which passed as finite. A NumPy `float32` given as
+  a `cfl`, as the `absorbing_layer_reflection` of an engine or as a number of
+  a source is now read as the float it holds as well. It was kept as given, so
+  the time step, the sponge and the source's waveform were computed in
+  `float32`: with `c=343.0` and `dx=0.01`, `cfl=np.float32(0.6)` gave a step
+  of 1.2369215255603194e-05 s where the float it holds gives
+  1.2369215322759996e-05 s. A run given one steps differently from before, by
+  1.3e-07 relative at the probe of a 40-step acoustic run on a 16 by 16 cell
+  grid driven by a Gaussian pulse, and by 1.0e-06 at that of a 24-step
+  elastic run on the same grid.
+
+- **A run longer than its record can hold is refused before it steps.** An
+  `FDTDRun` or an `ElasticRun` whose `duration_s` covers more time steps than
+  its record holds, as a sound speed of `2**70` m/s or a `duration_s` of
+  `1e300` s gives, built and then stopped `fdtd_simulation` or
+  `elastic_fdtd_simulation` with NumPy's `Maximum allowed dimension exceeded`
+  or `array is too big`, which name no input. NumPy refuses an array whose
+  bytes pass the largest index, an empty axis left out of the product, so
+  the float64 time axis is past it from about `2**60` steps on, and so is
+  the probe history, the empty one of a run with no probe included, and two
+  probes' history from about `2**59`. Such a run now raises `ValueError` when
+  it is built, naming `duration_s`, the time step and the array, with its
+  shape, its dtype and its bytes. Past the largest index, where `2**70` m/s
+  and `1e300` s fall and where a long enough `duration_s` makes the count
+  infinite, the refusal gives the time axis as more samples than that index
+  and more bytes than eight times it. Snapshots that no array holds in
+  the run's dtype are refused the same way when the function is called,
+  before the run steps, and so are the frames of an engine's
+  `run(n_steps, snapshot_every=...)`.
+
+- **A time step no float holds is refused by the numbers that give it.** A
+  `dx`, a `cfl` and a fastest speed whose step `cfl * dx / (c * sqrt(2))`
+  rounds to zero, as `c=1e154` with `dx=1e-170` gives, stopped an `FDTDRun`
+  or an `ElasticRun` with Python's `float division by zero`, which names no
+  input, and built an `FDTD2D` or an `ElasticFDTD2D` that stepped without
+  moving the wave. An infinite step, as `c=1e-300` with `dx=1e10` gives,
+  refused the run for a `duration_s` that covered no step and turned every
+  cell of the engine NaN. Both engines and both runs now raise `ValueError`
+  when they are built, naming `dx`, `cfl`, the fastest speed and the step.
 
 - **One number a function reads is read by name.** A function that turned one
   of its caller's numbers into a float with `float()`, or into a complex number

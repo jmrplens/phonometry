@@ -144,7 +144,8 @@ vídeo que escribas.
 Construir el registro lanza `ValueError` (`TypeError` para un valor de tipo
 equivocado, como un booleano en `fps`) ante una elección fuera de sus
 opciones, un `fps` que no sea un número finito positivo, un `vaapi_device`
-vacío, un `ffmpeg_encoder`, unas `ffmpeg_options` o un `vaapi_device` que
+vacío, un `ffmpeg_encoder` vacío o que empiece por un guion, un
+`ffmpeg_encoder`, unas `ffmpeg_options` o un `vaapi_device` que
 contengan un carácter NUL, que ningún argumento de un programa puede llevar,
 un `ffmpeg_encoder` junto a un `encoder` o un `codec` elegidos por ti, y un
 `codec` que el tipo de codificador que nombraste no escribe, como
@@ -183,9 +184,9 @@ una GPU de NVIDIA. Por eso, antes de que empiece el vídeo, cada candidato
 codifica por turno un fotograma negro del tamaño del vídeo, una
 codificación real, y el primero que lo consigue escribe el vídeo. Un éxito
 se recuerda durante el resto del proceso, para ese ffmpeg, ese codificador
-y ese tamaño de fotograma, y no se vuelve a probar; un fallo no se recuerda,
-porque un codificador de GPU que estaba ocupado hace un momento puede
-funcionar ahora.
+y ese tamaño de fotograma (y en VAAPI, para ese dispositivo), y no se vuelve
+a probar; un fallo no se recuerda, porque un codificador de GPU que estaba
+ocupado hace un momento puede funcionar ahora.
 
 `encoder=` nombra un tipo, y solo se prueba ese tipo: cuando no puede
 escribir el vídeo, `io.VideoEncoderError` lo dice y lista los codificadores
@@ -265,9 +266,9 @@ lo calibraste.
 
 ## 4. Una simulación FDTD directamente a vídeo
 
-`simulation.write_fdtd_animation(path, run)` hace avanzar una ejecución FDTD
-acústica y dibuja su campo de presión en un vídeo a medida que la ejecución
-lo calcula:
+`simulation.write_fdtd_animation(path, run, *, compute=None, frame=None, video=None)`
+hace avanzar una ejecución FDTD acústica y dibuja su campo de presión en un
+vídeo a medida que la ejecución lo calcula:
 
 ```python
 from phonometry import io, simulation
@@ -306,8 +307,9 @@ así que ni la falta de ffmpeg, ni un codificador que no supera su prueba, ni
 un codificador en bruto que este ffmpeg no tiene hacen perder una ejecución.
 
 Cómo se dibuja cada fotograma es un solo registro,
-`simulation.AnimationFrame`, que comprueba sus campos al construirse:
-`language`, el idioma de las etiquetas, `"en"`, o `"es"` para español;
+`simulation.AnimationFrame`, pasado como `frame=`, que comprueba sus campos al
+construirse: `language`, el idioma de las etiquetas, `"en"` (el valor por
+defecto) o `"es"` para español;
 `size`, el ancho y el alto del fotograma en píxeles, 960 por 540 píxeles
 salvo que diga otra cosa; y `color_limit`, la escala de color (más abajo).
 Cómo se codifica el vídeo es el mismo `io.VideoOptions` de la sección 2,
@@ -359,8 +361,9 @@ paso; cuando el campo se queda en cero ahí durante toda la ejecución, o no es
 finito, lo lanza tras la primera pasada, antes de codificar el primer
 fotograma del vídeo. Cada mensaje pide `AnimationFrame(color_limit=...)`.
 
-`simulation.write_elastic_fdtd_animation(path, run)` hace lo mismo con el
-`ElasticRun` que toma `elastic_fdtd_simulation`, y dibuja el campo que nombra
+`simulation.write_elastic_fdtd_animation(path, run, *, compute=None, frame=None, video=None)`
+hace lo mismo con el `ElasticRun` que toma `elastic_fdtd_simulation`, y
+dibuja el campo que nombra
 el `snapshot_field` de su `recording`, la presión `"p"` o una componente de
 la velocidad, `"vx"` o `"vy"`, como lo dibuja `.plot(kind="snapshot")` sobre
 el resultado de esa función. Aquí, una fuerza vertical sobre la superficie
@@ -394,11 +397,13 @@ dibujado: pascales para `"p"`, metros por segundo para `"vx"` y `"vy"`. Sin
 absorbente; una superficie libre no se excita, y se queda dentro.
 
 Las dos funciones toman el `compute=` de las funciones de simulación, así que
-una ejecución puede avanzar en una GPU, como explica
-[Dónde se calcula una simulación](/phonometry/es/simulation/compute/).
-Entonces solo llegan a esta máquina, para dibujarse, las celdas que conserva
-un fotograma, un fotograma cada vez. Con `fallback=True` y sin GPU, la
-ejecución avisa una sola vez y avanza con NumPy, las dos pasadas incluidas:
+una ejecución puede avanzar en una GPU; sin `compute=`, una función de
+escritura toma su ubicación del bloque `simulation.use()` más interior en el
+que se ejecuta; si no, de `PHONOMETRY_COMPUTE`, y si no, avanza con NumPy, como
+explica [Dónde se calcula una simulación](/phonometry/es/simulation/compute/).
+En una GPU, solo llegan a esta máquina, para dibujarse, las celdas que
+conserva un fotograma, un fotograma cada vez. Con `fallback=True` y sin GPU,
+la ejecución avisa una sola vez y avanza con NumPy, las dos pasadas incluidas:
 
 ```py
 res = simulation.write_fdtd_animation(
@@ -407,10 +412,19 @@ res = simulation.write_fdtd_animation(
 )
 ```
 
+La procedencia del resultado, `provenance`, registra dónde avanzó la
+ejecución y con qué versiones: tras volver a NumPy, su `device` dice `"cpu"`
+y su `host`, `None`, de modo que una ejecución que volvió a NumPy no puede
+pasar por una en GPU ni en un nodo.
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) lista
+sus campos.
+
 ## 5. En un nodo
 
-Con un `host` en su `compute=`, una función de escritura envía todo el
-trabajo a un nodo, una máquina nombrada en tu fichero de hosts como explica
+Con un `host` en su ubicación, venga de `compute=`, de un bloque
+`simulation.use()` o de `PHONOMETRY_COMPUTE` (`cupy@nas`), una función de
+escritura envía todo el trabajo a un nodo, una máquina nombrada en tu fichero
+de hosts como explica
 [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/);
 `nas` es el nodo del fichero de hosts de esa guía:
 
@@ -426,18 +440,26 @@ print(res.provenance.host)   # nas
 
 El nodo calcula la ejecución, dibuja sus fotogramas con el mismo estilo por
 defecto y codifica el vídeo con su propio ffmpeg, que lleva la imagen del
-nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib; un
-`vaapi_device` nombra un dispositivo del nodo. Solo
-vuelven el resultado y los bytes del vídeo, así que esta máquina no necesita
-para ello ni ffmpeg ni matplotlib, salvo que una ejecución fallida vuelva a
-ella con `fallback=True`. La ejecución, el registro del fotograma y las
-opciones de vídeo se comprueban primero aquí, incluido el contenedor de la
-ruta frente a las opciones, así que una llamada que se rechaza aquí nunca
-arranca ssh; el nodo los vuelve a comprobar al construirlos de nuevo. Un nodo
-al que le falta matplotlib, la tipografía con la que se dibuja cada
-fotograma, ffmpeg o un codificador que escriba el vídeo a su tamaño rechaza
-el trabajo antes de su primer paso, y `simulation.ComputeRemoteError` dice
-por qué.
+nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib. Un
+codificador de GPU en un nodo Docker necesita una ubicación en GPU
+(`device="cupy"` o `"torch:cuda"`), aquella con la que phonometry da una GPU
+a su contenedor: con cualquier otro dispositivo, phonometry no le da ninguna,
+así que `encoder="auto"` acaba en la CPU y `encoder="nvenc"` lanza
+`simulation.ComputeRemoteError`. Un `vaapi_device` nombra un dispositivo de
+un nodo Python: el comando que ejecuta un nodo Docker no pasa ninguno a su
+contenedor. Solo vuelven el resultado y los bytes del vídeo, así que esta
+máquina no necesita para ello ni ffmpeg ni matplotlib, salvo que una
+ejecución fallida vuelva a ella con `fallback=True`. La ejecución, el
+registro del fotograma y las opciones de vídeo se comprueban primero aquí,
+incluido el contenedor de la ruta frente a las opciones, así que una llamada
+que se rechaza aquí nunca arranca ssh; el nodo los vuelve a comprobar al
+construirlos de nuevo. Una ejecución viaja como datos, así que cada forma de
+onda que lleve tiene que ser el `.value` de un `GaussianPulse`, `CWSource` o
+`SignalSource`, como lo es la de `rayleigh`: cualquier otra lanza `TypeError`
+aquí, también con `fallback=True`. Un nodo al que le falta matplotlib, la
+tipografía con la que se dibuja cada fotograma, ffmpeg o un codificador que
+escriba el vídeo a su tamaño rechaza el trabajo antes de su primer paso, y
+`simulation.ComputeRemoteError` dice por qué.
 
 Los bytes del nodo se comprueban antes de que el vídeo ocupe el lugar de la
 ruta en esta máquina. El tamaño que declara el nodo no pasa de lo que cabe en

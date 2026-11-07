@@ -1,12 +1,12 @@
 ---
 title: "Dónde se calcula una simulación: NumPy, CuPy y torch"
-description: "Simulaciones FDTD acústica y elástica con NumPy, CuPy en una GPU NVIDIA o PyTorch: Compute, use(), PHONOMETRY_COMPUTE, la vuelta a NumPy y la procedencia."
+description: "Motores FDTD acústico y elástico con NumPy, CuPy en una GPU de NVIDIA o PyTorch: Compute, use(), PHONOMETRY_COMPUTE, la vuelta a NumPy y la procedencia."
 references:
   - type: web
     organization: "Consortium for Python Data API Standards"
     title: "Python array API standard"
     url: "https://data-apis.org/array-api/latest/"
-    note: "Las operaciones con las que las simulaciones FDTD hacen avanzar sus campos una vez construidas, que es lo que permite que un mismo código de avance calcule con NumPy, CuPy y torch."
+    note: "Las operaciones con las que los motores FDTD hacen avanzar sus campos una vez construidos, que es lo que permite que un mismo código de avance calcule con NumPy, CuPy y torch."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -15,15 +15,16 @@ import SeeAlso from '../../../../components/SeeAlso.astro';
 
 Una ejecución FDTD es un puñado de operaciones con arrays repetidas miles de
 veces sobre campos de tamaño fijo, que es justo el trabajo para el que está
-hecha una GPU. Las dos simulaciones de `phonometry.simulation`, la acústica
-de `FDTD2D` detrás de `fdtd_simulation` y la elástica de `ElasticFDTD2D`
-detrás de `elastic_fdtd_simulation`, calculan con NumPy por defecto, y en una
-GPU de NVIDIA con CuPy o con PyTorch (en una CPU, una GPU de NVIDIA o el MPS
-de Apple) cuando se les pide. Es un mismo código de avance para todos: cada
-simulación construye sus mapas con NumPy en float64, en este proceso, al
-crearse, los pasa al dispositivo una sola vez y, a partir
-de ahí, solo toca sus campos con operaciones del estándar de arrays de
-Python (el *array API standard*), que implementan las tres bibliotecas.
+hecha una GPU. Los dos motores de `phonometry.simulation`, el acústico
+`FDTD2D` detrás de `fdtd_simulation` y el elástico `ElasticFDTD2D` detrás de
+`elastic_fdtd_simulation`, calculan con NumPy por defecto, y en una GPU de
+NVIDIA con CuPy o con PyTorch (en una CPU, una GPU de NVIDIA o el MPS de
+Apple) cuando se les pide. Es un mismo código de avance para todos: cada
+motor construye sus mapas con NumPy en float64, en este proceso, al crearse,
+los pasa al dispositivo una sola vez y, a partir de ahí, solo toca sus campos
+con operaciones del estándar de arrays de Python (el *array API standard*),
+que NumPy y CuPy ofrecen en su propio espacio de nombres y torch a través de
+array-api-compat.
 
 Esta página explica cómo pedir un dispositivo, qué hay que instalar para cada
 uno, cómo elige su dispositivo un script entero o un proceso de trabajo, qué
@@ -45,13 +46,13 @@ ejecución puede volver a NumPy:
 | `device` | `"cpu"` (NumPy), `"cupy"` (una GPU de NVIDIA con CuPy), `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` (Apple silicon) | `"cpu"` |
 | `device_index` | qué GPU, para `"cupy"` y `"torch:cuda"` | `0` |
 | `dtype` | `"float64"` o `"float32"` | `"float64"` |
-| `fallback` | calcular con NumPy, con un aviso, cuando el dispositivo no está disponible, en lugar de lanzar un error | `False` |
+| `fallback` | calcular con NumPy aquí, con un aviso, cuando el dispositivo no está disponible o, con un `host`, cuando falla el nodo o la conexión, en lugar de lanzar un error | `False` |
 | `host` | el nodo al que va la ejecución, por su nombre en el fichero de hosts; véase [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/) | `None` (esta máquina) |
 | `timeout_s` | lo máximo que puede durar una ejecución en un nodo, en segundos; solo con un `host` | el del fichero de hosts o, si no, sin límite |
 
 El registro es una petición. Construirlo no importa ni sondea nada, así que un
 script que nombra una GPU se puede escribir y comprobar en un portátil que no
-la tiene; la simulación comprueba la petición al construirse. Una petición
+la tiene; el motor comprueba la petición al construirse. Una petición
 que no puede significar nada se rechaza en el acto con `ValueError`:
 `"torch:mps"` en float64 (MPS no tiene float64), un índice en un dispositivo
 que solo tiene una instancia (`"cpu"`, `"torch:cpu"` y `"torch:mps"`),
@@ -71,8 +72,9 @@ except ValueError as error:
     print(error)   # device 'torch:mps' needs dtype='float32': MPS has no float64
 ```
 
-`FDTD2D`, `ElasticFDTD2D`, `ElasticFDTD2D.from_regions` y las dos funciones
-de simulación lo toman como `compute=`:
+`FDTD2D`, `ElasticFDTD2D`, `ElasticFDTD2D.from_regions`, las dos funciones
+de simulación y las dos que escriben un vídeo, `write_fdtd_animation` y
+`write_elastic_fdtd_animation`, lo toman como `compute=`:
 
 ```py
 gpu = simulation.Compute(device="cupy")
@@ -125,33 +127,35 @@ pip install "phonometry[torch]"
 
 Añadir ese índice con `--extra-index-url` no basta: pip toma el torch más
 reciente que encuentra en cualquiera de los dos índices, también el de
-PyPI con CUDA. Cuando falta torch, el `ComputeImportError` que lanza una
-simulación da el mismo consejo: estas dos órdenes para `"torch:cpu"`, y
-solo el extra para `"torch:cuda"` y `"torch:mps"`.
+PyPI con CUDA. Cuando falta torch, el `ComputeImportError` que lanza un
+motor da el mismo consejo: estas dos órdenes para `"torch:cpu"`, y solo el
+extra para `"torch:cuda"` y `"torch:mps"`.
 
 `"torch:mps"` necesita un Mac con Apple silicon y calcula solo en float32.
 CuPy necesita una GPU de NVIDIA y su controlador; la prueba de la sección 6 se
 hizo con `cupy-cuda13x` 14.2.0, con el runtime de CUDA 13.2, sobre un
 controlador que admite CUDA 13.3. Una biblioteca que falta se notifica al
-construir una simulación, no al importar phonometry: el camino de NumPy no
-importa ni CuPy ni torch.
+construir un motor, no al importar phonometry: el camino de NumPy no importa
+ni CuPy ni torch.
 
 ## 3. Un dispositivo para todo un script: `use()` y `PHONOMETRY_COMPUTE`
 
 Pasar `compute=` en cada llamada es explícito, y es lo que debe hacer el
 código construido sobre phonometry. Un script o un cuaderno pueden nombrar el
-dispositivo una sola vez, y la ubicación que recibe una simulación es la
-primera de estas que diga algo:
+dispositivo una sola vez, y la ubicación que recibe un motor es la primera de
+estas que diga algo:
 
-1. el argumento `compute=` de la clase o de la función de simulación;
+1. el argumento `compute=` del motor, de la función de simulación o de la que
+   escribe el vídeo;
 2. el bloque `use()` más interior en el que se ejecuta la llamada;
 3. la variable de entorno `PHONOMETRY_COMPUTE`;
 4. NumPy en float64.
 
-La ubicación se resuelve al construir la simulación, con `FDTD2D(...)`,
-`ElasticFDTD2D(...)`, `ElasticFDTD2D.from_regions(...)` o una de las
-funciones de simulación, y la simulación conserva la que recibió: salir de un
-bloque `use()` no mueve una simulación construida dentro de él.
+La ubicación se resuelve al construir el motor, con `FDTD2D(...)`,
+`ElasticFDTD2D(...)`, `ElasticFDTD2D.from_regions(...)`, una de las
+funciones de simulación o una de las que escriben un vídeo, y el motor
+conserva la que recibió: salir de un bloque `use()` no mueve un motor
+construido dentro de él.
 
 ```python
 run = simulation.FDTDRun(
@@ -168,12 +172,14 @@ print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
 `PHONOMETRY_COMPUTE` escribe una ubicación como texto,
 `device[:index][@host][,option...]`, con las opciones `float32`, `float64` y
 `fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`, `torch:mps,float32`,
-`cpu,float32` o `cupy@nas`. Los espacios alrededor de las partes se ignoran.
-La variable se lee cada vez que se resuelve una ubicación y nunca al
-importar, así que se puede fijar después de `import phonometry`. Un valor que
-la gramática no describe, una opción repetida, dos `dtype` o una petición que
-`Compute` rechaza (`torch:mps` sin `float32`) lanzan `ValueError` nombrando
-la variable al resolver la ubicación.
+`cpu,float32` o `cupy@nas`. Los espacios alrededor de una coma o de la `@` se
+ignoran; un dispositivo y su índice se escriben juntos, sin espacios
+alrededor de los dos puntos. La variable se lee cada vez que se resuelve una
+ubicación y nunca al importar, así que se puede fijar después de
+`import phonometry`. Un valor que la gramática no describe, una opción
+repetida, dos `dtype` o una petición que `Compute` rechaza (`torch:mps` sin
+`float32`) lanzan `ValueError` nombrando la variable al resolver la
+ubicación.
 
 ```bash
 PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
@@ -218,9 +224,9 @@ print([res.provenance.dtype for res in results])   # ['float32', 'float32']
 
 ## 4. Cuando el dispositivo no está: `fallback`
 
-Sin `fallback`, construir una simulación en un dispositivo que no se puede
-usar, o enviar una ejecución a un nodo que falla, lanza un error, y el
-mensaje dice por qué:
+Sin `fallback`, construir un motor en un dispositivo que no se puede usar, o
+enviar una ejecución a un nodo que falla, lanza un error, y el mensaje dice
+por qué:
 
 - `ComputeImportError`, una subclase de `ImportError`, cuando la biblioteca
   del dispositivo no está instalada (`"cupy"` sin CuPy, o un dispositivo
@@ -244,10 +250,11 @@ mensaje dice por qué:
 Con `fallback=True` no se lanza ninguno de ellos. La ejecución avisa con
 `ComputeFallbackWarning`, un `PhonometryWarning` cuyo mensaje lleva el motivo,
 y calcula con NumPy en esta máquina, en el `dtype` pedido. El aviso señala la
-línea de tu código que construyó la simulación o llamó a la función de
-simulación, nunca una línea dentro de la biblioteca, y la procedencia del
-resultado dice `"cpu"`, sin host, de modo que una ejecución que volvió a
-NumPy no puede pasar después por una ejecución en GPU ni en un nodo.
+línea de tu código que construyó el motor o llamó a la función de simulación
+o a la que escribe el vídeo, nunca una línea dentro de la biblioteca, y la
+procedencia del resultado dice `"cpu"`, sin host, de modo que una ejecución
+que volvió a NumPy no puede pasar después por una ejecución en GPU ni en un
+nodo.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
@@ -275,8 +282,8 @@ warnings.simplefilter("error", simulation.ComputeFallbackWarning)
 
 ## 5. Dónde se calculó una ejecución: `provenance`
 
-Todo `FDTDResult` y todo `ElasticFDTDResult` llevan un `RunProvenance`, y una
-simulación da el mismo registro como `sim.provenance`:
+Todo `FDTDResult` y todo `ElasticFDTDResult` llevan un `RunProvenance`, y un
+motor da el mismo registro como `sim.provenance`:
 
 | Campo | Qué guarda |
 |---|---|
@@ -291,6 +298,11 @@ simulación da el mismo registro como `sim.provenance`:
 | `package_sha256` | el SHA-256 del paquete que se ejecutó en el nodo, `None` para una ejecución en esta máquina |
 
 ```python
+run = simulation.FDTDRun(
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+)
+light = simulation.fdtd_simulation(run, compute=simulation.Compute(dtype="float32"))
 print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
 # cpu float32 None
 ```
@@ -311,7 +323,7 @@ print(on_gpu.provenance)
 #     gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
 ```
 
-Los campos de una simulación viven en su dispositivo. `sim.p`, `sim.vx` y
+Los campos de un motor viven en su dispositivo. `sim.p`, `sim.vx` y
 `sim.vy` de un `FDTD2D`, los cinco arrays de esfuerzo y velocidad de un
 `ElasticFDTD2D`, su presión sintética `sim.p` y `sim.collocated(field)` son
 arrays de NumPy con NumPy y arrays propios de la biblioteca del dispositivo en
@@ -320,10 +332,9 @@ campo almacenado en cualquier dispositivo, y `sim.run(...)` devuelve sus
 fotogramas de instantáneas como arrays de NumPy. Lo que devuelve una función
 de simulación ya es NumPy: un resultado guarda arrays de NumPy sea
 cual sea el dispositivo con el que se calculó. Con CuPy y un `device_index`
-distinto de 0, una escritura en un campo desde fuera de la simulación, como
+distinto de 0, una escritura en un campo desde fuera del motor, como
 `sim.p[10, 10] = 1.0`, se ejecuta en el dispositivo actual de CuPy, así que
-hazla dentro de `with cupy.cuda.Device(i):`, con `i` el índice de la
-simulación.
+hazla dentro de `with cupy.cuda.Device(i):`, con `i` el índice del motor.
 
 ```python
 sim = simulation.FDTD2D(c=343.0, dx=0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
@@ -334,11 +345,13 @@ print(frames.shape, frames.dtype, type(field).__name__, sim.provenance.device)
 # (5, 50, 75) float32 ndarray cpu
 ```
 
+<span id="que-se-promete-en-cada-dispositivo"></span>
+
 ## 6. Qué se promete en cada dispositivo
 
 La referencia es NumPy en float64, y cada dispositivo se compara con ella
 sobre la misma matriz de escenarios: siete ejecuciones pequeñas, una por cada
-capacidad de las simulaciones (una esponja absorbente, un borde de impedancia,
+capacidad de los motores (una esponja absorbente, un borde de impedancia,
 un obstáculo con un mapa de amortiguamiento y una fuente muestreada, una
 fuente de onda plana, una sonda de contorno, un medio elástico por capas bajo
 una superficie libre, y fuentes de fuerza elásticas alrededor de un
@@ -348,10 +361,12 @@ obstáculo), sobre mallas de 32 por 40 a 64 por 48 celdas avanzadas entre 60 y
 **NumPy, float64: idéntico bit a bit.** Las mismas entradas dan salidas
 idénticas bit a bit en la misma plataforma: sin números aleatorios y con
 todas las operaciones en un orden fijo. El camino de NumPy se compara además
-con digests SHA-256 de cada número que dan esos escenarios, tomados de las
-dos simulaciones tal como eran antes de poder calcular en otro sitio
-(`engine-digests.json`, comprobado en CI), de modo que los demás dispositivos
-no le han costado nada a los números de NumPy.
+con digests SHA-256 de cada número que dan esos escenarios
+(`engine-digests.json`, comprobado en CI). Una copia congelada de los dos
+motores tal como eran antes de poder calcular en otro sitio demostró primero,
+en todos los runners, que los motores nuevos coincidían con ella bit a bit, y
+los digests se tomaron después de los motores nuevos, de modo que los demás
+dispositivos no le han costado nada a los números de NumPy.
 
 **CuPy, float64: campos idénticos bit a bit, según lo medido.** En una NVIDIA
 GeForce RTX 4060 con el controlador de NVIDIA 610.57.04, CuPy 14.2.0
@@ -363,9 +378,9 @@ relativo en esas siete ejecuciones, porque la GPU suma las celdas en otro
 orden; es el peor valor de la matriz, y una suma sobre una malla más grande
 puede diferir más. La medida está registrada en `gpu-parity.lock`, en la raíz
 del repositorio, con el controlador de NVIDIA, las versiones de CUDA, la imagen
-de contenedor en la que se hizo y una huella de las dos simulaciones, de sus
+de contenedor en la que se hizo y una huella de los dos motores, de sus
 backends y de la matriz de escenarios. La CI comprueba esa huella en cada pull
-request, así que una simulación que cambia sin una prueba nueva en GPU falla.
+request, así que un motor que cambia sin una prueba nueva en GPU falla.
 La promesa es esa única medida: el fichero registra una sola prueba, con la
 tarjeta, el controlador y las versiones de arriba, y otra GPU, otro controlador
 u otra versión de CuPy solo quedan cubiertos cuando el mantenedor hace con
@@ -381,8 +396,8 @@ fasores de contorno.
 | Dispositivo | dtype | Cota | Dónde se mide |
 |---|---|---|---|
 | `cpu` (NumPy) | float32 | 3×10⁻⁶ | todos los niveles de instrucciones de CPU, con NumPy 2.0.2 y 2.5.4 |
-| `torch:cpu` | float64 | 9×10⁻¹⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.14.1 |
-| `torch:cpu` | float32 | 2×10⁻⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.14.1 |
+| `torch:cpu` | float64 | 9×10⁻¹⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.15.0 |
+| `torch:cpu` | float32 | 2×10⁻⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.15.0 |
 | `torch:mps` | float32 | 2×10⁻⁶ | el trabajo de CI `mps`, en un runner de macOS 15 con Apple silicon, con torch 2.14.1 |
 | `torch:cuda` | float64, float32 | sin medir | ningún runner de CI tiene una GPU de NVIDIA |
 
@@ -399,12 +414,15 @@ con `torch:cpu`.
 Cada cota de CPU es el peor valor medido sobre todos los niveles de
 instrucciones de CPU que despacha la biblioteca (DEFAULT, AVX2 y AVX512 en
 torch; el nivel base, AVX2 y AVX512 en NumPy), con su versión mínima y con la
-fijada, redondeado hacia arriba a una cifra significativa, y solo se sube a
-partir de una medida nueva. Todo trabajo de CI que ejecuta los tests de
-simulación exige su cota a NumPy en float32, y el trabajo `array-api` exige
-las suyas a toda ejecución en `torch:cpu`. La cota de MPS la midió del mismo modo
-el trabajo `mps`, en un runner de macOS 15 con Apple silicon, y ese trabajo
-le exige esa cota a toda ejecución en MPS. `torch:cuda` avanza con el mismo código que
+que estaba fijada cuando se midió, redondeado hacia arriba a una cifra
+significativa, y solo se sube a partir de una medida nueva. Todo trabajo de
+CI que ejecuta la suite de tests entera o todo `tests/simulation` exige su
+cota a NumPy en float32, y las suyas a toda ejecución en `torch:cpu` allí
+donde está instalado torch: el trabajo `array-api`, con el torch que fija
+`requirements-torch.txt`, y el trabajo `minimum-versions`, con la versión
+mínima de torch. La cota de MPS la midió del mismo modo el trabajo `mps`, en
+un runner de macOS 15 con Apple silicon, y ese trabajo le exige esa cota a
+toda ejecución en MPS. `torch:cuda` avanza con el mismo código que
 `torch:cpu`, pero no se ha medido ninguna ejecución en él, así que no tiene
 cota.
 
@@ -414,11 +432,12 @@ una prueba en la GPU la mida. Como toda ejecución en float32, redondea cada
 paso a float32, unas siete cifras significativas.
 
 **Las sumas de la sonda de contorno.** Las sumas DFT acumuladas de una sonda
-de contorno (sección 4 de la guía acústica) añaden un término por paso durante
-miles de pasos, y el redondeo de una suma crece con su número de términos. Se
-acumulan en float64 en todo dispositivo que tenga float64, también cuando los
-campos avanzan en float32; en MPS, que no lo tiene, son float32 con suma
-compensada (de Neumaier). El trabajo `mps` ejecuta en el propio MPS una
+de contorno
+([sección 4 de la guía acústica](/phonometry/es/simulation/fdtd-simulation/#4-del-campo-cercano-al-campo-lejano))
+añaden un término por paso durante miles de pasos, y el redondeo de una suma
+crece con su número de términos. Se acumulan en float64 en todo dispositivo
+que tenga float64, también cuando los campos avanzan en float32; en MPS, que
+no lo tiene, son float32 con suma compensada (de Neumaier). El trabajo `mps` ejecuta en el propio MPS una
 comprobación del contorno en float32 de 3000 pasos, así que un compilador que
 reordene la suma compensada falla ahí.
 
@@ -426,7 +445,8 @@ reordene la suma compensada falla ahí.
 
 En una malla grande, las instantáneas son la mayor parte de lo que devuelve
 una ejecución: un fotograma en float64 de una malla de 400 por 600 celdas
-ocupa 1,9 MB, y una ejecución guarda uno cada `snapshot_every` pasos.
+ocupa 1,9 MB, y una ejecución guarda uno del estado inicial y después uno cada
+`snapshot_every` pasos.
 `snapshot_decimation=d` conserva una de cada `d` celdas en cada eje, empezando
 por la primera, de modo que un fotograma tiene $\lceil n_y/d \rceil$ por
 $\lceil n_x/d \rceil$ celdas: `d = 2` guarda una cuarta parte de las celdas y
@@ -435,8 +455,8 @@ dispositivo, y solo las celdas conservadas se copian a NumPy.
 
 La opción tiene el mismo nombre y la misma regla en todas partes:
 `FDTDRecording(snapshot_every=, snapshot_decimation=)`,
-`ElasticRecording(snapshot_every=, snapshot_decimation=)` y el `run()` de las
-dos simulaciones. Toma un número entero de 1 o más; un booleano, un texto o un
+`ElasticRecording(snapshot_every=, snapshot_decimation=)` y el `run()` de los
+dos motores. Toma un número entero de 1 o más; un booleano, un texto o un
 array lanzan `TypeError`, y un número menor que 1 o no entero, `ValueError`.
 El resultado lo registra como `snapshot_decimation`, y
 `.plot(kind="snapshot")` dibuja cada muestra sobre el bloque de `d` por `d`
@@ -458,19 +478,20 @@ decimated.plot(kind="snapshot", language="es")
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-Dónde avanzan las dos simulaciones FDTD: NumPy en float64 o float32, CuPy en
+Dónde avanzan los dos motores FDTD: NumPy en float64 o float32, CuPy en
 una GPU de NVIDIA y torch en una CPU, una GPU de NVIDIA o el MPS de Apple,
 elegido por llamada con `compute=`, por bloque con `use()` o por proceso con
 `PHONOMETRY_COMPUTE`; los rechazos de una petición que no se puede atender y
 la vuelta a NumPy con `ComputeFallbackWarning`; el `RunProvenance` que
 registra cada resultado; lo que se promete en cada dispositivo, bit a bit con
 NumPy en float64, bit a bit según lo medido con CuPy en float64 y dentro de
-una cota publicada sobre la matriz de escenarios con torch en la CPU y con
-NumPy en float32; y las instantáneas diezmadas.
+una cota publicada sobre la matriz de escenarios con torch en la CPU, con
+torch en el MPS en float32 y con NumPy en float32; y las instantáneas
+diezmadas.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-Una simulación avanza en un solo dispositivo: una ejecución no se reparte
+Un motor avanza en un solo dispositivo: una ejecución no se reparte
 entre varias GPU, y `device_index` elige una de ellas. Las demás bibliotecas
 de arrays (JAX, MLX, dpnp) no son backends, y la GPU ejecuta la misma
 secuencia de operaciones estándar que NumPy, sin núcleos fusionados ni
@@ -488,15 +509,19 @@ escenarios. El resto de phonometry calcula solo con NumPy.
 ## Véase también
 
 - [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
-  la simulación acústica, sus fuentes, sondas y contornos, y cómo dimensionar
-  una ejecución.
+  el motor acústico, sus fuentes, sondas y contornos, y cómo dimensionar una
+  ejecución.
 - [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
-  la simulación elástica, que toma el mismo `compute=`.
+  el motor elástico, que toma el mismo `compute=`.
 - [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
   la misma ejecución en otra máquina por SSH, con un `host` en la petición.
+- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+  las dos funciones que toman el mismo `compute=` y escriben una ejecución
+  directamente en un vídeo.
 - Referencia de la API: [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
   [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
-  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/).
+  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/),
+  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
 
 </SeeAlso>
 

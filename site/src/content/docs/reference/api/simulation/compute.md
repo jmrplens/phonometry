@@ -52,7 +52,7 @@ Where an FDTD simulation steps, in which dtype, and whether it may fall back.
 | `device` | The array library and device: `"cpu"` (NumPy, the default), `"cupy"` (an NVIDIA GPU through CuPy), `"torch:cpu"`, `"torch:cuda"` or `"torch:mps"` (Apple silicon, float32 only). |
 | `device_index` | Which GPU, for `"cupy"` and `"torch:cuda"`. |
 | `dtype` | `"float64"` (default) or `"float32"`. |
-| `fallback` | Run on NumPy, with a [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), when the device is not available, instead of raising. |
+| `fallback` | Run on NumPy here, with a [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), when the device is not available or, for a run with a `host`, when the node or the connection fails, instead of raising. |
 | `host` | The node the run goes to, by its name in the hosts file, or `None` (default) to run on this machine. Only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation), [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and the two video writers, [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) and [`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation), run on a node; an engine built here refuses a host. |
 | `timeout_s` | The longest a remote run may take, from connecting to the result [s], or `None` for the hosts file's value (no limit when the file names none). Only with a `host`. |
 
@@ -69,7 +69,7 @@ A requested device is not present or cannot be used.
 
 ## ComputeFallbackWarning
 
-A requested device was not available and the run went to NumPy.
+A requested device or node could not be used and the run went to NumPy here.
 
 ## ComputeImportError
 

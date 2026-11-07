@@ -170,8 +170,8 @@ class ContourPhasors(OwnsArrays):
         see one axis in the documented list form and refuse it.
 
         :raises ValueError: for a non-positive ``frequency`` or ``segment``,
-            for arrays that do not share one sample axis in the shapes above,
-            or for a non-finite sample.
+            or one too large for a float, for arrays that do not share one
+            sample axis in the shapes above, or for a non-finite sample.
         :raises TypeError: if ``frequency`` or ``segment`` is not a single real number,
             ``positions`` or ``normals`` holds a complex number, or an array holds a
             text, or ``pressure`` holds a text or a value that is not a number.
@@ -184,10 +184,15 @@ class ContourPhasors(OwnsArrays):
             refuse_complex(getattr(self, name), f"{name} must be real, not complex")
         for name in ("positions", "normals", "pressure", "normal_velocity"):
             refuse_text(getattr(self, name), f"{name} must be numbers, not text")
-        if not np.isfinite(self.frequency) or self.frequency <= 0.0:
+        # Each read as the float it holds: a Decimal, a Fraction or a NumPy
+        # float32 is kept as that float, and one too large for a float is
+        # refused by name rather than by NumPy's isfinite.
+        frequency = real_number(self.frequency, "frequency")
+        segment = real_number(self.segment, "segment")
+        if not np.isfinite(frequency) or frequency <= 0.0:
             msg = "frequency must be positive and finite"
             raise ValueError(msg)
-        if not np.isfinite(self.segment) or self.segment <= 0.0:
+        if not np.isfinite(segment) or segment <= 0.0:
             msg = "segment must be positive and finite"
             raise ValueError(msg)
         pos = real_array(self.positions, "positions")
@@ -212,6 +217,8 @@ class ContourPhasors(OwnsArrays):
         # Store the converted arrays so hand-built instances (lists, mixed
         # dtypes) behave exactly like probe-built ones downstream; what they
         # convert is already the record's own copy, so sealing it is enough.
+        object.__setattr__(self, "frequency", frequency)
+        object.__setattr__(self, "segment", segment)
         object.__setattr__(self, "positions", read_only(pos))
         object.__setattr__(self, "normals", read_only(nrm))
         object.__setattr__(self, "pressure", read_only(p))

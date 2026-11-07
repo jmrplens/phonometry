@@ -47,15 +47,16 @@ proof (``gpu-parity.lock``) found every field, snapshot and contour phasor
 bit-identical to NumPy's over the scenarios of both engines, and the energy
 within 1.79e-16 relative over them, because the GPU sums it in another
 order; the guide on where a simulation runs names the hardware it was
-measured on. Runs on torch's CPU device, and float32 runs on NumPy, agree
-with NumPy in float64 within the tolerance that guide publishes for each
-device and dtype. Each of these bounds is the worst over that scenario
-matrix (grids of up to 64 by 48 cells, up to 120 steps), not a promise about
-any run: float32 rounding grows with the number of steps. An acoustic run
-of 8085 steps on a 200 by 300 cell grid, driven by a 1 kHz ``CWSource``,
-differed by 8.0e-06 relative at its probe (4.0e-06 with a Gaussian pulse),
-on NumPy and on torch's CPU device alike. A float32 run on CuPy, and any run
-on torch's CUDA device, is not measured yet.
+measured on. Runs on torch's CPU device, runs on torch's MPS device (float32
+only), and float32 runs on NumPy, agree with NumPy in float64 within the
+tolerance that guide publishes for each device and dtype. Each of these
+bounds is the worst over that scenario matrix (grids of up to 64 by 48
+cells, up to 120 steps), not a promise about any run: float32 rounding grows
+with the number of steps. An acoustic run of 8085 steps on a 200 by 300 cell
+grid, driven by a 1 kHz ``CWSource``, differed by 8.0e-06 relative at its
+probe (4.0e-06 with a Gaussian pulse), on NumPy and on torch's CPU device
+alike. A float32 run on CuPy, and any run on torch's CUDA device, is not
+measured yet.
 
 Validated against analytic oracles: P- and S-wave times of flight
 :math:`c_\mathrm{P} = \sqrt{(\lambda + 2\mu) / \rho}` and
@@ -103,6 +104,7 @@ from .._internal.frozen import (
 )
 from .._internal.validation import (
     is_text,
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -135,6 +137,7 @@ from .fdtd import (
     _real_numbers,
     _real_sample,
     _recording_or_empty,
+    _refuse_snapshots_past_an_array,
     _require_courant,
     _require_grid_axes,
     _require_provenance,
@@ -243,15 +246,18 @@ class ExplosionSource(RichDisplay):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold whole cell indices and reject a non-finite ``amplitude`` gain.
+        """Hold whole cell indices and the ``amplitude`` gain as a float, refused when not finite.
+
+        The gain is held as the float it reads as, a ``Decimal`` or a
+        ``Fraction`` included, so it steps and travels to a node.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
             ``amplitude`` is not one real number.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, or ``amplitude``
-            is not finite.
+            is not finite or is past a float's range.
         """
         _hold_cells(self, "ix", "iy")
-        _finite("amplitude", self.amplitude)
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -298,16 +304,20 @@ class ForceSource(RichDisplay):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Hold the cell indices as ints and check the gain and the direction.
+        """Hold the cell indices as ints and the gain as a float, and check the direction.
+
+        The gain is held as the float it reads as, a ``Decimal`` or a
+        ``Fraction`` included, so it steps and travels to a node.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number,
             ``direction`` is not a text, or ``amplitude`` is not one real
             number.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, ``amplitude`` is
-            not finite, or ``direction`` is not ``"x"`` or ``"y"``.
+            not finite or is past a float's range, or ``direction`` is not
+            ``"x"`` or ``"y"``.
         """
         _hold_cells(self, "ix", "iy")
-        _finite("amplitude", self.amplitude)
+        object.__setattr__(self, "amplitude", _finite("amplitude", self.amplitude))
         require_choice(self.direction, "direction", _DIRECTIONS)
 
 
@@ -578,9 +588,9 @@ def _resolve_speed_map(name: str, value: ArrayLike, shape: GridShape | None) -> 
         if shape is None:
             msg = f"shape is required when {name} is a scalar"
             raise ValueError(msg)
-        out = np.full(shape, float(np.real(value)), dtype=np.float64)
+        out = np.full(shape, real_array(value, name), dtype=np.float64)
     else:
-        out = np.asarray(value, dtype=np.float64)
+        out = real_array(value, name)
     # The number is a count of array axes, not a quantity.
     if out.ndim != 2:  # noqa: PLR2004
         msg = f"{name} must be a 2D (ny, nx) map"
@@ -611,7 +621,7 @@ def _elastic_grid(
 
     :return: ``(cp_map, dx, dt)``; the step is bounded by ``c_p`` alone.
     """
-    _require_courant(cfl)
+    courant = _require_courant(cfl)
     # A shape is read whenever it is given: it spreads a scalar c_p over the
     # grid it names, and beside a map it must name the map's grid.
     grid = _given_grid(shape)
@@ -623,7 +633,7 @@ def _elastic_grid(
         msg = "the grid must be at least 2 x 2 cells"
         raise ValueError(msg)
     dx = _positive_finite("dx", dx)
-    return cp_map, dx, _time_step(cfl, dx, float(cp_map.max()))
+    return cp_map, dx, _time_step(courant, dx, float(cp_map.max()))
 
 
 def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
@@ -656,9 +666,9 @@ def _checked_density(rho: ArrayLike, ny: int, nx: int) -> Field2D:
     """
     _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
-        np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
+        np.full((ny, nx), real_array(rho, "rho"), dtype=np.float64)
         if np.isscalar(rho)
-        else np.asarray(rho, dtype=np.float64)
+        else real_array(rho, "rho")
     )
     if rho_map.shape != (ny, nx):
         msg = "rho map must match the shape of c_p"
@@ -682,6 +692,7 @@ class _ElasticMedium:
     dx: float
     dt: float
     absorbing_layer_cells: int
+    absorbing_layer_reflection: float
     sides: tuple[Side, ...]
     absorbing_sides: tuple[Side, ...]
     damping_map: NDArray[np.float64]
@@ -715,7 +726,7 @@ def _elastic_medium(
     ny, nx = cp_map.shape
     cs_map = _checked_shear_speed(c_s, cp_map)
     rho_map = _checked_density(rho, ny, nx)
-    cells, damping_map = _validate_sponge_damping(
+    cells, reflection, damping_map = _validate_sponge_damping(
         absorbing_layer_cells, absorbing_layer_reflection, damping, ny, nx
     )
     sides = _resolve_sponge_sides(absorbing_sides)
@@ -733,6 +744,7 @@ def _elastic_medium(
         dx=dx,
         dt=dt,
         absorbing_layer_cells=cells,
+        absorbing_layer_reflection=reflection,
         sides=sides,
         absorbing_sides=used,
         damping_map=damping_map,
@@ -869,11 +881,12 @@ class ElasticFDTD2D:
         that is not a number, a side of ``absorbing_sides`` or ``free_sides``
         is not a text, or ``compute`` is neither a :class:`Compute` nor
         ``None``.
-    :raises ValueError: for an argument out of its range, a ``shape`` given
-        beside a map of another shape, a side that is not ``"left"``,
-        ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
-        names a host: an engine steps in this process, and only
-        :func:`elastic_fdtd_simulation` and
+    :raises ValueError: for an argument out of its range, a ``dx``, a ``cfl``
+        and a fastest speed of ``c_p`` that give a time step past a float's
+        range (zero or infinite), a ``shape`` given beside a map of another
+        shape, a side that is not ``"left"``, ``"right"``, ``"top"`` or
+        ``"bottom"``, and for a ``compute`` that names a host: an engine steps
+        in this process, and only :func:`elastic_fdtd_simulation` and
         :func:`~phonometry.simulation.write_elastic_fdtd_animation` run on a
         node.
     :raises ComputeImportError: when the library of the device ``compute``
@@ -992,7 +1005,7 @@ class ElasticFDTD2D:
         self._init_decay(
             medium.sides,
             medium.absorbing_layer_cells,
-            absorbing_layer_reflection,
+            medium.absorbing_layer_reflection,
             medium.damping_map,
             c_max,
         )
@@ -1547,7 +1560,8 @@ class ElasticFDTD2D:
             :class:`ForceSource` returns anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             ``snapshot_every`` or ``snapshot_decimation`` is not a whole
-            number of 1 or more, or such a waveform returns a number too
+            number of 1 or more, the frames would take more bytes than a
+            NumPy array can hold, or such a waveform returns a number too
             large for a float.
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
@@ -1929,10 +1943,13 @@ class ElasticRun(OwnsArrays):
         ``shape`` that is not a pair or holds a count that is not a number, or
         a medium (``c_p``, ``c_s``, ``rho``, ``damping``) that holds a complex
         number or a text.
-    :raises ValueError: If an argument is out of its range, a ``shape`` is
-        not two whole numbers of two cells or more or is given beside a map of
-        another shape, or a source, a probe or the obstacle does not fit the
-        grid.
+    :raises ValueError: If an argument is out of its range, a ``dx``, a
+        ``cfl`` and a fastest speed of ``c_p`` give a time step past a float's
+        range (zero or infinite), a ``shape`` is not two whole numbers of two
+        cells or more or is given beside a map of another shape, a source, a
+        probe or the obstacle does not fit the grid, or the ``duration_s``
+        covers more steps than the record holds: its time axis or its probe
+        history would take more bytes than a NumPy array can hold.
     """
 
     c_p: float | Field2D
@@ -2042,6 +2059,11 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
     ny, nx = medium.cp_map.shape
     for source in run.sources:
         _check_elastic_source(source, (ny, nx), medium.obstacle)
+    probe_ix = _probe_indices(recording.probes, (ny, nx), medium.obstacle)
+    fields = tuple(recording.probe_fields)
+    steps = _step_count(
+        duration_s, medium.dt, ("signals", (probe_ix.shape[0], len(fields)))
+    )
     return _ElasticChecks(
         grid=(ny, nx),
         dx=medium.dx,
@@ -2050,9 +2072,9 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
         free_sides=medium.free_sides,
         absorbing_sides=absorbing_sides,
         absorbing_layer_cells=width,
-        probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
-        fields=tuple(recording.probe_fields),
-        steps=_step_count(duration_s, medium.dt),
+        probe_ix=read_only(probe_ix),
+        fields=fields,
+        steps=steps,
         snapshot_every=recording.snapshot_every,
         snapshot_field=recording.snapshot_field,
         snapshot_decimation=recording.snapshot_decimation,
@@ -2381,12 +2403,17 @@ def elastic_fdtd_simulation(
         a callable other than the ``value`` of a
         :class:`~phonometry.simulation.GaussianPulse`,
         :class:`~phonometry.simulation.CWSource` or
-        :class:`~phonometry.simulation.SignalSource`, or a whole number
-        outside the range of an int64; and, as the run steps, for a waveform
-        that returns anything but one real number.
-    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
-        a hosts file that cannot be read or is malformed; and, as the run
-        steps, for a waveform that returns a number too large for a float.
+        :class:`~phonometry.simulation.SignalSource`, a subclass of one of
+        the library's records, a whole number outside the range of an int64,
+        a number or an array of floats wider than 64 bits (a ``longdouble``),
+        or a ``Fraction`` or a ``Decimal`` the run keeps as given, such as
+        ``dx=Fraction(1, 100)``; and, as the run steps, for a waveform that
+        returns anything but one real number.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, a
+        hosts file that cannot be read or is malformed, or snapshots that
+        would take more bytes than a NumPy array can hold in the run's dtype,
+        refused before the run steps; and, as the run steps, for a waveform
+        that returns a number too large for a float.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import, unless ``fallback=True``.
@@ -2412,6 +2439,9 @@ def elastic_fdtd_simulation(
         dtype=np.float64,
     )
     frames = checks.snapshot_shape()
+    _refuse_snapshots_past_an_array(
+        frames, request.dtype, checks.snapshot_every, checks.snapshot_decimation
+    )
     snapshots = (
         None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
     )

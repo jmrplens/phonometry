@@ -2748,7 +2748,7 @@ _ES_EXACT = {
     "3 mm rigid backing": "fondo rígido de 3 mm",
     "Water over steel at normal incidence: the probe history res.plot() draws": "Agua sobre acero con incidencia normal: el historial de sonda que "
     "dibuja res.plot()",
-    "probe pressure, 7.5 m below the source": "presión en la sonda, 7,5 m bajo la fuente",
+    "probe pressure, 1.5 m below the source": "presión en la sonda, 1,5 m bajo la fuente",
     "incident\n1.02 ms": "incidente\n1,02 ms",
     "echo off the steel\n3.04 ms": "eco en el acero\n3,04 ms",
     "echo / incident = 0.939\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0.939": "eco / incidente = 0,939\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0,939",
@@ -4515,7 +4515,7 @@ _ES_EXACT = {
     "Lamb's problem: P, S and the surface wave (elastic 2D FDTD)": "Problema de Lamb: P, S y la onda de superficie (FDTD elástico 2D)",
     "Free top surface: a Rayleigh train rides it": "Superficie superior libre: la recorre un tren de Rayleigh",
     "Rigid top surface: same block, no surface wave": "Superficie superior rígida: el mismo bloque, sin onda de superficie",
-    "only P and S: a clamped wall carries no surface wave": "solo P y S: una pared empotrada no sostiene onda de superficie",
+    "only P and S: a rigid wall carries no surface wave": "solo P y S: una pared rígida no sostiene onda de superficie",
     "each field panel on its own colour scale; the probe traces share one": "cada panel de campo con su propia escala de color; las trazas de "
     "sonda comparten una",
     "depth [m]": "profundidad [m]",
@@ -4527,8 +4527,8 @@ _ES_EXACT = {
     "depth from the contact [mm]": "profundidad desde el contacto [mm]",
     "water": "agua",
     "steel": "acero",
-    "critical angles: 14.5° (P), 27.5° (SV). Dashed: the Snell direction of "
-    "each transmitted wave": "ángulos críticos: 14,5° (P), 27,5° (SV). Discontinua: la dirección "
+    "critical angles: 14.4° (P), 27.7° (SV). Dashed: the Snell direction of "
+    "each transmitted wave": "ángulos críticos: 14,4° (P), 27,7° (SV). Discontinua: la dirección "
     "de Snell de cada onda transmitida",
     # Radiation-efficiency clip (devices/emission/vibration-sound-power).
     # radiation_efficiency_sigma sat on the FL1/FL8 boundary; see above.

@@ -14,6 +14,7 @@ from __future__ import annotations
 import copy
 import dataclasses
 import pickle
+import re
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -22,6 +23,7 @@ import pytest
 
 from phonometry.simulation import (
     FDTD2D,
+    Compute,
     ElasticBoundaries,
     ElasticFDTD2D,
     ElasticRecording,
@@ -64,6 +66,15 @@ def _elastic(**changes: Any) -> ElasticRun:
         **changes,
     }
     return ElasticRun(c_p=4000.0, c_s=2300.0, dx=0.01, **fields)
+
+
+#: The refusal of a run whose steps pass the largest index, where the time
+#: axis has more samples than an array has bytes.
+_PAST_THE_LARGEST_INDEX = (
+    r": the time axis, of more than "
+    rf"{np.iinfo(np.intp).max} samples in float64, would take more than "
+    rf"{8 * int(np.iinfo(np.intp).max)} bytes, more than an array can hold"
+)
 
 
 @pytest.mark.parametrize(
@@ -166,6 +177,35 @@ def _elastic(**changes: Any) -> ElasticRun:
             ValueError,
             "duration_s must cover at least one time step",
         ),
+        # More steps than the record's arrays can hold, which NumPy refused
+        # from inside the function as "Maximum allowed dimension exceeded".
+        # Past the largest index the refusal still names the time axis, its
+        # samples, its dtype and its bytes, as bounds: a ratio of 1e308 s over
+        # a step is infinite, with no whole count to give.
+        (
+            _acoustic,
+            {"duration_s": 1e300},
+            ValueError,
+            r"duration_s covers .* time steps .*" + _PAST_THE_LARGEST_INDEX,
+        ),
+        (
+            _elastic,
+            {"duration_s": 1e300},
+            ValueError,
+            r"duration_s covers .* time steps .*" + _PAST_THE_LARGEST_INDEX,
+        ),
+        (
+            _acoustic,
+            {"duration_s": 1e308},
+            ValueError,
+            r"duration_s covers inf time steps .*" + _PAST_THE_LARGEST_INDEX,
+        ),
+        (
+            _elastic,
+            {"duration_s": 1e308},
+            ValueError,
+            r"duration_s covers inf time steps .*" + _PAST_THE_LARGEST_INDEX,
+        ),
     ],
 )
 def test_a_run_refuses_a_bad_argument_when_it_is_built(
@@ -176,6 +216,195 @@ def test_a_run_refuses_a_bad_argument_when_it_is_built(
 ) -> None:
     with pytest.raises(error, match=match):
         build(**bad)
+
+
+#: The most bytes NumPy gives one array: it refuses one whose item size
+#: times its axes, an empty axis left out of the product, passes the largest
+#: index, with "array is too big", naming no input.
+_MOST_BYTES = int(np.iinfo(np.intp).max)
+
+
+def _covering(
+    build: Callable[..., FDTDRun | ElasticRun], steps: float, **changes: Any
+) -> FDTDRun | ElasticRun:
+    """*build*'s run over about *steps* of its time step; building it steps nothing."""
+    return build(duration_s=steps * build()._checked.dt, **changes)
+
+
+@pytest.mark.parametrize("build", [_acoustic, _elastic])
+def test_a_run_whose_time_axis_passes_an_array_is_refused_when_it_is_built(
+    build: Callable[..., FDTDRun | ElasticRun],
+) -> None:
+    # One float64 sample per step and the initial one: past 2**60 steps the
+    # time axis takes more bytes than the largest index, though its count of
+    # samples is far below it. It built, and the simulation function stopped
+    # in NumPy with "array is too big".
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"duration_s covers .* time steps .*: the time axis, of shape "
+            r"\(\d+,\) in float64, would take \d+ bytes, more than an array can hold"
+        ),
+    ):
+        _covering(build, 1.01 * 2**60)
+
+
+@pytest.mark.parametrize("build", [_acoustic, _elastic])
+def test_a_run_whose_record_just_fits_an_array_builds(
+    build: Callable[..., FDTDRun | ElasticRun],
+) -> None:
+    run = _covering(build, 0.99 * 2**60)
+    assert 8 * (run._checked.steps + 1) <= _MOST_BYTES
+
+
+@pytest.mark.parametrize(
+    ("build", "recording", "history"),
+    [
+        # Two probes: the time axis fits, the history twice its size does not.
+        (
+            _acoustic,
+            FDTDRecording(probes=[(2, 2), (5, 5)]),
+            r"pressures, of shape \(2, \d+\)",
+        ),
+        (
+            _elastic,
+            ElasticRecording(probes=[(2, 2), (5, 5)]),
+            r"signals, of shape \(2, 1, \d+\)",
+        ),
+        # No probe and two fields: NumPy leaves the empty axis out of the
+        # product, not the array out of the count, and refused the empty
+        # (0, 2, steps + 1) history as it would a full one.
+        (
+            _elastic,
+            ElasticRecording(probe_fields=("vx", "vy")),
+            r"signals, of shape \(0, 2, \d+\)",
+        ),
+    ],
+)
+def test_a_run_whose_probe_history_passes_an_array_is_refused_when_it_is_built(
+    build: Callable[..., FDTDRun | ElasticRun],
+    recording: FDTDRecording | ElasticRecording,
+    history: str,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match=rf"duration_s covers .*: the {history} in float64, would take \d+ bytes",
+    ):
+        _covering(build, 1.01 * 2**59, recording=recording)
+
+
+@pytest.mark.parametrize(
+    ("build", "simulate", "recording"),
+    [
+        (_acoustic, fdtd_simulation, FDTDRecording(snapshot_every=1)),
+        (_elastic, elastic_fdtd_simulation, ElasticRecording(snapshot_every=1)),
+    ],
+)
+@pytest.mark.parametrize(("dtype", "itemsize"), [("float64", 8), ("float32", 4)])
+def test_snapshots_that_pass_an_array_are_refused_before_the_run_steps(
+    build: Callable[..., FDTDRun | ElasticRun],
+    simulate: Callable[..., object],
+    recording: FDTDRecording | ElasticRecording,
+    dtype: Literal["float64", "float32"],
+    itemsize: int,
+) -> None:
+    # A frame of 8 by 8 cells after every step, in the run's dtype: these
+    # frames pass the largest index while the time axis is far below it.
+    # NumPy refused them with "array is too big" before the first step.
+    run = _covering(build, 1.01 * _MOST_BYTES / (64 * itemsize), recording=recording)
+    compute = Compute(dtype=dtype)
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"the run records \d+ frames over its duration_s \(snapshot_every=1, "
+            rf"snapshot_decimation=1\): the snapshots, of shape \(\d+, 8, 8\) in "
+            rf"{dtype}, would take \d+ bytes, more than an array can hold"
+        ),
+    ):
+        simulate(run, compute=compute)
+
+
+@pytest.mark.parametrize(
+    "engine",
+    [
+        lambda: FDTD2D(c=343.0, dx=0.01, shape=(8, 8)),
+        lambda: ElasticFDTD2D(
+            c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(8, 8)
+        ),
+    ],
+    ids=["acoustic", "elastic"],
+)
+@pytest.mark.parametrize("n_steps", [int(1.01 * _MOST_BYTES / 512), 2**70])
+def test_an_engine_refuses_frames_that_pass_an_array_before_it_steps(
+    engine: Callable[[], FDTD2D | ElasticFDTD2D], n_steps: int
+) -> None:
+    # NumPy refused the first with "array is too big" and the second, more
+    # frames than an axis holds, with "Maximum allowed dimension exceeded".
+    sim = engine()
+    with pytest.raises(
+        ValueError,
+        match=(
+            rf"n_steps={n_steps} with snapshot_every=1 records \d+ frames: the "
+            r"frames, of shape \(\d+, 8, 8\) in float64, would take \d+ bytes"
+        ),
+    ):
+        sim.run(n_steps, snapshot_every=1)
+
+
+def _acoustic_run_on(dx: float, speed: float) -> FDTDRun:
+    return FDTDRun(c=speed, dx=dx, duration_s=1e-4, shape=(8, 8), sources=[_PULSE])
+
+
+def _elastic_run_on(dx: float, speed: float) -> ElasticRun:
+    source = ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)
+    return ElasticRun(
+        c_p=2.0 * speed,
+        c_s=speed,
+        rho=2500.0,
+        dx=dx,
+        duration_s=1e-4,
+        shape=(8, 8),
+        sources=[source],
+    )
+
+
+def _acoustic_engine_on(dx: float, speed: float) -> FDTD2D:
+    return FDTD2D(c=speed, dx=dx, shape=(8, 8))
+
+
+def _elastic_engine_on(dx: float, speed: float) -> ElasticFDTD2D:
+    return ElasticFDTD2D(c_p=2.0 * speed, c_s=speed, rho=2500.0, dx=dx, shape=(8, 8))
+
+
+@pytest.mark.parametrize(
+    ("dx", "speed", "step"),
+    [
+        # cfl * dx / (c * sqrt(2)) under the smallest float rounds to zero: a
+        # run divided its duration_s by it and stopped on "float division by
+        # zero", an engine built and stepped with it.
+        (1e-320, 1e10, r"0\.000e\+00"),
+        # Past the largest float it is infinite: a run blamed its duration_s
+        # for covering no step, an engine built and stepped into NaN.
+        (1e10, 1e-300, "inf"),
+    ],
+    ids=["zero", "infinite"],
+)
+@pytest.mark.parametrize(
+    "build",
+    [_acoustic_run_on, _elastic_run_on, _acoustic_engine_on, _elastic_engine_on],
+    ids=["FDTDRun", "ElasticRun", "FDTD2D", "ElasticFDTD2D"],
+)
+def test_a_time_step_no_float_holds_is_refused_by_the_numbers_that_give_it(
+    build: Callable[[float, float], object], dx: float, speed: float, step: str
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match=(
+            rf"dx = {re.escape(f'{dx:.3e}')} m, cfl = 0\.6 and the fastest speed "
+            rf"of .* m/s give a time step of {step} s, past the range of a float"
+        ),
+    ):
+        build(dx, speed)
 
 
 def test_a_changed_copy_of_a_run_is_checked_again() -> None:

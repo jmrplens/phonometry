@@ -107,7 +107,10 @@ injection) and `ForceSource` (a directional body force) as sources, probes
 that record ``p``, ``vx`` or ``vy``, the same sponge and obstacle
 machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
-their fields, the snapshot cadence and its field) and how the domain ends
+their fields, the snapshot cadence, the snapshot's field and its
+`snapshot_decimation=d`, which keeps one cell in `d` along each axis, as
+section 7 of [Where a simulation runs](/phonometry/simulation/compute/)
+explains) and how the domain ends
 as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
 acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
 count when it is built.
@@ -132,8 +135,10 @@ Courant number, where the dispersion error of the scheme is nearest its
 worst-case bound, so their effective resolution is poorer than the cell
 count suggests, which is why the ten-cell rule is a floor rather than a
 target in high-contrast problems. When only one medium carries the physics
-of interest, replacing the other by a boundary condition (an impedance edge
-or a sponge) is usually far cheaper than meshing both.
+of interest, replacing the other by a boundary condition is usually far
+cheaper than meshing both: a free side or a sponge here or, if what remains
+is a fluid, an impedance side in the acoustic solver (a number in
+`FDTDBoundaries(sides=...)`), which `ElasticBoundaries` does not offer.
 
 A simulation is one record:
 `ElasticRun(c_p=..., c_s=..., dx=..., duration_s=..., sources=..., rho=..., ...)`
@@ -171,9 +176,13 @@ The run stepped on NumPy in float64, as `res.provenance` records. The
 elastic solver takes the same `compute=` as the acoustic one, and so does
 `ElasticFDTD2D.from_regions`: the block above steps on an NVIDIA GPU through
 CuPy with one more argument. On such a device the engine's own fields,
-`sim.p` and `sim.collocated(field)` included, are that device's arrays, and
-`sim.numpy_field(field)` gives a NumPy copy; a result holds NumPy arrays
-whatever device stepped. [Where a simulation runs](/phonometry/simulation/compute/) covers the devices, what each needs
+`sim.p` and `sim.collocated(field)` included, are that device's arrays.
+`sim.numpy_field(field)` gives a NumPy copy of a stored field, `"txx"`,
+`"tyy"`, `"txy"`, `"vx"` or `"vy"`, and refuses `"p"`, which this engine
+computes from the two normal stresses:
+`-(sim.numpy_field("txx") + sim.numpy_field("tyy")) / 2` is the pressure in
+NumPy. `sim.run(...)` returns its frames as NumPy arrays, and a result holds
+NumPy arrays whatever device stepped. [Where a simulation runs](/phonometry/simulation/compute/) covers the devices, what each needs
 installed and what is promised about the numbers on each.
 
 ```py
@@ -227,19 +236,23 @@ will not build.
 
 ## 3. Free surfaces and Rayleigh waves
 
-**Every side is rigid unless you declare otherwise, and rigid here means
-clamped.** The boundary holds the particle velocity at zero, so it reflects
-with the *opposite* polarity of a free surface and supports no surface wave
-at all. That is the right model for a body continuing into something much
-stiffer, and the wrong one for a body in air or in vacuum (which is what
-most structural problems are). A plate, block or beam meant to be free must
+**Every side is rigid unless you declare otherwise, and rigid here means a
+shear-free wall.** The boundary holds the normal velocity and the shear
+stress at zero while the tangential motion slides freely along it, so it
+reflects with the *opposite* polarity of a free surface and supports no
+surface wave at all. That is the right model for a body sliding against
+something much stiffer, and the wrong one for a body in air or in vacuum
+(which is what most structural problems are) or for one bonded to its
+support: no side holds the tangential velocity at zero. A plate, block or
+beam meant to be free must
 therefore have **every** exposed side declared free, and the symptom of
 forgetting is quiet: the wavefronts still look plausible, but the Rayleigh
 train the figure below makes obvious is simply missing, the reflections come
 back inverted, and no free-plate closed form matches. The third option is
 `"absorbing"`, which terminates a half-space so the domain edge is not seen
-at all; the three are chosen per side, which is exactly how the half-space
-example works: free on top, absorbing on the other three. Since there is no
+at all; the three are chosen per side, which is how the half-space clip
+further down works: free on top, absorbing on the other three (the
+snapshot's code below leaves those three rigid). Since there is no
 elastic counterpart of `FDTD2D.plot_geometry`, read the boundary spec back
 off the `ElasticBoundaries` object before committing to a long run.
 
@@ -249,7 +262,7 @@ zero on the surface plane and the shear stress above it is its
 antisymmetric image. That single boundary condition is what makes surfaces
 wave-bearing: strike the free surface of an aluminium block vertically
 (Lamb's problem) and, besides the P and S body fronts, a **Rayleigh wave**
-rolls along the surface at $c_\mathrm{R} \approx 0.93\,c_\mathrm{S}$, the root of the exact
+rolls along the surface at $c_\mathrm{R} \approx 0.935\,c_\mathrm{S}$, the root of the exact
 Rayleigh characteristic equation (Cremer, Heckl & Petersson Eq. 3.149).
 The tests pin the measured Rayleigh speed to that root within 2 % and the
 flexural wave of a thin free-free strip to the Kirchhoff plate dispersion
@@ -260,7 +273,8 @@ second-order imaging surface being the most dispersive part of the scheme.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_halfspace_waves.webp" alt="Snapshot of the vertical particle velocity in a 0.6 by 0.3 metre aluminium block a few hundredths of a millisecond after a vertical hit on its free upper surface: the compressional P front is the outer arc, the shear S front the inner arc at about half its radius, and the strongest lobes hug the surface just behind the S front, labelled as the Rayleigh wave; dotted arcs mark the exact P and S radii" width="96%" loading="eager" />
 
 *One snapshot, three speeds: the P front has covered twice the distance of
-the S front (dotted arcs at the exact $c_\mathrm{P} t$ and $c_\mathrm{S} t$ radii), and the
+the S front (dotted arcs at the exact radii $c_\mathrm{P}(t - t_0)$ and
+$c_\mathrm{S}(t - t_0)$, $t_0 = 32$ µs being the peak of the pulse), and the
 strongest motion travels along the free surface as the Rayleigh wave, a
 whisker slower than S.*
 
@@ -276,9 +290,11 @@ reaches it. An interface or surface wave needs a thicker layer than a body
 wave: start at roughly twice the width you would use for P and S, then
 verify by extending the run and watching for a return. And when only the
 early arrivals matter, plain rigid sides with a run shorter than the first
-wall echo are cleaner than any sponge: that is exactly what the snapshot
-above does, at 73 µs on a 0.6 m block whose nearest side-wall P return
-arrives at 95 µs and whose Rayleigh wave reaches the corner at 103 µs.
+wall echo are cleaner than any sponge. The snapshot above runs just past
+that limit: the pulse peaks at 32 µs and its P peak reaches the bottom and
+both side walls, all 0.3 m from the source, at 79 µs, so at 73 µs the
+leading edge of the P front is already coming back off the rigid bottom, in
+the band along the lower edge of the frame.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -311,17 +327,18 @@ plt.show()
 </details>
 
 The snapshot stops at 73 µs because rigid sides and a short run were the
-cheapest way to get one clean frame, and one frame is enough for the two body
-speeds: the dotted arcs are drawn at the exact $c_\mathrm{P} t$ and $c_\mathrm{S} t$ radii, so
+cheapest way to get one frame, and one frame is enough for the two body
+speeds: the dotted arcs are drawn at the exact $c_\mathrm{P}(t - t_0)$ and
+$c_\mathrm{S}(t - t_0)$ radii, so
 they are a measurement and not a label. What one frame cannot settle is the
 **third** wave. Nothing analytic is drawn for it, its speed differs from the
-shear front's by 7 %, and its defining property (it stays on the surface
+shear front's by 6.5 %, and its defining property (it stays on the surface
 while the body fronts leave) is a statement about what happens next.
 
-So run the same hit for 163 µs instead, with sponges on the other three sides
+So run the same hit for 164 µs instead, with sponges on the other three sides
 and the domain widened until the corner where a sponge meets the free surface
 is outside the frame, and run it twice: once with the top declared `"free"`
-and once with it left at the solver default, the clamped rigid wall. Same
+and once with it left at the solver default, the shear-free rigid wall. Same
 aluminium, same hit, same two body fronts; no surface train appears in the
 second. That is the claim of this section, drawn: the boundary condition makes
 the Rayleigh wave, not the material.
@@ -338,12 +355,12 @@ Watch what the fronts do at the end. Both body arcs run out of the frame and
 keep going; the surface lobes do not go anywhere but along the surface, at
 their own slower speed, and they are still there when the body waves have
 left. The inset traces two surface probes 0.15 m apart, and the delay between
-their peaks is the measurement: the simulated $c_\mathrm{R}$ against 2921 m/s, the root
+their peaks is the measurement: the simulated $c_\mathrm{R}$ against 2897 m/s, the root
 of the exact Rayleigh characteristic equation quoted above, which the tests
 pin to within 2 %.
 
 The two field panels are drawn on **their own colour scales**, and the clip
-says so, because a vertical force applied *on* a clamped surface nearly
+says so, because a vertical force applied *on* a rigid wall nearly
 cancels against its own image and that run radiates far less than the free
 one. The probe traces below them keep a single shared scale, which is where
 the comparison stays quantitative: the missing surface arrival is a missing
@@ -361,7 +378,7 @@ in-plane precursor that races ahead down the receiving plate. This mode
 conversion the pinned-junction model deliberately leaves out is the reason
 this page needs an elastic solver rather than a flexural one. The
 [bending-wave transmission guide](/phonometry/vibration/structural/junction-transmission/)
-takes the same run apart against the EN 12354 vibration reduction index.
+reads the same run against the transmission coefficient $\tau_{12}(0°)$.
 
 <Video
   name="anim_elastic_plate_junction"
@@ -382,7 +399,8 @@ painted regions.
 
 A `Material` is three measurable numbers: the compressional speed, the
 shear speed and the density. A zero shear speed marks a fluid. Five
-constants ship, and every number elsewhere on this page comes out of them:
+constants ship, and they feed most of the numbers on this page; the sediment
+of section 6 and the video example write their own media out:
 
 | Constant | $c_\mathrm{P}$ [m/s] | $c_\mathrm{S}$ [m/s] | $\rho$ [kg/m³] |
 |---|---|---|---|
@@ -392,12 +410,14 @@ constants ship, and every number elsewhere on this page comes out of them:
 | `STEEL` | 5958 | 3184.7 | 7850 |
 | `ALUMINUM` | 6450.5 | 3098.7 | 2700 |
 
-Each comes off one page, Bies 5e Table C.1: the density is what it prints
-and the two speeds follow from the modulus and the Poisson ratio printed
-beside it, through the closed forms the same table prints at its end. They
-are representative values for documentation and validation, which the book
-itself says of them, not certified data, so a real specimen should still be
-entered by hand. Section 1 imports `ALUMINUM` rather than writing its
+The three solids come off Bies 5e Table C.1 (PDF pages 747 and 748): the
+density is what it prints and the two speeds follow from the modulus and the
+Poisson ratio printed beside it, through the closed forms the same table
+prints at its end. They are representative values for documentation and
+validation, which the book itself says of them, not certified data, so a
+real specimen should still be entered by hand. `AIR` and `WATER` are
+nominal fluid values and cite no page. Section 1 imports `ALUMINUM` rather
+than writing its
 numbers out, because a copy of them here would be free to drift away from
 the page. The constructor enforces one bound,
 $c_\mathrm{P}^2 \ge 2\,c_\mathrm{S}^2$: that is the statement that the first Lamé parameter is
@@ -410,7 +430,7 @@ lower of the two, and substituting one for the other is a common error.
 import numpy as np
 from phonometry.simulation import ElasticFDTD2D, STEEL, WATER
 
-# A 12 m water column over a steel half-space, as a 1D-like strip.
+# A 6 m water column over 6 m of steel, as a 1D-like strip.
 dx = 0.005
 sim = ElasticFDTD2D.from_regions(
     (2400, 3), dx, background=WATER, regions=[(np.s_[1200:, :], STEEL)])
@@ -429,25 +449,25 @@ trace = np.asarray(trace)
 t = (np.arange(trace.size) + 1) * sim.dt
 incident = trace[t < 1.8e-3].max()
 echo = trace[t > 2.6e-3]
-print(round(float(echo[np.abs(echo).argmax()] / incident), 3))   # 0.938
-# (Z2 - Z1)/(Z2 + Z1) = 0.938: at normal incidence no shear is excited
+print(round(float(echo[np.abs(echo).argmax()] / incident), 3))   # 0.939
+# (Z2 - Z1)/(Z2 + Z1) = 0.939: at normal incidence no shear is excited
 # and the steel behaves as a liquid of its rho and c_P (B&G Eq. 4.2.27)
 ```
 
-That 0.938 is a ratio between two events on one trace, and the trace is
+That 0.939 is a ratio between two events on one trace, and the trace is
 where you see whether the run was clean enough to quote it.
 `ElasticFDTDResult.plot()` draws exactly this by default: probe histories,
 not field maps; the snapshots of sections 3 and 6 are `.plot(kind="snapshot")`.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_probe_traces.svg" alt="Pressure history at a probe in a 12 metre water column over a steel half-space, over 3.4 milliseconds: a single clean Gaussian pulse of unit amplitude passing the probe at 1.02 milliseconds on its way down, a flat quiet stretch, and a second pulse of the same polarity and 0.938 times the amplitude at 3.04 milliseconds, the reflection returning from the steel, with both arrival times marked and the ratio annotated against the closed-form impedance formula" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_probe_traces.svg" alt="Pressure history at a probe in a 6 metre water column over a steel half-space, over 3.4 milliseconds: a single clean Gaussian pulse of unit amplitude passing the probe at 1.02 milliseconds on its way down, a flat quiet stretch, and a second pulse of the same polarity and 0.939 times the amplitude at 3.04 milliseconds, the reflection returning from the steel, with both arrival times marked and the ratio annotated against the closed-form impedance formula" width="92%" />
 
-*The whole measurement on one axis. The probe sits 7.5 m below the source
-and 7.5 m above the contact, so the incident pulse passes it at 1.02 ms and
+*The whole measurement on one axis. The probe sits 1.5 m below the source
+and 1.5 m above the contact, so the incident pulse passes it at 1.02 ms and
 the reflection returns at 3.04 ms: both times fixed by the geometry and the
 1480 m/s of water, and both worth checking before the amplitudes are read.
 The two events keep the same polarity, which is what a reflection off a
-*harder* medium does, and their ratio is 0.938 against the exact
-$(Z_2-Z_1)/(Z_2+Z_1) = 0.938$. The flat stretch between them is the evidence
+*harder* medium does, and their ratio is 0.939 against the exact
+$(Z_2-Z_1)/(Z_2+Z_1) = 0.939$. The flat stretch between them is the evidence
 that nothing else in the domain is contributing.*
 
 <details>
@@ -514,8 +534,8 @@ import numpy as np
 
 # The two critical angles come out of the speeds alone. Substitute your
 # own Material pair and the same two lines answer for it.
-print(round(float(np.degrees(np.arcsin(WATER.c_p / STEEL.c_p))), 1))   # 14.5
-print(round(float(np.degrees(np.arcsin(WATER.c_p / STEEL.c_s))), 1))   # 27.5
+print(round(float(np.degrees(np.arcsin(WATER.c_p / STEEL.c_p))), 1))   # 14.4
+print(round(float(np.degrees(np.arcsin(WATER.c_p / STEEL.c_s))), 1))   # 27.7
 ```
 
 The drawing below carries the three arrangements this and the next two
@@ -523,7 +543,7 @@ sections describe, on one interface line and at three incidences, together
 with the thing an off-by-one row error gets wrong: where the contact
 physically sits on the staggered grid.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_fluid_solid.svg" alt="Three panels sharing one horizontal fluid-solid interface line, water above and hatched solid below. Panel a, normal incidence: a downward incident arrow, an upward reflected arrow and a single transmitted P arrow, with the reflection coefficient 0.938 given below. Panel b, oblique incidence: an incident ray at an angle from the normal, its reflected ray, and two transmitted rays labelled P and SV leaving at different angles, with a probe drawn on the normal 0.12 metres above the hit point and the critical angles 14.5 and 27.5 degrees given below. Panel c, the Scholte case: an explosive shot ten metres above a water-sediment contact and an oscillating train hugging the interface at 1436 metres per second with dashed evanescent envelopes on both sides. A magnified inset below shows the last fluid row, the first solid row and the face plane between them." width="94%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_fluid_solid.svg" alt="Three panels sharing one horizontal fluid-solid interface line, water above and hatched solid below. Panel a, normal incidence: a downward incident arrow, an upward reflected arrow and a single transmitted P arrow, with the reflection coefficient 0.939 given below. Panel b, oblique incidence: an incident ray at an angle from the normal, its reflected ray, and two transmitted rays labelled P and SV leaving at different angles, with a probe drawn on the normal 0.12 metres above the hit point and the critical angles 14.4 and 27.7 degrees given below. Panel c, the Scholte case: an explosive shot ten metres above a water-sediment contact and an oscillating train hugging the interface at 1436 metres per second with dashed evanescent envelopes on both sides. A magnified inset below shows the last fluid row, the first solid row and the face plane between them." width="94%" />
 
 Those two angles cut the range into four regimes. The column headed
 *equivalent fluid* is the same interface modelled as a shear-free bottom of
@@ -533,14 +553,14 @@ exists.
 
 | Incidence | Transmitted waves | \|V\| elastic | \|V\| equivalent fluid | What it means |
 |---|---|---|---|---|
-| 0° | P only | 0.938 | 0.938 | no shear is excited, so the steel is exactly a liquid of its $\rho$ and $c_\mathrm{P}$ |
-| 0° to 14.5° | P and SV | 0.938 falling to 0.937 at 9°, then rising to the critical angle | 0.938 rising to 1 | shear already takes a share of the transmitted power, and the fluid model already returns more |
-| 14.5° to 27.5° | SV only, P evanescent | dips to 0.905 at 16.4°, 0.918 at 20° | 1 (total reflection) | the fluid model over-predicts the returned energy by the whole shear leak |
-| beyond 27.5° | none propagating | 1, with a phase | 1, with a *different* phase | total reflection either way; the phase difference is what a Scholte wave locks onto |
+| 0° | P only | 0.939 | 0.939 | no shear is excited, so the steel is exactly a liquid of its $\rho$ and $c_\mathrm{P}$ |
+| 0° to 14.4° | P and SV | 0.939 falling to 0.938 at 9°, then rising to the critical angle | 0.939 rising to 1 | shear already takes a share of the transmitted power, and the fluid model already returns more |
+| 14.4° to 27.7° | SV only, P evanescent | dips to 0.904 at 16.4°, 0.918 at 20° | 1 (total reflection) | the fluid model over-predicts the returned energy by the whole shear leak |
+| beyond 27.7° | none propagating | 1, with a phase | 1, with a *different* phase | total reflection either way; the phase difference is what a Scholte wave locks onto |
 
 Read the third row twice: between the critical angles an equivalent fluid
 reflects everything, while the real interface leaks close to a tenth of the
-amplitude into a shear wave (|V| falls to 0.905 at 16.4°). The validation suite launches oblique carrier beams at
+amplitude into a shear wave (|V| falls to 0.904 at 16.4°). The validation suite launches oblique carrier beams at
 10° and 20° and matches the exact reflection coefficient of Brekhovskikh &
 Godin (Eqs. 4.2.22-4.2.26) within a fraction of a percent, mode conversion
 included, so the elastic column above is measured and not only computed.
@@ -587,8 +607,8 @@ validation suite instead, which has the room to do it properly.
 
 At 10° two beams leave the contact along the dashed Snell directions, and they
 leave at different angles because they travel at different speeds: the slower
-shear wave plunging at 22.1° from the normal, the faster compressional wave
-bent much further out, to 43.8°. At 20° the P beam is not a shallower beam: it
+shear wave plunging at 21.9° from the normal, the faster compressional wave
+bent much further out, to 44.4°. At 20° the P beam is not a shallower beam: it
 is *gone*. What stands in its place is a skin that clings to the contact and
 dies within a wavelength, carrying nothing downward, while the shear beam
 alone takes what crosses. This shear leak is why the reflection settles
@@ -706,15 +726,15 @@ exactly the three-media fluid layer of B&G §2.4: its transmission follows
 the closed form of Eq. 2.4.14, which reduces to the familiar mass law for
 thin plates and low frequencies and predicts **total transmission** at the
 half-wave thickness resonances $f_n = n c_\mathrm{P} / (2 h)$ (Eq. 2.4.19). For a
-10 mm steel plate that first resonance sits at 295 kHz, and one broadband
+10 mm steel plate that first resonance sits at 297.9 kHz, and one broadband
 FDTD run reproduces the whole curve: 5.8 dB at 10 kHz (where
 `mass_law_transmission_loss` with water as the ambient fluid agrees with
 the exact form to 0.02 dB), 18.1 dB at 50 kHz, and a transmission-loss
-dip within 0.1 % of the 295 kHz resonance. The same suite stress-tests the
+dip within 0.1 % of the 297.9 kHz resonance. The same suite stress-tests the
 extreme contrast of an air-steel contact (impedance ratio ~$10^5$:1): stable
 over 10 000 steps with the reflected amplitude conserved to 0.5 %.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_immersed_plate_tl.svg" alt="Setup drawing of the immersed-plate transmission run. On the left, a tall narrow vertical strip drawn to scale: 0.75 metres of water with a 10 millimetre steel plate at 0.35 metres, a one-way plane pulse launched downward at 0.25 metres, probe A 30 millimetres above the plate and probe B 50 millimetres below it, with a note that the strip is three cells wide, a one-dimensional problem run in a two-dimensional solver at half a millimetre per cell. On the right, the two probe traces on a common time axis from 0 to 160 microseconds: probe A shows the incident pulse at 47 microseconds inside a shaded 65 microsecond gate and its plate reflection at 88 microseconds outside it, probe B shows only the transmitted ring-down. Below them the transmission-loss formula, and a boxed sketch of the half-wave standing pattern inside the plate with the 295 kilohertz first resonance." width="94%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_immersed_plate_tl.svg" alt="Setup drawing of the immersed-plate transmission run. On the left, a tall narrow vertical strip drawn to scale: 0.75 metres of water with a 10 millimetre steel plate at 0.35 metres, a one-way plane pulse launched downward at 0.25 metres, probe A 30 millimetres above the plate and probe B 50 millimetres below it, with a note that the strip is three cells wide, a one-dimensional problem run in a two-dimensional solver at half a millimetre per cell. On the right, the two probe traces on a common time axis from 0 to 160 microseconds: probe A shows the incident pulse at 47 microseconds inside a shaded 65 microsecond gate and its plate reflection at 88 microseconds outside it, probe B shows only the transmitted ring-down. Below them the transmission-loss formula, and a boxed sketch of the half-wave standing pattern inside the plate with the 297.9 kilohertz first resonance." width="94%" />
 
 **The measurement behind those three numbers.** The scene is a strip three
 cells wide and 0.75 m tall at $\Delta x = 0.5$ mm. This is a one-dimensional
@@ -722,7 +742,7 @@ problem run in a two-dimensional solver. It is filled with `WATER`, with a
 10 mm `STEEL` region painted at 0.35 m by `from_regions`. A Gaussian plane pulse
 1.5 mm wide is written one-way as in section 4, centred at 0.25 m; that
 width is what carries usable energy out to about 340 kHz, which is what puts
-the 295 kHz resonance inside the measured band. One probe sits 30 mm above
+the 297.9 kHz resonance inside the measured band. One probe sits 30 mm above
 the plate and one 50 mm below its lower face, and the run lasts 0.45 ms.
 
 The measurement itself is a time gate, and the geometry hands you the gate
@@ -738,7 +758,7 @@ against $f_n = n\,c_\mathrm{P}/(2h)$. The same time-gating logic is what an in-s
 ISO 13472-1 measurement does with an Adrienne window, so the trick transfers
 straight to a real bench.
 
-**What the 295 kHz is actually for.** It is three decades above the
+**What the 297.9 kHz is actually for.** It is three decades above the
 building-acoustics band, so an audio-frequency panel is *always* in the
 thin-plate limit, where the layer's transmission collapses onto the mass law
 and the thickness resonance can be ignored entirely. This is exactly why
@@ -748,42 +768,45 @@ thickness is the principle behind ultrasonic thickness gauging and behind
 the choice of transducer coupling layers, which is why the validation
 deliberately drives the plate to hundreds of kilohertz. The frequency where
 the two regimes meet is one division for any plate: $c_\mathrm{P}/(2h)$, which is
-295 kHz for 10 mm of steel and 59 kHz for 50 mm of it.
+297.9 kHz for 10 mm of steel and 59.6 kHz for 50 mm of it.
 
 At oblique incidence the plate physics gets richer, and the clip below is
 this solver driving the same 10 mm steel plate, now lying in air, with a
 sustained 45° plane wave arriving on it. The two panels differ in **one
-number only**: the drive frequency, $f_\mathrm{c}/2 = 603$ Hz on the left and
-$2 f_\mathrm{c} = 2413$ Hz on the right, either side of the 1206 Hz coincidence
-frequency the library computes from the same $m''$ and $B'$ used above.
+number only**: the drive frequency, $f_\mathrm{c}/2 = 602$ Hz on the left and
+$2 f_\mathrm{c} = 2410$ Hz on the right, either side of the 1205 Hz coincidence
+frequency `vibration.coincidence_frequency` returns for this plate.
 Everything else, the plate, the angle, the mesh and the colour scale, is
 held fixed. Below $f_\mathrm{c}$ the plate reflects almost everything and the
 transmitted level lands on the oblique mass law; above it the acoustic
 trace wavelength matches the free bending wavelength, the plate re-radiates
 a 45° beam that grows along the lit span, and the transmitted level holds at
 the low-frequency figure where the mass law demanded 12 dB more blocking.
-The air below the plate is drawn on both panels with the display gain
-`_weak_field_gain` measures off the settled field of the two runs together
-(×150, that is +44 dB) and prints on the canvas: read the *annotations* for
-levels, not the brightness. The
+The air below the plate is drawn on both panels with one display gain,
+measured off the settled field of the two runs together
+(×150, that is +44 dB) and printed on the canvas: read the *annotations*
+for levels, not the brightness. The
 [panel sound insulation guide](/phonometry/buildings/design/panel-sound-insulation/)
-takes the same run apart against the plateau method and the mass law.
+reads the same run against the oblique mass law.
 
 <Video
   name="anim_elastic_coincidence"
   width={2400}
   height={1350}
   title="Coincidence on a 10 mm steel plate in a 2D elastic FDTD simulation"
-  description="Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 603 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2413 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1206 Hz coincidence frequency of the library and both measured and mass-law levels annotated."
+  description="Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2410 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated."
 />
 
 ## Writing the run to a video
 
-The run record this guide builds goes to the video writer as it is:
-`simulation.write_elastic_fdtd_animation` steps it and draws the field its
-recording's `snapshot_field` names, the pressure or a velocity component,
-into a WebM, an MP4 or a GIF as it is computed, a frame every
-`snapshot_every` steps, without storing the snapshots.
+A run of this guide goes to the video writer as it is once its recording
+sets `snapshot_every`; the probe-only run of section 1 does not, and the
+writer refuses it with a `ValueError`.
+`simulation.write_elastic_fdtd_animation` takes the run, not a result: it
+steps the run and draws the field its recording's `snapshot_field` names,
+the pressure or a velocity component, into a WebM, an MP4 or a GIF as it is
+computed, one frame at t = 0 and one every `snapshot_every` steps. It stores
+no snapshots, so the result it returns holds the probes and the times only.
 [Writing animations and FDTD runs to video](/phonometry/io/videos/) says how a
 frame is drawn and its colour scale found, which encoder writes the file, and
 how the same call steps on a GPU or goes to a node.

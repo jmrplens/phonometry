@@ -122,6 +122,7 @@ to every video you write.
 Building the record raises `ValueError` (`TypeError` for a value of the
 wrong type, such as a bool for `fps`) for a choice outside its options, an
 `fps` that is not a positive finite number, an empty `vaapi_device`, an
+`ffmpeg_encoder` that is empty or starts with a dash, an
 `ffmpeg_encoder`, `ffmpeg_options` or `vaapi_device` holding a NUL character,
 which no argument of a program can carry, an `ffmpeg_encoder` together with
 an `encoder` or a `codec` of your own, and a `codec` that the kind of
@@ -158,9 +159,9 @@ hardware: most Linux builds list NVENC whether or not the machine has an
 NVIDIA GPU. So before the video starts, each candidate in turn encodes one
 black frame of the video's size, a real encode, and the first that succeeds
 writes the video. A success is remembered for the rest of the process, for
-that ffmpeg, encoder and frame size, and is not tried again; a failure is
-not remembered, since a GPU encoder that was busy a moment ago may work
-now.
+that ffmpeg, encoder and frame size (and for VAAPI, that device), and is not
+tried again; a failure is not remembered, since a GPU encoder that was busy a
+moment ago may work now.
 
 `encoder=` names one kind, and only that kind is tried: when it cannot
 write the video, `io.VideoEncoderError` says so and lists the encoders that
@@ -236,8 +237,9 @@ on.
 
 ## 4. An FDTD run straight to a video
 
-`simulation.write_fdtd_animation(path, run)` steps an acoustic FDTD run and
-draws its pressure field into a video as the run computes it:
+`simulation.write_fdtd_animation(path, run, *, compute=None, frame=None, video=None)`
+steps an acoustic FDTD run and draws its pressure field into a video as the
+run computes it:
 
 ```python
 from phonometry import io, simulation
@@ -273,13 +275,13 @@ trial encode of section 2 at the frame's size, and a raw `ffmpeg_encoder` is
 looked for in this ffmpeg's list, so a missing ffmpeg, an encoder that fails
 its trial or a raw encoder this ffmpeg lacks costs no run.
 
-How each frame is drawn is one record, `simulation.AnimationFrame`, which
-checks its fields when it is built: `language`, the labels' language, `"en"`
-or `"es"` for Spanish; `size`, the frame's width and height in pixels, 960 by
-540 pixels unless it says otherwise; and `color_limit`, the colour scale
-(below). How the video is encoded is the same `io.VideoOptions` as in
-section 2, passed as `video=`, and the path's suffix is the container, as in
-section 1. A simulation video plays at 30 frames per second unless the `fps`
+How each frame is drawn is one record, `simulation.AnimationFrame`, passed as
+`frame=`, which checks its fields when it is built: `language`, the labels'
+language, `"en"` (the default) or `"es"` for Spanish; `size`, the frame's
+width and height in pixels, 960 by 540 pixels unless it says otherwise; and
+`color_limit`, the colour scale (below). How the video is encoded is the same
+`io.VideoOptions` as in section 2, passed as `video=`, and the path's suffix
+is the container, as in section 1. A simulation video plays at 30 frames per second unless the `fps`
 of its `io.VideoOptions` says otherwise.
 
 The frames show what `simulation.fdtd_simulation(run).plot(kind="snapshot")`
@@ -321,12 +323,12 @@ the whole run, or is not finite, it raises it after the first pass, before the
 video's first frame is encoded. Each message asks for
 `AnimationFrame(color_limit=...)`.
 
-`simulation.write_elastic_fdtd_animation(path, run)` does the same for the
-`ElasticRun` that `elastic_fdtd_simulation` takes, and draws the field its
-recording's `snapshot_field` names, the pressure `"p"` or a velocity
-component, `"vx"` or `"vy"`, as the snapshot plot of that function's result
-draws it. Here a vertical force on the free surface of a solid, drawn as its
-vertical velocity:
+`simulation.write_elastic_fdtd_animation(path, run, *, compute=None, frame=None, video=None)`
+does the same for the `ElasticRun` that `elastic_fdtd_simulation` takes, and
+draws the field its recording's `snapshot_field` names, the pressure `"p"` or
+a velocity component, `"vx"` or `"vy"`, as the snapshot plot of that
+function's result draws it. Here a vertical force on the free surface of a
+solid, drawn as its vertical velocity:
 
 ```python
 waveform = simulation.GaussianPulse(ix=0, iy=0, half_width_s=4e-5).value
@@ -356,10 +358,12 @@ pass leaves out the cells the sources drive and the absorbing layer; a free
 surface is not driven, and stays in.
 
 Both writers take the `compute=` of the simulation functions, so a run can
-step on a GPU, as [Where a simulation runs](../simulation/compute.md)
-explains. Only the cells a frame keeps then come to this machine to be drawn,
-one frame at a time. With `fallback=True` and no GPU there, the run warns once
-and steps on NumPy, both passes included:
+step on a GPU; with no `compute=`, a writer takes its placement from the
+innermost `simulation.use()` block it runs in, else from `PHONOMETRY_COMPUTE`,
+else NumPy, as [Where a simulation runs](../simulation/compute.md)
+explains. On a GPU, only the cells a frame keeps come to this machine to be
+drawn, one frame at a time. With `fallback=True` and no GPU there, the run
+warns once and steps on NumPy, both passes included:
 
 ```py
 res = simulation.write_fdtd_animation(
@@ -368,10 +372,16 @@ res = simulation.write_fdtd_animation(
 )
 ```
 
+The result's `provenance` records where the run stepped and with which
+versions: after a fallback its `device` reads `"cpu"` and its `host` `None`,
+so a run that fell back cannot pass for one on a GPU or a node.
+[Where a simulation runs](../simulation/compute.md) lists its fields.
+
 ## 5. On a node
 
-With a `host` in its `compute=`, a writer sends the whole job to a node, a
-machine named in your hosts file as
+With a `host` in its placement, whether from `compute=`, a `simulation.use()`
+block or `PHONOMETRY_COMPUTE` (`cupy@nas`), a writer sends the whole job to a
+node, a machine named in your hosts file as
 [Sending a simulation to a remote node](../simulation/remote-node.md)
 explains; `nas` is the node of that guide's hosts file:
 
@@ -387,15 +397,22 @@ print(res.provenance.host)   # nas
 
 The node computes the run, draws its frames under the same default style and
 encodes the video with its own ffmpeg, which the node image carries and a
-Python node needs on its `PATH`, beside matplotlib; a `vaapi_device` names a
-device of the node's. Only the result and the
-video's bytes come back, so this machine needs neither ffmpeg nor matplotlib
-for it, unless a failed run comes back to it through `fallback=True`. The run,
-the frame and the video options are checked here first, the path's container
-against the options included, so a call refused here never starts ssh; the
-node checks them again when it builds them anew. A node that has no
-matplotlib, or not the font every frame is drawn in, no ffmpeg, or no encoder
-that writes the video at its size refuses before its first step, and
+Python node needs on its `PATH`, beside matplotlib. A GPU encoder on a Docker
+node needs a GPU placement (`device="cupy"` or `"torch:cuda"`), the one with
+which phonometry hands its container a GPU: with any other device the
+container gets none from phonometry, so `encoder="auto"` ends on the CPU and
+`encoder="nvenc"` raises `simulation.ComputeRemoteError`. A `vaapi_device`
+names a device of a Python node's: the command a Docker node runs passes none
+into its container. Only the result and the video's bytes come back, so this
+machine needs neither ffmpeg nor matplotlib for it, unless a failed run comes
+back to it through `fallback=True`. The run, the frame and the video options
+are checked here first, the path's container against the options included, so
+a call refused here never starts ssh; the node checks them again when it
+builds them anew. A run travels as data, so each waveform in it must be the
+`.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, as `rayleigh`'s
+is: any other raises `TypeError` here, with `fallback=True` too. A node that
+has no matplotlib, or not the font every frame is drawn in, no ffmpeg, or no
+encoder that writes the video at its size refuses before its first step, and
 `simulation.ComputeRemoteError` says why.
 
 The node's bytes are checked before the video takes the path's place here.

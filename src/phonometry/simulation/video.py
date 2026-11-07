@@ -18,9 +18,11 @@ How each frame is drawn is one record, :class:`AnimationFrame` (the labels'
 language, the size in pixels, the colour limit); how the video is encoded is
 another, :class:`phonometry.io.VideoOptions`, the one
 :func:`phonometry.io.write_video` takes. Before the first step ffmpeg is
-found and run, and the encoder that will write the video is chosen by a real
-one-frame encode at the frame's size, so neither a missing ffmpeg nor an
-encoder that cannot write the video costs a run.
+found and run, and the encoder of a WebM or an MP4 is chosen by a real
+one-frame encode at the frame's size (a GIF has no encoder to choose), so
+neither a missing ffmpeg nor an encoder that cannot write the video costs a
+run. A raw ``ffmpeg_encoder`` is only looked for in that ffmpeg's list of
+encoders, with no trial, as :class:`phonometry.io.VideoOptions` says.
 
 The frames show what the snapshot plot of the simulation function's result
 (:meth:`~phonometry.simulation.FDTDResult.plot` with ``kind="snapshot"``)
@@ -1149,9 +1151,13 @@ def write_fdtd_animation(
         :class:`Compute`, or ``path`` neither a text nor a path; or, when
         ``compute`` names a host, a part of the run that cannot travel to a
         node: a waveform other than the ``value`` of a
-        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`;
-        or, as a run written here steps, the waveform of a
-        :class:`PlaneWaveSource` that returns anything but one real number.
+        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`,
+        a subclass of one of the library's records, a whole number outside
+        the range of an int64, a number or an array of floats wider than 64
+        bits (a ``longdouble``), or a ``Fraction`` or a ``Decimal`` the run
+        keeps as given, such as ``dx=Fraction(1, 100)``; or, as a run
+        written here steps, the waveform of a :class:`PlaneWaveSource` that
+        returns anything but one real number.
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
@@ -1370,8 +1376,12 @@ def write_elastic_fdtd_animation(
         waveform is a callable other than the ``value`` of a
         :class:`~phonometry.simulation.GaussianPulse`,
         :class:`~phonometry.simulation.CWSource` or
-        :class:`~phonometry.simulation.SignalSource`; or, as a run written
-        here steps, a waveform that returns anything but one real number.
+        :class:`~phonometry.simulation.SignalSource`, a subclass of one of
+        the library's records, a whole number outside the range of an int64,
+        a number or an array of floats wider than 64 bits (a ``longdouble``),
+        or a ``Fraction`` or a ``Decimal`` the run keeps as given, such as
+        ``dx=Fraction(1, 100)``; or, as a run written here steps, a waveform
+        that returns anything but one real number.
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a

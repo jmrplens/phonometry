@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import cmath
 import math
+import numbers
 from collections import UserString
 from collections.abc import Iterable, Mapping, Sequence, Set
 from decimal import Decimal
@@ -664,9 +665,12 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
 
     An ``int`` or a numpy integer, or a float that is whole, such as 3.0;
     never a bool, a string, an array or a non-finite number. What is not a
-    number at all is the wrong type and is refused with :class:`TypeError`;
-    a number that is not whole, not finite or below *at_least* is the right
-    type with the wrong value, and is refused with :class:`ValueError`.
+    number at all is the wrong type and is refused with :class:`TypeError`,
+    and so is a number of another kind, a ``Decimal``, a ``Fraction`` or a
+    complex, whose message names the kinds a count takes even when it holds
+    a whole number; a number that is not whole, not finite or below
+    *at_least* is the right type with the wrong value, and is refused with
+    :class:`ValueError`.
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
@@ -675,14 +679,22 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
         the caller checks against the grid.
     :return: The validated value as an ``int``.
     :raises TypeError: for a bool, a text, an array or anything else that is
-        not a number.
+        not a number, and for a ``Decimal``, a ``Fraction`` or a complex.
     :raises ValueError: for a number that is not a whole number at or above
         *at_least*.
     """
     if isinstance(value, bool) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
-        msg = f"'{name}' must be a whole number, got {given_repr(value)}."
+        if isinstance(value, numbers.Number) and not isinstance(value, bool):
+            # A Decimal, a Fraction or a complex may hold a whole number: say
+            # which kinds a count takes, not that its value is not whole.
+            msg = (
+                f"'{name}' must be an int, a NumPy integer or a whole float, "
+                f"got {given_repr(value)}, a {type(value).__name__}."
+            )
+        else:
+            msg = f"'{name}' must be a whole number, got {given_repr(value)}."
         raise TypeError(msg)
     floor = -math.inf if at_least is None else at_least
     if isinstance(value, (int, np.integer)):

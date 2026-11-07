@@ -446,8 +446,11 @@ export function copyDefects(copy, { source, kind, title, references = [], headin
     for (const found of shown.matchAll(new RegExp(String.raw`(?<![\w.~%/-])${literal(basePath)}/`, 'g'))) rooted.add(found.index);
   }
   for (const at of [...rooted].sort((a, b) => a - b)) {
-    const line = copy.slice(copy.lastIndexOf('\n', at) + 1, at + 60).split('\n')[0];
-    defects.push(`it links ${JSON.stringify(line.slice(Math.max(0, line.length - 100)))} from the site's root`);
+    const start = copy.lastIndexOf('\n', at - 1) + 1;
+    const end = copy.indexOf('\n', at);
+    const line = copy.slice(start, end === -1 ? copy.length : end);
+    const column = at - start;
+    defects.push(`it links ${JSON.stringify(line.slice(Math.max(0, column - 40), column + 60))} from the site's root`);
   }
   if (kind === 'mdx') {
     for (const name of pageImports(source).keys()) {

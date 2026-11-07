@@ -33,7 +33,7 @@ import pytest
 import yaml
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Iterator, Mapping, Sequence
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -327,7 +327,7 @@ def test_the_version_step_holds_version_to_the_pattern_the_release_holds_it_to()
 
 @pytest.mark.skipif(
     sys.platform == "win32" or shutil.which("bash") is None,
-    reason="the step is a bash script that runs on ubuntu-latest",
+    reason="the step is a bash script that runs on Ubuntu",
 )
 @pytest.mark.parametrize(
     ("version", "accepted"),
@@ -418,6 +418,64 @@ def test_every_action_is_pinned_to_a_release_tag() -> None:
                 continue
             unpinned.append(f"{path.name}: {action}@{ref}")
     assert unpinned == []
+
+
+def _strings(node: object) -> Iterator[str]:
+    """Every string a parsed workflow holds, keys and values, at any depth."""
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            yield from _strings(key)
+            yield from _strings(value)
+    elif isinstance(node, list):
+        for item in node:
+            yield from _strings(item)
+
+
+#: The Ubuntu releases a workflow may name: the one ``ubuntu-latest`` names
+#: now, and the one whose glibc a few jobs hold their numbers to.
+_UBUNTU_RELEASES = ("ubuntu-26.04", "ubuntu-24.04")
+
+
+def test_no_workflow_runs_on_the_moving_ubuntu_label() -> None:
+    """Every Linux job names the Ubuntu release it runs on.
+
+    ``ubuntu-latest`` is a label GitHub moves: from 2026-10-19 it began to
+    point at Ubuntu 26.04 instead of 24.04. The release build is held to the
+    same bytes twice and the coverage upload to one cell of the matrix, so a
+    job that followed the label changed under them on the day it moved, with
+    no commit of ours. The jobs name ubuntu-26.04, the image the label names
+    now. Four name ubuntu-24.04, three of them because they hold their
+    numbers to its glibc: the FDTD engines' golden digests, measured there,
+    the remote-node job, which compares its runs with those of the node image
+    built on ``ubuntu:24.04``, and the weighting design on glibc's routines
+    without FMA, which only that release's baseline build of glibc carries.
+    A release is moved by an edit to the workflows and to the pair above,
+    once the gates pass on it.
+    """
+    moving: list[str] = []
+    unnamed: list[str] = []
+    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for text in _strings(workflow):
+            if "ubuntu-latest" in text:
+                moving.append(f"{path.name}: {text!r}")
+            unnamed += [
+                f"{path.name}: {release}"
+                for release in re.findall(r"ubuntu-\d+\.\d+", text)
+                if release not in _UBUNTU_RELEASES
+            ]
+    assert moving == [], (
+        "these workflow strings name ubuntu-latest, which GitHub moves to a new "
+        "Ubuntu release on its own; name the release, ubuntu-26.04, or "
+        f"ubuntu-24.04 for a job held to that release's glibc: {moving}"
+    )
+    assert unnamed == [], (
+        "these workflow strings name an Ubuntu release this test does not "
+        f"accept, {' or '.join(_UBUNTU_RELEASES)}; a release joins "
+        f"_UBUNTU_RELEASES once the gates pass on it: {unnamed}"
+    )
 
 
 def _config_time_filters(options: Mapping[str, str | Sequence[str]]) -> list[str]:

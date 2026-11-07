@@ -55,7 +55,7 @@ jobs:
   preflight:
     name: Preflight
     if: github.repository == 'jmrplens/phonometry'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Fifty, above the CI wait's own forty-five, so the message the wait
     # writes is the one a reader gets. The ceiling is not redundant: the loop
     # tests its deadline between iterations, so a `gh` call that hangs on a
@@ -193,7 +193,7 @@ jobs:
     name: Build
     needs: preflight
     if: needs.preflight.outputs.skip != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -286,7 +286,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-26.04, macos-latest, windows-latest]
         python-version: ["3.12", "3.13", "3.14"]
     env:
       VERSION: ${{ needs.preflight.outputs.version }}
@@ -326,7 +326,7 @@ jobs:
   publish:
     name: Publish to PyPI
     needs: [preflight, build, verify]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
       id-token: write # the OIDC exchange with PyPI's trusted publisher
@@ -377,7 +377,7 @@ jobs:
   github-release:
     name: GitHub Release
     needs: [preflight, build, verify, publish]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
       contents: write # the tag and the release
@@ -471,7 +471,7 @@ jobs:
     name: Dispatch the GitLab mirror
     needs: [preflight, github-release]
     if: github.event_name != 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       actions: write # dispatching the GitLab mirror
@@ -567,7 +567,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-26.04, macos-latest, windows-latest]
         python-version: ["3.12", "3.14"]
     env:
       VERSION: ${{ needs.preflight.outputs.version }}
@@ -595,7 +595,7 @@ jobs:
           python -c "import phonometry, sys; v = phonometry.__version__; print('phonometry', v, 'from PyPI'); sys.exit(v != '$VERSION')"
 
       - name: Verify the PEP 740 attestation of the wheel on PyPI
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+        if: matrix.os == 'ubuntu-26.04' && matrix.python-version == '3.14'
         run: |
           python -m pip install --no-cache-dir pypi-attestations
           python -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \

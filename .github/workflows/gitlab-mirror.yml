@@ -40,7 +40,7 @@ env:
 jobs:
   repository:
     name: Mirror repository
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     # Dependabot runs without Actions secrets, so the SSH key would be empty
     # and the job could only fail. Its branches reach GitLab with the next
@@ -117,7 +117,7 @@ jobs:
 
   releases:
     name: Sync linked releases
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # After the repository job, never beside it: a release created on GitHub
     # together with its tag (the web UI does that) reaches this job on the
     # same push, and GitLab refuses a release whose tag it does not have yet.

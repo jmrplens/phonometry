@@ -764,6 +764,23 @@ _MYPY_STATED_IN = (
     "Makefile",
 )
 
+#: Pages that tell a user how to type check their own code against the
+#: installed package, where an option and a file name are the point: that is
+#: not the repository's type check, so ``files`` under [tool.mypy] does not
+#: hold their arguments. Each must still state a mypy command, so an entry
+#: that outlived its page fails.
+_TYPE_CHECKS_OF_A_USERS_CODE = dict.fromkeys(
+    (
+        "docs/start/environments/index.md",
+        "docs/start/environments/type-checking.md",
+        "site/src/content/docs/start/environments/index.md",
+        "site/src/content/docs/start/environments/type-checking.md",
+        "site/src/content/docs/es/start/environments/index.md",
+        "site/src/content/docs/es/start/environments/type-checking.md",
+    ),
+    "the Environments pages type check a user's script, not this repository",
+)
+
 #: The roots bare `mypy` has to keep checking: the package, the scripts, the
 #: transition shim, the static typing pins and the script that writes the pull
 #: request comment.
@@ -1008,9 +1025,15 @@ def test_every_stated_type_check_is_bare_mypy() -> None:
         f"no type-check command found in {missing}; if one moved, update "
         "_MYPY_STATED_IN, and if the scan stopped finding it, fix the scan"
     )
+    stale = [name for name in _TYPE_CHECKS_OF_A_USERS_CODE if name not in stated]
+    assert not stale, (
+        f"these pages state no mypy command any more; drop them from "
+        f"_TYPE_CHECKS_OF_A_USERS_CODE: {stale}"
+    )
     spelled_out = [
         f"{name}: {command}"
         for name, commands in sorted(stated.items())
+        if name not in _TYPE_CHECKS_OF_A_USERS_CODE
         for command in commands
         if _spells_out(command)
     ]

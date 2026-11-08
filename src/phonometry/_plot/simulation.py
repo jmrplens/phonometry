@@ -147,7 +147,7 @@ def _probe_labels(
 
 def _setup_snapshot(
     ax: Axes,
-    field: NDArray[np.floating],
+    field: NDArray[np.float64],
     *,
     shape: tuple[int, int],
     obstacle_mask: NDArray[np.bool_] | None,
@@ -191,7 +191,7 @@ def _setup_snapshot(
 
 def _draw_field(
     ax: Axes,
-    field: NDArray[np.floating],
+    field: NDArray[np.float64],
     *,
     shape: tuple[int, int],
     obstacle_mask: NDArray[np.bool_] | None,
@@ -270,7 +270,7 @@ def _draw_field(
     return img
 
 
-def _update_snapshot(image: AxesImage, field: NDArray[np.floating], title: str) -> None:
+def _update_snapshot(image: AxesImage, field: NDArray[np.float64], title: str) -> None:
     """Draw the next field and its time into a video frame :func:`fdtd_frame` or :func:`elastic_frame` built.
 
     The data and the title's text change; the colour scale, the overlays,
@@ -625,7 +625,7 @@ def lay_out_frame(
 
 def _video_snapshot(
     ax: Axes,
-    field: NDArray[np.floating],
+    field: NDArray[np.float64],
     *,
     shape: tuple[int, int],
     obstacle_mask: NDArray[np.bool_] | None,
@@ -694,7 +694,7 @@ def elastic_source_positions(
 
 def fdtd_frame(
     ax: Axes,
-    field: NDArray[np.floating],
+    field: NDArray[np.floating[Any]],
     *,
     dx: float,
     shape: tuple[int, int],
@@ -738,7 +738,7 @@ def fdtd_frame(
 
 def elastic_frame(
     ax: Axes,
-    field: NDArray[np.floating],
+    field: NDArray[np.floating[Any]],
     *,
     dx: float,
     shape: tuple[int, int],

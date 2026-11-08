@@ -9,7 +9,9 @@ way glibc writes it, hold the reading of the real library here to
 ``readelf``'s wherever ``readelf`` knows the property note, and hold the
 ``libm`` and the loader read to the objects that define ``exp`` and
 ``__tls_get_addr``, found by absolute paths and by relative ones, with
-planted ones of the other build mapped ahead of them.
+planted ones of the other build mapped ahead of them. Only the tests that
+look a symbol up need :mod:`ctypes`; on an interpreter without it the others
+run, as :mod:`libm_identity` does there.
 :func:`libm_identity.mask_reading` reads how a loader reads
 ``GLIBC_TUNABLES`` from the names its parser carries, so the tests hand it
 loader images spelt as each glibc spells them and hold the reading of this
@@ -19,7 +21,6 @@ process's loader to what each mask does to a child's ``exp``.
 from __future__ import annotations
 
 import contextlib
-import ctypes
 import functools
 import os
 import platform
@@ -547,6 +548,14 @@ def _on_x86_64_glibc() -> None:
         pytest.skip("reads the objects glibc's loader maps on x86-64 Linux")
 
 
+#: Why a test that looks up where a symbol resolves, or maps a file of its
+#: own, skips: both go through ctypes.
+_WITHOUT_CTYPES = (
+    "needs ctypes to look up where the default namespace resolves a symbol and "
+    "to map a file; an interpreter built without libffi has none"
+)
+
+
 def _mappings() -> list[tuple[int, int, Path]]:
     """The files ``/proc/self/maps`` lists, each with the range it is mapped at."""
     maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
@@ -561,6 +570,12 @@ def _mappings() -> list[tuple[int, int, Path]]:
 
 def _file_holding(symbol: str) -> Path:
     """The file the kernel maps where the default namespace resolves *symbol*."""
+    try:
+        # Imported here: without ctypes this module still loads, and only the
+        # tests that look a symbol up skip.
+        import ctypes  # noqa: PLC0415
+    except ImportError:
+        pytest.skip(_WITHOUT_CTYPES)
     address = ctypes.cast(getattr(ctypes.CDLL(None), symbol), ctypes.c_void_p).value
     assert address is not None
     for start, end, file in _mappings():
@@ -627,6 +642,11 @@ _MAP_FIXED_NOREPLACE = 0x100000
 @contextlib.contextmanager
 def _mapped_first(path: Path) -> Iterator[None]:
     """*path* mapped below every file this process maps, so maps lists it first."""
+    try:
+        # Imported here, as in _file_holding.
+        import ctypes  # noqa: PLC0415
+    except ImportError:
+        pytest.skip(_WITHOUT_CTYPES)
     libc = ctypes.CDLL(None)
     mmap = libc.mmap
     mmap.argtypes = (
@@ -831,6 +851,8 @@ def test_where_dladdr_names_no_file_the_file_at_the_address_is_read(
     """
     _on_x86_64_glibc()
     real = _file_holding("exp")
+    # Imported here, where _file_holding has not skipped for the want of it.
+    import ctypes  # noqa: PLC0415
 
     class WithoutDladdr(ctypes.CDLL):
         """The libraries as ctypes opens them, with a ``dladdr`` that finds none."""
@@ -850,15 +872,58 @@ def test_where_dladdr_names_no_file_the_file_at_the_address_is_read(
         assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(real)
 
 
-def test_where_no_symbol_can_be_looked_up_the_first_mapped_files_are_read(
+def test_without_ctypes_the_first_mapped_files_are_read(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Where no symbol can be looked up, the first ``libm`` and loader listed are read.
+
+    An interpreter built without libffi has no ctypes, and nothing there asks
+    where the default namespace resolves a symbol: the files read are the
+    first of their names that ``/proc/self/maps`` lists.
+    """
     _on_x86_64_glibc()
-    monkeypatch.setattr(libm_identity, "_resolved", lambda symbol: None)
+    monkeypatch.setitem(sys.modules, "ctypes", None)
+    assert libm_identity._resolved("exp") is None
     assert libm_identity.loaded_libm() == _first_libm_mapped()
     loader = libm_identity.loaded_loader()
     assert loader == _first_mapped(libm_identity._LOADER_FILE_NAME)
     assert loader is not None
+
+
+#: A child whose ``_ctypes`` cannot be imported, as in an interpreter built
+#: without libffi, that loads this module, runs one of its tests that reads
+#: no object, and prints why a test that looks a symbol up skips.
+_WITHOUT_CTYPES_CHILD = (
+    "import sys\n"
+    "sys.modules['_ctypes'] = None\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import pytest\n"
+    "import test_libm_identity as here\n"
+    "here.test_a_build_for_x86_64_v3_declares_that_level()\n"
+    "try:\n"
+    "    here._file_holding('exp')\n"
+    "except pytest.skip.Exception as skipped:\n"
+    "    print(skipped)\n"
+)
+
+
+def test_without_ctypes_only_the_tests_that_look_a_symbol_up_skip() -> None:
+    """This module loads where ctypes cannot be imported.
+
+    :mod:`libm_identity` reads ``/proc/self/maps`` there, so the tests of the
+    note, of the mask and of that reading run on such an interpreter, and only
+    those that look up where a symbol resolves, or map a file of their own,
+    skip, saying why.
+    """
+    # Fixed argv, no shell; the directory is the one this module is in
+    shown = subprocess.run(
+        [sys.executable, "-I", "-c", _WITHOUT_CTYPES_CHILD, str(Path(__file__).parent)],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    ).stdout
+    assert shown.splitlines() == [_WITHOUT_CTYPES]
 
 
 def test_off_linux_no_symbol_is_looked_up(monkeypatch: pytest.MonkeyPatch) -> None:

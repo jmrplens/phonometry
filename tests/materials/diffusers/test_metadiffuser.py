@@ -59,7 +59,9 @@ QR_WELLS = [
 ]
 QR_SEQUENCE = (1.0, 4.0, 4.0, 1.0, 0.0)
 
-# Table 2: PR-metadiffuser, N = 6 slits, M = 1, L = 3.5 cm, d = 7 cm.
+# Table 2: PR-metadiffuser, N = 6 slits, M = 1, L = 3.5 cm, d = 7 cm. The
+# first slit is 0.5 mm high with a 19.4 mm neck, outside the fitted domain of
+# the Dubos end correction, which the model says each time it reads it.
 PR_WELLS = [
     _well(0.5, 26.1, 23.4, 19.4, 34.0),
     _well(14.4, 16.7, 26.0, 14.7, 34.0),
@@ -154,7 +156,8 @@ def test_pr_metadiffuser_sharp_absorption_peak() -> None:
     # Fig. 5(d): one slit of the PR-metadiffuser shows a sharp absorption
     # peak at 1510 Hz (quasi-perfect, not critically coupled).
     f = np.arange(1300.0, 1701.0, 5.0)
-    result = metadiffuser_reflection(f, PR_WELLS, depth_m=0.035, period_m=0.07)
+    with pytest.warns(SlowSoundAbsorberWarning, match="neck is wider than the slit"):
+        result = metadiffuser_reflection(f, PR_WELLS, depth_m=0.035, period_m=0.07)
     per_slit_peak = result.well_absorption.max(axis=1)
     best = int(np.argmax(per_slit_peak))
     assert per_slit_peak[best] > 0.8
@@ -165,9 +168,10 @@ def test_pr_metadiffuser_sharp_absorption_peak() -> None:
 def test_pr_metadiffuser_specular_notch() -> None:
     # The PRD-like scattered field presents a notch at the specular
     # direction (Fig. 4(g), evaluated with 6 repetitions at 1 kHz).
-    polar = metadiffuser_polar_response(
-        1000.0, PR_WELLS, depth_m=0.035, period_m=0.07, n_repetitions=6
-    )
+    with pytest.warns(SlowSoundAbsorberWarning, match="neck is wider than the slit"):
+        polar = metadiffuser_polar_response(
+            1000.0, PR_WELLS, depth_m=0.035, period_m=0.07, n_repetitions=6
+        )
     angles_deg = np.asarray(polar.angles_deg)
     specular = float(polar.levels[np.abs(angles_deg) < 3.0].mean())
     assert specular < -15.0
@@ -196,7 +200,7 @@ def test_broadband_panel_soft_bounds() -> None:
     # Several optimised necks are wider than their slits (outside the
     # Dubos-fit domain), so only the mid-band value is pinned, softly.
     wells = [_well(*row) for row in BROADBAND_ROWS]
-    with pytest.warns(SlowSoundAbsorberWarning):
+    with pytest.warns(SlowSoundAbsorberWarning, match="neck is wider than the slit"):
         spectrum = metadiffuser_diffusion_spectrum(
             np.array([1000.0]), wells, depth_m=0.03, period_m=0.12
         )

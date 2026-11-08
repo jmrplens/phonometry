@@ -58,6 +58,10 @@ RSS = np.array(
 )
 #: Background at every position, 10 dB or more below both sources, dB.
 BACKGROUND = np.array([68.0, 70.0, 72.0, 71.0, 66.0, 60.0, 55.0])
+#: A background more than 15 dB under both sources at every position and
+#: band: 7.5 has it measured, and 8.1 then asks no correction (K1 = 0), so a
+#: determination is Eq. (8) to (12) of the levels as measured.
+QUIET = np.full(FREQS.size, 40.0)
 #: Table D.1, k = 2..8 (the 63 Hz row is not in this example's range).
 CK_TABLE_D1 = np.array([-16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
 
@@ -73,6 +77,8 @@ def _k1(delta: float) -> float:
 
 
 def _power(**kwargs: object) -> emission.InSituSoundPowerResult:
+    """Eq. (11) of the example, over the quiet background unless told otherwise."""
+    kwargs.setdefault("background_levels", QUIET)
     return emission.sound_power_in_situ(ST, RSS, LW_RSS, frequencies=FREQS, **kwargs)  # type: ignore[arg-type]
 
 
@@ -249,6 +255,7 @@ def test_eq12_energy_averages_the_locations_separately() -> None:
         np.stack([RSS, RSS + 6.0]),
         np.stack([LW_RSS, LW_RSS + 6.0]),
         frequencies=FREQS,
+        background_levels=QUIET,
     )
     one = _power()
     np.testing.assert_allclose(res.sound_power_level, one.sound_power_level, atol=1e-12)
@@ -262,12 +269,13 @@ def test_eq12_energy_averages_the_locations_separately() -> None:
 
 def test_eq11_agrees_with_the_iso3741_comparison_method() -> None:
     """ISO 3741:2010 Eq. (21), LW = LW(RSS) + (Lp(ST) - Lp(RSS) + C2), is
-    Eq. (11) plus the Annex C correction; with no background the two
+    Eq. (11) plus the Annex C correction; with a background too far under
+    both sources to correct (K1 = 0 here, none given there) the two
     determinations share every other term, so the reference-condition level
     of this module must equal the reverberation-room result exactly.
     """
-    with warnings.catch_warnings():  # four positions trip the ISO 3741 advisory
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    # Four positions are short of the six an unqualified room asks for.
+    with pytest.warns(emission.SoundPowerWarning, match="Only 4 microphone position"):
         room = emission.sound_power_comparison(
             ST,
             RSS,
@@ -293,7 +301,9 @@ def test_identical_events_one_at_a_time_give_their_own_level() -> None:
     positions and Eq. (19) is Eq. (11) with LE(ST) in place of Lp(ST).
     """
     events = np.repeat(ST[:, None, :], 5, axis=1)
-    res = emission.sound_energy_in_situ(events, RSS, LW_RSS, frequencies=FREQS)
+    res = emission.sound_energy_in_situ(
+        events, RSS, LW_RSS, frequencies=FREQS, background_levels=QUIET
+    )
     lp_rss = _energy_mean(RSS, axis=0)
     np.testing.assert_allclose(
         res.mean_source_level, _energy_mean(ST, axis=0), atol=1e-12
@@ -311,10 +321,19 @@ def test_n_events_in_one_measurement_reduce_by_10_lg_n() -> None:
     position is the same determination as N events one at a time at L.
     """
     one_at_a_time = emission.sound_energy_in_situ(
-        np.repeat(ST[:, None, :], 8, axis=1), RSS, LW_RSS, frequencies=FREQS
+        np.repeat(ST[:, None, :], 8, axis=1),
+        RSS,
+        LW_RSS,
+        frequencies=FREQS,
+        background_levels=QUIET,
     )
     encompassing = emission.sound_energy_in_situ(
-        ST + 10.0 * np.log10(8.0), RSS, LW_RSS, frequencies=FREQS, n_events=8
+        ST + 10.0 * np.log10(8.0),
+        RSS,
+        LW_RSS,
+        frequencies=FREQS,
+        n_events=8,
+        background_levels=QUIET,
     )
     np.testing.assert_allclose(
         encompassing.sound_energy_level, one_at_a_time.sound_energy_level, atol=1e-12
@@ -378,9 +397,15 @@ def test_integration_time_carries_the_background_to_the_event_interval() -> None
 
 def test_eq20_with_identical_locations_collapses_to_eq19() -> None:
     events = np.repeat(ST[:, None, :], 5, axis=1)
-    one = emission.sound_energy_in_situ(events, RSS, LW_RSS, frequencies=FREQS)
+    one = emission.sound_energy_in_situ(
+        events, RSS, LW_RSS, frequencies=FREQS, background_levels=QUIET
+    )
     two = emission.sound_energy_in_situ(
-        events, np.stack([RSS, RSS]), LW_RSS, frequencies=FREQS
+        events,
+        np.stack([RSS, RSS]),
+        LW_RSS,
+        frequencies=FREQS,
+        background_levels=QUIET,
     )
     np.testing.assert_allclose(
         two.sound_energy_level, one.sound_energy_level, atol=1e-12
@@ -526,7 +551,9 @@ def test_a_weighted_total_uses_table_d1() -> None:
     )
     assert res.sound_power_level_a == pytest.approx(expected, abs=1e-12)
     events = np.repeat(ST[:, None, :], 5, axis=1)
-    energy = emission.sound_energy_in_situ(events, RSS, LW_RSS, frequencies=FREQS)
+    energy = emission.sound_energy_in_situ(
+        events, RSS, LW_RSS, frequencies=FREQS, background_levels=BACKGROUND
+    )
     expected_j = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * (energy.sound_energy_level + CK_TABLE_D1)))
     )
@@ -536,7 +563,11 @@ def test_a_weighted_total_uses_table_d1() -> None:
 def test_63_hz_row_of_table_d1_is_accepted() -> None:
     freqs = np.array([63.0, 125.0])
     res = emission.sound_power_in_situ(
-        ST[:, :2], RSS[:, :2], LW_RSS[:2], frequencies=freqs
+        ST[:, :2],
+        RSS[:, :2],
+        LW_RSS[:2],
+        frequencies=freqs,
+        background_levels=QUIET[:2],
     )
     expected = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * (res.sound_power_level + np.array([-26.2, -16.1]))))
@@ -587,7 +618,7 @@ def test_no_background_warns_and_meets_nothing() -> None:
     report the requirement as met in any band.
     """
     with pytest.warns(emission.SoundPowerWarning, match="7.5"):
-        res = _power()
+        res = _power(background_levels=None)
     assert not bool(np.any(res.background_requirement_met))
     five_events = np.repeat(ST[:, None, :], 5, axis=1)
     with pytest.warns(emission.SoundPowerWarning, match="7.5"):
@@ -599,7 +630,9 @@ def test_no_background_warns_and_meets_nothing() -> None:
 
 def test_fewer_than_five_events_warns() -> None:
     with pytest.warns(emission.SoundPowerWarning, match="7.6"):
-        emission.sound_energy_in_situ(ST, RSS, LW_RSS, frequencies=FREQS, n_events=4)
+        emission.sound_energy_in_situ(
+            ST, RSS, LW_RSS, frequencies=FREQS, n_events=4, background_levels=QUIET
+        )
 
 
 # --------------------------------------------------------------------------

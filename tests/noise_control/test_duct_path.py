@@ -41,6 +41,7 @@ from phonometry.noise_control import (
 )
 from phonometry.noise_control.duct_modes import PlaneWaveWarning
 from phonometry.noise_control.hvac import _OCTAVE_BANDS
+from phonometry.room import NoiseCriterionWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -341,6 +342,9 @@ def test_element_accepts_an_hvac_spectrum_result() -> None:
 
 
 def test_rc_criterion_family() -> None:
+    """Long's sheet starts at 63 Hz, so the RC rating, read when it is first
+    asked for, is told its 31.5 Hz band is missing.
+    """
     res = duct_path(
         frequencies=_OCTAVE_BANDS,
         source_level=FAN_LW,
@@ -350,7 +354,9 @@ def test_rc_criterion_family() -> None:
         target=35.0,
     )
     assert res.criterion == "RC"
-    assert res.rating.__class__.__name__ == "RCResult"
+    with pytest.warns(NoiseCriterionWarning, match=r"missing bands \(31\.5 Hz\)"):
+        rating = res.rating
+    assert rating.__class__.__name__ == "RCResult"
     assert res.criterion_curve is not None
 
 

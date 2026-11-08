@@ -136,7 +136,12 @@ def test_third_octave_labels_and_grouping(tmp_path: Path) -> None:
     intensity = np.linspace(0.5e-4, 1.5e-4, freqs.size)
     scan = np.tile(intensity, (_N_SEG, 1))
     res = sound_power_intensity(
-        scan, np.full(_N_SEG, _SEG_AREA), frequencies=freqs, fraction=3
+        scan,
+        np.full(_N_SEG, _SEG_AREA),
+        pressure_levels=np.full((_N_SEG, freqs.size), 80.0),
+        pressure_residual_index=15.0,
+        frequencies=freqs,
+        fraction=3,
     )
     out = tmp_path / "third.pdf"
     res.report(str(out))
@@ -231,7 +236,12 @@ def test_negative_band_reported_as_dash(tmp_path: Path) -> None:
     scan[:, 1] = -_INTENSITY[1]
     with pytest.warns(SoundPowerWarning, match="negative in one or more bands"):
         res = sound_power_intensity(
-            scan, np.full(_N_SEG, _SEG_AREA), frequencies=_FREQS, fraction=1
+            scan,
+            np.full(_N_SEG, _SEG_AREA),
+            pressure_levels=np.full((_N_SEG, len(_FREQS)), 80.0),
+            pressure_residual_index=15.0,
+            frequencies=_FREQS,
+            fraction=1,
         )
     out = tmp_path / "negative.pdf"
     res.report(str(out))

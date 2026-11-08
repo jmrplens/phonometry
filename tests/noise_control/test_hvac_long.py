@@ -94,7 +94,6 @@ def test_fan_sound_power_places_the_blade_increment_by_frequency() -> None:
         (70.0, 9.0),
         (60.0, 12.0),
         (52.0, 15.0),
-        (40.0, 16.0),
     ],
 )
 def test_efficiency_correction_table_13_6(efficiency: float, correction: float) -> None:
@@ -102,6 +101,15 @@ def test_efficiency_correction_table_13_6(efficiency: float, correction: float) 
         hvac.fan_efficiency_correction(relative_efficiency_percent=efficiency)
         == correction
     )
+
+
+def test_an_efficiency_under_table_13_6_takes_its_last_row_and_says_so() -> None:
+    """The table is tabulated from 50 % up: 40 % takes the 16 dB of its last
+    row, the worst case, and the caller is told the table does not reach it.
+    """
+    with pytest.warns(hvac.HVACWarning, match="below the 50 % floor"):
+        correction = hvac.fan_efficiency_correction(relative_efficiency_percent=40.0)
+    assert correction == 16.0
 
 
 def test_blade_passing_frequency_eq_13_4() -> None:

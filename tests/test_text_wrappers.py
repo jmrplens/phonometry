@@ -126,6 +126,29 @@ _ONE_NAME: dict[str, tuple[Callable[[Any], object], str, str]] = {
 }
 
 
+#: The advisory a call with the known name draws, where the smallest input
+#: that reads the name is too short for the standard: eight samples are no
+#: 3 min recording of ISO/TS 12913-2 D.3. The wrapper is refused before the
+#: recording is read, so its call draws none.
+_KNOWN_NAME_ADVISORY: dict[str, tuple[type[Warning], str]] = {
+    "binaural_indicators(parameters)": (
+        environment.SoundscapeWarning,
+        r"lasts 0\.0 s; .* at least 3 min",
+    ),
+}
+
+
+def _accepts(entry: str, call: Callable[[Any], object], known: str) -> None:
+    """Call ``entry`` with the name it knows, holding it to its advisory."""
+    advisory = _KNOWN_NAME_ADVISORY.get(entry)
+    if advisory is None:
+        call(known)
+        return
+    category, message = advisory
+    with pytest.warns(category, match=message):
+        call(known)
+
+
 #: One character of ``"abc"`` as a refusal shows it: a text, or a code.
 _A_CHARACTER = re.compile(r"'[abc]'|\b9[789]\b")
 
@@ -156,7 +179,7 @@ def test_a_wrapped_name_is_refused_by_name_and_never_split(
     entry: str, wrap: Callable[[str], object]
 ) -> None:
     call, known, name = _ONE_NAME[entry]
-    call(known)
+    _accepts(entry, call, known)
     wrapped = wrap(known)
     with pytest.raises(TypeError, match=name) as caught:
         call(wrapped)

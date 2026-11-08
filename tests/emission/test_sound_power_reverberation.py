@@ -245,15 +245,19 @@ def test_background_correction_is_per_position_eq14_to_16() -> None:
     to K1i = 0,4576 dB while the others follow Eq. (14). The corrected mean
     is 69,38872 dB (effective K1 = 0,36347 dB). A single K1 from the
     position-averaged spectra (margin 10,02 dB -> K1 = 0,45536 dB) would
-    land 0,09 dB low at 69,29683 dB.
+    land 0,09 dB low at 69,29683 dB. The six levels spread 2,16 dB, over the
+    1,5 dB sM criterion of 8.4.2.2, which is advised as well.
     """
     freqs = np.array([1000.0])
     t60 = np.array([1.5])
     levels = np.array([[70.0], [68.0], [66.0], [72.0], [71.0], [69.0]])
     background = np.array([[58.0], [60.0], [59.0], [60.0], [62.0], [58.0]])
-    with pytest.warns(
-        emission.SoundPowerWarning,
-        match=r"Background margin below the ISO 3741 criterion",
+    with (
+        pytest.warns(emission.SoundPowerWarning, match=r"sM criterion"),
+        pytest.warns(
+            emission.SoundPowerWarning,
+            match=r"Background margin below the ISO 3741 criterion",
+        ),
     ):
         res = emission.sound_power_reverberation(
             levels,

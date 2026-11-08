@@ -28,8 +28,11 @@ if TYPE_CHECKING:
 
 _FREQS = np.array([63, 125, 250, 500, 1000, 2000, 4000], dtype=float)
 _LENGTH = 0.5
-_S_EXP = 0.08
-_S_DUCT = 0.01
+#: A 45 mm chamber on a 16 mm pipe, area ratio 8: its first cut-on, 4.45 kHz,
+#: is above the 4 kHz octave, so the plane-wave closed form holds in every
+#: band of the fiche.
+_S_EXP = 0.0016
+_S_DUCT = 0.0002
 _C = 343.0
 
 

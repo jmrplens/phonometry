@@ -267,7 +267,8 @@ jobs:
         # on the site's own tree. The list IndexNow is sent at deploy has its
         # tests here too, on pairs of builds: one changed page sends that page
         # alone, a new or a removed page is sent as such, a new release number
-        # in the header of every Markdown copy sends nothing, no previous
+        # in the header of every Markdown copy sends nothing, nor does a new
+        # banner or footer around a page read from its <main>, no previous
         # manifest sends every URL, and the record compared with is the newest
         # one a run of main kept, read from a stand-in for the API. Node's own
         # test runner, after the install: the structured-data check and the

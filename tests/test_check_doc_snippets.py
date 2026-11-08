@@ -16,10 +16,8 @@ import importlib.util
 import pathlib
 import sys
 import time
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPT = (
     pathlib.Path(__file__).resolve().parent.parent / "scripts" / "check_doc_snippets.py"
@@ -1493,19 +1491,36 @@ def test_a_page_that_writes_bytes_its_streams_cannot_decode_is_still_reported(
     that the encoding of its streams does not decode; such a byte is read as
     a replacement character, so the page that fails is reported with its last
     line on stderr and the page that runs is held to its comments, rather
-    than the check stopping on the byte. ``0x81`` decodes neither as UTF-8
-    nor in code page 1252, the encodings the streams take on the runners.
+    than the check stopping on the byte.
+
+    The byte is one the encoding the check reads the streams in does not
+    decode, whatever the host gives it: ``0x80`` in UTF-8, ``0x81`` in code
+    page 1252, ``0x98`` in code page 1251. An encoding that decodes every
+    byte, as Latin-1 does, never reads a replacement character, and leaves
+    the test nothing to show.
     """
+    encoding = check_doc_snippets._STREAM_ENCODING
+    byte = next(
+        (
+            bytes([value])
+            for value in range(0x80, 0x100)
+            if (b"bad" + bytes([value])).decode(encoding, errors="replace")
+            == "bad\ufffd"
+        ),
+        None,
+    )
+    if byte is None:
+        pytest.skip(f"{encoding} decodes every byte")
     fails = _page(
         tmp_path,
-        "import sys\nsys.stderr.buffer.write(b'bad\\x81\\n')\nsys.stderr.flush()\n"
-        "raise SystemExit(1)",
+        f"import sys\nsys.stderr.buffer.write(b'bad' + {byte!r} + b'\\n')\n"
+        "sys.stderr.flush()\nraise SystemExit(1)",
         name="fails.md",
     )
     runs = _page(
         tmp_path,
-        "import sys\nsys.stdout.buffer.write(b'bad\\x81\\n')\nsys.stdout.flush()\n"
-        "print(2)  # 2",
+        f"import sys\nsys.stdout.buffer.write(b'bad' + {byte!r} + b'\\n')\n"
+        "sys.stdout.flush()\nprint(2)  # 2",
         name="runs.md",
     )
     assert check_doc_snippets.check_execution([fails, runs]) == [

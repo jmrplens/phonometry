@@ -98,6 +98,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -227,14 +228,14 @@ class WallTieCouplingResult(OwnsArrays):
         against.
     """
 
-    frequencies: np.ndarray
-    coupling_loss_factor: np.ndarray
+    frequencies: NDArray[np.float64]
+    coupling_loss_factor: NDArray[np.float64]
     mobility1: float
     mobility2: float
-    connector_mobility: np.ndarray
+    connector_mobility: NDArray[np.float64]
     ties_per_area: float
     tie_stiffness: float | None
-    rigid_coupling_loss_factor: np.ndarray
+    rigid_coupling_loss_factor: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject spectra that do not share one frequency axis.

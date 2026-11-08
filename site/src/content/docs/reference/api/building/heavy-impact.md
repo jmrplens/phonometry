@@ -537,7 +537,12 @@ and must not be compared with the table. Band-filter the force record
 first (for example with
 [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank)) and call this once
 per band, then hand the five results to
-[`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source).
+[`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source). A band filter rings on after the
+impact, the 31.5 Hz octave for some tenths of a second, so the record
+must run on past the impact until the filters have died away, and it
+is filtered with its mean kept (`detrend=False`), the impact's own
+and not an offset: a 20 ms half-sine cut at its end reads 45 dB low at
+31.5 Hz.
 :::
 
 **Parameters**

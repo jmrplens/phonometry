@@ -406,7 +406,12 @@ def impact_force_exposure_level(
        first (for example with
        :class:`~phonometry.filters.core.OctaveFilterBank`) and call this once
        per band, then hand the five results to
-       :func:`check_heavy_impact_source`.
+       :func:`check_heavy_impact_source`. A band filter rings on after the
+       impact, the 31.5 Hz octave for some tenths of a second, so the record
+       must run on past the impact until the filters have died away, and it
+       is filtered with its mean kept (``detrend=False``), the impact's own
+       and not an offset: a 20 ms half-sine cut at its end reads 45 dB low at
+       31.5 Hz.
 
     :param force_n: Sampled instantaneous force ``F(t)``, in newtons (1-D).
         Accepts a :class:`phonometry.io.Signal` for its rate; a calibration

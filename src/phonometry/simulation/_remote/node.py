@@ -208,7 +208,7 @@ def _forget_host() -> None:
     os.environ.pop(_ENV_VAR, None)
 
 
-def _little_endian(array: NDArray[Any]) -> memoryview:
+def _little_endian(array: NDArray[np.floating[Any]]) -> memoryview:
     little = np.ascontiguousarray(array, dtype=array.dtype.newbyteorder("<"))
     # Flattened before the byte view, as the arguments are (:mod:`.wire`).
     return memoryview(little.reshape(-1).view(np.uint8))

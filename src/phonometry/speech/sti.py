@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
@@ -178,11 +179,11 @@ class STIResult(OwnsArrays):
     """
 
     sti: float
-    mti: np.ndarray
-    mtf: np.ndarray
-    band_levels: np.ndarray | None
+    mti: NDArray[np.float64]
+    mtf: NDArray[np.float64]
+    band_levels: NDArray[np.float64] | None
     rating: STIRating
-    ambient_levels: np.ndarray | None = None
+    ambient_levels: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band quantities disagree.
@@ -334,7 +335,7 @@ def _rating(sti: float) -> STIRating:
     return _RATING_LETTERS[idx]
 
 
-def _masking_amdb(level: np.ndarray | float) -> np.ndarray:
+def _masking_amdb(level: NDArray[np.float64] | float) -> NDArray[np.float64]:
     r"""Level-dependent auditory masking ``amdB`` in dB (Ed.5 Table A.2).
 
     Four-segment continuous function of the total (signal + noise) level
@@ -370,7 +371,7 @@ def _octave_bank(fs: float) -> OctaveFilterBank:
     return bank
 
 
-def _validate_band_vector(values: NumericArrayLike, name: str) -> np.ndarray:
+def _validate_band_vector(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     arr = real_array(values, name)
     if arr.shape != (_NUM_BANDS,):
         msg = (
@@ -384,7 +385,7 @@ def _validate_band_vector(values: NumericArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _truncated_mtf(mtf: NumericArrayLike) -> np.ndarray:
+def _truncated_mtf(mtf: NumericArrayLike) -> NDArray[np.float64]:
     """Validate the modulation transfer matrix and truncate it to 1,0.
 
     Ed.4 A.5.3 NOTE 1 (= Ed.5): a value above 1,3 means the measurement is
@@ -395,7 +396,7 @@ def _truncated_mtf(mtf: NumericArrayLike) -> np.ndarray:
     return m
 
 
-def _checked_mtf(mtf: NumericArrayLike) -> tuple[np.ndarray, bool]:
+def _checked_mtf(mtf: NumericArrayLike) -> tuple[NDArray[np.float64], bool]:
     """The matrix truncated to 1,0, and whether a value lay above 1,3.
 
     The advisory on such a value is the caller's to give, once every argument
@@ -427,7 +428,7 @@ def _invalid_mtf_advisory(*, invalid: bool) -> None:
 
 def _snr_vector(
     snr: NumericArrayLike | None,
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """The per-band signal-to-noise ratios, broadcast from a scalar if given."""
     if snr is None:
         return None
@@ -471,21 +472,21 @@ class _LevelCorrection:
       multiplies every modulation transfer value of the band.
     """
 
-    speech_level: np.ndarray
-    ambient_level: np.ndarray | None
-    snr: np.ndarray | None
-    noise_transfer: np.ndarray
-    combined_level: np.ndarray
-    masking_db: np.ndarray
-    intensity: np.ndarray
-    intensity_masking: np.ndarray
-    intensity_threshold: np.ndarray
-    masking_threshold_transfer: np.ndarray
-    factor: np.ndarray
+    speech_level: NDArray[np.float64]
+    ambient_level: NDArray[np.float64] | None
+    snr: NDArray[np.float64] | None
+    noise_transfer: NDArray[np.float64]
+    combined_level: NDArray[np.float64]
+    masking_db: NDArray[np.float64]
+    intensity: NDArray[np.float64]
+    intensity_masking: NDArray[np.float64]
+    intensity_threshold: NDArray[np.float64]
+    masking_threshold_transfer: NDArray[np.float64]
+    factor: NDArray[np.float64]
 
 
 def _level_correction(
-    speech_level: np.ndarray, ambient_level: np.ndarray | None
+    speech_level: NDArray[np.float64], ambient_level: NDArray[np.float64] | None
 ) -> _LevelCorrection:
     """Every term of the A.5.3 correction for one condition (Ed.4 = Ed.5).
 
@@ -526,11 +527,11 @@ def _level_correction(
 
 
 def _corrected_mtf(
-    m: np.ndarray,
-    snr_arr: np.ndarray | None,
+    m: NDArray[np.float64],
+    snr_arr: NDArray[np.float64] | None,
     level: NumericArrayLike | None,
     ambient: NumericArrayLike | None,
-) -> tuple[np.ndarray, np.ndarray | None, np.ndarray | None]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Apply the noise and level-dependent corrections of A.5.3.
 
     Without absolute levels only the signal-to-noise correction applies; with
@@ -564,9 +565,9 @@ def _corrected_mtf(
 
 
 def _index_from_corrected_mtf(
-    m: np.ndarray,
-    band_levels: np.ndarray | None,
-    ambient_levels: np.ndarray | None,
+    m: NDArray[np.float64],
+    band_levels: NDArray[np.float64] | None,
+    ambient_levels: NDArray[np.float64] | None,
 ) -> STIResult:
     r"""A.5.4 to A.5.6 on a matrix that already carries every correction.
 
@@ -599,7 +600,7 @@ def _index_from_corrected_mtf(
 
 
 def _sti_from_mtf(
-    mtf: np.ndarray,
+    mtf: NDArray[np.float64],
     snr: NumericArrayLike | None = None,
     level: NumericArrayLike | None = None,
     ambient: NumericArrayLike | None = None,
@@ -853,7 +854,7 @@ def sti_from_impulse_response(
     return _sti_from_mtf(mtf, snr=snr, level=levels, ambient=ambient)
 
 
-def _intensity_envelopes(x: np.ndarray, fs: float) -> np.ndarray:
+def _intensity_envelopes(x: NDArray[np.float64], fs: float) -> NDArray[np.float64]:
     """Octave-band intensity envelopes I_k(t) = x_k^2(t) low-passed at
     ~100 Hz (Ed.4 A.5.2 = Ed.5), shape (7, n).
 
@@ -893,8 +894,8 @@ def _require_full_modulation_periods(n_samples: int, fs: float) -> None:
 
 
 def _stipa_modulation_depths(
-    env: np.ndarray, fs: float
-) -> tuple[np.ndarray, list[int]]:
+    env: NDArray[np.float64], fs: float
+) -> tuple[NDArray[np.float64], list[int]]:
     r"""Modulation depths :math:`mdr_{k,f_m}` of the intensity envelopes at
     the two Table B.1 frequencies of each band, over an integer number of
     periods (Ed.4 A.5.2):
@@ -1095,7 +1096,7 @@ def stipa(
     return result
 
 
-def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:
+def _pink_noise(n: int, rng: np.random.Generator) -> NDArray[np.float64]:
     """Gaussian pink (1/f power) noise of length ``n`` via FFT shaping."""
     spectrum = np.fft.rfft(rng.standard_normal(n))
     freq = np.fft.rfftfreq(n)
@@ -1111,7 +1112,7 @@ def stipa_signal(
     duration_s: float = 18.0,
     level: float | None = None,
     seed: int | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Generate an IEC 60268-16:2020 conformant STIPA test signal.
 
     Pink-noise carriers are band-limited to half-octave bands centred on

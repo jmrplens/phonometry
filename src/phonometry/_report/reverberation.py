@@ -64,6 +64,7 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
+    from numpy.typing import NDArray
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Table
 
@@ -100,7 +101,9 @@ def _fmt_t(value: float, language: Language = "en") -> str:
     return format_number(v, language, decimals=2)
 
 
-def _band_value(freqs: np.ndarray, values: np.ndarray, target: float) -> float:
+def _band_value(
+    freqs: NDArray[np.float64], values: NDArray[np.float64], target: float
+) -> float:
     """Return the value at the band closest to ``target`` Hz, or NaN if none near."""
     if freqs.size == 0:
         return float("nan")
@@ -110,7 +113,9 @@ def _band_value(freqs: np.ndarray, values: np.ndarray, target: float) -> float:
     return real_number(values[idx], "values")
 
 
-def _mid_or_first(freqs: np.ndarray, values: np.ndarray) -> tuple[float, bool]:
+def _mid_or_first(
+    freqs: NDArray[np.float64], values: NDArray[np.float64]
+) -> tuple[float, bool]:
     """Return ``(value, is_mid)`` for the mid-frequency descriptor.
 
     When both the 500 Hz and 1000 Hz octaves are present and finite, the

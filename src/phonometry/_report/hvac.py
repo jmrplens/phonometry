@@ -52,6 +52,7 @@ from ._noise_control_fiche import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -71,7 +72,7 @@ def _is_power(result: HVACSpectrumResult) -> bool:
     return getattr(result, "quantity", "") == "sound_power_level"
 
 
-def _a_weighting(frequencies: np.ndarray) -> np.ndarray | None:
+def _a_weighting(frequencies: NDArray[np.float64]) -> NDArray[np.float64] | None:
     """A-weighting band corrections at nominal band centres, or ``None``.
 
     Reuses the library's ISO 3744:2010 Annex E A-weighting table (the same
@@ -93,7 +94,7 @@ def _a_weighting(frequencies: np.ndarray) -> np.ndarray | None:
         return None
 
 
-def _overall_level(levels: np.ndarray) -> float:
+def _overall_level(levels: NDArray[np.float64]) -> float:
     """Energy-summed overall level, ``10 lg(sum 10^(L/10))``."""
     finite = levels[np.isfinite(levels)]
     if finite.size == 0:
@@ -102,7 +103,7 @@ def _overall_level(levels: np.ndarray) -> float:
 
 
 def _a_weighted_total(
-    levels: np.ndarray, corrections: np.ndarray | None
+    levels: NDArray[np.float64], corrections: NDArray[np.float64] | None
 ) -> float | None:
     """A-weighted energy-summed total, or ``None`` when no corrections apply."""
     if corrections is None:
@@ -197,7 +198,7 @@ def _value_table(
     result: HVACSpectrumResult,
     *,
     verbose: bool,
-    corrections: np.ndarray | None,
+    corrections: NDArray[np.float64] | None,
     language: Language = "en",
 ) -> Table:
     """Build the per-band table (nominal frequency and the reported quantity).
@@ -239,7 +240,7 @@ def _value_table(
 
 def _statement(
     result: HVACSpectrumResult,
-    corrections: np.ndarray | None,
+    corrections: NDArray[np.float64] | None,
     language: Language = "en",
 ) -> tuple[float, bool, str, list[str]]:
     """The boxed headline figure, its pass direction and the extended terms.
@@ -292,7 +293,7 @@ def _statement(
 
 def _basis_strip(
     result: HVACSpectrumResult,
-    corrections: np.ndarray | None,
+    corrections: NDArray[np.float64] | None,
     language: Language = "en",
 ) -> list[str]:
     """The method-basis strip(s) for the reported quantity."""

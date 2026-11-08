@@ -64,6 +64,7 @@ from ._layout import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -165,7 +166,9 @@ def _metadata_pairs(
 
 
 def _alpha_table(
-    freqs: np.ndarray, alpha_s: np.ndarray, language: Language = "en"
+    freqs: NDArray[np.float64],
+    alpha_s: NDArray[np.float64],
+    language: Language = "en",
 ) -> Table:
     """Build the compact two-column ``f | alpha_s`` table (accredited default)."""
     from reportlab.lib.units import mm

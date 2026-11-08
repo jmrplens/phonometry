@@ -68,6 +68,7 @@ from ._layout import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -92,7 +93,9 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _governing_index(per_impulse: np.ndarray, qualifies: np.ndarray) -> int:
+def _governing_index(
+    per_impulse: NDArray[np.float64], qualifies: NDArray[np.bool_]
+) -> int:
     """Return the index of the governing impulse (the highest qualifying ``P``).
 
     The governing impulse is the one with the highest predicted prominence among
@@ -106,7 +109,9 @@ def _governing_index(per_impulse: np.ndarray, qualifies: np.ndarray) -> int:
     return int(np.argmax(per_impulse))
 
 
-def _select_rows(per_impulse: np.ndarray, governing: int) -> tuple[list[int], int]:
+def _select_rows(
+    per_impulse: NDArray[np.float64], governing: int
+) -> tuple[list[int], int]:
     """Choose the impulse rows to show and how many are dropped.
 
     Every impulse is shown (in input order) when the set fits :data:`_MAX_TABLE_ROWS`;

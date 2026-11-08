@@ -58,6 +58,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -97,7 +98,9 @@ def _widths(columns: int) -> list[float]:
     return [_TABLE_WIDTH_MM / columns] * columns
 
 
-def _marked(values: np.ndarray, marks: list[str], language: Language) -> list[str]:
+def _marked(
+    values: NDArray[np.float64], marks: list[str], language: Language
+) -> list[str]:
     """One decimal per band, followed by the band's background marker."""
     return [
         d1(real_number(value, "values"), language) + (f" {mark}" if mark else "")
@@ -115,7 +118,7 @@ def _hard_walled_marks(result: HardWalledSoundPowerResult) -> list[str]:
     ]
 
 
-def _nearest_half(values: np.ndarray) -> np.ndarray:
+def _nearest_half(values: NDArray[np.float64]) -> NDArray[np.float64]:
     """The levels to the nearest one-half decibel (ISO 3743-2:2018, 12.5 d)."""
     return np.asarray(np.round(2.0 * real_array(values, "values")) / 2.0)
 

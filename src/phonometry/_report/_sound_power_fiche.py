@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -66,10 +67,10 @@ if TYPE_CHECKING:
         """
 
         @property
-        def frequencies(self) -> np.ndarray | None: ...
+        def frequencies(self) -> NDArray[np.float64] | None: ...
 
         @property
-        def sound_power_level(self) -> np.ndarray: ...
+        def sound_power_level(self) -> NDArray[np.float64]: ...
 
         @property
         def sound_power_level_a(self) -> float: ...
@@ -134,7 +135,7 @@ def d1(value: float, language: Language = "en") -> str:
 
 
 def nominal_bands(
-    frequencies: np.ndarray | None,
+    frequencies: NDArray[np.float64] | None,
 ) -> tuple[list[float] | None, int]:
     """Return the nominal band centres in hertz and the fraction (1, 3 or 0).
 
@@ -164,7 +165,7 @@ def nominal_bands(
 
 
 def band_labels(
-    frequencies: np.ndarray | None, n: int, language: Language = "en"
+    frequencies: NDArray[np.float64] | None, n: int, language: Language = "en"
 ) -> tuple[list[str], int]:
     """Return the nominal band labels and the band fraction (1, 3 or 0).
 
@@ -182,7 +183,9 @@ def band_labels(
     return [decimal_comma(f"{centre:g}", language) for centre in centres], fraction
 
 
-def range_str(values: np.ndarray, language: Language = "en", decimals: int = 1) -> str:
+def range_str(
+    values: NDArray[np.float64], language: Language = "en", decimals: int = 1
+) -> str:
     """Format a per-band quantity as a single value or an ``a to b`` range.
 
     ``decimals`` is the precision the quantity is read at: one decimal for a

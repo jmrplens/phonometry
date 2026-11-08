@@ -83,6 +83,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -204,14 +205,14 @@ def _value_table(
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _band_array(values: np.ndarray | None, n: int) -> np.ndarray:
+def _band_array(values: NDArray[np.float64] | None, n: int) -> NDArray[np.float64]:
     """A per-band float array, or all-``NaN`` when the quantity is absent."""
     if values is None:
         return np.full(n, np.nan, dtype=np.float64)
     return real_array(values, "values")
 
 
-def _grade_cell(grade: np.ndarray | None, i: int) -> str:
+def _grade_cell(grade: NDArray[np.object_] | None, i: int) -> str:
     """The per-band achieved-grade cell (grade number, or an em dash)."""
     if grade is None:
         return _ABSENT
@@ -298,7 +299,7 @@ def _criteria_strip(
 
 
 def _indicator_range(
-    values: np.ndarray | None, language: Language = "en", decimals: int = 1
+    values: NDArray[np.float64] | None, language: Language = "en", decimals: int = 1
 ) -> str:
     """A field-indicator range, or an em dash when the indicator is absent."""
     if values is None:
@@ -371,7 +372,7 @@ def _precision_basis(language: Language = "en") -> str:
     ).format(grade=t(_PRECISION_GRADE_PHRASE, language))
 
 
-def _band_uncertainty(result: PrecisionIntensityResult) -> np.ndarray:
+def _band_uncertainty(result: PrecisionIntensityResult) -> NDArray[np.float64]:
     """Per-band expanded uncertainty ``U = 2 sigma_R0`` (Table 1), in dB.
 
     ISO 9614-3:2002 clause 4.3 states the expanded uncertainty for a coverage
@@ -559,7 +560,7 @@ def _precision_caption(
 
 def _precision_omitted(
     result: PrecisionIntensityResult, criteria: PrecisionCriteria | None
-) -> np.ndarray:
+) -> NDArray[np.bool_]:
     """The bands the A-weighted determination leaves out, per band.
 
     Two rules put a band here, and the sheet has to distinguish them: the
@@ -574,7 +575,9 @@ def _precision_omitted(
     return omitted
 
 
-def _precision_level_a(result: PrecisionIntensityResult, omitted: np.ndarray) -> float:
+def _precision_level_a(
+    result: PrecisionIntensityResult, omitted: NDArray[np.bool_]
+) -> float:
     """The A-weighted level the fiche boxes: the qualified bands only.
 
     The result object sums every applicable band, because it is computed
@@ -661,7 +664,7 @@ def _normalization_offset(result: PrecisionIntensityResult) -> float:
 
 def _dynamic_capability(
     residual_index: NumericArrayLike | None,
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """``Ld = delta_pI0 - K`` with the fixed precision ``K``, or ``None``."""
     if residual_index is None:
         return None
@@ -767,7 +770,7 @@ def _omission_reason(
 def _omitted_band_list(
     result: PrecisionIntensityResult,
     criteria: PrecisionCriteria | None,
-    omitted: np.ndarray,
+    omitted: NDArray[np.bool_],
     language: Language = "en",
 ) -> str:
     """The omitted bands, each with the rule that omitted it."""
@@ -785,7 +788,7 @@ def _omitted_band_list(
 def _precision_criteria_strip(
     result: PrecisionIntensityResult,
     criteria: PrecisionCriteria | None,
-    omitted: np.ndarray,
+    omitted: NDArray[np.bool_],
     language: Language = "en",
 ) -> str:
     """The Annex C qualification / uncertainty line, with the mandatory statement."""

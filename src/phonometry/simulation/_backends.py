@@ -19,7 +19,7 @@ import os
 import sys
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -63,16 +63,23 @@ class Backend:
 
     xp: Any
     name: str
-    host_dtype: np.dtype[Any]
+    host_dtype: np.dtype[np.floating[Any]]
     accumulator_dtype: Dtype
     provenance: RunProvenance
-    _asarray: Callable[[NDArray[Any], str], DeviceArray]
-    _to_host: Callable[[DeviceArray], NDArray[Any]]
+    _asarray: Callable[
+        [NDArray[np.floating[Any]] | NDArray[np.bool_], str], DeviceArray
+    ]
+    _to_host: Callable[[DeviceArray], NDArray[np.floating[Any]]]
     _zeros: Callable[[tuple[int, ...], str], DeviceArray]
-    _index: Callable[[NDArray[Any]], DeviceArray]
+    _index: Callable[[NDArray[np.intp]], DeviceArray]
     _context: Callable[[], AbstractContextManager[None]]
 
-    def asarray(self, host: NDArray[Any], *, dtype: Dtype | None = None) -> DeviceArray:
+    def asarray(
+        self,
+        host: NDArray[np.floating[Any]] | NDArray[np.bool_],
+        *,
+        dtype: Dtype | None = None,
+    ) -> DeviceArray:
         """The host array *host* on the device, in the backend dtype or *dtype*.
 
         On NumPy it is *host* itself when *host* already has that dtype, and a
@@ -87,11 +94,11 @@ class Backend:
         """A zero array of *shape* on the device, in the backend dtype or *dtype*."""
         return self._zeros(shape, self.host_dtype.name if dtype is None else dtype)
 
-    def to_host(self, array: DeviceArray) -> NDArray[Any]:
+    def to_host(self, array: DeviceArray) -> NDArray[np.floating[Any]]:
         """*array* as a NumPy array (the array itself on NumPy)."""
         return self._to_host(array)
 
-    def index(self, host: NDArray[Any]) -> DeviceArray:
+    def index(self, host: NDArray[np.intp]) -> DeviceArray:
         """The host integer array *host* as an int64 index array on the device."""
         return self._index(host)
 
@@ -263,7 +270,9 @@ def _cupy(compute: Compute) -> Backend:
         with cupy.cuda.Device(index):
             yield
 
-    def asarray(host: NDArray[Any], dtype: str) -> DeviceArray:
+    def asarray(
+        host: NDArray[np.floating[Any]] | NDArray[np.bool_], dtype: str
+    ) -> DeviceArray:
         with cupy.cuda.Device(index):
             return cupy.asarray(np.asarray(host, dtype=dtype))
 
@@ -271,7 +280,7 @@ def _cupy(compute: Compute) -> Backend:
         with cupy.cuda.Device(index):
             return cupy.zeros(shape, dtype=dtype)
 
-    def as_index(host: NDArray[Any]) -> DeviceArray:
+    def as_index(host: NDArray[np.intp]) -> DeviceArray:
         with cupy.cuda.Device(index):
             return cupy.asarray(np.asarray(host, dtype=np.int64))
 
@@ -413,7 +422,10 @@ def strict_backend(compute: Compute) -> Backend:
         ),
         # Through DLPack, the standard's interchange, so a test can refuse
         # every other way into NumPy (__array__, the buffer protocol).
-        _to_host=lambda array: np.from_dlpack(array),
+        # np.from_dlpack is declared over every numeric dtype, since DLPack
+        # does not say what its producer holds; what this backend brings to
+        # the host are the fields and sums it allocated in its floating dtype.
+        _to_host=lambda array: cast("NDArray[np.floating[Any]]", np.from_dlpack(array)),
         _zeros=lambda shape, dtype: xp.zeros(shape, dtype=getattr(xp, dtype)),
         _index=lambda host: xp.asarray(
             np.array(host, dtype=np.int64, copy=True), dtype=xp.int64

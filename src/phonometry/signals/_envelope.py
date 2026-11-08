@@ -543,7 +543,9 @@ def envelope_spectrum(
         envelope detection as a zero-phase 4th-order Butterworth
         (:func:`scipy.signal.sosfiltfilt`, giving an 8th-order magnitude
         roll-off). Default ``None``: detect on the record as given.
-    :return: An :class:`EnvelopeSpectrumResult`.
+    :return: An :class:`EnvelopeSpectrumResult`. A finite record whose
+        transform or squared envelope leaves the floating-point range gives
+        an envelope, a mean level and a spectrum that are not finite.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes,
         ``kind`` is not a text, or an edge of ``band`` is not a real number.
@@ -563,13 +565,20 @@ def envelope_spectrum(
     if band is not None:
         xa, band_v = _bandpass_pre_filter(xa, fs_v, band)
 
-    env = np.asarray(np.abs(sp_signal.hilbert(xa)), dtype=np.float64)
-    detector = env**2 if kind == "squared" else env
-    mean_level = float(np.mean(detector))
-    y = detector - mean_level if remove_dc else detector
-
     taper = np.asarray(sp_signal.get_window(window, n), dtype=np.float64)
-    spectrum = np.abs(np.fft.rfft(y * taper, nfft_v)) / float(np.sum(taper))
+    # A finite record can still leave the floating-point range: its transform
+    # inside the Hilbert step, or its envelope once squared. The detector then
+    # reads inf or NaN, and the envelope, its mean and its spectrum carry it,
+    # which is the result such a record has. NumPy's own report of it came on
+    # some SciPy releases and not others: before 1.17, SciPy multiplies the
+    # transform by the analytic-signal mask (inf times 0) where 1.17 sets
+    # those bins, so it is left out on every one.
+    with np.errstate(over="ignore", invalid="ignore"):
+        env = np.asarray(np.abs(sp_signal.hilbert(xa)), dtype=np.float64)
+        detector = env**2 if kind == "squared" else env
+        mean_level = float(np.mean(detector))
+        y = detector - mean_level if remove_dc else detector
+        spectrum = np.abs(np.fft.rfft(y * taper, nfft_v)) / float(np.sum(taper))
     amplitude = 2.0 * spectrum
     amplitude[0] = spectrum[0]
     if nfft_v % 2 == 0:

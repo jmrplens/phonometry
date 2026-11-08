@@ -496,6 +496,21 @@ def test_envelope_spectrum_mean_level_restates_an_undetermined_envelope() -> Non
     assert math.isnan(restated.mean_level)
 
 
+@pytest.mark.parametrize("remove_dc", [True, False])
+def test_a_squared_envelope_past_the_floating_point_range_is_not_finite(
+    *, remove_dc: bool
+) -> None:
+    # The record and its Hilbert envelope are finite, their square is not:
+    # the envelope, its mean and its spectrum say so, with no RuntimeWarning
+    # of NumPy's from the square, the removed mean or the taper.
+    result = ph.signals.envelope_spectrum(
+        np.full(4096, 1e200), 8192.0, kind="squared", remove_dc=remove_dc
+    )
+    assert math.isinf(result.mean_level)
+    assert not np.isfinite(np.asarray(result.envelope)).any()
+    assert not np.isfinite(np.asarray(result.amplitude)).any()
+
+
 def test_envelope_spectrum_plot_two_panels_and_external_ax() -> None:
     res = ph.signals.envelope_spectrum(_am_signal(), FS)
     axes = res.plot()

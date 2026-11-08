@@ -437,6 +437,25 @@ return-overloads:
 parameter-annotations:
 	$(PYTHON) scripts/check_parameter_annotations.py
 
+# numpy gives np.ndarray, np.dtype and its abstract scalar types (np.floating,
+# np.integer, np.number and the others) default type arguments only from 2.3,
+# and the package runs on 2.0.2. Below 2.3 a type checker reads a bare
+# np.ndarray as ndarray[Unknown, Unknown] and a bare np.floating as
+# floating[Unknown], so every public name annotated with one is partly
+# unknown to it, and mypy reports a [type-arg] error for each. The package
+# wrote 3000, and pyright's --verifytypes read 86.9% of its public names as
+# known at NumPy 2.1.0. This fails on a numpy array or abstract scalar type
+# written without the type arguments it takes below 2.3, in any type
+# expression of src/phonometry (parameters, *args and **kwargs, returns,
+# annotated assignments and dataclass fields, type aliases, the bounds of a
+# type parameter and the type handed to cast, TypeVar and NewType), read
+# through the imports of the module and of each function around it and the
+# package's own re-exports, a string annotation included. An array whose
+# dtype is left open (NDArray[Any]) and np.generic are listed for review and
+# never fail. Stdlib only.
+bare-array-annotations:
+	$(PYTHON) scripts/check_bare_array_annotations.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -957,6 +976,6 @@ check: lint security test
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \
-	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations \
+	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations bare-array-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

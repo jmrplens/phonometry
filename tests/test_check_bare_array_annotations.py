@@ -84,7 +84,7 @@ def test_a_bare_array_in_a_parameter_is_found(tmp_path: pathlib.Path) -> None:
 def test_the_check_fails_on_a_bare_type(
     tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """The check lists a bare type and fails on it, with ``--refuse`` or without."""
+    """The check lists a bare type and fails on it, with no option asked."""
     root = _package(
         tmp_path, levels="def energy_mean(levels: np.ndarray) -> float: ...\n"
     )
@@ -92,8 +92,13 @@ def test_the_check_fails_on_a_bare_type(
     listed = capsys.readouterr().out
     assert "bare: np.ndarray in energy_mean parameter levels" in listed
     assert "1 bare, 0 open and 0 generic" in listed
-    assert cba.main(["--root", str(root), "--refuse"]) == 1
-    assert "::error::1 numpy type(s)" in capsys.readouterr().out
+    assert "::error::1 numpy type(s)" in listed
+
+
+def test_the_check_takes_no_option_that_turns_the_refusal_off() -> None:
+    """A bare type fails every run: no flag of the command line asks for it."""
+    with pytest.raises(SystemExit):
+        cba.main(["--refuse"])
 
 
 def test_a_complete_tree_passes_when_the_check_refuses(
@@ -103,7 +108,7 @@ def test_a_complete_tree_passes_when_the_check_refuses(
         tmp_path,
         levels="def energy_mean(levels: NDArray[np.float64]) -> float: ...\n",
     )
-    assert cba.main(["--root", str(root), "--refuse"]) == 0
+    assert cba.main(["--root", str(root)]) == 0
     assert "0 bare, 0 open and 0 generic numpy types in 0 files." in (
         capsys.readouterr().out
     )

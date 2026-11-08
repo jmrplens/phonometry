@@ -22,10 +22,9 @@ instead of reading it:
   number and returns such a value for a sequence of three, a reduction that
   hands its one number back as an array;
 * :data:`NOT_OF_A_NUMBER` names the calls whose result is no function of a
-  number, each with its reason, and :data:`ONE_ELEMENT` the functions whose
-  validator makes a number one-dimensional, which give a one-element array
-  for a number until they are converted; an entry the census no longer
-  flags fails, so neither list outlives what it excuses.
+  number, each with its reason: a time record, an output whose length a
+  value sets, a record built from numbers. An entry the census no longer
+  flags fails, so the list does not outlive what it excuses.
 
 What the census cannot call with numbers alone (a function of a ``Signal``,
 a text, a path or a record it cannot build) it leaves to the overload check
@@ -134,24 +133,6 @@ NOT_OF_A_NUMBER: dict[str, str] = {
         "the shape, and the census builds the record from numbers"
     ),
 }
-
-#: The functions and methods whose validator makes a number one-dimensional,
-#: so that a number gives a one-element array, as the detailed building model
-#: did before it followed the rule. They are not converted yet, and each
-#: leaves the list when it is: the census then fails its entry as stale.
-ONE_ELEMENT: frozenset[str] = frozenset(
-    {
-        "environment.acceleration_test_positions",
-        "environment.adrienne_reflection_window",
-        "metrology.exact_frequencies",
-        "vibration.kbf_signal",
-        "vibration.kb_signal",
-        "vibration.running_acceleration_level",
-        "vibration.running_velocity_level",
-        "vibration.running_velocity_rms",
-        "vibration.track_excitation_frequency",
-    }
-)
 
 #: What a census row says of a call.
 type Row = tuple[str, str]
@@ -380,19 +361,12 @@ def census() -> tuple[Row, ...]:
     return tuple(sorted(rows))
 
 
-def _exempt(row: Row) -> bool:
-    name, offence = row
-    return name in NOT_OF_A_NUMBER or (
-        name in ONE_ELEMENT and offence == "a one-element array"
-    )
-
-
 def test_numbers_give_a_number() -> None:
     """No call of numbers returns an array of one value or a numpy scalar."""
     offending = [
         f"{name}: {offence}"
         for name, offence in census()
-        if not _exempt((name, offence))
+        if name not in NOT_OF_A_NUMBER
     ]
     assert offending == [], (
         "these return an array of one value or a numpy scalar for numbers; "
@@ -401,14 +375,9 @@ def test_numbers_give_a_number() -> None:
 
 
 def test_every_exemption_is_still_needed() -> None:
-    """An entry of either list that the census no longer flags is stale."""
+    """An entry the census no longer flags is stale."""
     flagged = dict(census())
-    stale = sorted(
-        name
-        for name in NOT_OF_A_NUMBER.keys() | ONE_ELEMENT
-        if name not in flagged
-        or (name in ONE_ELEMENT and flagged[name] != "a one-element array")
-    )
+    stale = sorted(name for name in NOT_OF_A_NUMBER if name not in flagged)
     assert stale == []
 
 

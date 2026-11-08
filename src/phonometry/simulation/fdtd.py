@@ -240,7 +240,7 @@ def _finite(name: str, value: float) -> float:
 #: number is neither and a NumPy flag no ``np.integer``, so neither passes.
 #: A Python integer has no width and a long double may be wider than a
 #: float (80 bits on x86-64 Linux), so neither is here.
-_SURELY_REAL = float | np.float32 | np.float16 | np.integer
+_SURELY_REAL = (float, np.float32, np.float16, np.integer)
 
 
 def _one_real(value: object, refusal: Callable[[], str]) -> float:

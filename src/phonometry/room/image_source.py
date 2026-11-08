@@ -236,14 +236,14 @@ class ImageSourceResult(OwnsArrays):
     :ivar speed_of_sound: Speed of sound ``c``, m/s.
     """
 
-    ir: np.ndarray
+    ir: NDArray[np.float64]
     fs: int
-    frequencies: np.ndarray | None
-    times: np.ndarray
-    distances: np.ndarray
-    orders: np.ndarray
-    amplitudes: np.ndarray
-    image_positions: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    times: NDArray[np.float64]
+    distances: NDArray[np.float64]
+    orders: NDArray[np.intp]
+    amplitudes: NDArray[np.float64]
+    image_positions: NDArray[np.float64]
     dimensions: tuple[float, float, float]
     source: tuple[float, float, float]
     receiver: tuple[float, float, float]
@@ -434,7 +434,7 @@ def _resolve_band_maps(
     reflection: NDArray[np.float64],
     n_alpha_bands: int,
     air_attenuation_per_m: NumericArrayLike,
-    freq: np.ndarray | None,
+    freq: NDArray[np.float64] | None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], int, bool]:
     """Resolve the per-band reflection map, air map, band count and flag.
 
@@ -487,7 +487,13 @@ def _image_lattice(
     dims: tuple[float, float, float],
     max_order: int,
     speed_of_sound: float,
-) -> tuple[NDArray[np.float64], ...]:
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.intp],
+    NDArray[np.float64],
+    NDArray[np.float64],
+]:
     """Enumerate the shoebox image lattice up to ``max_order`` reflections.
 
     Returns, sorted by arrival time, ``(times, distances, orders, positions,
@@ -674,7 +680,7 @@ def image_source_rir(
         )
         raise ValueError(msg)
 
-    freq: np.ndarray | None = None
+    freq: NDArray[np.float64] | None = None
     n_freq: int | None = None
     if frequencies is not None:
         freq = real_array(frequencies, "frequencies")
@@ -700,8 +706,8 @@ def image_source_rir(
     ir = _sample_ir(times, amp, fs, duration_s, n_bands)
 
     if banded:
-        ir_out: np.ndarray = ir
-        amp_out: np.ndarray = amp
+        ir_out: NDArray[np.float64] = ir
+        amp_out: NDArray[np.float64] = amp
     else:
         ir_out = ir[0]
         amp_out = amp[0]

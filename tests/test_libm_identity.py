@@ -337,6 +337,32 @@ def test_a_mask_leaves_a_build_for_v3_on_the_pinned_routines(
     assert libm_identity.runs_the_pinned_routines() is pinned
 
 
+@pytest.mark.parametrize(
+    ("version", "pinned"),
+    [((2, 17), False), ((2, 28), False), ((2, 29), True), ((2, 43), True)],
+)
+def test_the_pinned_routines_start_at_glibc_2_29(
+    monkeypatch: pytest.MonkeyPatch, *, version: tuple[int, int], pinned: bool
+) -> None:
+    """glibc 2.29 is the first to ship ARM's ``exp``, ``log`` and ``pow``.
+
+    The commits that put them in place of IBM's routines came after the 2.28
+    release, so on an x86-64 processor with FMA and AVX2, unmasked, glibc 2.28
+    does not run the routines the pins spell and 2.29 does.
+    """
+    monkeypatch.setattr(platform, "system", lambda: "Linux")
+    monkeypatch.setattr(platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(libm_identity, "_glibc_version", lambda: version)
+    monkeypatch.setattr(
+        libm_identity, "_cpu_flags", lambda: frozenset({"fma", "avx2", "sse2"})
+    )
+    monkeypatch.setattr(libm_identity, "glibc_built_for_x86_64_v3", lambda: False)
+    monkeypatch.setattr(libm_identity, "mask_reading_here", lambda: _reading("2.39"))
+    monkeypatch.delenv(libm_identity.TUNABLES, raising=False)
+    assert libm_identity.glibc_on_x86_64_with_fma() is pinned
+    assert libm_identity.runs_the_pinned_routines() is pinned
+
+
 #: What each glibc did to a child's ``exp`` under a mask, as
 #: ``(glibc, tunables, masks)``, and for ``any``, a loader that cannot be read,
 #: whether the mask counts: wherever one of those glibcs reads it so.
@@ -495,7 +521,10 @@ def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
     them too.
     """
     if not libm_identity.glibc_on_x86_64_with_fma():
-        pytest.skip("needs glibc on an x86-64 processor with FMA and AVX2")
+        pytest.skip(
+            "needs glibc 2.29 or later, the routines the pins spell, on an x86-64 "
+            "processor with FMA and AVX2"
+        )
     if libm_identity.glibc_built_for_x86_64_v3():
         pytest.skip(
             "glibc here is built for x86-64-v3, so no mask moves it off its FMA variant"
@@ -697,8 +726,7 @@ def test_off_linux_no_object_is_asked_for(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def _real_glibc_libm() -> Path:
-    if not libm_identity.glibc_on_x86_64_with_fma():
-        pytest.skip("reads the libm of glibc on an x86-64 processor with FMA")
+    _on_x86_64_glibc()
     library = libm_identity.loaded_libm()
     assert library is not None, "glibc's libm is not mapped in this process"
     return library

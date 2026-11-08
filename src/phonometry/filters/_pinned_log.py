@@ -14,7 +14,7 @@ the cost of a design by about four.
 
 This module removes the loop without touching a single output bit. It spells
 the C library's own ``log`` (the table-driven routine from ARM's
-optimized-routines, which glibc has shipped as ``__ieee754_log`` since 2.28)
+optimized-routines, which glibc has shipped as ``__ieee754_log`` since 2.29)
 in numpy array arithmetic restricted to operations IEEE 754 pins exactly:
 addition, subtraction, multiplication, comparisons, and integer bit work.
 Nothing here is dispatched on a vector unit's taste; every operation is

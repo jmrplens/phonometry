@@ -8,6 +8,17 @@ glibc's SunPro ``log10`` on top of that ``log``. On that platform the
 bit-for-bit tests of those routines must hold, and a mismatch is a red build;
 anywhere else the local library is a different routine and they skip.
 
+glibc ships those routines from 2.29 on. They and their tables
+(``e_exp_data.c``, ``e_log_data.c`` and ``e_pow_log_data.c`` in
+``sysdeps/ieee754/dbl-64``) came in with commits e70c17682518 ("Add new exp
+and exp2 implementations"), f41b0a43e426 ("Add new log implementation") and
+424c4f60ed61 ("Add new pow implementation"), committed after the 2.28
+release, whose ``exp``, ``log`` and ``pow`` are still those of IBM's Accurate
+Mathematical Library. RHEL 8's glibc 2.28 carries IBM's as well: none of its
+patches touches those files. So glibc 2.28, on Debian 10 and RHEL 8 alike, is
+a different routine, and its version, which the running C library reports,
+says so.
+
 The platform is decided from what it is, never from whether the routines
 happen to agree on a probe: a probe that skipped on disagreement would turn a
 broken routine into a skipped test on the one machine where it is proved.
@@ -95,8 +106,10 @@ _USABLE_SUFFIX = "_Usable"
 #: applies every entry it can read.
 _ILL_FORMED_WARNING = b"invalid GLIBC_TUNABLES `"
 
-#: The first glibc that ships ARM's ``exp``, ``log`` and ``pow``.
-_FIRST_GLIBC = (2, 28)
+#: The first glibc that ships ARM's ``exp``, ``log`` and ``pow``: the commits
+#: that put them in place of IBM's (e70c17682518, f41b0a43e426 and
+#: 424c4f60ed61) came after the 2.28 release, so 2.28 runs IBM's routines.
+_FIRST_GLIBC = (2, 29)
 
 #: The environment variable through which glibc masks processor features.
 TUNABLES = "GLIBC_TUNABLES"
@@ -267,7 +280,11 @@ def masks_the_fma_variant(tunables: str, reading: MaskReading) -> bool:
 
 
 def glibc_on_x86_64_with_fma() -> bool:
-    """glibc 2.28 or later on an x86-64 processor that reports FMA and AVX2."""
+    """glibc 2.29 or later on an x86-64 processor that reports FMA and AVX2.
+
+    2.29 is the first glibc whose ``exp``, ``log`` and ``pow`` are the routines
+    the pins spell (:data:`_FIRST_GLIBC`).
+    """
     version = _glibc_version()
     if platform.system() != "Linux" or platform.machine() != "x86_64":
         return False

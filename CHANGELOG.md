@@ -2399,6 +2399,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   naming the command, so a new one cannot pass in a checkout and fail only
   in an archive.
 
+- **The release SBOM is written by cyclonedx-bom 8.0.1, and every CI job
+  upgrades pip before it installs.** The jobs that build, verify and rebuild
+  a release, build the stub and load the wheel in Pyodide installed with the
+  pip the runner image or a fresh virtual environment bundled, whatever it
+  lagged the newest release by; each upgrades it first now, as the test jobs
+  already did, and the rebuild SECURITY.md describes upgrades the pip of its
+  virtual environment too.
+
 - **A filter object types a Signal in as a Signal out, and an array in as an
   array out.** `WeightingFilter.filter` and `ParametricEQ.filter` returned
   `Signal | ndarray`, and `TimeWeighting.process` `TimeWeightedEnvelope |

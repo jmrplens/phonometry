@@ -82,6 +82,10 @@ jobs:
   build:
     name: Site builds and validates
     runs-on: ubuntu-26.04
+    env:
+      # corepack fetches the pnpm site/package.json pins and says so first;
+      # the pin is the decision, so the announcement adds nothing to the log.
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
       - uses: actions/checkout@v7
         with:

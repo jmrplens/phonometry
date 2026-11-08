@@ -149,6 +149,7 @@ from __future__ import annotations
 import functools
 import math
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -164,6 +165,9 @@ from .._internal.validation import (
     real_number,
     require_count,
 )
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 def _log_of(value: float) -> float:
@@ -307,7 +311,7 @@ class _Layout:
     den_quadratic: int
     den_linear: int
 
-    def blocks(self, theta: np.ndarray) -> tuple[np.ndarray, ...]:
+    def blocks(self, theta: NDArray[np.float64]) -> tuple[NDArray[np.float64], ...]:
         """Split *theta* into (numerator quads, num linear, den quads, den linear)."""
         cut1 = 2 * self.num_quadratic
         cut2 = cut1 + self.num_linear
@@ -322,7 +326,7 @@ class _Layout:
 
 def _corner_bounds(
     layout: _Layout, span: tuple[float, float]
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Lower and upper limits on *theta*, entry by entry, in log units.
 
     The limits are read off the fit grid rather than pulled from the air: a
@@ -408,8 +412,12 @@ def _anchor_hz(
 
 
 def _quadratic_group(
-    coefficients: np.ndarray, omega: np.ndarray, omega2: np.ndarray, *, grad: bool
-) -> tuple[np.ndarray, np.ndarray]:
+    coefficients: NDArray[np.float64],
+    omega: NDArray[np.float64],
+    omega2: NDArray[np.float64],
+    *,
+    grad: bool,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""``|s^2 + b1 s + b0|^2`` per factor at ``s = j omega``, and the gradient.
 
     With :math:`b_1 = \mathrm{e}^{\theta_1}` and :math:`b_0 = \mathrm{e}^{\theta_0}` the squared
@@ -432,8 +440,8 @@ def _quadratic_group(
 
 
 def _linear_group(
-    coefficients: np.ndarray, omega2: np.ndarray, *, grad: bool
-) -> tuple[np.ndarray, np.ndarray]:
+    coefficients: NDArray[np.float64], omega2: NDArray[np.float64], *, grad: bool
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """``|s + b1|^2`` per factor at ``s = j omega``, and the ``log`` gradient."""
     b1 = coefficients[None, :]
     denominator = omega2[:, None] + b1 * b1
@@ -443,14 +451,14 @@ def _linear_group(
 
 
 @functools.lru_cache(maxsize=4)
-def _exponentials(packed: bytes) -> np.ndarray:
+def _exponentials(packed: bytes) -> NDArray[np.float64]:
     """:func:`_scalar_exp` of the parameter vector *packed* holds, frozen."""
     values = _scalar_exp(np.frombuffer(packed, dtype=np.float64))
     values.setflags(write=False)
     return values
 
 
-def _coefficients(theta: np.ndarray) -> np.ndarray:
+def _coefficients(theta: NDArray[np.float64]) -> NDArray[np.float64]:
     """The factor coefficients ``exp(theta)``, computed once per distinct *theta*.
 
     A Levenberg-Marquardt step evaluates the same parameters on the grid and
@@ -466,8 +474,12 @@ def _coefficients(theta: np.ndarray) -> np.ndarray:
 
 
 def _log_mag2(
-    theta: np.ndarray, layout: _Layout, omega: np.ndarray, *, grad: bool = False
-) -> tuple[np.ndarray, np.ndarray]:
+    theta: NDArray[np.float64],
+    layout: _Layout,
+    omega: NDArray[np.float64],
+    *,
+    grad: bool = False,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r""":math:`\log |\tilde{H}(j\Omega)|^2` up to a constant, and its Jacobian.
 
     The overall gain is left out: the caller normalises the realised filter at
@@ -528,19 +540,19 @@ def _log_mag2(
 
 
 def _residual_db(
-    theta: np.ndarray,
+    theta: NDArray[np.float64],
     layout: _Layout,
-    omega: np.ndarray,
-    omega_ref: np.ndarray,
-    target_db: np.ndarray,
-) -> np.ndarray:
+    omega: NDArray[np.float64],
+    omega_ref: NDArray[np.float64],
+    target_db: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Deviation of the trial prototype from the printed one, in decibels."""
     value, _ = _log_mag2(theta, layout, omega)
     at_ref, _ = _log_mag2(theta, layout, omega_ref)
     return np.asarray(_DB_PER_LOG * (value - at_ref[0]) - target_db)
 
 
-def _scalar_arctan(values: np.ndarray) -> np.ndarray:
+def _scalar_arctan(values: NDArray[np.float64]) -> NDArray[np.float64]:
     """``arctan`` elementwise, correctly rounded, from :mod:`~phonometry._internal.pinned_trig`.
 
     It maps the warped grid back to real frequencies for the target curve, so
@@ -566,7 +578,7 @@ def _scalar_arctan(values: np.ndarray) -> np.ndarray:
     return pinned_atan(values)
 
 
-def _scalar_geomspace(start: float, stop: float, count: int) -> np.ndarray:
+def _scalar_geomspace(start: float, stop: float, count: int) -> NDArray[np.float64]:
     """:func:`numpy.geomspace`, spelled so a vector unit cannot change it.
 
     ``geomspace`` is ``10 ** linspace(log10(start), log10(stop), count)``, and
@@ -594,7 +606,7 @@ def _scalar_geomspace(start: float, stop: float, count: int) -> np.ndarray:
     return out
 
 
-def _scalar_pow(values: np.ndarray, exponent: float) -> np.ndarray:
+def _scalar_pow(values: NDArray[np.float64], exponent: float) -> NDArray[np.float64]:
     """``x ** exponent`` elementwise, in pinned arithmetic.
 
     ``numpy.power`` with a floating exponent is dispatched like the
@@ -611,7 +623,7 @@ def _scalar_pow(values: np.ndarray, exponent: float) -> np.ndarray:
     return pinned_pow(values, exponent)
 
 
-def _scalar_log(values: np.ndarray) -> np.ndarray:
+def _scalar_log(values: NDArray[np.float64]) -> NDArray[np.float64]:
     """``log`` in pinned arithmetic, so neither a vector unit nor a C library can change it.
 
     numpy's ``log``, ``exp`` and ``tan`` are dispatched on what the CPU offers,
@@ -645,7 +657,7 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     return pinned_log(values)
 
 
-def _scalar_exp(values: np.ndarray) -> np.ndarray:
+def _scalar_exp(values: NDArray[np.float64]) -> NDArray[np.float64]:
     """``exp`` elementwise: glibc's routine, spelled in :mod:`~phonometry._internal.pinned_exp`.
 
     The reason is the one :func:`_scalar_log` gives; the proof that it moves
@@ -657,7 +669,7 @@ def _scalar_exp(values: np.ndarray) -> np.ndarray:
     return pinned_exp(values)
 
 
-def _scalar_tan(values: np.ndarray) -> np.ndarray:
+def _scalar_tan(values: NDArray[np.float64]) -> NDArray[np.float64]:
     """``tan`` elementwise, correctly rounded, from :mod:`~phonometry._internal.pinned_trig`.
 
     The reason is the one :func:`_scalar_log` gives. glibc's own ``tan`` is
@@ -670,7 +682,7 @@ def _scalar_tan(values: np.ndarray) -> np.ndarray:
     return pinned_tan(values)
 
 
-def _ordered_sum(terms: np.ndarray) -> np.ndarray:
+def _ordered_sum(terms: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Add *terms* along their leading axis in an order fixed here.
 
     This module's machine independence rests on this function and on
@@ -719,7 +731,9 @@ def _ordered_sum(terms: np.ndarray) -> np.ndarray:
     return np.asarray(block[0])
 
 
-def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
+def _solve_dense(
+    matrix: NDArray[np.float64], vector: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Solve ``matrix @ x == vector`` by Gaussian elimination done here.
 
     The system is the damped normal equations: one row and column per fitted
@@ -775,7 +789,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
 
 
 @functools.lru_cache(maxsize=8)
-def _upper_triangle(order: int) -> tuple[np.ndarray, np.ndarray]:
+def _upper_triangle(order: int) -> tuple[NDArray[np.intp], NDArray[np.intp]]:
     """The upper-triangle index pair of an ``order`` by ``order`` matrix.
 
     Cached because :func:`_damped_step` asks for the same pattern at every
@@ -791,8 +805,11 @@ def _upper_triangle(order: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _damped_step(
-    jacobian: np.ndarray, residual: np.ndarray, weights: np.ndarray, damping: float
-) -> np.ndarray:
+    jacobian: NDArray[np.float64],
+    residual: NDArray[np.float64],
+    weights: NDArray[np.float64],
+    damping: float,
+) -> NDArray[np.float64]:
     """One Levenberg-Marquardt step of the weighted normal equations.
 
     The normal equations are scaled by the square roots of their own diagonal
@@ -823,7 +840,9 @@ def _damped_step(
     return np.asarray(_solve_dense(scaled, gradient / diagonal) / diagonal)
 
 
-def _weighted_cost(weights: np.ndarray, residual: np.ndarray) -> float:
+def _weighted_cost(
+    weights: NDArray[np.float64], residual: NDArray[np.float64]
+) -> float:
     """The weighted sum of squares the search descends.
 
     Named rather than inlined because it is what the accept test compares, so
@@ -834,12 +853,12 @@ def _weighted_cost(weights: np.ndarray, residual: np.ndarray) -> float:
 
 
 def _lm_round(
-    theta: np.ndarray,
+    theta: NDArray[np.float64],
     layout: _Layout,
-    grid: tuple[np.ndarray, np.ndarray, np.ndarray],
-    weights: np.ndarray,
-    bounds: tuple[np.ndarray, np.ndarray],
-) -> np.ndarray:
+    grid: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]],
+    weights: NDArray[np.float64],
+    bounds: tuple[NDArray[np.float64], NDArray[np.float64]],
+) -> NDArray[np.float64]:
     """``_LM_STEPS`` Levenberg-Marquardt steps at fixed Lawson weights."""
     omega, omega_ref, target_db = grid
     damping = _LM_INITIAL_DAMPING
@@ -863,11 +882,11 @@ def _lm_round(
 
 
 def _lawson_fit(
-    theta: np.ndarray,
+    theta: NDArray[np.float64],
     layout: _Layout,
-    grid: tuple[np.ndarray, np.ndarray, np.ndarray],
-    bounds: tuple[np.ndarray, np.ndarray],
-) -> np.ndarray:
+    grid: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]],
+    bounds: tuple[NDArray[np.float64], NDArray[np.float64]],
+) -> NDArray[np.float64]:
     """Drive the least-squares fit toward minimax, and keep the best round.
 
     Lawson's algorithm is not monotone (a round can overshoot and come back
@@ -927,7 +946,7 @@ def _lawson_fit(
 
 
 def _stable_factors(
-    roots: np.ndarray,
+    roots: NDArray[np.inexact[Any]],
 ) -> tuple[list[tuple[float, float]], list[tuple[float]]]:
     """Group left-half-plane roots into quadratic and linear factors.
 
@@ -965,7 +984,7 @@ def _stable_factors(
 
 
 def _padded_factors(
-    roots: np.ndarray,
+    roots: NDArray[np.inexact[Any]],
     degree: int,
     placement: tuple[float, float],
     pinned: int = 0,
@@ -1001,12 +1020,12 @@ def _padded_factors(
 
 
 def _start_parameters(
-    zeros: np.ndarray,
-    poles: np.ndarray,
+    zeros: NDArray[np.inexact[Any]],
+    poles: NDArray[np.inexact[Any]],
     degree: int,
     placement: tuple[float, float],
     at_origin: int,
-) -> tuple[np.ndarray, _Layout]:
+) -> tuple[NDArray[np.float64], _Layout]:
     """Parameter vector and layout of the prototype the search starts from.
 
     :param placement: Where the spare factors start; see
@@ -1068,7 +1087,9 @@ def _spare_placements(
     return tuple((first, ratio) for first in (2.0 * fs, span[1]) for ratio in ratios)
 
 
-def _factor_roots(quadratic: np.ndarray, linear: np.ndarray) -> list[complex]:
+def _factor_roots(
+    quadratic: NDArray[np.float64], linear: NDArray[np.float64]
+) -> list[complex]:
     """Roots of the fitted factors, in rad/s, all strictly in the left half plane."""
     roots: list[complex] = []
     for b1, b0 in _scalar_exp(quadratic):
@@ -1085,19 +1106,23 @@ def _factor_roots(quadratic: np.ndarray, linear: np.ndarray) -> list[complex]:
     return roots
 
 
-def _fitted_zpk(theta: np.ndarray, layout: _Layout) -> tuple[np.ndarray, np.ndarray]:
+def _fitted_zpk(
+    theta: NDArray[np.float64], layout: _Layout
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """Zeros and poles, in rad/s, of the fitted analog prototype."""
     num_quad, num_lin, den_quad, den_lin = layout.blocks(theta)
     zeros = [complex(0.0)] * layout.zeros_at_origin + _factor_roots(num_quad, num_lin)
     return np.array(zeros), np.array(_factor_roots(den_quad, den_lin))
 
 
-def _warped(frequencies: np.ndarray, fs: float) -> np.ndarray:
+def _warped(frequencies: NDArray[np.float64], fs: float) -> NDArray[np.float64]:
     r"""Analog frequencies the bilinear transform sends *frequencies* to, in rad/s."""
     return 2.0 * fs * _scalar_tan(np.pi * real_array(frequencies, "frequencies") / fs)
 
 
-def _log_distance2(roots: np.ndarray, omega: np.ndarray) -> np.ndarray:
+def _log_distance2(
+    roots: NDArray[np.inexact[Any]], omega: NDArray[np.float64]
+) -> NDArray[np.float64]:
     r""":math:`\sum \log |j\Omega - r|^2` over *roots*, at each of *omega*.
 
     Written in real arithmetic on purpose. The argument is on the imaginary
@@ -1119,11 +1144,11 @@ def _log_distance2(roots: np.ndarray, omega: np.ndarray) -> np.ndarray:
 
 
 def _analog_db(
-    zeros: np.ndarray,
-    poles: np.ndarray,
-    frequencies: np.ndarray,
+    zeros: NDArray[np.inexact[Any]],
+    poles: NDArray[np.inexact[Any]],
+    frequencies: NDArray[np.float64],
     reference_frequency_hz: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The prototype's magnitude in dB, relative to its value at *reference_frequency_hz*.
 
     The same quantity :func:`_log_mag2` computes for a trial prototype, for the
@@ -1136,14 +1161,16 @@ def _analog_db(
     omega = 2.0 * np.pi * real_array(frequencies, "frequencies")
     omega_ref = np.array([2.0 * np.pi * reference_frequency_hz])
 
-    def shape(at: np.ndarray) -> np.ndarray:
+    def shape(at: NDArray[np.float64]) -> NDArray[np.float64]:
         top = _log_distance2(zeros, at) if np.asarray(zeros).size else np.zeros(at.size)
         return np.asarray(top - _log_distance2(poles, at))
 
     return np.asarray(_DB_PER_LOG * (shape(omega) - shape(omega_ref)[0]))
 
 
-def _mapped_roots(roots: np.ndarray, fs2: float) -> np.ndarray:
+def _mapped_roots(
+    roots: NDArray[np.inexact[Any]], fs2: float
+) -> NDArray[np.inexact[Any]]:
     """``(2 fs + r) / (2 fs - r)`` for each root, as numpy computes it unfused.
 
     A real array is divided as numpy divides reals, which IEEE 754 fixes; a
@@ -1163,7 +1190,9 @@ def _mapped_roots(roots: np.ndarray, fs2: float) -> np.ndarray:
     return np.array(mapped, dtype=np.complex128)
 
 
-def _shifted_product(roots: np.ndarray, fs2: float) -> tuple[float, float] | float:
+def _shifted_product(
+    roots: NDArray[np.inexact[Any]], fs2: float
+) -> tuple[float, float] | float:
     """``prod(2 fs - r)``: a float for real roots, a ``(real, imaginary)`` pair for complex ones.
 
     numpy's product of reals multiplies left to right from the first element,
@@ -1178,8 +1207,11 @@ def _shifted_product(roots: np.ndarray, fs2: float) -> tuple[float, float] | flo
 
 
 def bilinear_zpk(
-    zeros: np.ndarray, poles: np.ndarray, gain: float, fs: float
-) -> tuple[np.ndarray, np.ndarray, float]:
+    zeros: NDArray[np.inexact[Any]],
+    poles: NDArray[np.inexact[Any]],
+    gain: float,
+    fs: float,
+) -> tuple[NDArray[np.inexact[Any]], NDArray[np.inexact[Any]], float]:
     """:func:`scipy.signal.bilinear_zpk`, bit for bit where numpy does not fuse, and everywhere.
 
     SciPy forms the digital roots and the gain with numpy's complex division
@@ -1388,8 +1420,8 @@ def _next_section(zeros: list[complex], poles: list[complex]) -> list[float]:
 
 
 def second_order_sections(
-    zeros: np.ndarray, poles: np.ndarray, gain: float
-) -> np.ndarray:
+    zeros: NDArray[np.inexact[Any]], poles: NDArray[np.inexact[Any]], gain: float
+) -> NDArray[np.float64]:
     """:func:`scipy.signal.zpk2sos`, step for step, in separately rounded arithmetic.
 
     SciPy pairs each pole with its zeros by complex magnitudes, numpy's own
@@ -1432,7 +1464,9 @@ def second_order_sections(
     return np.array(sections, dtype=np.float64)
 
 
-def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> float:
+def _cascade_magnitude(
+    sections: NDArray[np.float64], frequency: float, fs: float
+) -> float:
     r"""``|H|`` of a biquad cascade at one frequency, in real arithmetic.
 
     :func:`scipy.signal.sosfreqz` computes the same number and is the obvious
@@ -1473,7 +1507,7 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
     sine, half = (float(value) for value in pinned_sin(np.array([angle, 0.5 * angle])))
     versine = 2.0 * half * half
 
-    def squared(triplet: np.ndarray) -> float:
+    def squared(triplet: NDArray[np.float64]) -> float:
         c0, c1, c2 = (real_number(value, "triplet") for value in triplet)
         real = (c0 + c1 + c2) - (c0 + c2) * versine
         imaginary = (c0 - c2) * sine
@@ -1486,12 +1520,12 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
 
 
 def _fit_from(
-    prototype: tuple[np.ndarray, np.ndarray, int],
+    prototype: tuple[NDArray[np.inexact[Any]], NDArray[np.inexact[Any]], int],
     degree: int,
-    grid: tuple[np.ndarray, np.ndarray, np.ndarray],
+    grid: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]],
     span: tuple[float, float],
     placement: tuple[float, float],
-) -> tuple[float, np.ndarray, _Layout]:
+) -> tuple[float, NDArray[np.float64], _Layout]:
     """One whole fit, from the start *placement* describes.
 
     :param prototype: ``(zeros, poles, zeros at the origin)``, the last a count
@@ -1510,15 +1544,15 @@ def _fit_from(
 
 
 def fit_prototype(
-    zeros: np.ndarray,
-    poles: np.ndarray,
+    zeros: NDArray[np.inexact[Any]],
+    poles: NDArray[np.inexact[Any]],
     fs: float,
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
     *,
     n_origin_zeros: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     r"""Analog prototype whose bilinear image tracks *zeros*/*poles* at *fs*.
 
     The first entry of :func:`_spare_placements` gets the budget, and the rest
@@ -1604,15 +1638,15 @@ def fit_prototype(
 
 
 def design_sos(
-    zeros: np.ndarray,
-    poles: np.ndarray,
+    zeros: NDArray[np.inexact[Any]],
+    poles: NDArray[np.inexact[Any]],
     fs: float,
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
     *,
     n_origin_zeros: int,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Second-order sections realising the prototype at *fs*, 0 dB at *reference_frequency_hz*.
 
     The gain is folded into the first section so that the realised response
@@ -1654,15 +1688,15 @@ def design_sos(
 
 
 def fitted_prototype_hz(
-    zeros: np.ndarray,
-    poles: np.ndarray,
+    zeros: NDArray[np.inexact[Any]],
+    poles: NDArray[np.inexact[Any]],
     fs: float,
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
     *,
     n_origin_zeros: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """The fitted prototype's zeros and poles in Hz, for reading beside a table.
 
     The point of fitting a *prototype* rather than digital coefficients is that

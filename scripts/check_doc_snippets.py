@@ -1301,7 +1301,10 @@ def _disagreement(
     :param decimal_comma: Read a comma between two digits as a decimal point,
         or, when the comment does not state the output that way and the comma
         stands inside a bracket, as the comma between two values that it is
-        in ``[1,2]`` (:func:`_decimal_points`).
+        in ``[1,2]`` (:func:`_decimal_points`). The commas of all the
+        comment's brackets are read alike: one that writes a decimal comma in
+        a bracket has said what its commas are, so the ``[1,2]`` of
+        ``[0,5; 1,5] [1,2]`` is 1.2, as a reader takes it.
     :param arrow: Let a line of the comment end what it states at an arrow
         (:data:`_ARROW`), the rest of it a note; off when the print writes an
         arrow itself.

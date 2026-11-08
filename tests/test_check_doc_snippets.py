@@ -1272,6 +1272,20 @@ def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
     assert len(promise.lines) == count
 
 
+def test_a_spanish_comment_writes_the_commas_of_its_brackets_one_way() -> None:
+    """A comment that writes a decimal comma inside one bracket has said what
+    its commas are, so ``[1,2]`` in another bracket of it is 1.2, as a reader
+    takes it: the list is written ``[1, 2]`` or ``[1; 2]`` beside it.
+    """
+    mixed = "[0,5; 1,5] [1,2]"
+    assert "the comment says 1.2 where the print wrote 1" in _disagreement(
+        mixed, "[0.5, 1.5] [1, 2]", decimal_comma=True
+    )
+    assert _disagreement(mixed, "[0.5, 1.5] [1.2]", decimal_comma=True) == ""
+    for written_out in ("[0,5; 1,5] [1, 2]", "[0,5; 1,5] [1; 2]"):
+        assert _disagreement(written_out, "[0.5, 1.5] [1, 2]", decimal_comma=True) == ""
+
+
 def test_a_page_that_runs_past_its_time_reports_what_it_wrote_on_stderr(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

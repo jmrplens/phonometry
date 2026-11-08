@@ -44,12 +44,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     complex_array,
     refuse_text_beside_choice,
@@ -73,9 +74,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real
+    from ..._internal.types import ComplexScalar, ComplexValues, NumericArrayLike, Real
     from ...fluids import Fluid
 
 #: Discriminator tag of the term tuples built by :func:`_layer_terms`: a
@@ -967,11 +969,35 @@ def diffuse_field_absorption(
     )
 
 
+@overload
+def statistical_absorption[S: ComplexScalar](
+    normalized_impedance: S,
+    *,
+    angle_limit_rad: float = ...,
+) -> float: ...
+
+
+@overload
+def statistical_absorption[V: ComplexValues](
+    normalized_impedance: V,
+    *,
+    angle_limit_rad: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def statistical_absorption[A: NumericArrayLike](
+    normalized_impedance: A,
+    *,
+    angle_limit_rad: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def statistical_absorption(
     normalized_impedance: NumericArrayLike,
     *,
     angle_limit_rad: float = np.pi / 2.0,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Closed-form Paris integral for a locally reacting plane.
 
     With the normalised surface admittance :math:`Z_0 G = g_1 + j g_2 = 1/z`
@@ -996,7 +1022,8 @@ def statistical_absorption(
         :math:`\operatorname{Re}(z) > 0`.
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
-    :return: Statistical absorption coefficient ``alpha_dif``.
+    :return: Statistical absorption coefficient ``alpha_dif``. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``angle_limit_rad`` is not a single number, or
         ``normalized_impedance`` holds a text or a value that is not a number.
     """
@@ -1041,4 +1068,4 @@ def statistical_absorption(
         * np.arctan(g2_safe * (a - b) / (g2_safe**2 + a * b)),
     )
     alpha = 8.0 * g1 / sin2_t * (1.0 - cos_t + atan_term + g1 * log_term)
-    return np.asarray(alpha, dtype=np.float64)
+    return as_float_or_array(alpha, like=(normalized_impedance,))

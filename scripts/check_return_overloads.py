@@ -325,6 +325,48 @@ EXEMPT: dict[tuple[str, str], str] = {
         "union says it as well; each is passed as like, and "
         "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
     ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "absorption_coefficient_uncertainty",
+    ): (
+        "five arguments broadcast into the result (speed_of_sound, t_a, u_a, t_b and u_b): the heads "
+        "that say which one first holds an array would number seven, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "base_plate_scattering",
+    ): (
+        "six arguments broadcast into the result (c1, t1, c3, t3, m1 and m3): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "random_incidence_absorption",
+    ): (
+        "six arguments broadcast into the result (c1, t1, c2, t2, m1 and m2): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "specular_absorption_coefficient",
+    ): (
+        "six arguments broadcast into the result (c3, t3, c4, t4, m3 and m4): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    ("src/phonometry/emission/sound_power.py", "mean_single_event_level"): (
+        "an energy average over the events: with n_events=None it reduces "
+        "the first axis of the levels, so their rank decides whether one "
+        "number is left, which as_float_if_reduced applies; with n_events "
+        "the levels keep their shape and pass as like"
+    ),
     ("src/phonometry/room/acoustics.py", "reverberation_time_standard_deviation"): (
         "four arguments broadcast into the result (reverberation_time, "
         "bandwidth, decays, positions): the heads that say which one "

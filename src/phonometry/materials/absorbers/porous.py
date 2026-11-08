@@ -69,7 +69,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -78,6 +78,7 @@ from scipy import special
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_complex_or_array
 from ..._internal.validation import (
     floats_of,
     pair_of_floats,
@@ -96,7 +97,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real
+    from ..._internal.types import NumericArrayLike, Real, RealScalar, RealValues
 
 Criterion = Literal["beranek", "doutres"]
 
@@ -1121,6 +1122,42 @@ def perforation_end_correction(open_area: float) -> float:
     return float(0.85 * (1.0 - 1.47 * eps**0.5 + 0.47 * eps**1.5))
 
 
+@overload
+def perforated_plate_impedance[S: RealScalar](
+    frequency: S,
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> complex: ...
+
+
+@overload
+def perforated_plate_impedance[V: RealValues](
+    frequency: V,
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def perforated_plate_impedance[A: NumericArrayLike](
+    frequency: A,
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def perforated_plate_impedance(
     frequency: NumericArrayLike,
     *,
@@ -1129,7 +1166,7 @@ def perforated_plate_impedance(
     open_area: float,
     end_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Transfer impedance of a rigid perforated plate with circular holes.
 
     Acoustic mass with both end corrections and the boundary-layer term
@@ -1162,7 +1199,8 @@ def perforated_plate_impedance(
         (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
-    :return: Complex transfer impedance ``z``, in Pa s/m.
+    :return: Complex transfer impedance ``z``, in Pa s/m. A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``end_correction``, ``hole_radius``, ``open_area`` or
         ``thickness_m`` is not a single number, or ``frequency`` holds a text or a value
         that is not a real number.
@@ -1185,7 +1223,43 @@ def perforated_plate_impedance(
     edge = 1.0 + t / (2.0 * a)
     mass = (rho0 / eps) * (t + 2.0 * delta * a + np.sqrt(8.0 * nu / omega) * edge)
     resistance = (rho0 / eps) * np.sqrt(8.0 * nu * omega) * edge
-    return np.asarray(resistance + 1j * omega * mass, dtype=np.complex128)
+    return as_complex_or_array(resistance + 1j * omega * mass, like=(frequency,))
+
+
+@overload
+def microperforated_plate_impedance[S: RealScalar](
+    frequency: S,
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float = ...,
+    fluid: Fluid = ...,
+) -> complex: ...
+
+
+@overload
+def microperforated_plate_impedance[V: RealValues](
+    frequency: V,
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def microperforated_plate_impedance[A: NumericArrayLike](
+    frequency: A,
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float = ...,
+    fluid: Fluid = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def microperforated_plate_impedance(
@@ -1196,7 +1270,7 @@ def microperforated_plate_impedance(
     open_area: float,
     end_correction: float = 0.85,
     fluid: Fluid = ABSORBER_AIR,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Transfer impedance of a microperforated plate (Maa's exact model).
 
     The specific impedance of one submillimetre hole is the exact short-tube
@@ -1228,7 +1302,8 @@ def microperforated_plate_impedance(
         (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
-    :return: Complex transfer impedance ``z``, in Pa s/m.
+    :return: Complex transfer impedance ``z``, in Pa s/m. A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``end_correction``, ``hole_radius``, ``open_area`` or
         ``thickness_m`` is not a single number, or ``frequency`` holds a text or a value
         that is not a real number.
@@ -1251,7 +1326,34 @@ def microperforated_plate_impedance(
         + np.sqrt(2.0 * omega * rho0 * eta) / (2.0 * eps)
         + 1j * omega * rho0 * 2.0 * delta * a / eps
     )
-    return np.asarray(z, dtype=np.complex128)
+    return as_complex_or_array(z, like=(frequency,))
+
+
+@overload
+def membrane_impedance[S: RealScalar](
+    frequency: S,
+    *,
+    surface_density: float,
+    resistance: float = ...,
+) -> complex: ...
+
+
+@overload
+def membrane_impedance[V: RealValues](
+    frequency: V,
+    *,
+    surface_density: float,
+    resistance: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def membrane_impedance[A: NumericArrayLike](
+    frequency: A,
+    *,
+    surface_density: float,
+    resistance: float = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def membrane_impedance(
@@ -1259,7 +1361,7 @@ def membrane_impedance(
     *,
     surface_density: float,
     resistance: float = 0.0,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Transfer impedance of a limp impervious membrane.
 
     :math:`z = r + j \omega m`: the surface-mass reactance (Cox & D'Antonio
@@ -1269,14 +1371,15 @@ def membrane_impedance(
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param surface_density: Mass per unit area ``m``, in kg/m2.
     :param resistance: Series flow resistance ``r``, in Pa s/m (default 0).
-    :return: Complex transfer impedance ``z``, in Pa s/m.
+    :return: Complex transfer impedance ``z``, in Pa s/m. A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``resistance`` or ``surface_density`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     m = require_positive(surface_density, "surface_density")
     r = require_non_negative(resistance, "resistance")
-    return np.asarray(r + 1j * 2.0 * np.pi * f * m, dtype=np.complex128)
+    return as_complex_or_array(r + 1j * 2.0 * np.pi * f * m, like=(frequency,))
 
 
 def helmholtz_resonance_frequency(

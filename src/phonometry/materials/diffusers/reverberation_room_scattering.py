@@ -31,12 +31,13 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -56,7 +57,13 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        Real,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -194,20 +201,41 @@ def _nonneg_array(value: NumericArrayLike, name: str) -> Real:
 # ---------------------------------------------------------------------------
 # ISO 17497-1: speed of sound in air (Clause 8, Eq. (2)).
 # ---------------------------------------------------------------------------
-def speed_of_sound_iso17497(*, temperature_c: NumericArrayLike) -> Real:
+@overload
+def speed_of_sound_iso17497[S: RealScalar](*, temperature_c: S) -> float: ...
+
+
+@overload
+def speed_of_sound_iso17497[V: RealValues](
+    *,
+    temperature_c: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def speed_of_sound_iso17497[A: NumericArrayLike](
+    *,
+    temperature_c: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def speed_of_sound_iso17497(
+    *, temperature_c: NumericArrayLike
+) -> float | NDArray[np.float64]:
     r"""Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).
 
     :math:`c = 343.2 \sqrt{(273.15 + t) / 293.15}` (m/s).
 
     :param temperature_c: Air temperature, in **degrees Celsius** (scalar or
         per band).
-    :return: Speed of sound ``c``, in metres per second.
+    :return: Speed of sound ``c``, in metres per second. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if any temperature is at or below -273.15 degC.
     :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
         number.
     """
     kelvin = _T0 + require_above_absolute_zero_array(temperature_c, "temperature_c")
-    return np.asarray(_C_REF * np.sqrt(kelvin / _T_REF_K), dtype=np.float64)
+    return as_float_or_array(_C_REF * np.sqrt(kelvin / _T_REF_K), like=(temperature_c,))
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +293,7 @@ def random_incidence_absorption(
     t2: NumericArrayLike,
     m1: NumericArrayLike = 0.0,
     m2: NumericArrayLike = 0.0,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Random-incidence absorption coefficient ``alpha_s`` (ISO 17497-1, Eq. (1)).
 
     .. math::
@@ -288,14 +316,17 @@ def random_incidence_absorption(
         (see
         :func:`~phonometry.materials.power_attenuation_from_alpha`); defaults to 0.
     :param m2: Energy attenuation coefficient during ``t2``, in 1/m; defaults to 0.
-    :return: Random-incidence absorption coefficient ``alpha_s`` (per band).
+    :return: Random-incidence absorption coefficient ``alpha_s`` (per band). A ``float``
+        when ``c1``, ``t1``, ``c2``, ``t2``, ``m1`` and ``m2`` are all numbers, an array
+        when one of them is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
     :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c1``,
         ``t1``, ``m1``, ``c2``, ``t2`` or ``m2`` holds a text or a value that is not a
         real number.
     """
-    return _sabine_absorption(
-        volume, area, (c1, t1, m1), (c2, t2, m2), labels=("1", "2")
+    return as_float_or_array(
+        _sabine_absorption(volume, area, (c1, t1, m1), (c2, t2, m2), labels=("1", "2")),
+        like=(c1, t1, c2, t2, m1, m2),
     )
 
 
@@ -309,7 +340,7 @@ def specular_absorption_coefficient(
     t4: NumericArrayLike,
     m3: NumericArrayLike = 0.0,
     m4: NumericArrayLike = 0.0,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Specular absorption coefficient ``alpha_spec`` (ISO 17497-1, Eq. (4)).
 
     .. math::
@@ -330,15 +361,54 @@ def specular_absorption_coefficient(
     :param t4: Reverberation time, sample on the rotating turntable, in seconds.
     :param m3: Energy attenuation coefficient during ``t3``, in 1/m; defaults to 0.
     :param m4: Energy attenuation coefficient during ``t4``, in 1/m; defaults to 0.
-    :return: Specular absorption coefficient ``alpha_spec`` (per band).
+    :return: Specular absorption coefficient ``alpha_spec`` (per band). A ``float`` when
+        ``c3``, ``t3``, ``c4``, ``t4``, ``m3`` and ``m4`` are all numbers, an array when
+        one of them is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
     :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c3``,
         ``t3``, ``m3``, ``c4``, ``t4`` or ``m4`` holds a text or a value that is not a
         real number.
     """
-    return _sabine_absorption(
-        volume, area, (c3, t3, m3), (c4, t4, m4), labels=("3", "4")
+    return as_float_or_array(
+        _sabine_absorption(volume, area, (c3, t3, m3), (c4, t4, m4), labels=("3", "4")),
+        like=(c3, t3, c4, t4, m3, m4),
     )
+
+
+@overload
+def scattering_coefficient[S1: RealScalar, S2: RealScalar](
+    alpha_spec: S1,
+    alpha_s: S2,
+    *,
+    truncate_negative: bool = ...,
+) -> float: ...
+
+
+@overload
+def scattering_coefficient[V: RealValues, A2: NumericArrayLike](
+    alpha_spec: V,
+    alpha_s: A2,
+    *,
+    truncate_negative: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def scattering_coefficient[S1: RealScalar, V: RealValues](
+    alpha_spec: S1,
+    alpha_s: V,
+    *,
+    truncate_negative: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def scattering_coefficient[A1: NumericArrayLike, A2: NumericArrayLike](
+    alpha_spec: A1,
+    alpha_s: A2,
+    *,
+    truncate_negative: bool = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def scattering_coefficient(
@@ -346,7 +416,7 @@ def scattering_coefficient(
     alpha_s: NumericArrayLike,
     *,
     truncate_negative: bool = True,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Random-incidence scattering coefficient ``s`` (ISO 17497-1, Eq. (5)).
 
     .. math::
@@ -363,7 +433,9 @@ def scattering_coefficient(
     :param alpha_s: Random-incidence absorption coefficient ``alpha_s`` (Eq. (1)).
     :param truncate_negative: If ``True`` (default), clip negative ``s`` to 0
         per Clause 8.3; values above 1 are never clipped.
-    :return: Scattering coefficient ``s`` (per band).
+    :return: Scattering coefficient ``s`` (per band). A ``float`` when ``alpha_spec``
+        and ``alpha_s`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: if any ``alpha_s`` equals 1 (undefined ratio).
     :raises TypeError: if ``alpha_s`` or ``alpha_spec`` holds a text or a value that is
         not a real number.
@@ -377,7 +449,7 @@ def scattering_coefficient(
     s = (spec - diff) / denom
     if truncate_negative:
         s = np.maximum(s, 0.0)
-    return np.asarray(s, dtype=np.float64)
+    return as_float_or_array(s, like=(alpha_spec, alpha_s))
 
 
 @dataclass(frozen=True)
@@ -565,7 +637,7 @@ def base_plate_scattering(
     t3: NumericArrayLike,
     m1: NumericArrayLike = 0.0,
     m3: NumericArrayLike = 0.0,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Scattering coefficient of the base plate alone (ISO 17497-1, Eq. (6)).
 
     .. math::
@@ -588,14 +660,17 @@ def base_plate_scattering(
     :param t3: Reverberation time with the rotating base plate, in seconds.
     :param m1: Energy attenuation coefficient during ``t1``, in 1/m; defaults to 0.
     :param m3: Energy attenuation coefficient during ``t3``, in 1/m; defaults to 0.
-    :return: Base-plate scattering coefficient ``s_base`` (per band).
+    :return: Base-plate scattering coefficient ``s_base`` (per band). A ``float`` when
+        ``c1``, ``t1``, ``c3``, ``t3``, ``m1`` and ``m3`` are all numbers, an array when
+        one of them is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
     :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c1``,
         ``t1``, ``m1``, ``c3``, ``t3`` or ``m3`` holds a text or a value that is not a
         real number.
     """
-    return _sabine_absorption(
-        volume, area, (c1, t1, m1), (c3, t3, m3), labels=("1", "3")
+    return as_float_or_array(
+        _sabine_absorption(volume, area, (c1, t1, m1), (c3, t3, m3), labels=("1", "3")),
+        like=(c1, t1, c3, t3, m1, m3),
     )
 
 
@@ -774,7 +849,7 @@ def check_base_plate_scattering(
 # ---------------------------------------------------------------------------
 # ISO 17497-1: measurement uncertainty (Annex A, Eqs. (A.1)-(A.5)).
 # ---------------------------------------------------------------------------
-def reverberation_time_uncertainty(times: NumericArrayLike) -> Real:
+def reverberation_time_uncertainty(times: NumericArrayLike) -> float:
     r"""Standard uncertainty of a reverberation time (ISO 17497-1, Eq. (A.1)).
 
     .. math::
@@ -787,7 +862,8 @@ def reverberation_time_uncertainty(times: NumericArrayLike) -> Real:
 
     :param times: The :math:`N \ge 2` reverberation-time measurements, in
         seconds.
-    :return: Standard uncertainty ``u`` of the mean reverberation time (0-d).
+    :return: Standard uncertainty ``u`` of the mean reverberation time, in
+        seconds, a ``float``: the measurements are one axis, which it reduces.
     :raises ValueError: if fewer than two measurements are supplied.
     :raises TypeError: if ``times`` holds a text or a value that is not a real number.
     """
@@ -801,7 +877,7 @@ def reverberation_time_uncertainty(times: NumericArrayLike) -> Real:
         raise ValueError(msg)
     mean = arr.mean()
     variance_of_mean = np.sum((arr - mean) ** 2) / (n * (n - 1))
-    return np.asarray(np.sqrt(variance_of_mean), dtype=np.float64)
+    return float(np.sqrt(variance_of_mean))
 
 
 def absorption_coefficient_uncertainty(
@@ -813,7 +889,7 @@ def absorption_coefficient_uncertainty(
     u_a: NumericArrayLike,
     t_b: NumericArrayLike,
     u_b: NumericArrayLike,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Uncertainty of a Sabine absorption coefficient (ISO 17497-1, A.3/A.4).
 
     .. math::
@@ -832,7 +908,10 @@ def absorption_coefficient_uncertainty(
     :param u_a: Standard uncertainty of ``t_a`` (Eq. (A.1)), in seconds.
     :param t_b: Reverberation time of the second situation, in seconds.
     :param u_b: Standard uncertainty of ``t_b`` (Eq. (A.1)), in seconds.
-    :return: Combined standard uncertainty of the absorption coefficient (per band).
+    :return: Combined standard uncertainty of the absorption coefficient (per band). A
+        ``float`` when ``speed_of_sound``, ``t_a``, ``u_a``, ``t_b`` and ``u_b`` are all
+        numbers, an array when one of them is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
     :raises TypeError: if ``area`` or ``volume`` is not a single number, or
         ``speed_of_sound``, ``t_a``, ``t_b``, ``u_a`` or ``u_b`` holds a text or a value
@@ -847,7 +926,9 @@ def absorption_coefficient_uncertainty(
     ub = _nonneg_array(u_b, "u_b")
     prefactor = _SABINE_CONSTANT * vol / (c_arr * surf)
     combined = np.sqrt((ub / tb**2) ** 2 + (ua / ta**2) ** 2)
-    return np.asarray(prefactor * combined, dtype=np.float64)
+    return as_float_or_array(
+        prefactor * combined, like=(speed_of_sound, t_a, u_a, t_b, u_b)
+    )
 
 
 @dataclass(frozen=True)

@@ -111,12 +111,13 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
 from .._internal.frozen import OwnsArrays, read_only_copy, reduce_with_plain_rows
+from .._internal.types import as_complex_or_array
 from .._internal.validation import (
     check_engine,
     complex_array,
@@ -139,7 +140,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 #: The device a reactive silencer result describes, as its report names it.
@@ -425,6 +426,45 @@ def insertion_loss(
     return np.asarray(20.0 * np.log10(np.abs(num / (zs + zr))), dtype=np.float64)
 
 
+@overload
+def helmholtz_impedance[S: RealScalar](
+    frequencies: S,
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex: ...
+
+
+@overload
+def helmholtz_impedance[V: RealValues](
+    frequencies: V,
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def helmholtz_impedance[A: NumericArrayLike](
+    frequencies: A,
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def helmholtz_impedance(
     frequencies: NumericArrayLike,
     neck_area: float,
@@ -434,7 +474,7 @@ def helmholtz_impedance(
     resistance: float = 0.0,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-) -> _Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Acoustic impedance of a Helmholtz side branch (Bies Eq. (8.152)).
 
     :math:`Z = R + j(\rho \omega l_\mathrm{e} / S_{\mathrm{neck}} -
@@ -454,7 +494,8 @@ def helmholtz_impedance(
     :param resistance: Acoustic resistance ``R``, Pa s/m3 (default 0, lossless).
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :return: The complex branch impedance per frequency, Pa s/m3.
+    :return: The complex branch impedance per frequency, Pa s/m3. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``cavity_volume``, ``density``, ``neck_area``,
         ``neck_length``, ``resistance`` or ``speed_of_sound`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number.
@@ -468,7 +509,40 @@ def helmholtz_impedance(
     rho = require_positive(density, "density")
     omega = 2.0 * np.pi * f
     reactance = rho * omega * le / s_neck - rho * c**2 / (omega * vol)
-    return np.asarray(r + 1j * reactance, dtype=np.complex128)
+    return as_complex_or_array(r + 1j * reactance, like=(frequencies,))
+
+
+@overload
+def quarter_wave_impedance[S: RealScalar](
+    frequencies: S,
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex: ...
+
+
+@overload
+def quarter_wave_impedance[V: RealValues](
+    frequencies: V,
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def quarter_wave_impedance[A: NumericArrayLike](
+    frequencies: A,
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def quarter_wave_impedance(
@@ -478,7 +552,7 @@ def quarter_wave_impedance(
     *,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-) -> _Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Acoustic impedance of a closed quarter-wave side branch (Bies Eq. (8.146)).
 
     :math:`Z = -j (\rho c / S) \cot(k l_\mathrm{e})`; the reactance vanishes at
@@ -491,7 +565,8 @@ def quarter_wave_impedance(
     :param area: Tube cross-sectional area ``S``, m2.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :return: The complex branch impedance per frequency, Pa s/m3.
+    :return: The complex branch impedance per frequency, Pa s/m3. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
         a single number, or ``frequencies`` holds a text or a value that is not a real
         number.
@@ -507,7 +582,7 @@ def quarter_wave_impedance(
     # (Z -> infinity); the divide-by-zero is expected and its shunt 1/Z is 0.
     with np.errstate(divide="ignore", invalid="ignore"):
         zb = -1j * z / np.tan(k * le)
-    return np.asarray(zb, dtype=np.complex128)
+    return as_complex_or_array(zb, like=(frequencies,))
 
 
 #: The keys :attr:`ReactiveSilencerResult.geometry` may carry: the keys of

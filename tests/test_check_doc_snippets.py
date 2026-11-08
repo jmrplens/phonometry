@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib.util
 import pathlib
 import sys
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -518,13 +519,40 @@ def test_a_complex_number_holds_at_the_decimals_of_each_part() -> None:
     assert _disagreement("4.56j...", "4.5678j") == ""
 
 
+def test_a_complex_number_numpy_pads_is_one_value() -> None:
+    """NumPy pads the real part of each element to the width of the others."""
+    assert _disagreement("1+1j", "1.        +1.j") == ""
+    assert _disagreement("1+2j", "1.        +1.j") != ""
+    assert _disagreement("[1+1j 1.25-2j]", "[1.  +1.j 1.25-2.j]") == ""
+    assert "1.25-3j" in _disagreement("[1+1j 1.25-3j]", "[1.  +1.j 1.25-2.j]")
+    # A comment may space the sign out the same way.
+    assert _disagreement("1.23 + 4.57j", "(1.234+4.567j)") == ""
+    assert _disagreement("1.23 + 4.58j", "(1.234+4.567j)") != ""
+
+
 def test_a_minus_sign_reads_as_a_hyphen() -> None:
     assert _disagreement("\u22128.27 dB", "-8.27") == ""
+
+
+def test_a_minus_sign_the_print_writes_reads_as_a_hyphen() -> None:
+    """A formatted text that signs a value with U+2212 prints a negative value."""
+    assert _disagreement("-8.27 dB", "\u22128.27 dB") == ""
+    assert _disagreement("\u22128.27 dB", "\u22128.27 dB") == ""
+    assert "8.27" in _disagreement("8.27 dB", "\u22128.27 dB")
 
 
 def test_a_spanish_comment_may_write_a_decimal_comma() -> None:
     assert _disagreement("35,9 m", "35.9", decimal_comma=True) == ""
     assert _disagreement("35,9 m", "35.9") != ""
+
+
+def test_a_spanish_comment_may_write_a_container_without_spaces() -> None:
+    """A comma between two digits is a decimal point, or the comma of a list."""
+    assert _disagreement("[1,2]", "[1, 2]", decimal_comma=True) == ""
+    assert _disagreement("[1,2]", "[1 2]", decimal_comma=True) == ""
+    assert _disagreement("[1,2]", "[1, 3]", decimal_comma=True) != ""
+    assert _disagreement("1,2", "1.2", decimal_comma=True) == ""
+    assert _disagreement("1,2", "1.3", decimal_comma=True) != ""
 
 
 def test_a_comment_continues_while_its_brackets_are_open() -> None:
@@ -581,6 +609,33 @@ def test_digits_cut_short_hold_as_the_start_of_the_printed_ones() -> None:
     assert _disagreement("55.350668... dB", "55.35066774343508") != ""
 
 
+def test_a_zero_cut_short_begins_only_a_zero_of_its_own_sign() -> None:
+    """``-0.0...`` does not begin ``0.00``, nor ``0.0...`` a printed ``-0.00``."""
+    assert _disagreement("-0.0...", "0.00") != ""
+    assert _disagreement("0.0...", "-0.00") != ""
+    assert _disagreement("-0.0...", "-0.00") == ""
+    assert _disagreement("0.0...", "0.00") == ""
+    assert _disagreement("-0.0...", "-0.0123") == ""
+    assert _disagreement("0.0...", "0.0123") == ""
+
+
+def test_an_ellipsis_meets_the_last_line_of_a_long_loop_in_linear_time() -> None:
+    """The values before each line end are counted on, not counted again.
+
+    Each line end counted the stated values before it from the first one, so
+    the time grew with the square of the lines: 1.4 s for 5,000, 27.5 s for
+    20,000 and about a minute for these 30,000.
+    """
+    loop = [str(n) for n in range(30_000)]
+    start = time.perf_counter()
+    found = _disagreement("0 ... 29999", loop)
+    # Ten seconds against the minute the quadratic count took, and the
+    # second the linear one takes: wide enough for a loaded runner.
+    assert time.perf_counter() - start < 10.0
+    assert found == ""
+    assert "30000" in _disagreement("0 ... 30000", loop)
+
+
 def test_a_unit_power_and_a_symbol_index_are_not_values() -> None:
     assert _disagreement("4.9 m/s^1.5 -> 1.6 % over 240 s", "4.9 1.6") == ""
     assert _disagreement("0.38, against A(8) = 0.38 m/s^2", "0.38") == ""
@@ -594,6 +649,29 @@ def test_a_quoted_message_may_stop_where_its_quotation_does() -> None:
     said = "'integration_time' must be one of the time constants Tables 10 and 11"
     assert _disagreement(said, written) == ""
     assert _disagreement(said.replace("11", "12"), written) != ""
+
+
+def test_a_label_the_print_writes_is_no_quotation_of_a_message() -> None:
+    """``Levels: 1`` beside ``print('Levels:', left, right)`` leaves out the 2.
+
+    A comment that quotes a computed message may stop where its quotation
+    does; repeating the print's own label quotes nothing, so the values after
+    it are still to be stated.
+    """
+    script = "left, right = 1, 2\nprint('Levels:', left, right)  # Levels: 1\n"
+    (failure,) = _held_against(script, 2, ["Levels:", "1", "2"])
+    assert "stops before the printed 2" in failure
+    full = script.replace("# Levels: 1", "# Levels: 1 2")
+    assert _held_against(full, 2, ["Levels:", "1", "2"]) == []
+
+
+def test_a_quoted_message_does_not_stand_for_a_value_printed_apart() -> None:
+    """A quotation may stop inside its message, not before the next argument."""
+    script = "print(message, code)  # takes 1 positional argument\n"
+    texts = ["takes 1 positional argument but 2 were given", "5"]
+    (failure,) = _held_against(script, 1, texts)
+    assert "stops before the printed 5" in failure
+    assert _held_against(script, 1, texts[:1]) == []
 
 
 def test_one_value_states_an_output_that_is_that_value_throughout() -> None:
@@ -865,11 +943,19 @@ def test_a_message_quoted_over_more_lines_than_prints_goes_to_the_last() -> None
     (promise,) = check_doc_snippets.promised_outputs(script)
     assert promise.first == 2
     assert promise.word == "Supply"
+    # The bracket line opens like an output and goes on with the quotation;
+    # the line that opens on a word of its own is prose and ends it.
+    assert promise.lines == (
+        "Supply: 6 of 8 frequencies are above",
+        "(188 Hz), where higher-order modes propagate",
+    )
     message = (
         "Supply: 6 of 8 frequencies are above the first duct cut-on frequency "
         "(188 Hz), where higher-order modes propagate and so on"
     )
-    assert _disagreement(promise.lines[0], message) == ""
+    assert _disagreement(list(promise.lines), message) == ""
+    wrong = [promise.lines[0], promise.lines[1].replace("188", "189")]
+    assert "189" in _disagreement(wrong, message)
 
 
 def test_what_follows_an_arrow_may_be_a_note() -> None:

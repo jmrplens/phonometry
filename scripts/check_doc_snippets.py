@@ -376,10 +376,12 @@ _REAL = r"(?:\d+(?:\.(?!\.\.)\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 #: and an ellipsis, which stands for values left out. A ``~`` before a value
 #: gives it roughly, and an ellipsis right after its digits says they go on.
 #: Punctuation and spaces are not parts: a container prints them its own way
-#: and a comment lays them out its own.
+#: and a comment lays them out its own, so a complex number may carry spaces
+#: before and after the sign of its imaginary part, as NumPy pads one to the
+#: width of the others in an array (``[ 1.  +1.j  1.25-2.j]``).
 _OUTPUT_PART = re.compile(
     r"(?P<rough>[~\u2248]\s*)?"
-    rf"(?P<value>[-+]?{_REAL}[-+]{_REAL}j|[-+]?{_REAL}j?"
+    rf"(?P<value>[-+]?{_REAL} *[-+] *{_REAL}j|[-+]?{_REAL}j?"
     r"|(?<![\w.])(?:True|False|None|nan|-?inf)(?![\w.]))"
     r"(?P<cut>\.\.\.|\u2026)?"
     r"|(?P<word>[^\W\d]\w*)"
@@ -406,6 +408,11 @@ class _Part:
         an ellipsis.
     :param before: What the text writes between the part before and this
         one: the spaces, the punctuation and the brackets.
+    :param segment: For a part of an output, which stretch of it the part
+        stands in: the output is read in stretches of what the page's own
+        text wrote and of what its code computed, one after another, and a
+        computed value written apart from another by a stretch of the page's
+        text is in a stretch of its own.
     """
 
     kind: str
@@ -414,6 +421,7 @@ class _Part:
     rough: bool = False
     cut: bool = False
     before: str = ""
+    segment: int = 0
 
 
 #: What one argument of a print is: ``None`` for a value the code computes, or
@@ -673,8 +681,8 @@ def promised_outputs(script: str) -> list[_Promise]:
     ]
 
 
-def _parts(text: str, *, label: bool = False) -> list[_Part]:
-    """The values, words and ellipses of *text*, in order."""
+def _parts(text: str, *, label: bool = False, segment: int = 0) -> list[_Part]:
+    """The values, words and ellipses of *text*, in order, each in *segment*."""
     parts: list[_Part] = []
     at = 0
     for match in _OUTPUT_PART.finditer(text):
@@ -683,17 +691,22 @@ def _parts(text: str, *, label: bool = False) -> list[_Part]:
             parts.append(
                 _Part(
                     "value",
-                    match.group("value"),
+                    match.group("value").replace(" ", ""),
                     label,
                     rough=match.group("rough") is not None,
                     cut=match.group("cut") is not None,
                     before=before,
+                    segment=segment,
                 )
             )
         elif match.group("word") is not None:
-            parts.append(_Part("word", match.group(), label, before=before))
+            parts.append(
+                _Part("word", match.group(), label, before=before, segment=segment)
+            )
         elif match.group("gap") is not None:
-            parts.append(_Part("gap", match.group(), label, before=before))
+            parts.append(
+                _Part("gap", match.group(), label, before=before, segment=segment)
+            )
     return parts
 
 
@@ -770,15 +783,16 @@ def _written_parts(
     arguments: tuple[_Argument, ...] | None,
 ) -> list[_Part]:
     """The parts of what a print wrote over all its calls (:func:`_stretches`),
-    a ``"line"`` part where it ended a line and its own text marked as a
-    label.
+    a ``"line"`` part where it ended a line, its own text marked as a label
+    and each part in the stretch it stands in. A minus sign (U+2212) reads as
+    a hyphen, as it does in a comment.
     """
     out: list[_Part] = []
-    for text, label in _stretches(calls, arguments):
-        for number, line in enumerate(text.split("\n")):
+    for segment, (text, label) in enumerate(_stretches(calls, arguments)):
+        for number, line in enumerate(text.replace("\u2212", "-").split("\n")):
             if number:
-                out.append(_Part("line", "\n"))
-            out += _parts(line, label=label)
+                out.append(_Part("line", "\n", segment=segment))
+            out += _parts(line, label=label, segment=segment)
     return out
 
 
@@ -811,6 +825,8 @@ def _states(said: Decimal, wrote: Decimal, *, rough: bool, cut: bool) -> bool:
     exact = Context(prec=digits + 2, Emax=MAX_EMAX, Emin=MIN_EMIN, traps=[Inexact])
     step = Decimal((0, (1,), exponent))
     if cut:  # its digits begin the printed ones, sign and all
+        if said.is_signed() != wrote.is_signed():
+            return False  # only a zero of the other sign gets past the bounds
         if said.is_signed():
             return exact.subtract(said, step) < wrote <= said
         return said <= wrote < exact.add(said, step)
@@ -917,10 +933,19 @@ def _meet_after_gap(
         if wrote[n].kind == "value" and not wrote[n].label
     ]
     ends = [n for n in range(j, len(wrote)) if wrote[n].kind == "line"]
+    # How many of the stated values stand before each end, counted on as the
+    # ends go by rather than again for each one, which made a loop of many
+    # lines quadratic; an end with no new value before it is the last again.
+    reached = 0
+    tried = -1
     for end in [*ends, len(wrote)]:
-        before = [n for n in stated if n < end]
-        for count in range(min(len(after), len(before)), 0, -1):
-            tail = before[-count:]
+        while reached < len(stated) and stated[reached] < end:
+            reached += 1
+        if reached == tried:
+            continue
+        tried = reached
+        for count in range(min(len(after), reached), 0, -1):
+            tail = stated[reached - count : reached]
             if all(
                 _same_value(said[a], wrote[b].text)
                 for a, b in zip(after[:count], tail, strict=True)
@@ -997,6 +1022,20 @@ def _promised_after(said: list[_Part], last: int, read: int) -> int | None:
     return next((n for n in range(gap + 1, len(said)) if said[n].kind == "value"), None)
 
 
+def _apart(wrote: list[_Part], j: int, segment: int) -> _Part | None:
+    """The first value the print computed from ``wrote[j]`` to the end of that
+    line that stands outside *segment*, or ``None``: a comment that quotes a
+    message may stop inside the message, and not before a value written apart
+    from it, as the ``5`` of ``print(message, 5)``.
+    """
+    for part in wrote[j:]:
+        if part.kind == "line":
+            return None
+        if part.kind == "value" and not part.label and part.segment != segment:
+            return part
+    return None
+
+
 def _held(said: list[_Part], wrote: list[_Part]) -> str:
     """Why the comment's parts *said* do not state the output's parts *wrote*,
     or ``""`` (:func:`output_disagreement` gives the reading).
@@ -1015,11 +1054,14 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
     last = -1
     k = j = 0
     # Whether the comment has stated a value, whether a line of the output
-    # has ended since the last one it stated, how many words the comment has
-    # quoted in a row, and whether that row was broken by a part either side
-    # read past.
+    # has ended since the last one it stated, how many words of a computed
+    # text (a message) the comment has quoted in a row, the stretch of the
+    # output the last of them stands in, and whether that row was broken by a
+    # part either side read past. A word of the print's own label is repeated,
+    # not quoted: it leaves the row as it was.
     stated = crossed = broken = False
     quoted = 0
+    quoted_in = -1
     while j < len(wrote):
         part = wrote[j]
         if part.kind == "line":
@@ -1027,7 +1069,11 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
         elif part.kind == "word":
             if k < len(said) and said[k].kind == "word" and said[k].text == part.text:
                 k += 1
-                quoted = 1 if broken else quoted + 1
+                if not part.label:
+                    quoted = 1 if broken else quoted + 1
+                    quoted_in = part.segment
+                elif broken:
+                    quoted = 0
                 broken = False
             elif k < len(said):
                 broken = True
@@ -1047,8 +1093,13 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
                 continue
             if k == len(said):
                 if not part.label:
-                    if (stated and crossed) or (quoted and not broken):
+                    if stated and crossed:
                         return ""
+                    if quoted and not broken:
+                        apart = _apart(wrote, j, quoted_in)
+                        if apart is None:
+                            return ""
+                        return f"the comment stops before the printed {apart.text}"
                     return f"the comment stops before the printed {part.text}"
             elif _same_value(said[k], part.text):
                 if not part.label:
@@ -1100,7 +1151,9 @@ def _disagreement(
 ) -> str:
     """Why the comment lines *said_lines* do not state the output *wrote*.
 
-    :param decimal_comma: Read a comma between two digits as a decimal point.
+    :param decimal_comma: Read a comma between two digits as a decimal point,
+        or, when the comment does not state the output that way, as the comma
+        between two values that it is in ``[1,2]``.
     :param arrow: Let a line of the comment end what it states at an arrow
         (:data:`_ARROW`), the rest of it a note; off when the print writes an
         arrow itself.
@@ -1109,13 +1162,20 @@ def _disagreement(
         _NOT_A_VALUE.sub("", _reading(text).replace("\u2212", "-"))
         for text in said_lines
     ]
+    readings = [texts]
     if decimal_comma:
-        texts = [re.sub(r"(?<=\d),(?=\d)", ".", text) for text in texts]
-    why = _read(texts, wrote)
-    if why and arrow:
-        noted = [_ARROW.split(text, maxsplit=1)[0] for text in texts]
-        if noted != texts and not _read(noted, wrote):
+        decimal = [re.sub(r"(?<=\d),(?=\d)", ".", text) for text in texts]
+        readings = [decimal] if decimal == texts else [decimal, texts]
+    why = ""
+    for reading in readings:
+        failed = _read(reading, wrote)
+        if not failed:
             return ""
+        why = why or failed
+        if arrow:
+            noted = [_ARROW.split(text, maxsplit=1)[0] for text in reading]
+            if noted != reading and not _read(noted, wrote):
+                return ""
     return why
 
 
@@ -1171,8 +1231,9 @@ def output_disagreement(
     over several lines may also state the output line by line, each line with
     its own annotation. A comment that opens on a quoted word quotes the word
     the print opens with. *decimal_comma* reads a comma between two digits as
-    a decimal point, as a Spanish page may write one, unless the print writes
-    such a comma itself (:func:`_reads_decimal_comma`).
+    a decimal point, as a Spanish page may write one, or as the comma of a
+    list where the comment states the output that way, unless the print
+    writes such a comma itself (:func:`_reads_decimal_comma`).
 
     :param promised: The comment, or its lines.
     :param written: What the print wrote, or what each of its calls wrote, as

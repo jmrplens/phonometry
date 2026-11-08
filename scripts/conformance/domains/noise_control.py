@@ -94,7 +94,9 @@ def _chk_side_branch_closed_form() -> Outcome:
     f = np.array([120.0])
     zb = _sl.quarter_wave_impedance(f, 0.5, 0.002)
     t = _sl.shunt_matrix(zb)
-    tl = float(_sl.transmission_loss(t, inlet_area=0.01, outlet_area=0.01)[0])
+    tl = float(
+        np.asarray(_sl.transmission_loss(t, inlet_area=0.01, outlet_area=0.01))[0]
+    )
     closed = 20.0 * math.log10(abs(1.0 + 1.206 * 343.0 / (2.0 * 0.01 * zb[0])))
     return numeric(closed, tl, 1e-9, unit="dB")
 
@@ -111,8 +113,10 @@ def _chk_insertion_loss_equals_tl() -> Outcome:
     z = rho * c / s
     f = np.array([232.0])  # a frequency with a substantial, positive TL
     t = _sl.expansion_chamber(f, 0.3, 0.04, s).transfer_matrix
-    tl = float(_sl.transmission_loss(t, inlet_area=s, outlet_area=s)[0])
-    il = float(_sl.insertion_loss(t, source_impedance=z, radiation_impedance=z)[0])
+    tl = float(np.asarray(_sl.transmission_loss(t, inlet_area=s, outlet_area=s))[0])
+    il = float(
+        np.asarray(_sl.insertion_loss(t, source_impedance=z, radiation_impedance=z))[0]
+    )
     return numeric(tl, il, 1e-9, unit="dB", expected_label=f"{tl:.4f} dB (= TL)")
 
 

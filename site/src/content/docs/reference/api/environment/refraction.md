@@ -331,11 +331,27 @@ Plot the effective sound-speed profile (height on the vertical axis).
 
 ```python
 EffectiveSoundSpeedProfile.speed_at(
-    height_m: NumericArrayLike,
+    height_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+EffectiveSoundSpeedProfile.speed_at(
+    height_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+EffectiveSoundSpeedProfile.speed_at(
+    height_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Piecewise-linear effective sound speed at one or more heights.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `height_m` | Height above the ground, in metres. |
+
+**Returns:** The effective sound speed at each height, in metres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

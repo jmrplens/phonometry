@@ -265,15 +265,37 @@ limit of the cascade; extensions that would overlap are rejected.
 
 ```python
 helmholtz_impedance(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex
+
+helmholtz_impedance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]
+
+helmholtz_impedance(
     frequencies: NumericArrayLike,
     neck_area: float,
     neck_length: float,
     cavity_volume: float,
     *,
-    resistance: float = 0.0,
-    speed_of_sound: float = 343.0,
-    density: float = 1.206,
-) -> NDArray[np.complex128]
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Acoustic impedance of a Helmholtz side branch (Bies Eq. (8.152)).
@@ -299,7 +321,7 @@ its resistance instead, which is what bounds the peak attenuation.
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
-**Returns:** The complex branch impedance per frequency, Pa s/m3.
+**Returns:** The complex branch impedance per frequency, Pa s/m3. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -433,13 +455,31 @@ the cube of equal volume with its volume annotated.
 
 ```python
 quarter_wave_impedance(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex
+
+quarter_wave_impedance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]
+
+quarter_wave_impedance(
     frequencies: NumericArrayLike,
     length: float,
     area: float,
     *,
-    speed_of_sound: float = 343.0,
-    density: float = 1.206,
-) -> NDArray[np.complex128]
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Acoustic impedance of a closed quarter-wave side branch (Bies Eq. (8.146)).
@@ -459,7 +499,7 @@ pressure node and shorts the duct.
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
-**Returns:** The complex branch impedance per frequency, Pa s/m3.
+**Returns:** The complex branch impedance per frequency, Pa s/m3. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

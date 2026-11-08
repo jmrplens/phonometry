@@ -387,9 +387,24 @@ are equal.
 
 ```python
 normalized_diffusion_coefficient(
-    d_theta: NumericArrayLike,
+    d_theta: float | np.floating[Any] | np.integer[Any],
+    d_theta_reference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+normalized_diffusion_coefficient(
+    d_theta: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     d_theta_reference: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+normalized_diffusion_coefficient(
+    d_theta: float | np.floating[Any] | np.integer[Any],
+    d_theta_reference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+normalized_diffusion_coefficient(
+    d_theta: NumericArrayLike,
+    d_theta_reference: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Normalised directional diffusion coefficient (ISO 17497-2, Formula (7)).
@@ -408,7 +423,7 @@ to 0 and $d_\theta = 1$ to 1.
 | `d_theta` | Directional diffusion coefficient of the test surface. |
 | `d_theta_reference` | Directional diffusion coefficient of the reference flat surface `d_theta_r`. |
 
-**Returns:** Normalised directional diffusion coefficient `d_theta_n`.
+**Returns:** Normalised directional diffusion coefficient `d_theta_n`. A `float` when `d_theta` and `d_theta_reference` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

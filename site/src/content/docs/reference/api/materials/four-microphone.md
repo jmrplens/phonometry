@@ -37,9 +37,27 @@ that module.
 ```python
 air_density_astm_e2611(
     *,
-    temperature_c: NumericArrayLike,
-    static_pressure_kpa: NumericArrayLike = 101.325,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    static_pressure_kpa: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+air_density_astm_e2611(
+    *,
+    temperature_c: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    static_pressure_kpa: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
+
+air_density_astm_e2611(
+    *,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    static_pressure_kpa: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+air_density_astm_e2611(
+    *,
+    temperature_c: NumericArrayLike,
+    static_pressure_kpa: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Air density (ASTM E2611-19, Eq. (5)).
@@ -53,7 +71,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 | `temperature_c` | Room temperature, in **degrees Celsius**. |
 | `static_pressure_kpa` | Atmospheric pressure `P`, in **kilopascals** (default 101.325 kPa). |
 
-**Returns:** Air density `rho`, in kilograms per cubic metre.
+**Returns:** Air density `rho`, in kilograms per cubic metre. A `float` when `temperature_c` and `static_pressure_kpa` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -218,8 +236,18 @@ binding for every microphone pair).
 ```python
 speed_of_sound_astm_e2611(
     *,
-    temperature_c: NumericArrayLike,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+speed_of_sound_astm_e2611(
+    *,
+    temperature_c: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+speed_of_sound_astm_e2611(
+    *,
+    temperature_c: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Speed of sound in air (ASTM E2611-19, Eq. (4)).
@@ -232,7 +260,7 @@ $c = 20.047 \sqrt{273.15 + T}$.
 | :--- | :--- |
 | `temperature_c` | Room temperature, in **degrees Celsius**. |
 
-**Returns:** Speed of sound `c`, in metres per second.
+**Returns:** Speed of sound `c`, in metres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

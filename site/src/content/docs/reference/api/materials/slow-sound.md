@@ -179,16 +179,40 @@ unpacked by position, with the names
 
 ```python
 helmholtz_resonator_impedance(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    resonator: HelmholtzResonator,
+    *,
+    slit_height_m: float | None = ...,
+    lattice_step_m: float | None = ...,
+    end_correction: bool = ...,
+    geometry: Literal['square', 'slit'] = ...,
+    fluid: Fluid = ...,
+    n_sum_terms: int | np.integer[Any] = ...,
+) -> complex
+
+helmholtz_resonator_impedance(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    resonator: HelmholtzResonator,
+    *,
+    slit_height_m: float | None = ...,
+    lattice_step_m: float | None = ...,
+    end_correction: bool = ...,
+    geometry: Literal['square', 'slit'] = ...,
+    fluid: Fluid = ...,
+    n_sum_terms: int | np.integer[Any] = ...,
+) -> NDArray[np.complex128]
+
+helmholtz_resonator_impedance(
     frequency: NumericArrayLike,
     resonator: HelmholtzResonator,
     *,
-    slit_height_m: float | None = None,
-    lattice_step_m: float | None = None,
-    end_correction: bool = True,
-    geometry: Literal['square', 'slit'] = 'square',
+    slit_height_m: float | None = ...,
+    lattice_step_m: float | None = ...,
+    end_correction: bool = ...,
+    geometry: Literal['square', 'slit'] = ...,
     fluid: Fluid = ...,
-    n_sum_terms: int | np.integer[Any] = 40,
-) -> NDArray[np.complex128]
+    n_sum_terms: int | np.integer[Any] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
@@ -228,7 +252,7 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 | `fluid` | State of the air in the neck and cavity ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 | `n_sum_terms` | Transverse modes kept per axis in the duct series. |
 
-**Returns:** Complex acoustic impedance `Z_HR`, in Pa s/m3, shaped like `frequency`.
+**Returns:** Complex acoustic impedance `Z_HR`, in Pa s/m3, shaped like `frequency`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

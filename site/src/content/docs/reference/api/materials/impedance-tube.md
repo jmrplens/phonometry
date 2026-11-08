@@ -38,9 +38,15 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 ## absorption_from_reflection
 
 ```python
+absorption_from_reflection(reflection: complex | np.number[Any]) -> float
+
+absorption_from_reflection(
+    reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
 absorption_from_reflection(
     reflection: NumericArrayLike,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Normal-incidence absorption coefficient (ISO 10534-2, Eq. (18)).
@@ -54,7 +60,7 @@ ASTM E2611-19 Eq. (28).
 | :--- | :--- |
 | `reflection` | Complex reflection factor `r`. |
 
-**Returns:** Absorption coefficient `alpha` (real).
+**Returns:** Absorption coefficient `alpha` (real). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -67,9 +73,27 @@ ASTM E2611-19 Eq. (28).
 ```python
 air_density_iso10534(
     *,
-    temperature_c: NumericArrayLike,
-    static_pressure_kpa: NumericArrayLike = 101.325,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    static_pressure_kpa: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+air_density_iso10534(
+    *,
+    temperature_c: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    static_pressure_kpa: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
+
+air_density_iso10534(
+    *,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    static_pressure_kpa: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+air_density_iso10534(
+    *,
+    temperature_c: NumericArrayLike,
+    static_pressure_kpa: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Air density (ISO 10534-2:2001, Eq. (7)).
@@ -85,7 +109,7 @@ kelvin.
 | `temperature_c` | Air temperature, in **degrees Celsius**. |
 | `static_pressure_kpa` | Atmospheric pressure `pa`, in **kilopascals** (default 101.325 kPa). |
 
-**Returns:** Air density `rho`, in kilograms per cubic metre.
+**Returns:** Air density `rho`, in kilograms per cubic metre. A `float` when `temperature_c` and `static_pressure_kpa` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -98,9 +122,24 @@ kelvin.
 
 ```python
 apply_microphone_calibration(
-    h12_uncorrected: NumericArrayLike,
+    h12_uncorrected: complex | np.number[Any],
+    calibration_factor: complex | np.number[Any],
+) -> complex
+
+apply_microphone_calibration(
+    h12_uncorrected: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     calibration_factor: NumericArrayLike,
 ) -> NDArray[np.complex128]
+
+apply_microphone_calibration(
+    h12_uncorrected: complex | np.number[Any],
+    calibration_factor: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.complex128]
+
+apply_microphone_calibration(
+    h12_uncorrected: NumericArrayLike,
+    calibration_factor: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Apply the microphone calibration factor (ISO 10534-2, Eq. (13)).
@@ -114,7 +153,7 @@ $H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}$.
 | `h12_uncorrected` | Uncorrected measured transfer function. |
 | `calibration_factor` | Calibration factor `Hc` from [`microphone_calibration_factor`](/phonometry/reference/api/materials/impedance-tube/#microphone_calibration_factor). |
 
-**Returns:** Corrected transfer function `H12`.
+**Returns:** Corrected transfer function `H12`. A `complex` when `h12_uncorrected` and `calibration_factor` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -291,9 +330,24 @@ Advisory for out-of-plane-wave-range impedance-tube frequencies.
 
 ```python
 microphone_calibration_factor(
-    h12_config1: NumericArrayLike,
+    h12_config1: complex | np.number[Any],
+    h12_config2: complex | np.number[Any],
+) -> complex
+
+microphone_calibration_factor(
+    h12_config1: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     h12_config2: NumericArrayLike,
 ) -> NDArray[np.complex128]
+
+microphone_calibration_factor(
+    h12_config1: complex | np.number[Any],
+    h12_config2: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.complex128]
+
+microphone_calibration_factor(
+    h12_config1: NumericArrayLike,
+    h12_config2: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Microphone-mismatch calibration factor `Hc` (ISO 10534-2, Eq. (10)).
@@ -310,7 +364,7 @@ microphones physically interchanged (II); the cabling to the analyser is
 | `h12_config1` | Transfer function `H12^I` in the standard configuration. |
 | `h12_config2` | Transfer function `H12^II` with microphones swapped. |
 
-**Returns:** Complex calibration factor `Hc`.
+**Returns:** Complex calibration factor `Hc`. A `complex` when `h12_config1` and `h12_config2` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -322,8 +376,16 @@ microphones physically interchanged (II); the cabling to the analyser is
 
 ```python
 normalized_surface_admittance(
-    reflection: NumericArrayLike,
+    reflection: complex | np.number[Any],
+) -> complex
+
+normalized_surface_admittance(
+    reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
 ) -> NDArray[np.complex128]
+
+normalized_surface_admittance(
+    reflection: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Normalised surface admittance $G \rho c_0$ (ISO 10534-2, Eq. (20)).
@@ -336,7 +398,7 @@ $G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)$.
 | :--- | :--- |
 | `reflection` | Complex reflection factor `r`. |
 
-**Returns:** Normalised surface admittance (complex).
+**Returns:** Normalised surface admittance (complex). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -348,8 +410,16 @@ $G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)$.
 
 ```python
 normalized_surface_impedance(
-    reflection: NumericArrayLike,
+    reflection: complex | np.number[Any],
+) -> complex
+
+normalized_surface_impedance(
+    reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
 ) -> NDArray[np.complex128]
+
+normalized_surface_impedance(
+    reflection: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Normalised surface impedance $Z/(\rho c_0)$ (ISO 10534-2, Eq. (19)).
@@ -362,7 +432,7 @@ $Z / (\rho c_0) = (1 + r) / (1 - r)$.
 | :--- | :--- |
 | `reflection` | Complex reflection factor `r`. |
 
-**Returns:** Normalised surface impedance $Z/(\rho c_0)$ (complex).
+**Returns:** Normalised surface impedance $Z/(\rho c_0)$ (complex). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -514,12 +584,36 @@ range of
 
 ```python
 reflection_factor(
-    h12: NumericArrayLike,
+    h12: complex | np.number[Any],
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: complex | np.number[Any],
+) -> complex
+
+reflection_factor(
+    h12: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     *,
     spacing_m: float,
     x1: float,
     wavenumber: NumericArrayLike,
 ) -> NDArray[np.complex128]
+
+reflection_factor(
+    h12: complex | np.number[Any],
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.complex128]
+
+reflection_factor(
+    h12: NumericArrayLike,
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Complex reflection factor at the sample surface (ISO 10534-2, Eq. (17)).
@@ -542,7 +636,7 @@ the sample to the **farther** microphone (Clause 7.7).
 | `x1` | Distance from the sample surface to the farther microphone (position 1), in metres. |
 | `wavenumber` | Complex wavenumber `k0` (from [`tube_wavenumber`](/phonometry/reference/api/materials/impedance-tube/#tube_wavenumber)), scalar or per band. |
 
-**Returns:** Complex reflection factor `r` at the reference plane.
+**Returns:** Complex reflection factor `r` at the reference plane. A `complex` when `h12` and `wavenumber` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -555,8 +649,18 @@ the sample to the **farther** microphone (Clause 7.7).
 ```python
 speed_of_sound_iso10534(
     *,
-    temperature_c: NumericArrayLike,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+speed_of_sound_iso10534(
+    *,
+    temperature_c: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+speed_of_sound_iso10534(
+    *,
+    temperature_c: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Speed of sound in air (ISO 10534-2:2001, Eq. (5)).
@@ -569,7 +673,7 @@ $c_0 = 343.2 \sqrt{T / 293}$, with $T$ in kelvin.
 | :--- | :--- |
 | `temperature_c` | Air temperature, in **degrees Celsius**. |
 
-**Returns:** Speed of sound `c0`, in metres per second.
+**Returns:** Speed of sound `c0`, in metres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -582,9 +686,19 @@ $c_0 = 343.2 \sqrt{T / 293}$, with $T$ in kelvin.
 
 ```python
 surface_impedance(
-    reflection: NumericArrayLike,
+    reflection: complex | np.number[Any],
+    characteristic_impedance: float,
+) -> complex
+
+surface_impedance(
+    reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     characteristic_impedance: float,
 ) -> NDArray[np.complex128]
+
+surface_impedance(
+    reflection: NumericArrayLike,
+    characteristic_impedance: float,
+) -> complex | NDArray[np.complex128]
 ```
 
 Absolute surface impedance `Z` (ISO 10534-2, Eq. (19)).
@@ -598,7 +712,7 @@ $Z = \rho c_0 (1 + r) / (1 - r)$.
 | `reflection` | Complex reflection factor `r`. |
 | `characteristic_impedance` | Characteristic impedance of air `rho c0`, in rayls (`rho` and `c0` from the Clause 7.2 helpers). |
 
-**Returns:** Surface impedance `Z`, in rayls (complex).
+**Returns:** Surface impedance `Z`, in rayls (complex). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -610,10 +724,22 @@ $Z = \rho c_0 (1 + r) / (1 - r)$.
 
 ```python
 tube_attenuation_constant(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float,
+    diameter_m: float,
+) -> float
+
+tube_attenuation_constant(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     speed_of_sound: float,
     diameter_m: float,
 ) -> NDArray[np.float64]
+
+tube_attenuation_constant(
+    frequency: NumericArrayLike,
+    speed_of_sound: float,
+    diameter_m: float,
+) -> float | NDArray[np.float64]
 ```
 
 Lower-bound tube attenuation constant `k0''` (ISO 10534-2, Eq. (A.18)).
@@ -630,7 +756,7 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
 | `diameter_m` | Circular-tube diameter `d`, in metres, or the hydraulic diameter `4 * area / perimeter` for a rectangular tube (see [`hydraulic_diameter`](/phonometry/reference/api/materials/impedance-tube/#hydraulic_diameter)). |
 
-**Returns:** Attenuation constant `k0''`, in nepers per metre.
+**Returns:** Attenuation constant `k0''`, in nepers per metre. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -642,11 +768,25 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 
 ```python
 tube_wavenumber(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float,
+    *,
+    attenuation_np_per_m: NumericArrayLike | None = ...,
+) -> complex
+
+tube_wavenumber(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    speed_of_sound: float,
+    *,
+    attenuation_np_per_m: NumericArrayLike | None = ...,
+) -> NDArray[np.complex128]
+
+tube_wavenumber(
     frequency: NumericArrayLike,
     speed_of_sound: float,
     *,
-    attenuation_np_per_m: NumericArrayLike | None = None,
-) -> NDArray[np.complex128]
+    attenuation_np_per_m: NumericArrayLike | None = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Complex wavenumber $k_0 = k_0' - jk_0''$ (ISO 10534-2, Clause 2.6).
@@ -663,7 +803,7 @@ constant `k0''` enters with a **minus** sign on the imaginary part
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
 | `attenuation_np_per_m` | Attenuation constant `k0''`, in nepers per metre (scalar or matching `frequency`); `None` gives the lossless real wavenumber. Obtain a lower-bound estimate from [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant). |
 
-**Returns:** Complex wavenumber `k0`, in reciprocal metres.
+**Returns:** Complex wavenumber `k0`, in reciprocal metres. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

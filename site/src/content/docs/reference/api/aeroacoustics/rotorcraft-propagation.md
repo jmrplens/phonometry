@@ -334,8 +334,16 @@ flat-ground equations (§A.4.4).
 
 ```python
 MeanGroundPlaneResult.height(
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+MeanGroundPlaneResult.height(
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+MeanGroundPlaneResult.height(
+    distance_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The plane height $a\,d + b$ at `distance_m`, in metres.
@@ -346,7 +354,7 @@ The plane height $a\,d + b$ at `distance_m`, in metres.
 | :--- | :--- |
 | `distance_m` | Distance $d$ along the section, in metres (scalar or array). |
 
-**Returns:** The height of the plane at each distance, in metres.
+**Returns:** The height of the plane at each distance, in metres. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

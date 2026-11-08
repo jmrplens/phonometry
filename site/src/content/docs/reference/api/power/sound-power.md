@@ -242,7 +242,7 @@ mean_single_event_level(
     levels: NumericArrayLike,
     *,
     n_events: int | np.integer[Any] | None = None,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
@@ -276,7 +276,7 @@ are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-
 | `levels` | With `n_events=None`, the per-event levels in decibels with the events on the first axis (`(Ne,)`, `(Ne, NB)` or `(Ne, NM, NB)`); otherwise the one measurement encompassing `n_events` events, of any shape. |
 | `n_events` | `None` when each entry of the first axis is one event, else the number of events the single measurement encompasses. |
 
-**Returns:** The level of one event, in decibels: `levels` less its first axis for `n_events=None`, the shape of `levels` otherwise.
+**Returns:** The level of one event, in decibels: `levels` less its first axis for `n_events=None`, a `float` when that leaves one number; otherwise the shape of `levels`, a `float` for a number and an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

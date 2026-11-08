@@ -3987,6 +3987,68 @@ def test_a_receiver_is_dropped_whatever_it_is_called() -> None:
         _through_a_receiver_named_otherwise("medium")  # type: ignore[arg-type]
 
 
+class _ChecksThroughItsClass:
+    """A class whose class method and ``__new__`` call a plain method on the
+    class they hold, which takes the call's first argument as its instance.
+    """
+
+    def check(self, pace: _Pace = "fast") -> None:
+        """Check the pace this method is handed."""
+        require_choice(pace, "pace", _PACES)
+
+    @classmethod
+    def build(cls, pace: _Pace = "fast") -> None:
+        """Hand the pace to ``check`` as its instance."""
+        cls.check(pace)  # type: ignore[arg-type]
+
+    @classmethod
+    def build_held(cls, holder: object, pace: _Pace = "fast") -> None:
+        """Hand ``holder`` as the instance, and the pace to ``check``."""
+        cls.check(holder, pace)  # type: ignore[arg-type]
+
+    def __new__(cls, pace: _Pace = "fast") -> _ChecksThroughItsClass:
+        """Hand the pace to ``check`` as its instance."""
+        cls.check(pace)  # type: ignore[arg-type]
+        return super().__new__(cls)
+
+
+def _through_a_class_method(pace: _Pace = "fast") -> None:
+    """Hand a pace to a class method that loses it."""
+    _ChecksThroughItsClass.build(pace)
+
+
+def _through_a_class_method_held(pace: _Pace = "fast") -> None:
+    """Hand a pace to a class method that checks it."""
+    _ChecksThroughItsClass.build_held(None, pace)
+
+
+def _through_new(pace: _Pace = "fast") -> _ChecksThroughItsClass:
+    """Hand a pace to a ``__new__`` that loses it."""
+    return _ChecksThroughItsClass.__new__(_ChecksThroughItsClass, pace)
+
+
+def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument() -> None:
+    """In a class method, and in ``__new__``, ``cls`` is the class, so
+    ``cls.check(pace)`` calls a plain ``check`` through its class: the pace
+    is its instance and it checks its default, while
+    ``cls.check(holder, pace)`` checks the pace. The run agrees.
+
+    ``cls`` was read as an instance, as ``self`` is, so ``cls.check(pace)``
+    was read as checking the pace and ``cls.check(holder, pace)`` as never
+    checking it.
+    """
+    pace = "Literal['fast', 'slow']"
+    for lost in (_through_a_class_method, _through_new):
+        assert ccl._choice_verdict(lost, "pace", pace, field=False) is not None
+        lost("medium")  # type: ignore[arg-type]
+    assert (
+        ccl._choice_verdict(_through_a_class_method_held, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _through_a_class_method_held("medium")  # type: ignore[arg-type]
+
+
 @dataclass
 class _ChecksInItsInit:
     """A record whose ``__init__``, written by hand, checks the pace itself."""
@@ -4117,6 +4179,52 @@ def test_the_callers_of_a_private_method_are_the_calls_that_reach_it(
     assert isinstance(first_helper, ast.FunctionDef)
     assert ccl._callers_source(first_helper, "kind", module, 0) == ccl._Source(
         "texts", frozenset({"a", "c"})
+    )
+
+
+def test_a_helper_s_receiver_is_known_by_its_binding_at_every_caller(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The first parameter of a private method is its receiver whatever it
+    is called, so ``self._helper("a")`` hands ``"a"`` to ``kind`` of
+    ``_helper(this, kind)``; and ``cls`` in a class method is the class, so
+    ``cls._helper(text, "b")`` hands ``text`` to ``this`` and ``"b"`` to
+    ``kind``. Every caller hands ``kind`` a fixed text.
+
+    The receiver was known by the name ``self`` or ``cls``: ``"a"`` was
+    read as handed to ``this``, so ``kind`` was read as handed nothing and
+    came back open; and ``cls`` was read as an instance, so ``text`` was
+    read as handed to ``kind``.
+    """
+    source = (
+        "class Maker:\n"
+        "    def _helper(this, kind):\n"
+        "        return kind\n\n"
+        "    def a(self, text):\n"
+        "        return self._helper('a')\n\n"
+        "    @classmethod\n"
+        "    def b(cls, text):\n"
+        "        return cls._helper(text, 'b')\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_bound_helpers": source})
+    tree = ast.parse(source)
+    (maker,) = tree.body
+    assert isinstance(maker, ast.ClassDef)
+    helper, a, b = maker.body
+    module = "phonometry._bound_helpers"
+    owners = {id(helper): "Maker", id(a): "Maker", id(b): "Maker"}
+    sites: list[tuple[str, ast.AST | None, ast.Call]] = []
+    for caller in (a, b):
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        sites.append((module, caller, site))
+    monkeypatch.setattr(ccl, "_construction_sites", lambda: {"_helper": tuple(sites)})
+    monkeypatch.setattr(ccl, "_METHOD_OWNERS", owners)
+    assert isinstance(helper, ast.FunctionDef)
+    assert ccl._callers_source(helper, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a", "b"})
     )
 
 

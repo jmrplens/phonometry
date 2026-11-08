@@ -2122,7 +2122,9 @@ def _fills_the_first(node: ast.Call, namespace: Mapping[str, object]) -> bool:
     method called on ``self``, ``cls`` or a field of ``self`` its instance.
     A function, a static method however it is called, and a method called
     through its class (:func:`_instance_handed`) take the call's first
-    argument there.
+    argument there, the class a class method is bound to or ``__new__`` is
+    handed among them (:data:`_CLASS_RECEIVER`): ``cls.check(pace)`` there
+    hands ``pace`` to a plain ``check`` as its instance.
     """
     target = _call_target(node, namespace)
     if inspect.isclass(target) or inspect.ismethod(target):
@@ -2133,6 +2135,8 @@ def _fills_the_first(node: ast.Call, namespace: Mapping[str, object]) -> bool:
     receiver = func.value
     owner: object = None
     if isinstance(receiver, ast.Name) and receiver.id in {"self", "cls"}:
+        if receiver.id == namespace.get(_CLASS_RECEIVER):
+            return False
         owner = namespace.get(receiver.id)
     elif (
         isinstance(receiver, ast.Attribute)
@@ -2169,7 +2173,7 @@ def _instance_handed(node: ast.Call, namespace: Mapping[str, object]) -> bool:
 
 
 def _fills_the_helpers_first(
-    call: ast.Call, caller: ast.AST | None, module_name: str
+    call: ast.Call, caller: ast.AST | None, module_name: str, *, bound_to_class: bool
 ) -> bool:
     """Whether *call*, written in *caller* in module *module_name* (``None``
     at the top of the module), fills the first parameter of the private
@@ -2178,13 +2182,17 @@ def _fills_the_helpers_first(
     A call by a bare name runs a function, and one through a module a
     function of it, which take the call's first argument there, as a method
     called through its class does (:func:`_instance_handed`); a class
-    method called through its class is bound to it. The name before the
-    helper is read as an import of *caller* (:func:`_local_imports`), or
-    else as the module's.
+    method called through its class is bound to it (*bound_to_class*). So is
+    one called on the class a class method is bound to or ``__new__`` is
+    handed (:func:`_class_receiver`), which hands a plain method the call's
+    first argument as its instance. The name before the helper is read as
+    an import of *caller* (:func:`_local_imports`), or else as the module's.
     """
     func = call.func
     if not isinstance(func, ast.Attribute):
         return False
+    if isinstance(func.value, ast.Name) and func.value.id == _class_receiver(caller):
+        return bound_to_class
     if not isinstance(func.value, ast.Name) or func.value.id in {"self", "cls"}:
         return True
     head = func.value.id
@@ -2195,6 +2203,36 @@ def _fills_the_helpers_first(
         else getattr(_module_object(module_name), head, None)
     )
     return not (inspect.ismodule(owner) or _instance_handed(call, {head: owner}))
+
+
+#: The key of :func:`_namespace` that holds the name the function it reads
+#: binds its class to: the first parameter of a class method, or of
+#: ``__new__``, which a call of its class hands the class first.
+_CLASS_RECEIVER = "<class receiver>"
+
+#: The methods Python makes class methods without a ``classmethod``
+#: decorator.
+_IMPLICIT_CLASS_METHODS = frozenset({"__init_subclass__", "__class_getitem__"})
+
+
+def _class_receiver(function: ast.AST | None) -> str | None:
+    """The first parameter of *function* when it holds the class: in a
+    class method, one Python makes one (:data:`_IMPLICIT_CLASS_METHODS`),
+    and ``__new__``; ``None`` for any other function.
+    """
+    if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
+        return None
+    decorated = any(
+        isinstance(decorator, ast.Name) and decorator.id == "classmethod"
+        for decorator in function.decorator_list
+    )
+    if not (
+        decorated
+        or function.name in _IMPLICIT_CLASS_METHODS
+        or function.name == "__new__"
+    ):
+        return None
+    return first_parameter(function)
 
 
 def _bound_tables(
@@ -2262,6 +2300,9 @@ def _namespace(function: object, tree: ast.AST, module_name: str) -> dict[str, o
     if owner is not None:
         names["self"] = owner
         names["cls"] = owner
+        receiver = _class_receiver(_parsed_function(tree))
+        if receiver is not None:
+            names[_CLASS_RECEIVER] = receiver
     return names
 
 
@@ -4494,10 +4535,12 @@ def _callers_source(
 ) -> _Source:
     """What every caller of a private helper hands its parameter *name*.
 
-    A first parameter called ``self`` or ``cls`` is the receiver's when the
-    call fills it itself (:func:`_fills_the_helpers_first`), and the call's
-    first argument when it does not, as in a function or a static method,
-    or a method called through its class (``Maker._helper(self, ...)``).
+    The first parameter of a method that is no static method, whatever it
+    is called, is the receiver's when the call fills it itself
+    (:func:`_fills_the_helpers_first`), and the call's first argument when
+    it does not, as in a function or a static method, or a method called
+    through its class (``Maker._helper(self, ...)``) or through the class a
+    class method holds (``cls._helper(self, ...)``).
     The callers of a method are the calls that may reach it
     (:func:`_may_reach_method`), not every call of another class's method of
     its name.
@@ -4512,11 +4555,19 @@ def _callers_source(
     every = [
         argument.arg for argument in (*function.args.posonlyargs, *function.args.args)
     ]
-    static = any(
-        isinstance(decorator, ast.Name) and decorator.id == "staticmethod"
+    decorators = {
+        decorator.id
         for decorator in function.decorator_list
+        if isinstance(decorator, ast.Name)
+    }
+    static = "staticmethod" in decorators or function.name == "__new__"
+    # The receiver of a method is its first parameter, whatever it is
+    # called; of a function the guard places in no class, one called so.
+    method = owner is not None or bool(every and every[0] in {"self", "cls"})
+    receiver = 1 if every and method and not static else 0
+    bound_to_class = (
+        "classmethod" in decorators or function.name in _IMPLICIT_CLASS_METHODS
     )
-    receiver = 1 if every and every[0] in {"self", "cls"} and not static else 0
     found: list[_Source] = []
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
         if owner is not None:
@@ -4528,7 +4579,9 @@ def _callers_source(
             call,
             name,
             every[receiver:]
-            if _fills_the_helpers_first(call, caller, caller_module)
+            if _fills_the_helpers_first(
+                call, caller, caller_module, bound_to_class=bound_to_class
+            )
             else every,
             keyword=all(a.arg != name for a in function.args.posonlyargs),
         )

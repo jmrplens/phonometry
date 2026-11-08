@@ -399,13 +399,11 @@ def test_pe_finite_ground_shows_dip_below_hard_ground() -> None:
     # impedance-convention fix the PE ground condition received the conjugated
     # (e^{+j omega t}) impedance and the soft-ground dip almost vanished.
     freq, zs, zr = 395.0, 2.0, 2.0
-    with pytest.warns(
-        PorousAbsorberWarning,
-        match=_FIT_RANGE,
-    ):
+    profile = _flat_profile()
+    with pytest.warns(PorousAbsorberWarning, match=_FIT_RANGE):
         soft = atmospheric_parabolic_equation(
             freq,
-            _flat_profile(),
+            profile,
             source_height_m=zs,
             flow_resistivity_pa_s_m2=2e5,
             max_range=120.0,
@@ -490,10 +488,11 @@ def test_pe_flow_resistivity_matches_impedance_path() -> None:
     with pytest.warns(PorousAbsorberWarning, match=_FIT_RANGE):
         medium = delany_bazley(np.array([freq]), 2.0e5, fluid=ABSORBER_AIR)
     z = complex(np.conj(medium.normalized_impedance[0]))
+    profile = _flat_profile()
     with pytest.warns(PorousAbsorberWarning, match=_FIT_RANGE):
         via_sigma = atmospheric_parabolic_equation(
             freq,
-            _flat_profile(),
+            profile,
             source_height_m=2.0,
             flow_resistivity_pa_s_m2=2.0e5,
             max_range=400.0,

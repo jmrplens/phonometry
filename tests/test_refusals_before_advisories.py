@@ -98,6 +98,7 @@ def test_a_singular_load_pair_warns_once_and_numpy_says_nothing() -> None:
     warnings.simplefilter("error", RuntimeWarning)
     c0 = 343.24
     k = np.asarray(materials.tube_wavenumber(np.array([500.0, 1000.0]), c0))
+    wavenumber = k.real.astype(np.complex128)
     load = (1.0 + 0j, 0.9 + 0j, 0.8 + 0j, 0.7 + 0j)
     # A RuntimeWarning of NumPy's is handed back when the block ends, and the
     # filter above raises it.
@@ -106,7 +107,7 @@ def test_a_singular_load_pair_warns_once_and_numpy_says_nothing() -> None:
             load,
             load,
             thickness_m=0.05,
-            wavenumber=k.real.astype(np.complex128),
+            wavenumber=wavenumber,
             characteristic_impedance=1.204 * c0,
             l1=0.10,
             s1=0.03,

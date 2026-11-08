@@ -32,6 +32,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..electroacoustics.headphones import (
@@ -468,7 +469,7 @@ def plot_programme_characteristic_voltage(
     return ax
 
 
-def _plain_log_ticks(ax: Axes, values: np.ndarray, language: Language) -> None:
+def _plain_log_ticks(ax: Axes, values: NDArray[np.float64], language: Language) -> None:
     """Label a logarithmic voltage axis at 1, 2 and 5 per decade, as plain numbers."""
     import matplotlib.ticker as mticker
 
@@ -675,7 +676,7 @@ def _response_limits(lowest: float, highest: float) -> tuple[float, float]:
     return bottom, bottom + span
 
 
-def _band_ticks(ax: Axes, frequencies: np.ndarray, language: Language) -> None:
+def _band_ticks(ax: Axes, frequencies: NDArray[np.float64], language: Language) -> None:
     """Label a bar axis with every other band centre."""
     from .common import _format_freq
 

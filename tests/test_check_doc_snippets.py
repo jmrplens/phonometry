@@ -1335,3 +1335,30 @@ def test_a_page_that_runs_past_its_time_reports_what_it_wrote_on_stderr(
     silent.write_text("import time\ntime.sleep(60)\n", encoding="utf-8")
     _, error, _ = check_doc_snippets._run_page(silent)
     assert error == "timed out after 3 s"
+
+
+def test_a_page_that_writes_bytes_its_streams_cannot_decode_is_still_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A page, or a library it calls, can write raw bytes on stdout or stderr
+    that the encoding of its streams does not decode; such a byte is read as
+    a replacement character, so the page that fails is reported with its last
+    line on stderr and the page that runs is held to its comments, rather
+    than the check stopping on the byte. ``0x81`` decodes neither as UTF-8
+    nor in code page 1252, the encodings the streams take on the runners.
+    """
+    fails = _page(
+        tmp_path,
+        "import sys\nsys.stderr.buffer.write(b'bad\\x81\\n')\nsys.stderr.flush()\n"
+        "raise SystemExit(1)",
+        name="fails.md",
+    )
+    runs = _page(
+        tmp_path,
+        "import sys\nsys.stdout.buffer.write(b'bad\\x81\\n')\nsys.stdout.flush()\n"
+        "print(2)  # 2",
+        name="runs.md",
+    )
+    assert check_doc_snippets.check_execution([fails, runs]) == [
+        f"{check_doc_snippets._rel(fails)}: bad\ufffd"
+    ]

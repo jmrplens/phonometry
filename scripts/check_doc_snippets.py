@@ -65,6 +65,7 @@ import ast
 import concurrent.futures
 import io
 import json
+import locale
 import pathlib
 import re
 import subprocess
@@ -138,6 +139,14 @@ _FIXTURES: dict[str, str] = {
 
 #: Timeout per page, generous enough for the FDTD and ECMA pages.
 _TIMEOUT_S = 600
+
+#: The encoding a page's stdout and stderr are read in. A page runs on this
+#: interpreter, in this environment, so its streams take the encoding this
+#: process would give its own, the one :mod:`subprocess` reads text in when
+#: it is given none. A page, or a library it calls, can still write raw bytes
+#: that do not decode in it, and each such byte is read as a replacement
+#: character, so the report of that page is made all the same.
+_STREAM_ENCODING = "utf-8" if sys.flags.utf8_mode else locale.getencoding()
 
 
 #: The site's home page, which prints its examples from a data module rather
@@ -1583,10 +1592,11 @@ def _script(page: pathlib.Path, fixture: str = "") -> tuple[str, dict[int, int]]
 def _text(output: bytes | str | None) -> str:
     """What a stopped child wrote on a pipe, as text: :mod:`subprocess` hands
     it over as bytes on POSIX whatever ``text=`` asked for, as text on
-    Windows, and as ``None`` when the child wrote nothing.
+    Windows, and as ``None`` when the child wrote nothing. Bytes are read as
+    :func:`_run_page` reads text (:data:`_STREAM_ENCODING`).
     """
     if isinstance(output, bytes):
-        return output.decode("utf-8", errors="replace")
+        return output.decode(_STREAM_ENCODING, errors="replace")
     return output or ""
 
 
@@ -1612,6 +1622,8 @@ def _run_page(
                 check=False,
                 capture_output=True,
                 text=True,
+                encoding=_STREAM_ENCODING,
+                errors="replace",
                 timeout=_TIMEOUT_S,
                 cwd=tmp,
             )

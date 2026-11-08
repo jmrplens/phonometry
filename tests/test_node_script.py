@@ -76,6 +76,22 @@ def test_a_script_that_ends_with_a_status_and_writes_nothing_fails_with_it() -> 
         node_script.answer(script, [], timeout=_SCRIPT_S)
 
 
+def test_a_script_that_ends_with_a_status_keeps_bytes_it_cannot_decode() -> None:
+    """Node writes on stderr what a script hands it, so a byte that is not
+    UTF-8 can reach the helper; it is read as a replacement character, and
+    the status and the rest of what Node wrote reach the message with it.
+    """
+    script = (
+        "process.stderr.write(Buffer.from([0x62, 0x61, 0x64, 0xff, 0x0a]));"
+        "process.exitCode = 3;"
+    )
+    with pytest.raises(AssertionError) as caught:
+        node_script.answer(script, [], timeout=_SCRIPT_S)
+    assert str(caught.value) == (
+        "Node ended with status 3, and wrote on stderr:\nbad\ufffd\n"
+    )
+
+
 @pytest.mark.skipif(
     sys.platform == "win32", reason="a signal stops a process on POSIX only"
 )
@@ -117,14 +133,11 @@ def test_a_script_that_runs_past_its_time_fails_with_what_node_wrote() -> None:
     )
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="on Windows subprocess decodes what Node wrote before the helper does",
-)
 def test_a_script_that_runs_past_its_time_keeps_bytes_it_cannot_decode() -> None:
-    """On POSIX ``subprocess.TimeoutExpired`` keeps stderr as bytes whatever
-    ``text=`` asked for, and a byte that is not UTF-8 is read as a
-    replacement character, so the rest of the message is not lost with it.
+    """``subprocess.TimeoutExpired`` keeps stderr as bytes on POSIX whatever
+    ``text=`` asked for, and as text on Windows, read once Node is stopped;
+    either way a byte that is not UTF-8 is read as a replacement character,
+    so the rest of the message is not lost with it.
     """
     script = (
         "process.stderr.write(Buffer.from([0x62, 0x61, 0x64, 0xff, 0x0a]));"

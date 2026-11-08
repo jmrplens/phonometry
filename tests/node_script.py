@@ -32,7 +32,9 @@ def answer(script: str, given: object, *, timeout: float) -> list[object]:
     :raises AssertionError: when Node ends with a status other than 0, with
         that status, or the signal that stopped it, and what it wrote on
         stderr; and when it runs past *timeout* and is stopped, with what it
-        wrote on stderr before then.
+        wrote on stderr before then. Node writes there what a script hands
+        it, so a byte that is not UTF-8 is read as a replacement character
+        rather than failing the read.
     """
     assert NODE is not None, "no JavaScript engine on the path"
     try:
@@ -42,6 +44,7 @@ def answer(script: str, given: object, *, timeout: float) -> list[object]:
             capture_output=True,
             text=True,
             encoding="utf-8",
+            errors="replace",
             timeout=timeout,
             check=False,
         )
@@ -76,7 +79,8 @@ def _with_stderr(ended: str, stderr: bytes | str | None) -> str:
     :param stderr: What Node wrote there: text for a Node that ended, and for
         one stopped at its time limit what :class:`subprocess.TimeoutExpired`
         kept, bytes on POSIX whatever ``text=`` asked for, text on Windows,
-        ``None`` for nothing.
+        ``None`` for nothing. Bytes are decoded as :func:`answer` decodes
+        text, a byte that is not UTF-8 read as a replacement character.
     """
     if isinstance(stderr, bytes):
         stderr = stderr.decode("utf-8", errors="replace")

@@ -141,8 +141,9 @@ _PCM16_SAMPLE_BYTES = _SUBTYPE_SPEC["PCM_16"][1]
 _WAV_SUFFIXES = frozenset({".wav", ".wave", ".bwf"})
 
 #: numpy integer dtypes accepted for bit-exact pass-through, and the
-#: subtype their codes are. Keyed by every dtype the resolved input holds,
-#: float64 included, because each one is looked up here.
+#: subtype their codes are. Only the two integer dtypes are keys; the key
+#: type admits every dtype the resolved input holds, float64 included,
+#: because each one is looked up here.
 _PASSTHROUGH_SUBTYPES: dict[np.dtype[np.float64 | np.int16 | np.int32], Subtype] = {
     np.dtype(np.int16): "PCM_16",
     np.dtype(np.int32): "PCM_32",

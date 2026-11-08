@@ -9,7 +9,7 @@ library with nothing else installed. Every public module declares what it
 publishes, and the lazy domains of `import phonometry as ph` are visible to a
 checker as well as at run time.
 
-## A script that passes the strict modes
+## A script under the strict modes
 
 ```python
 import numpy as np
@@ -32,8 +32,14 @@ pressure = engine.numpy_field("p")       # a NumPy array; engine.p is the device
 print(pressure.shape)
 ```
 
-`mypy --strict` and pyright, in its basic and its strict mode, report nothing
-on this script, on Python 3.12 to 3.14.
+`mypy --strict` and pyright's basic mode report nothing on this script, on
+Python 3.12 to 3.14 and with every NumPy the library accepts there. pyright's
+strict mode reports nothing either from NumPy 2.3 on, the oldest the library
+accepts on Python 3.14. With NumPy 2.0 to 2.2, which Python 3.12 and 3.13
+still accept, `np.ndarray` has no default type arguments, so strict pyright
+reads the arrays phonometry annotates as partially unknown: three errors on
+this script, from `require_levels()` and `filter()`, and two more from
+`numpy_field()` before NumPy 2.2.
 
 ## What a checker catches
 
@@ -77,10 +83,16 @@ and pyright refuses the same four lines.
   array or a PyTorch tensor. A checker reads them as `Any`.
   `engine.numpy_field("p")` returns a NumPy copy on every device, typed as
   one.
+- **The keyword arguments of a plot.** `.plot()` hands the keyword arguments
+  it does not take itself on to matplotlib, typed `Any`, so a checker passes
+  a misspelt one such as `bands.plot(colour="red")`, which matplotlib refuses
+  with an AttributeError when the line runs.
 
 ## Completeness
 
 `pyright --verifytypes phonometry --ignoreexternal` reads the installed
-package as a user's checker does and scores it at 100%: every symbol the
-package exports has a known type. The repository's CI runs the same command
-on the built wheel and fails below 100%.
+package as a user's checker does and scores it at 100% with NumPy 2.3 or
+newer: every symbol the package exports has a known type. With NumPy 2.0 to
+2.2 it scores about 86%, for the reason the strict mode reports above. The
+repository's CI runs the same command on the built wheel, with the newest
+NumPy, and fails below 100%.

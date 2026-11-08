@@ -86,14 +86,27 @@ de Pyodide emite al dibujar, y entonces `.plot()` falla bajo la celda.
 
 ## Pyodide sin JupyterLite
 
-En una página o un script de Node.js que carga Pyodide por su cuenta, se llama
-a micropip directamente, con los mismos extras y los mismos límites:
+En una página o un script de Node.js que carga Pyodide por su cuenta,
+micropip es uno de los paquetes de la distribución de Pyodide, que Pyodide no
+carga hasta que se le pide. El script lo carga desde JavaScript, después de
+`loadPyodide()`:
+
+```js
+const pyodide = await loadPyodide();
+await pyodide.loadPackage("micropip");
+```
+
+y el Python que luego le pasa a `pyodide.runPythonAsync()` instala
+phonometry, con los mismos extras y los mismos límites:
 
 ```py
 import micropip
 
 await micropip.install("phonometry[plot,report,audio]")
 ```
+
+Sin el paso de `loadPackage`, `import micropip` falla con
+`ModuleNotFoundError: No module named 'micropip'`.
 
 ## Un sitio de JupyterLite propio
 
@@ -104,6 +117,9 @@ JupyterLite, o se detiene con "jupyter-server is not installed. You cannot add
 custom content to jupyterlite":
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
 jupyter lite build --contents content --output-dir _output
 ```

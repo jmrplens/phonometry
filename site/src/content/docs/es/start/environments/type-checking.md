@@ -9,7 +9,7 @@ comprueban una llamada a la biblioteca sin instalar nada más. Cada módulo
 público declara lo que publica, y los dominios perezosos de
 `import phonometry as ph` los ve tanto el comprobador como la ejecución.
 
-## Un script que pasa los modos estrictos
+## Un script en los modos estrictos
 
 ```python
 import numpy as np
@@ -32,8 +32,15 @@ pressure = engine.numpy_field("p")       # un array de NumPy; engine.p es el del
 print(pressure.shape)
 ```
 
-`mypy --strict` y pyright, en su modo básico y en el estricto, no señalan nada
-en este script, en Python 3.12 a 3.14.
+`mypy --strict` y el modo básico de pyright no señalan nada en este script,
+en Python 3.12 a 3.14 y con cualquier NumPy que la biblioteca acepte en ellos.
+El modo estricto de pyright tampoco señala nada a partir de NumPy 2.3, el más
+antiguo que la biblioteca acepta en Python 3.14. Con NumPy 2.0 a 2.2, que
+Python 3.12 y 3.13 todavía aceptan, `np.ndarray` no tiene argumentos de tipo
+por defecto, así que pyright en modo estricto lee como parcialmente
+desconocidos los arrays que anota phonometry: tres errores en este script,
+de `require_levels()` y `filter()`, y dos más de `numpy_field()` antes de
+NumPy 2.2.
 
 ## Qué detecta un comprobador
 
@@ -79,10 +86,18 @@ y pyright rechaza las mismas cuatro líneas.
   calcula: un array de NumPy, uno de CuPy o un tensor de PyTorch. Un
   comprobador los lee como `Any`. `engine.numpy_field("p")` devuelve una
   copia de NumPy en cualquier dispositivo, con su tipo.
+- **Los argumentos de palabra clave de una figura.** `.plot()` pasa a
+  matplotlib los argumentos de palabra clave que no toma él mismo, con tipo
+  `Any`, así que un comprobador deja pasar uno mal escrito como
+  `bands.plot(colour="red")`, que matplotlib rechaza con un AttributeError
+  cuando se ejecuta la línea.
 
 ## Completitud
 
 `pyright --verifytypes phonometry --ignoreexternal` lee el paquete instalado
-como lo hace el comprobador de un usuario y le da un 100 %: cada símbolo que
-exporta el paquete tiene un tipo conocido. La CI del repositorio ejecuta la
-misma orden sobre el wheel construido y falla por debajo del 100 %.
+como lo hace el comprobador de un usuario y le da un 100 % con NumPy 2.3 o
+posterior: cada símbolo que exporta el paquete tiene un tipo conocido. Con
+NumPy 2.0 a 2.2 le da en torno a un 86 %, por la misma razón por la que
+protesta el modo estricto más arriba. La CI del repositorio ejecuta la misma
+orden sobre el wheel construido, con el NumPy más reciente, y falla por
+debajo del 100 %.

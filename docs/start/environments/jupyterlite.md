@@ -83,14 +83,26 @@ also turns into an error a deprecation warning that Pyodide's matplotlib
 
 ## Pyodide without JupyterLite
 
-In a page or a Node.js script that loads Pyodide itself, micropip is called
-directly, with the same extras and the same limits:
+In a page or a Node.js script that loads Pyodide itself, micropip is one of
+the packages of the Pyodide distribution, which Pyodide does not load until
+it is asked to. The script loads it from JavaScript, after `loadPyodide()`:
+
+```js
+const pyodide = await loadPyodide();
+await pyodide.loadPackage("micropip");
+```
+
+and the Python it then hands to `pyodide.runPythonAsync()` installs
+phonometry, with the same extras and the same limits:
 
 ```py
 import micropip
 
 await micropip.install("phonometry[plot,report,audio]")
 ```
+
+Without the `loadPackage` step, `import micropip` fails with
+`ModuleNotFoundError: No module named 'micropip'`.
 
 ## A JupyterLite site of your own
 
@@ -100,6 +112,9 @@ JupyterLite packages, or it stops with "jupyter-server is not installed. You
 cannot add custom content to jupyterlite":
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
 jupyter lite build --contents content --output-dir _output
 ```

@@ -340,9 +340,9 @@ class RoomModesResult(OwnsArrays):
         {"dimensions": "m", "max_frequency": "Hz", "schroeder_frequency": "Hz"}
     )
 
-    orders: np.ndarray
-    frequencies: np.ndarray
-    kinds: np.ndarray
+    orders: NDArray[np.intp]
+    frequencies: NDArray[np.float64]
+    kinds: NDArray[np.str_]
     dimensions: tuple[float, float, float]
     speed_of_sound: float
     max_frequency: float

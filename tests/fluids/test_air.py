@@ -210,13 +210,12 @@ def test_only_the_impossible_is_refused() -> None:
         (200.0, 6.0),
     ):
         with pytest.warns(FluidWarning, match=_OUTSIDE_ANNEX_F):
-            assert math.isfinite(
-                air(
-                    temperature_c=temperature_c,
-                    static_pressure_pa=101_325.0,
-                    relative_humidity_percent=relative_humidity_percent,
-                ).density
+            state = air(
+                temperature_c=temperature_c,
+                static_pressure_pa=101_325.0,
+                relative_humidity_percent=relative_humidity_percent,
             )
+        assert math.isfinite(state.density)
     with pytest.raises(ValueError, match="'temperature_c' must be"):
         air(temperature_c=-273.15, static_pressure_pa=101_325.0)
 

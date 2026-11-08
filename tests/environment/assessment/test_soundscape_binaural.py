@@ -59,12 +59,10 @@ _SHORT = "ISO/TS 12913-2 D.3 requires a measurement time interval of at least 3 
 
 @pytest.fixture(scope="module")
 def levels_and_loudness() -> sb.BinauralIndicators:
-    with pytest.warns(
-        sb.SoundscapeWarning,
-        match=_SHORT,
-    ):
+    recording = _recording()
+    with pytest.warns(sb.SoundscapeWarning, match=_SHORT):
         return sb.binaural_indicators(
-            _recording(),
+            recording,
             FS,
             parameters=("sound_pressure_level", "loudness", "sharpness"),
         )

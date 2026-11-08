@@ -86,6 +86,8 @@ from ._write import (
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from numpy.typing import NDArray
+
     from ._wav import AudioFileInfo
 
 #: Suffixes that name lossy targets, refused by decided policy (writing
@@ -184,7 +186,7 @@ def _quantised_blocks(
     subtype: str,
     block_size: int | np.integer[Any],
     total_samples: int,
-) -> Iterator[np.ndarray]:
+) -> Iterator[NDArray[np.float64] | NDArray[np.int64]]:
     """Stream source blocks quantised for the target, counting every clip.
 
     The clipping count accumulates across the whole file and is reported
@@ -253,7 +255,7 @@ def _check_resolved_subtype(resolved: str, *, flac: bool) -> None:
 
 def _stream_to_flac(
     target: Path,
-    blocks: Iterator[np.ndarray],
+    blocks: Iterator[NDArray[np.float64] | NDArray[np.int64]],
     fs: int,
     channels: int,
     resolved: str,

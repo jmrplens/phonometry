@@ -49,7 +49,7 @@ import os
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from scipy.io import wavfile
@@ -111,7 +111,9 @@ class AudioFileInfo(RichDisplay):
     cue_points: tuple[CuePoint, ...] = ()
 
 
-def _scale_to_float(raw: NDArray[np.generic]) -> NDArray[np.float64]:
+def _scale_to_float(
+    raw: NDArray[np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]:
     """Scale scipy's decoded samples to float64 by the module convention.
 
     Float input passes through untouched (only recast); unsigned 8-bit is

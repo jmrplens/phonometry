@@ -406,7 +406,14 @@ def impact_force_exposure_level(
        first (for example with
        :class:`~phonometry.filters.core.OctaveFilterBank`) and call this once
        per band, then hand the five results to
-       :func:`check_heavy_impact_source`. A band filter rings on after the
+       :func:`check_heavy_impact_source`. A bank that carries no calibration
+       of its own filters a :class:`~phonometry.io.Signal` in pascals, its
+       samples multiplied by the calibration factor it carries, which this
+       function leaves off. Hand the bank the samples in newtons,
+       ``np.asarray(force_n)``, and this function each band it hands back
+       with the rate, ``fs``: through the Signal, a force record that
+       carries a factor of 2 reads every band 6.02 dB high. A band filter
+       rings on after the
        impact, the 31.5 Hz octave for some tenths of a second, so the record
        must run on past the impact until the filters have died away. Filter
        it forward (``zero_phase=False``, the default), as a filter between

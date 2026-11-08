@@ -490,6 +490,31 @@ def _warns_and_returns(**arguments: object) -> tuple[object, None]:
     ), None
 
 
+def test_a_node_that_turns_warnings_into_errors_still_sends_them(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The node records every warning of a run, whatever its own filters say.
+
+    A node started under ``-W error``, or with ``PYTHONWARNINGS=error``, would
+    otherwise end the job on the run's first advisory, which the client is
+    the one to judge under its own filters.
+    """
+    monkeypatch.setattr(
+        node,
+        "FUNCTIONS",
+        MappingProxyType(
+            {"fdtd_simulation": (_warns_and_returns, ("pressures", "snapshots"))}
+        ),
+    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    assert code == 0
+    ((header, _),) = frames
+    messages = [str(item["message"]) for item in header["warnings"]]
+    assert messages[:2] == ["device 'cupy' is absent", "overflow in a sum"]
+
+
 def test_the_warnings_of_a_run_travel_once_each_with_their_class(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

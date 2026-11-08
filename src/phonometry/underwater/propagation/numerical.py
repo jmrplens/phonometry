@@ -3031,7 +3031,7 @@ def _resolve_absorption(
             depth=zs,
             ph=spec.ph,
             model=key,
-        )[0]
+        )
     )
 
 

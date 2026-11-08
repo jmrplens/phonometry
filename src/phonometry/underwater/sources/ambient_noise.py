@@ -28,11 +28,12 @@ Noise* (2011): the rule of fives (p. 2) and the thermal-noise derivation
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_equal_shapes,
@@ -50,7 +51,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "AmbientNoiseResult",
@@ -75,9 +76,30 @@ _WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(
 )
 
 
+@overload
+def wind_noise_spectrum[S: RealScalar](
+    frequency_hz: S,
+    wind_speed_kt: float,
+) -> float: ...
+
+
+@overload
+def wind_noise_spectrum[V: RealValues](
+    frequency_hz: V,
+    wind_speed_kt: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def wind_noise_spectrum[A: NumericArrayLike](
+    frequency_hz: A,
+    wind_speed_kt: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def wind_noise_spectrum(
     frequency_hz: NumericArrayLike, wind_speed_kt: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Wind / sea-surface noise spectrum level (Wenz rule of fives), dB re
     1 µPa²/Hz.
 
@@ -95,7 +117,9 @@ def wind_noise_spectrum(
     :param wind_speed_kt: Wind speed ``U``, in knots. A calm sea (``0``) has
         no wind-driven noise, returning ``-inf`` (zero contribution in the
         energy sum).
-    :return: Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
+    :return: Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If the inputs are invalid (a negative wind speed).
     :raises TypeError: if ``wind_speed_kt`` is not a single number, or ``frequency_hz``
         holds a text or a value that is not a real number.
@@ -103,11 +127,43 @@ def wind_noise_spectrum(
     f_khz = require_positive_array(frequency_hz, "frequency_hz") / 1000.0
     u = require_non_negative(wind_speed_kt, "wind_speed_kt")
     if u <= 0.0:  # calm sea: no wind-driven noise (u is non-negative here)
-        return np.full(f_khz.shape, -np.inf, dtype=np.float64)
+        return as_float_or_array(
+            np.full(f_khz.shape, -np.inf, dtype=np.float64), like=(frequency_hz,)
+        )
     nl = _WIND_ANCHOR_DB - (5.0 / 3.0) * 10.0 * (
         np.log10(f_khz) - np.log10(u / _WIND_REF_KNOTS)
     )
-    return np.asarray(nl, dtype=np.float64)
+    return as_float_or_array(nl, like=(frequency_hz,))
+
+
+@overload
+def thermal_noise_spectrum[S: RealScalar](
+    frequency_hz: S,
+    *,
+    temperature_c: float = ...,
+    density: float = ...,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def thermal_noise_spectrum[V: RealValues](
+    frequency_hz: V,
+    *,
+    temperature_c: float = ...,
+    density: float = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def thermal_noise_spectrum[A: NumericArrayLike](
+    frequency_hz: A,
+    *,
+    temperature_c: float = ...,
+    density: float = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def thermal_noise_spectrum(
@@ -116,7 +172,7 @@ def thermal_noise_spectrum(
     temperature_c: float = 16.85,
     density: float = 1025.0,
     speed_of_sound: float = 1500.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Molecular thermal-noise spectrum level (Mellen 1952), dB re 1 µPa²/Hz.
 
     :math:`\langle p^2(f) \rangle = 4 \pi k T \rho f^2 / c` (Pa²/Hz); the
@@ -127,7 +183,9 @@ def thermal_noise_spectrum(
         = 290 K).
     :param density: Water density :math:`\rho`, in kg/m³ (default 1025).
     :param speed_of_sound: Sound speed ``c``, in m/s (default 1500).
-    :return: Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
+    :return: Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``density``, ``speed_of_sound`` or ``temperature_c`` is not a
         single number, or ``frequency_hz`` holds a text or a value that is not a real
@@ -138,7 +196,7 @@ def thermal_noise_spectrum(
     rho = require_positive(density, "density")
     c = require_positive(speed_of_sound, "speed_of_sound")
     p2 = 4.0 * np.pi * _BOLTZMANN * t_kelvin * rho * f**2 / c
-    return np.asarray(10.0 * np.log10(p2 / _P_REF**2), dtype=np.float64)
+    return as_float_or_array(10.0 * np.log10(p2 / _P_REF**2), like=(frequency_hz,))
 
 
 @dataclass(frozen=True)

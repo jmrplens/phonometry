@@ -64,8 +64,8 @@ def test_thorp_absorption_recompute() -> None:
         0.1 * f_khz**2 / (1 + f_khz**2) + 40 * f_khz**2 / (4100 + f_khz**2)
     )
     got = seawater_absorption(10_000.0, model="thorp")
-    assert got[0] == pytest.approx(expected, rel=1e-9)
-    assert got[0] == pytest.approx(1.1498, abs=1e-3)
+    assert got == pytest.approx(expected, rel=1e-9)
+    assert got == pytest.approx(1.1498, abs=1e-3)
 
 
 # Francois & Garrison, J. Acoust. Soc. Am. 72 (6), 1982, Part II, Table IV:
@@ -123,7 +123,7 @@ def test_francois_garrison_part2_table_iv_printed_values(
         ph=8.0,
         model="francois-garrison",
     )
-    assert float(got[0]) == pytest.approx(alpha_ref, abs=0.5 * ulp)
+    assert got == pytest.approx(alpha_ref, abs=0.5 * ulp)
 
 
 def test_francois_garrison_recompute() -> None:
@@ -145,7 +145,7 @@ def test_francois_garrison_recompute() -> None:
     got = seawater_absorption(
         10_000.0, temperature_c=t, salinity=s, depth=z, ph=ph, model="francois-garrison"
     )
-    assert got[0] == pytest.approx(expected, rel=1e-9)
+    assert got == pytest.approx(expected, rel=1e-9)
 
 
 def test_francois_garrison_and_ainslie_mccolm_agree() -> None:
@@ -174,7 +174,7 @@ def test_ainslie_mccolm_depth_in_km() -> None:
     # Depth enters A-M in km; 1000 m must reduce the MgSO4 term vs the surface.
     shallow = seawater_absorption(50_000.0, depth=0.0, model="ainslie-mccolm")
     deep = seawater_absorption(50_000.0, depth=1000.0, model="ainslie-mccolm")
-    assert deep[0] < shallow[0]
+    assert deep < shallow
 
 
 def test_unknown_absorption_model_rejected() -> None:
@@ -199,7 +199,7 @@ def test_propagation_loss_is_spreading_plus_absorption() -> None:
         salinity=35.0,
         depth=0.0,
         model="francois-garrison",
-    )[0]
+    )
     expected = 20.0 * np.log10(res.range_m) + alpha * (res.range_m / 1000.0)
     np.testing.assert_allclose(res.pl, expected, rtol=1e-9)
     np.testing.assert_allclose(res.spreading + res.absorption, res.pl)
@@ -304,4 +304,4 @@ def test_ainslie_mccolm_book_spot_value_300hz() -> None:
         ph=8.0,
         model="ainslie-mccolm",
     )
-    assert float(alpha[0]) == pytest.approx(0.0086, abs=1e-4)
+    assert alpha == pytest.approx(0.0086, abs=1e-4)

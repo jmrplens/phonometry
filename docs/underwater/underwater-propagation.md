@@ -53,9 +53,9 @@ import numpy as np
 from phonometry import underwater
 
 # Absorption coefficient at 10 kHz, 10 °C, 35 ppt, 100 m, pH 8 (dB/km).
-# seawater_absorption accepts scalar or array frequencies and returns an array.
+# seawater_absorption returns a float for one frequency and an array for several.
 alpha = underwater.seawater_absorption(10e3, temperature_c=10.0, salinity=35.0,
-                               depth=100.0, model="francois-garrison")[0]
+                               depth=100.0, model="francois-garrison")
 print(f"α = {alpha:.3f} dB/km")
 
 ranges = np.linspace(10.0, 20_000.0, 400)

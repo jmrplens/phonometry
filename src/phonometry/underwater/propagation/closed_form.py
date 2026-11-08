@@ -34,11 +34,12 @@ simplification, both transcriptions verified digit-for-digit).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_above_absolute_zero,
@@ -53,7 +54,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "PropagationLossResult",
@@ -103,12 +104,39 @@ def _positive_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     return arr
 
 
+@overload
+def spreading_loss[S: RealScalar](
+    range_m: S,
+    *,
+    law: SpreadingLaw = ...,
+    transition_range: float | None = ...,
+) -> float: ...
+
+
+@overload
+def spreading_loss[V: RealValues](
+    range_m: V,
+    *,
+    law: SpreadingLaw = ...,
+    transition_range: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def spreading_loss[A: NumericArrayLike](
+    range_m: A,
+    *,
+    law: SpreadingLaw = ...,
+    transition_range: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def spreading_loss(
     range_m: NumericArrayLike,
     *,
     law: SpreadingLaw = "spherical",
     transition_range: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Geometrical spreading loss, in dB.
 
     ``"spherical"`` gives :math:`20 \log_{10}(R)` (free field), ``"cylindrical"``
@@ -121,7 +149,8 @@ def spreading_loss(
     :param law: ``"spherical"`` (default), ``"cylindrical"`` or ``"practical"``.
     :param transition_range: Transition range ``R0`` in metres; required for
         ``"practical"``.
-    :return: Spreading loss per range, in dB.
+    :return: Spreading loss per range, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``transition_range`` is not a single number, or ``law`` is not
         a text, or ``range_m`` holds a text or a value that is not a real number.
@@ -129,16 +158,19 @@ def spreading_loss(
     r = _positive_array(range_m, "range_m")
     key = require_choice(law, "law", _SPREADING_LAWS)
     if key == "spherical":
-        return 20.0 * np.log10(r)
+        return as_float_or_array(20.0 * np.log10(r), like=(range_m,))
     if key == "cylindrical":
-        return 10.0 * np.log10(r)
+        return as_float_or_array(10.0 * np.log10(r), like=(range_m,))
     # "practical"
     if transition_range is None:
         msg = "'transition_range' is required for the 'practical' law."
         raise ValueError(msg)
     r0 = _positive(transition_range, "transition_range")
-    return np.where(
-        r <= r0, 20.0 * np.log10(r), 20.0 * np.log10(r0) + 10.0 * np.log10(r / r0)
+    return as_float_or_array(
+        np.where(
+            r <= r0, 20.0 * np.log10(r), 20.0 * np.log10(r0) + 10.0 * np.log10(r / r0)
+        ),
+        like=(range_m,),
     )
 
 
@@ -204,6 +236,42 @@ def _ainslie_mccolm(
     return np.asarray(boric + mgso4 + water, dtype=np.float64)
 
 
+@overload
+def seawater_absorption[S: RealScalar](
+    frequency_hz: S,
+    *,
+    temperature_c: float = ...,
+    salinity: float = ...,
+    depth: float = ...,
+    ph: float = ...,
+    model: AbsorptionModel = ...,
+) -> float: ...
+
+
+@overload
+def seawater_absorption[V: RealValues](
+    frequency_hz: V,
+    *,
+    temperature_c: float = ...,
+    salinity: float = ...,
+    depth: float = ...,
+    ph: float = ...,
+    model: AbsorptionModel = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def seawater_absorption[A: NumericArrayLike](
+    frequency_hz: A,
+    *,
+    temperature_c: float = ...,
+    salinity: float = ...,
+    depth: float = ...,
+    ph: float = ...,
+    model: AbsorptionModel = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def seawater_absorption(
     frequency_hz: NumericArrayLike,
     *,
@@ -212,7 +280,7 @@ def seawater_absorption(
     depth: float = 0.0,
     ph: float = 8.0,
     model: AbsorptionModel = "francois-garrison",
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Volume absorption coefficient :math:`\alpha`, in dB/km.
 
     :param frequency_hz: Acoustic frequency, in Hz (scalar or array).
@@ -223,7 +291,8 @@ def seawater_absorption(
     :param model: ``"francois-garrison"`` (default), ``"ainslie-mccolm"`` or
         ``"thorp"`` (the Thorp 1967 frequency-only form of Etter, valid below
         ~50 kHz; ignores ``temperature_c``/``salinity``/``depth``/``ph``).
-    :return: Absorption coefficient per frequency, in dB/km.
+    :return: Absorption coefficient per frequency, in dB/km. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``model`` is unknown or an input is invalid.
     :raises TypeError: if ``depth``, ``salinity`` or ``temperature_c`` is not a single
         number, or ``model`` is not a text, or ``frequency_hz`` holds a text or a value
@@ -246,7 +315,7 @@ def seawater_absorption(
     require_above_absolute_zero(t, "temperature_c")
     key = require_choice(model, "model", _ABSORPTION_MODELS)
     if key == "thorp":
-        return _thorp(f_khz)
+        return as_float_or_array(_thorp(f_khz), like=(frequency_hz,))
     if key == "francois-garrison":
         # This model has a pole of its own, 0,15 degC above absolute zero: its
         # relaxation frequencies are written 1245/(273 + t) and 1990/(273 + t)
@@ -261,9 +330,13 @@ def seawater_absorption(
                 "1245/(273 + t) and 1990/(273 + t)."
             )
             raise ValueError(msg)
-        return _francois_garrison(f_khz, t, s, z, float(ph))
+        return as_float_or_array(
+            _francois_garrison(f_khz, t, s, z, float(ph)), like=(frequency_hz,)
+        )
     # "ainslie-mccolm"
-    return _ainslie_mccolm(f_khz, t, s, z / _M_PER_KM, float(ph))
+    return as_float_or_array(
+        _ainslie_mccolm(f_khz, t, s, z / _M_PER_KM, float(ph)), like=(frequency_hz,)
+    )
 
 
 @dataclass(frozen=True)
@@ -392,7 +465,7 @@ def propagation_loss(
             depth=depth,
             ph=ph,
             model=model,
-        )[0]
+        )
     )
     absorption = alpha * (r / _M_PER_KM)
     return PropagationLossResult(

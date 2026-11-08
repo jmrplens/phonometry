@@ -195,7 +195,7 @@ def convert_frf(
     target: FrfKind,
     *,
     frequency: NumericArrayLike,
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Convert a frequency-response function between any two kinds (Table 1).
 
     .. note::
@@ -279,7 +279,7 @@ def convert_frf(
 
 def sdof_receptance(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Receptance of a viscously damped SDOF resonator (closed form).
 
     :math:`H(\omega) = 1 / (k - \omega^2 m + j \omega c)`, the textbook
@@ -304,7 +304,7 @@ def sdof_receptance(
 
 def sdof_mobility(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Mobility of a viscously damped SDOF resonator: :math:`Y = j \omega H`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
@@ -319,7 +319,7 @@ def sdof_mobility(
 
 def sdof_accelerance(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Accelerance of a viscously damped SDOF resonator: :math:`A = -\omega^2 H`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
@@ -378,8 +378,8 @@ class RigidMassCalibrationResult(OwnsArrays):
     #: The units the field names do not say, as the docstring gives them.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"mass": "kg"})
 
-    frequencies: np.ndarray
-    measured: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
     _: KW_ONLY
     mass: float
     quantity: Quantity
@@ -400,7 +400,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         _omega(self.frequencies, "frequencies")
 
     @property
-    def expected(self) -> np.ndarray:
+    def expected(self) -> NDArray[np.float64]:
         r"""Known correct magnitude of the block per frequency.
 
         :return: :math:`1/m` (accelerance) or :math:`1/(2 \pi f m)` (mobility).
@@ -411,7 +411,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         return np.asarray(1.0 / (_omega(freq) * self.mass), dtype=np.float64)
 
     @property
-    def relative_deviation(self) -> np.ndarray:
+    def relative_deviation(self) -> NDArray[np.float64]:
         """Relative deviation ``measured/expected - 1`` per frequency."""
         measured = np.asarray(self.measured, dtype=np.float64)
         return np.asarray(measured / self.expected - 1.0, dtype=np.float64)
@@ -422,7 +422,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         return _RIGID_MASS_TOLERANCE
 
     @property
-    def within_tolerance(self) -> np.ndarray:
+    def within_tolerance(self) -> NDArray[np.bool_]:
         """Per-frequency pass flag ``|deviation| <= tolerance``.
 
         Judged as a settled share of the tolerance, so that a block exactly
@@ -534,7 +534,7 @@ def verify_rigid_mass_calibration(
 
 def random_error_percent(
     coherence: NumericArrayLike, n_averages: int | np.integer[Any]
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
 
     :math:`\epsilon = \sqrt{(1 - \gamma^2) / (2 n \gamma^2)}`, the normalized
@@ -582,8 +582,8 @@ class MobilityResult(OwnsArrays):
     :ivar driving_point: ``True`` if response and force are co-located (i = j).
     """
 
-    frequencies: np.ndarray
-    mobility: np.ndarray
+    frequencies: NDArray[np.float64]
+    mobility: NDArray[np.complex128]
     _: KW_ONLY
     driving_point: bool = True
 
@@ -641,16 +641,16 @@ class MobilityResult(OwnsArrays):
                 raise ValueError(msg)
 
     @property
-    def magnitude(self) -> np.ndarray:
+    def magnitude(self) -> NDArray[np.float64]:
         """Mobility magnitude ``|Y|``, in m/(N.s)."""
         return np.asarray(np.abs(self.mobility), dtype=np.float64)
 
     @property
-    def phase_rad(self) -> np.ndarray:
+    def phase_rad(self) -> NDArray[np.float64]:
         """Mobility phase, in radians."""
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
-    def to(self, target: FrfKind) -> np.ndarray:
+    def to(self, target: FrfKind) -> NDArray[np.complex128]:
         r"""Convert the mobility to another FRF kind (see :func:`convert_frf`).
 
         The force-per-motion kinds are element-wise reciprocals, i.e. the

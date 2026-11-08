@@ -381,11 +381,6 @@ def serve(stream: IO[bytes], frames: IO[bytes]) -> int:
             _observer.observing(_Watcher(cancelled)),
             _running_as(version),
         ):
-            # Every warning of the run is recorded and sent, whatever this
-            # process's own filters say: the client raises each again under
-            # its filters, and a node started under -W error would otherwise
-            # end the job on the run's first advisory.
-            warnings.simplefilter("always")
             result, sent_after = function(**arguments, compute=placement)
     except _observer.RunCancelled:
         return 3

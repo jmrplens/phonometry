@@ -182,10 +182,20 @@ unfiltered pulse returns the broadband level, which is several decibels above
 any single band value and must not be compared with the table above. A band
 filter rings on after the 20 ms of the impact, the 31.5 Hz octave for some
 tenths of a second, and its ring is part of the band's energy: the record runs
-on in silence until the filters have died away, and the filter keeps the
-record's mean, which is the pulse's own and not an offset (`detrend=False`).
-Cut at the end of the pulse, the same five bands read
--6.7, 14.6, 23.0, 21.2 and 18.2 dB, the 31.5 Hz band 45 dB low.
+on in silence until the filters have died away. It is filtered forward, as a
+filter between the transducer and the analyser filters the force as it comes: a
+zero-phase filter (`zero_phase=True`) rings before the impact as well, so it
+needs as much silence before it, and even then it reads these five bands 0.3 to
+0.7 dB lower. The filter keeps the record's mean (`detrend=False`), which over
+the impact and its ring is the pulse's own: taken off, it hands every band a
+step at the start of the record, which moves the 500 Hz band by 0.2 dB here. A
+measured record also carries the offset the transducer reads at rest, which is
+no part of the pulse, so the mean of the samples before the impact is taken off
+the record first: an offset of 50 N, a thirtieth of the peak, left in raises
+the 500 Hz band by three quarters of a decibel. Cut at the end of the pulse,
+the same five bands read -2.9, 7.7, 13.3, 5.7 and -3.2 dB, the 31.5 Hz band
+41 dB low, and with the mean of so short a record taken off as well, as the
+default `detrend=True` does, -6.7, 14.6, 23.0, 21.2 and 18.2 dB.
 
 ```python
 import numpy as np

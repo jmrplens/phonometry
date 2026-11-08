@@ -190,10 +190,21 @@ cualquier valor por banda y no debe compararse con la tabla anterior. Un filtro
 de banda sigue sonando después de los 20 ms del impacto, el de la octava de
 31,5 Hz durante algunas décimas de segundo, y ese resto es parte de la energía
 de la banda: el registro sigue en silencio hasta que los filtros se han
-apagado, y el filtro conserva la media del registro, que es la del propio
-impulso y no un desplazamiento (`detrend=False`). Cortado al final del
-impulso, las mismas cinco bandas dan -6,7, 14,6, 23,0, 21,2 y 18,2 dB, la de
-31,5 Hz 45 dB por debajo.
+apagado. Se filtra hacia delante, como filtra la fuerza a medida que llega un
+filtro entre el transductor y el analizador: un filtro de fase cero
+(`zero_phase=True`) suena también antes del impacto, así que necesita otro
+tanto de silencio delante, e incluso así da estas cinco bandas entre 0,3 y
+0,7 dB más bajas. El filtro conserva la media del registro (`detrend=False`),
+que sobre el impacto y su resto es la del propio impulso: quitarla da a cada
+banda un escalón al principio del registro, que aquí mueve 0,2 dB la banda de
+500 Hz. Un registro medido lleva además el desplazamiento que el transductor
+marca en reposo, que no es parte del impulso, así que al registro se le resta
+primero la media de las muestras anteriores al impacto: un desplazamiento de
+50 N, la trigésima parte del pico, que se quede dentro sube la banda de 500 Hz
+tres cuartos de decibelio. Cortado al final del impulso, las mismas cinco
+bandas dan -2,9, 7,7, 13,3, 5,7 y -3,2 dB, la de 31,5 Hz 41 dB por debajo, y
+quitando además la media de un registro tan corto, como hace el `detrend=True`
+por defecto, -6,7, 14,6, 23,0, 21,2 y 18,2 dB.
 
 ```python
 import numpy as np

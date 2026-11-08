@@ -539,10 +539,17 @@ first (for example with
 per band, then hand the five results to
 [`check_heavy_impact_source`](/phonometry/reference/api/building/heavy-impact/#check_heavy_impact_source). A band filter rings on after the
 impact, the 31.5 Hz octave for some tenths of a second, so the record
-must run on past the impact until the filters have died away, and it
-is filtered with its mean kept (`detrend=False`), the impact's own
-and not an offset: a 20 ms half-sine cut at its end reads 45 dB low at
-31.5 Hz.
+must run on past the impact until the filters have died away. Filter
+it forward (`zero_phase=False`, the default), as a filter between
+the transducer and the analyser does: a zero-phase filter rings before
+the impact as well and reads the bands lower. Keep its mean
+(`detrend=False`), the impact's own, and take off instead the offset
+the transducer reads at rest, the mean of the samples before the
+impact. In the octave bands of
+[`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank) (`fraction=1`),
+filtered forward with `detrend=False`, a 20 ms half-sine sampled at
+48 kHz and cut at its end reads 41 dB low at 31.5 Hz against the same
+pulse followed by a second of silence.
 :::
 
 **Parameters**

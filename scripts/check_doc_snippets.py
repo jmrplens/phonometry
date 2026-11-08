@@ -1141,6 +1141,36 @@ def _lines_of(parts: list[_Part]) -> list[list[_Part]]:
 #: ``78.2 Hz, 38.6 Hz -> valid here``.
 _ARROW = re.compile(r"\s*(?:->|\u2192)")
 
+#: A comma between two digits, which a Spanish comment writes as its decimal
+#: point (``35,9 m``) or as the comma of a list it writes without spaces.
+_DIGIT_COMMA = re.compile(r"(?<=\d),(?=\d)")
+
+
+def _decimal_points(texts: Sequence[str], *, in_brackets: bool) -> list[str]:
+    """*texts*, the lines of a Spanish comment, each comma between two digits
+    read as a decimal point, or, with *in_brackets* false, only those outside
+    a bracket the comment opens, the ones inside one left the commas of a list
+    (``[1,2]``). A bracket a line leaves open goes on over the next line, as
+    the comment's container does.
+
+    Outside a bracket a comma between two digits is never a list's: read as
+    one, the digits after it would be a value a word may follow as a note, so
+    that ``0,5 dB`` would state ``0.4 dB`` on its ``0``.
+    """
+    out: list[str] = []
+    depth = 0
+    for text in texts:
+        pieces: list[str] = []
+        at = 0
+        for match in _DIGIT_COMMA.finditer(text):
+            inside = depth + _open_brackets(text[: match.start()]) > 0
+            pieces.append(text[at : match.start()])
+            pieces.append("," if inside and not in_brackets else ".")
+            at = match.end()
+        out.append("".join([*pieces, text[at:]]))
+        depth += _open_brackets(text)
+    return out
+
 
 def _disagreement(
     said_lines: Sequence[str],
@@ -1152,8 +1182,9 @@ def _disagreement(
     """Why the comment lines *said_lines* do not state the output *wrote*.
 
     :param decimal_comma: Read a comma between two digits as a decimal point,
-        or, when the comment does not state the output that way, as the comma
-        between two values that it is in ``[1,2]``.
+        or, when the comment does not state the output that way and the comma
+        stands inside a bracket, as the comma between two values that it is
+        in ``[1,2]`` (:func:`_decimal_points`).
     :param arrow: Let a line of the comment end what it states at an arrow
         (:data:`_ARROW`), the rest of it a note; off when the print writes an
         arrow itself.
@@ -1164,8 +1195,9 @@ def _disagreement(
     ]
     readings = [texts]
     if decimal_comma:
-        decimal = [re.sub(r"(?<=\d),(?=\d)", ".", text) for text in texts]
-        readings = [decimal] if decimal == texts else [decimal, texts]
+        decimal = _decimal_points(texts, in_brackets=True)
+        listed = _decimal_points(texts, in_brackets=False)
+        readings = [decimal] if listed == decimal else [decimal, listed]
     why = ""
     for reading in readings:
         failed = _read(reading, wrote)
@@ -1231,9 +1263,9 @@ def output_disagreement(
     over several lines may also state the output line by line, each line with
     its own annotation. A comment that opens on a quoted word quotes the word
     the print opens with. *decimal_comma* reads a comma between two digits as
-    a decimal point, as a Spanish page may write one, or as the comma of a
-    list where the comment states the output that way, unless the print
-    writes such a comma itself (:func:`_reads_decimal_comma`).
+    a decimal point, as a Spanish page may write one, or, inside a bracket,
+    as the comma of a list where the comment states the output that way,
+    unless the print writes such a comma itself (:func:`_reads_decimal_comma`).
 
     :param promised: The comment, or its lines.
     :param written: What the print wrote, or what each of its calls wrote, as

@@ -555,6 +555,24 @@ def test_a_spanish_comment_may_write_a_container_without_spaces() -> None:
     assert _disagreement("1,2", "1.3", decimal_comma=True) != ""
 
 
+def test_a_spanish_comma_outside_a_bracket_is_only_a_decimal_point() -> None:
+    """Read as a list's, the comma of ``0,5 dB`` would leave a ``0`` that
+    rounds the printed ``0.4`` and a ``5`` that the unit after it makes a
+    note, so a wrong value would pass.
+    """
+    assert "0.5 where the print wrote 0.4" in _disagreement(
+        "0,5 dB", "0.4 dB", decimal_comma=True
+    )
+    assert _disagreement("35,9 m", "35.5 m", decimal_comma=True) != ""
+    assert _disagreement("36,1 m", "35.6 m", decimal_comma=True) != ""
+    assert _disagreement("35,9 m", "35.9 m", decimal_comma=True) == ""
+    # A bracket opened on one line goes on over the next, and a decimal
+    # comma outside it is still read as a point beside the list.
+    assert _disagreement(["[1,2,", " 3,4]"], "[1, 2, 3, 4]", decimal_comma=True) == ""
+    assert _disagreement("3,2 dB [1,2]", "3.2 dB [1, 2]", decimal_comma=True) == ""
+    assert _disagreement("3,2 dB [1,2]", "3.4 dB [1, 2]", decimal_comma=True) != ""
+
+
 def test_a_comment_continues_while_its_brackets_are_open() -> None:
     script = "print({'a': 1, 'b': 2})\n# {'a': 1,\n#  'b': 3}\nx = 1\n# 5\n"
     (promise,) = check_doc_snippets.promised_outputs(script)

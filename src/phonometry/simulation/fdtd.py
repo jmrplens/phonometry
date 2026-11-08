@@ -806,7 +806,7 @@ def _run_recording(
     n_steps: int | np.integer[Any],
     snapshot_every: int | np.integer[Any] | None,
     snapshot_decimation: int | np.integer[Any],
-) -> NDArray[np.floating]:
+) -> NDArray[np.floating[Any]]:
     """Validate the ``run()`` arguments and march, recording pressure frames.
 
     The frames are written into one host array allocated before the march
@@ -965,7 +965,9 @@ def _resolve_sponge_sides(
     return tuple(require_choice(side, "absorbing_sides", _SIDES) for side in given)
 
 
-def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
+def _impedance_numbers(
+    side: str, value: object
+) -> NDArray[np.integer[Any] | np.floating[Any]]:
     """One side's impedance read as numbers: a real scalar, or a profile of them.
 
     Read as NumPy reads it, so no number moves; only what is no real number
@@ -1211,7 +1213,7 @@ def _acoustic_medium(
 
 
 def _refuse_past_an_array(
-    why: str, name: str, shape: tuple[int, ...], dtype: str | np.dtype[Any]
+    why: str, name: str, shape: tuple[int, ...], dtype: str | np.dtype[np.floating[Any]]
 ) -> None:
     """Refuse an array of *shape* in *dtype* that NumPy would not allocate, by its name and its bytes.
 
@@ -2008,7 +2010,7 @@ class FDTD2D:
         center = _finite("center_m", center_m)
         amplitude = _finite("amplitude", amplitude)
 
-        def profile(coord: NDArray[np.floating]) -> NDArray[np.float64]:
+        def profile(coord: NDArray[np.float64]) -> NDArray[np.float64]:
             envelope = amplitude * np.exp(-(((coord - center) / width) ** 2))
             if wavelength is not None:
                 envelope = envelope * np.sin(
@@ -2275,7 +2277,7 @@ class FDTD2D:
         *,
         snapshot_every: int | np.integer[Any] | None = None,
         snapshot_decimation: int | np.integer[Any] = 1,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray[np.floating[Any]]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
         With ``snapshot_every = k`` a NumPy copy of ``p`` is stored after
@@ -2302,7 +2304,7 @@ class FDTD2D:
     #: The arrays the engine stores, the names :meth:`numpy_field` reads.
     _STORED: tuple[Literal["p", "vx", "vy"], ...] = ("p", "vx", "vy")
 
-    def numpy_field(self, field: Literal["p", "vx", "vy"]) -> NDArray[np.floating]:
+    def numpy_field(self, field: Literal["p", "vx", "vy"]) -> NDArray[np.floating[Any]]:
         """A NumPy copy of the stored *field*, in this process, whatever the device.
 
         :param field: ``"p"`` (cell centres), ``"vx"`` or ``"vy"`` (faces).
@@ -2321,7 +2323,7 @@ class FDTD2D:
 def _require_grid_axes(
     owner: str,
     shape: tuple[int, int],
-    snapshots: NDArray[np.floating] | None,
+    snapshots: NDArray[np.floating[Any]] | None,
     obstacle_mask: NDArray[np.bool_] | None,
     snapshot_decimation: int,
 ) -> int:
@@ -2429,7 +2431,7 @@ class FDTDResult(OwnsArrays):
     dt: float
     shape: tuple[int, int]
     sources: tuple[AnySource, ...]
-    snapshots: NDArray[np.floating] | None
+    snapshots: NDArray[np.floating[Any]] | None
     snapshot_times: NDArray[np.float64] | None
     obstacle_mask: NDArray[np.bool_] | None
     snapshot_decimation: int
@@ -2820,7 +2822,7 @@ class FDTDRun(OwnsArrays):
 
 
 def _held_map(
-    value: NumericArrayLike | None, dtype: type[np.generic] | None = np.float64
+    value: NumericArrayLike | None, dtype: type[np.float64] | None = np.float64
 ) -> object:
     """A real-valued map given as nested sequences, as the run's own read-only array.
 
@@ -2847,7 +2849,7 @@ def _held_map(
         return value
     try:
         objects = np.asarray(value, dtype=object)
-        held: np.ndarray | None
+        held: NDArray[Any] | None
         if holds_complex(objects) or holds_text(objects):
             held = None
         elif dtype is np.float64:
@@ -2997,7 +2999,9 @@ def _placement_here(request: Compute) -> Compute:
     return request if request.host is None else Compute(dtype=request.dtype)
 
 
-def _cleared(first: NDArray[np.floating], second: NDArray[np.floating] | None) -> None:
+def _cleared(
+    first: NDArray[np.floating[Any]], second: NDArray[np.floating[Any]] | None
+) -> None:
     """Zero what a failed remote run may have half written, before the run here."""
     first[...] = 0.0
     if second is not None:
@@ -3182,7 +3186,7 @@ def _record_run(
     snapshot_every: int | None,
     snapshot_decimation: int,
     pressures: NDArray[np.float64],
-    snapshots: NDArray[np.floating] | None,
+    snapshots: NDArray[np.floating[Any]] | None,
 ) -> None:
     """Step the engine, writing probe histories and field snapshots in place.
 

@@ -1618,9 +1618,42 @@ class Tree:
             return [self._callee(method, bound=method.classmethod) if method else None]
         receiver, after = self._receiver(func.value, scope)
         if receiver is not None:
-            method = self.member(receiver, func.attr, after=after)
-            return [self._callee(method, bound=not method.static) if method else None]
+            classes = (
+                self._instance_classes(func.value, scope, receiver)
+                if after is None
+                else (receiver,)
+            )
+            found = []
+            for klass in classes:
+                method = self.member(klass, func.attr, after=after)
+                found.append(
+                    self._callee(method, bound=not method.static) if method else None
+                )
+            return found
         return [self._by_name(call, func.attr)]
+
+    def _instance_classes(
+        self, expr: ast.expr, scope: Scope, receiver: Class
+    ) -> tuple[Class, ...]:
+        """The classes the instance a call on *expr* is made on may be of:
+        *receiver*, and when *expr* is the receiver of the method the call is
+        written in, every class of the tree whose method resolution order
+        holds that method's class, since ``self.name(...)`` runs what the
+        class of the instance finds first, a subclass's own or a mixin's.
+        """
+        if not isinstance(expr, ast.Name):
+            return (receiver,)
+        found = self.lookup(expr.id, scope, scope.module)
+        if not (isinstance(found, Local) and expr.id == found.scope.receiver):
+            return (receiver,)
+        return (
+            receiver,
+            *(
+                klass
+                for klass in self.classes.values()
+                if klass is not receiver and receiver in self.linearization(klass)
+            ),
+        )
 
     def _receiver(
         self, expr: ast.expr, scope: Scope

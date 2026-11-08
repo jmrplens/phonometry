@@ -2365,3 +2365,42 @@ def test_every_exemption_carries_a_reason() -> None:
 def test_the_tree_passes_its_language_on() -> None:
     """The corpus itself, which is what the gate protects."""
     assert clf.main([]) == 0
+
+
+def test_a_call_on_self_reaches_the_method_the_class_of_the_instance_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``self._label(ax)`` in ``_Base.draw`` runs what the class of the
+    instance holds: on a ``Public``, ``Public._label``, which takes the
+    language, so the call drops it; on a ``_Base``, ``_Base._label``, which
+    takes none.
+
+    A call on ``self`` reached only the method the order of the class it is
+    written in finds, ``_Base._label``, so the call passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            class _Base:
+                def draw(self, ax, language="en"):
+                    return self._label(ax)
+
+                def _label(self, ax):
+                    return ax
+
+
+            class Public(_Base):
+                def _label(self, ax, language="en"):
+                    return language
+
+
+            class Other:
+                def _label(self, ax, language="en"):
+                    return language
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("_Base.draw", "pkg.records.Public._label")
+    ]

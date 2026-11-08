@@ -119,12 +119,30 @@ identical simulation without the scatterer and subtract its
 ```python
 far_field_from_contour(
     contour: ContourPhasors,
-    angles_deg: NumericArrayLike,
+    angles_deg: float | np.floating[Any] | np.integer[Any],
     *,
-    distance: float | None = None,
-    origin: tuple[float, float] = (0.0, 0.0),
+    distance: float | None = ...,
+    origin: tuple[float, float] = ...,
+    fluid: Fluid = ...,
+) -> complex
+
+far_field_from_contour(
+    contour: ContourPhasors,
+    angles_deg: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    distance: float | None = ...,
+    origin: tuple[float, float] = ...,
     fluid: Fluid = ...,
 ) -> NDArray[np.complex128]
+
+far_field_from_contour(
+    contour: ContourPhasors,
+    angles_deg: NumericArrayLike,
+    *,
+    distance: float | None = ...,
+    origin: tuple[float, float] = ...,
+    fluid: Fluid = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Exterior field of a closed contour: the 2D Kirchhoff-Helmholtz integral.
@@ -178,7 +196,7 @@ cancellation (below 0.01 dB on the validation scenes).
 | `origin` | Phase-reference point `(x, y)` [m]; the centre of the observation circle when `distance` is given. Default the grid origin. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`SIMULATION_AIR`](/phonometry/reference/api/simulation/ntff/#simulation_air), the air this package's solvers run in). |
 
-**Returns:** Complex array, one value per angle: the far-field pattern `F(a)` (units Pa sqrt(m)), or the pressure [Pa] at `distance`.
+**Returns:** Complex array, one value per angle: the far-field pattern `F(a)` (units Pa sqrt(m)), or the pressure [Pa] at `distance`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

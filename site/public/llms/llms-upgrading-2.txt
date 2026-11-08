@@ -7,6 +7,36 @@ Part of https://docs.jmrp.io/phonometry/llms.txt. One page in 2 parts, cut at it
 <!-- source: docs/start/upgrading.md | canonical: https://docs.jmrp.io/phonometry/start/upgrading/ -->
 Source: https://docs.jmrp.io/phonometry/start/upgrading/
 
+## Published tables refuse writes
+
+Every table the library publishes at module level is read-only in 4.0. In
+3.3.0 published tables were plain dictionaries and published arrays took
+in-place arithmetic, so a line such as `REFERENCE_CURVE[500] = 0.9` or
+`BAND_IMPORTANCE *= 2` changed the number for every caller that ran after it
+in the same process, and nothing raised. The dictionaries are now
+`types.MappingProxyType`, including the ones nested inside another table, and
+the arrays have their `writeable` flag cleared. Reading is unchanged; writing
+raises `TypeError` on a table and `ValueError` on an array.
+
+Code that adjusted a published table has to copy it first:
+
+```python
+from phonometry import room
+from phonometry.materials.absorbers import REFERENCE_CURVE
+
+curve = dict(REFERENCE_CURVE)
+curve[4000] = 1.0
+curves = room.NC_CURVE_LEVELS.copy()
+curves[0, 0] = 0.0
+print(REFERENCE_CURVE[4000], curve[4000], curves[0, 0], room.NC_CURVE_LEVELS[0, 0])
+# 0.9 1.0 0.0 78.0
+```
+
+A table with tables inside it needs each level copied, as in
+`{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. The same copy is
+needed before a table is pickled, deep-copied or written out as JSON, because
+a read-only mapping supports none of the three.
+
 ## A result keeps its own copy of the arrays it was given
 
 In 3.3.0 and in 4.0.0rc1 a result kept the very array it was handed whenever

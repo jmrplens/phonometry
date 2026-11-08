@@ -164,12 +164,28 @@ One transmission path of the detailed model, per band.
 
 ```python
 bare_floor_impact_level(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    mass_per_area: float,
+    structural_reverberation_time: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+) -> float
+
+bare_floor_impact_level(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     mass_per_area: float,
     structural_reverberation_time: NumericArrayLike,
     radiation_factor: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+bare_floor_impact_level(
+    frequencies: NumericArrayLike,
+    *,
+    mass_per_area: float,
+    structural_reverberation_time: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Normalized impact level of a bare monolithic floor (Part 2, F. B.2).
@@ -198,7 +214,7 @@ check on the pair.
 | `structural_reverberation_time` | Structural reverberation time `Ts` per band, in s. |
 | `radiation_factor` | Radiation factor for free bending waves `σ` per band. |
 
-**Returns:** The normalized impact sound pressure level `Ln` per band, in dB.
+**Returns:** The normalized impact sound pressure level `Ln` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -211,13 +227,31 @@ check on the pair.
 
 ```python
 bending_radiation_factor(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    critical_frequency: float,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> float
+
+bending_radiation_factor(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    critical_frequency: float,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+bending_radiation_factor(
     frequencies: NumericArrayLike,
     *,
     critical_frequency: float,
     length1: float,
     length2: float,
-    speed_of_sound: float = 340.0,
-) -> NDArray[np.float64]
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Radiation factor for free bending waves `σ` (Formulae B.4 to B.6).
@@ -255,7 +289,7 @@ modes) to 4 (corner modes) times more efficiently well below `fc`.
 | `length2` | The other side length, in m. |
 | `speed_of_sound` | Speed of sound in air `co`, in m/s (Default: 340 m/s, the value ISO 12354-1 Annex A fixes). |
 
-**Returns:** The radiation factor `σ` per band (dimensionless).
+**Returns:** The radiation factor `σ` per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -268,6 +302,36 @@ modes) to 4 (corner modes) times more efficiently well below `fc`.
 
 ```python
 calculated_sound_reduction_index(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    mass_per_area: float,
+    critical_frequency: float,
+    total_loss_factor: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+    forced_radiation_factor: NumericArrayLike,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    resonant_only: bool = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    fluid: Fluid = ...,
+) -> float
+
+calculated_sound_reduction_index(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    mass_per_area: float,
+    critical_frequency: float,
+    total_loss_factor: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+    forced_radiation_factor: NumericArrayLike,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    resonant_only: bool = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.float64]
+
+calculated_sound_reduction_index(
     frequencies: NumericArrayLike,
     *,
     mass_per_area: float,
@@ -275,12 +339,12 @@ calculated_sound_reduction_index(
     total_loss_factor: NumericArrayLike,
     radiation_factor: NumericArrayLike,
     forced_radiation_factor: NumericArrayLike,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-    resonant_only: bool = False,
-    density: float | None = None,
-    longitudinal_velocity: float | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    resonant_only: bool = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
     fluid: Fluid = ...,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Sound reduction index of a homogeneous element (Formulae B.2, B.10).
@@ -331,7 +395,7 @@ upwards on its lightweight blockwork.
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
-**Returns:** The sound reduction index `R` per band, in dB.
+**Returns:** The sound reduction index `R` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -632,11 +696,39 @@ lower level passing).
 
 ```python
 direct_impact_level(
+    floor_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    delta_l: float | np.floating[Any] | np.integer[Any] = ...,
+    delta_l_ceiling: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+direct_impact_level(
+    floor_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    delta_l: NumericArrayLike = ...,
+    delta_l_ceiling: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+direct_impact_level(
+    floor_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    delta_l: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    delta_l_ceiling: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+direct_impact_level(
+    floor_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    delta_l: float | np.floating[Any] | np.integer[Any] = ...,
+    delta_l_ceiling: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+direct_impact_level(
     floor_level: NumericArrayLike,
     *,
-    delta_l: NumericArrayLike = 0.0,
-    delta_l_ceiling: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+    delta_l: NumericArrayLike = ...,
+    delta_l_ceiling: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Normalized impact level of the direct path `Ln,d` (Part 2, F. 11).
@@ -654,7 +746,7 @@ receiving side (a suspended ceiling).
 | `delta_l` | Improvement of the floor covering `ΔLsitu`, per band, dB. |
 | `delta_l_ceiling` | Improvement `ΔLd,situ` of a layer on the receiving side, per band, in dB. |
 
-**Returns:** `Ln,d` per band, in dB.
+**Returns:** `Ln,d` per band, in dB. A `float` when `floor_level`, `delta_l` and `delta_l_ceiling` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -666,11 +758,39 @@ receiving side (a suspended ceiling).
 
 ```python
 direct_reduction_index(
+    separating_index: float | np.floating[Any] | np.integer[Any],
+    *,
+    delta_r_source: float | np.floating[Any] | np.integer[Any] = ...,
+    delta_r_receiving: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+direct_reduction_index(
+    separating_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    delta_r_source: NumericArrayLike = ...,
+    delta_r_receiving: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+direct_reduction_index(
+    separating_index: float | np.floating[Any] | np.integer[Any],
+    *,
+    delta_r_source: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    delta_r_receiving: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+direct_reduction_index(
+    separating_index: float | np.floating[Any] | np.integer[Any],
+    *,
+    delta_r_source: float | np.floating[Any] | np.integer[Any] = ...,
+    delta_r_receiving: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+direct_reduction_index(
     separating_index: NumericArrayLike,
     *,
-    delta_r_source: NumericArrayLike = 0.0,
-    delta_r_receiving: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+    delta_r_source: NumericArrayLike = ...,
+    delta_r_receiving: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Sound reduction index of the direct path `RDd` (Formula 14).
@@ -689,7 +809,7 @@ laboratory value, Formula 8).
 | `delta_r_source` | `ΔRD,situ` on the source side, per band, in dB. |
 | `delta_r_receiving` | `ΔRd,situ` on the receiving side, in dB. |
 
-**Returns:** `RDd` per band, in dB.
+**Returns:** `RDd` per band, in dB. A `float` when `separating_index`, `delta_r_source` and `delta_r_receiving` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -714,7 +834,7 @@ flanking_impact_level(
     area_j: float,
     delta_l: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Flanking normalized impact level `Ln,ij` per band (Part 2, F. 12).
@@ -737,7 +857,7 @@ and `j` the flanking element radiating in the receiving room.
 | `delta_l` | Improvement of the floor covering `ΔLsitu`, in dB. |
 | `delta_r_j` | Improvement `ΔRj,situ` of a lining on the flanking element, per band, in dB. |
 
-**Returns:** `Ln,ij` per band, in dB.
+**Returns:** `Ln,ij` per band, in dB. A `float` when `floor_level`, `index_i`, `index_j`, `velocity_level_difference`, `delta_l` and `delta_r_j` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -750,13 +870,31 @@ and `j` the flanking element radiating in the receiving room.
 
 ```python
 flanking_impact_level_from_flanking_level(
-    normalized_flanking_impact_level: NumericArrayLike,
+    normalized_flanking_impact_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    area: float,
+    laboratory_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+) -> float
+
+flanking_impact_level_from_flanking_level(
+    normalized_flanking_impact_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     area: float,
     laboratory_area: float,
     coupling_length: float,
     laboratory_coupling_length: float,
 ) -> NDArray[np.float64]
+
+flanking_impact_level_from_flanking_level(
+    normalized_flanking_impact_level: NumericArrayLike,
+    *,
+    area: float,
+    laboratory_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+) -> float | NDArray[np.float64]
 ```
 
 Flanking impact level from a measured `Ln,f` (Part 2, Formula 13).
@@ -779,7 +917,7 @@ ISO 12354-2:2017, Annex D indicates.
 | `coupling_length` | In-situ coupling length `lij`, in m. |
 | `laboratory_coupling_length` | Laboratory coupling length `llab`, in m. ISO 12354-1 Clause 4.4.2 gives the usual values: 4,5 m for horizontal flanking elements, 2,5 m for vertical ones. |
 
-**Returns:** `Ln,ij` per band, in dB.
+**Returns:** `Ln,ij` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -801,7 +939,7 @@ flanking_impact_level_from_normalized_difference(
     coupling_length: float,
     delta_l: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Flanking impact level of a Type B junction (Part 2, Formula 14).
@@ -825,7 +963,7 @@ normalized direction-averaged velocity level difference instead of
 | `delta_l` | Improvement of the floor covering `ΔLi`, per band, dB. |
 | `delta_r_j` | Improvement `ΔRj` of a lining on the flanking element, per band, in dB. |
 
-**Returns:** `Ln,ij` per band, in dB.
+**Returns:** `Ln,ij` per band, in dB. A `float` when `floor_level`, `index_i`, `index_j`, `normalized_velocity_level_difference`, `delta_l` and `delta_r_j` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -847,7 +985,7 @@ flanking_reduction_index(
     area_j: float,
     delta_r_i: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Flanking sound reduction index `Rij` per band (Formula 15).
@@ -875,7 +1013,7 @@ flanking element as `j`.
 | `delta_r_i` | `ΔRi,situ` on element `i`, per band, in dB. |
 | `delta_r_j` | `ΔRj,situ` on element `j`, per band, in dB. |
 
-**Returns:** `Rij` per band, in dB.
+**Returns:** `Rij` per band, in dB. A `float` when `index_i`, `index_j`, `velocity_level_difference`, `delta_r_i` and `delta_r_j` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -888,13 +1026,31 @@ flanking element as `j`.
 
 ```python
 flanking_reduction_index_from_flanking_level(
+    flanking_level_difference: float | np.floating[Any] | np.integer[Any],
+    *,
+    separating_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+    reference_absorption_area: float = ...,
+) -> float
+
+flanking_reduction_index_from_flanking_level(
+    flanking_level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    separating_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+    reference_absorption_area: float = ...,
+) -> NDArray[np.float64]
+
+flanking_reduction_index_from_flanking_level(
     flanking_level_difference: NumericArrayLike,
     *,
     separating_area: float,
     coupling_length: float,
     laboratory_coupling_length: float,
-    reference_absorption_area: float = 10.0,
-) -> NDArray[np.float64]
+    reference_absorption_area: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Flanking index from a measured `Dn,f` (Formula 16).
@@ -917,7 +1073,7 @@ for vertical ones such as facades.
 | `laboratory_coupling_length` | Laboratory coupling length `llab`, m. |
 | `reference_absorption_area` | `Ao`, in m² (Default: 10 m²). |
 
-**Returns:** `Rij` per band, in dB.
+**Returns:** `Rij` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -938,7 +1094,7 @@ flanking_reduction_index_from_normalized_difference(
     coupling_length: float,
     delta_r_i: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Flanking index of a Type B junction `Rij` (Formula 17).
@@ -965,7 +1121,7 @@ transmission only (see [`resonant_sound_reduction_index`](/phonometry/reference/
 | `delta_r_i` | `ΔRi,situ` on element `i`, per band, in dB. |
 | `delta_r_j` | `ΔRj,situ` on element `j`, per band, in dB. |
 
-**Returns:** `Rij` per band, in dB.
+**Returns:** `Rij` per band, in dB. A `float` when `index_i`, `index_j`, `normalized_velocity_level_difference`, `delta_r_i` and `delta_r_j` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -978,11 +1134,25 @@ transmission only (see [`resonant_sound_reduction_index`](/phonometry/reference/
 
 ```python
 floating_floor_improvement(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    resonance_frequency: float,
+    slope: float = ...,
+) -> float
+
+floating_floor_improvement(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    resonance_frequency: float,
+    slope: float = ...,
+) -> NDArray[np.float64]
+
+floating_floor_improvement(
     frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
-    slope: float = 30.0,
-) -> NDArray[np.float64]
+    slope: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Improvement of a floating floor `ΔL` per band (Part 2, Formula C.1).
@@ -1005,7 +1175,7 @@ $\Delta R = \Delta L$ is rough.
 | `resonance_frequency` | Resonance frequency `fo`, in Hz. |
 | `slope` | 30 (screed, Formula C.1) or 40 (asphalt/dry, Formula C.3). |
 
-**Returns:** The improvement `ΔL` per band, in dB (0 at and below `fo`).
+**Returns:** The improvement `ΔL` per band, in dB (0 at and below `fo`). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1018,12 +1188,28 @@ $\Delta R = \Delta L$ is rough.
 
 ```python
 forced_radiation_factor(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> float
+
+forced_radiation_factor(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+forced_radiation_factor(
     frequencies: NumericArrayLike,
     *,
     length1: float,
     length2: float,
-    speed_of_sound: float = 340.0,
-) -> NDArray[np.float64]
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Radiation factor for forced waves `σf` (Formula B.3).
@@ -1051,7 +1237,7 @@ implementation reproduces.
 | `length2` | The other side length, in m. |
 | `speed_of_sound` | Speed of sound in air `co`, in m/s (Default: 340 m/s). |
 
-**Returns:** The forced radiation factor `σf` per band (dimensionless), clipped to $0 \le \sigma_\mathrm{f} \le 2$ (the standard prints only the upper bound; the lower one guards the deep low-frequency extrapolation, where the logarithm turns negative).
+**Returns:** The forced radiation factor `σf` per band (dimensionless), clipped to $0 \le \sigma_\mathrm{f} \le 2$ (the standard prints only the upper bound; the lower one guards the deep low-frequency extrapolation, where the logarithm turns negative). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1248,12 +1434,28 @@ data come from a laboratory measurement.
 
 ```python
 in_situ_equivalent_absorption_length(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    area: float,
+    situ_reverberation_time: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> float
+
+in_situ_equivalent_absorption_length(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    area: float,
+    situ_reverberation_time: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+in_situ_equivalent_absorption_length(
     frequencies: NumericArrayLike,
     *,
     area: float,
     situ_reverberation_time: NumericArrayLike,
-    speed_of_sound: float = 340.0,
-) -> NDArray[np.float64]
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 In-situ equivalent absorption length `asitu` (Formula 11).
@@ -1278,7 +1480,7 @@ the ISO 12354 value $c_\mathrm{o} = 340$ m/s.
 | `situ_reverberation_time` | `Ts,situ` per band, in s. |
 | `speed_of_sound` | Speed of sound in air `co`, in m/s. |
 
-**Returns:** The equivalent absorption length `asitu` per band, in m.
+**Returns:** The equivalent absorption length `asitu` per band, in m. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1291,10 +1493,34 @@ the ISO 12354 value $c_\mathrm{o} = 340$ m/s.
 
 ```python
 in_situ_impact_level(
-    impact_level: NumericArrayLike,
+    impact_level: float | np.floating[Any] | np.integer[Any],
+    situ_reverberation_time: float | np.floating[Any] | np.integer[Any],
+    laboratory_reverberation_time: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+in_situ_impact_level(
+    impact_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     situ_reverberation_time: NumericArrayLike,
     laboratory_reverberation_time: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+in_situ_impact_level(
+    impact_level: float | np.floating[Any] | np.integer[Any],
+    situ_reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    laboratory_reverberation_time: NumericArrayLike,
+) -> NDArray[np.float64]
+
+in_situ_impact_level(
+    impact_level: float | np.floating[Any] | np.integer[Any],
+    situ_reverberation_time: float | np.floating[Any] | np.integer[Any],
+    laboratory_reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+in_situ_impact_level(
+    impact_level: NumericArrayLike,
+    situ_reverberation_time: NumericArrayLike,
+    laboratory_reverberation_time: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 In-situ normalized impact level `Ln,situ` (Part 2, Formula 5).
@@ -1312,7 +1538,7 @@ than in the laboratory radiates more impact sound.
 | `situ_reverberation_time` | `Ts,situ` per band, in s. |
 | `laboratory_reverberation_time` | `Ts,lab` per band, in s. |
 
-**Returns:** The in-situ level `Ln,situ` per band, in dB.
+**Returns:** The in-situ level `Ln,situ` per band, in dB. A `float` when `impact_level`, `situ_reverberation_time` and `laboratory_reverberation_time` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1325,10 +1551,34 @@ than in the laboratory radiates more impact sound.
 
 ```python
 in_situ_reduction_index(
-    sound_reduction_index: NumericArrayLike,
+    sound_reduction_index: float | np.floating[Any] | np.integer[Any],
+    situ_reverberation_time: float | np.floating[Any] | np.integer[Any],
+    laboratory_reverberation_time: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+in_situ_reduction_index(
+    sound_reduction_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     situ_reverberation_time: NumericArrayLike,
     laboratory_reverberation_time: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+in_situ_reduction_index(
+    sound_reduction_index: float | np.floating[Any] | np.integer[Any],
+    situ_reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    laboratory_reverberation_time: NumericArrayLike,
+) -> NDArray[np.float64]
+
+in_situ_reduction_index(
+    sound_reduction_index: float | np.floating[Any] | np.integer[Any],
+    situ_reverberation_time: float | np.floating[Any] | np.integer[Any],
+    laboratory_reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+in_situ_reduction_index(
+    sound_reduction_index: NumericArrayLike,
+    situ_reverberation_time: NumericArrayLike,
+    laboratory_reverberation_time: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 In-situ sound reduction index `Rsitu` (Formula 9).
@@ -1348,7 +1598,7 @@ correction is exactly zero for Type B elements (Clause 4.2.2.3).
 | `situ_reverberation_time` | In-situ structural reverberation time `Ts,situ` per band, in s. |
 | `laboratory_reverberation_time` | Laboratory structural reverberation time `Ts,lab` per band, in s. |
 
-**Returns:** The in-situ index `Rsitu` per band, in dB.
+**Returns:** The in-situ index `Rsitu` per band, in dB. A `float` when `sound_reduction_index`, `situ_reverberation_time` and `laboratory_reverberation_time` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1361,7 +1611,19 @@ correction is exactly zero for Type B elements (Clause 4.2.2.3).
 
 ```python
 in_situ_total_loss_factor(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    internal_loss_factor: float,
+    mass_per_area: float,
+    area: float,
+    critical_frequency: float,
+    radiation_factor: NumericArrayLike,
+    perimeter_absorption: float,
+    fluid: Fluid = ...,
+) -> float
+
+in_situ_total_loss_factor(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     internal_loss_factor: float,
     mass_per_area: float,
@@ -1371,6 +1633,18 @@ in_situ_total_loss_factor(
     perimeter_absorption: float,
     fluid: Fluid = ...,
 ) -> NDArray[np.float64]
+
+in_situ_total_loss_factor(
+    frequencies: NumericArrayLike,
+    *,
+    internal_loss_factor: float,
+    mass_per_area: float,
+    area: float,
+    critical_frequency: float,
+    radiation_factor: NumericArrayLike,
+    perimeter_absorption: float,
+    fluid: Fluid = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Total loss factor in situ `ηtot,situ` (Formula C.1).
@@ -1395,7 +1669,7 @@ Formula (C.4) absorption coefficients (see
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (may be zero for a free-edged element). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
-**Returns:** The total loss factor `ηtot,situ` per band (dimensionless).
+**Returns:** The total loss factor `ηtot,situ` per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1411,9 +1685,33 @@ in_situ_velocity_level_difference(
     vibration_reduction_index: NumericArrayLike,
     *,
     coupling_length: float,
-    absorption_length_i: NumericArrayLike,
+    absorption_length_i: float | np.floating[Any] | np.integer[Any],
+    absorption_length_j: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+in_situ_velocity_level_difference(
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     absorption_length_j: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+in_situ_velocity_level_difference(
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: float | np.floating[Any] | np.integer[Any],
+    absorption_length_j: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+in_situ_velocity_level_difference(
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: NumericArrayLike,
+    absorption_length_j: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 In-situ velocity level difference `Dv,ij,situ` (Formula 10).
@@ -1433,7 +1731,7 @@ built.
 | `absorption_length_i` | `ai,situ` per band, in m. |
 | `absorption_length_j` | `aj,situ` per band, in m. |
 
-**Returns:** `Dv,ij,situ` per band, in dB (never negative).
+**Returns:** `Dv,ij,situ` per band, in dB (never negative). A `float` when `absorption_length_i` and `absorption_length_j` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1502,11 +1800,25 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 laboratory_total_loss_factor(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    mass_per_area: float,
+    internal_loss_factor: float = ...,
+) -> float
+
+laboratory_total_loss_factor(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    mass_per_area: float,
+    internal_loss_factor: float = ...,
+) -> NDArray[np.float64]
+
+laboratory_total_loss_factor(
     frequencies: NumericArrayLike,
     *,
     mass_per_area: float,
-    internal_loss_factor: float = 0.01,
-) -> NDArray[np.float64]
+    internal_loss_factor: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Total loss factor in the laboratory `ηtot,lab` (Formula C.3).
@@ -1524,7 +1836,7 @@ $m' = 800$ kg/m² and `ηint` can normally be taken as 0.01.
 | `mass_per_area` | Mass per unit area `m'`, in kg/m². |
 | `internal_loss_factor` | Internal loss factor `ηint` (Default: 0,01). |
 
-**Returns:** The laboratory total loss factor per band (dimensionless).
+**Returns:** The laboratory total loss factor per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1575,9 +1887,23 @@ coefficients between 0,05 and 0,5.
 reciprocity_impact_level(
     sound_reduction_index: NumericArrayLike,
     *,
-    frequencies: NumericArrayLike,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float
+
+reciprocity_impact_level(
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
 ) -> NDArray[np.float64]
+
+reciprocity_impact_level(
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
@@ -1598,7 +1924,7 @@ about 1 kHz, above which the stiffness of the floor's top layer matters).
 | `frequencies` | Band centre frequencies, in Hz. |
 | `fraction` | The band set, 3 for one-third octaves (default, constant 38) or 1 for octaves (43). One of `1` or `3`. |
 
-**Returns:** The normalized impact sound pressure level `Ln` per band, dB.
+**Returns:** The normalized impact sound pressure level `Ln` per band, dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1613,10 +1939,26 @@ about 1 kHz, above which the stiffness of the floor's top layer matters).
 resonant_sound_reduction_index(
     sound_reduction_index: NumericArrayLike,
     *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    critical_frequency: float,
+    correction: NumericArrayLike = ...,
+) -> float
+
+resonant_sound_reduction_index(
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    critical_frequency: float,
+    correction: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+resonant_sound_reduction_index(
+    sound_reduction_index: NumericArrayLike,
+    *,
     frequencies: NumericArrayLike,
     critical_frequency: float,
-    correction: NumericArrayLike = 8.0,
-) -> NDArray[np.float64]
+    correction: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Correct a measured `R` to resonant transmission only (Formula B.1).
@@ -1639,7 +1981,7 @@ describes resonant transmission and is returned unchanged.
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `correction` | Correction applied below `fc`, in dB, one value or one per band (Default: 8 dB; Annex B.2 caps the estimate of Formula (B.8) at this value, and the Annex L lightweight example reduces it around the cavity resonance). |
 
-**Returns:** The resonant-only index `R*` per band, in dB.
+**Returns:** The resonant-only index `R*` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1654,8 +1996,20 @@ describes resonant transmission and is returned unchanged.
 structural_reverberation_time(
     total_loss_factor: NumericArrayLike,
     *,
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+structural_reverberation_time(
+    total_loss_factor: NumericArrayLike,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+structural_reverberation_time(
+    total_loss_factor: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Structural reverberation time $T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})$ (C.1).
@@ -1667,7 +2021,7 @@ Structural reverberation time $T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})$ (C.1).
 | `frequencies` | Band centre frequencies `f`, in Hz. |
 | `total_loss_factor` | Total loss factor `ηtot` per band. |
 
-**Returns:** The structural reverberation time `Ts` per band, in s.
+**Returns:** The structural reverberation time `Ts` per band, in s. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

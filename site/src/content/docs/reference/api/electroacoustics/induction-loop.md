@@ -311,7 +311,17 @@ operator".
 ## band_limit_response
 
 ```python
-band_limit_response(frequencies: NumericArrayLike) -> NDArray[np.float64]
+band_limit_response(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+band_limit_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+band_limit_response(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The theoretical response of the band limiting of the pink noise, in dB.
@@ -334,7 +344,7 @@ the two exchanged (see `docs/ERRATA.md`). The plus or minus 1 dB flatness
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
 
-**Returns:** The response, in dB.
+**Returns:** The response, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

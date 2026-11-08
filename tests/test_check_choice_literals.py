@@ -2695,8 +2695,9 @@ def test_a_method_called_through_its_class_takes_the_instance_first() -> None:
     pace = "Literal['fast', 'slow']"
     for through in (_ThroughTheClass.run, _ThroughTheClass.run_once):
         assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        instance = _ThroughTheClass()
         with pytest.raises(ValueError, match="pace"):
-            through(_ThroughTheClass(), "medium")  # type: ignore[arg-type]
+            through(instance, "medium")  # type: ignore[arg-type]
     assert ccl._choice_verdict(_through_a_named_init, "pace", pace, field=False) is None
     with pytest.raises(ValueError, match="pace"):
         _through_a_named_init("medium")  # type: ignore[arg-type]

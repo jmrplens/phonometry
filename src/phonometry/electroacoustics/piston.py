@@ -285,10 +285,10 @@ class PistonDirectivity(OwnsArrays):
         value rather than ``-inf``).
     """
 
-    angles_rad: np.ndarray
-    ka: np.ndarray
-    directivity: np.ndarray
-    directivity_db: np.ndarray
+    angles_rad: NDArray[np.float64]
+    ka: NDArray[np.float64]
+    directivity: NDArray[np.float64]
+    directivity_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a bundle whose pattern matrix does not match its two grids.
@@ -444,16 +444,16 @@ class RadiatingPistonResult(OwnsArrays):
     :ivar density: Air density :math:`\rho`, kg/m3.
     """
 
-    frequencies: np.ndarray
-    ka: np.ndarray
-    resistance: np.ndarray
-    reactance: np.ndarray
-    radiation_resistance: np.ndarray
-    radiation_reactance: np.ndarray
+    frequencies: NDArray[np.float64]
+    ka: NDArray[np.float64]
+    resistance: NDArray[np.float64]
+    reactance: NDArray[np.float64]
+    radiation_resistance: NDArray[np.float64]
+    radiation_reactance: NDArray[np.float64]
     radiation_mass: float
-    directivity_index: np.ndarray
-    angles_rad: np.ndarray | None
-    directivity: np.ndarray | None
+    directivity_index: NDArray[np.float64]
+    angles_rad: NDArray[np.float64] | None
+    directivity: NDArray[np.float64] | None
     radius: float
     speed_of_sound: float
     density: float
@@ -618,8 +618,8 @@ def radiating_piston(
     radiation_mass = 8.0 * rho * a**3 / 3.0
     di = _directivity_index(ka)
 
-    directivity: np.ndarray | None = None
-    angle_arr: np.ndarray | None = None
+    directivity: NDArray[np.float64] | None = None
+    angle_arr: NDArray[np.float64] | None = None
     if angles_rad is not None:
         angle_arr = np.atleast_1d(real_array(angles_rad, "angles_rad"))
         if angle_arr.ndim != 1 or angle_arr.size == 0:

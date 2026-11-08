@@ -28,6 +28,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, TwoPanels
@@ -837,9 +838,9 @@ def plot_eigenrays(
 
 def _plot_loss_field(
     ax: Axes | None,
-    ranges: np.ndarray,
-    depths: np.ndarray,
-    pl: np.ndarray,
+    ranges: NDArray[np.float64],
+    depths: NDArray[np.float64],
+    pl: NDArray[np.float64],
     *,
     title: str,
     language: Language,
@@ -967,7 +968,7 @@ def plot_gaussian_beams(
     return ax
 
 
-def _plottable(levels: NumericArrayLike) -> np.ndarray:
+def _plottable(levels: NumericArrayLike) -> NDArray[np.float64]:
     """Levels with non-finite entries as ``nan``, which matplotlib skips.
 
     Band levels carry ``-inf`` where a band holds no energy at all; drawing
@@ -979,7 +980,7 @@ def _plottable(levels: NumericArrayLike) -> np.ndarray:
 
 def _spectrum_axes(
     ax: Axes | None,
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
     *,
     ylabel: str,
     title: str,

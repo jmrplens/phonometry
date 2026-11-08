@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.container import BarContainer
     from matplotlib.patches import Rectangle
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -1091,8 +1092,8 @@ def plot_intensity_class(
 def _mark_background(
     bars: BarContainer,
     *,
-    not_met: np.ndarray,
-    upper: np.ndarray,
+    not_met: NDArray[np.bool_],
+    upper: NDArray[np.bool_],
     labels: tuple[str, str],
 ) -> list[Rectangle]:
     """Hatch the bands that fail the background requirement, and say why.
@@ -1130,11 +1131,11 @@ def _mark_background(
 def _plot_determined_spectrum(
     ax: Axes,
     *,
-    levels: np.ndarray,
-    frequencies: np.ndarray,
-    not_met: np.ndarray,
-    upper_bound: np.ndarray,
-    expanded: np.ndarray,
+    levels: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    not_met: NDArray[np.bool_],
+    upper_bound: NDArray[np.bool_],
+    expanded: NDArray[np.float64],
     total: float,
     labels: tuple[str, str, str, str, str],
     language: Language,
@@ -1737,7 +1738,7 @@ _TURBINE_K_LIMIT_DB = 7.0
 
 def _turbine_outline(
     surface: TurbineMeasurementSurface, view: str
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The closed outline of the measurement surface in plan or elevation."""
     edges = np.asarray(surface.x_edges_m)
     upper_x = np.repeat(edges, 2)[1:-1]

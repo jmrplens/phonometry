@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from .types import NumericArrayLike
 
 
-def read_only[A: np.ndarray](array: A) -> A:
+def read_only[S: np.generic](array: NDArray[S]) -> NDArray[S]:
     """Return *array* with its ``writeable`` flag cleared.
 
     The array is not copied: the flag is cleared on the object itself, so the
@@ -180,7 +180,7 @@ def owned_members(
 #: The arrays a function of the library has handed to the record it is
 #: building, by identity, until a record keeps one. Weak, so an array that
 #: never reaches a record leaves no trace here.
-_HANDED_OVER: weakref.WeakValueDictionary[int, np.ndarray] = (
+_HANDED_OVER: weakref.WeakValueDictionary[int, NDArray[Any]] = (
     weakref.WeakValueDictionary()
 )
 
@@ -190,10 +190,10 @@ def handed_over(array: None) -> None: ...
 
 
 @overload
-def handed_over[A: np.ndarray](array: A) -> A: ...
+def handed_over[S: np.generic](array: NDArray[S]) -> NDArray[S]: ...
 
 
-def handed_over(array: np.ndarray | None) -> np.ndarray | None:
+def handed_over[S: np.generic](array: NDArray[S] | None) -> NDArray[S] | None:
     """Let the record *array* is passed to keep it as it is, without a copy.
 
     A record that inherits :class:`OwnsArrays` copies every array it is
@@ -219,7 +219,7 @@ def handed_over(array: np.ndarray | None) -> np.ndarray | None:
     return array
 
 
-def _adopted(array: np.ndarray) -> np.ndarray | None:
+def _adopted[S: np.generic](array: NDArray[S]) -> NDArray[S] | None:
     """*array* sealed as it is, if it was handed over, else ``None``.
 
     The mark is taken off as it is read, so only the first record the array
@@ -234,7 +234,7 @@ def _adopted(array: np.ndarray) -> np.ndarray | None:
     return read_only(array)
 
 
-def _sealed(array: np.ndarray) -> bool:
+def _sealed(array: NDArray[Any]) -> bool:
     """Whether nobody can write into *array* through any name it has.
 
     It is read-only, and so is every array it is a view of: a read-only view
@@ -493,7 +493,7 @@ def _mapping_as_given(value: Mapping[object, object]) -> object:
     return MappingProxyType(pairs) if isinstance(value, MappingProxyType) else pairs
 
 
-def _objects_as_given(value: np.ndarray) -> object:
+def _objects_as_given(value: NDArray[np.object_]) -> object:
     """An array of objects for :func:`_as_given`, rebuilt with its shape."""
     members = [_as_given(member) for member in value.flat]
     if all(new is old for new, old in zip(members, value.flat, strict=True)):
@@ -507,8 +507,8 @@ def _objects_as_given(value: np.ndarray) -> object:
 
 
 def _owned_array(
-    value: np.ndarray, *, always: bool, within: frozenset[int] = frozenset()
-) -> np.ndarray:
+    value: NDArray[Any], *, always: bool, within: frozenset[int] = frozenset()
+) -> NDArray[Any]:
     """*value*, or a read-only C-ordered copy of it when one is due.
 
     An array passed through :func:`handed_over` is sealed as it is instead.
@@ -524,8 +524,8 @@ def _owned_array(
 
 
 def _owned_objects(
-    value: np.ndarray, *, always: bool, within: frozenset[int] = frozenset()
-) -> np.ndarray:
+    value: NDArray[np.object_], *, always: bool, within: frozenset[int] = frozenset()
+) -> NDArray[np.object_]:
     """An array of objects, with every array it holds owned as a tuple's is.
 
     Copying an array of objects copies its references, not the objects, so

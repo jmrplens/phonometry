@@ -1569,7 +1569,7 @@ class ElasticFDTD2D:
         *,
         snapshot_every: int | np.integer[Any] | None = None,
         snapshot_decimation: int | np.integer[Any] = 1,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray[np.floating[Any]]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
         With ``snapshot_every = k`` a NumPy copy of the synthetic pressure
@@ -1604,7 +1604,7 @@ class ElasticFDTD2D:
 
     def numpy_field(
         self, field: Literal["txx", "tyy", "txy", "vx", "vy"]
-    ) -> NDArray[np.floating]:
+    ) -> NDArray[np.floating[Any]]:
         """A NumPy copy of the stored *field*, in this process, whatever the device.
 
         :param field: ``"txx"`` or ``"tyy"`` (cell centres), ``"txy"``
@@ -1664,7 +1664,7 @@ class ElasticFDTDResult(OwnsArrays):
     dt: float
     shape: tuple[int, int]
     sources: tuple[ElasticSource, ...]
-    snapshots: NDArray[np.floating] | None
+    snapshots: NDArray[np.floating[Any]] | None
     snapshot_times: NDArray[np.float64] | None
     snapshot_field: Field
     obstacle_mask: NDArray[np.bool_] | None
@@ -2334,7 +2334,7 @@ def _record_elastic_run(
     snapshot_field: Field,
     snapshot_decimation: int,
     signals: NDArray[np.float64],
-    snapshots: NDArray[np.floating] | None,
+    snapshots: NDArray[np.floating[Any]] | None,
 ) -> None:
     """Step the engine, writing probe histories and field snapshots in place.
 

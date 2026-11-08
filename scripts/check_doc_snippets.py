@@ -371,6 +371,15 @@ def _reading(text: str) -> str:
 #: A point before an ellipsis is the ellipsis's, not the number's.
 _REAL = r"(?:\d+(?:\.(?!\.\.)\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 
+#: What a sign that follows it joins to what comes after, as the hyphen of a
+#: range (``50-80 Hz``) or of a name (``NC-35``) does: a digit, a letter, an
+#: underscore, a point or a closing bracket. Such a sign is no value's, in a
+#: comment and in what a print wrote alike, whoever wrote it.
+_JOINS = r"[\w.)\]}]"
+
+#: The sign of a value: one that does not follow what :data:`_JOINS` names.
+_SIGN = rf"(?:(?<!{_JOINS})[-+])?"
+
 #: The parts of an output, as :func:`output_disagreement` reads them: a value
 #: (a complex number, a real one, or a constant printed by its name), a word,
 #: and an ellipsis, which stands for values left out. A ``~`` before a value
@@ -378,10 +387,11 @@ _REAL = r"(?:\d+(?:\.(?!\.\.)\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 #: Punctuation and spaces are not parts: a container prints them its own way
 #: and a comment lays them out its own, so a complex number may carry spaces
 #: before and after the sign of its imaginary part, as NumPy pads one to the
-#: width of the others in an array (``[ 1.  +1.j  1.25-2.j]``).
+#: width of the others in an array (``[ 1.  +1.j  1.25-2.j]``). A sign is a
+#: value's only where :data:`_SIGN` says it is.
 _OUTPUT_PART = re.compile(
     r"(?P<rough>[~\u2248]\s*)?"
-    rf"(?P<value>[-+]?{_REAL} *[-+] *{_REAL}j|[-+]?{_REAL}j?"
+    rf"(?P<value>{_SIGN}{_REAL} *[-+] *{_REAL}j|{_SIGN}{_REAL}j?"
     r"|(?<![\w.])(?:True|False|None|nan|-?inf)(?![\w.]))"
     r"(?P<cut>\.\.\.|\u2026)?"
     r"|(?P<word>[^\W\d]\w*)"
@@ -744,28 +754,51 @@ def _pieces(text: str, argument: _Argument) -> list[tuple[str, bool]]:
 _Call = tuple[str, Sequence[str], str]
 
 
+#: How a value a sign may stand before opens: with a digit, a point before
+#: one, or the infinity a float prints by name.
+_UNSIGNED = re.compile(r"\.?\d|inf(?![\w.])")
+
+
+def _joins(char: str) -> bool:
+    """Whether a sign right after *char* joins what stands either side of it
+    (:data:`_JOINS`) rather than signing the value after it.
+    """
+    return re.fullmatch(_JOINS, char) is not None
+
+
 def _signed(pieces: list[tuple[str, bool]]) -> list[tuple[str, bool]]:
-    """*pieces*, none of them empty, with a sign the page's own text writes
-    right before a value its code computed given to that value, as
-    ``f"-{x:.2f} dB"``, or its minus sign (U+2212), signs what it formats: the
-    reader reads a negative number. A sign that follows a digit, a letter, a
-    point or a closing bracket joins what stands either side of it and stays
-    the text's, as the hyphen of a range ``f"{a:.0f}-{b:.0f} Hz"`` or of a name
-    ``f"NC-{n}"`` does.
+    """*pieces*, none of them empty, with each sign between the page's own
+    text and a value its code computed given to the side the output reads it
+    with (:data:`_SIGN`), as a comment's is.
+
+    A sign the text writes right before the value, as ``f"-{x:.2f} dB"``, or
+    its minus sign (U+2212), signs what it formats: the reader reads a
+    negative number. One that follows a digit, a letter, a point or a closing
+    bracket joins what stands either side of it and stays the text's, as the
+    hyphen of a range ``f"{a:.0f}-{b:.0f} Hz"`` or of a name ``f"NC-{n}"``
+    does, and so does the sign of a negative value right after such a
+    character, as in ``f"NC{n}"``: both print ``NC-35``, which reads the same
+    whichever wrote the hyphen.
     """
     out = list(pieces)
     for at in range(len(out) - 1):
         (text, label), (value, value_label) = out[at], out[at + 1]
-        if not label or value_label or text[-1] not in "-+−":
+        if not label or value_label:
             continue
-        if re.match(r"\.?\d", value) is None:
-            continue
-        # What the output writes right before the sign: the text's own
-        # character before it, or the end of the piece before.
-        before = text[-2:-1] if len(text) > 1 else (out[at - 1][0][-1:] if at else "")
-        if before and (before.isalnum() or before in "._)]}"):
-            continue
-        out[at], out[at + 1] = (text[:-1], True), (text[-1] + value, False)
+        if text[-1] in "-+\u2212" and _UNSIGNED.match(value) is not None:
+            # What the output writes right before the sign: the text's own
+            # character before it, or the end of the piece before.
+            before = (
+                text[-2:-1] if len(text) > 1 else (out[at - 1][0][-1:] if at else "")
+            )
+            if not (before and _joins(before)):
+                out[at], out[at + 1] = (text[:-1], True), (text[-1] + value, False)
+        elif (
+            value[0] in "-+\u2212"
+            and _UNSIGNED.match(value, 1) is not None
+            and _joins(text[-1])
+        ):
+            out[at], out[at + 1] = (text + value[0], True), (value[1:], False)
     return [piece for piece in out if piece[0]]
 
 
@@ -780,8 +813,8 @@ def _stretches(
     as a reader reads them: ``print(1, 2, sep="")`` writes the value ``12``,
     and a loop of ``print(x, end="")`` one value of all their digits. A
     computed value and the page's text never join, so ``f"A{x}"`` still
-    writes the label ``A`` and the value of ``x``, but for a sign the text
-    writes right before the value, which is the value's (:func:`_signed`).
+    writes the label ``A`` and the value of ``x``; a sign where the two meet
+    goes to the side the output reads it with (:func:`_signed`).
     """
     pieces: list[tuple[str, bool]] = []
     for sep, texts, end in calls:

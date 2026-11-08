@@ -556,6 +556,43 @@ def test_a_sign_the_page_writes_before_a_value_is_the_values() -> None:
     assert _held_against(script, 2, ["50-80 Hz"]) == []
 
 
+def test_a_sign_after_a_digit_or_a_letter_joins_in_the_comment_too(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A hyphen right after a digit, a letter, a point or a closing bracket
+    joins what stands either side of it wherever it stands, so a comment that
+    writes a range or a name as the print writes it is held to the values the
+    print wrote, whether its text, its separator or its code wrote the hyphen.
+    """
+    script = 'a, b = 50, 80\nprint(f"{a}-{b} Hz")  # 50-80 Hz\n'
+    assert _held_against(script, 2, ["50-80 Hz"]) == []
+    (failure,) = _held_against(script.replace("50-80", "50-90"), 2, ["50-80 Hz"])
+    assert "the comment says 90 where the print wrote 80" in failure
+    script = 'n = 35\nprint(f"NC-{n}")  # NC-35\n'
+    assert _held_against(script, 2, ["NC-35"]) == []
+    script = 'n = -35\nprint(f"NC{n}")  # NC-35\n'
+    assert _held_against(script, 2, ["NC-35"]) == []
+    script = 'x = 0.5\nprint(f"[{x}]-{x}")  # [0.5]-0.5\n'
+    assert _held_against(script, 2, ["[0.5]-0.5"]) == []
+    # The same text computed whole reads the same way.
+    assert _disagreement("50 to 80 Hz", "50-80 Hz") == ""
+    assert _disagreement("NC 35", "NC-35") == ""
+    # After a space, an opening bracket or an equals sign the sign is the
+    # value's, in the comment as in the print.
+    assert "-80 where the print wrote 80" in _disagreement("50 -80 Hz", "50 80 Hz")
+    assert "-8.27 where the print wrote 8.27" in _disagreement("x=-8.27", "x=8.27")
+    assert "-1 where the print wrote 1" in _disagreement("[-1]", "[1]")
+    # A sign the page writes before an infinity it formats is the infinity's.
+    script = 'x = float("inf")\nprint(f"-{x}")  # -inf\n'
+    assert _held_against(script, 2, ["-inf"]) == []
+    (failure,) = _held_against(script.replace("# -inf", "# inf"), 2, ["-inf"])
+    assert "the comment says inf where the print wrote -inf" in failure
+    code = (
+        "a, b = 50, 80\nprint(a, b, sep='-')  # 50-80\nprint(a, -b, sep='')  # 50-80\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+
+
 def test_a_spanish_comment_may_write_a_decimal_comma() -> None:
     assert _disagreement("35,9 m", "35.9", decimal_comma=True) == ""
     assert _disagreement("35,9 m", "35.9") != ""

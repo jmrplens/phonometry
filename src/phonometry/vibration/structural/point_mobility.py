@@ -62,7 +62,7 @@ from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
-from ..._internal.types import as_float_or_array
+from ..._internal.types import as_complex_or_array, as_float_or_array
 from ..._internal.validation import (
     complex_array,
     real_array,
@@ -304,13 +304,43 @@ def infinite_plate_mobility(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def infinite_beam_impedance[S: RealScalar](
+    frequency: S,
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: BeamLocation = ...,
+) -> complex: ...
+
+
+@overload
+def infinite_beam_impedance[V: RealValues](
+    frequency: V,
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: BeamLocation = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def infinite_beam_impedance[A: NumericArrayLike](
+    frequency: A,
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: BeamLocation = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def infinite_beam_impedance(
     frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
     location: BeamLocation = "center",
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Point impedance of an infinite beam in bending (Cremer Table 5.1).
 
     :math:`Z = 2 m' c_\mathrm{B} (1 + j)` for a force at the centre of the beam and
@@ -322,7 +352,8 @@ def infinite_beam_impedance(
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :param location: ``"center"`` or ``"end"``.
-    :return: The complex point impedance ``Z``, in N.s/m.
+    :return: The complex point impedance ``Z``, in N.s/m. A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input or unknown location.
     :raises TypeError: if ``mass_per_length`` is not a single number, or ``location`` is
         not a text.
@@ -331,7 +362,37 @@ def infinite_beam_impedance(
     m1 = require_positive(mass_per_length, "mass_per_length")
     c_b = beam_bending_wave_speed(frequency, bending_stiffness, m1)
     z = _BEAM_CONSTANT[location] * m1 * c_b * (1.0 + 1j)
-    return np.asarray(z, dtype=np.complex128)
+    return as_complex_or_array(z, like=(frequency,))
+
+
+@overload
+def infinite_beam_mobility[S: RealScalar](
+    frequency: S,
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: BeamLocation = ...,
+) -> complex: ...
+
+
+@overload
+def infinite_beam_mobility[V: RealValues](
+    frequency: V,
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: BeamLocation = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def infinite_beam_mobility[A: NumericArrayLike](
+    frequency: A,
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: BeamLocation = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def infinite_beam_mobility(
@@ -340,7 +401,7 @@ def infinite_beam_mobility(
     mass_per_length: float,
     *,
     location: BeamLocation = "center",
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Point mobility of an infinite beam in bending (Cremer Table 5.1).
 
     :math:`Y = (1 - j) / (4 m' c_\mathrm{B})` for a force at the centre and
@@ -352,19 +413,44 @@ def infinite_beam_mobility(
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :param location: ``"center"`` or ``"end"``.
-    :return: The complex point mobility ``Y``, in m/(N.s).
+    :return: The complex point mobility ``Y``, in m/(N.s). A ``complex`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input or unknown location.
     :raises TypeError: if ``location`` is not a text.
     """
     z = infinite_beam_impedance(
         frequency, bending_stiffness, mass_per_length, location=location
     )
-    return np.asarray(1.0 / z, dtype=np.complex128)
+    return as_complex_or_array(1.0 / z, like=(frequency,))
+
+
+@overload
+def infinite_beam_moment_mobility[S: RealScalar](
+    frequency: S,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> complex: ...
+
+
+@overload
+def infinite_beam_moment_mobility[V: RealValues](
+    frequency: V,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def infinite_beam_moment_mobility[A: NumericArrayLike](
+    frequency: A,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def infinite_beam_moment_mobility(
     frequency: NumericArrayLike, bending_stiffness: float, mass_per_length: float
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Moment (rotational) mobility of an infinite beam (Cremer Eq. 5.75).
 
     :math:`Y_\mathrm{M} = \omega (1 + j) / (4 B k_\mathrm{B})` with the bending wavenumber
@@ -374,7 +460,8 @@ def infinite_beam_moment_mobility(
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
-    :return: The complex moment mobility ``Y_M``, in rad/(N.m.s).
+    :return: The complex moment mobility ``Y_M``, in rad/(N.m.s). A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_length`` is not a single
         number, or ``frequency`` holds a text or a value that is not a real number.
@@ -385,7 +472,7 @@ def infinite_beam_moment_mobility(
     c_b = beam_bending_wave_speed(frequency, b, m1)
     k_b = omega / c_b
     y = omega * (1.0 + 1j) / (4.0 * b * k_b)
-    return np.asarray(y, dtype=np.complex128)
+    return as_complex_or_array(y, like=(frequency,))
 
 
 # ---------------------------------------------------------------------------

@@ -100,12 +100,13 @@ import functools
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_complex_or_array
 from .._internal.validation import (
     real_array,
     require_choice,
@@ -121,7 +122,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "SIMULATED_PROGRAM_SPECTRUM",
@@ -230,7 +231,23 @@ _BINDING_SLACK_DB = 1e-9
 _LIMIT_SLACK_DB = 1e-9
 
 
-def program_signal_filter(frequencies: NumericArrayLike) -> NDArray[np.complex128]:
+@overload
+def program_signal_filter[S: RealScalar](frequencies: S) -> complex: ...
+
+
+@overload
+def program_signal_filter[V: RealValues](frequencies: V) -> NDArray[np.complex128]: ...
+
+
+@overload
+def program_signal_filter[A: NumericArrayLike](
+    frequencies: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def program_signal_filter(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]:
     r"""The transfer function of the filter of IEC 60268-1:1985 Figure 2.
 
     The voltage across the 10 kohm output resistor over the e.m.f. of the
@@ -241,8 +258,9 @@ def program_signal_filter(frequencies: NumericArrayLike) -> NDArray[np.complex12
 
     :param frequencies: Frequencies, in Hz, any shape; each must be
         positive.
-    :return: The complex response, dimensionless, with the shape of
-        ``frequencies``.
+    :return: The complex response, dimensionless, with the shape of ``frequencies``. A
+        ``complex`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If a frequency is not a positive finite number.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
@@ -271,7 +289,7 @@ def program_signal_filter(frequencies: NumericArrayLike) -> NDArray[np.complex12
     # Solve [[a11, -g2, 0], [-g2, a22, -g3], [0, -g3, a33]] v = [g1, 0, 0].
     determinant = a11 * (a22 * a33 - g3 * g3) - g2 * g2 * a33
     response = g1 * g2 * g3 / determinant
-    return np.asarray(response, dtype=np.complex128)
+    return as_complex_or_array(response, like=(frequencies,))
 
 
 #: The decibel-to-exponent factor, :math:`\ln 10 / 10`.

@@ -101,6 +101,7 @@ from ..._internal.resolve import (
     resolve_pair_fs,
     resolve_samples,
 )
+from ..._internal.types import as_complex_or_array
 from ..._internal.validation import (
     complex_array,
     complex_number,
@@ -133,7 +134,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine, TwoPanels
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+        TwoPanels,
+    )
     from ..._report.metadata import ReportMetadata
 
 Kind = Literal["accelerance", "mobility", "receptance"]
@@ -1481,15 +1488,49 @@ class SingleModeFitResult(OwnsArrays):
         )
         return np.asarray(value, dtype=np.complex128)
 
-    def fitted_frf(self, frequencies: NumericArrayLike) -> NDArray[np.complex128]:
+    @overload
+    def fitted_frf[S: RealScalar](self, frequencies: S) -> complex: ...
+
+    @overload
+    def fitted_frf[V: RealValues](self, frequencies: V) -> NDArray[np.complex128]: ...
+
+    @overload
+    def fitted_frf[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
+
+    def fitted_frf(
+        self, frequencies: NumericArrayLike
+    ) -> complex | NDArray[np.complex128]:
         """The fitted model at any frequencies, window included, of kind :attr:`kind`.
 
         :param frequencies: Frequencies, in hertz.
-        :return: The complex FRF.
+        :return: The complex FRF. A ``complex`` for a number, an array for a sequence or
+            an array, a zero-dimensional one included.
         """
-        return self._synthesize(frequencies, complex(self.pole_rad_s))
+        return as_complex_or_array(
+            self._synthesize(frequencies, complex(self.pole_rad_s)), like=(frequencies,)
+        )
 
-    def corrected_frf(self, frequencies: NumericArrayLike) -> NDArray[np.complex128]:
+    @overload
+    def corrected_frf[S: RealScalar](self, frequencies: S) -> complex: ...
+
+    @overload
+    def corrected_frf[V: RealValues](
+        self,
+        frequencies: V,
+    ) -> NDArray[np.complex128]: ...
+
+    @overload
+    def corrected_frf[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
+
+    def corrected_frf(
+        self, frequencies: NumericArrayLike
+    ) -> complex | NDArray[np.complex128]:
         r"""The mode with the window taken out, of kind :attr:`kind` (Annex A).
 
         The pole is moved back by the decay rate, :math:`p + a`, and the
@@ -1498,24 +1539,46 @@ class SingleModeFitResult(OwnsArrays):
         and nothing else (Formula (A.2)).
 
         :param frequencies: Frequencies, in hertz.
-        :return: The complex FRF.
+        :return: The complex FRF. A ``complex`` for a number, an array for a sequence or
+            an array, a zero-dimensional one included.
         """
         pole = complex(self.pole_rad_s) + self.exponential_decay_rate_per_s
-        return self._synthesize(frequencies, pole)
+        return as_complex_or_array(
+            self._synthesize(frequencies, pole), like=(frequencies,)
+        )
+
+    @overload
+    def corrected_mobility[S: RealScalar](self, frequencies: S) -> complex: ...
+
+    @overload
+    def corrected_mobility[V: RealValues](
+        self,
+        frequencies: V,
+    ) -> NDArray[np.complex128]: ...
+
+    @overload
+    def corrected_mobility[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
 
     def corrected_mobility(
         self, frequencies: NumericArrayLike
-    ) -> NDArray[np.complex128]:
+    ) -> complex | NDArray[np.complex128]:
         """The corrected mode as mobility, in m/(N·s).
 
         :param frequencies: Frequencies, in hertz (> 0).
-        :return: The complex mobility.
+        :return: The complex mobility. A ``complex`` for a number, an array for a
+            sequence or an array, a zero-dimensional one included.
         """
-        return convert_frf(
-            self.corrected_frf(frequencies),
-            frequency=frequencies,
-            source=self.kind,
-            target="mobility",
+        return as_complex_or_array(
+            convert_frf(
+                self.corrected_frf(frequencies),
+                frequency=frequencies,
+                source=self.kind,
+                target="mobility",
+            ),
+            like=(frequencies,),
         )
 
     def plot(

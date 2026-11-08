@@ -46,10 +46,13 @@ from phonometry import (
     fluids,
     hearing,
     materials,
+    metrology,
     noise_control,
     psychoacoustics,
     room,
     signals,
+    simulation,
+    underwater,
     vibration,
 )
 
@@ -76,11 +79,14 @@ class Case:
     :ivar arguments: Keyword arguments that make a valid call, every deciding
         one a Python number.
     :ivar deciding: The arguments whose shape the result follows.
-    :ivar single: What the function returns for numbers: ``float``, or
-        ``str`` for a grade.
+    :ivar single: What the function returns for numbers: ``float``,
+        ``complex`` for a complex result, or ``str`` for a grade.
     :ivar together: Whether the deciding arguments take one shape between
         them (one value per band each) rather than broadcasting, so that a
         sequence is given to all of them at once.
+    :ivar increasing: Whether the deciding argument is an axis that must
+        increase (a frequency axis), so that a sequence of it holds the
+        number and its double rather than the number twice.
     :ivar label: Tells two cases of one function apart.
     """
 
@@ -89,6 +95,7 @@ class Case:
     deciding: tuple[str, ...]
     single: type = float
     together: bool = False
+    increasing: bool = False
     label: str = field(default="")
 
     @property
@@ -112,6 +119,37 @@ def _cases() -> tuple[Case, ...]:
     )
     box = (7.0, 5.0, 3.0)
     impedance = electroacoustics.loop_impedance(2.0, 1.0e-4)
+    record = np.zeros(4800)
+    record[288] = 96000.0
+    record[624] = 0.3 * 96000.0
+    windowed = metrology.time_selective_response(
+        record, 96000.0, window_start_s=0.0025, window_end_s=0.006
+    )
+    microphone = metrology.ReciprocityMicrophone(
+        equivalent_volume_m3=144e-9,
+        resonance_frequency_hz=8200.0,
+        loss_factor=1.0,
+        front_cavity_volume_m3=0.534e-6,
+        front_cavity_depth_m=1.95e-3,
+        front_cavity_diameter_m=18.6e-3,
+    )
+    mode = vibration.SingleModeFitResult(
+        frequencies=np.array([30.0, 40.0, 50.0]),
+        frf=np.array([1.0e-3 + 0.0j, 2.0e-3 + 1.0e-3j, 1.0e-3 + 0.0j]),
+        pole_rad_s=complex(-5.0, 2.0 * np.pi * 40.0),
+        residue=complex(0.0, -1.0e-2),
+        direct_term=0.0j,
+    )
+    contour = simulation.ContourPhasors(
+        frequency=500.0,
+        positions=np.array([[0.1, 0.0], [0.0, 0.1], [-0.1, 0.0], [0.0, -0.1]]),
+        normals=np.array([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0], [0.0, -1.0]]),
+        pressure=np.array([1.0 + 0.0j, 1.0j, -1.0 + 0.0j, -1.0j]),
+        normal_velocity=np.array([1.0e-3 + 0.0j, 1.0e-3j, -1.0e-3 + 0.0j, -1.0e-3j]),
+        segment=0.157,
+    )
+    sdof = {"frequency": 10.0, "mass": 1.0, "stiffness": 1.0e4, "damping": 5.0}
+    beam = {"frequency": 100.0, "bending_stiffness": 1.0e3, "mass_per_length": 10.0}
     amplifier = electroacoustics.amplifier_frequency_response(
         frequencies=[50.0, 100.0, 1000.0, 8000.0],
         output_current_a=[1.0, 1.9, 2.0, 1.5],
@@ -741,6 +779,180 @@ def _cases() -> tuple[Case, ...]:
             {"force_n": 1.0, "mobility": 1.0e-4},
             ("force_n", "mobility"),
         ),
+        # The complex form: a Python complex for numbers.
+        Case(
+            electroacoustics.program_signal_filter,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            metrology.microphone_acoustic_impedance,
+            {
+                "electrical_admittance_s": 1.0e-6,
+                "blocked_impedance_ohm": 1.0e5,
+                "pressure_sensitivity_v_per_pa": 0.05,
+            },
+            (
+                "electrical_admittance_s",
+                "blocked_impedance_ohm",
+                "pressure_sensitivity_v_per_pa",
+            ),
+            single=complex,
+        ),
+        Case(
+            metrology.temperature_transfer_function,
+            {"length_to_diameter_ratio": 0.5, "x": 10.0},
+            ("x",),
+            single=complex,
+        ),
+        Case(
+            metrology.temperature_transfer_function,
+            {"length_to_diameter_ratio": 0.5, "x": 10.0, "method": "approximation"},
+            ("x",),
+            single=complex,
+            label="approximation",
+        ),
+        Case(
+            metrology.air_gap_series_impedance_pa_s_m3,
+            {"frequencies": 1000.0, "gap_length_m": 2.0e-3, "gap_radius_m": 6.35e-3},
+            ("frequencies",),
+            single=complex,
+            increasing=True,
+        ),
+        Case(
+            metrology.free_field_transfer_impedance,
+            {
+                "sensitivity_1_v_per_pa": 0.05,
+                "sensitivity_2_v_per_pa": 0.05,
+                "frequencies": 1000.0,
+                "diaphragm_distance_m": 0.2,
+                "temperature_c": 23.0,
+                "static_pressure_pa": 101325.0,
+                "relative_humidity_percent": 50.0,
+            },
+            ("frequencies",),
+            single=complex,
+            increasing=True,
+        ),
+        Case(
+            windowed.response_at,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            single=complex,
+            increasing=True,
+        ),
+        Case(
+            windowed.record_response_at,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            single=complex,
+            increasing=True,
+        ),
+        Case(
+            microphone.acoustic_impedance_pa_s_m3,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            microphone.complex_equivalent_volume_m3,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            simulation.far_field_from_contour,
+            {"contour": contour, "angles_deg": 30.0},
+            ("angles_deg",),
+            single=complex,
+        ),
+        Case(
+            underwater.reflection_coefficient,
+            {
+                "grazing_angle_deg": 30.0,
+                "rho1": 1025.0,
+                "c1": 1500.0,
+                "rho2": 1800.0,
+                "c2": 1700.0,
+            },
+            ("grazing_angle_deg",),
+            single=complex,
+        ),
+        Case(
+            vibration.seat_to_spine_transfer,
+            {"frequencies": 5.0},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            vibration.band_limitation_response,
+            {"frequencies": 10.0},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            vibration.kb_weighting_response,
+            {"frequencies": 10.0},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            vibration.convert_frf,
+            {
+                "value": 1.0e-4,
+                "source": "receptance",
+                "target": "mobility",
+                "frequency": 100.0,
+            },
+            ("value", "frequency"),
+            single=complex,
+        ),
+        Case(vibration.sdof_receptance, sdof, ("frequency",), single=complex),
+        Case(vibration.sdof_mobility, sdof, ("frequency",), single=complex),
+        Case(vibration.sdof_accelerance, sdof, ("frequency",), single=complex),
+        Case(vibration.base_transmissibility, sdof, ("frequency",), single=complex),
+        Case(vibration.infinite_beam_impedance, beam, ("frequency",), single=complex),
+        Case(vibration.infinite_beam_mobility, beam, ("frequency",), single=complex),
+        Case(
+            vibration.infinite_beam_moment_mobility,
+            beam,
+            ("frequency",),
+            single=complex,
+        ),
+        Case(
+            vibration.blocking_force_ratio,
+            {"driving_point_stiffness": 2.0e6, "termination_stiffness": 1.0e7},
+            ("driving_point_stiffness", "termination_stiffness"),
+            single=complex,
+        ),
+        Case(
+            vibration.transfer_stiffness_direct,
+            {"blocking_force": 10.0, "input_displacement": 1.0e-5},
+            ("blocking_force", "input_displacement"),
+            single=complex,
+        ),
+        Case(
+            vibration.transfer_stiffness_indirect,
+            {
+                "transmissibility": 0.05,
+                "blocking_mass": 50.0,
+                "frequency": 100.0,
+                "flange_mass": 1.0,
+            },
+            ("transmissibility", "frequency"),
+            single=complex,
+        ),
+        Case(mode.fitted_frf, {"frequencies": 40.0}, ("frequencies",), single=complex),
+        Case(
+            mode.corrected_frf, {"frequencies": 40.0}, ("frequencies",), single=complex
+        ),
+        Case(
+            mode.corrected_mobility,
+            {"frequencies": 40.0},
+            ("frequencies",),
+            single=complex,
+        ),
     )
 
 
@@ -834,18 +1046,44 @@ def test_numpy_numbers_give_a_single_value(case: Case, kind: type[np.floating]) 
     assert type(case.call(**changed)) is case.single
 
 
+#: How far a complex value of an array may sit from the value a number gives,
+#: relative to it: numpy divides complex numbers in another order in the loop
+#: over an array than in the one over a single number, and the two differ in
+#: the last bits. A number keeps the bits it always had.
+_COMPLEX_ROUNDING = 4 * np.finfo(np.float64).eps
+
+
+def _same_values(result: object, expected: list[object], single: type) -> None:
+    if single is complex:
+        np.testing.assert_allclose(
+            np.asarray(result), expected, rtol=_COMPLEX_ROUNDING, atol=0.0
+        )
+    else:
+        np.testing.assert_array_equal(np.asarray(result), expected)
+
+
 @pytest.mark.parametrize("case", CASES, ids=_ids)
 def test_a_sequence_gives_an_array(case: Case) -> None:
     """Each deciding argument given as a list makes the result an array."""
     expected = case.call()
     groups = [case.deciding] if case.together else [(name,) for name in case.deciding]
     for names in groups:
-        result = case.call(
-            **{name: [case.arguments[name], case.arguments[name]] for name in names}
-        )
+        if case.increasing:
+            listed = {
+                name: [case.arguments[name], 2.0 * case.arguments[name]]
+                for name in names
+            }
+            doubled = case.call(**{name: 2.0 * case.arguments[name] for name in names})
+            values = [expected, doubled]
+        else:
+            listed = {
+                name: [case.arguments[name], case.arguments[name]] for name in names
+            }
+            values = [expected, expected]
+        result = case.call(**listed)
         assert isinstance(result, np.ndarray), names
         assert result.shape == (2,), names
-        np.testing.assert_array_equal(result, [expected, expected])
+        _same_values(result, values, case.single)
 
 
 @pytest.mark.parametrize("case", CASES, ids=_ids)

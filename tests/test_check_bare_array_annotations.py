@@ -289,7 +289,8 @@ def test_a_class_of_the_package_named_like_numpys_is_not_numpys(
     found = _found(
         tmp_path,
         own="""
-        class ndarray:  # noqa: N801 - the name is the point
+        # The name is the point.
+        class ndarray:  # noqa: N801
             pass
 
 

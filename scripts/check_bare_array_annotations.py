@@ -218,7 +218,8 @@ class _Reader:
                 )
                 self._read_type(value, site, value)
 
-    def _read_scope(  # noqa: PLR0913 - the scope's place, and what it inherits
+    # The scope's place, and what it inherits: six arguments, each needed.
+    def _read_scope(  # noqa: PLR0913
         self,
         node: ast.AST,
         module: str,

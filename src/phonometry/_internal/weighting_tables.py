@@ -12,9 +12,14 @@ apart.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from .validation import real_array
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 __all__ = ["WEIGHTING_TABLE3", "exact_base10"]
 
@@ -86,7 +91,7 @@ _F3 = 737.86223
 _F4 = 12194.217
 
 
-def exact_base10(frequencies: np.ndarray) -> np.ndarray:
+def exact_base10(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Exact base-10 frequencies :math:`1000 \cdot 10^{n/10}`.
 
     IEC 61672-1:2013 Table 3 NOTE: the tabulated weightings are computed
@@ -99,7 +104,9 @@ def exact_base10(frequencies: np.ndarray) -> np.ndarray:
     )
 
 
-def _analytic_weighting_db(curve: str, frequencies: np.ndarray) -> np.ndarray:
+def _analytic_weighting_db(
+    curve: str, frequencies: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Analytic design-goal weighting, re 1 kHz.
 
     For A/C(/Z) this evaluates the exact transfer-function magnitudes of IEC
@@ -114,31 +121,31 @@ def _analytic_weighting_db(curve: str, frequencies: np.ndarray) -> np.ndarray:
     if curve == "Z":
         return np.zeros_like(f)
 
-    def _c_gain(x: np.ndarray) -> np.ndarray:
+    def _c_gain(x: NDArray[np.float64]) -> NDArray[np.float64]:
         x2 = x**2
         return np.asarray(
             (_F4**2 * x2) / ((x2 + _F1**2) * (x2 + _F4**2)), dtype=np.float64
         )
 
-    def _a_gain(x: np.ndarray) -> np.ndarray:
+    def _a_gain(x: NDArray[np.float64]) -> NDArray[np.float64]:
         x2 = x**2
         return np.asarray(
             _c_gain(x) * x2 / np.sqrt((x2 + _F2**2) * (x2 + _F3**2)),
             dtype=np.float64,
         )
 
-    def _b_gain(x: np.ndarray) -> np.ndarray:
+    def _b_gain(x: NDArray[np.float64]) -> NDArray[np.float64]:
         # ANSI S1.4-1983 Formula (C2): W_B = 10 lg(K2 f^2/(f^2 + f5^2)) + W_C
         # (the constant K2 cancels in the 1 kHz normalization below).
         return np.asarray(_c_gain(x) * x / np.sqrt(x**2 + _F5**2), dtype=np.float64)
 
-    def _u_gain(x: np.ndarray) -> np.ndarray:
+    def _u_gain(x: NDArray[np.float64]) -> NDArray[np.float64]:
         # Magnitude of the all-pole U weighting from the Table 2 pole
         # coordinates in Hz (the 2*pi scale cancels in the normalization).
         den = np.prod(1j * x[:, None] - _U_POLES_HZ[None, :], axis=1)
         return np.asarray(1.0 / np.abs(den), dtype=np.float64)
 
-    def _au_gain(x: np.ndarray) -> np.ndarray:
+    def _au_gain(x: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.asarray(_a_gain(x) * _u_gain(x), dtype=np.float64)
 
     gain = {"A": _a_gain, "B": _b_gain, "C": _c_gain, "AU": _au_gain}[curve]

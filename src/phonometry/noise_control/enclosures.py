@@ -132,13 +132,13 @@ class EnclosureInsertionLossResult(OwnsArrays):
     :ivar room_constant: Interior room constant ``R_i`` per band, m2.
     """
 
-    frequencies: np.ndarray | None
-    panel_transmission_loss: np.ndarray
-    correction: np.ndarray
-    insertion_loss: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    panel_transmission_loss: NDArray[np.float64]
+    correction: NDArray[np.float64]
+    insertion_loss: NDArray[np.float64]
     external_area: float
     internal_area: float
-    room_constant: np.ndarray
+    room_constant: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a sheet whose columns do not all run over the same bands.

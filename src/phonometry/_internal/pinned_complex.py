@@ -19,11 +19,14 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import numpy as np
+    from numpy.typing import NDArray
 
 __all__ = ["complex_product", "complex_quotient"]
 
 
-def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
+def _shifted_to(
+    w_ref: float, roots: NDArray[np.float64] | NDArray[np.complex128]
+) -> list[tuple[float, float]]:
     """``j w_ref - r`` for each root, as ``(real, imaginary)``, formed as numpy forms it."""
     return [(0.0 - root.real, w_ref - root.imag) for root in roots.tolist()]
 

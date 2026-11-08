@@ -3538,6 +3538,145 @@ def test_a_call_keeps_what_the_init_it_runs_keeps(tmp_path: pathlib.Path) -> Non
     ]
 
 
+#: Records whose own ``__init__`` hands its values on to the ``__init__`` of
+#: a base it names, past a base before it in their order.
+_NAMED_HAND_OFFS = """
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays, read_only_copy
+
+@dataclass(frozen=True)
+class _Copying:
+    data: NDArray[np.float64]
+
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+@dataclass(frozen=True)
+class _Owning(OwnsArrays):
+    data: NDArray[np.float64]
+
+class _Mixin:
+    def __init__(self):
+        pass
+
+@dataclass(frozen=True)
+class NamedPast(_Mixin, _Copying):
+    def __init__(self, data):
+        _Copying.__init__(self, data)
+
+@dataclass(frozen=True)
+class SuperPast(_Mixin, _Copying):
+    def __init__(self, data):
+        super(_Mixin, self).__init__(data)
+
+@dataclass(frozen=True)
+class NamedMixin(_Copying, _Mixin):
+    def __init__(self, data):
+        _Mixin.__init__(self)
+        object.__setattr__(self, "data", data)
+
+@dataclass(frozen=True)
+class LentPast(_Mixin, _Owning):
+    def __init__(self, data):
+        _Owning.__init__(self, data)
+
+def build_named_past(data):
+    return NamedPast(data)
+
+def build_super_past(data):
+    return SuperPast(data)
+
+def build_named_mixin(data):
+    return NamedMixin(data)
+"""
+
+
+def test_an_init_handed_on_to_is_the_one_its_call_names(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_Copying.__init__(self, data)`` runs the ``__init__`` ``_Copying``
+    looks up, the one ``@dataclass`` wrote for it, which calls the hook that
+    copies ``data``, though ``_Mixin`` comes before it in the order of
+    ``NamedPast``; ``super(_Mixin, self).__init__(data)`` runs the first one
+    after ``_Mixin``, the same. ``_Mixin.__init__`` calls none, though the
+    class after ``NamedMixin`` in its order has one that does: the caller's
+    array is kept. ``LentPast`` hands its values to the ``__init__`` written
+    for ``_Owning``, which calls the hook ``OwnsArrays`` lends.
+
+    Every ``__init__`` a hand-written one named was read as the one of the
+    next class of the order that has one: ``_Mixin``'s for ``NamedPast``,
+    ``SuperPast`` and ``LentPast``, so arrays their hook copies were
+    reported as kept and ``LentPast`` as running no hook, and
+    ``_Copying``'s for ``NamedMixin``, so the array it keeps passed.
+    """
+    found = _findings(tmp_path, runs=_NAMED_HAND_OFFS)
+    assert found == {
+        ("NamedMixin.__init__", "NamedMixin.data", "data"),
+        ("build_named_mixin", "NamedMixin.data", "data"),
+    }
+    root = _package(tmp_path / "unequipped", {"runs": _NAMED_HAND_OFFS})
+    unhooked = [
+        finding.function
+        for finding in caa.records_without_mechanism(sorted(root.rglob("*.py")), root)
+        if finding.function == "LentPast"
+    ]
+    assert unhooked == []
+
+
+def test_a_method_called_through_its_class_takes_the_instance_first(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``Box._first(self, kept, other)`` hands ``self`` to the method's
+    ``self``, ``kept`` to ``kept``; a ``classmethod`` called through the
+    class, ``Box._first_of(kept, other)``, is bound to it, and one called on
+    ``self`` binds ``self``.
+
+    A method called through the class's name was bound as one called on
+    ``self``, so each argument landed one place too far: ``give`` was
+    reported as keeping ``other``, which the method never returns, and not
+    ``kept``.
+    """
+    found = _findings(
+        tmp_path,
+        runs="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        @dataclass(frozen=True)
+        class Rec:
+            data: NDArray[np.float64]
+
+        class Box:
+            def _first(self, kept, other):
+                return kept
+
+            @classmethod
+            def _first_of(cls, kept, other):
+                return kept
+
+            def give(self, kept, other):
+                return Rec(Box._first(self, kept, other))
+
+            def give_bound(self, kept, other):
+                return Rec(self._first(kept, other))
+
+            def give_class(self, kept, other):
+                return Rec(Box._first_of(kept, other))
+        """,
+    )
+    assert found == {
+        ("Box.give", "Rec.data", "kept"),
+        ("Box.give_bound", "Rec.data", "kept"),
+        ("Box.give_class", "Rec.data", "kept"),
+    }
+
+
 #: Records whose constructor takes the fields of their bases in their method
 #: resolution order, which reading each base's own order whole, the last
 #: base's first, does not give.

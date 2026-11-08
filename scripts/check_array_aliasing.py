@@ -1646,9 +1646,9 @@ class Tree:
         own or a base's (:data:`MECHANISM` lends one): a class that is no
         record over it, or a dataclass told ``init=False``, does not change
         that. One written by hand calls it when its body names it, and runs
-        what the next ``__init__`` of the order runs when it hands its
-        values on to one (``super().__init__(...)``, or a base's called by
-        name). A named tuple is built by ``__new__`` and calls none.
+        what each ``__init__`` it hands its values on to runs
+        (:meth:`_handed_on`). A named tuple is built by ``__new__`` and
+        calls none.
         """
         node = info.node
         found = self.hook_cache.get(node)
@@ -1666,9 +1666,25 @@ class Tree:
         """Whether the ``__init__`` one method resolution order runs calls
         ``self.__post_init__`` (:meth:`calls_post_init`).
         """
-        for later in line:
+        return self._calls_from(line, 0, frozenset())
+
+    def _calls_from(
+        self, line: Sequence[ClassInfo], start: int, seen: frozenset[ast.AST | None]
+    ) -> bool:
+        """Whether the ``__init__`` of the first class of *line* from place
+        *start* on with one of its own calls ``self.__post_init__``
+        (:meth:`calls_post_init`).
+
+        *seen* are the ``class`` statements whose written ``__init__`` is
+        being read: a hand-off back to one of them runs nothing it has not
+        run.
+        """
+        for place in range(start, len(line)):
+            later = line[place]
             written = self.running_inits(later)
             if written:
+                if later.node in seen:
+                    return False
                 named = {
                     inner.attr if isinstance(inner, ast.Attribute) else inner.id
                     for definition in written
@@ -1677,9 +1693,13 @@ class Tree:
                 }
                 if "__post_init__" in named:
                     return True
-                if "__init__" in named:
-                    continue
-                return False
+                if "__init__" not in named:
+                    return False
+                seen = seen | {later.node}
+                return any(
+                    starts and all(self._calls_from(*begun, seen) for begun in starts)
+                    for starts in self._handed_on(line, place, written)
+                )
             if _generates_init(later):
                 return all(
                     any(self.lends_hook(base) for base in order)
@@ -1688,6 +1708,85 @@ class Tree:
             if "NamedTuple" in later.bases:
                 return False
         return False
+
+    def _handed_on(
+        self, line: Sequence[ClassInfo], place: int, written: Sequence[FunctionInfo]
+    ) -> Iterator[list[tuple[Sequence[ClassInfo], int]]]:
+        """For each ``<receiver>.__init__(...)`` call of the ``__init__``
+        written for the class at *place* of *line*, the order and the place
+        in it its ``__init__`` is looked up from, for every class the
+        receiver may name; none when it names none the guard can read
+        (``self``, whose ``__init__`` is the one being read).
+
+        ``super().__init__(...)`` looks it up from the class after its own
+        in *line* on, and ``super(Base, self).__init__(...)`` from the class
+        after ``Base``. ``Base.__init__(self, ...)`` looks it up through the
+        order of ``Base``, the class it names, so a base before ``Base`` in
+        *line*, which a lookup from the next class on would find, is passed
+        over: its place in *line* is that of the first class of an order of
+        ``Base`` that has an ``__init__`` of its own.
+        """
+        for definition in written:
+            for node in ast.walk(definition.node):
+                if not (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "__init__"
+                ):
+                    continue
+                receiver = node.func.value
+                if (
+                    isinstance(receiver, ast.Call)
+                    and isinstance(receiver.func, ast.Name)
+                    and receiver.func.id == "super"
+                ):
+                    if not receiver.args:
+                        yield [(line, place + 1)]
+                        continue
+                    yield [
+                        (line, at + 1)
+                        for named in self._classes_named(definition, receiver.args[0])
+                        for at, later in enumerate(line)
+                        if later is named
+                    ]
+                    continue
+                yield [
+                    _placed(line, order, self._first_init(order))
+                    for named in self._classes_named(definition, receiver)
+                    for order in self.linearizations(named)
+                ]
+
+    def _first_init(self, order: Sequence[ClassInfo]) -> int:
+        """The place in *order* of the first class with an ``__init__`` of
+        its own, written in its body or generated by ``@dataclass``, or of
+        the first named tuple; past the last class when only ``object``'s
+        runs.
+        """
+        return next(
+            (
+                place
+                for place, later in enumerate(order)
+                if self.running_inits(later)
+                or _generates_init(later)
+                or "NamedTuple" in later.bases
+            ),
+            len(order),
+        )
+
+    def _classes_named(
+        self, definition: FunctionInfo, expr: ast.expr
+    ) -> list[ClassInfo]:
+        """The classes of the package *expr*, read in *definition*, may
+        stand for there (:meth:`named_at`, :meth:`classes_stood`).
+        """
+        pins: _Pins = {}
+        keys = self.named_at(definition.module, expr, pins=pins)
+        return [
+            stood
+            for key in keys
+            if key in self.classes
+            for stood in self.classes_stood(key, pins)
+        ]
 
     def lends_hook(self, info: ClassInfo) -> bool:
         """Whether a class has a ``__post_init__`` of its own, written in its
@@ -1748,6 +1847,23 @@ class Tree:
         )
         self.attribute_cache[key] = annotation
         return annotation
+
+
+def _placed(
+    line: Sequence[ClassInfo], order: Sequence[ClassInfo], place: int
+) -> tuple[Sequence[ClassInfo], int]:
+    """Where the class at *place* of *order* stands in *line*, the method
+    resolution order of the instance being built, when it stands there, and
+    in *order* otherwise: an ``__init__`` it hands its values on to with
+    ``super()`` is read on from there.
+    """
+    if place < len(order):
+        found = next(
+            (at for at, later in enumerate(line) if later is order[place]), None
+        )
+        if found is not None:
+            return line, found
+    return order, place
 
 
 def _inside(module: str, package: str) -> bool:
@@ -2807,7 +2923,9 @@ class Reader:
                 return flat(receiver)
             target = self.method_target(func)
             if target is not None:
-                return self.apply(target, node, arguments, keywords, bound=True)
+                return self.apply(
+                    target, node, arguments, keywords, bound=self.binds(func, target)
+                )
             module = self.module_of(func.value)
             if module is not None:
                 pins: _Pins = {}
@@ -2935,6 +3053,19 @@ class Reader:
         if isinstance(node, ast.Name):
             return self.tree.resolve_module(self.module, node.id)
         return None
+
+    def binds(self, func: ast.Attribute, target: tuple[str, str]) -> bool:
+        """Whether a call of the method *target* fills its first parameter
+        itself: one on ``self`` or ``cls`` does, and one through the class's
+        name, ``Owner.method(self, ...)``, takes the instance as its first
+        argument, but for a ``classmethod``, which the class binds.
+        """
+        if isinstance(func.value, ast.Name) and func.value.id in {"self", "cls"}:
+            return True
+        return any(
+            definition.kind == "classmethod"
+            for definition in self.tree.definitions.get(target, [])
+        )
 
     def method_target(self, func: ast.Attribute) -> tuple[str, str] | None:
         """The method ``self.name`` or ``cls.name`` names, in the class read."""

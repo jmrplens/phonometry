@@ -25,6 +25,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..noise_control._cabin_insulation import CabinInsulationResult
@@ -240,11 +241,11 @@ _LEGEND_MAX_SERIES = 10
 _LEGEND_SINGLE_COLUMN_MAX = 4
 
 
-def _cascade_series(result: DuctPathResult) -> list[tuple[str, np.ndarray]]:
+def _cascade_series(result: DuctPathResult) -> list[tuple[str, NDArray[np.float64]]]:
     """The labelled spectra of a duct path, from the source to the receiver."""
     if result.contributions:
         return [(name, np.asarray(values)) for name, values in result.contributions]
-    series: list[tuple[str, np.ndarray]] = [
+    series: list[tuple[str, NDArray[np.float64]]] = [
         (result.source_label, np.asarray(result.source_level))
     ]
     series += [(stage.label, np.asarray(stage.levels)) for stage in result.stages]

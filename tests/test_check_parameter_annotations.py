@@ -2541,6 +2541,73 @@ def test_an_init_option_is_read_through_the_name_that_holds_it(
     assert sorted((f.function, f.parameter) for f in found) == expected
 
 
+def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record whose body binds ``__init__ = _Checker.__init__`` keeps that
+    one, which ``@dataclass`` does not replace: ``_ChecksThroughAssigned(n)``
+    runs ``_Checker.__init__``, which checks the count, and
+    ``_SkipsThroughAssigned(n)`` runs ``_Quiet.__init__``, which never calls
+    the hook that would.
+
+    The assignment was passed over for the ``__init__`` ``@dataclass``
+    would write: the count checked passed as ``int``, and the one never
+    checked was reported through the hook.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["assigned_checks", "assigned_skips"]
+
+
+            class _Checker:
+                def __init__(self, n: int = 1) -> None:
+                    object.__setattr__(self, "n", require_count(n, "n"))
+
+
+            class _Quiet:
+                def __init__(self, n: int = 1) -> None:
+                    object.__setattr__(self, "n", n)
+
+
+            @dataclass(frozen=True)
+            class _ChecksThroughAssigned:
+                n: int = 1
+
+                __init__ = _Checker.__init__
+
+
+            @dataclass(frozen=True)
+            class _SkipsThroughAssigned:
+                n: int = 1
+
+                __init__ = _Quiet.__init__
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(self, "n", require_count(self.n, "n"))
+
+
+            def assigned_checks(n: int) -> _ChecksThroughAssigned:
+                return _ChecksThroughAssigned(n)
+
+
+            def assigned_skips(n: int) -> _SkipsThroughAssigned:
+                return _SkipsThroughAssigned(n)
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("assigned_checks", "n"),
+    ]
+
+
 def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument(
     tmp_path: pathlib.Path,
 ) -> None:

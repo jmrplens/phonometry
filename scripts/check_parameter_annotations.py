@@ -200,6 +200,7 @@ from ast_scan import (
     argument_places,
     argument_reach,
     is_type_checking_block,
+    last_class_binding,
     module_constant,
     own_names,
     python_files,
@@ -2314,16 +2315,38 @@ class Reader:
         )
 
     def _writes_init(self, owner: str) -> bool:
-        """Whether *owner* writes an ``__init__`` that runs: one in its body,
-        not the one it declares for the type checker alone
-        (:func:`_declared_constructor`), which no run defines.
+        """Whether *owner* writes an ``__init__`` that runs: a ``def`` in its
+        body, not the one it declares for the type checker alone
+        (:func:`_declared_constructor`), which no run defines, or an
+        assignment of one (:meth:`_init_of`).
         """
+        return self._init_of(owner) is not None
+
+    def _defines_init(self, owner: str) -> bool:
+        """Whether *owner*'s body writes a ``def __init__`` a run defines."""
         function = self.package.functions.get(f"{owner}.__init__")
         if function is None or function.implementation is None:
             return False
         return function.implementation is not _declared_constructor(
             self.annotations, owner
         )
+
+    def _init_of(self, owner: str) -> str | None:
+        """The function the ``__init__`` *owner* writes in its body is, by
+        its dotted name: the ``def`` (:meth:`_defines_init`), or what the
+        last binding of the name assigns, ``__init__ = _Checker.__init__``,
+        which ``@dataclass`` keeps in place of the one it would write; ``""``
+        for an assignment of something the reader cannot tell, and ``None``
+        when the body writes none.
+        """
+        entry = self.annotations.classes.get(owner)
+        if entry is not None:
+            module, node = entry
+            last = last_class_binding(node, "__init__")
+            if isinstance(last, ast.Assign | ast.AnnAssign) and last.value is not None:
+                dotted = self.package.resolve(module, last.value)
+                return dotted if dotted in self.package.functions else ""
+        return f"{owner}.__init__" if self._defines_init(owner) else None
 
     def _initializer(self, owner: str, *, after: str | None = None) -> str | None:
         """The class whose ``__init__`` a call of *owner* runs: the first
@@ -2473,7 +2496,7 @@ class Reader:
                     if init_fields(self.package, self.annotations, runs)
                     else ("", False)
                 )
-            method: str | None = f"{runs}.__init__"
+            method: str | None = self._init_of(runs) or None
         elif after is not None:
             method = self._inherited(owner, func.attr, after)
         else:
@@ -2589,8 +2612,10 @@ class Reader:
         runs = self._initializer(owner)
         if runs is None:
             return None
-        written = f"{runs}.__init__"
         if self._writes_init(runs):
+            written = self._init_of(runs)
+            if not written:
+                return None
             node = self.package.functions[written].implementation
             # A class method is bound to its class however it is called, so
             # ``Class.__init__(n)`` hands ``n`` to the parameter after ``cls``.

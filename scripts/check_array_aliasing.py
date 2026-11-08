@@ -173,6 +173,7 @@ from ast_scan import (
     for_the_type_checker,
     global_bindings,
     imported_names,
+    last_class_binding,
     live_bindings,
     live_class_members,
     module_constant,
@@ -1674,6 +1675,19 @@ class Tree:
         """
         return self.running_methods(info, "__init__")
 
+    def assigns_init(self, info: ClassInfo) -> bool:
+        """Whether the last binding of ``__init__`` a ``class`` statement
+        makes in its own body is an assignment, ``__init__ =
+        _Keeper.__init__``: the class then holds that function, which
+        ``@dataclass`` keeps in place of the one it would write, and which
+        the guard reads as an ``__init__`` written by hand it cannot follow.
+        """
+        node = info.node
+        if not isinstance(node, ast.ClassDef):
+            return False
+        last = last_class_binding(node, "__init__")
+        return isinstance(last, ast.Assign | ast.AnnAssign)
+
     def calls_post_init(self, info: ClassInfo) -> bool:
         """Whether the ``__init__`` a call of *info* runs calls
         ``self.__post_init__``, in every method resolution order the class
@@ -1724,6 +1738,8 @@ class Tree:
         """
         for place in range(start, len(line)):
             later = line[place]
+            if self.assigns_init(later):
+                return False
             written = self.running_inits(later)
             if written:
                 if later.node in seen:
@@ -1836,6 +1852,7 @@ class Tree:
                 place
                 for place, later in enumerate(order)
                 if self.running_inits(later)
+                or self.assigns_init(later)
                 or self.generates_init(later) is not False
                 or "NamedTuple" in later.bases
             ),
@@ -1915,7 +1932,7 @@ class Tree:
         for line in self.linearizations(info):
             runs: ClassInfo | None = None
             for later in line:
-                if self.running_inits(later):
+                if self.running_inits(later) or self.assigns_init(later):
                     break
                 generated = self.generates_init(later)
                 if generated or "NamedTuple" in later.bases:

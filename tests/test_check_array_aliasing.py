@@ -5089,6 +5089,62 @@ def test_the_hook_a_call_runs_is_the_one_its_order_resolves(
     assert _findings(tmp_path, records=source) == expected
 
 
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        (
+            """
+            @dataclass(frozen=True)
+            class Rec:
+                data: NDArray[np.float64]
+
+                __init__ = _Keeper.__init__
+
+                def __post_init__(self):
+                    object.__setattr__(self, "data", read_only_copy(self.data))
+            """,
+            {("make", "Rec.data", "data")},
+        ),
+        (
+            """
+            @dataclass(frozen=True)
+            class Rec:
+                data: NDArray[np.float64]
+
+                def __post_init__(self):
+                    object.__setattr__(self, "data", read_only_copy(self.data))
+            """,
+            set(),
+        ),
+    ],
+    ids=["assigned", "generated"],
+)
+def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
+    tmp_path: pathlib.Path, body: str, expected: set[tuple[str, str, str]]
+) -> None:
+    """A record whose body binds ``__init__ = _Keeper.__init__`` keeps that
+    one, which ``@dataclass`` does not replace: a call runs it, and it
+    keeps the caller's array and calls no hook, so the copying hook never
+    runs. With no assignment, the generated one runs and calls the hook.
+
+    The assignment was passed over for the ``__init__`` ``@dataclass``
+    would write, which calls the hook, so the copy was credited.
+    """
+    source = (
+        _RECORDS_HEAD
+        + textwrap.dedent(
+            """
+            class _Keeper:
+                def __init__(self, data):
+                    object.__setattr__(self, "data", data)
+            """
+        )
+        + textwrap.dedent(body)
+        + "\ndef make(data):\n    return Rec(data)\n"
+    )
+    assert _findings(tmp_path, records=source) == expected
+
+
 #: A record with no hook, one over it whose hook copies, and a record whose
 #: ``__init__`` is written by hand over that.
 _HAND_WRITTEN_HEAD = """

@@ -632,6 +632,36 @@ def spells(value: ast.expr | None, name: str, owners: Collection[str] = ()) -> b
     return isinstance(head, ast.Name) and (not owners or head.id in owners)
 
 
+def last_class_binding(node: ast.ClassDef, name: str) -> ast.stmt | None:
+    """The last statement of a class body that binds *name* itself, a
+    ``def`` or an assignment of it alone (``__init__ = _Keeper.__init__``),
+    or ``None``: the one the class holds once its body has run. A binding
+    under a block, ``if TYPE_CHECKING:`` among them, is not read.
+    """
+    return next(
+        (child for child in reversed(node.body) if _binds_itself(child, name)), None
+    )
+
+
+def _binds_itself(statement: ast.stmt, name: str) -> bool:
+    """Whether a statement of a class body binds *name* by a ``def`` or by
+    an assignment of it alone (:func:`last_class_binding`).
+    """
+    if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef):
+        return statement.name == name
+    if isinstance(statement, ast.Assign):
+        return any(
+            isinstance(target, ast.Name) and target.id == name
+            for target in statement.targets
+        )
+    return (
+        isinstance(statement, ast.AnnAssign)
+        and isinstance(statement.target, ast.Name)
+        and statement.target.id == name
+        and statement.value is not None
+    )
+
+
 #: What :func:`module_constant` gives for a value it cannot read.
 UNREAD = object()
 

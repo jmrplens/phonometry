@@ -1695,6 +1695,38 @@ def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
     assert ast_scan.assignment_target(statement) is None
 
 
+def test_the_last_binding_of_a_class_body_is_the_one_the_class_holds() -> None:
+    """``last_class_binding`` gives the last ``def`` or assignment of a name
+    in a class body, the one the class holds; a binding under a block is
+    not read, and a name the body never binds gives ``None``.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            class Assigned:
+                def __init__(self): ...
+                __init__ = Other.__init__
+
+            class Defined:
+                __init__ = Other.__init__
+                def __init__(self): ...
+
+            class Hidden:
+                if TYPE_CHECKING:
+                    __init__ = Other.__init__
+            """
+        )
+    )
+    assigned, defined, hidden = tree.body
+    assert isinstance(assigned, ast.ClassDef)
+    assert isinstance(defined, ast.ClassDef)
+    assert isinstance(hidden, ast.ClassDef)
+    assert isinstance(ast_scan.last_class_binding(assigned, "__init__"), ast.Assign)
+    assert isinstance(ast_scan.last_class_binding(defined, "__init__"), ast.FunctionDef)
+    assert ast_scan.last_class_binding(hidden, "__init__") is None
+    assert ast_scan.last_class_binding(assigned, "missing") is None
+
+
 def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
     """``module_constant`` reads a constant, or a name its module binds once
     by an assignment to it alone; a name bound twice, imported, or bound to

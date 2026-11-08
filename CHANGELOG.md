@@ -5157,9 +5157,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **A function of a number or an array of them returns a `float` for numbers
   (a `complex` where its result is complex) and an array for an array, a
-  zero-dimensional one included, and says so in its signature.** Two hundred
-  and forty-seven public functions and methods follow the rule. Ninety of them, such as `room.room_constant`,
-  `room.critical_distance`,
+  zero-dimensional one included, and says so in its signature.** Three hundred
+  and thirty-three public functions and methods follow the rule. Ninety of
+  them, such as `room.room_constant`, `room.critical_distance`,
   `fluids.sea_water_sound_speed` and `vibration.evaluation_zone`, returned a
   `float` (or a grade) for a zero-dimensional array, most of them annotated
   `float | ndarray` with no overload, so a typed caller narrowed a value its
@@ -5168,8 +5168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   one, and an array as soon as one of them is a sequence or an array:
   `np.array(0.2)` gives a zero-dimensional array, and a one-element list a
   one-element array, where the ISO 11200 functions returned a `float` for any
-  one-element input:
-  `emission.local_environmental_correction`,
+  one-element input: `emission.local_environmental_correction`,
   `emission.environmental_ratio_from_k2`,
   `emission.environmental_ratio_from_absorption`, and the
   `background_margin_db` field and the `correction` property of the
@@ -5177,8 +5176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `emission.background_noise_correction_at_workstation` returns.
   `piston_resistance`, `piston_reactance` and `piston_directivity` return a
   Python `float` for a number, where they returned `numpy.float64`. The other
-  sixty-six returned a zero-dimensional array or a numpy scalar for
-  numbers: twenty of `building` (`building.mass_law_transmission_loss`,
+  sixty-six returned a zero-dimensional array or a numpy scalar for numbers:
+  twenty of `building` (`building.mass_law_transmission_loss`,
   `building.coupling_term`, `building.background_correction` and the
   structure-borne power and installed-source functions beside them), with
   `building.surface_pressure_intensity_indicator` and
@@ -5187,8 +5186,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `emission.reverberation_parameter` and the others of the sound power and
   intensity standards); `environment.air_attenuation`,
   `environment.air_power_attenuation_per_m`,
-  `environment.predicted_prominence` and `environment.impulse_adjustment`;
-  the induction loop functions of `electroacoustics` (`field_strength`,
+  `environment.predicted_prominence` and `environment.impulse_adjustment`; the
+  induction loop functions of `electroacoustics` (`field_strength`,
   `field_strength_level`, `magnetic_flux_density`, `telecoil_response`) and
   the `at` and `drive_voltage` methods of `LoopImpedance` and the `at` of
   `AmplifierFrequencyResponse`; `hearing.age_and_noise_threshold`; the three
@@ -5197,20 +5196,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`vibration.corner_transmission_coefficient`, `vibration.loss_factor`,
   `vibration.injected_power`, `vibration.ultimate_strength`,
   `vibration.phase_tolerance_deg` and the others of the junction, transfer
-  stiffness and point mobility models). They return a
-  `float` for numbers now, `building.composite_transmission_loss` and
+  stiffness and point mobility models). They return a `float` for numbers now,
+  `building.composite_transmission_loss` and
   `building.total_structure_borne_pressure_level` a `float` when they reduce
   to one number, and the levels of the `SurveyServiceEquipmentResult` that
   `building.survey_service_equipment_level` returns are floats for single
-  readings; the values are the same bits.
-  A function whose result is complex follows the rule in its complex form, a
-  Python `complex` for numbers and a `complex128` array otherwise, through
-  `as_complex_or_array`: forty-four of them, the single degree of freedom
-  mobilities and `vibration.convert_frf`, the infinite beam impedances and
-  mobilities, the transfer stiffnesses, `vibration.blocking_force_ratio`,
-  `vibration.base_transmissibility`, the fitted and corrected modes of a
-  `vibration.SingleModeFitResult`, `vibration.seat_to_spine_transfer`, the
-  two responses of the vibration meter, `underwater.reflection_coefficient`,
+  readings; the values are the same bits. A function whose result is complex
+  follows the rule in its complex form, a Python `complex` for numbers and a
+  `complex128` array otherwise, through `as_complex_or_array`: forty-four of
+  them, the single degree of freedom mobilities and `vibration.convert_frf`,
+  the infinite beam impedances and mobilities, the transfer stiffnesses,
+  `vibration.blocking_force_ratio`, `vibration.base_transmissibility`, the
+  fitted and corrected modes of a `vibration.SingleModeFitResult`,
+  `vibration.seat_to_spine_transfer`, the two responses of the vibration
+  meter, `underwater.reflection_coefficient`,
   `simulation.far_field_from_contour`,
   `electroacoustics.program_signal_filter`, the impedances, volumes and
   transfer impedances of `metrology`, the surface impedances, admittance,
@@ -5226,47 +5225,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   alias of a complex array that the census of returns had not read. Twenty
   real results of `materials` and `environment` named the same way (the air
   properties of ISO 10534-2, ASTM E2611 and ISO 17497-1, the absorption
-  coefficients and the uncertainty of ISO 17497-1, the absorptions read from
-  a reflection factor, a standing wave ratio or an impedance, the scattering
-  and diffusion coefficients, the tube attenuation constant and
+  coefficients and the uncertainty of ISO 17497-1, the absorptions read from a
+  reflection factor, a standing wave ratio or an impedance, the scattering and
+  diffusion coefficients, the tube attenuation constant and
   `environment.kurze_anderson_attenuation`),
   `aircraft.MeanGroundPlaneResult.height` and
   `environment.EffectiveSoundSpeedProfile.speed_at` returned a
-  zero-dimensional array for numbers, and `materials.reverberation_time_uncertainty`
-  and `emission.mean_single_event_level` one for a sequence they reduce; they
-  return a `float` now. The twenty-two functions of the
-  detailed building model and `electroacoustics.band_limit_response`
-  returned a one-element array for a number and for a zero-dimensional
-  array, because the check of their frequencies or levels made either
-  one-dimensional; they return a `float` and a zero-dimensional array now.
-  The values are the same bits. Two hundred and twelve of them have
-  overloads, so `room.room_constant(100.0, 0.2)`
-  reads as a `float`, `room.room_constant(100.0, alphas)` as an array
-  whatever the shape of `alphas`, and an `ArrayLike` or a nested list as the
-  union. The heads
-  take their arguments as type parameters bounded by those forms, so that an
-  argument whose type holds an explicit `Any` (a bare `np.ndarray`, or what
-  `np.array(...)` returns) reads as an array too:
+  zero-dimensional array for numbers, and
+  `materials.reverberation_time_uncertainty` and
+  `emission.mean_single_event_level` one for a sequence they reduce; they
+  return a `float` now. The twenty-two functions of the detailed building
+  model and `electroacoustics.band_limit_response` returned a one-element
+  array for a number and for a zero-dimensional array, because the check of
+  their frequencies or levels made either one-dimensional; they return a
+  `float` and a zero-dimensional array now. Eighty-four functions and methods
+  more gave a one-element array for a number and for a zero-dimensional array,
+  because the check of their frequencies, levels, distances or areas made
+  either one-dimensional: `aircraft.atmospheric_adjustment`,
+  `aircraft.diffraction_attenuation` and `aircraft.ground_effect_adjustment`;
+  in `building`, `acceleration_level`, `band_mode_count`,
+  `direction_averaged_level_difference`, `equivalent_absorption_length`,
+  `fast_reverberation_correction`, `modal_overlap_factor`,
+  `normalized_ceiling_attenuation`, `partition_referenced_reduction_index`,
+  `plate_loss_factor`, `resilient_mount_improvement`,
+  `short_pulse_mean_square_force`, `total_loss_factor`,
+  `velocity_level_difference` and `vibration_reduction_index_from_flanking`;
+  `electroacoustics.weighting_bs468`; in `emission`,
+  `in_duct_reproducibility`, `directionality_tolerance`,
+  `inverse_square_law_tolerance`, `min_analyzer_bandwidth`,
+  `plant_air_absorption_db_per_m`, `reverberation_background_correction`,
+  `room_absorption_coefficient`, `room_constant_from_air_absorption`,
+  `room_constant_from_reverberation_time` and
+  `ReferenceSourceCalibration.sound_power_level_at`; in `environment`,
+  `barrier_background_correction`, `fresnel_number` and
+  `line_source_segment_power`; `hearing.reat_expanded_uncertainty`; in
+  `materials`, `air_absorption_correction` and
+  `spot_internal_loss_correction`; `metrology.RectangularPulse.level_at` and
+  `metrology.RectangularPulse.spectrum_at`; in `noise_control`,
+  `band_internal_levels`, `cavitation_distribution`, `duct_sound_power_level`,
+  `flow_noise_power_level`, `flow_velocity_m_s`, `insertion_level_difference`,
+  `measured_transmission_loss`, `open_end_reflection_coefficient`,
+  `open_end_transmission_loss`, `reverberant_surface_area_m2`,
+  `silencer_background_correction`, `silencer_sound_power_level`,
+  `substitution_insertion_loss`, `transmission_level_difference`,
+  `transmission_loss_correction`, `turbulent_distribution` and
+  `velocity_pressure_pa`; in `room`, `corrected_distribution_value`,
+  `floor_reference_value`, `level_excess`, `reference_distribution_value` and
+  `sound_distribution_value`; in `underwater`, `seawater_absorption`,
+  `spreading_loss`, `thermal_noise_spectrum` and `wind_noise_spectrum`; and in
+  `vibration`, `assessment_weighting_response`, `band_limiting_factors`,
+  `beam_modal_density`, `blast_peak_velocity_mm_s`,
+  `cylindrical_shell_modal_density`, `elastic_insertion_loss`,
+  `far_field_velocity_mm_s`, `foundation_to_floor_level_difference`,
+  `ground_attenuation_coefficient_per_m`, `ground_transmission`,
+  `impact_peak_velocity_mm_s`, `kb_weighted_levels`,
+  `material_damping_factor`, `passage_energy_spectral_density`,
+  `predict_floor_spectrum`, `rescale_emission_for_speed`,
+  `spectral_density_level`, `train_kb_fmax`, `train_velocity_ratio`,
+  `velocity_psd_from_voltage`, `velocity_spectrum_um_s` and
+  `weighting_factors`. They return a `float` and a zero-dimensional array now,
+  and a one-element sequence the one-element array it gave. The `level_at` and
+  `phase_deg_at` of `metrology.TimeSelectiveResponse` returned the numpy
+  scalar that the absolute value or the angle of the complex response gives
+  for a number and for a zero-dimensional array; they return a `float` and a
+  zero-dimensional array now. The values are the same bits. Two hundred and
+  ninety-seven of them have overloads, so `room.room_constant(100.0, 0.2)`
+  reads as a `float`, `room.room_constant(100.0, alphas)` as an array whatever
+  the shape of `alphas`, and an `ArrayLike` or a nested list as the union. The
+  heads take their arguments as type parameters bounded by those forms, so
+  that an argument whose type holds an explicit `Any` (a bare `np.ndarray`, or
+  what `np.array(...)` returns) reads as an array too:
   `room.room_constant(100.0, np.array([0.2, 0.3]))` is an
   `NDArray[np.float64]` to mypy, where heads written with the plain forms
   answered `Any`. The reducers (the `signals` levels, `signals.ln_levels`
   among them, `broadcast.true_peak_level`, `building.energy_average_level`,
   `room.directivity_energy_average` and their kin), the predictions that read
   their bands from the surfaces they are given, the two properties,
-  `room.reverberation_time_standard_deviation`, `room.steady_state_spl`,
-  the four flanking paths of the detailed building model and three ISO
-  17497-1 absorption coefficients and the uncertainty of one keep the union
-  with the rule at run time. `tests/test_census_of_number_returns.py` calls
-  every public function and method it can call with numbers alone and fails
-  a zero-dimensional array, a one-element array or a numpy scalar for them,
-  which a function annotated as an array alone gave past the check; it names
-  the 96 functions and methods whose validator still makes a number
-  one-dimensional, which follow later. `scripts/check_return_overloads.py` also fails on a
-  single value and an array in one return with no overload saying which, and
-  on a `float` head beside a complex array or a `complex` beside a real one,
-  rule A57 states both forms, the
-  API reference shows each head with the bounds of its type parameters, and
-  the upgrading guide maps the change.
+  `room.reverberation_time_standard_deviation`, `room.steady_state_spl`, the
+  four flanking paths of the detailed building model,
+  `building.vibration_reduction_index_from_flanking` and three ISO 17497-1
+  absorption coefficients and the uncertainty of one keep the union with the
+  rule at run time. `tests/test_census_of_number_returns.py` calls every
+  public function and method it can call with numbers alone and fails a
+  zero-dimensional array, a one-element array or a numpy scalar for them,
+  which a function annotated as an array alone gave past the check; it names,
+  with the reason, only the calls whose result is no function of a number,
+  such as a time record or the bands a record holds.
+  `scripts/check_return_overloads.py` also fails on a single value and an
+  array in one return with no overload saying which, and on a `float` head
+  beside a complex array or a `complex` beside a real one, rule A57 states
+  both forms, the API reference shows each head with the bounds of its type
+  parameters, and the upgrading guide maps the change.
+
+- **A four-pole matrix of one frequency is a `(2, 2)` matrix.**
+  `noise_control.duct_matrix` and `noise_control.shunt_matrix` returned a
+  stack of one matrix, of shape `(1, 2, 2)`, for one frequency or one
+  impedance; they return the `(2, 2)` matrix alone for a number or a
+  zero-dimensional array, and the `(n_freq, 2, 2)` stack for a sequence or an
+  array as before. `noise_control.cascade` multiplies matrices alone into a
+  matrix, where 4.0.0rc1 refused them, and stacks into a stack, and refuses a
+  matrix alone beside a stack with a `ValueError` that names it;
+  `noise_control.transmission_loss` and `noise_control.insertion_loss` return
+  a `float` for a matrix alone, where they raised an `IndexError`, and one
+  value per frequency for a stack, with the rank of the matrix as their reason
+  in the `EXEMPT` of `scripts/check_return_overloads.py`. A stack of one,
+  `matrix[np.newaxis]`, gives the one-element array it gave, and the values
+  are the same bits; rule A57 and the upgrading guide say so.
 
 - **An overload head that promises a float array back takes only the arrays
   the call reads as real.** The form of several real numbers an overload

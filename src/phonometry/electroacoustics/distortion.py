@@ -31,13 +31,14 @@ are built on the spectrum, notch and weighting helpers of this module.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.itu_r_468 import itu_r_468_prototype
 from .._internal.resolve import apply_calibration, resolve_fs
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -54,7 +55,7 @@ if TYPE_CHECKING:
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import NumericArrayLike, WindowSpec
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, WindowSpec
 
 __all__ = [
     "HarmonicDistortionResult",
@@ -556,7 +557,21 @@ def sinad(
     return float(-thdn_db)
 
 
-def weighting_bs468(frequencies: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def weighting_bs468[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def weighting_bs468[V: RealValues](frequencies: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def weighting_bs468[A: NumericArrayLike](
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def weighting_bs468(frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""ITU-R BS.468-4 weighting response, in dB re 1 kHz.
 
     Clause 1 of the Recommendation defines the nominal curve as the response
@@ -589,7 +604,8 @@ def weighting_bs468(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     between six mask frequencies rather than all 21.)
 
     :param frequencies: Frequencies, in Hz (scalar or array-like, >= 0).
-    :return: Response in dB re the 1 kHz value, same shape as the input.
+    :return: Response in dB re the 1 kHz value, same shape as the input. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for negative or non-finite frequencies.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
@@ -606,7 +622,7 @@ def weighting_bs468(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     # The zero at the origin is exactly that: dc is blocked, not merely
     # attenuated, so log10(0) -> -inf is the answer and not an edge case.
     with np.errstate(divide="ignore"):
-        return np.asarray(20.0 * np.log10(magnitude), dtype=np.float64)
+        return as_float_or_array(20.0 * np.log10(magnitude), like=(frequencies,))
 
 
 def _weighted_rms_468(x: NDArray[np.float64], fs: float) -> float:

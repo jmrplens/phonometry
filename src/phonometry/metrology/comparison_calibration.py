@@ -217,7 +217,12 @@ from scipy import special
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
-from .._internal.types import CALIBRATION_FIELDS, CalibrationField, as_complex_or_array
+from .._internal.types import (
+    CALIBRATION_FIELDS,
+    CalibrationField,
+    as_complex_or_array,
+    as_float_or_array,
+)
 from .._internal.validation import (
     real_array,
     refuse_text,
@@ -3929,30 +3934,58 @@ class RectangularPulse(RichDisplay):
         r""":math:`X(0) = 2ab`, the area of the pulse, in V·s."""
         return self.amplitude_v * self.duration_s
 
-    def spectrum_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def spectrum_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def spectrum_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def spectrum_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def spectrum_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`X(f)` of Formula (B.10), in V·s, the transform of the pulse
         centred on the time origin, where it is real.
 
         :param frequencies: Any frequencies, in Hz.
-        :return: :math:`X(f)` at each.
+        :return: :math:`X(f)` at each. A ``float`` for a number, an array for a sequence
+            or an array, a zero-dimensional one included.
         :raises ValueError: for a frequency that is not finite.
         :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
             number.
         """
-        frequencies = require_finite_array(frequencies, "frequencies")
+        f = require_finite_array(frequencies, "frequencies")
         # numpy's sinc is sin(pi x)/(pi x): with x = 2 f b it is (B.10) over 2ab.
-        return self.area_v_s * np.sinc(frequencies * self.duration_s)
+        return as_float_or_array(
+            self.area_v_s * np.sinc(f * self.duration_s), like=(frequencies,)
+        )
 
-    def level_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def level_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def level_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def level_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def level_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`20\lg\lvert X(f)/X(0)\rvert`, how far the spectrum has
         fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 
         :param frequencies: Any frequencies, in Hz.
-        :return: The level at each, in dB.
+        :return: The level at each, in dB. A ``float`` for a number, an array for a
+            sequence or an array, a zero-dimensional one included.
         """
         relative = np.abs(self.spectrum_at(frequencies)) / self.area_v_s
         with np.errstate(divide="ignore"):
-            return 20.0 * np.log10(relative)
+            return as_float_or_array(20.0 * np.log10(relative), like=(frequencies,))
 
     def plot(
         self,

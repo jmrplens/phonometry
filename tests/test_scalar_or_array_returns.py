@@ -160,6 +160,7 @@ def _cases() -> tuple[Case, ...]:
     )
     plane = aircraft.mean_ground_plane([0.0, 100.0, 200.0], [0.0, 1.0, 3.0])
     profile = environment.linear_sound_speed_profile(0.1)
+    pulse = metrology.RectangularPulse(duration_s=1.0e-3, amplitude_v=1.0)
     return (
         Case(
             broadcast.channel_weight,
@@ -1424,6 +1425,16 @@ def _cases() -> tuple[Case, ...]:
             ("source_level", "receive_level"),
             together=True,
         ),
+        Case(
+            electroacoustics.weighting_bs468, {"frequencies": 1000.0}, ("frequencies",)
+        ),
+        Case(
+            hearing.reat_expanded_uncertainty,
+            {"frequencies": 500.0, "protector": "earplug"},
+            ("frequencies",),
+        ),
+        Case(pulse.level_at, {"frequencies": 100.0}, ("frequencies",)),
+        Case(pulse.spectrum_at, {"frequencies": 100.0}, ("frequencies",)),
     )
 
 

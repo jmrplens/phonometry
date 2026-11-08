@@ -470,12 +470,39 @@ def _frequency_range(frequency: float) -> FrequencyRange:
     return _HIGH
 
 
+@overload
+def reat_expanded_uncertainty[S: RealScalar](
+    frequencies: S,
+    *,
+    protector: Protector,
+    between_laboratories: bool = ...,
+) -> float: ...
+
+
+@overload
+def reat_expanded_uncertainty[V: RealValues](
+    frequencies: V,
+    *,
+    protector: Protector,
+    between_laboratories: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reat_expanded_uncertainty[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    protector: Protector,
+    between_laboratories: bool = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def reat_expanded_uncertainty(
     frequencies: NumericArrayLike,
     *,
     protector: Protector,
     between_laboratories: bool = False,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """The typical :math:`U_{95}` of a mean attenuation, band by band (A.2, B.2).
 
     Reads the budget of Table A.2 (within one laboratory) or Table B.2
@@ -490,7 +517,8 @@ def reat_expanded_uncertainty(
     :param protector: ``"earplug"`` or ``"earmuff"``.
     :param between_laboratories: ``False`` (default) for Table A.2, ``True``
         for Table B.2.
-    :return: :math:`U_{95}` per band, in dB.
+    :return: :math:`U_{95}` per band, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a protector type the tables do not list, or for
         frequencies that are not positive and finite.
     :raises TypeError: if ``protector`` is not a text, or ``frequencies`` holds a text
@@ -507,9 +535,12 @@ def reat_expanded_uncertainty(
         msg = "'frequencies' must be positive, finite centre frequencies in hertz."
         raise ValueError(msg)
     column = table[protector]
-    return np.array(
-        [column[_frequency_range(float(f))].expanded_uncertainty_db for f in freqs],
-        dtype=np.float64,
+    return as_float_or_array(
+        np.array(
+            [column[_frequency_range(float(f))].expanded_uncertainty_db for f in freqs],
+            dtype=np.float64,
+        ),
+        like=(frequencies,),
     )
 
 

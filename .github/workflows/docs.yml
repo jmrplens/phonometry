@@ -89,6 +89,9 @@ jobs:
   build:
     name: Site builds and validates
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      actions: read # the record of the pages IndexNow was last sent, kept by an earlier run
     env:
       # corepack fetches the pnpm site/package.json pins and says so first;
       # the pin is the decision, so the announcement adds nothing to the log.
@@ -265,10 +268,11 @@ jobs:
         # tests here too, on pairs of builds: one changed page sends that page
         # alone, a new or a removed page is sent as such, a new release number
         # in the header of every Markdown copy sends nothing, no previous
-        # manifest sends every URL, and the live manifest is fetched past the
-        # cache. Node's own test runner, after the install: the structured-data
-        # check and the guides' dates read a page's frontmatter with the parser
-        # the content collection uses, from @astrojs/markdown-remark.
+        # manifest sends every URL, and the record compared with is the newest
+        # one a run of main kept, read from a stand-in for the API. Node's own
+        # test runner, after the install: the structured-data check and the
+        # guides' dates read a page's frontmatter with the parser the content
+        # collection uses, from @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -495,34 +499,57 @@ jobs:
         # share one preview.
         run: pnpm run check:visual
         working-directory: site
-      - name: Work out which pages changed since the live deploy
+      - name: Find the pages IndexNow was last sent
         # IndexNow is told that a page was added, changed or removed, and the
         # deploy used to send it every URL of the sitemap after every merge,
         # the whole site for a typo on one page. The build now publishes
         # indexnow-manifest.json, a digest of what each page says: its title,
         # its description, its date and the text of its Markdown copy, less
-        # the header lines that name the release. This step fetches the
-        # manifest the live site carries, past every cache by this commit's
-        # SHA, and lists the pages whose digest changed, the new ones and the
-        # removed ones. A live site with no manifest, or one that cannot be
-        # read, gives the full list, as before. On a pull request it only
-        # prints what a merge would send; on main the list goes to the
-        # IndexNow job. It fails if a step changed the pages after the
+        # the header lines that name the release, or the text the page shows
+        # where it publishes no copy. Once the IndexNow job has submitted a
+        # deploy's pages it keeps that deploy's manifest as an artifact, and
+        # this step asks the API for the newest one a run of main kept. It
+        # runs on every event: a deploy dispatched by hand or by jmrp.io has
+        # to be compared like a push, and a pull request prints what its
+        # merge would send.
+        id: submitted
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/indexnow-diff.mjs last-submitted
+        working-directory: site
+      - name: Fetch the manifest of the pages IndexNow was last sent
+        if: steps.submitted.outputs.run-id != ''
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-submitted
+          run-id: ${{ steps.submitted.outputs.run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/indexnow/submitted
+      - name: Work out which pages changed since IndexNow was last sent them
+        # The pages whose digest changed, the new ones and the removed ones.
+        # With no record to compare with, or one that cannot be read, the full
+        # list goes out, as before. The comparison is with the record, not
+        # with the manifest the live site carries: a deploy goes live before
+        # its IndexNow job submits, so a run whose job failed, or which a
+        # newer push cancelled in between, would otherwise leave its pages
+        # out for good. It fails if a step changed the pages after the
         # manifest was written, which would publish a manifest that does not
         # describe the site.
-        run: node scripts/indexnow-diff.mjs diff --live --out "$RUNNER_TEMP/indexnow/urls.json"
+        run: >-
+          node scripts/indexnow-diff.mjs diff
+          --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
+          --out "$RUNNER_TEMP/indexnow/next"
         working-directory: site
       - name: Hand the list of changed pages to the IndexNow job
-        # The deploy publishes the manifest before the IndexNow job submits,
-        # and the next run compares with it, so a failed IndexNow job loses
-        # its pages unless they change again. Re-running that job submits
-        # them: it downloads this list, kept a week so the re-run still
-        # works after a weekend.
+        # With the manifest it was worked out from, which the job keeps once
+        # it has submitted them. The list is kept a week, so a failed job can
+        # still be re-run after a weekend; the next deploy sends those pages
+        # anyway, since the failed job kept no record.
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v7
         with:
           name: indexnow-urls
-          path: ${{ runner.temp }}/indexnow/urls.json
+          path: ${{ runner.temp }}/indexnow/next/
           if-no-files-found: error
           retention-days: 7
       # Only the branch that publishes needs the tarball. A pull request has
@@ -558,9 +585,7 @@ jobs:
       # The URLs come from the build this run deployed, through the list its
       # last steps wrote (site/scripts/indexnow-diff.mjs). This job used to
       # read the sitemap from the live site a moment after the deploy, where
-      # the edge could still be serving the copy of the deploy before. When
-      # it fails, re-run it: the next deploy compares with the manifest this
-      # one published and does not send these pages again.
+      # the edge could still be serving the copy of the deploy before.
       - name: Fetch the list of changed pages the build wrote
         uses: actions/download-artifact@v8
         with:
@@ -590,11 +615,11 @@ jobs:
               listed = json.load(handle)
           urls = listed["urls"]
           if listed["full"]:
-              print(f"No previous manifest to compare with, because {listed['reason']}: all {len(urls)} URLs of the sitemap.")
+              print(f"No record of the pages IndexNow was last sent to compare with, because {listed['reason']}: all {len(urls)} URLs of the sitemap.")
           else:
               print(
                   f"{len(listed['changed'])} changed, {len(listed['new'])} new and "
-                  f"{len(listed['removed'])} removed since the deploy before."
+                  f"{len(listed['removed'])} removed since IndexNow was last sent the pages."
               )
           if not urls:
               print("No page changed: nothing to submit.")
@@ -633,3 +658,15 @@ jobs:
                   if r.status not in (200, 202):
                       sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
           PY
+      - name: Keep the manifest of the pages IndexNow was sent
+        # The record the next build compares with, kept only once the
+        # submission above went through: a failed job keeps none, so the next
+        # deploy sends this one's pages along with its own. Ninety days, so a
+        # quiet spell does not send the whole site again; after one longer than
+        # that the next deploy sends every URL once, as the first one does.
+        uses: actions/upload-artifact@v7
+        with:
+          name: indexnow-submitted
+          path: indexnow/indexnow-manifest.json
+          if-no-files-found: error
+          retention-days: 90

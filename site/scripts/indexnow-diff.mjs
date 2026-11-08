@@ -10,45 +10,53 @@
 //
 // Now the build publishes a manifest beside the sitemap,
 // `indexnow-manifest.json`: every URL of the sitemap with a digest of what
-// the page says. Before the next deploy the build fetches the manifest the
-// live site carries, compares it with its own and hands the IndexNow job the
-// URLs whose digest changed, the URLs that are new and the URLs that are gone.
-// When there is no previous manifest to compare with (the first deploy, a
-// manifest that cannot be read, or one written by another version of this
-// script), the job sends every URL of the sitemap, as it did before.
+// the page says. Once the IndexNow job has submitted a deploy's pages, it
+// keeps that deploy's manifest as an artifact of its run, the record of what
+// the engines were last told. The next build finds the newest record, compares
+// its own manifest with it and hands the IndexNow job the URLs whose digest
+// changed, the URLs that are new and the URLs that are gone. When there is no
+// record to compare with (the first deploy, a record that expired, one that
+// cannot be read or one written by another version of this script), the job
+// sends every URL of the sitemap, as it did before.
+//
+// The record is the IndexNow job's own, not the manifest the live site
+// carries, because a deploy goes live before its pages are submitted. A run
+// whose IndexNow job fails, or which a newer push cancels after it deployed
+// and before it submitted, keeps no record, so the next run compares with the
+// record before it and sends those pages along with its own.
 //
 // What a page says is read from the build, the way an engine reads it: its
 // title, its meta description, the date the sitemap gives it (the last commit
 // that changed its content or the data it is built from, as
 // src/lib/content-dates.mjs dates it) and the text of its Markdown copy, the
 // `index.md` beside it. The pages src/lib/page-markdown.mjs gives no Markdown
-// copy, the two landing pages, give the text of their <main> element instead,
-// and a page it gives one that the build did not write fails the build.
-// Nothing in the record depends on when the build ran, so two builds of the
-// same tree publish the same manifest. The header lines of a copy that name
-// the release (`Version:` and `Install:`, listed in src/lib/page-markdown.mjs)
-// are left out, so stamping a release does not report every page as changed;
-// the landing pages state the release in their text, and the sitemap dates
-// them by it, so they are reported.
-//
-// The manifest goes live with the deploy, before the IndexNow job submits,
-// and the next run compares with it. So the pages of a run whose IndexNow job
-// does not submit are not sent by any later run unless they change again:
-// - a job that fails (the key file unreachable, a refused request): re-run
-//   that job from the run's page on GitHub, which downloads the same list
-//   (kept seven days) and submits it;
-// - a run that a newer push cancels after it deployed and before it
-//   submitted: its pages are left to the sitemap's <lastmod>.
+// copy, those that render their data through a component (the two landing
+// pages and the catalogues among them), give the text of their <main> element
+// instead, and a page it gives one that the build did not write fails the
+// build. Nothing in the record depends on when the build ran, so two builds of
+// the same tree publish the same manifest. The header lines of a copy that
+// name the release (`Version:` and `Install:`, listed in
+// src/lib/page-markdown.mjs) are left out, so stamping a release does not
+// report every page as changed; the landing pages state the release in their
+// text, and the sitemap dates them by it, so they are reported.
 //
 // Usage:
 //   node scripts/indexnow-diff.mjs manifest [dist]
 //     writes <dist>/indexnow-manifest.json (package.json `postbuild`, last)
-//   node scripts/indexnow-diff.mjs diff [--dist <dir>] (--live | --previous <file or URL>) [--out <file>]
+//   node scripts/indexnow-diff.mjs last-submitted
+//     asks the GitHub API (GITHUB_API_URL, GITHUB_REPOSITORY, GITHUB_TOKEN)
+//     for the newest record an IndexNow job kept, and writes the id of its run
+//     as `run-id` to $GITHUB_OUTPUT, for the workflow to download it from;
+//     writes nothing when there is none
+//   node scripts/indexnow-diff.mjs diff [--dist <dir>] --previous <file or URL> [--out <dir>]
 //     checks the published manifest against the pages, compares it with the
-//     previous one, prints the changed, new and removed URLs, and writes the
-//     URLs to submit to <file> as JSON ({"urls": [...]} and the lists behind it)
+//     previous one (a record, or a URL such as the live site's manifest, to
+//     compare a local build with), prints the changed, new and removed URLs,
+//     and writes into <dir> the URLs to submit (urls.json: {"urls": [...]}
+//     and the lists behind it) and the manifest they were worked out from,
+//     which the IndexNow job keeps once it has submitted them
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -60,6 +68,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 /** The file the build publishes, at the root of the site. */
 export const MANIFEST_NAME = 'indexnow-manifest.json';
+/** The file `diff --out` writes the URLs to submit to, beside a copy of the manifest. */
+export const URLS_NAME = 'urls.json';
 /**
  * What a digest is made of. A manifest written under another number is not
  * compared with, because its digests mean something else; changing what a
@@ -69,8 +79,20 @@ export const MANIFEST_NAME = 'indexnow-manifest.json';
 export const MANIFEST_FORMAT = 1;
 /** Every URL of the site starts with this and a slash. */
 export const ORIGIN = `${siteUrl}${basePath}`;
-/** How long the fetch of the live manifest may take before the full list is sent instead. */
+/** How long a fetch from another server may take before the full list is sent instead. */
 const FETCH_TIMEOUT_MS = 30_000;
+/**
+ * The artifact an IndexNow job keeps the manifest of the pages it submitted
+ * in. .github/workflows/docs.yml uploads it once the submission has gone
+ * through, and the next build compares with the newest one.
+ */
+export const SUBMITTED_ARTIFACT = 'indexnow-submitted';
+/** The branch the site deploys from: the IndexNow jobs of its runs are the only ones that submit. */
+export const DEPLOY_BRANCH = 'main';
+/** The most artifacts the GitHub API lists on one page. */
+const PER_PAGE = 100;
+/** The most pages of artifacts read before giving up, far more than a record kept 90 days can fill. */
+const MAX_PAGES = 50;
 
 /** A failure that stops the build, with what to do about it in the message. */
 export class ManifestError extends Error {}
@@ -229,6 +251,55 @@ export function urlsToSubmit(current, previous) {
 	return { full: false, changed, added, removed, urls: [...changed, ...added, ...removed].sort() };
 }
 
+/**
+ * The record to compare with, out of the artifacts the GitHub API lists: the
+ * newest {@link SUBMITTED_ARTIFACT} that has not expired, kept by a run of this
+ * repository's {@link DEPLOY_BRANCH}. A pull request, from a fork or not, can
+ * upload an artifact of that name from a workflow it edits, and its run
+ * submits nothing, so its artifact is never the record. The API does not say
+ * in what order it lists artifacts, so the newest is the one created last,
+ * and of two created in the same second the one with the larger id.
+ *
+ * @returns the artifact, or undefined when there is no record
+ */
+export function lastSubmitted(artifacts) {
+	let newest;
+	for (const artifact of artifacts) {
+		const run = artifact.workflow_run;
+		if (artifact.name !== SUBMITTED_ARTIFACT || artifact.expired !== false || !run) continue;
+		if (run.head_branch !== DEPLOY_BRANCH || run.head_repository_id !== run.repository_id) continue;
+		const later =
+			newest === undefined ||
+			artifact.created_at > newest.created_at ||
+			(artifact.created_at === newest.created_at && artifact.id > newest.id);
+		if (later) newest = artifact;
+	}
+	return newest;
+}
+
+/**
+ * Every artifact named {@link SUBMITTED_ARTIFACT} of a repository, read from
+ * the GitHub API a page at a time until it has listed as many as it counts.
+ */
+export async function submittedArtifacts({ api, repository, token }) {
+	const artifacts = [];
+	for (let page = 1; page <= MAX_PAGES; page += 1) {
+		const url = `${api}/repos/${repository}/actions/artifacts?name=${SUBMITTED_ARTIFACT}&per_page=${PER_PAGE}&page=${page}`;
+		const response = await fetch(url, {
+			headers: { accept: 'application/vnd.github+json', authorization: `Bearer ${token}`, 'x-github-api-version': '2022-11-28' },
+			signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+		});
+		if (!response.ok) throw new Error(`the API answered ${response.status} to ${url}`);
+		const listed = await response.json();
+		if (!Array.isArray(listed?.artifacts) || !Number.isInteger(listed.total_count)) {
+			throw new Error(`the API answered ${url} with no list of artifacts`);
+		}
+		artifacts.push(...listed.artifacts);
+		if (listed.artifacts.length < PER_PAGE || artifacts.length >= listed.total_count) return artifacts;
+	}
+	throw new Error(`the API lists more than ${MAX_PAGES * PER_PAGE} artifacts named ${SUBMITTED_ARTIFACT}`);
+}
+
 /** The value of `--name` in an argument list, or undefined. */
 function option(args, name) {
 	const at = args.indexOf(name);
@@ -241,6 +312,38 @@ function writeManifest(args) {
 	const manifest = buildManifest(dist);
 	writeFileSync(join(dist, MANIFEST_NAME), serialize(manifest));
 	console.log(`[indexnow] wrote ${MANIFEST_NAME} with the digests of ${Object.keys(manifest.pages).length} pages`);
+}
+
+/**
+ * `last-submitted`: name the run whose IndexNow job kept the newest record, in
+ * the step output `run-id`, for the workflow to download the record from. A
+ * record that cannot be listed is not a reason to stop a deploy: with no
+ * `run-id` the build compares with nothing and the full list goes out, as it
+ * always did, with a warning on the run.
+ */
+async function findLastSubmitted() {
+	const { GITHUB_API_URL: api = 'https://api.github.com', GITHUB_REPOSITORY: repository, GITHUB_TOKEN: token, GITHUB_OUTPUT: output } = process.env;
+	if (!repository || !token || !output) {
+		throw new ManifestError('last-submitted reads the GitHub API from a workflow step: it needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT.');
+	}
+	let artifacts;
+	try {
+		artifacts = await submittedArtifacts({ api, repository, token });
+	} catch (error) {
+		console.log(`::warning::[indexnow] the records of the pages IndexNow was sent could not be listed (${error.cause?.code ?? error.message}): the full list goes out.`);
+		return;
+	}
+	const record = lastSubmitted(artifacts);
+	if (record === undefined) {
+		console.log(
+			`[indexnow] no IndexNow job of a run of ${DEPLOY_BRANCH} has kept a record that has not expired ` +
+				`(${artifacts.length} artifacts named ${SUBMITTED_ARTIFACT} listed): the full list goes out.`,
+		);
+		return;
+	}
+	const run = record.workflow_run;
+	console.log(`[indexnow] the pages were last submitted by run ${run.id}, of commit ${run.head_sha}, on ${record.created_at}.`);
+	appendFileSync(output, `run-id=${run.id}\n`);
 }
 
 /** `diff ...`: compare the build with the previous manifest and say what to submit. */
@@ -256,10 +359,8 @@ async function diff(args) {
 			`${published} is not the manifest the built pages give: a step after it changed the pages or the sitemap, so it has to run last.`,
 		);
 	}
-	const source = args.includes('--live')
-		? `${ORIGIN}/${MANIFEST_NAME}?v=${process.env.GITHUB_SHA ?? Date.now()}`
-		: option(args, '--previous');
-	if (!source) throw new ManifestError('say where the previous manifest is: --live or --previous <file or URL>.');
+	const source = option(args, '--previous');
+	if (!source) throw new ManifestError('say where the previous manifest is: --previous <file or URL>.');
 	const previous = await loadPrevious(source);
 	const result = urlsToSubmit(current.pages, previous.pages);
 	const total = Object.keys(current.pages).length;
@@ -278,12 +379,13 @@ async function diff(args) {
 	}
 	const out = option(args, '--out');
 	if (out) {
-		mkdirSync(dirname(resolve(out)), { recursive: true });
+		mkdirSync(out, { recursive: true });
 		const reason = result.full ? previous.reason : null;
 		writeFileSync(
-			out,
+			join(out, URLS_NAME),
 			`${JSON.stringify({ previous: previous.from, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
 		);
+		writeFileSync(join(out, MANIFEST_NAME), serialize(current));
 	}
 }
 
@@ -291,8 +393,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 	const [command, ...args] = process.argv.slice(2);
 	try {
 		if (command === 'manifest') writeManifest(args);
+		else if (command === 'last-submitted') await findLastSubmitted();
 		else if (command === 'diff') await diff(args);
-		else throw new ManifestError(`unknown command ${JSON.stringify(command)}: use \`manifest\` or \`diff\`.`);
+		else throw new ManifestError(`unknown command ${JSON.stringify(command)}: use \`manifest\`, \`last-submitted\` or \`diff\`.`);
 	} catch (error) {
 		if (!(error instanceof ManifestError)) throw error;
 		console.error(`[indexnow] FAIL ${error.message}`);

@@ -215,6 +215,276 @@ def test_the_docs_workflow_triggers_on_every_root_file_the_site_build_reads() ->
         )
 
 
+_INDEXNOW_SCRIPT = _ROOT / "site" / "scripts" / "indexnow-diff.mjs"
+
+#: The events that deploy the site: a push to main, and a run dispatched by
+#: hand or by a merge on jmrp.io, whose identity data the site carries. A
+#: newer run cancels an older one in the same queue, so a dispatch that comes
+#: right after a merge is the run that deploys that merge's pages.
+_DEPLOYING_EVENTS = ("push", "workflow_dispatch")
+
+#: One token of a job's or step's ``if:``, in the part of GitHub's expression
+#: language a condition on the event uses.
+_CONDITION_TOKEN = re.compile(
+    r"\s*(\(|\)|&&|\|\||==|!=|!|'(?:[^']|'')*'|[A-Za-z_][\w.-]*(?:\(\))?)"
+)
+
+
+def _runs_on(condition: object, event: str) -> bool:
+    """Whether a job or a step whose ``if:`` is *condition* runs on *event*.
+
+    No ``if:`` runs on every event. The reader knows ``github.event_name``
+    compared with a string (case-insensitively, as GitHub compares strings),
+    ``!``, ``&&``, ``||``, parentheses and ``success()``; anything else raises,
+    so a condition that also depends on what this test cannot see is never
+    judged by half of it.
+    """
+    if condition is None:
+        return True
+    text = str(condition).strip()
+    if text.startswith("${{") and text.endswith("}}"):
+        text = text[3:-2].strip()
+    tokens: list[str] = []
+    position = 0
+    while position < len(text):
+        match = _CONDITION_TOKEN.match(text, position)
+        if match is None:
+            msg = f"cannot read {text[position:]!r} in {condition!r}"
+            raise ValueError(msg)
+        tokens.append(match.group(1))
+        position = match.end()
+    at = 0
+
+    def peek() -> str | None:
+        return tokens[at] if at < len(tokens) else None
+
+    def take() -> str:
+        nonlocal at
+        if at == len(tokens):
+            msg = f"{condition!r} ends too soon"
+            raise ValueError(msg)
+        at += 1
+        return tokens[at - 1]
+
+    def operand() -> str | bool:
+        token = take()
+        if token == "(":
+            value = either()
+            if take() != ")":
+                msg = f"unbalanced parentheses in {condition!r}"
+                raise ValueError(msg)
+            return value
+        if token == "!":
+            return not operand()
+        if token.startswith("'"):
+            return token[1:-1].replace("''", "'")
+        if token == "github.event_name":
+            return event
+        if token == "success()":
+            return True
+        msg = f"{condition!r} reads {token}, which this test cannot know"
+        raise ValueError(msg)
+
+    def comparison() -> str | bool:
+        left = operand()
+        if peek() in {"==", "!="}:
+            equal = take() == "=="
+            right = operand()
+            same = str(left).casefold() == str(right).casefold()
+            return same if equal else not same
+        return left
+
+    def both() -> str | bool:
+        value = comparison()
+        while peek() == "&&":
+            take()
+            right = comparison()
+            value = right if value else value
+        return value
+
+    def either() -> str | bool:
+        value = both()
+        while peek() == "||":
+            take()
+            right = both()
+            value = value or right
+        return value
+
+    result = either()
+    if at != len(tokens):
+        msg = f"cannot read {' '.join(tokens[at:])!r} in {condition!r}"
+        raise ValueError(msg)
+    return bool(result)
+
+
+def test_the_event_reader_follows_the_conditions_the_workflows_write() -> None:
+    """The reader of ``if:`` gives each event the answer GitHub would."""
+    assert _runs_on(None, "push")
+    assert not _runs_on("github.event_name != 'pull_request'", "pull_request")
+    assert _runs_on("${{ github.event_name != 'pull_request' }}", "workflow_dispatch")
+    assert not _runs_on("github.event_name == 'push'", "workflow_dispatch")
+    assert _runs_on("github.event_name == 'PUSH'", "push")
+    condition = "!(github.event_name == 'push' || github.event_name == 'schedule')"
+    assert _runs_on(condition, "workflow_dispatch")
+    assert not _runs_on(condition, "push")
+    assert not _runs_on("success() && github.event_name == 'push'", "pull_request")
+    for unknown in (
+        "steps.found.outputs.run-id != ''",
+        "always()",
+        "github.ref == 'x'",
+    ):
+        with pytest.raises(ValueError, match="which this test cannot know"):
+            _runs_on(unknown, "push")
+
+
+def _steps_running(
+    steps: list[dict[str, object]], command: str
+) -> list[tuple[int, dict[str, object]]]:
+    """The steps whose ``run:`` holds *command*, with their positions."""
+    return [
+        (index, step)
+        for index, step in enumerate(steps)
+        if command in str(step.get("run", ""))
+    ]
+
+
+def _steps_using(
+    steps: list[dict[str, object]], action: str, name: str
+) -> list[tuple[int, dict[str, object]]]:
+    """The steps that use *action* on the artifact *name*, with their positions."""
+    found = []
+    for index, step in enumerate(steps):
+        inputs = step.get("with")
+        if (
+            str(step.get("uses", "")).startswith(f"{action}@")
+            and isinstance(inputs, dict)
+            and inputs.get("name") == name
+        ):
+            found.append((index, step))
+    return found
+
+
+def _the_one(
+    found: list[tuple[int, dict[str, object]]], what: str
+) -> tuple[int, dict[str, object]]:
+    assert len(found) == 1, f"docs.yml has {len(found)} steps that {what}"
+    return found[0]
+
+
+def _shell_path(path: object) -> str:
+    """A path as a ``run:`` and a ``with:`` input would both spell it."""
+    return str(path).replace("${{ runner.temp }}", "$RUNNER_TEMP").rstrip("/")
+
+
+def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
+    """A deploy dispatched by hand or by jmrp.io is compared like a push.
+
+    The IndexNow submission cannot run on a pull request, so nothing but this
+    test shows that the steps behind it run on every event that deploys: the
+    one that finds the record of the pages IndexNow was last sent, the one
+    that downloads it, the comparison, and the hand-over of its list to the
+    IndexNow job. A step limited to ``push`` would leave a dispatched deploy
+    with no list, or with every URL of the site, and still deploy green. The
+    record has to travel too: the IndexNow job keeps the manifest it was
+    handed, only once its submission went through, under the name the build
+    looks for, in the folder the comparison reads, and the build may read it
+    from an earlier run.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    triggers = workflow[True] if True in workflow else workflow["on"]
+    assert set(_DEPLOYING_EVENTS) <= set(triggers), (
+        f"docs.yml deploys on {_DEPLOYING_EVENTS}, and its triggers are {sorted(triggers)}"
+    )
+    jobs: dict[str, dict[str, object]] = workflow["jobs"]
+    build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
+    indexnow: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    record = re.search(
+        r"export const SUBMITTED_ARTIFACT = '([^']+)'",
+        _INDEXNOW_SCRIPT.read_text(encoding="utf-8"),
+    )
+    assert record, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
+    submitted = record.group(1)
+
+    _, find = _the_one(
+        _steps_running(build, "indexnow-diff.mjs last-submitted"),
+        "find the record of the last submission",
+    )
+    _, fetch = _the_one(
+        _steps_using(build, "actions/download-artifact", submitted),
+        f"download {submitted}",
+    )
+    _, compare = _the_one(
+        _steps_running(build, "indexnow-diff.mjs diff"), "compare the manifests"
+    )
+    _, hand = _the_one(
+        _steps_using(build, "actions/upload-artifact", "indexnow-urls"),
+        "hand the list to the IndexNow job",
+    )
+    for event in _DEPLOYING_EVENTS:
+        for what, step in (
+            ("finding", find),
+            ("comparing", compare),
+            ("handing", hand),
+        ):
+            assert _runs_on(step.get("if"), event), f"the {what} step skips {event}"
+        for job in ("build", "deploy", "indexnow"):
+            assert _runs_on(jobs[job].get("if"), event), f"the {job} job skips {event}"
+    assert _runs_on(compare.get("if"), "pull_request"), (
+        "a pull request no longer prints what its merge would send"
+    )
+    assert not _runs_on(hand.get("if"), "pull_request")
+
+    # The record is fetched from the run the finding step names, whatever
+    # event this run is, and the build is allowed to read it.
+    finder = find.get("id")
+    assert fetch.get("if") == f"steps.{finder}.outputs.run-id != ''"
+    inputs = fetch["with"]
+    assert isinstance(inputs, dict)
+    assert inputs.get("run-id") == f"${{{{ steps.{finder}.outputs.run-id }}}}"
+    assert inputs.get("github-token"), "another run's artifact needs a token"
+    permissions = jobs["build"].get("permissions")
+    assert isinstance(permissions, dict)
+    assert permissions.get("actions") == "read"
+    finder_env = find.get("env")
+    assert isinstance(finder_env, dict)
+    assert finder_env.get("GITHUB_TOKEN")
+
+    # The comparison reads the record where it was downloaded, and writes the
+    # list and the manifest where the hand-over takes them from.
+    command = " ".join(str(compare["run"]).split())
+    previous = re.search(r'--previous "?([^"\s]+)', command)
+    out = re.search(r'--out "?([^"\s]+)', command)
+    assert previous, command
+    assert out, command
+    assert previous.group(1) == f"{_shell_path(inputs['path'])}/indexnow-manifest.json"
+    handed = hand["with"]
+    assert isinstance(handed, dict)
+    assert _shell_path(handed["path"]) == out.group(1)
+
+    # The IndexNow job keeps the manifest it was handed, under the name the
+    # build looks for, after it submitted and only if it did.
+    received, download = _the_one(
+        _steps_using(indexnow, "actions/download-artifact", "indexnow-urls"),
+        "take the list in the IndexNow job",
+    )
+    sent, _ = _the_one(
+        _steps_running(indexnow, "api.indexnow.org"), "submit to IndexNow"
+    )
+    kept, keep = _the_one(
+        _steps_using(indexnow, "actions/upload-artifact", submitted),
+        f"keep {submitted}",
+    )
+    assert received < sent < kept
+    assert keep.get("if") in {None, "success()"}, (
+        "a record kept after a failed submission makes the next deploy skip its pages"
+    )
+    kept_inputs = keep["with"]
+    downloaded = download["with"]
+    assert isinstance(kept_inputs, dict)
+    assert isinstance(downloaded, dict)
+    assert kept_inputs["path"] == f"{downloaded['path']}/indexnow-manifest.json"
+
+
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
     """The 3.14 job explains itself by quoting pyproject's numba floor.
 

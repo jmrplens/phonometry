@@ -46,8 +46,9 @@ member), traced by :mod:`stored_verdicts`. A field either way fails unless
 states, a branch the caller chose by what they gave, a fact of an input the
 result does not hold, a property of the file read, the convergence of an
 iterative solver, a column of a published table row, a row a verdict's own
-property builds, the yes/no observations a tester records, or the ISO 8297
-requirement record. A regime or a classification the function reached by
+property builds, the yes/no observations a tester records, the line of a
+layout a function placed each position on, or the ISO 8297 requirement
+record. A regime or a classification the function reached by
 comparing values the result holds, or could hold, with a constant or a
 printed threshold (the over-critical hammer, the cavitating valve, the
 screened section, the identified tone) is a verdict like any other and stays
@@ -649,6 +650,10 @@ _OBSERVED = (
     "indicator latched, an indication inside the manual's range), judged "
     "against no printed limit"
 )
+_LAYOUT = (
+    "which line of the layout each position stands on, as the function placed "
+    "it, compared against no limit"
+)
 
 #: Boolean or flag-named fields that are no stored verdict, each with why.
 _STATED_FLAGS = {
@@ -690,7 +695,9 @@ _STATED_FLAGS = {
     "phonometry.emission.sound_power_plant.PlantRequirement.holds": _RECORD,
     "phonometry.emission._sound_power_special_room.SpecialRoomReverberationCheck."
     "centered": _CALLER,
+    "phonometry.emission.turbine_noise.TurbineMicrophoneArray.overhead_mask": _LAYOUT,
     "phonometry.emission.turbine_noise.TurbineNoiseDeclaration.tonal": _CALLER,
+    "phonometry.emission.turbine_noise.TurbineSoundPowerResult.overhead_mask": _CALLER,
     "phonometry.environment.assessment.soundscape.QuestionnaireScale.continuous": _ROW,
     "phonometry.environment.assessment.soundscape_binaural.BinauralParameter."
     "average_allowed": _ROW,
@@ -805,7 +812,8 @@ def test_no_result_stores_a_verdict_flag() -> None:
         "caller gives, a branch the caller chose, a fact of an input the result "
         "does not hold, a property of the file read, the convergence of an "
         "iterative solver, a column of a published table row, a row a verdict's "
-        "property builds, a tester's observations or a requirement record: "
+        "property builds, a tester's observations, the line of a layout the "
+        "function placed a position on or a requirement record: "
         + ", ".join(unexpected)
     )
 

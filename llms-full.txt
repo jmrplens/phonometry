@@ -7441,7 +7441,7 @@ bank = filters.OctaveFilterBank(fs, fraction=1, limits=[31.5, 500.0])
 filtered = bank.filter(force, sigbands=True, calculate_level=False)
 freqs, bands = filtered.frequencies, filtered.bands
 lfe = [building.impact_force_exposure_level(b, fs) for b in bands]
-print([round(v, 1) for v in lfe])   # [-1.4, 14.0, 22.1, 20.2, 17.1]
+print([round(v, 1) for v in lfe])   # [-6.7, 14.6, 23.0, 21.2, 18.2]
 
 # Those five go to the conformance check; this synthetic half-sine is not a
 # rubber ball, so it does not conform:
@@ -7489,12 +7489,12 @@ li_fmax = [65.3, 64.5, 58.0, 55.8]           # energy-averaged over ball positio
 t = [1.43, 3.70, 3.10, 2.38]                 # receiving-room reverberation time
 
 res = building.standardized_max_impact_level(li_fmax, 41.4, t, frequencies=freqs)
-print(res.volume_term)                        # 10 lg(41.4/50) = -0.8 dB
+print(res.volume_term)                        # -0.82 dB, which is 10 lg(41.4/50)
 print(building.fast_reverberation_correction([0.5]))   # exactly 0 dB at T = T0
 res.plot()   # measured and standardized spectra (needs matplotlib)
 
 # One-third-octave measurements combine into octaves with Formula (20):
-print(building.heavy_impact_octave_levels([60.0] * 6))   # +10 lg 3 dB per octave
+print(building.heavy_impact_octave_levels([60.0] * 6))   # [64.77 64.77]: 60 dB + 10 lg 3 per octave
 ```
 
 ## The single number is an A-weighted sum, not a shifted curve
@@ -14604,7 +14604,7 @@ freqs = [250.0, 500.0, 1000.0, 2000.0]
 alpha = np.array([[0.10, 0.15, 0.25, 0.40]] * 6)     # (6 walls, 4 bands)
 res = room.image_source_rir((7.0, 5.0, 3.0), (2.0, 1.6, 1.5), (5.2, 3.4, 1.7),
                             alpha, fs=48000, max_order=12, frequencies=freqs)
-print(res.ir.shape)                                  # (4 bands, n_samples)
+print(res.ir.shape)                                  # (4, 12207): 4 bands of n_samples each
 print(np.round(np.sum(res.ir ** 2, axis=1), 4))      # more absorption -> less energy
 ```
 
@@ -15752,7 +15752,7 @@ ir[480] += 0.5
 
 res = room.sound_strength(ir, reference, fs)
 print(res.frequencies.round(0))              # [ 126.  251.  501. 1000. 1995. 3981.]
-print(res.strength.round(1))               # [5.9 4.1 4.  4.8 4.7 4.9]  dB
+print(res.strength.round(1))               # [5.9 4.  4.  4.8 4.7 4.9]  dB
 
 res.plot()      # G against the Table A.1 typical range (needs matplotlib)
 ```
@@ -17318,26 +17318,29 @@ from a pointer. The record therefore has to include the decay: a burst that
 ends at the last sample is read before the needle has finished rising.
 
 ```python
+import numpy as np
 from phonometry import broadcast, signals
 
 fs = 48000
 # Clause 2.2's own stimulus: 5 ms (25-period) bursts of 5 kHz at 10 per
 # second, at the amplitude that makes the steady tone read 0 dBqps.
-burst = signals.tone_burst(fs, 5000.0, 25, amplitude=0.285,
+steady = np.sin(2 * np.pi * 5000.0 * np.arange(3 * fs) / fs)
+amplitude = broadcast.DBQPS_REFERENCE_V / broadcast.quasi_peak_meter(steady, fs).reading
+burst = signals.tone_burst(fs, 5000.0, 25, amplitude=amplitude,
                            n_repetitions=16, repetition_rate=10.0,
                            post_silence=0.5)
 result = broadcast.quasi_peak_meter(burst.signal, fs)
-print(round(result.reading, 4))                            # 0.5872   volts
-print(round(result.level, 2), result.level_unit)        # -2.41 dBqps
+print(round(result.reading, 4))                            # 0.5867   volts
+print(round(result.level, 2), result.level_unit)        # -2.42 dBqps
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter.svg" alt="Quasi-peak detector reading a train of sixteen 5 millisecond bursts of 5 kilohertz tone at 10 per second. Grey vertical bars mark the rectified 468-weighted bursts, reaching 1.10 volts. The blue detector output climbs from zero over the first half second, then ripples gently along 0.58 volts for the rest of the train, and decays smoothly after the last burst at 1.55 seconds, falling to 0.16 volts by 2.1 seconds. A red dashed line marks the reading of 0.5872 volts, minus 2.41 dBqps, and a green dotted line above it marks the 0.775 volts the same tone would read steadily, 0 dBqps" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/quasi_peak_meter.svg" alt="Quasi-peak detector reading a train of sixteen 5 millisecond bursts of 5 kilohertz tone at 10 per second. Grey vertical bars mark the rectified 468-weighted bursts, reaching 1.10 volts. The blue detector output climbs from zero over the first half second, then ripples gently along 0.58 volts for the rest of the train, and decays smoothly after the last burst at 1.55 seconds, falling to 0.16 volts by 2.1 seconds. A red dashed line marks the reading of 0.5867 volts, minus 2.42 dBqps, and a green dotted line above it marks the 0.775 volts the same tone would read steadily, 0 dBqps" width="96%"></picture>
 
 The whole content of clause 2 in one picture: the needle rises over the first
 half second, ripples once the charge between bursts and the decay in the gaps
 balance, and falls away after the train stops. The gap between the two
 horizontal lines is Table 3's 10 bursts per second cell, drawn to scale: the
-train reads 75.8 % of the steady tone against a printed 77 %, inside the 72 to
+train reads 75.7 % of the steady tone against a printed 77 %, inside the 72 to
 82 % window.
 
 The result carries the `trace` the figure draws, sample for sample with the
@@ -17357,8 +17360,8 @@ first:
   is fixed by that sentence.
 - **dBqps is a voltage level.** phonometry measures the factor at the caller's
   own sample rate rather than storing one fitted at 48 kHz, because the
-  chain's steady-sine gain moves by 0.0141 dB between 32 and 192 kHz and
-  clause 2.6 admits no such slack.
+  chain's steady-sine gain moves by 0.0147 dB across 32, 44.1, 48, 96 and
+  192 kHz and clause 2.6 admits no such slack.
 
 ```python
 import numpy as np
@@ -17458,23 +17461,25 @@ the same chain's steady reading.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.255
 row = report.stimuli[0]
-print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
+print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.85
 ```
 
-All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. The worst margin
-is 0.259 dB, at the 100 bursts per second cell whose upper limit is the
-physical ceiling. Between those five rates no reading moves by more than
-0.080 dB, or 4.2 % of its own window, which is why the peak-follower worry
-about reading the largest *sample* rather than the largest value of the
+All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. At each rate the
+worst margin is at the 100 bursts per second cell, whose upper limit is the
+physical ceiling: 0.255 dB at 48 kHz, the margin the example prints, and
+0.248 dB at 32 kHz, the smallest of the five. Between those five rates no
+reading moves by more than 0.043 dB, and none by more than 1.8 % of its own
+window, which is why the peak-follower worry about reading the largest
+*sample* rather than the largest value of the
 waveform does not bite here: the 1.41 ms charge spans fourteen half-periods of
 the rectified 5 kHz carrier, so the ripple is long gone before any maximum is
 taken.
 
 `deviation_db` is also reported, against the *reference* column, and the
 report calls it what it is: a self-imposed regression bound, not conformance.
-The worst is 0.140 dB, at 10 bursts per second. The reference row is printed
+The worst is 0.148 dB, at 10 bursts per second. The reference row is printed
 to two significant figures on nine of the eleven cells, so its own quantum is
 0.027 to 0.108 dB, and nothing tighter than that would mean anything.
 
@@ -18004,7 +18009,7 @@ x = electroacoustics.simulated_program_signal(fs, 60.0, spectrum="figure_2", see
 bands = octave_filter(x, fs, fraction=3, limits=[19.95, 19952.6])
 check = electroacoustics.check_program_signal(bands.levels, frequencies=bands.frequencies)
 print(check.passes, round(check.margin_db, 2), check.binding_bands_hz)
-# True 0.12 (315.0, 5000.0)
+# True 0.12 (40.0, 315.0)
 
 y = electroacoustics.simulated_program_signal(fs, 60.0, seed=2)
 bands_y = octave_filter(y, fs, fraction=3, limits=[19.95, 19952.6])
@@ -19441,7 +19446,7 @@ from phonometry import electroacoustics
 
 res = electroacoustics.radiating_piston(radius=0.1, frequencies=np.geomspace(20, 20000, 200),
                                         angles_rad=np.linspace(0.0, np.pi / 2, 91))
-print(round(res.radiation_mass, 4))               # 8 rho a^3 / 3, kg
+print(round(res.radiation_mass, 4))               # 0.0032 kg = 8 rho a^3 / 3
 print(round(float(res.directivity_index[0]), 2))  # 3.01 dB half-space limit
 res.plot()                                         # R1 and X1 vs ka
 ```
@@ -27584,7 +27589,7 @@ lv = np.array([82.0, 85.0, 83.0, 79.0])          # mean velocity level per band 
 
 # Part 1 upper limit (epsilon = 1):
 upper = emission.sound_power_from_vibration(lv, area=1.6, frequencies=bands)
-print(round(upper.total_level, 1))               # e.g. 89.4  dB re 1 pW
+print(round(upper.total_level, 1))               # 90.9  dB re 1 pW, unweighted
 
 # Part 2 engineering value with a measured radiation factor:
 eps = np.array([0.45, 0.75, 0.95, 1.00])
@@ -42363,7 +42368,7 @@ R = materials.alternating_airflow_resistance(
     piston_stroke_specimen=14e-3, piston_stroke_termination=1.4e-3,
     frequency=2.0, cavity_volume=7.854e-4, kappa_prime=kp,
 )
-print(round(R))                   # 222956  airflow resistance R [Pa*s/m^3]
+print(round(R))                   # 222949  airflow resistance R [Pa*s/m^3]
 ```
 
 Pass the `effective_kappa` result to `alternating_airflow_resistance` for an
@@ -49119,7 +49124,7 @@ auditory filters and their loudness summation.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing close to 1 sone at 40 dB SPL" width="80%"></picture>
 
 *The three models pass through approximately 1 sone at the 40 dB anchor
-(the Sottek front-end documents 0.984 sone_HMS there) and diverge with level:
+(the Sottek front-end documents 0.9845 sone_HMS there) and diverge with level:
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
 more slowly (about 1.65× per 10 dB), an intrinsic difference between the
 auditory summations, not a calibration error.*
@@ -49380,7 +49385,7 @@ filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
 with $z = 0.5\ ..\ 26.5$, half-wave rectification, block RMS and a compressive
 nonlinearity, Formula 23) that is **shared** by its loudness, tonality and
 roughness metrics. The loudness $N$ is reported in **sone_HMS**, and the same
-1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.984,
+1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.9845,
 with the full Clause 6.2.3 band averaging; the residual's origin is
 documented in the module docstring). `loudness_ecma` is monaural: the
 binaural combination of Formula 118 (Clause 8.1.5) is not implemented, so
@@ -49395,7 +49400,7 @@ t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = psychoacoustics.loudness_ecma(x, fs, field="free")
-print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.985 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
@@ -52483,7 +52488,7 @@ ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) 
 
 # Indirect method: from a measured room impulse response
 res = speech.sti_from_impulse_response(ir, fs, snr=25.0)
-print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
+print(f"STI = {res.sti:.2f}  ({res.rating})")   # 0.73 (A)
 
 # Direct STIPA measurement: play speech.stipa_signal() in the room, record it
 test = speech.stipa_signal(fs, duration_s=18.0, level=80.0)
@@ -52514,7 +52519,7 @@ rng = np.random.default_rng(0)
 n = np.arange(fs)
 ir = rng.standard_normal(fs) * np.exp(-6.9078 * n / fs / 0.9)
 res = speech.sti_from_impulse_response(ir, fs, snr=15.0)
-print(round(res.sti, 3), res.rating)      # 0.583 E
+print(round(res.sti, 3), res.rating)      # 0.584 E
 
 # One line: the per-band MTI bars with the STI and its rating in the title.
 res.plot()
@@ -60655,10 +60660,10 @@ print(result.overall_class)          # 1
 print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
-print(band["frequency"], band["class"], band["checked_to_omega"])
-# 12.589254117941678 1 1906.3877633382747
-print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
-# 0.39999977486865645 0.35126579320766144
+print(round(band["frequency"], 3), band["class"], round(band["checked_to_omega"], 1))
+# 12.589 1 1906.4
+print(round(band["margin_class1_db"], 3), round(band["bandwidth_margin_class1_db"], 3))
+# 0.4 0.351
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the IEC 61260-2 tests that need no specimen (the 24-point grid, the effective bandwidth, the summation and the sweep) computed on the design as well, and the tests a laboratory runs on a device, IEC 61260-2 on a specimen and IEC 61260-3 periodic tests graded by verify_filter_periodic, set apart as outside the check" width="88%"></picture>
@@ -60954,7 +60959,7 @@ from phonometry import filters
 bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
 swept = filters.verify_time_invariance(bank)
 print(swept.overall_class)                       # 1
-print(round(swept.worst_deviation_db, 3))        # 0.056
+print(round(swept.worst_deviation_db, 3))        # 0.049
 print(swept.seconds_per_decade)                  # (2.0, 5.0)
 print(round(filters.swept_band_level(
     127.0, fraction=3, sweep_duration_s=30, averaging_time_s=30,
@@ -62642,7 +62647,7 @@ varying = np.tile(np.concatenate([quiet, loud]), 3)
 
 stats = signals.ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
-# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
+# LA10=66.7  LA50=65.4  LA90=58.6 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
@@ -63286,8 +63291,9 @@ la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lau = signals.leq(filters.weighting_filter(x, fs, weighting="AU"))
 la_ref = signals.leq(filters.weighting_filter(audible, fs, weighting="A"))
 print(f"LA = {la:.1f} dB   LAU = {lau:.1f} dB   audible alone = {la_ref:.1f} dB")
-# LA = 78.6 dB   LAU = 71.0 dB   audible alone = 71.0 dB
-# The ultrasound inflates LA by 7.6 dB; AU recovers the audible level.
+# LA = 79.3 dB   LAU = 71.0 dB   audible alone = 71.0 dB
+print(f"the ultrasound inflates LA by {la - la_ref:.1f} dB")
+# the ultrasound inflates LA by 8.4 dB; AU recovers the audible level
 ```
 
 Ultrasound only reaches a digital filter when the sample rate captures it,
@@ -63834,7 +63840,7 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
 ```
 
@@ -67804,11 +67810,11 @@ the level fluctuated ($L_{90}$ is the background, $L_{10}$ the events), the
 C-weighted **peak** for impulsive content.
 
 ```python
-la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ~70.2 dB
+la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ~70.1 dB
 ln = signals.ln_levels(
     recording, fs, n=(10, 50, 90), weighting="A", calibration_factor=cal
 )                                                # L10 ~78.0, L50 ~55.1, L90 ~54.9
-lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ~80.2
+lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ~80.1
 lc_pk = signals.lc_peak(recording, fs, calibration_factor=cal)           # ~84.4
 
 print(f"LAeq {la_eq:.1f} dB | L10 {ln[10]:.1f} | L90 {ln[90]:.1f} "
@@ -74999,7 +75005,8 @@ result = filters.octave_filter(signal, fs=fs, fraction=3)
 print(f"Bands: {result.frequencies}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
 print(f"SPL [dB]: {result.levels}")
-# SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB at 100 Hz and ~90.9 dB at 1 kHz
+# SPL [dB]: [46.77640002 47.81719048 48.93133762 ...]
+# the 100 Hz band reads about 90.7 dB and the 1 kHz band about 90.9 dB
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
@@ -84928,10 +84935,10 @@ for band in (40.0, 63.0):
         f"{band:g} Hz: L_vF2 {passage.band_interval_levels[1, i]:.1f} dB,"
         f" L_vFmax {passage.band_max_levels[i]:.1f} dB"
     )
-# 40 Hz: L_vF2 70.4 dB, L_vFmax 72.0 dB
-# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.3 dB
+# 40 Hz: L_vF2 70.3 dB, L_vFmax 71.9 dB
+# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.2 dB
 print(f"sum level {vibration.band_sum_level(passage.band_interval_levels[1]):.1f} dB")
-# 71.1 dB, Formula (B.3)
+# 71.0 dB, Formula (B.3)
 ```
 
 ## 5. Narrow band, and what Table 1 is
@@ -84987,8 +84994,8 @@ centres, rms = bands.frequencies, bands.velocities_mm_s
 levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 for band in (40.0, 50.0, 63.0):
     print(f"{band:g} Hz from narrow band: {levels[list(centres).index(band)]:.1f} dB")
-# 40 Hz from narrow band: 70.5 dB   (70.4 dB from the band filter)
-# 50 Hz from narrow band: 39.2 dB   (44.7 dB from the band filter)
+# 40 Hz from narrow band: 70.5 dB   (70.3 dB from the band filter)
+# 50 Hz from narrow band: 39.2 dB   (41.4 dB from the band filter)
 # 63 Hz from narrow band: 62.5 dB   (62.4 dB from the band filter)
 ```
 
@@ -85015,11 +85022,11 @@ of the mean energy.
 ```python
 from phonometry import vibration
 
-before = [70.4, 62.4]  # 40 Hz and 63 Hz, without the mat
+before = [70.3, 62.4]  # 40 Hz and 63 Hz, without the mat
 after = [61.0, 50.9]
-print(vibration.elastic_insertion_loss(before, after))  # [ 9.4 11.5]
+print(vibration.elastic_insertion_loss(before, after))  # [ 9.3 11.5]
 
-average = vibration.passage_average_level([70.4, 72.1, 69.0])
+average = vibration.passage_average_level([70.3, 72.1, 69.0])
 print(f"{average:.1f} dB")  # 70.7 dB
 rms = vibration.passage_average_velocity([0.18, 0.21, 0.16])
 print(f"{rms:.4f} mm/s")  # 0.1845 mm/s
@@ -85496,14 +85503,14 @@ event = 1.8 * np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
 peak_mm_s = float(np.max(np.abs(event)))
 guideline = float(vibration.guideline_velocity("residential", 17.0))
 print(f"peak {peak_mm_s:.3f} mm/s against {guideline:.2f} mm/s at 17 Hz")
-print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.269
+print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.267
 
 # The Annex E route: no frequency anywhere.
 assessment = vibration.assess_short_term_vibration(
     event, fs, building_class="residential"
 )
 print(f"|v_B2|max {assessment.assessment_velocity_mm_s:.3f} mm/s against 5 mm/s")
-print(f"  ratio {assessment.ratio:.3f}")  # 0.271
+print(f"  ratio {assessment.ratio:.3f}")  # 0.268
 print(f"  within the guideline: {assessment.within_guideline}")
 ```
 
@@ -85865,9 +85872,9 @@ groups added after that are further off.
 ```python
 from phonometry import vibration
 
-print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.448]
+print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.452]
 print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], n_reference_machines=3).round(2))
-# [0.68 0.89 0.97], against 0.57, 0.95 and 1.04 measured
+# [0.69 0.89 0.97], against 0.57, 0.95 and 1.04 measured
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction.svg" alt="Six decreasing curves of the correction chi against the number of machines running from 4 to 100, on an axis from 0 to 0.6, one curve per reference count of 3, 5, 10, 30, 60 and 100 machines, the top curve starting at 0.55 and flattening to 0.29 and the bottom one starting at 0.19 and flattening to 0.10. Small dots mark the points read off the printed nomogram, and a note says they were read at a five-hundredth" width="96%"></picture>

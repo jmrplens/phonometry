@@ -812,9 +812,11 @@ jobs:
   # the metrology split shipped seven blocks where `from phonometry import
   # signals` sat next to `from scipy import signal` and silently rebound the
   # name, which Python does not warn about and no other gate can see. The
-  # script also holds the English and Spanish pages to the same API and skips,
-  # with a written reason, the pages whose blocks are excerpts of a workflow
-  # rather than a script.
+  # script also holds the English and Spanish pages to the same API, holds
+  # every output comment ("print(x)  # 5958.0") to what that print wrote in
+  # the same run, in English, Spanish and the docs/ mirror, and skips, with a
+  # written reason, the pages whose blocks are excerpts of a workflow rather
+  # than a script.
   doc-snippets:
     name: Documentation snippets run
     runs-on: ubuntu-latest

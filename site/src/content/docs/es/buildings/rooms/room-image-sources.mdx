@@ -249,7 +249,7 @@ freqs = [250.0, 500.0, 1000.0, 2000.0, 4000.0]
 alpha = np.array([[0.10, 0.15, 0.25, 0.40, 0.50]] * 6)   # (6 paredes, 5 bandas)
 res = room.image_source_rir((7.0, 5.0, 3.0), (2.0, 1.6, 1.5), (5.2, 3.4, 1.7),
                             alpha, fs=48000, max_order=60, frequencies=freqs)
-print(res.ir.shape)                                  # (5 bandas, n_muestras)
+print(res.ir.shape)                                  # (5, 59225): 5 bandas de n_muestras cada una
 res.plot()   # un decaimiento por banda; la figura de abajo añade el término de aire
 ```
 

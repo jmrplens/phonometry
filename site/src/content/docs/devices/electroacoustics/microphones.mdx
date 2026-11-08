@@ -391,7 +391,10 @@ for b in (0.0, 0.5, 1.0):
         response, 12.5, frequencies=freqs, tolerance_db=3.0,
         directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, polar),
                                                            frequency=1000.0))
-    print(b, round(family.directivity_index, 1))     # 0.0 / 4.8 / 4.8 dB
+    print(b, round(family.directivity_index, 1))
+# 0.0 0.0
+# 0.5 4.8   b = 1/2 and b = 1: one index from opposite shapes
+# 1.0 4.8
 
 result.report("microphone.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-4"))
 ```

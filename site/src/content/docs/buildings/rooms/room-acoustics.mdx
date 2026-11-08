@@ -539,8 +539,8 @@ valid = np.array([res.t30_valid for res in results])
 
 mean = np.nanmean(np.where(valid, t30, np.nan), axis=0)
 spread = np.nanstd(np.where(valid, t30, np.nan), axis=0)
-print(np.round(mean, 2))                  # [0.99 1.   1.02 1.02 1.03 1.01] s
-print(np.round(100.0 * spread / mean, 1))  # [4.  4.7 4.8 5.1 4.9 4.8] %
+print(np.round(mean, 2))                  # [0.98 1.   1.02 1.02 1.03 1.01] s
+print(np.round(100.0 * spread / mean, 1))  # [4.5 4.3 4.8 5.1 4.9 4.8] %
 print(int(valid.sum(axis=0).min()))        # 3 positions survived the flag
 ```
 

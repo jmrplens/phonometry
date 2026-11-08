@@ -581,7 +581,7 @@ Four placement mistakes bias the mean itself:
 The third mistake is the one worth drawing, because it does not look like a
 mistake in the result:
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/source_distance_bias.svg" alt="Two stacked panels sharing a source-receiver distance axis from 0.6 to 7 metres in the same 10 by 6 by 3.5 metre room as the setup drawings. Above, the 500 to 1000 Hz mean T30 stays between 0.54 and 0.66 seconds across the whole sweep while EDT climbs from 0.18 to about 0.45 seconds; below, clarity C80 falls from 17.5 to about 10.5 decibels. The region inside d_min = 2.0 metres is shaded as excluded and the critical distance of 1.5 metres is marked with a dotted line" width="90%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/source_distance_bias.svg" alt="Two stacked panels sharing a source-receiver distance axis from 0.6 to 7 metres in the same 10 by 6 by 3.5 metre room as the setup drawings. Above, the 500 to 1000 Hz mean T30 stays between 0.53 and 0.65 seconds across the whole sweep while EDT climbs from 0.18 to about 0.45 seconds; below, clarity C80 falls from 17.6 to about 10.7 decibels. The region inside d_min = 2.0 metres is shaded as excluded and the critical distance of 1.5 metres is marked with a dotted line" width="90%" />
 
 *EDT, T30 and C80 of the room above against source distance, from synthetic
 impulse responses. Inside $d_\mathrm{min}$, EDT is short by a factor of about 2.5 and
@@ -615,7 +615,7 @@ for dist in (0.6, 1.0, 2.0, 4.0, 7.0):
         band.append([np.mean(par.edt[mid]), np.mean(par.t30[mid]),
                      np.mean(par.c80[mid])])
     print(dist, np.round(np.mean(band, axis=0), 2))
-# 0.6 [ 0.18  0.54 17.48]  ...  7.0 [ 0.44  0.66 10.65]
+# 0.6 [ 0.18  0.53 17.56]  ...  7.0 [ 0.45  0.65 10.72]
 plt.show()
 ```
 

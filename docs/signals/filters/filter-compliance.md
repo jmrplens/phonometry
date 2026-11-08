@@ -43,10 +43,10 @@ print(result.overall_class)          # 1
 print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
-print(band["frequency"], band["class"], band["checked_to_omega"])
-# 12.589254117941678 1 1906.3877633382747
-print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
-# 0.39999977486865645 0.35126579320766144
+print(round(band["frequency"], 3), band["class"], round(band["checked_to_omega"], 1))
+# 12.589 1 1906.4
+print(round(band["margin_class1_db"], 3), round(band["bandwidth_margin_class1_db"], 3))
+# 0.4 0.351
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the IEC 61260-2 tests that need no specimen (the 24-point grid, the effective bandwidth, the summation and the sweep) computed on the design as well, and the tests a laboratory runs on a device, IEC 61260-2 on a specimen and IEC 61260-3 periodic tests graded by verify_filter_periodic, set apart as outside the check" width="88%"></picture>
@@ -342,7 +342,7 @@ from phonometry import filters
 bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
 swept = filters.verify_time_invariance(bank)
 print(swept.overall_class)                       # 1
-print(round(swept.worst_deviation_db, 3))        # 0.056
+print(round(swept.worst_deviation_db, 3))        # 0.049
 print(swept.seconds_per_decade)                  # (2.0, 5.0)
 print(round(filters.swept_band_level(
     127.0, fraction=3, sweep_duration_s=30, averaging_time_s=30,

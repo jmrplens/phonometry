@@ -184,11 +184,11 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A por encima de 20 dB: el número ponderado A ocultaría el retumbo.
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/c_minus_a_spectrum.svg" alt="Niveles en tercios de octava de dos señales, cada una dibujada sin ponderar, con ponderación A y con ponderación C. A la izquierda, un retumbo de 50 Hz bajo un siseo ligero: las curvas sin ponderar y ponderada C coinciden en un pico de 77 dB en la banda de 50 Hz, mientras que la curva ponderada A recorta esa misma banda hasta 47 dB, y el recuadro indica LAeq 52,4 dB, LCeq 75,7 dB y C menos A 23,2 dB. A la derecha, ruido rosa de banda ancha: las tres curvas quedan a un par de decibelios unas de otras desde 1 kHz hacia arriba y la curva A cae por debajo de esa frecuencia, y el recuadro indica LAeq 54,6 dB, LCeq 56,4 dB y C menos A 1,8 dB" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/c_minus_a_spectrum.svg" alt="Niveles en tercios de octava de dos señales, cada una dibujada sin ponderar, con ponderación A y con ponderación C. A la izquierda, un retumbo de 50 Hz bajo un siseo ligero: las curvas sin ponderar y ponderada C coinciden en un pico de 77 dB en la banda de 50 Hz, mientras que la curva ponderada A recorta esa misma banda hasta 47 dB, y el recuadro indica LAeq 52,6 dB, LCeq 75,7 dB y C menos A 23,1 dB. A la derecha, ruido rosa de banda ancha: las tres curvas quedan a un par de decibelios unas de otras desde 1 kHz hacia arriba y la curva A cae por debajo de esa frecuencia, y el recuadro indica LAeq 54,6 dB, LCeq 56,4 dB y C menos A 1,8 dB" width="92%" />
 
 *Los mismos tres niveles de banda para dos señales. Una fuente concentrada en
 baja frecuencia (izquierda) pone casi toda su energía justo donde A recorta con
@@ -276,8 +276,8 @@ print(f"suma energética de las bandas ponderadas A "
       f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
 print(f"LAeq de la misma señal                     "
       f"{signals.laeq(band_source, fs):.2f} dB")
-# suma energética de las bandas ponderadas A 62.84 dB
-# LAeq de la misma señal                     62.79 dB
+# suma energética de las bandas ponderadas A 62.85 dB
+# LAeq de la misma señal                     62.81 dB
 ```
 
 La vía de la **tabla** es a la que te ves obligado cuando los datos llegan ya

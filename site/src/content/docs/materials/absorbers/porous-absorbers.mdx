@@ -865,11 +865,11 @@ spaced = materials.layered_absorber(
 thick = materials.layered_absorber(bands_gap, [materials.PorousLayer(thickness_m=0.15, medium=med_gap)])
 print(np.round(flat.absorption, 2))     # [0.09 0.26 0.62 0.94]  50 mm on the wall
 print(np.round(spaced.absorption, 2))   # [0.44 0.78 0.9  0.77]  50 mm + 100 mm gap
-print(np.round(thick.absorption, 2))    # [0.52 0.71 0.8  0.89]  150 mm on the wall
+print(np.round(thick.absorption, 2))    # [0.52 0.7  0.8  0.89]  150 mm on the wall
 ```
 
 At 250 Hz the 50 mm layer on a 100 mm cavity beats 150 mm of solid blanket
-(0.78 against 0.71) for a third of the material and the same 150 mm of total
+(0.78 against 0.70) for a third of the material and the same 150 mm of total
 depth. Two limits come with the trick: the gain disappears above the first
 cavity half-wave, where the layer lands back in a velocity node (visible as
 the spaced curve falling below the flat one at 1 kHz), and on a large surface
@@ -1132,7 +1132,7 @@ print(round(float(z_perf.real[0]) / rho_c, 4))   # 0.0925, 16x lower
 
 # A membrane is pure reactance unless a fixing resistance is supplied.
 print(np.round(materials.membrane_impedance(f_peak, surface_density=2.0), 1))
-# [0.+8513.6j]
+# [0.+8513.7j]
 
 # The Fok interaction: crowded holes shorten the effective plug.
 print(round(materials.perforation_end_correction(0.05), 3))   # 0.575 vs 0.85

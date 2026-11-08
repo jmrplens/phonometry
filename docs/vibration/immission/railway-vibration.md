@@ -231,10 +231,10 @@ for band in (40.0, 63.0):
         f"{band:g} Hz: L_vF2 {passage.band_interval_levels[1, i]:.1f} dB,"
         f" L_vFmax {passage.band_max_levels[i]:.1f} dB"
     )
-# 40 Hz: L_vF2 70.4 dB, L_vFmax 72.0 dB
-# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.3 dB
+# 40 Hz: L_vF2 70.3 dB, L_vFmax 71.9 dB
+# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.2 dB
 print(f"sum level {vibration.band_sum_level(passage.band_interval_levels[1]):.1f} dB")
-# 71.1 dB, Formula (B.3)
+# 71.0 dB, Formula (B.3)
 ```
 
 ## 5. Narrow band, and what Table 1 is
@@ -290,8 +290,8 @@ centres, rms = bands.frequencies, bands.velocities_mm_s
 levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 for band in (40.0, 50.0, 63.0):
     print(f"{band:g} Hz from narrow band: {levels[list(centres).index(band)]:.1f} dB")
-# 40 Hz from narrow band: 70.5 dB   (70.4 dB from the band filter)
-# 50 Hz from narrow band: 39.2 dB   (44.7 dB from the band filter)
+# 40 Hz from narrow band: 70.5 dB   (70.3 dB from the band filter)
+# 50 Hz from narrow band: 39.2 dB   (41.4 dB from the band filter)
 # 63 Hz from narrow band: 62.5 dB   (62.4 dB from the band filter)
 ```
 
@@ -318,11 +318,11 @@ of the mean energy.
 ```python
 from phonometry import vibration
 
-before = [70.4, 62.4]  # 40 Hz and 63 Hz, without the mat
+before = [70.3, 62.4]  # 40 Hz and 63 Hz, without the mat
 after = [61.0, 50.9]
-print(vibration.elastic_insertion_loss(before, after))  # [ 9.4 11.5]
+print(vibration.elastic_insertion_loss(before, after))  # [ 9.3 11.5]
 
-average = vibration.passage_average_level([70.4, 72.1, 69.0])
+average = vibration.passage_average_level([70.3, 72.1, 69.0])
 print(f"{average:.1f} dB")  # 70.7 dB
 rms = vibration.passage_average_velocity([0.18, 0.21, 0.16])
 print(f"{rms:.4f} mm/s")  # 0.1845 mm/s

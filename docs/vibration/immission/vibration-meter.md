@@ -299,14 +299,14 @@ event = 1.8 * np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
 peak_mm_s = float(np.max(np.abs(event)))
 guideline = float(vibration.guideline_velocity("residential", 17.0))
 print(f"peak {peak_mm_s:.3f} mm/s against {guideline:.2f} mm/s at 17 Hz")
-print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.269
+print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.267
 
 # The Annex E route: no frequency anywhere.
 assessment = vibration.assess_short_term_vibration(
     event, fs, building_class="residential"
 )
 print(f"|v_B2|max {assessment.assessment_velocity_mm_s:.3f} mm/s against 5 mm/s")
-print(f"  ratio {assessment.ratio:.3f}")  # 0.271
+print(f"  ratio {assessment.ratio:.3f}")  # 0.268
 print(f"  within the guideline: {assessment.within_guideline}")
 ```
 

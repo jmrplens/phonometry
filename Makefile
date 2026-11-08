@@ -714,10 +714,11 @@ llms:
 pypi-readme:
 	$(PYTHON) scripts/generate_pypi_readme.py
 
-# Run every Python snippet the guides print, hold the two languages to the
-# same API and reject a block that shadows a name it imported (see the
-# doc-snippets job in python-app.yml). `make snippets-static` skips the
-# execution pass, which is the slow half.
+# Run every Python snippet the guides print, in both languages and the docs/
+# mirror, hold each output comment to what its print wrote, hold the two
+# languages to the same API and reject a block that shadows a name it imported
+# (see the doc-snippets job in python-app.yml). `make snippets-static` skips
+# the execution and output passes, which are the slow half.
 snippets:
 	$(PYTHON) scripts/check_doc_snippets.py
 

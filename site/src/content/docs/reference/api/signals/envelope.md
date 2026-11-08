@@ -169,7 +169,7 @@ untouched) before the detector, the Figure 13.11 front end.
 | `remove_dc` | Remove the envelope mean before the transform (default `True`, the Figure 13.11 DC remover); the mean is reported either way. |
 | `band` | Optional `(low, high)` band-pass edges, in Hz ($0 < \text{low} < \text{high} < f_\mathrm{s}/2$), applied to the record before envelope detection as a zero-phase 4th-order Butterworth (`scipy.signal.sosfiltfilt`, giving an 8th-order magnitude roll-off). Default `None`: detect on the record as given. |
 
-**Returns:** An [`EnvelopeSpectrumResult`](/phonometry/reference/api/signals/envelope/#envelopespectrumresult).
+**Returns:** An [`EnvelopeSpectrumResult`](/phonometry/reference/api/signals/envelope/#envelopespectrumresult). A finite record whose transform or squared envelope leaves the floating-point range gives an envelope, a mean level and a spectrum that are not finite.
 
 **Raises**
 

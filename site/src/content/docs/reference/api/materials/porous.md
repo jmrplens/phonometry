@@ -587,11 +587,25 @@ The bound $\lvert K_c/K_\mathrm{f} \rvert$ must stay below.
 
 ```python
 membrane_impedance(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    surface_density: float,
+    resistance: float = ...,
+) -> complex
+
+membrane_impedance(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    surface_density: float,
+    resistance: float = ...,
+) -> NDArray[np.complex128]
+
+membrane_impedance(
     frequency: NumericArrayLike,
     *,
     surface_density: float,
-    resistance: float = 0.0,
-) -> NDArray[np.complex128]
+    resistance: float = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Transfer impedance of a limp impervious membrane.
@@ -608,7 +622,7 @@ resistance for the internal/fixing losses.
 | `surface_density` | Mass per unit area `m`, in kg/m2. |
 | `resistance` | Series flow resistance `r`, in Pa s/m (default 0). |
 
-**Returns:** Complex transfer impedance `z`, in Pa s/m.
+**Returns:** Complex transfer impedance `z`, in Pa s/m. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -657,14 +671,34 @@ the porous-filled cavity case below about 500 Hz.
 
 ```python
 microperforated_plate_impedance(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float = ...,
+    fluid: Fluid = ...,
+) -> complex
+
+microperforated_plate_impedance(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.complex128]
+
+microperforated_plate_impedance(
     frequency: NumericArrayLike,
     *,
     thickness_m: float,
     hole_radius: float,
     open_area: float,
-    end_correction: float = 0.85,
+    end_correction: float = ...,
     fluid: Fluid = ...,
-) -> NDArray[np.complex128]
+) -> complex | NDArray[np.complex128]
 ```
 
 Transfer impedance of a microperforated plate (Maa's exact model).
@@ -697,7 +731,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 | `end_correction` | End-correction factor `delta` per end (default 0.85, the isolated-orifice value used by Maa). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** Complex transfer impedance `z`, in Pa s/m.
+**Returns:** Complex transfer impedance `z`, in Pa s/m. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -757,14 +791,34 @@ MIKI_VALIDITY = (0.01, 1.0)
 
 ```python
 perforated_plate_impedance(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> complex
+
+perforated_plate_impedance(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    thickness_m: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.complex128]
+
+perforated_plate_impedance(
     frequency: NumericArrayLike,
     *,
     thickness_m: float,
     hole_radius: float,
     open_area: float,
-    end_correction: float | None = None,
+    end_correction: float | None = ...,
     fluid: Fluid = ...,
-) -> NDArray[np.complex128]
+) -> complex | NDArray[np.complex128]
 ```
 
 Transfer impedance of a rigid perforated plate with circular holes.
@@ -798,7 +852,7 @@ holes.
 | `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/phonometry/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
-**Returns:** Complex transfer impedance `z`, in Pa s/m.
+**Returns:** Complex transfer impedance `z`, in Pa s/m. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

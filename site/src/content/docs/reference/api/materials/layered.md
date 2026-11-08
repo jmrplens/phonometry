@@ -361,10 +361,22 @@ is passed to [`layered_absorber`](/phonometry/reference/api/materials/layered/#l
 
 ```python
 statistical_absorption(
+    normalized_impedance: complex | np.number[Any],
+    *,
+    angle_limit_rad: float = ...,
+) -> float
+
+statistical_absorption(
+    normalized_impedance: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    *,
+    angle_limit_rad: float = ...,
+) -> NDArray[np.float64]
+
+statistical_absorption(
     normalized_impedance: NumericArrayLike,
     *,
-    angle_limit_rad: float = 1.5707963267948966,
-) -> NDArray[np.float64]
+    angle_limit_rad: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Closed-form Paris integral for a locally reacting plane.
@@ -388,7 +400,7 @@ Sect. D.5).
 | `normalized_impedance` | Normalised surface impedance $z = Z_\mathrm{s} / (\rho c)$ (complex scalar or array), with $\operatorname{Re}(z) > 0$. |
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 
-**Returns:** Statistical absorption coefficient `alpha_dif`.
+**Returns:** Statistical absorption coefficient `alpha_dif`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

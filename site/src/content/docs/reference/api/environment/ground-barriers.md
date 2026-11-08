@@ -411,8 +411,16 @@ of the materials domain. Exactly one of the two must be given.
 
 ```python
 kurze_anderson_attenuation(
-    fresnel_number: NumericArrayLike,
+    fresnel_number: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+kurze_anderson_attenuation(
+    fresnel_number: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+kurze_anderson_attenuation(
+    fresnel_number: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Kurze-Anderson barrier attenuation (Bies Eq. (5.138); Kurze & Anderson, 1971).
@@ -437,7 +445,7 @@ at 0 dB (a barrier never amplifies).
 | :--- | :--- |
 | `fresnel_number` | Fresnel number `N` (scalar or array). |
 
-**Returns:** Attenuation `Delta`, in decibels (>= 0), matching the input shape.
+**Returns:** Attenuation `Delta`, in decibels (>= 0), matching the input shape. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -503,9 +511,29 @@ spherical_reflection_coefficient(
     receiver_height_m: float,
     distance: float,
     *,
-    frequencies: NumericArrayLike,
-    speed_of_sound: float = 343.0,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float = ...,
+) -> complex
+
+spherical_reflection_coefficient(
+    normalized_impedance: NumericArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
+    distance: float,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    speed_of_sound: float = ...,
 ) -> NDArray[np.complex128]
+
+spherical_reflection_coefficient(
+    normalized_impedance: NumericArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
+    distance: float,
+    *,
+    frequencies: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Spherical-wave reflection coefficient `Q` (Weyl-Van der Pol).
@@ -529,7 +557,7 @@ $w = \sqrt{i k R_2 / 2} \, (\cos\theta + 1/Z)$ (Eq. (D.57)).
 | `distance` | Horizontal source-receiver distance, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in m/s. |
 
-**Returns:** Complex `Q` per frequency.
+**Returns:** Complex `Q` per frequency. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

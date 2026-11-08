@@ -44,7 +44,7 @@ absorption_coefficient_uncertainty(
     u_a: NumericArrayLike,
     t_b: NumericArrayLike,
     u_b: NumericArrayLike,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Uncertainty of a Sabine absorption coefficient (ISO 17497-1, A.3/A.4).
@@ -69,7 +69,7 @@ the standard is taken as a single (mean) speed of sound.
 | `t_b` | Reverberation time of the second situation, in seconds. |
 | `u_b` | Standard uncertainty of `t_b` (Eq. (A.1)), in seconds. |
 
-**Returns:** Combined standard uncertainty of the absorption coefficient (per band).
+**Returns:** Combined standard uncertainty of the absorption coefficient (per band). A `float` when `speed_of_sound`, `t_a`, `u_a`, `t_b` and `u_b` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -107,7 +107,7 @@ base_plate_scattering(
     t3: NumericArrayLike,
     m1: NumericArrayLike = 0.0,
     m3: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Scattering coefficient of the base plate alone (ISO 17497-1, Eq. (6)).
@@ -135,7 +135,7 @@ must not exceed the Table 1 limits (Clause 6.2). See
 | `m1` | Energy attenuation coefficient during `t1`, in 1/m; defaults to 0. |
 | `m3` | Energy attenuation coefficient during `t3`, in 1/m; defaults to 0. |
 
-**Returns:** Base-plate scattering coefficient `s_base` (per band).
+**Returns:** Base-plate scattering coefficient `s_base` (per band). A `float` when `c1`, `t1`, `c3`, `t3`, `m1` and `m3` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -272,7 +272,7 @@ random_incidence_absorption(
     t2: NumericArrayLike,
     m1: NumericArrayLike = 0.0,
     m2: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Random-incidence absorption coefficient `alpha_s` (ISO 17497-1, Eq. (1)).
@@ -298,7 +298,7 @@ situation 2 adds the test sample, still without turntable rotation
 | `m1` | Energy attenuation coefficient during `t1`, in 1/m (see [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha)); defaults to 0. |
 | `m2` | Energy attenuation coefficient during `t2`, in 1/m; defaults to 0. |
 
-**Returns:** Random-incidence absorption coefficient `alpha_s` (per band).
+**Returns:** Random-incidence absorption coefficient `alpha_s` (per band). A `float` when `c1`, `t1`, `c2`, `t2`, `m1` and `m2` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -310,9 +310,7 @@ situation 2 adds the test sample, still without turntable rotation
 ## reverberation_time_uncertainty
 
 ```python
-reverberation_time_uncertainty(
-    times: NumericArrayLike,
-) -> NDArray[np.float64]
+reverberation_time_uncertainty(times: NumericArrayLike) -> float
 ```
 
 Standard uncertainty of a reverberation time (ISO 17497-1, Eq. (A.1)).
@@ -331,7 +329,7 @@ error of the mean.
 | :--- | :--- |
 | `times` | The $N \ge 2$ reverberation-time measurements, in seconds. |
 
-**Returns:** Standard uncertainty `u` of the mean reverberation time (0-d).
+**Returns:** Standard uncertainty `u` of the mean reverberation time, in seconds, a `float`: the measurements are one axis, which it reduces.
 
 **Raises**
 
@@ -344,11 +342,32 @@ error of the mean.
 
 ```python
 scattering_coefficient(
+    alpha_spec: float | np.floating[Any] | np.integer[Any],
+    alpha_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    truncate_negative: bool = ...,
+) -> float
+
+scattering_coefficient(
+    alpha_spec: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    alpha_s: NumericArrayLike,
+    *,
+    truncate_negative: bool = ...,
+) -> NDArray[np.float64]
+
+scattering_coefficient(
+    alpha_spec: float | np.floating[Any] | np.integer[Any],
+    alpha_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    truncate_negative: bool = ...,
+) -> NDArray[np.float64]
+
+scattering_coefficient(
     alpha_spec: NumericArrayLike,
     alpha_s: NumericArrayLike,
     *,
-    truncate_negative: bool = True,
-) -> NDArray[np.float64]
+    truncate_negative: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Random-incidence scattering coefficient `s` (ISO 17497-1, Eq. (5)).
@@ -370,7 +389,7 @@ results table is left to the caller.
 | `alpha_s` | Random-incidence absorption coefficient `alpha_s` (Eq. (1)). |
 | `truncate_negative` | If `True` (default), clip negative `s` to 0 per Clause 8.3; values above 1 are never clipped. |
 
-**Returns:** Scattering coefficient `s` (per band).
+**Returns:** Scattering coefficient `s` (per band). A `float` when `alpha_spec` and `alpha_s` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -576,7 +595,7 @@ specular_absorption_coefficient(
     t4: NumericArrayLike,
     m3: NumericArrayLike = 0.0,
     m4: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Specular absorption coefficient `alpha_spec` (ISO 17497-1, Eq. (4)).
@@ -602,7 +621,7 @@ apparent (specular) absorption includes the energy lost to scattering.
 | `m3` | Energy attenuation coefficient during `t3`, in 1/m; defaults to 0. |
 | `m4` | Energy attenuation coefficient during `t4`, in 1/m; defaults to 0. |
 
-**Returns:** Specular absorption coefficient `alpha_spec` (per band).
+**Returns:** Specular absorption coefficient `alpha_spec` (per band). A `float` when `c3`, `t3`, `c4`, `t4`, `m3` and `m4` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -616,8 +635,18 @@ apparent (specular) absorption includes the energy lost to scattering.
 ```python
 speed_of_sound_iso17497(
     *,
-    temperature_c: NumericArrayLike,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+speed_of_sound_iso17497(
+    *,
+    temperature_c: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+speed_of_sound_iso17497(
+    *,
+    temperature_c: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).
@@ -630,7 +659,7 @@ $c = 343.2 \sqrt{(273.15 + t) / 293.15}$ (m/s).
 | :--- | :--- |
 | `temperature_c` | Air temperature, in **degrees Celsius** (scalar or per band). |
 
-**Returns:** Speed of sound `c`, in metres per second.
+**Returns:** Speed of sound `c`, in metres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

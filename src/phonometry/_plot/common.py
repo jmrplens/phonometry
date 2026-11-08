@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
     from matplotlib.transforms import Bbox
     from matplotlib.typing import ColorType, LegendLocType
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import ThreePanels, TwoPanels
@@ -790,7 +791,9 @@ def styled(kwargs: dict[str, Any], **defaults: Any) -> dict[str, Any]:
     return merged
 
 
-def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: Language = "en") -> None:
+def _freq_axis(
+    ax: Axes, freqs: NDArray[np.float64], *, language: Language = "en"
+) -> None:
     """Configure a logarithmic frequency x-axis labelled with band centres."""
     import matplotlib.ticker as mticker
 
@@ -972,11 +975,11 @@ def format_frequency_axis(
 
 def _band_axis(
     ax: Axes,
-    labels_or_freqs: np.ndarray | Sequence[str] | Sequence[float],
+    labels_or_freqs: NDArray[np.floating[Any]] | Sequence[str] | Sequence[float],
     *,
     xlabel: str | None = _LABEL_FREQUENCY_HZ,
     language: Language = "en",
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Categorical band x-axis: evenly spaced positions labelled with centres.
 
     Band bars/curves are drawn on evenly spaced positions (a *linear* axis)
@@ -1001,10 +1004,10 @@ def _band_axis(
 
 def _fractile_band(
     ax: Axes,
-    freqs: np.ndarray,
-    median: np.ndarray,
-    spread_lower: np.ndarray,
-    spread_upper: np.ndarray,
+    freqs: NDArray[np.float64],
+    median: NDArray[np.float64],
+    spread_lower: NDArray[np.float64],
+    spread_upper: NDArray[np.float64],
     *,
     color: str,
     floor: float | None = None,
@@ -1031,7 +1034,7 @@ def _fractile_band(
     )
 
 
-def _hatch_invalid(bars: BarContainer, mask: np.ndarray) -> None:
+def _hatch_invalid(bars: BarContainer, mask: NDArray[np.bool_]) -> None:
     """Hatch (and outline) the bars flagged invalid/unusable by ``mask``."""
     for bar, bad in zip(bars, np.asarray(mask, dtype=bool), strict=True):
         if bad:
@@ -1075,9 +1078,9 @@ def _hatch_invalid(bars: BarContainer, mask: np.ndarray) -> None:
 
 
 def _plot_rating(
-    frequencies: np.ndarray,
-    measured: np.ndarray,
-    reference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    reference: NDArray[np.float64],
     *,
     impact: bool,
     title: str,
@@ -1131,8 +1134,8 @@ def _plot_rating(
 
 
 def _unfavourable_mask(
-    measured: np.ndarray, reference: np.ndarray, *, impact: bool
-) -> np.ndarray:
+    measured: NDArray[np.float64], reference: NDArray[np.float64], *, impact: bool
+) -> NDArray[np.bool_]:
     """Bands whose deviation is unfavourable.
 
     Airborne (ISO 717-1, higher is better): the reference exceeds the
@@ -1146,8 +1149,8 @@ def _unfavourable_mask(
 
 def _annotate_impact_500(
     ax: Axes,
-    frequencies: np.ndarray,
-    reference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    reference: NDArray[np.float64],
     rating: int,
     *,
     language: Language = "en",
@@ -1203,8 +1206,8 @@ def _annotate_impact_500(
 
 
 def _facade_x_axis(
-    ax: Axes, freqs: np.ndarray | None, n: int, *, language: Language = "en"
-) -> np.ndarray:
+    ax: Axes, freqs: NDArray[np.float64] | None, n: int, *, language: Language = "en"
+) -> NDArray[np.float64]:
     """Frequency x-axis when centres are known, else a labelled band index."""
     if freqs is None:
         x = np.arange(n, dtype=np.float64)
@@ -1226,7 +1229,7 @@ def _facade_x_axis(
 
 
 def _draw_decay_times(
-    ax: Axes, positions: np.ndarray, result: RoomAcousticsResult, **kwargs: Any
+    ax: Axes, positions: NDArray[np.float64], result: RoomAcousticsResult, **kwargs: Any
 ) -> None:
     """Grouped EDT/T20/T30 bars, invalid bands hatched and greyed."""
     width = 0.27
@@ -1327,7 +1330,7 @@ def _sound_power_designation(
 # ---------------------------------------------------------------------------
 
 
-def _bar_width(positions: np.ndarray, k: float = 0.2) -> np.ndarray:
+def _bar_width(positions: NDArray[np.float64], k: float = 0.2) -> NDArray[np.float64]:
     """Per-bar widths for a *logarithmic* frequency axis.
 
     A constant linear width makes high-frequency bars almost invisible on
@@ -1346,8 +1349,8 @@ def _bar_width(positions: np.ndarray, k: float = 0.2) -> np.ndarray:
 
 
 def _fit_segment(
-    time: np.ndarray, level: np.ndarray, lo: float, hi: float
-) -> np.ndarray | None:
+    time: NDArray[np.float64], level: NDArray[np.float64], lo: float, hi: float
+) -> NDArray[np.float64] | None:
     """Least-squares straight line over ``hi <= level <= lo``, over full time."""
     mask = (level <= lo) & (level >= hi) & np.isfinite(level)
     if int(np.count_nonzero(mask)) < _MIN_LINE_FIT_POINTS:
@@ -1363,7 +1366,7 @@ def _fit_segment(
 
 def _time_axis(
     n: int, fs: float | None, *, language: Language = "en"
-) -> tuple[np.ndarray, str]:
+) -> tuple[NDArray[np.float64], str]:
     """Sample times in seconds when ``fs`` is known, else sample index."""
     if fs:
         return np.arange(n) / real_number(fs, "fs"), _t("Time [s]", language)
@@ -1402,8 +1405,8 @@ def _time_axis(
 
 def _plot_band_level_bars(
     ax: Axes | None,
-    levels: np.ndarray,
-    frequencies: np.ndarray | None,
+    levels: NDArray[np.float64],
+    frequencies: NDArray[np.float64] | None,
     total_level: float,
     *,
     ylabel: str,
@@ -1483,7 +1486,7 @@ def _plot_band_level_bars(
 
 
 def _plot_insulation_bands(
-    curves: Sequence[tuple[str, np.ndarray]],
+    curves: Sequence[tuple[str, NDArray[np.float64]]],
     *,
     ylabel: str,
     title: str,
@@ -1572,7 +1575,7 @@ _POINTS_PER_INCH: Final = 72.0
 #: One mark a legend box can close over: the path it can cross (``None`` for
 #: markers, which have no line between them), the vertices it can cover, and
 #: how far a vertex reaches past its centre in display units.
-type _Mark = tuple[Path | None, np.ndarray, float]
+type _Mark = tuple[Path | None, NDArray[np.float64], float]
 
 
 def _line_marks(line: Line2D, pixels_per_point: float) -> list[_Mark]:
@@ -1709,7 +1712,7 @@ def place_legend_clear(legend: Legend, *twins: Axes) -> LegendLocType:
         # first draw or the first time something asks for them.
         panel.get_ylim()
     pixels_per_point = legend.figure.dpi / _POINTS_PER_INCH
-    marks: list[tuple[Path | None, np.ndarray, float]] = []
+    marks: list[tuple[Path | None, NDArray[np.float64], float]] = []
     extents: list[Bbox] = []
     for panel in panels:
         panel_marks, panel_extents = _drawn_marks(panel, pixels_per_point)
@@ -1737,10 +1740,10 @@ def place_legend_clear(legend: Legend, *twins: Axes) -> LegendLocType:
 
 def _plot_two_runs(
     ax: Axes | None,
-    frequencies: np.ndarray | None,
-    upper: np.ndarray,
-    lower: np.ndarray,
-    insulation: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    upper: NDArray[np.float64],
+    lower: NDArray[np.float64],
+    insulation: NDArray[np.float64],
     *,
     labels: tuple[str, str, str],
     ylabel: str,

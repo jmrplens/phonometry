@@ -3949,3 +3949,171 @@ def test_a_value_another_scope_binds_tells_nothing_of_the_mapping() -> None:
     assert ccl._value_names(tree, target) == {
         ("value", ccl._function_in(tree)),
     }
+
+
+class _ReceiverNamedOtherwise:
+    """A class whose ``__init__`` calls its receiver ``instance``."""
+
+    def __init__(instance, pace: _Pace = "fast") -> None:  # noqa: N805
+        require_choice(pace, "pace", _PACES)
+        instance.pace = pace
+
+
+def _through_a_receiver_named_otherwise(
+    pace: _Pace = "fast",
+) -> _ReceiverNamedOtherwise:
+    """Hand a pace to a class whose ``__init__`` names its receiver otherwise."""
+    return _ReceiverNamedOtherwise(pace)
+
+
+def test_a_receiver_is_dropped_whatever_it_is_called() -> None:
+    """A call of a class fills the first parameter of the ``__init__`` it
+    runs itself, whatever it is called: ``_ReceiverNamedOtherwise(pace)``
+    hands the pace to ``pace``, which the ``__init__`` checks.
+
+    The receiver was dropped only when it was called ``self`` or ``cls``,
+    so the pace was read as handed to ``instance`` and reported as never
+    checked.
+    """
+    pace = "Literal['fast', 'slow']"
+    assert (
+        ccl._choice_verdict(
+            _through_a_receiver_named_otherwise, "pace", pace, field=False
+        )
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _through_a_receiver_named_otherwise("medium")  # type: ignore[arg-type]
+
+
+@dataclass
+class _ChecksInItsInit:
+    """A record whose ``__init__``, written by hand, checks the pace itself."""
+
+    pace: _Pace = "fast"
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        require_choice(pace, "pace", _PACES)
+        self.pace = pace
+
+
+class _PlainOverChecks(_ChecksInItsInit):
+    """A class that is no record over one that checks in its ``__init__``."""
+
+
+def _through_an_inherited_init(pace: _Pace = "fast") -> _PlainOverChecks:
+    """Hand a pace to a class that runs its base's hand-written ``__init__``."""
+    return _PlainOverChecks(pace)
+
+
+@dataclass
+class _QuietHook:
+    """A record whose hook checks nothing."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        """Check nothing."""
+
+
+@dataclass
+class _NamesItsHook(_QuietHook):
+    """A record whose ``__init__`` runs the base's hook by its class's name,
+    past a hook of its own that checks the pace and never runs.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        _QuietHook.__post_init__(self)
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+def _through_a_named_hook(pace: _Pace = "fast") -> _NamesItsHook:
+    """Hand a pace to a record whose ``__init__`` names the hook it runs."""
+    return _NamesItsHook(pace)
+
+
+def test_a_hand_written_init_is_read_and_runs_the_hook_it_names() -> None:
+    """``_PlainOverChecks(pace)`` runs the ``__init__`` its base writes by
+    hand, which checks the pace as a function does; ``_NamesItsHook(pace)``
+    runs ``_QuietHook.__post_init__``, which its ``__init__`` names through
+    the class, and never the hook of its own that checks.
+
+    A record's ``__init__`` was read only through the hook it runs, so the
+    pace ``_ChecksInItsInit.__init__`` checks was reported as never checked;
+    and the hook was looked up through the record's own order, so the check
+    that never runs was credited.
+    """
+    pace = "Literal['fast', 'slow']"
+    assert (
+        ccl._choice_verdict(_through_an_inherited_init, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _through_an_inherited_init("medium")  # type: ignore[arg-type]
+    assert ccl._post_init(_NamesItsHook) is inspect.unwrap(
+        vars(_QuietHook)["__post_init__"]
+    )
+    assert (
+        ccl._choice_verdict(_through_a_named_hook, "pace", pace, field=False)
+        is not None
+    )
+    assert _through_a_named_hook("medium").pace == "medium"  # type: ignore[arg-type]
+
+
+def test_the_callers_of_a_private_method_are_the_calls_that_reach_it(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``self._helper("a")`` in ``First`` and ``First._helper(First(), "c")``
+    reach ``First._helper``; ``Second``'s own ``_helper``, of the same name,
+    takes the open text its callers hand, and is no caller of ``First``'s.
+
+    Every call of a method of that name was read as a caller, so the open
+    text ``Second`` hands its own ``_helper`` made ``First._helper``'s
+    ``kind`` open.
+    """
+    source = (
+        "class First:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def a(self, text):\n"
+        "        return self._helper('a')\n\n"
+        "class Second:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def b(self, text):\n"
+        "        return self._helper(text)\n\n"
+        "def c(text):\n"
+        "    return First._helper(First(), 'c')\n\n"
+        "def d(text):\n"
+        "    return Second._helper(Second(), text)\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_two_helpers": source})
+    tree = ast.parse(source)
+    first, second, c, d = tree.body
+    assert isinstance(first, ast.ClassDef)
+    assert isinstance(second, ast.ClassDef)
+    first_helper, a = first.body
+    second_helper, b = second.body
+    module = "phonometry._two_helpers"
+    owners = {
+        id(first_helper): "First",
+        id(a): "First",
+        id(second_helper): "Second",
+        id(b): "Second",
+    }
+    sites: list[tuple[str, ast.AST | None, ast.Call]] = []
+    for caller in (a, b, c, d):
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        sites.append((module, caller, site))
+    monkeypatch.setattr(ccl, "_construction_sites", lambda: {"_helper": tuple(sites)})
+    monkeypatch.setattr(ccl, "_METHOD_OWNERS", owners)
+    assert isinstance(first_helper, ast.FunctionDef)
+    assert ccl._callers_source(first_helper, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a", "c"})
+    )

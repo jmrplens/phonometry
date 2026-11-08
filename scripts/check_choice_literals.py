@@ -2082,21 +2082,17 @@ def _arguments(
     """What a call hands each parameter of *callee*, by the parameter's name.
 
     By position, by keyword, and from a dict of keywords the body built and
-    spreads into the call (``f(**options)``). A first parameter called
-    ``self`` or ``cls`` is the receiver's when the call fills it itself
-    (:func:`_fills_the_first`), and the call's first argument when it does
-    not, as in a function or a static method, or a method called through
-    its class.
+    spreads into the call (``f(**options)``). The first parameter is the
+    receiver's when the call fills it itself (:func:`_fills_the_first`),
+    whatever it is called, ``def __init__(instance, pace)`` too, and the
+    call's first argument when it does not, as in a function or a static
+    method, or a method called through its class.
     """
     try:
         parameters = list(inspect.signature(callee).parameters)
     except (TypeError, ValueError):
         return {}
-    if (
-        parameters
-        and parameters[0] in {"self", "cls"}
-        and _fills_the_first(node, namespace)
-    ):
+    if parameters and _fills_the_first(node, namespace):
         parameters = parameters[1:]
     handed: dict[str, ast.expr] = {}
     for index, argument in enumerate(node.args):
@@ -3463,15 +3459,68 @@ def _handed_on(
 def _post_init(record: type) -> Callable[..., object] | None:
     """The ``__post_init__`` a record runs, its own or the nearest base's,
     when the ``__init__`` a call of it runs calls one (:func:`_runs_a_post_init`).
+
+    The one ``@dataclass`` writes calls ``self.__post_init__()``, which the
+    record's own order resolves; one written by hand that names the hook
+    through a class, ``Base.__post_init__(self)``, runs the one that class's
+    order resolves (:func:`_named_hook_order`), whatever a subclass writes.
     """
     if not _runs_a_post_init(record):
         return None
-    for owner in record.__mro__:
+    for owner in _named_hook_order(record) or record.__mro__:
         check = vars(owner).get("__post_init__")
         if check is not None:
             unwrapped: Callable[..., object] = inspect.unwrap(check)
             return unwrapped
     return None
+
+
+def _named_hook_order(record: type) -> tuple[type, ...] | None:
+    """The order a hand-written ``__init__`` of *record* looks its hook up
+    through when it names it through a class, ``Base.__post_init__(self)``,
+    or past its own class, ``super().__post_init__()``: the order of
+    ``Base``, or the part of the record's past the class the ``__init__`` is
+    written in. ``None`` when the ``__init__`` that runs is the one
+    ``@dataclass`` writes, or calls ``self.__post_init__()``, which the
+    record's own order resolves, or names it two ways.
+    """
+    first = _first_init(record.__mro__)
+    if first is None:
+        return None
+    owner, init = first
+    unwrapped = inspect.unwrap(init)
+    tree = _parsed(unwrapped)
+    if tree is None:
+        return None
+    namespace = _namespace(unwrapped, tree, getattr(unwrapped, "__module__", "") or "")
+    orders: list[tuple[type, ...]] = []
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "__post_init__"
+        ):
+            continue
+        receiver = node.func.value
+        if (
+            isinstance(receiver, ast.Call)
+            and isinstance(receiver.func, ast.Name)
+            and receiver.func.id == "super"
+            and not receiver.args
+        ):
+            mro = record.__mro__
+            orders.append(mro[mro.index(owner) + 1 :])
+        elif (
+            isinstance(receiver, ast.Name)
+            and receiver.id not in {"self", "cls"}
+            and inspect.isclass(namespace.get(receiver.id))
+        ):
+            named = namespace[receiver.id]
+            assert inspect.isclass(named)
+            orders.append(named.__mro__)
+        else:
+            return None
+    return orders[0] if len(set(orders)) == 1 else None
 
 
 def _field_spelling(
@@ -3943,6 +3992,11 @@ def vocabulary_tables() -> Iterator[Choice]:
                     )
 
 
+#: The class each function of :func:`_construction_sites` is a method of, by
+#: the node of the function, and its qualified name in its module.
+_METHOD_OWNERS: dict[int, str] = {}
+
+
 @functools.cache
 def _construction_sites() -> MappingProxyType[
     str, tuple[tuple[str, ast.AST | None, ast.Call], ...]
@@ -3950,8 +4004,11 @@ def _construction_sites() -> MappingProxyType[
     """Every call in the package by the name it calls: ``(module, function, call)``.
 
     *function* is the function the call is written in, or ``None`` at module
-    level, so an argument is read where it is written.
+    level, so an argument is read where it is written. The class each
+    function written in a class body is a method of goes in
+    :data:`_METHOD_OWNERS`.
     """
+    _METHOD_OWNERS.clear()
     sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
     root = pathlib.Path(phonometry.__file__).parent
     for path in sorted(root.rglob("*.py")):
@@ -3962,7 +4019,10 @@ def _construction_sites() -> MappingProxyType[
         tree = empty_type_checking_bodies(ast.parse(path.read_text(encoding="utf-8")))
 
         def visit(
-            node: ast.AST, function: ast.AST | None, module_name: str = module_name
+            node: ast.AST,
+            function: ast.AST | None,
+            module_name: str = module_name,
+            owner: str | None = None,
         ) -> None:
             for child in ast.iter_child_nodes(node):
                 inner = (
@@ -3970,6 +4030,24 @@ def _construction_sites() -> MappingProxyType[
                     if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
                     else function
                 )
+                if (
+                    isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
+                    and owner is not None
+                ):
+                    _METHOD_OWNERS[id(child)] = owner
+                # The class a body inside *child* is written in: a class at
+                # the top or in another class, never one in a function; a
+                # block keeps the class it is written in.
+                if isinstance(child, ast.ClassDef):
+                    held = (
+                        (f"{owner}.{child.name}" if owner else child.name)
+                        if function is None
+                        else None
+                    )
+                elif isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef):
+                    held = None
+                else:
+                    held = owner
                 if isinstance(child, ast.Call):
                     called = child.func
                     name = (
@@ -3983,7 +4061,7 @@ def _construction_sites() -> MappingProxyType[
                         sites.setdefault(name, []).append(
                             (module_name, function, child)
                         )
-                visit(child, inner)
+                visit(child, inner, owner=held)
 
         visit(tree, None)
     return MappingProxyType({name: tuple(found) for name, found in sites.items()})
@@ -4344,8 +4422,17 @@ def _callers_source(
     call fills it itself (:func:`_fills_the_helpers_first`), and the call's
     first argument when it does not, as in a function or a static method,
     or a method called through its class (``Maker._helper(self, ...)``).
+    The callers of a method are the calls that may reach it
+    (:func:`_may_reach_method`), not every call of another class's method of
+    its name.
     """
-    defined = getattr(_module_object(module_name), function.name, None)
+    _construction_sites()
+    owner = _METHOD_OWNERS.get(id(function))
+    defined = (
+        _class_member(module_name, owner, function.name)
+        if owner is not None
+        else getattr(_module_object(module_name), function.name, None)
+    )
     every = [
         argument.arg for argument in (*function.args.posonlyargs, *function.args.args)
     ]
@@ -4356,7 +4443,10 @@ def _callers_source(
     receiver = 1 if every and every[0] in {"self", "cls"} and not static else 0
     found: list[_Source] = []
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
-        if getattr(_module_object(caller_module), function.name, None) is not defined:
+        if owner is not None:
+            if not _may_reach_method(call, caller, caller_module, defined):
+                continue
+        elif getattr(_module_object(caller_module), function.name, None) is not defined:
             continue
         handed = _handed_in(
             call,
@@ -4370,6 +4460,58 @@ def _callers_source(
             return _OPEN_SOURCE
         found.append(_source(handed, caller, caller_module, depth + 1))
     return _merged(found) if found else _OPEN_SOURCE
+
+
+def _class_member(module_name: str, owner: str, name: str) -> object | None:
+    """The function the class *owner* of module *module_name* holds as
+    *name*, its own or a base's, unwrapped of ``staticmethod`` and
+    ``classmethod``.
+    """
+    holder: object = _module_object(module_name)
+    for part in owner.split("."):
+        holder = getattr(holder, part, None)
+    if not inspect.isclass(holder):
+        return None
+    return _unwrapped(getattr(holder, name, None))
+
+
+def _unwrapped(member: object) -> object | None:
+    """*member* unwrapped of a bound method's instance and of decorators."""
+    function = getattr(member, "__func__", member)
+    return inspect.unwrap(function) if callable(function) else None
+
+
+def _may_reach_method(
+    call: ast.Call, caller: ast.AST | None, caller_module: str, defined: object
+) -> bool:
+    """Whether *call*, written in *caller* in *caller_module*, may run the
+    method *defined*: a call on ``self`` or ``cls`` runs what the caller's
+    class holds of the name, one through a class or a module what that holds,
+    and a bare name a function, never a method; a call on any other object
+    may run it.
+    """
+    if defined is None:
+        return True
+    func = call.func
+    if isinstance(func, ast.Name):
+        return False
+    if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+        return True
+    head = func.value.id
+    if head in {"self", "cls"}:
+        owner = _METHOD_OWNERS.get(id(caller)) if caller is not None else None
+        if owner is None:
+            return True
+        return _class_member(caller_module, owner, func.attr) is defined
+    imported = _local_imports(caller, caller_module) if caller is not None else {}
+    holder = (
+        imported[head]
+        if head in imported
+        else getattr(_module_object(caller_module), head, None)
+    )
+    if inspect.isclass(holder) or inspect.ismodule(holder):
+        return _unwrapped(getattr(holder, func.attr, None)) is defined
+    return True
 
 
 def _field_options(record: object, name: str) -> frozenset[str]:
@@ -5589,6 +5731,30 @@ def _checks_of(
             if handed_part is False:
                 continue
             check = _post_init(record) if record is not None else callee
+            if (
+                record is not None
+                and check is not callee
+                and _parsed(inspect.unwrap(callee)) is not None
+            ):
+                # An ``__init__`` written by hand, which the record runs in
+                # place of the one ``@dataclass`` writes, checks what it is
+                # handed as any function does, beside the hook it may run.
+                inner.extend(
+                    _checks_of(
+                        callee,
+                        parameter,
+                        field=False,
+                        collection=collection and (target(value) or keys_kept),
+                        depth=depth + 1,
+                        options=options,
+                        part=handed_part,
+                        **_as_handed(
+                            forms,
+                            nontext=nontext,
+                            whole=base(value) and handed_part == part,
+                        ),
+                    )
+                )
             if check is None:
                 continue
             inner.extend(

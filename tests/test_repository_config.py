@@ -500,6 +500,81 @@ def test_every_workflow_that_runs_pip_turns_its_version_notice_off() -> None:
     )
 
 
+#: The actions of a ``filterwarnings`` entry that let a warning through.
+_LETS_THROUGH = frozenset({"ignore", "default", "always", "module", "once"})
+
+
+def test_a_stray_warning_fails_the_suite(tmp_path: pathlib.Path) -> None:
+    """A UserWarning or RuntimeWarning that no test asked for is an error.
+
+    Before, 63 tests in 14 files met an advisory of the library they did not
+    assert, and the suite printed each in its summary, where a new one beside
+    them read as one more of the same. The configuration turns both classes
+    into errors, and no later entry lets either class back through whole: an
+    entry after them may let one warning through by its message, never the
+    class. A planted file under the configuration shows it: a stray topic
+    warning and a stray division by zero fail, an asserted one passes.
+    """
+    options = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    entries = options["tool"]["pytest"]["ini_options"]["filterwarnings"]
+    assert "error::UserWarning" in entries
+    assert "error::RuntimeWarning" in entries
+    first = min(
+        entries.index("error::UserWarning"), entries.index("error::RuntimeWarning")
+    )
+    whole_class = []
+    for entry in entries[first + 1 :]:
+        action, message, category = (entry.split(":") + ["", ""])[:3]
+        if (
+            action in _LETS_THROUGH
+            and not message
+            and category
+            in {
+                "",
+                "Warning",
+                "UserWarning",
+                "RuntimeWarning",
+            }
+        ):
+            whole_class.append(entry)
+    assert whole_class == []
+    planted = tmp_path / "test_planted.py"
+    planted.write_text(
+        "import warnings\n\n"
+        "import numpy as np\n"
+        "import pytest\n\n"
+        "from phonometry.filters import FilterBankWarning\n\n\n"
+        "def test_a_stray_advisory():\n"
+        "    warnings.warn('stray', FilterBankWarning, stacklevel=1)\n\n\n"
+        "def test_a_stray_division_by_zero():\n"
+        "    np.log10(np.zeros(1))\n\n\n"
+        "def test_an_asserted_advisory():\n"
+        "    with pytest.warns(FilterBankWarning, match='asked for'):\n"
+        "        warnings.warn('asked for', FilterBankWarning, stacklevel=1)\n",
+        encoding="utf-8",
+    )
+    result = child_process.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "-c",
+            str(_ROOT / "pyproject.toml"),
+            "--rootdir",
+            str(tmp_path),
+            str(planted),
+        ],
+        timeout=120,
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+    )
+    assert "2 failed, 1 passed" in result.stdout, result.stdout + result.stderr
+
+
 #: ``<interpreter> -m pip [options] install <rest>``: the pip of that
 #: interpreter, unless ``--python`` hands the install to another one, which
 #: the interpreter's own pip still runs.

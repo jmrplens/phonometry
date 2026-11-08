@@ -533,6 +533,14 @@ markers = [
     "git_checkout: asks git about the repository, its tracked files or their attributes, and so needs a git checkout",
 ]
 filterwarnings = [
+    # A warning a test does not ask for fails it: every advisory of the
+    # library is a UserWarning, and a RuntimeWarning is NumPy's word for an
+    # overflow, a division by zero or a NaN. A test asserts the advisory it
+    # means to meet with pytest.warns and its topic class, or gives the call
+    # the input the clause asks for (tests.md, T28). The entries below this
+    # pair are later, so they override it for what they name.
+    "error::UserWarning",
+    "error::RuntimeWarning",
     # The clip-frame audit, the figure checks, the doc-snippet runner and the
     # process-exit tests fork on purpose, so a child shares what its parent
     # computed. Python 3.12 and later warn at a fork while another thread

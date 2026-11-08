@@ -17,16 +17,13 @@ import json
 import pathlib
 import sys
 import textwrap
-from typing import TYPE_CHECKING
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_bare_array_annotations as cba
-
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _IMPORTS = """
 from __future__ import annotations
@@ -84,14 +81,14 @@ def test_a_bare_array_in_a_parameter_is_found(tmp_path: pathlib.Path) -> None:
     assert finding.written == "np.ndarray"
 
 
-def test_the_check_fails_on_a_bare_type_only_when_it_refuses(
+def test_the_check_fails_on_a_bare_type(
     tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Report mode lists and passes; ``--refuse`` fails on the same tree."""
+    """The check lists a bare type and fails on it, with ``--refuse`` or without."""
     root = _package(
         tmp_path, levels="def energy_mean(levels: np.ndarray) -> float: ...\n"
     )
-    assert cba.main(["--root", str(root)]) == 0
+    assert cba.main(["--root", str(root)]) == 1
     listed = capsys.readouterr().out
     assert "bare: np.ndarray in energy_mean parameter levels" in listed
     assert "1 bare, 0 open and 0 generic" in listed
@@ -364,7 +361,7 @@ def test_naming_a_file_narrows_the_listing(
         one="def one(a: np.ndarray) -> None: ...\n",
         two="def two(a: np.ndarray) -> None: ...\n",
     )
-    assert cba.main(["--root", str(root), str(root / "two.py")]) == 0
+    assert cba.main(["--root", str(root), str(root / "two.py")]) == 1
     listed = capsys.readouterr().out
     assert "two parameter a" in listed
     assert "one parameter a" not in listed
@@ -381,9 +378,15 @@ def test_the_findings_are_written_and_counted_by_file(
         """,
     )
     written = tmp_path / "findings.json"
-    assert cba.main(["--root", str(root), "--json", str(written)]) == 0
+    assert cba.main(["--root", str(root), "--json", str(written)]) == 1
     capsys.readouterr()
     rows = json.loads(written.read_text(encoding="utf-8"))
     assert sorted(row["kind"] for row in rows) == ["bare", "bare", "generic", "open"]
     counted = cba.counts(cba.findings_in(root))
     assert list(counted.values()) == [{"bare": 2, "open": 1, "generic": 1}]
+
+
+@pytest.mark.whole_tree
+def test_the_package_writes_no_bare_numpy_type() -> None:
+    """Every numpy array and abstract scalar type of the package names its arguments."""
+    assert cba.main([]) == 0

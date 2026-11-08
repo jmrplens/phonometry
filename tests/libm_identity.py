@@ -56,9 +56,11 @@ included, and of several settings of the tunable keeps the last.
 
 Which of the two a process runs is decided from what its ``libm`` is, by the
 same rule. That ``libm`` is the object that defines ``exp`` where the
-process's default namespace resolves it, the one :mod:`math` calls, which the
-loader names through ``dladdr``: the first ``libm`` mapped may be one that
-``dlmopen`` loaded into another namespace. What is read is the ISA level the
+process's default namespace resolves it, the one :mod:`math` calls: the file
+the loader names through ``dladdr``, or the file the kernel maps at that
+address where the loader names it by a relative path. The first ``libm``
+mapped may be one that ``dlmopen`` loaded into another namespace, so it is
+read only where ``exp`` cannot be looked up. What is read is the ISA level the
 object declares it needs, in the
 ``GNU_PROPERTY_X86_ISA_1_NEEDED`` property of its ``.note.gnu.property``.
 glibc writes that property from the same ``MINIMUM_X86_ISA_LEVEL``
@@ -366,17 +368,17 @@ def x86_isa_levels_needed(image: bytes) -> int | None:
     return None
 
 
-def _object_defining(symbol: str) -> Path | None:
-    """The file of the object that defines ``symbol`` for this process, or ``None``.
+def _resolved(symbol: str) -> tuple[int, Path | None] | None:
+    """Where this process's default namespace resolves ``symbol``, or ``None``.
 
-    The symbol is looked up as the process's default namespace resolves it,
-    the namespace :mod:`math` and the interpreter are linked in, and the
-    object that holds its address is the one glibc's loader names through
-    ``dladdr``.
+    The symbol is looked up as the default namespace resolves it, the
+    namespace :mod:`math` and the interpreter are linked in, and glibc's
+    loader names the object that holds its address through ``dladdr``, by the
+    path it found that object by.
 
-    :return: The object's file, or ``None`` off Linux, without :mod:`ctypes`,
-        where the symbol or ``dladdr`` cannot be found, or where the loader
-        names no file by its absolute path.
+    :return: The symbol's address and the file ``dladdr`` names, the file
+        ``None`` where ``dladdr`` cannot be found or names none; ``None`` off
+        Linux, without :mod:`ctypes` or where the symbol cannot be found.
     """
     if platform.system() != "Linux":
         return None
@@ -399,6 +401,8 @@ def _object_defining(symbol: str) -> Path | None:
         address = ctypes.cast(getattr(ctypes.CDLL(None), symbol), ctypes.c_void_p)
     except (AttributeError, OSError):
         return None
+    if address.value is None:
+        return None
     # dladdr is in libc from glibc 2.34 and in libdl before.
     for library in (None, "libdl.so.2"):
         try:
@@ -408,50 +412,95 @@ def _object_defining(symbol: str) -> Path | None:
         dladdr.argtypes = (ctypes.c_void_p, ctypes.POINTER(DlInfo))
         dladdr.restype = ctypes.c_int
         info = DlInfo()
-        if not dladdr(address, ctypes.byref(info)):
-            return None
-        named = Path(os.fsdecode(info.dli_fname or b""))
-        return named if named.is_absolute() else None
-    return None
+        if not dladdr(address, ctypes.byref(info)) or not info.dli_fname:
+            return address.value, None
+        return address.value, Path(os.fsdecode(info.dli_fname))
+    return address.value, None
+
+
+def _mappings() -> list[tuple[int, int, Path]]:
+    """The files ``/proc/self/maps`` lists, each with the range it is mapped at.
+
+    The kernel names each file by its absolute path, wherever the process is.
+
+    :return: The mappings in the order listed, none where the list cannot be
+        read.
+    """
+    try:
+        maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    mapped = []
+    for line in maps.splitlines():
+        fields = line.split(maxsplit=5)
+        if len(fields) == 6 and fields[5].startswith("/"):
+            start, _, end = fields[0].partition("-")
+            mapped.append((int(start, 16), int(end, 16), Path(fields[5])))
+    return mapped
 
 
 def _first_mapped(file_name: re.Pattern[str]) -> Path | None:
     """The first file ``/proc/self/maps`` lists whose name matches, or ``None``."""
-    try:
-        maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return None
-    for line in maps.splitlines():
-        fields = line.split(maxsplit=5)
-        if len(fields) == 6 and file_name.fullmatch(Path(fields[5]).name):
-            return Path(fields[5])
+    for _, _, file in _mappings():
+        if file_name.fullmatch(file.name):
+            return file
     return None
+
+
+def _mapped_at(address: int) -> Path | None:
+    """The file ``/proc/self/maps`` lists at ``address``, or ``None``."""
+    for start, end, file in _mappings():
+        if start <= address < end:
+            return file
+    return None
+
+
+def _object_defining(symbol: str, file_name: re.Pattern[str]) -> Path | None:
+    """The file of the object that defines ``symbol`` for this process, or ``None``.
+
+    It is the file ``dladdr`` names, where it names it by an absolute path.
+    glibc's loader names an object by the path it found it by, so a relative
+    entry of ``LD_LIBRARY_PATH``, or the loader run by a relative path, gives a
+    name relative to the directory the process was in, which names another
+    file or none once it changes directory. The object is then the file the
+    kernel maps at the symbol's address, and never a file found by its name:
+    the first one ``/proc/self/maps`` lists may be one that ``dlmopen`` loaded
+    into another namespace. Only where the symbol cannot be looked up
+    (:func:`_resolved`) is it the first file listed whose name matches
+    ``file_name``.
+
+    :return: The object's file, or ``None`` where nothing names it.
+    """
+    resolved = _resolved(symbol)
+    if resolved is None:
+        return _first_mapped(file_name)
+    address, named = resolved
+    if named is not None and named.is_absolute():
+        return named
+    return _mapped_at(address)
 
 
 def loaded_libm() -> Path | None:
     """The file of the ``libm`` whose routines :mod:`math` calls, or ``None``.
 
     It is the object that defines ``exp`` where this process's default
-    namespace resolves it, so a ``libm`` another namespace mapped first is not
-    taken for it. :mod:`math` is imported first, so that library is mapped
-    whether the interpreter links it or the module does. Only where that
-    cannot be asked, as :func:`_object_defining` says, is it the first
-    ``libm`` in ``/proc/self/maps``.
+    namespace resolves it (:func:`_object_defining`), so a ``libm`` another
+    namespace mapped first is not taken for it. :mod:`math` is imported first,
+    so that library is mapped whether the interpreter links it or the module
+    does.
     """
     importlib.import_module("math")
-    defining = _object_defining("exp")
-    return defining if defining is not None else _first_mapped(_LIBM_FILE_NAME)
+    return _object_defining("exp", _LIBM_FILE_NAME)
 
 
 def loaded_loader() -> Path | None:
     """The file of the dynamic loader this process runs, or ``None``.
 
     It is the object that defines ``__tls_get_addr``, which glibc's loader
-    exports, where the default namespace resolves it; only where that cannot
-    be asked is it the first loader in ``/proc/self/maps``.
+    exports, where the default namespace resolves it
+    (:func:`_object_defining`).
     """
-    defining = _object_defining("__tls_get_addr")
-    return defining if defining is not None else _first_mapped(_LOADER_FILE_NAME)
+    return _object_defining("__tls_get_addr", _LOADER_FILE_NAME)
 
 
 def mask_reading_here() -> MaskReading:

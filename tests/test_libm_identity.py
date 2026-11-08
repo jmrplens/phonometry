@@ -8,7 +8,8 @@ the ``libm`` :mod:`math` calls, so the tests below hand the reader minimal
 way glibc writes it, hold the reading of the real library here to
 ``readelf``'s wherever ``readelf`` knows the property note, and hold the
 ``libm`` and the loader read to the objects that define ``exp`` and
-``__tls_get_addr``, with planted ones mapped ahead of them.
+``__tls_get_addr``, found by absolute paths and by relative ones, with
+planted ones of the other build mapped ahead of them.
 :func:`libm_identity.mask_reading` reads how a loader reads
 ``GLIBC_TUNABLES`` from the names its parser carries, so the tests hand it
 loader images spelt as each glibc spells them and hold the reading of this
@@ -569,11 +570,51 @@ def _file_holding(symbol: str) -> Path:
     raise AssertionError(msg)
 
 
-def _first_libm_mapped() -> Path | None:
+def _first_mapped(file_name: re.Pattern[str]) -> Path | None:
     for _, _, file in _mappings():
-        if libm_identity._LIBM_FILE_NAME.fullmatch(file.name):
+        if file_name.fullmatch(file.name):
             return file
     return None
+
+
+def _first_libm_mapped() -> Path | None:
+    return _first_mapped(libm_identity._LIBM_FILE_NAME)
+
+
+def _declares_v3(library: Path) -> bool:
+    """Whether *library* declares x86-64-v3 or a higher level, as readelf names them."""
+    needed = libm_identity.x86_isa_levels_needed(library.read_bytes())
+    return needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
+
+
+def _libm_of_the_other_build(real: Path, directory: Path) -> Path:
+    """A ``libm.so.6`` in *directory* that declares the build *real* is not.
+
+    It declares x86-64-v3 where *real* is built for a lower level and the
+    baseline where *real* is built for x86-64-v3, so that reading it in place
+    of *real* changes the predicate on either build.
+    """
+    planted = directory / "libm.so.6"
+    planted.parent.mkdir(parents=True, exist_ok=True)
+    needed = _BASELINE if _declares_v3(real) else _V3
+    planted.write_bytes(_elf((_PT_GNU_PROPERTY, _glibc_libm_note(needed), 8)))
+    return planted
+
+
+def _loader_read_otherwise(real: Path, directory: Path) -> Path:
+    """A loader in *directory* spelt as a glibc that reads the mask unlike *real*."""
+    reading = libm_identity.mask_reading(real.read_bytes())
+    expected = reading if reading is not None else libm_identity.ANY_READING
+    planted = directory / "ld-linux-x86-64.so.2"
+    planted.parent.mkdir(parents=True, exist_ok=True)
+    planted.write_bytes(
+        next(
+            image
+            for image in _LOADERS.values()
+            if libm_identity.mask_reading(image) != expected
+        )
+    )
+    return planted
 
 
 #: ``PROT_READ``, ``MAP_PRIVATE`` and ``MAP_FIXED_NOREPLACE`` (Linux 4.17),
@@ -620,16 +661,14 @@ def test_the_libm_read_is_the_one_that_defines_exp(tmp_path: Path) -> None:
 
     ``dlmopen`` maps a second ``libm`` into another namespace below the
     libraries already mapped, so ``/proc/self/maps`` lists it first. A planted
-    one that declares x86-64-v3, mapped below every file here, stands in for
-    it: the library read is still the file the kernel maps at the address the
-    default namespace resolves for ``exp``.
+    one that declares the other build, mapped below every file here, stands in
+    for it: the library read is still the file the kernel maps at the address
+    the default namespace resolves for ``exp``, and the predicate is still
+    that file's.
     """
     _on_x86_64_glibc()
     real = _file_holding("exp")
-    needed = libm_identity.x86_isa_levels_needed(real.read_bytes())
-    built_for_v3 = needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
-    planted = tmp_path / "libm.so.6"
-    planted.write_bytes(_elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8)))
+    planted = _libm_of_the_other_build(real, tmp_path)
     with _mapped_first(planted):
         first = _first_libm_mapped()
         assert first is not None
@@ -637,68 +676,79 @@ def test_the_libm_read_is_the_one_that_defines_exp(tmp_path: Path) -> None:
         library = libm_identity.loaded_libm()
         assert library is not None
         assert library.samefile(real)
-        assert libm_identity.glibc_built_for_x86_64_v3() is built_for_v3
+        assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(real)
 
 
 def test_the_loader_read_is_the_one_that_defines_tls_get_addr(tmp_path: Path) -> None:
     """A loader mapped ahead of this process's is not the one whose mask is read.
 
-    A planted one, spelt as glibc 2.28's and mapped below every file here,
-    stands in for a loader another namespace or a copy maps: the mask is still
-    read as the loader the default namespace resolves ``__tls_get_addr`` in
-    reads it, or in any spelling where that loader names no mask tunable, as
-    glibc's before 2.26 and one built without tunables do.
+    A planted one, spelt as a glibc that reads the mask otherwise and mapped
+    below every file here, stands in for a loader another namespace or a copy
+    maps: the mask is still read as the loader the default namespace resolves
+    ``__tls_get_addr`` in reads it, or in any spelling where that loader names
+    no mask tunable, as glibc's before 2.26 and one built without tunables do.
     """
     _on_x86_64_glibc()
     real = _file_holding("__tls_get_addr")
     reading = libm_identity.mask_reading(real.read_bytes())
     expected = reading if reading is not None else libm_identity.ANY_READING
-    planted = tmp_path / "ld-linux-x86-64.so.2"
-    planted.write_bytes(_LOADERS["2.28"])
-    with _mapped_first(planted):
+    with _mapped_first(_loader_read_otherwise(real, tmp_path)):
         loader = libm_identity.loaded_loader()
         assert loader is not None
         assert loader.samefile(real)
         assert libm_identity.mask_reading_here() == expected
 
 
-#: A child that imports :mod:`math`, leaves the directory it started in, and
-#: prints the ``libm`` read and the file mapped at ``exp``'s address.
-_LIBM_AFTER_CHDIR = (
+#: A child that imports :mod:`math` and leaves the directory it started in,
+#: then, with the file its command line names mapped ahead of every other,
+#: prints the first ``libm`` listed, the ``libm`` read and the predicate, and
+#: last the file mapped at ``exp``'s address.
+_LIBM_READ_IN_A_CHILD = (
     "import math, os, sys\n"
+    "from pathlib import Path\n"
     "sys.path.insert(0, sys.argv[1])\n"
     "import test_libm_identity as here\n"
     "os.chdir('/')\n"
-    "print(here.libm_identity.loaded_libm())\n"
+    "with here._mapped_first(Path(sys.argv[2])):\n"
+    "    print(here._first_libm_mapped())\n"
+    "    print(here.libm_identity.loaded_libm())\n"
+    "    print(here.libm_identity.glibc_built_for_x86_64_v3())\n"
     "print(here._file_holding('exp'))\n"
 )
 
 
-def test_a_libm_found_by_a_relative_path_is_read_by_its_absolute_path(
+def test_a_libm_found_by_a_relative_path_is_the_file_mapped_at_exp(
     tmp_path: Path,
 ) -> None:
-    """The ``libm`` read is a file by its absolute path, wherever the process is.
+    """The ``libm`` read is the one :mod:`math` calls, by its absolute path.
 
     With ``LD_LIBRARY_PATH=lib`` the loader finds ``libm.so.6`` under the
     directory the process starts in, and ``dladdr`` names it as the loader
     found it, ``lib/libm.so.6``: after a change of directory that name is
-    another file or none. A copy of the ``libm`` mapped at ``exp``'s address,
-    under ``lib/``, stands in for a library a relative path finds.
+    another file or none, and the first ``libm`` ``/proc/self/maps`` lists may
+    be another namespace's. A copy of the ``libm`` mapped at ``exp``'s
+    address, under ``lib/``, stands in for a library a relative path finds,
+    and a planted ``libm`` of the other build, mapped ahead of every file, for
+    one that ``dlmopen`` loaded: the library read is the copy, and the
+    predicate is the copy's.
     """
     _on_x86_64_glibc()
-    planted = tmp_path / "lib" / "libm.so.6"
-    planted.parent.mkdir()
-    shutil.copyfile(_file_holding("exp"), planted)
+    copy = tmp_path / "lib" / "libm.so.6"
+    copy.parent.mkdir()
+    shutil.copyfile(_file_holding("exp"), copy)
+    planted = _libm_of_the_other_build(copy, tmp_path / "other")
     search = os.environ.get("LD_LIBRARY_PATH")
     environment = dict(os.environ, LD_LIBRARY_PATH=f"lib:{search}" if search else "lib")
-    # Fixed argv, no shell; the directory is the one this module is in
-    read, mapped = subprocess.run(
+    # Fixed argv, no shell; the paths are this module's directory and a file
+    # this test wrote
+    first, read, v3, mapped = subprocess.run(
         [
             sys.executable,
             "-I",
             "-c",
-            _LIBM_AFTER_CHDIR,
-            str(Path(libm_identity.__file__).parent),
+            _LIBM_READ_IN_A_CHILD,
+            str(Path(__file__).parent),
+            str(planted),
         ],
         check=True,
         capture_output=True,
@@ -707,25 +757,113 @@ def test_a_libm_found_by_a_relative_path_is_read_by_its_absolute_path(
         env=environment,
         timeout=60,
     ).stdout.splitlines()
-    assert Path(mapped).samefile(planted)
+    assert Path(mapped).samefile(copy)
+    assert Path(first).samefile(planted)
     assert Path(read).is_absolute()
-    assert Path(read).samefile(planted)
+    assert Path(read).samefile(copy)
+    assert v3 == str(_declares_v3(copy))
 
 
-def test_where_dladdr_cannot_be_asked_the_first_mapped_files_are_read(
+#: A child that, with the file its command line names mapped ahead of every
+#: other, prints the loader read and whether the mask is read as the file
+#: mapped at ``__tls_get_addr``'s address reads it, and last that file.
+_LOADER_READ_IN_A_CHILD = (
+    "import sys\n"
+    "from pathlib import Path\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import test_libm_identity as here\n"
+    "real = here._file_holding('__tls_get_addr')\n"
+    "reading = here.libm_identity.mask_reading(real.read_bytes())\n"
+    "expected = reading or here.libm_identity.ANY_READING\n"
+    "with here._mapped_first(Path(sys.argv[2])):\n"
+    "    print(here.libm_identity.loaded_loader())\n"
+    "    print(here.libm_identity.mask_reading_here() == expected)\n"
+    "print(real)\n"
+)
+
+
+def test_a_loader_run_by_a_relative_path_is_the_file_mapped_at_tls_get_addr(
+    tmp_path: Path,
+) -> None:
+    """The loader read is the one this process runs, by its absolute path.
+
+    Run as ``./ld-linux-x86-64.so.2`` from its own directory, the loader names
+    itself through ``dladdr`` by that relative path. A planted loader spelt as
+    a glibc that reads the mask otherwise, mapped ahead of every file, stands
+    in for one another namespace maps: the loader read is the file mapped at
+    ``__tls_get_addr``'s address, and the mask is read as it reads it.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("__tls_get_addr")
+    planted = _loader_read_otherwise(real, tmp_path)
+    # Fixed argv, no shell; the loader is the one this process runs, the
+    # paths this module's directory and a file this test wrote
+    read, agrees, mapped = subprocess.run(
+        [
+            f"./{real.name}",
+            sys.executable,
+            "-I",
+            "-c",
+            _LOADER_READ_IN_A_CHILD,
+            str(Path(__file__).parent),
+            str(planted),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=real.parent,
+        timeout=60,
+    ).stdout.splitlines()
+    assert Path(mapped).samefile(real)
+    assert Path(read).is_absolute()
+    assert Path(read).samefile(real)
+    assert agrees == "True"
+
+
+def test_where_dladdr_names_no_file_the_file_at_the_address_is_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Where ``exp`` is looked up but ``dladdr`` finds no object, none is guessed.
+
+    The library read is still the file mapped at ``exp``'s address, not the
+    first ``libm`` listed, which is a planted one of the other build mapped
+    ahead of every file.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("exp")
+
+    class WithoutDladdr(ctypes.CDLL):
+        """The libraries as ctypes opens them, with a ``dladdr`` that finds none."""
+
+        @staticmethod
+        def dladdr(address: object, info: object) -> int:
+            return 0
+
+    monkeypatch.setattr(ctypes, "CDLL", WithoutDladdr)
+    resolved = libm_identity._resolved("exp")
+    assert resolved is not None
+    assert resolved[1] is None
+    with _mapped_first(_libm_of_the_other_build(real, tmp_path)):
+        library = libm_identity.loaded_libm()
+        assert library is not None
+        assert library.samefile(real)
+        assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(real)
+
+
+def test_where_no_symbol_can_be_looked_up_the_first_mapped_files_are_read(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _on_x86_64_glibc()
-    monkeypatch.setattr(libm_identity, "_object_defining", lambda symbol: None)
+    monkeypatch.setattr(libm_identity, "_resolved", lambda symbol: None)
     assert libm_identity.loaded_libm() == _first_libm_mapped()
     loader = libm_identity.loaded_loader()
+    assert loader == _first_mapped(libm_identity._LOADER_FILE_NAME)
     assert loader is not None
-    assert libm_identity._LOADER_FILE_NAME.fullmatch(loader.name)
 
 
-def test_off_linux_no_object_is_asked_for(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_off_linux_no_symbol_is_looked_up(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(platform, "system", lambda: "Darwin")
-    assert libm_identity._object_defining("exp") is None
+    assert libm_identity._resolved("exp") is None
 
 
 def _real_glibc_libm() -> Path:
@@ -738,9 +876,7 @@ def _real_glibc_libm() -> Path:
 def test_the_real_libm_is_found_and_read() -> None:
     library = _real_glibc_libm()
     assert library.is_file()
-    needed = libm_identity.x86_isa_levels_needed(library.read_bytes())
-    built_for_v3 = needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
-    assert libm_identity.glibc_built_for_x86_64_v3() is built_for_v3
+    assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(library)
 
 
 def _readelf_notes(library: Path) -> str:

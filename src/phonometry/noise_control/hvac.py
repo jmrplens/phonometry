@@ -670,8 +670,8 @@ class HVACSpectrumResult(OwnsArrays):
     :ivar label: A short human label of the element.
     """
 
-    frequencies: np.ndarray
-    values: np.ndarray
+    frequencies: NDArray[np.float64]
+    values: NDArray[np.float64]
     quantity: HVACQuantity
     label: str
 

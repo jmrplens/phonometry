@@ -31,6 +31,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..emission.sound_power_plant import (
@@ -122,7 +123,7 @@ def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     return s.format(**fmt) if fmt else s
 
 
-def _closed(vertices: np.ndarray) -> np.ndarray:
+def _closed(vertices: NDArray[np.float64]) -> NDArray[np.float64]:
     """The polygon with its first vertex repeated at the end."""
     return np.vstack([vertices, vertices[:1]])
 

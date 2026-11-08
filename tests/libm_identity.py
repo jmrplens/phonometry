@@ -16,19 +16,39 @@ glibc built for the x86-64 baseline, as Debian's and Ubuntu's generic
 ``amd64`` packages are, carries ``exp``, ``log``, ``pow``, ``sin``, ``tan``
 and ``atan`` twice and picks its FMA variant when the processor reports both
 FMA and AVX2 as usable, so masking FMA or AVX2 through ``GLIBC_TUNABLES``
-(``glibc.cpu.hwcaps=-FMA``, or ``-FMA_Usable`` where glibc reads the older
-spelling) hands the same process the other variant. Masking AVX alone does
-not: the mask clears only the feature it names, and FMA and AVX2 stay
-usable. glibc built for x86-64-v3, as Ubuntu's ``amd64v3`` packages are (the
-ones the ``ubuntu-26.04`` runner image installs), carries no other variant:
-it compiles those routines for a processor with FMA and AVX2, and glibc's
+hands the same process the other variant. Masking AVX alone does not: the
+mask clears only the feature it names, and FMA and AVX2 stay usable. glibc
+built for x86-64-v3, as Ubuntu's ``amd64v3`` packages are (the ones the
+``ubuntu-26.04`` runner image installs), carries no other variant: it
+compiles those routines for a processor with FMA and AVX2, and glibc's
 multiarch sources build the variants without them only below that level
 (``MINIMUM_X86_ISA_LEVEL < AVX2_X86_ISA_LEVEL`` in
 ``sysdeps/x86_64/fpu/multiarch`` of glibc 2.43), so no mask hands a process
 anything but the FMA routines there.
 
+The mask is read by the dynamic loader, and glibc has spelt it three ways.
+Up to 2.28 the tunable is ``glibc.tune.hwcaps``, renamed ``glibc.cpu.hwcaps``
+in 2.29 (commit dce452dc5278, "Rename the glibc.tune namespace to
+glibc.cpu"). Up to 2.31 FMA's usable bit, the one the selector reads, is
+masked as ``-FMA_Usable``, and ``-FMA`` clears only the bit the processor
+reported; from 2.32 ``-FMA`` clears the usable bit and the ``_Usable`` names
+are gone (commit 107e6a3c2212, "x86: Support usable check for all CPU
+features"). No release reads both. A distribution's backport moves the
+spelling off the version, though: RHEL 8's glibc 2.28 reads
+``glibc.cpu.hwcaps=-FMA``. So which one a process's glibc reads is decided
+from its loader: the parser compares the mask with names the loader carries
+as strings in its image, and from 2.39 on the loader also carries the warning
+with which it drops a whole ``GLIBC_TUNABLES`` that holds an ill-formed
+entry, where an earlier one applies what it can read. Every glibc reads the
+mask as written, spaces included, matches a name as it is spelt, case
+included, and of several settings of the tunable keeps the last.
+
 Which of the two a process runs is decided from what its ``libm`` is, by the
-same rule: the ISA level the object declares it needs, in the
+same rule. That ``libm`` is the object that defines ``exp`` where the
+process's default namespace resolves it, the one :mod:`math` calls, which the
+loader names through ``dladdr``: the first ``libm`` mapped may be one that
+``dlmopen`` loaded into another namespace. What is read is the ISA level the
+object declares it needs, in the
 ``GNU_PROPERTY_X86_ISA_1_NEEDED`` property of its ``.note.gnu.property``.
 glibc writes that property from the same ``MINIMUM_X86_ISA_LEVEL``
 (``sysdeps/x86/isa-level.c``), and its loader checks it against the
@@ -42,6 +62,7 @@ variant is not there.
 
 from __future__ import annotations
 
+import dataclasses
 import importlib
 import os
 import platform
@@ -58,13 +79,21 @@ import pytest
 #: only the feature it names (``sysdeps/x86/cpu-tunables.c``).
 _FMA_VARIANT_FEATURES = frozenset({"FMA", "AVX2"})
 
-#: The suffix of the name under which an older glibc masks a feature's usable
-#: bit, ``FMA_Usable``. glibc 2.31 as Ubuntu 20.04 builds it reads only those
-#: names, and glibc 2.32 on, as RHEL 8's glibc 2.28 does, only the features'
-#: own; each ignores the other spelling, and matches a name only as it is
-#: spelt, case included. Which spelling a glibc reads is not in its version,
-#: so a mask in either counts.
+#: The tunables through which glibc masks processor features:
+#: ``glibc.cpu.hwcaps`` from glibc 2.29, ``glibc.tune.hwcaps`` before.
+_HWCAPS_TUNABLES = ("glibc.cpu.hwcaps", "glibc.tune.hwcaps")
+
+#: The suffix of the name under which glibc 2.26 to 2.31 mask a feature's
+#: usable bit, ``FMA_Usable``; glibc 2.32 masks that bit under the feature's
+#: own name.
 _USABLE_SUFFIX = "_Usable"
+
+#: The start of the warning with which glibc's loader, from 2.39 on, drops a
+#: whole ``GLIBC_TUNABLES`` that holds an ill-formed entry (commits
+#: 680c597e9c36, "elf: Do not parse ill-formatted strings", and eb9291aaa6ff,
+#: "elf: Emit warning if tunable is ill-formatted"); a loader without it
+#: applies every entry it can read.
+_ILL_FORMED_WARNING = b"invalid GLIBC_TUNABLES `"
 
 #: The first glibc that ships ARM's ``exp``, ``log`` and ``pow``.
 _FIRST_GLIBC = (2, 28)
@@ -73,10 +102,12 @@ _FIRST_GLIBC = (2, 28)
 TUNABLES = "GLIBC_TUNABLES"
 
 #: The value that makes glibc built for the x86-64 baseline take its variants
-#: without FMA, in both spellings of the mask, so that every glibc reads it.
+#: without FMA, in every spelling glibc has read the mask in, so that every
+#: glibc reads it: each one ignores a tunable and a name it does not know.
 WITHOUT_FMA = (
     "glibc.cpu.hwcaps=-AVX2,-FMA,-FMA4,-AVX,"
     "-AVX2_Usable,-FMA_Usable,-FMA4_Usable,-AVX_Usable"
+    ":glibc.tune.hwcaps=-AVX2_Usable,-FMA_Usable,-FMA4_Usable,-AVX_Usable"
 )
 
 #: ``EM_X86_64``, the machine whose processor-specific properties these are.
@@ -103,6 +134,10 @@ _X86_ISA_1_V3 = 1 << 2
 #: ``libm.so.6`` since glibc 2.34 and ``libm-2.31.so`` before.
 _LIBM_FILE_NAME = re.compile(r"libm(?:-\d+(?:\.\d+)*)?\.so(?:\.\d+)*")
 
+#: The file name of glibc's dynamic loader as ``/proc/self/maps`` names it:
+#: ``ld-linux-x86-64.so.2`` since glibc 2.34 and ``ld-2.31.so`` before.
+_LOADER_FILE_NAME = re.compile(r"ld-linux-x86-64\.so\.2|ld-\d+(?:\.\d+)+\.so")
+
 
 def _cpu_flags() -> frozenset[str]:
     """The ``flags`` line of ``/proc/cpuinfo``, or nothing where there is none."""
@@ -128,20 +163,102 @@ def _glibc_version() -> tuple[int, ...] | None:
         return None
 
 
-def masks_the_fma_variant(tunables: str) -> bool:
-    """Whether a ``GLIBC_TUNABLES`` value masks a feature glibc's FMA variant needs."""
-    for item in tunables.split(":"):
-        name, _, value = item.partition("=")
-        if name.strip() != "glibc.cpu.hwcaps":
-            continue
-        masked = {
-            part.strip()[1:].removesuffix(_USABLE_SUFFIX)
-            for part in value.split(",")
-            if part.strip().startswith("-")
-        }
-        if masked & _FMA_VARIANT_FEATURES:
-            return True
-    return False
+@dataclasses.dataclass(frozen=True)
+class MaskReading:
+    """How a glibc's dynamic loader reads a mask of processor features.
+
+    :ivar tunables: The tunables it reads the mask from.
+    :ivar fma_variant_names: The names that, masked, take glibc off its FMA
+        variant: ``FMA_Usable`` and ``AVX2_Usable`` up to glibc 2.31, ``FMA``
+        and ``AVX2`` from 2.32.
+    :ivar drops_ill_formed: Whether an ill-formed entry anywhere in
+        ``GLIBC_TUNABLES`` makes it ignore the whole variable, as glibc does
+        from 2.39 on.
+    """
+
+    tunables: frozenset[str]
+    fma_variant_names: frozenset[str]
+    drops_ill_formed: bool
+
+
+#: The reading of a loader that cannot be read: a mask counts in any spelling,
+#: so that a process that may run another variant is not held to the pins.
+ANY_READING = MaskReading(
+    tunables=frozenset(_HWCAPS_TUNABLES),
+    fma_variant_names=frozenset(
+        feature + suffix
+        for feature in _FMA_VARIANT_FEATURES
+        for suffix in ("", _USABLE_SUFFIX)
+    ),
+    drops_ill_formed=False,
+)
+
+
+def _named(name: str, image: bytes) -> bool:
+    """Whether ``image`` holds ``name`` as a string of its own."""
+    return name.encode("ascii") + b"\0" in image
+
+
+def mask_reading(loader: bytes) -> MaskReading | None:
+    """How the dynamic loader whose bytes are ``loader`` reads the mask.
+
+    The loader's parser compares the tunable's name and each feature's name
+    with strings the loader carries, so they are read from its image: a
+    ``_Usable`` name there is the one that masks that feature's usable bit,
+    and the feature's own name otherwise.
+
+    :param loader: The bytes of glibc's dynamic loader.
+    :return: The reading, or ``None`` when the image names no tunable that
+        masks processor features.
+    """
+    tunables = frozenset(name for name in _HWCAPS_TUNABLES if _named(name, loader))
+    if not tunables:
+        return None
+    return MaskReading(
+        tunables=tunables,
+        fma_variant_names=frozenset(
+            feature + _USABLE_SUFFIX
+            if _named(feature + _USABLE_SUFFIX, loader)
+            else feature
+            for feature in _FMA_VARIANT_FEATURES
+        ),
+        drops_ill_formed=_ILL_FORMED_WARNING in loader,
+    )
+
+
+def _ill_formed(entries: list[str]) -> bool:
+    """Whether glibc 2.39's parser refuses ``GLIBC_TUNABLES`` cut at its colons.
+
+    It refuses a value that holds an ``=`` and a last entry without one
+    (``parse_tunables_string`` in ``elf/dl-tunables.c``); an entry without one
+    before a colon it skips.
+    """
+    return "=" not in entries[-1] or any(entry.count("=") > 1 for entry in entries)
+
+
+def masks_the_fma_variant(tunables: str, reading: MaskReading) -> bool:
+    """Whether a ``GLIBC_TUNABLES`` value takes glibc off its FMA variant.
+
+    :param tunables: The value of ``GLIBC_TUNABLES``.
+    :param reading: How the loader reads it.
+    :return: ``True`` when the last setting of a tunable the loader reads
+        masks, as written, a name that takes glibc off its FMA variant;
+        ``False`` otherwise, and for a value the loader drops whole.
+    """
+    if not tunables:
+        return False
+    entries = tunables.split(":")
+    if reading.drops_ill_formed and _ill_formed(entries):
+        return False
+    setting = None
+    for entry in entries:
+        name, equals, value = entry.partition("=")
+        if equals and name in reading.tunables:
+            setting = value
+    if setting is None:
+        return False
+    masked = {part[1:] for part in setting.split(",") if part.startswith("-")}
+    return not masked.isdisjoint(reading.fma_variant_names)
 
 
 def glibc_on_x86_64_with_fma() -> bool:
@@ -227,22 +344,109 @@ def x86_isa_levels_needed(image: bytes) -> int | None:
     return None
 
 
-def loaded_libm() -> Path | None:
-    """The file of the ``libm`` this process has mapped, or ``None``.
+def _object_defining(symbol: str) -> Path | None:
+    """The file of the object that defines ``symbol`` for this process, or ``None``.
 
-    :mod:`math` is imported first, so the library its routines call is mapped
-    whether the interpreter links it or the module does.
+    The symbol is looked up as the process's default namespace resolves it,
+    the namespace :mod:`math` and the interpreter are linked in, and the
+    object that holds its address is the one glibc's loader names through
+    ``dladdr``.
+
+    :return: The object's file, or ``None`` off Linux, without :mod:`ctypes`,
+        where the symbol or ``dladdr`` cannot be found, or where the loader
+        names no file by its absolute path.
     """
-    importlib.import_module("math")
+    if platform.system() != "Linux":
+        return None
+    try:
+        # Imported here: an interpreter built without libffi has no ctypes,
+        # and the caller then reads /proc/self/maps instead.
+        import ctypes  # noqa: PLC0415
+    except ImportError:
+        return None
+
+    class DlInfo(ctypes.Structure):
+        _fields_ = (
+            ("dli_fname", ctypes.c_char_p),
+            ("dli_fbase", ctypes.c_void_p),
+            ("dli_sname", ctypes.c_char_p),
+            ("dli_saddr", ctypes.c_void_p),
+        )
+
+    try:
+        address = ctypes.cast(getattr(ctypes.CDLL(None), symbol), ctypes.c_void_p)
+    except (AttributeError, OSError):
+        return None
+    # dladdr is in libc from glibc 2.34 and in libdl before.
+    for library in (None, "libdl.so.2"):
+        try:
+            dladdr = ctypes.CDLL(library).dladdr
+        except (AttributeError, OSError):
+            continue
+        dladdr.argtypes = (ctypes.c_void_p, ctypes.POINTER(DlInfo))
+        dladdr.restype = ctypes.c_int
+        info = DlInfo()
+        if not dladdr(address, ctypes.byref(info)):
+            return None
+        named = Path(os.fsdecode(info.dli_fname or b""))
+        return named if named.is_absolute() else None
+    return None
+
+
+def _first_mapped(file_name: re.Pattern[str]) -> Path | None:
+    """The first file ``/proc/self/maps`` lists whose name matches, or ``None``."""
     try:
         maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
     for line in maps.splitlines():
         fields = line.split(maxsplit=5)
-        if len(fields) == 6 and _LIBM_FILE_NAME.fullmatch(Path(fields[5]).name):
+        if len(fields) == 6 and file_name.fullmatch(Path(fields[5]).name):
             return Path(fields[5])
     return None
+
+
+def loaded_libm() -> Path | None:
+    """The file of the ``libm`` whose routines :mod:`math` calls, or ``None``.
+
+    It is the object that defines ``exp`` where this process's default
+    namespace resolves it, so a ``libm`` another namespace mapped first is not
+    taken for it. :mod:`math` is imported first, so that library is mapped
+    whether the interpreter links it or the module does. Only where that
+    cannot be asked, as :func:`_object_defining` says, is it the first
+    ``libm`` in ``/proc/self/maps``.
+    """
+    importlib.import_module("math")
+    defining = _object_defining("exp")
+    return defining if defining is not None else _first_mapped(_LIBM_FILE_NAME)
+
+
+def loaded_loader() -> Path | None:
+    """The file of the dynamic loader this process runs, or ``None``.
+
+    It is the object that defines ``__tls_get_addr``, which glibc's loader
+    exports, where the default namespace resolves it; only where that cannot
+    be asked is it the first loader in ``/proc/self/maps``.
+    """
+    defining = _object_defining("__tls_get_addr")
+    return defining if defining is not None else _first_mapped(_LOADER_FILE_NAME)
+
+
+def mask_reading_here() -> MaskReading:
+    """How this process's loader reads the mask, or :data:`ANY_READING`.
+
+    :return: The reading of the loader's image, or :data:`ANY_READING` where
+        the loader cannot be found or read or names no tunable that masks
+        processor features.
+    """
+    loader = loaded_loader()
+    if loader is None:
+        return ANY_READING
+    try:
+        reading = mask_reading(loader.read_bytes())
+    except OSError:
+        return ANY_READING
+    return reading if reading is not None else ANY_READING
 
 
 def glibc_built_for_x86_64_v3() -> bool:
@@ -251,8 +455,8 @@ def glibc_built_for_x86_64_v3() -> bool:
     Such a glibc compiles ``exp``, ``log``, ``pow``, ``sin``, ``tan`` and
     ``atan`` for a processor with FMA and AVX2 and carries no variant without
     them for ``GLIBC_TUNABLES`` to select. It is read from the ISA level the
-    mapped ``libm`` declares it needs, never from whether a masked process's
-    routines agree with this one's.
+    ``libm`` :mod:`math` calls (:func:`loaded_libm`) declares it needs, never
+    from whether a masked process's routines agree with this one's.
 
     :return: ``True`` when the ``libm`` of glibc on x86-64 Linux names
         x86-64-v3 or a higher level as needed; ``False`` for a build for a
@@ -278,13 +482,13 @@ def runs_the_pinned_routines() -> bool:
 
     A mask takes glibc off its FMA variant only where glibc carries another:
     a process on a glibc built for x86-64-v3 runs the FMA routines under any
-    mask.
+    mask. Elsewhere it does when this process's loader reads it so.
     """
     if not glibc_on_x86_64_with_fma():
         return False
     if glibc_built_for_x86_64_v3():
         return True
-    return not masks_the_fma_variant(os.environ.get(TUNABLES, ""))
+    return not masks_the_fma_variant(os.environ.get(TUNABLES, ""), mask_reading_here())
 
 
 #: Marks a test that compares a pinned routine bit for bit with :mod:`math`.

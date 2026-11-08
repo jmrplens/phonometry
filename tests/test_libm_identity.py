@@ -1,15 +1,23 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""glibc's build is read from the ISA level its ``libm`` declares it needs.
+"""glibc's build and its reading of a mask are read from what its objects are.
 
 :func:`libm_identity.glibc_built_for_x86_64_v3` decides whether glibc carries
 a variant without FMA from the ``GNU_PROPERTY_X86_ISA_1_NEEDED`` property of
-the mapped ``libm``, so the tests below hand the reader minimal 64-bit ELF
-objects whose note says x86-64-v3, the baseline or nothing, the way glibc
-writes it, and hold the reading of the real library here to ``readelf``'s.
+the ``libm`` :mod:`math` calls, so the tests below hand the reader minimal
+64-bit ELF objects whose note says x86-64-v3, the baseline or nothing, the
+way glibc writes it, hold the reading of the real library here to
+``readelf``'s, and hold the ``libm`` and the loader read to the objects that
+define ``exp`` and ``__tls_get_addr``, with planted ones mapped ahead of
+them. :func:`libm_identity.mask_reading` reads how a loader reads
+``GLIBC_TUNABLES`` from the names its parser carries, so the tests hand it
+loader images spelt as each glibc spells them and hold the reading of this
+process's loader to what each mask does to a child's ``exp``.
 """
 
 from __future__ import annotations
 
+import contextlib
+import ctypes
 import functools
 import os
 import platform
@@ -18,13 +26,14 @@ import shutil
 import struct
 import subprocess
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import libm_identity
 import pytest
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from collections.abc import Iterator
 
 #: ``PT_GNU_PROPERTY`` and ``PT_NOTE``, the segments the property is read from.
 _PT_GNU_PROPERTY = 0x6474E553
@@ -224,6 +233,91 @@ def test_the_libm_file_name(*, name: str, is_libm: bool) -> None:
 
 
 @pytest.mark.parametrize(
+    ("name", "is_loader"),
+    [
+        ("ld-linux-x86-64.so.2", True),
+        ("ld-2.31.so", True),
+        ("ld-2.28.so", True),
+        ("ld-linux.so.2", False),
+        ("ld-musl-x86_64.so.1", False),
+        ("libdl.so.2", False),
+    ],
+)
+def test_the_loader_file_name(*, name: str, is_loader: bool) -> None:
+    assert bool(libm_identity._LOADER_FILE_NAME.fullmatch(name)) is is_loader
+
+
+def _loader(*, tunable: str, usable: bool, drops: bool) -> bytes:
+    """The strings a glibc loader's mask parser carries, among some it does not."""
+    names = [b"glibc.malloc.check", tunable.encode(), b"AVX", b"FMA", b"AVX2", b"FMA4"]
+    if usable:
+        names += [b"AVX_Usable", b"FMA_Usable", b"AVX2_Usable", b"FMA4_Usable"]
+    if drops:
+        names.append(b"WARNING: ld.so: invalid GLIBC_TUNABLES `%s': ignored.\n")
+    return b"\x7fELF" + b"\0".join(names) + b"\0"
+
+
+#: Loader images spelt as each glibc's: 2.28 as Debian 10 builds it, 2.31 as
+#: Ubuntu 20.04 does, 2.35 as Ubuntu 22.04 does (and RHEL 8's 2.28, which
+#: carries the 2.32 parser), and 2.39 as Ubuntu 24.04 does, as every later
+#: one reads it.
+_LOADERS = {
+    "2.28": _loader(tunable="glibc.tune.hwcaps", usable=True, drops=False),
+    "2.31": _loader(tunable="glibc.cpu.hwcaps", usable=True, drops=False),
+    "2.35": _loader(tunable="glibc.cpu.hwcaps", usable=False, drops=False),
+    "2.39": _loader(tunable="glibc.cpu.hwcaps", usable=False, drops=True),
+}
+
+
+def _reading(glibc: str) -> libm_identity.MaskReading:
+    """How the loader of *glibc* reads the mask, or any spelling for ``any``."""
+    if glibc == "any":
+        return libm_identity.ANY_READING
+    reading = libm_identity.mask_reading(_LOADERS[glibc])
+    assert reading is not None
+    return reading
+
+
+@pytest.mark.parametrize(
+    ("glibc", "tunable", "names", "drops"),
+    [
+        ("2.28", "glibc.tune.hwcaps", {"FMA_Usable", "AVX2_Usable"}, False),
+        ("2.31", "glibc.cpu.hwcaps", {"FMA_Usable", "AVX2_Usable"}, False),
+        ("2.35", "glibc.cpu.hwcaps", {"FMA", "AVX2"}, False),
+        ("2.39", "glibc.cpu.hwcaps", {"FMA", "AVX2"}, True),
+    ],
+)
+def test_the_loader_says_how_it_reads_the_mask(
+    *, glibc: str, tunable: str, names: set[str], drops: bool
+) -> None:
+    assert libm_identity.mask_reading(_LOADERS[glibc]) == libm_identity.MaskReading(
+        tunables=frozenset({tunable}),
+        fma_variant_names=frozenset(names),
+        drops_ill_formed=drops,
+    )
+
+
+@pytest.mark.parametrize(
+    "image",
+    [b"", b"\x7fELF", b"glibc.cpu.hwcap_mask\0", b"glibc.cpu.hwcapsx\0FMA_Usable\0"],
+    ids=["empty", "header-only", "another-tunable", "a-longer-name"],
+)
+def test_a_loader_that_names_no_mask_tunable_says_nothing(image: bytes) -> None:
+    assert libm_identity.mask_reading(image) is None
+
+
+@pytest.mark.parametrize("found", ["none", "absent", "no-mask-tunable"])
+def test_a_loader_that_cannot_be_read_counts_a_mask_in_any_spelling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, found: str
+) -> None:
+    planted = tmp_path / "ld-linux-x86-64.so.2"
+    planted.write_bytes(b"\x7fELF\0glibc.cpu.hwcap_mask\0")
+    loaders = {"none": None, "absent": tmp_path / "absent", "no-mask-tunable": planted}
+    monkeypatch.setattr(libm_identity, "loaded_loader", lambda: loaders[found])
+    assert libm_identity.mask_reading_here() == libm_identity.ANY_READING
+
+
+@pytest.mark.parametrize(
     ("v3", "tunables", "pinned"),
     [
         (False, "", True),
@@ -238,33 +332,72 @@ def test_a_mask_leaves_a_build_for_v3_on_the_pinned_routines(
 ) -> None:
     monkeypatch.setattr(libm_identity, "glibc_on_x86_64_with_fma", lambda: True)
     monkeypatch.setattr(libm_identity, "glibc_built_for_x86_64_v3", lambda: v3)
+    monkeypatch.setattr(libm_identity, "mask_reading_here", lambda: _reading("2.39"))
     monkeypatch.setenv(libm_identity.TUNABLES, tunables)
     assert libm_identity.runs_the_pinned_routines() is pinned
 
 
 @pytest.mark.parametrize(
-    ("tunables", "masks"),
+    ("glibc", "tunables", "masks"),
     [
-        ("", False),
-        ("glibc.cpu.hwcaps=-AVX", False),
-        ("glibc.cpu.hwcaps=-FMA4", False),
-        ("glibc.cpu.hwcaps=-AVX,-FMA4", False),
-        ("glibc.cpu.hwcaps=-FMA", True),
-        ("glibc.cpu.hwcaps=-AVX2", True),
-        ("glibc.cpu.hwcaps=-AVX,-FMA", True),
-        ("glibc.cpu.hwcaps=-FMA_Usable", True),
-        ("glibc.cpu.hwcaps=-AVX2_Usable", True),
-        ("glibc.cpu.hwcaps=-AVX_Usable", False),
-        ("glibc.cpu.hwcaps=-fma", False),
-        (libm_identity.WITHOUT_FMA, True),
-        ("glibc.malloc.check=3:glibc.cpu.hwcaps=-AVX2", True),
-        ("glibc.malloc.check=3", False),
+        ("2.39", "", False),
+        ("2.39", "glibc.malloc.check=3", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA", True),
+        ("2.39", "glibc.cpu.hwcaps=-AVX2", True),
+        ("2.39", "glibc.cpu.hwcaps=-AVX,-FMA", True),
+        ("2.39", "glibc.malloc.check=3:glibc.cpu.hwcaps=-AVX2", True),
+        ("2.39", "glibc.cpu.hwcaps=-AVX", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA4", False),
+        ("2.39", "glibc.cpu.hwcaps=-AVX,-FMA4", False),
+        ("2.39", "glibc.cpu.hwcaps=-fma", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA_Usable", False),
+        ("2.39", "glibc.cpu.hwcaps=-AVX2_Usable", False),
+        ("2.39", "glibc.tune.hwcaps=-FMA", False),
+        ("2.35", "glibc.cpu.hwcaps=-FMA", True),
+        ("2.35", "glibc.cpu.hwcaps=-FMA_Usable", False),
+        ("2.31", "glibc.cpu.hwcaps=-FMA_Usable", True),
+        ("2.31", "glibc.cpu.hwcaps=-AVX2_Usable", True),
+        ("2.31", "glibc.cpu.hwcaps=-FMA,-AVX2", False),
+        ("2.31", "glibc.cpu.hwcaps=-AVX_Usable", False),
+        ("2.31", "glibc.tune.hwcaps=-FMA_Usable", False),
+        ("2.28", "glibc.tune.hwcaps=-FMA_Usable", True),
+        ("2.28", "glibc.tune.hwcaps=-FMA", False),
+        ("2.28", "glibc.cpu.hwcaps=-FMA_Usable", False),
+        ("2.39", "glibc.cpu.hwcaps= -FMA", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA ", False),
+        ("2.39", " glibc.cpu.hwcaps=-FMA", False),
+        ("2.39", "glibc.cpu.hwcaps =-FMA", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.cpu.hwcaps=-SSE4_1", False),
+        ("2.39", "glibc.cpu.hwcaps=-SSE4_1:glibc.cpu.hwcaps=-FMA", True),
+        ("2.31", "glibc.cpu.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA:junk", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA,-X=1", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.malloc.check=3=1", False),
+        ("2.39", "glibc.cpu.hwcaps=-FMA::", False),
+        ("2.39", "junk:glibc.cpu.hwcaps=-FMA", True),
+        ("2.35", "glibc.cpu.hwcaps=-FMA:junk", True),
+        ("2.35", "glibc.cpu.hwcaps=-FMA,-X=1", True),
+        ("2.31", "glibc.cpu.hwcaps=-FMA_Usable::", True),
+        ("2.28", libm_identity.WITHOUT_FMA, True),
+        ("2.31", libm_identity.WITHOUT_FMA, True),
+        ("2.35", libm_identity.WITHOUT_FMA, True),
+        ("2.39", libm_identity.WITHOUT_FMA, True),
+        ("any", "glibc.cpu.hwcaps=-FMA_Usable", True),
+        ("any", "glibc.tune.hwcaps=-FMA", True),
+        ("any", "glibc.cpu.hwcaps=-FMA:junk", True),
+        ("any", "glibc.cpu.hwcaps=-AVX,-AVX_Usable", False),
     ],
 )
-def test_a_mask_of_fma_or_avx2_is_one_and_of_avx_alone_is_not(
-    *, tunables: str, masks: bool
+def test_a_mask_counts_as_the_glibc_reading_it_reads_it(
+    *, glibc: str, tunables: str, masks: bool
 ) -> None:
-    assert libm_identity.masks_the_fma_variant(tunables) is masks
+    """Each row is what that glibc did to a child's ``exp`` under the mask.
+
+    The rows were measured on Debian 10 (2.28), Ubuntu 20.04 (2.31), 22.04
+    (2.35) and 24.04 (2.39); the test below holds the loader of this process
+    to the same rule.
+    """
+    assert libm_identity.masks_the_fma_variant(tunables, _reading(glibc)) is masks
 
 
 #: A child's :func:`math.exp` on a grid of the double range, whose digest
@@ -298,36 +431,179 @@ def _exp_digest_under(tunables: str) -> str:
 @pytest.mark.parametrize(
     "tunables",
     [
+        "glibc.cpu.hwcaps=-FMA",
+        "glibc.cpu.hwcaps=-AVX2",
+        "glibc.cpu.hwcaps=-FMA_Usable",
+        "glibc.cpu.hwcaps=-AVX2_Usable",
+        "glibc.tune.hwcaps=-FMA_Usable",
         "glibc.cpu.hwcaps=-AVX",
         "glibc.cpu.hwcaps=-FMA4",
         "glibc.cpu.hwcaps=-AVX_Usable",
         "glibc.cpu.hwcaps=-fma",
-        "glibc.cpu.hwcaps=-FMA,-FMA_Usable",
-        "glibc.cpu.hwcaps=-AVX2,-AVX2_Usable",
+        "glibc.cpu.hwcaps= -FMA,-AVX2_Usable",
+        "glibc.cpu.hwcaps=-FMA,-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1",
+        "glibc.cpu.hwcaps=-SSE4_1:glibc.cpu.hwcaps=-FMA,-FMA_Usable",
+        "glibc.cpu.hwcaps=-FMA,-FMA_Usable:junk",
         libm_identity.WITHOUT_FMA,
     ],
 )
 def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
-    tunables: str,
+    monkeypatch: pytest.MonkeyPatch, tunables: str
 ) -> None:
-    """The helper reads a mask as what the mask does to glibc's routines.
+    """This process counts a mask as taking it off the pins when it does.
 
-    glibc takes its FMA variant when FMA and AVX2 are usable, and the mask
-    clears only the feature it names, as it spells it, so a child with AVX or
-    FMA4 masked, or ``fma`` in lower case, stays on it, its ``exp`` the same
-    as an unmasked child's, and the bit-for-bit tests of the pinned routines
-    run under that mask. Each mask here names its features in both spellings
-    or in neither: a glibc reads one spelling, and which one is not in its
-    version.
+    A child started under the mask runs the same loader, which reads the mask
+    in its own spelling and ignores the others, as written, keeping the last
+    setting, and from glibc 2.39 drops the whole variable over an ill-formed
+    entry. So the pinned routines count as running under the mask exactly
+    when the child's ``exp`` is an unmasked child's: a mask this glibc does not
+    read leaves the bit-for-bit tests running, and one it reads skips them.
     """
-    if not libm_identity.runs_the_pinned_routines():
-        pytest.skip("needs this process on glibc's FMA variant, unmasked")
+    if not libm_identity.glibc_on_x86_64_with_fma():
+        pytest.skip("needs glibc on an x86-64 processor with FMA and AVX2")
     if libm_identity.glibc_built_for_x86_64_v3():
         pytest.skip(
             "glibc here is built for x86-64-v3, so no mask moves it off its FMA variant"
         )
     moved = _exp_digest_under(tunables) != _exp_digest_under("")
-    assert libm_identity.masks_the_fma_variant(tunables) is moved
+    monkeypatch.setenv(libm_identity.TUNABLES, tunables)
+    assert libm_identity.runs_the_pinned_routines() is not moved
+
+
+def _on_x86_64_glibc() -> None:
+    if platform.machine() != "x86_64" or platform.libc_ver()[0] != "glibc":
+        pytest.skip("reads the objects glibc's loader maps on x86-64 Linux")
+
+
+def _mappings() -> list[tuple[int, int, Path]]:
+    """The files ``/proc/self/maps`` lists, each with the range it is mapped at."""
+    maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
+    mapped = []
+    for line in maps.splitlines():
+        fields = line.split(maxsplit=5)
+        if len(fields) == 6 and fields[5].startswith("/"):
+            start, _, end = fields[0].partition("-")
+            mapped.append((int(start, 16), int(end, 16), Path(fields[5])))
+    return mapped
+
+
+def _file_holding(symbol: str) -> Path:
+    """The file the kernel maps where the default namespace resolves *symbol*."""
+    address = ctypes.cast(getattr(ctypes.CDLL(None), symbol), ctypes.c_void_p).value
+    assert address is not None
+    for start, end, file in _mappings():
+        if start <= address < end:
+            return file
+    msg = f"no file is mapped at {symbol}'s address {address:#x}"
+    raise AssertionError(msg)
+
+
+def _first_libm_mapped() -> Path | None:
+    for _, _, file in _mappings():
+        if libm_identity._LIBM_FILE_NAME.fullmatch(file.name):
+            return file
+    return None
+
+
+#: ``PROT_READ``, ``MAP_PRIVATE`` and ``MAP_FIXED_NOREPLACE`` (Linux 4.17),
+#: which maps at the address asked or fails.
+_PROT_READ = 0x1
+_MAP_PRIVATE = 0x2
+_MAP_FIXED_NOREPLACE = 0x100000
+
+
+@contextlib.contextmanager
+def _mapped_first(path: Path) -> Iterator[None]:
+    """*path* mapped below every file this process maps, so maps lists it first."""
+    libc = ctypes.CDLL(None)
+    mmap = libc.mmap
+    mmap.argtypes = (
+        ctypes.c_void_p,
+        ctypes.c_size_t,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_long,
+    )
+    mmap.restype = ctypes.c_void_p
+    munmap = libc.munmap
+    munmap.argtypes = (ctypes.c_void_p, ctypes.c_size_t)
+    munmap.restype = ctypes.c_int
+    size = path.stat().st_size
+    wanted = min(start for start, _, _ in _mappings()) // 2 & ~0xFFF
+    with path.open("rb") as file:
+        flags = _MAP_PRIVATE | _MAP_FIXED_NOREPLACE
+        address = mmap(wanted, size, _PROT_READ, flags, file.fileno(), 0)
+    if address != wanted:
+        if address not in (None, ctypes.c_void_p(-1).value):
+            munmap(address, size)
+        pytest.fail(f"could not map {path} at {wanted:#x}")
+    try:
+        yield
+    finally:
+        munmap(address, size)
+
+
+def test_the_libm_read_is_the_one_that_defines_exp(tmp_path: Path) -> None:
+    """A ``libm`` mapped ahead of the one :mod:`math` calls is not the one read.
+
+    ``dlmopen`` maps a second ``libm`` into another namespace below the
+    libraries already mapped, so ``/proc/self/maps`` lists it first. A planted
+    one that declares x86-64-v3, mapped below every file here, stands in for
+    it: the library read is still the file the kernel maps at the address the
+    default namespace resolves for ``exp``.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("exp")
+    needed = libm_identity.x86_isa_levels_needed(real.read_bytes())
+    built_for_v3 = needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
+    planted = tmp_path / "libm.so.6"
+    planted.write_bytes(_elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8)))
+    with _mapped_first(planted):
+        first = _first_libm_mapped()
+        assert first is not None
+        assert first.samefile(planted)
+        library = libm_identity.loaded_libm()
+        assert library is not None
+        assert library.samefile(real)
+        assert libm_identity.glibc_built_for_x86_64_v3() is built_for_v3
+
+
+def test_the_loader_read_is_the_one_that_defines_tls_get_addr(tmp_path: Path) -> None:
+    """A loader mapped ahead of this process's is not the one whose mask is read.
+
+    A planted one, spelt as glibc 2.28's and mapped below every file here,
+    stands in for a loader another namespace or a copy maps: the mask is still
+    read as the loader the default namespace resolves ``__tls_get_addr`` in
+    reads it.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("__tls_get_addr")
+    reading = libm_identity.mask_reading(real.read_bytes())
+    assert reading is not None
+    planted = tmp_path / "ld-linux-x86-64.so.2"
+    planted.write_bytes(_LOADERS["2.28"])
+    with _mapped_first(planted):
+        loader = libm_identity.loaded_loader()
+        assert loader is not None
+        assert loader.samefile(real)
+        assert libm_identity.mask_reading_here() == reading
+
+
+def test_where_dladdr_cannot_be_asked_the_first_mapped_files_are_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _on_x86_64_glibc()
+    monkeypatch.setattr(libm_identity, "_object_defining", lambda symbol: None)
+    assert libm_identity.loaded_libm() == _first_libm_mapped()
+    loader = libm_identity.loaded_loader()
+    assert loader is not None
+    assert libm_identity._LOADER_FILE_NAME.fullmatch(loader.name)
+
+
+def test_off_linux_no_object_is_asked_for(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(platform, "system", lambda: "Darwin")
+    assert libm_identity._object_defining("exp") is None
 
 
 def _real_glibc_libm() -> Path:

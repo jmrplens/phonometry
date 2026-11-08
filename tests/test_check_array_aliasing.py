@@ -5198,6 +5198,85 @@ def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
     assert _findings(tmp_path, records=source) == expected
 
 
+#: A record with no hook, whose generated ``__init__`` calls none, and the
+#: start of a module that decorates a class over it.
+_KEEPING_BASE = """
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import read_only_copy
+
+
+@dataclass
+class Base:
+    data: NDArray[np.float64]
+"""
+
+#: A class over :data:`_KEEPING_BASE` whose hook copies, built by ``make``.
+_COPYING_OVER = """
+@dataclass
+class Sub(Base):
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+
+def make(data):
+    return Sub(data)
+"""
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "expected"),
+    [
+        (
+            """
+            def dataclass(cls):
+                return cls
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        ("dataclass = lambda cls: cls", {("make", "Sub.data", "data")}),
+        (
+            """
+            if (dataclass := lambda cls: cls):
+                pass
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        (
+            """
+            try:
+                from dataclasses import dataclass
+            except ImportError:
+                def dataclass(cls):
+                    return cls
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        ("", set()),
+    ],
+    ids=["defined", "assigned", "walrus", "either", "imported"],
+)
+def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_runs(
+    tmp_path: pathlib.Path, rebinding: str, expected: set[tuple[str, str, str]]
+) -> None:
+    """``@dataclass`` is what the name holds where the ``class`` statement
+    runs: once a ``def``, an assignment or a ``:=`` has replaced the import,
+    ``Sub`` is no record, a call of it runs the ``__init__`` ``Base``'s
+    decorator wrote, which calls no hook, and the caller's array is kept;
+    with an import and a fallback that may each stand, either may run. With
+    the import alone, the generated ``__init__`` calls the copying hook.
+
+    The decorator was read by its spelling, so each replacement was read as
+    ``dataclasses``' own, writing an ``__init__`` that calls the copying
+    hook, and the array kept passed.
+    """
+    source = _KEEPING_BASE + textwrap.dedent(rebinding) + textwrap.dedent(_COPYING_OVER)
+    assert _findings(tmp_path, records=source) == expected
+
+
 #: A record with no hook, one over it whose hook copies, and a record whose
 #: ``__init__`` is written by hand over that.
 _HAND_WRITTEN_HEAD = """

@@ -179,6 +179,7 @@ from ast_scan import (
     module_constant,
     own_names,
     python_files,
+    reads_import,
     relative,
     scope_nodes,
     scopes_around,
@@ -654,11 +655,20 @@ def _pinned_functions(
     return [found for found in held if isinstance(found, FunctionInfo)]
 
 
-def _is_record_decorator(node: ast.expr) -> bool:
+def _record_decorator(node: ast.expr, module: ast.Module) -> bool | None:
+    """Whether the decorator *node*, written in *module*, is ``dataclasses``'
+    ``dataclass``, with or without arguments: its name read as it stands
+    where the ``class`` statement runs its decorators, in the scope that
+    writes the class or a scope around it (:func:`ast_scan.reads_import`).
+
+    ``True`` when every binding that may stand there imports it, ``False``
+    when none does, a ``def`` of the name that replaced the import, a
+    decorator of its own that writes nothing say, and ``None`` when an
+    import and a fallback may each stand, so the class may be a record or
+    not.
+    """
     target = node.func if isinstance(node, ast.Call) else node
-    if isinstance(target, ast.Name):
-        return target.id == "dataclass"
-    return isinstance(target, ast.Attribute) and target.attr == "dataclass"
+    return reads_import(module, target, "dataclasses.dataclass")
 
 
 def _base_name(node: ast.expr) -> str:
@@ -873,8 +883,9 @@ class Tree:
         for node in body:
             if isinstance(node, ast.ClassDef):
                 qualname = f"{scope}.{node.name}" if scope else node.name
+                tree = self.modules[module]
                 record = any(
-                    _is_record_decorator(d) for d in node.decorator_list
+                    _record_decorator(d, tree) is not False for d in node.decorator_list
                 ) or any(_base_name(b) == "NamedTuple" for b in node.bases)
                 info = ClassInfo(
                     node.name,
@@ -884,7 +895,7 @@ class Tree:
                     node.lineno,
                     node=node,
                 )
-                keyword_only = _keyword_only_record(node.decorator_list)
+                keyword_only = _keyword_only_record(node.decorator_list, tree)
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(
                         item.target, ast.Name
@@ -1908,9 +1919,10 @@ class Tree:
         """Whether ``@dataclass`` writes a class an ``__init__``
         (:func:`_generates_init`), its ``init=`` read through a name its
         module binds once at its top to ``True`` or ``False``; ``None`` when
-        that is a value the guard cannot read, so it may write one or not.
+        that is a value the guard cannot read, or the decorator may be
+        ``dataclasses``' or another, so it may write one or not.
         """
-        return _generates_init(info, self.modules.get(info.module))
+        return _generates_init(info, self.modules[info.module])
 
     def _classes_named(
         self, definition: FunctionInfo, expr: ast.expr
@@ -2083,24 +2095,29 @@ def _public_path(module: str) -> bool:
     return not any(part.startswith("_") for part in module.split("."))
 
 
-def _generates_init(info: ClassInfo, module: ast.Module | None = None) -> bool | None:
+def _generates_init(info: ClassInfo, module: ast.Module) -> bool | None:
     """Whether ``@dataclass`` writes a class an ``__init__``: a decorator of
-    it is ``dataclass``, and it does not say ``init=False``, as a constant
-    or as a name *module* binds once at its top to one. ``None`` when its
-    ``init=`` is a value the guard cannot read.
+    it is ``dataclasses``' ``dataclass`` where the class statement runs
+    (:func:`_record_decorator`), and it does not say ``init=False``, as a
+    constant or as a name *module* binds once at its top to one. ``None``
+    when its ``init=`` is a value the guard cannot read, or the decorator
+    may be ``dataclasses``' or another, so it may write one or not.
     """
     node = info.node
     if node is None:
         return False
     found: bool | None = False
     for decorator in node.decorator_list:
-        if not _is_record_decorator(decorator):
+        surely = _record_decorator(decorator, module)
+        if surely is False:
             continue
-        if not isinstance(decorator, ast.Call):
-            return True
-        flag = next((k.value for k in decorator.keywords if k.arg == "init"), None)
+        flag = (
+            next((k.value for k in decorator.keywords if k.arg == "init"), None)
+            if isinstance(decorator, ast.Call)
+            else None
+        )
         value = module_constant(flag, module) if flag is not None else True
-        if value is True:
+        if value is True and surely:
             return True
         if value is not False:
             found = None
@@ -2128,13 +2145,13 @@ def _excluded_from_init(value: ast.expr | None) -> bool:
     )
 
 
-def _keyword_only_record(decorators: Sequence[ast.expr]) -> bool:
+def _keyword_only_record(decorators: Sequence[ast.expr], module: ast.Module) -> bool:
     """Whether ``@dataclass(kw_only=True)`` makes every field of the class
     keyword-only.
     """
     return any(
         isinstance(decorator, ast.Call)
-        and _is_record_decorator(decorator)
+        and _record_decorator(decorator, module) is not False
         and _keyword_constant(decorator, "kw_only", default=False) is True
         for decorator in decorators
     )

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..metrology.reciprocity_calibration import (
@@ -316,7 +317,7 @@ def _frequency_axes(ax: Axes, language: Language, ylabel: str, title: str) -> No
     localize_axes(ax, language)
 
 
-def _band_label(uncertainty: np.ndarray, language: Language) -> str:
+def _band_label(uncertainty: NDArray[np.float64], language: Language) -> str:
     """The legend entry of the uncertainty band, with the range of U.
 
     A band of a few hundredths of a decibel is narrower than the curves on an

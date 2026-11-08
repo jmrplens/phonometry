@@ -63,7 +63,10 @@ _REF_PRESSURE = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 def _level_db(
-    mean_square: NDArray[np.float64], calibration_factor: float, *, dbfs: bool
+    mean_square: NDArray[np.float64] | np.float64,
+    calibration_factor: float,
+    *,
+    dbfs: bool,
 ) -> NDArray[np.float64]:
     """Convert mean-square values to dB SPL (re 20 uPa) or dBFS."""
     eps = np.finfo(float).eps

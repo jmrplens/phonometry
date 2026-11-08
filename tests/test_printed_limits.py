@@ -35,8 +35,10 @@ and the class of each band, and store them beside the readings they came
 from, so a result built by hand could hold readings that fail and a flag that
 says they pass. No public result outside the private packages may store a
 field that is a verdict, found two ways: by the class alone, a field annotated
-``bool`` (a bool, an optional bool, an array annotated as one) or named like a
-verdict flag; and by the source, a field some function of the package fills
+``bool`` (a bool, an optional bool, an array annotated as one, but not a
+function whose signature names one: what a function takes and gives is not
+what the field holds) or named like a verdict flag; and by the source, a
+field some function of the package fills
 with an ordering comparison, a combination of them, or a label one chose (a
 per-band mask annotated ``np.ndarray``, a category held as a string, an enum
 member), traced by :mod:`stored_verdicts`. A field either way fails unless
@@ -61,6 +63,7 @@ verdict reads are held read-only, so a write cannot move it after the fact.
 
 from __future__ import annotations
 
+import ast
 import dataclasses
 import functools
 import importlib
@@ -76,8 +79,11 @@ import stored_verdicts
 import phonometry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
     from pathlib import Path
+
+    import numpy as np
+    from numpy.typing import NDArray
 
 #: The tests that trace the verdicts of the whole package share what the tracer
 #: and this module keep of it, so they run on one worker (rule T19), and it is
@@ -559,8 +565,42 @@ _FLAG_NAME = re.compile(
 _FLAG_TYPE = re.compile(r"\bbool\b|\bbool_\b")
 
 
+def _is_callable(node: ast.expr) -> bool:
+    """Whether *node* names a function type, ``Callable`` bare or subscripted."""
+    target = node.value if isinstance(node, ast.Subscript) else node
+    if isinstance(target, ast.Attribute):
+        return target.attr == "Callable"
+    return isinstance(target, ast.Name) and target.id == "Callable"
+
+
+def _held_types(annotation: str) -> list[str]:
+    """The members of a field's annotation that hold a value, as text.
+
+    A member of a union that is a function type is left out: a backend's
+    converter typed ``Callable[[NDArray[np.bool_]], ...]`` takes a mask and
+    holds none. An annotation that is no expression (the ``str()`` of a
+    class, ``<class 'bool'>``) is read whole.
+    """
+    try:
+        node = ast.parse(annotation, mode="eval").body
+    except SyntaxError:
+        return [annotation]
+    held: list[str] = []
+    members = [node]
+    while members:
+        member = members.pop()
+        if isinstance(member, ast.BinOp) and isinstance(member.op, ast.BitOr):
+            members.extend((member.left, member.right))
+        elif not _is_callable(member):
+            held.append(ast.unparse(member))
+    return held
+
+
 def _is_flag_field(field: dataclasses.Field[object]) -> bool:
-    return bool(_FLAG_TYPE.search(str(field.type)) or _FLAG_NAME.match(field.name))
+    return bool(
+        any(_FLAG_TYPE.search(held) for held in _held_types(str(field.type)))
+        or _FLAG_NAME.match(field.name)
+    )
 
 
 @functools.cache
@@ -790,6 +830,25 @@ class _StoredByName:
 
     level: float
     background_ok: object
+
+
+@dataclasses.dataclass(frozen=True)
+class _HoldsAFunction:
+    """A function whose signature names a mask, and a field that may hold a flag."""
+
+    convert: Callable[[NDArray[np.bool_], str], object]
+    either: Callable[[float], bool] | bool
+
+
+def test_a_field_that_holds_a_function_is_no_flag() -> None:
+    # What a function takes and gives is not what the field holds; the bool a
+    # union holds beside the function still is one.
+    flagged = {
+        field.name
+        for field in dataclasses.fields(_HoldsAFunction)
+        if _is_flag_field(field)
+    }
+    assert flagged == {"either"}
 
 
 def test_the_guard_sees_a_stored_flag_by_type_and_by_name() -> None:

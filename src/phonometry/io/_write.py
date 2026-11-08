@@ -72,7 +72,7 @@ import os
 import struct
 from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 from scipy.io import wavfile
@@ -141,8 +141,9 @@ _PCM16_SAMPLE_BYTES = _SUBTYPE_SPEC["PCM_16"][1]
 _WAV_SUFFIXES = frozenset({".wav", ".wave", ".bwf"})
 
 #: numpy integer dtypes accepted for bit-exact pass-through, and the
-#: subtype their codes are.
-_PASSTHROUGH_SUBTYPES: dict[np.dtype[Any], Subtype] = {
+#: subtype their codes are. Keyed by every dtype the resolved input holds,
+#: float64 included, because each one is looked up here.
+_PASSTHROUGH_SUBTYPES: dict[np.dtype[np.float64 | np.int16 | np.int32], Subtype] = {
     np.dtype(np.int16): "PCM_16",
     np.dtype(np.int32): "PCM_32",
 }
@@ -156,7 +157,7 @@ _RIFF_FOURCC = b"RIFF"
 def _resolve_input(
     x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None,
-) -> tuple[np.ndarray, int]:
+) -> tuple[NDArray[np.float64] | NDArray[np.int16] | NDArray[np.int32], int]:
     """Normalise the input to ``(channels, samples)`` plus a sample rate.
 
     A :class:`Signal` brings its own ``fs`` (a conflicting explicit one is
@@ -196,7 +197,9 @@ def _resolve_input(
     return data, require_count(fs, "fs", at_least=None)
 
 
-def _resolve_subtype(data: np.ndarray, subtype: object) -> Subtype:
+def _resolve_subtype(
+    data: NDArray[np.float64] | NDArray[np.int16] | NDArray[np.int32], subtype: object
+) -> Subtype:
     """Pick or validate the subtype for the resolved input data.
 
     Float data defaults to ``FLOAT``: float32 represents every sample that
@@ -353,7 +356,9 @@ def build_wav_header(
     )
 
 
-def _encode_frames(data: np.ndarray, subtype: str) -> bytes:
+def _encode_frames(
+    data: NDArray[np.float64] | NDArray[np.int64], subtype: str
+) -> bytes:
     """Encode ``(channels, samples)`` data as interleaved sample bytes.
 
     Integer input must already be quantised codes; the transpose
@@ -363,7 +368,9 @@ def _encode_frames(data: np.ndarray, subtype: str) -> bytes:
     if subtype == "PCM_16":
         return interleaved.astype("<i2").tobytes()
     if subtype == "PCM_24":
-        return _pack_pcm24(interleaved)
+        # The PCM subtypes stream the int64 codes of _quantise (see above): the
+        # subtype says so, not the dtype, and the checker cannot follow it.
+        return _pack_pcm24(cast("NDArray[np.int64]", interleaved))
     if subtype == "PCM_32":
         return interleaved.astype("<i4").tobytes()
     samples = real_array(interleaved, "x")
@@ -459,7 +466,7 @@ def _check_dither(dither: str | None, subtype: str) -> None:
 def _resolve_bext(
     x: Signal | NumericArrayLike,
     bext: BroadcastMetadata | str | None,
-    data: np.ndarray,
+    data: NDArray[np.float64] | NDArray[np.int16] | NDArray[np.int32],
     fs: int,
     subtype: str,
     algorithm: str = "PCM",
@@ -545,7 +552,7 @@ def _reconcile_streamed_header(
 
 def write_wav_stream(
     path: str | os.PathLike[str],
-    blocks: Iterable[np.ndarray],
+    blocks: Iterable[NDArray[np.float64] | NDArray[np.int64]],
     fs: int,
     channels: int,
     subtype: str,
@@ -621,7 +628,7 @@ def write_wav_stream(
 
 def write_wav(
     path: str | os.PathLike[str],
-    data: np.ndarray,
+    data: NDArray[np.int64],
     fs: int,
     subtype: str,
     *,
@@ -691,7 +698,7 @@ def _refuse_passthrough_dither(dither: str | None) -> None:
 def _write_pcm24(
     path: str | os.PathLike[str],
     file: Path,
-    data: np.ndarray,
+    data: NDArray[np.float64],
     rate: int,
     resolved: str,
     dither: str | None,
@@ -720,7 +727,7 @@ def _write_pcm24(
 def _write_through_scipy(
     path: str | os.PathLike[str],
     file: Path,
-    data: np.ndarray,
+    data: NDArray[np.float64],
     rate: int,
     resolved: str,
     dither: str | None,
@@ -901,12 +908,32 @@ def write(
     # The audio is written beside a regular file at the name and takes its
     # place whole: a write stopped half way leaves the old file there.
     with writing_beside(target) as file:
+        # Past the pass-through test the data are the float64 samples
+        # _resolve_input made; the checker does not narrow on a dtype found
+        # in a table.
         if data.dtype in _PASSTHROUGH_SUBTYPES:
             _scipy_write(file, rate, data)
         elif resolved == "PCM_24":
-            _write_pcm24(path, file, data, rate, resolved, dither, rng, bext_payload)
+            _write_pcm24(
+                path,
+                file,
+                cast("NDArray[np.float64]", data),
+                rate,
+                resolved,
+                dither,
+                rng,
+                bext_payload,
+            )
         else:
-            _write_through_scipy(path, file, data, rate, resolved, dither, rng)
+            _write_through_scipy(
+                path,
+                file,
+                cast("NDArray[np.float64]", data),
+                rate,
+                resolved,
+                dither,
+                rng,
+            )
         # The in-house packer of PCM_24 writes the bext in the header; scipy
         # writes none, so it is appended to what scipy wrote.
         if bext_payload is not None and resolved != "PCM_24":
@@ -925,7 +952,14 @@ def _write_signal_sidecar(path: str | os.PathLike[str], carried: bytes | None) -
         put_sidecar(path, carried)
 
 
-def _scipy_write(path: str | os.PathLike[str], fs: int, data: np.ndarray) -> None:
+def _scipy_write(
+    path: str | os.PathLike[str],
+    fs: int,
+    data: NDArray[np.float64]
+    | NDArray[np.float32]
+    | NDArray[np.int16]
+    | NDArray[np.int32],
+) -> None:
     """Write ``(channels, samples)`` data through scipy's writer.
 
     scipy fully serves four of the five subtypes (int16/int32 PCM, float
@@ -940,8 +974,10 @@ def _scipy_write(path: str | os.PathLike[str], fs: int, data: np.ndarray) -> Non
 
 
 def _flac_passthrough_codes(
-    data: np.ndarray, subtype: object, dither: str | None
-) -> np.ndarray:
+    data: NDArray[np.float64] | NDArray[np.int16] | NDArray[np.int32],
+    subtype: object,
+    dither: str | None,
+) -> NDArray[np.int16]:
     """int16 codes pass through whole; a conflicting request is refused."""
     require_choice(subtype, "subtype", (None, "PCM_16"))
     _refuse_passthrough_dither(dither)
@@ -950,11 +986,11 @@ def _flac_passthrough_codes(
 
 def _flac_quantised_codes(
     path: str | os.PathLike[str],
-    data: np.ndarray,
+    data: NDArray[np.float64] | NDArray[np.int16] | NDArray[np.int32],
     subtype: str | None,
     dither: str | None,
     rng: np.random.Generator | int | None,
-) -> tuple[str, np.ndarray]:
+) -> tuple[str, NDArray[np.int16] | NDArray[np.int32]]:
     """Quantise float data to the integer codes a FLAC subtype stores."""
     if data.dtype.kind != "f":
         msg = (
@@ -971,7 +1007,11 @@ def _flac_quantised_codes(
         raise ValueError(msg)
     _check_dither(dither, resolved)
     bits = _SUBTYPE_BITS[resolved]
-    codes, clipped, peak_dbfs = _quantise(data, bits, dither, rng)
+    # Past the refusal above the data are the float64 samples _resolve_input
+    # made, which the checker does not see from the dtype's kind.
+    codes, clipped, peak_dbfs = _quantise(
+        cast("NDArray[np.float64]", data), bits, dither, rng
+    )
     if clipped:
         _warn_clipped(path, resolved, clipped, data.size, peak_dbfs)
     out = (
@@ -986,7 +1026,7 @@ def _write_flac(
     path: str | os.PathLike[str],
     file: Path,
     x: Signal | NumericArrayLike,
-    data: np.ndarray,
+    data: NDArray[np.float64] | NDArray[np.int16] | NDArray[np.int32],
     fs: int,
     subtype: str | None,
     bext: BroadcastMetadata | str | None,
@@ -1016,7 +1056,7 @@ def _write_flac(
 
     sf = _import_soundfile("FLAC", action="Writing")
     implied = _PASSTHROUGH_SUBTYPES.get(data.dtype)
-    out: np.ndarray
+    out: NDArray[np.int16] | NDArray[np.int32]
     if implied == "PCM_32":
         msg = (
             f"{escaped(os.fspath(path))}: FLAC stores integers up to 24 bits (libsndfile), so "

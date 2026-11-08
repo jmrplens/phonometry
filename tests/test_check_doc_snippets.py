@@ -973,3 +973,29 @@ def test_a_print_is_read_with_the_separator_and_the_ending_it_was_given(
     # The page's own text and a value it formats into it stay apart.
     script = 'x = 5\nprint(f"A{x}")  # 5\n'
     assert _held_against(script, 2, ["A5"]) == []
+
+
+def test_a_print_inside_another_statement_is_held() -> None:
+    """A call of ``print`` in an assignment or a comprehension writes too."""
+    script = "result = print(2)  # 3\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert promise.lines == ("3",)
+    (failure,) = _failures(script, {1: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+    spread = "values = [\n    print(x) for x in (1, 2)\n]  # 1\n"
+    (promise,) = check_doc_snippets.promised_outputs(spread)
+    assert (promise.first, promise.last, promise.lines) == (1, 3, ("1",))
+    # The header of a compound statement closes on the call's own line.
+    header = "if print(4) is None:  # 4\n    pass\n"
+    (promise,) = check_doc_snippets.promised_outputs(header)
+    assert (promise.first, promise.last) == (1, 1)
+
+
+def test_two_prints_in_one_statement_share_its_comment() -> None:
+    """Each is held to what both wrote, as two prints on one line are."""
+    script = "data = [\n    print(1),\n    print(2),\n]  # 1 2\n"
+    promises = check_doc_snippets.promised_outputs(script)
+    assert [(p.first, p.last, p.lines) for p in promises] == [(1, 4, ("1 2",))] * 2
+    assert _failures(script, {2: "1", 3: "2"}) == []
+    (failure, _) = _failures(script.replace("# 1 2", "# 1 3"), {2: "1", 3: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure

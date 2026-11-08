@@ -426,8 +426,10 @@ _Argument = tuple[str | None, ...] | None
 class _Promise:
     """The output a comment promises for one print of a page's script.
 
-    :param first: The line of the script the print statement opens on.
-    :param last: The line it closes on.
+    :param first: The line of the script the statement the print stands in
+        opens on, or the print's own first line in the header of a compound
+        statement (:func:`_print_calls`).
+    :param last: The line that statement, or that print, closes on.
     :param lines: The comment and the comment lines that continue it.
     :param arguments: What each argument of the print is (:data:`_Argument`),
         or ``None`` when its arguments cannot be told apart (``*args``).
@@ -449,14 +451,41 @@ class _Promise:
         return " ".join(self.lines)
 
 
-def _is_print(node: ast.AST) -> TypeGuard[ast.Expr]:
-    """True for a statement that is a call of the builtin ``print``."""
+def _is_print(node: ast.AST) -> TypeGuard[ast.Call]:
+    """True for a call of the builtin ``print``, a statement of its own or
+    inside another one (``result = print(2)``, ``[print(x) for x in xs]``):
+    the record holds what every call writes, wherever it stands.
+    """
     return (
-        isinstance(node, ast.Expr)
-        and isinstance(node.value, ast.Call)
-        and isinstance(node.value.func, ast.Name)
-        and node.value.func.id == "print"
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "print"
     )
+
+
+def _print_calls(tree: ast.AST) -> dict[ast.Call, tuple[int, int]]:
+    """Every call of ``print`` in *tree*, with the lines its comment stands
+    for: those of the statement the call stands in, whose last line is where
+    a reader writes the comment of a list comprehension of prints over three
+    lines, or the call's own lines in the header of a compound statement.
+    Two calls in one statement stand for its lines alike, as two prints
+    written on one line with a semicolon between them do.
+    """
+    found: dict[ast.Call, tuple[int, int]] = {}
+
+    def visit(node: ast.AST, span: tuple[int, int] | None) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.stmt):
+                simple = not hasattr(child, "body") and not hasattr(child, "cases")
+                lines = (child.lineno, child.end_lineno or child.lineno)
+                visit(child, lines if simple else None)
+                continue
+            if _is_print(child):
+                found[child] = span or (child.lineno, child.end_lineno or child.lineno)
+            visit(child, span)
+
+    visit(tree, None)
+    return found
 
 
 def _open_brackets(text: str) -> int:
@@ -561,19 +590,15 @@ def promised_outputs(script: str) -> list[_Promise]:
             number += 1
         return said
 
-    def end(node: ast.stmt) -> int:
-        return node.end_lineno or node.lineno
+    spans = _print_calls(ast.parse(script))
 
-    def call_of(node: ast.stmt) -> ast.Call:
-        value = node.value if isinstance(node, ast.Expr) else None
-        if not isinstance(value, ast.Call):  # pragma: no cover - passed _is_print
-            raise TypeError(node)
-        return value
+    def start(node: ast.Call) -> int:
+        return spans[node][0]
 
-    prints = sorted(
-        (node for node in ast.walk(ast.parse(script)) if _is_print(node)),
-        key=lambda node: node.lineno,
-    )
+    def end(node: ast.Call) -> int:
+        return spans[node][1]
+
+    prints = sorted(spans, key=lambda node: (start(node), node.lineno))
     said_by: dict[int, list[str]] = {}
     word_by: dict[int, str] = {}
 
@@ -581,7 +606,7 @@ def promised_outputs(script: str) -> list[_Promise]:
         """Whether *text* opens like the output of the print at *index*, or
         on a word, noted for the run to settle.
         """
-        if _opens_output(text, call_of(prints[index])):
+        if _opens_output(text, prints[index]):
             return True
         word = _opening_word(text)
         if word is not None:
@@ -594,13 +619,13 @@ def promised_outputs(script: str) -> list[_Promise]:
         comment = trailing(end(node))
         if comment is not None:
             if opening(comment, at):
-                said_by[at] = run_from(end(node) + 1, [comment], call_of(node))
+                said_by[at] = run_from(end(node) + 1, [comment], node)
             at += 1
             continue
         stack = [at]
         while (
             stack[-1] + 1 < len(prints)
-            and prints[stack[-1] + 1].lineno == end(prints[stack[-1]]) + 1
+            and start(prints[stack[-1] + 1]) == end(prints[stack[-1]]) + 1
             and trailing(end(prints[stack[-1] + 1])) is None
         ):
             stack.append(stack[-1] + 1)
@@ -611,7 +636,7 @@ def promised_outputs(script: str) -> list[_Promise]:
             if comment_only(under + place)
             and opening(comments[under + place][1], index)
         ]
-        last = call_of(prints[stack[-1]])
+        last = prints[stack[-1]]
         # A line that opens on a word may be prose that starts a comment the
         # next lines go on with, so a share-out that counts one holds only
         # when there is exactly one comment line for each print.
@@ -638,10 +663,10 @@ def promised_outputs(script: str) -> list[_Promise]:
         at = stack[-1] + 1
     return [
         _Promise(
-            prints[index].lineno,
+            start(prints[index]),
             end(prints[index]),
             tuple(said),
-            _arguments(call_of(prints[index])),
+            _arguments(prints[index]),
             word_by.get(index),
         )
         for index, said in sorted(said_by.items())

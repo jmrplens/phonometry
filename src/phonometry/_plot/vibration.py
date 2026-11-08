@@ -2288,7 +2288,7 @@ def _draw_fault_lines(
 
 def _measured_spectrum_vectors(
     spectrum: _SpectrumLike,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The two vectors of ``spectrum``, measured before either scales an axis.
 
     ``spectrum`` is a structural contract, anything exposing the two vectors,
@@ -3887,7 +3887,7 @@ def plot_response_decay_check(
     floor = -80.0
     reference = result.peak if result.peak > 0.0 else 1.0
 
-    def _db(ratio: float | np.ndarray) -> np.ndarray:
+    def _db(ratio: float | NDArray[np.float64]) -> NDArray[np.float64]:
         with np.errstate(divide="ignore"):
             return np.maximum(20.0 * np.log10(real_array(ratio, "ratio")), floor)
 
@@ -3988,7 +3988,9 @@ def plot_response_decay_check(
     return ax
 
 
-def _symmetric_limits(values: np.ndarray, tolerance: float) -> tuple[float, float]:
+def _symmetric_limits(
+    values: NDArray[np.float64], tolerance: float
+) -> tuple[float, float]:
     """Axis limits about zero: twice the tolerance, or wider to hold every value."""
     reach = max(2.0 * tolerance, 1.1 * float(np.max(np.abs(values))))
     return -reach, reach

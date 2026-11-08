@@ -1460,7 +1460,10 @@ class _RuntimeView(ast.NodeTransformer):
 
     A bare declaration (``x: int`` with no value) binds nothing at run time
     and is dropped whole; an assigned one keeps its assignment and loses the
-    annotation.
+    annotation. A ``type`` statement binds its name at run time and keeps
+    it, with its value and type parameters taken out: Python evaluates the
+    value lazily, when something reads the alias's ``__value__``, which no
+    drawing code does, so the value is a type checker's alone.
     """
 
     def visit_arg(self, node: ast.arg) -> ast.arg:
@@ -1483,6 +1486,11 @@ class _RuntimeView(ast.NodeTransformer):
         return ast.copy_location(
             ast.Assign(targets=[node.target], value=self.visit(node.value)), node
         )
+
+    def visit_TypeAlias(self, node: ast.TypeAlias) -> ast.TypeAlias:
+        node.type_params = []
+        node.value = ast.copy_location(ast.Constant(None), node.value)
+        return node
 
 
 class Sources:

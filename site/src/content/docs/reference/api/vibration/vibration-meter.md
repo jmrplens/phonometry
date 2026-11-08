@@ -306,10 +306,22 @@ BAND_LIMIT_CORNER_FACTOR = 0.8
 
 ```python
 band_limitation_response(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex
+
+band_limitation_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> NDArray[np.complex128]
+
+band_limitation_response(
     frequencies: NumericArrayLike,
     *,
-    working_range: Literal['building', 'railway'] = 'building',
-) -> NDArray[np.complex128]
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 The band limitation of the unweighted signal, Formula (3).
@@ -321,7 +333,7 @@ The band limitation of the unweighted signal, Formula (3).
 | `frequencies` | Frequencies, in hertz. |
 | `working_range` | `"building"` (1 Hz to 80 Hz, the default) or `"railway"` (4 Hz to 315 Hz); see [`WORKING_RANGES_HZ`](/phonometry/reference/api/vibration/vibration-meter/#working_ranges_hz). |
 
-**Returns:** The complex response $H_{u\mathrm{Soll}}$, whose magnitude is Formula (5).
+**Returns:** The complex response $H_{u\mathrm{Soll}}$, whose magnitude is Formula (5). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -490,10 +502,22 @@ KB_TIME_CONSTANT_S = 0.125
 
 ```python
 kb_weighting_response(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex
+
+kb_weighting_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> NDArray[np.complex128]
+
+kb_weighting_response(
     frequencies: NumericArrayLike,
     *,
-    working_range: Literal['building', 'railway'] = 'building',
-) -> NDArray[np.complex128]
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 The KB frequency weighting, Formula (4).
@@ -505,7 +529,7 @@ The KB frequency weighting, Formula (4).
 | `frequencies` | Frequencies, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 
-**Returns:** The complex response $H_{B\mathrm{Soll}}$, whose magnitude is Formula (6).
+**Returns:** The complex response $H_{B\mathrm{Soll}}$, whose magnitude is Formula (6). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

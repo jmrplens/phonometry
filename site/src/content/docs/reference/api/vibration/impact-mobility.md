@@ -1635,8 +1635,16 @@ $\hat\zeta_r$ of Annex A, the window's included.
 
 ```python
 SingleModeFitResult.corrected_frf(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+SingleModeFitResult.corrected_frf(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+SingleModeFitResult.corrected_frf(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 The mode with the window taken out, of kind `kind` (Annex A).
@@ -1652,14 +1660,22 @@ and nothing else (Formula (A.2)).
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
 
-**Returns:** The complex FRF.
+**Returns:** The complex FRF. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### SingleModeFitResult.corrected_mobility()
 
 ```python
 SingleModeFitResult.corrected_mobility(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+SingleModeFitResult.corrected_mobility(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+SingleModeFitResult.corrected_mobility(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 The corrected mode as mobility, in m/(N·s).
@@ -1670,7 +1686,7 @@ The corrected mode as mobility, in m/(N·s).
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz (> 0). |
 
-**Returns:** The complex mobility.
+**Returns:** The complex mobility. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### SingleModeFitResult.correction
 
@@ -1688,8 +1704,16 @@ Damped natural frequency $\omega_d / 2\pi$, in hertz.
 
 ```python
 SingleModeFitResult.fitted_frf(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+SingleModeFitResult.fitted_frf(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+SingleModeFitResult.fitted_frf(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 The fitted model at any frequencies, window included, of kind `kind`.
@@ -1700,7 +1724,7 @@ The fitted model at any frequencies, window included, of kind `kind`.
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
 
-**Returns:** The complex FRF.
+**Returns:** The complex FRF. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### SingleModeFitResult.plot()
 

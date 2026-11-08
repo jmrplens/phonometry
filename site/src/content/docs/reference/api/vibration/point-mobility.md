@@ -112,12 +112,28 @@ $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$.
 
 ```python
 infinite_beam_impedance(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: Literal['center', 'end'] = ...,
+) -> complex
+
+infinite_beam_impedance(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: Literal['center', 'end'] = ...,
+) -> NDArray[np.complex128]
+
+infinite_beam_impedance(
     frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: Literal['center', 'end'] = 'center',
-) -> NDArray[np.complex128]
+    location: Literal['center', 'end'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Point impedance of an infinite beam in bending (Cremer Table 5.1).
@@ -136,7 +152,7 @@ bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
 | `location` | `"center"` or `"end"`. |
 
-**Returns:** The complex point impedance `Z`, in N.s/m.
+**Returns:** The complex point impedance `Z`, in N.s/m. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -149,12 +165,28 @@ bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
 
 ```python
 infinite_beam_mobility(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: Literal['center', 'end'] = ...,
+) -> complex
+
+infinite_beam_mobility(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    bending_stiffness: float,
+    mass_per_length: float,
+    *,
+    location: Literal['center', 'end'] = ...,
+) -> NDArray[np.complex128]
+
+infinite_beam_mobility(
     frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: Literal['center', 'end'] = 'center',
-) -> NDArray[np.complex128]
+    location: Literal['center', 'end'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Point mobility of an infinite beam in bending (Cremer Table 5.1).
@@ -173,7 +205,7 @@ $\omega^{-1/2}$.
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
 | `location` | `"center"` or `"end"`. |
 
-**Returns:** The complex point mobility `Y`, in m/(N.s).
+**Returns:** The complex point mobility `Y`, in m/(N.s). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -186,10 +218,22 @@ $\omega^{-1/2}$.
 
 ```python
 infinite_beam_moment_mobility(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> complex
+
+infinite_beam_moment_mobility(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     bending_stiffness: float,
     mass_per_length: float,
 ) -> NDArray[np.complex128]
+
+infinite_beam_moment_mobility(
+    frequency: NumericArrayLike,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> complex | NDArray[np.complex128]
 ```
 
 Moment (rotational) mobility of an infinite beam (Cremer Eq. 5.75).
@@ -206,7 +250,7 @@ at the driving point.
 | `bending_stiffness` | Beam bending stiffness $B = E I$, in N.m^2. |
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
 
-**Returns:** The complex moment mobility `Y_M`, in rad/(N.m.s).
+**Returns:** The complex moment mobility `Y_M`, in rad/(N.m.s). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

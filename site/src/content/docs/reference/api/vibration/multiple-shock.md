@@ -484,8 +484,16 @@ crossings; only positive peaks are counted.
 
 ```python
 seat_to_spine_transfer(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+seat_to_spine_transfer(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+seat_to_spine_transfer(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Seat-to-spine transfer function $H(\omega)$ (clause 5.2,
@@ -500,7 +508,7 @@ the vertical spinal response; the transmissibility is unity at 0 Hz.
 | :--- | :--- |
 | `frequencies` | Frequencies at which to evaluate `H`, in hertz. |
 
-**Returns:** The complex frequency response, aligned with `frequencies`.
+**Returns:** The complex frequency response, aligned with `frequencies`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -144,8 +144,16 @@ table.
 
 ```python
 program_signal_filter(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+program_signal_filter(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+program_signal_filter(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 The transfer function of the filter of IEC 60268-1:1985 Figure 2.
@@ -162,7 +170,7 @@ conventions the figure's notes state.
 | :--- | :--- |
 | `frequencies` | Frequencies, in Hz, any shape; each must be positive. |
 
-**Returns:** The complex response, dimensionless, with the shape of `frequencies`.
+**Returns:** The complex response, dimensionless, with the shape of `frequencies`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

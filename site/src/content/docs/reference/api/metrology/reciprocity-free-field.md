@@ -391,14 +391,40 @@ free_field_transfer_impedance(
     sensitivity_1_v_per_pa: NumericArrayLike,
     sensitivity_2_v_per_pa: NumericArrayLike,
     *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    diaphragm_distance_m: float,
+    temperature_c: float,
+    static_pressure_pa: float,
+    relative_humidity_percent: float,
+    acoustic_centers_m: Sequence[NumericArrayLike] = ...,
+    dispersion: bool = ...,
+) -> complex
+
+free_field_transfer_impedance(
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    diaphragm_distance_m: float,
+    temperature_c: float,
+    static_pressure_pa: float,
+    relative_humidity_percent: float,
+    acoustic_centers_m: Sequence[NumericArrayLike] = ...,
+    dispersion: bool = ...,
+) -> NDArray[np.complex128]
+
+free_field_transfer_impedance(
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
+    *,
     frequencies: NumericArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,
-    acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0),
-    dispersion: bool = True,
-) -> NDArray[np.complex128]
+    acoustic_centers_m: Sequence[NumericArrayLike] = ...,
+    dispersion: bool = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 The electrical transfer impedance two microphones of known free-field
@@ -427,7 +453,7 @@ sensitivity and the scattering factor (Formula (4)).
 | `acoustic_centers_m` | The two acoustic centres, in m (Default: the diaphragms). |
 | `dispersion` | Whether $k$ includes dispersion (Default: `True`). |
 
-**Returns:** $U_2/i_1$, complex, in Ω, at each frequency.
+**Returns:** $U_2/i_1$, complex, in Ω, at each frequency. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

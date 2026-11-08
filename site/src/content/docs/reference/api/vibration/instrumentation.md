@@ -334,8 +334,18 @@ angles of two frequency components in the most unfavourable manner."
 ```python
 phase_tolerance_deg(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+phase_tolerance_deg(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+phase_tolerance_deg(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The Table 5 characteristic phase-deviation band, region by region.
@@ -352,7 +362,7 @@ r.m.s.-only meter is not graded on phase at all.
 | `name` | One of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Frequencies at which the band is wanted, in hertz. |
 
-**Returns:** The permitted deviation, in degrees, infinite in the two tails.
+**Returns:** The permitted deviation, in degrees, infinite in the two tails. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -2486,6 +2486,74 @@ def test_a_route_runs_the_init_the_call_runs_and_the_hook_a_keyword_hands(
     ]
 
 
+def test_a_record_handed_by_keyword_to_a_keyword_only_parameter_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_store(record=self, name="n")`` hands the record to ``record``
+    whether it is a positional parameter or a keyword-only one, and the
+    count it stores reaches ``require_count()`` both ways.
+
+    A record was followed by keyword only into a positional parameter, so
+    the keyword-only ``record`` held nothing and its count passed as
+    ``int``.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["keyword_only", "positional"]
+
+
+            def _store(record: object, name: str) -> None:
+                object.__setattr__(
+                    record, name, require_count(getattr(record, name), name)
+                )
+
+
+            def _store_by_name(*, record: object, name: str) -> None:
+                object.__setattr__(
+                    record, name, require_count(getattr(record, name), name)
+                )
+
+
+            @dataclass(frozen=True)
+            class _Positional:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    _store(record=self, name="n")
+
+
+            @dataclass(frozen=True)
+            class _KeywordOnly:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    _store_by_name(record=self, name="n")
+
+
+            def positional(n: int) -> _Positional:
+                return _Positional(n)
+
+
+            def keyword_only(n: int) -> _KeywordOnly:
+                return _KeywordOnly(n)
+
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("keyword_only", "n"),
+        ("positional", "n"),
+    ]
+
+
 def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -2945,6 +2945,7 @@ class Reader:
                 call,
                 positional,
                 owner,
+                takes_keyword=_takes_keyword(node),
                 positional_only=posonly,
                 open_ended=node.args.vararg is not None,
             )
@@ -5406,6 +5407,7 @@ def _holders(
     positional: Sequence[str],
     owner: str,
     *,
+    takes_keyword: Collection[str],
     positional_only: int = 0,
     open_ended: bool = True,
 ) -> list[str]:
@@ -5413,10 +5415,11 @@ def _holders(
 
     ``_hold_cells(self, "ix", "iy")`` hands ``self`` to the parameter
     ``record`` of ``_hold_cells(record, *names)``, and
-    ``_store(record=self, name="n")`` to the parameter its keyword names, but
-    a positional-only one, whose name goes to ``**kwargs``. Written after a
-    ``*`` argument, the record may fill any of *positional* from the lowest
-    place it may take on (:func:`_filled`).
+    ``_store(record=self, name="n")`` to the parameter its keyword names
+    among *takes_keyword* (:func:`_takes_keyword`), a keyword-only one too,
+    but not a positional-only one, whose name goes to ``**kwargs``. Written
+    after a ``*`` argument, the record may fill any of *positional* from the
+    lowest place it may take on (:func:`_filled`).
     """
     given = [
         index
@@ -5429,7 +5432,7 @@ def _holders(
         if keyword.arg is not None
         and isinstance(keyword.value, ast.Name)
         and keyword.value.id == owner
-        and keyword.arg in positional[positional_only:]
+        and keyword.arg in takes_keyword
     ]
     spread = _landing(call)
     if spread is None:
@@ -5504,6 +5507,7 @@ def _handed_stores(
             call,
             positional,
             owner,
+            takes_keyword=_takes_keyword(node),
             positional_only=posonly,
             open_ended=vararg is not None,
         )

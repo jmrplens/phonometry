@@ -740,6 +740,12 @@ class Module:
         self._written: (
             dict[str, list[tuple[tuple[str, ast.AST, int], Function]]] | None
         ) = None
+        #: Every ``class`` statement of the file, and the method resolution
+        #: order of each over the classes of the file (:meth:`linearization`).
+        self.class_statements = [
+            node for node in ast.walk(self.tree) if isinstance(node, ast.ClassDef)
+        ]
+        self._lines: dict[ast.ClassDef, tuple[ast.ClassDef, ...]] = {}
         self._index_calls()
         self._memo: dict[object, Value] = {}
         self._classes: dict[object, ast.ClassDef | None] = {}
@@ -824,8 +830,117 @@ class Module:
         ):
             owner = self.owner_class(scope)
             if owner is not None:
-                return _methods(owner, func.attr)
+                return self.reached_methods(owner, func.attr)
         return ()
+
+    def reached_methods(self, owner: ast.ClassDef, name: str) -> tuple[Function, ...]:
+        """The methods ``self.name`` in a method of *owner* may run: on an
+        instance of *owner*, or of any class of the file whose method
+        resolution order holds *owner*, the one that order finds first
+        (:meth:`linearization`): the caller's own, one a base gives it, one
+        a subclass writes over it or a mixin lends the subclass.
+        """
+        found: dict[Function, None] = {}
+        for klass in self.class_statements:
+            line = self.linearization(klass)
+            if owner not in line:
+                continue
+            for later in line:
+                methods = _methods(later, name)
+                if methods:
+                    found.update(dict.fromkeys(methods))
+                    break
+        return tuple(found)
+
+    def linearization(self, klass: ast.ClassDef) -> tuple[ast.ClassDef, ...]:
+        """The method resolution order of *klass* over the classes of the file:
+        the C3 merge Python builds of its bases' orders and the bases
+        themselves, a base the file does not define left out, since nothing
+        of it can be read here. A class Python cannot linearize, or one
+        reached again while it is read, is the class alone.
+        """
+        found = self._lines.get(klass)
+        if found is not None:
+            return found
+        self._lines[klass] = (klass,)
+        scope = self.enclosing(klass)
+        bases = [
+            base
+            for node in klass.bases
+            if isinstance(node, ast.Name)
+            and (base := self.class_named(node.id, scope, klass)) is not None
+        ]
+        order = [klass]
+        pending = [list(self.linearization(base)) for base in bases] + [bases]
+        pending = [sequence for sequence in pending if sequence]
+        while pending:
+            chosen = next(
+                (
+                    sequence[0]
+                    for sequence in pending
+                    if not any(
+                        sequence[0] is later for other in pending for later in other[1:]
+                    )
+                ),
+                None,
+            )
+            if chosen is None:
+                order = [klass]
+                break
+            order.append(chosen)
+            pending = [
+                rest
+                for sequence in pending
+                if (rest := sequence[1:] if sequence[0] is chosen else sequence)
+            ]
+        line = tuple(order)
+        self._lines[klass] = line
+        return line
+
+    def fills_receiver(
+        self, function: Function, call: ast.Call, caller: Function | None
+    ) -> bool:
+        """Whether *call*, written in *caller*, fills the first parameter of
+        *function* itself, so the call's first argument goes to the second.
+
+        A class method is bound to its class however it is called; a
+        function, a static method and ``__new__``, which a call of its class
+        hands the class first, never are. A plain method is bound to the
+        instance it is called on, but not to the class a class method or
+        ``__new__`` holds in its first parameter (:meth:`receiver_kind`):
+        ``cls._ok(None, margin)`` hands ``margin`` to the parameter after
+        ``self``.
+        """
+        if (
+            not self.is_method(function)
+            or _is_static(function)
+            or function.name == "__new__"
+        ):
+            return False
+        if _is_class_method(function):
+            return True
+        return self.receiver_kind(call, caller) == "instance"
+
+    def receiver_kind(self, call: ast.Call, caller: Function | None) -> str | None:
+        """What *call* is made on in *caller*: ``"instance"`` for the first
+        parameter of a plain method, ``"class"`` for that of a class method
+        or ``__new__``, read in the method *caller* is or is written in;
+        ``None`` for a call by a bare name, which binds nothing. A name that
+        is no such parameter is read by its spelling, ``cls`` as a class.
+        """
+        func = call.func
+        if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+            return None
+        receiver = func.value.id
+        method: ast.AST | None = caller
+        while method is not None and not isinstance(self.holder(method), ast.ClassDef):
+            method = self.enclosing(method)
+        if isinstance(method, ast.FunctionDef | ast.AsyncFunctionDef):
+            named = [*method.args.posonlyargs, *method.args.args]
+            if named and named[0].arg == receiver and not _is_static(method):
+                held_class = _is_class_method(method) or method.name == "__new__"
+                return "class" if held_class else "instance"
+        return "class" if receiver == "cls" else "instance"
 
     def _index_calls(self) -> None:
         for node in ast.walk(self.tree):
@@ -1422,9 +1537,11 @@ class Module:
     def bind(
         self, function: Function, call: ast.Call, context: Context
     ) -> tuple[tuple[str, Value], ...]:
-        """The parameters of ``function`` bound to what ``call`` passes."""
+        """The parameters of ``function`` bound to what ``call`` passes, the
+        first left out when the call fills it itself (:meth:`fills_receiver`).
+        """
         arguments = function.args
-        skip = 1 if self.is_method(function) and not _is_static(function) else 0
+        skip = 1 if self.fills_receiver(function, call, context.function) else 0
         positional = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]][
             skip:
         ]
@@ -1571,14 +1688,13 @@ class Module:
         sites = self.calls.get(function, [])
         if public or not sites:
             return None
-        skip = 1 if self.is_method(function) and not _is_static(function) else 0
         arguments = function.args
-        positional = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]][
-            skip:
-        ]
+        named = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]]
         by_place = {arg.arg for arg in arguments.posonlyargs}
         owners: list[ast.ClassDef | None] = []
         for call, scope in sites:
+            skip = 1 if self.fills_receiver(function, call, scope) else 0
+            positional = named[skip:]
             argument = _argument(call, positional, name, keyword=name not in by_place)
             if isinstance(argument, ast.Name) and argument.id == "self":
                 owners.append(self.owner_class(scope))
@@ -2142,6 +2258,21 @@ def _is_property(function: Function) -> bool:
 
 def _is_static(function: Function) -> bool:
     return "staticmethod" in _decorator_names(function)
+
+
+#: The methods Python makes class methods without a ``classmethod``
+#: decorator: their first parameter is bound to the class.
+_IMPLICIT_CLASS_METHODS = frozenset({"__init_subclass__", "__class_getitem__"})
+
+
+def _is_class_method(function: Function) -> bool:
+    """Whether *function* is bound to its class however it is called: a
+    ``classmethod``, or one Python makes one (:data:`_IMPLICIT_CLASS_METHODS`).
+    """
+    return (
+        "classmethod" in _decorator_names(function)
+        or function.name in _IMPLICIT_CLASS_METHODS
+    )
 
 
 def _methods(owner: ast.ClassDef, name: str) -> tuple[Function, ...]:

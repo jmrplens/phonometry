@@ -1734,3 +1734,124 @@ def test_a_comprehension_reads_its_own_variable(tmp_path: pathlib.Path) -> None:
         return [margin >= _MARGIN_DB for margin in (signal - background,)]
     """
     assert _texts(source, tmp_path) == ["margin >= _MARGIN_DB"]
+
+
+def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument(
+    tmp_path: pathlib.Path,
+) -> None:
+    """In a class method, and in ``__new__``, ``cls`` is the class, so
+    ``cls._ok(None, a - b)`` hands the margin to the parameter after
+    ``self``, while ``cls._ok(a - b)`` hands it to ``self`` and the margin
+    keeps its default; a class method called on it stays bound, and so does
+    a plain method called on ``self``.
+
+    Every method that is no static method was read as filling its first
+    parameter itself, so the margin ``cls._ok(None, a - b)`` hands was read
+    as ``None`` and its comparison passed, and the one ``cls._ok(a - b)``
+    hands to ``self`` was read as the margin and refused.
+    """
+    source = """
+    LIMIT = 6.0
+
+
+    class Checked:
+        def _ok(self, margin=LIMIT):
+            return margin >= LIMIT
+
+        @classmethod
+        def judge(cls, a, b):
+            return cls._ok(None, a - b)
+
+
+    class Lost:
+        def _ok(self, margin=LIMIT):
+            return margin >= LIMIT
+
+        @classmethod
+        def judge(cls, a, b):
+            return cls._ok(a - b)
+
+
+    class InNew:
+        def _ok(self, margin=LIMIT):
+            return margin >= LIMIT
+
+        def __new__(cls, a, b):
+            cls._ok(None, a - b)
+            return super().__new__(cls)
+
+
+    class OnSelf:
+        def _ok(self, margin=LIMIT):
+            return margin >= LIMIT
+
+        def judge(self, a, b):
+            return self._ok(a - b)
+
+
+    class Bound:
+        @classmethod
+        def _ok(cls, margin=LIMIT):
+            return margin >= LIMIT
+
+        @classmethod
+        def judge(cls, a, b):
+            return cls._ok(a - b)
+    """
+    assert sorted(finding.scope for finding in _refused(source, tmp_path)) == [
+        "Bound._ok",
+        "Checked._ok",
+        "InNew._ok",
+        "OnSelf._ok",
+    ]
+
+
+def test_a_call_on_self_reaches_the_method_the_class_of_the_instance_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``self._ok(a - b)`` runs what the class of the instance holds: in
+    ``Base.judge`` on a ``Sub``, ``Sub``'s own ``_ok``, which compares the
+    margin; in ``Inheriting.judge``, the ``_ok`` it takes from ``Holder``.
+    Both comparisons are handed a computed margin.
+
+    A call on ``self`` reached only a method the caller's own class body
+    writes, so ``Base.judge`` was no caller of ``Sub._ok`` and
+    ``Inheriting.judge`` called no ``_ok`` at all: each comparison was read
+    as handed only the printed limit its other caller hands it, and passed.
+    """
+    source = """
+    LIMIT = 6.0
+
+
+    class Base:
+        def _ok(self, margin=LIMIT):
+            return True
+
+        def judge(self, a, b):
+            return self._ok(a - b)
+
+
+    class Sub(Base):
+        def _ok(self, margin=LIMIT):
+            return margin >= LIMIT
+
+        def fixed(self):
+            return self._ok(LIMIT)
+
+
+    class Holder:
+        def _ok(self, margin=LIMIT):
+            return margin >= LIMIT
+
+        def fixed(self):
+            return self._ok(LIMIT)
+
+
+    class Inheriting(Holder):
+        def judge(self, a, b):
+            return self._ok(a - b)
+    """
+    assert sorted(finding.scope for finding in _refused(source, tmp_path)) == [
+        "Holder._ok",
+        "Sub._ok",
+    ]

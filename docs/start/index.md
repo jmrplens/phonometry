@@ -22,7 +22,9 @@ levels are in [Build a sound level
 meter](../signals/sound-level-meter.md), which runs the whole chain end
 to end on one page, and [Calibration and
 dBFS](../signals/metrology/calibration.md) is the deep guide behind the
-one step that matters most.
+one step that matters most. [Environments](environments/index.md)
+says how the same install goes with uv or conda, in a notebook or a browser,
+in a container and under a type checker.
 
 **My code is written against 3.3 and the imports fail.**
 [Upgrading from 3.3 to 4.0](upgrading.md) is the map: the one rule

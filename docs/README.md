@@ -18,6 +18,13 @@ against an earlier release,
 [Support the project](start/support.md) lists the ways to help, starting with
 the sources the library still lacks, and [About](start/about.md) says
 who maintains it, how to report an error and how to cite it.
+[Environments](start/environments/index.md) then takes each place the library
+runs in turn: [pip and uv](start/environments/pip-and-uv.md),
+[conda and mamba](start/environments/conda.md),
+[Jupyter and JupyterLab](start/environments/jupyter.md),
+[JupyterLite and Pyodide](start/environments/jupyterlite.md),
+[Docker and servers](start/environments/docker.md) and
+[Type checking](start/environments/type-checking.md).
 
 ### [Signal analysis](signals/index.md)
 

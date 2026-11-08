@@ -268,6 +268,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the `ComputeImportError` an engine raises when torch is missing: these two
   commands for `torch:cpu`, the extra alone for `torch:cuda` and `torch:mps`.
 
+- **The documentation says how to install and run phonometry in each place
+  it goes.** A new section of Start, Environments, takes them one page each,
+  in English and Spanish and in the `docs/` mirror: pip and uv (each extra
+  and what it brings, torch from PyTorch's CPU index, a uv project and the
+  `pyproject.toml` that keeps its torch off CUDA), conda and mamba (the
+  dependencies under their conda-forge names, then phonometry with pip in the
+  same environment), Jupyter and JupyterLab (tables, inline and SVG figures,
+  videos, fiches and how a warning shows in a cell), JupyterLite and Pyodide
+  (which extras micropip installs, what runs in a browser and what does not,
+  and a JupyterLite site of your own), Docker and servers (a slim image that
+  runs under any user id and on a read-only root, and ffmpeg for videos) and
+  type checking (what mypy and pyright check, and where a type is wider than
+  its value). Every command and example on the pages was run in the place it
+  is written for; Getting Started links them from its install and notebook sections, and no
+  longer says that VS Code and Colab show the record tables, which nothing
+  had tried.
+
 - **Contributors and coding agents have one written style guide.**
   `docs/contributing/` says how phonometry names things, shapes its public API,
   writes docstrings and comments, compares and holds numbers, writes tests,

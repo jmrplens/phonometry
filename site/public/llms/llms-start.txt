@@ -29,7 +29,9 @@ levels are in [Build a sound level
 meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/), which runs the whole chain end
 to end on one page, and [Calibration and
 dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) is the deep guide behind the
-one step that matters most.
+one step that matters most. [Environments](https://docs.jmrp.io/phonometry/start/environments/)
+says how the same install goes with uv or conda, in a notebook or a browser,
+in a container and under a type checker.
 
 **My code is written against 3.3 and the imports fail.**
 [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/) is the map: the one rule
@@ -119,6 +121,9 @@ Source: https://docs.jmrp.io/phonometry/start/getting-started/
 
 ## Installation
 
+The commands below are pip's. [Environments](https://docs.jmrp.io/phonometry/start/environments/) takes uv,
+conda, Jupyter, JupyterLite, Docker and type checkers in turn.
+
 **Option 1: From PyPI (Recommended)**
 
 ```bash
@@ -194,7 +199,9 @@ Adding that index with `--extra-index-url` is not enough: pip takes the
 newest torch it finds on either index, PyPI's CUDA build included.
 
 [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) says what each device of the FDTD engines
-needs, CuPy's wheel for an NVIDIA GPU among them.
+needs, CuPy's wheel for an NVIDIA GPU among them, and [pip and
+uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) what each extra brings and how uv installs
+them.
 
 **Option 2: Cloning and Installing**
 
@@ -203,6 +210,9 @@ git clone https://github.com/jmrplens/phonometry.git
 cd phonometry
 pip install .
 ```
+
+pip builds the wheel without a compiler; [pip and
+uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/#from-a-clone) has the rest.
 
 **Option 3: Git Submodule**
 
@@ -340,7 +350,7 @@ rescaled to full scale, so keep calibrator and measurement in the same format;
 
 ## In a notebook
 
-Jupyter, JupyterLab, VS Code and Colab display the value of the last line of a
+Jupyter and JupyterLab display the value of the last line of a
 cell, and a result displays as a table of its fields: each with its unit when
 its name carries one (`_db`, `_hz`, `_m`...), names a level or a level
 difference (`insertion_loss` and `band_levels` are in decibels) or is an axis
@@ -417,6 +427,10 @@ ax = bank.plot()    # drawn under the cell; in a script, plt.show()
 *The figure `bank.plot()` draws under the cell: the one-third-octave spectrum
 of the 1 kHz tone over noise.*
 
+[Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) carries on from here: SVG
+figures, videos, fiches and how a warning shows in a cell, and [JupyterLite and
+Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/) the same notebook in a browser.
+
 ## Where to go next
 
 The octave analysis above uses the `filters` core, one of twenty-one domain
@@ -433,6 +447,742 @@ the normative PDF fiche.
 - [Conformance report](https://docs.jmrp.io/phonometry/reference/conformance/): the expected and computed value of all 1897 checks
 - [API Reference](https://docs.jmrp.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
+
+---
+
+
+<!-- source: docs/start/environments/index.md | canonical: https://docs.jmrp.io/phonometry/start/environments/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/
+
+# Environments
+
+phonometry is pure Python on top of NumPy and SciPy, published as one wheel
+for every operating system, and it needs Python 3.12 or newer. The same
+package therefore installs wherever those run, from a virtual environment on a
+laptop to a container on a server or a notebook in a browser tab. What changes
+from one place to the next is how its dependencies arrive and which of the
+optional extras can follow them. The pages of this section take one place
+each, with commands that were run there.
+
+| Where | How phonometry arrives | What runs | What does not |
+|---|---|---|---|
+| [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | nothing is left out |
+| [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
+| [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
+| [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
+| [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
+| [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode | the FDTD field arrays, typed `Any` |
+
+## Warnings as errors
+
+Importing phonometry and every one of its domains raises no warning, so a
+program, a test suite or a notebook can run with warnings turned into errors
+from the first line. Every warning the library itself gives is a
+`phonometry.PhonometryWarning`, which lets you make the library's warnings
+errors without making errors of every other package's:
+
+```python
+import warnings
+
+import numpy as np
+import phonometry
+from phonometry import filters
+
+fs = 48000
+x = np.sin(2 * np.pi * 1000.0 * np.arange(fs) / fs)
+with warnings.catch_warnings():
+    warnings.simplefilter("error", phonometry.PhonometryWarning)
+    try:
+        filters.octave_filter(x, fs, fraction=3, limits=[12.0, 25000.0])
+    except filters.FilterBankWarning as warning:
+        print(warning)   # Low sampling rate: fs = 48000 Hz cannot hold the 25 kHz band, ...
+```
+
+The limits asked for here reach past half the sample rate, which the bank
+reports; a call that stays below it raises nothing. That narrower filter is
+the one to use in JupyterLite, where the matplotlib Pyodide ships gives a
+deprecation warning of its own while it draws, which a blanket
+`warnings.simplefilter("error")` turns into an error.
+
+## A GPU
+
+None of these pages covers one. [Where a simulation
+runs](https://docs.jmrp.io/phonometry/simulation/compute/) says what each device of the FDTD
+engines needs, from the PyTorch wheels to CuPy's for an NVIDIA GPU, and how a
+run falls back to NumPy when its device is missing.
+
+## The pages
+
+- [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/): a virtual environment, each extra and what it brings, torch without CUDA, a uv project and an install from a clone.
+- [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/): the dependencies under their conda-forge names, then phonometry with pip in the same environment.
+- [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
+- [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
+- [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/): a slim image, any user id, a read-only root file system and ffmpeg for videos.
+- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/): what mypy and pyright see, the choices they check and the one place typed `Any`.
+
+---
+
+
+<!-- source: docs/start/environments/pip-and-uv.md | canonical: https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/
+
+# pip and uv
+
+phonometry installs from PyPI with pip or uv on Python 3.12, 3.13 and 3.14,
+as one wheel with no compiled code of its own. Both tools land on the same
+packages; the difference is how they keep a project's dependencies, and how
+each is told to take torch from PyTorch's CPU index.
+
+## pip in a virtual environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install "phonometry[full]"
+```
+
+`python -m pip install phonometry` alone brings NumPy and SciPy and nothing
+else; that is enough for every metric of the library. `python -m pip check`
+reports no broken requirement afterwards, with or without extras. Check what
+the environment imports:
+
+```python
+import phonometry
+
+print(phonometry.__version__)   # the release you installed
+```
+
+## What each extra brings
+
+| Extra | Brings | So that |
+|---|---|---|
+| `[plot]` | matplotlib | `.plot()` and the filter response plots draw |
+| `[report]` | reportlab, svglib | `.report()` writes a PDF fiche; its figure panel also needs `[plot]` |
+| `[audio]` | python-soundfile, whose wheel carries libsndfile | `phonometry.io` reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV, and writes FLAC |
+| `[perf]` | numba | the `impulse` time weighting runs compiled |
+| `[full]` | all four above | every feature but the torch backend |
+| `[torch]` | torch, array-api-compat | the FDTD engines step on PyTorch |
+
+No extra needs a system package: on a bare `python:3.13-slim` image every one
+of them installs and runs from its wheels, `[audio]` included. Without numba
+the `impulse` time weighting runs as plain Python and says nothing about it.
+A feature whose extra is missing says which one to install, with its pip and
+its conda spelling:
+
+```text
+ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
+```
+
+The oldest release of each dependency the library is tested with, on each
+Python, is listed in [Getting
+Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation).
+
+## torch without CUDA
+
+`[full]` leaves `[torch]` out, because the torch wheels PyPI serves on Linux
+bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
+install torch from PyTorch's CPU index first, then the extra, which keeps the
+torch it finds:
+
+```bash
+python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+python -m pip install "phonometry[torch]"
+```
+
+The environment then holds the CPU build of torch and no NVIDIA package, and
+an FDTD run on `Compute(device="torch:cpu")` gives the same pressures as the
+NumPy run. [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) covers the
+other devices.
+
+## From a clone
+
+```bash
+git clone https://github.com/jmrplens/phonometry.git
+cd phonometry
+python -m pip install .
+```
+
+pip builds the wheel with setuptools and no compiler, and the build also
+passes under `PYTHONWARNINGS=error`.
+
+## uv
+
+`uv pip` takes the same requirements as pip, in an environment uv creates:
+
+```bash
+uv venv
+uv pip install "phonometry[full]"
+```
+
+For torch, `--torch-backend cpu` tells uv to take torch from PyTorch's CPU
+index, with no NVIDIA package:
+
+```bash
+uv pip install "phonometry[torch]" --torch-backend cpu
+```
+
+In a uv project, `uv add` writes the requirement into `pyproject.toml` and the
+lock file, and `uv run` runs in the project's environment:
+
+```bash
+uv init acoustics
+cd acoustics
+uv add "phonometry[full]"
+uv run python -c "import phonometry; print(phonometry.__version__)"
+```
+
+`uv add` resolves the same way in a project for Python 3.12, 3.13 or 3.14.
+
+### torch from the CPU index in a project
+
+Name the index in `pyproject.toml`, mark it explicit so that only torch is
+taken from it, and route torch to it:
+
+```toml
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+```
+
+Then add torch by name beside the extra:
+
+```bash
+uv add "phonometry[torch]" torch
+```
+
+The name matters. A source applies to a dependency the project names itself,
+so `uv add "phonometry[torch]"` alone, with the same `pyproject.toml`, locks
+the torch of PyPI's default index together with its CUDA and NVIDIA packages,
+and says nothing about it.
+
+---
+
+
+<!-- source: docs/start/environments/conda.md | canonical: https://docs.jmrp.io/phonometry/start/environments/conda/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/conda/
+
+# conda and mamba
+
+phonometry installs from PyPI. In a conda environment, take its dependencies
+from conda-forge first, then install phonometry with the environment's own
+pip: pip finds every requirement already there and adds phonometry alone, so
+NumPy, SciPy and the rest stay conda-forge builds.
+
+## An environment with every extra
+
+```bash
+conda create -n acoustics -c conda-forge python=3.13 numpy scipy matplotlib-base numba reportlab svglib pysoundfile
+conda activate acoustics
+python -m pip install "phonometry[full]"
+```
+
+pip reports each requirement as already satisfied and installs phonometry
+only. `conda list` then shows phonometry with the channel `pypi` beside the
+conda-forge packages, and `python -m pip check` reports nothing broken. mamba
+takes the same arguments: `mamba create -n acoustics -c conda-forge ...`
+builds the same environment. Python 3.12, 3.13 and 3.14 all work.
+
+## The extras under their conda-forge names
+
+| Extra | conda-forge packages |
+|---|---|
+| the base install | numpy, scipy |
+| `[plot]` | matplotlib-base |
+| `[report]` | reportlab, svglib, and matplotlib-base for the fiche's figure |
+| `[audio]` | pysoundfile, which brings libsndfile |
+| `[perf]` | numba |
+| `[torch]` | pytorch, array-api-compat |
+
+`matplotlib-base` is matplotlib without a GUI backend, which is what the
+library draws with; `pysoundfile` is the conda-forge name of the package PyPI
+calls `soundfile`. Install the conda-forge packages of the extras you want
+before pip runs. A dependency still missing when pip runs comes from PyPI
+instead, and `conda list` shows it with the channel `pypi` beside the
+conda-forge NumPy.
+
+A feature whose dependency is missing names both spellings:
+
+```text
+ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
+```
+
+In a conda environment, the second one is the command to run.
+
+## pytorch
+
+On a machine without a GPU, conda-forge installs its CPU build of pytorch, so
+no index has to be named:
+
+```bash
+conda create -n fdtd -c conda-forge python=3.14 numpy scipy pytorch array-api-compat
+conda activate fdtd
+python -m pip install "phonometry[torch]"
+```
+
+pip again installs phonometry alone, and an FDTD run on
+`Compute(device="torch:cpu")` gives the same pressures as the NumPy run.
+
+---
+
+
+<!-- source: docs/start/environments/jupyter.md | canonical: https://docs.jmrp.io/phonometry/start/environments/jupyter/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/jupyter/
+
+# Jupyter and JupyterLab
+
+A notebook runs phonometry in an ordinary IPython kernel, so it installs as
+anywhere else; what the notebook adds is how a result shows itself under a
+cell. [In a notebook](https://docs.jmrp.io/phonometry/start/getting-started/#in-a-notebook), in
+Getting Started, walks through a first cell and the table it displays; this
+page is the rest of what a notebook user meets.
+
+## Installing
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install jupyterlab "phonometry[full]"
+jupyter lab
+```
+
+That one environment holds JupyterLab, the IPython kernel it starts and
+phonometry with every extra but `[torch]`.
+
+## A result shows a table
+
+The value on the last line of a cell displays as a table of its fields, with
+their units, and the line under it names what the result can draw:
+
+```python
+import numpy as np
+from phonometry import building, filters, io
+
+fs = 48000
+t = np.arange(fs) / fs
+x = 0.4 * np.sin(2 * np.pi * 1000.0 * t)
+bands = filters.octave_filter(x, fs, fraction=3)
+bands       # the last line of the cell: the notebook shows its table
+```
+
+## Figures
+
+`.plot()` draws under the cell through the inline backend, with no
+`plt.show()`. The cell also prints the axes it returns, as
+`<Axes: title={'center': 'Band levels'}, ...>`; a semicolon after the call
+leaves the figure alone. The figures come out as PNG; one line in a cell
+switches the session to SVG:
+
+```py
+%config InlineBackend.figure_formats = ["svg"]
+bands.plot();
+```
+
+A `.plot()` that raises, on a misspelt keyword such as `colour=` for instance,
+leaves no half-drawn figure under the cell, only the error.
+
+## Fiches
+
+```python
+rating = building.weighted_rating(
+    [30, 34, 38, 41, 45, 49, 50, 53, 54, 55, 56, 57, 58, 58, 58, 58]
+)
+rating.report("rating.pdf")
+```
+
+The PDF is written to the path you give, relative to the notebook's working
+directory; `[report]` writes it and `[plot]` draws its figure.
+
+## Videos
+
+`io.write_video` and the FDTD animation writers run ffmpeg, a program that
+pip does not install. On Debian it comes from the system's packages, with
+`apt install ffmpeg`, and [Writing videos](https://docs.jmrp.io/phonometry/io/videos/) gives the
+command for conda, macOS and Windows. IPython's own display classes then show
+the file under the cell:
+
+```python
+from matplotlib.animation import FuncAnimation
+from matplotlib.figure import Figure
+
+fig = Figure(figsize=(3.2, 2.4), dpi=100)
+ax = fig.add_subplot()
+phase = np.linspace(0.0, 2.0 * np.pi, 200)
+(line,) = ax.plot(phase, np.sin(phase))
+
+
+def update(k):
+    line.set_ydata(np.sin(phase - 0.2 * k))
+    return (line,)
+
+
+animation = FuncAnimation(fig, update, frames=30, interval=50)
+io.write_video("wave.mp4", animation)
+io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))
+```
+
+```py
+from IPython.display import Image, Video
+
+Video("wave.mp4", embed=True)   # an MP4 or a WebM, embedded in the notebook
+Image(filename="wave.gif")      # a GIF
+```
+
+## Warnings in a cell
+
+A warning the library gives names the line of the cell that made the call,
+and it shows under every cell that makes one, not only the first:
+
+```text
+/tmp/ipykernel_2485/1280619122.py:1: FilterBankWarning: Low sampling rate: fs = 48000 Hz cannot hold the 25 kHz band, whose upper edge 28184 Hz is above fs/2 = 24000 Hz; it was left out of the bank.
+  wide = filters.octave_filter(x, fs, fraction=3, limits=[12.0, 25000.0])
+```
+
+To have warnings raise instead, set the filter in a cell. All of them:
+
+```py
+import warnings
+
+warnings.simplefilter("error")
+```
+
+or the library's alone, `warnings.simplefilter("error",
+phonometry.PhonometryWarning)`. Do not start the kernel with
+`PYTHONWARNINGS=error`: the kernel itself then stops on a DeprecationWarning
+of its own event loop before it answers the notebook, and the notebook
+reports a kernel that died.
+
+## VS Code and Colab
+
+Both run notebooks on an IPython kernel, so what this page shows should
+apply there as well. Neither was tried for this page.
+
+---
+
+
+<!-- source: docs/start/environments/jupyterlite.md | canonical: https://docs.jmrp.io/phonometry/start/environments/jupyterlite/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/jupyterlite/
+
+# JupyterLite and Pyodide
+
+JupyterLite runs a notebook in a browser tab, on Pyodide: CPython compiled to
+WebAssembly, with nothing to install on the machine. phonometry is pure
+Python, so it installs there with micropip and runs on the NumPy, SciPy and
+matplotlib that Pyodide builds for the browser. What cannot follow it is
+anything that needs a compiled package Pyodide does not build, or a program
+of its own.
+
+## Installing in a notebook
+
+```py
+%pip install "phonometry[plot,report,audio]"
+```
+
+The cell prints nothing when it succeeds. numpy, scipy, matplotlib and
+soundfile come from Pyodide's own builds, the last one with libsndfile
+compiled for the browser; reportlab and svglib are pure Python and come from
+PyPI.
+
+**Name every extra in the first install.** micropip leaves the extras of a
+package it already installed alone: once phonometry is there, a later
+`%pip install "phonometry[report]"` installs nothing, and prints nothing
+either. To add what a later extra would have brought, name its packages:
+
+```py
+%pip install reportlab svglib
+```
+
+and `%pip install soundfile` for `[audio]`. A message for a missing extra
+spells its command as `pip install "phonometry[...]"`; in a JupyterLite cell
+it runs with a `%` in front.
+
+## What runs in the browser
+
+Every domain imports, and the record tables, `.plot()` under the cell and
+`.report()` work as in Jupyter. WAV and FLAC files are written and read back
+in the notebook's own folder. The FDTD engines step on NumPy.
+
+```python
+import numpy as np
+from phonometry import building, filters, io
+
+fs = 48000
+x = 0.4 * np.sin(2 * np.pi * 1000.0 * np.arange(fs) / fs)
+bands = filters.octave_filter(x, fs, fraction=3)
+io.write("tone.wav", 0.5 * x, fs)
+tone = io.read("tone.wav")
+rating = building.weighted_rating(
+    [30, 34, 38, 41, 45, 49, 50, 53, 54, 55, 56, 57, 58, 58, 58, 58]
+)
+rating.report("rating.pdf")
+```
+
+## What does not
+
+- **`[perf]`, `[torch]` and `[full]` do not install.** micropip finds no
+  wheel of numba or torch it can run in the browser, and one requirement it
+  cannot meet stops the whole install:
+
+  ```text
+  ValueError: Can't find a pure Python 3 wheel for 'numba>=0.63.0; python_version >= "3.14" and extra == "perf"'.
+  ```
+
+  Without numba, the `impulse` time weighting runs as plain Python and says
+  nothing about it.
+- **No compute device but `"cpu"`.** `Compute(device="torch:cpu")` raises
+  `ComputeDeviceError: device 'torch:cpu' is not available in Pyodide; only
+  'cpu' is`; with `fallback=True` the run steps on NumPy and warns
+  `ComputeFallbackWarning` instead.
+- **No video.** A browser cannot start a program, so `io.write_video` and the
+  FDTD animation writers raise `FFmpegNotFoundError: Pyodide cannot start
+  programs, so it cannot run ffmpeg; write the video from Python on a
+  desktop, a server or a node`.
+
+To make the library's warnings errors in a JupyterLite notebook, filter on
+its own class, `warnings.simplefilter("error",
+phonometry.PhonometryWarning)`. A blanket `warnings.simplefilter("error")`
+also turns into an error a deprecation warning that Pyodide's matplotlib
+3.10.8 gives while it draws, and `.plot()` then fails under the cell.
+
+## Pyodide without JupyterLite
+
+In a page or a Node.js script that loads Pyodide itself, micropip is called
+directly, with the same extras and the same limits:
+
+```py
+import micropip
+
+await micropip.install("phonometry[plot,report,audio]")
+```
+
+## A JupyterLite site of your own
+
+A course or a lab can publish its notebooks as a JupyterLite site, built once
+and served as static files. The build needs `jupyter-server` beside the two
+JupyterLite packages, or it stops with "jupyter-server is not installed. You
+cannot add custom content to jupyterlite":
+
+```bash
+python -m pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
+jupyter lite build --contents content --output-dir _output
+```
+
+`content` holds the notebooks, and `_output` is the site to serve. The build
+also prints two notices, about `libarchive-c` and `jupyterlab_server`, that
+change nothing in the site. A wheel placed in a `pypi` folder of the
+directory the build runs in is published with the site, and `%pip install`
+takes it from there before PyPI.
+
+---
+
+
+<!-- source: docs/start/environments/docker.md | canonical: https://docs.jmrp.io/phonometry/start/environments/docker/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/docker/
+
+# Docker and servers
+
+phonometry needs nothing from the operating system beyond Python: every
+extra installs from wheels, libsndfile inside the soundfile wheel included,
+so a `python:*-slim` image is enough. The one system package worth adding is
+ffmpeg, and only for videos.
+
+## An image
+
+```dockerfile
+FROM python:3.13-slim
+RUN python -m venv /opt/venv \
+ && /opt/venv/bin/python -m pip install --no-cache-dir --upgrade pip \
+ && /opt/venv/bin/python -m pip install --no-cache-dir "phonometry[full]"
+ENV PATH=/opt/venv/bin:$PATH MPLCONFIGDIR=/tmp/matplotlib
+COPY analyse.py /app/analyse.py
+WORKDIR /tmp
+CMD ["python", "/app/analyse.py"]
+```
+
+The virtual environment keeps pip's warning about running as root out of the
+build log. `analyse.py` stands for your own job; this one writes a band
+spectrum, its figure and a fiche:
+
+```python
+"""A batch job: a one-third-octave analysis, its figure and a fiche."""
+from pathlib import Path
+
+import numpy as np
+
+from phonometry import building, filters
+
+out = Path("out")
+out.mkdir(exist_ok=True)
+
+fs = 48000
+t = np.arange(2 * fs) / fs
+x = 0.1 * np.sin(2 * np.pi * 1000 * t)
+
+bands = filters.octave_filter(x, fs, fraction=3)
+bands.plot().figure.savefig(out / "bands.png")
+impulse = filters.time_weighting(x, fs, mode="impulse")
+rating = building.weighted_rating(
+    [30, 34, 38, 41, 45, 49, 50, 53, 54, 55, 56, 57, 58, 58, 58, 58]
+)
+rating.report(out / "rating.pdf")
+print(f"{len(bands.frequencies)} bands, impulse maximum {float(np.max(impulse)):.4f}")
+print("wrote", sorted(p.name for p in out.iterdir()))
+```
+
+```bash
+docker build -t acoustics .
+docker run --rm acoustics
+```
+
+```text
+33 bands, impulse maximum 0.0092
+wrote ['bands.png', 'rating.pdf']
+```
+
+matplotlib picks its Agg backend by itself in a container with no display,
+so nothing has to set `MPLBACKEND`.
+
+## Any user, any file system
+
+The image runs the same job as root, as an arbitrary user id
+(`docker run --user 12345:12345`), as `nobody`, and on a read-only root file
+system with a writable `/tmp` (`docker run --read-only --tmpfs /tmp`). Two
+caches and one directory decide how quietly it does so:
+
+- **`MPLCONFIGDIR`.** matplotlib keeps its configuration and cache under the
+  user's home. For a user with no writable home it prints "Matplotlib created
+  a temporary cache directory at ..." each time it starts; the `ENV` line
+  above points it at `/tmp` instead, and it says nothing.
+- **numba's cache.** numba keeps the compiled `impulse` kernel beside the
+  package or under the home directory. Where it can write to neither, it
+  compiles the kernel once in each process instead and says nothing. With
+  `NUMBA_CACHE_DIR=/tmp/numba` it writes the kernel there, for the processes
+  that follow in the same container.
+- **A read-only root.** The job needs somewhere to write: here its working
+  directory, `/tmp`, which `--tmpfs /tmp` keeps writable. With no writable
+  mount at all, the job stops at its own `out.mkdir`.
+
+## Videos
+
+`io.write_video` and the FDTD animation writers run ffmpeg. Install it from
+the image's own packages before the virtual environment:
+
+```dockerfile
+FROM python:3.13-slim
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
+RUN python -m venv /opt/venv \
+ && /opt/venv/bin/python -m pip install --no-cache-dir --upgrade pip \
+ && /opt/venv/bin/python -m pip install --no-cache-dir "phonometry[full]"
+ENV PATH=/opt/venv/bin:$PATH MPLCONFIGDIR=/tmp/matplotlib
+```
+
+WebM and MP4 then encode on the CPU, as `nobody` and on a read-only root
+with a writable `/tmp` alike. [Writing videos](https://docs.jmrp.io/phonometry/io/videos/) covers
+the encoders and a node that has a GPU.
+
+## Servers and threads
+
+A server that handles requests in a thread pool may import the domains it
+needs from those threads, several at once. [Sending a simulation to a remote
+node](https://docs.jmrp.io/phonometry/simulation/remote-node/) covers an FDTD run the server
+should not step itself.
+
+---
+
+
+<!-- source: docs/start/environments/type-checking.md | canonical: https://docs.jmrp.io/phonometry/start/environments/type-checking/ -->
+Source: https://docs.jmrp.io/phonometry/start/environments/type-checking/
+
+# Type checking
+
+phonometry ships its types in the wheel, with the `py.typed` marker that tells
+a type checker to read them, so mypy and pyright check a call into the
+library with nothing else installed. Every public module declares what it
+publishes, and the lazy domains of `import phonometry as ph` are visible to a
+checker as well as at run time.
+
+## A script that passes the strict modes
+
+```python
+import numpy as np
+
+from phonometry import filters, io, signals, simulation
+
+fs = 48000
+x = 0.1 * np.sin(2 * np.pi * 1000.0 * np.arange(fs) / fs)
+
+bands = filters.octave_filter(x, fs, fraction=3)
+levels = bands.require_levels()          # an array, where bands.levels may be None
+
+recording = io.Signal(x, fs)
+weighted = filters.WeightingFilter(fs, "A").filter(recording)   # a Signal in, a Signal out
+level = float(signals.leq(weighted))      # leq returns a float, or an array for several channels
+print(f"Leq = {level:.1f} dB over {levels.size} bands")
+
+engine = simulation.FDTD2D(c=343.0, dx=0.01, shape=(64, 64))
+pressure = engine.numpy_field("p")       # a NumPy array; engine.p is the device's own
+print(pressure.shape)
+```
+
+`mypy --strict` and pyright, in its basic and its strict mode, report nothing
+on this script, on Python 3.12 to 3.14.
+
+## What a checker catches
+
+A text where the library takes numbers, a choice outside the ones a
+parameter accepts, a write into a published table and a field a catalogue
+row does not have are all refused before the code runs. In `wrong.py`:
+
+```py
+from phonometry import filters, materials, signals
+
+signals.leq("not a signal")
+filters.WeightingFilter(48000, "Q")
+row = next(iter(materials.PUBLISHED_ABSORPTION.values()))
+materials.PUBLISHED_ABSORPTION["mine"] = row
+print(row.density)
+```
+
+`mypy wrong.py` says:
+
+```text
+wrong.py:3: error: Argument 1 to "leq" has incompatible type "str"; expected "Signal | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray]"  [arg-type]
+wrong.py:4: error: Argument 2 to "WeightingFilter" has incompatible type "Literal['Q']"; expected "Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z']"  [arg-type]
+wrong.py:6: error: Unsupported target for indexed assignment ("Mapping[str, AbsorptionSpectrum]")  [index]
+wrong.py:7: error: "AbsorptionSpectrum" has no attribute "density"  [attr-defined]
+Found 4 errors in 1 file (checked 1 source file)
+```
+
+and pyright refuses the same four lines.
+
+## Where the types are wider than the value
+
+- **A field that may be absent.** `bands.levels` is `None` for a call that
+  asked for no level, so its type says `np.ndarray | None`; the result's
+  `require_levels()` returns the array, or raises a ValueError that says why
+  there is none. `require_bands()` does the same for the per-band waveforms.
+- **The type a filter hands back.** `WeightingFilter.filter()` and
+  `ParametricEQ.filter()` return a `Signal` for a `Signal` and an array for
+  an array, and the checker sees which.
+- **The FDTD fields.** `engine.p`, `engine.vx` and the other fields an FDTD
+  engine steps are arrays of the library it steps on: a NumPy array, a CuPy
+  array or a PyTorch tensor. A checker reads them as `Any`.
+  `engine.numpy_field("p")` returns a NumPy copy on every device, typed as
+  one.
+
+## Completeness
+
+`pyright --verifytypes phonometry --ignoreexternal` reads the installed
+package as a user's checker does and scores it at 100%: every symbol the
+package exports has a known type. The repository's CI runs the same command
+on the built wheel and fails below 100%.
 
 ---
 

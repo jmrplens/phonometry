@@ -86,6 +86,23 @@ export const topics = [
     items: [
       { slug: 'start', label: 'Overview', translations: { es: 'Resumen' } },
       'start/getting-started',
+      // How to install and run the library in each place it goes, one page
+      // per place, collapsed so that the pages a new reader wants first stay
+      // in view.
+      {
+        label: 'Environments',
+        translations: { es: 'Entornos' },
+        collapsed: true,
+        items: [
+          { slug: 'start/environments', label: 'Overview', translations: { es: 'Resumen' } },
+          'start/environments/pip-and-uv',
+          'start/environments/conda',
+          'start/environments/jupyter',
+          'start/environments/jupyterlite',
+          'start/environments/docker',
+          'start/environments/type-checking',
+        ],
+      },
       // The task-shaped door. The rest of the site is a subject tree, which
       // only helps a reader who already knows which subject owns their job;
       // this row is the same library indexed by the job instead.

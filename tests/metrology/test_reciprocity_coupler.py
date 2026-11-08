@@ -1009,8 +1009,8 @@ def test_parameter_uncertainty_follows_the_gas_of_the_coupler() -> None:
     same_air = metrology.coupler_parameter_uncertainty(
         _F, _PLANE, _MICS, uncertainties, **_CONDITIONS, gas=_air()
     )
-    warmer = fluids.air(
-        temperature_c=40.0,
+    warmer = fluids.air(  # 26 degC, inside the 15 to 27 degC of Annex F
+        temperature_c=26.0,
         static_pressure_pa=_CONDITIONS["static_pressure_pa"],
         relative_humidity_percent=_CONDITIONS["relative_humidity_percent"],
     )

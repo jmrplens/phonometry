@@ -630,10 +630,14 @@ def test_comparison_identity_with_the_sound_power_comparison() -> None:
     """The same room and reference source: L_J = L_W + 10 lg(T/T0), T = 8 s,
     with the test source's background as an exposure and the steady reference
     source's as a time average.
+
+    The test source stands 11 dB over its background, inside the 10 dB to
+    15 dB of ISO 3741:2010 9.1.2 where Eq. (14) corrects every band without
+    holding K1 at the criterion, so both determinations correct the same way.
     """
     rng = np.random.default_rng(31)
     lp = np.array([80.0, 82.0, 84.0]) + rng.normal(0.0, 0.3, (6, 3))
-    bg = lp - 9.0
+    bg = lp - 11.0
     lp_rss = lp - 2.0
     bg_rss = lp_rss - 12.0
     reference_sound_power_levels = np.array([85.0, 86.0, 84.0])

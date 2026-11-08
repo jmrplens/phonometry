@@ -59,9 +59,12 @@ def _open_plan() -> ph.room.OpenPlanResult:
 
 
 def _resonator() -> ph.materials.HelmholtzResonator:
+    """A neck narrower than the 1 mm slits it is set in below, where the Dubos
+    end correction of the neck into the slit holds.
+    """
     return ph.materials.HelmholtzResonator(
         neck_length_m=1.0e-3,
-        neck_side_m=3.0e-3,
+        neck_side_m=0.8e-3,
         cavity_length_m=30.0e-3,
         cavity_side_m=27.0e-3,
     )

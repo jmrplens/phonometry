@@ -287,12 +287,21 @@ def test_every_tabulated_band_has_a_row_in_both_tables() -> None:
 
 
 def test_one_position_reports_no_across_surface_indicators() -> None:
-    """F2, F3 and F4 are a spread over positions, and one position has none."""
-    result = emission.sound_power_intensity_points(
-        np.full((1, 3), 1e-6),
-        np.full(1, 0.1),
-        frequencies=np.array([250.0, 500.0, 1000.0]),
-    )
+    """F2, F3 and F4 are a spread over positions, and one position has none.
+
+    Clause 8.2 asks for at least ten positions, and the advisory says so;
+    three bands summed with no pressure levels skip the screening of clause
+    10.5 b), which is said as well.
+    """
+    with (
+        pytest.warns(emission.SoundPowerWarning, match=r"clause 10\.5 b\)"),
+        pytest.warns(emission.SoundPowerWarning, match=r"Only 1 measurement position"),
+    ):
+        result = emission.sound_power_intensity_points(
+            np.full((1, 3), 1e-6),
+            np.full(1, 0.1),
+            frequencies=np.array([250.0, 500.0, 1000.0]),
+        )
     assert result.f2 is None
     assert result.f3 is None
     assert result.f4 is None
@@ -1652,7 +1661,7 @@ def test_a_single_band_the_criteria_threw_out_is_not_the_a_weighted_total() -> N
     failed criterion 1 is omitted from the A-weighted determination whether it
     had company or not.
     """
-    positions = 6
+    positions = 10  # the least clause 8.2 asks for
     intensity = np.full((positions, 1), 3e-6)
     intensity[1, 0] = 3.2e-6
     areas = np.full(positions, 0.5)

@@ -26,10 +26,19 @@ def _k(f: np.ndarray, c: float = 343.0) -> np.ndarray:
     return 2.0 * np.pi * f / c
 
 
+#: Below 440 Hz, under the first cut-on of every chamber these tests build
+#: (445 Hz for the widest, 0.16 m2), where the four-pole result and the closed
+#: forms it is checked against both describe the whole field.
+_PLANE_WAVE_HZ = 440.0
+
+
 def test_expansion_chamber_matches_closed_form() -> None:
-    f = np.linspace(20.0, 2000.0, 2000)
+    """Eq. (8.111) over one and a half periods of sin^2(kL), at kL = pi/2,
+    pi and 3 pi/2, with the 0.6 m chamber below its cut-on.
+    """
+    f = np.linspace(20.0, _PLANE_WAVE_HZ, 2000)
     for m in (2.0, 4.0, 8.0, 16.0):
-        s_duct, length = 0.01, 0.3
+        s_duct, length = 0.01, 0.6
         res = sl.expansion_chamber(f, length, m * s_duct, s_duct)
         cf = 10.0 * np.log10(
             1.0 + 0.25 * (m - 1.0 / m) ** 2 * np.sin(_k(f) * length) ** 2
@@ -41,7 +50,8 @@ def test_expansion_chamber_matches_closed_form() -> None:
     ("m", "peak"), [(2.0, 1.94), (4.0, 6.55), (8.0, 12.18), (16.0, 18.10)]
 )
 def test_expansion_chamber_peaks(m: float, peak: float) -> None:
-    f = np.linspace(20.0, 2000.0, 6000)
+    """Every peak of sin^2(kL) is the same, so the first, at c/4L = 286 Hz, is enough."""
+    f = np.linspace(20.0, _PLANE_WAVE_HZ, 6000)
     res = sl.expansion_chamber(f, 0.3, m * 0.01, 0.01)
     assert res.transmission_loss.max() == pytest.approx(peak, abs=0.02)
 
@@ -104,7 +114,7 @@ def test_insertion_loss_equals_tl_for_anechoic_reference() -> None:
     # the (anechoic) transmission loss; a positive, not negative, quantity.
     c, rho, s = 343.0, 1.206, 0.01
     z = rho * c / s
-    f = np.linspace(50.0, 1500.0, 400)
+    f = np.linspace(50.0, 880.0, 400)  # the 0.04 m2 chamber cuts on at 891 Hz
     t = sl.expansion_chamber(f, 0.3, 0.04, s).transfer_matrix
     tl = sl.transmission_loss(t, inlet_area=s, outlet_area=s)
     il = sl.insertion_loss(t, source_impedance=z, radiation_impedance=z)
@@ -176,7 +186,7 @@ def test_cascade_refuses_what_is_not_a_four_pole_stack() -> None:
 
 
 def test_extended_tube_reduces_to_expansion_chamber() -> None:
-    f = np.linspace(20.0, 2000.0, 500)
+    f = np.linspace(20.0, 880.0, 500)  # below the 891 Hz cut-on of 0.04 m2
     ext = sl.extended_tube_chamber(f, 0.3, 0.04, 0.01)
     plain = sl.expansion_chamber(f, 0.3, 0.04, 0.01)
     assert np.allclose(ext.transmission_loss, plain.transmission_loss, atol=1e-9)
@@ -209,7 +219,7 @@ def test_extended_tube_straight_section_excludes_the_extensions() -> None:
     # the same cascade by hand from the documented building blocks reproduces
     # the result; using the full length does not.
     c, length, la, lb = 343.0, 0.5, 0.25, 0.1
-    f = np.linspace(50.0, 900.0, 400)
+    f = np.linspace(50.0, 880.0, 400)  # below the 891 Hz cut-on of 0.04 m2
     s_exp, s_duct = 0.04, 0.01
     result = sl.extended_tube_chamber(
         f,
@@ -483,7 +493,7 @@ def test_empty_chain_has_no_matrix() -> None:
 def test_plot_language_spanish_and_validation() -> None:
     # The reactive-silencer .plot() renderer localises to Spanish and rejects
     # an unknown language code; English remains the unchanged default.
-    f = np.linspace(20.0, 2000.0, 500)
+    f = np.linspace(20.0, 880.0, 500)  # below the 891 Hz cut-on of 0.04 m2
     res = sl.expansion_chamber(f, 0.3, 0.04, 0.01)
     ax = res.plot(language="es")
     assert "Frecuencia" in ax.get_xlabel()

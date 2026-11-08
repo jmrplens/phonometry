@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from matplotlib.transforms import Transform
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -332,7 +333,7 @@ _DATA_PAD_SHARE = 0.08
 
 
 def _cover(
-    low: float, high: float, data: np.ndarray | list[float]
+    low: float, high: float, data: NDArray[np.float64] | list[float]
 ) -> tuple[float, float]:
     """A y-range that keeps *low* to *high* and every finite value of *data*.
 
@@ -493,7 +494,7 @@ def plot_filter_summation(
     _limit_lines(ax, limits, language)
     shade = theme_line(_C_PRIMARY, ax, quiet=0.45)
 
-    def curve_of(k: int) -> tuple[np.ndarray, np.ndarray]:
+    def curve_of(k: int) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         return _bank_summation(
             result.sos,
             result.factors,
@@ -506,7 +507,7 @@ def plot_filter_summation(
         )
 
     first = True
-    drawn: list[np.ndarray] = []
+    drawn: list[NDArray[np.float64]] = []
     for k in graded:
         omega, curve = curve_of(k)
         drawn.append(curve)
@@ -650,7 +651,7 @@ def _margin_db(verification: ConformanceVerification) -> float:
 
 def _draw_margins(
     ax: Axes,
-    positions: np.ndarray,
+    positions: NDArray[np.float64],
     verifications: tuple[ConformanceVerification, ...],
     language: Language,
     kwargs: dict[str, Any],
@@ -1206,7 +1207,7 @@ def plot_octave_levels(
 _SPECTROGRAM_RANGE_DB = 80.0
 
 
-def _frame_extent(times: np.ndarray) -> tuple[float, float]:
+def _frame_extent(times: NDArray[np.float64]) -> tuple[float, float]:
     """The start of the first window column and the end of the last.
 
     Each column is one hop wide and centred on its window. A single frame has
@@ -1233,7 +1234,7 @@ def _log_frequency_rows(ax: Axes) -> Transform:
 
 def _spectrogram_grid(
     result: OctaveSpectrogramResult, channel: int | np.integer[Any] | None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The ``(bands, frames)`` grid of the channel to draw.
 
     :raises TypeError: for a channel that is not a number, or is a bool.

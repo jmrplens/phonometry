@@ -376,19 +376,33 @@ def _shell_path(path: object) -> str:
     return str(path).replace("${{ runner.temp }}", "$RUNNER_TEMP").rstrip("/")
 
 
+def _needs(job: dict[str, object]) -> set[str]:
+    """The jobs a job waits for, whether ``needs:`` names one or a list."""
+    needs = job.get("needs")
+    if isinstance(needs, str):
+        return {needs}
+    return {str(name) for name in needs} if isinstance(needs, list) else set()
+
+
 def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     """A deploy dispatched by hand or by jmrp.io is compared like a push.
 
     The IndexNow submission cannot run on a pull request, so nothing but this
     test shows that the steps behind it run on every event that deploys: the
     one that finds the record of the pages IndexNow was last sent, the one
-    that downloads it, the comparison, and the hand-over of its list to the
-    IndexNow job. A step limited to ``push`` would leave a dispatched deploy
-    with no list, or with every URL of the site, and still deploy green. The
-    record has to travel too: the IndexNow job keeps the manifest it was
-    handed, only once its submission went through, under the name the build
-    looks for, in the folder the comparison reads, and the build may read it
-    from an earlier run.
+    that downloads it, the comparison, the hand-over of its list to the
+    IndexNow job, and in that job the steps that take the list, submit it and
+    keep the record. A step limited to ``push`` would leave a dispatched
+    deploy with no list, or with every URL of the site, or with a record of
+    pages it never sent, and still deploy green. They run in the order the
+    record needs, and none of them, nor any of the three jobs, lets the run go
+    on past a failure: a comparison made before the record is downloaded
+    sends every URL on every deploy, and a submission that fails quietly
+    keeps a record of pages the engines were never told about. The record has
+    to travel too: the IndexNow job keeps the manifest it was handed, only
+    once its submission went through, under the name the build looks for, in
+    the folder the comparison reads, and the build may read it from an
+    earlier run.
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     triggers = workflow[True] if True in workflow else workflow["on"]
@@ -405,27 +419,52 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert record, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
     submitted = record.group(1)
 
-    _, find = _the_one(
+    built_at, _ = _the_one(_steps_running(build, "pnpm build"), "build the site")
+    find_at, find = _the_one(
         _steps_running(build, "indexnow-diff.mjs last-submitted"),
         "find the record of the last submission",
     )
-    _, fetch = _the_one(
+    fetch_at, fetch = _the_one(
         _steps_using(build, "actions/download-artifact", submitted),
         f"download {submitted}",
     )
-    _, compare = _the_one(
+    compare_at, compare = _the_one(
         _steps_running(build, "indexnow-diff.mjs diff"), "compare the manifests"
     )
-    _, hand = _the_one(
+    hand_at, hand = _the_one(
         _steps_using(build, "actions/upload-artifact", "indexnow-urls"),
         "hand the list to the IndexNow job",
     )
+    received_at, download = _the_one(
+        _steps_using(indexnow, "actions/download-artifact", "indexnow-urls"),
+        "take the list in the IndexNow job",
+    )
+    sent_at, submit = _the_one(
+        _steps_running(indexnow, "api.indexnow.org"), "submit to IndexNow"
+    )
+    kept_at, keep = _the_one(
+        _steps_using(indexnow, "actions/upload-artifact", submitted),
+        f"keep {submitted}",
+    )
+
+    # The record is kept only once the submission went through.
+    assert keep.get("if") in {None, "success()"}, (
+        "a record kept after a failed submission makes the next deploy skip its pages"
+    )
+
+    # Every step the pages go through runs on every event that deploys. The
+    # download of the record is held to the step that names its run instead,
+    # below, which is what it waits for on any event.
+    on_every_event = {
+        "finding": find,
+        "comparing": compare,
+        "handing": hand,
+        "receiving": download,
+        "submitting": submit,
+        "keeping": keep,
+    }
     for event in _DEPLOYING_EVENTS:
-        for what, step in (
-            ("finding", find),
-            ("comparing", compare),
-            ("handing", hand),
-        ):
+        for what, step in on_every_event.items():
             assert _runs_on(step.get("if"), event), f"the {what} step skips {event}"
         for job in ("build", "deploy", "indexnow"):
             assert _runs_on(jobs[job].get("if"), event), f"the {job} job skips {event}"
@@ -433,6 +472,40 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
         "a pull request no longer prints what its merge would send"
     )
     assert not _runs_on(hand.get("if"), "pull_request")
+
+    # A failure anywhere on the way stops the run before the record is kept.
+    for what, step in {**on_every_event, "fetching": fetch}.items():
+        assert not step.get("continue-on-error"), (
+            f"a failure of the {what} step lets its job go on, "
+            "so a record can be kept of pages that were not sent"
+        )
+    for job in ("build", "deploy", "indexnow"):
+        assert not jobs[job].get("continue-on-error"), (
+            f"a failure of the {job} job lets the run go on, "
+            "so a record can be kept of pages that were not sent"
+        )
+
+    # In the order the record needs: the build writes the manifest, the run
+    # of the record is found, the record fetched, the manifests compared and
+    # the list handed over; the IndexNow job waits for the deploy, takes the
+    # list, submits it and only then keeps the record.
+    assert find_at < fetch_at, (
+        "the record is fetched before the step that names its run, so it never is"
+    )
+    assert fetch_at < compare_at, (
+        "the comparison runs before the record is fetched, "
+        "so every deploy sends the full list"
+    )
+    assert built_at < compare_at, (
+        "the comparison runs before the build wrote the manifest"
+    )
+    assert compare_at < hand_at, (
+        "the list is handed over before the comparison wrote it"
+    )
+    assert "build" in _needs(jobs["deploy"])
+    assert "deploy" in _needs(jobs["indexnow"]), "IndexNow is told before the deploy"
+    assert received_at < sent_at, "the submission runs before the list is taken"
+    assert sent_at < kept_at, "the record is kept before the submission went through"
 
     # The record is fetched from the run the finding step names, whatever
     # event this run is, and the build is allowed to read it.
@@ -462,22 +535,7 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert _shell_path(handed["path"]) == out.group(1)
 
     # The IndexNow job keeps the manifest it was handed, under the name the
-    # build looks for, after it submitted and only if it did.
-    received, download = _the_one(
-        _steps_using(indexnow, "actions/download-artifact", "indexnow-urls"),
-        "take the list in the IndexNow job",
-    )
-    sent, _ = _the_one(
-        _steps_running(indexnow, "api.indexnow.org"), "submit to IndexNow"
-    )
-    kept, keep = _the_one(
-        _steps_using(indexnow, "actions/upload-artifact", submitted),
-        f"keep {submitted}",
-    )
-    assert received < sent < kept
-    assert keep.get("if") in {None, "success()"}, (
-        "a record kept after a failed submission makes the next deploy skip its pages"
-    )
+    # build looks for.
     kept_inputs = keep["with"]
     downloaded = download["with"]
     assert isinstance(kept_inputs, dict)

@@ -327,9 +327,11 @@ def _reference_power_levels(
             "ReferenceSourceCalibration."
         )
         raise ValueError(msg)
-    return reference_sound_power_levels.sound_power_level_at(
-        real_array(cast("NumericArrayLike", frequencies), "frequencies"),
-        fraction=fraction,
-        temperature_c=temperature_c,
-        static_pressure_kpa=static_pressure_kpa,
+    return np.atleast_1d(
+        reference_sound_power_levels.sound_power_level_at(
+            real_array(cast("NumericArrayLike", frequencies), "frequencies"),
+            fraction=fraction,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+        )
     )

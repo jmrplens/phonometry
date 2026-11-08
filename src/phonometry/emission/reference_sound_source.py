@@ -81,13 +81,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.sound_power import _a_weighting_corrections
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -113,7 +114,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import BandFraction, NumericArrayLike
+    from .._internal.types import BandFraction, NumericArrayLike, RealScalar, RealValues
     from ._sound_power_anechoic import PrecisionSoundPowerResult
 
 RadiationCharacter = Literal["monopole", "dipole", "unknown"]
@@ -610,6 +611,36 @@ class ReferenceSourceCalibration(OwnsArrays):
             raise ValueError(msg)
         return inside
 
+    @overload
+    def sound_power_level_at[S: RealScalar](
+        self,
+        frequencies: S,
+        *,
+        fraction: BandFraction | np.integer[Any] = ...,
+        temperature_c: float | None = ...,
+        static_pressure_kpa: float | None = ...,
+    ) -> float: ...
+
+    @overload
+    def sound_power_level_at[V: RealValues](
+        self,
+        frequencies: V,
+        *,
+        fraction: BandFraction | np.integer[Any] = ...,
+        temperature_c: float | None = ...,
+        static_pressure_kpa: float | None = ...,
+    ) -> NDArray[np.float64]: ...
+
+    @overload
+    def sound_power_level_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+        *,
+        fraction: BandFraction | np.integer[Any] = ...,
+        temperature_c: float | None = ...,
+        static_pressure_kpa: float | None = ...,
+    ) -> float | NDArray[np.float64]: ...
+
     def sound_power_level_at(
         self,
         frequencies: NumericArrayLike,
@@ -617,7 +648,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         fraction: BandFraction | np.integer[Any] = 3,
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
-    ) -> NDArray[np.float64]:
+    ) -> float | NDArray[np.float64]:
         r"""The calibrated level in the bands a comparison method asks for.
 
         Without meteorological conditions, :math:`L_W` under the reference
@@ -638,7 +669,8 @@ class ReferenceSourceCalibration(OwnsArrays):
             reference conditions.
         :param static_pressure_kpa: Static pressure at the test, in
             kilopascals, given together with ``temperature_c``.
-        :return: The level per requested band, in dB re 1 pW.
+        :return: The level per requested band, in dB re 1 pW. A ``float`` for a number,
+            an array for a sequence or an array, a zero-dimensional one included.
         :raises ValueError: for a band the calibration does not cover, an
             octave asked at a frequency that is not an octave mid-band, only
             one of the two conditions, or conditions asked of a calibration
@@ -693,7 +725,7 @@ class ReferenceSourceCalibration(OwnsArrays):
                 )
                 raise ValueError(msg)
             out.append(energy_sum([known[w] for w in wanted]))
-        return np.array(out, dtype=np.float64)
+        return as_float_or_array(np.array(out, dtype=np.float64), like=(frequencies,))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

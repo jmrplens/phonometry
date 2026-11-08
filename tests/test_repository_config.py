@@ -575,6 +575,43 @@ def test_a_stray_warning_fails_the_suite(tmp_path: pathlib.Path) -> None:
     assert "2 failed, 1 passed" in result.stdout, result.stdout + result.stderr
 
 
+def test_a_cache_pytest_cannot_write_fails_no_run(tmp_path: pathlib.Path) -> None:
+    """A run whose tests pass passes where pytest cannot write its cache.
+
+    pytest warns with a PytestCacheWarning, a UserWarning, when its cache
+    directory cannot be made or written, as in a read-only checkout or
+    container a packager's run can be. Raised once the last test has run,
+    the warning ended such a run with a traceback, exit status 1 and no
+    summary line. The configuration shows it instead.
+    """
+    planted = tmp_path / "test_planted.py"
+    planted.write_text("def test_a_pass():\n    assert True\n", encoding="utf-8")
+    # A cache directory under a file: no platform can make it, root included.
+    (tmp_path / "a-file").write_text("", encoding="utf-8")
+    result = child_process.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-c",
+            str(_ROOT / "pyproject.toml"),
+            "--rootdir",
+            str(tmp_path),
+            "-o",
+            f"cache_dir={tmp_path / 'a-file' / 'cache'}",
+            str(planted),
+        ],
+        timeout=120,
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "1 passed, 1 warning" in result.stdout, result.stdout
+    assert "could not create cache path" in result.stdout
+
+
 #: ``<interpreter> -m pip [options] install <rest>``: the pip of that
 #: interpreter, unless ``--python`` hands the install to another one, which
 #: the interpreter's own pip still runs.

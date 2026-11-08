@@ -2409,7 +2409,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printed example that lacks the input is what it tests, or gives the call
   the input the standard asks for. A packager who runs the suite against a
   newer NumPy or SciPy sees a warning that release adds as a failure that
-  names it, not as one more line in the summary.
+  names it, not as one more line in the summary. pytest's own warning that
+  it cannot write its cache directory, as in a read-only tree, is shown and
+  fails nothing.
+
+- **`signals.envelope_spectrum` returns the same result for a record past
+  the floating-point range on every SciPy, with no NumPy warning.** A finite
+  record whose transform overflows inside the Hilbert step, or whose
+  envelope overflows once squared under `kind="squared"`, gives an envelope,
+  a mean level and a spectrum that are not finite. Before 1.17, SciPy
+  multiplied that transform by the analytic-signal mask, and NumPy warned of
+  an invalid value where SciPy 1.17 says nothing; the square and the removed
+  mean warned on every release. Under `-W error` the call raised instead of
+  returning.
 
 - **The release SBOM is written by cyclonedx-bom 8.0.1, and every CI job
   upgrades pip before it installs.** The jobs that build, verify and rebuild

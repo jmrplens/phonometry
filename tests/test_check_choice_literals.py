@@ -1106,6 +1106,62 @@ def test_a_keyword_fills_no_positional_only_parameter(
     assert (found.texts if found.kind == "texts" else None) == texts
 
 
+def test_a_private_method_called_through_its_class_takes_the_instance_first(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``Maker._helper(self, "a", text)`` hands ``self`` to the method's
+    ``self`` and the fixed text to its ``kind``, as ``self._helper("b",
+    text)`` does, and a class method called through its class is bound to
+    it: every caller hands ``kind`` a fixed text.
+
+    A method's ``self`` was taken as filled by the call whatever named the
+    method, so ``self`` was read as the ``kind`` the first call hands, and
+    the texts came back open.
+    """
+    source = (
+        "class Maker:\n"
+        "    def _helper(self, kind, other):\n"
+        "        return kind\n\n"
+        "    @classmethod\n"
+        "    def _once(cls, kind):\n"
+        "        return kind\n\n"
+        "    def through_the_class(self, text):\n"
+        "        return Maker._helper(self, 'a', text)\n\n"
+        "    def on_self(self, text):\n"
+        "        return self._helper('b', text)\n\n"
+        "    def bound_to_the_class(self):\n"
+        "        return Maker._once('c')\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_through_the_class": source})
+    tree = ast.parse(source)
+    maker = tree.body[0]
+    assert isinstance(maker, ast.ClassDef)
+    helper, once, *callers = maker.body
+    assert isinstance(helper, ast.FunctionDef)
+    assert isinstance(once, ast.FunctionDef)
+    module = "phonometry._through_the_class"
+    sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
+    for caller in callers:
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        assert isinstance(site.func, ast.Attribute)
+        sites.setdefault(site.func.attr, []).append((module, caller, site))
+    monkeypatch.setattr(
+        ccl,
+        "_construction_sites",
+        lambda: {name: tuple(found) for name, found in sites.items()},
+    )
+    assert ccl._callers_source(helper, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a", "b"})
+    )
+    assert ccl._callers_source(helper, "other", module, 0).kind == "open"
+    assert ccl._callers_source(once, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"c"})
+    )
+
+
 def test_a_function_the_body_imports_is_followed() -> None:
     """A call to a name the body imports itself reaches the library function."""
     found = ccl.passed_on_evidence(_imports_inside, "mode")

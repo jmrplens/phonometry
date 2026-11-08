@@ -2133,6 +2133,27 @@ def _instance_handed(node: ast.Call, namespace: Mapping[str, object]) -> bool:
     )
 
 
+def _through_its_class(
+    call: ast.Call, caller: ast.AST | None, module_name: str
+) -> bool:
+    """Whether *call*, written in *caller* in module *module_name* (``None``
+    at the top of the module), hands a method its instance as its first
+    argument (:func:`_instance_handed`): the name before the method read as
+    an import of *caller* (:func:`_local_imports`), or else as the module's.
+    """
+    func = call.func
+    if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+        return False
+    head = func.value.id
+    imported = _local_imports(caller, module_name) if caller is not None else {}
+    owner = (
+        imported[head]
+        if head in imported
+        else getattr(_module_object(module_name), head, None)
+    )
+    return _instance_handed(call, {head: owner})
+
+
 def _bound_tables(
     handed: dict[str, ast.expr], constants: dict[str, ast.expr]
 ) -> dict[str, ast.expr]:
@@ -4272,13 +4293,17 @@ def _callers_source(
     module_name: str,
     depth: int,
 ) -> _Source:
-    """What every caller of a private helper hands its parameter *name*."""
+    """What every caller of a private helper hands its parameter *name*.
+
+    A method's ``self`` or ``cls`` is the receiver's, but in a method called
+    through its class (``Maker._helper(self, ...)``), which takes the
+    instance as the call's first argument (:func:`_through_its_class`).
+    """
     defined = getattr(_module_object(module_name), function.name, None)
-    positional = [
+    every = [
         argument.arg for argument in (*function.args.posonlyargs, *function.args.args)
     ]
-    if positional and positional[0] in {"self", "cls"}:
-        positional = positional[1:]
+    receiver = 1 if every and every[0] in {"self", "cls"} else 0
     found: list[_Source] = []
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
         if getattr(_module_object(caller_module), function.name, None) is not defined:
@@ -4286,7 +4311,9 @@ def _callers_source(
         handed = _handed_in(
             call,
             name,
-            positional,
+            every
+            if receiver and _through_its_class(call, caller, caller_module)
+            else every[receiver:],
             keyword=all(a.arg != name for a in function.args.posonlyargs),
         )
         if not isinstance(handed, ast.expr):

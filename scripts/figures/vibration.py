@@ -1758,10 +1758,8 @@ def generate_experimental_sea_clf(output_dir: str) -> None:
         internal_loss_factor1=4.4e-3,
         internal_loss_factor2=2.4e-3,
         modal_density1=vibration.flat_plate_modal_density(area_p, t_p, c_l),
-        modal_density2=float(
-            vibration.cylindrical_shell_modal_density(500.0, area_c, t_c, radius, c_l)[
-                0
-            ]
+        modal_density2=vibration.cylindrical_shell_modal_density(
+            500.0, area_c, t_c, radius, c_l
         ),
     )
 

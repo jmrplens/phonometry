@@ -1669,6 +1669,153 @@ def _cases() -> tuple[Case, ...]:
             {"frequency_hz": 1000.0, "wind_speed_kt": 10.0},
             ("frequency_hz",),
         ),
+        Case(
+            vibration.assessment_weighting_response,
+            {"frequencies": 20.0, "building_class": "residential"},
+            ("frequencies",),
+        ),
+        Case(
+            vibration.band_limiting_factors,
+            {"name": "Wk", "frequencies": 10.0},
+            ("frequencies",),
+        ),
+        Case(
+            vibration.beam_modal_density,
+            {
+                "frequency": 500.0,
+                "length": 3.0,
+                "mass_per_length": 10.0,
+                "bending_stiffness": 100000.0,
+            },
+            ("frequency",),
+        ),
+        Case(
+            vibration.blast_peak_velocity_mm_s,
+            {
+                "charge_kg": 10.0,
+                "distance_m": 50.0,
+                "coefficient_mm_s": 700.0,
+                "charge_exponent": 0.5,
+                "distance_exponent": 1.5,
+            },
+            ("distance_m",),
+        ),
+        Case(
+            vibration.cylindrical_shell_modal_density,
+            {
+                "frequency": 1000.0,
+                "area": 2.0,
+                "thickness_m": 0.005,
+                "mean_radius": 0.3,
+                "longitudinal_wave_speed": 5000.0,
+            },
+            ("frequency",),
+        ),
+        Case(
+            vibration.elastic_insertion_loss,
+            {"levels_before": 80.0, "levels_after": 70.0},
+            ("levels_before", "levels_after"),
+            together=True,
+        ),
+        Case(
+            vibration.far_field_velocity_mm_s,
+            {
+                "reference_velocity_mm_s": 2.0,
+                "distance_m": 20.0,
+                "reference_distance_m": 10.0,
+                "exponent": 0.5,
+            },
+            ("distance_m",),
+        ),
+        Case(
+            vibration.foundation_to_floor_level_difference,
+            {
+                "frequencies": 20.0,
+                "floor": "concrete",
+                "floor_natural_frequency_hz": 20.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            vibration.ground_attenuation_coefficient_per_m,
+            {"frequencies": 20.0, "damping_ratio": 0.05, "shear_wave_speed_m_s": 200.0},
+            ("frequencies",),
+        ),
+        Case(
+            vibration.ground_transmission,
+            {
+                "frequencies": 20.0,
+                "distance_m": 20.0,
+                "reference_distance_m": 8.0,
+                "exponent": 0.5,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            vibration.impact_peak_velocity_mm_s,
+            {
+                "fall_energy_kj": 10.0,
+                "distance_m": 20.0,
+                "coefficient_mm_s": 1.0,
+                "distance_exponent": 1.0,
+            },
+            ("distance_m",),
+        ),
+        Case(
+            vibration.kb_weighted_levels,
+            {"levels": 70.0, "frequencies": 10.0},
+            ("levels", "frequencies"),
+            together=True,
+        ),
+        Case(
+            vibration.material_damping_factor,
+            {
+                "distance_m": 20.0,
+                "damping_ratio": 0.05,
+                "frequency_hz": 20.0,
+                "wave_speed_m_s": 200.0,
+            },
+            ("distance_m",),
+        ),
+        Case(
+            vibration.passage_energy_spectral_density,
+            {"psd": 0.01, "duration_s": 8.0},
+            ("psd",),
+        ),
+        Case(
+            vibration.predict_floor_spectrum,
+            {"emission_levels": 80.0, "ground_level_difference": -5.0},
+            ("emission_levels",),
+        ),
+        Case(
+            vibration.rescale_emission_for_speed,
+            {"levels": 80.0, "speed_from_kmh": 100.0, "speed_to_kmh": 120.0},
+            ("levels",),
+        ),
+        Case(vibration.spectral_density_level, {"psd": 0.01}, ("psd",)),
+        Case(vibration.train_kb_fmax, {"kb_ftm_zug": 0.2}, ("kb_ftm_zug",)),
+        Case(
+            vibration.train_velocity_ratio,
+            {
+                "distance_m": 30.0,
+                "reference_distance_m": 8.0,
+                "transition_distance_m": 20.0,
+                "point_exponent": 1.0,
+                "exponent_correction": 0.5,
+            },
+            ("distance_m",),
+        ),
+        Case(
+            vibration.velocity_psd_from_voltage,
+            {"psd_v2_per_hz": 0.0001, "sensitivity_v_per_mm_s": 0.1, "gain": 10.0},
+            ("psd_v2_per_hz",),
+        ),
+        Case(vibration.velocity_spectrum_um_s, {"levels": 80.0}, ("levels",)),
+        Case(
+            vibration.weighting_factors,
+            {"name": "Wk", "frequencies": 10.0},
+            ("frequencies",),
+        ),
     )
 
 

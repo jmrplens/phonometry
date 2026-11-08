@@ -59,7 +59,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, get_args
+from typing import TYPE_CHECKING, Any, Literal, get_args, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -68,6 +68,7 @@ from scipy import signal as sig
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -90,7 +91,13 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        Real,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 Kind = Literal["hav", "wbv"]
@@ -584,7 +591,30 @@ def band_limiting_response(
     return _response_result(name, frequencies, band_limiting=True)
 
 
-def band_limiting_factors(name: WeightingName, frequencies: NumericArrayLike) -> Real:
+@overload
+def band_limiting_factors[S: RealScalar](
+    name: WeightingName,
+    frequencies: S,
+) -> float: ...
+
+
+@overload
+def band_limiting_factors[V: RealValues](
+    name: WeightingName,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def band_limiting_factors[A: NumericArrayLike](
+    name: WeightingName,
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def band_limiting_factors(
+    name: WeightingName, frequencies: NumericArrayLike
+) -> float | NDArray[np.float64]:
     """Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
 
     Convenience wrapper over :func:`band_limiting_response` returning only the
@@ -595,14 +625,37 @@ def band_limiting_factors(name: WeightingName, frequencies: NumericArrayLike) ->
         ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
         ``"Wm"``.
     :param frequencies: Band centre frequencies, in hertz.
-    :return: Band-limiting factor per frequency.
+    :return: Band-limiting factor per frequency. A ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``name`` is not a text.
     """
     require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
-    return band_limiting_response(name, frequencies).magnitude
+    return as_float_or_array(
+        band_limiting_response(name, frequencies).magnitude, like=(frequencies,)
+    )
 
 
-def weighting_factors(name: WeightingName, frequencies: NumericArrayLike) -> Real:
+@overload
+def weighting_factors[S: RealScalar](name: WeightingName, frequencies: S) -> float: ...
+
+
+@overload
+def weighting_factors[V: RealValues](
+    name: WeightingName,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def weighting_factors[A: NumericArrayLike](
+    name: WeightingName,
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def weighting_factors(
+    name: WeightingName, frequencies: NumericArrayLike
+) -> float | NDArray[np.float64]:
     """Weighting factors ``|H(f)|`` of weighting ``name`` (ISO 8041-1).
 
     Convenience wrapper over :func:`frequency_weighting` returning only the
@@ -612,11 +665,14 @@ def weighting_factors(name: WeightingName, frequencies: NumericArrayLike) -> Rea
         ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
         ``"Wm"``.
     :param frequencies: Band centre frequencies, in hertz.
-    :return: Weighting factor per frequency.
+    :return: Weighting factor per frequency. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``name`` is not a text.
     """
     require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
-    return frequency_weighting(name, frequencies).magnitude
+    return as_float_or_array(
+        frequency_weighting(name, frequencies).magnitude, like=(frequencies,)
+    )
 
 
 def apply_weighting(

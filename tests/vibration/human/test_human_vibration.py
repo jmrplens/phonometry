@@ -76,7 +76,7 @@ _ANNEX_B = [
 @pytest.mark.parametrize(("name", "n", "expected"), _ANNEX_B)
 def test_annex_b_design_goal_factors(name: str, n: int, expected: float) -> None:
     """|H| at the true band centre matches the Annex B four-figure factor."""
-    got = hv.weighting_factors(name, _fc(n))[0]
+    got = hv.weighting_factors(name, _fc(n))
     # 0,1 % relative + a floor for the deep-attenuation four-figure entries.
     assert got == pytest.approx(expected, rel=1e-3, abs=5e-6)
 
@@ -100,7 +100,7 @@ def test_table_1_reference_frequency_factors(
     name: str, freq: float, expected: float
 ) -> None:
     """|H| at the Table 1 reference frequency matches the tabulated factor."""
-    got = hv.weighting_factors(name, freq)[0]
+    got = hv.weighting_factors(name, freq)
     assert got == pytest.approx(expected, rel=1.5e-3)
 
 
@@ -108,7 +108,7 @@ def test_annex_b_full_tables_reproduce() -> None:
     """Every printed Annex B factor (Tables B.1-B.9, 318 bands) reproduces."""
     for name, rows in ISO8041_1_ANNEX_B_FACTORS.items():
         for n, printed in rows:
-            got = float(hv.weighting_factors(name, _fc(n))[0])
+            got = float(hv.weighting_factors(name, _fc(n)))
             # The tables print four significant figures (<= 0,05 % rounding).
             assert got == pytest.approx(printed, rel=1e-3), (name, n)
 
@@ -135,7 +135,7 @@ def test_table_5_tolerance_envelope() -> None:
         for n, printed in rows:
             freq = _fc(n)
             upper, lower = ISO8041_1_TABLE5_TOLERANCES[_tolerance_region(freq, name)]
-            ratio = float(hv.weighting_factors(name, freq)[0]) / printed - 1.0
+            ratio = float(hv.weighting_factors(name, freq)) / printed - 1.0
             assert -lower <= ratio <= upper, (name, n, ratio)
 
 
@@ -172,7 +172,7 @@ def test_iso5349_1_wh_third_octave_table_a2() -> None:
         1000.0: 30,
     }
     for nominal, expected in a2.items():
-        got = hv.weighting_factors("Wh", _fc(n_of[nominal]))[0]
+        got = hv.weighting_factors("Wh", _fc(n_of[nominal]))
         assert got == pytest.approx(expected, rel=2e-3, abs=5e-4)
 
 
@@ -180,7 +180,7 @@ def test_iso2631_2_wm_table_a1() -> None:
     """Wm matches ISO 2631-2 Table A.1 at representative true centres."""
     a1 = {2: 0.934, 3: 0.932, 10: 0.494, 18: 0.0834, -3: 0.368}
     for n, expected in a1.items():
-        got = hv.weighting_factors("Wm", _fc(n))[0]
+        got = hv.weighting_factors("Wm", _fc(n))
         assert got == pytest.approx(expected, rel=2e-3, abs=5e-4)
 
 
@@ -219,7 +219,7 @@ def test_apply_weighting_scales_sine_by_magnitude() -> None:
     t = np.arange(int(4 * fs)) / fs
     x = np.sqrt(2.0) * np.sin(2.0 * math.pi * f0 * t)  # unit-r.m.s. amplitude
     y = hv.apply_weighting(x, fs, name="Wk")
-    factor = hv.weighting_factors("Wk", f0)[0]
+    factor = hv.weighting_factors("Wk", f0)
     # Interior r.m.s. (drop edges) equals |H(f0)| * input r.m.s. (~1).
     interior = y[int(0.5 * fs) : -int(0.5 * fs)]
     assert float(np.sqrt(np.mean(interior**2))) == pytest.approx(factor, rel=2e-2)
@@ -245,7 +245,7 @@ def test_annex_b_band_limiting_columns_reproduce() -> None:
     """
     for name, rows in ISO8041_1_ANNEX_B_BAND_LIMITING.items():
         for n, printed in rows:
-            got = float(hv.band_limiting_factors(name, _fc(n))[0])
+            got = float(hv.band_limiting_factors(name, _fc(n)))
             # The tables print four significant figures (<= 0,05 % rounding).
             assert got == pytest.approx(printed, rel=1e-3), (name, n)
 
@@ -258,10 +258,10 @@ def test_the_band_limiting_column_is_not_the_weighting_column() -> None:
     overall weighting would fail every band in the middle of the range.
     """
     freq = _fc(0)
-    assert float(hv.band_limiting_factors("Wk", freq)[0]) == pytest.approx(
+    assert float(hv.band_limiting_factors("Wk", freq)) == pytest.approx(
         0.9874, rel=1e-3
     )
-    assert float(hv.weighting_factors("Wk", freq)[0]) == pytest.approx(0.4825, rel=1e-3)
+    assert float(hv.weighting_factors("Wk", freq)) == pytest.approx(0.4825, rel=1e-3)
 
 
 def test_six_weightings_share_one_band_limiting_pair() -> None:
@@ -317,10 +317,10 @@ def test_apply_band_limiting_scales_a_sine_by_the_band_limiting_factor() -> None
     t = np.arange(int(4 * fs)) / fs
     x = np.sqrt(2.0) * np.sin(2.0 * math.pi * f0 * t)  # unit-r.m.s. amplitude
     y = hv.apply_band_limiting(x, fs, name="Wk")
-    factor = float(hv.band_limiting_factors("Wk", f0)[0])
+    factor = float(hv.band_limiting_factors("Wk", f0))
     interior = y[int(0.5 * fs) : -int(0.5 * fs)]
     assert float(np.sqrt(np.mean(interior**2))) == pytest.approx(factor, rel=2e-2)
-    assert factor / float(hv.weighting_factors("Wk", f0)[0]) > 5.0
+    assert factor / float(hv.weighting_factors("Wk", f0)) > 5.0
 
 
 def test_the_band_limiting_plot_says_that_is_what_it_is() -> None:
@@ -443,7 +443,7 @@ def test_weighted_acceleration_matches_manual_sum() -> None:
 
 def test_weighted_acceleration_single_band_equals_factor_times_level() -> None:
     result = hv.weighted_acceleration([1.0], frequencies=[10.0], weighting="Wh")
-    assert result.overall == pytest.approx(hv.weighting_factors("Wh", 10.0)[0])
+    assert result.overall == pytest.approx(hv.weighting_factors("Wh", 10.0))
 
 
 def test_weighted_acceleration_length_mismatch_raises() -> None:

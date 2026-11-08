@@ -83,11 +83,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_choice,
@@ -107,7 +108,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Floor = Literal["concrete", "timber"]
 Statistic = Literal["mean", "lower", "upper"]
@@ -461,6 +462,39 @@ def _nominal(
     return np.asarray(hit.argmax(axis=1), dtype=np.intp)
 
 
+@overload
+def predict_floor_spectrum[S: RealScalar](
+    emission_levels: S,
+    *,
+    ground_level_difference: NumericArrayLike = ...,
+    foundation_level_difference: NumericArrayLike = ...,
+    floor_level_difference: NumericArrayLike = ...,
+    mitigation_level_difference: NumericArrayLike = ...,
+) -> float: ...
+
+
+@overload
+def predict_floor_spectrum[V: RealValues](
+    emission_levels: V,
+    *,
+    ground_level_difference: NumericArrayLike = ...,
+    foundation_level_difference: NumericArrayLike = ...,
+    floor_level_difference: NumericArrayLike = ...,
+    mitigation_level_difference: NumericArrayLike = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def predict_floor_spectrum[A: NumericArrayLike](
+    emission_levels: A,
+    *,
+    ground_level_difference: NumericArrayLike = ...,
+    foundation_level_difference: NumericArrayLike = ...,
+    floor_level_difference: NumericArrayLike = ...,
+    mitigation_level_difference: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def predict_floor_spectrum(
     emission_levels: NumericArrayLike,
     *,
@@ -468,7 +502,7 @@ def predict_floor_spectrum(
     foundation_level_difference: NumericArrayLike = 0.0,
     floor_level_difference: NumericArrayLike = 0.0,
     mitigation_level_difference: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The predicted spectrum on a floor, Formula (1).
 
     Every term is added, band by band, as the formula prints it: the
@@ -489,7 +523,8 @@ def predict_floor_spectrum(
     :param floor_level_difference: :math:`\Delta L_{v,\mathrm{DF}}`, per band or one value.
     :param mitigation_level_difference: :math:`D_\mathrm{e}`, per band or one value, added as
         printed, so negative for a mitigation.
-    :return: :math:`L_v`, one level per band.
+    :return: :math:`L_v`, one level per band. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-finite input or a term that does not
         broadcast to the emission spectrum.
     :raises TypeError: if ``emission_levels`` holds a text or a value that is not a real
@@ -512,12 +547,39 @@ def predict_floor_spectrum(
         except ValueError as error:
             msg = f"'{name}' must be one value or one per band of 'emission_levels'."
             raise ValueError(msg) from error
-    return total
+    return as_float_or_array(total, like=(emission_levels,))
+
+
+@overload
+def rescale_emission_for_speed[S: RealScalar](
+    levels: S,
+    *,
+    speed_from_kmh: float,
+    speed_to_kmh: float,
+) -> float: ...
+
+
+@overload
+def rescale_emission_for_speed[V: RealValues](
+    levels: V,
+    *,
+    speed_from_kmh: float,
+    speed_to_kmh: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def rescale_emission_for_speed[A: NumericArrayLike](
+    levels: A,
+    *,
+    speed_from_kmh: float,
+    speed_to_kmh: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def rescale_emission_for_speed(
     levels: NumericArrayLike, *, speed_from_kmh: float, speed_to_kmh: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""An emission spectrum carried to another train speed, Formula (3).
 
     :math:`L_{v,\mathrm{E2}} = L_{v,\mathrm{E1}} + 20 \lg (v_2 / v_1)`, the
@@ -531,13 +593,14 @@ def rescale_emission_for_speed(
         speed, in decibels.
     :param speed_from_kmh: :math:`v_1`, the speed it was measured at.
     :param speed_to_kmh: :math:`v_2`, the speed wanted, in the same unit.
-    :return: :math:`L_{v,\mathrm{E2}}`.
+    :return: :math:`L_{v,\mathrm{E2}}`. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive speed, a change of more than 30 %,
         or a non-finite spectrum.
     :raises TypeError: if ``speed_from_kmh`` or ``speed_to_kmh`` is not a single number,
         or ``levels`` holds a text or a value that is not a real number.
     """
-    levels = _levels(levels, "levels")
+    emission = _levels(levels, "levels")
     v_1 = require_positive(speed_from_kmh, "speed_from_kmh")
     v_2 = require_positive(speed_to_kmh, "speed_to_kmh")
     change = abs(v_2 / v_1 - 1.0)
@@ -549,12 +612,39 @@ def rescale_emission_for_speed(
             f"{v_1:g} to {v_2:g} is {abs(v_2 / v_1 - 1.0):.0%}."
         )
         raise ValueError(msg)
-    return levels + 20.0 * math.log10(v_2 / v_1)
+    return as_float_or_array(emission + 20.0 * math.log10(v_2 / v_1), like=(levels,))
+
+
+@overload
+def ground_attenuation_coefficient_per_m[S: RealScalar](
+    frequencies: S,
+    *,
+    damping_ratio: float,
+    shear_wave_speed_m_s: float,
+) -> float: ...
+
+
+@overload
+def ground_attenuation_coefficient_per_m[V: RealValues](
+    frequencies: V,
+    *,
+    damping_ratio: float,
+    shear_wave_speed_m_s: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def ground_attenuation_coefficient_per_m[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    damping_ratio: float,
+    shear_wave_speed_m_s: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def ground_attenuation_coefficient_per_m(
     frequencies: NumericArrayLike, *, damping_ratio: float, shear_wave_speed_m_s: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The material damping of the ground, :math:`\alpha_R` of Clause 5.3.
 
     :math:`\alpha_R(f) = 2\pi D / \lambda_R = 2\pi f D / c_s`: the damping
@@ -565,7 +655,8 @@ def ground_attenuation_coefficient_per_m(
     :param frequencies: The band centres, in hertz.
     :param damping_ratio: :math:`D`, the damping ratio of the ground.
     :param shear_wave_speed_m_s: :math:`c_s`, in metres per second.
-    :return: :math:`\alpha_R`, in reciprocal metres, one per band.
+    :return: :math:`\alpha_R`, in reciprocal metres, one per band. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a negative damping ratio, a non-positive speed
         or a non-positive frequency.
     :raises TypeError: if ``damping_ratio`` or ``shear_wave_speed_m_s`` is not a single
@@ -574,7 +665,45 @@ def ground_attenuation_coefficient_per_m(
     freqs = require_positive_array(frequencies, "frequencies")
     damping = require_non_negative(damping_ratio, "damping_ratio")
     speed = require_positive(shear_wave_speed_m_s, "shear_wave_speed_m_s")
-    return 2.0 * math.pi * freqs * damping / speed
+    return as_float_or_array(
+        2.0 * math.pi * freqs * damping / speed, like=(frequencies,)
+    )
+
+
+@overload
+def ground_transmission[S: RealScalar](
+    frequencies: S,
+    *,
+    distance_m: float,
+    reference_distance_m: float,
+    exponent: NumericArrayLike,
+    damping_ratio: float | None = ...,
+    shear_wave_speed_m_s: float | None = ...,
+) -> float: ...
+
+
+@overload
+def ground_transmission[V: RealValues](
+    frequencies: V,
+    *,
+    distance_m: float,
+    reference_distance_m: float,
+    exponent: NumericArrayLike,
+    damping_ratio: float | None = ...,
+    shear_wave_speed_m_s: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def ground_transmission[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    distance_m: float,
+    reference_distance_m: float,
+    exponent: NumericArrayLike,
+    damping_ratio: float | None = ...,
+    shear_wave_speed_m_s: float | None = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def ground_transmission(
@@ -585,7 +714,7 @@ def ground_transmission(
     exponent: NumericArrayLike,
     damping_ratio: float | None = None,
     shear_wave_speed_m_s: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The transmission through the ground, Formulae (4) to (6).
 
     Formula (5) gives the ratio of the velocity at :math:`r` to that at
@@ -608,8 +737,9 @@ def ground_transmission(
     :param damping_ratio: :math:`D` of the ground; ``None`` (default) leaves
         the material damping out.
     :param shear_wave_speed_m_s: :math:`c_s`, needed with a damping ratio.
-    :return: :math:`\Delta L_{v,\mathrm{BB}}`, in decibels, one per band; negative
-        where the building is further from the source than the reference.
+    :return: :math:`\Delta L_{v,\mathrm{BB}}`, in decibels, one per band; negative where
+        the building is further from the source than the reference. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive distance, a negative exponent or
         damping, a damping ratio without a wave speed, or an exponent that
         does not broadcast to the bands.
@@ -631,7 +761,7 @@ def ground_transmission(
         raise ValueError(msg) from error
     spreading = -20.0 * exponents * math.log10(distance / reference)
     if damping_ratio is None:
-        return np.asarray(spreading, dtype=np.float64)
+        return as_float_or_array(spreading, like=(frequencies,))
     damping = require_non_negative(damping_ratio, "damping_ratio")
     if shear_wave_speed_m_s is None:
         msg = "a damping ratio needs the shear wave speed for alpha_R."
@@ -639,7 +769,10 @@ def ground_transmission(
     alpha = ground_attenuation_coefficient_per_m(
         freqs, damping_ratio=damping, shear_wave_speed_m_s=shear_wave_speed_m_s
     )
-    return spreading - 20.0 * math.log10(math.e) * alpha * (distance - reference)
+    return as_float_or_array(
+        spreading - 20.0 * math.log10(math.e) * alpha * (distance - reference),
+        like=(frequencies,),
+    )
 
 
 def ground_to_floor_level_difference(
@@ -694,13 +827,43 @@ def ground_to_foundation_level_difference(
     return np.asarray(table[require_choice(statistic, "statistic", _STATISTICS)])
 
 
+@overload
+def foundation_to_floor_level_difference[S: RealScalar](
+    frequencies: S,
+    *,
+    floor: Floor,
+    floor_natural_frequency_hz: float,
+    statistic: Statistic = ...,
+) -> float: ...
+
+
+@overload
+def foundation_to_floor_level_difference[V: RealValues](
+    frequencies: V,
+    *,
+    floor: Floor,
+    floor_natural_frequency_hz: float,
+    statistic: Statistic = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def foundation_to_floor_level_difference[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    floor: Floor,
+    floor_natural_frequency_hz: float,
+    statistic: Statistic = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def foundation_to_floor_level_difference(
     frequencies: NumericArrayLike,
     *,
     floor: Floor,
     floor_natural_frequency_hz: float,
     statistic: Statistic = "mean",
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The level difference from the foundation to a floor, Tables A.5 and A.6.
 
     :math:`\Delta L_{v,\mathrm{DF}}` against the ratio of the band to the natural
@@ -715,7 +878,8 @@ def foundation_to_floor_level_difference(
     :param floor_natural_frequency_hz: :math:`f_\mathrm{e}`, positive.
     :param statistic: ``"mean"`` (default), ``"lower"`` or ``"upper"``.
     :return: :math:`\Delta L_{v,\mathrm{DF}}`, in decibels, one per band, ``nan``
-        outside the table.
+        outside the table. A ``float`` for a number, an array for a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: For an unknown floor or statistic, a non-positive
         frequency, or a non-finite input.
     :raises TypeError: if ``floor_natural_frequency_hz`` is not a single number, or
@@ -740,12 +904,44 @@ def foundation_to_floor_level_difference(
         lower = all_ratios[gap - 1] if gap > 0 else -math.inf
         upper = all_ratios[gap + 1] if gap + 1 < len(all_ratios) else math.inf
         out[(ratio > lower) & (ratio < upper)] = math.nan
-    return np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(frequencies,))
+
+
+@overload
+def kb_weighted_levels[S1: RealScalar, S2: RealScalar](
+    levels: S1,
+    *,
+    frequencies: S2,
+) -> float: ...
+
+
+@overload
+def kb_weighted_levels[V: RealValues, A2: NumericArrayLike](
+    levels: V,
+    *,
+    frequencies: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def kb_weighted_levels[S1: RealScalar, V: RealValues](
+    levels: S1,
+    *,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def kb_weighted_levels[A1: NumericArrayLike, A2: NumericArrayLike](
+    levels: A1,
+    *,
+    frequencies: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def kb_weighted_levels(
     levels: NumericArrayLike, *, frequencies: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The KB-weighted third-octave levels, Formula (8) with Table 2.
 
     :math:`L_{v,KB}(f_{\mathrm{T}n}) = L_v(f_{\mathrm{T}n}) +
@@ -756,18 +952,20 @@ def kb_weighted_levels(
 
     :param levels: :math:`L_v`, one level per band, in decibels.
     :param frequencies: The band centres, nominal, 4 Hz to 80 Hz.
-    :return: :math:`L_{v,KB}`, one per band.
+    :return: :math:`L_{v,KB}`, one per band. A ``float`` when ``levels`` and
+        ``frequencies`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: For a band outside Table 2, or mismatched inputs.
     :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
         not a real number.
     """
-    levels = _levels(levels, "levels")
+    band_levels = _levels(levels, "levels")
     index = _nominal(frequencies, tuple(KB_WEIGHTING_CORRECTIONS))
-    if index.shape != levels.shape:
+    if index.shape != band_levels.shape:
         msg = "'levels' and 'frequencies' must match, one level per band."
         raise ValueError(msg)
     weights = np.asarray(list(KB_WEIGHTING_CORRECTIONS.values()))[index]
-    return levels + weights
+    return as_float_or_array(band_levels + weights, like=(levels, frequencies))
 
 
 def takt_max_kb(weighted_levels: NumericArrayLike) -> float:
@@ -809,7 +1007,21 @@ def peak_velocity_from_kb_mm_s(kb_fmax_zug: float) -> float:
     return PEAK_VELOCITY_FACTOR * require_non_negative(kb_fmax_zug, "kb_fmax_zug")
 
 
-def velocity_spectrum_um_s(levels: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def velocity_spectrum_um_s[S: RealScalar](levels: S) -> float: ...
+
+
+@overload
+def velocity_spectrum_um_s[V: RealValues](levels: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_spectrum_um_s[A: NumericArrayLike](
+    levels: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def velocity_spectrum_um_s(levels: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""A level spectrum as a velocity spectrum, Formula (13).
 
     :math:`v_\mathrm{RMS}(f_{\mathrm{T}n}) = 1000 \, v_0 \,
@@ -817,12 +1029,17 @@ def velocity_spectrum_um_s(levels: NumericArrayLike) -> NDArray[np.float64]:
     curves of VDI 2038 Blatt 2 are drawn in.
 
     :param levels: :math:`L_v`, one level per band, in decibels.
-    :return: :math:`v_\mathrm{RMS}`, one per band, in micrometres per second.
+    :return: :math:`v_\mathrm{RMS}`, one per band, in micrometres per second. A
+        ``float`` for a number, an array for a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: For a non-finite input.
     :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    levels = _levels(levels, "levels")
-    return _UM_PER_MM * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (levels / 20.0)
+    band_levels = _levels(levels, "levels")
+    return as_float_or_array(
+        _UM_PER_MM * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (band_levels / 20.0),
+        like=(levels,),
+    )
 
 
 @dataclass(frozen=True)
@@ -1021,6 +1238,39 @@ def train_decay_exponent(
     return exponent - correction
 
 
+@overload
+def train_velocity_ratio[S: RealScalar](
+    distance_m: S,
+    *,
+    reference_distance_m: float,
+    transition_distance_m: float,
+    point_exponent: float,
+    exponent_correction: float,
+) -> float: ...
+
+
+@overload
+def train_velocity_ratio[V: RealValues](
+    distance_m: V,
+    *,
+    reference_distance_m: float,
+    transition_distance_m: float,
+    point_exponent: float,
+    exponent_correction: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def train_velocity_ratio[A: NumericArrayLike](
+    distance_m: A,
+    *,
+    reference_distance_m: float,
+    transition_distance_m: float,
+    point_exponent: float,
+    exponent_correction: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def train_velocity_ratio(
     distance_m: NumericArrayLike,
     *,
@@ -1028,7 +1278,7 @@ def train_velocity_ratio(
     transition_distance_m: float,
     point_exponent: float,
     exponent_correction: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The decay of a train's vibration with distance, Figure B.1.
 
     The ratio of the velocity at :math:`r` to that at :math:`r_0`, as the
@@ -1043,7 +1293,8 @@ def train_velocity_ratio(
     :param transition_distance_m: :math:`R_0`, in metres.
     :param point_exponent: :math:`n_\mathrm{Punkt}`.
     :param exponent_correction: :math:`n_\mathrm{Korr}`, 0,3 to 0,5.
-    :return: :math:`v(r) / v(r_0)`, one per distance.
+    :return: :math:`v(r) / v(r_0)`, one per distance. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive distance, a reference beyond the
         transition, a negative exponent or a correction outside Annex B.
     :raises TypeError: if ``exponent_correction``, ``point_exponent``,
@@ -1070,4 +1321,6 @@ def train_velocity_ratio(
     near = (distances / reference) ** (-line)
     at_transition = (transition / reference) ** (-line)
     far = at_transition * (distances / transition) ** (-exponent)
-    return np.asarray(np.where(distances <= transition, near, far), dtype=np.float64)
+    return as_float_or_array(
+        np.where(distances <= transition, near, far), like=(distance_m,)
+    )

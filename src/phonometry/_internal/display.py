@@ -55,7 +55,7 @@ import os
 import re
 from collections.abc import Mapping, Sequence
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
@@ -63,6 +63,8 @@ from .figures import closes_its_figures, is_plotting_method
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from numpy.typing import NDArray
 
 #: An array is summarised by the range of its values only up to this many
 #: values: about 130 MB of float64, read in a few tens of milliseconds. Above
@@ -706,7 +708,7 @@ def _shape(shape: tuple[int, ...]) -> str:
     return "\N{MULTIPLICATION SIGN}".join(str(n) for n in shape)
 
 
-def _real_range(values: np.ndarray) -> str:
+def _real_range(values: NDArray[np.floating[Any]]) -> str:
     """The range of a real array, NaN set aside and said."""
     low = np.fmin.reduce(values, axis=None)
     if np.isnan(low):
@@ -718,7 +720,7 @@ def _real_range(values: np.ndarray) -> str:
     return text
 
 
-def _magnitude_range(values: np.ndarray) -> str:
+def _magnitude_range(values: NDArray[np.complexfloating[Any, Any]]) -> str:
     """The range of the magnitude of a complex array, a block at a time.
 
     ``np.abs`` of the whole array would allocate a second array of its size.
@@ -734,7 +736,7 @@ def _magnitude_range(values: np.ndarray) -> str:
     return "|z| " + _real_range(np.array([min(lows), max(highs)]))
 
 
-def array_summary(values: np.ndarray) -> str:
+def array_summary(values: NDArray[Any]) -> str:
     """One line for an array: its shape, its type and the range of its values.
 
     :param values: The array, of any shape and type.

@@ -35,7 +35,11 @@ ones included, because a public method returns what its renderer returns:
   apart, one returning the single value alone and one the array alone, so
   that the union head is the one left for the inputs whose shape a type
   checker cannot know (mypy's ``overload-cannot-match`` keeps it behind the
-  heads it would otherwise shadow);
+  heads it would otherwise shadow); and the single value and the array hold
+  numbers of one kind between the heads, a ``float`` beside a real array
+  and a ``complex`` beside a complex one, since a function whose result is
+  complex returns a Python ``complex`` for numbers as a real one returns a
+  ``float`` (a ``float`` head beside ``NDArray[np.complex128]`` is refused);
 * a return annotation that is a union of a record of the package (a class
   it defines, ``Signal`` or ``TimeWeightedEnvelope``) with a numpy array, or
   of a tuple of records with a tuple of arrays, is held to the same: a
@@ -329,6 +333,11 @@ EXEMPT: dict[tuple[str, str], str] = {
         "returns follows the arguments its caller hands it as like, and "
         "the caller's own heads say each case"
     ),
+    ("src/phonometry/_internal/types.py", "as_complex_or_array"): (
+        "the complex form of as_float_or_array: what it returns follows the "
+        "arguments its caller hands it as like, and the caller's own heads "
+        "say each case"
+    ),
     ("src/phonometry/_internal/types.py", "as_float_if_reduced"): (
         "the private helper of the reducers: the rank of what was "
         "reduced decides, as for the reducers it serves (see leq)"
@@ -485,6 +494,40 @@ _SCALARS = frozenset(
         "numpy.void",
         "numpy.record",
         "numpy.object_",
+    }
+)
+
+#: The real floating types, a single value's and an array's dtype alike: what
+#: a ``float`` returned for numbers stands beside.
+_REAL_KIND = frozenset(
+    {
+        "builtins.float",
+        "numpy.floating",
+        "numpy.float16",
+        "numpy.float32",
+        "numpy.float64",
+        "numpy.float96",
+        "numpy.float128",
+        "numpy.half",
+        "numpy.single",
+        "numpy.double",
+        "numpy.longdouble",
+    }
+)
+
+#: The complex types, a single value's and an array's dtype alike: what a
+#: ``complex`` returned for numbers stands beside.
+_COMPLEX_KIND = frozenset(
+    {
+        "builtins.complex",
+        "numpy.complexfloating",
+        "numpy.complex64",
+        "numpy.complex128",
+        "numpy.complex192",
+        "numpy.complex256",
+        "numpy.csingle",
+        "numpy.cdouble",
+        "numpy.clongdouble",
     }
 )
 
@@ -1308,6 +1351,52 @@ class Package:
                 several.append(ast.unparse(member))
         return single, several
 
+    def number_kinds(
+        self, module: str, node: ast.expr | None
+    ) -> tuple[set[str], set[str]]:
+        """The kinds of number, ``"real"`` or ``"complex"``, a return names.
+
+        The first set reads the single values (``float``, ``complex`` and the
+        numpy scalars of either kind), the second the dtype of the arrays
+        (``NDArray[np.complex128]``, ``np.ndarray[Any, np.dtype[np.float64]]``),
+        through the package's aliases. A member of another kind (an integer,
+        a grade, an array whose dtype is open or holds both kinds) names none.
+        """
+        single: set[str] = set()
+        several: set[str] = set()
+        for where, member in self.members(module, node):
+            base = member.value if isinstance(member, ast.Subscript) else member
+            dotted = self.resolve(where, base)
+            if dotted in _SCALARS:
+                kind = _number_kind({dotted})
+                if kind is not None:
+                    single.add(kind)
+            elif dotted in _ARRAYS and isinstance(member, ast.Subscript):
+                kind = self._dtype_kind(where, member)
+                if kind is not None:
+                    several.add(kind)
+        return single, several
+
+    def _dtype_kind(self, module: str, array: ast.Subscript) -> str | None:
+        """The kind of number an array's dtype holds, when it holds one kind."""
+        items = (
+            array.slice.elts if isinstance(array.slice, ast.Tuple) else [array.slice]
+        )
+        dtype = items[-1]
+        if (
+            isinstance(dtype, ast.Subscript)
+            and self.resolve(module, dtype.value) == "numpy.dtype"
+        ):
+            dtype = dtype.slice
+        named: set[str] = set()
+        for where, member in self.members(module, dtype):
+            base = member.value if isinstance(member, ast.Subscript) else member
+            dotted = self.resolve(where, base)
+            if dotted is None:
+                return None
+            named.add(dotted)
+        return _number_kind(named)
+
     def _record_or_array(self, module: str, node: ast.expr) -> str | None:
         """``"record"``, ``"array"`` or ``None``: what one member of a union stands for.
 
@@ -2046,6 +2135,50 @@ def reaching_polar(package: Package) -> set[str]:
     return reached
 
 
+def _number_kind(named: set[str]) -> str | None:
+    """``"real"`` or ``"complex"`` when every type in *named* is of that kind."""
+    if named and named <= _REAL_KIND:
+        return "real"
+    if named and named <= _COMPLEX_KIND:
+        return "complex"
+    return None
+
+
+def _kind_findings(package: Package, function: Function, path: str) -> list[Finding]:
+    """A single value and an array of different kinds of number between the heads.
+
+    A function whose result is complex returns a Python ``complex`` for
+    numbers, as a real one returns a ``float``: a head that returns a
+    ``float`` beside one that returns a complex array, or a ``complex``
+    beside a real array, says the result changes kind with the shape of the
+    input, which no computation of the package does. Read over the heads and
+    the implementation together, each member of each union for itself.
+    """
+    module = function.module
+    single: set[str] = set()
+    several: set[str] = set()
+    for definition in function.definitions:
+        values, arrays = package.number_kinds(module, definition.returns)
+        single |= values
+        several |= arrays
+    if not single or not several or single == several:
+        return []
+    anchor = function.implementation or function.heads[0]
+    value = " and ".join(
+        sorted("a float" if kind == "real" else "a complex" for kind in single)
+    )
+    array = " and ".join(sorted(f"a {kind} array" for kind in several))
+    return [
+        Finding(
+            path,
+            anchor.lineno,
+            function.qualname,
+            f"returns {value} for numbers and {array} otherwise: a complex "
+            "result is a complex for numbers, a real one a float",
+        )
+    ]
+
+
 def _tells_apart(shapes: Sequence[tuple[list[str], list[str]]]) -> bool:
     """Whether some head returns the one case alone and another the other alone."""
     return any(one and not other for one, other in shapes) and any(
@@ -2164,6 +2297,7 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                 )
         for case in _CASES:
             found.extend(_case_findings(package, function, path, case))
+        found.extend(_kind_findings(package, function, path))
         implementation = function.implementation
         if implementation is None or implementation.returns is None:
             continue
@@ -2242,7 +2376,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "typing.overload head per case, each returning the one type it "
             "gives (Axes for a given ax, a tuple of Axes for none; PolarAxes "
             "where the axes is polar; a float for numbers and an NDArray for "
-            "a sequence or an array, with a last head taking ArrayLike; a "
+            "a sequence or an array, a complex and a complex NDArray where the "
+            "result is complex, with a last head taking NumericArrayLike; a "
             "Signal, or the record built from one, for a Signal and an NDArray "
             "for an array), and "
             "keep the union on the implementation; a polar axes the function "

@@ -147,13 +147,14 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import optimize
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     holds_complex,
     real_array,
@@ -173,7 +174,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Component = Literal["x", "y", "z", "magnitude"]
 
@@ -438,7 +439,9 @@ class LoopField(OwnsArrays):
             else getattr(self, f"h_{name}_a_per_m")
         )
         with np.errstate(divide="ignore"):
-            return 20.0 * np.log10(np.abs(values) / _REFERENCE_FIELD_STRENGTH_A_PER_M)
+            return np.asarray(
+                20.0 * np.log10(np.abs(values) / _REFERENCE_FIELD_STRENGTH_A_PER_M)
+            )
 
     def plot(
         self,
@@ -881,29 +884,60 @@ class LoopImpedance(OwnsArrays):
         """The frequency where the reactance equals the resistance, in hertz."""
         return self.resistance_ohm / (2.0 * math.pi * self.inductance_h)
 
-    def at(self, frequency_hz: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def at[S: RealScalar](self, frequency_hz: S) -> float: ...
+
+    @overload
+    def at[V: RealValues](self, frequency_hz: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def at[A: NumericArrayLike](
+        self, frequency_hz: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def at(self, frequency_hz: NumericArrayLike) -> float | NDArray[np.float64]:
         """The magnitude of the impedance at any frequency, in ohms.
 
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
-        :return: :math:`|Z|` there, in ohms.
+        :return: :math:`|Z|` there, in ohms; a ``float`` for a number, an array
+            for a sequence or an array, a zero-dimensional one included.
         :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a
             real number.
         """
         f = _frequencies_to_read(frequency_hz)
-        return np.hypot(self.resistance_ohm, 2.0 * math.pi * f * self.inductance_h)
+        return as_float_or_array(
+            np.hypot(self.resistance_ohm, 2.0 * math.pi * f * self.inductance_h),
+            like=(frequency_hz,),
+        )
+
+    @overload
+    def drive_voltage[S: RealScalar](
+        self, current_a: float, frequency_hz: S
+    ) -> float: ...
+
+    @overload
+    def drive_voltage[V: RealValues](
+        self, current_a: float, frequency_hz: V
+    ) -> NDArray[np.float64]: ...
+
+    @overload
+    def drive_voltage[A: NumericArrayLike](
+        self, current_a: float, frequency_hz: A
+    ) -> float | NDArray[np.float64]: ...
 
     def drive_voltage(
         self, current_a: float, frequency_hz: NumericArrayLike
-    ) -> NDArray[np.float64]:
+    ) -> float | NDArray[np.float64]:
         """The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 
         :param current_a: RMS loop current, in amperes.
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
-        :return: :math:`U = I|Z|`, in volts.
+        :return: :math:`U = I|Z|`, in volts; a ``float`` for a number, an array
+            for a sequence or an array, a zero-dimensional one included.
         :raises TypeError: if ``current_a`` is not a single number.
         """
         current = require_finite(current_a, "current_a")
-        return current * self.at(frequency_hz)
+        return as_float_or_array(current * self.at(frequency_hz), like=(frequency_hz,))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

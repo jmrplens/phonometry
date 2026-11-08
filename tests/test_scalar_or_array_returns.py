@@ -110,6 +110,7 @@ def _cases() -> tuple[Case, ...]:
         [30.0, 33.0, 36.0, 41.0, 45.0], [0.3, 0.3, 0.2, 0.15, 0.05]
     )
     box = (7.0, 5.0, 3.0)
+    impedance = electroacoustics.loop_impedance(2.0, 1.0e-4)
     return (
         Case(
             broadcast.channel_weight,
@@ -122,6 +123,24 @@ def _cases() -> tuple[Case, ...]:
             electroacoustics.piston_directivity,
             {"ka": 2.0, "theta": 0.3},
             ("ka", "theta"),
+        ),
+        Case(
+            electroacoustics.field_strength_level,
+            {"field_strength_a_per_m": 0.1},
+            ("field_strength_a_per_m",),
+        ),
+        Case(electroacoustics.field_strength, {"level": -12.0}, ("level",)),
+        Case(
+            electroacoustics.magnetic_flux_density,
+            {"field_strength_a_per_m": 0.4},
+            ("field_strength_a_per_m",),
+        ),
+        Case(electroacoustics.telecoil_response, {"angle_deg": 45.0}, ("angle_deg",)),
+        Case(impedance.at, {"frequency_hz": 1000.0}, ("frequency_hz",)),
+        Case(
+            impedance.drive_voltage,
+            {"current_a": 3.0, "frequency_hz": 1000.0},
+            ("frequency_hz",),
         ),
         Case(
             emission.plant_background_correction,

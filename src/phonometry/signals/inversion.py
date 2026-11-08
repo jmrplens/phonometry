@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
@@ -534,7 +534,7 @@ def regularized_inverse_filter(
         regularization_outside * scale,
         transition_octaves,
     )
-    inv_spectrum = np.conj(spectrum_h) / (power + eps)
+    inv_spectrum = spectrum_h.conj() / (power + eps)
     inv_spectrum = inv_spectrum * np.exp(-2j * np.pi * freqs * lag / fs_v)
     inverse = np.fft.irfft(inv_spectrum, n=size)
 
@@ -551,9 +551,7 @@ def regularized_inverse_filter(
     return InverseFilterResult(
         inverse=np.asarray(inverse),
         frequencies=freqs,
-        # complex128, as the conjugate of rfft's spectrum: numpy's stubs type
-        # np.conj as returning Any, and the quotient then reads as float64.
-        spectrum=cast("NDArray[np.complex128]", np.asarray(inv_spectrum)),
+        spectrum=np.asarray(inv_spectrum),
         response_spectrum=np.asarray(spectrum_h),
         regularization=np.asarray(eps),
         f_range=(f1, f2),

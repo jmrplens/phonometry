@@ -279,7 +279,9 @@ def reverberation_index(t: NumericArrayLike, *, t0: float = _T0) -> NDArray[np.f
     if np.any(tt <= 0.0):
         msg = "'t' must contain positive values."
         raise ValueError(msg)
-    return 10.0 * np.log10(tt / _positive(t0, "t0"))
+    # The array of one time is zero-dimensional, and numpy's arithmetic on it
+    # gives a numpy scalar; asarray keeps the index an array for it too.
+    return np.asarray(10.0 * np.log10(tt / _positive(t0, "t0")), dtype=np.float64)
 
 
 #: A room of ISO 10052:2021 Table 4, by the key :func:`estimate_reverberation_index`

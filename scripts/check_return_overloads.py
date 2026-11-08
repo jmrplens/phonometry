@@ -292,6 +292,39 @@ EXEMPT: dict[tuple[str, str], str] = {
         "surfaces tuples and the rows of objects are, which a type "
         "checker reads as one type; each is passed as like"
     ),
+    ("src/phonometry/building/prediction/detailed_model.py", "flanking_impact_level"): (
+        "six arguments broadcast into the result (floor_level, index_i, index_j, velocity_level_difference, delta_l and delta_r_j): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/prediction/detailed_model.py",
+        "flanking_impact_level_from_normalized_difference",
+    ): (
+        "six arguments broadcast into the result (floor_level, index_i, index_j, normalized_velocity_level_difference, delta_l and delta_r_j): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/prediction/detailed_model.py",
+        "flanking_reduction_index",
+    ): (
+        "five arguments broadcast into the result (index_i, index_j, velocity_level_difference, delta_r_i and delta_r_j): the heads "
+        "that say which one first holds an array would number seven, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/prediction/detailed_model.py",
+        "flanking_reduction_index_from_normalized_difference",
+    ): (
+        "five arguments broadcast into the result (index_i, index_j, normalized_velocity_level_difference, delta_r_i and delta_r_j): the heads "
+        "that say which one first holds an array would number seven, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
     ("src/phonometry/room/acoustics.py", "reverberation_time_standard_deviation"): (
         "four arguments broadcast into the result (reverberation_time, "
         "bandwidth, decays, positions): the heads that say which one "

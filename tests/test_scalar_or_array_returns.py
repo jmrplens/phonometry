@@ -867,6 +867,18 @@ def _cases() -> tuple[Case, ...]:
             increasing=True,
         ),
         Case(
+            windowed.level_at,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            increasing=True,
+        ),
+        Case(
+            windowed.phase_deg_at,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            increasing=True,
+        ),
+        Case(
             microphone.acoustic_impedance_pa_s_m3,
             {"frequencies": 1000.0},
             ("frequencies",),

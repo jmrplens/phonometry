@@ -4343,23 +4343,55 @@ class TimeSelectiveResponse(OwnsArrays):
             response = response / (pulse.spectrum_at(frequencies) * delay)
         return response
 
-    def level_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def level_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def level_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def level_at[A: NumericArrayLike](
+        self, frequencies: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def level_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`20\lg\lvert H(f)\rvert`, in dB re 1 of the response's unit
         times a second.
 
         :param frequencies: The frequencies, in Hz, increasing.
-        :return: The level at each, in dB.
+        :return: The level at each, in dB. A ``float`` for a number, an array
+            for a sequence or an array, a zero-dimensional one included.
         """
-        return 20.0 * np.log10(np.abs(self.response_at(frequencies)))
+        return as_float_or_array(
+            20.0 * np.log10(np.abs(self.response_at(frequencies))),
+            like=(frequencies,),
+        )
 
-    def phase_deg_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def phase_deg_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def phase_deg_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def phase_deg_at[A: NumericArrayLike](
+        self, frequencies: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def phase_deg_at(
+        self, frequencies: NumericArrayLike
+    ) -> float | NDArray[np.float64]:
         r""":math:`\arg H(f)`, in degrees, with the time origin at the start of
         the record.
 
         :param frequencies: The frequencies, in Hz, increasing.
-        :return: The phase at each, in degrees.
+        :return: The phase at each, in degrees. A ``float`` for a number, an
+            array for a sequence or an array, a zero-dimensional one included.
         """
-        return np.degrees(np.angle(self.response_at(frequencies)))
+        return as_float_or_array(
+            np.degrees(np.angle(self.response_at(frequencies))),
+            like=(frequencies,),
+        )
 
     def free_field_region(
         self,

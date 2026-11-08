@@ -1632,6 +1632,29 @@ def _cases() -> tuple[Case, ...]:
             ("total_pressure_pa", "static_pressure_pa"),
             together=True,
         ),
+        Case(
+            room.corrected_distribution_value,
+            {
+                "distribution_levels": -4.0,
+                "measured_reference_levels": -6.0,
+                "distances": 2.0,
+            },
+            ("distribution_levels", "measured_reference_levels", "distances"),
+            together=True,
+        ),
+        Case(room.floor_reference_value, {"distances": 2.0}, ("distances",)),
+        Case(
+            room.level_excess,
+            {"distribution_levels": -6.0, "distances": 2.0},
+            ("distribution_levels", "distances"),
+            together=True,
+        ),
+        Case(room.reference_distribution_value, {"distances": 2.0}, ("distances",)),
+        Case(
+            room.sound_distribution_value,
+            {"levels": 70.0, "sound_power_levels": 80.0},
+            ("levels",),
+        ),
     )
 
 

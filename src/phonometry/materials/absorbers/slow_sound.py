@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, Real
@@ -962,7 +963,7 @@ def critical_coupling_design(
     cos_t = float(np.cos(theta))
     z0 = rho0 * c0 / (d * a)
 
-    def residual(x: np.ndarray) -> list[float]:
+    def residual(x: NDArray[np.float64]) -> list[float]:
         lc, h = real_number(x[0], "x"), real_number(x[1], "x")
         if not (lc_lo <= lc <= lc_hi and h_lo <= h <= h_hi and h <= d):
             return [1e6, 1e6]

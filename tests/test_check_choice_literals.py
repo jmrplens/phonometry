@@ -1162,6 +1162,63 @@ def test_a_private_method_called_through_its_class_takes_the_instance_first(
     )
 
 
+def test_a_private_function_or_static_method_takes_what_its_callers_hand(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``_shaped(Maker, "a")`` hands the class to ``_shaped``'s ``cls`` and
+    the fixed text to its ``kind``, as ``Maker._for(Maker, "b")`` and
+    ``self._for(Maker, "c")`` do to a static method's: a function and a
+    static method take every argument a call hands them, whatever their
+    first parameter is called.
+
+    A first parameter called ``cls`` was taken as filled by every call, so
+    the class was read as the ``kind`` the call hands, and the texts came
+    back open.
+    """
+    source = (
+        "def _shaped(cls, kind):\n"
+        "    return kind\n\n"
+        "class Maker:\n"
+        "    @staticmethod\n"
+        "    def _for(cls, kind):\n"
+        "        return kind\n\n"
+        "    def by_name(self, text):\n"
+        "        return _shaped(Maker, 'a')\n\n"
+        "    def through_the_class(self, text):\n"
+        "        return Maker._for(Maker, 'b')\n\n"
+        "    def on_self(self, text):\n"
+        "        return self._for(Maker, 'c')\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_helpers_with_cls": source})
+    tree = ast.parse(source)
+    shaped, maker = tree.body
+    assert isinstance(shaped, ast.FunctionDef)
+    assert isinstance(maker, ast.ClassDef)
+    static, *callers = maker.body
+    assert isinstance(static, ast.FunctionDef)
+    module = "phonometry._helpers_with_cls"
+    sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
+    for caller in callers:
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        assert isinstance(site.func, ast.Name | ast.Attribute)
+        called = site.func.id if isinstance(site.func, ast.Name) else site.func.attr
+        sites.setdefault(called, []).append((module, caller, site))
+    monkeypatch.setattr(
+        ccl,
+        "_construction_sites",
+        lambda: {name: tuple(found) for name, found in sites.items()},
+    )
+    assert ccl._callers_source(shaped, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a"})
+    )
+    assert ccl._callers_source(static, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"b", "c"})
+    )
+
+
 def test_a_function_the_body_imports_is_followed() -> None:
     """A call to a name the body imports itself reaches the library function."""
     found = ccl.passed_on_evidence(_imports_inside, "mode")
@@ -2701,6 +2758,69 @@ def test_a_method_called_through_its_class_takes_the_instance_first() -> None:
     assert ccl._choice_verdict(_through_a_named_init, "pace", pace, field=False) is None
     with pytest.raises(ValueError, match="pace"):
         _through_a_named_init("medium")  # type: ignore[arg-type]
+
+
+def _check_after_a_class(cls: object, pace: _Pace) -> None:
+    """A function whose first parameter is called ``cls``: it takes the
+    class a caller hands it first, and checks the pace after it.
+    """
+    require_choice(pace, "pace", _PACES)
+
+
+def _hands_a_class_then_the_pace(pace: _Pace = "fast") -> None:
+    """Hand the function a class, and the pace in its second place."""
+    _check_after_a_class(int, pace)
+
+
+def _hands_the_pace_first(pace: _Pace = "fast") -> None:
+    """Hand the function the pace in its first place, where it takes a class."""
+    _check_after_a_class(pace, "fast")
+
+
+class _StaticPaceChecker:
+    """A class whose static method takes a class first and checks the pace."""
+
+    @staticmethod
+    def check_for(cls: object, pace: _Pace) -> None:
+        require_choice(pace, "pace", _PACES)
+
+    def through_the_class(self, pace: _Pace = "fast") -> None:
+        _StaticPaceChecker.check_for(type(self), pace)
+
+    def on_self(self, pace: _Pace = "fast") -> None:
+        self.check_for(type(self), pace)
+
+
+def test_a_function_or_static_method_takes_what_it_is_handed_first() -> None:
+    """A call fills no parameter of a function, or of a static method, by
+    itself, whatever the parameter is called: ``_check_after_a_class(int,
+    pace)`` hands ``int`` to ``cls`` and the pace to ``pace``, which it
+    checks, and ``_check_after_a_class(pace, "fast")`` hands the pace to
+    ``cls``, which nothing checks. ``_StaticPaceChecker.check_for`` takes
+    what it is handed through its class and on ``self`` alike.
+
+    A first parameter called ``cls`` or ``self`` was taken as filled by the
+    call whatever the callee was, so the first argument was read as the
+    pace: the pace a function checks was reported as never checked, and one
+    it never checks passed.
+    """
+    pace = "Literal['fast', 'slow']"
+    never = "never checked, so a misspelling passes"
+    assert (
+        ccl._choice_verdict(_hands_a_class_then_the_pace, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _hands_a_class_then_the_pace("medium")  # type: ignore[arg-type]
+    assert (
+        ccl._choice_verdict(_hands_the_pace_first, "pace", pace, field=False) == never
+    )
+    _hands_the_pace_first("medium")  # type: ignore[arg-type]
+    instance = _StaticPaceChecker()
+    for through in (_StaticPaceChecker.through_the_class, _StaticPaceChecker.on_self):
+        assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        with pytest.raises(ValueError, match="pace"):
+            through(instance, "medium")  # type: ignore[arg-type]
 
 
 def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:

@@ -2048,7 +2048,7 @@ def _function_of(target: object, home: str) -> FunctionType | None:
     return None
 
 
-def _call_target(node: ast.Call, namespace: dict[str, object]) -> object | None:
+def _call_target(node: ast.Call, namespace: Mapping[str, object]) -> object | None:
     """What a call names, looked up in *namespace* (:func:`_callee`)."""
     target: object | None = None
     function = node.func
@@ -2082,10 +2082,11 @@ def _arguments(
     """What a call hands each parameter of *callee*, by the parameter's name.
 
     By position, by keyword, and from a dict of keywords the body built and
-    spreads into the call (``f(**options)``). A method's ``self`` or
-    ``cls`` is the receiver's, but in a method called through its class,
-    which takes the instance as the call's first argument
-    (:func:`_instance_handed`).
+    spreads into the call (``f(**options)``). A first parameter called
+    ``self`` or ``cls`` is the receiver's when the call fills it itself
+    (:func:`_fills_the_first`), and the call's first argument when it does
+    not, as in a function or a static method, or a method called through
+    its class.
     """
     try:
         parameters = list(inspect.signature(callee).parameters)
@@ -2094,7 +2095,7 @@ def _arguments(
     if (
         parameters
         and parameters[0] in {"self", "cls"}
-        and not _instance_handed(node, namespace)
+        and _fills_the_first(node, namespace)
     ):
         parameters = parameters[1:]
     handed: dict[str, ast.expr] = {}
@@ -2112,6 +2113,42 @@ def _arguments(
                 if key in parameters
             )
     return handed
+
+
+def _fills_the_first(node: ast.Call, namespace: Mapping[str, object]) -> bool:
+    """Whether a call fills the first parameter of what it runs itself,
+    looked up in *namespace* as :func:`_call_target` looks it up.
+
+    A call of a class fills the ``self`` of the ``__init__`` it runs, a
+    method bound to an object or a class method its first parameter, and a
+    method called on ``self``, ``cls`` or a field of ``self`` its instance.
+    A function, a static method however it is called, and a method called
+    through its class (:func:`_instance_handed`) take the call's first
+    argument there.
+    """
+    target = _call_target(node, namespace)
+    if inspect.isclass(target) or inspect.ismethod(target):
+        return True
+    func = node.func
+    if not isinstance(func, ast.Attribute):
+        return False
+    receiver = func.value
+    owner: object = None
+    if isinstance(receiver, ast.Name) and receiver.id in {"self", "cls"}:
+        owner = namespace.get(receiver.id)
+    elif (
+        isinstance(receiver, ast.Attribute)
+        and isinstance(receiver.value, ast.Name)
+        and receiver.value.id == "self"
+    ):
+        holder = namespace.get("self")
+        owner = _held_class(holder, receiver.attr) if inspect.isclass(holder) else None
+    else:
+        return False
+    return not (
+        inspect.isclass(owner)
+        and isinstance(inspect.getattr_static(owner, func.attr, None), staticmethod)
+    )
 
 
 def _instance_handed(node: ast.Call, namespace: Mapping[str, object]) -> bool:
@@ -2133,17 +2170,25 @@ def _instance_handed(node: ast.Call, namespace: Mapping[str, object]) -> bool:
     )
 
 
-def _through_its_class(
+def _fills_the_helpers_first(
     call: ast.Call, caller: ast.AST | None, module_name: str
 ) -> bool:
     """Whether *call*, written in *caller* in module *module_name* (``None``
-    at the top of the module), hands a method its instance as its first
-    argument (:func:`_instance_handed`): the name before the method read as
-    an import of *caller* (:func:`_local_imports`), or else as the module's.
+    at the top of the module), fills the first parameter of the private
+    helper it calls itself, as a method called on an object does.
+
+    A call by a bare name runs a function, and one through a module a
+    function of it, which take the call's first argument there, as a method
+    called through its class does (:func:`_instance_handed`); a class
+    method called through its class is bound to it. The name before the
+    helper is read as an import of *caller* (:func:`_local_imports`), or
+    else as the module's.
     """
     func = call.func
-    if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+    if not isinstance(func, ast.Attribute):
         return False
+    if not isinstance(func.value, ast.Name) or func.value.id in {"self", "cls"}:
+        return True
     head = func.value.id
     imported = _local_imports(caller, module_name) if caller is not None else {}
     owner = (
@@ -2151,7 +2196,7 @@ def _through_its_class(
         if head in imported
         else getattr(_module_object(module_name), head, None)
     )
-    return _instance_handed(call, {head: owner})
+    return not (inspect.ismodule(owner) or _instance_handed(call, {head: owner}))
 
 
 def _bound_tables(
@@ -4295,15 +4340,20 @@ def _callers_source(
 ) -> _Source:
     """What every caller of a private helper hands its parameter *name*.
 
-    A method's ``self`` or ``cls`` is the receiver's, but in a method called
-    through its class (``Maker._helper(self, ...)``), which takes the
-    instance as the call's first argument (:func:`_through_its_class`).
+    A first parameter called ``self`` or ``cls`` is the receiver's when the
+    call fills it itself (:func:`_fills_the_helpers_first`), and the call's
+    first argument when it does not, as in a function or a static method,
+    or a method called through its class (``Maker._helper(self, ...)``).
     """
     defined = getattr(_module_object(module_name), function.name, None)
     every = [
         argument.arg for argument in (*function.args.posonlyargs, *function.args.args)
     ]
-    receiver = 1 if every and every[0] in {"self", "cls"} else 0
+    static = any(
+        isinstance(decorator, ast.Name) and decorator.id == "staticmethod"
+        for decorator in function.decorator_list
+    )
+    receiver = 1 if every and every[0] in {"self", "cls"} and not static else 0
     found: list[_Source] = []
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
         if getattr(_module_object(caller_module), function.name, None) is not defined:
@@ -4311,9 +4361,9 @@ def _callers_source(
         handed = _handed_in(
             call,
             name,
-            every
-            if receiver and _through_its_class(call, caller, caller_module)
-            else every[receiver:],
+            every[receiver:]
+            if _fills_the_helpers_first(call, caller, caller_module)
+            else every,
             keyword=all(a.arg != name for a in function.args.posonlyargs),
         )
         if not isinstance(handed, ast.expr):

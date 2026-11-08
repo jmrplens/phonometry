@@ -34,6 +34,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..electroacoustics.induction_loop import (
@@ -214,7 +215,7 @@ def _requirement_name(name: str, language: Language) -> str:
     return spanish if language == "es" else english
 
 
-def _position_axis(result: LoopField) -> tuple[np.ndarray, str]:
+def _position_axis(result: LoopField) -> tuple[NDArray[np.float64], str]:
     """The coordinate that varies most among the points, and its name."""
     spans = {
         name: float(np.ptp(values)) if values.size else 0.0
@@ -331,8 +332,8 @@ def plot_loop_impedance(
 
 def _response_panel(
     ax: Axes,
-    frequencies: np.ndarray,
-    response: np.ndarray,
+    frequencies: NDArray[np.float64],
+    response: NDArray[np.float64],
     kwargs: dict[str, Any],
     label: str,
     language: Language,

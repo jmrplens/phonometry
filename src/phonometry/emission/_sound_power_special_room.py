@@ -71,9 +71,11 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, overload
 
 import numpy as np
+
+from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
@@ -83,7 +85,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -237,9 +239,37 @@ def _table4_correction(
     )
 
 
+@overload
+def special_room_background_correction[S1: RealScalar, S2: RealScalar](
+    levels: S1,
+    background_levels: S2,
+) -> float: ...
+
+
+@overload
+def special_room_background_correction[V: RealValues, A2: NumericArrayLike](
+    levels: V,
+    background_levels: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def special_room_background_correction[S1: RealScalar, V: RealValues](
+    levels: S1,
+    background_levels: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def special_room_background_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    levels: A1,
+    background_levels: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def special_room_background_correction(
     levels: NumericArrayLike, background_levels: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The background correction of ISO 3743-2:2018 Table 4 (9.8).
 
     The decibels to subtract from a level measured with the source operating
@@ -259,7 +289,9 @@ def special_room_background_correction(
     :param levels: Levels measured with the source operating, in decibels.
     :param background_levels: Background levels alone, broadcasting against
         ``levels``, in decibels.
-    :return: The correction to subtract, in decibels, of the broadcast shape.
+    :return: The correction to subtract, in decibels, of the broadcast shape. A
+        ``float`` when ``levels`` and ``background_levels`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-finite or empty inputs, or shapes that do not
         broadcast.
     :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
@@ -289,7 +321,37 @@ def special_room_background_correction(
             f"meeting the background requirement ({_STANDARD}, 9.8).",
             SoundPowerWarning,
         )
-    return correction
+    return as_float_or_array(correction, like=(levels, background_levels))
+
+
+@overload
+def reverberation_parameter[S: RealScalar](
+    frequencies: S,
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> float: ...
+
+
+@overload
+def reverberation_parameter[V: RealValues](
+    frequencies: V,
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_parameter[A: NumericArrayLike](
+    frequencies: A,
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def reverberation_parameter(
@@ -298,7 +360,7 @@ def reverberation_parameter(
     *,
     surface_area: float | None = None,
     speed_of_sound: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The reverberation parameter :math:`R` of ISO 3743-2:2018, 6.3.
 
     .. math::
@@ -328,7 +390,8 @@ def reverberation_parameter(
         with ``speed_of_sound`` it selects the NOTE form.
     :param speed_of_sound: Speed of sound, in metres per second, required
         with ``surface_area`` and refused without it.
-    :return: :math:`R` per frequency.
+    :return: :math:`R` per frequency. A ``float`` for a number, an array for a sequence
+        or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, volume, area or speed,
         or only one of the NOTE's two inputs.
     :raises TypeError: if ``speed_of_sound``, ``surface_area`` or ``volume`` is not a
@@ -347,10 +410,15 @@ def reverberation_parameter(
         )
         raise ValueError(msg)
     if surface_area is None or speed_of_sound is None:
-        return np.asarray(1.0 + _R_CONSTANT / (freqs * volume ** (1.0 / 3.0)))
+        return as_float_or_array(
+            np.asarray(1.0 + _R_CONSTANT / (freqs * volume ** (1.0 / 3.0))),
+            like=(frequencies,),
+        )
     area = require_positive(surface_area, "surface_area")
     speed = require_positive(speed_of_sound, "speed_of_sound")
-    return np.asarray(1.0 + speed * area / (8.0 * volume * freqs))
+    return as_float_or_array(
+        np.asarray(1.0 + speed * area / (8.0 * volume * freqs)), like=(frequencies,)
+    )
 
 
 def _tolerance(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:

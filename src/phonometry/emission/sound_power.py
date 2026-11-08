@@ -626,11 +626,43 @@ class SoundPowerResult(OwnsArrays):
         )
 
 
+@overload
+def background_noise_correction[S1: RealScalar, S2: RealScalar](
+    source_levels: S1,
+    background_levels: S2,
+    grade: Grade = ...,
+) -> float: ...
+
+
+@overload
+def background_noise_correction[V: RealValues, A2: NumericArrayLike](
+    source_levels: V,
+    background_levels: A2,
+    grade: Grade = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_noise_correction[S1: RealScalar, V: RealValues](
+    source_levels: S1,
+    background_levels: V,
+    grade: Grade = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_noise_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_levels: A1,
+    background_levels: A2,
+    grade: Grade = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def background_noise_correction(
     source_levels: NumericArrayLike,
     background_levels: NumericArrayLike,
     grade: Grade = "engineering",
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Background-noise correction ``K1`` per band (ISO 3744:2010 Eq. 16).
 
     :math:`K_1 = -10 \log_{10}\left( 1 - 10^{-0.1 \Delta L_p} \right)` with
@@ -648,7 +680,9 @@ def background_noise_correction(
     :param source_levels: Levels with the source operating, in decibels.
     :param background_levels: Background-noise levels, in decibels.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
-    :return: ``K1`` per band, in decibels.
+    :return: ``K1`` per band, in decibels. A ``float`` when ``source_levels`` and
+        ``background_levels`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises TypeError: if ``background_levels`` or ``source_levels`` holds a text or a
         value that is not a real number, or ``grade`` is not a text.
     """
@@ -669,7 +703,7 @@ def background_noise_correction(
             "(ISO 3744:2010, 8.2.3).",
             SoundPowerWarning,
         )
-    return np.asarray(k1, dtype=np.float64)
+    return as_float_or_array(k1, like=(source_levels, background_levels))
 
 
 def _require_room_pair(

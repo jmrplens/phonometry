@@ -65,11 +65,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, given_repr
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
@@ -90,7 +91,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 Device = Literal["probe", "processor", "instrument"]
@@ -740,13 +741,53 @@ def _plane_wave_phase_deg(
     return np.asarray(360.0 * freq * spacing / c, dtype=np.float64)
 
 
+@overload
+def phase_mismatch_from_residual_index[S1: RealScalar, S2: RealScalar](
+    residual_index: S1,
+    spacing_m: float,
+    *,
+    frequency: S2,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def phase_mismatch_from_residual_index[V: RealValues, A2: NumericArrayLike](
+    residual_index: V,
+    spacing_m: float,
+    *,
+    frequency: A2,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def phase_mismatch_from_residual_index[S1: RealScalar, V: RealValues](
+    residual_index: S1,
+    spacing_m: float,
+    *,
+    frequency: V,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def phase_mismatch_from_residual_index[A1: NumericArrayLike, A2: NumericArrayLike](
+    residual_index: A1,
+    spacing_m: float,
+    *,
+    frequency: A2,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def phase_mismatch_from_residual_index(
     residual_index: NumericArrayLike,
     spacing_m: float,
     *,
     frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Channel phase mismatch equivalent to a pressure-residual intensity index.
 
     In an axially propagating plane progressive wave the true phase difference
@@ -768,8 +809,9 @@ def phase_mismatch_from_residual_index(
         ``residual_index``).
     :param spacing_m: Microphone separation in metres.
     :param speed_of_sound: Speed of sound in m/s (default 343.0).
-    :return: The equivalent phase mismatch in degrees, as a
-        :class:`numpy.ndarray` (0-d for scalar inputs).
+    :return: The equivalent phase mismatch in degrees. A ``float`` when
+        ``residual_index`` and ``frequency`` are both numbers, an array when either is a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive
         and finite, or if ``residual_index`` is not finite.
     :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number, or
@@ -783,7 +825,49 @@ def phase_mismatch_from_residual_index(
     kd_deg = _plane_wave_phase_deg(
         real_array(frequency, "frequency"), spacing_m, speed_of_sound
     )
-    return np.asarray(kd_deg * 10.0 ** (-index / 10.0), dtype=np.float64)
+    return as_float_or_array(
+        kd_deg * 10.0 ** (-index / 10.0), like=(residual_index, frequency)
+    )
+
+
+@overload
+def residual_index_from_phase_mismatch[S1: RealScalar, S2: RealScalar](
+    phase_mismatch_deg: S1,
+    spacing_m: float,
+    *,
+    frequency: S2,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def residual_index_from_phase_mismatch[V: RealValues, A2: NumericArrayLike](
+    phase_mismatch_deg: V,
+    spacing_m: float,
+    *,
+    frequency: A2,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def residual_index_from_phase_mismatch[S1: RealScalar, V: RealValues](
+    phase_mismatch_deg: S1,
+    spacing_m: float,
+    *,
+    frequency: V,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def residual_index_from_phase_mismatch[A1: NumericArrayLike, A2: NumericArrayLike](
+    phase_mismatch_deg: A1,
+    spacing_m: float,
+    *,
+    frequency: A2,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def residual_index_from_phase_mismatch(
@@ -792,7 +876,7 @@ def residual_index_from_phase_mismatch(
     *,
     frequency: NumericArrayLike,
     speed_of_sound: float = 343.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Pressure-residual intensity index of a given channel phase mismatch.
 
     The inverse of :func:`phase_mismatch_from_residual_index`:
@@ -817,8 +901,9 @@ def residual_index_from_phase_mismatch(
         ``phase_mismatch_deg``).
     :param spacing_m: Microphone separation in metres.
     :param speed_of_sound: Speed of sound in m/s (default 343.0).
-    :return: ``delta_pI0`` in decibels, as a :class:`numpy.ndarray` (0-d for
-        scalar inputs).
+    :return: ``delta_pI0`` in decibels. A ``float`` when ``phase_mismatch_deg`` and
+        ``frequency`` are both numbers, an array when either is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If ``phase_mismatch_deg`` is not positive and finite, or
         if ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive and finite.
     :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number, or
@@ -832,4 +917,6 @@ def residual_index_from_phase_mismatch(
     kd_deg = _plane_wave_phase_deg(
         real_array(frequency, "frequency"), spacing_m, speed_of_sound
     )
-    return np.asarray(10.0 * np.log10(kd_deg / phi), dtype=np.float64)
+    return as_float_or_array(
+        10.0 * np.log10(kd_deg / phi), like=(phase_mismatch_deg, frequency)
+    )

@@ -353,6 +353,22 @@ def test_acoustic_impedance_from_the_admittance_inverts_formula_e1() -> None:
     )
 
 
+def test_acoustic_impedance_of_numbers_is_the_array_its_annotation_names() -> None:
+    """Numbers give a zero-dimensional complex128 array, not a numpy scalar.
+
+    The annotation says ``NDArray[np.complex128]``; arithmetic on the three
+    zero-dimensional arrays the inputs are read as gives a ``numpy.complex128``,
+    which is no array.
+    """
+    za = metrology.microphone_acoustic_impedance(
+        1e-6 + 2e-7j, 1e5 - 3e4j, 0.05 + 0.001j
+    )
+    assert isinstance(za, np.ndarray)
+    assert za.dtype == np.complex128
+    assert za.shape == ()
+    assert za[()] == (1e5 - 3e4j - 1.0 / (1e-6 + 2e-7j)) / (0.05 + 0.001j) ** 2
+
+
 def test_microphone_refuses_a_negative_loss_factor() -> None:
     with pytest.raises(ValueError, match="'loss_factor' must be non-negative"):
         dataclasses.replace(_MICS[0], loss_factor=-0.1)

@@ -54,11 +54,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -78,7 +79,12 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -201,9 +207,25 @@ def _resolve_speed(
     return _speed_of_sound(temperature_c)
 
 
+@overload
+def power_attenuation_from_alpha[S: RealScalar](attenuation_db_per_m: S) -> float: ...
+
+
+@overload
+def power_attenuation_from_alpha[V: RealValues](
+    attenuation_db_per_m: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def power_attenuation_from_alpha[A: NumericArrayLike](
+    attenuation_db_per_m: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def power_attenuation_from_alpha(
     attenuation_db_per_m: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Air power attenuation coefficient ``m`` from the ISO 9613-1 ``alpha``.
 
     The one conversion both reverberation-room standards make, ISO 354:2003
@@ -221,7 +243,8 @@ def power_attenuation_from_alpha(
     :param attenuation_db_per_m: Attenuation coefficient ``alpha`` of
         ISO 9613-1, in dB/m (scalar or per band).
     :return: Power attenuation coefficient ``m``, in 1/m, with the shape of
-        ``attenuation_db_per_m``.
+        ``attenuation_db_per_m``. A ``float`` for a number, an array for a sequence or
+        an array, a zero-dimensional one included.
     :raises ValueError: if any value is negative or not finite.
     :raises TypeError: if ``attenuation_db_per_m`` holds a text or a value that is not a
         real number.
@@ -233,7 +256,7 @@ def power_attenuation_from_alpha(
     if np.any(alpha < 0.0):
         msg = "'attenuation_db_per_m' values must be non-negative."
         raise ValueError(msg)
-    return alpha / _TEN_LG_E
+    return as_float_or_array(alpha / _TEN_LG_E, like=(attenuation_db_per_m,))
 
 
 def _validate_area_inputs(
@@ -304,6 +327,39 @@ def _absorption_area(
     return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
 
 
+@overload
+def absorption_area[S: RealScalar](
+    t60: S,
+    volume: float,
+    *,
+    temperature_c: float = ...,
+    speed_of_sound: float | None = ...,
+    m: NumericArrayLike = ...,
+) -> float: ...
+
+
+@overload
+def absorption_area[V: RealValues](
+    t60: V,
+    volume: float,
+    *,
+    temperature_c: float = ...,
+    speed_of_sound: float | None = ...,
+    m: NumericArrayLike = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_area[A: NumericArrayLike](
+    t60: A,
+    volume: float,
+    *,
+    temperature_c: float = ...,
+    speed_of_sound: float | None = ...,
+    m: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def absorption_area(
     t60: NumericArrayLike,
     volume: float,
@@ -311,7 +367,7 @@ def absorption_area(
     temperature_c: float = 20.0,
     speed_of_sound: float | None = None,
     m: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Equivalent sound absorption area of a room (ISO 354:2003, Eq. (5)/(7)).
 
     :math:`A = 55.3 V / (c T) - 4 V m`. This is Sabine's equation with the
@@ -332,8 +388,9 @@ def absorption_area(
         A per-band ``m`` whose shape differs from ``t60`` raises ``ValueError``.
         Obtain it from an ISO 9613-1 attenuation coefficient with
         :func:`power_attenuation_from_alpha`.
-    :return: Equivalent sound absorption area ``A``, in square metres, with the
-        shape of ``t60``.
+    :return: Equivalent sound absorption area ``A``, in square metres, with the shape of
+        ``t60``. A ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises TypeError: if ``speed_of_sound``, ``temperature_c`` or ``volume`` is not a
         single number, or ``m`` or ``t60`` holds a text or a value that is not a real
         number.
@@ -342,7 +399,71 @@ def absorption_area(
         t60, volume, temperature_c=temperature_c, speed_of_sound=speed_of_sound, m=m
     )
     _warn_small_room(volume)
-    return area
+    return as_float_or_array(area, like=(t60,))
+
+
+@overload
+def absorption_coefficient[S1: RealScalar, S2: RealScalar](
+    t1: S1,
+    t2: S2,
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> float: ...
+
+
+@overload
+def absorption_coefficient[V: RealValues, A2: NumericArrayLike](
+    t1: V,
+    t2: A2,
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_coefficient[S1: RealScalar, V: RealValues](
+    t1: S1,
+    t2: V,
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_coefficient[A1: NumericArrayLike, A2: NumericArrayLike](
+    t1: A1,
+    t2: A2,
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def absorption_coefficient(
@@ -357,7 +478,7 @@ def absorption_coefficient(
     speed_of_sound2: float | None = None,
     m1: NumericArrayLike = 0.0,
     m2: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Sound absorption coefficient of a plane absorber (ISO 354:2003, Eq. (9)).
 
     Builds the equivalent sound absorption area of the specimen from Eq. (8),
@@ -401,8 +522,9 @@ def absorption_coefficient(
     :param m1: Empty-room air attenuation coefficient ``m1``, in 1/m (default 0).
     :param m2: With-specimen air attenuation coefficient ``m2``, in 1/m
         (default 0).
-    :return: Sound absorption coefficient ``alpha_s`` with the broadcast shape of
-        ``t1`` and ``t2``.
+    :return: Sound absorption coefficient ``alpha_s`` with the broadcast shape of ``t1``
+        and ``t2``. A ``float`` when ``t1`` and ``t2`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``sample_area``, ``speed_of_sound1``, ``speed_of_sound2``,
         ``temperature1_c``, ``temperature2_c`` or ``volume`` is not a single number, or
         ``m1``, ``m2``, ``t1`` or ``t2`` holds a text or a value that is not a real
@@ -457,7 +579,7 @@ def absorption_coefficient(
                 "reverberation time; check the measurement (ISO 354:2003, 8.1.2/8.1.3).",
                 AbsorptionWarning,
             )
-        return alpha_s
+        return as_float_or_array(alpha_s, like=(t1, t2))
 
 
 # --- one-third-octave measurement result (ISO 354:2003, Clause 8) --------

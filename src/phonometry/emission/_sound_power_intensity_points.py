@@ -119,16 +119,18 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
+
+from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import BandFraction, NumericArrayLike
+    from .._internal.types import BandFraction, NumericArrayLike, RealScalar, RealValues
 
 from .._internal.boundary import settled, settled_net_share, settled_ratio
 from .._internal.display import RichDisplay
@@ -614,9 +616,33 @@ def error_factor(grade: DeterminationGrade, *, a_weighted: bool = False) -> floa
     return value
 
 
+@overload
+def normal_intensity_from_levels[S: RealScalar](
+    levels: S,
+    *,
+    negative: NumericArrayLike = ...,
+) -> float: ...
+
+
+@overload
+def normal_intensity_from_levels[V: RealValues](
+    levels: V,
+    *,
+    negative: NumericArrayLike = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def normal_intensity_from_levels[A: NumericArrayLike](
+    levels: A,
+    *,
+    negative: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def normal_intensity_from_levels(
     levels: NumericArrayLike, *, negative: NumericArrayLike = False
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Signed normal intensity from printed intensity levels (clause 9.1).
 
     ISO 9614-1 does not print a signed level. A normal intensity level is
@@ -647,9 +673,10 @@ def normal_intensity_from_levels(
         prefix, i.e. where the flow is inward. A single bool applies to every
         level; an array broadcasts against ``levels``.
     :return: The signed normal intensity in W/m^2, of the shape of ``levels``.
-        ``negative`` is broadcast onto that shape and never widens it: one flag
-        per level, or one flag for all of them, and a mask of any other shape
-        is refused rather than returning more intensities than levels went in.
+        ``negative`` is broadcast onto that shape and never widens it: one flag per
+        level, or one flag for all of them, and a mask of any other shape is refused
+        rather than returning more intensities than levels went in. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a level is not finite, or ``negative`` cannot be
         broadcast against ``levels``.
     :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
@@ -667,7 +694,7 @@ def normal_intensity_from_levels(
             f"'levels' of shape {values.shape}; pass one flag, or one per level."
         )
         raise ValueError(msg) from exc
-    return np.asarray(sign * _I0 * 10.0 ** (values / 10.0), dtype=np.float64)
+    return as_float_or_array(sign * _I0 * 10.0 ** (values / 10.0), like=(levels,))
 
 
 @dataclass(frozen=True)

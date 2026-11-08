@@ -58,10 +58,11 @@ bending wavenumber.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     complex_array,
     real_array,
@@ -74,7 +75,13 @@ from .mechanical_mobility import MobilityResult
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
 
 BeamLocation = Literal["center", "end"]
 PlateLocation = Literal["center", "edge"]
@@ -131,16 +138,41 @@ def plate_bending_stiffness(
     return float(e * h**3 / (12.0 * (1.0 - poisson_ratio**2)))
 
 
+@overload
+def beam_bending_wave_speed[S: RealScalar](
+    frequency: S,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> float: ...
+
+
+@overload
+def beam_bending_wave_speed[V: RealValues](
+    frequency: V,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def beam_bending_wave_speed[A: NumericArrayLike](
+    frequency: A,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def beam_bending_wave_speed(
     frequency: NumericArrayLike, bending_stiffness: float, mass_per_length: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Free bending wave speed of a beam
     :math:`c_\mathrm{B} = (B \omega^2 / m')^{1/4}`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
-    :return: The bending phase speed ``cB``, in m/s.
+    :return: The bending phase speed ``cB``, in m/s. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive stiffness, mass or frequency.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_length`` is not a single
         number, or ``frequency`` holds a text or a value that is not a real number.
@@ -148,12 +180,36 @@ def beam_bending_wave_speed(
     b = require_positive(bending_stiffness, "bending_stiffness")
     m1 = require_positive(mass_per_length, "mass_per_length")
     omega = _omega(frequency)
-    return np.asarray((b * omega**2 / m1) ** 0.25, dtype=np.float64)
+    return as_float_or_array((b * omega**2 / m1) ** 0.25, like=(frequency,))
+
+
+@overload
+def plate_bending_wave_speed[S: RealScalar](
+    frequency: S,
+    bending_stiffness: float,
+    mass_per_area: float,
+) -> float: ...
+
+
+@overload
+def plate_bending_wave_speed[V: RealValues](
+    frequency: V,
+    bending_stiffness: float,
+    mass_per_area: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def plate_bending_wave_speed[A: NumericArrayLike](
+    frequency: A,
+    bending_stiffness: float,
+    mass_per_area: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def plate_bending_wave_speed(
     frequency: NumericArrayLike, bending_stiffness: float, mass_per_area: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Free bending wave speed of a plate
     :math:`c_\mathrm{B} = (B' \omega^2 / m'')^{1/4}`.
 
@@ -161,7 +217,8 @@ def plate_bending_wave_speed(
     :param bending_stiffness: Plate bending stiffness per unit width ``B'``,
         in N.m.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
-    :return: The bending phase speed ``cB``, in m/s.
+    :return: The bending phase speed ``cB``, in m/s. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive stiffness, mass or frequency.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_area`` is not a single
         number, or ``frequency`` holds a text or a value that is not a real number.
@@ -169,7 +226,7 @@ def plate_bending_wave_speed(
     b = require_positive(bending_stiffness, "bending_stiffness")
     m2 = require_positive(mass_per_area, "mass_per_area")
     omega = _omega(frequency)
-    return np.asarray((b * omega**2 / m2) ** 0.25, dtype=np.float64)
+    return as_float_or_array((b * omega**2 / m2) ** 0.25, like=(frequency,))
 
 
 def _omega(frequency: NumericArrayLike) -> NDArray[np.float64]:
@@ -379,9 +436,37 @@ def longitudinal_rod_mobility(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def injected_power[S1: ComplexScalar, S2: ComplexScalar](
+    force_n: S1,
+    mobility: S2,
+) -> float: ...
+
+
+@overload
+def injected_power[V: ComplexValues, A2: NumericArrayLike](
+    force_n: V,
+    mobility: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def injected_power[S1: ComplexScalar, V: ComplexValues](
+    force_n: S1,
+    mobility: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def injected_power[A1: NumericArrayLike, A2: NumericArrayLike](
+    force_n: A1,
+    mobility: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def injected_power(
     force_n: NumericArrayLike, mobility: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Time-averaged vibrational power injected by a point force (Cremer 5.23).
 
     :math:`W = 0.5\, |F|^2 \operatorname{Re}\{Y\}`: only the real part
@@ -391,13 +476,15 @@ def injected_power(
     :param force_n: Point-force amplitude ``F`` (peak, scalar or array), in N.
     :param mobility: Complex point mobility ``Y`` (broadcast with *force_n*),
         in m/(N.s).
-    :return: The injected power ``W``, in W.
+    :return: The injected power ``W``, in W. A ``float`` when ``force_n`` and
+        ``mobility`` are both numbers, an array when either is a sequence or an array, a
+        zero-dimensional one included.
     :raises TypeError: if ``force_n`` or ``mobility`` holds a text or a value that is
         not a number.
     """
     f = complex_array(force_n, "force_n")
     y = complex_array(mobility, "mobility")
-    return np.asarray(0.5 * np.abs(f) ** 2 * y.real, dtype=np.float64)
+    return as_float_or_array(0.5 * np.abs(f) ** 2 * y.real, like=(force_n, mobility))
 
 
 def infinite_plate_point_mobility(

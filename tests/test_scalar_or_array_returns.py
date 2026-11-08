@@ -49,6 +49,7 @@ from phonometry import (
     noise_control,
     psychoacoustics,
     room,
+    signals,
     vibration,
 )
 
@@ -624,6 +625,121 @@ def _cases() -> tuple[Case, ...]:
             vibration.wave_vibration_reduction_index,
             {"transmission_coefficient": 0.1, "critical_frequency_receiver": 100.0},
             ("transmission_coefficient",),
+        ),
+        Case(emission.normal_intensity_from_levels, {"levels": 80.0}, ("levels",)),
+        Case(
+            emission.reverberation_parameter,
+            {"frequencies": 1000.0, "volume": 70.0},
+            ("frequencies",),
+        ),
+        Case(
+            emission.special_room_background_correction,
+            {"levels": 70.0, "background_levels": 62.0},
+            ("levels", "background_levels"),
+        ),
+        Case(
+            emission.phase_mismatch_from_residual_index,
+            {"residual_index": 10.0, "spacing_m": 0.012, "frequency": 1000.0},
+            ("residual_index", "frequency"),
+        ),
+        Case(
+            emission.residual_index_from_phase_mismatch,
+            {"phase_mismatch_deg": 0.3, "spacing_m": 0.012, "frequency": 1000.0},
+            ("phase_mismatch_deg", "frequency"),
+        ),
+        Case(
+            emission.background_noise_correction,
+            {"source_levels": 70.0, "background_levels": 60.0},
+            ("source_levels", "background_levels"),
+            together=True,
+        ),
+        Case(
+            emission.air_absorption_np_per_m,
+            {
+                "frequencies": 16000.0,
+                "temperature_c": 20.0,
+                "relative_humidity_percent": 50.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            emission.free_field_absorption_correction,
+            {
+                "frequencies": 16000.0,
+                "radius": 3.0,
+                "temperature_c": 20.0,
+                "relative_humidity_percent": 50.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            emission.free_field_absorption_correction,
+            {
+                "frequencies": 16000.0,
+                "radius": 1.0,
+                "temperature_c": 20.0,
+                "relative_humidity_percent": 50.0,
+            },
+            ("frequencies",),
+            label="no correction within 2 m",
+        ),
+        Case(emission.velocity_level, {"velocity": 1.0e-3}, ("velocity",)),
+        Case(
+            emission.velocity_level_from_acceleration,
+            {"peak_acceleration": 1.0, "frequency": 100.0},
+            ("peak_acceleration", "frequency"),
+        ),
+        Case(
+            emission.radiation_factor,
+            {"sound_power": 1.0e-3, "area": 2.0, "mean_square_velocity": 1.0e-6},
+            ("sound_power", "mean_square_velocity"),
+        ),
+        Case(
+            emission.radiated_sound_power_level,
+            {"velocity_level": 90.0, "area": 2.0, "radiation_factor": 0.5},
+            ("velocity_level", "radiation_factor"),
+        ),
+        Case(environment.air_attenuation, {"frequencies": 1000.0}, ("frequencies",)),
+        Case(
+            environment.air_power_attenuation_per_m,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+        ),
+        Case(
+            hearing.age_and_noise_threshold,
+            {"htla": 10.0, "nipts_value": 5.0},
+            ("htla", "nipts_value"),
+        ),
+        Case(
+            materials.power_attenuation_from_alpha,
+            {"attenuation_db_per_m": 0.005},
+            ("attenuation_db_per_m",),
+        ),
+        Case(materials.absorption_area, {"t60": 2.0, "volume": 200.0}, ("t60",)),
+        Case(
+            materials.absorption_coefficient,
+            {"t1": 4.0, "t2": 2.0, "volume": 200.0, "sample_area": 11.0},
+            ("t1", "t2"),
+        ),
+        Case(
+            signals.comb_filter_response,
+            {"frequencies": 10.3, "period_s": 0.1, "n_averages": 8},
+            ("frequencies",),
+        ),
+        Case(
+            vibration.beam_bending_wave_speed,
+            {"frequency": 100.0, "bending_stiffness": 1.0e4, "mass_per_length": 10.0},
+            ("frequency",),
+        ),
+        Case(
+            vibration.plate_bending_wave_speed,
+            {"frequency": 100.0, "bending_stiffness": 1.0e4, "mass_per_area": 10.0},
+            ("frequency",),
+        ),
+        Case(
+            vibration.injected_power,
+            {"force_n": 1.0, "mobility": 1.0e-4},
+            ("force_n", "mobility"),
         ),
     )
 

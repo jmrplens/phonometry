@@ -876,7 +876,8 @@ def microphone_acoustic_impedance(
     :param electrical_admittance_s: :math:`Y`, complex, in S.
     :param blocked_impedance_ohm: :math:`Z_\mathrm{e,0}`, complex, in Ω.
     :param pressure_sensitivity_v_per_pa: :math:`M_\mathrm{p}`, complex, in V/Pa.
-    :return: :math:`Z_\mathrm{a}`, complex, in Pa·s/m³.
+    :return: :math:`Z_\mathrm{a}`, complex, in Pa·s/m³, an array of the broadcast
+        shape of the three, zero-dimensional for numbers.
     :raises ValueError: for an admittance or a sensitivity of zero, or a value
         that is not finite.
     :raises TypeError: if ``blocked_impedance_ohm``, ``electrical_admittance_s`` or
@@ -898,7 +899,9 @@ def microphone_acoustic_impedance(
     if not (np.all(np.abs(admittance) > 0.0) and np.all(np.abs(sensitivity) > 0.0)):
         msg = "The admittance and the sensitivity must not be zero."
         raise ValueError(msg)
-    return (blocked - 1.0 / admittance) / sensitivity**2
+    # Numbers alone make numpy scalars of these arrays' arithmetic; asarray keeps
+    # the complex array the annotation names, zero-dimensional for numbers.
+    return np.asarray((blocked - 1.0 / admittance) / sensitivity**2)
 
 
 @dataclass(frozen=True, kw_only=True)

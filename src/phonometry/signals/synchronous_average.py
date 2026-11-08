@@ -86,6 +86,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.resolve import like_input, require_signal_rate, resolve_fs
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     require_count,
@@ -104,7 +105,7 @@ if TYPE_CHECKING:
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import NumericArrayLike, TwoPanels
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, TwoPanels
 
 __all__ = [
     "SynchronousAverageResult",
@@ -121,11 +122,35 @@ _ALIGN_TOL = 1e-9
 _MIN_SAMPLES_PER_PERIOD = 2
 
 
+@overload
+def comb_filter_response[S: RealScalar](
+    frequencies: S,
+    period_s: float,
+    n_averages: int | np.integer[Any],
+) -> float: ...
+
+
+@overload
+def comb_filter_response[V: RealValues](
+    frequencies: V,
+    period_s: float,
+    n_averages: int | np.integer[Any],
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def comb_filter_response[A: NumericArrayLike](
+    frequencies: A,
+    period_s: float,
+    n_averages: int | np.integer[Any],
+) -> float | NDArray[np.float64]: ...
+
+
 def comb_filter_response(
     frequencies: NumericArrayLike,
     period_s: float,
     n_averages: int | np.integer[Any],
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Magnitude of the N-period synchronous-averaging comb filter.
 
     The closed form of McFadden Eq. 8,
@@ -138,9 +163,10 @@ def comb_filter_response(
     :param frequencies: Frequencies at which to evaluate, in Hz.
     :param period_s: Repetition period ``T``, in seconds.
     :param n_averages: Number of averaged periods ``N`` (at least 1).
-    :return: The filter magnitude at each frequency (unitless; bounded by 1,
-        though floating-point cancellation immediately beside a tooth can
-        return values above 1 by a few parts in 1e9).
+    :return: The filter magnitude at each frequency (unitless; bounded by 1, though
+        floating-point cancellation immediately beside a tooth can return values above 1
+        by a few parts in 1e9). A ``float`` for a number, an array for a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: If the parameters are invalid.
     :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
         goes, or ``frequencies`` holds a text or a value that is not a real number.
@@ -176,7 +202,7 @@ def comb_filter_response(
     # At the teeth (integer order) the 0/0 limit is exactly 1 (Eq. 9).
     at_tooth = np.abs(lower) < _ALIGN_TOL
     response = np.where(at_tooth, 1.0, ratio)
-    return np.asarray(response, dtype=np.float64)
+    return as_float_or_array(response, like=(frequencies,))
 
 
 @dataclass(frozen=True)

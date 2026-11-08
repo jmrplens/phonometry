@@ -114,13 +114,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.air_absorption import _EIGHT_686, _KELVIN, _pure_tone_terms, _validate
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     require_choice,
@@ -144,7 +145,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .reference_sound_source import ReferenceSourceCalibration
 
 __all__ = [
@@ -197,13 +198,43 @@ _METHODS = ("direct", "comparison")
 # --- Annex A: air absorption in nepers per metre -----------------------------
 
 
+@overload
+def air_absorption_np_per_m[S: RealScalar](
+    frequencies: S,
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float: ...
+
+
+@overload
+def air_absorption_np_per_m[V: RealValues](
+    frequencies: V,
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_absorption_np_per_m[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def air_absorption_np_per_m(
     frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Air absorption coefficient :math:`\alpha` in nepers per metre (ISO 9295 Annex A).
 
     Formulae (A.1) to (A.5) of ISO 9295:2015 are the ISO 9613-1:1993
@@ -224,7 +255,8 @@ def air_absorption_np_per_m(
     :param relative_humidity_percent: Relative humidity ``h_r``, in percent.
     :param static_pressure_kpa: Static pressure ``p_s``, in kilopascals
         (default 101,325 kPa, the pressure Tables 1 and 2 are printed at).
-    :return: :math:`\alpha` in Np/m, with the shape of ``frequencies``.
+    :return: :math:`\alpha` in Np/m, with the shape of ``frequencies``. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, a temperature at or
         below absolute zero, a relative humidity outside [0, 100] % or a
         non-positive static pressure.
@@ -246,7 +278,7 @@ def air_absorption_np_per_m(
     f2, bracket = _pure_tone_terms(
         freqs, temperature_c + _KELVIN, relative_humidity_percent, static_pressure_kpa
     )
-    return np.asarray(f2 * bracket, dtype=np.float64)
+    return as_float_or_array(f2 * bracket, like=(frequencies,))
 
 
 # --- Room constant: Formulae (4), (5) and (7) --------------------------------
@@ -432,6 +464,39 @@ def tone_level_from_sidebands(sideband_levels: NumericArrayLike) -> float:
 # --- Formula (10): the free-field method beyond 2 m --------------------------
 
 
+@overload
+def free_field_absorption_correction[S: RealScalar](
+    frequencies: S,
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float: ...
+
+
+@overload
+def free_field_absorption_correction[V: RealValues](
+    frequencies: V,
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def free_field_absorption_correction[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def free_field_absorption_correction(
     frequencies: NumericArrayLike,
     *,
@@ -439,7 +504,7 @@ def free_field_absorption_correction(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Air absorption correction of the free-field method (ISO 9295 Formula (10)).
 
     :math:`K_\alpha = r \cdot \alpha`, with :math:`\alpha` the air absorption in
@@ -458,7 +523,8 @@ def free_field_absorption_correction(
     :param relative_humidity_percent: Relative humidity, in percent.
     :param static_pressure_kpa: Static pressure, in kilopascals (default
         101,325 kPa).
-    :return: :math:`K_\alpha` per frequency, in decibels.
+    :return: :math:`K_\alpha` per frequency, in decibels. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive radius or the atmospheric inputs
         :func:`air_absorption_np_per_m` refuses.
     :raises TypeError: if ``radius`` is not a single number.
@@ -471,8 +537,8 @@ def free_field_absorption_correction(
         static_pressure_kpa=static_pressure_kpa,
     )
     if radius <= _ABSORPTION_CORRECTION_RADIUS_M:
-        return np.zeros_like(alpha_db_per_m)
-    return np.asarray(radius * alpha_db_per_m, dtype=np.float64)
+        return as_float_or_array(np.zeros_like(alpha_db_per_m), like=(frequencies,))
+    return as_float_or_array(radius * alpha_db_per_m, like=(frequencies,))
 
 
 # --- Formulae (6), (8) and (9): the sound power level ------------------------

@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -32,7 +32,10 @@ from .._internal.frozen import OwnsArrays, read_only
 
 # Imported to run, not only to type: typing.get_type_hints resolves the
 # sex field of HTLANResult in this module's namespace.
-from .._internal.types import Sex  # noqa: TC001
+from .._internal.types import (
+    Sex,  # noqa: TC001
+    as_float_or_array,
+)
 from .._internal.validation import (
     check_engine,
     real_array,
@@ -52,7 +55,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -609,9 +612,37 @@ def nipts(
     )
 
 
+@overload
+def age_and_noise_threshold[S1: RealScalar, S2: RealScalar](
+    htla: S1,
+    nipts_value: S2,
+) -> float: ...
+
+
+@overload
+def age_and_noise_threshold[V: RealValues, A2: NumericArrayLike](
+    htla: V,
+    nipts_value: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def age_and_noise_threshold[S1: RealScalar, V: RealValues](
+    htla: S1,
+    nipts_value: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def age_and_noise_threshold[A1: NumericArrayLike, A2: NumericArrayLike](
+    htla: A1,
+    nipts_value: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def age_and_noise_threshold(
     htla: NumericArrayLike, nipts_value: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Combine the age and noise components by Formula (1) (clause 6.1).
 
     :math:`H' = H + N - H N / 120`, the hearing threshold level associated
@@ -628,13 +659,15 @@ def age_and_noise_threshold(
 
     :param htla: Age-associated hearing threshold level ``H``, in dB.
     :param nipts_value: Noise-induced permanent threshold shift ``N``, in dB.
-    :return: The combined threshold ``H'``, in dB.
+    :return: The combined threshold ``H'``, in dB. A ``float`` when ``htla`` and
+        ``nipts_value`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises TypeError: if ``htla`` or ``nipts_value`` holds a text or a value that is
         not a real number.
     """
     h = real_array(htla, "htla")
     n = real_array(nipts_value, "nipts_value")
-    return h + n - h * n / _HTLAN_DENOM
+    return as_float_or_array(h + n - h * n / _HTLAN_DENOM, like=(htla, nipts_value))
 
 
 def htlan(

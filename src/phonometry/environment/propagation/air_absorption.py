@@ -67,7 +67,7 @@ the ISO 9613-1 ``alpha`` via :math:`m = \alpha / (10 \log_{10} e)`.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -80,6 +80,7 @@ from ..._internal.air_absorption import (
     _validate,
 )
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -93,7 +94,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "AtmosphericAbsorptionWarning",
@@ -104,6 +105,39 @@ __all__ = [
 ]
 
 
+@overload
+def air_attenuation[S: RealScalar](
+    frequencies: S,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float: ...
+
+
+@overload
+def air_attenuation[V: RealValues](
+    frequencies: V,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_attenuation[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def air_attenuation(
     frequencies: NumericArrayLike,
     *,
@@ -111,7 +145,7 @@ def air_attenuation(
     relative_humidity_percent: float = 50.0,
     static_pressure_kpa: float = 101.325,
     exact_midband: bool = False,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Pure-tone atmospheric attenuation coefficient (ISO 9613-1, Eq. (5)).
 
     Evaluates ``alpha`` in decibels per metre from the oxygen and nitrogen
@@ -140,7 +174,8 @@ def air_attenuation(
         reproducing the frequencies used for Table 1 (Note 5). Default
         ``False`` (use ``frequencies`` verbatim).
     :return: Attenuation coefficient ``alpha``, in dB/m, with the shape of
-        ``frequencies``.
+        ``frequencies``. A ``float`` for a number, an array for a sequence or an array,
+        a zero-dimensional one included.
     :raises TypeError: if ``relative_humidity_percent``, ``static_pressure_kpa`` or
         ``temperature_c`` is not a single number, or ``frequencies`` holds a text or a
         value that is not a real number.
@@ -164,7 +199,40 @@ def air_attenuation(
         static_pressure_kpa,
     )
     alpha = _EIGHT_686 * f2 * bracket
-    return np.asarray(alpha, dtype=np.float64)
+    return as_float_or_array(alpha, like=(frequencies,))
+
+
+@overload
+def air_power_attenuation_per_m[S: RealScalar](
+    frequencies: S,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float: ...
+
+
+@overload
+def air_power_attenuation_per_m[V: RealValues](
+    frequencies: V,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_power_attenuation_per_m[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def air_power_attenuation_per_m(
@@ -174,7 +242,7 @@ def air_power_attenuation_per_m(
     relative_humidity_percent: float = 50.0,
     static_pressure_kpa: float = 101.325,
     exact_midband: bool = False,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""ISO 354 air power-attenuation coefficient ``m`` (1/m) from conditions.
 
     Convenience composition of :func:`air_attenuation` (ISO 9613-1 ``alpha`` in
@@ -194,7 +262,8 @@ def air_power_attenuation_per_m(
     :param exact_midband: Snap frequencies to exact midbands; see
         :func:`air_attenuation`.
     :return: Power attenuation coefficient ``m``, in 1/m, with the shape of
-        ``frequencies``.
+        ``frequencies``. A ``float`` for a number, an array for a sequence or an array,
+        a zero-dimensional one included.
     """
     alpha = air_attenuation(
         frequencies,
@@ -203,7 +272,7 @@ def air_power_attenuation_per_m(
         static_pressure_kpa=static_pressure_kpa,
         exact_midband=exact_midband,
     )
-    return power_attenuation_from_alpha(alpha)
+    return as_float_or_array(power_attenuation_from_alpha(alpha), like=(frequencies,))
 
 
 # --- plottable atmospheric-attenuation result (ISO 9613-1:1993) -----------

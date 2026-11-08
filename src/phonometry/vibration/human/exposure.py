@@ -853,11 +853,13 @@ def _weighted_signal(x: SignalInput) -> Real:
     unit conversion nobody asked for. This is the exemption the contract
     describes for a quantity that is not a pressure.
     """
-    x = np.asarray(resolve_samples(x, calibrate=False, name="x"), dtype=np.float64)
-    if x.ndim != 1 or x.size == 0:
+    samples = np.asarray(
+        resolve_samples(x, calibrate=False, name="x"), dtype=np.float64
+    )
+    if samples.ndim != 1 or samples.size == 0:
         msg = "'x' must be a non-empty 1-D array."
         raise ValueError(msg)
-    return x
+    return samples
 
 
 def _positive_fs(fs: float) -> float:

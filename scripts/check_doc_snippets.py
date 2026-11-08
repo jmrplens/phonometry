@@ -744,6 +744,31 @@ def _pieces(text: str, argument: _Argument) -> list[tuple[str, bool]]:
 _Call = tuple[str, Sequence[str], str]
 
 
+def _signed(pieces: list[tuple[str, bool]]) -> list[tuple[str, bool]]:
+    """*pieces*, none of them empty, with a sign the page's own text writes
+    right before a value its code computed given to that value, as
+    ``f"-{x:.2f} dB"``, or its minus sign (U+2212), signs what it formats: the
+    reader reads a negative number. A sign that follows a digit, a letter, a
+    point or a closing bracket joins what stands either side of it and stays
+    the text's, as the hyphen of a range ``f"{a:.0f}-{b:.0f} Hz"`` or of a name
+    ``f"NC-{n}"`` does.
+    """
+    out = list(pieces)
+    for at in range(len(out) - 1):
+        (text, label), (value, value_label) = out[at], out[at + 1]
+        if not label or value_label or text[-1] not in "-+−":
+            continue
+        if re.match(r"\.?\d", value) is None:
+            continue
+        # What the output writes right before the sign: the text's own
+        # character before it, or the end of the piece before.
+        before = text[-2:-1] if len(text) > 1 else (out[at - 1][0][-1:] if at else "")
+        if before and (before.isalnum() or before in "._)]}"):
+            continue
+        out[at], out[at + 1] = (text[:-1], True), (text[-1] + value, False)
+    return [piece for piece in out if piece[0]]
+
+
 def _stretches(
     calls: Sequence[_Call], arguments: tuple[_Argument, ...] | None
 ) -> list[tuple[str, bool]]:
@@ -755,7 +780,8 @@ def _stretches(
     as a reader reads them: ``print(1, 2, sep="")`` writes the value ``12``,
     and a loop of ``print(x, end="")`` one value of all their digits. A
     computed value and the page's text never join, so ``f"A{x}"`` still
-    writes the label ``A`` and the value of ``x``.
+    writes the label ``A`` and the value of ``x``, but for a sign the text
+    writes right before the value, which is the value's (:func:`_signed`).
     """
     pieces: list[tuple[str, bool]] = []
     for sep, texts, end in calls:
@@ -768,9 +794,7 @@ def _stretches(
     # Each stretch gathers its pieces and joins them once, so a loop of many
     # calls that write one stretch does not copy it again for each call.
     stretches: list[tuple[list[str], bool]] = []
-    for text, label in pieces:
-        if not text:
-            continue
+    for text, label in _signed([piece for piece in pieces if piece[0]]):
         if stretches and stretches[-1][1] == label:
             stretches[-1][0].append(text)
         else:

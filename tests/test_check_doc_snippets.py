@@ -541,6 +541,21 @@ def test_a_minus_sign_the_print_writes_reads_as_a_hyphen() -> None:
     assert "8.27" in _disagreement("8.27 dB", "\u22128.27 dB")
 
 
+def test_a_sign_the_page_writes_before_a_value_is_the_values() -> None:
+    """``f"\u2212{x:.2f}"`` prints a negative number, and the hyphen of a
+    range, after the value before it, stays the text's.
+    """
+    script = 'x = 8.27\nprint(f"\u2212{x:.2f} dB")  # \u22128.27 dB\n'
+    assert _held_against(script, 2, ["\u22128.27 dB"]) == []
+    positive = script.replace("# \u2212", "# ")
+    (failure,) = _held_against(positive, 2, ["\u22128.27 dB"])
+    assert "the comment says 8.27 where the print wrote -8.27" in failure
+    script = 'x = 8.27\nprint(f"dL = -{x:.2f} dB")  # dL = -8.27 dB\n'
+    assert _held_against(script, 2, ["dL = -8.27 dB"]) == []
+    script = 'a, b = 50, 80\nprint(f"{a}-{b} Hz")  # 50 to 80 Hz\n'
+    assert _held_against(script, 2, ["50-80 Hz"]) == []
+
+
 def test_a_spanish_comment_may_write_a_decimal_comma() -> None:
     assert _disagreement("35,9 m", "35.9", decimal_comma=True) == ""
     assert _disagreement("35,9 m", "35.9") != ""

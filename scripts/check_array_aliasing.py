@@ -175,6 +175,7 @@ from ast_scan import (
     imported_names,
     live_bindings,
     live_class_members,
+    module_constant,
     own_names,
     python_files,
     relative,
@@ -2036,34 +2037,12 @@ def _generates_init(info: ClassInfo, module: ast.Module | None = None) -> bool |
         if not isinstance(decorator, ast.Call):
             return True
         flag = next((k.value for k in decorator.keywords if k.arg == "init"), None)
-        value = _module_constant(flag, module) if flag is not None else True
+        value = module_constant(flag, module) if flag is not None else True
         if value is True:
             return True
         if value is not False:
             found = None
     return found
-
-
-def _module_constant(node: ast.expr, module: ast.Module | None) -> object:
-    """The constant *node* is, itself or a name *module* binds once, by an
-    assignment to it alone, to one (:func:`ast_scan.bindings_by_name`, so
-    an import, a ``def`` or a write from a function under ``global`` is
-    another binding); a value of its own (:data:`_UNREAD`) when it is
-    neither.
-    """
-    if isinstance(node, ast.Constant):
-        return node.value
-    if not isinstance(node, ast.Name) or module is None:
-        return _UNREAD
-    nodes = bindings_by_name(module).get(node.id, [])
-    if len(nodes) != 1:
-        return _UNREAD
-    value = assigned_value(module, nodes[0])
-    return value.value if isinstance(value, ast.Constant) else _UNREAD
-
-
-#: What :func:`_module_constant` gives for a value it cannot read.
-_UNREAD = object()
 
 
 def _init_only(annotation: str) -> bool:

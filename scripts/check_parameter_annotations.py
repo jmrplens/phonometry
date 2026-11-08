@@ -200,6 +200,7 @@ from ast_scan import (
     argument_places,
     argument_reach,
     is_type_checking_block,
+    module_constant,
     own_names,
     python_files,
     what_never_runs,
@@ -5152,17 +5153,17 @@ def _generates_init(
     package: overloads.Package, module: str, node: ast.ClassDef
 ) -> bool:
     """Whether ``@dataclass`` writes the class an ``__init__``: it is a
-    dataclass, and its decorator does not say ``init=False``.
+    dataclass, and its decorator does not say ``init=False``, as a constant
+    or as a name its module binds once to one (:func:`ast_scan.module_constant`).
     """
     if not _is_dataclass(package, module, node):
         return False
+    tree = package.trees.get(module)
     return not any(
         isinstance(decorator, ast.Call)
         and package.resolve(module, decorator.func) in _DATACLASS
         and any(
-            keyword.arg == "init"
-            and isinstance(keyword.value, ast.Constant)
-            and keyword.value.value is False
+            keyword.arg == "init" and module_constant(keyword.value, tree) is False
             for keyword in decorator.keywords
         )
         for decorator in node.decorator_list

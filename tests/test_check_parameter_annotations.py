@@ -2486,6 +2486,61 @@ def test_a_route_runs_the_init_the_call_runs_and_the_hook_a_keyword_hands(
     ]
 
 
+@pytest.mark.parametrize(
+    ("option", "expected"),
+    [
+        ("NO_INIT = False", []),
+        ("NO_INIT = True", [("named_option", "n")]),
+    ],
+    ids=["false", "true"],
+)
+def test_an_init_option_is_read_through_the_name_that_holds_it(
+    tmp_path: pathlib.Path, option: str, expected: list[tuple[str, str]]
+) -> None:
+    """``@dataclass(init=NO_INIT)`` with ``NO_INIT = False`` writes no
+    ``__init__``, so a call runs the base's, which checks nothing, and the
+    hook that checks the count never runs; with ``NO_INIT = True`` the
+    generated one runs and calls it.
+
+    A name was read as no value, ``init=True``, so the count was reported
+    as reaching the hook either way.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["named_option"]
+
+            OPTION
+
+
+            class _Quiet:
+                def __init__(self, n: int = 1) -> None:
+                    object.__setattr__(self, "n", n)
+
+
+            @dataclass(frozen=True, init=NO_INIT)
+            class _Named(_Quiet):
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(self, "n", require_count(self.n, "n"))
+
+
+            def named_option(n: int) -> _Named:
+                return _Named(n)
+            """.replace("OPTION", option),
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
 def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument(
     tmp_path: pathlib.Path,
 ) -> None:

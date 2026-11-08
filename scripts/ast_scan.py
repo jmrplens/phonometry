@@ -632,6 +632,29 @@ def spells(value: ast.expr | None, name: str, owners: Collection[str] = ()) -> b
     return isinstance(head, ast.Name) and (not owners or head.id in owners)
 
 
+#: What :func:`module_constant` gives for a value it cannot read.
+UNREAD = object()
+
+
+def module_constant(node: ast.expr, module: ast.Module | None) -> object:
+    """The constant *node* is, itself or a name *module* binds once, by an
+    assignment to it alone, to one (:func:`bindings_by_name`, so an import,
+    a ``def`` or a write from a function under ``global`` is another
+    binding); :data:`UNREAD` when it is neither. ``init=NO_INIT`` of a
+    ``@dataclass`` reads as the ``False`` a module's ``NO_INIT = False``
+    holds.
+    """
+    if isinstance(node, ast.Constant):
+        return node.value
+    if not isinstance(node, ast.Name) or module is None:
+        return UNREAD
+    nodes = bindings_by_name(module).get(node.id, [])
+    if len(nodes) != 1:
+        return UNREAD
+    value = assigned_value(module, nodes[0])
+    return value.value if isinstance(value, ast.Constant) else UNREAD
+
+
 def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
     """Each name *scope* binds itself, with every node that binds it, in the
     order of the source.

@@ -100,6 +100,7 @@ from ast_scan import (
     held_before,
     is_type_checking_block,
     live_bindings,
+    module_constant,
     own_names,
     scope_nodes,
     what_never_runs,
@@ -717,7 +718,8 @@ def _generates_init(klass: Class) -> bool:
     """Whether ``@dataclass`` writes *klass* an ``__init__``: a decorator of
     it is the one ``dataclasses`` defines, by a name or an attribute of the
     module its scope or module imports (:func:`_dataclass_call`), and it does
-    not say ``init=False``.
+    not say ``init=False``, as a constant or as a name its module binds once
+    to one (:func:`ast_scan.module_constant`).
     """
     decorator = _dataclass_call(klass)
     if decorator is None:
@@ -726,8 +728,7 @@ def _generates_init(klass: Class) -> bool:
         isinstance(decorator, ast.Call)
         and any(
             keyword.arg == "init"
-            and isinstance(keyword.value, ast.Constant)
-            and keyword.value.value is False
+            and module_constant(keyword.value, klass.module.node) is False
             for keyword in decorator.keywords
         )
     )

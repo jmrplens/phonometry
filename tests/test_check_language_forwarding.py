@@ -2219,6 +2219,52 @@ def test_an_init_a_record_binds_or_writes_is_the_one_a_call_runs(
     ]
 
 
+@pytest.mark.parametrize(
+    ("option", "expected"),
+    [
+        ("NO_INIT = False", [("draw", "pkg.records._Labelled.__init__")]),
+        ("NO_INIT = True", []),
+    ],
+    ids=["false", "true"],
+)
+def test_an_init_option_is_read_through_the_name_that_holds_it(
+    tmp_path: pathlib.Path, option: str, expected: list[tuple[str, str]]
+) -> None:
+    """``@dataclass(init=NO_INIT)`` with ``NO_INIT = False`` writes no
+    ``__init__``, so ``Spoken(1.0)`` runs ``_Labelled.__init__``, which
+    takes the language and is handed none; with ``NO_INIT = True`` the
+    generated one runs, and it takes no language.
+
+    A name was read as no value, ``init=True``, so the call that drops the
+    language passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            from dataclasses import dataclass
+
+            OPTION
+
+
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.language = language
+
+
+            @dataclass(init=NO_INIT)
+            class Spoken(_Labelled):
+                value: float = 0.0
+
+
+            def draw(language="en"):
+                return Spoken(1.0)
+            """.replace("OPTION", option)
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == expected
+
+
 def test_a_class_method_an_alias_holds_and_super_of_another_instance(
     tmp_path: pathlib.Path,
 ) -> None:

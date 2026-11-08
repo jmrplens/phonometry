@@ -1695,6 +1695,33 @@ def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
     assert ast_scan.assignment_target(statement) is None
 
 
+def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
+    """``module_constant`` reads a constant, or a name its module binds once
+    by an assignment to it alone; a name bound twice, imported, or bound to
+    anything but a constant is :data:`ast_scan.UNREAD`.
+    """
+    module = ast.parse(
+        textwrap.dedent(
+            """
+            ONCE = False
+            TWICE = True
+            TWICE = False
+            COMPUTED = not True
+            from flags import IMPORTED
+            """
+        )
+    )
+
+    def read(source: str) -> object:
+        node = ast.parse(source, mode="eval").body
+        return ast_scan.module_constant(node, module)
+
+    assert read("True") is True
+    assert read("ONCE") is False
+    for unread in ("TWICE", "COMPUTED", "IMPORTED", "MISSING"):
+        assert read(unread) is ast_scan.UNREAD
+
+
 def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
     """``every_path_calls`` yields the calls a function makes as statements
     of their own at the top of its body, up to the first statement that may

@@ -2471,6 +2471,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   default to an empty read-only mapping that its signature shows, where it
   showed `...`. The score is 100%, and a CI job holds the wheel to it.
 
+- **Every numpy type the package annotates names its dtype, so a type checker
+  reads the package the same on every NumPy it accepts.** numpy gives
+  `np.ndarray`, `np.dtype` and its abstract scalar types (`np.floating`,
+  `np.integer` and the others) default type arguments only from 2.3, and the
+  package wrote 3000 of them without any, so on NumPy 2.0.2 to 2.2, which
+  Python 3.12 and 3.13 accept, a type checker read every public name
+  annotated with one as partly unknown: pyright's `--verifytypes` scored the
+  package at 86.9% on NumPy 2.1.0, its strict mode reported the arrays of
+  `bands.require_levels()` and `WeightingFilter.filter()`, and mypy reported
+  a `[type-arg]` error for each. Each was read on its own, from what the
+  function builds, returns or accepts and what its callers pass, and names
+  the dtype its array holds (`NDArray[np.float64]`, `NDArray[np.complex128]`,
+  `NDArray[np.bool_]`, `NDArray[np.int64]`) or the precision of its scalar
+  (`np.floating[Any]`); 26 keep a type open where the array or the scalar
+  really takes several dtypes (numpy's `__array__` protocol, the readers that
+  hold a caller's numbers before a check refuses the wrong dtype, the wire
+  format of a remote run). The score is 100% at the oldest versions each
+  Python accepts as at the newest, and strict pyright reads the script of the
+  type checking page of the documentation clean on each of them.
+  `scripts/check_bare_array_annotations.py` refuses a bare type where it is
+  written, a CI job of its own and `make bare-array-annotations` run
+  it, the minimum-versions job runs `--verifytypes` at each Python's floors,
+  and rule A66 of the contributor guide states it. The junction transmission
+  functions of `vibration` hold the junction's name as the `Junction`
+  literal they hand on, which pyright read as a text.
+
 - **The FDTD engines say what their fields are.** `FDTD2D.p`, `vx` and
   `vy`, and the stresses and velocities of `ElasticFDTD2D` with its
   synthetic pressure, are arrays of the library the engine steps on, a
@@ -4723,6 +4749,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printing; the stamps already committed hold on all four versions, and
   `tests/test_animation_fingerprint.py` pins the print of a fragment that
   carries each kind of empty list, printed the way the older versions print.
+- **Changing the value of a type alias moves no clip.** A clip's fingerprint
+  kept the value and the type parameters of a `type` statement, which Python
+  evaluates only when something asks for the alias's `__value__` and no
+  drawing code does, so typing the array of the legend mark that the plot
+  helpers share marked all 43 clips stale. It reads the alias's name now,
+  as it reads the other annotations it strips, and
+  `tests/test_animation_fingerprint.py` holds that changing the value of an
+  alias a clip's module defines moves no clip.
 - **SonarCloud counts as new the code written since the last release, and its
   findings are fixed rather than outgrown.** The scan named no project version,
   so every analysis since the first, in January 2026, recorded it as "not
@@ -5121,11 +5155,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   choice that no annotation states; rule A59 of the contributor guide
   states it.
 
-- **A function of a number or an array of them returns an array for an array,
-  a zero-dimensional one included, and says so in its signature.** Ninety
-  public functions and methods such as `room.room_constant`,
+- **A function of a number or an array of them returns a `float` for numbers
+  and an array for an array, a zero-dimensional one included, and says so in
+  its signature.** A hundred and fifty-five public functions and methods
+  follow the rule. Ninety of them, such as `room.room_constant`,
   `room.critical_distance`,
-  `fluids.sea_water_sound_speed` and `vibration.evaluation_zone` returned a
+  `fluids.sea_water_sound_speed` and `vibration.evaluation_zone`, returned a
   `float` (or a grade) for a zero-dimensional array, most of them annotated
   `float | ndarray` with no overload, so a typed caller narrowed a value its
   own argument had already fixed. They return a `float` (or a grade) now only
@@ -5141,10 +5176,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `WorkstationBackgroundCorrection` that
   `emission.background_noise_correction_at_workstation` returns.
   `piston_resistance`, `piston_reactance` and `piston_directivity` return a
-  Python `float` for a number, where they returned `numpy.float64`. Sixty-six
-  of them gain overloads, so `room.room_constant(100.0, 0.2)` reads as a
-  `float`, `room.room_constant(100.0, alphas)` as an array whatever the shape
-  of `alphas`, and an `ArrayLike` or a nested list as the union. The heads
+  Python `float` for a number, where they returned `numpy.float64`. The other
+  sixty-five returned a zero-dimensional array or a numpy scalar for
+  numbers: twenty of `building` (`building.mass_law_transmission_loss`,
+  `building.coupling_term`, `building.background_correction` and the
+  structure-borne power and installed-source functions beside them), with
+  `building.surface_pressure_intensity_indicator` and
+  `building.reverberation_index`; twelve of `emission`
+  (`emission.background_noise_correction`, `emission.velocity_level`,
+  `emission.reverberation_parameter` and the others of the sound power and
+  intensity standards); `environment.air_attenuation`,
+  `environment.air_power_attenuation_per_m`,
+  `environment.predicted_prominence` and `environment.impulse_adjustment`;
+  the induction loop functions of `electroacoustics` (`field_strength`,
+  `field_strength_level`, `magnetic_flux_density`, `telecoil_response`) and
+  the `at` and `drive_voltage` methods of `LoopImpedance` and the `at` of
+  `AmplifierFrequencyResponse`; `hearing.age_and_noise_threshold`; the three
+  ISO 354 conversions of `materials`; `room.hard_object_absorption`;
+  `signals.comb_filter_response`; and twelve of `vibration`
+  (`vibration.corner_transmission_coefficient`, `vibration.loss_factor`,
+  `vibration.injected_power`, `vibration.ultimate_strength` and the others of
+  the junction, transfer stiffness and point mobility models). They return a
+  `float` for numbers now, `building.composite_transmission_loss` and
+  `building.total_structure_borne_pressure_level` a `float` when they reduce
+  to one number, and the levels of the `SurveyServiceEquipmentResult` that
+  `building.survey_service_equipment_level` returns are floats for single
+  readings; the values are the same bits.
+  `metrology.microphone_acoustic_impedance` returns the zero-dimensional
+  `complex128` array its annotation names for numbers, where it returned a
+  `numpy.complex128`, as the other complex results of a number do. A hundred
+  and thirty of them have overloads, so `room.room_constant(100.0, 0.2)`
+  reads as a `float`, `room.room_constant(100.0, alphas)` as an array
+  whatever the shape of `alphas`, and an `ArrayLike` or a nested list as the
+  union. The heads
   take their arguments as type parameters bounded by those forms, so that an
   argument whose type holds an explicit `Any` (a bare `np.ndarray`, or what
   `np.array(...)` returns) reads as an array too:
@@ -5160,6 +5224,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   array in one return with no overload saying which, rule A57 states it, the
   API reference shows each head with the bounds of its type parameters, and
   the upgrading guide maps the change.
+
+- **An overload head that promises a float array back takes only the arrays
+  the call reads as real.** The form of several real numbers an overload
+  head of such a function takes (`RealValues`, a sequence of numbers or an
+  array) and the form of a curve's rows (`ArrayRows`) ended in an array of
+  any dtype, so `room.room_constant(100.0, complex_alphas)` read as an
+  `NDArray[np.float64]` to mypy and an array of texts passed the same head,
+  where the call refuses both. The array they take holds truth values,
+  integers or floats, as `real_array` reads it (and, for the rows, an object
+  array holding each row whole): a complex array reads as the union of the
+  last head, and an array of texts is a type error.
 
 - **A multi-panel `.plot()` returns a tuple of axes without `ax`, and every
   plot whose return an argument decides says so in its signature.**

@@ -1252,8 +1252,9 @@ do, where it raised an `AttributeError` from matplotlib.
 A function of a number or an array of them returns a `float` only when every
 argument that decides the shape of its result is a number, a Python or a
 NumPy one, and an array as soon as one of them is a sequence or an array,
-where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array.
-Ninety public functions and methods follow the rule, `room.room_constant`,
+where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array,
+and a zero-dimensional array or a NumPy scalar for numbers. A hundred and
+fifty-five public functions and methods follow the rule, `room.room_constant`,
 `room.critical_distance` and `fluids.sea_water_sound_speed` among them, and
 `vibration.evaluation_zone` follows it with a zone letter where the others
 give a `float`:
@@ -1263,8 +1264,51 @@ give a `float`:
 | `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
 | `emission.local_environmental_correction([0.5])` returned a `float` for any one-element input, as did `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, and the `background_margin_db` field and the `correction` property of the `WorkstationBackgroundCorrection` that `emission.background_noise_correction_at_workstation` returns | each gives a one-element array; hand over `0.5`, not `[0.5]`, to get a number |
 | `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
+| `building.mass_law_transmission_loss(500.0, 10.0)` returned a zero-dimensional array, as did 45 other functions and methods listed below | it returns a Python `float`; `np.asarray(...)` gives an array where one is wanted |
+| `materials.absorption_coefficient(4.0, 2.0, 200.0, 11.0)` returned a `numpy.float64`, as did 16 others listed below | it returns a Python `float`, with no `.shape` or `.dtype` |
+| `building.composite_transmission_loss([10.0, 2.0], [40.0, 25.0])` returned a zero-dimensional array, as did `building.total_structure_borne_pressure_level([30.0, 35.0])` | each returns a `float` when it reduces to one number |
+| `building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)` held a zero-dimensional array in `l_xy` and a `numpy.float64` in `l_xy_nt` and `l_xy_n` | the three levels are Python `float`s for single readings |
+| `metrology.microphone_acoustic_impedance` returned a `numpy.complex128` for numbers, which its `NDArray` annotation did not name | it returns the zero-dimensional `complex128` array, as the other complex results of a number do; `complex(...)` gives the number |
 
-Sixty-six of them gain typed overloads, so a type checker reads
+The functions and methods that returned a zero-dimensional array for numbers
+are, besides `building.mass_law_transmission_loss`: in `building`,
+`background_correction`, `low_frequency_level`,
+`characteristic_reception_plate_power`, `equivalent_blocked_force_level`,
+`equivalent_free_velocity_level`, `source_mobility_from_levels`,
+`structure_borne_power_level`, `transmission_loss_from_coefficient`,
+`coupling_term`, `coupling_term_force_source`,
+`coupling_term_velocity_source`, `installed_power_from_reception_plate`,
+`installed_structure_borne_power_level`,
+`structure_borne_pressure_level_path`, `structure_to_airborne_adjustment`,
+`tapping_machine_characteristic_power_level`,
+`tapping_machine_coupling_term`, `tapping_machine_force_level_estimate` and
+`force_pulse`; in `electroacoustics`, `AmplifierFrequencyResponse.at`; in
+`emission`, `normal_intensity_from_levels`, `reverberation_parameter`,
+`special_room_background_correction`,
+`phase_mismatch_from_residual_index`,
+`residual_index_from_phase_mismatch`, `background_noise_correction`,
+`air_absorption_np_per_m`, `free_field_absorption_correction`,
+`radiated_sound_power_level`, `radiation_factor`, `velocity_level` and
+`velocity_level_from_acceleration`; `environment.air_attenuation`;
+`signals.comb_filter_response`; and in `vibration`,
+`corner_transmission_coefficient`, `straight_transmission_coefficient`,
+`coupling_loss_factor`, `point_connection_coupling_loss_factor`,
+`wave_vibration_reduction_index`, `random_error_percent`,
+`transfer_stiffness_level`, `loss_factor`, `beam_bending_wave_speed`,
+`plate_bending_wave_speed` and `injected_power`. Those that returned a
+NumPy scalar are, besides `materials.absorption_coefficient`:
+`building.surface_pressure_intensity_indicator` and
+`building.reverberation_index`; in `electroacoustics`, `field_strength`,
+`field_strength_level`, `magnetic_flux_density`, `telecoil_response`,
+`LoopImpedance.at` and `LoopImpedance.drive_voltage`; in `environment`,
+`predicted_prominence`, `impulse_adjustment` and
+`air_power_attenuation_per_m`; `hearing.age_and_noise_threshold`;
+`materials.absorption_area` and `materials.power_attenuation_from_alpha`;
+`room.hard_object_absorption`; and `vibration.ultimate_strength`. A
+zero-dimensional array given to any of them gives a zero-dimensional array,
+and the values are the same.
+
+A hundred and thirty of them have typed overloads, so a type checker reads
 `room.room_constant(100.0, 0.2)` as a `float` and
 `room.room_constant(100.0, alphas)` as an array whatever the shape of
 `alphas`; an `ArrayLike` or a nested list reads as the union, which a typed

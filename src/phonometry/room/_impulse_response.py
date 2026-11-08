@@ -208,7 +208,7 @@ class ImpulseResponseResult(OwnsArrays):
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray:
+    ) -> NDArray[Any]:
         """Return the impulse response as an array (optionally recast)."""
         return np.asarray(self.ir, dtype=dtype, copy=copy)
 
@@ -235,7 +235,7 @@ class ImpulseResponseResult(OwnsArrays):
         return tuple(self.ir.shape)
 
     @property
-    def dtype(self) -> np.dtype[Any]:
+    def dtype(self) -> np.dtype[np.float64]:
         return self.ir.dtype
 
     @overload
@@ -274,7 +274,7 @@ def sweep_signal(
     *,
     amplitude: float = 1.0,
     fade: float = 0.01,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Generate an exponential sine sweep (ESS) with exact analytic phase.
 
     The instantaneous frequency rises exponentially from ``f1`` to ``f2``,
@@ -334,7 +334,7 @@ def sweep_signal(
     # that multiplies by f2/f1 over the sweep time.
     k = 2.0 * np.pi * f1 * ts / np.log(ratio)
     phase = k * (ratio ** (t / ts) - 1.0)
-    sweep: np.ndarray = amplitude * np.sin(phase)
+    sweep: NDArray[np.float64] = amplitude * np.sin(phase)
 
     if fade > 0.0:
         sweep = _apply_fade(sweep, fade)
@@ -349,7 +349,7 @@ def inverse_filter(
     *,
     amplitude: float = 1.0,
     fade: float = 0.01,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Build the Farina inverse filter for an exponential sine sweep.
 
     The inverse filter is the time-reversed sweep multiplied by an amplitude
@@ -404,11 +404,11 @@ def inverse_filter(
 
 
 def _farina_deconvolve(
-    rec: np.ndarray,
-    ref: np.ndarray,
+    rec: NDArray[np.float64],
+    ref: NDArray[np.float64],
     fs: float,
     f_range: tuple[float, float] | None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Farina inverse-filter deconvolution (ISO 18233:2006, Figure B.2).
 
     Rebuilds the analytic inverse filter from ``ref`` and convolves it with the
@@ -582,7 +582,7 @@ def impulse_response(
     return ImpulseResponseResult(ir=np.asarray(ir), fs=fs, method=method)
 
 
-def mls_signal(order: int | np.integer[Any]) -> np.ndarray:
+def mls_signal(order: int | np.integer[Any]) -> NDArray[np.float64]:
     """Generate a maximum-length sequence (MLS) of the given order.
 
     A Fibonacci LFSR with primitive-polynomial feedback taps produces a
@@ -695,7 +695,9 @@ def mls_impulse_response(
     return ImpulseResponseResult(ir=out, fs=fs, method="mls")
 
 
-def _warn_alias_tail(ir: np.ndarray, period: int, excitation: str, remedy: str) -> None:
+def _warn_alias_tail(
+    ir: NDArray[np.float64], period: int, excitation: str, remedy: str
+) -> None:
     """Warn when a circularly recovered IR keeps energy at the period end.
 
     A system IR longer than one excitation period aliases back into the
@@ -719,7 +721,9 @@ def _warn_alias_tail(ir: np.ndarray, period: int, excitation: str, remedy: str) 
         )
 
 
-def _periodic_output(ir: np.ndarray, period: int, length: int | None) -> np.ndarray:
+def _periodic_output(
+    ir: NDArray[np.float64], period: int, length: int | None
+) -> NDArray[np.float64]:
     """Trim or periodically extend a one-period IR to ``length`` samples."""
     out_len = length if length is not None else period
     if out_len <= period:
@@ -743,7 +747,9 @@ _GOLAY_MAX_ORDER = 22
 _SHAPED_EDGE_OCTAVES = 1.0 / 6.0
 
 
-def golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]:
+def golay_pair(
+    order: int | np.integer[Any],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Generate a complementary Golay pair of length ``2**order``.
 
     Built with the append recursion of Golay (1961): starting from
@@ -910,11 +916,11 @@ class ShapedSweepResult(OwnsArrays):
         {"f_range": "Hz", "group_delay": "s"}
     )
 
-    signal: np.ndarray
+    signal: NDArray[np.float64]
     fs: float
-    frequencies: np.ndarray
-    magnitude: np.ndarray
-    group_delay: np.ndarray
+    frequencies: NDArray[np.float64]
+    magnitude: NDArray[np.float64]
+    group_delay: NDArray[np.float64]
     f_range: tuple[float, float]
     crest_factor_db: float
 
@@ -959,7 +965,7 @@ class ShapedSweepResult(OwnsArrays):
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray:
+    ) -> NDArray[Any]:
         """Return the sweep samples as an array (optionally recast)."""
         return np.asarray(self.signal, dtype=dtype, copy=copy)
 
@@ -1007,9 +1013,9 @@ class ShapedSweepResult(OwnsArrays):
 
 def _shaped_target_db(
     target: str | tuple[NumericArrayLike, NumericArrayLike],
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
     f_range: tuple[float, float],
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Evaluate the target magnitude, in dB, on the synthesis grid.
 
     Named targets: ``"white"`` is flat; ``"pink"`` falls 3 dB per octave in
@@ -1055,8 +1061,8 @@ def _shaped_target_db(
 
 
 def _band_edge_taper(
-    freqs: np.ndarray, f_range: tuple[float, float], fs: float
-) -> np.ndarray:
+    freqs: NDArray[np.float64], f_range: tuple[float, float], fs: float
+) -> NDArray[np.float64]:
     """Half-cosine band-edge weights (1 inside ``f_range``, 0 far outside).
 
     The tapers roll off over ``_SHAPED_EDGE_OCTAVES`` octaves *outside* the

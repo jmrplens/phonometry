@@ -131,6 +131,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -375,7 +376,9 @@ _SMALL_VOLUME_LAYOUTS: tuple[SmallVolumeLayout, ...] = (
 # ---------------------------------------------------------------------------
 
 
-def field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray:
+def field_strength_level(
+    field_strength_a_per_m: NumericArrayLike,
+) -> NDArray[np.float64]:
     r"""The magnetic field strength level, in dB re 400 mA/m (IEC 60118-4:2014 3.1).
 
     .. math::
@@ -394,7 +397,7 @@ def field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray
     return 20.0 * np.log10(h / REFERENCE_FIELD_STRENGTH_A_PER_M)
 
 
-def field_strength(level: NumericArrayLike) -> np.ndarray:
+def field_strength(level: NumericArrayLike) -> NDArray[np.float64]:
     r"""The magnetic field strength of a level in dB re 400 mA/m, in A/m.
 
     The inverse of :func:`field_strength_level`: -12 dB is the 100 mA/m of
@@ -412,7 +415,9 @@ def field_strength(level: NumericArrayLike) -> np.ndarray:
     return REFERENCE_FIELD_STRENGTH_A_PER_M * 10.0 ** (level / 20.0)
 
 
-def magnetic_flux_density(field_strength_a_per_m: NumericArrayLike) -> np.ndarray:
+def magnetic_flux_density(
+    field_strength_a_per_m: NumericArrayLike,
+) -> NDArray[np.float64]:
     r"""The magnetic flux density in air of a field strength (IEC 60118-4:2014 E.6).
 
     :math:`B = \mu_0 \mu_\mathrm{r} H` with :math:`\mu_\mathrm{r} = 1` in air,
@@ -432,7 +437,7 @@ def magnetic_flux_density(field_strength_a_per_m: NumericArrayLike) -> np.ndarra
     return _MU_0 * h
 
 
-def telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray:
+def telecoil_response(angle_deg: NumericArrayLike) -> NDArray[np.float64]:
     r"""The relative response of a telecoil off its axis, in dB (IEC 60118-4:2014 E.2).
 
     A telecoil follows a cosine law, :math:`20\lg|\cos\theta|`: 3 dB down at
@@ -459,7 +464,7 @@ def telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray:
         raise ValueError(msg)
     from_null = np.abs(90.0 - np.mod(angle, 180.0))
     with np.errstate(divide="ignore"):
-        response: np.ndarray = 20.0 * np.log10(np.sin(np.radians(from_null)))
+        response: NDArray[np.float64] = 20.0 * np.log10(np.sin(np.radians(from_null)))
     return response
 
 
@@ -487,8 +492,8 @@ class FieldStrengthReading(OwnsArrays):
 
     fs: int
     weighting: Weighting
-    times: np.ndarray
-    levels: np.ndarray
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     max_level: float
     equivalent_level: float
 
@@ -565,7 +570,7 @@ def field_strength_meter(
 # ---------------------------------------------------------------------------
 
 
-def band_limit_response(frequencies: NumericArrayLike) -> np.ndarray:
+def band_limit_response(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     r"""The theoretical response of the band limiting of the pink noise, in dB.
 
     6.4 band-limits the pink noise with third-order Butterworth high-pass and
@@ -592,7 +597,9 @@ def band_limit_response(frequencies: NumericArrayLike) -> np.ndarray:
     return 10.0 * np.log10(power)
 
 
-def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.ndarray:
+def _band_limited_noise(
+    fs: int, n: int, rms: float, seed: int | None
+) -> NDArray[np.float64]:
     """``n`` samples of the pink noise of 6.4 at an RMS of ``rms``."""
     from ..signals import noise_signal
 
@@ -618,7 +625,7 @@ def loop_test_noise(
     *,
     rms: float = 1.0,
     seed: int | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The pink noise test signal of IEC 60118-4:2014 6.4.
 
     Pink noise band-limited by third-order Butterworth high-pass and low-pass
@@ -661,12 +668,12 @@ def loop_test_noise(
     return _band_limited_noise(rate, n, level, seed)
 
 
-def _zero_crossings(x: np.ndarray) -> np.ndarray:
+def _zero_crossings(x: NDArray[np.float64]) -> NDArray[np.intp]:
     """Indices ``k`` where the record changes sign between ``k`` and ``k + 1``."""
     return np.flatnonzero((x[:-1] < 0.0) != (x[1:] < 0.0))
 
 
-def _nearer_zero(x: np.ndarray, k: int) -> int:
+def _nearer_zero(x: NDArray[np.float64], k: int) -> int:
     """Of the two samples either side of the crossing at ``k``, the smaller one."""
     return k + 1 if abs(real_number(x[k + 1], "x")) < abs(real_number(x[k], "x")) else k
 
@@ -678,7 +685,7 @@ def combi_signal(
     noise_s: float = _COMBI_MIN_NOISE_S,
     n_cycles: int | np.integer[Any] = 1,
     seed: int | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The combi signal of IEC 60118-4:2014 6.6 and Table 2.
 
     Bursts of a 1 kHz sine at an RMS of 1, with 5 ms rise and fall times,
@@ -741,7 +748,7 @@ def combi_signal(
     spare = round(0.02 * rate)
     noise_rms = 10.0 ** (_COMBI_NOISE_RELATIVE_DB / 20.0)
     noise = _band_limited_noise(rate, n_cycles * (n_noise + 2 * spare), noise_rms, seed)
-    pieces: list[np.ndarray] = []
+    pieces: list[NDArray[np.float64]] = []
     for k in range(n_cycles):
         stretch = noise[k * (n_noise + 2 * spare) : (k + 1) * (n_noise + 2 * spare)]
         crossings = _zero_crossings(stretch)
@@ -759,7 +766,7 @@ def combi_signal(
 
 def small_volume_measurement_points(
     layout: PointLayout,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The measurement points of a disabled refuge or a counter (clause 9 as amended).
 
     ``"refuge_small"`` is Figure 2 a), for a magnetic field source of small
@@ -814,7 +821,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
         at low frequencies, which withholds the 22 dB relaxation.
     """
 
-    noise_levels: np.ndarray
+    noise_levels: NDArray[np.float64]
     noise_is_tonal: bool
 
     @property
@@ -1080,7 +1087,7 @@ class InductionLoopVerification(RichDisplay):
         return plot_induction_loop_verification(self, ax, language=language, **kwargs)
 
 
-def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
+def _levels(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A non-empty array of finite, real levels, of any shape."""
     arr = real_array(values, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
@@ -1090,7 +1097,11 @@ def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
 
 
 def _band_requirement(
-    name: RequirementName, clause: str, values: np.ndarray, low: float, high: float
+    name: RequirementName,
+    clause: str,
+    values: NDArray[np.float64],
+    low: float,
+    high: float,
 ) -> LoopRequirement:
     """A requirement with the same limits for every value."""
     flat = tuple(real_number(v, "values") for v in values.ravel())
@@ -1274,7 +1285,7 @@ def verify_induction_loop_system(
 
 
 def _height_coverage(
-    levels: np.ndarray, heights_m: NumericArrayLike | None, name: str
+    levels: NDArray[np.float64], heights_m: NumericArrayLike | None, name: str
 ) -> None:
     """Refuse a useful volume of 9.4 that leaves out a height of 9.2 or 9.3.
 
@@ -1507,8 +1518,8 @@ class AmplifierOverloadVerification(OwnsArrays):
     test_current_a: float
     doubling_frequency_hz: float
     end_frequency_hz: float
-    frequencies: np.ndarray
-    voltage_v: np.ndarray
+    frequencies: NDArray[np.float64]
+    voltage_v: NDArray[np.float64]
     test_frequency_voltage_v: float
     compliance_voltage_v: float
 
@@ -1634,7 +1645,7 @@ def verify_amplifier_overload(
             )
             raise ValueError(msg)
 
-    def voltage(f: float | np.ndarray) -> np.ndarray:
+    def voltage(f: float | NDArray[np.float64]) -> NDArray[np.float64]:
         gain = (
             np.ones_like(real_array(f, "f"))
             if current_response is None

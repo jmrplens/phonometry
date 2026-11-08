@@ -304,7 +304,7 @@ def _critical_frequency(thickness: float, wave_speed: float) -> float:
 
 def _junction(junction: object) -> tuple[float, float, float | None]:
     """Validated ``(J1, J2, J3)`` for a perpendicular junction name."""
-    name = require_choice(junction, "junction", tuple(_JUNCTIONS))
+    name: Junction = require_choice(junction, "junction", tuple(_JUNCTIONS))
     return _JUNCTIONS[name]
 
 
@@ -1049,7 +1049,9 @@ def junction_transmission(
     :raises TypeError: if ``junction`` is not a text, or ``angles_deg`` holds a text or
         a value that is not a real number.
     """
-    name = require_choice(junction, "junction", tuple(_JUNCTIONS))
+    # Declared, since pyright reads the call alone as a text and the overload
+    # heads and the record below take the Junction it hands back.
+    name: Junction = require_choice(junction, "junction", tuple(_JUNCTIONS))
     params = junction_wave_parameters(
         thickness1_m,
         wave_speed1,

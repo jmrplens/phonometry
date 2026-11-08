@@ -2210,6 +2210,13 @@ def _class_receiver(node: ast.FunctionDef | ast.AsyncFunctionDef | None) -> str 
     return positional[0].arg if positional else None
 
 
+#: What one reading of a parameter's routes is kept by
+#: (:meth:`Reader._known_routes`): the function, the parameter, the part of
+#: the rule, and the class of the instance ``self`` holds when it is not the
+#: class the method is written in (:attr:`Reader._building`).
+_RouteKey = tuple[str, str, str, str, str | None]
+
+
 class Reader:
     """Follows a parameter from a public function to where its body admits it."""
 
@@ -2232,9 +2239,17 @@ class Reader:
         #: (:func:`_landing`), read once for each call, as every route through
         #: it asks again.
         self._stars: dict[ast.Call, _Spread] = {}
-        self._memo: dict[tuple[str, str, str, str], list[tuple[str, int, int]]] = {}
-        self._active: set[tuple[str, str, str, str]] = set()
+        self._memo: dict[_RouteKey, list[tuple[str, int, int]]] = {}
+        self._active: set[_RouteKey] = set()
         self._cut = False
+        #: The class of the instance ``self`` holds in the method being read,
+        #: when a call builds one of a class that inherits the method: a
+        #: call of ``Quiet`` runs ``_Wrapper.__init__`` with ``self`` a
+        #: ``Quiet``, whose order the hook and ``super()`` are looked up in.
+        self._building: str | None = None
+        #: The class each class call builds, by the call and the
+        #: ``__init__`` it reaches (:meth:`_callees`).
+        self._built: dict[tuple[int, str], str] = {}
         self._public: frozenset[str] | None = None
         self._public_records: frozenset[str] | None = None
         self._inputs: frozenset[str] | None = None
@@ -2411,10 +2426,20 @@ class Reader:
         own = self._own_method(function, func, call)
         if own is not None:
             return [own] if own[0] else []
-        found = [
-            self._resolved_callee(target, func, ends)
-            for target in self.package.call_targets(function, func, call)
-        ]
+        found: list[tuple[str, bool] | None] = []
+        classes = self.annotations.classes
+        for target in self.package.call_targets(function, func, call):
+            resolved = self._resolved_callee(target, func, ends)
+            if (
+                resolved is not None
+                and target in classes
+                and resolved[0].endswith(".__init__")
+                and resolved[0] != f"{target}.__init__"
+            ):
+                # A call of a class that inherits its ``__init__`` builds an
+                # instance of that class, which the ``__init__`` runs on.
+                self._built[id(call), resolved[0]] = target
+            found.append(resolved)
         found.extend(
             self._declared_beside(target, func)
             for target in self.package.call_targets(function, func, call)
@@ -2480,12 +2505,17 @@ class Reader:
             func.value, ast.Name
         ) and func.value.id == _class_receiver(function.implementation)
         after: str | None = None
+        written_in = owner
         if inherited:
             after = self._super_start(function, func.value, call, owner)
             order = self._super_instance(function, func.value, call, owner)
             if after is None or order is None:
                 return "", False
             owner = order
+        if self._building is not None and owner == written_in and not on_the_class:
+            # ``self`` is an instance of the class built, which inherits the
+            # method: ``super()`` and ``self.name`` read its order.
+            owner = self._building
         if func.attr == "__init__":
             runs = self._initializer(owner, after=after)
             if runs is None:
@@ -2774,7 +2804,8 @@ class Reader:
         does; what was read along it is not kept, so another way in reads it
         whole.
         """
-        key = (function.module, function.qualname, name, target.kind)
+        building = self._building if self._holds_self(function) else None
+        key = (function.module, function.qualname, name, target.kind, building)
         if key in self._memo:
             return self._memo[key]
         if key in self._active:
@@ -2782,12 +2813,39 @@ class Reader:
             return []
         self._active.add(key)
         outer, self._cut = self._cut, False
-        found = list(self._read_routes(function, name, target))
+        saved, self._building = self._building, building
+        try:
+            found = list(self._read_routes(function, name, target))
+        finally:
+            self._building = saved
         self._active.discard(key)
         if not self._cut:
             self._memo[key] = found
         self._cut = self._cut or outer
         return found
+
+    def _holds_self(self, function: overloads.Function) -> bool:
+        """Whether the instance being built (:attr:`_building`) is one the
+        method *function* may be run on: its class is in the order of the
+        class built.
+        """
+        building = self._building
+        if building is None or function.owner is None:
+            return False
+        owner = f"{function.module}.{function.owner}"
+        return owner != building and owner in linearized(
+            self.package, self.annotations, building
+        )
+
+    def _instance_of(self, function: overloads.Function, call: ast.Call) -> str | None:
+        """The class of the instance a call builds or hands on
+        (:func:`_instance_built`), the class being built
+        (:attr:`_building`) when the method is one it inherits.
+        """
+        built = _instance_built(function, call)
+        if built is not None and self._building is not None:
+            return self._building
+        return built
 
     def _read_routes(
         self, function: overloads.Function, name: str, target: Target
@@ -2873,24 +2931,39 @@ class Reader:
             spread = stars[call]
         else:
             spread = stars[call] = _landing(call)
-        handed = (
-            self._constructed(
-                reached,
-                (positions, spread),
-                keywords,
-                target,
-                instance=_instance_built(function, call),
-                instance_given=not bound_self,
-            )
-            if reached in self.annotations.classes
-            else self._handed(
-                reached,
-                (positions, spread),
-                keywords,
-                bound=bound_self,
-                target=target,
-            )
+        instance = self._instance_of(function, call)
+        # The instance the callee runs on: the one a class call builds, or
+        # the one the call hands on, ``self`` of a method or the record
+        # built; none for a call of anything else.
+        on_self = (
+            self._own_method(function, call.func, call) is not None
+            or instance is not None
         )
+        building = self._built.get(
+            (id(call), reached), instance or (self._building if on_self else None)
+        )
+        saved, self._building = self._building, building
+        try:
+            handed = list(
+                self._constructed(
+                    reached,
+                    (positions, spread),
+                    keywords,
+                    target,
+                    instance=instance,
+                    instance_given=not bound_self,
+                )
+                if reached in self.annotations.classes
+                else self._handed(
+                    reached,
+                    (positions, spread),
+                    keywords,
+                    bound=bound_self,
+                    target=target,
+                )
+            )
+        finally:
+            self._building = saved
         for how, deeper, hops in handed:
             if level + deeper <= _DEEPEST:
                 yield how, level + deeper, hops

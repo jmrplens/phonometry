@@ -2541,6 +2541,81 @@ def test_an_init_option_is_read_through_the_name_that_holds_it(
     assert sorted((f.function, f.parameter) for f in found) == expected
 
 
+def test_an_inherited_init_runs_the_hook_of_the_class_it_builds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of ``_Quiet`` runs ``_Wrapper.__init__`` on a ``_Quiet``, and
+    the ``__post_init__`` the generated ``__init__`` of ``_Hooked`` calls
+    through ``super().__init__(n)`` is ``_Quiet``'s, which checks nothing;
+    a call of ``_Loud`` runs ``_PlainWrapper.__init__`` on a ``_Loud``, whose
+    own hook checks the count. The run agrees: only ``loud`` checks it.
+
+    Routes were read for the function alone, so the hook was looked up in
+    the order of the class the ``__init__`` is written in: ``quiet`` was
+    reported through ``_Hooked``'s hook, which never runs, and ``loud``
+    passed.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["loud", "quiet"]
+
+
+            @dataclass(frozen=True)
+            class _Hooked:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            class _Wrapper(_Hooked):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class _Quiet(_Wrapper):
+                def __post_init__(self) -> None:
+                    pass
+
+
+            @dataclass(frozen=True)
+            class _Plain:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    pass
+
+
+            class _PlainWrapper(_Plain):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class _Loud(_PlainWrapper):
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            def quiet(n: int) -> _Quiet:
+                return _Quiet(n)
+
+
+            def loud(n: int) -> _Loud:
+                return _Loud(n)
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [("loud", "n")]
+
+
 def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
     tmp_path: pathlib.Path,
 ) -> None:

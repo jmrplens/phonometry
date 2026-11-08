@@ -1375,6 +1375,26 @@ def test_a_print_bound_to_something_else_is_not_said_never_to_run(
     assert "the page never runs this print" in failure
 
 
+def test_a_complex_number_spelled_across_the_page_s_text_is_one_value(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A complex number whose parts the code computes and whose sign and
+    ``j`` the page writes is the one value the reader reads; a part the
+    page's own text writes stays its label, which a comment may leave out.
+    """
+    code = (
+        "a = 1.0\n"
+        "b = 2.5\n"
+        'print(f"{a} + {b}j")  # 1.0 + 2.5j\n'
+        'print(f"{a}{b:+}j")  # 1.0+2.5j\n'
+        'print(f"{a} + 2.5j")  # 1.0\n'
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = _page(tmp_path, code.replace("# 1.0 + 2.5j", "# 1.0 + 2.6j"), name="w.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "the comment says 1.0+2.6j where the print wrote 1.0+2.5j" in failure
+
+
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.

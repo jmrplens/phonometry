@@ -855,30 +855,31 @@ def _promises(script: str, tree: ast.Module) -> list[_Promise]:
 
 def _parts(text: str, *, label: bool = False, segment: int = 0) -> list[_Part]:
     """The values, words and ellipses of *text*, in order, each in *segment*."""
-    parts: list[_Part] = []
+    return [part for _, _, part in _located_parts(text, label=label, segment=segment)]
+
+
+def _located_parts(
+    text: str, *, label: bool = False, segment: int = 0
+) -> list[tuple[int, int, _Part]]:
+    """:func:`_parts`, each with where it opens and closes in *text*."""
+    parts: list[tuple[int, int, _Part]] = []
     at = 0
     for match in _OUTPUT_PART.finditer(text):
         before, at = text[at : match.start()], match.end()
         if match.group("value") is not None:
-            parts.append(
-                _Part(
-                    "value",
-                    match.group("value").replace(" ", ""),
-                    label,
-                    rough=match.group("rough") is not None,
-                    cut=match.group("cut") is not None,
-                    before=before,
-                    segment=segment,
-                )
+            part = _Part(
+                "value",
+                match.group("value").replace(" ", ""),
+                label,
+                rough=match.group("rough") is not None,
+                cut=match.group("cut") is not None,
+                before=before,
+                segment=segment,
             )
-        elif match.group("word") is not None:
-            parts.append(
-                _Part("word", match.group(), label, before=before, segment=segment)
-            )
-        elif match.group("gap") is not None:
-            parts.append(
-                _Part("gap", match.group(), label, before=before, segment=segment)
-            )
+        else:
+            kind = "word" if match.group("word") is not None else "gap"
+            part = _Part(kind, match.group(), label, before=before, segment=segment)
+        parts.append((match.start(), match.end(), part))
     return parts
 
 
@@ -1026,16 +1027,90 @@ def _stretches(calls: Sequence[_Call]) -> list[tuple[str, bool]]:
 def _written_parts(calls: Sequence[_Call]) -> list[_Part]:
     """The parts of what a print wrote over all its calls (:func:`_stretches`),
     a ``"line"`` part where it ended a line, its own text marked as a label
-    and each part in the stretch it stands in. A minus sign (U+2212) reads as
-    a hyphen, as it does in a comment.
+    and each part in the stretch it stands in, a complex number written
+    across stretches read as one value (:func:`_line_parts`). A minus sign
+    (U+2212) reads as a hyphen, as it does in a comment.
     """
     out: list[_Part] = []
+    line: list[tuple[str, bool, int]] = []
     for segment, (text, label) in enumerate(_stretches(calls)):
-        for number, line in enumerate(text.replace("\u2212", "-").split("\n")):
+        for number, piece in enumerate(text.replace("\u2212", "-").split("\n")):
             if number:
+                out += _line_parts(line)
+                line = []
                 out.append(_Part("line", "\n", segment=segment))
-            out += _parts(line, label=label, segment=segment)
-    return out
+            if piece:
+                line.append((piece, label, segment))
+    return out + _line_parts(line)
+
+
+#: A complex number as a print may spell one across the page's own text and
+#: the values its code computes: ``f"{a} + {b}j"``, ``f"{a}{b:+}j"``.
+_SPELLED_COMPLEX = re.compile(rf"{_SIGN}{_REAL} *[-+] *{_REAL}j")
+
+
+def _line_parts(pieces: Sequence[tuple[str, bool, int]]) -> list[_Part]:
+    """The parts of one line of what a print wrote, from the *pieces* of its
+    stretches it is written in, each with whether the page's own text wrote
+    it and the stretch it stands in.
+
+    A complex number whose two parts the code computed and whose sign and
+    ``j`` the page's own text writes around them, as ``f"{a} + {b}j"`` does,
+    is the one value the reader reads there, not two values and a label: it
+    is read as a value the code computed, in the stretch of its real part.
+    """
+    located: list[tuple[int, int, _Part]] = []
+    at = 0
+    for text, label, segment in pieces:
+        located += [
+            (at + start, at + end, part)
+            for start, end, part in _located_parts(text, label=label, segment=segment)
+        ]
+        at += len(text)
+    if len(pieces) < 2:
+        return [part for _, _, part in located]
+    whole = "".join(text for text, _, _ in pieces)
+    out: list[_Part] = []
+    index = 0
+    for match in _SPELLED_COMPLEX.finditer(whole):
+        while index < len(located) and located[index][0] < match.start():
+            out.append(located[index][2])
+            index += 1
+        inside = index
+        while inside < len(located) and located[inside][1] <= match.end():
+            inside += 1
+        covered = located[index:inside]
+        if _spells_complex(covered, match.start(), match.end()):
+            real = covered[0][2]
+            out.append(
+                _Part(
+                    "value",
+                    match.group().replace(" ", ""),
+                    before=real.before,
+                    segment=real.segment,
+                )
+            )
+            index = inside
+    return out + [part for _, _, part in located[index:]]
+
+
+def _spells_complex(
+    covered: Sequence[tuple[int, int, _Part]], start: int, end: int
+) -> bool:
+    """Whether the parts *covered*, each where it opens and closes in a line,
+    are a complex number spelled from *start* to *end* (:data:`_SPELLED_COMPLEX`):
+    its real and its imaginary part, both computed, and at most the page's
+    ``j`` after them, opening and closing where it does.
+    """
+    parts = [part for _, _, part in covered]
+    if len(parts) < 2 or (covered[0][0], covered[-1][1]) != (start, end):
+        return False
+    real, imaginary, *rest = parts
+    if any(part.kind != "value" or part.label for part in (real, imaginary)):
+        return False
+    if not rest:
+        return imaginary.text.endswith("j")
+    return [(part.kind, part.text) for part in rest] == [("word", "j")]
 
 
 def _read_number(text: str) -> Decimal | None:

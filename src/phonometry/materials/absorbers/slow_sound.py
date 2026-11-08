@@ -67,13 +67,14 @@ phonometry (a passive medium has :math:`\operatorname{Im}(k) < 0`):
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy.optimize import root
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_complex_or_array
 from ..._internal.validation import (
     real_number,
     require_choice,
@@ -93,7 +94,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real
+    from ..._internal.types import NumericArrayLike, Real, RealScalar, RealValues
     from ...fluids import Fluid
 
 Geometry = Literal["square", "slit"]
@@ -446,6 +447,48 @@ def _square_resonator_ducts(
     return rho_n, kap_n, rho_c, kap_c, z_n, z_c, dl
 
 
+@overload
+def helmholtz_resonator_impedance[S: RealScalar](
+    frequency: S,
+    resonator: HelmholtzResonator,
+    *,
+    slit_height_m: float | None = ...,
+    lattice_step_m: float | None = ...,
+    end_correction: bool = ...,
+    geometry: Geometry = ...,
+    fluid: Fluid = ...,
+    n_sum_terms: int | np.integer[Any] = ...,
+) -> complex: ...
+
+
+@overload
+def helmholtz_resonator_impedance[V: RealValues](
+    frequency: V,
+    resonator: HelmholtzResonator,
+    *,
+    slit_height_m: float | None = ...,
+    lattice_step_m: float | None = ...,
+    end_correction: bool = ...,
+    geometry: Geometry = ...,
+    fluid: Fluid = ...,
+    n_sum_terms: int | np.integer[Any] = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def helmholtz_resonator_impedance[A: NumericArrayLike](
+    frequency: A,
+    resonator: HelmholtzResonator,
+    *,
+    slit_height_m: float | None = ...,
+    lattice_step_m: float | None = ...,
+    end_correction: bool = ...,
+    geometry: Geometry = ...,
+    fluid: Fluid = ...,
+    n_sum_terms: int | np.integer[Any] = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def helmholtz_resonator_impedance(
     frequency: NumericArrayLike,
     resonator: HelmholtzResonator,
@@ -456,7 +499,7 @@ def helmholtz_resonator_impedance(
     geometry: Geometry = "square",
     fluid: Fluid = ABSORBER_AIR,
     n_sum_terms: int | np.integer[Any] = _DUCT_TERMS,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
 
     With the default ``geometry="square"`` the neck and cavity are square
@@ -499,8 +542,9 @@ def helmholtz_resonator_impedance(
         density ``rho0``, viscosity ``eta``, Prandtl number ``Pr``, ratio of
         specific heats ``gamma`` and static pressure ``P0`` are read from it.
     :param n_sum_terms: Transverse modes kept per axis in the duct series.
-    :return: Complex acoustic impedance ``Z_HR``, in Pa s/m3, shaped like
-        ``frequency``.
+    :return: Complex acoustic impedance ``Z_HR``, in Pa s/m3, shaped like ``frequency``.
+        A ``complex`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises TypeError: if ``lattice_step_m`` or ``slit_height_m`` is not a single
         number, or ``frequency`` holds a text or a value that is not a real number, or
         ``geometry`` is not a text.
@@ -541,7 +585,7 @@ def helmholtz_resonator_impedance(
         cos_n * cos_c - z_n * k_n * dl * cos_n * sin_c / z_c - z_n * sin_n * sin_c / z_c
     )
     den = sin_n * cos_c / z_n - k_n * dl * sin_n * sin_c / z_c + cos_n * sin_c / z_c
-    return np.asarray(-1j * num / den, dtype=np.complex128)
+    return as_complex_or_array(-1j * num / den, like=(frequency,))
 
 
 # ---------------------------------------------------------------------------

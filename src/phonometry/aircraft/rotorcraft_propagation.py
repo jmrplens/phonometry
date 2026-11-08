@@ -54,11 +54,12 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_scalar,
     real_array,
@@ -81,7 +82,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import GroundClass, NumericArrayLike
+    from .._internal.types import GroundClass, NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "MeanGroundPlaneResult",
@@ -421,18 +422,32 @@ class MeanGroundPlaneResult(OwnsArrays):
         require_ranks(self, distances_m=1, heights_m=1)
         require_same_length(self, "distances_m", "heights_m", axis="section vertex")
 
-    def height(self, distance_m: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def height[S: RealScalar](self, distance_m: S) -> float: ...
+
+    @overload
+    def height[V: RealValues](self, distance_m: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def height[A: NumericArrayLike](
+        self,
+        distance_m: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def height(self, distance_m: NumericArrayLike) -> float | NDArray[np.float64]:
         r"""The plane height :math:`a\,d + b` at ``distance_m``, in metres.
 
         :param distance_m: Distance :math:`d` along the section, in metres
             (scalar or array).
-        :return: The height of the plane at each distance, in metres.
+        :return: The height of the plane at each distance, in metres. A ``float`` for a
+            number, an array for a sequence or an array, a zero-dimensional one
+            included.
         :raises TypeError: if ``distance_m`` holds a text or a value that is not a real
             number.
         """
-        return np.asarray(
+        return as_float_or_array(
             self.slope * real_array(distance_m, "distance_m") + self.intercept,
-            dtype=np.float64,
+            like=(distance_m,),
         )
 
     def equivalent_height(self, distance_m: float, height_m: float) -> float:

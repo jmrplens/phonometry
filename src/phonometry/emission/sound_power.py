@@ -85,7 +85,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.sound_power import _a_weighting_corrections
-from .._internal.types import ReportEngine, as_float_or_array
+from .._internal.types import ReportEngine, as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
@@ -1512,7 +1512,7 @@ class SoundEnergyResult(OwnsArrays):
 
 def mean_single_event_level(
     levels: NumericArrayLike, *, n_events: int | np.integer[Any] | None = None
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 
     Two ways of measuring :math:`N_\mathrm{e}` sound emission events reach the
@@ -1546,11 +1546,16 @@ def mean_single_event_level(
     :param n_events: ``None`` when each entry of the first axis is one event,
         else the number of events the single measurement encompasses.
     :return: The level of one event, in decibels: ``levels`` less its first
-        axis for ``n_events=None``, the shape of ``levels`` otherwise.
+        axis for ``n_events=None``, a ``float`` when that leaves one number;
+        otherwise the shape of ``levels``, a ``float`` for a number and an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-finite levels, an empty first axis or a
         non-positive ``n_events``.
     """
-    return _single_event_mean(levels, n_events, name="levels")
+    one_event = _single_event_mean(levels, n_events, name="levels")
+    if n_events is None:
+        return as_float_if_reduced(one_event)
+    return as_float_or_array(one_event, like=(levels,))
 
 
 def _static_pressure_at_altitude(altitude: float) -> float:

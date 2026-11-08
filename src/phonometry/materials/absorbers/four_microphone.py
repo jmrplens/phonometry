@@ -29,12 +29,13 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     complex_array,
     real_array,
@@ -57,7 +58,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real
+    from ..._internal.types import NumericArrayLike, Real, RealScalar, RealValues
 
 Shape = Literal["circular", "rectangular", "square"]
 
@@ -108,26 +109,81 @@ __all__ = [
 # Air properties. The ISO 10534-2 pair lives with the two-microphone method;
 # both pairs take degrees Celsius.
 # ---------------------------------------------------------------------------
-def speed_of_sound_astm_e2611(*, temperature_c: NumericArrayLike) -> Real:
+@overload
+def speed_of_sound_astm_e2611[S: RealScalar](*, temperature_c: S) -> float: ...
+
+
+@overload
+def speed_of_sound_astm_e2611[V: RealValues](
+    *,
+    temperature_c: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def speed_of_sound_astm_e2611[A: NumericArrayLike](
+    *,
+    temperature_c: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def speed_of_sound_astm_e2611(
+    *, temperature_c: NumericArrayLike
+) -> float | NDArray[np.float64]:
     r"""Speed of sound in air (ASTM E2611-19, Eq. (4)).
 
     :math:`c = 20.047 \sqrt{273.15 + T}`.
 
     :param temperature_c: Room temperature, in **degrees Celsius**.
-    :return: Speed of sound ``c``, in metres per second.
+    :return: Speed of sound ``c``, in metres per second. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if any temperature is at or below -273.15 degC.
     :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
         number.
     """
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
-    return np.asarray(_ASTM_C_CONST * np.sqrt(_ASTM_T0 + t), dtype=np.float64)
+    return as_float_or_array(
+        _ASTM_C_CONST * np.sqrt(_ASTM_T0 + t), like=(temperature_c,)
+    )
+
+
+@overload
+def air_density_astm_e2611[S1: RealScalar, S2: RealScalar](
+    *,
+    temperature_c: S1,
+    static_pressure_kpa: S2 = ...,
+) -> float: ...
+
+
+@overload
+def air_density_astm_e2611[V: RealValues, A2: NumericArrayLike](
+    *,
+    temperature_c: V,
+    static_pressure_kpa: A2 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_density_astm_e2611[S1: RealScalar, V: RealValues](
+    *,
+    temperature_c: S1,
+    static_pressure_kpa: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_density_astm_e2611[A1: NumericArrayLike, A2: NumericArrayLike](
+    *,
+    temperature_c: A1,
+    static_pressure_kpa: A2 = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def air_density_astm_e2611(
     *,
     temperature_c: NumericArrayLike,
     static_pressure_kpa: NumericArrayLike = _ASTM_P_REF,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Air density (ASTM E2611-19, Eq. (5)).
 
     :math:`\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}`.
@@ -135,7 +191,9 @@ def air_density_astm_e2611(
     :param temperature_c: Room temperature, in **degrees Celsius**.
     :param static_pressure_kpa: Atmospheric pressure ``P``, in
         **kilopascals** (default 101.325 kPa).
-    :return: Air density ``rho``, in kilograms per cubic metre.
+    :return: Air density ``rho``, in kilograms per cubic metre. A ``float`` when
+        ``temperature_c`` and ``static_pressure_kpa`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
     :raises TypeError: if ``static_pressure_kpa`` or ``temperature_c`` holds a text or a
@@ -146,9 +204,9 @@ def air_density_astm_e2611(
     if np.any(p <= 0.0):
         msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
-    return np.asarray(
+    return as_float_or_array(
         _ASTM_RHO_REF * (p / _ASTM_P_REF) * (_ASTM_T0 / (_ASTM_T0 + t)),
-        dtype=np.float64,
+        like=(temperature_c, static_pressure_kpa),
     )
 
 

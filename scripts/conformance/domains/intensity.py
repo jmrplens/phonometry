@@ -341,9 +341,9 @@ def _chk_sound_energy_identity_iso3744() -> Outcome:
     "One measurement encompassing Ne = 5 events is 10 lg 5 above one event",
 )
 def _chk_sound_energy_events_eq20() -> Outcome:
-    level = ph.emission.mean_single_event_level(np.array([90.0]), n_events=5)
+    level = ph.emission.mean_single_event_level(90.0, n_events=5)
     return numeric(
-        10.0 * math.log10(5.0), 90.0 - float(level[0]), 1e-12, unit="dB", places=6
+        10.0 * math.log10(5.0), 90.0 - float(level), 1e-12, unit="dB", places=6
     )
 
 

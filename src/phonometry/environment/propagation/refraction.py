@@ -50,12 +50,13 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import march_rays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -74,7 +75,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
@@ -142,15 +143,31 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
         require_ranks(self, heights_m=1, speeds_of_sound=1)
         require_same_length(self, "heights_m", "speeds_of_sound", axis="profile node")
 
-    def speed_at(self, height_m: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def speed_at[S: RealScalar](self, height_m: S) -> float: ...
+
+    @overload
+    def speed_at[V: RealValues](self, height_m: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def speed_at[A: NumericArrayLike](
+        self,
+        height_m: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def speed_at(self, height_m: NumericArrayLike) -> float | NDArray[np.float64]:
         """Piecewise-linear effective sound speed at one or more heights.
 
+        :param height_m: Height above the ground, in metres.
+        :return: The effective sound speed at each height, in metres per second. A
+            ``float`` for a number, an array for a sequence or an array, a
+            zero-dimensional one included.
         :raises TypeError: if ``height_m`` holds a text or a value that is not a real
             number.
         """
         z = real_array(height_m, "height_m")
-        return np.asarray(
-            np.interp(z, self.heights_m, self.speeds_of_sound), dtype=np.float64
+        return as_float_or_array(
+            np.interp(z, self.heights_m, self.speeds_of_sound), like=(height_m,)
         )
 
     def plot(

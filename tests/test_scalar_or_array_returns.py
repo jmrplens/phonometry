@@ -38,6 +38,7 @@ import pytest
 
 import phonometry
 from phonometry import (
+    aircraft,
     broadcast,
     building,
     electroacoustics,
@@ -154,6 +155,11 @@ def _cases() -> tuple[Case, ...]:
         frequencies=[50.0, 100.0, 1000.0, 8000.0],
         output_current_a=[1.0, 1.9, 2.0, 1.5],
     )
+    resonator = materials.HelmholtzResonator(
+        neck_length_m=0.01, neck_side_m=0.01, cavity_length_m=0.05, cavity_side_m=0.05
+    )
+    plane = aircraft.mean_ground_plane([0.0, 100.0, 200.0], [0.0, 1.0, 3.0])
+    profile = environment.linear_sound_speed_profile(0.1)
     return (
         Case(
             broadcast.channel_weight,
@@ -1115,6 +1121,213 @@ def _cases() -> tuple[Case, ...]:
             {"name": "Wb", "frequencies": 500.0},
             ("frequencies",),
         ),
+        Case(
+            materials.apply_microphone_calibration,
+            {"h12_uncorrected": 0.5, "calibration_factor": 1.1},
+            ("h12_uncorrected", "calibration_factor"),
+            single=complex,
+        ),
+        Case(
+            materials.microphone_calibration_factor,
+            {"h12_config1": 0.5, "h12_config2": 0.4},
+            ("h12_config1", "h12_config2"),
+            single=complex,
+        ),
+        Case(
+            materials.normalized_surface_admittance,
+            {"reflection": 0.5},
+            ("reflection",),
+            single=complex,
+        ),
+        Case(
+            materials.normalized_surface_impedance,
+            {"reflection": 0.5},
+            ("reflection",),
+            single=complex,
+        ),
+        Case(
+            materials.reflection_factor,
+            {"h12": 0.5, "spacing_m": 0.05, "x1": 0.1, "wavenumber": 18.3},
+            ("h12", "wavenumber"),
+            single=complex,
+        ),
+        Case(
+            materials.surface_impedance,
+            {"reflection": 0.5, "characteristic_impedance": 413.0},
+            ("reflection",),
+            single=complex,
+        ),
+        Case(
+            materials.tube_wavenumber,
+            {"frequency": 500.0, "speed_of_sound": 343.0},
+            ("frequency",),
+            single=complex,
+        ),
+        Case(
+            materials.standing_wave_normalized_impedance,
+            {"swr": 2.0, "first_min_distance": 0.1, "wavelength": 0.686},
+            ("swr", "first_min_distance", "wavelength"),
+            single=complex,
+        ),
+        Case(
+            materials.standing_wave_reflection,
+            {"swr": 2.0, "first_min_distance": 0.1, "wavelength": 0.686},
+            ("swr", "first_min_distance", "wavelength"),
+            single=complex,
+        ),
+        Case(
+            materials.membrane_impedance,
+            {"frequency": 500.0, "surface_density": 1.0},
+            ("frequency",),
+            single=complex,
+        ),
+        Case(
+            materials.perforated_plate_impedance,
+            {
+                "frequency": 500.0,
+                "thickness_m": 0.001,
+                "hole_radius": 0.002,
+                "open_area": 0.05,
+            },
+            ("frequency",),
+            single=complex,
+        ),
+        Case(
+            materials.microperforated_plate_impedance,
+            {
+                "frequency": 500.0,
+                "thickness_m": 0.0005,
+                "hole_radius": 0.0002,
+                "open_area": 0.01,
+            },
+            ("frequency",),
+            single=complex,
+        ),
+        Case(
+            materials.helmholtz_resonator_impedance,
+            {"frequency": 500.0, "resonator": resonator},
+            ("frequency",),
+            single=complex,
+        ),
+        Case(
+            noise_control.helmholtz_impedance,
+            {
+                "frequencies": 500.0,
+                "neck_area": 1.0e-4,
+                "neck_length": 0.01,
+                "cavity_volume": 1.0e-3,
+            },
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            noise_control.quarter_wave_impedance,
+            {"frequencies": 500.0, "length": 0.5, "area": 1.0e-2},
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            environment.spherical_reflection_coefficient,
+            {
+                "normalized_impedance": 5.0 + 3.0j,
+                "source_height_m": 1.0,
+                "receiver_height_m": 1.5,
+                "distance": 10.0,
+                "frequencies": 500.0,
+            },
+            ("frequencies",),
+            single=complex,
+        ),
+        Case(
+            materials.absorption_from_reflection,
+            {"reflection": 0.5},
+            ("reflection",),
+        ),
+        Case(
+            materials.absorption_reference_corrected,
+            {"road_reflection": 0.5, "reference_reflection": 0.9},
+            ("road_reflection", "reference_reflection"),
+        ),
+        Case(
+            materials.air_density_astm_e2611,
+            {"temperature_c": 20.0, "static_pressure_kpa": 101.325},
+            ("temperature_c", "static_pressure_kpa"),
+        ),
+        Case(
+            materials.air_density_iso10534,
+            {"temperature_c": 20.0, "static_pressure_kpa": 101.325},
+            ("temperature_c", "static_pressure_kpa"),
+        ),
+        Case(
+            materials.in_situ_absorption_from_reflection,
+            {"reflection": 0.5},
+            ("reflection",),
+        ),
+        Case(
+            materials.normalized_diffusion_coefficient,
+            {"d_theta": 0.6, "d_theta_reference": 0.3},
+            ("d_theta", "d_theta_reference"),
+        ),
+        Case(
+            materials.scattering_coefficient,
+            {"alpha_spec": 0.6, "alpha_s": 0.3},
+            ("alpha_spec", "alpha_s"),
+        ),
+        Case(
+            materials.speed_of_sound_astm_e2611,
+            {"temperature_c": 20.0},
+            ("temperature_c",),
+        ),
+        Case(
+            materials.speed_of_sound_iso10534,
+            {"temperature_c": 20.0},
+            ("temperature_c",),
+        ),
+        Case(
+            materials.speed_of_sound_iso17497,
+            {"temperature_c": 20.0},
+            ("temperature_c",),
+        ),
+        Case(
+            materials.standing_wave_absorption,
+            {"swr": 2.0},
+            ("swr",),
+        ),
+        Case(
+            materials.standing_wave_ratio_from_level,
+            {"level_difference": 6.0},
+            ("level_difference",),
+        ),
+        Case(
+            materials.standing_wave_reflection_magnitude,
+            {"swr": 2.0},
+            ("swr",),
+        ),
+        Case(
+            materials.statistical_absorption,
+            {"normalized_impedance": 2.0},
+            ("normalized_impedance",),
+        ),
+        Case(
+            materials.tube_attenuation_constant,
+            {"frequency": 500.0, "speed_of_sound": 343.0, "diameter_m": 0.1},
+            ("frequency",),
+        ),
+        Case(
+            environment.kurze_anderson_attenuation,
+            {"fresnel_number": 1.0},
+            ("fresnel_number",),
+        ),
+        Case(
+            plane.height,
+            {"distance_m": 50.0},
+            ("distance_m",),
+        ),
+        Case(
+            profile.speed_at,
+            {"height_m": 10.0},
+            ("height_m",),
+        ),
     )
 
 
@@ -1198,6 +1411,61 @@ UNHEADED = (
             "delta_r_i",
             "delta_r_j",
         ),
+    ),
+    Case(
+        materials.absorption_coefficient_uncertainty,
+        {
+            "volume": 200.0,
+            "area": 10.0,
+            "speed_of_sound": 343.0,
+            "t_a": 5.0,
+            "u_a": 0.05,
+            "t_b": 4.0,
+            "u_b": 0.05,
+        },
+        ("speed_of_sound", "t_a", "u_a", "t_b", "u_b"),
+    ),
+    Case(
+        materials.base_plate_scattering,
+        {
+            "volume": 200.0,
+            "area": 10.0,
+            "c1": 343.0,
+            "t1": 5.0,
+            "c3": 343.0,
+            "t3": 4.9,
+            "m1": 0.0,
+            "m3": 0.0,
+        },
+        ("c1", "t1", "c3", "t3", "m1", "m3"),
+    ),
+    Case(
+        materials.random_incidence_absorption,
+        {
+            "volume": 200.0,
+            "area": 10.0,
+            "c1": 343.0,
+            "t1": 5.0,
+            "c2": 343.0,
+            "t2": 4.0,
+            "m1": 0.0,
+            "m2": 0.0,
+        },
+        ("c1", "t1", "c2", "t2", "m1", "m2"),
+    ),
+    Case(
+        materials.specular_absorption_coefficient,
+        {
+            "volume": 200.0,
+            "area": 10.0,
+            "c3": 343.0,
+            "t3": 4.9,
+            "c4": 343.0,
+            "t4": 3.9,
+            "m3": 0.0,
+            "m4": 0.0,
+        },
+        ("c3", "t3", "c4", "t4", "m3", "m4"),
     ),
 )
 
@@ -1416,6 +1684,29 @@ def test_the_reverberation_index_is_keyed_on_weighted() -> None:
     )
     bands = building.estimate_reverberation_index(30.0, "furnished")
     assert isinstance(bands, np.ndarray)
+
+
+def test_the_reverberation_time_uncertainty_is_one_number() -> None:
+    """The measurements are one axis, which it reduces to one ``float``."""
+    times = [8.05, 7.94, 8.12, 7.88, 8.03, 7.98]
+    assert type(materials.reverberation_time_uncertainty(times)) is float
+    assert type(materials.reverberation_time_uncertainty(np.array(times))) is float
+
+
+def test_the_mean_single_event_level_is_keyed_on_n_events() -> None:
+    """Events one at a time reduce their axis; one reading of several keeps its shape."""
+    one_by_one = emission.mean_single_event_level([89.0, 91.0, 90.0, 90.5, 89.5])
+    assert type(one_by_one) is float
+    per_band = emission.mean_single_event_level(np.full((5, 3), 97.0))
+    assert isinstance(per_band, np.ndarray)
+    assert per_band.shape == (3,)
+    assert type(emission.mean_single_event_level(97.0, n_events=5)) is float
+    zero_d = emission.mean_single_event_level(np.asarray(97.0), n_events=5)
+    assert isinstance(zero_d, np.ndarray)
+    assert zero_d.ndim == 0
+    listed = emission.mean_single_event_level([97.0, 96.0], n_events=5)
+    assert isinstance(listed, np.ndarray)
+    assert listed.shape == (2,)
 
 
 def test_a_guideline_without_a_frequency_is_one_number() -> None:

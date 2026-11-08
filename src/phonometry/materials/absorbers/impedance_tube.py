@@ -32,12 +32,13 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_complex_or_array, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     complex_array,
@@ -60,7 +61,15 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real, ReportEngine
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        Real,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 Shape = Literal["circular", "rectangular", "square"]
@@ -134,13 +143,34 @@ class ImpedanceTubeWarning(PhonometryWarning):
 # Air properties. Eqs. (5) and (7) are written in kelvin; the argument is in
 # degrees Celsius, as everywhere else in the library, and converted here.
 # ---------------------------------------------------------------------------
-def speed_of_sound_iso10534(*, temperature_c: NumericArrayLike) -> Real:
+@overload
+def speed_of_sound_iso10534[S: RealScalar](*, temperature_c: S) -> float: ...
+
+
+@overload
+def speed_of_sound_iso10534[V: RealValues](
+    *,
+    temperature_c: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def speed_of_sound_iso10534[A: NumericArrayLike](
+    *,
+    temperature_c: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def speed_of_sound_iso10534(
+    *, temperature_c: NumericArrayLike
+) -> float | NDArray[np.float64]:
     r"""Speed of sound in air (ISO 10534-2:2001, Eq. (5)).
 
     :math:`c_0 = 343.2 \sqrt{T / 293}`, with :math:`T` in kelvin.
 
     :param temperature_c: Air temperature, in **degrees Celsius**.
-    :return: Speed of sound ``c0``, in metres per second.
+    :return: Speed of sound ``c0``, in metres per second. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if any temperature is at or below -273.15 degC.
     :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
         number.
@@ -148,14 +178,48 @@ def speed_of_sound_iso10534(*, temperature_c: NumericArrayLike) -> Real:
     kelvin = _ABSOLUTE_ZERO_C_OFFSET + require_above_absolute_zero_array(
         temperature_c, "temperature_c"
     )
-    return np.asarray(_ISO_C_REF * np.sqrt(kelvin / _ISO_T_REF), dtype=np.float64)
+    return as_float_or_array(
+        _ISO_C_REF * np.sqrt(kelvin / _ISO_T_REF), like=(temperature_c,)
+    )
+
+
+@overload
+def air_density_iso10534[S1: RealScalar, S2: RealScalar](
+    *,
+    temperature_c: S1,
+    static_pressure_kpa: S2 = ...,
+) -> float: ...
+
+
+@overload
+def air_density_iso10534[V: RealValues, A2: NumericArrayLike](
+    *,
+    temperature_c: V,
+    static_pressure_kpa: A2 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_density_iso10534[S1: RealScalar, V: RealValues](
+    *,
+    temperature_c: S1,
+    static_pressure_kpa: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_density_iso10534[A1: NumericArrayLike, A2: NumericArrayLike](
+    *,
+    temperature_c: A1,
+    static_pressure_kpa: A2 = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def air_density_iso10534(
     *,
     temperature_c: NumericArrayLike,
     static_pressure_kpa: NumericArrayLike = _ISO_P_REF,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Air density (ISO 10534-2:2001, Eq. (7)).
 
     :math:`\rho = \rho_0 (p_\mathrm{a} T_0) / (p_0 T)` with :math:`\rho_0 = 1.186`
@@ -165,7 +229,9 @@ def air_density_iso10534(
     :param temperature_c: Air temperature, in **degrees Celsius**.
     :param static_pressure_kpa: Atmospheric pressure ``pa``, in
         **kilopascals** (default 101.325 kPa).
-    :return: Air density ``rho``, in kilograms per cubic metre.
+    :return: Air density ``rho``, in kilograms per cubic metre. A ``float`` when
+        ``temperature_c`` and ``static_pressure_kpa`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
     :raises TypeError: if ``static_pressure_kpa`` or ``temperature_c`` holds a text or a
@@ -184,8 +250,9 @@ def air_density_iso10534(
     if np.any(pa <= 0.0):
         msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
-    return np.asarray(
-        _ISO_RHO_REF * (pa * _ISO_T_REF) / (_ISO_P_REF * kelvin), dtype=np.float64
+    return as_float_or_array(
+        _ISO_RHO_REF * (pa * _ISO_T_REF) / (_ISO_P_REF * kelvin),
+        like=(temperature_c, static_pressure_kpa),
     )
 
 
@@ -223,9 +290,33 @@ def hydraulic_diameter(width_m: float, height_m: float) -> float:
     return float(2.0 * width_m * height_m / (width_m + height_m))
 
 
+@overload
+def tube_attenuation_constant[S: RealScalar](
+    frequency: S,
+    speed_of_sound: float,
+    diameter_m: float,
+) -> float: ...
+
+
+@overload
+def tube_attenuation_constant[V: RealValues](
+    frequency: V,
+    speed_of_sound: float,
+    diameter_m: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def tube_attenuation_constant[A: NumericArrayLike](
+    frequency: A,
+    speed_of_sound: float,
+    diameter_m: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def tube_attenuation_constant(
     frequency: NumericArrayLike, speed_of_sound: float, diameter_m: float
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Lower-bound tube attenuation constant ``k0''`` (ISO 10534-2, Eq. (A.18)).
 
     :math:`k_0'' = 1.94\times 10^{-2} \sqrt{f} / (c_0 d)`
@@ -237,7 +328,8 @@ def tube_attenuation_constant(
     :param diameter_m: Circular-tube diameter ``d``, in metres, or the hydraulic
         diameter ``4 * area / perimeter`` for a rectangular tube (see
         :func:`hydraulic_diameter`).
-    :return: Attenuation constant ``k0''``, in nepers per metre.
+    :return: Attenuation constant ``k0''``, in nepers per metre. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``diameter_m`` or ``speed_of_sound`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number.
     """
@@ -251,10 +343,36 @@ def tube_attenuation_constant(
     if np.any(f < 0.0):
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
-    return np.asarray(
-        _ISO_ATTEN_CONST * np.sqrt(f) / (speed_of_sound * diameter_m),
-        dtype=np.float64,
+    return as_float_or_array(
+        _ISO_ATTEN_CONST * np.sqrt(f) / (speed_of_sound * diameter_m), like=(frequency,)
     )
+
+
+@overload
+def tube_wavenumber[S: RealScalar](
+    frequency: S,
+    speed_of_sound: float,
+    *,
+    attenuation_np_per_m: NumericArrayLike | None = ...,
+) -> complex: ...
+
+
+@overload
+def tube_wavenumber[V: RealValues](
+    frequency: V,
+    speed_of_sound: float,
+    *,
+    attenuation_np_per_m: NumericArrayLike | None = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def tube_wavenumber[A: NumericArrayLike](
+    frequency: A,
+    speed_of_sound: float,
+    *,
+    attenuation_np_per_m: NumericArrayLike | None = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def tube_wavenumber(
@@ -262,7 +380,7 @@ def tube_wavenumber(
     speed_of_sound: float,
     *,
     attenuation_np_per_m: NumericArrayLike | None = None,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Complex wavenumber :math:`k_0 = k_0' - jk_0''` (ISO 10534-2, Clause 2.6).
 
     The real part is :math:`k_0' = 2\pi f/c_0` (Eq. (2)); the optional attenuation
@@ -275,7 +393,8 @@ def tube_wavenumber(
         (scalar or matching ``frequency``); ``None`` gives the lossless real
         wavenumber. Obtain a lower-bound estimate from
         :func:`tube_attenuation_constant`.
-    :return: Complex wavenumber ``k0``, in reciprocal metres.
+    :return: Complex wavenumber ``k0``, in reciprocal metres. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or
         ``attenuation_np_per_m`` or ``frequency`` holds a text or a value that is not a
         real number.
@@ -294,7 +413,7 @@ def tube_wavenumber(
         k_imag = require_per_band(
             attenuation_np_per_m, "attenuation_np_per_m", k_real, bands_name="frequency"
         )
-    return np.asarray(k_real - 1j * k_imag, dtype=np.complex128)
+    return as_complex_or_array(k_real - 1j * k_imag, like=(frequency,))
 
 
 def _require_h12_per_band(
@@ -320,13 +439,53 @@ def _require_h12_per_band(
 # ---------------------------------------------------------------------------
 # ISO 10534-2: reflection factor, impedance, absorption.
 # ---------------------------------------------------------------------------
+@overload
+def reflection_factor[S1: ComplexScalar, S2: ComplexScalar](
+    h12: S1,
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: S2,
+) -> complex: ...
+
+
+@overload
+def reflection_factor[V: ComplexValues, A2: NumericArrayLike](
+    h12: V,
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: A2,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def reflection_factor[S1: ComplexScalar, V: ComplexValues](
+    h12: S1,
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def reflection_factor[A1: NumericArrayLike, A2: NumericArrayLike](
+    h12: A1,
+    *,
+    spacing_m: float,
+    x1: float,
+    wavenumber: A2,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def reflection_factor(
     h12: NumericArrayLike,
     *,
     spacing_m: float,
     x1: float,
     wavenumber: NumericArrayLike,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Complex reflection factor at the sample surface (ISO 10534-2, Eq. (17)).
 
     .. math::
@@ -347,7 +506,9 @@ def reflection_factor(
         (position 1), in metres.
     :param wavenumber: Complex wavenumber ``k0`` (from :func:`tube_wavenumber`),
         scalar or per band.
-    :return: Complex reflection factor ``r`` at the reference plane.
+    :return: Complex reflection factor ``r`` at the reference plane. A ``complex`` when
+        ``h12`` and ``wavenumber`` are both numbers, an array when either is a sequence
+        or an array, a zero-dimensional one included.
     :raises TypeError: if ``spacing_m`` or ``x1`` is not a single number, or ``h12`` or
         ``wavenumber`` holds a text or a value that is not a number.
     """
@@ -364,25 +525,66 @@ def reflection_factor(
     h_i = np.exp(-1j * k0 * spacing_m)
     h_r = np.exp(1j * k0 * spacing_m)
     r = (h - h_i) / (h_r - h) * np.exp(2j * k0 * x1)
-    return np.asarray(r, dtype=np.complex128)
+    return as_complex_or_array(r, like=(h12, wavenumber))
 
 
-def normalized_surface_impedance(reflection: NumericArrayLike) -> Complex:
+@overload
+def normalized_surface_impedance[S: ComplexScalar](reflection: S) -> complex: ...
+
+
+@overload
+def normalized_surface_impedance[V: ComplexValues](
+    reflection: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def normalized_surface_impedance[A: NumericArrayLike](
+    reflection: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def normalized_surface_impedance(
+    reflection: NumericArrayLike,
+) -> complex | NDArray[np.complex128]:
     r"""Normalised surface impedance :math:`Z/(\rho c_0)` (ISO 10534-2, Eq. (19)).
 
     :math:`Z / (\rho c_0) = (1 + r) / (1 - r)`.
 
     :param reflection: Complex reflection factor ``r``.
-    :return: Normalised surface impedance :math:`Z/(\rho c_0)` (complex).
+    :return: Normalised surface impedance :math:`Z/(\rho c_0)` (complex). A ``complex``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
     r = complex_array(reflection, "reflection")
-    return np.asarray((1.0 + r) / (1.0 - r), dtype=np.complex128)
+    return as_complex_or_array((1.0 + r) / (1.0 - r), like=(reflection,))
+
+
+@overload
+def surface_impedance[S: ComplexScalar](
+    reflection: S,
+    characteristic_impedance: float,
+) -> complex: ...
+
+
+@overload
+def surface_impedance[V: ComplexValues](
+    reflection: V,
+    characteristic_impedance: float,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def surface_impedance[A: NumericArrayLike](
+    reflection: A,
+    characteristic_impedance: float,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def surface_impedance(
     reflection: NumericArrayLike, characteristic_impedance: float
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Absolute surface impedance ``Z`` (ISO 10534-2, Eq. (19)).
 
     :math:`Z = \rho c_0 (1 + r) / (1 - r)`.
@@ -390,49 +592,116 @@ def surface_impedance(
     :param reflection: Complex reflection factor ``r``.
     :param characteristic_impedance: Characteristic impedance of air
         ``rho c0``, in rayls (``rho`` and ``c0`` from the Clause 7.2 helpers).
-    :return: Surface impedance ``Z``, in rayls (complex).
+    :return: Surface impedance ``Z``, in rayls (complex). A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``characteristic_impedance`` is not a single number.
     """
     require_scalar(characteristic_impedance, "characteristic_impedance")
     if characteristic_impedance <= 0.0:
         msg = "'characteristic_impedance' must be positive."
         raise ValueError(msg)
-    return np.asarray(
+    return as_complex_or_array(
         characteristic_impedance * normalized_surface_impedance(reflection),
-        dtype=np.complex128,
+        like=(reflection,),
     )
 
 
-def normalized_surface_admittance(reflection: NumericArrayLike) -> Complex:
+@overload
+def normalized_surface_admittance[S: ComplexScalar](reflection: S) -> complex: ...
+
+
+@overload
+def normalized_surface_admittance[V: ComplexValues](
+    reflection: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def normalized_surface_admittance[A: NumericArrayLike](
+    reflection: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def normalized_surface_admittance(
+    reflection: NumericArrayLike,
+) -> complex | NDArray[np.complex128]:
     r"""Normalised surface admittance :math:`G \rho c_0` (ISO 10534-2, Eq. (20)).
 
     :math:`G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)`.
 
     :param reflection: Complex reflection factor ``r``.
-    :return: Normalised surface admittance (complex).
+    :return: Normalised surface admittance (complex). A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
     r = complex_array(reflection, "reflection")
-    return np.asarray((1.0 - r) / (1.0 + r), dtype=np.complex128)
+    return as_complex_or_array((1.0 - r) / (1.0 + r), like=(reflection,))
 
 
-def absorption_from_reflection(reflection: NumericArrayLike) -> Real:
+@overload
+def absorption_from_reflection[S: ComplexScalar](reflection: S) -> float: ...
+
+
+@overload
+def absorption_from_reflection[V: ComplexValues](
+    reflection: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_from_reflection[A: NumericArrayLike](
+    reflection: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def absorption_from_reflection(
+    reflection: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Normal-incidence absorption coefficient (ISO 10534-2, Eq. (18)).
 
     :math:`\alpha = 1 - |r|^2`. This form is shared with ISO 10534-1 Eq. (9) and
     ASTM E2611-19 Eq. (28).
 
     :param reflection: Complex reflection factor ``r``.
-    :return: Absorption coefficient ``alpha`` (real).
+    :return: Absorption coefficient ``alpha`` (real). A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
     r = complex_array(reflection, "reflection")
-    return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
+    return as_float_or_array(1.0 - np.abs(r) ** 2, like=(reflection,))
+
+
+@overload
+def microphone_calibration_factor[S1: ComplexScalar, S2: ComplexScalar](
+    h12_config1: S1,
+    h12_config2: S2,
+) -> complex: ...
+
+
+@overload
+def microphone_calibration_factor[V: ComplexValues, A2: NumericArrayLike](
+    h12_config1: V,
+    h12_config2: A2,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def microphone_calibration_factor[S1: ComplexScalar, V: ComplexValues](
+    h12_config1: S1,
+    h12_config2: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def microphone_calibration_factor[A1: NumericArrayLike, A2: NumericArrayLike](
+    h12_config1: A1,
+    h12_config2: A2,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def microphone_calibration_factor(
     h12_config1: NumericArrayLike, h12_config2: NumericArrayLike
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Microphone-mismatch calibration factor ``Hc`` (ISO 10534-2, Eq. (10)).
 
     :math:`H_\mathrm{c} = \sqrt{H_{12}^{I} / H_{12}^{II}}` from a transfer function measured on an
@@ -442,18 +711,48 @@ def microphone_calibration_factor(
 
     :param h12_config1: Transfer function ``H12^I`` in the standard configuration.
     :param h12_config2: Transfer function ``H12^II`` with microphones swapped.
-    :return: Complex calibration factor ``Hc``.
+    :return: Complex calibration factor ``Hc``. A ``complex`` when ``h12_config1`` and
+        ``h12_config2`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises TypeError: if ``h12_config1`` or ``h12_config2`` holds a text or a value
         that is not a number.
     """
     h1 = complex_array(h12_config1, "h12_config1")
     h2 = complex_array(h12_config2, "h12_config2")
-    return np.asarray(np.sqrt(h1 / h2), dtype=np.complex128)
+    return as_complex_or_array(np.sqrt(h1 / h2), like=(h12_config1, h12_config2))
+
+
+@overload
+def apply_microphone_calibration[S1: ComplexScalar, S2: ComplexScalar](
+    h12_uncorrected: S1,
+    calibration_factor: S2,
+) -> complex: ...
+
+
+@overload
+def apply_microphone_calibration[V: ComplexValues, A2: NumericArrayLike](
+    h12_uncorrected: V,
+    calibration_factor: A2,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def apply_microphone_calibration[S1: ComplexScalar, V: ComplexValues](
+    h12_uncorrected: S1,
+    calibration_factor: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def apply_microphone_calibration[A1: NumericArrayLike, A2: NumericArrayLike](
+    h12_uncorrected: A1,
+    calibration_factor: A2,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def apply_microphone_calibration(
     h12_uncorrected: NumericArrayLike, calibration_factor: NumericArrayLike
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Apply the microphone calibration factor (ISO 10534-2, Eq. (13)).
 
     :math:`H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}`.
@@ -461,13 +760,15 @@ def apply_microphone_calibration(
     :param h12_uncorrected: Uncorrected measured transfer function.
     :param calibration_factor: Calibration factor ``Hc`` from
         :func:`microphone_calibration_factor`.
-    :return: Corrected transfer function ``H12``.
+    :return: Corrected transfer function ``H12``. A ``complex`` when ``h12_uncorrected``
+        and ``calibration_factor`` are both numbers, an array when either is a sequence
+        or an array, a zero-dimensional one included.
     :raises TypeError: if ``calibration_factor`` or ``h12_uncorrected`` holds a text or
         a value that is not a number.
     """
     h = complex_array(h12_uncorrected, "h12_uncorrected")
     hc = complex_array(calibration_factor, "calibration_factor")
-    return np.asarray(h / hc, dtype=np.complex128)
+    return as_complex_or_array(h / hc, like=(h12_uncorrected, calibration_factor))
 
 
 def plane_wave_frequency_range(

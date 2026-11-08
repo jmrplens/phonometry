@@ -148,10 +148,22 @@ in time with the record it came from.
 
 ```python
 assessment_weighting_response(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
+) -> float
+
+assessment_weighting_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
 ) -> NDArray[np.float64]
+
+assessment_weighting_response(
+    frequencies: NumericArrayLike,
+    *,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
+) -> float | NDArray[np.float64]
 ```
 
 The target magnitude of an Annex E weighting filter, Table E.1.
@@ -170,7 +182,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 | `frequencies` | Frequencies, in hertz. |
 | `building_class` | The row of DIN 4150-3:1999-02 Table 1, as [`ASSESSMENT_GUIDE_VALUES_MM_S`](/phonometry/reference/api/vibration/vibration-meter/#assessment_guide_values_mm_s) keys it. One of `"commercial"`, `"residential"` or `"sensitive"`. |
 
-**Returns:** The target magnitude, dimensionless, 1 below 10 Hz.
+**Returns:** The target magnitude, dimensionless, 1 below 10 Hz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

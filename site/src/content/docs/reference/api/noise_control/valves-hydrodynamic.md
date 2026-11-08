@@ -87,13 +87,31 @@ AIR_DENSITY_KG_M3 = 1.293
 
 ```python
 band_internal_levels(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    internal_level: float,
+    *,
+    turbulent_peak: float,
+    cavitation_peak: float | None = ...,
+    cavitation_fraction: float = ...,
+) -> float
+
+band_internal_levels(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    internal_level: float,
+    *,
+    turbulent_peak: float,
+    cavitation_peak: float | None = ...,
+    cavitation_fraction: float = ...,
+) -> NDArray[np.float64]
+
+band_internal_levels(
     frequency: NumericArrayLike,
     internal_level: float,
     *,
     turbulent_peak: float,
-    cavitation_peak: float | None = None,
-    cavitation_fraction: float = 0.0,
-) -> NDArray[np.float64]
+    cavitation_peak: float | None = ...,
+    cavitation_fraction: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Equations (19a) and (19b): the internal level, band by band.
@@ -122,7 +140,7 @@ $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$ alone.
 | `cavitation_peak` | $f_\mathrm{p,cav}$, in Hz, or `None` for the turbulent branch. |
 | `cavitation_fraction` | $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$, between 0 and 1. Zero gives Equation (19a) whatever else is passed. |
 
-**Returns:** $L_{pi}(f_i)$, in dB, one value per band.
+**Returns:** $L_{pi}(f_i)$, in dB, one value per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -187,9 +205,19 @@ and no inequality; the minimum is what it means.
 
 ```python
 cavitation_distribution(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    peak: float,
+) -> float
+
+cavitation_distribution(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     peak: float,
 ) -> NDArray[np.float64]
+
+cavitation_distribution(
+    frequency: NumericArrayLike,
+    peak: float,
+) -> float | NDArray[np.float64]
 ```
 
 Equation (20b): how cavitation noise spreads over the bands.
@@ -214,7 +242,7 @@ gravel where turbulence is heard as a hiss around one frequency.
 | `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
 | `peak` | $f_\mathrm{p,cav}$ from [`cavitation_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#cavitation_peak_frequency), in Hz. |
 
-**Returns:** $F_{cav}(f_i)$, in dB.
+**Returns:** $F_{cav}(f_i)$, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1157,9 +1185,19 @@ STROUHAL_CONSTANTS = {'annex': 0.036, 'clause': 0.02}
 
 ```python
 transmission_loss_correction(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    ring: float,
+) -> float
+
+transmission_loss_correction(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     ring: float,
 ) -> NDArray[np.float64]
+
+transmission_loss_correction(
+    frequency: NumericArrayLike,
+    ring: float,
+) -> float | NDArray[np.float64]
 ```
 
 Equations (16b) and (22b): how far the wall is from its ring.
@@ -1184,7 +1222,7 @@ costs 6,02.
 | `frequency` | $f$, in Hz. A scalar or a 1-D array. |
 | `ring` | $f_r$ from [`pipe_ring_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#pipe_ring_frequency), in Hz. |
 
-**Returns:** $\Delta TL$, in dB, one value per frequency, and always negative: the correction is worth at least 5,85 dB even where it is smallest.
+**Returns:** $\Delta TL$, in dB, one value per frequency, and always negative: the correction is worth at least 5,85 dB even where it is smallest. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1197,9 +1235,19 @@ costs 6,02.
 
 ```python
 turbulent_distribution(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    peak: float,
+) -> float
+
+turbulent_distribution(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     peak: float,
 ) -> NDArray[np.float64]
+
+turbulent_distribution(
+    frequency: NumericArrayLike,
+    peak: float,
+) -> float | NDArray[np.float64]
 ```
 
 Equation (20a): how turbulent noise spreads over the bands.
@@ -1230,7 +1278,7 @@ page renders it as a bare 1, which flattens the low-frequency side.
 | `frequency` | $f_i$, the band centre or centres, in Hz (scalar or array). |
 | `peak` | $f_\mathrm{p,turb}$ from [`turbulent_peak_frequency`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#turbulent_peak_frequency), in Hz. |
 
-**Returns:** $F_{turb}(f_i)$, in dB.
+**Returns:** $F_{turb}(f_i)$, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

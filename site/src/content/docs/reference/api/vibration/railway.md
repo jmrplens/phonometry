@@ -189,9 +189,24 @@ passage spread over the same hour: $v_{\mathrm{E\,ges}} = \sqrt{\sum v_{\mathrm{
 
 ```python
 elastic_insertion_loss(
-    levels_before: NumericArrayLike,
+    levels_before: float | np.floating[Any] | np.integer[Any],
+    levels_after: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+elastic_insertion_loss(
+    levels_before: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     levels_after: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+elastic_insertion_loss(
+    levels_before: float | np.floating[Any] | np.integer[Any],
+    levels_after: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+elastic_insertion_loss(
+    levels_before: NumericArrayLike,
+    levels_after: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The insertion loss $D_\mathrm{e}(f_{\mathrm{T}n})$ of Annex B, Formula (B.1), in dB.
@@ -209,7 +224,7 @@ two spectra.
 | `levels_before` | The third-octave levels before, in decibels. |
 | `levels_after` | The levels after, at the same point, in decibels. |
 
-**Returns:** $L_1 - L_2$ per band, positive where the element reduces the level.
+**Returns:** $L_1 - L_2$ per band, positive where the element reduces the level. A `float` when `levels_before` and `levels_after` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -479,9 +494,19 @@ PASSAGE_BANDS_HZ = (4.0, 315.0)
 
 ```python
 passage_energy_spectral_density(
-    psd: NumericArrayLike,
+    psd: float | np.floating[Any] | np.integer[Any],
+    duration_s: float,
+) -> float
+
+passage_energy_spectral_density(
+    psd: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     duration_s: float,
 ) -> NDArray[np.float64]
+
+passage_energy_spectral_density(
+    psd: NumericArrayLike,
+    duration_s: float,
+) -> float | NDArray[np.float64]
 ```
 
 The energy spectral density of $T_2$, Formula (13), in (mm/s)²/Hz².
@@ -499,7 +524,7 @@ all of its mean square. This returns the formula as printed.
 | `psd` | $G_2$, the power spectral density of the stretch, in (mm/s)²/Hz, as [`narrowband_psd`](/phonometry/reference/api/vibration/railway/#narrowband_psd) gives it. |
 | `duration_s` | $T_2$, in seconds. |
 
-**Returns:** $e_2$ at the same lines, in (mm/s)²/Hz².
+**Returns:** $e_2$ at the same lines, in (mm/s)²/Hz². A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -605,7 +630,15 @@ which is what Figure 3 draws, is 7 % and 0,9 % short.
 ## spectral_density_level
 
 ```python
-spectral_density_level(psd: NumericArrayLike) -> NDArray[np.float64]
+spectral_density_level(
+    psd: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+spectral_density_level(
+    psd: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+spectral_density_level(psd: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 The level of a power spectral density, as Figure 7 draws it, in dB.
@@ -619,7 +652,7 @@ hertz.
 | :--- | :--- |
 | `psd` | The density, in (mm/s)²/Hz. |
 
-**Returns:** The level at each line, in decibels; `-inf` where the density is exactly zero.
+**Returns:** The level at each line, in decibels; `-inf` where the density is exactly zero. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -814,11 +847,25 @@ VELOCITY_LEVEL_REFERENCE_MM_S = 5e-05
 
 ```python
 velocity_psd_from_voltage(
-    psd_v2_per_hz: NumericArrayLike,
+    psd_v2_per_hz: float | np.floating[Any] | np.integer[Any],
+    *,
+    sensitivity_v_per_mm_s: float,
+    gain: float,
+) -> float
+
+velocity_psd_from_voltage(
+    psd_v2_per_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     sensitivity_v_per_mm_s: float,
     gain: float,
 ) -> NDArray[np.float64]
+
+velocity_psd_from_voltage(
+    psd_v2_per_hz: NumericArrayLike,
+    *,
+    sensitivity_v_per_mm_s: float,
+    gain: float,
+) -> float | NDArray[np.float64]
 ```
 
 A density measured in volts, in the unit of the velocity (Annex A).
@@ -835,7 +882,7 @@ square: $G_{vv} = G_{\mathrm{V}} / (\kappa_A^2 \kappa_V^2)$.
 | `sensitivity_v_per_mm_s` | $\kappa_A$, in volts per millimetre per second (Annex A uses 0,030). |
 | `gain` | $\kappa_V$, the amplifier gain, in volts per volt (Annex A uses 10). |
 
-**Returns:** The density of the velocity, in (mm/s)²/Hz.
+**Returns:** The density of the velocity, in (mm/s)²/Hz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

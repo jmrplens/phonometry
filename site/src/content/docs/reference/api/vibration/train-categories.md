@@ -337,7 +337,15 @@ $KB_\mathrm{Fmax}$ of Formula (7) is formed from this value.
 ## train_kb_fmax
 
 ```python
-train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> NDArray[np.float64]
+train_kb_fmax(
+    kb_ftm_zug: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+train_kb_fmax(
+    kb_ftm_zug: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 The $KB_\mathrm{Fmax,Zug}$ of each category, Formula (7).
@@ -354,7 +362,7 @@ prints as 0,568.
 | :--- | :--- |
 | `kb_ftm_zug` | $KB_\mathrm{FTm,Zug}$ of each category. |
 
-**Returns:** $KB_\mathrm{Fmax,Zug}$ of each, in the same order.
+**Returns:** $KB_\mathrm{Fmax,Zug}$ of each, in the same order. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

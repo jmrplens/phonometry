@@ -100,12 +100,30 @@ wavelength that matters. Figure A.19 prints 0,005 for a damping ratio of
 ```python
 blast_peak_velocity_mm_s(
     charge_kg: float,
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+    *,
+    coefficient_mm_s: float,
+    charge_exponent: float,
+    distance_exponent: float,
+) -> float
+
+blast_peak_velocity_mm_s(
+    charge_kg: float,
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     coefficient_mm_s: float,
     charge_exponent: float,
     distance_exponent: float,
 ) -> NDArray[np.float64]
+
+blast_peak_velocity_mm_s(
+    charge_kg: float,
+    distance_m: NumericArrayLike,
+    *,
+    coefficient_mm_s: float,
+    charge_exponent: float,
+    distance_exponent: float,
+) -> float | NDArray[np.float64]
 ```
 
 The peak velocity of a blast in the far field, Formula (5).
@@ -127,7 +145,7 @@ the distance in millimetres, which the reference metre says is a slip.
 | `charge_exponent` | $b$. |
 | `distance_exponent` | $m$. |
 
-**Returns:** $v_{\max}$, one per distance, in millimetres per second.
+**Returns:** $v_{\max}$, one per distance, in millimetres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -176,12 +194,30 @@ kilojoules, the unit Formula (6) wants.
 ```python
 far_field_velocity_mm_s(
     reference_velocity_mm_s: float,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference_distance_m: float,
+    exponent: float,
+    attenuation_per_m: float = ...,
+) -> float
+
+far_field_velocity_mm_s(
+    reference_velocity_mm_s: float,
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reference_distance_m: float,
+    exponent: float,
+    attenuation_per_m: float = ...,
+) -> NDArray[np.float64]
+
+far_field_velocity_mm_s(
+    reference_velocity_mm_s: float,
     distance_m: NumericArrayLike,
     *,
     reference_distance_m: float,
     exponent: float,
-    attenuation_per_m: float = 0.0,
-) -> NDArray[np.float64]
+    attenuation_per_m: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The velocity amplitude at a distance in the far field, Formula (2).
@@ -201,7 +237,7 @@ amplitude at the reference distance, spread with the exponent of Figure
 | `exponent` | $n$, from [`geometric_exponent`](/phonometry/reference/api/vibration/prediction/#geometric_exponent). |
 | `attenuation_per_m` | $\alpha$, from [`attenuation_coefficient_per_m`](/phonometry/reference/api/vibration/prediction/#attenuation_coefficient_per_m); 0 (default) for no material damping. |
 
-**Returns:** $\bar v$, one per distance, in millimetres per second.
+**Returns:** $\bar v$, one per distance, in millimetres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -318,11 +354,27 @@ The exponent $n$ of Formula (2) for a source and a wave, Figure 1.
 ```python
 impact_peak_velocity_mm_s(
     fall_energy_kj: float,
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+    *,
+    coefficient_mm_s: float,
+    distance_exponent: float,
+) -> float
+
+impact_peak_velocity_mm_s(
+    fall_energy_kj: float,
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     coefficient_mm_s: float,
     distance_exponent: float,
 ) -> NDArray[np.float64]
+
+impact_peak_velocity_mm_s(
+    fall_energy_kj: float,
+    distance_m: NumericArrayLike,
+    *,
+    coefficient_mm_s: float,
+    distance_exponent: float,
+) -> float | NDArray[np.float64]
 ```
 
 The peak velocity of a falling mass, Formula (6).
@@ -341,7 +393,7 @@ usually the smaller source; the impact is this one.
 | `coefficient_mm_s` | $k$, in millimetres per second. |
 | `distance_exponent` | $m$. |
 
-**Returns:** $v_{\max}$, one per distance, in millimetres per second.
+**Returns:** $v_{\max}$, one per distance, in millimetres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -463,12 +515,28 @@ sixty, the nearest group; beyond that the added groups are further off.
 
 ```python
 material_damping_factor(
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+    *,
+    damping_ratio: float,
+    frequency_hz: float,
+    wave_speed_m_s: float,
+) -> float
+
+material_damping_factor(
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     damping_ratio: float,
     frequency_hz: float,
     wave_speed_m_s: float,
 ) -> NDArray[np.float64]
+
+material_damping_factor(
+    distance_m: NumericArrayLike,
+    *,
+    damping_ratio: float,
+    frequency_hz: float,
+    wave_speed_m_s: float,
+) -> float | NDArray[np.float64]
 ```
 
 The share the ground absorbs over a distance, Figure 2.
@@ -487,7 +555,7 @@ the amplitude at 10 Hz and 79 % at 50 Hz.
 | `frequency_hz` | $f$, in hertz. |
 | `wave_speed_m_s` | $c$, in metres per second. |
 
-**Returns:** The factor, one per distance, between 0 and 1.
+**Returns:** The factor, one per distance, between 0 and 1. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

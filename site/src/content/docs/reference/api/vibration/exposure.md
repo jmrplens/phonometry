@@ -154,8 +154,18 @@ negligible, as for any block frequency-domain filtering.
 ```python
 band_limiting_factors(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+band_limiting_factors(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+band_limiting_factors(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
@@ -171,7 +181,7 @@ Tables B.1 to B.9.
 | `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Band centre frequencies, in hertz. |
 
-**Returns:** Band-limiting factor per frequency.
+**Returns:** Band-limiting factor per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1012,8 +1022,18 @@ Requires matplotlib (the `[plot]` extra); returns the
 ```python
 weighting_factors(
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+weighting_factors(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+weighting_factors(
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Weighting factors `|H(f)|` of weighting `name` (ISO 8041-1).
@@ -1028,7 +1048,7 @@ magnitude array (the `W_i` of ISO 2631-1 Eq. (9) / ISO 5349-1 Eq. (A.1)).
 | `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). One of `"Wb"`, `"Wc"`, `"Wd"`, `"We"`, `"Wf"`, `"Wh"`, `"Wj"`, `"Wk"` or `"Wm"`. |
 | `frequencies` | Band centre frequencies, in hertz. |
 
-**Returns:** Weighting factor per frequency.
+**Returns:** Weighting factor per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

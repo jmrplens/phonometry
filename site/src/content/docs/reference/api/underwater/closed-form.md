@@ -134,14 +134,34 @@ Plot the propagation loss versus range with its two contributions.
 
 ```python
 seawater_absorption(
+    frequency_hz: float | np.floating[Any] | np.integer[Any],
+    *,
+    temperature_c: float = ...,
+    salinity: float = ...,
+    depth: float = ...,
+    ph: float = ...,
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = ...,
+) -> float
+
+seawater_absorption(
+    frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    temperature_c: float = ...,
+    salinity: float = ...,
+    depth: float = ...,
+    ph: float = ...,
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = ...,
+) -> NDArray[np.float64]
+
+seawater_absorption(
     frequency_hz: NumericArrayLike,
     *,
-    temperature_c: float = 10.0,
-    salinity: float = 35.0,
-    depth: float = 0.0,
-    ph: float = 8.0,
-    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = 'francois-garrison',
-) -> NDArray[np.float64]
+    temperature_c: float = ...,
+    salinity: float = ...,
+    depth: float = ...,
+    ph: float = ...,
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Volume absorption coefficient $\alpha$, in dB/km.
@@ -157,7 +177,7 @@ Volume absorption coefficient $\alpha$, in dB/km.
 | `ph` | Acidity (used by Francois-Garrison and Ainslie-McColm; default 8). |
 | `model` | `"francois-garrison"` (default), `"ainslie-mccolm"` or `"thorp"` (the Thorp 1967 frequency-only form of Etter, valid below ~50 kHz; ignores `temperature_c`/`salinity`/`depth`/`ph`). |
 
-**Returns:** Absorption coefficient per frequency, in dB/km.
+**Returns:** Absorption coefficient per frequency, in dB/km. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -170,11 +190,25 @@ Volume absorption coefficient $\alpha$, in dB/km.
 
 ```python
 spreading_loss(
+    range_m: float | np.floating[Any] | np.integer[Any],
+    *,
+    law: Literal['spherical', 'cylindrical', 'practical'] = ...,
+    transition_range: float | None = ...,
+) -> float
+
+spreading_loss(
+    range_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    law: Literal['spherical', 'cylindrical', 'practical'] = ...,
+    transition_range: float | None = ...,
+) -> NDArray[np.float64]
+
+spreading_loss(
     range_m: NumericArrayLike,
     *,
-    law: Literal['spherical', 'cylindrical', 'practical'] = 'spherical',
-    transition_range: float | None = None,
-) -> NDArray[np.float64]
+    law: Literal['spherical', 'cylindrical', 'practical'] = ...,
+    transition_range: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Geometrical spreading loss, in dB.
@@ -192,7 +226,7 @@ $20 \log_{10}(R_0) + 10 \log_{10}(R/R_0)$ (mode stripping in a channel).
 | `law` | `"spherical"` (default), `"cylindrical"` or `"practical"`. |
 | `transition_range` | Transition range `R0` in metres; required for `"practical"`. |
 
-**Returns:** Spreading loss per range, in dB.
+**Returns:** Spreading loss per range, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -112,11 +112,25 @@ $n(f) = 2 L / c_\mathrm{L}$, independent of frequency.
 
 ```python
 beam_modal_density(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    length: float,
+    mass_per_length: float,
+    bending_stiffness: float,
+) -> float
+
+beam_modal_density(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     length: float,
     mass_per_length: float,
     bending_stiffness: float,
 ) -> NDArray[np.float64]
+
+beam_modal_density(
+    frequency: NumericArrayLike,
+    length: float,
+    mass_per_length: float,
+    bending_stiffness: float,
+) -> float | NDArray[np.float64]
 ```
 
 Modal density of a uniform beam in flexure (Norton Eq. 6.24).
@@ -133,7 +147,7 @@ other subsystem here, it *decreases* with frequency.
 | `mass_per_length` | Mass per unit length `rho A`, in kg/m (> 0). |
 | `bending_stiffness` | Flexural stiffness `E I`, in N.m^2 (> 0). |
 
-**Returns:** The modal density `n(f)`, in modes per hertz.
+**Returns:** The modal density `n(f)`, in modes per hertz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -146,14 +160,34 @@ other subsystem here, it *decreases* with frequency.
 
 ```python
 cylindrical_shell_modal_density(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    thickness_m: float,
+    mean_radius: float,
+    longitudinal_wave_speed: float,
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float
+
+cylindrical_shell_modal_density(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    area: float,
+    thickness_m: float,
+    mean_radius: float,
+    longitudinal_wave_speed: float,
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> NDArray[np.float64]
+
+cylindrical_shell_modal_density(
     frequency: NumericArrayLike,
     area: float,
     thickness_m: float,
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
-    fraction: Literal[1, 3] | np.integer[Any] = 1,
-) -> NDArray[np.float64]
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Average modal density of a thin-walled cylinder (Norton 6.27-6.29).
@@ -191,7 +225,7 @@ frequency, which for long thin shells can be substantial.
 | `longitudinal_wave_speed` | Plate wave speed `cL`, in m/s (> 0). |
 | `fraction` | The analysis band set, 1 for octaves (Default, $F = 1.414$) or 3 for one-third octaves ($F = 1.122$). One of `1` or `3`. |
 
-**Returns:** The modal density `n(f)`, in modes per hertz.
+**Returns:** The modal density `n(f)`, in modes per hertz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

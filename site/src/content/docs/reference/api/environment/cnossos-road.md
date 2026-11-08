@@ -72,9 +72,19 @@ Junction types `k` of Table F-3 for the speed-variation correction.
 
 ```python
 line_source_segment_power(
-    line_power: NumericArrayLike,
+    line_power: float | np.floating[Any] | np.integer[Any],
+    length: float,
+) -> float
+
+line_source_segment_power(
+    line_power: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     length: float,
 ) -> NDArray[np.float64]
+
+line_source_segment_power(
+    line_power: NumericArrayLike,
+    length: float,
+) -> float | NDArray[np.float64]
 ```
 
 Sound power of the point source representing a segment of source line.
@@ -92,7 +102,7 @@ methodology". Only the per-metre line power is defined by the method.
 | `line_power` | Per-metre line power `L'_W,eq,line,i`, in dB re 1 pW per metre. |
 | `length` | Length `dL` of the segment, in m. |
 
-**Returns:** The segment sound power, in dB re 1 pW.
+**Returns:** The segment sound power, in dB re 1 pW. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

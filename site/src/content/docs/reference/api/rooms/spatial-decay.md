@@ -186,13 +186,49 @@ read band by band.
 
 ```python
 corrected_distribution_value(
+    distribution_levels: float | np.floating[Any] | np.integer[Any],
+    measured_reference_levels: float | np.floating[Any] | np.integer[Any],
+    distances: float | np.floating[Any] | np.integer[Any],
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float
+
+corrected_distribution_value(
+    distribution_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    measured_reference_levels: NumericArrayLike,
+    distances: NumericArrayLike,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]
+
+corrected_distribution_value(
+    distribution_levels: float | np.floating[Any] | np.integer[Any],
+    measured_reference_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    distances: NumericArrayLike,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]
+
+corrected_distribution_value(
+    distribution_levels: float | np.floating[Any] | np.integer[Any],
+    measured_reference_levels: float | np.floating[Any] | np.integer[Any],
+    distances: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]
+
+corrected_distribution_value(
     distribution_levels: NumericArrayLike,
     measured_reference_levels: NumericArrayLike,
     distances: NumericArrayLike,
     *,
-    source_height_m: float = 0.0,
-    path_height_m: float | None = None,
-) -> NDArray[np.float64]
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The Annex B correction for the source's own curve, Equation (B.1).
@@ -218,7 +254,7 @@ meter saw.
 | `source_height_m` | $h_\mathrm{S}$, in metres. |
 | `path_height_m` | $h_\mathrm{P}$, in metres. |
 
-**Returns:** $D_{\mathrm{corr}\,j}(r)$, in decibels.
+**Returns:** $D_{\mathrm{corr}\,j}(r)$, in decibels. A `float` when `distribution_levels`, `measured_reference_levels` and `distances` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -282,11 +318,25 @@ EVALUATION_DISTANCES_M = {'near': 4.0, 'middle': 10.0, 'far': 30.0}
 
 ```python
 floor_reference_value(
+    distances: float | np.floating[Any] | np.integer[Any],
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float
+
+floor_reference_value(
+    distances: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]
+
+floor_reference_value(
     distances: NumericArrayLike,
     *,
-    source_height_m: float = 0.0,
-    path_height_m: float | None = None,
-) -> NDArray[np.float64]
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The reference curve over a reflecting plane, Equations (B.2) to (B.4).
@@ -308,7 +358,7 @@ the free field folded into a half space.
 | `source_height_m` | $h_\mathrm{S}$, in metres; zero for a source on the floor. |
 | `path_height_m` | $h_\mathrm{P}$, in metres; omit it for a path at the source height. |
 
-**Returns:** $D_\mathrm{floor,ref}(r)$, in decibels.
+**Returns:** $D_\mathrm{floor,ref}(r)$, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -353,9 +403,24 @@ ISO14257_REFERENCE_DISTANCE_M = 1.0
 
 ```python
 level_excess(
-    distribution_levels: NumericArrayLike,
+    distribution_levels: float | np.floating[Any] | np.integer[Any],
+    distances: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+level_excess(
+    distribution_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     distances: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+level_excess(
+    distribution_levels: float | np.floating[Any] | np.integer[Any],
+    distances: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+level_excess(
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The excess over a free field at each position, Equation (6).
@@ -371,7 +436,7 @@ $$
 | `distribution_levels` | $D$ at each position, in decibels. |
 | `distances` | $r$ at each position, in metres. |
 
-**Returns:** $\mathrm{DL}_\mathrm{f}$ at each position, in decibels.
+**Returns:** $\mathrm{DL}_\mathrm{f}$ at each position, in decibels. A `float` when `distribution_levels` and `distances` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -603,8 +668,16 @@ PREFERRED_MIDDLE_LIMIT_M = 24.0
 
 ```python
 reference_distribution_value(
-    distances: NumericArrayLike,
+    distances: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reference_distribution_value(
+    distances: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+reference_distribution_value(
+    distances: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The free-field reference curve, Equation (2).
@@ -623,7 +696,7 @@ used here, because it is the curve the standard draws in its own figures.
 | :--- | :--- |
 | `distances` | $r$ at each position, in metres. |
 
-**Returns:** $D_\mathrm{ref}(r)$, in decibels.
+**Returns:** $D_\mathrm{ref}(r)$, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -636,9 +709,19 @@ used here, because it is the curve the standard draws in its own figures.
 
 ```python
 sound_distribution_value(
-    levels: NumericArrayLike,
+    levels: float | np.floating[Any] | np.integer[Any],
+    sound_power_levels: NumericArrayLike,
+) -> float
+
+sound_distribution_value(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     sound_power_levels: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+sound_distribution_value(
+    levels: NumericArrayLike,
+    sound_power_levels: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The sound distribution value of a measured point, Equation (1).
@@ -658,7 +741,7 @@ back the same.
 | `levels` | $L_{pj}(r)$ at each position, in decibels. |
 | `sound_power_levels` | $L_{Wj}$ of the source, in decibels, as a scalar or one value per position. |
 
-**Returns:** $D_j(r)$, in decibels.
+**Returns:** $D_j(r)$, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

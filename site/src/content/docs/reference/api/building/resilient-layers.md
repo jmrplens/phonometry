@@ -656,7 +656,17 @@ top of it.
 
 ```python
 resilient_mount_improvement(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: float | np.floating[Any] | np.integer[Any],
+    mount_stiffness: float,
+    mount_density: float,
+) -> float
+
+resilient_mount_improvement(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     impedance: float,
     mass_per_area: float,
@@ -664,6 +674,26 @@ resilient_mount_improvement(
     mount_stiffness: float,
     mount_density: float,
 ) -> NDArray[np.float64]
+
+resilient_mount_improvement(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    mount_stiffness: float,
+    mount_density: float,
+) -> NDArray[np.float64]
+
+resilient_mount_improvement(
+    frequencies: NumericArrayLike,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: NumericArrayLike,
+    mount_stiffness: float,
+    mount_density: float,
+) -> float | NDArray[np.float64]
 ```
 
 Improvement of a floating floor on discrete resilient mounts (Vér).
@@ -712,7 +742,7 @@ gives; the two forms agree.
 | `mount_stiffness` | Dynamic stiffness `k` of one mount, in N/m. |
 | `mount_density` | Number of mounts per unit area `N/S1`, in 1/m² (Vigran's `N`, which is already a density). |
 
-**Returns:** The improvement `ΔL` per band, in dB, and 0 dB at and below `fo`.
+**Returns:** The improvement `ΔL` per band, in dB, and 0 dB at and below `fo`. A `float` when `frequencies` and `loss_factor` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -725,10 +755,22 @@ gives; the two forms agree.
 
 ```python
 short_pulse_mean_square_force(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float
+
+short_pulse_mean_square_force(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> NDArray[np.float64]
+
+short_pulse_mean_square_force(
     frequencies: NumericArrayLike,
     *,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-) -> NDArray[np.float64]
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Band mean-square force of a short impact
@@ -747,7 +789,7 @@ concrete slabs of at least 100 mm.
 | `frequencies` | Band centre frequencies `f`, in Hz. |
 | `fraction` | The band set, 3 for one-third octaves ($B = 0.23 f$) or 1 for octaves ($B = 0.707 f$). One of `1` or `3`. |
 
-**Returns:** The band mean-square force `F²rms`, in N².
+**Returns:** The band mean-square force `F²rms`, in N². A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

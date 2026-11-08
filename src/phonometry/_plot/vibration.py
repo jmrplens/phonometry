@@ -3887,7 +3887,13 @@ def plot_response_decay_check(
     floor = -80.0
     reference = result.peak if result.peak > 0.0 else 1.0
 
-    def _db(ratio: float | NDArray[np.float64]) -> NDArray[np.float64]:
+    @overload
+    def _db(ratio: float) -> np.float64: ...
+
+    @overload
+    def _db(ratio: NDArray[np.float64]) -> NDArray[np.float64]: ...
+
+    def _db(ratio: float | NDArray[np.float64]) -> np.float64 | NDArray[np.float64]:
         with np.errstate(divide="ignore"):
             return np.maximum(20.0 * np.log10(real_array(ratio, "ratio")), floor)
 

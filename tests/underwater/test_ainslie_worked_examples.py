@@ -217,7 +217,7 @@ def test_detection_range_records_its_absorption_in_db_per_km() -> None:
 
     res = detection_range(82.7, 50e3, temperature_c=4.0, salinity=35.0, depth=50.0)
     alpha = seawater_absorption(50e3, temperature_c=4.0, salinity=35.0, depth=50.0)
-    assert res.absorption_db_per_km == pytest.approx(float(alpha[0]), rel=1e-12)
+    assert res.absorption_db_per_km == pytest.approx(alpha, rel=1e-12)
     assert res.absorption_db_per_km > 10.0
 
 

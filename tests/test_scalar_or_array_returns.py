@@ -1655,6 +1655,20 @@ def _cases() -> tuple[Case, ...]:
             {"levels": 70.0, "sound_power_levels": 80.0},
             ("levels",),
         ),
+        Case(
+            underwater.seawater_absorption, {"frequency_hz": 10000.0}, ("frequency_hz",)
+        ),
+        Case(underwater.spreading_loss, {"range_m": 1000.0}, ("range_m",)),
+        Case(
+            underwater.thermal_noise_spectrum,
+            {"frequency_hz": 50000.0},
+            ("frequency_hz",),
+        ),
+        Case(
+            underwater.wind_noise_spectrum,
+            {"frequency_hz": 1000.0, "wind_speed_kt": 10.0},
+            ("frequency_hz",),
+        ),
     )
 
 

@@ -480,7 +480,7 @@ def test_absorption_defaults_route_to_francois_garrison_at_the_source() -> None:
             depth=zs,
             ph=7.9,
             model="francois-garrison",
-        )[0]
+        )
     )
     assert res.absorption_db_per_km == expected
     off = gaussian_beams(

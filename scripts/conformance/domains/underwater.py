@@ -183,7 +183,7 @@ def _chk_uwp_spreading() -> Outcome:
 def _chk_uwp_thorp() -> Outcome:
     f = 10.0  # kHz
     expected = 1.0936 * (0.1 * f**2 / (1 + f**2) + 40 * f**2 / (4100 + f**2))
-    got = float(ph.underwater.seawater_absorption(10_000.0, model="thorp")[0])
+    got = float(ph.underwater.seawater_absorption(10_000.0, model="thorp"))
     return numeric(expected, got, 1e-6, unit="dB/km", places=4)
 
 
@@ -195,10 +195,10 @@ def _chk_uwp_thorp() -> Outcome:
 def _chk_uwp_absorption_agreement() -> Outcome:
     kw = {"temperature_c": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
     fg = float(
-        ph.underwater.seawater_absorption(10_000.0, model="francois-garrison", **kw)[0]
+        ph.underwater.seawater_absorption(10_000.0, model="francois-garrison", **kw)
     )
     am = float(
-        ph.underwater.seawater_absorption(10_000.0, model="ainslie-mccolm", **kw)[0]
+        ph.underwater.seawater_absorption(10_000.0, model="ainslie-mccolm", **kw)
     )
     return numeric(fg, am, 0.1 * fg, unit="dB/km", places=4)
 
@@ -214,7 +214,7 @@ def _chk_uwp_fg_printed_table() -> Outcome:
     # digit, i.e. the print's own rounding.
     kw = {"temperature_c": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
     got = float(
-        ph.underwater.seawater_absorption(100_000.0, model="francois-garrison", **kw)[0]
+        ph.underwater.seawater_absorption(100_000.0, model="francois-garrison", **kw)
     )
     return numeric(33.6, got, 0.05, unit="dB/km", places=3)
 
@@ -282,7 +282,7 @@ def _chk_uwp_wind_noise() -> Outcome:
     # Wenz/Knudsen "25 dB (5 x 5)" is re 0.0002 dyn/cm2 = 20 uPa; re 1 uPa
     # (ISO 18405) the anchor is 25 + 20*lg(20) = 51.0206 dB (matches the
     # published Wenz chart: ~50 dB at 1 kHz for 4-6 kt).
-    got = float(ph.underwater.wind_noise_spectrum(1000.0, 5.0)[0])
+    got = float(ph.underwater.wind_noise_spectrum(1000.0, 5.0))
     return numeric(51.0206, got, 1e-4, unit="dB", places=4)
 
 
@@ -298,7 +298,7 @@ def _chk_uwp_thermal_noise() -> Outcome:
     got = float(
         ph.underwater.thermal_noise_spectrum(
             f, temperature_c=t, density=rho, speed_of_sound=c
-        )[0]
+        )
     )
     return numeric(expected, got, 1e-6, unit="dB", places=4)
 

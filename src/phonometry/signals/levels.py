@@ -63,8 +63,8 @@ _REF_PRESSURE = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 def _level_db(
-    mean_square: np.ndarray, calibration_factor: float, *, dbfs: bool
-) -> np.ndarray:
+    mean_square: NDArray[np.float64], calibration_factor: float, *, dbfs: bool
+) -> NDArray[np.float64]:
     """Convert mean-square values to dB SPL (re 20 uPa) or dBFS."""
     eps = np.finfo(float).eps
     rms = np.sqrt(np.maximum(mean_square, eps))
@@ -76,7 +76,9 @@ def _level_db(
     return np.asarray(20 * np.log10(np.maximum(rms, eps) / _REF_PRESSURE))
 
 
-def _validate_level_input(x_proc: np.ndarray, calibration_factor: float) -> None:
+def _validate_level_input(
+    x_proc: NDArray[np.float64], calibration_factor: float
+) -> None:
     """Shared validation for the public level functions."""
     require_scalar(calibration_factor, "calibration_factor")
     if x_proc.shape[-1] == 0:

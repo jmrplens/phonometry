@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -128,7 +129,7 @@ class OpenPlanResult(OwnsArrays):
     lp_as_4m: float
     rd: float
     rp: float
-    positions_m: np.ndarray
+    positions_m: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Refuse a result built without the positions it was fitted on.
@@ -236,7 +237,7 @@ class OpenPlanResult(OwnsArrays):
         )
 
 
-def _linear_fit(x: np.ndarray, y: np.ndarray) -> tuple[float, float]:
+def _linear_fit(x: NDArray[np.float64], y: NDArray[np.float64]) -> tuple[float, float]:
     r"""Ordinary least-squares fit
     :math:`y = \text{slope} \cdot x + \text{intercept}`.
 

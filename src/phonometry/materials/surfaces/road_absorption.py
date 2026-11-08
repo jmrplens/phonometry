@@ -92,7 +92,14 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import ComplexScalar, ComplexValues, NumericArrayLike, Real
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        Real,
+        RealScalar,
+        RealValues,
+    )
 
 LeadingEdge = Literal["blackman-harris", "cosine-squared"]
 
@@ -1140,12 +1147,48 @@ def check_spot_frequency_range(frequency: NumericArrayLike) -> None:
         )
 
 
+@overload
+def spot_internal_loss_correction[S1: RealScalar, S2: RealScalar](
+    measured_absorption: S1,
+    system_absorption: S2,
+    *,
+    clip_negative: bool = ...,
+) -> float: ...
+
+
+@overload
+def spot_internal_loss_correction[V: RealValues, A2: NumericArrayLike](
+    measured_absorption: V,
+    system_absorption: A2,
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def spot_internal_loss_correction[S1: RealScalar, V: RealValues](
+    measured_absorption: S1,
+    system_absorption: V,
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def spot_internal_loss_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    measured_absorption: A1,
+    system_absorption: A2,
+    *,
+    clip_negative: bool = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def spot_internal_loss_correction(
     measured_absorption: NumericArrayLike,
     system_absorption: NumericArrayLike,
     *,
     clip_negative: bool = True,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Internal-loss (system) correction (ISO 13472-2:2010, Annex A).
 
     The tube reads all thermal/viscous losses between the microphones and the
@@ -1167,7 +1210,9 @@ def spot_internal_loss_correction(
     :param system_absorption: Reference-plate (system) absorption
         ``alpha_system(f)``, same bands.
     :param clip_negative: Set negative corrected values to zero (default ``True``).
-    :return: Corrected absorption coefficient ``alpha(f)``.
+    :return: Corrected absorption coefficient ``alpha(f)``. A ``float`` when
+        ``measured_absorption`` and ``system_absorption`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the two inputs differ in shape.
     :raises TypeError: if ``measured_absorption`` or ``system_absorption`` holds a text
         or a value that is not a real number.
@@ -1185,7 +1230,7 @@ def spot_internal_loss_correction(
     corrected = alpha_m - alpha_s
     if clip_negative:
         corrected = np.maximum(corrected, 0.0)
-    return np.asarray(corrected, dtype=np.float64)
+    return as_float_or_array(corrected, like=(measured_absorption, system_absorption))
 
 
 def _check_geometry(source_height_m: float, microphone_height_m: float) -> None:

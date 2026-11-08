@@ -1503,6 +1503,43 @@ def _cases() -> tuple[Case, ...]:
             {"reverberation_time": 1.5, "volume": 200.0, "surface_area": 220.0},
             ("reverberation_time",),
         ),
+        Case(
+            environment.barrier_background_correction,
+            {"level_difference": 8.0},
+            ("level_difference",),
+        ),
+        Case(
+            environment.fresnel_number,
+            {
+                "source_to_edge": 5.0,
+                "edge_to_receiver": 5.0,
+                "direct_distance": 9.0,
+                "frequencies": 500.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            environment.line_source_segment_power,
+            {"line_power": 80.0, "length": 10.0},
+            ("line_power",),
+        ),
+        Case(
+            materials.air_absorption_correction,
+            {
+                "volume": 200.0,
+                "specimen_area_m2": 10.0,
+                "attenuation_with_per_m": 0.0015,
+                "attenuation_empty_per_m": 0.001,
+            },
+            ("attenuation_with_per_m", "attenuation_empty_per_m"),
+            together=True,
+        ),
+        Case(
+            materials.spot_internal_loss_correction,
+            {"measured_absorption": 0.4, "system_absorption": 0.05},
+            ("measured_absorption", "system_absorption"),
+            together=True,
+        ),
     )
 
 

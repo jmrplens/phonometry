@@ -76,6 +76,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -101,7 +102,7 @@ __all__ = [
 ]
 
 
-def transmission_loss_from_coefficient(tau: NumericArrayLike) -> np.ndarray:
+def transmission_loss_from_coefficient(tau: NumericArrayLike) -> NDArray[np.float64]:
     r"""Sound reduction index :math:`R = -10 \log_{10}(\tau)` from a transmission
     coefficient.
 
@@ -137,8 +138,8 @@ class ApertureTransmissionResult(OwnsArrays):
     #: The units the field names do not say, as the docstring gives them.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"depth": "m"})
 
-    frequencies: np.ndarray
-    transmission_coefficient: np.ndarray
+    frequencies: NDArray[np.float64]
+    transmission_coefficient: NDArray[np.float64]
     kind: Literal["slit", "circular"]
     depth: float
     width_m: float | None = None
@@ -204,7 +205,7 @@ class ApertureTransmissionResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def transmission_loss(self) -> np.ndarray:
+    def transmission_loss(self) -> NDArray[np.float64]:
         r"""Aperture sound reduction index :math:`R = -10 \log_{10}(\tau)` per
         band, dB.
         """
@@ -243,7 +244,7 @@ class ApertureTransmissionResult(OwnsArrays):
         return plot_aperture_result_geometry(self, ax=ax, language=language, **kwargs)
 
 
-def _slit_end_correction(k_big: np.ndarray) -> np.ndarray:
+def _slit_end_correction(k_big: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""End correction :math:`e = (1/\pi)(\ln(8/K) - \gamma)` (Hopkins
     Eq. 4.100).
     """
@@ -327,7 +328,7 @@ def slit_resonance_frequencies(
     *,
     n_orders: int | np.integer[Any] = 3,
     speed_of_sound: float = _SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Slit resonance frequencies :math:`d + 2e = z\lambda/2` (Hopkins
     Eq. 4.101).
 
@@ -425,7 +426,7 @@ def circular_aperture_transmission_coefficient(
 
 def composite_transmission_loss(
     areas: NumericArrayLike, reduction_indices: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Composite sound reduction index of parallel elements (Hopkins
     Eq. 4.92).
 

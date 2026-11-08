@@ -279,9 +279,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   runs under any user id and on a read-only root, and ffmpeg for videos) and
   type checking (what mypy and pyright check, and where a type is wider than
   its value). Every command and example on the pages was run in the place it
-  is written for; Getting Started links them from its install and notebook sections, and no
-  longer says that VS Code and Colab show the record tables, which nothing
-  had tried.
+  is written for; Getting Started links them from its install and notebook
+  sections, and no longer says that VS Code and Colab show the record
+  tables, which nothing had tried.
 
 - **Contributors and coding agents have one written style guide.**
   `docs/contributing/` says how phonometry names things, shapes its public API,

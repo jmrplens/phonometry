@@ -58,7 +58,7 @@ Started](/phonometry/start/getting-started/#from-pypi-recommended).
 `[full]` leaves `[torch]` out, because the torch wheels PyPI serves on Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
 install torch from PyTorch's CPU index first, then the extra, which keeps the
-torch it finds:
+torch it finds, in the virtual environment made above:
 
 ```bash
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -75,6 +75,9 @@ other devices.
 ```bash
 git clone https://github.com/jmrplens/phonometry.git
 cd phonometry
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install .
 ```
 

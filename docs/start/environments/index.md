@@ -17,7 +17,7 @@ each, with commands that were run there.
 | [Jupyter and JupyterLab](jupyter.md) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
 | [JupyterLite and Pyodide](jupyterlite.md) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
 | [Docker and servers](docker.md) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
-| [Type checking](type-checking.md) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode | the FDTD field arrays, typed `Any` |
+| [Type checking](type-checking.md) | nothing to add: the wheel ships `py.typed` | `mypy --strict`, and pyright's strict mode from NumPy 2.3 | pyright's strict mode on NumPy 2.0 to 2.2; the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors
 
@@ -64,4 +64,4 @@ run falls back to NumPy when its device is missing.
 - [Jupyter and JupyterLab](jupyter.md): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
 - [JupyterLite and Pyodide](jupyterlite.md): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
 - [Docker and servers](docker.md): a slim image, any user id, a read-only root file system and ffmpeg for videos.
-- [Type checking](type-checking.md): what mypy and pyright see, the choices they check and the one place typed `Any`.
+- [Type checking](type-checking.md): what mypy and pyright see on each NumPy, the choices they check and where a type is wider than its value.

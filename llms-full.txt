@@ -75127,7 +75127,7 @@ each, with commands that were run there.
 | [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
 | [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
 | [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
-| [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode | the FDTD field arrays, typed `Any` |
+| [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict`, and pyright's strict mode from NumPy 2.3 | pyright's strict mode on NumPy 2.0 to 2.2; the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors
 
@@ -75174,7 +75174,7 @@ run falls back to NumPy when its device is missing.
 - [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
 - [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
 - [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/): a slim image, any user id, a read-only root file system and ffmpeg for videos.
-- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/): what mypy and pyright see, the choices they check and the one place typed `Any`.
+- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/): what mypy and pyright see on each NumPy, the choices they check and where a type is wider than its value.
 
 ---
 
@@ -75400,14 +75400,26 @@ also turns into an error a deprecation warning that Pyodide's matplotlib
 
 ## Pyodide without JupyterLite
 
-In a page or a Node.js script that loads Pyodide itself, micropip is called
-directly, with the same extras and the same limits:
+In a page or a Node.js script that loads Pyodide itself, micropip is one of
+the packages of the Pyodide distribution, which Pyodide does not load until
+it is asked to. The script loads it from JavaScript, after `loadPyodide()`:
+
+```js
+const pyodide = await loadPyodide();
+await pyodide.loadPackage("micropip");
+```
+
+and the Python it then hands to `pyodide.runPythonAsync()` installs
+phonometry, with the same extras and the same limits:
 
 ```py
 import micropip
 
 await micropip.install("phonometry[plot,report,audio]")
 ```
+
+Without the `loadPackage` step, `import micropip` fails with
+`ModuleNotFoundError: No module named 'micropip'`.
 
 ## A JupyterLite site of your own
 
@@ -75417,6 +75429,9 @@ JupyterLite packages, or it stops with "jupyter-server is not installed. You
 cannot add custom content to jupyterlite":
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
 jupyter lite build --contents content --output-dir _output
 ```
@@ -75490,7 +75505,7 @@ Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation).
 `[full]` leaves `[torch]` out, because the torch wheels PyPI serves on Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
 install torch from PyTorch's CPU index first, then the extra, which keeps the
-torch it finds:
+torch it finds, in the virtual environment made above:
 
 ```bash
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -75507,6 +75522,9 @@ other devices.
 ```bash
 git clone https://github.com/jmrplens/phonometry.git
 cd phonometry
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install .
 ```
 
@@ -75581,7 +75599,7 @@ library with nothing else installed. Every public module declares what it
 publishes, and the lazy domains of `import phonometry as ph` are visible to a
 checker as well as at run time.
 
-## A script that passes the strict modes
+## A script under the strict modes
 
 ```python
 import numpy as np
@@ -75604,8 +75622,14 @@ pressure = engine.numpy_field("p")       # a NumPy array; engine.p is the device
 print(pressure.shape)
 ```
 
-`mypy --strict` and pyright, in its basic and its strict mode, report nothing
-on this script, on Python 3.12 to 3.14.
+`mypy --strict` and pyright's basic mode report nothing on this script, on
+Python 3.12 to 3.14 and with every NumPy the library accepts there. pyright's
+strict mode reports nothing either from NumPy 2.3 on, the oldest the library
+accepts on Python 3.14. With NumPy 2.0 to 2.2, which Python 3.12 and 3.13
+still accept, `np.ndarray` has no default type arguments, so strict pyright
+reads the arrays phonometry annotates as partially unknown: three errors on
+this script, from `require_levels()` and `filter()`, and two more from
+`numpy_field()` before NumPy 2.2.
 
 ## What a checker catches
 
@@ -75649,13 +75673,19 @@ and pyright refuses the same four lines.
   array or a PyTorch tensor. A checker reads them as `Any`.
   `engine.numpy_field("p")` returns a NumPy copy on every device, typed as
   one.
+- **The keyword arguments of a plot.** `.plot()` hands the keyword arguments
+  it does not take itself on to matplotlib, typed `Any`, so a checker passes
+  a misspelt one such as `bands.plot(colour="red")`, which matplotlib refuses
+  with an AttributeError when the line runs.
 
 ## Completeness
 
 `pyright --verifytypes phonometry --ignoreexternal` reads the installed
-package as a user's checker does and scores it at 100%: every symbol the
-package exports has a known type. The repository's CI runs the same command
-on the built wheel and fails below 100%.
+package as a user's checker does and scores it at 100% with NumPy 2.3 or
+newer: every symbol the package exports has a known type. With NumPy 2.0 to
+2.2 it scores about 86%, for the reason the strict mode reports above. The
+repository's CI runs the same command on the built wheel, with the newest
+NumPy, and fails below 100%.
 
 ---
 

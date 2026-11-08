@@ -35,7 +35,11 @@ const lockPath = join(
   dirname(fileURLToPath(import.meta.resolve("pyodide"))),
   "pyodide-lock.json",
 );
-const pyodide = await loadPyodide();
+// A directory for the wheels Pyodide fetches from its CDN, which CI keeps
+// between runs: loadPyodide loads a wheel found there and keeps one it had to
+// download. Unset, Pyodide keeps them beside itself in node_modules.
+const packageCacheDir = process.env.PYODIDE_PACKAGE_CACHE_DIR;
+const pyodide = await loadPyodide(packageCacheDir ? { packageCacheDir } : {});
 await pyodide.loadPackage(["micropip", "packaging"]);
 const wheel = `/wheels/${basename(wheelPath)}`;
 pyodide.FS.mkdirTree("/wheels");

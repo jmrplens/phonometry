@@ -118,7 +118,7 @@ _S0 = 1.0
 _T0 = 0.5
 
 
-def _as_array(value: NumericArrayLike, name: str) -> np.ndarray:
+def _as_array(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Return *value* as a 1-D float array, raising on non-finite entries."""
     arr = np.atleast_1d(real_array(value, name))
     if not np.all(np.isfinite(arr)):
@@ -199,7 +199,9 @@ class FacadeElement(OwnsArrays):
             raise ValueError(msg)
         return given[0]
 
-    def tau(self, total_area: float, n_bands: int | np.integer[Any]) -> np.ndarray:
+    def tau(
+        self, total_area: float, n_bands: int | np.integer[Any]
+    ) -> NDArray[np.float64]:
         """Transmission factor ``τ`` of this element for the whole façade area.
 
         :raises ValueError: for a ``total_area`` that is not positive, an
@@ -240,7 +242,7 @@ def _band_count(elements: Sequence[FacadeElement], owner: str) -> int:
     elements disagree is answered by name: which element carries which
     spectrum, rather than the bare fact that two of them differ.
     """
-    spectra: dict[str, np.ndarray] = {}
+    spectra: dict[str, NDArray[np.float64]] = {}
     for el in elements:
         kind = el._kind()  # exactly one of r / dn_e / insertion_loss
         label = f"{el.name} ({kind})"
@@ -278,16 +280,16 @@ class FacadePredictionResult(OwnsArrays):
         kept so :meth:`plot_geometry` can draw the elevation.
     """
 
-    r_prime: np.ndarray
-    r_45: np.ndarray
-    r_tr_s: np.ndarray
-    d_2m_nt: np.ndarray
+    r_prime: NDArray[np.float64]
+    r_45: NDArray[np.float64]
+    r_tr_s: NDArray[np.float64]
+    d_2m_nt: NDArray[np.float64]
     element_r: Mapping[str, NDArray[np.float64]]
     elements: tuple[FacadeElement, ...]
     r_tr_s_w: int | None = None
     d_2m_nt_w: int | None = None
     c_tr: int | None = None
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a prediction whose element rows and bands do not line up.
@@ -439,10 +441,10 @@ class RadiatedPowerResult(OwnsArrays):
         the axis by band index.
     """
 
-    l_w: np.ndarray
-    r_prime: np.ndarray
+    l_w: NDArray[np.float64]
+    r_prime: NDArray[np.float64]
     l_w_dba: float | None = None
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a radiated power whose bands and band centres disagree.
@@ -489,7 +491,7 @@ _A_WEIGHT_OCTAVE = {
 
 def _apparent_reduction(
     elements: Sequence[FacadeElement], total_area: float, owner: str
-) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+) -> tuple[NDArray[np.float64], dict[str, NDArray[np.float64]]]:
     r""":math:`R' = -10 \log_{10}(\sum \tau)` (F. 10 / Part 4 F. 3), plus ``Rp``."""
     require_scalar(total_area, "total_area")
     if not elements:
@@ -513,7 +515,7 @@ def _apparent_reduction(
 
 
 def _single_number(
-    values: np.ndarray, fraction: BandFraction | np.integer[Any] | None
+    values: NDArray[np.float64], fraction: BandFraction | np.integer[Any] | None
 ) -> tuple[int, int] | None:
     """(rating, Ctr) via ISO 717-1 for 5 octave or 16 third-octave bands."""
     from ..measurement.ratings import weighted_rating

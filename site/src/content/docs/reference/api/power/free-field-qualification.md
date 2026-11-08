@@ -201,10 +201,22 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 ```python
 directionality_tolerance(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> float
+
+directionality_tolerance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> NDArray[np.float64]
+
+directionality_tolerance(
+    frequencies: NumericArrayLike,
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> float | NDArray[np.float64]
 ```
 
 Allowable deviation of the test source directionality (ISO 26101 Table B.1).
@@ -216,7 +228,7 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 | `frequencies` | One-third octave mid-band frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
-**Returns:** The half-width of the tolerance band, in dB, per frequency.
+**Returns:** The half-width of the tolerance band, in dB, per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -513,10 +525,22 @@ span the frequency range, each with its own mathematical origin, and
 
 ```python
 inverse_square_law_tolerance(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> float
+
+inverse_square_law_tolerance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> NDArray[np.float64]
+
+inverse_square_law_tolerance(
+    frequencies: NumericArrayLike,
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> float | NDArray[np.float64]
 ```
 
 Allowable deviation from the inverse square law per band (Table A.1).
@@ -532,7 +556,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 | `frequencies` | Test frequencies or band mid-frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
-**Returns:** The half-width of the tolerance band, in dB, per frequency.
+**Returns:** The half-width of the tolerance band, in dB, per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

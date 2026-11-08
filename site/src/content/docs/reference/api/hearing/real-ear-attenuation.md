@@ -491,11 +491,25 @@ REAT_BETWEEN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUnce
 
 ```python
 reat_expanded_uncertainty(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    protector: Literal['earplug', 'earmuff'],
+    between_laboratories: bool = ...,
+) -> float
+
+reat_expanded_uncertainty(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    protector: Literal['earplug', 'earmuff'],
+    between_laboratories: bool = ...,
+) -> NDArray[np.float64]
+
+reat_expanded_uncertainty(
     frequencies: NumericArrayLike,
     *,
     protector: Literal['earplug', 'earmuff'],
-    between_laboratories: bool = False,
-) -> NDArray[np.float64]
+    between_laboratories: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The typical $U_{95}$ of a mean attenuation, band by band (A.2, B.2).
@@ -516,7 +530,7 @@ to one decimal, as the tables print them (see
 | `protector` | `"earplug"` or `"earmuff"`. |
 | `between_laboratories` | `False` (default) for Table A.2, `True` for Table B.2. |
 
-**Returns:** $U_{95}$ per band, in dB.
+**Returns:** $U_{95}$ per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -1716,8 +1716,16 @@ $b$ of Formula (B.10), half the duration, in s.
 
 ```python
 RectangularPulse.level_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+RectangularPulse.level_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+RectangularPulse.level_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $20\lg\lvert X(f)/X(0)\rvert$, how far the spectrum has
@@ -1729,7 +1737,7 @@ fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 | :--- | :--- |
 | `frequencies` | Any frequencies, in Hz. |
 
-**Returns:** The level at each, in dB.
+**Returns:** The level at each, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### RectangularPulse.plot()
 
@@ -1768,8 +1776,16 @@ frequencies of interest.
 
 ```python
 RectangularPulse.spectrum_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+RectangularPulse.spectrum_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+RectangularPulse.spectrum_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $X(f)$ of Formula (B.10), in V·s, the transform of the pulse
@@ -1781,7 +1797,7 @@ centred on the time origin, where it is real.
 | :--- | :--- |
 | `frequencies` | Any frequencies, in Hz. |
 
-**Returns:** $X(f)$ at each.
+**Returns:** $X(f)$ at each. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -2379,8 +2395,16 @@ an impulse response to its frequency step.
 
 ```python
 TimeSelectiveResponse.level_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+TimeSelectiveResponse.level_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+TimeSelectiveResponse.level_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $20\lg\lvert H(f)\rvert$, in dB re 1 of the response's unit
@@ -2392,14 +2416,22 @@ times a second.
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 
-**Returns:** The level at each, in dB.
+**Returns:** The level at each, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### TimeSelectiveResponse.phase_deg_at()
 
 ```python
 TimeSelectiveResponse.phase_deg_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+TimeSelectiveResponse.phase_deg_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+TimeSelectiveResponse.phase_deg_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $\arg H(f)$, in degrees, with the time origin at the start of
@@ -2411,7 +2443,7 @@ the record.
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 
-**Returns:** The phase at each, in degrees.
+**Returns:** The phase at each, in degrees. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### TimeSelectiveResponse.plot()
 

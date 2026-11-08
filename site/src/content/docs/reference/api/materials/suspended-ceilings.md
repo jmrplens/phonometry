@@ -57,9 +57,33 @@ air_absorption_correction(
     *,
     volume: float,
     specimen_area_m2: float,
-    attenuation_with_per_m: NumericArrayLike,
+    attenuation_with_per_m: float | np.floating[Any] | np.integer[Any],
+    attenuation_empty_per_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+air_absorption_correction(
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     attenuation_empty_per_m: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+air_absorption_correction(
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: float | np.floating[Any] | np.integer[Any],
+    attenuation_empty_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+air_absorption_correction(
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: NumericArrayLike,
+    attenuation_empty_per_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The correction 4.2.1 caps, as an absorption coefficient.
@@ -87,7 +111,7 @@ humidity or more.
 | `attenuation_with_per_m` | $m_2$ per band, in reciprocal metres. |
 | `attenuation_empty_per_m` | $m_1$ per band, in reciprocal metres. |
 
-**Returns:** $\Delta\alpha$ per band.
+**Returns:** $\Delta\alpha$ per band. A `float` when `attenuation_with_per_m` and `attenuation_empty_per_m` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

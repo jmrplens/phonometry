@@ -222,10 +222,22 @@ Table A.1 (bang machine).
 
 ```python
 fast_reverberation_correction(
+    reverberation_time: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference_time: float = ...,
+) -> float
+
+fast_reverberation_correction(
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reference_time: float = ...,
+) -> NDArray[np.float64]
+
+fast_reverberation_correction(
     reverberation_time: NumericArrayLike,
     *,
-    reference_time: float = 0.5,
-) -> NDArray[np.float64]
+    reference_time: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Fast time-weighting reverberation correction (Formulae (4), (5), (6)).
@@ -247,7 +259,7 @@ when $T = T_0$.
 | `reverberation_time` | Receiving-room reverberation time `T` per band, in seconds (> 0). |
 | `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
 
-**Returns:** The correction per band, in dB.
+**Returns:** The correction per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -358,7 +358,17 @@ between 31,5 Hz and 400 Hz.
 ## weighting_bs468
 
 ```python
-weighting_bs468(frequencies: NumericArrayLike) -> NDArray[np.float64]
+weighting_bs468(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+weighting_bs468(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+weighting_bs468(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 ITU-R BS.468-4 weighting response, in dB re 1 kHz.
@@ -398,7 +408,7 @@ between six mask frequencies rather than all 21.)
 | :--- | :--- |
 | `frequencies` | Frequencies, in Hz (scalar or array-like, >= 0). |
 
-**Returns:** Response in dB re the 1 kHz value, same shape as the input.
+**Returns:** Response in dB re the 1 kHz value, same shape as the input. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

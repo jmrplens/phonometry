@@ -586,12 +586,28 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 
 ```python
 ReferenceSourceCalibration.sound_power_level_at(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    temperature_c: float | None = ...,
+    static_pressure_kpa: float | None = ...,
+) -> float
+
+ReferenceSourceCalibration.sound_power_level_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    temperature_c: float | None = ...,
+    static_pressure_kpa: float | None = ...,
+) -> NDArray[np.float64]
+
+ReferenceSourceCalibration.sound_power_level_at(
     frequencies: NumericArrayLike,
     *,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-    temperature_c: float | None = None,
-    static_pressure_kpa: float | None = None,
-) -> NDArray[np.float64]
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    temperature_c: float | None = ...,
+    static_pressure_kpa: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The calibrated level in the bands a comparison method asks for.
@@ -615,7 +631,7 @@ calibrated.
 | `temperature_c` | Air temperature at the test, in degrees Celsius; `None` (default), with `static_pressure_kpa`, reads the reference conditions. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, given together with `temperature_c`. |
 
-**Returns:** The level per requested band, in dB re 1 pW.
+**Returns:** The level per requested band, in dB re 1 pW. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

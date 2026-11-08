@@ -311,10 +311,28 @@ fresnel_number(
     source_to_edge: float,
     edge_to_receiver: float,
     direct_distance: float,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    speed_of_sound: float = ...,
+) -> float
+
+fresnel_number(
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+fresnel_number(
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
     frequencies: NumericArrayLike,
     *,
-    speed_of_sound: float = 343.0,
-) -> NDArray[np.float64]
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Fresnel number $N = (2/\lambda)(A + B - d)$ (Bies Eq. (5.134)).
@@ -334,7 +352,7 @@ in the bright zone.
 | `frequencies` | Frequencies, in hertz. |
 | `speed_of_sound` | Speed of sound `c`, in m/s. |
 
-**Returns:** Fresnel number `N` per frequency.
+**Returns:** Fresnel number `N` per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

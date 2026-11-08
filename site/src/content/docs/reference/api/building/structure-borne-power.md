@@ -256,8 +256,20 @@ only the reference differs.
 plate_loss_factor(
     reverberation_time: NumericArrayLike,
     *,
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+plate_loss_factor(
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+plate_loss_factor(
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Plate loss factor $\eta = 2.2 / (f\, T_\mathrm{s})$ (EN 15657, Formula 13).
@@ -272,7 +284,7 @@ ISO 10848 total loss factor.
 | `frequency` | Band centre frequency `f`, in hertz (scalar or per band). |
 | `reverberation_time` | Structural reverberation time `Ts`, in s. |
 
-**Returns:** The loss factor `eta` (dimensionless) per band.
+**Returns:** The loss factor `eta` (dimensionless) per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

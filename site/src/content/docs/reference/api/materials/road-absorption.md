@@ -842,11 +842,32 @@ SPOT_FREQUENCY_RANGE_HZ = (250.0, 1600.0)
 
 ```python
 spot_internal_loss_correction(
+    measured_absorption: float | np.floating[Any] | np.integer[Any],
+    system_absorption: float | np.floating[Any] | np.integer[Any],
+    *,
+    clip_negative: bool = ...,
+) -> float
+
+spot_internal_loss_correction(
+    measured_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    system_absorption: NumericArrayLike,
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]
+
+spot_internal_loss_correction(
+    measured_absorption: float | np.floating[Any] | np.integer[Any],
+    system_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]
+
+spot_internal_loss_correction(
     measured_absorption: NumericArrayLike,
     system_absorption: NumericArrayLike,
     *,
-    clip_negative: bool = True,
-) -> NDArray[np.float64]
+    clip_negative: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Internal-loss (system) correction (ISO 13472-2:2010, Annex A).
@@ -873,7 +894,7 @@ one-third-octave results are set to zero when `clip_negative` is true
 | `system_absorption` | Reference-plate (system) absorption `alpha_system(f)`, same bands. |
 | `clip_negative` | Set negative corrected values to zero (default `True`). |
 
-**Returns:** Corrected absorption coefficient `alpha(f)`.
+**Returns:** Corrected absorption coefficient `alpha(f)`. A `float` when `measured_absorption` and `system_absorption` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

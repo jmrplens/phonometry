@@ -180,9 +180,19 @@ margin that floating point leaves a few parts in $10^{14}$ under
 
 ```python
 flow_velocity_m_s(
-    velocity_pressure_pa: NumericArrayLike,
+    velocity_pressure_pa: float | np.floating[Any] | np.integer[Any],
+    density: float,
+) -> float
+
+flow_velocity_m_s(
+    velocity_pressure_pa: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     density: float,
 ) -> NDArray[np.float64]
+
+flow_velocity_m_s(
+    velocity_pressure_pa: NumericArrayLike,
+    density: float,
+) -> float | NDArray[np.float64]
 ```
 
 The flow velocity a velocity pressure stands for, Equation (28).
@@ -196,7 +206,7 @@ $w = \sqrt{2 p_\mathrm{v} / \rho}$.
 | `velocity_pressure_pa` | $p_\mathrm{v}$, in pascals. |
 | `density` | $\rho$, in kilograms per cubic metre. |
 
-**Returns:** $w$, in metres per second.
+**Returns:** $w$, in metres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -369,9 +379,24 @@ band, or one value per band.
 
 ```python
 insertion_level_difference(
-    levels_without: NumericArrayLike,
+    levels_without: float | np.floating[Any] | np.integer[Any],
+    levels_with: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+insertion_level_difference(
+    levels_without: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     levels_with: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+insertion_level_difference(
+    levels_without: float | np.floating[Any] | np.integer[Any],
+    levels_with: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+insertion_level_difference(
+    levels_without: NumericArrayLike,
+    levels_with: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The level difference the silencer made, Equation (3).
@@ -388,7 +413,7 @@ which run they are.
 | `levels_without` | $L_{p\mathrm{II}}$ per band, in decibels. |
 | `levels_with` | $L_{p\mathrm{I}}$ per band, in decibels. |
 
-**Returns:** $D_{\mathrm{i}p\mathrm{s}}$ per band, in decibels.
+**Returns:** $D_{\mathrm{i}p\mathrm{s}}$ per band, in decibels. A `float` when `levels_without` and `levels_with` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -657,10 +682,24 @@ difference taken afterwards.
 ```python
 reverberant_surface_area_m2(
     volume_m3: float,
+    reverberation_time_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    speed_of_sound: float = ...,
+) -> float
+
+reverberant_surface_area_m2(
+    volume_m3: float,
+    reverberation_time_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+reverberant_surface_area_m2(
+    volume_m3: float,
     reverberation_time_s: NumericArrayLike,
     *,
-    speed_of_sound: float = 340.0,
-) -> NDArray[np.float64]
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 A quarter of the room absorption, as an area, Equations (6), (10) and (12).
@@ -687,7 +726,7 @@ so.
 | `reverberation_time_s` | The reverberation time per band, in seconds. |
 | `speed_of_sound` | The speed of sound, in metres per second. |
 
-**Returns:** The area, in square metres.
+**Returns:** The area, in square metres. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -708,8 +747,16 @@ SABINE_AREA_COEFFICIENT = 13.815510557964275
 
 ```python
 silencer_background_correction(
-    level_difference: NumericArrayLike,
+    level_difference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+silencer_background_correction(
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+silencer_background_correction(
+    level_difference: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The background correction of Table 1, in decibels to subtract.
@@ -735,7 +782,7 @@ the 10 dB row.
 | :--- | :--- |
 | `level_difference` | The difference between the level measured with the source running and the background level alone, in decibels. |
 
-**Returns:** The correction to subtract, in decibels.
+**Returns:** The correction to subtract, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -813,11 +860,39 @@ sound pressure level".
 
 ```python
 silencer_sound_power_level(
+    mean_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    area: float | np.floating[Any] | np.integer[Any],
+    field_correction: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+silencer_sound_power_level(
+    mean_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    area: NumericArrayLike,
+    field_correction: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+silencer_sound_power_level(
+    mean_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    field_correction: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+silencer_sound_power_level(
+    mean_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    area: float | np.floating[Any] | np.integer[Any],
+    field_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+silencer_sound_power_level(
     mean_level: NumericArrayLike,
     *,
     area: NumericArrayLike,
-    field_correction: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+    field_correction: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 A mean level read as a sound power, Equations (5), (7), (9) and (11).
@@ -841,7 +916,7 @@ have been chosen as 3.3 and 3.4 define them.
 | `area` | $S$, in square metres. |
 | `field_correction` | $K$, in decibels. |
 
-**Returns:** $L_W$ per band, in decibels.
+**Returns:** $L_W$ per band, in decibels. A `float` when `mean_level`, `area` and `field_correction` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1046,9 +1121,24 @@ also the static pressure difference.
 
 ```python
 transmission_level_difference(
-    source_levels: NumericArrayLike,
+    source_levels: float | np.floating[Any] | np.integer[Any],
+    receiver_levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+transmission_level_difference(
+    source_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     receiver_levels: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+transmission_level_difference(
+    source_levels: float | np.floating[Any] | np.integer[Any],
+    receiver_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+transmission_level_difference(
+    source_levels: NumericArrayLike,
+    receiver_levels: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The level difference across the silencer, Equation (1).
@@ -1069,7 +1159,7 @@ turns into a transmission loss.
 | `source_levels` | $\overline{L_{p2}}$ per band, in decibels. |
 | `receiver_levels` | $\overline{L_{p1}}$ per band, in decibels. |
 
-**Returns:** $D_{\mathrm{t}p\mathrm{s}}$ per band, in decibels.
+**Returns:** $D_{\mathrm{t}p\mathrm{s}}$ per band, in decibels. A `float` when `source_levels` and `receiver_levels` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1098,9 +1188,24 @@ UPSTREAM_DISTANCE_DIAMETERS = 1.5
 
 ```python
 velocity_pressure_pa(
-    total_pressure_pa: NumericArrayLike,
+    total_pressure_pa: float | np.floating[Any] | np.integer[Any],
+    static_pressure_pa: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+velocity_pressure_pa(
+    total_pressure_pa: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     static_pressure_pa: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+velocity_pressure_pa(
+    total_pressure_pa: float | np.floating[Any] | np.integer[Any],
+    static_pressure_pa: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+velocity_pressure_pa(
+    total_pressure_pa: NumericArrayLike,
+    static_pressure_pa: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The velocity pressure, Equation (27).
@@ -1116,7 +1221,7 @@ asks.
 | `total_pressure_pa` | $p_\mathrm{T}$, in pascals. |
 | `static_pressure_pa` | $p_\mathrm{S}$, in pascals. |
 
-**Returns:** $p_\mathrm{v}$, in pascals.
+**Returns:** $p_\mathrm{v}$, in pascals. A `float` when `total_pressure_pa` and `static_pressure_pa` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

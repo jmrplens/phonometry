@@ -151,8 +151,16 @@ coefficient in the annex is transcribed and none of them warns.
 
 ```python
 in_duct_reproducibility(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+in_duct_reproducibility(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+in_duct_reproducibility(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Standard deviation of reproducibility $\sigma_R$ per band.
@@ -170,7 +178,7 @@ carries those bands says so in `information_only_band`.
 | :--- | :--- |
 | `frequencies` | Nominal one-third-octave centre frequencies, in hertz, 50 Hz to 20 kHz. |
 
-**Returns:** $\sigma_R$ per band, in decibels.
+**Returns:** $\sigma_R$ per band, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

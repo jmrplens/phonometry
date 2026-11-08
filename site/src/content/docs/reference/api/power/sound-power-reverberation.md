@@ -180,11 +180,39 @@ A level array of several spectra draws one curve per spectrum.
 
 ```python
 reverberation_background_correction(
-    levels: NumericArrayLike,
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reverberation_background_correction(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     background_levels: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+reverberation_background_correction(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
+
+reverberation_background_correction(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+reverberation_background_correction(
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Background-noise correction $K_1$, ISO 3741:2010 Equation (14).
@@ -209,7 +237,7 @@ this.
 | `background_levels` | Background levels in the same bands, in decibels. |
 | `frequencies` | Nominal band centre frequencies, in hertz. |
 
-**Returns:** $K_1$ per band, in decibels, to be subtracted from `levels`.
+**Returns:** $K_1$ per band, in decibels, to be subtracted from `levels`. A `float` when `levels`, `background_levels` and `frequencies` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

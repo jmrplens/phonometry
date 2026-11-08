@@ -362,11 +362,12 @@ def _first_call(
 ) -> tuple[bool, object]:
     """Call *function* with each of *numbers* until one is accepted."""
     for number in numbers:
+        # A call that raises, whatever it raises, returns nothing to judge.
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 return True, function(**_arguments(slots, number))
-        except Exception:  # noqa: BLE001 - a call that raises returns nothing to judge
+        except Exception:
             continue
     return False, None
 

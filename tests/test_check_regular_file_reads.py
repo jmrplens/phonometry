@@ -1564,6 +1564,175 @@ def test_a_method_called_through_its_class_takes_the_instance_first(
     ) == [("Reader.instance_read", _FOREIGN), ("reads_after_holder", _FOREIGN)]
 
 
+def test_a_keyword_hands_the_parameter_it_names_alone(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``Reader.check(self, other=path)`` hands the name to ``other``, so
+    ``check`` checks its default, not the name: the read after it is
+    unchecked. ``Reader.check(self, path=path)`` and
+    ``Reader.check(self, other=x, path=path)`` hand it to ``path``, which
+    ``check`` checks.
+
+    The only keyword of a call that hands the instance alone by position was
+    read as the parameter after it whatever it named, so ``by_other`` passed,
+    and a call with a second keyword was read as handing nothing, so
+    ``by_both`` was refused.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+        from check import require_regular
+
+        class Reader:
+            def check(self, path="safe", *, other=None):
+                require_regular(path)
+
+            def by_other(self, path):
+                Reader.check(self, other=path)
+                return np.load(path)
+
+            def by_name(self, path):
+                Reader.check(self, path=path)
+                return np.load(path)
+
+            def by_both(self, path, x):
+                Reader.check(self, other=x, path=path)
+                return np.load(path)
+        """,
+    ) == [("Reader.by_other", _FOREIGN)]
+
+
+def test_a_method_called_on_the_class_of_a_class_method_takes_the_instance_first(
+    tmp_path: pathlib.Path,
+) -> None:
+    """In a class method, ``cls`` is the class, so ``cls.check(holder,
+    path)`` calls a plain ``check`` through its class: ``holder`` is the
+    instance and ``path`` the name it checks, and ``cls.check(path, other)``
+    checks ``other``.
+
+    ``cls`` was read as an instance, as ``self`` is, so the call's first
+    argument was taken as the name checked: ``right`` was refused and
+    ``wrong`` passed.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+        from check import require_regular
+
+        class Reader:
+            def check(self, path):
+                require_regular(path)
+
+            @classmethod
+            def right(cls, holder, path):
+                cls.check(holder, path)
+                return np.load(path)
+
+            @classmethod
+            def wrong(cls, path, other):
+                cls.check(path, other)
+                return np.load(path)
+        """,
+    ) == [("Reader.wrong", _FOREIGN)]
+
+
+def test_a_call_on_the_receiver_is_known_by_its_place_whatever_it_is_called(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call on the first parameter of a method is a call on its receiver
+    whatever it is called: ``this.check(path)`` reaches ``check`` of the
+    class and hands it the name first. A parameter called ``self`` of a
+    static method is no receiver: ``self.check(path)`` there is a call on
+    whatever the caller hands, and no check.
+
+    The receiver was known by the name ``self`` or ``cls``: ``this.check``
+    reached no function, so the read after it was refused, and
+    ``self.check`` in the static method was read as the class's ``check``
+    called on an instance, so the read after it passed.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+        from check import require_regular
+
+        class Reader:
+            def check(self, path):
+                require_regular(path)
+
+            def on_the_receiver(this, path):
+                this.check(path)
+                return np.load(path)
+
+            @staticmethod
+            def static(self, path):
+                self.check(path)
+                return np.load(path)
+        """,
+    ) == [("Reader.static", _FOREIGN)]
+
+
+def test_a_definition_a_later_one_replaces_gives_no_place(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A static ``check(path)`` that replaces a method ``check(self, path)``
+    is the one ``Replaced.check(path)`` calls, so it takes the name first.
+
+    The replaced method still gave the name's place second through the
+    class, the two places disagreed, and the checked read was refused.
+    """
+    source = """
+        import numpy as np
+        from check import require_regular
+
+        class Replaced:
+            def check(self, path):
+                require_regular(path)
+
+            @staticmethod
+            def check(path):
+                require_regular(path)
+
+            def reads(self, path):
+                Replaced.check(path)
+                return np.load(path)
+        """
+    assert _found(tmp_path, source) == []
+
+
+def test_a_name_handed_past_the_second_place_is_read_at_its_place(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``check(self, cls, path)`` checks ``path``, which
+    ``Third.check(None, None, path)`` hands third, so the read after it is
+    checked; ``Third.check(path, None, other)`` checks ``other``.
+
+    Only a call's first two arguments were looked at for the name before its
+    place was worked out, so the checked read was refused.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+        from check import require_regular
+
+        class Third:
+            def check(self, cls, path):
+                require_regular(path)
+
+            def reads(self, path):
+                Third.check(None, None, path)
+                return np.load(path)
+
+            def wrong(self, path, other):
+                Third.check(path, None, other)
+                return np.load(path)
+        """,
+    ) == [("Third.wrong", _FOREIGN)]
+
+
 #: A module of checks with the short names of the library's own: ``info``
 #: asks what the name holds, as ``io.info`` does, and ``described`` hands its
 #: name to NumPy's ``info``, which asks nothing.

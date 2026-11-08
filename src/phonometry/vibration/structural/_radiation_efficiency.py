@@ -150,8 +150,8 @@ class RadiationEfficiencyResult(OwnsArrays):
         {"critical_frequency": "Hz", "length_x": "m", "length_y": "m"}
     )
 
-    frequencies: np.ndarray
-    radiation_efficiency: np.ndarray
+    frequencies: NDArray[np.float64]
+    radiation_efficiency: NDArray[np.float64]
     critical_frequency: float
     length_x: float
     length_y: float
@@ -181,7 +181,7 @@ class RadiationEfficiencyResult(OwnsArrays):
         require_same_length(self, "frequencies", "radiation_efficiency")
 
     @property
-    def radiation_index(self) -> np.ndarray:
+    def radiation_index(self) -> NDArray[np.float64]:
         r"""Radiation index :math:`10 \log_{10}(\sigma)` per band, in dB."""
         sigma = np.asarray(self.radiation_efficiency, dtype=np.float64)
         return np.asarray(10.0 * np.log10(sigma), dtype=np.float64)

@@ -50,9 +50,13 @@ def test_a_parametric_eq_types_each_input_as_its_function_does() -> None:
     """The cascade and its function agree, input for input."""
     cascade = filters.ParametricEQ(_FS, _SECTION)
     equalized_take = assert_type(cascade.filter(_TAKE), io.Signal)
-    equalized: NDArray[np.float64] = assert_type(cascade.filter(_SAMPLES), np.ndarray)
+    equalized: NDArray[np.float64] = assert_type(
+        cascade.filter(_SAMPLES), NDArray[np.float64]
+    )
     assert_type(filters.parametric_eq(_TAKE, sections=_SECTION), io.Signal)
-    assert_type(filters.parametric_eq(_SAMPLES, _FS, sections=_SECTION), np.ndarray)
+    assert_type(
+        filters.parametric_eq(_SAMPLES, _FS, sections=_SECTION), NDArray[np.float64]
+    )
     assert isinstance(equalized_take, io.Signal)
     assert not isinstance(equalized, io.Signal)
 

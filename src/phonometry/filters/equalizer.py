@@ -616,9 +616,9 @@ class ParametricEQ:
     def filter(self, x: Signal) -> Signal: ...
 
     @overload
-    def filter(self, x: NumericArrayLike) -> np.ndarray: ...
+    def filter(self, x: NumericArrayLike) -> NDArray[np.float64]: ...
 
-    def filter(self, x: Signal | NumericArrayLike) -> Signal | np.ndarray:
+    def filter(self, x: Signal | NumericArrayLike) -> Signal | NDArray[np.float64]:
         """Apply the EQ cascade to a signal.
 
         :param x: Input signal (1D or 2D ``[channels, samples]``), or a
@@ -634,7 +634,8 @@ class ParametricEQ:
         x_proc = resolve_samples(x)
         if not self.stateful:
             return like_input(
-                x, cast(np.ndarray, signal.sosfilt(self.sos, x_proc, axis=-1))
+                x,
+                cast("NDArray[np.float64]", signal.sosfilt(self.sos, x_proc, axis=-1)),
             )
 
         if _sos_state_mismatch(self.zi, x_proc):
@@ -642,7 +643,7 @@ class ParametricEQ:
                 sos=self.sos, x_proc=x_proc, steady_ic=self._steady_ic
             )
         y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
-        return like_input(x, cast(np.ndarray, y))
+        return like_input(x, cast("NDArray[np.float64]", y))
 
     def response(
         self,
@@ -712,7 +713,7 @@ def parametric_eq(
     fs: float,
     *,
     sections: EQSection | Sequence[EQSection],
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 def parametric_eq(
@@ -720,7 +721,7 @@ def parametric_eq(
     fs: float | None = None,
     *,
     sections: EQSection | Sequence[EQSection],
-) -> Signal | np.ndarray:
+) -> Signal | NDArray[np.float64]:
     """Apply a parametric-EQ cascade to a signal (RBJ Audio EQ Cookbook).
 
     Convenience wrapper around :class:`ParametricEQ` for one-shot use.

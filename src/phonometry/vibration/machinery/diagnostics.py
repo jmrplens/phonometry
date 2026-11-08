@@ -108,6 +108,7 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
 
@@ -231,12 +232,12 @@ class FaultFrequencyResult(RichDisplay):
         return tuple(line.name for line in self.lines)
 
     @property
-    def frequencies(self) -> np.ndarray:
+    def frequencies(self) -> NDArray[np.float64]:
         """Predicted frequencies, in hertz, in order."""
         return np.array([line.frequency for line in self.lines], dtype=np.float64)
 
     @property
-    def orders(self) -> np.ndarray:
+    def orders(self) -> NDArray[np.float64]:
         """Predicted frequencies in shaft orders, in order."""
         return np.array([line.order for line in self.lines], dtype=np.float64)
 
@@ -244,7 +245,9 @@ class FaultFrequencyResult(RichDisplay):
         """The lines as a ``{name: frequency}`` mapping."""
         return {line.name: line.frequency for line in self.lines}
 
-    def harmonics(self, name: str, n_harmonics: int | np.integer[Any]) -> np.ndarray:
+    def harmonics(
+        self, name: str, n_harmonics: int | np.integer[Any]
+    ) -> NDArray[np.float64]:
         r"""The first *n_harmonics* integer harmonics of the line called *name*.
 
         :param name: Line name (see :attr:`names`).

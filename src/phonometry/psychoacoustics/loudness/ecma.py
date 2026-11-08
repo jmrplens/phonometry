@@ -70,6 +70,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
@@ -227,7 +228,7 @@ _NR_ALPHA = 20.0
 _NR_BETA = 0.07
 
 
-def _band_frequencies() -> tuple[np.ndarray, np.ndarray]:
+def _band_frequencies() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Centre frequencies F(z) and bandwidths df(z) (Formulae 9, 10)."""
     f_centre = (_DF0 / _C) * np.sinh(_C * _Z)
     df = np.sqrt(_DF0**2 + (_C * f_centre) ** 2)
@@ -237,7 +238,7 @@ def _band_frequencies() -> tuple[np.ndarray, np.ndarray]:
 _F_CENTRE, _DF = _band_frequencies()
 
 
-def _block_sizes() -> tuple[np.ndarray, np.ndarray]:
+def _block_sizes() -> tuple[NDArray[np.int64], NDArray[np.int64]]:
     """Band-dependent block size s_b(z) and hop size s_h(z) (Table 4)."""
     s_b = np.empty(_CBF, dtype=np.int64)
     for i, df in enumerate(_DF):
@@ -270,7 +271,7 @@ _G_CD = {
 }
 
 
-def _g_of_z() -> np.ndarray:
+def _g_of_z() -> NDArray[np.float64]:
     """Frequency-dependent factor g(z) = c / F(z)^d (Formula 46, Table 8)."""
     out = np.empty(_CBF)
     for i in range(_CBF):
@@ -343,12 +344,12 @@ class EcmaLoudness(OwnsArrays):
     )
 
     loudness: float
-    specific_loudness: np.ndarray
-    bark: np.ndarray
-    frequencies: np.ndarray
-    times: np.ndarray
-    loudness_vs_time: np.ndarray
-    basis_loudness_vs_time: np.ndarray
+    specific_loudness: NDArray[np.float64]
+    bark: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    times: NDArray[np.float64]
+    loudness_vs_time: NDArray[np.float64]
+    basis_loudness_vs_time: NDArray[np.float64]
     last_evaluated_block: int
     field: Literal["free", "diffuse"]
 
@@ -446,7 +447,7 @@ class EcmaLoudness(OwnsArrays):
 # --------------------------------------------------------------------------
 
 
-def _ear_filter_sos(field: str) -> np.ndarray:
+def _ear_filter_sos(field: str) -> NDArray[np.float64]:
     """Outer & middle/inner ear filter as second-order sections (Clause 5.1.3).
 
     Returns the Table 1 biquads as ``scipy`` SOS rows ``[b0,b1,b2,1,a1,a2]``.
@@ -462,7 +463,9 @@ def _ear_filter_sos(field: str) -> np.ndarray:
     return sos
 
 
-def _auditory_coeffs(band: int) -> tuple[np.ndarray, np.ndarray]:
+def _auditory_coeffs(
+    band: int,
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """Complex band-pass IIR coefficients (b', a') for band ``band``.
 
     Implements the discrete gammatone-like auditory filter of Clause 5.1.4:
@@ -484,7 +487,7 @@ def _auditory_coeffs(band: int) -> tuple[np.ndarray, np.ndarray]:
     return b * rot_b, a * rot_a
 
 
-def _auditory_bandpass(p_om: np.ndarray, band: int) -> np.ndarray:
+def _auditory_bandpass(p_om: NDArray[np.float64], band: int) -> NDArray[np.float64]:
     """Real-valued band-pass signal p_om,z(n) for band ``band`` (Clause 5.1.4).
 
     The real ear-filtered signal is filtered with the complex coefficients;
@@ -495,7 +498,7 @@ def _auditory_bandpass(p_om: np.ndarray, band: int) -> np.ndarray:
     return np.asarray(2.0 * np.real(complex_out), dtype=np.float64)
 
 
-def _fade_in(x: np.ndarray) -> np.ndarray:
+def _fade_in(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """Trigonometric 5 ms fade-in of the input signal (Clause 5.1.2, Formula 1).
 
     Shared by every ECMA-418-2 metric: Formula (1) applies to the input
@@ -509,7 +512,7 @@ def _fade_in(x: np.ndarray) -> np.ndarray:
     return x
 
 
-def _preprocess(x: np.ndarray) -> tuple[np.ndarray, int, int]:
+def _preprocess(x: NDArray[np.float64]) -> tuple[NDArray[np.float64], int, int]:
     """Fade-in and zero-pad the signal (Clause 5.1.2, Formulae 1-3).
 
     Returns the padded signal p(n), n_samples (original length) and n_new.
@@ -522,7 +525,9 @@ def _preprocess(x: np.ndarray) -> tuple[np.ndarray, int, int]:
     return padded, n_samples, n_new
 
 
-def _segment_bs(p_band: np.ndarray, block_size: int, n_new: int) -> np.ndarray:
+def _segment_bs(
+    p_band: NDArray[np.float64], block_size: int, n_new: int
+) -> NDArray[np.float64]:
     """Segment a band-pass signal into blocks (Clause 5.1.5, Formulae 18-20).
 
     Takes the block size directly so a band can also be re-segmented at a
@@ -539,8 +544,8 @@ def _segment_bs(p_band: np.ndarray, block_size: int, n_new: int) -> np.ndarray:
 
 
 def _band_basis_loudness(
-    p_band: np.ndarray, band: int, block_size: int, n_new: int
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    p_band: NDArray[np.float64], band: int, block_size: int, n_new: int
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Rectified blocks of one band and their specific basis loudness (Formulae 18-25).
 
     Segments the band-pass signal of ``band`` at ``block_size`` (Formulae
@@ -557,7 +562,9 @@ def _band_basis_loudness(
     return rect, energy, _specific_basis_loudness(rms, band)  # Formulae 23-25
 
 
-def _specific_basis_loudness(rms: np.ndarray, band: int) -> np.ndarray:
+def _specific_basis_loudness(
+    rms: NDArray[np.float64], band: int
+) -> NDArray[np.float64]:
     """Specific basis loudness from block RMS values (Clause 5.1.8-5.1.9).
 
     ``rms`` is p~(l, z) for one band. Applies the compressive nonlinearity
@@ -578,8 +585,8 @@ def _specific_basis_loudness(rms: np.ndarray, band: int) -> np.ndarray:
 
 
 def _band_acf(
-    rect: np.ndarray, s_b: int, energy: np.ndarray | None = None
-) -> np.ndarray:
+    rect: NDArray[np.float64], s_b: int, energy: NDArray[np.float64] | None = None
+) -> NDArray[np.float64]:
     """Unbiased, normalized ACF of the rectified blocks (Formulae 27-29).
 
     ``rect`` is (n_blocks, s_b). Returns phi_z(m) of shape
@@ -612,12 +619,12 @@ def _band_acf(
 
 
 def _scaled_acf_at(
-    p_bands: list[np.ndarray],
+    p_bands: list[NDArray[np.float64]],
     band: int,
     block_size: int,
     n_new: int,
-    cache: dict[tuple[int, int], tuple[np.ndarray, np.ndarray]],
-) -> np.ndarray:
+    cache: dict[tuple[int, int], tuple[NDArray[np.float64], NDArray[np.float64]]],
+) -> NDArray[np.float64]:
     """Scaled ACF phi'_z(m) of ``band`` computed at ``block_size`` (Formulae 22-30).
 
     Segments the band-pass signal at ``block_size``, half-wave rectifies
@@ -638,8 +645,8 @@ def _scaled_acf_at(
 
 
 def _average_bands_full(
-    p_bands: list[np.ndarray], n_new: int
-) -> tuple[list[np.ndarray], list[np.ndarray]]:
+    p_bands: list[NDArray[np.float64]], n_new: int
+) -> tuple[list[NDArray[np.float64]], list[NDArray[np.float64]]]:
     """Full Clause 6.2.3 band averaging with cross-group recomputation.
 
     For each target band z (block size B = s_b(z), reach = min(N_B, z, 52-z)),
@@ -654,8 +661,8 @@ def _average_bands_full(
     own block size (Table 4), formed on the way for Formula 30, so Formula 26
     sums it without segmenting the band a second time.
     """
-    cache: dict[tuple[int, int], tuple[np.ndarray, np.ndarray]] = {}
-    out: list[np.ndarray] = []
+    cache: dict[tuple[int, int], tuple[NDArray[np.float64], NDArray[np.float64]]] = {}
+    out: list[NDArray[np.float64]] = []
     for band in range(_CBF):
         block_size = int(_S_B[band])
         n_b = _N_B_BY_SB[block_size]
@@ -687,13 +694,13 @@ def _average_bands_full(
     return out, basis
 
 
-def _average_blocks(averaged: list[np.ndarray]) -> list[np.ndarray]:
+def _average_blocks(averaged: list[NDArray[np.float64]]) -> list[NDArray[np.float64]]:
     """Average ACFs over neighbouring time blocks (Clause 6.2.3).
 
     Applied only to the 8192- and 4096-sample block sizes; the first and last
     blocks are left unchanged.
     """
-    out: list[np.ndarray] = []
+    out: list[NDArray[np.float64]] = []
     for band in range(_CBF):
         acf = averaged[band]
         if int(_S_B[band]) in (8192, 4096) and acf.shape[0] >= _TIME_AVG_BLOCKS:
@@ -706,8 +713,8 @@ def _average_blocks(averaged: list[np.ndarray]) -> list[np.ndarray]:
 
 
 def _tonal_estimate(
-    acf: np.ndarray, band: int
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    acf: NDArray[np.float64], band: int
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Windowed-ACF tonal loudness estimate (Clause 6.2.4-6.2.5).
 
     Returns ``(Nhat'_tonal(l, z), N'_signal(l, z), f_ton(l, z))`` at the band's
@@ -738,7 +745,9 @@ def _tonal_estimate(
     return n_tonal, n_signal, f_ton
 
 
-def _resample_common(values: np.ndarray, band: int, n_common: int) -> np.ndarray:
+def _resample_common(
+    values: NDArray[np.float64], band: int, n_common: int
+) -> NDArray[np.float64]:
     """Linearly resample a band time series onto the common grid (Clause 6.2.6, Table 6)."""
     factor = int(_INTERP[band])
     positions = np.arange(values.size) * factor
@@ -747,7 +756,7 @@ def _resample_common(values: np.ndarray, band: int, n_common: int) -> np.ndarray
     )
 
 
-def _lowpass_time(x: np.ndarray) -> np.ndarray:
+def _lowpass_time(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """3.5 Hz time low-pass used in the noise reduction (Clause 6.2.7).
 
     Order-3 low-pass of Formula (11) with tau = (1/32)*6/(7 Hz) (footnote 20).
@@ -764,8 +773,15 @@ def _lowpass_time(x: np.ndarray) -> np.ndarray:
 
 
 def _tonal_noise_split(
-    x: np.ndarray, field: str
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int, np.ndarray]:
+    x: NDArray[np.float64], field: str
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    int,
+    int,
+    NDArray[np.float64],
+]:
     """Clause 5 front-end + Clause 6.2 tonal/noise split on the common grid.
 
     Runs the shared auditory front-end (Clause 5), the full Clause 6.2.3
@@ -841,8 +857,8 @@ def _last_evaluated_block(n_samples: int, n_blocks: int) -> int:
 
 
 def _assemble_loudness(
-    n_tonal: np.ndarray, n_noise: np.ndarray, n_samples: int
-) -> tuple[float, np.ndarray, np.ndarray, np.ndarray]:
+    n_tonal: NDArray[np.float64], n_noise: NDArray[np.float64], n_samples: int
+) -> tuple[float, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Combine tonal/noise loudness into the loudness metric (Clause 8.1).
 
     Returns (N, N'(z), N(l), time).

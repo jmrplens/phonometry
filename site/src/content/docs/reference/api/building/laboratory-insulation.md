@@ -57,9 +57,24 @@ per-band values are supplied.
 
 ```python
 background_correction(
+    signal_and_background: float | np.floating[Any] | np.integer[Any],
+    background: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+background_correction(
+    signal_and_background: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    background: NumericArrayLike,
+) -> NDArray[np.float64]
+
+background_correction(
+    signal_and_background: float | np.floating[Any] | np.integer[Any],
+    background: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+background_correction(
     signal_and_background: NumericArrayLike,
     background: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Correct receiving-room levels for background noise (ISO 10140-4:2010).
@@ -101,7 +116,7 @@ directly.
 | `signal_and_background` | Combined signal-plus-background levels `Lsb` per band, in dB. |
 | `background` | Background-noise levels `Lb` per band, in dB. |
 
-**Returns:** The background-corrected levels per band, in dB.
+**Returns:** The background-corrected levels per band, in dB. A `float` when `signal_and_background` and `background` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -209,8 +224,8 @@ assumed already corrected for background noise (see
 
 ```python
 LaboratoryAirborneInsulationResult(
-    r: np.ndarray,
-    absorption_area: np.ndarray,
+    r: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
     rating: WeightedRatingResult | None,
 )
 ```
@@ -301,8 +316,8 @@ is rejected.
 
 ```python
 LaboratoryImpactInsulationResult(
-    l_n: np.ndarray,
-    absorption_area: np.ndarray,
+    l_n: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
     rating: ImpactRatingResult | None,
 )
 ```

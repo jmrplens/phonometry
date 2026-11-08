@@ -74,12 +74,12 @@ AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
 ```python
 EcmaLoudness(
     loudness: float,
-    specific_loudness: np.ndarray,
-    bark: np.ndarray,
-    frequencies: np.ndarray,
-    times: np.ndarray,
-    loudness_vs_time: np.ndarray,
-    basis_loudness_vs_time: np.ndarray,
+    specific_loudness: NDArray[np.float64],
+    bark: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    times: NDArray[np.float64],
+    loudness_vs_time: NDArray[np.float64],
+    basis_loudness_vs_time: NDArray[np.float64],
     last_evaluated_block: int,
     field: Literal['free', 'diffuse'],
 )

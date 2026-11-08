@@ -150,10 +150,10 @@ CEILING_ATTENUATION_CONTOUR = {125.0: -16.0, 160.0: -13.0, 200.0: -10.0, 250.0: 
 
 ```python
 CeilingAttenuationResult(
-    frequencies: np.ndarray,
-    measured: np.ndarray,
-    shifted_reference: np.ndarray,
-    deficiencies: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted_reference: NDArray[np.float64],
+    deficiencies: NDArray[np.float64],
     deficiency_sum: float,
     max_deficiency: float,
     rating: int,
@@ -216,7 +216,7 @@ normalized_ceiling_attenuation(
     absorption_area: NumericArrayLike,
     *,
     reference_area: float = 10.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Normalized ceiling attenuation `Dn,c` (ISO 140-9:1985, clause 3.3).
@@ -252,7 +252,7 @@ partition_referenced_reduction_index(
     reduction_index: NumericArrayLike,
     room_height_m: float,
     room_length: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Refer `Rcl` to the partition area instead of the ceiling
@@ -360,13 +360,13 @@ about 0.24 dB.
 
 ```python
 PlenumFlankingResult(
-    frequencies: np.ndarray | None,
-    reduction_index: np.ndarray,
-    transmission_factor: np.ndarray,
-    reduction_index_source: np.ndarray,
-    reduction_index_receiving: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    reduction_index: NDArray[np.float64],
+    transmission_factor: NDArray[np.float64],
+    reduction_index_source: NDArray[np.float64],
+    reduction_index_receiving: NDArray[np.float64],
     geometry_term: float | None,
-    penalty: np.ndarray,
+    penalty: NDArray[np.float64],
     model: Literal['undamped', 'attenuated'],
     epsilon: float,
     plenum_height_m: float,

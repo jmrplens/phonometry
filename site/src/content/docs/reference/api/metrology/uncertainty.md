@@ -40,7 +40,7 @@ path of 6.4.8 for non-independent quantities is not implemented; use
 
 ```python
 combined_standard_uncertainty(
-    contributions: Sequence[float | Sequence[float] | NDArray[Any]] | NDArray[Any],
+    contributions: Sequence[float | Sequence[float] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> float
 ```
 
@@ -172,7 +172,7 @@ MonteCarloResult(
     interval: tuple[float, float],
     coverage: float,
     n_trials: int,
-    samples: np.ndarray | None = None,
+    samples: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -321,8 +321,8 @@ Combined standard uncertainty by the GUM law of propagation (clause 5).
 UncertaintyResult(
     value: float,
     combined_uncertainty: float,
-    sensitivities: np.ndarray,
-    contributions: np.ndarray,
+    sensitivities: NDArray[np.float64],
+    contributions: NDArray[np.float64],
     effective_dof: float,
     names: tuple[str, ...] = (),
 )

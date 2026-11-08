@@ -285,7 +285,7 @@ sensitivity verdict when a requirement is given, and the footer.
 LoudspeakerDirectivity(
     *,
     piston: RadiatingPistonResult | None = None,
-    polar: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
+    polar: Sequence[NumericArrayLike] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any] | np.object_] | None = None,
     frequency: float | None = None,
     index: float | None = None,
 )

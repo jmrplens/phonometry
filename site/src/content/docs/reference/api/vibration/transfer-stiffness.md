@@ -142,10 +142,10 @@ without a warning, since its lines were excluded rather than missing.
 
 ```python
 BandAveragedStiffness(
-    nominal_frequencies: np.ndarray,
-    center_frequencies: np.ndarray,
-    stiffness: np.ndarray,
-    line_counts: np.ndarray,
+    nominal_frequencies: NDArray[np.float64],
+    center_frequencies: NDArray[np.float64],
+    stiffness: NDArray[np.float64],
+    line_counts: NDArray[np.integer[Any]],
 )
 ```
 
@@ -224,7 +224,7 @@ base_transmissibility(
     mass: float,
     stiffness: float,
     damping: float = 0.0,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Transmissibility of a mass on an ideal resilient element (model).
@@ -266,7 +266,7 @@ limit $T \ll 1$.
 blocking_force_ratio(
     driving_point_stiffness: NumericArrayLike,
     termination_stiffness: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Ratio of the delivered force to the blocking force (ISO 10846-1, Eq. 6).
@@ -578,10 +578,10 @@ encourages, and the note to (B.3) allows doing so band by band.
 
 ```python
 DrivingPointStiffnessResult(
-    frequencies: np.ndarray,
-    driving_point_stiffness: np.ndarray,
-    blocked_output_difference: np.ndarray | None = None,
-    unwanted_input_difference: np.ndarray | None = None,
+    frequencies: NDArray[np.float64],
+    driving_point_stiffness: NDArray[np.complex128],
+    blocked_output_difference: NDArray[np.float64] | None = None,
+    unwanted_input_difference: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -865,8 +865,8 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 
 ```python
 EffectiveBlockingMass(
-    frequencies: np.ndarray,
-    effective_mass_kg: np.ndarray,
+    frequencies: NDArray[np.float64],
+    effective_mass_kg: NDArray[np.float64],
     blocking_mass: float,
 )
 ```
@@ -1009,8 +1009,8 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 
 ```python
 LevelDifferenceCheck(
-    frequencies: np.ndarray,
-    difference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    difference: NDArray[np.float64],
     condition: Literal['blocked_output', 'unwanted_input'],
 )
 ```
@@ -1091,7 +1091,13 @@ Requires matplotlib (the `[plot]` extra).
 ## loss_factor
 
 ```python
-loss_factor(stiffness: NumericArrayLike) -> np.ndarray
+loss_factor(stiffness: complex | np.number[Any]) -> float
+
+loss_factor(
+    stiffness: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+loss_factor(stiffness: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 Loss factor
@@ -1107,7 +1113,7 @@ negligible; it is the tangent of the phase angle of the transfer stiffness.
 | :--- | :--- |
 | `stiffness` | Dynamic transfer stiffness $k_{2,1}$ (complex, scalar or array, with a non-zero real part), in N/m. |
 
-**Returns:** The loss factor `eta` (dimensionless).
+**Returns:** The loss factor `eta` (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1128,9 +1134,9 @@ MIN_FREQUENCIES_PER_BAND = 5
 
 ```python
 OutputMassCheck(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     output_mass_kg: float,
-    output_apparent_mass_kg: np.ndarray,
+    output_apparent_mass_kg: NDArray[np.float64],
 )
 ```
 
@@ -1251,7 +1257,7 @@ REFERENCE_STIFFNESS_N_M = 1.0
 transfer_stiffness_direct(
     blocking_force: NumericArrayLike,
     input_displacement: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Dynamic transfer stiffness by the direct method (ISO 10846-2).
@@ -1284,7 +1290,7 @@ transfer_stiffness_indirect(
     *,
     frequency: NumericArrayLike,
     flange_mass: float = 0.0,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Dynamic transfer stiffness by the indirect method (ISO 10846-3, Eq. 1).
@@ -1341,10 +1347,22 @@ $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
 
 ```python
 transfer_stiffness_level(
+    stiffness: complex | np.number[Any],
+    *,
+    reference: float = ...,
+) -> float
+
+transfer_stiffness_level(
+    stiffness: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    *,
+    reference: float = ...,
+) -> NDArray[np.float64]
+
+transfer_stiffness_level(
     stiffness: NumericArrayLike,
     *,
-    reference: float = 1.0,
-) -> np.ndarray
+    reference: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Level of the dynamic transfer stiffness (ISO 10846-2/-3, 3.17).
@@ -1359,7 +1377,7 @@ stiffness.
 | `stiffness` | Dynamic transfer stiffness $k_{2,1}$ (complex or real, scalar or array, non-zero), in N/m. |
 | `reference` | Reference stiffness `k0` (Default: 1 N/m), in N/m. |
 
-**Returns:** The level `L_k`, in dB re `k0`.
+**Returns:** The level `L_k`, in dB re `k0`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1514,7 +1532,7 @@ no pass/fail verdict.
 ```python
 TransferStiffnessResult.to(
     target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Convert $k_{2,1}$ to an FRF (ISO 10846-1 Annex A / Table A.2).

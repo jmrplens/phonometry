@@ -83,7 +83,7 @@ OpenPlanResult(
     lp_as_4m: float,
     rd: float,
     rp: float,
-    positions_m: np.ndarray,
+    positions_m: NDArray[np.float64],
 )
 ```
 

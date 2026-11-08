@@ -315,7 +315,7 @@ free_field_reference_level(
 ) -> float
 
 free_field_reference_level(
-    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     distance: float,
 ) -> NDArray[np.float64]
 
@@ -799,7 +799,7 @@ min_receiver_positions(
 ) -> float
 
 min_receiver_positions(
-    seats: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    seats: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 min_receiver_positions(
@@ -966,13 +966,13 @@ reverberation_room_reference_level(
 ) -> float
 
 reverberation_room_reference_level(
-    reverberation_room_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reverberation_room_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     absorption_area: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 reverberation_room_reference_level(
     reverberation_room_level: float | np.floating[Any] | np.integer[Any],
-    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 reverberation_room_reference_level(
@@ -1202,13 +1202,13 @@ sound_strength_from_power(
 ) -> float
 
 sound_strength_from_power(
-    pressure_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    pressure_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     power_level: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 sound_strength_from_power(
     pressure_level: float | np.floating[Any] | np.integer[Any],
-    power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 sound_strength_from_power(

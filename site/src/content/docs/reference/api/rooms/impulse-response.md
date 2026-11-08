@@ -127,7 +127,9 @@ the heuristic's noise-floor false positives).
 ## golay_pair
 
 ```python
-golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]
+golay_pair(
+    order: int | np.integer[Any],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 
 Generate a complementary Golay pair of length `2**order`.
@@ -311,7 +313,7 @@ inverse_filter(
     *,
     amplitude: float = 1.0,
     fade: float = 0.01,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Build the Farina inverse filter for an exponential sine sweep.
@@ -385,7 +387,7 @@ a definitive aliasing diagnosis.
 ## mls_signal
 
 ```python
-mls_signal(order: int | np.integer[Any]) -> np.ndarray
+mls_signal(order: int | np.integer[Any]) -> NDArray[np.float64]
 ```
 
 Generate a maximum-length sequence (MLS) of the given order.
@@ -535,11 +537,11 @@ measurement's noise floor (that is its purpose: SNR shaping).
 
 ```python
 ShapedSweepResult(
-    signal: np.ndarray,
+    signal: NDArray[np.float64],
     fs: float,
-    frequencies: np.ndarray,
-    magnitude: np.ndarray,
-    group_delay: np.ndarray,
+    frequencies: NDArray[np.float64],
+    magnitude: NDArray[np.float64],
+    group_delay: NDArray[np.float64],
     f_range: tuple[float, float],
     crest_factor_db: float,
 )
@@ -617,7 +619,7 @@ sweep_signal(
     *,
     amplitude: float = 1.0,
     fade: float = 0.01,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Generate an exponential sine sweep (ESS) with exact analytic phase.

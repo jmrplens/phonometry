@@ -86,7 +86,7 @@ convert_frf(
     target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
     *,
     frequency: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Convert a frequency-response function between any two kinds (Table 1).
@@ -136,8 +136,8 @@ FRF_UNITS = {'receptance': 'm/N', 'mobility': 'm/(N·s)', 'accelerance': '1/kg',
 
 ```python
 MobilityResult(
-    frequencies: np.ndarray,
-    mobility: np.ndarray,
+    frequencies: NDArray[np.float64],
+    mobility: NDArray[np.complex128],
     *,
     driving_point: bool = True,
 )
@@ -240,7 +240,7 @@ verdict.
 ```python
 MobilityResult.to(
     target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Convert the mobility to another FRF kind (see [`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
@@ -267,9 +267,19 @@ impedance $1/Y_{ij}$, not the blocked matrix impedance of Table 1
 
 ```python
 random_error_percent(
+    coherence: float | np.floating[Any] | np.integer[Any],
+    n_averages: int | np.integer[Any],
+) -> float
+
+random_error_percent(
+    coherence: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    n_averages: int | np.integer[Any],
+) -> NDArray[np.float64]
+
+random_error_percent(
     coherence: NumericArrayLike,
     n_averages: int | np.integer[Any],
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
@@ -291,7 +301,7 @@ below 5 %: e.g. $\gamma^2 = 0.8$ needs about $n = 75$ spectra
 | `coherence` | Ordinary coherence $\gamma^2$ per frequency, in (0, 1]. |
 | `n_averages` | Number of averaged spectra `n` (>= 1). |
 
-**Returns:** The normalized random error, in percent (same shape as input).
+**Returns:** The normalized random error, in percent (same shape as input). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -328,8 +338,8 @@ SDOF, in Hz.
 
 ```python
 RigidMassCalibrationResult(
-    frequencies: np.ndarray,
-    measured: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
     *,
     mass: float,
     quantity: Literal['accelerance', 'mobility'],
@@ -428,7 +438,7 @@ sdof_accelerance(
     mass: float,
     stiffness: float,
     damping: float,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Accelerance of a viscously damped SDOF resonator: $A = -\omega^2 H$.
@@ -452,7 +462,7 @@ sdof_mobility(
     mass: float,
     stiffness: float,
     damping: float,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Mobility of a viscously damped SDOF resonator: $Y = j \omega H$.
@@ -506,7 +516,7 @@ sdof_receptance(
     mass: float,
     stiffness: float,
     damping: float,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Receptance of a viscously damped SDOF resonator (closed form).

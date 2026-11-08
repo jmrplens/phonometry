@@ -254,12 +254,28 @@ and without them it is the plain mean of the surfaces.
 
 ```python
 reverberation_parameter(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> float
+
+reverberation_parameter(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> NDArray[np.float64]
+
+reverberation_parameter(
     frequencies: NumericArrayLike,
     volume: float,
     *,
-    surface_area: float | None = None,
-    speed_of_sound: float | None = None,
-) -> np.ndarray
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The reverberation parameter $R$ of ISO 3743-2:2018, 6.3.
@@ -294,7 +310,7 @@ that volume too and nothing is read off the figure.
 | `surface_area` | Total surface area of the room, in square metres; with `speed_of_sound` it selects the NOTE form. |
 | `speed_of_sound` | Speed of sound, in metres per second, required with `surface_area` and refused without it. |
 
-**Returns:** $R$ per frequency.
+**Returns:** $R$ per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -425,9 +441,24 @@ needed, and the 300 m³ ceiling of 6.2 does not apply (NOTE).
 
 ```python
 special_room_background_correction(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+special_room_background_correction(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    background_levels: NumericArrayLike,
+) -> NDArray[np.float64]
+
+special_room_background_correction(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+special_room_background_correction(
     levels: NumericArrayLike,
     background_levels: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 The background correction of ISO 3743-2:2018 Table 4 (9.8).
@@ -453,7 +484,7 @@ table, and that is what is applied.
 | `levels` | Levels measured with the source operating, in decibels. |
 | `background_levels` | Background levels alone, broadcasting against `levels`, in decibels. |
 
-**Returns:** The correction to subtract, in decibels, of the broadcast shape.
+**Returns:** The correction to subtract, in decibels, of the broadcast shape. A `float` when `levels` and `background_levels` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -517,9 +548,9 @@ shall be reported.
 ```python
 SpecialRoomReverberationCheck(
     *,
-    frequencies: np.ndarray,
-    reverberation_time: np.ndarray,
-    reverberation_parameter: np.ndarray,
+    frequencies: NDArray[np.float64],
+    reverberation_time: NDArray[np.float64],
+    reverberation_parameter: NDArray[np.float64],
     nominal_reverberation_time_s: float,
     centered: bool,
     volume: float,
@@ -666,18 +697,18 @@ comparison method.
 
 ```python
 SpecialRoomSoundPowerResult(
-    frequencies: np.ndarray,
-    sound_power_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    background_correction: np.ndarray,
-    background_margin_db: np.ndarray,
-    reference_background_margin_db: np.ndarray,
-    mean_reference_level: np.ndarray,
-    reference_power_level: np.ndarray,
+    frequencies: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
+    background_margin_db: NDArray[np.float64],
+    reference_background_margin_db: NDArray[np.float64],
+    mean_reference_level: NDArray[np.float64],
+    reference_power_level: NDArray[np.float64],
     volume: float,
     nominal_reverberation_time_s: float,
     c2: float,
-    sigma_r0: np.ndarray,
+    sigma_r0: NDArray[np.float64],
     sigma_r0_a: float,
     sigma_omc_db: float,
     coverage_factor: float,
@@ -868,9 +899,9 @@ The Annex F total of `sound_power_level_at_reference_conditions`, `LWA + C2`.
 
 ```python
 SpecialRoomSuitabilityCheck(
-    frequencies: np.ndarray,
-    measured_power_level: np.ndarray,
-    calibrated_power_level: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured_power_level: NDArray[np.float64],
+    calibrated_power_level: NDArray[np.float64],
 )
 ```
 
@@ -936,10 +967,10 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 SpecialRoomSurfaceCheck(
-    frequencies: np.ndarray,
-    surface_absorption: np.ndarray,
-    floor_absorption: np.ndarray,
-    mean_absorption: np.ndarray,
+    frequencies: NDArray[np.float64],
+    surface_absorption: NDArray[np.float64],
+    floor_absorption: NDArray[np.float64],
+    mean_absorption: NDArray[np.float64],
 )
 ```
 

@@ -390,7 +390,9 @@ Total acoustic field energy [J per metre of depth].
 ### FDTD2D.numpy_field()
 
 ```python
-FDTD2D.numpy_field(field: Literal['p', 'vx', 'vy']) -> NDArray[np.floating]
+FDTD2D.numpy_field(
+    field: Literal['p', 'vx', 'vy'],
+) -> NDArray[np.floating[Any]]
 ```
 
 A NumPy copy of the stored *field*, in this process, whatever the device.
@@ -458,7 +460,7 @@ FDTD2D.run(
     *,
     snapshot_every: int | np.integer[Any] | None = None,
     snapshot_decimation: int | np.integer[Any] = 1,
-) -> NDArray[np.floating]
+) -> NDArray[np.floating[Any]]
 ```
 
 Advance `n_steps` steps, optionally recording pressure frames.
@@ -640,7 +642,7 @@ FDTDResult(
     dt: float,
     shape: tuple[int, int],
     sources: tuple[GaussianPulse | CWSource | SignalSource | PlaneWaveSource, ...],
-    snapshots: NDArray[np.floating] | None,
+    snapshots: NDArray[np.floating[Any]] | None,
     snapshot_times: NDArray[np.float64] | None,
     obstacle_mask: NDArray[np.bool_] | None,
     snapshot_decimation: int,

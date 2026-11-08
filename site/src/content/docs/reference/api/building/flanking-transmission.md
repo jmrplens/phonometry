@@ -84,7 +84,7 @@ band_mode_count(
     critical_frequency: float,
     *,
     speed_of_sound: float = 343.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 In-band mode count $N = B \cdot n$ (Part 4, Formula (4)).
@@ -208,7 +208,7 @@ Hopkins Eq. 2.201 derives. See `docs/ERRATA.md`.
 direction_averaged_level_difference(
     dv_ij: NumericArrayLike,
     dv_ji: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Direction-averaged velocity level difference (Formula (11)).
@@ -243,7 +243,7 @@ equivalent_absorption_length(
     *,
     frequencies: NumericArrayLike,
     speed_of_sound: float = 343.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Equivalent absorption length `aj` (Formula (12)).
@@ -276,7 +276,7 @@ with $f_{\mathrm{ref}} = 1000$ Hz.
 
 ```python
 FlankingImpactLevelResult(
-    l_n_f: np.ndarray,
+    l_n_f: NDArray[np.float64],
     rating: ImpactRatingResult | None,
 )
 ```
@@ -356,7 +356,7 @@ measurement statement, an optional requirement verdict and a footer.
 
 ```python
 FlankingLevelDifferenceResult(
-    d_n_f: np.ndarray,
+    d_n_f: NDArray[np.float64],
     rating: WeightedRatingResult | None,
 )
 ```
@@ -471,7 +471,7 @@ modal_overlap_factor(
     structural_reverberation_time: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Modal overlap factor $M = 2.2 \cdot n / T_\mathrm{s}$ (Part 4, F. (6)).
@@ -677,7 +677,7 @@ total_loss_factor(
     structural_reverberation_time: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
@@ -704,7 +704,7 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 velocity_level_difference(
     source_level: NumericArrayLike,
     receive_level: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Velocity level difference $D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},j}$ (Formula (8)).
@@ -790,7 +790,7 @@ vibration_reduction_index_from_flanking(
     absorption_length_j: NumericArrayLike,
     *,
     reference_area: float = 10.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Indirect `Kij` from the normalized flanking level difference.
@@ -832,9 +832,9 @@ The standard warns this holds only for resonant-only transmission; measured
 
 ```python
 VibrationReductionResult(
-    frequencies: np.ndarray | None,
-    k_ij: np.ndarray,
-    modal_overlap: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None,
+    k_ij: NDArray[np.float64],
+    modal_overlap: NDArray[np.float64] | None = None,
     fraction: Literal[1, 3] | None = None,
 )
 ```

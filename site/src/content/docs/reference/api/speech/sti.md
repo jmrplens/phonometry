@@ -261,7 +261,7 @@ stipa_signal(
     duration_s: float = 18.0,
     level: float | None = None,
     seed: int | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Generate an IEC 60268-16:2020 conformant STIPA test signal.
@@ -296,11 +296,11 @@ in amplitude through its square root (Annex B).
 ```python
 STIResult(
     sti: float,
-    mti: np.ndarray,
-    mtf: np.ndarray,
-    band_levels: np.ndarray | None,
+    mti: NDArray[np.float64],
+    mtf: NDArray[np.float64],
+    band_levels: NDArray[np.float64] | None,
     rating: Literal['U', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A', 'A+'],
-    ambient_levels: np.ndarray | None = None,
+    ambient_levels: NDArray[np.float64] | None = None,
 )
 ```
 

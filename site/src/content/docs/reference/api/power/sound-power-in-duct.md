@@ -98,7 +98,7 @@ flow_modal_correction(
     *,
     shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
     speed_of_sound: float = 340.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Combined mean flow velocity and modal correction $C_{3,4}$.
@@ -150,7 +150,9 @@ coefficient in the annex is transcribed and none of them warns.
 ## in_duct_reproducibility
 
 ```python
-in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray
+in_duct_reproducibility(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Standard deviation of reproducibility $\sigma_R$ per band.
@@ -181,16 +183,16 @@ carries those bands says so in `information_only_band`.
 
 ```python
 InDuctSoundPowerResult(
-    frequencies: np.ndarray,
-    sound_power_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    corrected_pressure_level: np.ndarray,
-    microphone_correction: np.ndarray,
-    shield_correction: np.ndarray,
-    flow_modal_correction: np.ndarray,
-    combined_correction: np.ndarray,
-    reproducibility_standard_deviation: np.ndarray,
-    expanded_uncertainty: np.ndarray,
+    frequencies: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    corrected_pressure_level: NDArray[np.float64],
+    microphone_correction: NDArray[np.float64],
+    shield_correction: NDArray[np.float64],
+    flow_modal_correction: NDArray[np.float64],
+    combined_correction: NDArray[np.float64],
+    reproducibility_standard_deviation: NDArray[np.float64],
+    expanded_uncertainty: NDArray[np.float64],
     duct_diameter_m: float,
     duct_area: float,
     characteristic_impedance: float,

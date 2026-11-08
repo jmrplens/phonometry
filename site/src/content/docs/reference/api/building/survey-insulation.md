@@ -80,7 +80,7 @@ estimate_reverberation_index(
     room: Literal['furnished', 'kitchen', 'bathroom', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a+e', 'b+f', 'c+g', 'd+h'],
     *,
     weighted: Literal[False] = False,
-) -> np.ndarray
+) -> NDArray[np.float64]
 
 estimate_reverberation_index(
     volume: float,
@@ -94,7 +94,7 @@ estimate_reverberation_index(
     room: Literal['furnished', 'kitchen', 'bathroom', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a+e', 'b+f', 'c+g', 'd+h'],
     *,
     weighted: bool = ...,
-) -> np.ndarray | float
+) -> NDArray[np.float64] | float
 ```
 
 Estimate the reverberation index from room type and volume (Clause 6.5).
@@ -131,7 +131,23 @@ to 150 m³.
 ## reverberation_index
 
 ```python
-reverberation_index(t: NumericArrayLike, *, t0: float = 0.5) -> np.ndarray
+reverberation_index(
+    t: float | np.floating[Any] | np.integer[Any],
+    *,
+    t0: float = ...,
+) -> float
+
+reverberation_index(
+    t: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    t0: float = ...,
+) -> NDArray[np.float64]
+
+reverberation_index(
+    t: NumericArrayLike,
+    *,
+    t0: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Reverberation index $k = 10 \log_{10}(T/T_0)$ (ISO 10052, Cl. 3.3).
@@ -143,7 +159,7 @@ Reverberation index $k = 10 \log_{10}(T/T_0)$ (ISO 10052, Cl. 3.3).
 | `t` | Receiving-room reverberation time per band, in seconds. |
 | `t0` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
 
-**Returns:** The reverberation index `k` per band, in dB.
+**Returns:** The reverberation index `k` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -336,10 +352,10 @@ $L_{XY,\mathrm{n}} = L_{XY} - k - 10 \log_{10}(A_0 T_0 / (0.16\,V))$
 
 ```python
 SurveyAirborneResult(
-    d: np.ndarray,
-    d_nt: np.ndarray,
-    d_n: np.ndarray | None,
-    r_prime: np.ndarray | None,
+    d: NDArray[np.float64],
+    d_nt: NDArray[np.float64],
+    d_n: NDArray[np.float64] | None,
+    r_prime: NDArray[np.float64] | None,
     rating: WeightedRatingResult | None,
     r_prime_rating: WeightedRatingResult | None,
 )
@@ -431,9 +447,9 @@ requirement) and a footer with the identity block and disclaimer.
 
 ```python
 SurveyFacadeResult(
-    d_2m: np.ndarray,
-    d_2m_nt: np.ndarray,
-    d_2m_n: np.ndarray | None,
+    d_2m: NDArray[np.float64],
+    d_2m_nt: NDArray[np.float64],
+    d_2m_n: NDArray[np.float64] | None,
     rating: WeightedRatingResult | None,
 )
 ```
@@ -514,9 +530,9 @@ requirement) and a footer with the identity block and disclaimer.
 
 ```python
 SurveyImpactResult(
-    l_i: np.ndarray,
-    l_nt: np.ndarray,
-    l_n: np.ndarray | None,
+    l_i: NDArray[np.float64],
+    l_nt: NDArray[np.float64],
+    l_n: NDArray[np.float64] | None,
     rating: ImpactRatingResult | None,
 )
 ```
@@ -597,9 +613,9 @@ a footer with the identity block and disclaimer.
 
 ```python
 SurveyServiceEquipmentResult(
-    l_xy: np.ndarray,
-    l_xy_nt: np.ndarray,
-    l_xy_n: np.ndarray | None,
+    l_xy: float | NDArray[np.float64],
+    l_xy_nt: float | NDArray[np.float64],
+    l_xy_n: float | NDArray[np.float64] | None,
 )
 ```
 
@@ -612,3 +628,6 @@ Service-equipment sound pressure level, survey method (ISO 10052).
 | `l_xy` | Service-equipment level `LXY` (Clause 3.16), the energy average of the three measurement positions, in dB. |
 | `l_xy_nt` | Standardized level $L_{XY,\mathrm{n}T} = L_{XY} - k$ (Clause 3.17). |
 | `l_xy_n` | Normalized level `LXY,n` (Clause 3.18), or `None` when the receiving-room volume was not supplied. |
+
+Each level is a `float` for three single readings and one value per
+band for a banded analysis.

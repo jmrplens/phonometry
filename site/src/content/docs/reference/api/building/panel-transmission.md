@@ -295,14 +295,34 @@ Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
 
 ```python
 mass_law_transmission_loss(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    mass_per_area: float,
+    *,
+    incidence: Literal['normal', 'field'] = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> float
+
+mass_law_transmission_loss(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    mass_per_area: float,
+    *,
+    incidence: Literal['normal', 'field'] = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.float64]
+
+mass_law_transmission_loss(
     frequency: NumericArrayLike,
     mass_per_area: float,
     *,
-    incidence: Literal['normal', 'field'] = 'field',
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-    field_correction: float | None = None,
+    incidence: Literal['normal', 'field'] = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    field_correction: float | None = ...,
     fluid: Fluid = ...,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Mass-law transmission loss of a limp panel (Bies Eq. 7.40/7.42).
@@ -324,7 +344,7 @@ builds its estimate on).
 | `field_correction` | Explicit field-incidence correction, in dB (>= 0), overriding the band table (Default: `None`). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
-**Returns:** The transmission loss `TL`, in dB.
+**Returns:** The transmission loss `TL`, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -791,8 +811,8 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 ```python
 SoundReductionResult(
     *,
-    frequencies: np.ndarray,
-    transmission_loss: np.ndarray,
+    frequencies: NDArray[np.float64],
+    transmission_loss: NDArray[np.float64],
     model: Literal['sharp-single', 'cremer-single', 'plateau', 'orthotropic-integral', 'orthotropic-heckl', 'double-wall'],
     critical_frequency: float | None = None,
     resonance_frequency: float | None = None,

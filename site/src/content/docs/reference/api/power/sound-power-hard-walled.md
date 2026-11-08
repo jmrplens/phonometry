@@ -190,8 +190,8 @@ dimensions that still complies with 4.4.
 
 ```python
 HardWalledRoomCheck(
-    frequencies: np.ndarray,
-    level_range_db: np.ndarray,
+    frequencies: NDArray[np.float64],
+    level_range_db: NDArray[np.float64],
     n_orientations: int,
     volume: float,
     reference_box_volume_m3: float,
@@ -318,19 +318,19 @@ least".
 
 ```python
 HardWalledSoundPowerResult(
-    frequencies: np.ndarray,
-    sound_power_level: np.ndarray,
-    sound_energy_level: np.ndarray,
-    mean_source_level: np.ndarray,
-    mean_reference_level: np.ndarray,
-    mean_background_level: np.ndarray,
-    reference_power_level: np.ndarray,
-    background_correction: np.ndarray,
-    reference_background_correction: np.ndarray,
-    background_margin_db: np.ndarray,
-    reference_background_margin_db: np.ndarray,
+    frequencies: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    sound_energy_level: NDArray[np.float64],
+    mean_source_level: NDArray[np.float64],
+    mean_reference_level: NDArray[np.float64],
+    mean_background_level: NDArray[np.float64],
+    reference_power_level: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
+    reference_background_correction: NDArray[np.float64],
+    background_margin_db: NDArray[np.float64],
+    reference_background_margin_db: NDArray[np.float64],
     c2: float,
-    sigma_r0: np.ndarray,
+    sigma_r0: NDArray[np.float64],
     sigma_r0_a: float,
     sigma_omc_db: float,
     coverage_factor: float,
@@ -716,10 +716,10 @@ total.
 ```python
 SourceLocationPlan(
     standard: Literal['ISO 3743-1:2010', 'ISO 3743-2:2018'],
-    frequencies: np.ndarray,
-    standard_deviation_db: np.ndarray,
-    source_locations: np.ndarray,
-    additional_room_locations: np.ndarray,
+    frequencies: NDArray[np.float64],
+    standard_deviation_db: NDArray[np.float64],
+    source_locations: NDArray[np.int64],
+    additional_room_locations: NDArray[np.int64],
     n_microphone_positions: int,
     a_weighted_standard_deviation_db: float = nan,
     n_a_weighted_source_locations: int = 0,

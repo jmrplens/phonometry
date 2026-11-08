@@ -59,12 +59,12 @@ unmodulated carrier: a fully modulated signal whose carrier alone sits at
 ```python
 EcmaRoughness(
     roughness: float,
-    specific_roughness: np.ndarray,
-    bark: np.ndarray,
-    frequencies: np.ndarray,
-    times: np.ndarray,
-    roughness_vs_time: np.ndarray,
-    specific_roughness_vs_time: np.ndarray,
+    specific_roughness: NDArray[np.float64],
+    bark: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    times: NDArray[np.float64],
+    roughness_vs_time: NDArray[np.float64],
+    specific_roughness_vs_time: NDArray[np.float64],
     field: Literal['free', 'diffuse'],
 )
 ```

@@ -39,7 +39,7 @@ standard defers to external references) are not implemented here.
 ## nc_curve
 
 ```python
-nc_curve(index: float) -> np.ndarray
+nc_curve(index: float) -> NDArray[np.float64]
 ```
 
 Octave-band levels of a Noise Criteria curve (ANSI/ASA S12.2-2019 Table 1).
@@ -77,8 +77,8 @@ Octave-band levels of a Noise Criteria curve (ANSI/ASA S12.2-2019 Table 1).
 NCResult(
     rating: float,
     governing_frequency: float,
-    frequencies: np.ndarray,
-    levels: np.ndarray,
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
     sil: float = nan,
     tangency_rating: float = nan,
     method: Literal['SIL', 'tangency'] = 'tangency',
@@ -234,7 +234,7 @@ which the spectral-tag deviation tests then skip.
 ## rc_curve
 
 ```python
-rc_curve(index: float) -> np.ndarray
+rc_curve(index: float) -> NDArray[np.float64]
 ```
 
 Octave-band levels of a Room Criteria Mark II curve (Annex D, Table D.1).
@@ -264,9 +264,9 @@ RCResult(
     rating: int,
     lmf: float,
     classification: Literal['N', 'R', 'H', 'RH'],
-    reference_curve: np.ndarray,
-    frequencies: np.ndarray,
-    levels: np.ndarray,
+    reference_curve: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
 )
 ```
 

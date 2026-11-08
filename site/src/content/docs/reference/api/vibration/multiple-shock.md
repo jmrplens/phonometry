@@ -204,7 +204,7 @@ injury_probability(
 ) -> float
 
 injury_probability(
-    risk: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    risk: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     sex: Literal['male', 'female'] = 'male',
 ) -> NDArray[np.float64]
@@ -351,7 +351,7 @@ MultipleShockResult(
     exposure_duration_years: int,
     days_per_year: float,
     peaks: NumericArrayLike,
-    risk_thresholds: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    risk_thresholds: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 )
 ```
 
@@ -458,7 +458,7 @@ moderate band matching the Annex C worked example.
 ## response_peaks
 
 ```python
-response_peaks(response: NumericArrayLike) -> np.ndarray
+response_peaks(response: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Positive response peaks $A_{\mathrm{z},i}$ (clause 5.3).
@@ -483,7 +483,9 @@ crossings; only positive peaks are counted.
 ## seat_to_spine_transfer
 
 ```python
-seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray
+seat_to_spine_transfer(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.complex128]
 ```
 
 Seat-to-spine transfer function $H(\omega)$ (clause 5.2,
@@ -512,7 +514,7 @@ the vertical spinal response; the transmissibility is unity at 0 Hz.
 spinal_response(
     acceleration_m_s2: Signal | NumericArrayLike,
     fs: float | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Vertical spinal response $A_\mathrm{z}(t)$ (clause 5.2, Formula 2).
@@ -562,10 +564,22 @@ Static compressive stress $S_\text{stat} = m_\mathrm{z} \cdot 9.81$
 
 ```python
 ultimate_strength(
+    age: float | np.floating[Any] | np.integer[Any],
+    *,
+    sex: Literal['male', 'female'] = 'male',
+) -> float
+
+ultimate_strength(
+    age: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    sex: Literal['male', 'female'] = 'male',
+) -> NDArray[np.float64]
+
+ultimate_strength(
     age: NumericArrayLike,
     *,
     sex: Literal['male', 'female'] = 'male',
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Ultimate lumbar strength $S_\mathrm{u}$ at an age (Annex C,
@@ -578,7 +592,7 @@ Formula C.4).
 | `age` | Age $b + i$, in years. |
 | `sex` | `"male"` or `"female"` (sets the age slope $S_\text{age}$). |
 
-**Returns:** The ultimate strength $S_\mathrm{u} = 6.75 - S_\text{age} (b+i)$, MPa.
+**Returns:** The ultimate strength $S_\mathrm{u} = 6.75 - S_\text{age} (b+i)$, MPa; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

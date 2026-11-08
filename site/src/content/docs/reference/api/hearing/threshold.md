@@ -73,11 +73,11 @@ AgeThresholdResult(
     age: float,
     sex: Literal['male', 'female'],
     fractile: float,
-    frequencies: np.ndarray,
-    median: np.ndarray,
-    spread_upper: np.ndarray,
-    spread_lower: np.ndarray,
-    threshold: np.ndarray,
+    frequencies: NDArray[np.float64],
+    median: NDArray[np.float64],
+    spread_upper: NDArray[np.float64],
+    spread_lower: NDArray[np.float64],
+    threshold: NDArray[np.float64],
 )
 ```
 
@@ -138,7 +138,7 @@ EARPHONE_COUPLERS = {'DT 48': 'IEC 60303 acoustic coupler', 'TDH 39': 'IEC 60303
 earphone_reference_level(
     earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
     frequencies: NumericArrayLike | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Reference equivalent threshold sound pressure level (ISO 389-1:1998).
@@ -189,7 +189,7 @@ hearing_level_to_coupler_spl(
     earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
     *,
     frequencies: NumericArrayLike | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 An audiogram in dB HL as the level the coupler has to see, in dB SPL.
@@ -222,7 +222,7 @@ is a decibel more in the coupler.
 reference_threshold(
     field: Literal['free', 'diffuse'] = 'free',
     frequencies: NumericArrayLike | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Reference threshold of hearing (ISO 389-7:2005, Table 1).

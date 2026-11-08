@@ -114,12 +114,12 @@ need the annex's table back.
 
 ```python
 AssumedProtectionResult(
-    apv: np.ndarray,
-    mean_attenuation: np.ndarray,
-    standard_deviation: np.ndarray,
+    apv: NDArray[np.float64],
+    mean_attenuation: NDArray[np.float64],
+    standard_deviation: NDArray[np.float64],
     performance: int,
     alpha: float,
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     n_subjects: int,
 )
 ```
@@ -301,10 +301,10 @@ HMLRatingResult(
     high: float,
     medium: float,
     low: float,
-    subject_high: np.ndarray,
-    subject_medium: np.ndarray,
-    subject_low: np.ndarray,
-    predicted_reduction: np.ndarray,
+    subject_high: NDArray[np.float64],
+    subject_medium: NDArray[np.float64],
+    subject_low: NDArray[np.float64],
+    predicted_reduction: NDArray[np.float64],
     performance: int,
     alpha: float,
 )
@@ -416,8 +416,8 @@ ProtectedLevelResult(
     noise_reduction: float | None,
     performance: int | None,
     method: Literal['octave-band', 'HML', 'SNR'],
-    band_levels: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
+    band_levels: NDArray[np.float64] | None = None,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -593,7 +593,7 @@ what the `HML` method's three values recover.
 SNRRatingResult(
     *,
     snr: float,
-    subject_snr: np.ndarray,
+    subject_snr: NDArray[np.float64],
     mean: float,
     standard_deviation: float,
     performance: int,

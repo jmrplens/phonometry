@@ -160,13 +160,13 @@ produces in the room and a noise-criterion curve.
 
 ```python
 EnclosureInsertionLossResult(
-    frequencies: np.ndarray | None,
-    panel_transmission_loss: np.ndarray,
-    correction: np.ndarray,
-    insertion_loss: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    panel_transmission_loss: NDArray[np.float64],
+    correction: NDArray[np.float64],
+    insertion_loss: NDArray[np.float64],
     external_area: float,
     internal_area: float,
-    room_constant: np.ndarray,
+    room_constant: NDArray[np.float64],
 )
 ```
 

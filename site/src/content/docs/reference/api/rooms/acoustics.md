@@ -95,7 +95,11 @@ DECAY_UNCERTAINTY_COEFFICIENTS = {20.0: (0.88, 1.9), 30.0: (0.55, 1.52)}
 ## DecayCurve
 
 ```python
-DecayCurve(times: np.ndarray, levels: np.ndarray, band: float | None = None)
+DecayCurve(
+    times: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    band: float | None = None,
+)
 ```
 
 Schroeder backward-integrated decay curve of an impulse response.
@@ -140,7 +144,7 @@ filter_bandwidth(
 ) -> float
 
 filter_bandwidth(
-    center: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    center: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     fraction: int | np.integer[Any] = 1,
 ) -> NDArray[np.float64]
 
@@ -214,7 +218,7 @@ min_reliable_reverberation_time(
 ) -> float
 
 min_reliable_reverberation_time(
-    bandwidth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    bandwidth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     detector_time: float = 0.0,
 ) -> NDArray[np.float64]
 
@@ -366,16 +370,16 @@ Table A.1).
 
 ```python
 RoomAcousticsResult(
-    frequencies: np.ndarray | None,
-    edt: np.ndarray,
-    t20: np.ndarray,
-    t30: np.ndarray,
-    c50: np.ndarray,
-    c80: np.ndarray,
-    d50: np.ndarray,
-    ts: np.ndarray,
-    dynamic_range: np.ndarray,
-    curvature: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    edt: NDArray[np.float64],
+    t20: NDArray[np.float64],
+    t30: NDArray[np.float64],
+    c50: NDArray[np.float64],
+    c80: NDArray[np.float64],
+    d50: NDArray[np.float64],
+    ts: NDArray[np.float64],
+    dynamic_range: NDArray[np.float64],
+    curvature: NDArray[np.float64],
 )
 ```
 

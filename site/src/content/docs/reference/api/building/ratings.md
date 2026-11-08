@@ -85,8 +85,8 @@ ExtendedImpactRatingResult(
     ci: float,
     ci_50_2500: float | None,
     core: ImpactRatingResult,
-    frequencies: np.ndarray,
-    measured: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
 )
 ```
 
@@ -147,8 +147,8 @@ ExtendedWeightedRatingResult(
     ctr_50_5000: float | None,
     ctr_100_5000: float | None,
     core: WeightedRatingResult,
-    frequencies: np.ndarray,
-    measured: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
 )
 ```
 
@@ -281,8 +281,8 @@ ImpactImprovementRatingResult(
     delta_lw: int,
     ci_delta: int,
     ci_r: int,
-    frequencies: np.ndarray,
-    improvement: np.ndarray,
+    frequencies: NDArray[np.float64],
+    improvement: NDArray[np.float64],
 )
 ```
 
@@ -336,9 +336,9 @@ ImpactRatingResult(
     rating: int,
     ci: int,
     unfavorable_sum: float,
-    frequencies: np.ndarray,
-    measured: np.ndarray,
-    shifted_reference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted_reference: NDArray[np.float64],
     quantity: Literal['impact'] = 'impact',
 )
 ```
@@ -797,9 +797,9 @@ WeightedRatingResult(
     c: int,
     ctr: int,
     unfavorable_sum: float,
-    frequencies: np.ndarray,
-    measured: np.ndarray,
-    shifted_reference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted_reference: NDArray[np.float64],
     quantity: Literal['airborne'] = 'airborne',
 )
 ```

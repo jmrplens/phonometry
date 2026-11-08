@@ -188,9 +188,9 @@ footnote makes one mask govern every weighting characteristic, B included.
 
 ```python
 WeightingClassLimits(
-    frequencies: np.ndarray,
-    lower: np.ndarray,
-    upper: np.ndarray,
+    frequencies: NDArray[np.float64],
+    lower: NDArray[np.float64],
+    upper: NDArray[np.float64],
 )
 ```
 

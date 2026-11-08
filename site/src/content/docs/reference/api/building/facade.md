@@ -193,7 +193,7 @@ values may be scalars or equal-length arrays.
 FacadeElement.tau(
     total_area: float,
     n_bands: int | np.integer[Any],
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Transmission factor `τ` of this element for the whole façade area.
@@ -209,16 +209,16 @@ Transmission factor `τ` of this element for the whole façade area.
 
 ```python
 FacadePredictionResult(
-    r_prime: np.ndarray,
-    r_45: np.ndarray,
-    r_tr_s: np.ndarray,
-    d_2m_nt: np.ndarray,
+    r_prime: NDArray[np.float64],
+    r_45: NDArray[np.float64],
+    r_tr_s: NDArray[np.float64],
+    d_2m_nt: NDArray[np.float64],
     element_r: Mapping[str, NDArray[np.float64]],
     elements: tuple[FacadeElement, ...],
     r_tr_s_w: int | None = None,
     d_2m_nt_w: int | None = None,
     c_tr: int | None = None,
-    frequencies: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -483,10 +483,10 @@ the standard's separate segment-of-openings Formula (4).
 
 ```python
 RadiatedPowerResult(
-    l_w: np.ndarray,
-    r_prime: np.ndarray,
+    l_w: NDArray[np.float64],
+    r_prime: NDArray[np.float64],
     l_w_dba: float | None = None,
-    frequencies: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 

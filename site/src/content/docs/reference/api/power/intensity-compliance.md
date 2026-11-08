@@ -105,8 +105,8 @@ reduces to the looser of the two component classes.
 
 ```python
 IntensityInstrumentComplianceResult(
-    frequencies: np.ndarray,
-    residual_index: np.ndarray,
+    frequencies: NDArray[np.float64],
+    residual_index: NDArray[np.float64],
     device: Literal['probe', 'processor', 'instrument'],
     spacing_m: float,
 )
@@ -217,7 +217,7 @@ per-band class, because a band meeting class 1 meets class 2 as well.
 IntensityInstrumentComplianceResult.phase_mismatch_deg(
     *,
     speed_of_sound: float = 343.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Equivalent channel phase mismatch per band, in degrees.
@@ -332,12 +332,36 @@ The Table 2 Note 1 term $10 \log_{10}(x/25)$, in dB.
 
 ```python
 phase_mismatch_from_residual_index(
+    residual_index: float | np.floating[Any] | np.integer[Any],
+    spacing_m: float,
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float = ...,
+) -> float
+
+phase_mismatch_from_residual_index(
+    residual_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    spacing_m: float,
+    *,
+    frequency: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+phase_mismatch_from_residual_index(
+    residual_index: float | np.floating[Any] | np.integer[Any],
+    spacing_m: float,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+phase_mismatch_from_residual_index(
     residual_index: NumericArrayLike,
     spacing_m: float,
     *,
     frequency: NumericArrayLike,
-    speed_of_sound: float = 343.0,
-) -> np.ndarray
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Channel phase mismatch equivalent to a pressure-residual intensity index.
@@ -365,7 +389,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 | `spacing_m` | Microphone separation in metres. |
 | `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
-**Returns:** The equivalent phase mismatch in degrees, as a `numpy.ndarray` (0-d for scalar inputs).
+**Returns:** The equivalent phase mismatch in degrees. A `float` when `residual_index` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -378,12 +402,36 @@ angular unit $k d$ is expressed in; degrees are used here.
 
 ```python
 residual_index_from_phase_mismatch(
+    phase_mismatch_deg: float | np.floating[Any] | np.integer[Any],
+    spacing_m: float,
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float = ...,
+) -> float
+
+residual_index_from_phase_mismatch(
+    phase_mismatch_deg: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    spacing_m: float,
+    *,
+    frequency: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+residual_index_from_phase_mismatch(
+    phase_mismatch_deg: float | np.floating[Any] | np.integer[Any],
+    spacing_m: float,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+residual_index_from_phase_mismatch(
     phase_mismatch_deg: NumericArrayLike,
     spacing_m: float,
     *,
     frequency: NumericArrayLike,
-    speed_of_sound: float = 343.0,
-) -> np.ndarray
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Pressure-residual intensity index of a given channel phase mismatch.
@@ -413,7 +461,7 @@ table requires.
 | `spacing_m` | Microphone separation in metres. |
 | `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
-**Returns:** `delta_pI0` in decibels, as a `numpy.ndarray` (0-d for scalar inputs).
+**Returns:** `delta_pI0` in decibels. A `float` when `phase_mismatch_deg` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -462,9 +510,9 @@ for a spacing in metres).
 
 ```python
 ResidualIndexLimits(
-    frequencies: np.ndarray,
-    class_1: np.ndarray,
-    class_2: np.ndarray,
+    frequencies: NDArray[np.float64],
+    class_1: NDArray[np.float64],
+    class_2: NDArray[np.float64],
 )
 ```
 

@@ -132,7 +132,10 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
 ## OctaveBandLevels
 
 ```python
-OctaveBandLevels(frequencies: np.ndarray, levels: np.ndarray)
+OctaveBandLevels(
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
+)
 ```
 
 Octave-band levels summed from one-third-octave bands (ISO 3741 Annex F).
@@ -219,12 +222,12 @@ this.
 
 ```python
 ReverberationSoundEnergyResult(
-    frequencies: np.ndarray | None,
-    sound_energy_level: np.ndarray,
-    mean_event_level: np.ndarray,
-    absorption_area: np.ndarray,
-    waterhouse_correction: np.ndarray,
-    background_correction: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_energy_level: NDArray[np.float64],
+    mean_event_level: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
+    waterhouse_correction: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
     c1: float,
     c2: float,
     speed_of_sound: float,
@@ -288,12 +291,12 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 ReverberationSoundPowerResult(
-    frequencies: np.ndarray | None,
-    sound_power_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    absorption_area: np.ndarray,
-    waterhouse_correction: np.ndarray,
-    background_correction: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_power_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
+    waterhouse_correction: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
     c1: float,
     c2: float,
     speed_of_sound: float,

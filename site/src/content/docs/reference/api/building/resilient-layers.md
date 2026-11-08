@@ -210,13 +210,13 @@ model identifies the general features rather than replacing a measurement.
 
 ```python
 CoveringImprovementResult(
-    frequencies: np.ndarray,
-    improvement: np.ndarray,
-    two_line: np.ndarray,
+    frequencies: NDArray[np.float64],
+    improvement: NDArray[np.float64],
+    two_line: NDArray[np.float64],
     cut_off_frequency: float,
     bare_cut_off_frequency: float,
-    lines: np.ndarray,
-    line_improvement: np.ndarray,
+    lines: NDArray[np.float64],
+    line_improvement: NDArray[np.float64],
     bare: TappingForceResult,
     covered: TappingForceResult,
 )
@@ -434,8 +434,8 @@ $m' = 73.5$ kg/m².
 
 ```python
 FloatingFloorImprovementResult(
-    frequencies: np.ndarray,
-    improvement: np.ndarray,
+    frequencies: NDArray[np.float64],
+    improvement: NDArray[np.float64],
     resonance_frequency: float,
     model: Literal['en12354', 'cremer', 'cremer_hammer'],
     slope: float,
@@ -484,13 +484,31 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 force_pulse(
+    time: float | np.floating[Any] | np.integer[Any],
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> float
+
+force_pulse(
+    time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> NDArray[np.float64]
+
+force_pulse(
     time: NumericArrayLike,
     contact_stiffness: float,
     impedance: float,
     *,
-    mass: float = 0.5,
-    impact_velocity: float | None = None,
-) -> np.ndarray
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Force pulse `F1(t)` of a single hammer impact (Eqs. 3.95/3.96).
@@ -525,7 +543,7 @@ impacts rather than one that overflows partway through it.
 | `mass` | Hammer mass `m`, in kg (Default: 0,5). |
 | `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
 
-**Returns:** The force `F1(t)`, in N, with the same shape as `time`; never negative.
+**Returns:** The force `F1(t)`, in N, with the same shape as `time`; never negative. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -645,7 +663,7 @@ resilient_mount_improvement(
     loss_factor: NumericArrayLike,
     mount_stiffness: float,
     mount_density: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Improvement of a floating floor on discrete resilient mounts (Vér).
@@ -710,7 +728,7 @@ short_pulse_mean_square_force(
     frequencies: NumericArrayLike,
     *,
     fraction: Literal[1, 3] | np.integer[Any] = 3,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Band mean-square force of a short impact
@@ -869,10 +887,10 @@ TAPPING_IMPACT_RATE_HZ = 10.0
 
 ```python
 TappingForceResult(
-    frequencies: np.ndarray,
-    peak_force: np.ndarray,
-    mean_square_force: np.ndarray,
-    power_input: np.ndarray,
+    frequencies: NDArray[np.float64],
+    peak_force: NDArray[np.float64],
+    mean_square_force: NDArray[np.float64],
+    power_input: NDArray[np.float64],
     cut_off_frequency: float,
     limiting_frequency: float,
     *,

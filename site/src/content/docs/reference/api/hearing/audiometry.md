@@ -119,7 +119,7 @@ ambient_noise_limits(
     earphone_attenuation: NumericArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The maximum permissible ambient sound pressure levels of a test room.
@@ -165,13 +165,13 @@ conservative reading.
 ```python
 AmbientNoiseCheck(
     presentation: Literal['air', 'bone', 'sound field'],
-    frequencies: np.ndarray,
-    levels: np.ndarray,
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
     lowest_test_frequency_hz: float,
     lowest_hearing_level: float,
-    noise_floor_levels: np.ndarray | None = None,
+    noise_floor_levels: NDArray[np.float64] | None = None,
     earphone: Literal['supra-aural', 'ER-3A', 'HDA 200', 'own attenuation'] | None = None,
-    earphone_attenuation: np.ndarray | None = None,
+    earphone_attenuation: NDArray[np.float64] | None = None,
     allowed_threshold_shift_db: float = 2.0,
 )
 ```
@@ -359,11 +359,11 @@ presentations, a new call with `shortened=False`.
 
 ```python
 AscendingThresholdResult(
-    ascent_levels: np.ndarray,
+    ascent_levels: NDArray[np.float64],
     shortened: bool,
     next_level: float,
-    presentation_levels: np.ndarray | None = None,
-    responses: np.ndarray | None = None,
+    presentation_levels: NDArray[np.float64] | None = None,
+    responses: NDArray[np.bool_] | None = None,
 )
 ```
 
@@ -514,9 +514,9 @@ levels are averages about which individuals vary widely.
 
 ```python
 AudiogramCautions(
-    frequencies: np.ndarray,
-    air_conduction_threshold_levels: np.ndarray | None,
-    bone_conduction_threshold_levels: np.ndarray | None,
+    frequencies: NDArray[np.float64],
+    air_conduction_threshold_levels: NDArray[np.float64] | None,
+    bone_conduction_threshold_levels: NDArray[np.float64] | None,
     vibrator_placement: Literal['mastoid', 'forehead'],
 )
 ```
@@ -799,7 +799,7 @@ is a property of the method, and nothing here corrects for it.
 
 ```python
 AutomaticThresholdResult(
-    reversal_levels: np.ndarray,
+    reversal_levels: NDArray[np.float64],
     mean_level: float,
     threshold_level: float,
 )
@@ -943,8 +943,8 @@ the tie.
 
 ```python
 BracketingThresholdResult(
-    ascent_levels: np.ndarray,
-    descent_levels: np.ndarray,
+    ascent_levels: NDArray[np.float64],
+    descent_levels: NDArray[np.float64],
     mean_level: float,
     threshold_level: float,
 )
@@ -1248,14 +1248,14 @@ and the run advances one reversal at a time.
 
 ```python
 SweepThresholdResult(
-    reversal_frequencies: np.ndarray,
-    reversal_levels: np.ndarray,
-    frequencies: np.ndarray,
-    mean_level: np.ndarray,
-    threshold_level: np.ndarray,
-    spread_db: np.ndarray,
-    running_frequencies: np.ndarray,
-    running_threshold_levels: np.ndarray,
+    reversal_frequencies: NDArray[np.float64],
+    reversal_levels: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    mean_level: NDArray[np.float64],
+    threshold_level: NDArray[np.float64],
+    spread_db: NDArray[np.float64],
+    running_frequencies: NDArray[np.float64],
+    running_threshold_levels: NDArray[np.float64],
 )
 ```
 

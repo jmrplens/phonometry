@@ -96,21 +96,21 @@ excess_sound_pressure_level(
 ) -> float
 
 excess_sound_pressure_level(
-    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     reference_sound_power_levels: NumericArrayLike,
     distance: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
     level: float | np.floating[Any] | np.integer[Any],
-    reference_sound_power_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reference_sound_power_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     distance: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
     level: float | np.floating[Any] | np.integer[Any],
     reference_sound_power_levels: float | np.floating[Any] | np.integer[Any],
-    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
@@ -182,19 +182,19 @@ the grade the standard grants when the evidence is not there.
 
 ```python
 InSituSoundPowerResult(
-    frequencies: np.ndarray,
-    sound_power_level: np.ndarray,
-    sound_energy_level: np.ndarray,
-    mean_source_level: np.ndarray,
-    mean_reference_level: np.ndarray,
-    reference_levels: np.ndarray,
-    reference_power_level: np.ndarray,
-    background_correction: np.ndarray,
-    reference_background_correction: np.ndarray,
-    background_margin_db: np.ndarray,
-    reference_background_margin_db: np.ndarray,
+    frequencies: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    sound_energy_level: NDArray[np.float64],
+    mean_source_level: NDArray[np.float64],
+    mean_reference_level: NDArray[np.float64],
+    reference_levels: NDArray[np.float64],
+    reference_power_level: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
+    reference_background_correction: NDArray[np.float64],
+    background_margin_db: NDArray[np.float64],
+    reference_background_margin_db: NDArray[np.float64],
     c2: float,
-    excess_levels: np.ndarray | None,
+    excess_levels: NDArray[np.float64] | None,
     directivity_range_db: float | None,
     sigma_omc_db: float,
     coverage_factor: float,

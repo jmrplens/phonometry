@@ -84,11 +84,11 @@ Build the plottable band table of an ANSI S3.5-1997 band procedure.
 ```python
 SIIProcedure(
     method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'],
-    frequencies: np.ndarray,
-    band_edges: np.ndarray,
-    band_importance: np.ndarray,
-    internal_noise: np.ndarray,
-    speech_spectrum: np.ndarray,
+    frequencies: NDArray[np.float64],
+    band_edges: NDArray[np.float64],
+    band_importance: NDArray[np.float64],
+    internal_noise: NDArray[np.float64],
+    speech_spectrum: NDArray[np.float64],
 )
 ```
 
@@ -145,13 +145,13 @@ Requires matplotlib (the `[plot]` extra); returns the
 ```python
 SIIResult(
     sii: float,
-    band_audibility: np.ndarray,
-    band_importance: np.ndarray,
-    frequencies: np.ndarray,
-    speech_spectrum: np.ndarray,
-    disturbance: np.ndarray,
-    masking: np.ndarray,
-    level_distortion: np.ndarray,
+    band_audibility: NDArray[np.float64],
+    band_importance: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    speech_spectrum: NDArray[np.float64],
+    disturbance: NDArray[np.float64],
+    masking: NDArray[np.float64],
+    level_distortion: NDArray[np.float64],
     method: Literal['critical-band', 'equally-contributing', 'one-third-octave', 'octave'] = 'one-third-octave',
 )
 ```
@@ -318,7 +318,7 @@ function, which still returns the bare per-band array.
 ```python
 standard_speech_spectrum(
     vocal_effort: Literal['normal', 'raised', 'loud', 'shout'] = 'normal',
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
@@ -342,9 +342,9 @@ Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
 
 ```python
 StandardSpeechSpectrum(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     vocal_efforts: tuple[Literal['normal', 'raised', 'loud', 'shout'], ...],
-    levels: np.ndarray,
+    levels: NDArray[np.float64],
 )
 ```
 

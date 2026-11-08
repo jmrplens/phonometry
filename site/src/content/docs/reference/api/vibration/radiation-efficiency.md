@@ -182,8 +182,8 @@ expressions.
 
 ```python
 RadiationEfficiencyResult(
-    frequencies: np.ndarray,
-    radiation_efficiency: np.ndarray,
+    frequencies: NDArray[np.float64],
+    radiation_efficiency: NDArray[np.float64],
     critical_frequency: float,
     length_x: float,
     length_y: float,

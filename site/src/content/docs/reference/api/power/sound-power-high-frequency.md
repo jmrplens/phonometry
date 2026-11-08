@@ -122,12 +122,28 @@ in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
 
 ```python
 air_absorption_np_per_m(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float
+
+air_absorption_np_per_m(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]
+
+air_absorption_np_per_m(
     frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
-    static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Air absorption coefficient $\alpha$ in nepers per metre (ISO 9295 Annex A).
@@ -152,7 +168,7 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 | `relative_humidity_percent` | Relative humidity `h_r`, in percent. |
 | `static_pressure_kpa` | Static pressure `p_s`, in kilopascals (default 101,325 kPa, the pressure Tables 1 and 2 are printed at). |
 
-**Returns:** $\alpha$ in Np/m, with the shape of `frequencies`.
+**Returns:** $\alpha$ in Np/m, with the shape of `frequencies`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -165,13 +181,31 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 
 ```python
 free_field_absorption_correction(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float
+
+free_field_absorption_correction(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]
+
+free_field_absorption_correction(
     frequencies: NumericArrayLike,
     *,
     radius: float,
     temperature_c: float,
     relative_humidity_percent: float,
-    static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Air absorption correction of the free-field method (ISO 9295 Formula (10)).
@@ -196,7 +230,7 @@ is the same thing.
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Static pressure, in kilopascals (default 101,325 kPa). |
 
-**Returns:** $K_\alpha$ per frequency, in decibels.
+**Returns:** $K_\alpha$ per frequency, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

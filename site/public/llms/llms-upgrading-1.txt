@@ -1258,8 +1258,9 @@ do, where it raised an `AttributeError` from matplotlib.
 A function of a number or an array of them returns a `float` only when every
 argument that decides the shape of its result is a number, a Python or a
 NumPy one, and an array as soon as one of them is a sequence or an array,
-where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array.
-Ninety public functions and methods follow the rule, `room.room_constant`,
+where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array,
+and a zero-dimensional array or a NumPy scalar for numbers. A hundred and
+fifty-five public functions and methods follow the rule, `room.room_constant`,
 `room.critical_distance` and `fluids.sea_water_sound_speed` among them, and
 `vibration.evaluation_zone` follows it with a zone letter where the others
 give a `float`:
@@ -1269,8 +1270,51 @@ give a `float`:
 | `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
 | `emission.local_environmental_correction([0.5])` returned a `float` for any one-element input, as did `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, and the `background_margin_db` field and the `correction` property of the `WorkstationBackgroundCorrection` that `emission.background_noise_correction_at_workstation` returns | each gives a one-element array; hand over `0.5`, not `[0.5]`, to get a number |
 | `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
+| `building.mass_law_transmission_loss(500.0, 10.0)` returned a zero-dimensional array, as did 45 other functions and methods listed below | it returns a Python `float`; `np.asarray(...)` gives an array where one is wanted |
+| `materials.absorption_coefficient(4.0, 2.0, 200.0, 11.0)` returned a `numpy.float64`, as did 16 others listed below | it returns a Python `float`, with no `.shape` or `.dtype` |
+| `building.composite_transmission_loss([10.0, 2.0], [40.0, 25.0])` returned a zero-dimensional array, as did `building.total_structure_borne_pressure_level([30.0, 35.0])` | each returns a `float` when it reduces to one number |
+| `building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)` held a zero-dimensional array in `l_xy` and a `numpy.float64` in `l_xy_nt` and `l_xy_n` | the three levels are Python `float`s for single readings |
+| `metrology.microphone_acoustic_impedance` returned a `numpy.complex128` for numbers, which its `NDArray` annotation did not name | it returns the zero-dimensional `complex128` array, as the other complex results of a number do; `complex(...)` gives the number |
 
-Sixty-six of them gain typed overloads, so a type checker reads
+The functions and methods that returned a zero-dimensional array for numbers
+are, besides `building.mass_law_transmission_loss`: in `building`,
+`background_correction`, `low_frequency_level`,
+`characteristic_reception_plate_power`, `equivalent_blocked_force_level`,
+`equivalent_free_velocity_level`, `source_mobility_from_levels`,
+`structure_borne_power_level`, `transmission_loss_from_coefficient`,
+`coupling_term`, `coupling_term_force_source`,
+`coupling_term_velocity_source`, `installed_power_from_reception_plate`,
+`installed_structure_borne_power_level`,
+`structure_borne_pressure_level_path`, `structure_to_airborne_adjustment`,
+`tapping_machine_characteristic_power_level`,
+`tapping_machine_coupling_term`, `tapping_machine_force_level_estimate` and
+`force_pulse`; in `electroacoustics`, `AmplifierFrequencyResponse.at`; in
+`emission`, `normal_intensity_from_levels`, `reverberation_parameter`,
+`special_room_background_correction`,
+`phase_mismatch_from_residual_index`,
+`residual_index_from_phase_mismatch`, `background_noise_correction`,
+`air_absorption_np_per_m`, `free_field_absorption_correction`,
+`radiated_sound_power_level`, `radiation_factor`, `velocity_level` and
+`velocity_level_from_acceleration`; `environment.air_attenuation`;
+`signals.comb_filter_response`; and in `vibration`,
+`corner_transmission_coefficient`, `straight_transmission_coefficient`,
+`coupling_loss_factor`, `point_connection_coupling_loss_factor`,
+`wave_vibration_reduction_index`, `random_error_percent`,
+`transfer_stiffness_level`, `loss_factor`, `beam_bending_wave_speed`,
+`plate_bending_wave_speed` and `injected_power`. Those that returned a
+NumPy scalar are, besides `materials.absorption_coefficient`:
+`building.surface_pressure_intensity_indicator` and
+`building.reverberation_index`; in `electroacoustics`, `field_strength`,
+`field_strength_level`, `magnetic_flux_density`, `telecoil_response`,
+`LoopImpedance.at` and `LoopImpedance.drive_voltage`; in `environment`,
+`predicted_prominence`, `impulse_adjustment` and
+`air_power_attenuation_per_m`; `hearing.age_and_noise_threshold`;
+`materials.absorption_area` and `materials.power_attenuation_from_alpha`;
+`room.hard_object_absorption`; and `vibration.ultimate_strength`. A
+zero-dimensional array given to any of them gives a zero-dimensional array,
+and the values are the same.
+
+A hundred and thirty of them have typed overloads, so a type checker reads
 `room.room_constant(100.0, 0.2)` as a `float` and
 `room.room_constant(100.0, alphas)` as an array whatever the shape of
 `alphas`; an `ArrayLike` or a nested list reads as the union, which a typed
@@ -1656,76 +1700,5 @@ A table with tables inside it needs each level copied, as in
 `{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. The same copy is
 needed before a table is pickled, deep-copied or written out as JSON, because
 a read-only mapping supports none of the three.
-
-## A result keeps its own copy of the arrays it was given
-
-In 3.3.0 and in 4.0.0rc1 a result kept the very array it was handed whenever
-that array was already of the type the function reads, `float64` for levels
-and frequencies, because `np.asarray` hands its argument back unchanged in
-that case. Changing the caller's array afterwards, `levels[0] = 0.0` or
-`frequencies *= 2`, changed a result already computed and perhaps already
-printed. In 4.0 every array that a function or a method of the library
-keeps from the arguments it was given is a copy of its own, made read-only
-like the published tables, and the caller's array is left as it was. That
-holds for the objects that keep arrays to hand out later as well: the
-frequency grid of a `noise_control.SilencerChain`, the axes and flight paths
-an `aircraft.ANPDatabase` is built from, and the medium maps of
-`simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
-and `c_s` now stay the ones the time step was computed from. The maps the
-engines derive from them, `FDTD2D.kappa` and `ElasticFDTD2D.mu` and `.lam`,
-are read-only NumPy copies too: in 4.0.0rc1 an edit to one reached part of the
-step and not the time step, and now it raises `ValueError`, so a different
-medium is a new engine built from edited maps. A `Signal`
-keeps a copy of its own samples too, which stays writeable for processing in
-place, as the samples of a file read with `io.read` always were. A result
-record built by hand, by calling its class directly, makes the same copy:
-every public record that can hold an array copies the arrays it is handed
-when it is built, whoever builds it, also inside a tuple, a list or any
-mapping. A record held inside another one is kept whole and answers for its
-own arrays, and a `Signal` is no exception: the seven results that hand a
-waveform back as a `Signal` (`filters.OctaveFilterResult`,
-`signals.EnvelopeResult`, `signals.ResampledSignalResult`,
-`signals.AlignedImpulseResponseResult`, `signals.SynchronousAverageResult`,
-`environment.DirectSoundSubtraction` and `underwater.PileStrikeResult`) hold
-one of their own when the library builds them, whose samples stay writeable
-like any `Signal`'s, and hold the caller's own when built by hand around it.
-Every other array a result holds refuses in-place writes, the ones it
-computed as well as the ones it was given, where in 3.3.0 most computed
-arrays took them. Writing into one now raises `ValueError`, so code that
-edited one in place has to copy it first:
-
-```python
-import numpy as np
-
-from phonometry import io, room
-
-levels = np.array([60.0, 58.0, 55.0, 52.0, 50.0, 48.0, 45.0, 42.0, 40.0, 38.0])
-nc = room.noise_criterion(levels)
-levels[0] = 0.0
-samples = np.zeros(4)
-signal = io.Signal(samples, fs=48_000)
-samples[0] = 1.0
-measured = np.array([1.0, 0.5, 0.25, 0.125])
-response = room.ImpulseResponseResult(ir=measured, fs=48_000, method="farina")
-measured[0] = 0.0
-edited = nc.levels.copy()
-edited[0] = 62.0
-print(nc.levels[0], nc.levels.flags.writeable, response.ir[0], response.ir.flags.writeable)
-print(signal.data[0, 0], signal.data.flags.writeable)
-# 60.0 False 1.0 False
-# 0.0 True
-```
-
-The window a spectral result was computed with is held the same way.
-`signals.power_spectral_density`, `signals.cross_spectral_density`,
-`signals.coherent_output_spectrum`, `signals.miso_coherence`,
-`signals.spectrogram`, `signals.zoom_fft`, `signals.envelope_spectrum` and
-`signals.window_metrics` store the `window` they were given, and a window
-given with its parameters keeps parameters of its own: the weights of
-`("general_cosine", weights)` given as a list are held as a tuple of the
-same numbers, where 3.3.0 held the caller's list, so
-`result.window == ("general_cosine", (0.5, 0.5))`; given as an array they
-are a read-only copy, as every array a result holds is. A result built by
-hand, or anew by `dataclasses.replace`, holds its window the same way.
 
 ---

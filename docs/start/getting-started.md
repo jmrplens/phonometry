@@ -116,7 +116,8 @@ result = filters.octave_filter(signal, fs=fs, fraction=3)
 print(f"Bands: {result.frequencies}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
 print(f"SPL [dB]: {result.levels}")
-# SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB at 100 Hz and ~90.9 dB at 1 kHz
+# SPL [dB]: [46.77640002 47.81719048 48.93133762 ...]
+# the 100 Hz band reads about 90.7 dB and the 1 kHz band about 90.9 dB
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>

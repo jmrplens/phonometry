@@ -430,14 +430,14 @@ event = 1.8 * np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
 peak_mm_s = float(np.max(np.abs(event)))
 guideline = float(vibration.guideline_velocity("residential", 17.0))
 print(f"peak {peak_mm_s:.3f} mm/s against {guideline:.2f} mm/s at 17 Hz")
-print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.269
+print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.267
 
 # The Annex E route: no frequency anywhere.
 assessment = vibration.assess_short_term_vibration(
     event, fs, building_class="residential"
 )
 print(f"|v_B2|max {assessment.assessment_velocity_mm_s:.3f} mm/s against 5 mm/s")
-print(f"  ratio {assessment.ratio:.3f}")  # 0.271
+print(f"  ratio {assessment.ratio:.3f}")  # 0.268
 print(f"  within the guideline: {assessment.within_guideline}")
 ```
 
@@ -840,10 +840,10 @@ for band in (40.0, 63.0):
         f"{band:g} Hz: L_vF2 {passage.band_interval_levels[1, i]:.1f} dB,"
         f" L_vFmax {passage.band_max_levels[i]:.1f} dB"
     )
-# 40 Hz: L_vF2 70.4 dB, L_vFmax 72.0 dB
-# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.3 dB
+# 40 Hz: L_vF2 70.3 dB, L_vFmax 71.9 dB
+# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.2 dB
 print(f"sum level {vibration.band_sum_level(passage.band_interval_levels[1]):.1f} dB")
-# 71.1 dB, Formula (B.3)
+# 71.0 dB, Formula (B.3)
 ```
 
 ## 5. Narrow band, and what Table 1 is
@@ -899,8 +899,8 @@ centres, rms = bands.frequencies, bands.velocities_mm_s
 levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 for band in (40.0, 50.0, 63.0):
     print(f"{band:g} Hz from narrow band: {levels[list(centres).index(band)]:.1f} dB")
-# 40 Hz from narrow band: 70.5 dB   (70.4 dB from the band filter)
-# 50 Hz from narrow band: 39.2 dB   (44.7 dB from the band filter)
+# 40 Hz from narrow band: 70.5 dB   (70.3 dB from the band filter)
+# 50 Hz from narrow band: 39.2 dB   (41.4 dB from the band filter)
 # 63 Hz from narrow band: 62.5 dB   (62.4 dB from the band filter)
 ```
 
@@ -927,11 +927,11 @@ of the mean energy.
 ```python
 from phonometry import vibration
 
-before = [70.4, 62.4]  # 40 Hz and 63 Hz, without the mat
+before = [70.3, 62.4]  # 40 Hz and 63 Hz, without the mat
 after = [61.0, 50.9]
-print(vibration.elastic_insertion_loss(before, after))  # [ 9.4 11.5]
+print(vibration.elastic_insertion_loss(before, after))  # [ 9.3 11.5]
 
-average = vibration.passage_average_level([70.4, 72.1, 69.0])
+average = vibration.passage_average_level([70.3, 72.1, 69.0])
 print(f"{average:.1f} dB")  # 70.7 dB
 rms = vibration.passage_average_velocity([0.18, 0.21, 0.16])
 print(f"{rms:.4f} mm/s")  # 0.1845 mm/s
@@ -2364,9 +2364,9 @@ groups added after that are further off.
 ```python
 from phonometry import vibration
 
-print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.448]
+print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.452]
 print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], n_reference_machines=3).round(2))
-# [0.68 0.89 0.97], against 0.57, 0.95 and 1.04 measured
+# [0.69 0.89 0.97], against 0.57, 0.95 and 1.04 measured
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction.svg" alt="Six decreasing curves of the correction chi against the number of machines running from 4 to 100, on an axis from 0 to 0.6, one curve per reference count of 3, 5, 10, 30, 60 and 100 machines, the top curve starting at 0.55 and flattening to 0.29 and the bottom one starting at 0.19 and flattening to 0.10. Small dots mark the points read off the printed nomogram, and a note says they were read at a five-hundredth" width="96%"></picture>

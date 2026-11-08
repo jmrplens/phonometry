@@ -179,11 +179,11 @@ the level fluctuated ($L_{90}$ is the background, $L_{10}$ the events), the
 C-weighted **peak** for impulsive content.
 
 ```python
-la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ~70.2 dB
+la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ~70.1 dB
 ln = signals.ln_levels(
     recording, fs, n=(10, 50, 90), weighting="A", calibration_factor=cal
 )                                                # L10 ~78.0, L50 ~55.1, L90 ~54.9
-lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ~80.2
+lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ~80.1
 lc_pk = signals.lc_peak(recording, fs, calibration_factor=cal)           # ~84.4
 
 print(f"LAeq {la_eq:.1f} dB | L10 {ln[10]:.1f} | L90 {ln[90]:.1f} "
@@ -195,7 +195,7 @@ own and the nine background seconds 55.0 dB, so in energy the event contributes
 $1 \times 10^{8.00}$ and the background $9 \times 10^{5.50} = 2.9 \times 10^{6}$:
 a ratio of about 35:1, or 15.5 dB. The event's 25 dB head start beats the
 9.5 dB ($10\log_{10}9$) the background wins back on duration, which is why the
-10 s $L_\mathrm{Aeq}$ of 70.2 dB sits only 0.1 dB above the 70.0 dB the event alone
+10 s $L_\mathrm{Aeq}$ of 70.1 dB sits only 0.1 dB above the 70.0 dB the event alone
 would give spread over the same 10 s: the background is almost invisible in the
 energy average. $L_{\mathrm{A}E}$ is that $L_\mathrm{Aeq}$ plus $10\log_{10}(10\ \mathrm{s}/1\
 \mathrm{s}) = 10$ dB, the whole energy compressed into one second. The
@@ -203,7 +203,7 @@ percentiles read the other way round: the event fills exactly 10 % of the
 record, so it lifts $L_{10}$ to 78.0 dB and leaves $L_{90}$ at 54.9 dB, the
 background level.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_level_track.svg" alt="Fast A-weighted level history of the ten-second recording of this page, rising from about 55 dB of pink background to 80 dB during the one-second event at four seconds, with horizontal lines at LAeq 70.2 dB, L10 78.0 dB, L50 55.1 dB and L90 54.9 dB, the event second shaded, and an annotation reading LAE 80.2 dB, the whole event energy compressed into one second" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_level_track.svg" alt="Fast A-weighted level history of the ten-second recording of this page, rising from about 55 dB of pink background to 80 dB during the one-second event at four seconds, with horizontal lines at LAeq 70.1 dB, L10 78.0 dB, L50 55.1 dB and L90 54.9 dB, the event second shaded, and an annotation reading LAE 80.1 dB, the whole event energy compressed into one second" width="88%" />
 
 *The readouts of this step drawn on the recording that produced them: the
 event second lifts $L_\mathrm{Aeq}$ and $L_{10}$, and leaves $L_{50}$ and $L_{90}$ on
@@ -279,7 +279,7 @@ step 3 instead of the raw recording:
 ```python
 spl_a = filters.octave_filter(weighted, fs, fraction=3, nominal=True).levels
 print(f"sum of the A bands  {10 * np.log10(np.sum(10 ** (spl_a / 10))):.1f} dB")
-# sum of the A bands  70.2 dB -> the LAeq of step 4, to a hundredth of a decibel
+# sum of the A bands  70.1 dB -> the LAeq of step 4, to a hundredth of a decibel
 ```
 
 That identity closes the loop between the two halves of the meter: the

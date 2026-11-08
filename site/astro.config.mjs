@@ -386,7 +386,10 @@ const jsonLd = JSON.stringify({
       softwareVersion: version,
       applicationCategory: 'DeveloperApplication',
       applicationSubCategory: 'Scientific/Engineering',
-      operatingSystem: 'Windows, Linux, macOS',
+      // One platform per entry, in the order jmrp.io/projects/ lists them for
+      // this @id, so the merged node names three platforms rather than four
+      // values, one of them the three again joined into a single string.
+      operatingSystem: ['Linux', 'macOS', 'Windows'],
       programmingLanguage: 'Python',
       url: repositoryUrl,
       downloadUrl: 'https://pypi.org/project/phonometry/',

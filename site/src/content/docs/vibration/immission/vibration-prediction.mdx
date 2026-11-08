@@ -204,9 +204,9 @@ groups added after that are further off.
 ```python
 from phonometry import vibration
 
-print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.448]
+print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.452]
 print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], n_reference_machines=3).round(2))
-# [0.68 0.89 0.97], against 0.57, 0.95 and 1.04 measured
+# [0.69 0.89 0.97], against 0.57, 0.95 and 1.04 measured
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction.svg" alt="Six decreasing curves of the correction chi against the number of machines running from 4 to 100, on an axis from 0 to 0.6, one curve per reference count of 3, 5, 10, 30, 60 and 100 machines, the top curve starting at 0.55 and flattening to 0.29 and the bottom one starting at 0.19 and flattening to 0.10. Small dots mark the points read off the printed nomogram, and a note says they were read at a five-hundredth" width="96%" />

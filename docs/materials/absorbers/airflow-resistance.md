@@ -182,7 +182,7 @@ R = materials.alternating_airflow_resistance(
     piston_stroke_specimen=14e-3, piston_stroke_termination=1.4e-3,
     frequency=2.0, cavity_volume=7.854e-4, kappa_prime=kp,
 )
-print(round(R))                   # 222956  airflow resistance R [Pa*s/m^3]
+print(round(R))                   # 222949  airflow resistance R [Pa*s/m^3]
 ```
 
 Pass the `effective_kappa` result to `alternating_airflow_resistance` for an

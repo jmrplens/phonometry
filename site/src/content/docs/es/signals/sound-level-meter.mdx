@@ -190,11 +190,11 @@ exposición sonora** que normaliza el evento a un segundo, y el **pico** con
 ponderación C para contenido impulsivo.
 
 ```python
-la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ≈70,2 dB
+la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ≈70,1 dB
 ln = signals.ln_levels(
     recording, fs, n=(10, 50, 90), weighting="A", calibration_factor=cal
 )                                          # L10 ≈78,0, L50 ≈55,1, L90 ≈54,9
-lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ≈80,2
+lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ≈80,1
 lc_pk = signals.lc_peak(recording, fs, calibration_factor=cal)           # ≈84,4
 
 print(f"LAeq {la_eq:.1f} dB | L10 {ln[10]:.1f} | L90 {ln[90]:.1f} "
@@ -206,7 +206,7 @@ Fíjate en la aritmética que codifican los números. El segundo del evento mide
 evento aporta $1 \times 10^{8{,}00}$ y el fondo
 $9 \times 10^{5{,}50} = 2{,}9 \times 10^{6}$: una razón de unos 35:1, o 15,5 dB.
 La ventaja de 25 dB del evento gana a los 9,5 dB ($10\log_{10}9$) que el fondo
-recupera por duración, y por eso el $L_\mathrm{Aeq}$ de 10 s de 70,2 dB queda solo
+recupera por duración, y por eso el $L_\mathrm{Aeq}$ de 10 s de 70,1 dB queda solo
 0,1 dB por encima de los 70,0 dB que daría el evento solo repartido sobre esos
 mismos 10 s: el fondo es casi invisible en el promedio energético. El $L_{\mathrm{A}E}$
 es ese $L_\mathrm{Aeq}$ más $10\log_{10}(10\ \mathrm{s}/1\ \mathrm{s}) = 10$ dB, toda
@@ -214,7 +214,7 @@ la energía comprimida en un segundo. Los percentiles se leen al revés: el even
 ocupa exactamente el 10 % del registro, así que sube el $L_{10}$ a 78,0 dB y
 deja el $L_{90}$ en 54,9 dB, el nivel de fondo.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_level_track.svg" alt="Historial de nivel ponderado A con respuesta Fast de la grabación de diez segundos de esta página, que sube desde unos 55 dB de fondo rosa hasta 80 dB durante el evento de un segundo en el segundo cuatro, con líneas horizontales en LAeq 70,2 dB, L10 78,0 dB, L50 55,1 dB y L90 54,9 dB, el segundo del evento sombreado, y una anotación que dice LAE 80,2 dB, toda la energía del evento comprimida en un segundo" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_level_track.svg" alt="Historial de nivel ponderado A con respuesta Fast de la grabación de diez segundos de esta página, que sube desde unos 55 dB de fondo rosa hasta 80 dB durante el evento de un segundo en el segundo cuatro, con líneas horizontales en LAeq 70,1 dB, L10 78,0 dB, L50 55,1 dB y L90 54,9 dB, el segundo del evento sombreado, y una anotación que dice LAE 80,1 dB, toda la energía del evento comprimida en un segundo" width="88%" />
 
 *Las lecturas de este paso dibujadas sobre la grabación que las produjo: el
 segundo del evento sube el $L_\mathrm{Aeq}$ y el $L_{10}$, y deja el $L_{50}$ y el
@@ -294,7 +294,7 @@ del paso 3 en lugar de la grabación en bruto:
 ```python
 spl_a = filters.octave_filter(weighted, fs, fraction=3, nominal=True).levels
 print(f"suma de las bandas A {10 * np.log10(np.sum(10 ** (spl_a / 10))):.1f} dB")
-# suma de las bandas A 70.2 dB -> el LAeq del paso 4, con una centésima de decibelio
+# suma de las bandas A 70.1 dB -> el LAeq del paso 4, con una centésima de decibelio
 ```
 
 Esa identidad cierra el círculo entre las dos mitades del sonómetro: la etapa de

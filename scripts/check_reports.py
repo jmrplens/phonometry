@@ -103,6 +103,7 @@ from generated_assets import (
     raster_problem,
     tracked_files,
 )
+from markdown_spans import page_markup
 
 REPORT_DIR = ".github/reports"
 
@@ -186,6 +187,21 @@ DOCS_DIR = "site/src/content/docs"
 EMBEDDED = re.compile(r"<ReportPreview\s[^>]*name=\"([a-z0-9_]+)\"", re.DOTALL)
 
 
+def shown_fiches(text: str) -> set[str]:
+    """The fiche names a page embeds: the ``name`` of each ``ReportPreview`` it renders.
+
+    The page is read as the site reads it (:func:`markdown_spans.page_markup`):
+    a component quoted in a fence, a code span or a comment, or written in the
+    frontmatter, shows no fiche, and a fiche named only there is one no reader
+    sees. A page that never writes the tag is not read at all.
+
+    :param text: The page as written.
+    """
+    if "<ReportPreview" not in text:
+        return set()
+    return set(EMBEDDED.findall(page_markup(text, kind="mdx")))
+
+
 def _shown_in(language: str) -> set[str]:
     """Fiche names embedded on the pages of one language."""
     root = Path(DOCS_DIR)
@@ -205,7 +221,7 @@ def _shown_in(language: str) -> set[str]:
     return {
         name
         for page in pages
-        for name in EMBEDDED.findall(page.read_text(encoding="utf-8"))
+        for name in shown_fiches(page.read_text(encoding="utf-8"))
     }
 
 

@@ -76,7 +76,7 @@ from phonometry import electroacoustics
 
 res = electroacoustics.radiating_piston(radius=0.1, frequencies=np.geomspace(20, 20000, 200),
                                         angles_rad=np.linspace(0.0, np.pi / 2, 91))
-print(round(res.radiation_mass, 4))               # 8 rho a^3 / 3, kg
+print(round(res.radiation_mass, 4))               # 0.0032 kg = 8 rho a^3 / 3
 print(round(float(res.directivity_index[0]), 2))  # 3.01 dB half-space limit
 res.plot()                                         # R1 and X1 vs ka
 ```

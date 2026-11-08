@@ -66,8 +66,8 @@ one and [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs4
   absolute factor, the network's +11.7 dB at 5 kHz included, cancels.
 * **The ballistics run at the caller's rate** on the record
   [`phonometry.filters.weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) returns. Measured across 32,
-  44.1, 48, 96 and 192 kHz, no reading moves by more than 0.080 dB, or 4.2 %
-  of its own window.
+  44.1, 48, 96 and 192 kHz, no reading moves by more than 0.043 dB, and none
+  by more than 1.8 % of its own window.
 
 What no oracle can check
 ------------------------
@@ -365,7 +365,7 @@ answer by construction.
 
 | Name | Description |
 | :--- | :--- |
-| `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) warns; the consequence measures 0.006 dB against a 2.626 dB window. |
+| `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) warns; gating it a whole sample later moves the reading by under 0.0001 dB, against a 2.626 dB window. |
 | `ballistics` | The chain to check, defaulting to the fitted [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs468_ballistics). Passing another set is how the published statement about how far each constant can move is reproduced, and the reason the chain takes them as an argument at all. |
 
 **Returns:** A [`QuasiPeakDynamicsResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakdynamicsresult), which carries the verdict together with the eleven rows it is the conjunction of.

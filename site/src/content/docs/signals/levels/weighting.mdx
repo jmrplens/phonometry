@@ -177,11 +177,11 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/c_minus_a_spectrum.svg" alt="One-third-octave band levels of two signals, each drawn unweighted, A-weighted and C-weighted. On the left, a 50 Hz rumble under a light hiss: the unweighted and C-weighted curves coincide on a 77 dB spike in the 50 Hz band, while the A-weighted curve cuts that same band to 47 dB, and the box reads LAeq 52.4 dB, LCeq 75.7 dB, C minus A 23.2 dB. On the right, broadband pink noise: all three curves lie within a couple of decibels of each other from 1 kHz upward and the A curve falls away below it, and the box reads LAeq 54.6 dB, LCeq 56.4 dB, C minus A 1.8 dB" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/c_minus_a_spectrum.svg" alt="One-third-octave band levels of two signals, each drawn unweighted, A-weighted and C-weighted. On the left, a 50 Hz rumble under a light hiss: the unweighted and C-weighted curves coincide on a 77 dB spike in the 50 Hz band, while the A-weighted curve cuts that same band to 47 dB, and the box reads LAeq 52.6 dB, LCeq 75.7 dB, C minus A 23.1 dB. On the right, broadband pink noise: all three curves lie within a couple of decibels of each other from 1 kHz upward and the A curve falls away below it, and the box reads LAeq 54.6 dB, LCeq 56.4 dB, C minus A 1.8 dB" width="92%" />
 
 *The same three band levels for two signals. A concentrated low-frequency
 source (left) puts almost all its energy where A cuts hardest, so C − A reaches
@@ -266,8 +266,8 @@ print(f"energy sum of the A-weighted bands "
       f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
 print(f"LAeq of the same signal          "
       f"{signals.laeq(band_source, fs):.2f} dB")
-# energy sum of the A-weighted bands 62.84 dB
-# LAeq of the same signal            62.79 dB
+# energy sum of the A-weighted bands 62.85 dB
+# LAeq of the same signal          62.81 dB
 ```
 
 The **table** route is the one you are forced into when the data arrives as

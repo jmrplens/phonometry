@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { dropInlineSpans, dropInlineSpansByBlock, inlineSpans, SPAN_MARK } from './markdown-spans.mjs';
+import { dropInlineSpans, dropInlineSpansByBlock, inlineSpans, pageMarkup, SPAN_MARK } from './markdown-spans.mjs';
 
 const spans = (text, markers = '`') =>
   inlineSpans(text, markers).map(([start, end]) => text.slice(start, end));
@@ -191,4 +191,88 @@ test('the kind of a page says where a span stops', () => {
 test('a line of code is not read for a span', () => {
   const text = 'a `b\n```\nc` d\n```\ne` f';
   assert.equal(dropInlineSpansByBlock(text), text);
+});
+
+// The page as the site renders it: page_markup of scripts/markdown_spans.py
+// and tests/test_markdown_spans.py hold the Python reading to the same cases.
+const TAG = '<Video name="a" />';
+
+test('a tag the page does not render is blanked, the lines kept', () => {
+  const cases = [
+    [`---\ndescription: '${TAG}'\n---\n`, 'mdx'],
+    [`\`\`\`mdx\n${TAG}\n\`\`\`\n`, 'mdx'],
+    [`~~~\n${TAG}\n~~~\n`, 'mdx'],
+    [`- item\n\n  \`\`\`\n  ${TAG}\n  \`\`\`\n`, 'mdx'],
+    [`Embed it with \`${TAG}\` here.\n`, 'mdx'],
+    [`Embed it with\n\`${TAG}\`\nhere.\n`, 'mdx'],
+    [`{/* ${TAG} */}\n`, 'mdx'],
+    [`{/*\n${TAG}\n*/}\n`, 'mdx'],
+    [`$$\n${TAG}\n$$\n`, 'mdx'],
+    [`<!-- ${TAG} -->\n`, 'md'],
+    [`Text.\n\n    ${TAG}\n`, 'md'],
+    [`Write \\${TAG} here.\n`, 'mdx'],
+    [`Write \\${TAG} here.\n`, 'md'],
+    [`<code>{'${TAG}'}</code>\n`, 'mdx'],
+    [`Text {'${TAG}'} here.\n`, 'mdx'],
+    [`\n---\ndescription: '${TAG}'\n---\n`, 'mdx'],
+    [`\n \n---\ndescription: '${TAG}'\n---\n`, 'mdx'],
+    [`﻿---\ndescription: '${TAG}'\n---\n`, 'mdx'],
+    [`+++\ndescription = '${TAG}'\n+++\n`, 'mdx'],
+  ];
+  for (const [page, kind] of cases) {
+    const shown = pageMarkup(page, { kind });
+    assert.ok(!shown.includes('<Video'), JSON.stringify(page));
+    assert.equal(shown.split('\n').length, page.split('\n').length, JSON.stringify(page));
+  }
+});
+
+test('a tag the page renders stands where it is written', () => {
+  const cases = [
+    [`Text.\n\n${TAG}\n`, 'mdx'],
+    ['<Video\n  name="a"\n/>\n', 'mdx'],
+    [`A clip, ${TAG}, in a paragraph.\n`, 'mdx'],
+    [`---\ntitle: A\n---\n\n${TAG}\n`, 'mdx'],
+    [`Use \`code\` and then\n${TAG}\n`, 'mdx'],
+    [`Text.\n\n    ${TAG}\n`, 'mdx'],
+    [`Write \\\\${TAG} here.\n`, 'mdx'],
+    [`---\n${TAG}\n`, 'mdx'],
+  ];
+  for (const [page, kind] of cases) {
+    const where = (text) => text.split('\n').map((line) => line.indexOf('<Video'));
+    assert.deepEqual(where(pageMarkup(page, { kind })), where(page), JSON.stringify(page));
+  }
+});
+
+test('a tag the page renders is read whole', () => {
+  // No span or expression opens inside it: what its quotes hold is its own.
+  const cases = [
+    ['<Video alt="from $20" name="a" caption="to $30" />', 'mdx'],
+    ['<Video alt="a `b" name="a" caption="c` d" />', 'mdx'],
+    ['<Video\n  alt="from $20" name="a" caption="to $30"\n/>', 'mdx'],
+    ['<Video name="a" caption={`a ${b}`} />', 'mdx'],
+    ['<span title="a `b">c</span>', 'md'],
+  ];
+  for (const [tag, kind] of cases) {
+    assert.ok(pageMarkup(`Text.\n\n${tag} and \`d\`\n`, { kind }).includes(tag), tag);
+  }
+});
+
+test('what opens first wins between a tag, a span and an expression', () => {
+  const written = [
+    ['`<Video name="a" />`', false],
+    [' ', true],
+    ['<Video alt="`" name="b" />', true],
+    [' ', true],
+    ['{x}', false],
+    [' ', true],
+    ['`c`', false],
+    [' ', true],
+    ['\\$', false],
+    ['d ', true],
+    ['$e$', false],
+    ['\n', true],
+  ];
+  const page = written.map(([piece]) => piece).join('');
+  const shown = written.map(([piece, kept]) => (kept ? piece : ' '.repeat(piece.length))).join('');
+  assert.equal(pageMarkup(page), shown);
 });

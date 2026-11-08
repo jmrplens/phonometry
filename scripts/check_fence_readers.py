@@ -165,6 +165,11 @@ EXEMPT: dict[tuple[str, str], str] = {
         "writes them, to see the shared reader leave them out; it reads no "
         "fence itself"
     ),
+    ("site/scripts/reports.test.mjs", "<script>"): (
+        "a test of the index of fiches hands it a guide that holds the tag of a "
+        "fiche in a fenced block, written out as a page writes it, to see the "
+        "index leave it out; it reads no fence itself"
+    ),
     ("site/scripts/shared/markdown-spans.test.mjs", "<script>"): (
         "A test of the span reader: its page shows a fence, to say a span does not "
         "pair across one."
@@ -173,6 +178,11 @@ EXEMPT: dict[tuple[str, str], str] = {
         "a test of the figure check hands it a page that holds a fenced "
         "block, written out as a page writes it, to see the shared reader "
         "step over it; it reads no fence itself"
+    ),
+    ("site/scripts/shared/page-twin.test.mjs", "<script>"): (
+        "a test of the Markdown copy of a page hands it a page that holds a "
+        "fenced example, written out as a page writes it, to see the copy keep "
+        "the example's lines; it reads no fence itself"
     ),
 }
 

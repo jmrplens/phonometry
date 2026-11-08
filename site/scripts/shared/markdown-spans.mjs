@@ -17,7 +17,7 @@
 // behind a backslash. A reader that took an escaped backtick for an opening
 // one hid the prose up to the next backtick from its check.
 
-import { cellSpans, NOT_INLINE_ROLES, pageLines } from '../../src/lib/markdown-fences.mjs';
+import { cellSpans, MDX_EXPRESSION, MDX_TAG, NOT_INLINE_ROLES, pageLines } from '../../src/lib/markdown-fences.mjs';
 
 /** A run of backticks or of dollar signs. */
 const RUN = /`+|\$+/g;
@@ -148,8 +148,10 @@ export function dropInlineSpansByBlock(text, markers = '`', { comments, kind } =
  * Each block says how it `reads`: `text`, spans read over its lines; `raw`, a raw
  * HTML block, where no span opens; `row`, a row of a table, whose cells each bound
  * what opens in them; `code`, a line of code or display maths, which nothing reads.
+ * `walked` is the walk of the page as written, for a reader that blanked some of
+ * its lines first: a line blanked is no line the walk can read.
  */
-function blocksOf(lines, comments, kind) {
+function blocksOf(lines, comments, kind, walked = pageLines(lines, { kind })) {
   const opener = comments ? COMMENT_LINE[comments] : null;
   const blocks = [];
   let current = null;
@@ -157,7 +159,7 @@ function blocksOf(lines, comments, kind) {
     if (current !== null) blocks.push(current);
     current = null;
   };
-  pageLines(lines, { kind }).forEach((read, index) => {
+  walked.forEach((read, index) => {
     const line = lines[index];
     if (current !== null && opener && unclosed(current.lines, comments)) {
       current.lines.push(line);
@@ -235,4 +237,199 @@ function dropBlockSpans(block, markers, comments) {
     done = end;
   }
   return kept + text.slice(done);
+}
+
+/**
+ * A page's frontmatter as Astro reads it (`frontmatterRE` of
+ * `@astrojs/internal-helpers`): fenced by `---` or by `+++`, at the start of the
+ * page behind a byte order mark or after blank lines, its closing fence opening
+ * a line. One that never closes is no frontmatter.
+ */
+const FRONTMATTER = /(?:^﻿?|^\s*\n)(?:---|\+\+\+)([\s\S]*?\n)(?:---|\+\+\+)/;
+
+/**
+ * A backslash and the ASCII punctuation character it escapes (CommonMark 0.31.2,
+ * 2.4): the page shows the character, and it opens nothing.
+ */
+const ESCAPE = /\\[!-\/:-@[-`{-~]/y;
+
+/**
+ * A tag of raw HTML written in the prose of a `.md` page, open or closing, and an
+ * autolink (CommonMark 0.31.2, 6.6 and 6.5), each taken whole.
+ */
+const HTML_TAG =
+  /<[A-Za-z][A-Za-z0-9-]*(?:[ \t\n]+[A-Za-z_:][A-Za-z0-9_.:-]*(?:[ \t\n]*=[ \t\n]*(?:[^ \t\n"'=<>`]+|'[^']*'|"[^"]*"))?)*[ \t\n]*\/?>|<\/[A-Za-z][A-Za-z0-9-]*[ \t\n]*>|<[A-Za-z][A-Za-z0-9+.-]{1,31}:[^ \t\n<>]*>/y;
+
+/**
+ * Where the frontmatter of a page ends, as Astro finds it ({@link FRONTMATTER}):
+ * the index right past its closing fence, 0 when the page has none.
+ *
+ * @param {string} text The page as written.
+ * @returns {number} How many code units of the page its frontmatter takes.
+ */
+export function frontmatterEnd(text) {
+  const head = FRONTMATTER.exec(text);
+  return head === null ? 0 : head[0].length;
+}
+
+/** What may open where a backslash, a tag, an expression or a comment does. */
+const OPENER = /[\\<{]/g;
+
+/** The tags and expressions of an `.mdx` page, read here apart from the walk's. */
+const TAG = new RegExp(MDX_TAG.source, 'y');
+const EXPRESSION = new RegExp(MDX_EXPRESSION.source, 'y');
+
+/**
+ * `text` with every character but a line end a space, one for each code unit, so
+ * that every index of the page stays where it was: a reader maps what it finds
+ * back onto the page by its index. Python's `page_markup` keeps its own columns,
+ * which count code points, so a character outside the basic plane blanked there
+ * is one space and two here.
+ */
+function blank(text) {
+  return text.replace(/[^\n]/g, ' ');
+}
+
+/** The end of what the sticky `pattern` matches at `at`, or `null`. */
+function endOf(pattern, text, at) {
+  pattern.lastIndex = at;
+  const found = pattern.exec(text);
+  return found === null ? null : found.index + found[0].length;
+}
+
+/**
+ * Where what opens at `text[at]` ends, and whether the page renders it as
+ * markup, or `null` when nothing opens there. A backslash escape and a comment
+ * end inside the piece of a block that ends at `end`; a tag and an expression
+ * may run on over the lines after it. On the lines of a raw HTML block only a
+ * comment opens.
+ */
+function openedAt(text, at, end, kind, reads) {
+  const opened = text[at];
+  if (opened === '<' || opened === '{') {
+    const comment = endOf(new RegExp(COMMENTS[kind].source, 'y'), text, at);
+    if (comment !== null && comment <= end) return [comment, false];
+  }
+  if (reads === 'raw') return null;
+  if (opened === '\\') {
+    const escape = endOf(ESCAPE, text, at);
+    return escape !== null && escape <= end ? [escape, false] : null;
+  }
+  if (opened === '<') {
+    const tag = endOf(kind === 'mdx' ? TAG : HTML_TAG, text, at);
+    return tag === null ? null : [tag, true];
+  }
+  if (kind === 'mdx') {
+    const expression = endOf(EXPRESSION, text, at);
+    return expression === null ? null : [expression, false];
+  }
+  return null;
+}
+
+/**
+ * The first escape, comment, tag or expression past `at` and before `end`: where
+ * it opens and ends, and whether the page renders it as markup.
+ */
+function firstOpened(text, at, end, kind, reads) {
+  OPENER.lastIndex = at;
+  for (let found = OPENER.exec(text); found !== null && found.index < end; found = OPENER.exec(text)) {
+    const opened = openedAt(text, found.index, end, kind, reads);
+    if (opened !== null) return [found.index, ...opened];
+    OPENER.lastIndex = found.index + 1;
+  }
+  return null;
+}
+
+/**
+ * The `[start, end]` of each part of `text` the page shows as text or hides,
+ * read left to right over each block of the page and each cell of a row on its
+ * own: at each character the first of a code or maths span, a backslash escape,
+ * a comment, a tag and an expression that opens there takes what follows. A tag
+ * the page renders is markup, and the rest is read again from its end. A tag and
+ * an expression may run on over the lines after their block. The spans of a
+ * piece are read once and taken in turn, and read again only past what else
+ * opened; the next opener is looked for again only once a span has held it.
+ */
+function unrendered(text, kind, walked) {
+  const found = [];
+  let at = 0;
+  let start = 0;
+  for (const block of blocksOf(text.split('\n'), kind, kind, walked)) {
+    const joined = block.lines.join('\n');
+    const pieces =
+      block.reads === 'row'
+        ? cellSpans(joined).map(([first, last]) => [start + first, start + last])
+        : [[start, start + joined.length]];
+    start += joined.length + 1;
+    if (block.reads === 'code') continue;
+    const markers = block.reads === 'raw' ? '' : '`$';
+    for (const [first, last] of pieces) {
+      at = Math.max(at, first);
+      let spans = null;
+      let opened = null;
+      let looked = false;
+      while (at < last) {
+        if (spans === null) {
+          spans = inlineSpans(text.slice(at, last), markers)
+            .map(([a, b]) => [at + a, at + b])
+            .reverse();
+        }
+        if (!looked || (opened !== null && opened[0] < at)) {
+          opened = firstOpened(text, at, last, kind, block.reads);
+          looked = true;
+        }
+        const span = spans.length ? spans[spans.length - 1] : null;
+        if (span !== null && (opened === null || span[0] < opened[0])) {
+          found.push(spans.pop());
+          at = span[1];
+        } else if (opened !== null) {
+          if (!opened[2]) found.push([opened[0], opened[1]]);
+          at = opened[1];
+          spans = null;
+          looked = false;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+  return found;
+}
+
+/**
+ * `text` with every part of the page that renders no tag blanked: the reading of
+ * `page_markup` of `scripts/markdown_spans.py`, which the Python checks read a
+ * page's components through.
+ *
+ * A component a page renders, a `<ReportPreview>` or a `<Catalogues>`, is a tag
+ * written outside its frontmatter, its code, fenced or indented, its display
+ * maths, its inline code and maths spans, its comments and its expressions, and
+ * not behind a backslash. Written in any of those it is text the page shows or
+ * hides, and a reader that looks for a component in the page as written counts
+ * it as one the page renders. Each of them is blanked as the site reads it: the
+ * frontmatter as Astro finds it, after a byte order mark or blank lines too, the
+ * blocks by one walk of the page, and the rest left to right over each block,
+ * whichever opens first taking what follows: a span written before a tag holds
+ * it, and a tag holds what its attributes write, a `$` or a backtick among them.
+ * On a `.md` page a tag is one of raw HTML, and there is no expression. Every
+ * code unit blanked but a line end becomes a space, so a tag found in the result
+ * stands at the index where the page writes it, as the page writes it.
+ *
+ * @param {string} text The page as written, its frontmatter in.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {string} The page, as many lines long as it was.
+ */
+export function pageMarkup(text, { kind = 'mdx' } = {}) {
+  const head = frontmatterEnd(text);
+  const body = blank(text.slice(0, head)) + text.slice(head);
+  const lines = body.split('\n');
+  const walked = pageLines(lines, { kind });
+  const prose = lines.map((line, index) => (NOT_INLINE_ROLES.has(walked[index].role) ? blank(line) : line)).join('\n');
+  let shown = '';
+  let done = 0;
+  for (const [start, end] of unrendered(prose, kind, walked)) {
+    shown += prose.slice(done, start) + blank(prose.slice(start, end));
+    done = end;
+  }
+  return shown + prose.slice(done);
 }

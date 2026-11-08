@@ -29,6 +29,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import FrozenInstanceError, replace
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -53,6 +54,7 @@ from phonometry.broadcast import (
     quasi_peak_meter,
     verify_quasi_peak_dynamics,
 )
+from phonometry.broadcast import quasi_peak as quasi_peak_module
 from phonometry.io import Signal
 from phonometry.signals import tone_burst
 
@@ -65,13 +67,13 @@ RATES = (32000.0, 44100.0, FS, 96000.0, 192000.0)
 
 #: Self-imposed, not from BS.468-4: how far a reading may sit from the
 #: *reference* reading printed in Tables 2 and 3. The worst of the eleven is
-#: 0.140 dB, at 10 bursts per second. The reference is printed to two
+#: 0.148 dB, at 10 bursts per second. The reference is printed to two
 #: significant figures on nine of the eleven cells, so its own quantum is
 #: 0.027 to 0.108 dB and nothing tighter than this would be meaningful.
 REFERENCE_BOUND_DB = 0.15
 
 #: Self-imposed: how much of its own acceptance window a reading may spend on
-#: moving between sample rates. The worst of the eleven is 4.22 %, at 100
+#: moving between sample rates. The worst of the eleven is 1.80 %, at 100
 #: bursts per second, whose window is the narrowest in the document.
 RATE_SPREAD_FRACTION = 0.05
 
@@ -88,9 +90,11 @@ def dynamics() -> dict[float, QuasiPeakDynamicsResult]:
 
     44.1 kHz warns from ``tone_burst``: 25 cycles of 5 kHz span 220.5 samples
     there, so the gate cannot close on the tone's final zero crossing. The
-    warning is correct and the consequence measures 0.006 dB against a
-    2.626 dB window, which
-    :func:`test_a_reading_barely_moves_between_sample_rates` is what checks.
+    warning is correct, and gating the burst a whole sample later moves the
+    reading by under 0.0001 dB against a 2.626 dB window, which
+    :func:`test_the_44_1_khz_gate_moves_the_reading_by_less_than_published`
+    measures and :func:`test_a_reading_barely_moves_between_sample_rates`
+    holds with the other ten.
     """
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=r".*incommensurate with fs.*")
@@ -748,3 +752,148 @@ def test_the_window_is_read_from_the_table_not_from_the_row() -> None:
     with pytest.raises(TypeError, match="does not support item assignment"):
         row["margin_db"] = -3.0  # type: ignore[index]
     assert report.passes is True
+
+
+# ---------------------------------------------------------------------------
+# The published figures of how the chain moves with the sample rate
+# ---------------------------------------------------------------------------
+#
+# The module docstring, the helper that fixes the clause 2.6 scale, the
+# verifier's docstring and all three editions of the page say in words how
+# much the chain moves between the five rates of RATES. Each figure is worked
+# out here from the chain and looked for, at the digits the prose writes it
+# to, in every place that gives it: a change to the chain that moves one of
+# them fails until the prose says the new figure, and so does prose edited to
+# a figure the chain does not give.
+
+_ROOT = Path(__file__).resolve().parents[2]
+_PAGE = Path("devices") / "broadcast" / "quasi-peak"
+_GUIDES = Path("site") / "src" / "content" / "docs"
+#: The three editions of the page, each held to its own wording.
+_EDITIONS = {
+    "en": _GUIDES / _PAGE.with_suffix(".mdx"),
+    "es": _GUIDES / "es" / _PAGE.with_suffix(".mdx"),
+    "mirror": Path("docs") / _PAGE.with_suffix(".md"),
+}
+
+
+def _figures(dynamics: dict[float, QuasiPeakDynamicsResult]) -> dict[str, str]:
+    """Every figure the prose gives, as the chain gives it, at the prose's digits."""
+    scales = [quasi_peak_module._calibration_factor(fs) for fs in RATES]
+    gains = [-20.0 * math.log10(scale) for scale in scales]
+    peak_multiple = 1.0 / (quasi_peak_module._calibration_factor(FS) * math.sqrt(2.0))
+    moves, shares = [], []
+    for stimulus in (row["stimulus"] for row in dynamics[FS].stimuli):
+        rows = [
+            next(r for r in dynamics[fs].stimuli if r["stimulus"] == stimulus)
+            for fs in RATES
+        ]
+        readings = [row["reading_percent"] for row in rows]
+        move = 20.0 * math.log10(max(readings) / min(readings))
+        window = 20.0 * math.log10(rows[0]["upper_percent"] / rows[0]["lower_percent"])
+        moves.append(move)
+        shares.append(move / window)
+    deviations = [abs(dynamics[fs].worst_deviation_db) for fs in RATES]
+    return {
+        "gain_spread_db": f"{max(gains) - min(gains):.4f}",
+        "peak_multiple": f"{peak_multiple:.4f}",
+        "reading_move_db": f"{max(moves):.3f}",
+        "window_share_percent": f"{100.0 * max(shares):.1f}",
+        "margin_48k_db": f"{dynamics[48000.0].worst_margin_db:.3f}",
+        "margin_32k_db": f"{dynamics[32000.0].worst_margin_db:.3f}",
+        "deviation_db": f"{max(deviations):.3f}",
+    }
+
+
+def _phrases(figures: dict[str, str], *, spanish: bool) -> list[str]:
+    """What a page says about the rates, with the chain's figures in it."""
+    if spanish:
+        f = {key: value.replace(".", ",") for key, value in figures.items()}
+        return [
+            f"se mueve {f['gain_spread_db']} dB entre 32, 44,1, 48, 96 y 192 kHz",
+            "el peor margen está en la celda de 100 ráfagas por segundo",
+            f"{f['margin_48k_db']} dB a 48 kHz",
+            f"{f['margin_32k_db']} dB a 32 kHz, el menor de los cinco",
+            f"ninguna lectura se mueve más de {f['reading_move_db']} dB, ni ninguna "
+            f"más del {f['window_share_percent']} % de su propia ventana",
+            f"La peor es de {f['deviation_db']} dB, a 10 ráfagas por segundo",
+        ]
+    return [
+        f"steady-sine gain moves by {figures['gain_spread_db']} dB across 32, "
+        "44.1, 48, 96 and 192 kHz",
+        "the worst margin is at the 100 bursts per second cell",
+        f"{figures['margin_48k_db']} dB at 48 kHz",
+        f"{figures['margin_32k_db']} dB at 32 kHz, the smallest of the five",
+        f"no reading moves by more than {figures['reading_move_db']} dB, and none "
+        f"by more than {figures['window_share_percent']} % of its own window",
+        f"The worst is {figures['deviation_db']} dB, at 10 bursts per second",
+    ]
+
+
+def _flat(text: str | None) -> str:
+    """*text* with every run of white space one space, as a reader sees it."""
+    return " ".join((text or "").split())
+
+
+@pytest.mark.parametrize("edition", sorted(_EDITIONS))
+def test_each_edition_of_the_page_gives_the_chains_rate_figures(
+    dynamics: dict[float, QuasiPeakDynamicsResult], edition: str
+) -> None:
+    """The page quotes the figures the chain gives at the five rates."""
+    path = _EDITIONS[edition]
+    text = _flat((_ROOT / path).read_text(encoding="utf-8"))
+    for phrase in _phrases(_figures(dynamics), spanish=edition == "es"):
+        assert phrase in text, f"{path} does not say {phrase!r}"
+
+
+def test_the_docstrings_give_the_chains_rate_figures(
+    dynamics: dict[float, QuasiPeakDynamicsResult],
+) -> None:
+    """The module and the clause 2.6 helper quote the same figures as the page."""
+    figures = _figures(dynamics)
+    module = _flat(quasi_peak_module.__doc__)
+    scale = _flat(quasi_peak_module._calibration_factor.__doc__)
+    assert (
+        f"no reading moves by more than {figures['reading_move_db']} dB, and none "
+        f"by more than {figures['window_share_percent']} % of its own window"
+    ) in module
+    assert f"{figures['peak_multiple']} of it at 48 kHz" in scale
+    assert f"the multiple moves by {figures['gain_spread_db']} dB" in scale
+
+
+def test_the_worst_cells_are_the_ones_the_prose_names(
+    dynamics: dict[float, QuasiPeakDynamicsResult],
+) -> None:
+    """At every rate the worst margin is at 100 bursts/s and the worst
+    deviation at 10 bursts/s, and 32 kHz has the smallest margin of the five.
+    """
+    for report in dynamics.values():
+        rows = report.stimuli
+        assert min(rows, key=lambda r: r["margin_db"])["stimulus"] == "100 bursts/s"
+        worst = max(rows, key=lambda r: abs(r["deviation_db"]))
+        assert worst["stimulus"] == "10 bursts/s"
+    smallest = min(RATES, key=lambda fs: dynamics[fs].worst_margin_db)
+    assert smallest == 32000.0
+
+
+def test_the_44_1_khz_gate_moves_the_reading_by_less_than_published() -> None:
+    """The 25-cycle burst spans 220.5 samples at 44.1 kHz and is gated at 220.
+
+    Gating it a whole sample later, at 221, bounds what the half sample costs,
+    and the verifier's docstring publishes that bound.
+    """
+    fs = 44100.0
+    reference = quasi_peak_module._steady_reference(fs, BS468_BALLISTICS)
+    tail = np.zeros(int(round(quasi_peak_module._BURST_TAIL_SECONDS * fs)))
+
+    def reading(samples: int) -> float:
+        burst = np.sin(2.0 * math.pi * BS468_BURST_HZ * np.arange(samples) / fs)
+        trace = quasi_peak_module._detector_trace(
+            np.concatenate([burst, tail]), fs, weighted=True
+        )
+        return float(trace.max()) / reference
+
+    shift_db = abs(20.0 * math.log10(reading(221) / reading(220)))
+    assert shift_db < 1e-4
+    published = _flat(verify_quasi_peak_dynamics.__doc__)
+    assert "moves the reading by under 0.0001 dB" in published

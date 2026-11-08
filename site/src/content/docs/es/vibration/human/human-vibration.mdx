@@ -841,7 +841,11 @@ from phonometry import vibration
 
 # Los cuatro puntos de la Tabla C.1 entre los que interpola la relación.
 for a8 in (26.0, 14.0, 7.0, 3.7):
-    print(a8, round(vibration.hav_vwf_lifetime_years(a8), 1))   # 1.0 / 1.9 / 4.0 / 7.9 años
+    print(a8, round(vibration.hav_vwf_lifetime_years(a8), 1))
+# 26.0 1.0   años
+# 14.0 1.9
+# 7.0 4.0
+# 3.7 7.9
 
 # Y los dos valores que fija la Directiva, leídos sobre la misma curva.
 print(round(vibration.hav_vwf_lifetime_years(2.5), 1))   # 12.0 años en el VAE

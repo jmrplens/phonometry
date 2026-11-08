@@ -244,7 +244,7 @@ x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
-# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# LAeq = 52.6 dB   LCeq = 75.7 dB   C - A = 23.1 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
 ```
 
@@ -780,8 +780,9 @@ la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
 lau = signals.leq(filters.weighting_filter(x, fs, weighting="AU"))
 la_ref = signals.leq(filters.weighting_filter(audible, fs, weighting="A"))
 print(f"LA = {la:.1f} dB   LAU = {lau:.1f} dB   audible alone = {la_ref:.1f} dB")
-# LA = 78.6 dB   LAU = 71.0 dB   audible alone = 71.0 dB
-# The ultrasound inflates LA by 7.6 dB; AU recovers the audible level.
+# LA = 79.3 dB   LAU = 71.0 dB   audible alone = 71.0 dB
+print(f"the ultrasound inflates LA by {la - la_ref:.1f} dB")
+# the ultrasound inflates LA by 8.4 dB; AU recovers the audible level
 ```
 
 Ultrasound only reaches a digital filter when the sample rate captures it,
@@ -1335,7 +1336,7 @@ varying = np.tile(np.concatenate([quiet, loud]), 3)
 
 stats = signals.ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
-# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
+# LA10=66.7  LA50=65.4  LA90=58.6 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>

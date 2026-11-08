@@ -60,8 +60,8 @@ one and :data:`BS468_BALLISTICS` has to be refitted.
   absolute factor, the network's +11.7 dB at 5 kHz included, cancels.
 * **The ballistics run at the caller's rate** on the record
   :func:`phonometry.filters.weighting_filter` returns. Measured across 32,
-  44.1, 48, 96 and 192 kHz, no reading moves by more than 0.080 dB, or 4.2 %
-  of its own window.
+  44.1, 48, 96 and 192 kHz, no reading moves by more than 0.043 dB, and none
+  by more than 1.8 % of its own window.
 
 What no oracle can check
 ------------------------
@@ -441,11 +441,11 @@ def _calibration_factor(
     """The scale factor clause 2.6 fixes, at this sample rate.
 
     Clause 2.6: a steady 1 kHz sine at 0.775 V r.m.s. shall read 0.775 V. The
-    chain reads a fixed multiple of the peak of a steady sine, 0.9816 of it at
+    chain reads a fixed multiple of the peak of a steady sine, 0.9801 of it at
     48 kHz, where clause 2.6 asks for the r.m.s. value, 0.7071 of it; one
-    division settles the difference. Measured over 32 to 192 kHz the multiple
-    moves by 0.0141 dB, which is why it is computed per rate instead of
-    frozen: clause 2.6 is an equality, not a tolerance.
+    division settles the difference. Measured at 32, 44.1, 48, 96 and 192 kHz
+    the multiple moves by 0.0147 dB, which is why it is computed per rate
+    instead of frozen: clause 2.6 is an equality, not a tolerance.
 
     The tone goes through the weighting network, where it sees the network's
     0 dB at 1 kHz. NOTE 2 to clause 1 calibrates the whole instrument at
@@ -885,8 +885,9 @@ def verify_quasi_peak_dynamics(
 
     :param fs: Sample rate to run the stimuli at, in Hz. At 44.1 kHz the
         25-cycle burst is not sample-exact (it spans 220.5 samples) and
-        :func:`~phonometry.signals.tone_burst` warns; the consequence
-        measures 0.006 dB against a 2.626 dB window.
+        :func:`~phonometry.signals.tone_burst` warns; gating it a whole
+        sample later moves the reading by under 0.0001 dB, against a
+        2.626 dB window.
     :return: A :class:`QuasiPeakDynamicsResult`, which carries the verdict
         together with the eleven rows it is the conjunction of.
     :param ballistics: The chain to check, defaulting to the fitted

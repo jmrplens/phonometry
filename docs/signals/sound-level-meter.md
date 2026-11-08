@@ -108,11 +108,11 @@ the level fluctuated ($L_{90}$ is the background, $L_{10}$ the events), the
 C-weighted **peak** for impulsive content.
 
 ```python
-la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ~70.2 dB
+la_eq = signals.laeq(recording, fs, calibration_factor=cal)     # ~70.1 dB
 ln = signals.ln_levels(
     recording, fs, n=(10, 50, 90), weighting="A", calibration_factor=cal
 )                                                # L10 ~78.0, L50 ~55.1, L90 ~54.9
-lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ~80.2
+lae = signals.sel(recording, fs, weighting="A", calibration_factor=cal)  # ~80.1
 lc_pk = signals.lc_peak(recording, fs, calibration_factor=cal)           # ~84.4
 
 print(f"LAeq {la_eq:.1f} dB | L10 {ln[10]:.1f} | L90 {ln[90]:.1f} "

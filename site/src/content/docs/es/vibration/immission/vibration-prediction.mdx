@@ -209,9 +209,9 @@ allá, porque los grupos añadidos después están más lejos.
 ```python
 from phonometry import vibration
 
-print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.448]
+print(vibration.machine_count_correction([12.0], n_reference_machines=3).round(3))  # [0.452]
 print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], n_reference_machines=3).round(2))
-# [0.68 0.89 0.97], frente a 0.57, 0.95 y 1.04 medidos
+# [0.69 0.89 0.97], frente a 0.57, 0.95 y 1.04 medidos
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction.svg" alt="Seis curvas decrecientes de la corrección chi frente al número de máquinas en marcha de 4 a 100, sobre un eje de 0 a 0,6, una curva por recuento de referencia de 3, 5, 10, 30, 60 y 100 máquinas, la curva superior arrancando en 0,55 y aplanándose hasta 0,29 y la inferior arrancando en 0,19 y aplanándose hasta 0,10. Unos puntos pequeños marcan los puntos leídos del nomograma impreso, y una nota dice que se leyeron a 1/500" width="96%" />

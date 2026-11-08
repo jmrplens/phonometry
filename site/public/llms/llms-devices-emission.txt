@@ -1667,7 +1667,7 @@ lv = np.array([82.0, 85.0, 83.0, 79.0])          # mean velocity level per band 
 
 # Part 1 upper limit (epsilon = 1):
 upper = emission.sound_power_from_vibration(lv, area=1.6, frequencies=bands)
-print(round(upper.total_level, 1))               # e.g. 89.4  dB re 1 pW
+print(round(upper.total_level, 1))               # 90.9  dB re 1 pW, unweighted
 
 # Part 2 engineering value with a measured radiation factor:
 eps = np.array([0.45, 0.75, 0.95, 1.00])

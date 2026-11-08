@@ -1936,6 +1936,192 @@ def test_a_keyword_reaches_no_positional_only_language(
     assert sorted(f.caller for f in found) == ["by_keyword", "by_mapping"]
 
 
+def test_a_call_of_a_class_runs_the_init_its_order_gives(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a class runs the ``__init__`` of the first class of its
+    method resolution order that has one of its own: ``@dataclass`` writes
+    ``Rec`` one, whichever spelling of the decorator it is, so a call of
+    ``Rec`` runs no ``_Labelled.__init__`` and has no language to hand it.
+    ``Plain``, and a dataclass told ``init=False``, run the one
+    ``_Labelled`` writes, and drop the language it takes.
+
+    The ``__init__`` was looked up by name through the bases, so ``Rec``
+    was read as calling ``_Labelled.__init__`` and refused for a language
+    its constructor does not take.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            import dataclasses as dc
+            from dataclasses import dataclass
+
+
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+
+
+            @dataclass(frozen=True)
+            class Rec(_Labelled):
+                value: float = 0.0
+
+
+            @dc.dataclass(frozen=True)
+            class Dotted(_Labelled):
+                value: float = 0.0
+
+
+            @dc.dataclass(frozen=True, init=False)
+            class Unwritten(_Labelled):
+                value: float = 0.0
+
+
+            class Plain(_Labelled):
+                pass
+
+
+            def plot_rec(ax, *, language="en"):
+                return Rec(1.0)
+
+
+            def plot_dotted(ax, *, language="en"):
+                return Dotted(1.0)
+
+
+            def plot_unwritten(ax, *, language="en"):
+                return Unwritten(1.0)
+
+
+            def plot_plain(ax, *, language="en"):
+                return Plain(1.0)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_plain", "pkg.records._Labelled.__init__"),
+        ("plot_unwritten", "pkg.records._Labelled.__init__"),
+    ]
+
+
+def test_super_init_and_an_init_by_name_run_the_init_the_order_gives(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``super().__init__(...)`` and ``Rec.__init__(obj, ...)`` run the
+    ``__init__`` of the first class of the order that has one of its own, as
+    a call of the class does: past ``Rec``, which ``@dataclass`` writes one,
+    no ``_Labelled.__init__`` runs, so ``Sub`` and ``plot_via_init`` have no
+    language to hand it. Over ``Plain``, which writes none, both reach the
+    one ``_Labelled`` writes and drop the language it takes.
+
+    The ``__init__`` was looked up by name through the bases, so both were
+    refused for a helper that never runs.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            from dataclasses import dataclass
+
+
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+
+
+            @dataclass
+            class Rec(_Labelled):
+                value: float = 0.0
+
+
+            class Plain(_Labelled):
+                pass
+
+
+            class Sub(Rec):
+                def __init__(self, value, *, language="en"):
+                    super().__init__(value)
+
+
+            class PlainSub(Plain):
+                def __init__(self, value, *, language="en"):
+                    super().__init__(value)
+
+
+            def plot_via_init(ax, *, language="en"):
+                r = Rec.__new__(Rec)
+                Rec.__init__(r, 1.0)
+
+
+            def plot_plain_via_init(ax, *, language="en"):
+                r = Plain.__new__(Plain)
+                Plain.__init__(r, 1.0)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("PlainSub.__init__", "pkg.records._Labelled.__init__"),
+        ("plot_plain_via_init", "pkg.records._Labelled.__init__"),
+    ]
+
+
+def test_super_of_a_named_class_and_a_class_method_through_its_class(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``super(_Plain, self).plot(ax)`` looks the method up past ``_Plain``
+    in the order of the class it is written in: in ``PastPlain(_Plain,
+    _Labelled)`` it reaches ``_Labelled.plot``, which takes the language and
+    is not handed it; in ``PastLabelled(_Labelled, _Plain)``,
+    ``super(_Labelled, self)`` reaches ``_Plain.plot``, which takes none. A
+    class method called through its class, ``_Labelled.build(ax,
+    language)``, is bound to the class, so the language it is handed second
+    fills its ``language``.
+
+    ``super(Base, self)`` was read as ``super()``, past the class the method
+    is written in, so the first call passed and the second was refused; and
+    a method called through its class was read as taking the class's first
+    argument in its first parameter, ``cls`` for a class method, so the
+    language landed one place short and the call was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            class _Plain:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Labelled:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+                @classmethod
+                def build(cls, ax=None, language="en"):
+                    return ax
+
+
+            class PastPlain(_Plain, _Labelled):
+                def plot(self, ax=None, *, language="en"):
+                    return super(_Plain, self).plot(ax)
+
+
+            class PastLabelled(_Labelled, _Plain):
+                def plot(self, ax=None, *, language="en"):
+                    return super(_Labelled, self).plot(ax)
+
+
+            def through_class(ax, language="en"):
+                return _Labelled.build(ax, language)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("PastPlain.plot", "pkg.records._Labelled.plot"),
+    ]
+
+
 _EXEMPTED = """
 from .helpers import axis
 

@@ -197,6 +197,7 @@ from typing import TYPE_CHECKING
 import check_return_overloads as overloads
 from ast_scan import (
     ROOT,
+    argument_places,
     is_type_checking_block,
     own_names,
     python_files,
@@ -2001,38 +2002,94 @@ def _positional(
     return every[1:] if bound and every else every
 
 
-def _first_star(call: ast.Call) -> int | None:
-    """The place of a call's first ``*`` argument, if it has one."""
-    for index, argument in enumerate(call.args):
-        if isinstance(argument, ast.Starred):
-            return index
-    return None
+@dataclass(frozen=True)
+class _Landing:
+    """Where each argument of a call with a ``*`` argument may land."""
+
+    #: For each argument given by its place, the lowest place it may fill and
+    #: whether it may fill any place from there on
+    #: (:func:`ast_scan.argument_places`).
+    places: Sequence[tuple[int, bool]]
+    #: The names the call's explicit keywords fill: a ``*`` argument, or one
+    #: after it, that reached the place of one would make the call raise.
+    named: frozenset[str]
 
 
-def _filled(places: Sequence[str], positions: Sequence[int], spread: int) -> list[str]:
+#: Where the arguments of a call may land (:class:`_Landing`), ``None`` for
+#: a call without a ``*`` argument, whose arguments each fill their own place.
+type _Spread = _Landing | None
+
+
+def _landing(call: ast.Call) -> _Spread:
+    """Where each argument of *call* may land, if it has a ``*`` argument."""
+    if not any(isinstance(argument, ast.Starred) for argument in call.args):
+        return None
+    return _Landing(
+        argument_places(call.args),
+        frozenset(keyword.arg for keyword in call.keywords if keyword.arg is not None),
+    )
+
+
+def _filled(
+    places: Sequence[str],
+    positions: Sequence[int],
+    spread: _Spread,
+    *,
+    positional_only: int = 0,
+) -> list[str]:
     """The names of *places* a call's arguments at *positions* may fill.
 
-    An argument past the first ``*`` argument (at *spread*) may fill any
-    place from the star's own on, as the star hands an unknown number of
-    values; one before it fills the place it is written in.
+    A ``*`` argument, and every argument after one, may fill any place from
+    the lowest it may take on (*spread*), the star its items one each: in
+    ``f(*head, 1, n)`` the count fills the second place or a later one,
+    never the first. A place an explicit keyword of the call fills is that
+    keyword's alone, as Python raises rather than put an item there, but
+    for the first *positional_only* places, which no keyword fills. An
+    argument with no star at or before it fills the place it is written in.
     """
     filled: list[str] = []
     for index in positions:
-        if index > spread:
-            filled.extend(places[spread:])
+        lowest, spreads = spread.places[index] if spread is not None else (index, False)
+        if spread is not None and spreads:
+            named = spread.named
+            filled.extend(
+                name
+                for place, name in enumerate(places[lowest:], lowest)
+                if place < positional_only or name not in named
+            )
         elif index < len(places):
             filled.append(places[index])
     return filled
 
 
-def _past_the_places(positions: Sequence[int], places: int, spread: int | None) -> bool:
+def _positional_only(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, *, bound: bool
+) -> int:
+    """How many of the places a call fills by position (:func:`_positional`)
+    take no keyword: the positional-only ones, ``self`` or ``cls`` left out
+    when bound.
+    """
+    count = len(node.args.posonlyargs)
+    return count - 1 if bound and count else count
+
+
+def _takes_keyword(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
+    """The parameters a keyword of their name fills: every named one but the
+    positional-only ones, whose name a keyword hands to ``**kwargs``.
+    """
+    return frozenset(
+        argument.arg for argument in (*node.args.args, *node.args.kwonlyargs)
+    )
+
+
+def _past_the_places(positions: Sequence[int], places: int, spread: _Spread) -> bool:
     """Whether a call's argument at one of *positions* may land past a
     function's *places* named positional parameters, in its ``*args``: one
-    written past them, or one after the call's first ``*`` argument (at
-    *spread*), which may land anywhere from the star's place on.
+    written past them, a ``*`` argument, whose items may run past them, or
+    one after it (*spread*).
     """
     return any(
-        index >= places or (spread is not None and index > spread)
+        index >= places or (spread is not None and spread.places[index][1])
         for index in positions
     )
 
@@ -2058,6 +2115,14 @@ def _is_static(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     )
 
 
+def _is_classmethod(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    """Whether a method is a ``classmethod``, which a call through its class binds."""
+    return any(
+        isinstance(decorator, ast.Name) and decorator.id == "classmethod"
+        for decorator in node.decorator_list
+    )
+
+
 class Reader:
     """Follows a parameter from a public function to where its body admits it."""
 
@@ -2076,9 +2141,10 @@ class Reader:
         self._rebound: dict[int, frozenset[str]] = {}
         self._calls: dict[int, list[ast.Call]] = {}
         self._refusing: dict[int, frozenset[int]] = {}
-        #: The place of each call's first ``*`` argument (:func:`_first_star`),
-        #: read once for each call, as every route through it asks again.
-        self._stars: dict[ast.Call, int | None] = {}
+        #: Where each argument of a call with a ``*`` argument may land
+        #: (:func:`_landing`), read once for each call, as every route through
+        #: it asks again.
+        self._stars: dict[ast.Call, _Spread] = {}
         self._memo: dict[tuple[str, str, str, str], list[tuple[str, int, int]]] = {}
         self._active: set[tuple[str, str, str, str]] = set()
         self._cut = False
@@ -2135,20 +2201,49 @@ class Reader:
             )
         return self._public
 
-    def _inherited(self, owner: str, name: str) -> str | None:
-        """The method ``super().name`` reaches from a class: that of the
-        first class after it in its method resolution order
-        (:func:`linearized`) that defines it.
+    def _after(self, owner: str, after: str | None) -> tuple[str, ...]:
+        """The method resolution order of *owner* (:func:`linearized`), or
+        with *after*, the part of it past that class, where ``super()``
+        looks: nothing when *after* is not in it, as Python raises then.
+        """
+        order = linearized(self.package, self.annotations, owner)
+        if after is None:
+            return order
+        return order[order.index(after) + 1 :] if after in order else ()
+
+    def _inherited(self, owner: str, name: str, after: str) -> str | None:
+        """The method ``super(after, self).name`` reaches from a method of
+        *owner*: that of the first class past *after* in the method
+        resolution order of *owner* (:meth:`_after`) that defines it;
+        ``super().name`` looks past *owner* itself.
         """
         functions = self.package.functions
         return next(
             (
                 f"{later}.{name}"
-                for later in linearized(self.package, self.annotations, owner)[1:]
+                for later in self._after(owner, after)
                 if f"{later}.{name}" in functions
             ),
             None,
         )
+
+    def _initializer(self, owner: str, *, after: str | None = None) -> str | None:
+        """The class whose ``__init__`` a call of *owner* runs: the first
+        class of its method resolution order (:func:`linearized`) that has
+        one of its own, written in its body (under ``if TYPE_CHECKING:``
+        too) or generated by ``@dataclass``, which writes one unless told
+        ``init=False``, over any its bases have. With *after*, the first
+        past that class, the one ``super(after, self).__init__(...)`` runs
+        (:meth:`_after`). ``None`` when only ``object``'s runs.
+        """
+        functions = self.package.functions
+        classes = self.annotations.classes
+        for later in self._after(owner, after):
+            if f"{later}.__init__" in functions:
+                return later
+            if _generates_init(self.package, *classes[later]):
+                return later
+        return None
 
     def _typed(self, target: Target) -> frozenset[str]:
         """The annotations of a callee's parameter that end a route of *target*.
@@ -2185,7 +2280,7 @@ class Reader:
         callees, and a route through the call is one through either.
         """
         func = call.func
-        own = self._own_method(function, func)
+        own = self._own_method(function, func, call)
         if own is not None:
             return [own] if own[0] else []
         found = (
@@ -2195,44 +2290,99 @@ class Reader:
         return [callee for callee in found if callee is not None]
 
     def _own_method(
-        self, function: overloads.Function, func: ast.expr
+        self, function: overloads.Function, func: ast.expr, call: ast.Call
     ) -> tuple[str, bool] | None:
         """The method a call on ``super()`` or on the record reaches, ``("",
         False)`` when it reaches none, or ``None`` for a call of neither.
+
+        ``super().name`` looks the method up past the class the method is
+        written in, and ``super(Base, self).name`` past ``Base``, in the
+        order of the class the method is written in (:meth:`_after`).
+        ``__init__`` is the one of the first class of the order, from the
+        record's own or the one past where ``super()`` looks, that has one
+        of its own (:meth:`_initializer`): past one ``@dataclass`` writes,
+        which the call runs as a record's constructor, no base's written
+        ``__init__`` runs.
         """
-        if (
-            isinstance(func, ast.Attribute)
-            and _is_super(func.value)
-            and function.owner is not None
-        ):
-            method = self._inherited(f"{function.module}.{function.owner}", func.attr)
-        elif (
-            isinstance(func, ast.Attribute)
-            and isinstance(func.value, ast.Name)
-            and func.value.id in _OWNERS
-            and function.owner is not None
-        ):
-            method = self._method(f"{function.module}.{function.owner}", func.attr)
-        else:
+        if not (isinstance(func, ast.Attribute) and function.owner is not None):
             return None
+        owner = f"{function.module}.{function.owner}"
+        inherited = _is_super(func.value)
+        if not inherited and not (
+            isinstance(func.value, ast.Name) and func.value.id in _OWNERS
+        ):
+            return None
+        after: str | None = None
+        if inherited:
+            after = self._super_start(function, func.value, call, owner)
+            if after is None:
+                return "", False
+        if func.attr == "__init__":
+            runs = self._initializer(owner, after=after)
+            if runs is None:
+                return "", False
+            if f"{runs}.__init__" not in self.package.functions:
+                return (
+                    (runs, True)
+                    if init_fields(self.package, self.annotations, runs)
+                    else ("", False)
+                )
+            method: str | None = f"{runs}.__init__"
+        elif after is not None:
+            method = self._inherited(owner, func.attr, after)
+        else:
+            method = self._method(owner, func.attr)
         if method is None:
             return "", False
         node = self.package.functions[method].implementation
         return method, node is not None and not _is_static(node)
 
+    def _super_start(
+        self, function: overloads.Function, expr: ast.expr, call: ast.Call, owner: str
+    ) -> str | None:
+        """The class past which a ``super()`` call written in *function*
+        looks: the class the method is written in, *owner*, or the class
+        ``super(Base, self)`` names, when it names one class of the package.
+        """
+        if not (isinstance(expr, ast.Call) and expr.args):
+            return owner
+        named = [
+            target
+            for target in self.package.call_targets(function, expr.args[0], call)
+            if target in self.annotations.classes
+        ]
+        return named[0] if len(named) == 1 else None
+
     def _resolved_callee(
         self, target: str, func: ast.expr, ends: Iterable[str]
     ) -> tuple[str, bool] | None:
-        """The callee a call reaches through *target*, the dotted name it names."""
+        """The callee a call reaches through *target*, the dotted name it names.
+
+        With whether the call fills the callee's first parameter itself
+        (:meth:`_callees`). A method reached through its class,
+        ``Base.method(self, ...)``, is the one the order of ``Base`` gives
+        (:meth:`_method`), and takes the instance as the call's first
+        argument, but a ``classmethod``, which takes the class. Its
+        ``__init__``, ``Base.__init__(self, ...)``, is the one a call of
+        ``Base`` runs (:meth:`_initializer`), looked up through the order of
+        ``Base``, the class the call names, not the next class of the
+        instance's own order: the one ``@dataclass`` writes is read as the
+        record's constructor, with the instance first.
+        """
         if target in ends or target == "builtins.isinstance":
             return target, False
-        if target in self.annotations.classes:
-            constructor = self._method(target, "__init__")
-            if constructor is not None:
-                return constructor, True
-            if record_fields(self.package, self.annotations, target):
-                return target, True
-            return None
+        classes = self.annotations.classes
+        if target in classes:
+            return self._class_callee(target, instance_given=False)
+        holder, _, name = target.rpartition(".")
+        if isinstance(func, ast.Attribute) and holder in classes:
+            if name == "__init__":
+                return self._class_callee(holder, instance_given=True)
+            method = self._method(holder, name)
+            if method is None:
+                return None
+            node = self.package.functions[method].implementation
+            return method, node is not None and _is_classmethod(node)
         if target in self.package.functions:
             callee = self.package.functions[target]
             node = callee.implementation
@@ -2240,6 +2390,28 @@ class Reader:
                 callee.owner is not None and node is not None and not _is_static(node)
             )
             return target, is_method and isinstance(func, ast.Attribute)
+        return None
+
+    def _class_callee(
+        self, owner: str, *, instance_given: bool
+    ) -> tuple[str, bool] | None:
+        """The ``__init__`` a call of *owner* runs (:meth:`_initializer`), as
+        a callee: the one written in a class's body, or the record whose
+        generated one runs, *owner* itself. *instance_given* when the call
+        hands the instance itself as its first argument
+        (``Base.__init__(self, ...)``): the callee's first parameter is
+        then the call's first argument.
+        """
+        runs = self._initializer(owner)
+        if runs is None:
+            return None
+        written = f"{runs}.__init__"
+        if written in self.package.functions:
+            return written, not instance_given
+        # The generated ``__init__`` takes each field and each ``InitVar``:
+        # a record whose only inputs are ``InitVar`` is built by one too.
+        if init_fields(self.package, self.annotations, runs):
+            return owner, not instance_given
         return None
 
     def conversion(
@@ -2460,8 +2632,8 @@ class Reader:
         """Where a call takes the parameter leads through one callee it may reach.
 
         *given* is where the call takes it, by position and by keyword, and
-        the level it is read at. A position past the call's first ``*``
-        argument may be any place from the star's own on (:func:`_filled`).
+        the level it is read at. A ``*`` argument, and a position after one,
+        may be any place from the lowest it may take on (:func:`_filled`).
         """
         positions, keywords, level = given
         ends = self._ends(target)
@@ -2483,9 +2655,16 @@ class Reader:
         if call in stars:
             spread = stars[call]
         else:
-            spread = stars[call] = _first_star(call)
+            spread = stars[call] = _landing(call)
         handed = (
-            self._constructed(reached, (positions, spread), keywords, target)
+            self._constructed(
+                reached,
+                (positions, spread),
+                keywords,
+                target,
+                instance=_instance_built(function, call),
+                instance_given=not bound_self,
+            )
             if reached in self.annotations.classes
             else self._handed(
                 reached,
@@ -2568,7 +2747,8 @@ class Reader:
         of a vararg it loops over: ``_hold_cells(self, "ix", "iy")`` reads
         ``getattr(record, name)`` for each ``name`` of ``names``. A name or
         the record written after a ``*`` argument may fill any parameter
-        from the star's place on (:func:`_filled`), or the vararg.
+        from the lowest place it may take on (:func:`_filled`), or the
+        vararg.
         """
         owner, _, field = name.partition(".")
         if owner not in _OWNERS or not field or field.startswith("{"):
@@ -2595,16 +2775,22 @@ class Reader:
         if node is None:
             return
         positional = [argument.arg for argument in _positional(node, bound=bound_self)]
-        holders = [owner] if bound_self else _holders(call, positional, owner)
+        posonly = _positional_only(node, bound=bound_self)
+        holders = (
+            [owner]
+            if bound_self
+            else _holders(call, positional, owner, positional_only=posonly)
+        )
         if not holders:
             return
-        spread = _first_star(call)
+        spread = _landing(call)
         received = (
             [positional[index] for index in given if index < len(positional)]
             if spread is None
-            else _filled(positional, given, spread)
+            else _filled(positional, given, spread, positional_only=posonly)
         )
-        received.extend(keywords)
+        takes_keyword = _takes_keyword(node)
+        received.extend(keyword for keyword in keywords if keyword in takes_keyword)
         names = [(parameter, parameter) for parameter in dict.fromkeys(received)]
         vararg = node.args.vararg
         if vararg is not None and _past_the_places(given, len(positional), spread):
@@ -2680,9 +2866,12 @@ class Reader:
     def _constructed(
         self,
         record: str,
-        positions: tuple[list[int], int | None],
+        positions: tuple[list[int], _Spread],
         keywords: list[str],
         target: Target,
+        *,
+        instance: str | None = None,
+        instance_given: bool = False,
     ) -> Iterator[tuple[str, int, int]]:
         """What a record built with its generated ``__init__`` does with a value.
 
@@ -2693,18 +2882,41 @@ class Reader:
         :func:`_filled`), and the record's ``__post_init__`` reads that
         field as ``self.<field>``, or takes an ``InitVar`` as the parameter
         of its place among them: a count handed to a record that validates
-        it is followed there as it is into a function.
+        it is followed there as it is into a function. The ``__init__`` the
+        call runs is the one the first record of its method resolution
+        order generates (:meth:`_initializer`), and it calls
+        ``self.__post_init__`` only when that record had one, of its own or
+        from a base, when ``@dataclass`` wrote it: ``Plain(_Count)``, a
+        class that is no record over one that has none, never runs the
+        ``__post_init__`` it writes. A record's ``__init__`` a method runs on
+        its own instance, ``super().__init__(...)`` or
+        ``Base.__init__(self, ...)``, calls the ``__post_init__`` the class
+        of that instance resolves (*instance*); in the second the call's
+        first argument is the instance (*instance_given*), and the fields
+        take the arguments after it.
         """
-        fields = init_fields(self.package, self.annotations, record)
+        runs = self._initializer(record) or record
+        fields = init_fields(self.package, self.annotations, runs)
         positional = [field.name for field in fields.values() if field.positional]
+        if instance_given:
+            # ``Base.__init__(self, ...)``: the first argument is the instance.
+            positional.insert(0, "")
         given, spread = positions
-        received = (
-            [positional[index] for index in given if index < len(positional)]
-            if spread is None
-            else _filled(positional, given, spread)
-        )
+        received = [
+            name
+            for name in (
+                [positional[index] for index in given if index < len(positional)]
+                if spread is None
+                else _filled(positional, given, spread)
+            )
+            if name in fields
+        ]
         received.extend(keyword for keyword in keywords if keyword in fields)
-        dotted = self._method(record, "__post_init__")
+        dotted = (
+            self._method(instance or record, "__post_init__")
+            if self._method(runs, "__post_init__") is not None
+            else None
+        )
         post_init = self.package.functions[dotted] if dotted is not None else None
         handed_on = [name for name, field in fields.items() if field.kind == _HANDED_ON]
         shown = record.rpartition(".")[2]
@@ -2739,7 +2951,7 @@ class Reader:
     def _handed(
         self,
         reached: str,
-        positions: tuple[list[int], int | None],
+        positions: tuple[list[int], _Spread],
         keywords: list[str],
         *,
         bound: bool,
@@ -2760,9 +2972,15 @@ class Reader:
         received = (
             [positional[index] for index in given if index < len(positional)]
             if spread is None
-            else _filled(positional, given, spread)
+            else _filled(
+                positional,
+                given,
+                spread,
+                positional_only=_positional_only(node, bound=bound),
+            )
         )
-        received.extend(keyword for keyword in keywords if keyword in parameters)
+        takes_keyword = _takes_keyword(node)
+        received.extend(keyword for keyword in keywords if keyword in takes_keyword)
         vararg = node.args.vararg
         if vararg is not None and _past_the_places(given, len(positional), spread):
             received.append(vararg.arg)
@@ -2791,6 +3009,30 @@ class Reader:
                     level,
                     hops + 1,
                 )
+
+
+def _instance_built(function: overloads.Function, call: ast.Call) -> str | None:
+    """The class whose instance a method's ``super().__init__(...)``,
+    ``self.__init__(...)`` or ``Base.__init__(self, ...)`` builds: the class
+    the method is written in, or ``None`` for any other call.
+    """
+    func = call.func
+    if not (
+        isinstance(func, ast.Attribute)
+        and func.attr == "__init__"
+        and function.owner is not None
+        and (
+            _is_super(func.value)
+            or (isinstance(func.value, ast.Name) and func.value.id in _OWNERS)
+            or (
+                bool(call.args)
+                and isinstance(call.args[0], ast.Name)
+                and call.args[0].id in _OWNERS
+            )
+        )
+    ):
+        return None
+    return f"{function.module}.{function.owner}"
 
 
 def _ending(reached: str, target: Target) -> str:
@@ -4696,6 +4938,27 @@ def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -
     return False
 
 
+def _generates_init(
+    package: overloads.Package, module: str, node: ast.ClassDef
+) -> bool:
+    """Whether ``@dataclass`` writes the class an ``__init__``: it is a
+    dataclass, and its decorator does not say ``init=False``.
+    """
+    if not _is_dataclass(package, module, node):
+        return False
+    return not any(
+        isinstance(decorator, ast.Call)
+        and package.resolve(module, decorator.func) in _DATACLASS
+        and any(
+            keyword.arg == "init"
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is False
+            for keyword in decorator.keywords
+        )
+        for decorator in node.decorator_list
+    )
+
+
 def _field_default_off(
     node: ast.AnnAssign, package: overloads.Package, module: str
 ) -> bool:
@@ -4958,23 +5221,29 @@ def _rebound(
 _SETATTR = 3
 
 
-def _holders(call: ast.Call, positional: Sequence[str], owner: str) -> list[str]:
+def _holders(
+    call: ast.Call, positional: Sequence[str], owner: str, *, positional_only: int = 0
+) -> list[str]:
     """The parameters of a function that a call may hand the record to, by name.
 
     ``_hold_cells(self, "ix", "iy")`` hands ``self`` to the parameter
     ``record`` of ``_hold_cells(record, *names)``. Written after a ``*``
-    argument, the record may fill any of *positional* from the star's place
-    on (:func:`_filled`).
+    argument, the record may fill any of *positional* from the lowest place
+    it may take on (:func:`_filled`).
     """
     given = [
         index
         for index, value in enumerate(call.args)
         if isinstance(value, ast.Name) and value.id == owner
     ]
-    spread = _first_star(call)
+    spread = _landing(call)
     if spread is None:
         return [positional[index] for index in given if index < len(positional)]
-    return list(dict.fromkeys(_filled(positional, given, spread)))
+    return list(
+        dict.fromkeys(
+            _filled(positional, given, spread, positional_only=positional_only)
+        )
+    )
 
 
 def _loops_over(node: ast.FunctionDef | ast.AsyncFunctionDef, name: str) -> list[str]:
@@ -5004,8 +5273,10 @@ def _handed_stores(
     text, a parameter filled by the call, or a loop name over its vararg;
     *looping* reads the call's own arguments when they are loop names of the
     caller. A method called on ``self`` is read where it is called. After a
-    ``*`` argument, an argument may fill any place from the star's on, or
-    the vararg, and the record any parameter from there (:func:`_holders`).
+    ``*`` argument, an argument may fill any place from the lowest it may
+    take on, or the vararg, and the record any parameter from there
+    (:func:`_holders`), but one an explicit keyword fills, which holds the
+    keyword's value alone.
     """
     if not any(
         isinstance(value, ast.Name) and value.id in _OWNERS for value in call.args
@@ -5018,11 +5289,14 @@ def _handed_stores(
     if node is None:
         return set()
     positional = [argument.arg for argument in _positional(node, bound=False)]
+    posonly = _positional_only(node, bound=False)
     owners = {
-        holder for owner in _OWNERS for holder in _holders(call, positional, owner)
+        holder
+        for owner in _OWNERS
+        for holder in _holders(call, positional, owner, positional_only=posonly)
     }
     vararg = node.args.vararg
-    spread = _first_star(call)
+    spread = _landing(call)
     rest = [
         value
         for index, value in enumerate(call.args)
@@ -5030,6 +5304,13 @@ def _handed_stores(
     ]
     by_vararg = set(_loops_over(node, vararg.arg)) if vararg is not None else set()
     places = {name: index for index, name in enumerate(positional)}
+    # A keyword fills the parameter of its name, but a positional-only one,
+    # whose name goes to ``**kwargs``: no argument a ``*`` spreads reaches it.
+    takes_keyword = _takes_keyword(node)
+    by_keyword: dict[str, list[ast.expr]] = {}
+    for keyword in call.keywords:
+        if keyword.arg in takes_keyword:
+            by_keyword.setdefault(keyword.arg, []).append(keyword.value)
     helper = reader.package.functions[callee[0]]
     stored: set[str] = set()
     for inner in ast.walk(node):
@@ -5049,13 +5330,24 @@ def _handed_stores(
             stored.add(field.value)
         elif isinstance(field, ast.Name) and field.id in by_vararg:
             handed.extend(rest)
+        elif isinstance(field, ast.Name) and field.id in by_keyword:
+            # A keyword of the parameter's name fills it, and its place.
+            handed.extend(by_keyword[field.id])
         elif isinstance(field, ast.Name) and field.id in places:
             place = places[field.id]
-            if spread is not None and place >= spread:
-                # Past the star, any argument after it may fill the place.
-                handed.extend(call.args[spread + 1 :])
-            elif place < len(call.args):
-                handed.append(call.args[place])
+            if spread is None:
+                handed.extend(call.args[place : place + 1])
+            else:
+                # An argument after a star may fill any place from the
+                # lowest it may take on.
+                handed.extend(
+                    argument
+                    for argument, (lowest, spreads) in zip(
+                        call.args, spread.places, strict=True
+                    )
+                    if not isinstance(argument, ast.Starred)
+                    and (lowest <= place if spreads else lowest == place)
+                )
         for value in handed:
             named = _field_named(value, looping)
             if named is not None:

@@ -293,7 +293,7 @@ def _body(function: object) -> _Body | None:
             continue
         callee = ccl._callee(node, namespace, module)
         if callee is not None and callee.__module__ != _GUARDS:
-            calls.append((callee, ccl._arguments(node, callee, spread)))
+            calls.append((callee, ccl._arguments(node, callee, spread, namespace)))
     return _Body(tree, tuple(_text_branches(tree)), tuple(calls))
 
 

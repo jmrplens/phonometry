@@ -1106,6 +1106,119 @@ def test_a_keyword_fills_no_positional_only_parameter(
     assert (found.texts if found.kind == "texts" else None) == texts
 
 
+def test_a_private_method_called_through_its_class_takes_the_instance_first(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``Maker._helper(self, "a", text)`` hands ``self`` to the method's
+    ``self`` and the fixed text to its ``kind``, as ``self._helper("b",
+    text)`` does, and a class method called through its class is bound to
+    it: every caller hands ``kind`` a fixed text.
+
+    A method's ``self`` was taken as filled by the call whatever named the
+    method, so ``self`` was read as the ``kind`` the first call hands, and
+    the texts came back open.
+    """
+    source = (
+        "class Maker:\n"
+        "    def _helper(self, kind, other):\n"
+        "        return kind\n\n"
+        "    @classmethod\n"
+        "    def _once(cls, kind):\n"
+        "        return kind\n\n"
+        "    def through_the_class(self, text):\n"
+        "        return Maker._helper(self, 'a', text)\n\n"
+        "    def on_self(self, text):\n"
+        "        return self._helper('b', text)\n\n"
+        "    def bound_to_the_class(self):\n"
+        "        return Maker._once('c')\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_through_the_class": source})
+    tree = ast.parse(source)
+    maker = tree.body[0]
+    assert isinstance(maker, ast.ClassDef)
+    helper, once, *callers = maker.body
+    assert isinstance(helper, ast.FunctionDef)
+    assert isinstance(once, ast.FunctionDef)
+    module = "phonometry._through_the_class"
+    sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
+    for caller in callers:
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        assert isinstance(site.func, ast.Attribute)
+        sites.setdefault(site.func.attr, []).append((module, caller, site))
+    monkeypatch.setattr(
+        ccl,
+        "_construction_sites",
+        lambda: {name: tuple(found) for name, found in sites.items()},
+    )
+    assert ccl._callers_source(helper, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a", "b"})
+    )
+    assert ccl._callers_source(helper, "other", module, 0).kind == "open"
+    assert ccl._callers_source(once, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"c"})
+    )
+
+
+def test_a_private_function_or_static_method_takes_what_its_callers_hand(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``_shaped(Maker, "a")`` hands the class to ``_shaped``'s ``cls`` and
+    the fixed text to its ``kind``, as ``Maker._for(Maker, "b")`` and
+    ``self._for(Maker, "c")`` do to a static method's: a function and a
+    static method take every argument a call hands them, whatever their
+    first parameter is called.
+
+    A first parameter called ``cls`` was taken as filled by every call, so
+    the class was read as the ``kind`` the call hands, and the texts came
+    back open.
+    """
+    source = (
+        "def _shaped(cls, kind):\n"
+        "    return kind\n\n"
+        "class Maker:\n"
+        "    @staticmethod\n"
+        "    def _for(cls, kind):\n"
+        "        return kind\n\n"
+        "    def by_name(self, text):\n"
+        "        return _shaped(Maker, 'a')\n\n"
+        "    def through_the_class(self, text):\n"
+        "        return Maker._for(Maker, 'b')\n\n"
+        "    def on_self(self, text):\n"
+        "        return self._for(Maker, 'c')\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_helpers_with_cls": source})
+    tree = ast.parse(source)
+    shaped, maker = tree.body
+    assert isinstance(shaped, ast.FunctionDef)
+    assert isinstance(maker, ast.ClassDef)
+    static, *callers = maker.body
+    assert isinstance(static, ast.FunctionDef)
+    module = "phonometry._helpers_with_cls"
+    sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
+    for caller in callers:
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        assert isinstance(site.func, ast.Name | ast.Attribute)
+        called = site.func.id if isinstance(site.func, ast.Name) else site.func.attr
+        sites.setdefault(called, []).append((module, caller, site))
+    monkeypatch.setattr(
+        ccl,
+        "_construction_sites",
+        lambda: {name: tuple(found) for name, found in sites.items()},
+    )
+    assert ccl._callers_source(shaped, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a"})
+    )
+    assert ccl._callers_source(static, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"b", "c"})
+    )
+
+
 def test_a_function_the_body_imports_is_followed() -> None:
     """A call to a name the body imports itself reaches the library function."""
     found = ccl.passed_on_evidence(_imports_inside, "mode")
@@ -2370,6 +2483,427 @@ class _KeysSkipAPace:
                     require_choice(value, "sides", _PACES)
         else:
             require_choice(self.sides, "sides", _PACES)
+
+
+@dataclass(frozen=True)
+class _Unhooked:
+    """A record with no ``__post_init__``: the ``__init__`` written for it
+    calls none.
+    """
+
+    pace: _Pace = "fast"
+
+
+class _CheckedTooLate(_Unhooked):
+    """A class that is no record over one that has no ``__post_init__``: the
+    one it writes never runs.
+    """
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Hooking:
+    """A record whose ``__init__`` calls ``self.__post_init__``."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        pass
+
+
+class _CheckedInTime(_Hooking):
+    """A class that is no record over one whose ``__init__`` calls
+    ``self.__post_init__``: its own runs.
+    """
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Checking:
+    """A record whose ``__post_init__`` checks its pace."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Delegating(_Checking):
+    """A record whose own ``__init__`` hands its value to the one
+    ``@dataclass`` wrote for ``_Checking``, which calls ``__post_init__``.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super().__init__(pace)
+
+
+class _PlainDelegating(_Checking):
+    """A class that is no record whose ``__init__`` hands its value on."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super().__init__(pace)
+
+
+class _NamedDelegating(_Checking):
+    """A class whose ``__init__`` calls a base's ``__init__`` by its name."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _Checking.__init__(self, pace)
+
+
+class _DelegatedTooLate(_Unhooked):
+    """A class whose ``__init__`` hands its value to one that calls no
+    ``__post_init__``: the one it writes never runs.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super().__init__(pace)
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+class _Unhanded(_Checking):
+    """A class whose ``__init__`` stores the value itself and hands nothing
+    on: the check of the record under it never runs.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        object.__setattr__(self, "pace", pace)
+
+
+def test_a_record_runs_a_post_init_only_when_its_init_calls_one() -> None:
+    """The ``__init__`` a call runs, here the one ``@dataclass`` writes for the
+    first record of the order, calls ``self.__post_init__`` only when that
+    record had one when it was written: ``_CheckedTooLate`` never runs the
+    check it writes, so a misspelt pace is never refused, and
+    ``_CheckedInTime`` runs its own. One written by hand runs what the
+    ``__init__`` it hands its values on to runs, through ``super()`` or by
+    the base's name: ``_Delegating`` and its two plain forms run the check
+    of ``_Checking``, ``_DelegatedTooLate`` hands them to one that runs
+    none, and ``_Unhanded`` hands them to none.
+
+    The first ``__post_init__`` of the order was read as the one that runs,
+    so a check that never runs passed the choice as checked; then only an
+    ``__init__`` that names ``__post_init__`` itself was read as running
+    one, so a choice ``_Delegating`` checks was reported as never checked.
+    """
+    assert ccl._post_init(_CheckedTooLate) is None
+    assert ccl._post_init(_Unhooked) is None
+    assert ccl._post_init(_CheckedInTime) is inspect.unwrap(
+        vars(_CheckedInTime)["__post_init__"]
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _CheckedInTime("medium")  # type: ignore[arg-type]
+    unchecked = _CheckedTooLate("medium")  # type: ignore[arg-type]
+    assert vars(unchecked)["pace"] == "medium"
+    check = inspect.unwrap(vars(_Checking)["__post_init__"])
+    pace = "Literal['fast', 'slow']"
+    for runs in (_Delegating, _PlainDelegating, _NamedDelegating):
+        found = ccl._post_init(runs)
+        assert found is check, runs
+        assert ccl._choice_verdict(found, "pace", pace, field=True) is None
+        with pytest.raises(ValueError, match="pace"):
+            runs("medium")  # type: ignore[arg-type]
+    for skipped in (_DelegatedTooLate, _Unhanded):
+        assert ccl._post_init(skipped) is None, skipped
+        assert vars(skipped("medium"))["pace"] == "medium"  # type: ignore[arg-type]
+
+
+class _PlainChecking(_Checking):
+    """A class that is no record over one whose check runs."""
+
+
+def _through_plain(pace: _Pace = "fast") -> _PlainChecking:
+    """Hand a pace to a class that is no record over one that checks it."""
+    return _PlainChecking(pace)
+
+
+def _through_in_time(pace: _Pace = "fast") -> _CheckedInTime:
+    """Hand a pace to a class that is no record and checks it itself."""
+    return _CheckedInTime(pace)
+
+
+def test_a_call_of_a_class_runs_the_init_its_order_gives() -> None:
+    """A call of ``_PlainChecking``, which writes no ``__init__``, runs the
+    one ``@dataclass`` wrote for ``_Checking``, and that one runs the check:
+    the pace it is handed is checked. The hook it calls is the one the class
+    called resolves: a call of ``_CheckedInTime`` runs the check it writes,
+    not the empty one of ``_Hooking``, whose ``__init__`` it runs.
+
+    The class's own ``__init__`` alone was read, so the call reached no
+    constructor and the pace was reported as never checked.
+    """
+    call = ast.parse("_PlainChecking(pace)", mode="eval").body
+    assert isinstance(call, ast.Call)
+    namespace: dict[str, object] = {"_PlainChecking": _PlainChecking}
+    assert ccl._callee(call, namespace, __name__) is vars(_Checking)["__init__"]
+    pace = "Literal['fast', 'slow']"
+    for through in (_through_plain, _through_in_time):
+        assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        with pytest.raises(ValueError, match="pace"):
+            through("medium")  # type: ignore[arg-type]
+
+
+class _Unchecking:
+    """A class whose ``__init__`` checks nothing and hands nothing on."""
+
+    def __init__(self) -> None:
+        pass
+
+
+class _NamedPastAnEarlierBase(_Unchecking, _Checking):
+    """A class whose ``__init__`` calls by name the ``__init__`` of a base
+    that comes after another base with one of its own in the order.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _Checking.__init__(self, pace)
+
+
+class _SuperPastAnEarlierBase(_Unchecking, _Checking):
+    """A class whose ``__init__`` looks the next one up from after the base
+    it names, with ``super(_Unchecking, self)``.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super(_Unchecking, self).__init__(pace)
+
+
+class _NamedAnUncheckingBase(_Checking, _Unchecking):
+    """A class whose ``__init__`` calls by name the ``__init__`` of a base
+    that calls no ``__post_init__``, though the next class of the order has
+    one that does.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _Unchecking.__init__(self)
+        object.__setattr__(self, "pace", pace)
+
+
+def test_an_init_handed_on_to_runs_the_one_its_call_names() -> None:
+    """``_Checking.__init__(self, pace)`` runs the ``__init__`` ``_Checking``
+    looks up, the one ``@dataclass`` wrote for it, which runs the check,
+    though ``_Unchecking`` comes before it in the order of
+    ``_NamedPastAnEarlierBase``; ``super(_Unchecking, self).__init__(pace)``
+    runs the first one after ``_Unchecking``, the same. ``_Unchecking.__init__``
+    calls none, though the class after ``_NamedAnUncheckingBase`` in its
+    order, ``_Checking``, has one that does: its pace is never checked.
+
+    Every ``__init__`` a hand-written one named was read as the one of the
+    next class of the order that has one: ``_Unchecking``'s for the first
+    two, so a pace they check was reported as never checked, and
+    ``_Checking``'s for the third, so a pace it never checks passed.
+    """
+    check = inspect.unwrap(vars(_Checking)["__post_init__"])
+    pace = "Literal['fast', 'slow']"
+    for runs in (_NamedPastAnEarlierBase, _SuperPastAnEarlierBase):
+        found = ccl._post_init(runs)
+        assert found is check, runs
+        assert ccl._choice_verdict(found, "pace", pace, field=True) is None
+        with pytest.raises(ValueError, match="pace"):
+            runs("medium")  # type: ignore[arg-type]
+    assert ccl._post_init(_NamedAnUncheckingBase) is None
+    assert vars(_NamedAnUncheckingBase("medium"))["pace"] == "medium"  # type: ignore[arg-type]
+
+
+class _PaceChecker:
+    """A class whose methods check the pace they are handed."""
+
+    def check(self, pace: _Pace) -> None:
+        require_choice(pace, "pace", _PACES)
+
+    @classmethod
+    def check_once(cls, pace: _Pace) -> None:
+        require_choice(pace, "pace", _PACES)
+
+
+class _ThroughTheClass(_PaceChecker):
+    """A class that calls its base's methods through the base's name."""
+
+    def run(self, pace: _Pace = "fast") -> None:
+        _PaceChecker.check(self, pace)
+
+    def run_once(self, pace: _Pace = "fast") -> None:
+        _PaceChecker.check_once(pace)
+
+
+def _through_a_named_init(pace: _Pace = "fast") -> _NamedPastAnEarlierBase:
+    """Hand a pace to a class whose ``__init__`` hands it on by name."""
+    return _NamedPastAnEarlierBase(pace)
+
+
+def test_a_method_called_through_its_class_takes_the_instance_first() -> None:
+    """``_PaceChecker.check(self, pace)`` hands ``self`` to the method's
+    ``self`` and the pace to its ``pace``, which it checks, as
+    ``_Checking.__init__(self, pace)`` hands the pace to the record's field;
+    a class method called through its class, ``_PaceChecker.check_once(pace)``,
+    is bound to it.
+
+    A method's ``self`` was taken as filled by the call whatever named the
+    method, so the pace was read as handed to the method's second parameter
+    or to none, and reported as never checked.
+    """
+    pace = "Literal['fast', 'slow']"
+    for through in (_ThroughTheClass.run, _ThroughTheClass.run_once):
+        assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        instance = _ThroughTheClass()
+        with pytest.raises(ValueError, match="pace"):
+            through(instance, "medium")  # type: ignore[arg-type]
+    assert ccl._choice_verdict(_through_a_named_init, "pace", pace, field=False) is None
+    with pytest.raises(ValueError, match="pace"):
+        _through_a_named_init("medium")  # type: ignore[arg-type]
+
+
+def _check_after_a_class(cls: object, pace: _Pace) -> None:
+    """A function whose first parameter is called ``cls``: it takes the
+    class a caller hands it first, and checks the pace after it.
+    """
+    require_choice(pace, "pace", _PACES)
+
+
+def _hands_a_class_then_the_pace(pace: _Pace = "fast") -> None:
+    """Hand the function a class, and the pace in its second place."""
+    _check_after_a_class(int, pace)
+
+
+def _hands_the_pace_first(pace: _Pace = "fast") -> None:
+    """Hand the function the pace in its first place, where it takes a class."""
+    _check_after_a_class(pace, "fast")
+
+
+class _StaticPaceChecker:
+    """A class whose static method takes a class first and checks the pace."""
+
+    @staticmethod
+    def check_for(cls: object, pace: _Pace) -> None:
+        require_choice(pace, "pace", _PACES)
+
+    def through_the_class(self, pace: _Pace = "fast") -> None:
+        _StaticPaceChecker.check_for(type(self), pace)
+
+    def on_self(self, pace: _Pace = "fast") -> None:
+        self.check_for(type(self), pace)
+
+
+def test_a_function_or_static_method_takes_what_it_is_handed_first() -> None:
+    """A call fills no parameter of a function, or of a static method, by
+    itself, whatever the parameter is called: ``_check_after_a_class(int,
+    pace)`` hands ``int`` to ``cls`` and the pace to ``pace``, which it
+    checks, and ``_check_after_a_class(pace, "fast")`` hands the pace to
+    ``cls``, which nothing checks. ``_StaticPaceChecker.check_for`` takes
+    what it is handed through its class and on ``self`` alike.
+
+    A first parameter called ``cls`` or ``self`` was taken as filled by the
+    call whatever the callee was, so the first argument was read as the
+    pace: the pace a function checks was reported as never checked, and one
+    it never checks passed.
+    """
+    pace = "Literal['fast', 'slow']"
+    never = "never checked, so a misspelling passes"
+    assert (
+        ccl._choice_verdict(_hands_a_class_then_the_pace, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _hands_a_class_then_the_pace("medium")  # type: ignore[arg-type]
+    assert (
+        ccl._choice_verdict(_hands_the_pace_first, "pace", pace, field=False) == never
+    )
+    _hands_the_pace_first("medium")  # type: ignore[arg-type]
+    instance = _StaticPaceChecker()
+    for through in (_StaticPaceChecker.through_the_class, _StaticPaceChecker.on_self):
+        assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        with pytest.raises(ValueError, match="pace"):
+            through(instance, "medium")  # type: ignore[arg-type]
+
+
+#: A module whose function and static method take a class first and check
+#: the pace after it, and one that calls them through the module and
+#: through a field of ``self``.
+_THROUGH_A_MODULE = {
+    "_takes_a_class_first": """
+        from phonometry._internal.validation import require_choice
+
+        PACES = ("fast", "slow")
+
+
+        def check_after(cls, pace):
+            require_choice(pace, "pace", PACES)
+
+
+        class StaticChecker:
+            @staticmethod
+            def check_for(cls, pace):
+                require_choice(pace, "pace", PACES)
+        """,
+    "_hands_through_a_module": """
+        from typing import Literal
+
+        from phonometry import _takes_a_class_first as first
+
+        Pace = Literal["fast", "slow"]
+
+
+        def through_the_module(pace: Pace = "fast") -> None:
+            first.check_after(int, pace)
+
+
+        def the_pace_first(pace: Pace = "fast") -> None:
+            first.check_after(pace, "fast")
+
+
+        class Holder:
+            checker: first.StaticChecker
+
+            def __init__(self) -> None:
+                self.checker = first.StaticChecker()
+
+            def on_a_field(self, pace: Pace = "fast") -> None:
+                self.checker.check_for(int, pace)
+        """,
+}
+
+
+def test_a_function_through_its_module_or_a_static_method_on_a_field_takes_it_all(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``first.check_after(int, pace)`` runs a function of the module
+    ``first``, which takes ``int`` as its ``cls`` and checks the pace after
+    it, and ``self.checker.check_for(int, pace)`` a static method of the
+    class the field ``checker`` is annotated with, which takes what it is
+    handed the same way; ``first.check_after(pace, "fast")`` checks
+    ``"fast"`` and never the pace.
+
+    A call through a module, or on a field of ``self``, was read as filling
+    a first parameter called ``cls`` itself whatever it ran, so ``int`` was
+    read as the pace: the pace checked was reported as never checked, and
+    the one never checked passed.
+    """
+    _plant_modules(tmp_path, monkeypatch, _THROUGH_A_MODULE)
+    module = sys.modules["phonometry._hands_through_a_module"]
+    pace = "Literal['fast', 'slow']"
+    never = "never checked, so a misspelling passes"
+    assert (
+        ccl._choice_verdict(module.through_the_module, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        module.through_the_module("medium")
+    assert (
+        ccl._choice_verdict(module.the_pace_first, "pace", pace, field=False) == never
+    )
+    module.the_pace_first("medium")
+    on_a_field = module.Holder.on_a_field
+    assert ccl._choice_verdict(on_a_field, "pace", pace, field=False) is None
+    holder = module.Holder()
+    with pytest.raises(ValueError, match="pace"):
+        holder.on_a_field("medium")
 
 
 def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:

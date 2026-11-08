@@ -159,6 +159,7 @@ from typing import TYPE_CHECKING, TypeGuard
 from ast_scan import (
     COMPOUND_STATEMENTS,
     ROOT,
+    argument_places,
     assigned_value,
     assignment_target,
     binding_of,
@@ -726,6 +727,10 @@ class Tree:
         #: package is read.
         self.base_cache: dict[ast.AST | None, tuple[tuple[ClassInfo, ...], ...]] = {}
         self.copies_cache: dict[ast.AST | None, bool] = {}
+        #: What :meth:`calls_post_init` and :meth:`initializer` found, read
+        #: once for each ``class`` statement.
+        self.hook_cache: dict[ast.AST | None, bool] = {}
+        self.init_cache: dict[ast.AST | None, ClassInfo | None] = {}
         self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
         self.orders_cache: dict[ast.AST | None, tuple[_Order, ...]] = {}
         self.places_cache: dict[ast.AST | None, tuple[tuple[str, ...], ...]] = {}
@@ -1513,11 +1518,18 @@ class Tree:
         return found
 
     def copies_arrays(self, info: ClassInfo) -> bool:
+        """Whether a call of a record copies every array it is built with: it
+        inherits :data:`MECHANISM` (:meth:`inherits_mechanism`), whose
+        ``__post_init__`` makes the copies, and the ``__init__`` the call
+        runs calls one (:meth:`calls_post_init`).
+        """
+        return self.inherits_mechanism(info) and self.calls_post_init(info)
+
+    def inherits_mechanism(self, info: ClassInfo) -> bool:
         """Whether a record inherits :data:`MECHANISM`, itself or through a
         base every class of which it may be where the ``class`` statement
-        reads it (:meth:`base_classes`) copies, and so copies every array it
-        is built with. A class that is no record copies through its own
-        bases: the record built on it runs the ``__post_init__`` they lend.
+        reads it (:meth:`base_classes`) inherits it. A class that is no
+        record inherits it through its own bases.
         """
         if MECHANISM in info.bases:
             return True
@@ -1530,42 +1542,59 @@ class Tree:
         # while it is read, it copies nothing.
         self.copies_cache[node] = False
         copies = any(
-            classes and all(self.copies_arrays(candidate) for candidate in classes)
+            classes and all(self.inherits_mechanism(candidate) for candidate in classes)
             for classes in self.base_classes(info)
         )
         self.copies_cache[node] = copies
         return copies
 
-    def owns(
+    def owns(self, info: ClassInfo, name: str) -> bool:
+        """Whether a call of a record copies a field itself: the ``__init__``
+        it runs calls a ``__post_init__`` (:meth:`calls_post_init`), and the
+        field is one the record's hooks copy (:meth:`_owns`). One that calls
+        none keeps the caller's array whatever its ``__post_init__`` does.
+        """
+        return self.calls_post_init(info) and self._owns(info, name)
+
+    def _owns(
         self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
     ) -> bool:
-        """Whether a record copies a field itself: every field of one that
+        """Whether a record's hooks copy a field: every field of one that
         inherits :data:`MECHANISM`, or one its own ``__post_init__`` copies,
         or that of every class a base may be (:meth:`base_classes`), a class
-        that is no record through its own bases as :meth:`copies_arrays`
-        reads it.
+        that is no record through its own bases as
+        :meth:`inherits_mechanism` reads it.
         """
-        if info.owned.get(name) or self.copies_arrays(info):
+        if info.owned.get(name) or self.inherits_mechanism(info):
             return True
         if not info.bases:
             return False
         seen = seen | {info.node}
         for classes in self.base_classes(info):
             if classes and all(
-                candidate.node not in seen and self.owns(candidate, name, seen)
+                candidate.node not in seen and self._owns(candidate, name, seen)
                 for candidate in classes
             ):
                 return True
         return False
 
-    def seals(
+    def seals(self, info: ClassInfo, name: str) -> bool:
+        """Whether a call of a record publishes a field as a read-only copy of
+        its own: the ``__init__`` it runs calls a ``__post_init__``
+        (:meth:`calls_post_init`) and the record's hooks seal the field
+        (:meth:`_seals`).
+        """
+        return self.calls_post_init(info) and self._seals(info, name)
+
+    def _seals(
         self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
     ) -> bool:
-        """Whether a record publishes a field as a read-only copy of its own,
-        itself or through every class a base may be (:meth:`base_classes`).
+        """Whether a record's hooks publish a field as a read-only copy of
+        their own, itself or through every class a base may be
+        (:meth:`base_classes`).
         """
-        if self.copies_arrays(info) or (
-            info.sealed.get(name) and self.owns(info, name)
+        if self.inherits_mechanism(info) or (
+            info.sealed.get(name) and self._owns(info, name)
         ):
             return True
         if not info.bases:
@@ -1573,11 +1602,226 @@ class Tree:
         seen = seen | {info.node}
         for classes in self.base_classes(info):
             if classes and all(
-                candidate.node not in seen and self.seals(candidate, name, seen)
+                candidate.node not in seen and self._seals(candidate, name, seen)
                 for candidate in classes
             ):
                 return True
         return False
+
+    def own_methods(self, info: ClassInfo, name: str) -> list[FunctionInfo]:
+        """The ``def`` statements of *name* a ``class`` statement writes in
+        its own body.
+        """
+        key = self.qualnames.get(info.node) if info.node is not None else None
+        if key is None:
+            return []
+        module, qualname = key
+        return [
+            definition
+            for definition in self.definitions.get((module, f"{qualname}.{name}"), [])
+            if definition.owner is info
+        ]
+
+    def running_inits(self, info: ClassInfo) -> list[FunctionInfo]:
+        """The ``__init__`` a ``class`` statement writes in its own body that
+        a run of the program defines: one under ``if TYPE_CHECKING:`` is a
+        signature for the type checker, and the one ``@dataclass`` writes
+        stands in its place (:func:`ast_scan.for_the_type_checker`).
+        """
+        return [
+            definition
+            for definition in self.own_methods(info, "__init__")
+            if id(definition.node)
+            not in for_the_type_checker(self.modules[definition.module])
+        ]
+
+    def calls_post_init(self, info: ClassInfo) -> bool:
+        """Whether the ``__init__`` a call of *info* runs calls
+        ``self.__post_init__``, in every method resolution order the class
+        may have (:meth:`linearizations`), read once for each statement.
+
+        That ``__init__`` is the one of the first class of the order with one
+        of its own. The one ``@dataclass`` writes (:func:`_generates_init`)
+        calls the hook when the record it was written for had one then, its
+        own or a base's (:data:`MECHANISM` lends one): a class that is no
+        record over it, or a dataclass told ``init=False``, does not change
+        that. One written by hand calls it when its body names it, and runs
+        what each ``__init__`` it hands its values on to runs
+        (:meth:`_handed_on`). A named tuple is built by ``__new__`` and
+        calls none.
+        """
+        node = info.node
+        found = self.hook_cache.get(node)
+        if found is None:
+            # A class a function writes under ``global`` may be its own base:
+            # while it is read, its call is taken to run none.
+            self.hook_cache[node] = False
+            found = all(
+                self._order_calls_post_init(line) for line in self.linearizations(info)
+            )
+            self.hook_cache[node] = found
+        return found
+
+    def _order_calls_post_init(self, line: Sequence[ClassInfo]) -> bool:
+        """Whether the ``__init__`` one method resolution order runs calls
+        ``self.__post_init__`` (:meth:`calls_post_init`).
+        """
+        return self._calls_from(line, 0, frozenset())
+
+    def _calls_from(
+        self, line: Sequence[ClassInfo], start: int, seen: frozenset[ast.AST | None]
+    ) -> bool:
+        """Whether the ``__init__`` of the first class of *line* from place
+        *start* on with one of its own calls ``self.__post_init__``
+        (:meth:`calls_post_init`).
+
+        *seen* are the ``class`` statements whose written ``__init__`` is
+        being read: a hand-off back to one of them runs nothing it has not
+        run.
+        """
+        for place in range(start, len(line)):
+            later = line[place]
+            written = self.running_inits(later)
+            if written:
+                if later.node in seen:
+                    return False
+                named = {
+                    inner.attr if isinstance(inner, ast.Attribute) else inner.id
+                    for definition in written
+                    for inner in ast.walk(definition.node)
+                    if isinstance(inner, ast.Attribute | ast.Name)
+                }
+                if "__post_init__" in named:
+                    return True
+                if "__init__" not in named:
+                    return False
+                seen = seen | {later.node}
+                return any(
+                    starts and all(self._calls_from(*begun, seen) for begun in starts)
+                    for starts in self._handed_on(line, place, written)
+                )
+            if _generates_init(later):
+                return all(
+                    any(self.lends_hook(base) for base in order)
+                    for order in self.linearizations(later)
+                )
+            if "NamedTuple" in later.bases:
+                return False
+        return False
+
+    def _handed_on(
+        self, line: Sequence[ClassInfo], place: int, written: Sequence[FunctionInfo]
+    ) -> Iterator[list[tuple[Sequence[ClassInfo], int]]]:
+        """For each ``<receiver>.__init__(...)`` call of the ``__init__``
+        written for the class at *place* of *line*, the order and the place
+        in it its ``__init__`` is looked up from, for every class the
+        receiver may name; none when it names none the guard can read
+        (``self``, whose ``__init__`` is the one being read).
+
+        ``super().__init__(...)`` looks it up from the class after its own
+        in *line* on, and ``super(Base, self).__init__(...)`` from the class
+        after ``Base``. ``Base.__init__(self, ...)`` looks it up through the
+        order of ``Base``, the class it names, so a base before ``Base`` in
+        *line*, which a lookup from the next class on would find, is passed
+        over: its place in *line* is that of the first class of an order of
+        ``Base`` that has an ``__init__`` of its own.
+        """
+        for definition in written:
+            for node in ast.walk(definition.node):
+                if not (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "__init__"
+                ):
+                    continue
+                receiver = node.func.value
+                if (
+                    isinstance(receiver, ast.Call)
+                    and isinstance(receiver.func, ast.Name)
+                    and receiver.func.id == "super"
+                ):
+                    if not receiver.args:
+                        yield [(line, place + 1)]
+                        continue
+                    yield [
+                        (line, at + 1)
+                        for named in self._classes_named(definition, receiver.args[0])
+                        for at, later in enumerate(line)
+                        if later is named
+                    ]
+                    continue
+                yield [
+                    _placed(line, order, self._first_init(order))
+                    for named in self._classes_named(definition, receiver)
+                    for order in self.linearizations(named)
+                ]
+
+    def _first_init(self, order: Sequence[ClassInfo]) -> int:
+        """The place in *order* of the first class with an ``__init__`` of
+        its own, written in its body or generated by ``@dataclass``, or of
+        the first named tuple; past the last class when only ``object``'s
+        runs.
+        """
+        return next(
+            (
+                place
+                for place, later in enumerate(order)
+                if self.running_inits(later)
+                or _generates_init(later)
+                or "NamedTuple" in later.bases
+            ),
+            len(order),
+        )
+
+    def _classes_named(
+        self, definition: FunctionInfo, expr: ast.expr
+    ) -> list[ClassInfo]:
+        """The classes of the package *expr*, read in *definition*, may
+        stand for there (:meth:`named_at`, :meth:`classes_stood`).
+        """
+        pins: _Pins = {}
+        keys = self.named_at(definition.module, expr, pins=pins)
+        return [
+            stood
+            for key in keys
+            if key in self.classes
+            for stood in self.classes_stood(key, pins)
+        ]
+
+    def lends_hook(self, info: ClassInfo) -> bool:
+        """Whether a class has a ``__post_init__`` of its own, written in its
+        body or lent by :data:`MECHANISM`.
+        """
+        return MECHANISM in info.bases or bool(self.own_methods(info, "__post_init__"))
+
+    def initializer(self, info: ClassInfo) -> ClassInfo | None:
+        """The record whose generated constructor a call of *info* runs: the
+        first class of its method resolution order with an ``__init__`` of
+        its own, when ``@dataclass`` wrote it (:func:`_generates_init`), or
+        a named tuple, in every order the class may have. ``None`` when an
+        ``__init__`` written by hand comes first, or the orders disagree.
+
+        A class that is no record over a record, and a dataclass told
+        ``init=False``, are built by the record's: its fields are the ones
+        the call fills.
+        """
+        node = info.node
+        if node in self.init_cache:
+            return self.init_cache[node]
+        found: list[ClassInfo | None] = []
+        for line in self.linearizations(info):
+            runs: ClassInfo | None = None
+            for later in line:
+                if self.running_inits(later):
+                    break
+                if _generates_init(later) or "NamedTuple" in later.bases:
+                    runs = later
+                    break
+            found.append(runs)
+        first = found[0] if found else None
+        chosen = first if all(runs is first for runs in found) else None
+        self.init_cache[node] = chosen
+        return chosen
 
     def attribute_annotation(self, info: ClassInfo, name: str) -> str | None:
         """The annotation of an attribute of a class, looked up its bases
@@ -1603,6 +1847,23 @@ class Tree:
         )
         self.attribute_cache[key] = annotation
         return annotation
+
+
+def _placed(
+    line: Sequence[ClassInfo], order: Sequence[ClassInfo], place: int
+) -> tuple[Sequence[ClassInfo], int]:
+    """Where the class at *place* of *order* stands in *line*, the method
+    resolution order of the instance being built, when it stands there, and
+    in *order* otherwise: an ``__init__`` it hands its values on to with
+    ``super()`` is read on from there.
+    """
+    if place < len(order):
+        found = next(
+            (at for at, later in enumerate(line) if later is order[place]), None
+        )
+        if found is not None:
+            return line, found
+    return order, place
 
 
 def _inside(module: str, package: str) -> bool:
@@ -1631,6 +1892,23 @@ def _exported(tree: ast.Module) -> tuple[str, ...]:
 def _public_path(module: str) -> bool:
     """Whether every part of a dotted module name is public."""
     return not any(part.startswith("_") for part in module.split("."))
+
+
+def _generates_init(info: ClassInfo) -> bool:
+    """Whether ``@dataclass`` writes a class an ``__init__``: a decorator of
+    it is ``dataclass``, and it does not say ``init=False``.
+    """
+    node = info.node
+    if node is None:
+        return False
+    return any(
+        _is_record_decorator(decorator)
+        and not (
+            isinstance(decorator, ast.Call)
+            and _keyword_constant(decorator, "init", default=True) is False
+        )
+        for decorator in node.decorator_list
+    )
 
 
 def _excluded_from_init(value: ast.expr | None) -> bool:
@@ -1864,7 +2142,7 @@ class Reader:
             # A record that copies its arrays has done so before its own
             # ``__post_init__`` runs: what that reads back from ``self`` is
             # the record's copy, not the constructor's argument.
-            copied = self.tree.copies_arrays(owner)
+            copied = self.tree.inherits_mechanism(owner)
             for name, _ in self.tree.record_fields(owner):
                 env[f"self.{name}"] = _CLEAN if copied else frozenset({f"self.{name}"})
         return env
@@ -2645,7 +2923,9 @@ class Reader:
                 return flat(receiver)
             target = self.method_target(func)
             if target is not None:
-                return self.apply(target, node, arguments, keywords, bound=True)
+                return self.apply(
+                    target, node, arguments, keywords, bound=self.binds(func, target)
+                )
             module = self.module_of(func.value)
             if module is not None:
                 pins: _Pins = {}
@@ -2774,6 +3054,19 @@ class Reader:
             return self.tree.resolve_module(self.module, node.id)
         return None
 
+    def binds(self, func: ast.Attribute, target: tuple[str, str]) -> bool:
+        """Whether a call of the method *target* fills its first parameter
+        itself: one on ``self`` or ``cls`` does, and one through the class's
+        name, ``Owner.method(self, ...)``, takes the instance as its first
+        argument, but for a ``classmethod``, which the class binds.
+        """
+        if isinstance(func.value, ast.Name) and func.value.id in {"self", "cls"}:
+            return True
+        return any(
+            definition.kind == "classmethod"
+            for definition in self.tree.definitions.get(target, [])
+        )
+
     def method_target(self, func: ast.Attribute) -> tuple[str, str] | None:
         """The method ``self.name`` or ``cls.name`` names, in the class read."""
         owner = self.function.owner
@@ -2825,30 +3118,16 @@ class Reader:
                 and self.copies_on_every_path(node)
             )
             values.extend(
-                self.constructor_sink(
-                    info,
-                    node,
-                    arguments,
-                    keywords,
-                    public=public,
-                    alone=alone,
+                self.built_value(
+                    info, node, arguments, keywords, public=public, alone=alone
                 )
-                if info.record
-                else _CLEAN
                 for info in built
             )
             if not pinned:
                 return values[0] if len(values) == 1 else union(_CLEAN, *values)
-        spread = next(
-            (
-                index
-                for index, argument in enumerate(node.args)
-                if isinstance(argument, ast.Starred)
-            ),
-            None,
-        )
+        places = argument_places(node.args)
         values.extend(
-            self._returned_by(function, arguments, keywords, bound=bound, spread=spread)
+            self._returned_by(function, arguments, keywords, bound=bound, places=places)
             for function in self.reached(target, node, pins=pins)
         )
         return union(*values) if values else _CLEAN
@@ -2860,11 +3139,11 @@ class Reader:
         keywords: dict[str | None, Value],
         *,
         bound: bool,
-        spread: int | None = None,
+        places: Sequence[tuple[int, bool]] = (),
     ) -> Value:
         """What one definition returns of the arguments given to it, bound
-        to its own parameters (:func:`bind`, *spread* the place of the first
-        ``*`` argument).
+        to its own parameters (:func:`bind`, *places* where each argument
+        may land, :func:`ast_scan.argument_places`).
 
         A function defined in this one, or in one around it (a sibling
         helper), is read as it was where it is defined, so what it returns of
@@ -2878,13 +3157,13 @@ class Reader:
             returned, closure = held
             mapping: dict[str, Value] = {label: frozenset({label}) for label in closure}
             mapping.update(
-                bind(function, arguments, keywords, bound=bound, spread=spread)
+                bind(function, arguments, keywords, bound=bound, places=places)
             )
             return substitute(returned, mapping)
         summary = self.summaries.get(function.node)
         if summary is None or not flat(summary.value):
             return _CLEAN
-        mapping = bind(function, arguments, keywords, bound=bound, spread=spread)
+        mapping = bind(function, arguments, keywords, bound=bound, places=places)
         return substitute(summary.value, mapping)
 
     def reached(
@@ -2929,6 +3208,31 @@ class Reader:
         return definitions
 
     # -- the places an array is kept --------------------------------------
+    def built_value(
+        self,
+        info: ClassInfo,
+        node: ast.Call,
+        arguments: list[Value],
+        keywords: dict[str | None, Value],
+        *,
+        public: bool,
+        alone: bool,
+    ) -> Value:
+        """What a call of the class *info* keeps, and returns, read through
+        the constructor it runs (:meth:`Tree.initializer`): the one
+        ``@dataclass`` wrote for a record of its order takes that record's
+        fields, a class that is no record over one keeps them too, and a
+        record whose ``__init__`` is written by hand is read with its own
+        fields. A class that is no record and runs no generated constructor
+        keeps nothing a caller hands it in a field.
+        """
+        runs = self.tree.initializer(info)
+        if runs is None and not info.record:
+            return _CLEAN
+        return self.constructor_sink(
+            info, node, arguments, keywords, public=public, alone=alone, runs=runs
+        )
+
     def constructor_sink(
         self,
         info: ClassInfo,
@@ -2938,23 +3242,30 @@ class Reader:
         *,
         public: bool,
         alone: bool = True,
+        runs: ClassInfo | None = None,
     ) -> Value:
         """Report what a record keeps, and return the record as a value.
 
         An argument given by its place fills each field that place may hold
-        (:func:`_places_reached`), and one that may fall past the last of
-        them is read as spread over the record, as a ``*`` argument is. A
-        copy handed to a record that copies is reported only when every
-        class the call may build is a record that copies, and no function it
-        may run hands its argument back instead (*alone*, :meth:`apply`).
+        (:func:`_places_reached`), a ``*`` argument each field its items may
+        fill, and one that may fall past the last of them is read as spread
+        over the record. A copy handed to a record that copies is reported
+        only when every class the call may build is a record that copies,
+        and no function it may run hands its argument back instead (*alone*,
+        :meth:`apply`). The fields are those the constructor the call runs
+        takes, written for *runs* when that is another record of the order,
+        and what the record copies is what the ``__post_init__`` that
+        constructor calls copies (:meth:`Tree.owns`).
         """
-        fields = self.tree.record_fields(info)
+        taking = runs if runs is not None else info
+        fields = self.tree.record_fields(taking)
         annotations = dict(fields)
+        orders = self.tree.positional_orders(taking)
         if self.tree.copies_arrays(info):
             # Every array it is built with, however it is passed, is replaced
             # by a copy of its own: the record carries nothing of the caller.
             if public and alone and self.findings is not None:
-                self.copied_twice(info, node, fields)
+                self.copied_twice(info, node, fields, orders)
             return Fields(tuple((name, _CLEAN) for name, _ in fields))
         kept: dict[str, Value] = {}
         spilled: list[Value] = []
@@ -2962,13 +3273,11 @@ class Reader:
         def keep(name: str, value: Value) -> None:
             kept[name] = union(kept[name], value) if name in kept else value
 
-        places = _places_reached(self.tree.positional_orders(info), node.args)
+        places = _places_reached(orders, node)
         for index, value in enumerate(arguments):
             names, past = places[index]
-            if isinstance(node.args[index], ast.Starred) or past:
+            if past:
                 spilled.append(value)
-            if isinstance(node.args[index], ast.Starred):
-                continue
             for filled in names:
                 keep(filled, value)
         for name, value in keywords.items():
@@ -3051,7 +3360,11 @@ class Reader:
         )
 
     def copied_twice(
-        self, info: ClassInfo, node: ast.Call, fields: Sequence[tuple[str, str]]
+        self,
+        info: ClassInfo,
+        node: ast.Call,
+        fields: Sequence[tuple[str, str]],
+        orders: Sequence[tuple[str, ...]],
     ) -> None:
         """Report a copy made of an array handed to a record that copies it.
 
@@ -3065,7 +3378,7 @@ class Reader:
         copy for every one of them.
         """
         annotations = dict(fields)
-        places = _places_reached(self.tree.positional_orders(info), node.args)
+        places = _places_reached(orders, node)
         given: list[tuple[tuple[str, ...], ast.expr]] = [
             (names, argument)
             for (names, _), argument in zip(places, node.args, strict=True)
@@ -4112,35 +4425,36 @@ def _lent_fields(
 
 
 def _places_reached(
-    orders: Sequence[tuple[str, ...]], arguments: Sequence[ast.expr]
+    orders: Sequence[tuple[str, ...]], call: ast.Call
 ) -> list[tuple[tuple[str, ...], bool]]:
-    """What each argument a call gives by its place may fill of a record's
+    """What each argument *call* gives by its place may fill of a record's
     fields, in every order its constructor may take them in
     (:meth:`Tree.positional_orders`), and whether it may fall past the last
     of them in one.
 
-    From the first ``*`` argument on, the number of values the call hands is
-    unknown: an argument written after it may fill any place from the
-    star's own on, as :func:`bind` reads it for a function.
+    A ``*`` argument, and every argument after one, may fill any field from
+    the lowest place it may take on (:func:`ast_scan.argument_places`), the
+    star its items one each: ``Rec(x, *rest)`` hands ``rest`` every field
+    after the first, and ``Rec(*head, 1, value)`` hands ``value`` none of
+    the first. A field an explicit keyword of the call fills is that
+    keyword's alone, as Python raises rather than put an item there:
+    ``Rec(*head, data=values)`` hands ``head`` no ``data``. Only an
+    argument whose lowest place is past the last field of an order may fall
+    past them.
     """
-    spread = next(
-        (
-            index
-            for index, argument in enumerate(arguments)
-            if isinstance(argument, ast.Starred)
-        ),
-        None,
-    )
+    named = {keyword.arg for keyword in call.keywords if keyword.arg is not None}
     reached: list[tuple[tuple[str, ...], bool]] = []
-    for index in range(len(arguments)):
+    for lowest, spread in argument_places(call.args):
         names: dict[str, None] = {}
         past = False
         for order in orders:
-            if spread is not None and index > spread:
-                names.update(dict.fromkeys(order[spread:]))
-            elif index < len(order):
-                names[order[index]] = None
-            past = past or index >= len(order)
+            if spread:
+                names.update(
+                    dict.fromkeys(name for name in order[lowest:] if name not in named)
+                )
+            elif lowest < len(order):
+                names[order[lowest]] = None
+            past = past or lowest >= len(order)
         reached.append((tuple(names), past))
     return reached
 
@@ -4151,13 +4465,15 @@ def bind(
     keywords: dict[str | None, Value],
     *,
     bound: bool,
-    spread: int | None = None,
+    places: Sequence[tuple[int, bool]] = (),
 ) -> dict[str, Value]:
     """What each parameter of *function* receives from one call.
 
-    From *spread*, the place of the first ``*`` argument, on, the number of
-    values the call hands is unknown: that argument and every one after it
-    may land in any place from its own on, or in ``*args``, and a place they
+    *places* says where each argument may land
+    (:func:`ast_scan.argument_places`); with none given, each fills its own
+    place. From the first ``*`` argument on, the number of values the call
+    hands is unknown: that argument and every one after it may land in any
+    place from the lowest it may take on, or in ``*args``, and a place they
     may leave unfilled is one a keyword or ``**options`` may fill. A place an
     explicit keyword fills is that keyword's alone.
     """
@@ -4170,10 +4486,11 @@ def bind(
     beyond: list[Value] = []
     maybe: set[str] = set()
     for index, value in enumerate(arguments):
-        if spread is not None and index >= spread:
-            for name in positional[spread:]:
+        lowest, spread = places[index] if index < len(places) else (index, False)
+        if spread:
+            for name in positional[lowest:]:
                 mapping[name] = union(mapping.get(name, _CLEAN), value)
-            maybe.update(positional[spread:])
+            maybe.update(positional[lowest:])
             beyond.append(value)
         elif index < len(positional):
             mapping[positional[index]] = value
@@ -4340,8 +4657,10 @@ def records_without_mechanism(
     A record a caller builds by hand never passes through a function of the
     package, so no trail the analysis above follows reaches it; the record
     has to copy for itself. One that inherits :data:`MECHANISM`, directly or
-    through a record it extends, does; any other public record with a field
-    annotated as something that can hold an array is reported, at its class.
+    through a record it extends, does, when the ``__init__`` a call of it
+    runs calls the ``__post_init__`` that copies (:meth:`Tree.copies_arrays`);
+    any other public record with a field annotated as something that can
+    hold an array is reported, at its class.
     Each ``class`` statement of a public name is read, as a caller may build
     the one written in either branch of an ``if``, or one an alias keeps
     after a later one replaced it.
@@ -4361,13 +4680,19 @@ def records_without_mechanism(
                 if tree.holds_array(annotation)
             )
             if holding:
+                why = (
+                    f"inherits {MECHANISM}, but the __init__ a call of it runs "
+                    "calls no __post_init__"
+                    if tree.inherits_mechanism(info)
+                    else f"does not inherit {MECHANISM}"
+                )
                 found.append(
                     Finding(
                         tree.paths[key[0]],
                         key[1],
                         info.line,
                         f"{info.name} can hold an array ({', '.join(holding)}) "
-                        f"and does not inherit {MECHANISM}",
+                        f"and {why}",
                         (),
                     )
                 )

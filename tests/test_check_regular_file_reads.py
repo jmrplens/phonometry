@@ -1494,6 +1494,76 @@ def test_a_check_counts_through_helpers_that_hand_it_their_first_parameter(
     ) == [("unchecked", _FOREIGN)]
 
 
+def test_a_method_called_through_its_class_takes_the_instance_first(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``Reader.check(self, path)`` hands ``self`` to the method's ``self``
+    and the name to its ``path``, which it checks, as ``self.check(path)``
+    does, and so does ``Reader.check(self, path=path)``; a class method and
+    a static method called through the class take no instance. So
+    ``Reader.check(path, self)`` checks ``self``, not the name, and
+    ``holder_first(holder, path)``, which calls ``Reader.check(holder,
+    path)``, checks its second parameter, not its first: a read of the name
+    it is handed first is unchecked.
+
+    The call's first argument was read as the name the method checks,
+    whatever named the method: ``through_class`` and ``by_keyword`` were
+    refused, ``instance_read`` passed, and ``holder_first`` counted as a
+    check of ``holder``, so ``reads_after_holder`` passed, though only
+    ``other`` is checked.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+        from check import require_regular
+
+        class Reader:
+            def check(self, path):
+                require_regular(path)
+
+            @classmethod
+            def check_once(cls, path):
+                require_regular(path)
+
+            @staticmethod
+            def check_static(path):
+                require_regular(path)
+
+            def through_self(self, path):
+                self.check(path)
+                return np.load(path)
+
+            def through_class(self, path):
+                Reader.check(self, path)
+                return np.load(path)
+
+            def by_keyword(self, path):
+                Reader.check(self, path=path)
+                return np.load(path)
+
+            def through_classmethod(self, path):
+                Reader.check_once(path)
+                return np.load(path)
+
+            def through_static(self, path):
+                Reader.check_static(path)
+                return np.load(path)
+
+            def instance_read(self, path):
+                Reader.check(path, self)
+                return np.load(path)
+
+        def holder_first(holder, path):
+            Reader.check(holder, path)
+
+        def reads_after_holder(path, other):
+            holder_first(path, other)
+            return np.load(path)
+        """,
+    ) == [("Reader.instance_read", _FOREIGN), ("reads_after_holder", _FOREIGN)]
+
+
 #: A module of checks with the short names of the library's own: ``info``
 #: asks what the name holds, as ``io.info`` does, and ``described`` hands its
 #: name to NumPy's ``info``, which asks nothing.

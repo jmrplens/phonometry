@@ -1203,6 +1203,31 @@ def test_a_name_an_assignment_binds_to_a_function_reaches_that_function(
     ]
 
 
+def test_an_argument_after_a_star_takes_no_place_before_its_lowest(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An argument after a ``*`` one lands in the place of the number of
+    plain arguments before it, or a later one: ``_within(*_NONE, 0.0,
+    max(levels) - min(levels))`` hands the spread to ``scale`` or
+    ``offset``, never to ``spread``, which the ``0.0`` fills when the star
+    hands nothing, and without the ``0.0`` it may.
+
+    Every argument after the star was read from the star's own place on, so
+    the spread reached ``spread`` and the comparison of a constant was
+    refused.
+    """
+    template = (
+        "_SPREAD_DB = 3.0\n_NONE = ()\n"
+        "def _within(spread, scale=1.0, offset=0.0):\n"
+        "    return spread <= _SPREAD_DB\n"
+        "def judge(levels):\n    return {call}\n"
+    )
+    placed = template.format(call="_within(*_NONE, 0.0, max(levels) - min(levels))")
+    assert _texts(placed, tmp_path) == []
+    reached = template.format(call="_within(*_NONE, max(levels) - min(levels))")
+    assert _texts(reached, tmp_path) == ["spread <= _SPREAD_DB"]
+
+
 @pytest.mark.parametrize(
     "call",
     [

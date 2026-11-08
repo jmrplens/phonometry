@@ -80,6 +80,27 @@ def _calls(root: ast.AST, name: str) -> list[ast.Call]:
     return sorted(calls, key=lambda call: (call.lineno, call.col_offset))
 
 
+def test_an_argument_lands_from_the_lowest_place_the_stars_before_it_allow() -> None:
+    """A ``*`` argument may hand nothing, so the lowest place an argument may
+    fill is the number of plain arguments before it, and a star, and every
+    argument after one, may fill any place from there on; one with no star
+    at or before it fills its own place alone.
+    """
+    call = ast.parse("f(a, *head, 1, value, *rest, last)", mode="eval").body
+    assert isinstance(call, ast.Call)
+    assert ast_scan.argument_places(call.args) == [
+        (0, False),
+        (1, True),
+        (1, True),
+        (2, True),
+        (3, True),
+        (3, True),
+    ]
+    plain = ast.parse("f(a, b)", mode="eval").body
+    assert isinstance(plain, ast.Call)
+    assert ast_scan.argument_places(plain.args) == [(0, False), (1, False)]
+
+
 def test_a_scope_binds_what_runs_in_it_alone() -> None:
     names = ast_scan.own_names(_outer())
     assert names.parameters == {"keep", "x"}

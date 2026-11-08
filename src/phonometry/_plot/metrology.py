@@ -717,7 +717,7 @@ def _verdict_word(*, passes: bool, language: Language) -> str:
 def _draw_limits(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
-    positions: np.ndarray,
+    positions: NDArray[np.float64],
     language: Language,
     *,
     one_sided: bool,
@@ -782,7 +782,7 @@ def _draw_limits(
 def _draw_open_limits(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
-    positions: np.ndarray,
+    positions: NDArray[np.float64],
     language: Language,
 ) -> None:
     """Short bars at the finite limits of intervals open on one side.
@@ -812,7 +812,7 @@ def _draw_open_limits(
 def _draw_uncertainties(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
-    positions: np.ndarray,
+    positions: NDArray[np.float64],
     language: Language,
 ) -> None:
     """The shaded maximum-permitted band and the actual-uncertainty error bar."""
@@ -847,7 +847,7 @@ def _draw_uncertainties(
 def _draw_verdicts(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
-    positions: np.ndarray,
+    positions: NDArray[np.float64],
     language: Language,
     kwargs: dict[str, Any],
     *,

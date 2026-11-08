@@ -167,7 +167,9 @@ from ast_scan import (
     bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
+    every_path_calls,
     exempted,
+    first_parameter,
     for_the_type_checker,
     global_bindings,
     imported_names,
@@ -731,7 +733,7 @@ class Tree:
         #: What :meth:`calls_post_init` and :meth:`initializer` found, read
         #: once for each ``class`` statement.
         self.hook_cache: dict[ast.AST | None, bool] = {}
-        self.init_cache: dict[ast.AST | None, ClassInfo | None] = {}
+        self.init_cache: dict[ast.AST | None, tuple[ClassInfo | None, ...]] = {}
         self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
         self.orders_cache: dict[ast.AST | None, tuple[_Order, ...]] = {}
         self.places_cache: dict[ast.AST | None, tuple[tuple[str, ...], ...]] = {}
@@ -1557,26 +1559,62 @@ class Tree:
         """
         return self.calls_post_init(info) and self._owns(info, name)
 
-    def _owns(
-        self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
-    ) -> bool:
+    def _owns(self, info: ClassInfo, name: str) -> bool:
         """Whether a record's hooks copy a field: every field of one that
-        inherits :data:`MECHANISM`, or one its own ``__post_init__`` copies,
-        or that of every class a base may be (:meth:`base_classes`), a class
-        that is no record through its own bases as
-        :meth:`inherits_mechanism` reads it.
+        inherits :data:`MECHANISM`, which composes its copy around whatever
+        ``__post_init__`` the class runs, or one the ``__post_init__`` a call
+        runs copies (:meth:`_hook_keeps`), in every method resolution order
+        the class may have.
         """
-        if info.owned.get(name) or self.inherits_mechanism(info):
+        if self.inherits_mechanism(info):
             return True
-        if not info.bases:
-            return False
-        seen = seen | {info.node}
-        for classes in self.base_classes(info):
-            if classes and all(
-                candidate.node not in seen and self._owns(candidate, name, seen)
-                for candidate in classes
-            ):
+        return all(
+            self._hook_keeps(line, 0, name, sealed=False, seen=frozenset())
+            for line in self.linearizations(info)
+        )
+
+    def _hook_keeps(
+        self,
+        line: Sequence[ClassInfo],
+        start: int,
+        name: str,
+        *,
+        sealed: bool,
+        seen: frozenset[ast.AST | None],
+    ) -> bool:
+        """Whether the ``__post_init__`` the order *line* resolves from place
+        *start* on copies the field *name*, and seals it with *sealed*: the
+        first class from there with one of its own that a run defines
+        (:meth:`running_methods`) copies it, or every ``def`` of it hands on,
+        on every path a call that returns takes (:func:`ast_scan.every_path_calls`),
+        to a hook that does (:meth:`_handed_on`). A subclass's hook that
+        hands on to none replaces the base's, whatever the base copies.
+
+        *seen* are the ``class`` statements whose hook is being read.
+        """
+        for place in range(start, len(line)):
+            later = line[place]
+            hooks = self.running_methods(later, "__post_init__")
+            if not hooks:
+                continue
+            if later.node in seen:
+                return False
+            if later.owned.get(name) and (not sealed or later.sealed.get(name)):
                 return True
+            inner = seen | {later.node}
+            return all(
+                any(
+                    starts
+                    and all(
+                        self._hook_keeps(*begun, name, sealed=sealed, seen=inner)
+                        for begun in starts
+                    )
+                    for starts in self._handed_on(
+                        line, place, [definition], "__post_init__"
+                    )
+                )
+                for definition in hooks
+            )
         return False
 
     def seals(self, info: ClassInfo, name: str) -> bool:
@@ -1587,27 +1625,19 @@ class Tree:
         """
         return self.calls_post_init(info) and self._seals(info, name)
 
-    def _seals(
-        self, info: ClassInfo, name: str, seen: frozenset[ast.AST | None] = frozenset()
-    ) -> bool:
+    def _seals(self, info: ClassInfo, name: str) -> bool:
         """Whether a record's hooks publish a field as a read-only copy of
-        their own, itself or through every class a base may be
-        (:meth:`base_classes`).
+        their own: one that inherits :data:`MECHANISM` does, and otherwise
+        the ``__post_init__`` a call runs, or one it hands on to, copies and
+        seals it (:meth:`_hook_keeps`), in every method resolution order the
+        class may have.
         """
-        if self.inherits_mechanism(info) or (
-            info.sealed.get(name) and self._owns(info, name)
-        ):
+        if self.inherits_mechanism(info):
             return True
-        if not info.bases:
-            return False
-        seen = seen | {info.node}
-        for classes in self.base_classes(info):
-            if classes and all(
-                candidate.node not in seen and self._seals(candidate, name, seen)
-                for candidate in classes
-            ):
-                return True
-        return False
+        return all(
+            self._hook_keeps(line, 0, name, sealed=True, seen=frozenset())
+            for line in self.linearizations(info)
+        )
 
     def own_methods(self, info: ClassInfo, name: str) -> list[FunctionInfo]:
         """The ``def`` statements of *name* a ``class`` statement writes in
@@ -1623,18 +1653,25 @@ class Tree:
             if definition.owner is info
         ]
 
-    def running_inits(self, info: ClassInfo) -> list[FunctionInfo]:
-        """The ``__init__`` a ``class`` statement writes in its own body that
-        a run of the program defines: one under ``if TYPE_CHECKING:`` is a
-        signature for the type checker, and the one ``@dataclass`` writes
-        stands in its place (:func:`ast_scan.for_the_type_checker`).
+    def running_methods(self, info: ClassInfo, name: str) -> list[FunctionInfo]:
+        """The ``def`` statements of *name* a ``class`` statement writes in
+        its own body that a run of the program defines: one under ``if
+        TYPE_CHECKING:`` is a signature for the type checker alone
+        (:func:`ast_scan.for_the_type_checker`).
         """
         return [
             definition
-            for definition in self.own_methods(info, "__init__")
+            for definition in self.own_methods(info, name)
             if id(definition.node)
             not in for_the_type_checker(self.modules[definition.module])
         ]
+
+    def running_inits(self, info: ClassInfo) -> list[FunctionInfo]:
+        """The ``__init__`` a ``class`` statement writes in its own body that
+        a run of the program defines (:meth:`running_methods`): in place of
+        one under ``if TYPE_CHECKING:`` stands the one ``@dataclass`` writes.
+        """
+        return self.running_methods(info, "__init__")
 
     def calls_post_init(self, info: ClassInfo) -> bool:
         """Whether the ``__init__`` a call of *info* runs calls
@@ -1646,10 +1683,14 @@ class Tree:
         calls the hook when the record it was written for had one then, its
         own or a base's (:data:`MECHANISM` lends one): a class that is no
         record over it, or a dataclass told ``init=False``, does not change
-        that. One written by hand calls it when its body names it, and runs
-        what each ``__init__`` it hands its values on to runs
-        (:meth:`_handed_on`). A named tuple is built by ``__new__`` and
-        calls none.
+        that, and a dataclass whose ``init=`` the guard cannot read is read
+        both ways. One written by hand calls it when each ``def`` of it calls
+        ``self.__post_init__()`` on every path a call that returns takes
+        (:func:`ast_scan.every_path_calls`), or hands ``self`` on, on every such
+        path, to an ``__init__`` that does (:meth:`_handed_on`): a hook it
+        names without calling, calls on one branch, or runs on another
+        instance is not run on ``self``. A named tuple is built by
+        ``__new__`` and calls none.
         """
         node = info.node
         found = self.hook_cache.get(node)
@@ -1686,38 +1727,45 @@ class Tree:
             if written:
                 if later.node in seen:
                     return False
-                named = {
-                    inner.attr if isinstance(inner, ast.Attribute) else inner.id
-                    for definition in written
-                    for inner in ast.walk(definition.node)
-                    if isinstance(inner, ast.Attribute | ast.Name)
-                }
-                if "__post_init__" in named:
-                    return True
-                if "__init__" not in named:
-                    return False
-                seen = seen | {later.node}
-                return any(
-                    starts and all(self._calls_from(*begun, seen) for begun in starts)
-                    for starts in self._handed_on(line, place, written)
-                )
-            if _generates_init(later):
+                inner = seen | {later.node}
                 return all(
+                    _calls_own_hook(definition.node)
+                    or any(
+                        starts
+                        and all(self._calls_from(*begun, inner) for begun in starts)
+                        for starts in self._handed_on(line, place, [definition])
+                    )
+                    for definition in written
+                )
+            generated = self.generates_init(later)
+            if generated is not False:
+                calls = all(
                     any(self.lends_hook(base) for base in order)
                     for order in self.linearizations(later)
                 )
+                if generated is None:
+                    # Read both ways: the generated one, or the next class's.
+                    return calls and self._calls_from(line, place + 1, seen)
+                return calls
             if "NamedTuple" in later.bases:
                 return False
         return False
 
     def _handed_on(
-        self, line: Sequence[ClassInfo], place: int, written: Sequence[FunctionInfo]
+        self,
+        line: Sequence[ClassInfo],
+        place: int,
+        written: Sequence[FunctionInfo],
+        method: str = "__init__",
     ) -> Iterator[list[tuple[Sequence[ClassInfo], int]]]:
         """For each ``<receiver>.__init__(...)`` call of the ``__init__``
-        written for the class at *place* of *line*, the order and the place
-        in it its ``__init__`` is looked up from, for every class the
-        receiver may name; none when it names none the guard can read
-        (``self``, whose ``__init__`` is the one being read).
+        written for the class at *place* of *line* that runs on every path a
+        call that returns takes (:func:`ast_scan.every_path_calls`) and hands on
+        ``self``, the order and the place in it its ``__init__`` is looked
+        up from, for every class the receiver may name; none when it names
+        none the guard can read (``self``, whose ``__init__`` is the one
+        being read). *method* is ``__post_init__`` for the hand-offs of a
+        hook.
 
         ``super().__init__(...)`` looks it up from the class after its own
         in *line* on, and ``super(Base, self).__init__(...)`` from the class
@@ -1725,14 +1773,16 @@ class Tree:
         order of ``Base``, the class it names, so a base before ``Base`` in
         *line*, which a lookup from the next class on would find, is passed
         over: its place in *line* is that of the first class of an order of
-        ``Base`` that has an ``__init__`` of its own.
+        ``Base`` that has an ``__init__`` of its own. A call that hands on
+        another instance, ``Base.__init__(other, ...)`` or ``super(Base,
+        other)``, builds that one, not ``self``, and one on a single branch
+        may not run: neither is a hand-off.
         """
         for definition in written:
-            for node in ast.walk(definition.node):
+            instance = first_parameter(definition.node)
+            for node in every_path_calls(definition.node):
                 if not (
-                    isinstance(node, ast.Call)
-                    and isinstance(node.func, ast.Attribute)
-                    and node.func.attr == "__init__"
+                    isinstance(node.func, ast.Attribute) and node.func.attr == method
                 ):
                     continue
                 receiver = node.func.value
@@ -1744,6 +1794,11 @@ class Tree:
                     if not receiver.args:
                         yield [(line, place + 1)]
                         continue
+                    if not (
+                        len(receiver.args) == _SUPER_ARGUMENTS
+                        and _is_name(receiver.args[1], instance)
+                    ):
+                        continue
                     yield [
                         (line, at + 1)
                         for named in self._classes_named(definition, receiver.args[0])
@@ -1751,28 +1806,48 @@ class Tree:
                         if later is named
                     ]
                     continue
+                if not (node.args and _is_name(node.args[0], instance)):
+                    continue
                 yield [
-                    _placed(line, order, self._first_init(order))
+                    _placed(line, order, self._first_with(order, method))
                     for named in self._classes_named(definition, receiver)
                     for order in self.linearizations(named)
                 ]
 
-    def _first_init(self, order: Sequence[ClassInfo]) -> int:
+    def _first_with(self, order: Sequence[ClassInfo], method: str) -> int:
         """The place in *order* of the first class with an ``__init__`` of
-        its own, written in its body or generated by ``@dataclass``, or of
-        the first named tuple; past the last class when only ``object``'s
-        runs.
+        its own, written in its body or generated by ``@dataclass`` (or
+        maybe, :meth:`generates_init`), or of the first named tuple; past
+        the last class when only ``object``'s runs. For ``__post_init__``,
+        that of the first class with one of its own a run defines.
         """
+        if method != "__init__":
+            return next(
+                (
+                    place
+                    for place, later in enumerate(order)
+                    if self.running_methods(later, method)
+                ),
+                len(order),
+            )
         return next(
             (
                 place
                 for place, later in enumerate(order)
                 if self.running_inits(later)
-                or _generates_init(later)
+                or self.generates_init(later) is not False
                 or "NamedTuple" in later.bases
             ),
             len(order),
         )
+
+    def generates_init(self, info: ClassInfo) -> bool | None:
+        """Whether ``@dataclass`` writes a class an ``__init__``
+        (:func:`_generates_init`), its ``init=`` read through a name its
+        module binds once at its top to ``True`` or ``False``; ``None`` when
+        that is a value the guard cannot read, so it may write one or not.
+        """
+        return _generates_init(info, self.modules.get(info.module))
 
     def _classes_named(
         self, definition: FunctionInfo, expr: ast.expr
@@ -1790,10 +1865,15 @@ class Tree:
         ]
 
     def lends_hook(self, info: ClassInfo) -> bool:
-        """Whether a class has a ``__post_init__`` of its own, written in its
-        body or lent by :data:`MECHANISM`.
+        """Whether a class has a ``__post_init__`` of its own that a run
+        defines, written in its body (:meth:`running_methods`) or lent by
+        :data:`MECHANISM`: one declared under ``if TYPE_CHECKING:`` alone is
+        none, so the ``__init__`` ``@dataclass`` writes for the class calls
+        no hook, a subclass's included.
         """
-        return MECHANISM in info.bases or bool(self.own_methods(info, "__post_init__"))
+        return MECHANISM in info.bases or bool(
+            self.running_methods(info, "__post_init__")
+        )
 
     def initializer(self, info: ClassInfo) -> ClassInfo | None:
         """The record whose generated constructor a call of *info* runs: the
@@ -1806,21 +1886,44 @@ class Tree:
         ``init=False``, are built by the record's: its fields are the ones
         the call fills.
         """
+        found = self.initializers(info)
+        return found[0] if len(found) == 1 else None
+
+    def builds_record(self, info: ClassInfo) -> bool:
+        """Whether a call of *info* builds a record: it is one, or a class
+        that is no record over one, every constructor it may run the one
+        ``@dataclass`` wrote for a record of its order
+        (:meth:`initializers`).
+        """
+        return info.record or all(
+            runs is not None and runs.record for runs in self.initializers(info)
+        )
+
+    def initializers(self, info: ClassInfo) -> tuple[ClassInfo | None, ...]:
+        """Each record whose generated constructor a call of *info* may run
+        (:meth:`initializer`), one for each method resolution order the class
+        may have and each way a dataclass whose ``init=`` the guard cannot
+        read may go (:meth:`generates_init`), without repeats; ``None`` among
+        them for a way that runs an ``__init__`` written by hand, or only
+        ``object``'s.
+        """
         node = info.node
         if node in self.init_cache:
             return self.init_cache[node]
-        found: list[ClassInfo | None] = []
+        found: dict[int, ClassInfo | None] = {}
         for line in self.linearizations(info):
             runs: ClassInfo | None = None
             for later in line:
                 if self.running_inits(later):
                     break
-                if _generates_init(later) or "NamedTuple" in later.bases:
+                generated = self.generates_init(later)
+                if generated or "NamedTuple" in later.bases:
                     runs = later
                     break
-            found.append(runs)
-        first = found[0] if found else None
-        chosen = first if all(runs is first for runs in found) else None
+                if generated is None:
+                    found.setdefault(id(later), later)
+            found.setdefault(id(runs), runs)
+        chosen = tuple(found.values())
         self.init_cache[node] = chosen
         return chosen
 
@@ -1848,6 +1951,28 @@ class Tree:
         )
         self.attribute_cache[key] = annotation
         return annotation
+
+
+#: The arguments of ``super(Base, instance)``.
+_SUPER_ARGUMENTS = 2
+
+
+def _is_name(node: ast.expr, name: str | None) -> bool:
+    """Whether *node* is the name *name*."""
+    return name is not None and isinstance(node, ast.Name) and node.id == name
+
+
+def _calls_own_hook(function: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    """Whether an ``__init__`` written by hand calls ``self.__post_init__()``
+    on every path a call that returns takes (:func:`ast_scan.every_path_calls`).
+    """
+    instance = first_parameter(function)
+    return any(
+        isinstance(call.func, ast.Attribute)
+        and call.func.attr == "__post_init__"
+        and _is_name(call.func.value, instance)
+        for call in every_path_calls(function)
+    )
 
 
 def _placed(
@@ -1895,21 +2020,61 @@ def _public_path(module: str) -> bool:
     return not any(part.startswith("_") for part in module.split("."))
 
 
-def _generates_init(info: ClassInfo) -> bool:
+def _generates_init(info: ClassInfo, module: ast.Module | None = None) -> bool | None:
     """Whether ``@dataclass`` writes a class an ``__init__``: a decorator of
-    it is ``dataclass``, and it does not say ``init=False``.
+    it is ``dataclass``, and it does not say ``init=False``, as a constant
+    or as a name *module* binds once at its top to one. ``None`` when its
+    ``init=`` is a value the guard cannot read.
     """
     node = info.node
     if node is None:
         return False
-    return any(
-        _is_record_decorator(decorator)
-        and not (
-            isinstance(decorator, ast.Call)
-            and _keyword_constant(decorator, "init", default=True) is False
-        )
-        for decorator in node.decorator_list
-    )
+    found: bool | None = False
+    for decorator in node.decorator_list:
+        if not _is_record_decorator(decorator):
+            continue
+        if not isinstance(decorator, ast.Call):
+            return True
+        flag = next((k.value for k in decorator.keywords if k.arg == "init"), None)
+        value = _module_constant(flag, module) if flag is not None else True
+        if value is True:
+            return True
+        if value is not False:
+            found = None
+    return found
+
+
+def _module_constant(node: ast.expr, module: ast.Module | None) -> object:
+    """The constant *node* is, itself or a name *module* binds once, by an
+    assignment to it alone, to one (:func:`ast_scan.bindings_by_name`, so
+    an import, a ``def`` or a write from a function under ``global`` is
+    another binding); a value of its own (:data:`_UNREAD`) when it is
+    neither.
+    """
+    if isinstance(node, ast.Constant):
+        return node.value
+    if not isinstance(node, ast.Name) or module is None:
+        return _UNREAD
+    nodes = bindings_by_name(module).get(node.id, [])
+    if len(nodes) != 1:
+        return _UNREAD
+    value = assigned_value(module, nodes[0])
+    return value.value if isinstance(value, ast.Constant) else _UNREAD
+
+
+#: What :func:`_module_constant` gives for a value it cannot read.
+_UNREAD = object()
+
+
+def _init_only(annotation: str) -> bool:
+    """Whether a field's annotation is ``InitVar[...]``: an argument of the
+    constructor, handed to ``__post_init__``, that the record does not hold.
+    """
+    try:
+        node = ast.parse(annotation, mode="eval").body
+    except SyntaxError:
+        return False
+    return isinstance(node, ast.Subscript) and _base_name(node.value) == "InitVar"
 
 
 def _excluded_from_init(value: ast.expr | None) -> bool:
@@ -2499,12 +2664,14 @@ class Reader:
     def built_records(self, node: ast.expr | None) -> list[ClassInfo]:
         """Each record class a call may build, if *node* is a call that
         builds a record whichever path runs; ``cls`` in a method of a record
-        is that record.
+        is that record. A class that is no record over one, built by the
+        record's generated constructor (:meth:`Tree.builds_record`), is a
+        record a call builds.
 
         Every function or class the call may name is a class with no ``def``
         of its name standing where the name was read (*pins*,
         :meth:`Tree.resolve_top`), and each ``class`` statement of it the
-        call may build (:meth:`classes_built`) is a record: two records bound
+        call may build (:meth:`classes_built`) is one: two records bound
         to a name in two branches, or a class written in each, are each
         built. A call that may run a function instead, one bound to the name
         in another branch or a ``def`` that took the name from the class, or
@@ -2516,14 +2683,16 @@ class Reader:
         func = node.func
         owner = self.function.owner
         if isinstance(func, ast.Name) and func.id == "cls":
-            return [owner] if owner is not None and owner.record else []
+            return (
+                [owner] if owner is not None and self.tree.builds_record(owner) else []
+            )
         pins: _Pins = {}
         built: list[ClassInfo] = []
         for key in self.callees(func, pins=pins):
             if key not in self.tree.classes or _pinned_functions(pins, key):
                 return []
             for info in self.classes_built(key, pins):
-                if not info.record:
+                if not self.tree.builds_record(info):
                     return []
                 built.append(info)
         return built
@@ -2925,7 +3094,7 @@ class Reader:
             target = self.method_target(func)
             if target is not None:
                 return self.apply(
-                    target, node, arguments, keywords, bound=self.binds(func, target)
+                    target, node, arguments, keywords, bound=self.binds(func)
                 )
             module = self.module_of(func.value)
             if module is not None:
@@ -2975,14 +3144,13 @@ class Reader:
             if name in _PASS_THROUGH_BUILTINS or name in {"enumerate", "zip"}:
                 return union(_CLEAN, *map(flat, arguments))
             if name == "cls" and self.function.owner is not None:
-                if not self.function.owner.record:
-                    return _CLEAN
-                return self.constructor_sink(
+                return self.built_value(
                     self.function.owner,
                     node,
                     arguments,
                     keywords,
                     public=self.owner_public(),
+                    alone=True,
                 )
             if name == "replace" and name not in self.tree.functions_named(self.module):
                 return self.replace_sink(node, arguments, keywords)
@@ -3014,14 +3182,13 @@ class Reader:
             and func.func.id == "type"
             and self.function.owner is not None
         ):
-            if not self.function.owner.record:
-                return _CLEAN
-            return self.constructor_sink(
+            return self.built_value(
                 self.function.owner,
                 node,
                 arguments,
                 keywords,
                 public=self.owner_public(),
+                alone=True,
             )
         self.expr(func, env)
         return _CLEAN
@@ -3055,18 +3222,16 @@ class Reader:
             return self.tree.resolve_module(self.module, node.id)
         return None
 
-    def binds(self, func: ast.Attribute, target: tuple[str, str]) -> bool:
-        """Whether a call of the method *target* fills its first parameter
-        itself: one on ``self`` or ``cls`` does, and one through the class's
-        name, ``Owner.method(self, ...)``, takes the instance as its first
-        argument, but for a ``classmethod``, which the class binds.
+    def binds(self, func: ast.Attribute) -> bool:
+        """Whether a method call hands its receiver as an instance: one on
+        ``self`` does, so a method it reaches takes ``self`` first, and one
+        on ``cls`` or the class's name, ``Owner.method(self, ...)``, does
+        not, so a method takes the call's first argument there. Each
+        definition the call reaches is bound by its own kind
+        (:func:`_bound_by`): a ``classmethod`` always to its class, a
+        ``staticmethod`` never.
         """
-        if isinstance(func.value, ast.Name) and func.value.id in {"self", "cls"}:
-            return True
-        return any(
-            definition.kind == "classmethod"
-            for definition in self.tree.definitions.get(target, [])
-        )
+        return isinstance(func.value, ast.Name) and func.value.id == "self"
 
     def method_target(self, func: ast.Attribute) -> tuple[str, str] | None:
         """The method ``self.name`` or ``cls.name`` names, in the class read."""
@@ -3128,7 +3293,11 @@ class Reader:
                 return values[0] if len(values) == 1 else union(_CLEAN, *values)
         values.extend(
             self._returned_by(
-                function, arguments, keywords, bound=bound, given=node.args
+                function,
+                arguments,
+                keywords,
+                bound=_bound_by(function, instance=bound),
+                given=node.args,
             )
             for function in self.reached(target, node, pins=pins)
         )
@@ -3221,19 +3390,25 @@ class Reader:
         alone: bool,
     ) -> Value:
         """What a call of the class *info* keeps, and returns, read through
-        the constructor it runs (:meth:`Tree.initializer`): the one
+        each constructor it may run (:meth:`Tree.initializers`): the one
         ``@dataclass`` wrote for a record of its order takes that record's
         fields, a class that is no record over one keeps them too, and a
         record whose ``__init__`` is written by hand is read with its own
-        fields. A class that is no record and runs no generated constructor
-        keeps nothing a caller hands it in a field.
+        fields. A class that is no record keeps nothing a caller hands it in
+        a field on a way that runs no generated constructor, and what it
+        keeps on the others; one over a base written in each branch of an
+        ``if`` keeps what either constructor keeps.
         """
-        runs = self.tree.initializer(info)
-        if runs is None and not info.record:
+        values = [
+            self.constructor_sink(
+                info, node, arguments, keywords, public=public, alone=alone, runs=runs
+            )
+            for runs in self.tree.initializers(info)
+            if runs is not None or info.record
+        ]
+        if not values:
             return _CLEAN
-        return self.constructor_sink(
-            info, node, arguments, keywords, public=public, alone=alone, runs=runs
-        )
+        return values[0] if len(values) == 1 else union(_CLEAN, *values)
 
     def constructor_sink(
         self,
@@ -3293,6 +3468,13 @@ class Reader:
                 spilled.append(value)
             else:
                 keep(name, value)
+        # An ``InitVar`` is handed to ``__post_init__`` and stored nowhere by
+        # the constructor: what the hook does with it is read in the hook.
+        kept = {
+            name: value
+            for name, value in kept.items()
+            if not _init_only(annotations[name])
+        }
         # A field the record copies itself, or one that cannot hold an array,
         # carries nothing a later read could keep.
         kept = {
@@ -4272,6 +4454,16 @@ def _imports_of(
         for name in imported_names(node):
             found.setdefault(name, []).append(node)
     return {name: tuple(nodes) for name, nodes in found.items()}
+
+
+def _bound_by(function: FunctionInfo, *, instance: bool) -> bool:
+    """Whether a call fills the first parameter of the definition it reaches
+    itself: a ``classmethod``'s, with its class, however it is called; a
+    plain method's when the call hands an instance (``self.method(...)``,
+    *instance*), not through ``cls`` or the class's name, where the call's
+    first argument takes it; a ``staticmethod``'s or a function's never.
+    """
+    return function.kind == "classmethod" or (instance and function.kind == "method")
 
 
 def _bound_parameter(

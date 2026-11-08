@@ -122,6 +122,8 @@ from ast_scan import (
     bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
+    every_path_calls,
+    first_parameter,
     for_the_type_checker,
     global_bindings,
     held_before,
@@ -3362,9 +3364,12 @@ def _runs_a_post_init(record: type) -> bool:
     had one at the time, which a class that is no record over it does not
     change, so ``Plain(_Count)``, over a record that has none, never runs
     the ``__post_init__`` it writes. One written by hand runs it when it
-    names it, and runs what each ``__init__`` it hands its values on to runs
-    (:func:`_handed_on`); one that does neither calls none, as ``object``'s
-    does.
+    calls it on ``self`` (:func:`_calls_the_hook`) on every path a call that
+    returns takes (:func:`ast_scan.every_path_calls`), and runs what an
+    ``__init__`` it hands ``self`` on to on every such path runs
+    (:func:`_handed_on`): a hook it names without calling, calls on one
+    branch, or runs on another instance does not check ``self``. One that
+    does neither calls none, as ``object``'s does.
     """
     first = _first_init(record.__mro__)
     return first is not None and _init_runs_a_post_init(record, *first, frozenset())
@@ -3389,16 +3394,22 @@ def _init_runs_a_post_init(
     through an ``__init__`` it hands its values on to (:func:`_handed_on`).
 
     *seen* are the classes whose ``__init__`` is being read: a hand-off back
-    to one of them runs nothing it has not run.
+    to one of them runs nothing it has not run. One with no source, as the
+    one ``@dataclass`` writes, calls the hook when its code names it, which
+    it does on every path.
     """
-    code = getattr(inspect.unwrap(init), "__code__", None)
+    unwrapped = inspect.unwrap(init)
+    code = getattr(unwrapped, "__code__", None)
     if code is None:
         return False
-    names = _code_names(code)
-    if "__post_init__" in names:
+    function = _parsed_function(_parsed(unwrapped))
+    if function is None:
+        return "__post_init__" in _code_names(code)
+    if any(
+        _calls_the_hook(call, first_parameter(function))
+        for call in every_path_calls(function)
+    ):
         return True
-    if "__init__" not in names:
-        return False
     seen = seen | {owner}
     return any(
         (found := _first_init(order)) is not None
@@ -3421,23 +3432,24 @@ def _handed_on(
     the class it names, so a base before ``Base`` in the record's order,
     which a lookup from the next class on would find, is passed over. A
     receiver that names no class the guard can read (``self``, whose
-    ``__init__`` is the one being read) yields none.
+    ``__init__`` is the one being read) yields none. Only a call that runs
+    on every path a call that returns takes (:func:`ast_scan.every_path_calls`)
+    and hands on ``self`` is a hand-off: ``Base.__init__(other, ...)`` and
+    ``super(Base, other)`` build another instance.
     """
     unwrapped = inspect.unwrap(init)
     tree = _parsed(unwrapped)
-    if tree is None:
+    function = _parsed_function(tree)
+    if tree is None or function is None:
         return
+    instance = first_parameter(function)
     module_name = getattr(unwrapped, "__module__", "") or ""
     namespace = _namespace(unwrapped, tree, module_name)
     namespace.pop("self", None)
     namespace.pop("cls", None)
     order = record.__mro__
-    for node in ast.walk(tree):
-        if not (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "__init__"
-        ):
+    for node in every_path_calls(function):
+        if not (isinstance(node.func, ast.Attribute) and node.func.attr == "__init__"):
             continue
         receiver = node.func.value
         if (
@@ -3445,15 +3457,79 @@ def _handed_on(
             and isinstance(receiver.func, ast.Name)
             and receiver.func.id == "super"
         ):
+            if receiver.args and not (
+                len(receiver.args) == _SUPER_ARGUMENTS
+                and isinstance(receiver.args[1], ast.Name)
+                and receiver.args[1].id == instance
+            ):
+                continue
             start = (
                 _named_object(receiver.args[0], namespace) if receiver.args else owner
             )
             if start in order:
                 yield order[order.index(start) + 1 :]
             continue
+        if not (
+            node.args
+            and isinstance(node.args[0], ast.Name)
+            and node.args[0].id == instance
+        ):
+            continue
         named = _named_object(receiver, namespace)
         if inspect.isclass(named):
             yield named.__mro__
+
+
+#: The arguments of ``super(Base, instance)``.
+_SUPER_ARGUMENTS = 2
+
+
+def _calls_the_hook(call: ast.Call, instance: str | None) -> bool:
+    """Whether *call* runs a ``__post_init__`` on *instance*, the first
+    parameter of the ``__init__`` it is written in: ``self.__post_init__()``,
+    ``super().__post_init__()``, ``super(Base, self).__post_init__()`` or
+    ``Base.__post_init__(self)``. Which hook that is, is
+    :func:`_named_hook_order`'s.
+    """
+    func = call.func
+    if not (isinstance(func, ast.Attribute) and func.attr == "__post_init__"):
+        return False
+    receiver = func.value
+    if isinstance(receiver, ast.Name):
+        if receiver.id == instance:
+            return True
+        return bool(
+            call.args
+            and isinstance(call.args[0], ast.Name)
+            and call.args[0].id == instance
+        )
+    if (
+        isinstance(receiver, ast.Call)
+        and isinstance(receiver.func, ast.Name)
+        and receiver.func.id == "super"
+    ):
+        return not receiver.args or (
+            len(receiver.args) == _SUPER_ARGUMENTS
+            and isinstance(receiver.args[1], ast.Name)
+            and receiver.args[1].id == instance
+        )
+    return False
+
+
+def _parsed_function(
+    tree: ast.AST | None,
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    """The function whose source *tree* is (:func:`_parsed`), or ``None``."""
+    if not isinstance(tree, ast.Module):
+        return None
+    return next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        ),
+        None,
+    )
 
 
 def _post_init(record: type) -> Callable[..., object] | None:

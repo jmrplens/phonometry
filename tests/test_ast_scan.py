@@ -1693,3 +1693,45 @@ def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
     assert isinstance(statement, ast.Assign)
     assert ast_scan.assignment_target(statement.targets[0]) is statement.targets[0]
     assert ast_scan.assignment_target(statement) is None
+
+
+def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
+    """``every_path_calls`` yields the calls a function makes as statements
+    of their own at the top of its body, or of a ``with`` block there, up to
+    the first statement that may ``return``; a call on one branch, in a loop
+    or in a ``try``, or after a ``return`` that may have left, is not one,
+    and a ``return`` in a function written inside is that function's.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def init(self, data, fast):
+                first(self)
+                with lock:
+                    second(self)
+                if fast:
+                    branch(self)
+                for item in data:
+                    looped(self)
+                try:
+                    guarded(self)
+                except ValueError:
+                    pass
+                def inner():
+                    return 1
+                third(self)
+                if fast:
+                    return
+                after(self)
+            """
+        )
+    )
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    names = [
+        call.func.id
+        for call in ast_scan.every_path_calls(function)
+        if isinstance(call.func, ast.Name)
+    ]
+    assert names == ["first", "second", "third"]
+    assert ast_scan.first_parameter(function) == "self"

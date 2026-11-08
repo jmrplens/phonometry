@@ -385,6 +385,52 @@ def _same_scope(node: ast.AST) -> list[ast.AST]:
     return list(ast.iter_child_nodes(node))
 
 
+def first_parameter(function: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
+    """The name of a function's first parameter, ``self`` in a method."""
+    spec = function.args
+    positional = (*spec.posonlyargs, *spec.args)
+    return positional[0].arg if positional else None
+
+
+def every_path_calls(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> Iterator[ast.Call]:
+    """The calls a function makes, as statements of their own, on every path
+    a call of it that returns takes: one at the top of its body, or of a
+    ``with`` block there, before any statement that may ``return``
+    (:func:`scope_nodes` of the statement, so a ``return`` of a function or
+    a class written there is another scope's). One in a branch, a loop or a
+    ``try`` may not run, nor one after a ``return`` that may have left; a
+    path that raises returns nothing.
+    """
+    body: list[ast.stmt] = list(function.body)
+    while body:
+        statement = body.pop(0)
+        if isinstance(statement, ast.With | ast.AsyncWith):
+            body[:0] = statement.body
+            continue
+        if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+            yield statement.value
+        if isinstance(statement, ast.Return) or any(
+            isinstance(inner, ast.Return) for inner in _statement_nodes(statement)
+        ):
+            return
+
+
+def _statement_nodes(statement: ast.stmt) -> list[ast.AST]:
+    """Every node a statement runs in the scope it is written in, the
+    statement too: a ``def``, a ``class`` or a lambda written in it is met,
+    its body not entered (:func:`_same_scope`).
+    """
+    found: list[ast.AST] = []
+    pending: list[ast.AST] = [statement]
+    while pending:
+        node = pending.pop()
+        found.append(node)
+        pending.extend(_same_scope(node))
+    return found
+
+
 def scope_nodes(scope: ast.AST) -> list[ast.AST]:
     """Every node *scope* runs as its own, a scope inside it met but not entered."""
     found: list[ast.AST] = []

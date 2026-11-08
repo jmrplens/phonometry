@@ -4117,3 +4117,110 @@ def test_the_callers_of_a_private_method_are_the_calls_that_reach_it(
     assert ccl._callers_source(first_helper, "kind", module, 0) == ccl._Source(
         "texts", frozenset({"a", "c"})
     )
+
+
+@dataclass
+class _ChecksItsPace:
+    """A record whose hook checks the pace."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(init=False)
+class _HookOnOneBranch(_ChecksItsPace):
+    """A record whose ``__init__`` runs the hook on one branch alone."""
+
+    def __init__(self, pace: _Pace = "fast", *, check: bool = False) -> None:
+        self.pace = pace
+        if check:
+            self.__post_init__()
+
+
+@dataclass(init=False)
+class _HookNamedOnly(_ChecksItsPace):
+    """A record whose ``__init__`` looks the hook up and never calls it."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        self.hook = self.__post_init__
+
+
+@dataclass(init=False)
+class _BuildsAnother(_ChecksItsPace):
+    """A record whose ``__init__`` hands the pace to the base's ``__init__``
+    for another instance, whose hook checks nothing.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        other = object.__new__(_QuietHook)
+        _ChecksItsPace.__init__(other, pace)  # type: ignore[arg-type]
+        self.pace = pace
+
+
+@dataclass(init=False)
+class _CallsItsHook(_ChecksItsPace):
+    """A record whose ``__init__`` calls the hook on every path."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        self.__post_init__()
+
+
+@dataclass(init=False)
+class _CallsPastItself(_ChecksItsPace):
+    """A record whose ``__init__`` calls the base's hook through ``super()``."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        super().__post_init__()
+
+
+@dataclass(init=False)
+class _HandsItselfOn(_ChecksItsPace):
+    """A record whose ``__init__`` hands ``self`` to the base's."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _ChecksItsPace.__init__(self, pace)
+
+
+@pytest.mark.parametrize(
+    ("record", "runs"),
+    [
+        (_HookOnOneBranch, False),
+        (_HookNamedOnly, False),
+        (_BuildsAnother, False),
+        (_CallsItsHook, True),
+        (_CallsPastItself, True),
+        (_HandsItselfOn, True),
+    ],
+    ids=[
+        "one-branch",
+        "named-only",
+        "another-instance",
+        "called",
+        "called-past-itself",
+        "handed-on",
+    ],
+)
+def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
+    record: type[_ChecksItsPace], *, runs: bool
+) -> None:
+    """An ``__init__`` written by hand runs ``__post_init__`` on ``self``
+    when it calls ``self.__post_init__()``, or hands ``self`` to an
+    ``__init__`` that does, on every path a call that returns takes; the
+    run agrees: only those refuse a pace the hook does not take.
+
+    Any mention of ``__post_init__`` in its code was read as a call, so a
+    hook called on one branch, or only looked up, was credited with its
+    check; and any ``Base.__init__(...)`` was read as a hand-off, so one
+    that builds another instance credited the check to ``self``.
+    """
+    assert ccl._runs_a_post_init(record) is runs
+    if runs:
+        with pytest.raises(ValueError, match="pace"):
+            record("medium")  # type: ignore[arg-type]
+    else:
+        assert record("medium").pace == "medium"  # type: ignore[arg-type]

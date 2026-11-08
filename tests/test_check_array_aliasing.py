@@ -4971,3 +4971,463 @@ def test_a_numpy_scalar_class_written_with_its_argument_is_one_number() -> None:
     assert caa.holds_array("np.ndarray | np.integer[Any]")
     assert caa.holds_array("Mapping[str, Any]")
     assert caa.holds_array("Any")
+
+
+#: The imports of the records below.
+_RECORDS_HEAD = """
+import sys
+from dataclasses import InitVar, dataclass, field
+from typing import TYPE_CHECKING
+
+import numpy as np
+from numpy.typing import NDArray
+
+from ._internal.frozen import OwnsArrays, handed_over, read_only_copy
+"""
+
+#: A base whose own ``__post_init__`` copies ``data``, and a record over it
+#: whose ``__init__`` is the one ``@dataclass`` writes for the base.
+_COPYING_BASE = """
+@dataclass(frozen=True)
+class Base:
+    data: NDArray[np.float64]
+
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+"""
+
+
+@pytest.mark.parametrize(
+    ("base", "body", "expected"),
+    [
+        # A subclass's hook that hands on to none replaces the base's.
+        (
+            _COPYING_BASE,
+            """
+            class Plain(Base):
+                def __post_init__(self):
+                    pass
+
+            def make(data):
+                return Plain(data)
+            """,
+            {("make", "Plain.data", "data")},
+        ),
+        (
+            _COPYING_BASE,
+            """
+            class Plain(Base):
+                def __post_init__(self):
+                    super().__post_init__()
+
+            def make(data):
+                return Plain(data)
+            """,
+            set(),
+        ),
+        # A hook declared for the type checker alone is none: the base's
+        # generated __init__ calls no hook, the subclass's included.
+        (
+            "",
+            """
+            @dataclass(frozen=True)
+            class Base:
+                data: NDArray[np.float64]
+
+                if TYPE_CHECKING:
+                    def __post_init__(self) -> None: ...
+
+            class Plain(Base):
+                def __post_init__(self):
+                    object.__setattr__(self, "data", read_only_copy(self.data))
+
+            def make(data):
+                return Plain(data)
+            """,
+            {("make", "Plain.data", "data")},
+        ),
+        (
+            "",
+            """
+            @dataclass(frozen=True)
+            class Base:
+                data: NDArray[np.float64]
+
+                def __post_init__(self) -> None:
+                    pass
+
+            class Plain(Base):
+                def __post_init__(self):
+                    object.__setattr__(self, "data", read_only_copy(self.data))
+
+            def make(data):
+                return Plain(data)
+            """,
+            set(),
+        ),
+    ],
+    ids=["override", "delegates", "type-checking-hook", "running-hook"],
+)
+def test_the_hook_a_call_runs_is_the_one_its_order_resolves(
+    tmp_path: pathlib.Path,
+    base: str,
+    body: str,
+    expected: set[tuple[str, str, str]],
+) -> None:
+    """The ``__post_init__`` a record's constructor calls is the first its
+    method resolution order holds that a run defines, and it copies what it
+    copies itself or what a hook it hands on to does.
+
+    Every hook of the order was read as copying what any of them copies, so
+    ``Plain``, whose own hook replaces the base's and copies nothing, was
+    read as copying ``data``; and a ``__post_init__`` declared under ``if
+    TYPE_CHECKING:`` was read as one the base's generated ``__init__``
+    calls, so ``Plain``'s copying hook, which never runs, was credited.
+    """
+    source = _RECORDS_HEAD + base + textwrap.dedent(body)
+    assert _findings(tmp_path, records=source) == expected
+
+
+#: A record with no hook, one over it whose hook copies, and a record whose
+#: ``__init__`` is written by hand over that.
+_HAND_WRITTEN_HEAD = """
+@dataclass(frozen=True)
+class Plain:
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True)
+class Rec(Plain):
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+"""
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        (
+            """
+            def __init__(self, data, check=False):
+                Plain.__init__(self, data)
+                if check:
+                    self.__post_init__()
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        (
+            """
+            def __init__(self, data):
+                Plain.__init__(self, data)
+                hook = self.__post_init__
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        (
+            """
+            def __init__(self, data):
+                other = object.__new__(Rec)
+                Rec.__init__(other, data)
+                Plain.__init__(self, data)
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        (
+            """
+            def __init__(self, data):
+                Plain.__init__(self, data)
+                self.__post_init__()
+            """,
+            set(),
+        ),
+        (
+            """
+            def __init__(self, data):
+                Rec.__init__(self, data)
+            """,
+            set(),
+        ),
+    ],
+    ids=["one-branch", "named-only", "other-instance", "called", "handed-on"],
+)
+def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
+    tmp_path: pathlib.Path, body: str, expected: set[tuple[str, str, str]]
+) -> None:
+    """An ``__init__`` written by hand runs ``__post_init__`` when it calls
+    ``self.__post_init__()``, or hands ``self`` to an ``__init__`` that
+    does, on every path a call that returns takes.
+
+    Any mention of ``__post_init__`` in its body was read as a call, so a
+    hook called on one branch, or only looked up, was credited; and any
+    ``Base.__init__(...)`` was read as a hand-off, so ``Rec.__init__(other,
+    data)``, which copies into another instance, was credited to ``self``.
+    """
+    source = (
+        _RECORDS_HEAD
+        + _HAND_WRITTEN_HEAD
+        + "\n@dataclass(frozen=True, init=False)\nclass Sub(Rec):\n"
+        + textwrap.indent(textwrap.dedent(body), "    ")
+        + "\ndef make(data):\n    return Sub(data)\n"
+    )
+    assert _findings(tmp_path, records=source) == expected
+
+
+@pytest.mark.parametrize(
+    ("option", "expected"),
+    [
+        ("NO_INIT = False\n", {("make", "Rec.data", "data")}),
+        ("NO_INIT = True\n", set()),
+        ("NO_INIT = sys.flags.optimize > 9\n", {("make", "Rec.data", "data")}),
+    ],
+    ids=["false", "true", "unread"],
+)
+def test_an_init_option_is_read_through_the_name_that_holds_it(
+    tmp_path: pathlib.Path, option: str, expected: set[tuple[str, str, str]]
+) -> None:
+    """``@dataclass(init=NO_INIT)`` reads the constant its module binds the
+    name to, and a value the guard cannot read both ways: the ``__init__``
+    the decorator writes, or the base's, which calls no hook.
+
+    A name was read as ``init=True``, so the copy the record's own hook
+    makes was credited to a call that runs the base's ``__init__``.
+    """
+    source = (
+        _RECORDS_HEAD
+        + option
+        + """
+@dataclass(frozen=True)
+class Base:
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True, init=NO_INIT)
+class Rec(Base):
+    def __post_init__(self):
+        object.__setattr__(self, "data", read_only_copy(self.data))
+
+def make(data):
+    return Rec(data)
+"""
+    )
+    assert _findings(tmp_path, records=source) == expected
+
+
+#: A record that keeps what it is built with.
+_KEPT_REC = """
+@dataclass(frozen=True)
+class Rec:
+    data: NDArray[np.float64]
+"""
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        # A class method a later plain method of its name replaces.
+        """
+        class Maker:
+            @classmethod
+            def pick(cls, data):
+                return read_only_copy(data)
+
+            def pick(self, data):
+                return data
+
+            @classmethod
+            def build(cls, holder, data):
+                return Rec(cls.pick(holder, data))
+        """,
+        """
+        class Maker:
+            @classmethod
+            def pick(cls, data):
+                return read_only_copy(data)
+
+            def pick(self, data):
+                return data
+
+            def build(self, holder, data):
+                return Rec(Maker.pick(holder, data))
+        """,
+        # A plain method called through ``cls`` takes the call's first argument.
+        """
+        class Maker:
+            def pick(self, data):
+                return data
+
+            @classmethod
+            def build(cls, holder, data):
+                return Rec(cls.pick(holder, data))
+        """,
+    ],
+    ids=["replaced-through-cls", "replaced-through-name", "plain-through-cls"],
+)
+def test_a_method_call_binds_each_definition_it_reaches_by_its_kind(
+    tmp_path: pathlib.Path, body: str
+) -> None:
+    """A call through ``cls`` or the class's name fills the first parameter
+    of a class method with the class, and hands a plain method the call's
+    first argument there, whichever definition of the name the call reaches.
+
+    A call through ``cls`` was read as binding the first parameter of every
+    definition, and one through the class's name as binding it when any
+    definition of the name was a class method, so ``pick(self, data)`` took
+    ``holder`` as ``data`` and ``holder`` was reported as kept in
+    ``Rec.data`` beside ``data``.
+    """
+    source = _RECORDS_HEAD + _KEPT_REC + textwrap.dedent(body)
+    assert _findings(tmp_path, records=source) == {("Maker.build", "Rec.data", "data")}
+
+
+def test_cls_and_type_of_self_build_through_the_constructor_they_run(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``cls(data)`` and ``type(self)(data)`` run the constructor a call of
+    the class runs: the base's, when the record is told ``init=False`` or is
+    a class that is no record over one, with the base's fields.
+
+    They were read with the class's own fields, so a field its own
+    declaration leaves out of ``__init__`` dropped the array the base's
+    constructor keeps, and a class that is no record kept nothing.
+    """
+    source = (
+        _RECORDS_HEAD
+        + """
+@dataclass(frozen=True)
+class Base:
+    data: NDArray[np.float64]
+
+@dataclass(frozen=True, init=False)
+class Rec(Base):
+    data: NDArray[np.float64] = field(init=False)
+
+    @classmethod
+    def build(cls, data):
+        return cls(data)
+
+    def again(self, data):
+        return type(self)(data)
+
+class Over(Base):
+    @classmethod
+    def build(cls, data):
+        return cls(data)
+"""
+    )
+    assert _findings(tmp_path, records=source) == {
+        ("Rec.build", "Rec.data", "data"),
+        ("Rec.again", "Rec.data", "data"),
+        ("Over.build", "Over.data", "data"),
+    }
+
+
+def test_a_class_over_an_owning_record_is_a_record_it_builds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class that is no record over one that inherits ``OwnsArrays`` runs
+    the record's generated constructor, which copies: a copy handed to it is
+    made twice, and an array built for it passes through ``handed_over``.
+
+    Only a record was read as built, so the second copy went unreported and
+    ``handed_over`` was refused as handing no record that copies.
+    """
+    source = (
+        _RECORDS_HEAD
+        + """
+@dataclass(frozen=True)
+class Base(OwnsArrays):
+    data: NDArray[np.float64]
+
+class Rec(Base):
+    pass
+
+def twice(data):
+    return Rec(read_only_copy(data))
+
+def built(n):
+    data = np.zeros(n)
+    return Rec(handed_over(data))
+"""
+    )
+    assert _findings(tmp_path, records=source) == {
+        ("twice", "Rec.data (copied twice)", "")
+    }
+    root = tmp_path / "pkg"
+    refused = caa.handovers_in(sorted(root.rglob("*.py")), root)
+    assert [(f.function, f.sink) for f in refused] == []
+
+
+def test_a_class_over_a_base_written_in_each_branch_keeps_what_either_keeps(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A class that is no record over a base written in each branch of an
+    ``if`` runs either base's generated constructor, and keeps what each
+    keeps.
+
+    The two constructors disagreeing was read as none running, so the call
+    kept nothing though both keep ``data``.
+    """
+    source = (
+        _RECORDS_HEAD
+        + """
+if sys.platform == "win32":
+    @dataclass(frozen=True)
+    class Base:
+        data: NDArray[np.float64]
+else:
+    @dataclass(frozen=True)
+    class Base:
+        data: NDArray[np.float64]
+        label: str = ""
+
+class Rec(Base):
+    pass
+
+def make(data):
+    return Rec(data)
+"""
+    )
+    assert _findings(tmp_path, records=source) == {("make", "Rec.data", "data")}
+
+
+def test_an_init_var_is_handed_to_the_hook_and_held_by_no_field(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An ``InitVar`` takes a place of the constructor and is handed to
+    ``__post_init__``, and the record holds it in no field: what the hook
+    stores of it is read in the hook.
+
+    It was read as a field the record keeps, so ``Rec(3, data)`` was
+    reported as keeping ``data`` in ``Rec.seed``, which no record has.
+    """
+    source = (
+        _RECORDS_HEAD
+        + """
+@dataclass(frozen=True)
+class Base:
+    size: int
+    seed: InitVar[NDArray[np.float64]]
+
+    def __post_init__(self, seed):
+        pass
+
+class Rec(Base):
+    pass
+
+def make(data):
+    return Rec(3, data)
+
+@dataclass(frozen=True)
+class Stored:
+    size: int
+    seed: InitVar[NDArray[np.float64]]
+    kept: NDArray[np.float64] = field(init=False)
+
+    def __post_init__(self, seed):
+        object.__setattr__(self, "kept", seed)
+
+def store(data):
+    return Stored(3, data)
+"""
+    )
+    assert _findings(tmp_path, records=source) == {
+        ("Stored.__post_init__", "Stored.kept", "seed")
+    }

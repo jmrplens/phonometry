@@ -131,15 +131,17 @@ const HTML_LONE_TAG =
 
 /**
  * A tag of an `.mdx` page, over as many lines as it takes: a quoted value and an
- * expression among its attributes may hold a `>`.
+ * expression among its attributes may hold a `>`. Sticky: a reader sets its
+ * `lastIndex` to where the tag would open. `pageMarkup` of
+ * `scripts/shared/markdown-spans.mjs` reads the tags of a page by it too.
  */
-const MDX_TAG = /<\/?(?:[A-Za-z_$][\w.:$-]*(?:[^"'>{]|"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\})*)?>/y;
+export const MDX_TAG = /<\/?(?:[A-Za-z_$][\w.:$-]*(?:[^"'>{]|"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\})*)?>/y;
 
 /**
  * An expression of an `.mdx` page, over as many lines as it takes: a comment, or
- * braces balanced three levels down.
+ * braces balanced three levels down. Sticky, as {@link MDX_TAG} is.
  */
-const MDX_EXPRESSION = /\{\s*\/\*[\s\S]*?\*\/\s*\}|\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}/y;
+export const MDX_EXPRESSION = /\{\s*\/\*[\s\S]*?\*\/\s*\}|\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}/y;
 
 /** The roles of a line that is code. */
 const CODE_ROLES = new Set(['open', 'body', 'close', 'indented']);

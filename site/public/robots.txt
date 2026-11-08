@@ -7,12 +7,10 @@
 # fetch it is told the same thing.
 #
 # The two files are not identical, and no check here can make them so: the root
-# file lives in another repository. Each names a few crawlers the other does
-# not. What they share is the policy, which is the part a crawler is asking
-# about: both open with `User-agent: *` / `Allow: /`, and every per-crawler rule
-# in either file is another `Allow: /`. So a crawler reading this copy is
-# granted exactly what the root file grants it, whether or not it is named in
-# both.
+# file lives in another repository, and the crawlers each one names can differ.
+# What they share is the policy for every path under /phonometry/, the only
+# paths this copy speaks for: both allow every crawler there, named or not, so
+# a crawler reading this copy is granted what the root file grants it here.
 #
 # Structured context for LLMs:
 #   https://docs.jmrp.io/phonometry/llms.txt

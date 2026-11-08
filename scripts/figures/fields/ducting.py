@@ -25,6 +25,14 @@ if TYPE_CHECKING:
 
 _DUCT_AXIS = 400.0  # channel-axis depth [m]
 _DUCT_SRC_DEPTHS = (400.0, 150.0)  # on the axis / near the surface
+_DUCT_DX = 2.0  # grid spacing [m]
+_DUCT_NY, _DUCT_NX = 400, 1200  # 800 m depth x 2400 m range
+_DUCT_SPONGE = 30  # absorbing cells on every side
+_DUCT_SRC_IX = 100  # source column, its centre 201 m in
+#: The doublet: its Gaussian half-width, and how long after the first
+#: pulse's peak (four half-widths in, GaussianPulse's default) the second,
+#: inverted one peaks [s].
+_DUCT_HALF_WIDTH_S, _DUCT_OFFSET_S = 0.028, 0.033
 
 
 def _duct_profile(z: NDArray[np.floating[Any]]) -> NDArray[np.float64]:
@@ -43,6 +51,24 @@ def _duct_profile(z: NDArray[np.floating[Any]]) -> NDArray[np.float64]:
     return np.minimum(c, c1 + 250.0)
 
 
+def _duct_crossed_s() -> float:
+    """When the axis run's trapped arrival has gone into the right sponge [s].
+
+    Launched on the axis, the last of the pulse to arrive anywhere is what
+    stays on the axis, at the minimum sound speed: every ray that leaves it
+    crosses faster water. The second, inverted pulse peaks 4 w + offset in,
+    at 145 ms; at the axis speed it reaches the face where the right sponge
+    starts, 2 139 m from the source cell, 1.445 s later; and two half-widths
+    after that its Gaussian is down to e^-4 of its peak. 1.646 s in all, the
+    delay counted as the seabed and plate-junction clips count theirs.
+    """
+    x_source = (_DUCT_SRC_IX + 0.5) * _DUCT_DX
+    x_sponge = (_DUCT_NX - _DUCT_SPONGE) * _DUCT_DX
+    c_axis = float(_duct_profile(np.array([_DUCT_AXIS]))[0])
+    second_peak = 4.0 * _DUCT_HALF_WIDTH_S + _DUCT_OFFSET_S
+    return second_peak + (x_sponge - x_source) / c_axis + 2.0 * _DUCT_HALF_WIDTH_S
+
+
 # SOFAR-duct timeline. Mesh: the pulse carries useful energy to ~19 Hz,
 # where the slowest water on the axis (1 480 m/s) gives lambda = 77.9 m and
 # lambda / 8 = 9.7 m; the geometry has no feature smaller than the 300 m
@@ -55,7 +81,10 @@ def _duct_profile(z: NDArray[np.floating[Any]]) -> NDArray[np.float64]:
 # path (1 480 m/s on the channel axis). The near-surface source at
 # (200, 150) m is the binding one at 2 294 m -- the on-axis source is
 # 2 236 m away -- so 2 294 / 1 480 x 1.2 = 1.860 s, against the old
-# 1.589 s window, which cut the wavefronts off before the frame edge.
+# 1.589 s window, which cut the wavefronts off before the frame edge. The
+# doublet peaks 112 and 145 ms in, which that count leaves out; the margin
+# covers it, and by the last frame the energy left in the frame is below
+# 0.1 % of its peak in both runs (measured on the two runs, NumPy).
 # Sampling: every solver step is captured, 490.5 us apart, i.e. 107.3
 # frames per 19 Hz period (>= 48; a two-step stride would already drop to
 # 53.6, still compliant, but this grid's dt is the natural floor). 3 793
@@ -90,24 +119,28 @@ def _ducting_fields(
 
     compute = clip_placement.compute_for("anim_fdtd_ducting")
 
-    dx = 2.0
-    ny, nx = 400, 1200  # 800 m depth x 2400 m range
+    dx = _DUCT_DX
+    ny, nx = _DUCT_NY, _DUCT_NX
     z = (np.arange(ny) + 0.5) * dx
     c_prof = _duct_profile(z)
     c_map = np.repeat(c_prof[:, np.newaxis], nx, axis=1)
     every = _DUCT_EVERY
-    width, offset = 0.028, 0.033
+    width, offset = _DUCT_HALF_WIDTH_S, _DUCT_OFFSET_S
     p_all, e_all = [], []
     times = np.zeros(0)
     for depth in _DUCT_SRC_DEPTHS:
         sim = FDTD2D(
-            c=c_map, dx=dx, rho=1025.0, absorbing_layer_cells=30, compute=compute
+            c=c_map,
+            dx=dx,
+            rho=1025.0,
+            absorbing_layer_cells=_DUCT_SPONGE,
+            compute=compute,
         )
         iy = round(depth / dx)
-        sim.add_source(GaussianPulse(ix=100, iy=iy, half_width_s=width))
+        sim.add_source(GaussianPulse(ix=_DUCT_SRC_IX, iy=iy, half_width_s=width))
         sim.add_source(
             GaussianPulse(
-                ix=100,
+                ix=_DUCT_SRC_IX,
                 iy=iy,
                 half_width_s=width,
                 t0=4.0 * width + offset,
@@ -306,7 +339,19 @@ def animate_fdtd_ducting(output_dir: str) -> None:
             "edgecolor": "none",
         },
     )
-    reveal = int(0.83 * p_all.shape[1])  # ~17.5 s: pulse has crossed
+    # The overlay comes in once the pulse has crossed: the axis run's
+    # trapped arrival, the slowest and last, has gone into the right sponge
+    # (_duct_crossed_s: 1.646 s into the run, frame 3356 of 3793, 18.6 s of
+    # playback), so no front is still on its way when the energy map covers
+    # the field. The same frame holds for the near-surface run: its source
+    # sits in the 1 730 m/s water above the channel, so no ray it launches
+    # is turned back into the slow water, and what is left in either panel's
+    # open water at that frame is faint, 12.5 % of the shared colour scale on
+    # the axis panel and 8.8 % on the near-surface one, which also drops
+    # below 5 % first, at 1.697 s against 1.706 s (measured on the two runs,
+    # NumPy). The overlay is opaque 12 frames later and stays 2.4 s, past
+    # the 2 s hold the other clips close on.
+    reveal = int(np.searchsorted(times, _duct_crossed_s()))
     captions_on = int(0.38 * p_all.shape[1])  # first refocus is visible
 
     def update(k: int) -> tuple[Any, ...]:

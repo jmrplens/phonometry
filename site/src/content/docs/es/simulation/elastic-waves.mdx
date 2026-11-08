@@ -362,7 +362,7 @@ la del frente de cizalla, y su propiedad definitoria, que se queda en la
 superficie mientras los frentes de cuerpo se marchan, es una afirmación sobre
 lo que pasa después.
 
-Así que ejecuta el mismo golpe durante 164 µs, con esponjas en los otros tres
+Así que ejecuta el mismo golpe durante 196 µs, con esponjas en los otros tres
 lados y el dominio ensanchado hasta que la esquina donde una esponja se
 encuentra con la superficie libre quede fuera del encuadre, y ejecútalo dos
 veces: una con el lado superior declarado `"free"` y otra dejándolo en el valor
@@ -376,22 +376,28 @@ hace la condición de contorno, no el material.
   width={2400}
   height={1350}
   title="El problema de Lamb con la superficie superior libre y con ella rígida"
-  description="Un golpe vertical sobre un semiespacio de aluminio emite un frente de compresión y un frente de cizalla más lento, ambos dibujados con arcos punteados en sus radios analíticos exactos, que se mantienen pegados a ellos mientras se expanden y salen del encuadre. En el panel de superficie libre un tren de lóbulos intensos se queda atrás sobre la superficie mucho después de que los frentes de cuerpo se hayan ido, y las dos trazas de sonda de debajo se separan en el tiempo de vuelo de Rayleigh. En el panel de superficie rígida aparecen esos mismos dos frentes y no los sigue ningún tren de superficie."
+  description="Un golpe vertical sobre un semiespacio de aluminio emite un frente de compresión y un frente de cizalla más lento, ambos dibujados con arcos punteados en sus radios analíticos exactos, que se mantienen pegados a ellos mientras se expanden y salen del encuadre. En el panel de superficie libre un tren de lóbulos intensos recorre la superficie un paso por detrás del frente de cizalla, el movimiento más intenso del encuadre una vez lejos del impacto, hasta que sale por los lados, y las dos trazas de sonda de al lado se separan en el tiempo de vuelo de Rayleigh. El clip sigue hasta que los dos frentes de cuerpo han salido del encuadre. En el panel de superficie rígida aparecen esos mismos dos frentes y no los sigue ningún tren de superficie."
 />
 
-Fíjate en lo que hacen los frentes al final. Los dos arcos de cuerpo se salen
-del encuadre y siguen su camino; los lóbulos de superficie no van a ninguna
-parte salvo a lo largo de la superficie, a su propia velocidad más lenta, y
-siguen ahí cuando las ondas de cuerpo ya se han marchado. El recuadro traza dos
-sondas de superficie separadas 0,15 m, y el retardo entre sus picos es la
-medición: el $c_\mathrm{R}$ simulado frente a 2897 m/s, la raíz de la ecuación
+Fíjate en lo que hacen los frentes. Los dos arcos de cuerpo se hunden en el
+bloque y salen del encuadre, el de compresión a los 98 µs y el de cizalla a los
+169 µs, aunque la cola del pulso de cizalla sigue en las esquinas inferiores
+hasta cerca de los 177 µs, y la ejecución sigue hasta que los dos se han ido.
+Los lóbulos de superficie no van a ninguna parte salvo a lo largo de la
+superficie, un paso por detrás del frente de cizalla y a su propia velocidad
+más lenta, y una vez lejos del impacto son el movimiento más intenso del
+encuadre hasta que el pico del tren llega a sus lados a los 136 µs; el lóbulo
+de cola, con un tercio de su amplitud, llega a ellos a los 147 µs, y hacia los
+160 µs el tren ha salido del encuadre. El recuadro traza dos sondas de
+superficie separadas 0,15 m, y el retardo entre sus picos es la medición: el
+$c_\mathrm{R}$ simulado frente a 2897 m/s, la raíz de la ecuación
 característica exacta de Rayleigh citada arriba, que los tests fijan dentro
 del 2 %.
 
 Los dos paneles de campo están dibujados con **escalas de color propias**, y el
 clip así lo indica, porque una fuerza vertical aplicada *sobre* una pared
 rígida casi se cancela contra su propia imagen y esa ejecución radia mucho
-menos que la libre. Las trazas de sonda de debajo conservan una única escala
+menos que la libre. Las trazas de sonda de al lado conservan una única escala
 compartida, que es donde la comparación sigue siendo cuantitativa: la llegada
 de superficie que falta es un pico que falta, no un pico reescalado.
 

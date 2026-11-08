@@ -1346,6 +1346,35 @@ def test_each_call_is_read_with_the_arguments_of_its_own_print(
     assert all("the comment says 30 where the print wrote 20" in f for f in failures)
 
 
+def test_a_print_bound_to_something_else_is_not_said_never_to_run(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a name ``print`` that the page binds to something else need
+    not reach the builtin, so a run that records none of its calls does not
+    show the page never runs it; one that reaches the builtin is still held
+    to its comment, and a builtin print that never runs is still reported.
+    """
+    bound = [
+        "def print(*args, **kwargs):\n    pass\n\nprint(2)  # 2\n",
+        "from pprint import pprint as print\n\nprint(2)  # 2\n",
+        "def show(print):\n    print(2)  # 2\n\nshow(lambda value: None)\nprint(3)  # 3\n",
+    ]
+    pages = [_page(tmp_path, code, name=f"bound{n}.md") for n, code in enumerate(bound)]
+    assert check_doc_snippets.check_execution(pages) == []
+    passed_on = (
+        "import functools\n\n"
+        "print = functools.partial(print, end='!\\n')\n"
+        "print(2)  # 3\n"
+    )
+    (failure,) = check_doc_snippets.check_execution(
+        [_page(tmp_path, passed_on, name="passed.md")]
+    )
+    assert "the comment says 3 where the print wrote 2" in failure
+    never = _page(tmp_path, "def never():\n    print(4)  # 4\n", name="never.md")
+    (failure,) = check_doc_snippets.check_execution([never])
+    assert "the page never runs this print" in failure
+
+
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.

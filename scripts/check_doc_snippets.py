@@ -85,6 +85,7 @@ from decimal import (
 )
 from typing import TYPE_CHECKING, NamedTuple, TypeGuard
 
+import ast_scan
 from markdown_fences import fences, page_kind
 
 if TYPE_CHECKING:
@@ -490,6 +491,10 @@ class _Promise:
         calls the comment does not stand for: one with a comment of its own on
         fewer lines inside them, and one that runs on past *last*, the print
         whose arguments hold this one.
+    :param builtin: Whether the print reads the builtin ``print``: a name
+        the script binds to something else (``from rich import print``) need
+        not reach the recorder, so a run that records none of its calls does
+        not show that the page never runs it.
     """
 
     first: int
@@ -498,6 +503,7 @@ class _Promise:
     prints: tuple[tuple[_Place, tuple[_Argument, ...] | None], ...] = ()
     word: str | None = None
     apart: tuple[_Place, ...] = ()
+    builtin: bool = True
 
     @property
     def text(self) -> str:
@@ -506,14 +512,45 @@ class _Promise:
 
 
 def _is_print(node: ast.AST) -> TypeGuard[ast.Call]:
-    """True for a call of the builtin ``print``, a statement of its own or
+    """True for a call of ``print`` by that name, a statement of its own or
     inside another one (``result = print(2)``, ``[print(x) for x in xs]``):
-    the record holds what every call writes, wherever it stands.
+    the record holds what every call writes, wherever it stands. Whether the
+    name is the builtin's there is :func:`_reads_builtin`'s to tell.
     """
     return (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id == "print"
+    )
+
+
+def _binds_print(tree: ast.Module) -> bool:
+    """Whether any scope of *tree*, the module, a function, a lambda, a class
+    body or a comprehension, binds the name ``print``, as its own or under
+    ``global``: when none does, every call of the name reads the builtin,
+    and none is looked up (:func:`_reads_builtin`).
+    """
+    scopes = [
+        tree,
+        *(node for node in ast.walk(tree) if isinstance(node, ast_scan.SCOPES)),
+    ]
+    return any(
+        ast_scan.own_names(scope).binds("print")
+        or ast_scan.own_names(scope).rebinds("print")
+        for scope in scopes
+    )
+
+
+def _reads_builtin(tree: ast.Module, call: ast.Call) -> bool:
+    """Whether the name *call* calls is the builtin ``print``: no scope it is
+    looked up in binds it (:func:`ast_scan.binding_of`), neither the module
+    nor a function that declares it ``global`` and binds it there.
+    """
+    how, _ = ast_scan.binding_of(tree, call.func, "print")
+    return (
+        how in {"outside", "global"}
+        and not ast_scan.own_names(tree).binds("print")
+        and "print" not in ast_scan.global_bindings(tree)
     )
 
 
@@ -630,6 +667,17 @@ def promised_outputs(script: str) -> list[_Promise]:
     hold it, which opens on its line: the run tells the calls apart by where
     each stands (:data:`_Place`), not by the line alone.
     """
+    tree = ast.parse(script)
+    try:
+        return _promises(script, tree)
+    finally:
+        # The scopes read for each print are kept by the tree they came from;
+        # a page's tree is read once, so nothing of it is kept for the next.
+        ast_scan.forget_trees()
+
+
+def _promises(script: str, tree: ast.Module) -> list[_Promise]:
+    """:func:`promised_outputs`, of *script* parsed as *tree*."""
     lines = script.splitlines()
     comments: dict[int, tuple[int, str]] = {}
     for token in tokenize.generate_tokens(io.StringIO(script).readline):
@@ -666,7 +714,7 @@ def promised_outputs(script: str) -> list[_Promise]:
             number += 1
         return said
 
-    found = _print_calls(ast.parse(script))
+    found = _print_calls(tree)
     span: dict[ast.Call, _Span] = {}
     said_by: dict[ast.Call, list[str]] = {}
     word_by: dict[ast.Call, str] = {}
@@ -785,6 +833,7 @@ def promised_outputs(script: str) -> list[_Promise]:
             shares[stretch] = (kept, left)
         return shares[stretch]
 
+    bound = _binds_print(tree)
     promises: list[_Promise] = []
     for node in sorted(
         said_by, key=lambda node: (span[node][0], node.lineno, node.col_offset)
@@ -798,6 +847,7 @@ def promised_outputs(script: str) -> list[_Promise]:
                 tuple((_place(each), _arguments(each)) for each in kept),
                 word_by.get(node),
                 tuple(_place(each) for each in left),
+                not bound or _reads_builtin(tree, node),
             )
         )
     return promises
@@ -1518,10 +1568,11 @@ def output_disagreements(
             if first is None or (first.kind, first.text) != ("word", promise.word):
                 continue  # prose about the line, not what the print writes
         if not calls:
-            failures.append(
-                f"{where}: the comment promises {promise.text!r}, but the page "
-                "never runs this print"
-            )
+            if promise.builtin:
+                failures.append(
+                    f"{where}: the comment promises {promise.text!r}, but the "
+                    "page never runs this print"
+                )
             continue
         output = "".join(call.text for call in calls).removesuffix("\n")
         comma = _reads_decimal_comma(output, spanish=spanish)

@@ -94,23 +94,30 @@ RealScalar = float | np.floating[Any] | np.integer[Any]
 
 #: Several real numbers: a sequence of them, Python or numpy ones (a list of
 #: ``np.float32`` is no ``Sequence[float]`` to a type checker), or a numpy
-#: array of any shape, a zero-dimensional one included. A function that takes
+#: array of any shape, a zero-dimensional one included, of the dtypes
+#: :func:`~phonometry._internal.validation.real_array` reads as real numbers
+#: (truth values, integers and floats of any width). A function that takes
 #: a number or an array of them returns an array for it. A list that mixes
 #: Python and numpy numbers is no ``ArrayLike`` to numpy's own stubs, so it
-#: is left out here too and reads as the union.
+#: is left out here too and reads as the union, as a complex array does.
 RealValues = (
     Sequence[float]
     | Sequence[np.floating[Any]]
     | Sequence[np.integer[Any]]
-    | NDArray[Any]
+    | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]]
 )
 
 #: A fixed count of arrays a record holds as one field, a curve's ``(x, y)``
 #: or the ``(x, y, z)`` axes of an elevation model: a sequence of them, each
 #: any array-like of numbers (a tuple of an array and a list), or one array whose rows
 #: they are (``np.vstack((x, y))``), which is no ``Sequence`` to a type
-#: checker and so is named beside it.
-ArrayRows = Sequence[NumericArrayLike] | NDArray[Any]
+#: checker and so is named beside it: an array of real numbers, or an array
+#: of objects that holds each member whole, as rows of different lengths are
+#: held (:func:`~phonometry._internal.validation.arrays_of` reads both).
+ArrayRows = (
+    Sequence[NumericArrayLike]
+    | NDArray[np.bool_ | np.integer[Any] | np.floating[Any] | np.object_]
+)
 
 #: Values keyed by a band centre frequency in hertz (or by another number a
 #: caller writes as an ``int`` as often as a ``float``, an angle in degrees),

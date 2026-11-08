@@ -62,6 +62,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
@@ -162,12 +163,12 @@ _Q1_HI = 1.2822  # q1 for the high-rate weighting (Formula 87)
 _Q1_LO = 0.7066  # q1 for the low-rate weighting (below Formula 95)
 
 
-def _f_max() -> np.ndarray:
+def _f_max() -> NDArray[np.float64]:
     """Modulation rate of the weighting maximum f_max(z) (Formula 86)."""
     return 72.6937 * (1.0 - 1.1739 * np.exp(-5.4583 * _F_CENTRE / 1000.0))
 
 
-def _r_max() -> np.ndarray:
+def _r_max() -> NDArray[np.float64]:
     """Scaling factor r_max(z) (Formula 84, Table 11)."""
     lg = np.abs(np.log2(_F_CENTRE / 1000.0))
     r1 = np.where(_F_CENTRE < _REFERENCE_FREQUENCY, 0.3560, 0.8024)
@@ -175,7 +176,7 @@ def _r_max() -> np.ndarray:
     return np.asarray(1.0 / (1.0 + r1 * lg**r2), dtype=np.float64)
 
 
-def _q2_hi() -> np.ndarray:
+def _q2_hi() -> NDArray[np.float64]:
     """q2(z) for the high-rate weighting (Formula 87)."""
     lg = np.log2(_F_CENTRE / 1000.0)
     out = 0.2471 * np.ones(_CBF)
@@ -184,7 +185,7 @@ def _q2_hi() -> np.ndarray:
     return out
 
 
-def _q2_lo() -> np.ndarray:
+def _q2_lo() -> NDArray[np.float64]:
     """q2(z) for the low-rate weighting (Formula 96)."""
     return np.asarray(1.0967 - 0.0640 * np.log2(_F_CENTRE / 1000.0), dtype=np.float64)
 
@@ -228,12 +229,12 @@ class EcmaRoughness(OwnsArrays):
     )
 
     roughness: float
-    specific_roughness: np.ndarray
-    bark: np.ndarray
-    frequencies: np.ndarray
-    times: np.ndarray
-    roughness_vs_time: np.ndarray
-    specific_roughness_vs_time: np.ndarray
+    specific_roughness: NDArray[np.float64]
+    bark: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    times: NDArray[np.float64]
+    roughness_vs_time: NDArray[np.float64]
+    specific_roughness_vs_time: NDArray[np.float64]
     field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
@@ -323,8 +324,8 @@ class EcmaRoughness(OwnsArrays):
 
 
 def _front_end(
-    x: np.ndarray, field: str
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+    x: NDArray[np.float64], field: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], int]:
     """Envelopes, basis loudness and block times for the roughness chain.
 
     Applies the roughness zero-padding (Clause 5.1.2.2), ear filter and
@@ -375,7 +376,9 @@ def _front_end(
 # --------------------------------------------------------------------------
 
 
-def _noise_reduced_spectra(envelopes: np.ndarray, basis: np.ndarray) -> np.ndarray:
+def _noise_reduced_spectra(
+    envelopes: NDArray[np.float64], basis: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Noise-reduced scaled envelope power spectra Phi_hat (Formulae 66-71).
 
     Returns the one-sided spectra of shape ``(L, 257, Z)``.
@@ -440,7 +443,9 @@ def _bias_correction(f_tilde: float) -> float:
     )  # Formula 78
 
 
-def _pick_peaks(spec: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _pick_peaks(
+    spec: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Peak modulation rates f_p,i and amplitudes A_i (Clause 7.1.5.1).
 
     ``spec`` is the noise-reduced spectrum Phi_hat for one (l, z). Returns
@@ -484,7 +489,7 @@ def _pick_peaks(spec: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return f_p, a_i
 
 
-def _harmonic_members(f_p: np.ndarray, i0: int) -> list[int]:
+def _harmonic_members(f_p: NDArray[np.float64], i0: int) -> list[int]:
     """Peaks that are near-integer multiples of ``f_p[i0]`` (Formulae 88-90).
 
     Each integer ratio keeps the single peak whose relative deviation from the
@@ -503,7 +508,9 @@ def _harmonic_members(f_p: np.ndarray, i0: int) -> list[int]:
     return [i for i, err in cand.values() if err < _HARMONIC_TOL]  # Formula 90
 
 
-def _fundamental_set(f_p: np.ndarray, a_tilde: np.ndarray) -> tuple[list[int], int]:
+def _fundamental_set(
+    f_p: NDArray[np.float64], a_tilde: NDArray[np.float64]
+) -> tuple[list[int], int]:
     """Harmonic-complex index set I_max and its argmax i_max (Formulae 88-91)."""
     n = f_p.size
     best_energy = -1.0
@@ -521,7 +528,7 @@ def _fundamental_set(f_p: np.ndarray, a_tilde: np.ndarray) -> tuple[list[int], i
     return i_set, i_max
 
 
-def _amplitude(spec: np.ndarray, band: int) -> float:
+def _amplitude(spec: NDArray[np.float64], band: int) -> float:
     """Weighted, summed amplitude A(l, z) for one block/band (Clause 7.1.5)."""
     f_p, a_i = _pick_peaks(spec)
     if f_p.size == 0:
@@ -563,7 +570,7 @@ def _amplitude(spec: np.ndarray, band: int) -> float:
     return amp if amp >= _A_THRESHOLD else 0.0
 
 
-def _amplitudes(spectra: np.ndarray) -> np.ndarray:
+def _amplitudes(spectra: NDArray[np.float64]) -> NDArray[np.float64]:
     """Uncalibrated amplitude A(l, z) for every block/band (Clause 7.1.5)."""
     n_blocks = spectra.shape[0]
     out = np.zeros((n_blocks, _CBF))
@@ -579,8 +586,8 @@ def _amplitudes(spectra: np.ndarray) -> np.ndarray:
 
 
 def _time_dependent(
-    a_lz: np.ndarray, block_times: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    a_lz: NDArray[np.float64], block_times: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Time-dependent specific roughness R'(l50, z) (Formulae 103-110)."""
     t_end = real_number(block_times[-1], "block_times")
     n50 = int(np.floor(t_end * _R_S50)) + 1
@@ -614,8 +621,8 @@ def _time_dependent(
 
 
 def _aggregate(
-    r_time: np.ndarray,
-) -> tuple[float, np.ndarray, np.ndarray]:
+    r_time: NDArray[np.float64],
+) -> tuple[float, NDArray[np.float64], NDArray[np.float64]]:
     """Average specific roughness, R(l50) and single value (Clause 7.1.8-7.1.10)."""
     kept = (
         r_time[ROUGHNESS_SETTLING_FRAMES:]

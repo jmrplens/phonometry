@@ -541,6 +541,13 @@ filterwarnings = [
     # pair are later, so they override it for what they name.
     "error::UserWarning",
     "error::RuntimeWarning",
+    # pytest's own PytestCacheWarning, a UserWarning named here by its builtin
+    # class and its two messages, says it cannot write its cache directory, as
+    # in a read-only checkout or container. It speaks of no test and comes
+    # once the last has run, so it is shown, not raised; `-p no:cacheprovider`
+    # keeps pytest from writing a cache at all.
+    "default:could not create cache path:UserWarning",
+    "default:cache could not write path:UserWarning",
     # The clip-frame audit, the figure checks, the doc-snippet runner and the
     # process-exit tests fork on purpose, so a child shares what its parent
     # computed. Python 3.12 and later warn at a fork while another thread

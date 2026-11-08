@@ -727,4 +727,4 @@ def test_one_position_reports_no_indicators() -> None:
 
 **Enforced by:** `pyproject.toml`, `tests/test_repository_config.py::test_a_stray_warning_fails_the_suite`
 
-**Exceptions.** A test helper that takes a logarithm of an exact zero on purpose says so with `np.errstate(divide="ignore")` around that one line. The `DeprecationWarning` Python gives at a fork while another thread lives is filtered in the configuration by its message ([T25](#t25)), because every process the suite forks meets it.
+**Exceptions.** A test helper that takes a logarithm of an exact zero on purpose says so with `np.errstate(divide="ignore")` around that one line. The `DeprecationWarning` Python gives at a fork while another thread lives is filtered in the configuration by its message ([T25](#t25)), because every process the suite forks meets it. pytest's own warning that it cannot write its cache directory, as in a read-only tree, is shown and not raised, by its two messages, since it comes once the last test has run and speaks of none.

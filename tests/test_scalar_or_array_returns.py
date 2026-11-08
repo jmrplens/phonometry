@@ -341,6 +341,7 @@ def _cases() -> tuple[Case, ...]:
             {"level": 80.0, "distance": 10.0},
             ("level",),
         ),
+        Case(room.hard_object_absorption, {"object_volume": 0.65}, ("object_volume",)),
         Case(room.min_receiver_positions, {"seats": 800.0}, ("seats",)),
         Case(
             room.min_reliable_reverberation_time, {"bandwidth": 100.0}, ("bandwidth",)
@@ -428,6 +429,7 @@ def _cases() -> tuple[Case, ...]:
         ),
         Case(vibration.height_fundamental_frequency, {"height_m": 30.0}, ("height_m",)),
         Case(vibration.injury_probability, {"risk": 0.5}, ("risk",)),
+        Case(vibration.ultimate_strength, {"age": 40.0}, ("age",)),
         Case(
             vibration.evaluation_zone,
             {"magnitude": 2.5, "boundaries": _ZONES},

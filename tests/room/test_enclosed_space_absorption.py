@@ -123,7 +123,8 @@ def test_enclosed_space_reverberation_spectrum() -> None:
 
 
 def test_equivalent_area_accepts_single_object() -> None:
-    # A room with a single hard object (a 0-d array from hard_object_absorption).
+    # A room with a single hard object (the float hard_object_absorption gives
+    # for one volume).
     aobj = m.hard_object_absorption(0.65)
     a = m.equivalent_absorption_area([(12.39, 0.05)], objects=aobj)
     assert a == pytest.approx(12.39 * 0.05 + 0.65 ** (2.0 / 3.0))

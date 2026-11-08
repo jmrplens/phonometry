@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -134,8 +135,8 @@ class LoudnessContour(OwnsArrays):
         Formula (1).
     """
 
-    frequencies: np.ndarray
-    levels: np.ndarray
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
     phon: float | None
 
     def plot(
@@ -248,10 +249,10 @@ class EqualLoudnessContours(OwnsArrays):
     20 uPa on the same grid.
     """
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     phons: tuple[float, ...]
-    contours: np.ndarray
-    threshold: np.ndarray
+    contours: NDArray[np.float64]
+    threshold: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a family whose contours do not span the grid they are drawn on.

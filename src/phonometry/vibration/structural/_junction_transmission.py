@@ -751,9 +751,9 @@ class JunctionTransmissionResult(OwnsArrays):
     psi: float
     critical_frequency1: float
     critical_frequency2: float
-    angles_deg: np.ndarray
-    corner: np.ndarray
-    straight: np.ndarray | None
+    angles_deg: NDArray[np.float64]
+    corner: NDArray[np.float64]
+    straight: NDArray[np.float64] | None
     corner_average: float
     straight_average: float | None
     _: KW_ONLY
@@ -902,7 +902,7 @@ def junction_transmission(
     )
 
     _, _, j3 = _JUNCTIONS[name]
-    straight: np.ndarray | None
+    straight: NDArray[np.float64] | None
     straight_avg: float | None
     if j3 is None:
         straight = None

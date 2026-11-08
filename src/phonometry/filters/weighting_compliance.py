@@ -68,6 +68,8 @@ from .weighting import WeightingFilter, _runtime_frequency_response
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
+    from numpy.typing import NDArray
+
 Edition = Literal["2013", "1979"]
 #: The weightings graded across the editions: A, C and Z (IEC 61672-1:2013
 #: Table 3), B (IEC 651 / ANSI S1.4) and AU (IEC 61012).
@@ -356,7 +358,9 @@ def _quoted_list(items: tuple[str, ...]) -> str:
     return f"{', '.join(quoted[:-1])} or {quoted[-1]}"
 
 
-def _edition_masks(spec: dict[str, Any]) -> dict[int, tuple[np.ndarray, np.ndarray]]:
+def _edition_masks(
+    spec: dict[str, Any],
+) -> dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]]:
     """One ``(lower, upper)`` acceptance mask per class of the edition.
 
     Keyed strictest class first, so the verdict functions can take the first
@@ -391,9 +395,9 @@ class WeightingClassLimits(OwnsArrays):
         {"lower": "dB", "upper": "dB"}
     )
 
-    frequencies: np.ndarray
-    lower: np.ndarray
-    upper: np.ndarray
+    frequencies: NDArray[np.float64]
+    lower: NDArray[np.float64]
+    upper: NDArray[np.float64]
 
 
 def weighting_class_limits(
@@ -438,7 +442,7 @@ def weighting_class_limits(
     return WeightingClassLimits(frequencies=freqs, lower=lower, upper=upper)
 
 
-def _design_goal_db(curve: str) -> np.ndarray:
+def _design_goal_db(curve: str) -> NDArray[np.float64]:
     """Design-goal relative response at the 34 nominal frequencies, in dB.
 
     A and C come from IEC 61672-1:2013 Table 3, B from ANSI S1.4-1983
@@ -455,7 +459,9 @@ def _design_goal_db(curve: str) -> np.ndarray:
 
 
 def _au_design_and_limits() -> tuple[
-    np.ndarray, np.ndarray, dict[int, tuple[np.ndarray, np.ndarray]]
+    NDArray[np.float64],
+    NDArray[np.float64],
+    dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]],
 ]:
     """IEC 61012:1990 Table 1 nominal frequencies, AU design goals and mask.
 
@@ -479,7 +485,11 @@ def _au_design_and_limits() -> tuple[
 
 def _curve_design_and_limits(
     curve: str, spec: dict[str, Any]
-) -> tuple[np.ndarray, np.ndarray, dict[int, tuple[np.ndarray, np.ndarray]]]:
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]],
+]:
     """Nominal frequencies, design goals and one acceptance mask per class.
 
     The mask is the edition's own tolerance table, with one exception: under
@@ -502,7 +512,9 @@ def _curve_design_and_limits(
     return nominal, design, _edition_masks(spec)
 
 
-def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.ndarray:
+def _weighting_response_db(
+    wf: WeightingFilter, frequencies: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Relative steady-state response of *wf* in dB, normalized to 1 kHz.
 
     Measured over the whole path the signal takes (see
@@ -529,9 +541,9 @@ def _band_class(margins: dict[int, float]) -> int | None:
 
 
 def _weighting_band_verdicts(
-    freqs_nom: np.ndarray,
-    deviation: np.ndarray,
-    masks: dict[int, tuple[np.ndarray, np.ndarray]],
+    freqs_nom: NDArray[np.float64],
+    deviation: NDArray[np.float64],
+    masks: dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]],
 ) -> list[dict[str, Any]]:
     """Per-band margins against the edition's acceptance limits.
 
@@ -557,8 +569,8 @@ def _weighting_band_verdicts(
 
 def _between_nominals_sweep(
     wf: WeightingFilter,
-    freqs_exact: np.ndarray,
-    masks: dict[int, tuple[np.ndarray, np.ndarray]],
+    freqs_exact: NDArray[np.float64],
+    masks: dict[int, tuple[NDArray[np.float64], NDArray[np.float64]]],
     n_sweep_points: int | np.integer[Any],
 ) -> dict[str, float]:
     """Subclause 5.5.7 sweep between adjacent exact nominal frequencies.
@@ -574,7 +586,7 @@ def _between_nominals_sweep(
     seg = np.clip(
         np.searchsorted(freqs_exact, grid, side="right") - 1, 0, freqs_exact.size - 2
     )
-    sweep_margins: dict[int, np.ndarray] = {}
+    sweep_margins: dict[int, NDArray[np.float64]] = {}
     for cls, (lower, upper) in masks.items():
         up = np.maximum(upper[seg], upper[seg + 1])
         lo = np.minimum(lower[seg], lower[seg + 1])
